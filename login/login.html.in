@@ -1,0 +1,11 @@
+<!-- Overlay for fixed sidebar -->
+<div class="sidebar-overlay"></div>
+<div class="container">
+	<!-- Row 1: Logo and Main navigation -->
+	<div id="loginApp" ng-app="ermrestApp">
+        <navbar></navbar>
+		<div ng-include="'../views/ermlogin.html'"></div>
+	</div>
+</div>
+<!-- Row 3: Footer -->
+<div id="ermrestFooter"></div>

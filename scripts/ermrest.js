@@ -260,6 +260,9 @@ var ERMREST = {
 			dataType: 'json',
 			success: function(data, textStatus, jqXHR) {
 				document.body.style.cursor = 'default';
+				if (data === undefined) {
+				  data = $.parseJSON(jqXHR.responseText);
+				}
 				if (successCallback != null) {
 					successCallback(data, textStatus, jqXHR, param);
 				}

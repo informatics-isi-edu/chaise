@@ -234,9 +234,9 @@ describe('Record Add', function() {
             chaisePage.waitForElement(helpBtn);
         });
 
-            it("should open a new window with the help page.",function(){
-                helpBtn.click();
-                browser.getAllWindowHandles().then(function(handles){
+        it("should open a new window with the help page.",function() {
+            helpBtn.click();
+            browser.getAllWindowHandles().then(function(handles){
                 return handles;
             }).then(function(handles) {
                 allWindows = handles;

@@ -577,40 +577,82 @@ distclean: clean
 html: $(HTML)
 
 # Rules to attach JavaScript and CSS assets to the head
-search/index.html: search/index.html.in .make-asset-block .make-template-block
+search/index.html: .make-asset-block .make-template-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
 		-e '/%TEMPLATES%/ {' -e 'r .make-template-block' -e 'd' -e '}' \
-		search/index.html.in > search/index.html
+		search/search.html.in > search/index.html
 
-login/index.html: login/index.html.in .make-asset-block
+login/index.html: .make-asset-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
-		login/index.html.in > login/index.html
+		-e 's/%APPNAME%//' \
+		-e 's/%PAGE%/Chaise :: Login/' \
+		-e 's/%NAVBAR%//' \
+		-e 's/%FOOTER%//' \
+		-e 's/%TEMPLATES%//' \
+		-e '/%CONTENT%/ {' -e 'r login/login.html.in' -e 'd' -e '}' \
+		index.html.in > login/index.html
 
-detailed/index.html: detailed/index.html.in .make-detailed-asset-block .make-detailed-template-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-detailed-asset-block' -e 'd' -e '}' \
-		-e '/%TEMPLATES%/ {' -e 'r .make-detailed-template-block' -e 'd' -e '}' \
-		detailed/index.html.in > detailed/index.html
-
-record/index.html: record/index.html.in .make-record-asset-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-record-asset-block' -e 'd' -e '}' \
-		record/index.html.in > record/index.html
-
-recordset/index.html: recordset/index.html.in .make-rs-asset-block .make-rs-template-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-rs-asset-block' -e 'd' -e '}' \
-		-e '/%TEMPLATES%/ {' -e 'r .make-rs-template-block' -e 'd' -e '}' \
-		recordset/index.html.in > recordset/index.html
-
-viewer/index.html: viewer/index.html.in .make-viewer-asset-block
+viewer/index.html: .make-viewer-asset-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-viewer-asset-block' -e 'd' -e '}' \
-		viewer/index.html.in > viewer/index.html
+		-e 's/%APPNAME%/ng-app="chaise.viewer"/' \
+		-e 's/%PAGE%/Image Viewer/' \
+		-e 's/%NAVBAR%//' \
+		-e 's/%FOOTER%//' \
+		-e '/%TEMPLATES%/ {' -e 'r .make-viewer-asset-block' -e 'd' -e '}' \
+		-e '/%CONTENT%/ {' -e 'r viewer/viewer.html.in' -e 'd' -e '}' \
+		index.html.in > viewer/index.html
 
-recordedit/index.html: recordedit/index.html.in .make-de-asset-block
+record/index.html: .make-record-asset-block
+	sed -e '/%ASSETS%/ {' -e 'r .make-record-asset-block' -e 'd' -e '}' \
+		-e 's/%APPNAME%/ng-app="chaise.record"/' \
+		-e 's/%PAGE%/Record/' \
+		-e 's/%NAVBAR%/<navbar><\/navbar>/g' \
+		-e 's/%FOOTER%/<footer><\/footer>/g' \
+		-e 's/%TEMPLATES%//' \
+		-e '/%CONTENT%/ {' -e 'r record/record.html.in' -e 'd' -e '}' \
+		index.html.in > record/index.html
+
+detailed/index.html:.make-detailed-asset-block .make-detailed-template-block
+	sed -e '/%ASSETS%/ {' -e 'r .make-detailed-asset-block' -e 'd' -e '}' \
+		-e 's/%APPNAME%/ng-app="chaise.record"/' \
+		-e 's/%PAGE%/Record/' \
+		-e 's/%NAVBAR%/<navbar><\/navbar>/g' \
+		-e 's/%FOOTER%/<footer><\/footer>/g' \
+		-e '/%ASSETS%/ {' -e 'r .make-detailed-asset-block' -e 'd' -e '}' \
+		-e '/%TEMPLATES%/ {' -e 'r .make-detailed-template-block' -e 'd' -e '}' \
+		-e 's/%CONTENT%//' \
+		index.html.in > detailed/index.html
+
+
+recordset/index.html: .make-rs-asset-block .make-rs-template-block
+	sed -e '/%ASSETS%/ {' -e 'r .make-rs-asset-block' -e 'd' -e '}' \
+		-e 's/%APPNAME%/ng-app="recordset"/' \
+		-e 's/%PAGE%/Image Viewer/' \
+		-e 's/%NAVBAR%//' \
+		-e 's/%FOOTER%/<footer><\/footer>/g' \
+		-e '/%TEMPLATES%/ {' -e 'r .make-rs-template-block' -e 'd' -e '}' \
+		-e 's/%CONTENT%//' \
+		index.html.in > recordset/index.html
+
+recordedit/index.html: .make-de-asset-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-de-asset-block' -e 'd' -e '}' \
-		recordedit/index.html.in > recordedit/index.html
+		-e 's/%APPNAME%/ng-app="chaise.recordEdit"/' \
+		-e 's/%PAGE%/RecordEdit App/' \
+		-e 's/%NAVBAR%/<navbar><\/navbar>/g' \
+		-e 's/%FOOTER%/<footer><\/footer>/g' \
+		-e 's/%TEMPLATES%//' \
+		-e '/%CONTENT%/ {' -e 'r recordedit/recordedit.html.in' -e 'd' -e '}' \
+		index.html.in > recordedit/index.html
 
-recordedit/mdHelp.html: recordedit/mdHelp.html.in .make-md-asset-block
+recordedit/mdHelp.html: .make-md-asset-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-md-asset-block' -e 'd' -e '}' \
-	recordedit/mdHelp.html.in > recordedit/mdHelp.html
+		-e 's/%APPNAME%/ng-app="chaise.mdHelp"/' \
+		-e 's/%PAGE%/Markdown Help/' \
+		-e 's/%NAVBAR%/<navbar><\/navbar>/g' \
+		-e 's/%FOOTER%/<footer><\/footer>/g' \
+		-e 's/%TEMPLATES%//' \
+		-e '/%CONTENT%/ {' -e 'r recordedit/mdHelp.html.in' -e 'd' -e '}' \
+		index.html.in > recordedit/mdHelp.html
 
 $(JS_CONFIG): chaise-config-sample.js
 	cp -n chaise-config-sample.js $(JS_CONFIG) || true

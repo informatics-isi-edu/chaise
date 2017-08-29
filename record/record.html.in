@@ -1,15 +1,5 @@
-<!DOCTYPE html>
-<html ng-app="chaise.record">
-<head>
-    <title>Record</title>
-    <meta charset="utf-8" http-equiv="X-UA-Compatible" content="IE=10; IE=9; IE=8; IE=7; IE=EDGE" />
-    <script src="/gtm-id.js"></script>
-    %ASSETS%
-</head>
-<body>
-    <navbar></navbar>
-    <loading-spinner ng-show="!displayReady"></loading-spinner>
-    <div id="main-content" class="container-fluid">
+<loading-spinner ng-show="!displayReady"></loading-spinner>
+<div id="main-content" class="container-fluid">
         <div ng-controller="RecordController as ctrl">
             <div id="bookmark-container" class="col-xs-12 meta-icons">
                 <a id="create-record" ng-click="::ctrl.createRecord()" ng-if="::ctrl.canCreate()" uib-tooltip="Click here to create a record." tooltip-placement="bottom">
@@ -82,6 +72,4 @@
             </div>
             <span id="rt-loading" ng-show="loading">Loading...</span>
         </div>
-    </div>
-    <footer></footer>
-</body>
+</div>

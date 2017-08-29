@@ -1,220 +1,206 @@
-<!DOCTYPE html>
-<html lang="en" ng-app="chaise.mdHelp">
 
-<head>
-    <meta charset="utf-8" http-equiv="X-UA-Compatible" content="IE=10; IE=9; IE=8; IE=7; IE=EDGE" />
-    <title>Markdown Help</title>
-    %ASSETS%
-</head>
+<div class="container-mdhelp" id="mdhelp-record">
+    <div class="twelve columns center">
 
-<body ng-controller="mdHelpController as ctrl">
-    <navbar></navbar>
-    <div class="container-mdhelp" id="mdhelp-record">
-        <div class="twelve columns center">
+        <table class="markdown-reference" id="mainTable">
+            <thead class="hdrStyle">
+                <tr>
+                    <th>{{ctrl.hdr1}} </th>
+                    <th>{{ctrl.hdr2}}</th>
+                    <th>{{ctrl.hdr3}}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="rawInput" id="rBold1">**Something Bold**</td>
+                    <td class="rawInput" id="rBold2">__Something Bold__</td>
+                    <td id="oBold" class="markdown-container"><strong>Something Bold</strong></td>
+                </tr>
+                <tr>
+                    <td class="rawInput" id="rItalic1">*Some Italic*</td>
+                    <td class="rawInput" id="rItalic2">_Some Italic_</td>
+                    <td id="oItalic" class="markdown-container"><em>Some Italic</em></td>
+                </tr>
+                <tr>
+                    <td class="rawInput" id="rStrike1">~~strikethrough text~~</td>
+                    <td class="rawInput" id="rStrike2"></td>
+                    <td id="oStrike" class="markdown-container"><strike>strikethrough text</strike></td>
+                </tr>
+                <tr>
+                    <td class="rawInput" id="rLargeHdr1">
+                        # Large Heading
+                    </td>
+                    <td class="rawInput" id="rLargeHdr2">
+                        Large Heading<br> =========
+                    </td>
+                    <td id="oLargeHdr" class="markdown-container">
+                        <h1 class="smaller-h1">Large Heading</h1>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="rawInput" id="rSmallHdr1">
+                        ## Heading
+                    </td>
+                    <td class="rawInput" id="rSmallHdr2">
+                        Heading<br> ---------
+                    </td>
+                    <td id="oSmallHdr" class="markdown-container">
+                        <h2 class="smaller-h2">Heading</h2>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="rawInput">
+                        [Link](http://usc.edu)
+                    </td>
+                    <td class="rawInput ">
+                        [Link][1]<br> ⋮
+                        <br> [1]: http://usc.edu
+                    </td>
+                    <td class="markdown-container"><a href="#" target="_blank">Link</a></td>
+                </tr>
+                <tr>
+                    <td class="rawInput">
+                        ![Image](http://xyz/a.png)
+                    </td>
+                    <td class="rawInput ">
+                        ![Image][1]<br> ⋮
+                        <br> [1]: http://xyz/a.png
+                    </td>
+                    <td class="markdown-container">
+                        <img src="{{::ctrl.img}}" height="50" alt="Markdown">
+                    </td>
+                </tr>
+                <tr>
+                    <td class="rawInput">
+                        &gt; This is<br> blockquote
 
-            <table class="markdown-reference" id="mainTable">
-                <thead class="hdrStyle">
-                    <tr>
-                        <th>{{ctrl.hdr1}} </th>
-                        <th>{{ctrl.hdr2}}</th>
-                        <th>{{ctrl.hdr3}}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="rawInput" id="rBold1">**Something Bold**</td>
-                        <td class="rawInput" id="rBold2">__Something Bold__</td>
-                        <td id="oBold" class="markdown-container"><strong>Something Bold</strong></td>
-                    </tr>
-                    <tr>
-                        <td class="rawInput" id="rItalic1">*Some Italic*</td>
-                        <td class="rawInput" id="rItalic2">_Some Italic_</td>
-                        <td id="oItalic" class="markdown-container"><em>Some Italic</em></td>
-                    </tr>
-                    <tr>
-                        <td class="rawInput" id="rStrike1">~~strikethrough text~~</td>
-                        <td class="rawInput" id="rStrike2"></td>
-                        <td id="oStrike" class="markdown-container"><strike>strikethrough text</strike></td>
-                    </tr>
-                    <tr>
-                        <td class="rawInput" id="rLargeHdr1">
-                            # Large Heading
-                        </td>
-                        <td class="rawInput" id="rLargeHdr2">
-                            Large Heading<br> =========
-                        </td>
-                        <td id="oLargeHdr" class="markdown-container">
-                            <h1 class="smaller-h1">Large Heading</h1>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="rawInput" id="rSmallHdr1">
-                            ## Heading
-                        </td>
-                        <td class="rawInput" id="rSmallHdr2">
-                            Heading<br> ---------
-                        </td>
-                        <td id="oSmallHdr" class="markdown-container">
-                            <h2 class="smaller-h2">Heading</h2>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="rawInput">
-                            [Link](http://usc.edu)
-                        </td>
-                        <td class="rawInput ">
-                            [Link][1]<br> ⋮
-                            <br> [1]: http://usc.edu
-                        </td>
-                        <td class="markdown-container"><a href="#" target="_blank">Link</a></td>
-                    </tr>
-                    <tr>
-                        <td class="rawInput">
-                            ![Image](http://xyz/a.png)
-                        </td>
-                        <td class="rawInput ">
-                            ![Image][1]<br> ⋮
-                            <br> [1]: http://xyz/a.png
-                        </td>
-                        <td class="markdown-container">
-                            <img src="{{::ctrl.img}}" height="50" alt="Markdown">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="rawInput">
-                            &gt; This is<br> blockquote
+                    </td>
+                    <td class="rawInput ">
+                        &nbsp;
+                    </td>
+                    <td class="markdown-container">
+                        <blockquote>
+                            <p>This is<br> blockquote</p>
+                        </blockquote>
 
-                        </td>
-                        <td class="rawInput ">
-                            &nbsp;
-                        </td>
-                        <td class="markdown-container">
-                            <blockquote>
-                                <p>This is<br> blockquote</p>
-                            </blockquote>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="rawInput">
+                        `Inline code` is very usefull
+                    </td>
+                    <td class="rawInput">
+                        &nbsp;
+                    </td>
+                    <td class="markdown-container">
+                        <code class="rawInput">Inline code</code> is very usefull
+                    </td>
+                </tr>
+                <tr>
+                    <td class="rawInput">
+                        <p>
+                            * List Item 1<br> * List Item 2<br> * List Item 3
+                        </p>
+                    </td>
+                    <td class="rawInput">
+                        <p>
+                            - List Item 1<br> - List Item 2<br> - List Item 3<br>
+                        </p>
+                    </td>
+                    <td class="markdown-container">
+                        <ul>
+                            <li>List Item 1</li>
+                            <li>List Item 2</li>
+                            <li>List Item 3</li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="rawInput">
+                        <p>
+                            1. One<br> 2. Two<br> 3. Three
+                        </p>
+                    </td>
+                    <td class="rawInput ">
+                        <p>
+                            1) One<br> 2) Two<br> 3) Three
+                        </p>
+                    </td>
+                    <td class="markdown-container">
+                        <ol>
+                            <li>One</li>
+                            <li>Two</li>
+                            <li>Three</li>
+                        </ol>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="rawInput">
+                        Horizontal Rule<br>
+                        <br> ---
+                    </td>
+                    <td class="rawInput">
+                        Horizontal Rule<br>
+                        <br> ***
+                    </td>
+                    <td class="markdown-container">
+                        Horizontal Rule
+                        <hr class="custom-hr">
+                    </td>
+                </tr>
 
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="rawInput">
-                            `Inline code` is very usefull
-                        </td>
-                        <td class="rawInput">
-                            &nbsp;
-                        </td>
-                        <td class="markdown-container">
-                            <code class="rawInput">Inline code</code> is very usefull
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="rawInput">
-                            <p>
-                                * List Item 1<br> * List Item 2<br> * List Item 3
-                            </p>
-                        </td>
-                        <td class="rawInput">
-                            <p>
-                                - List Item 1<br> - List Item 2<br> - List Item 3<br>
-                            </p>
-                        </td>
-                        <td class="markdown-container">
-                            <ul>
-                                <li>List Item 1</li>
-                                <li>List Item 2</li>
-                                <li>List Item 3</li>
-                            </ul>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="rawInput">
-                            <p>
-                                1. One<br> 2. Two<br> 3. Three
-                            </p>
-                        </td>
-                        <td class="rawInput ">
-                            <p>
-                                1) One<br> 2) Two<br> 3) Three
-                            </p>
-                        </td>
-                        <td class="markdown-container">
-                            <ol>
-                                <li>One</li>
-                                <li>Two</li>
-                                <li>Three</li>
-                            </ol>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="rawInput">
-                            Horizontal Rule<br>
-                            <br> ---
-                        </td>
-                        <td class="rawInput">
-                            Horizontal Rule<br>
-                            <br> ***
-                        </td>
-                        <td class="markdown-container">
-                            Horizontal Rule
-                            <hr class="custom-hr">
-                        </td>
-                    </tr>
+                <tr>
+                    <td class="rawInput">
+                        ```<br> # neo eth<br> log 'my name to'<br> log 'ym mane ot'<br> ```
+                    </td>
+                    <td class="rawInput ">
+                        <span class="spaces">····</span># neo eth<br>
+                        <span class="spaces">····</span>log 'my name to'<br>
+                        <span class="spaces">····</span>log 'ym mane ot'
+                    </td>
+                    <td class="markdown-container">
+                        <div class="code-block">
+                            # neo eth
+                            <br> log 'my name to'
+                            <br> log 'ym mane ot'
+                        </div>
+                    </td>
+                </tr>
+                <tr>
 
-                    <tr>
-                        <td class="rawInput">
-                            ```<br> # neo eth<br> log 'my name to'<br> log 'ym mane ot'<br> ```
-                        </td>
-                        <td class="rawInput ">
-                            <span class="spaces">····</span># neo eth<br>
-                            <span class="spaces">····</span>log 'my name to'<br>
-                            <span class="spaces">····</span>log 'ym mane ot'
-                        </td>
-                        <td class="markdown-container">
-                            <div class="code-block">
-                                # neo eth
-                                <br> log 'my name to'
-                                <br> log 'ym mane ot'
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-
-                        <td class="rawInput">
-                            <pre class="highlight-pre">
+                    <td class="rawInput">
+                        <pre class="highlight-pre">
 Header1 | Header2
 ------- | -------
 Cell 1 | Cell 2
 Cell 3 | Cell 4
-                            </pre>
-                        </td>
-                        <td></td>
-                        <td class="markdown-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Header1</th>
-                                        <th>Header2</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Cell 1</td>
-                                        <td>Cell 2</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Cell 3</td>
-                                        <td>Cell 4</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </td>
+                        </pre>
+                    </td>
+                    <td></td>
+                    <td class="markdown-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Header1</th>
+                                    <th>Header2</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Cell 1</td>
+                                    <td>Cell 2</td>
+                                </tr>
+                                <tr>
+                                    <td>Cell 3</td>
+                                    <td>Cell 4</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
 
-                    </tr>
+                </tr>
 
-                </tbody>
-            </table>
-        </div>
+            </tbody>
+        </table>
     </div>
-    <footer></footer>
-</body>
-
-</html>
+</div>
