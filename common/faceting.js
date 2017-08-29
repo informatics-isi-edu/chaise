@@ -484,7 +484,7 @@
             };
         }])
         
-        .directive('choicePicker', ['$uibModal', function ($uibModal) {
+        .directive('choicePicker', ['recordTableUtils', '$uibModal', function (recordTableUtils, $uibModal) {
             var PAGE_SIZE = 10;
             
             function updateFacetColumn(scope) {
@@ -627,6 +627,18 @@
                         scope.isActive = true;
                         updateVMReference(scope, ref);
                     };
+                    
+                    scope.enterPressed = function() {
+                        var term = scope.search;
+                        if (term) term = term.trim();
+
+                        scope.search = term;
+                        var ref = scope.reference.search(term); // this will clear previous search first
+                        // updateVMReference(scope, ref);
+                        ref.read(11).then(function(page) {
+                            console.log(page);
+                        });
+                    }
 
                     scope.$on('data-modified', function ($event) {
                         scope.facetColumn = scope.vm.facetColumns[scope.facetColumn.index];
