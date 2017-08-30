@@ -487,15 +487,19 @@
         .directive('choicePicker', ['recordTableUtils', '$uibModal', function (recordTableUtils, $uibModal) {
             var PAGE_SIZE = 10;
             
-            function updateFacetColumn(scope) {
+            function updateFacetColumn(scope, reference) {
                 scope.hasLoaded = false;
                 scope.initialized = false;
                 
                 // facetColumn has changed so create the new reference
-                if (scope.facetColumn.isEntityMode) {
-                    scope.reference = scope.facetColumn.sourceReference.contextualize.compact;
+                if (typeof reference == 'undefined') {
+                    if (scope.facetColumn.isEntityMode) {
+                        scope.reference = scope.facetColumn.sourceReference.contextualize.compact;
+                    } else {
+                        scope.reference = scope.facetColumn.column.groupAggregate.entityCounts;
+                    }
                 } else {
-                    scope.reference = scope.facetColumn.column.groupAggregate.entityCounts;
+                    scope.reference = reference;
                 }
                 
                 // get the list of applied filters
@@ -627,18 +631,20 @@
                         scope.isActive = true;
                         updateVMReference(scope, ref);
                     };
-                    
-                    scope.enterPressed = function() {
-                        var term = scope.search;
-                        if (term) term = term.trim();
 
-                        scope.search = term;
-                        var ref = scope.reference.search(term); // this will clear previous search first
-                        // updateVMReference(scope, ref);
-                        ref.read(11).then(function(page) {
-                            console.log(page);
-                        });
+                    scope.enterPressed = function(searchTerm) {
+                        if (searchTerm) searchTerm = searchTerm.trim();
+
+                        updateFacetColumn(scope, scope.reference.search(searchTerm));
                     }
+
+                    scope.clearSearch = function() {
+                        if (scope.reference.location.searchTerm) {
+                            updateFacetColumn(scope, scope.reference.search());
+                        }
+
+                        scope.$$childHead.search = null;
+                    };
 
                     scope.$on('data-modified', function ($event) {
                         scope.facetColumn = scope.vm.facetColumns[scope.facetColumn.index];
