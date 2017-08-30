@@ -13,6 +13,7 @@
                 link: function (scope, element, attr) {
                     
                     scope.isOpen = [];
+                    scope.isLoading = [];
                     
                     scope.hasFilter = function (col) {
                         if(scope.vm.reference == null) {
@@ -322,7 +323,8 @@
                 scope: {
                     vm: "=",
                     facetColumn: "=",
-                    isOpen: "="
+                    isOpen: "=",
+                    isLoading: "="
                 },
                 link: function (scope, element, attr) {
                     scope.isOpen = scope.facetColumn.filters.length > 0;
@@ -488,7 +490,7 @@
             var PAGE_SIZE = 10;
             
             function updateFacetColumn(scope, reference) {
-                scope.hasLoaded = false;
+                scope.isLoading = true;
                 scope.initialized = false;
                 
                 // facetColumn has changed so create the new reference
@@ -546,14 +548,14 @@
                         
                         scope.hasMore = page.hasNext;    
                         scope.initialized = true;
-                        scope.hasLoaded = true;
+                        scope.isLoading = false;
                     }, function (err) {
                         throw err;
                     });
                     
                 } else {
                     scope.initialized = true;
-                    scope.hasLoaded = true;
+                    scope.isLoading = false;
                 }
             }
 
@@ -569,16 +571,18 @@
                 scope: {
                     vm: "=",
                     facetColumn: "=",
-                    isOpen: "="
+                    isOpen: "=",
+                    isLoading: "="
                 },
                 link: function (scope, element, attr) {
                     scope.initialized = false;
                     scope.isActive = false;
-                    scope.isOpen = scope.facetColumn.filters.length > 0;
+                    scope.isOpen = false;
+                    // scope.isOpen = scope.facetColumn.filters.length > 0;
                     
-                    if (scope.isOpen) {
-                        updateFacetColumn(scope);
-                    }
+                    // if (scope.isOpen) {
+                    //     updateFacetColumn(scope);
+                    // }
 
                     scope.openSearchPopup = function() {
                         var params = {};

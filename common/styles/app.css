@@ -77,6 +77,14 @@ img.spinner {
     opacity: 0.8;
 }
 
+img.spinner-sm {
+    display: inline-block;
+    margin: 0 auto;
+    width: 17px;
+    height: 17px;
+    opacity: 0.8;
+}
+
 /****************** HEADER ******************/
 
 #header{
@@ -1068,10 +1076,11 @@ footer .container1 {
 /*************** LIST ***************************/
 .chaise-list-container {
     padding-left: 0px;
+    margin-top: 10px;
 }
 .chaise-checkbox {
     position: relative;
-    margin: 10px 0;
+    /*margin: 10px 0;*/
 }
 
 .chaise-checkbox input {
@@ -1089,6 +1098,7 @@ footer .container1 {
     font-weight: 500;
     position: relative;
     vertical-align: middle;
+    min-height: 20px;
 }
 .chaise-checkbox label:before {
     content: "";

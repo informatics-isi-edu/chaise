@@ -174,6 +174,40 @@
                 throw exception;
             });
         }
+        
+        function newRead(scope, broadcast) {
+            if (!scope.vm.isIdle) {
+                return;
+            }
+            
+            scope.vm.isIdle = false;
+            (function (reference) {
+                reference.read.then(function (page) {
+                    scope.vm.isIdle = true;
+                    if (scope.vm.reference.uri === reference.uri) {
+                        
+                        scope.vm.page = page;
+                        scope.vm.rowValues = DataUtils.getRowValuesFromPage(page);
+                        scope.vm.hasLoaded = true;
+                        
+                        scope.$emit('reference-modified');
+                        
+                        if (broadcast) {
+                            scope.$emit('data-modified');
+                        }
+                    } else {
+                        newRead(scope, broadcast);
+                    }
+                }).catch(function (err) {
+                    scope.vm.isIdle = true;
+                    if (scope.vm.reference.uri === reference.uri) {
+                        throw err; // this is the last request
+                    } else {
+                        newRead(scope, broadcast); // some request are still pending
+                    }
+                })
+            })(scope.vm.reference);
+        }
 
         return {
             read: read
