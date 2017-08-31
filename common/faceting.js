@@ -330,7 +330,6 @@
                     scope.isOpen = scope.facetColumn.filters.length > 0;
                     scope.ranges = [];
                     scope.initialized = false;
-                    scope.hasLoaded = false;
                     // draw the plot
                     // TODO change the data
                     // scope.plot = {
@@ -414,7 +413,7 @@
                     // Gets the facet data for min/max
                     // TODO get the histogram data
                     scope.initialFacetData = function () {
-                        scope.hasLoaded = false;
+                        scope.isLoading = true;
                         scope.initialized = false;
                         
                         var agg = scope.facetColumn.column.aggregate;
@@ -447,7 +446,7 @@
                             }
 
                             scope.initialized = true;
-                            scope.hasLoaded = true;
+                            scope.isLoading = false;
                         });
                     };
 
@@ -636,10 +635,12 @@
                         updateVMReference(scope, ref);
                     };
 
-                    scope.enterPressed = function(searchTerm) {
-                        if (searchTerm) searchTerm = searchTerm.trim();
+                    scope.enterPressed = function() {
+                        var term = scope.search;
+                        if (term) term = term.trim();
+                        scope.search = term;
 
-                        updateFacetColumn(scope, scope.reference.search(searchTerm));
+                        updateFacetColumn(scope, scope.reference.search(term));
                     }
 
                     scope.clearSearch = function() {
@@ -647,7 +648,7 @@
                             updateFacetColumn(scope, scope.reference.search());
                         }
 
-                        scope.$$childHead.search = null;
+                        scope.search = null;
                     };
 
                     scope.$on('data-modified', function ($event) {
