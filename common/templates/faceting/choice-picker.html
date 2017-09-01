@@ -19,6 +19,7 @@
         </span>
     </div>
     <record-list rows='checkboxRows' on-row-click='onRowClick'></record-list>
-    <span ng-if="!isLoading && !hasMore && checkboxRows.length === 0">No Results Found</span>
+    <!-- TODO -->
+    <span ng-if="checkboxRows.length === 0">No Results Found</span>
     <a ng-if="hasMore" ng-click="openSearchPopup()">Find More</a>
 </div>

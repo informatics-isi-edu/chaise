@@ -181,8 +181,8 @@
             }
             
             scope.vm.isIdle = false;
-            (function (reference) {
-                reference.read.then(function (page) {
+            (function (reference, send) {
+                reference.read(scope.vm.pageLimit).then(function (page) {
                     scope.vm.isIdle = true;
                     if (scope.vm.reference.uri === reference.uri) {
                         
@@ -192,25 +192,26 @@
                         
                         scope.$emit('reference-modified');
                         
-                        if (broadcast) {
-                            scope.$emit('data-modified');
+                        if (send) {
+                            scope.$broadcast('data-modified');
                         }
                     } else {
-                        newRead(scope, broadcast);
+                        newRead(scope, send);
                     }
                 }).catch(function (err) {
                     scope.vm.isIdle = true;
                     if (scope.vm.reference.uri === reference.uri) {
                         throw err; // this is the last request
                     } else {
-                        newRead(scope, broadcast); // some request are still pending
+                        newRead(scope, send); // some request are still pending
                     }
                 })
-            })(scope.vm.reference);
+            })(scope.vm.reference, broadcast);
         }
 
         return {
-            read: read
+            read: read,
+            newRead: newRead
         }
     }])
 
@@ -364,6 +365,7 @@
 
                 scope.vm.backgroundSearchPendingTerm = null;
                 scope.vm.currentPageSelected = false;
+                scope.vm.isIdle = true;
 
                 scope.setPageLimit = function(limit) {
                     scope.vm.pageLimit = limit;
@@ -526,8 +528,6 @@
                 }
 
                 scope.$on('data-modified', function($event) {
-                    //TODO fix this
-                    scope.vm.facetColumns = scope.vm.reference.facetColumns;
                     
                     console.log('data-modified in recordset directive, getting count');
                     if (!scope.vm.config.hideTotalCount && scope.vm.search == scope.vm.reference.location.searchTerm) {
@@ -550,7 +550,8 @@
                 
                 scope.$on('facet-modified', function ($event) {
                     console.log('facet-modified in recordset directive');
-                    recordTableUtils.read(scope, false, true);
+                    // recordTableUtils.read(scope, false, true);
+                    recordTableUtils.newRead(scope, true);
                     // $event.stopPropagation();
                 });
                 

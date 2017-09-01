@@ -4,16 +4,58 @@
     angular.module('chaise.faceting', ['plotly'])
 
         .directive('faceting', [function () {
+            var MAX_CONCURENT_REQUEST = 4;
+            
             return {
                 restrict: 'AE',
                 templateUrl: '../common/templates/faceting/faceting.html',
                 scope: {
                     vm: "="
                 },
-                link: function (scope, element, attr) {
+                controller: ['$scope', function ($scope) {
+                    var ctrl = this;
+                    
+                    ctrl.childCtrls = []; // child controllers
+                    ctrl.outStandingRequestCount = 0; // number of pending requests
+                    ctrl.doneRequests = []; // to keep track of requests that are done
+                    
+                    // register a children controller in here
+                    ctrl.register = function (childCtrl, index) {
+                        ctrl.childCtrls[index] = childCtrl;
+                        $scope.isOpen[index] = false;
+                        $scope.isLoading[index] = false;
+                        $scope.initialized[index] = false;
+                    };
+                    
+                    ctrl.updateFacets = function () {
+                        if(!$scope.vm.isIdle) {
+                            return;
+                        }
+                        
+                        $scope.vm.reference.facetColumns.forEach(function (fc, index) {
+                            if (ctrl.doneRequests[index] || !$scope.isOpen[index] || ctrl.outStandingRequestCount >= (MAX_CONCURENT_REQUEST-1) || !$scope.isLoading[index]) {
+                                return;
+                            }
+                            
+                            ctrl.outStandingRequestCount += 1;
+                            console.log("asking for the " + index + ". waiting requests:" + ctrl.outStandingRequestCount);
+                            ctrl.doneRequests[index] = true;
+                            ctrl.childCtrls[index].updateFacet(true);
+                        });
+                    };
+                    
+                    // given the index of facet, update its content
+                    ctrl.updateFacet = function (index) {
+                        ctrl.childCtrls[index].updateFacet(false);
+                    }
+                    
+                }],
+                require: 'faceting',
+                link: function (scope, element, attr, currentCtrl) {
                     
                     scope.isOpen = [];
                     scope.isLoading = [];
+                    scope.initialized = [];
                     
                     scope.hasFilter = function (col) {
                         if(scope.vm.reference == null) {
@@ -44,13 +86,12 @@
                     };
                     
                     scope.toggleFacet = function (index) {
-                        // setTimeout(function() {
-                            if (scope.isOpen[index]) {
-                                scope.isOpen[index] = false;
-                            } else {
-                                scope.isOpen[index] = true;
-                            }
-                        // }, 0);
+                        if (scope.isOpen[index]) {
+                            scope.isOpen[index] = false;                            
+                        } else {
+                            currentCtrl.updateFacet(index);
+                            scope.isOpen[index] = true;
+                        }
                     };
                     
                     scope.vm.openFacet = function (fc) {
@@ -74,9 +115,33 @@
                         scope.removeFilter(colId, id);
                     }
                     
+                    // when the data has been modified, we need to get the new faceting data
                     scope.$on('data-modified', function ($event) {
                         console.log('data-modified in faceting');
+                        currentCtrl.doneRequests = [];
+                        currentCtrl.updateFacets();
                     })
+                    
+                    // make sure to change the state of open and close facets on each update
+                    scope.$on('facet-modified', function ($event) {
+                        scope.isOpen.forEach(function (val, index) {
+                            if (val) {
+                                scope.isLoading[index] = true;
+                            } else {
+                                scope.initialized[index] = false;
+                            }
+                        });
+                    });
+                    
+                //     
+                // scope.$watch("isOpen", function (newValue, oldValue) {
+                //     //TODO This is wrong, this should be called just one time!
+                //     if(angular.equals(newValue, oldValue) || !newValue || scope.initialized){
+                //         return;
+                //     }
+                //     scope.initialized = false;
+                //     updateFacetColumn(scope);
+                // });
                 }
             };
         }])
@@ -489,9 +554,12 @@
         .directive('choicePicker', ['recordTableUtils', '$uibModal', function (recordTableUtils, $uibModal) {
             var PAGE_SIZE = 10;
             
-            function updateFacetColumn(scope, reference) {
-                scope.isLoading = true;
-                scope.initialized = false;
+            // TODO right now I am keeping multiple boolean 
+            // it can be in a single object! (facetModel)
+            
+            function updateFacetColumn(scope, reference, callParent) {
+                console.log("updating FACET: " + scope.index);
+                scope.isLoading[scope.index] = true;
                 
                 // facetColumn has changed so create the new reference
                 if (typeof reference == 'undefined') {
@@ -504,63 +572,84 @@
                     scope.reference = reference;
                 }
                 
-                // get the list of applied filters
-                var currentValues = {};
-                scope.checkboxRows = scope.facetColumn.choiceFilters.map(function(f) {
-                    currentValues[f.uniqueId] = true;
-                    return {
-                        selected: true, displayname: f.displayname, 
-                        uniqueId: f.uniqueId, data: {value: f.term}
-                    }; // what about the count? do we want to read or not?
-                });
+                
+                // read new data if neede                
+                (function (reference, facetColumn,  callParent) {
+                    var currentValues = {};
+                    
+                    // get the list of applied filters
+                    scope.checkboxRows = facetColumn.choiceFilters.map(function(f) {
+                        currentValues[f.uniqueId] = true;
+                        return {
+                            selected: true, displayname: f.displayname, 
+                            uniqueId: f.uniqueId, data: {value: f.term}
+                        }; // what about the count? do we want to read or not?
+                    });
 
-                var appliedLen = scope.facetColumn.choiceFilters.length;
-
-                // read new data if needed
-                if (appliedLen < 5) {
-                    scope.reference.read(appliedLen + PAGE_SIZE).then(function (page) {
-                        page.tuples.forEach(function (tuple) {
-                            if (scope.checkboxRows.length == PAGE_SIZE) {
-                                return;
-                            }
-                            
-                            var value;
-                            if (scope.facetColumn.isEntityMode) {
-                                // the filter might not be on the shortest key,
-                                // therefore the uniqueId is not correct.
-                                value = tuple.data[scope.facetColumn.column.name];
-                            } else {
-                                // The name of column is value
-                                value = tuple.data['value'];
-                            }
-                            
-                            if (!(value in currentValues)) {
-                                var row = {
-                                    selected: false,
-                                    displayname: tuple.displayname,
-                                    uniqueId: value
-                                };
+                    var appliedLen = scope.checkboxRows.length;
+                    
+                    if (appliedLen < PAGE_SIZE) {
+                        reference.read(appliedLen + PAGE_SIZE).then(function (page) {
+                            page.tuples.forEach(function (tuple) {
+                                // if this is not the result of latest facet change
+                                if (scope.reference.uri !== reference.uri) {
+                                    return;
+                                }
+                                // if we're showing enough rows
+                                if (scope.checkboxRows.length == PAGE_SIZE) {
+                                    return;
+                                }
                                 
-                                currentValues[value] = true;
-                                scope.checkboxRows.push(row);
+                                var value;
+                                if (scope.facetColumn.isEntityMode) {
+                                    // the filter might not be on the shortest key,
+                                    // therefore the uniqueId is not correct.
+                                    value = tuple.data[scope.facetColumn.column.name];
+                                } else {
+                                    // The name of column is value
+                                    value = tuple.data['value'];
+                                }
+                                
+                                if (!(value in currentValues)) {
+                                    var row = {
+                                        selected: false,
+                                        displayname: tuple.displayname,
+                                        uniqueId: value,
+                                        data: {value: value}
+                                    };
+                                    
+                                    currentValues[value] = true;
+                                    scope.checkboxRows.push(row);
+                                }
+                            });
+                            
+                            scope.hasMore = page.hasNext;    
+                            
+                            //TODO refactor this
+                            scope.initialized[scope.index] = true;
+                            scope.isLoading[scope.index] = false;
+                            
+                            if (callParent) {
+                                scope.parentCtrl.outStandingRequestCount -= 1;
+                                console.log("got resposne for the " + scope.index + ". waiting requests:" + scope.parentCtrl.outStandingRequestCount);
+                                scope.parentCtrl.updateFacets();
                             }
+                            
+                        }, function (err) {
+                            scope.initialized[scope.index] = true;
+                            scope.isLoading[scope.index] = false;
+                            throw err;
                         });
                         
-                        scope.hasMore = page.hasNext;    
-                        scope.initialized = true;
-                        scope.isLoading = false;
-                    }, function (err) {
-                        throw err;
-                    });
-                    
-                } else {
-                    scope.initialized = true;
-                    scope.isLoading = false;
-                }
+                    } else {
+                        scope.initialized[scope.index] = true;
+                        scope.isLoading[scope.index] = false;
+                    }
+                })(scope.reference, scope.facetColumn, callParent);
+                
             }
 
             function updateVMReference(scope, ref) {
-                scope.hasLoaded = false;
                 scope.vm.reference = ref;
                 scope.$emit('facet-modified');
             }
@@ -571,18 +660,29 @@
                 scope: {
                     vm: "=",
                     facetColumn: "=",
-                    isOpen: "=",
-                    isLoading: "="
+                    initialized: "=",
+                    isLoading: "=",
+                    index: "="
                 },
-                link: function (scope, element, attr) {
-                    scope.initialized = false;
-                    scope.isActive = false;
-                    scope.isOpen = false;
-                    // scope.isOpen = scope.facetColumn.filters.length > 0;
+                controller: ['$scope', function ($scope) {
+                    var ctrl = this;
+                    ctrl.sss = $scope;
                     
-                    // if (scope.isOpen) {
-                    //     updateFacetColumn(scope);
-                    // }
+                    //TODO fix this
+                    ctrl.updateFacet = function (callParent) {
+                        updateFacetColumn($scope, undefined, callParent);
+                    }
+                    
+                }],
+                require: ['^faceting', 'choice-picker'],
+                link: function (scope, element, attr, ctrls) {
+                    var parentCtrl = ctrls[0],
+                        currentCtrl = ctrls[1];
+                    
+                    parentCtrl.register(currentCtrl, scope.index);
+                    
+                    //TODO
+                    scope.parentCtrl = parentCtrl;
 
                     scope.openSearchPopup = function() {
                         var params = {};
@@ -632,7 +732,6 @@
                         } else {
                             ref = scope.facetColumn.removeChoiceFilters([row.uniqueId]);
                         }
-                        scope.isActive = true;
                         updateVMReference(scope, ref);
                     };
 
@@ -649,26 +748,6 @@
 
                         scope.$$childHead.search = null;
                     };
-
-                    scope.$on('data-modified', function ($event) {
-                        scope.facetColumn = scope.vm.facetColumns[scope.facetColumn.index];
-
-                        if (scope.isOpen && !scope.isActive) {
-                            updateFacetColumn(scope);
-                        }
-                        if (!scope.isOpen) {
-                            scope.initialized = false;
-                        }
-                        scope.isActive = false;
-                    });
-
-                    scope.$watch("isOpen", function (newValue, oldValue) {
-                        //TODO This is wrong, this should be called just one time!
-                        if(angular.equals(newValue, oldValue) || !newValue || scope.initialized){
-                            return;
-                        }
-                        updateFacetColumn(scope);
-                    });
                 }
             };
             

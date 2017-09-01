@@ -195,7 +195,6 @@
                     recordsetModel.reference = reference.contextualize.compact;
                     recordsetModel.context = "compact";
                     recordsetModel.reference.session = session;
-                    recordsetModel.facetColumns = recordsetModel.reference.facetColumns;
                     //TODO should remove this:
                     baseRef = recordsetModel.reference;
 
@@ -215,7 +214,6 @@
                         recordsetModel.subTitle = location.queryParams.subset;
                     }
 
-                    recordsetModel.facetColumns = recordsetModel.reference.facetColumns;
                     recordsetModel.columns = recordsetModel.reference.columns;
                     recordsetModel.search = recordsetModel.reference.location.searchTerm;
 
