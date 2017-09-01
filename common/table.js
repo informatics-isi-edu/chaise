@@ -327,12 +327,13 @@
         };
     }])
 
-    .directive('recordList', ['recordTableUtils', function(recordTableUtils) {
+    .directive('recordList', ['recordTableUtils', '$timeout', function(recordTableUtils, $timeout) {
 
         return {
             restrict: 'E',
             templateUrl: '../common/templates/list.html',
             scope: {
+                initialized: '=?',
                 onRowClick: '=',
                 rows: '=' // each row: {uniqueId, displayname, count, selected}
             },
@@ -341,6 +342,18 @@
                     row.selected = !row.selected;
                     scope.onRowClick(row);
                 }
+
+                scope.$watch('initialized', function (newVal, oldVal) {
+                    if (newVal) {
+                        $timeout(function () {
+                            var listElem = elem[0].getElementsByClassName("chaise-list-container")[0];
+
+                            // set the height to the clientHeight or the rendered height so when the content changes the page doesn't thrash
+                            listElem.style.height = listElem.clientHeight + "px";
+                            listElem.style.overflow = "hidden";
+                        }, 0);
+                    }
+                });
             }
         }
     }])
