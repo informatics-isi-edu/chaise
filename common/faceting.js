@@ -551,7 +551,7 @@
             };
         }])
         
-        .directive('choicePicker', ['recordTableUtils', '$uibModal', function (recordTableUtils, $uibModal) {
+        .directive('choicePicker', ['recordTableUtils', '$timeout', '$uibModal', function (recordTableUtils, $timeout, $uibModal) {
             var PAGE_SIZE = 10;
             
             // TODO right now I am keeping multiple boolean 
@@ -756,6 +756,18 @@
                             updateFacetColumn(scope);
                         }
                     };
+
+                    scope.$watch(function () {
+                        return scope.initialized[scope.index]
+                    }, function (newVal, oldVal) {
+                        var findMoreHeight = 30;
+                        if (newVal) {
+                            $timeout(function () {
+                                var choicePickerElem = element[0].getElementsByClassName("choice-picker")[0];
+                                choicePickerElem.style.height = choicePickerElem.clientHeight + findMoreHeight + "px";
+                            }, 0);
+                        }
+                    })
                 }
             };
             
