@@ -20,8 +20,9 @@
                     ctrl.doneRequests = []; // to keep track of requests that are done
                     
                     // register a children controller in here
-                    ctrl.register = function (childCtrl, index) {
+                    ctrl.register = function (childCtrl, index, facetColumn) {
                         ctrl.childCtrls[index] = childCtrl;
+                        //TODO this should be changed for openning facets when we load the page
                         $scope.isOpen[index] = false;
                         $scope.isLoading[index] = false;
                         $scope.initialized[index] = false;
@@ -86,11 +87,10 @@
                     };
                     
                     scope.toggleFacet = function (index) {
-                        if (scope.isOpen[index]) {
-                            scope.isOpen[index] = false;                            
-                        } else {
+                        scope.isOpen[index] = !scope.isOpen[index];
+                        
+                        if (!scope.initialized[index]) {
                             currentCtrl.updateFacet(index);
-                            scope.isOpen[index] = true;
                         }
                     };
                     
@@ -556,21 +556,21 @@
             // TODO right now I am keeping multiple boolean 
             // it can be in a single object! (facetModel)
             
-            function updateFacetColumn(scope, reference, callParent) {
+            function updateFacetColumn(scope, callParent) {
                 console.log("updating FACET: " + scope.index);
                 scope.isLoading[scope.index] = true;
                 
                 // facetColumn has changed so create the new reference
-                if (typeof reference == 'undefined') {
-                    if (scope.facetColumn.isEntityMode) {
-                        scope.reference = scope.facetColumn.sourceReference.contextualize.compact;
-                    } else {
-                        scope.reference = scope.facetColumn.column.groupAggregate.entityCounts;
-                    }
+                if (scope.facetColumn.isEntityMode) {
+                    scope.reference = scope.facetColumn.sourceReference.contextualize.compact;
                 } else {
-                    scope.reference = reference;
+                    scope.reference = scope.facetColumn.column.groupAggregate.entityCounts;
                 }
                 
+                // make sure to add the search term
+                if (scope.searchTerm) {
+                    scope.reference = scope.reference.search(scope.searchTerm);
+                }
                 
                 // read new data if neede                
                 (function (reference, facetColumn,  callParent) {
@@ -665,22 +665,22 @@
                 },
                 controller: ['$scope', function ($scope) {
                     var ctrl = this;
-                    ctrl.sss = $scope;
                     
-                    //TODO fix this
+                    /**
+                     * update the current parent
+                     * @param  {boolean} callParent if true, will call the updateFacets in faceting directive
+                     */
                     ctrl.updateFacet = function (callParent) {
-                        updateFacetColumn($scope, undefined, callParent);
+                        updateFacetColumn($scope, callParent);
                     }
-                    
                 }],
                 require: ['^faceting', 'choice-picker'],
                 link: function (scope, element, attr, ctrls) {
                     var parentCtrl = ctrls[0],
                         currentCtrl = ctrls[1];
                     
-                    parentCtrl.register(currentCtrl, scope.index);
-                    
-                    //TODO
+                    // register this controller in the parent
+                    parentCtrl.register(currentCtrl, scope.index, scope.facetColumn);
                     scope.parentCtrl = parentCtrl;
 
                     scope.openSearchPopup = function() {
@@ -734,20 +734,22 @@
                         updateVMReference(scope, ref);
                     };
 
+                    // change the searchTerm and fire the updateFacetColumn
                     scope.enterPressed = function() {
-                        var term = scope.search;
-                        if (term) term = term.trim();
-                        scope.search = term;
-
-                        updateFacetColumn(scope, scope.reference.search(term));
+                        var term = null;
+                        if (scope.searchTerm) {
+                            term = scope.searchTerm.trim();
+                        } 
+                        scope.searchTerm = term;
+                        updateFacetColumn(scope);
                     }
 
+                    // clear the search, if reference has search then fire update
                     scope.clearSearch = function() {
+                        scope.searchTerm = null;
                         if (scope.reference.location.searchTerm) {
-                            updateFacetColumn(scope, scope.reference.search());
+                            updateFacetColumn(scope);
                         }
-
-                        scope.search = null;
                     };
                 }
             };
