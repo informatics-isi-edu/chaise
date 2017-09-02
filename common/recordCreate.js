@@ -1,8 +1,7 @@
 (function() {
     'use strict';
     angular.module('chaise.recordcreate', ['chaise.errors']).factory("recordCreate", ['$rootScope', '$cookies', '$log', '$window', '$uibModal', 'AlertsService', 'DataUtils', 'MathUtils', 'UriUtils', function($rootScope, $cookies, $log, $window, $uibModal, AlertsService, DataUtils, MathUtils, UriUtils) {
-
-        // .factory("recordCreate", ['AlertsService', '$cookies', '$log', 'UriUtils', 'DataUtils', 'ErrorService', 'MathUtils', 'messageMap', '$rootScope', '$window', '$scope', '$uibModal', '$controller', function (AlertsService, $cookies, $log, UriUtils, DataUtils, ErrorService, MathUtils, messageMap, $rootScope, $window, $scope, $uibModal, $controller) {
+        
         var viewModel = {};
         var GV_recordEditModel = {},
             completed = {};
@@ -145,6 +144,7 @@
                         onSuccessFunction(page);
                     } else {
                         onSuccessFunction(model, page, result);
+
                     }
                 }).catch(function(exception) {
                     viewModel.submissionButtonDisabled = false;
@@ -159,100 +159,9 @@
 
         }
 
-        function isDisabled(column) {
-            try {
-                31
-                if (column.getInputDisabled(context.appContext)) {
-                    return true;
-                } else if (vm.prefillCookie) {
-                    return vm.prefillCookie.constraintName == column.name;
-                }
-                return false;
-            } catch (e) {
-                $log.info(e);
-            }
-        }
-
-        function transformRowValues(row) {
-            var transformedRow = {};
-            /* Go through the set of columns for the reference.
-             * If a value for that column is present (row[col.name]), transform the row value as needed
-             * NOTE:
-             * Opted to loop through the columns once and use the row object for quick checking instead
-             * of looking at each key in row and looping through the column set each time to grab the column
-             * My solution is worst case n-time
-             * The latter is worst case rowKeys.length * n time
-             */
-            for (var i = 0; i < $rootScope.reference.columns.length; i++) {
-                var col = $rootScope.reference.columns[i];
-                var rowVal = row[col.name];
-                if (rowVal && !col.getInputDisabled($rootScope.context.appContext)) {
-                    switch (col.type.name) {
-                        case "timestamp":
-                        case "timestamptz":
-                            if (viewModel.readyToSubmit) {
-                                if (rowVal.date && rowVal.time && rowVal.meridiem) {
-                                    rowVal = moment(rowVal.date + rowVal.time + rowVal.meridiem, 'YYYY-MM-DDhh:mm:ssA').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
-                                } else if (rowVal.date && rowVal.time === null) {
-                                    rowVal.time = '00:00:00';
-                                    rowVal = moment(rowVal.date + rowVal.time + rowVal.meridiem, 'YYYY-MM-DDhh:mm:ssA').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
-                                    // in create if the user doesn't change the timestamp field, it will be an object in form {time: null, date: null, meridiem: AM}
-                                    // meridiem should never be null,time can be left empty (null) but the case above would catch that.
-                                } else if (!rowVal.date) {
-                                    rowVal = null;
-                                }
-                            }
-                            break;
-                        case "json":
-                        case "jsonb":
-                            rowVal = JSON.parse(rowVal);
-                            break;
-                        default:
-                            if (col.isAsset) {
-                                if (!viewModel.readyToSubmit) {
-                                    rowVal = {
-                                        url: ""
-                                    };
-                                }
-                            }
-                            break;
-                    }
-                }
-                transformedRow[col.name] = rowVal;
-            }
-            return transformedRow;
-        }
-
-        function populateSubmissionRow(modelRow, submissionRow, originalTuple, columns, editOrCopy) {
-            var transformedRow = transformRowValues(modelRow);
-            columns.forEach(function(column) {
-                // If the column is a foreign key column, it needs to get the originating columns name for data submission
-                if (column.isForeignKey) {
-
-                    var foreignKeyColumns = column.foreignKey.colset.columns;
-                    for (var k = 0; k < foreignKeyColumns.length; k++) {
-                        var referenceColumn = foreignKeyColumns[k];
-                        var foreignTableColumn = column.foreignKey.mapping.get(referenceColumn);
-                        // check if value is set in submission data yet
-                        if (!submissionRow[referenceColumn.name]) {
-
-                            if (editOrCopy && undefined != originalTuple.data[referenceColumn.name]) {
-                                submissionRow[referenceColumn.name] = originalTuple.data[referenceColumn.name];
-                            } else {
-                                submissionRow[referenceColumn.name] = null;
-                            }
-                        }
-                    }
-                    // not foreign key, column.name is sufficient for the keys
-                } else {
-                    // set null if not set so that the whole data object is filled out for posting to ermrestJS
-                    submissionRow[column.name] = (transformedRow[column.name] === undefined) ? null : transformedRow[column.name];
-                }
-            });
-
-            return submissionRow;
-        }
-
+        /**
+         * Will add the cookie and also populate the values for the main table.
+         */
         function updateViewModel(cookie) {
             var recordEditModel = {
                 table: {},
@@ -273,15 +182,10 @@
         }
         var addPopup = function(ref, rowIndex, derivedref, isModalUpdate) {
             var column = ref;
-            // if (isDisabled(column)) return;
-
 
             var originalTuple, nullArr = [],
                 editOrCopy = true,
                 params = {};
-
-            // pass the reference as a param for the modal
-            // call to page with tuple to get proper reference
 
             if (viewModel.editMode) {
                 originalTuple = $rootScope.tuples[rowIndex];
@@ -289,9 +193,6 @@
                 originalTuple = null;
                 editOrCopy = false;
             }
-
-            //var submissionRow = populateSubmissionRow(GV_recordEditModel.rows[rowIndex], GV_recordEditModel.submissionRows[rowIndex], originalTuple, $rootScope.reference.columns, editOrCopy);
-            // var ref1 = isModalUpdate?ref.unfilteredReference.contextualize.compact:ref.filteredRef(submissionRow).contextualize.compactSelect;
             var ref1 = ref.unfilteredReference.contextualize.compact;
             params.reference = ref1.contextualize.compactSelect;
             params.reference.session = $rootScope.session;
@@ -312,39 +213,19 @@
             modalInstance.result.then(function dataSelected(tuples) {
                 // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
                 // set data in view model (model.rows) and submission model (model.submissionRows)
-                if (!isModalUpdate) {
-                    var foreignKeyColumns = ref.foreignKey.colset.columns;
-                    for (var i = 0; i < foreignKeyColumns.length; i++) {
-                        var referenceCol = foreignKeyColumns[i];
-                        var foreignTableCol = ref.foreignKey.mapping.get(referenceCol);
+                // we assume that the data for the main table has been populated before
+                var mapping = derivedref._secondFKR.mapping;
 
-                        GV_recordEditModel.submissionRows[rowIndex][referenceCol.name] = tuples.data[foreignTableCol.name];
-                        return GV_recordEditModel;
-                    }
-                } else {
-                    var key_subRow = {},
-                        key_row = {};
-                    angular.copy(GV_recordEditModel.submissionRows[0], key_subRow);
-                    angular.copy(GV_recordEditModel.rows[0], key_row);
-                    // for (i = 1; i < tuples.length; i++) {
-                    //     GV_recordEditModel.submissionRows.push(key_subRow);
-                    //     GV_recordEditModel.rows.push(key_row);
-                    // }
-                    for (i = 0; i < tuples.length; i++) {
-                        if (i != 0) {
-                            var ob1 = {},
-                                ob2 = {};
-                            angular.copy(key_subRow, ob1)
-                            angular.copy(key_row, ob2)
-                            ob1[column.table.name] = tuples[i].data['term'];
-                            GV_recordEditModel.submissionRows.push(ob1);
-                            ob2[column.columns[0].name] = tuples[i].displayname.value;
-                            GV_recordEditModel.rows.push(ob2);
-                        } else {
-                            GV_recordEditModel.submissionRows[i][column.table.name] = tuples[i].data['term'];
-                            GV_recordEditModel.rows[i][column.columns[0].name] = tuples[i].displayname.value;
+                for (i = 0; i < tuples.length; i++) {
+                    derivedref._secondFKR.key.colset.columns.forEach(function(col) {
+                        if (angular.isUndefined(GV_recordEditModel.submissionRows[i])) {
+                            var obj = {};
+                            angular.copy(GV_recordEditModel.submissionRows[i - 1], obj);
+                            GV_recordEditModel.submissionRows.push(obj);
                         }
-                    }
+                        GV_recordEditModel.submissionRows[i][mapping.getFromColumn(col).name] = tuples[i].data[col.name];
+                    });
+
                 }
                 if (isModalUpdate)
                     addRecords(viewModel.editMode, derivedref, nullArr, isModalUpdate, viewModel.onSuccess);
@@ -355,20 +236,8 @@
 
             updateViewModel(modelObject);
             var derivedref = isModal ? ref.derivedAssociationReference : null;
-            // var refToPass =  isModal?ref.unfilteredReference.contextualize.compact;
             addPopup(ref, 0, derivedref, isModal);
         };
-
-
-
-        // function called from form.controller.js to notify record that an entity was just updated
-        window.updated = function(id) {
-            updated[editRecordRequests[id].schema + ":" + editRecordRequests[id].table] = true;
-            delete editRecordRequests[id];
-        }
-        var testfunction = function(p) {
-            return p * 3;
-        }
 
         function addRelatedRecordFact(isModalUpdate, ref, rowIdx, modelObject, editMode, formContainer, readyToSubmit, recordsetLink, resultsetModel, resultset, submissionButtonDisabled, omittedResultsetModel, onSuccess) {
             viewModel.onSuccess = onSuccess;
@@ -385,8 +254,7 @@
 
         return {
             addRelatedRecordFact: addRelatedRecordFact,
-            addRecords: addRecords,
-            testfunction: testfunction
+            addRecords: addRecords
         }
     }])
 })();
