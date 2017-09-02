@@ -3,7 +3,7 @@
         <!-- sortable column header -->
         <thead class="table-heading">
             <tr>
-                <th ng-switch="::vm.config.selectMode" ng-if="::(vm.config.viewable || vm.config.editable || vm.config.deletable || vm.config.selectMode)" ng-class="{'multi-select-width': vm.config.selectMode == 'multi-select'}">
+                <th ng-switch="::vm.config.selectMode" ng-if="(vm.config.viewable || vm.config.editable || vm.config.deletable || vm.config.selectMode)" ng-class="{'multi-select-width': vm.config.selectMode == 'multi-select'}">
                     <span ng-switch-when="no-select">Actions</span>
                     <span ng-switch-when="single-select">Select</span>
                     <div ng-switch-when="multi-select">

@@ -270,7 +270,6 @@
                         console.log('Could not find cookie', cookie);
                     }
                 }
-
                 // read updated tables
                 if (isModalUpdate || Object.keys(completed).length > 0 || updated !== {}) {
                     for (var i = 0; i < $rootScope.inboundFKCols.length; i++) {
@@ -284,7 +283,6 @@
             }
 
         };
-
         // function called from form.controller.js to notify record that an entity was just updated
         window.updated = function(id) {
             updated[editRecordRequests[id].schema + ":" + editRecordRequests[id].table] = true;

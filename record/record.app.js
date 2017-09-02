@@ -192,6 +192,7 @@
                 $rootScope.inboundFKColsIdx = allInbFKColsIdx;
                 $rootScope.inbFKRef = allInbFKCols;
                 if(allInbFKCols.length>0){
+
                     $rootScope.rtrefDisTypetable = [];
                     $rootScope.colTableModels = [];
 
