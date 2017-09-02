@@ -192,7 +192,7 @@
             });
 
             if(ref.derivedAssociationReference){
-                recordCreate.addRelatedRecordFact(true, ref, 0, cookie, vm.editMode, vm.formContainer, vm.readyToSubmit, vm.recordsetLink, vm.resultsetModel, vm.resultset, vm.submissionButtonDisabled, vm.omittedResultsetModel, onSuccess);
+                recordCreate.addRelatedRecordFact(true, ref, 0, cookie, vm.editMode, vm.formContainer, vm.readyToSubmit, vm.recordsetLink, vm.submissionButtonDisabled, onSuccess);
                 return;
             }
 

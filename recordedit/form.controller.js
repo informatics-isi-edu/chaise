@@ -265,11 +265,6 @@
 
             if (isDisabled(column)) return;
 
-            //call recordCreate
-            //addRelatedRecordFact(isModalUpdate, ref, rowIdx, modelObject, editMode, formContainer, readyToSubmit, recordsetLink, resultsetModel, resultset, submissionButtonDisabled, omittedResultsetModel)
-            // vm.recordEditModel = recordCreate.addRelatedRecordFact(false, column, rowIndex, $rootScope.cookieObj, vm.editMode, vm.formContainer, vm.readyToSubmit, vm.recordsetLink, vm.resultsetModel, vm.resultset, vm.submissionButtonDisabled, vm.omittedResultsetModel);
-            //
-            // return;
             var originalTuple,
                 editOrCopy = true,
                 params = {};

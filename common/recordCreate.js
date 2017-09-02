@@ -1,7 +1,7 @@
 (function() {
     'use strict';
     angular.module('chaise.recordcreate', ['chaise.errors']).factory("recordCreate", ['$rootScope', '$cookies', '$log', '$window', '$uibModal', 'AlertsService', 'DataUtils', 'MathUtils', 'UriUtils', function($rootScope, $cookies, $log, $window, $uibModal, AlertsService, DataUtils, MathUtils, UriUtils) {
-        
+
         var viewModel = {};
         var GV_recordEditModel = {},
             completed = {};
@@ -10,11 +10,15 @@
         var updated = {};
 
 
+        /**
+         * uploadFiles - uploading files
+         *
+         * @param  {array} submissionRowsCopy data that is going to be uploaded
+         * @param  {bool} isUpdate           flag to check if it is an update call
+         * @param  {object} onSuccess          callback
+         */
         function uploadFiles(submissionRowsCopy, isUpdate, onSuccess) {
 
-            // If url is valid
-            // if (areFilesValid(submissionRowsCopy)) {
-            if (1) {
                 $uibModal.open({
                     templateUrl: "../common/templates/uploadProgress.modal.html",
                     controller: "UploadModalDialogController",
@@ -34,12 +38,17 @@
 
                     if (exception) AlertsService.addAlert(exception.message, 'error');
                 });
-            } else {
-                viewModel.readyToSubmit = false;
-                viewModel.submissionButtonDisabled = false;
-            }
         }
 
+        /**
+         * addRecords - Function that calls ermrestjs method to add data
+         *
+         * @param  {bool} isUpdate            flag
+         * @param  {object} derivedref        derived referene of the column that is being added
+         * @param  {array} recordEditModel   data array
+         * @param  {bool} isModalUpdate     if updating through record app
+         * @param  {object} onSuccessFunction callback
+         */
         function addRecords(isUpdate, derivedref, recordEditModel, isModalUpdate, onSuccessFunction) {
             var model = isModalUpdate ? GV_recordEditModel : recordEditModel;
             var form = viewModel.formContainer;
@@ -160,7 +169,9 @@
         }
 
         /**
-         * Will add the cookie and also populate the values for the main table.
+         * updateViewModel - Will add the cookie and also initialize the values for the main table.
+         *
+         * @param  {type} cookie object which has initial value
          */
         function updateViewModel(cookie) {
             var recordEditModel = {
@@ -180,6 +191,15 @@
             });
             GV_recordEditModel = recordEditModel;
         }
+
+        /**
+         * var addPopup - Create pop-up for user to select values
+         *
+         * @param  {object} ref             column reference
+         * @param  {int} rowIndex           row index
+         * @param  {object} derivedref      derived referene of the column that is being added
+         * @param  {bool} isModalUpdate     flag
+         */
         var addPopup = function(ref, rowIndex, derivedref, isModalUpdate) {
             var column = ref;
 
@@ -232,6 +252,15 @@
 
             });
         }
+
+        /**
+         * var addRelatedRecord - begining of the record addition
+         *
+         * @param  {object} ref         column object
+         * @param  {int} rowIndex       row index
+         * @param  {object} modelObject object holds peripheral attributes
+         * @param  {bool} isModal       if creating via record app
+         */
         var addRelatedRecord = function(ref, rowIndex, modelObject, isModal) {
 
             updateViewModel(modelObject);
@@ -239,16 +268,27 @@
             addPopup(ref, 0, derivedref, isModal);
         };
 
-        function addRelatedRecordFact(isModalUpdate, ref, rowIdx, modelObject, editMode, formContainer, readyToSubmit, recordsetLink, resultsetModel, resultset, submissionButtonDisabled, omittedResultsetModel, onSuccess) {
+        /**
+         * addRelatedRecordFact - Exposed API for adding records.
+         *
+         * @param  {bool} isModalUpdate             Create via record app
+         * @param  {obj} ref                        column reference
+         * @param  {int} rowIdx                     row index
+         * @param  {obj} modelObject                object holds peripheral attributes
+         * @param  {bool} editMode                  mode is edit or add
+         * @param  {obj} formContainer              contains DOM attributes
+         * @param  {bool} readyToSubmit             if ready to call create function
+         * @param  {obj} recordsetLink              after update link should be redirected
+         * @param  {bool} submissionButtonDisabled  disable submission button
+         * @param  {callback} onSuccess             callback
+         */
+        function addRelatedRecordFact(isModalUpdate, ref, rowIdx, modelObject, editMode, formContainer, readyToSubmit, recordsetLink, submissionButtonDisabled, onSuccess) {
             viewModel.onSuccess = onSuccess;
             viewModel.editMode = editMode;
             viewModel.formContainer = formContainer;
             viewModel.readyToSubmit = readyToSubmit;
             viewModel.recordsetLink = recordsetLink;
-            viewModel.resultsetModel = resultsetModel;
-            viewModel.resultset = resultset;
             viewModel.submissionButtonDisabled = submissionButtonDisabled;
-            viewModel.omittedResultsetModel = omittedResultsetModel;
             addRelatedRecord(ref, rowIdx, modelObject, isModalUpdate);
         }
 
