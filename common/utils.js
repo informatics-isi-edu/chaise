@@ -905,6 +905,18 @@
         }
     })
 
+    // directive to show tooltip when data in the row is truncated
+    .directive('chaiseEnableTooltip', ['$timeout', function ($timeout) {
+        return {
+            restrict: 'A',
+            link: function (scope, elem, attrs) {
+                $timeout(function () {
+                    if (elem[0].scrollWidth > elem[0].offsetWidth) scope.tooltipEnabled = true;
+                }, 0);
+            }
+        }
+    }])
+
     // if a view value is empty string (''), change it to null before submitting to the database
     .directive('emptyToNull', function () {
         return {
