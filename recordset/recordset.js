@@ -146,21 +146,12 @@
             var modifyEnabled = chaiseConfig.editRecord === false ? false : true;
             var deleteEnabled = chaiseConfig.deleteRecord === true ? true : false;
 
-            if(1){
-                recordsetModel.config = {
-                    viewable: true,
-                    editable: true,//modifyEnabled,
-                    deletable: true,//modifyEnabled && deleteEnabled,
-                    selectMode: "multi-select"
-                };
-            }else{
-                recordsetModel.config = {
+            recordsetModel.config = {
                     viewable: true,
                     editable: modifyEnabled,
                     deletable: modifyEnabled && deleteEnabled,
                     selectMode: "no-select"
                 };
-            }
 
             $rootScope.alerts = AlertsService.alerts;
 
