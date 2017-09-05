@@ -349,9 +349,13 @@
                             var listElem = elem[0].getElementsByClassName("chaise-list-container")[0];
 
                             // set the height to the clientHeight or the rendered height so when the content changes the page doesn't thrash
-                            listElem.style.height = listElem.clientHeight + "px";
+                            listElem.style.height = listElem.scrollHeight + "px";
                             listElem.style.overflow = "hidden";
                         }, 0);
+                    } else if (newVal == false) {
+                        var listElem = elem[0].getElementsByClassName("chaise-list-container")[0];
+                        listElem.style.height = "";
+                        listElem.style.overflow = "";
                     }
                 });
             }

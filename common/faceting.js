@@ -91,6 +91,8 @@
                         
                         if (!scope.initialized[index]) {
                             currentCtrl.updateFacet(index);
+                        } else {
+                            scope.initialized[index] = false;
                         }
                     };
                     
@@ -758,9 +760,14 @@
                         var findMoreHeight = 30;
                         if (newVal) {
                             $timeout(function () {
-                                var choicePickerElem = element[0].getElementsByClassName("choice-picker")[0];
-                                choicePickerElem.style.height = choicePickerElem.clientHeight + findMoreHeight + "px";
+                                var choicePickerElem = element[0].getElementsByClassName("choice-picker");
+                                var addedHeight = choicePickerElem[0].scrollHeight;
+                                if (!scope.hasMore) addedHeight += findMoreHeight;
+                                choicePickerElem[0].style.height = addedHeight + "px";
                             }, 0);
+                        } else if (newVal == false) {
+                            var choicePickerElem = element[0].getElementsByClassName("choice-picker")[0];
+                            choicePickerElem.style.height = "";
                         }
                     })
                 }
