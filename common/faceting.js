@@ -24,11 +24,13 @@
                         ctrl.childCtrls[index] = childCtrl;
                         //TODO this should be changed for openning facets when we load the page
                         $scope.initialized[index] = false;
-                        $scope.isOpen[index] = facetColumn.filters.length > 0;
-                        if ($scope.isOpen[index]) {
-                            $scope.isLoading[index] = true;
-                            ctrl.addRequest(index);
-                        }
+                        $scope.isOpen[index] = false;
+                        $scope.isLoading[index] = false;
+                        // $scope.isOpen[index] = facetColumn.filters.length > 0;
+                        // if ($scope.isOpen[index]) {
+                        //     $scope.isLoading[index] = true;
+                        //     ctrl.addRequest(index);
+                        // }
                     };
                     
                     ctrl.updateVMReference = function (reference, index) {
@@ -127,13 +129,14 @@
                         scope.isOpen[index] = !scope.isOpen[index];
                         
                         if (!scope.isOpen[index]) {
+                            if (scope.isLoading[index]) {
+                                scope.initialized[index] = false;
+                            }
+                            
                             scope.isLoading[index] = false;
-                        }
-                        
-                        if (!scope.initialized[index] && scope.isOpen[index]) {
-                            // currentCtrl.initializeFacet(index);
+                        } else if (!scope.initialized[index]) {
                             currentCtrl.addRequest(index);
-                        }
+                        } 
                     };
                     
                     /**
@@ -699,7 +702,7 @@
                 scope: {
                     facetColumn: "=",
                     initialized: "=",
-                    isLoading: "=",
+                    isOpen: "=",
                     index: "="
                 },
                 controller: ['$scope', function ($scope) {
@@ -797,14 +800,19 @@
                     };
 
                     scope.$watch(function () {
-                        return scope.initialized[scope.index]
+                        return scope.isOpen[scope.index] && scope.initialized[scope.index];
                     }, function (newVal, oldVal) {
                         var findMoreHeight = 30;
                         if (newVal) {
                             $timeout(function () {
-                                var choicePickerElem = element[0].getElementsByClassName("choice-picker")[0];
-                                choicePickerElem.style.height = choicePickerElem.clientHeight + findMoreHeight + "px";
+                                var choicePickerElem = element[0].getElementsByClassName("choice-picker");
+                                var addedHeight = choicePickerElem[0].scrollHeight;
+                                if (!scope.hasMore) addedHeight += findMoreHeight;
+                                choicePickerElem[0].style.height = addedHeight + "px";
                             }, 0);
+                        } else if (newVal == false) {
+                            var choicePickerElem = element[0].getElementsByClassName("choice-picker")[0];
+                            choicePickerElem.style.height = "";
                         }
                     })
                 }

@@ -1082,6 +1082,11 @@ footer .container1 {
     position: relative;
     /*margin: 10px 0;*/
 }
+.ellipsis-text label{
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
 
 .chaise-checkbox input {
     position: absolute;

@@ -1,7 +1,7 @@
 <ul class="chaise-list-container">
-    <li ng-repeat="row in rows track by $index"  class="chaise-checkbox">
+    <li ng-repeat="row in rows track by $index" class="chaise-checkbox ellipsis-text">
         <input type="checkbox" ng-checked="row.selected" ng-click="onSelect(row)" />
-        <label ng-if="row.displayname.isHTML" ng-bind-html="row.displayname.value"></label>
-        <label ng-if="!row.displayname.isHTML" ng-bind="row.displayname.value"></label>
+        <label ng-if="row.displayname.isHTML" ng-bind-html="row.displayname.value" tooltip-enable="tooltipEnabled" uib-tooltip="{{row.displayname.value}}" tooltip-placement="bottom" chaise-enable-tooltip></label>
+        <label ng-if="!row.displayname.isHTML" ng-bind="row.displayname.value" tooltip-enable="tooltipEnabled" uib-tooltip="{{row.displayname.value}}" tooltip-placement="bottom" chaise-enable-tooltip></label>
     </li>
 </ul>

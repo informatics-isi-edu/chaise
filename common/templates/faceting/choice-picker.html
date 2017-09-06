@@ -18,7 +18,7 @@
             </button>
         </span>
     </div>
-    <record-list rows='checkboxRows' on-row-click='onRowClick' initialized='initialized[index]'></record-list>
+    <record-list rows='checkboxRows' on-row-click='onRowClick' initialized='initialized[index] && isOpen[index]'></record-list>
     <span ng-if="!isLoading[index] && checkboxRows.length === 0">No Results Found</span>
     <a ng-if="hasMore" ng-click="openSearchPopup()">Find More</a>
 </div>
