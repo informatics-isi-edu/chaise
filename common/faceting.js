@@ -37,6 +37,12 @@
                         $scope.updateReference(reference, index);
                     }
                     
+                    ctrl.setInitialized = function () {
+                        $scope.isOpen.forEach(function (val, index) {
+                            if (val) $scope.initialized[index] = false;
+                        });
+                    }
+                    
                     ctrl.sendRequests = function () {
                         if (!$scope.vm.isIdle) return;
                         
@@ -762,6 +768,7 @@
                                 }
                                 return {value: value, displayvalue: t.displayname.value, isHTML: t.displayname.isHTML};
                             }));
+                            scope.parentCtrl.setInitialized();
                             scope.parentCtrl.updateVMReference(ref, scope.index);
                         });
                     }
@@ -805,10 +812,11 @@
                         var findMoreHeight = 30;
                         if (newVal) {
                             $timeout(function () {
-                                var choicePickerElem = element[0].getElementsByClassName("choice-picker");
-                                var addedHeight = choicePickerElem[0].scrollHeight;
+                                var choicePickerElem = element[0].getElementsByClassName("choice-picker")[0];
+                                var addedHeight = choicePickerElem.scrollHeight;
+                                // if the load more text link isn't present, save some space for it
                                 if (!scope.hasMore) addedHeight += findMoreHeight;
-                                choicePickerElem[0].style.height = addedHeight + "px";
+                                choicePickerElem.style.height = addedHeight + "px";
                             }, 0);
                         } else if (newVal == false) {
                             var choicePickerElem = element[0].getElementsByClassName("choice-picker")[0];
