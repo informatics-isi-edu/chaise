@@ -180,11 +180,13 @@
                 return;
             }
             
+            scope.vm.hasLoaded = false;
+            
             scope.vm.isIdle = false;
-            (function (reference, send) {
-                reference.read(scope.vm.pageLimit).then(function (page) {
+            (function (uri, send) {
+                scope.vm.reference.read(scope.vm.pageLimit).then(function (page) {
                     scope.vm.isIdle = true;
-                    if (scope.vm.reference.uri === reference.uri) {
+                    if (scope.vm.reference.uri === uri) {
                         
                         scope.vm.page = page;
                         scope.vm.rowValues = DataUtils.getRowValuesFromPage(page);
@@ -200,13 +202,14 @@
                     }
                 }).catch(function (err) {
                     scope.vm.isIdle = true;
-                    if (scope.vm.reference.uri === reference.uri) {
+                    if (scope.vm.reference.uri === uri) {
+                        scope.vm.hasLoaded = true;
                         throw err; // this is the last request
                     } else {
                         newRead(scope, send); // some request are still pending
                     }
                 })
-            })(scope.vm.reference, broadcast);
+            })(scope.vm.reference.uri, broadcast);
         }
 
         return {

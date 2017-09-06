@@ -33,8 +33,8 @@
                 </div>
                 <div id="ft-col-1-{{$index}}" class="panel-collapse collapse">
                     <div class="panel-body" ng-switch="fc.preferredMode">
-                        <range-picker ng-switch-when="range" vm="vm" facet-column="fc" initialized="initialized" is-loading="isLoading" index="$index"></range-picker>
-                        <choice-picker ng-switch-when="choices" vm="vm" facet-column="fc" initialized="initialized" is-loading="isLoading" index="$index"></string-picker>
+                        <!-- <range-picker ng-switch-when="range" vm="vm" facet-column="fc" initialized="initialized" is-loading="isLoading" index="$index"></range-picker> -->
+                        <choice-picker ng-switch-when="choices" facet-column="fc" initialized="initialized" is-loading="isLoading" index="$index"></string-picker>
                     </div>
                 </div>
             </div>
