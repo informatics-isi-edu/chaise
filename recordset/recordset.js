@@ -130,6 +130,10 @@
 
             return link;
         };
+        
+        $scope.create = function() {
+            return recordsetModel.reference.contextualize.entryCreate.appLink;
+        };
 
         $scope.unfiltered = function () {
             return recordsetModel.reference.unfilteredReference.contextualize.compact.appLink;

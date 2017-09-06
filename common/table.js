@@ -372,8 +372,8 @@
             templateUrl: '../common/templates/recordset.html',
             scope: {
                 vm: '=',
-                onRowClick: '&?',        // set row click function
-                onPlusButtonClick: '&?'
+                onRowClick: '&?',       // set row click function
+                allowCreate: '=?'       // if undefined, assume false
             },
             link: function (scope, elem, attr) {
 
@@ -411,12 +411,6 @@
                     }
 
                 };
-                
-                scope.onPlusButtonClickCB = function () {
-                    console.log("!!!!!!!!!!!");
-                    scope.onPlusButtonClick()(scope.vm.search);
-                }
- 
 
                 var inputChangedPromise;
 

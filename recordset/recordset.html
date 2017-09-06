@@ -18,8 +18,12 @@
                     </div>
                 </div>
                 
+                <a id="create-link" ng-if="vm.reference.canCreate && vm.config.editable" ng-href="{{create()}}" uib-tooltip="Click here to create a record." tooltip-placement="bottom">
+                    <span class="glyphicon glyphicon-plus"></span> <strong>Create</strong>
+                </a>&nbsp;&nbsp;
                 <!-- edit -->
-                <a id="edit-link" ng-if="vm.page && vm.reference.canUpdate && vm.config.editable" ng-disabled="vm.pageLimit > vm.RECORDEDIT_MAX_ROWS"
+                <!-- TODO: this edit link isn't being disabled. To disable an <a> tag with an href, remove the href attribute -->
+                <a id="edit-link" ng-if="vm.page && vm.reference.canUpdate && vm.config.editable" ng-disabled="{{vm.pageLimit > vm.RECORDEDIT_MAX_ROWS}}"
                     ng-href="{{ edit() }}" tooltip-placement="bottom" uib-tooltip="{{ ((vm.pageLimit > vm.RECORDEDIT_MAX_ROWS) ? 'Editing disabled when items per page > ' + vm.RECORDEDIT_MAX_ROWS : 'Click here to edit this page of records.' ) }}">
                     <span class="glyphicon glyphicon-pencil"></span> <strong>Edit</strong>
                 </a>&nbsp;&nbsp;
@@ -34,6 +38,6 @@
             </div>
         </div>
         
-        <recordset vm="vm"></recordset>
+        <recordset vm="vm" allow-create="false"></recordset>
     </div>
 </div>
