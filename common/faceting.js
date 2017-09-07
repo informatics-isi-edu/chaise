@@ -57,9 +57,7 @@
                     scope.updateReference = function (reference, index) {
                         scope.vm.lastActiveFacet = index;
                         scope.vm.reference = reference;
-                        $timeout(function() {
-                            scope.$emit('facet-modified');
-                        }, 0);
+                        scope.$emit('facet-modified');
                     };
                     
                     scope.hasFilter = function (col) {
@@ -379,12 +377,11 @@
             };
         }])
 
-        .directive('rangePicker', ['$timeout', function ($timeout) {
+        .directive('rangePicker', ['$timeout', '$q', function ($timeout, $q) {
             return {
                 restrict: 'AE',
                 templateUrl: '../common/templates/faceting/range-picker.html',
                 scope: {
-                    vm: "=",
                     facetColumn: "=",
                     facetModel: "=",
                     index: "="
@@ -397,12 +394,10 @@
                      * @param  {boolean} callParent if true, will call the updateFacets in faceting directive
                      */
                     ctrl.updateFacet = function () {
-                        $scope.updateFacetData(true);
-                    }
-                    
-                    ctrl.initializeFacet = function () {
-                        $scope.initialRows();
-                        $scope.updateFacetData();
+                        if (!$scope.facetModel.initialized) {
+                            $scope.initialRows();
+                        }
+                        return $scope.updateFacetData();
                     }
                 }],
                 require: ['^faceting', 'rangePicker'],
@@ -411,7 +406,7 @@
                         currentCtrl = ctrls[1];
                     
                     // register this controller in the parent
-                    parentCtrl.register(currentCtrl, scope.index, scope.facetColumn);
+                    parentCtrl.register(currentCtrl, scope.facetColumn, scope.index);
                     scope.parentCtrl = parentCtrl;
                     
                     scope.ranges = [];
@@ -462,8 +457,7 @@
                         } else {
                             res = scope.facetColumn.removeRangeFilter(row.metaData.min, row.metaData.max);
                         }
-                        scope.vm.reference = res.reference;
-                        scope.$emit("facet-modified");
+                        scope.parentCtrl.updateVMReference(res.reference, scope.index);
                     };
 
                     // Add new integer filter, used as the callback function to range-inputs
@@ -472,8 +466,7 @@
                         if (!res) return;
 
                         scope.ranges.push(createChoiceDisplay(res.filter, true));
-                        scope.vm.reference = res.reference;
-                        scope.$emit("facet-modified");
+                        scope.parentCtrl.updateVMReference(res.reference, scope.index);
                     };
 
                     // Look at the filters available for the facet and add rows to represent the preset filters
@@ -496,49 +489,51 @@
 
                     // Gets the facet data for min/max
                     // TODO get the histogram data
-                    scope.updateFacetData = function (callParent) {
-                        scope.isLoading[scope.index] = true;
+                    scope.updateFacetData = function () {
+                        var defer = $q.defer();
                         
-                        var agg = scope.facetColumn.column.aggregate;
-                        var aggregateList = [
-                            agg.minAgg,
-                            agg.maxAgg
-                        ];
-                        
-                        (function (facetColumn, callParent) {
-                            facetColumn.sourceReference.getAggregates(aggregateList).then(function(response) {
-                                console.log("Facet " + facetColumn.displayname.value + " min/max: ", response);
-                                if (scope.facetColumn.column.type.name.indexOf("timestamp") > -1) {
-                                    // convert and set the values if they are defined.
-                                    // if values are null, undefined, false, 0, or '' we don't want to show anything
-                                    if (response[0] && response[1]) { 
-                                        var minTs = moment(response[0]);
-                                        var maxTs = moment(response[1]);
-
-                                        scope.rangeOptions.absMin = {
-                                            date: minTs.format('YYYY-MM-DD'),
-                                            time: minTs.format('hh:mm:ss')
-                                        };
-                                        scope.rangeOptions.absMax = {
-                                            date: maxTs.format('YYYY-MM-DD'),
-                                            time: maxTs.format('hh:mm:ss')
-                                        };
-                                    }
+                        (function (uri) {
+                            var agg = scope.facetColumn.column.aggregate;
+                            var aggregateList = [
+                                agg.minAgg,
+                                agg.maxAgg
+                            ];
+                            
+                            scope.facetColumn.sourceReference.getAggregates(aggregateList).then(function(response) {
+                                if (scope.facetColumn.sourceReference.uri !== uri) {
+                                    defer.resolve(false);
                                 } else {
-                                    scope.rangeOptions.absMin = response[0];
-                                    scope.rangeOptions.absMax = response[1];
-                                }
-
-                                scope.initialized[scope.index] = true;
-                                scope.isLoading[scope.index] = false;
                                 
-                                if (callParent) {
-                                    scope.parentCtrl.runningRequestCount -= 1;
-                                    console.log("got resposne for the " + scope.index + ". waiting requests:" + scope.parentCtrl.runningRequestCount);
-                                    scope.parentCtrl.updateFacets();
+                                    console.log("Facet " + scope.facetColumn.displayname.value + " min/max: ", response);
+                                    if (scope.facetColumn.column.type.name.indexOf("timestamp") > -1) {
+                                        // convert and set the values if they are defined.
+                                        // if values are null, undefined, false, 0, or '' we don't want to show anything
+                                        if (response[0] && response[1]) { 
+                                            var minTs = moment(response[0]);
+                                            var maxTs = moment(response[1]);
+
+                                            scope.rangeOptions.absMin = {
+                                                date: minTs.format('YYYY-MM-DD'),
+                                                time: minTs.format('hh:mm:ss')
+                                            };
+                                            scope.rangeOptions.absMax = {
+                                                date: maxTs.format('YYYY-MM-DD'),
+                                                time: maxTs.format('hh:mm:ss')
+                                            };
+                                        }
+                                    } else {
+                                        scope.rangeOptions.absMin = response[0];
+                                        scope.rangeOptions.absMax = response[1];
+                                    }
+                                    
+                                    defer.resolve(true);
                                 }
+                            }).catch(function (err) {
+                                defer.reject(err);
                             });
-                        })(scope.facetColumn, callParent); 
+                        })(scope.facetColumn.sourceReference.uri); 
+                        
+                        return defer.promise;
                     };
 
                     //  all the events related to the plot

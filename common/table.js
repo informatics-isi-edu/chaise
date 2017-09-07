@@ -283,7 +283,9 @@
             scope.vm.dirtyResult = updateResult || scope.vm.dirtyResult;
             scope.vm.dirtyCount = updateCount || scope.vm.dirtyCount;
             
-            updatePage(scope);
+            $timeout(function () {
+                updatePage(scope);
+            }, 0);
         }
         // pass the vm instead of scope!
         function updatePage(scope) {
@@ -891,10 +893,7 @@
                 
                 scope.$on('facet-modified', function ($event) {
                     console.log('facet-modified in recordset directive');
-                    // recordTableUtils.read(scope, false, true);
-                    // recordTableUtils.newRead(scope, true);
                     recordTableUtils.update(scope, true, true, true);
-                    // $event.stopPropagation();
                 });
                 
                 // row data has been modified (from ellipses)
@@ -902,7 +901,6 @@
                 scope.$on('record-modified', function($event) {
                     console.log('record-modified in recordset directive');
                     recordTableUtils.update(scope, true, true, true);
-                    // $event.stopPropagation();
                 });
             }
         };
