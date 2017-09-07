@@ -39,8 +39,8 @@
                     };
                     
                     ctrl.setInitialized = function () {
-                        $scope.vm.facetColumns.forEach(function (fm, index) {
-                            if (fm.isOpen) $scope.initialized[index] = false;
+                        $scope.vm.facetModels.forEach(function (fm, index) {
+                            if (fm.isOpen) fm.initialized = false;
                         });
                     };
                     
@@ -582,31 +582,35 @@
                     scope.reference = scope.reference.search(scope.searchTerm);
                 }
                 
-                var currentValues = {};
-                
                 // get the list of applied filters
-                var rows = scope.facetColumn.choiceFilters.map(function(f) {
-                    currentValues[f.uniqueId] = true;
-                    return {
-                        selected: true, displayname: f.displayname, 
-                        uniqueId: f.uniqueId, data: {value: f.term}
-                    }; // what about the count? do we want to read or not?
-                });
+                var currentValues;
+                var alreadyAppliedRows = function () {
+                    currentValues = {};
+                    return scope.facetColumn.choiceFilters.map(function(f) {
+                        currentValues[f.uniqueId] = true;
+                        return {
+                            selected: true, displayname: f.displayname, 
+                            uniqueId: f.uniqueId, data: {value: f.term}
+                        }; // what about the count? do we want to read or not?
+                    });
+                }
                 
-                if (rows.length >= PAGE_SIZE) {
-                    scope.checkboxRows = rows;
+                var appliedLen = scope.facetColumn.choiceFilters.length;
+                if (appliedLen >= PAGE_SIZE) {
+                    scope.checkboxRows = alreadyAppliedRows();
                     defer.resolve(true);
                 } else {
                     // read new data if neede                
                     (function (uri) {
-                        scope.reference.read(rows.length + PAGE_SIZE).then(function (page) {
+                        scope.reference.read(appliedLen + PAGE_SIZE).then(function (page) {
                             // if this is not the result of latest facet change
                             if (scope.reference.uri !== uri) {
                                 defer.resolve(false);
                             } else {
+                                scope.checkboxRows = alreadyAppliedRows();
                                 page.tuples.forEach(function (tuple) {
                                     // if we're showing enough rows
-                                    if (rows.length == PAGE_SIZE) {
+                                    if (scope.checkboxRows.length == PAGE_SIZE) {
                                         return;
                                     }
                                     
@@ -622,7 +626,7 @@
                                     
                                     if (!(value in currentValues)) {
                                         currentValues[value] = true;
-                                        rows.push({
+                                        scope.checkboxRows.push({
                                             selected: false,
                                             displayname: tuple.displayname,
                                             uniqueId: value,
@@ -631,7 +635,6 @@
                                     }
                                 });
                                 
-                                scope.checkboxRows = rows;
                                 scope.hasMore = page.hasNext;    
                                 
                                 defer.resolve(true);
@@ -672,8 +675,10 @@
 
                     scope.openSearchPopup = function() {
                         var params = {};
-                        
-                        params.reference = scope.reference;    
+                        // TODO since emrest cnt has bug, we should not sort based on count
+                        params.reference = scope.reference.sort([{
+                            "column": "value", "descending": false
+                        }]);    
                         params.reference.session = scope.$root.session;
                         params.displayname = scope.facetColumn.displayname;
                         params.context = "compact/select";
@@ -735,7 +740,6 @@
                     }
 
                     // clear the search, if reference has search then fire update
-                    // TODO
                     scope.clearSearch = function() {
                         scope.searchTerm = null;
                         if (scope.reference.location.searchTerm) {
