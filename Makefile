@@ -576,83 +576,53 @@ distclean: clean
 .PHONY: html
 html: $(HTML)
 
+# generateHTML function creates output html file by replacing placeholders with data passed in
+# It takes following arguments
+# Argument 1: ASSETS. This is usually the assets resource generated
+# Argument 2: APPNAME. The angular appname. Pass it as a non-quoted string in following format: ng-app="chaise.record"
+# Argument 3: PAGE. The title of the page. Pass it as a non-quoted string
+# Argument 4: NAVBAR. The navbar placeholder. Pass relevent esapced html as a non-quoted string
+# Argument 5: FOOTER. The footer placeholder. Pass relevent esapced html as a non-quoted string
+# Argument 6: TEMPLATES. This is usually the templates html that needs to be replaced. Pass quoted filepath prefixed with r or empty quoted string.
+# Argument 7: CONTENT. This is usually the page html that needs to be replaced. Pass quoted filepath prefixed with r or empty quoted string.
+# Argument 8: Output file. The output html file to which we copy the generated string.
+define generateHtml
+	sed -e '/%ASSETS%/ {' -e $(1) -e 'd' -e '}' \
+		-e 's/%APPNAME%/$(2)/g' \
+		-e 's/%PAGE%/$(3)/g' \
+		-e 's/%NAVBAR%/$(4)/g' \
+		-e 's/%FOOTER%/$(5)/g' \
+		-e '/%TEMPLATES%/ {' -e $(6) -e 'd' -e '}' \
+		-e '/%CONTENT%/ {' -e $(7) -e 'd' -e '}' \
+		index.html.in > $(8)
+endef
+
 # Rules to attach JavaScript and CSS assets to the head
-search/index.html: .make-asset-block .make-template-block
+search/index.html: search/search.html.in .make-asset-block .make-template-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
 		-e '/%TEMPLATES%/ {' -e 'r .make-template-block' -e 'd' -e '}' \
 		search/search.html.in > search/index.html
 
-login/index.html: .make-asset-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
-		-e 's/%APPNAME%//' \
-		-e 's/%PAGE%/Chaise :: Login/' \
-		-e 's/%NAVBAR%//' \
-		-e 's/%FOOTER%//' \
-		-e 's/%TEMPLATES%//' \
-		-e '/%CONTENT%/ {' -e 'r login/login.html.in' -e 'd' -e '}' \
-		index.html.in > login/index.html
+login/index.html: index.html.in login/login.html.in .make-asset-block
+	$(call generateHtml,'r .make-asset-block',,Chaise :: Login,,,'','r login/login.html.in',login/index.html)
 
-viewer/index.html: .make-viewer-asset-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-viewer-asset-block' -e 'd' -e '}' \
-		-e 's/%APPNAME%/ng-app="chaise.viewer"/' \
-		-e 's/%PAGE%/Image Viewer/' \
-		-e 's/%NAVBAR%//' \
-		-e 's/%FOOTER%//' \
-		-e '/%TEMPLATES%/ {' -e 'r .make-viewer-asset-block' -e 'd' -e '}' \
-		-e '/%CONTENT%/ {' -e 'r viewer/viewer.html.in' -e 'd' -e '}' \
-		index.html.in > viewer/index.html
+viewer/index.html: index.html.in viewer/viewer.html.in .make-viewer-asset-block
+	$(call generateHtml,'r .make-viewer-asset-block',ng-app="chaise.viewer",Image Viewer,,,'r .make-viewer-asset-block','r viewer/viewer.html.in','viewer/index.html')
 
-record/index.html: .make-record-asset-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-record-asset-block' -e 'd' -e '}' \
-		-e 's/%APPNAME%/ng-app="chaise.record"/' \
-		-e 's/%PAGE%/Record/' \
-		-e 's/%NAVBAR%/<navbar><\/navbar>/g' \
-		-e 's/%FOOTER%/<footer><\/footer>/g' \
-		-e 's/%TEMPLATES%//' \
-		-e '/%CONTENT%/ {' -e 'r record/record.html.in' -e 'd' -e '}' \
-		index.html.in > record/index.html
+record/index.html: index.html.in record/record.html.in .make-record-asset-block
+	$(call generateHtml,'r .make-record-asset-block',ng-app="chaise.record",Record,<navbar><\/navbar>,<footer><\/footer>,'','r record/record.html.in','record/index.html')
+	
+detailed/index.html: index.html.in .make-detailed-asset-block .make-detailed-template-block
+	$(call generateHtml,'r .make-detailed-asset-block',ng-app="chaise.record",Record,<navbar><\/navbar>,<footer><\/footer>,'r .make-detailed-template-block','','detailed/index.html')
 
-detailed/index.html:.make-detailed-asset-block .make-detailed-template-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-detailed-asset-block' -e 'd' -e '}' \
-		-e 's/%APPNAME%/ng-app="chaise.record"/' \
-		-e 's/%PAGE%/Record/' \
-		-e 's/%NAVBAR%/<navbar><\/navbar>/g' \
-		-e 's/%FOOTER%/<footer><\/footer>/g' \
-		-e '/%ASSETS%/ {' -e 'r .make-detailed-asset-block' -e 'd' -e '}' \
-		-e '/%TEMPLATES%/ {' -e 'r .make-detailed-template-block' -e 'd' -e '}' \
-		-e 's/%CONTENT%//' \
-		index.html.in > detailed/index.html
+recordset/index.html: index.html.in .make-rs-asset-block .make-rs-template-block
+	$(call generateHtml,'r .make-rs-asset-block',ng-app="recordset",Image Viewer,,<footer><\/footer>,'r .make-rs-template-block','','recordset/index.html')
+	
+recordedit/index.html: index.html.in recordedit/recordedit.html.in .make-de-asset-block
+	$(call generateHtml,'r .make-de-asset-block',ng-app="chaise.recordEdit",RecordEdit App,<navbar><\/navbar>,<footer><\/footer>,'','r recordedit/recordedit.html.in','recordedit/index.html')
 
-
-recordset/index.html: .make-rs-asset-block .make-rs-template-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-rs-asset-block' -e 'd' -e '}' \
-		-e 's/%APPNAME%/ng-app="recordset"/' \
-		-e 's/%PAGE%/Image Viewer/' \
-		-e 's/%NAVBAR%//' \
-		-e 's/%FOOTER%/<footer><\/footer>/g' \
-		-e '/%TEMPLATES%/ {' -e 'r .make-rs-template-block' -e 'd' -e '}' \
-		-e 's/%CONTENT%//' \
-		index.html.in > recordset/index.html
-
-recordedit/index.html: .make-de-asset-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-de-asset-block' -e 'd' -e '}' \
-		-e 's/%APPNAME%/ng-app="chaise.recordEdit"/' \
-		-e 's/%PAGE%/RecordEdit App/' \
-		-e 's/%NAVBAR%/<navbar><\/navbar>/g' \
-		-e 's/%FOOTER%/<footer><\/footer>/g' \
-		-e 's/%TEMPLATES%//' \
-		-e '/%CONTENT%/ {' -e 'r recordedit/recordedit.html.in' -e 'd' -e '}' \
-		index.html.in > recordedit/index.html
-
-recordedit/mdHelp.html: .make-md-asset-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-md-asset-block' -e 'd' -e '}' \
-		-e 's/%APPNAME%/ng-app="chaise.mdHelp"/' \
-		-e 's/%PAGE%/Markdown Help/' \
-		-e 's/%NAVBAR%/<navbar><\/navbar>/g' \
-		-e 's/%FOOTER%/<footer><\/footer>/g' \
-		-e 's/%TEMPLATES%//' \
-		-e '/%CONTENT%/ {' -e 'r recordedit/mdHelp.html.in' -e 'd' -e '}' \
-		index.html.in > recordedit/mdHelp.html
+recordedit/mdHelp.html: index.html.in recordedit/mdHelp.html.in .make-md-asset-block
+	$(call generateHtml,'r .make-md-asset-block',ng-app="chaise.mdHelp",Markdown Help,<navbar><\/navbar>,<footer><\/footer>,'','r recordedit/mdHelp.html.in','recordedit/mdHelp.html')
 
 $(JS_CONFIG): chaise-config-sample.js
 	cp -n chaise-config-sample.js $(JS_CONFIG) || true
