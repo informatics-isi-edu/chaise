@@ -38,7 +38,7 @@
                             </div>
                         </div>
                         <!-- Form section -->
-                        <div class="row">
+                        <div class="row main-container">
                             <div class="col-xs-12">
                                 <div class="row">
                                     <div ng-if="displayname" class="col-xs-7">
