@@ -26,9 +26,7 @@
                             isOpen: false,
                             isLoading: false,
                             processed: true,
-                            hasError: false,
-                            updateFacet: childCtrl.updateFacet,
-                            index: index
+                            updateFacet: childCtrl.updateFacet
                         };
                         
                         if (facetColumn.filters.length > 0) {
@@ -114,12 +112,6 @@
                             // TODO should have priority
                             currentCtrl.updateFacetColumn(index);
                         } 
-                    };
-                    
-                    scope.refreshFacet = function (index) {
-                        if (scope.vm.facetModels[index].hasError) {
-                            currentCtrl.updateFacetColumn(index);
-                        }
                     };
                     
                     /**

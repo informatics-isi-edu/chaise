@@ -307,14 +307,13 @@
                     }
                     scope.vm.occupiedSlots--;
                     scope.vm.dirtyResult = !res;
-                    updatePage(scope);
                 }
                 
                 updateResult(scope).then(function (res) {
                     afterUpdateResult(res);
+                    updatePage(scope);
                 }).catch(function (err) {
                     afterUpdateResult(true);
-                    //TODO show soft warning!!;
                     throw err;
                 });
             }
@@ -330,25 +329,18 @@
                 var afterFacetUpdate = function (i, res, hasError) {
                     scope.vm.occupiedSlots--;
                     var currFm = scope.vm.facetModels[i];
-                    if (hasError) {
-                        currFm.initialized = false;
-                        currFm.isLoading = false;
-                        currFm.processed = true;
-                    } else {
-                        currFm.initialized = res || currFm.initialized;
-                        currFm.isLoading = !res;
-                        currFm.processed = res || currFm.processed;                        
-                    }
-                    currFm.hasError = hasError;
-                    updatePage(scope);
+                    currFm.initialized = res || currFm.initialized;
+                    currFm.isLoading = !res;
+                    currFm.processed = res || currFm.processed;                      
                 };
                 
                 (function (i) {
                     scope.vm.facetModels[i].updateFacet().then(function (res) {
                         afterFacetUpdate(i, res);
+                        updatePage(scope);
                     }).catch(function (err) {
-                        afterFacetUpdate(i, false, true);
-                        return;
+                        afterFacetUpdate(i, false);
+                        throw err;
                     });
                 })(index);
             });
@@ -363,15 +355,14 @@
                 var afterUpdateCount = function (res, hasError) {
                     scope.vm.occupiedSlots--;
                     scope.vm.dirtyCount = !res;
-                    if (!hasError) {
-                        updatePage(scope);
-                    }
                 }
                 
                 updateCount(scope).then(function (res) {
                     afterUpdateCount(res);
+                    updatePage(scope);
                 }).catch(function (err) {
-                    afterUpdateCount(true, true);
+                    afterUpdateCount(true);
+                    throw err;
                 });
             }
         }

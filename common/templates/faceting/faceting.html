@@ -3,18 +3,13 @@
         <div class="panel-group" id="ft-cols-1">
             <div class="panel" ng-repeat="fc in vm.reference.facetColumns track by $index">
                 <div class="panel-heading">
-                    <h4 class="panel-title collapsed">
+                    <h4 class="panel-title accordion-toggle collapsed" data-toggle="collapse" href="#ft-col-1-{{$index}}" id="ft-heading-1-{{$index}}" ng-click="toggleFacet($index)">
                         <!-- data-parent="#ft-cols-1" -->
-                        <a class="accordion-toggle" href="#ft-col-1-{{$index}}" ng-click="toggleFacet($index)" id="ft-heading-1-{{$index}}" data-toggle="collapse" title="{{fc.comment}}"
-                           ng-attr-uib-tooltip="{{::(fc.comment) ? fc.comment : undefined}}" ng-attr-tooltip-placement="{{::(fc.comment) ? 'top' : undefined}}">
+                        <a ng-attr-uib-tooltip="{{::(fc.comment) ? fc.comment : undefined}}" ng-attr-tooltip-placement="{{::(fc.comment) ? 'top' : undefined}}" title="{{fc.comment}}">
                             <span ng-if="::fc.displayname.isHTML" ng-bind-html="::fc.displayname.value"></span>
                             <span ng-if="::!fc.displayname.isHTML" ng-bind="::fc.displayname.value"></span>
                         </a>
-                        <!-- <img ng-if="vm.facetModels[$index].isLoading" src="../common/styles/images/loader.gif" class="spinner spinner-sm"/> -->
-                        <span ng-if="vm.facetModels[$index].isLoading || vm.facetModels[$index].hasError" ng-click="refreshFacet($index)" 
-                              class="glyphicon glyphicon-refresh" ng-class="vm.facetModels[$index].isLoading ? 'glyphicon-refresh-animate' : 'refresh-btn'"
-                              tooltip-placement="bottom" uib-tooltip="Click to Retry" tooltip-enable="vm.facetModels[$index].hasError"></span>
-                        <span ng-if="vm.facetModels[$index].hasError" class="pull-right glyphicon glyphicon-alert" tooltip-placement="bottom" uib-tooltip="Couldn't Load Facet Data."></span>
+                        <img ng-if="vm.facetModels[$index].isLoading" src="../common/styles/images/loader.gif" class="spinner spinner-sm"/>
                     </h4>
                     <!-- <div class="applied-filters row" ng-show="hasFilter(fc)">
                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
