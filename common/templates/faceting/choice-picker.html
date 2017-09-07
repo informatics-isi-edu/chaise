@@ -7,18 +7,18 @@
                on-enter="enterPressed()"
                placeholder="Search"
                autofocus
-               ng-disabled="isLoading[index]">
-        <div class="form-control-feedback coltooltip" ng-hide="!reference.location.searchTerm || isLoading[index]" ng-style="{'cursor': 'pointer', 'right': '50px', 'pointer-events': 'all', 'z-index': '5'}"><!-- form-control:focus changes the z-index of the form control from 2 to 3. form-control-feedback has z-index of 2. Overriding that z index to 5 so it isn't hidden when focused-->
+               ng-disabled="facetModel.isLoading">
+        <div class="form-control-feedback coltooltip" ng-hide="!reference.location.searchTerm || facetModel.isLoading" ng-style="{'cursor': 'pointer', 'right': '50px', 'pointer-events': 'all', 'z-index': '5'}"><!-- form-control:focus changes the z-index of the form control from 2 to 3. form-control-feedback has z-index of 2. Overriding that z index to 5 so it isn't hidden when focused-->
             <span id="search-clear" class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="::clearSearch()" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
         </div>
         <span class="input-group-btn">
-            <button id="search-submit" class="btn btn-primary" ng-click="enterPressed()" role="button" ng-disabled="isLoading[index]" tooltip-placement="bottom"
+            <button id="search-submit" class="btn btn-primary" ng-click="enterPressed()" role="button" ng-disabled="facetModel.isLoading" tooltip-placement="bottom"
                 uib-tooltip-html="'<p>Use space to separate between conjunctive terms, | (no spaces) to separate disjunctive terms and quotations for exact phrases.</p><p>For example, <i><b>usc 1234</b></i> returns all records containing &ldquo;usc&rdquo; and &ldquo;1234&rdquo;.</p><p><i><b>usc|1234</b></i> returns all records containing &ldquo;usc&rdquo; or &ldquo;1234&rdquo;.</b></i></p><p><i><b>&ldquo;usc 1234&rdquo;</b></i> returns all records containing &ldquo;usc 1234&rdquo;.</p>'">
                 &nbsp;<span class="glyphicon glyphicon-search"></span>&nbsp;<!-- Added 2 non-breaking spaces to prevent btn's margins from collapsing and to center the icon-->
             </button>
         </span>
     </div>
-    <record-list rows='checkboxRows' on-row-click='onRowClick' initialized='initialized[index] && isOpen[index]'></record-list>
-    <span ng-if="!isLoading[index] && checkboxRows.length === 0">No Results Found</span>
+    <record-list rows='checkboxRows' on-row-click='onRowClick' initialized='facetModel.initialized && facetModel.isOpen'></record-list>
+    <span ng-if="facetModel.initialized && checkboxRows.length === 0">No Results Found</span>
     <a ng-if="hasMore" ng-click="openSearchPopup()">Find More</a>
 </div>

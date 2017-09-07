@@ -73,7 +73,9 @@
      * 4. `record-modified`: one of the records in the recordset table has been
      * modified. ellipses will fire this event and recordset directive will use it.
      */
-    .factory('recordTableUtils', ['DataUtils', '$timeout','Session', function(DataUtils, $timeout, Session) {
+    .factory('recordTableUtils', ['DataUtils', '$timeout','Session', '$q', function(DataUtils, $timeout, Session, $q) {
+        
+        var MAX_CONCURENT_REQUEST = 4;
 
         // This method sets backgroundSearch states depending upon various parameters
         // If it returns true then we should render the data
@@ -211,10 +213,174 @@
                 })
             })(scope.vm.reference.uri, broadcast);
         }
+        
+        function updateResult (scope) {
+            scope.vm.hasLoaded = false;
+            var defer = $q.defer();
+            (function (uri) {
+                scope.vm.reference.read(scope.vm.pageLimit).then(function (page) {
+                    if (scope.vm.reference.uri !== uri) {
+                        defer.resolve(false);
+                    } else {
+                        scope.vm.page = page;
+                        scope.vm.rowValues = DataUtils.getRowValuesFromPage(page);
+                        scope.vm.hasLoaded = true;
+                        defer.resolve(true);
+                    }
+                }).catch(function(err) {
+                    if (scope.vm.reference.uri !== uri) {
+                        defer.resolve(false);
+                    } else {
+                        scope.vm.hasLoaded = true;
+                        throw error;
+                    }
+                });
+                //TODO what about error
+            }) (scope.vm.reference.uri);
+            return defer.promise;
+        }
+        
+        function updateCount (scope) {
+            var  defer = $q.defer();
+            (function (uri) {
+                scope.vm.reference.getAggregates([scope.vm.reference.aggregate.countAgg]).then(function getAggregateCount(response) {
+                    if (scope.vm.reference.uri !== uri) {
+                        defer.resolve(false);
+                    } else {
+                        scope.vm.totalRowsCnt = response[0];
+                        defer.resolve(true);
+                    }
+                }).catch(function (err) {
+                    if (scope.vm.reference.uri !== uri) {
+                        defer.resolve(false);
+                    } else {
+                        scope.vm.totalRowsCnt = null;
+                        defer.reject(err);
+                    }
+                });
+            })(scope.vm.reference.uri);
+            return defer.promise;
+        }
+        
+        function update (scope, updateResult, updateCount, updateFacets) {
+            if (updateFacets) {
+                scope.vm.facetModels.forEach(function (fm, index) {
+                    if (scope.vm.lastActiveFacet === index) {
+                        return;
+                    }
+                    
+                    if (fm.isOpen) {
+                        fm.processed = false;
+                        fm.isLoading = true;
+                    } else {
+                        fm.initialized = false;
+                        fm.processed = true;
+                    }
+                });
+            }
+            
+            // if it's true change, otherwise don't change.
+            scope.vm.dirtyResult = updateResult || vm.dirtyResult;
+            scope.vm.dirtyCount = updateCount || vm.dirtyCount;
+            
+            updatePage(scope);
+        }
+        // pass the vm instead of scope!
+        function updatePage(scope) {
+            var haveFreeSlot = function () {
+                return scope.vm.occupiedSlots < MAX_CONCURENT_REQUEST;
+            }
+            
+            if (!haveFreeSlot) {
+                return;
+            }
+            
+            // update the resultset
+            if (scope.vm.dirtyResult) {
+                scope.vm.occupiedSlots++;
+                scope.vm.dirtyResult = false;
+                
+                var afterUpdateResult = function (res) {
+                    if (res) {
+                        // we got the results, let's just update the url
+                        scope.$emit('reference-modified');
+                    }
+                    scope.vm.occupiedSlots--;
+                    scope.vm.dirtyResult = !res;
+                    updatePage(scope);
+                }
+                
+                updateResult(scope).then(function (res) {
+                    afterUpdateResult(res);
+                }).catch(function (err) {
+                    afterUpdateResult(true);
+                    //TODO show soft warning!!;
+                    throw err;
+                });
+            }
+            
+            // update the facets
+            scope.vm.facetModels.forEach(function (fm, index) {
+                if (!haveFreeSlot|| fm.processed) {
+                    return;
+                }
+                scope.vm.occupiedSlots++;
+                fm.processed = true;
+                
+                var afterFacetUpdate = function (i, res, hasError) {
+                    scope.vm.occupiedSlots--;
+                    var currFm = scope.vm.facetModels[i];
+                    if (hasError) {
+                        currFm.initialized = false;
+                        currFm.isLoading = false;
+                        currFm.processed = true;
+                    } else {
+                        currFm.initialized = res || currFm.initialized;
+                        currFm.isLoading = !res;
+                        currFm.processed = res || currFm.processed;                        
+                    }
+                    currFm.hasError = hasError;
+                    updatePage(scope);
+                };
+                
+                (function (i) {
+                    scope.vm.facetModels[i].updateFacet().then(function (res) {
+                        afterFacetUpdate(i, res);
+                    }).catch(function (err) {
+                        afterFacetUpdate(i, false, true);
+                        return;
+                    });
+                })(index);
+            });
+            
+            // update the count
+            if (scope.vm.config.hideTotalCount) {
+                scope.vm.totalRowsCnt = null;
+            } else if (scope.vm.dirtyCount && haveFreeSlot) {
+                scope.vm.occupiedSlots++;
+                scope.vm.dirtyCount = false;
+                
+                var afterUpdateCount = function (res, hasError) {
+                    scope.vm.occupiedSlots--;
+                    scope.vm.dirtyCount = !res;
+                    if (!hasError) {
+                        updatePage(scope);
+                    }
+                }
+                
+                updateCount(scope).then(function (res) {
+                    afterUpdateCount(res);
+                }).catch(function (err) {
+                    afterUpdateCount(true, true);
+                });
+            }
+        }
 
         return {
             read: read,
-            newRead: newRead
+            newRead: newRead,
+            update: update,
+            updatePage: updatePage
         }
     }])
 
@@ -386,6 +552,9 @@
                 scope.vm.backgroundSearchPendingTerm = null;
                 scope.vm.currentPageSelected = false;
                 scope.vm.isIdle = true;
+                scope.vm.facetModels = [];
+                scope.vm.dirtyResult = false;
+                scope.vm.occupiedSlots = 0;
 
                 scope.setPageLimit = function(limit) {
                     scope.vm.pageLimit = limit;
@@ -571,7 +740,8 @@
                 scope.$on('facet-modified', function ($event) {
                     console.log('facet-modified in recordset directive');
                     // recordTableUtils.read(scope, false, true);
-                    recordTableUtils.newRead(scope, true);
+                    // recordTableUtils.newRead(scope, true);
+                    recordTableUtils.update(scope, true, true, true);
                     // $event.stopPropagation();
                 });
                 

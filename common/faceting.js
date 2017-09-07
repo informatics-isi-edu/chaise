@@ -3,8 +3,7 @@
 
     angular.module('chaise.faceting', ['plotly'])
 
-        .directive('faceting', [function () {
-            var MAX_CONCURENT_REQUEST = 4;
+        .directive('faceting', ['recordTableUtils', '$timeout', function (recordTableUtils, $timeout) {
             
             return {
                 restrict: 'AE',
@@ -16,89 +15,54 @@
                     var ctrl = this;
                     
                     ctrl.childCtrls = []; // child controllers
-                    ctrl.runningRequestCount = 0; // number of pending requests
-                    ctrl.requests = [];
                     
                     // register a children controller in here
-                    ctrl.register = function (childCtrl, index, facetColumn) {
+                    ctrl.register = function (childCtrl, facetColumn, index) {
                         ctrl.childCtrls[index] = childCtrl;
+                        
                         //TODO this should be changed for openning facets when we load the page
-                        $scope.initialized[index] = false;
-                        $scope.isOpen[index] = false;
-                        $scope.isLoading[index] = false;
-                        // $scope.isOpen[index] = facetColumn.filters.length > 0;
-                        // if ($scope.isOpen[index]) {
-                        //     $scope.isLoading[index] = true;
-                        //     ctrl.addRequest(index);
-                        // }
+                        $scope.vm.facetModels[index] = {
+                            initialized: false,
+                            isOpen: false,
+                            isLoading: false,
+                            processed: true,
+                            hasError: false,
+                            updateFacet: childCtrl.updateFacet,
+                            index: index
+                        };
+                        
+                        if (facetColumn.filters.length > 0) {
+                            $scope.vm.openFacet(index);
+                        }
                     };
                     
                     ctrl.updateVMReference = function (reference, index) {
                         $scope.updateReference(reference, index);
-                    }
+                    };
                     
                     ctrl.setInitialized = function () {
-                        $scope.isOpen.forEach(function (val, index) {
-                            if (val) $scope.initialized[index] = false;
+                        $scope.vm.facetColumns.forEach(function (fm, index) {
+                            if (fm.isOpen) $scope.initialized[index] = false;
                         });
-                    }
+                    };
                     
-                    ctrl.sendRequests = function () {
-                        if (!$scope.vm.isIdle) return;
-                        
-                        while (ctrl.requests.length > 0 && ctrl.runningRequestCount < MAX_CONCURENT_REQUEST) {
-                            ctrl.runningRequestCount++;
-                            (function (index) {
-                                var finishRequest = function () {
-                                    ctrl.runningRequestCount--;
-                                    $scope.isLoading[index] = false;
-                                    $scope.initialized[index] = true;
-                                    ctrl.sendRequests();
-                                }
-                                
-                                $scope.isLoading[index] = true;
-                                ctrl.childCtrls[index].updateFacet().then(function () {
-                                    finishRequest();
-                                }).catch(function () {
-                                    finishRequest();
-                                    //TODO show the warning here
-                                });
-                            })(ctrl.requests[0]);
-                            ctrl.requests.shift();
-                        }
-                    }
-                    
-                    ctrl.addRequest = function (index) {
-                        // if we have a request pending for that facet, don't do anything
-                        for (var i = 0; i < ctrl.requests.length; i++) {
-                            if (index === ctrl.requests[i]) {
-                                return;
-                            }
-                        }
-                        
-                        if (index === $scope.lastActive) {
-                            return;
-                        }
-                        
-                        // add the request to the pending ones.
-                        ctrl.requests.push(index);
-                        ctrl.sendRequests();
-                    }
-                    
+                    ctrl.updateFacetColumn = function (index) {
+                        var fm = $scope.vm.facetModels[index];
+                        fm.processed = false;
+                        fm.isLoading = true;
+                        recordTableUtils.updatePage($scope);
+                    };
                 }],
                 require: 'faceting',
                 link: function (scope, element, attr, currentCtrl) {
                     
-                    scope.isOpen = [];
-                    scope.isLoading = [];
-                    scope.initialized = [];
-                    scope.lasActive = -1;
-                    
                     scope.updateReference = function (reference, index) {
-                        scope.lastActive = index;
+                        scope.vm.lastActiveFacet = index;
                         scope.vm.reference = reference;
-                        scope.$emit('facet-modified');
-                    }
+                        $timeout(function() {
+                            scope.$emit('facet-modified');
+                        }, 0);
+                    };
                     
                     scope.hasFilter = function (col) {
                         if(scope.vm.reference == null) {
@@ -132,17 +96,30 @@
                      * @param  {int} index index of facet
                      */
                     scope.toggleFacet = function (index) {
-                        scope.isOpen[index] = !scope.isOpen[index];
+                        var fm = scope.vm.facetModels[index];
                         
-                        if (!scope.isOpen[index]) {
-                            if (scope.isLoading[index]) {
-                                scope.initialized[index] = false;
+                        // toggle the isOpen booelan
+                        fm.isOpen = !fm.isOpen;
+                        
+                        if (!fm.isOpen) {
+                            // make sure to get the result again later
+                            if (fm.isLoading) {
+                                fm.initialized = false;
                             }
                             
-                            scope.isLoading[index] = false;
-                        } else if (!scope.initialized[index]) {
-                            currentCtrl.addRequest(index);
+                            // hide the spinner
+                            fm.isLoading = false;
+                        } else if (!fm.initialized) {
+                            // send a request
+                            // TODO should have priority
+                            currentCtrl.updateFacetColumn(index);
                         } 
+                    };
+                    
+                    scope.refreshFacet = function (index) {
+                        if (scope.vm.facetModels[index].hasError) {
+                            currentCtrl.updateFacetColumn(index);
+                        }
                     };
                     
                     /**
@@ -150,12 +127,12 @@
                      * //TODO change be changed to use the index
                      * @param  {FacetColumn} fc the facet column
                      */
-                    scope.vm.openFacet = function (fc) {
-                        var el = document.getElementById('ft-heading-1-' + fc.index);
+                    scope.vm.openFacet = function (index) {
+                        var el = document.getElementById('ft-heading-1-' + index);
                         var container = document.getElementsByClassName('faceting-container')[0];
-                        setTimeout(function() {
+                        $timeout(function() {
                             container.scrollTop = el.offsetTop - 50;
-                            if (!scope.isOpen[fc.index]) {
+                            if (!scope.vm.facetModels[index].isOpen) {
                                 el.click();
                             }
                         }, 0);
@@ -171,28 +148,6 @@
                         scope.removeFilter(colId, id);
                     }
                     
-                    // when the data has been modified, we need to get the new faceting data
-                    scope.$on('data-modified', function ($event) {
-                        console.log('data-modified in faceting');
-                        scope.isOpen.forEach(function (val, index) {
-                            if(val) {
-                                currentCtrl.addRequest(index);
-                            }
-                        });
-                        
-                    })
-                    
-                    // make sure to change the state of open and close facets on each update
-                    scope.$on('facet-modified', function ($event) {
-                        scope.isOpen.forEach(function (val, index) {
-                            if (index === scope.lastActive) return;
-                            if (val) {
-                                scope.isLoading[index] = true;
-                            } else {
-                                scope.initialized[index] = false;
-                            }
-                        });
-                    });
                 }
             };
         }])
@@ -439,8 +394,7 @@
                 scope: {
                     vm: "=",
                     facetColumn: "=",
-                    isLoading: "=",
-                    initialized: "=",
+                    facetModel: "=",
                     index: "="
                 },
                 controller: ['$scope', function ($scope) {
@@ -636,68 +590,66 @@
                     scope.reference = scope.reference.search(scope.searchTerm);
                 }
                 
-                // read new data if neede                
-                (function (reference, facetColumn,  callParent, uri) {
-                    var currentValues = {};
-                    
-                    // get the list of applied filters
-                    scope.checkboxRows = facetColumn.choiceFilters.map(function(f) {
-                        currentValues[f.uniqueId] = true;
-                        return {
-                            selected: true, displayname: f.displayname, 
-                            uniqueId: f.uniqueId, data: {value: f.term}
-                        }; // what about the count? do we want to read or not?
-                    });
-
-                    var appliedLen = scope.checkboxRows.length;
-                    
-                    if (appliedLen < PAGE_SIZE) {
-                        reference.read(appliedLen + PAGE_SIZE).then(function (page) {
+                var currentValues = {};
+                
+                // get the list of applied filters
+                var rows = scope.facetColumn.choiceFilters.map(function(f) {
+                    currentValues[f.uniqueId] = true;
+                    return {
+                        selected: true, displayname: f.displayname, 
+                        uniqueId: f.uniqueId, data: {value: f.term}
+                    }; // what about the count? do we want to read or not?
+                });
+                
+                if (rows.length >= PAGE_SIZE) {
+                    scope.checkboxRows = rows;
+                    defer.resolve(true);
+                } else {
+                    // read new data if neede                
+                    (function (uri) {
+                        scope.reference.read(rows.length + PAGE_SIZE).then(function (page) {
                             // if this is not the result of latest facet change
                             if (scope.reference.uri !== uri) {
-                                return;
-                            }
-                            page.tuples.forEach(function (tuple) {
-                                // if we're showing enough rows
-                                if (scope.checkboxRows.length == PAGE_SIZE) {
-                                    return;
-                                }
-                                
-                                var value;
-                                if (scope.facetColumn.isEntityMode) {
-                                    // the filter might not be on the shortest key,
-                                    // therefore the uniqueId is not correct.
-                                    value = tuple.data[scope.facetColumn.column.name];
-                                } else {
-                                    // The name of column is value
-                                    value = tuple.data['value'];
-                                }
-                                
-                                if (!(value in currentValues)) {
-                                    var row = {
-                                        selected: false,
-                                        displayname: tuple.displayname,
-                                        uniqueId: value,
-                                        data: {value: value}
-                                    };
+                                defer.resolve(false);
+                            } else {
+                                page.tuples.forEach(function (tuple) {
+                                    // if we're showing enough rows
+                                    if (rows.length == PAGE_SIZE) {
+                                        return;
+                                    }
                                     
-                                    currentValues[value] = true;
-                                    scope.checkboxRows.push(row);
-                                }
-                            });
+                                    var value;
+                                    if (scope.facetColumn.isEntityMode) {
+                                        // the filter might not be on the shortest key,
+                                        // therefore the uniqueId is not correct.
+                                        value = tuple.data[scope.facetColumn.column.name];
+                                    } else {
+                                        // The name of column is value
+                                        value = tuple.data['value'];
+                                    }
+                                    
+                                    if (!(value in currentValues)) {
+                                        currentValues[value] = true;
+                                        rows.push({
+                                            selected: false,
+                                            displayname: tuple.displayname,
+                                            uniqueId: value,
+                                            data: {value: value}
+                                        });
+                                    }
+                                });
+                                
+                                scope.checkboxRows = rows;
+                                scope.hasMore = page.hasNext;    
+                                
+                                defer.resolve(true);
+                            }
                             
-                            scope.hasMore = page.hasNext;    
-                            
-                            defer.resolve();
-                            
-                        }, function (err) {
-                            throw err;
+                        }).catch(function (err) {
+                            defer.reject(err);
                         });
-                        
-                    } else {
-                        defer.resolve();
-                    }
-                })(scope.reference, scope.facetColumn, callParent, scope.reference.uri);
+                    })(scope.reference.uri);
+                }
                 
                 return defer.promise;
             }
@@ -707,24 +659,15 @@
                 templateUrl: '../common/templates/faceting/choice-picker.html',
                 scope: {
                     facetColumn: "=",
-                    initialized: "=",
-                    isOpen: "=",
+                    facetModel: "=",
                     index: "="
                 },
                 controller: ['$scope', function ($scope) {
                     var ctrl = this;
                     
-                    /**
-                     * update the current parent
-                     * @param  {boolean} callParent if true, will call the updateFacets in faceting directive
-                     */
                     ctrl.updateFacet = function () {
                         return updateFacetColumn($scope);
                     }
-                    
-                    // ctrl.initializeFacet = function () {
-                    //     updateFacetColumn($scope);
-                    // }
                 }],
                 require: ['^faceting', 'choicePicker'],
                 link: function (scope, element, attr, ctrls) {
@@ -732,7 +675,7 @@
                         currentCtrl = ctrls[1];
                     
                     // register this controller in the parent
-                    parentCtrl.register(currentCtrl, scope.index, scope.facetColumn);
+                    parentCtrl.register(currentCtrl, scope.facetColumn, scope.index);
                     scope.parentCtrl = parentCtrl;
 
                     scope.openSearchPopup = function() {
@@ -788,6 +731,7 @@
                     };
 
                     // change the searchTerm and fire the updateFacetColumn
+                    // TODO
                     scope.enterPressed = function() {
                         //TODO should it go through the dispatcher?!
                         var term = null;
@@ -795,19 +739,21 @@
                             term = scope.searchTerm.trim();
                         } 
                         scope.searchTerm = term;
-                        updateFacetColumn(scope);
+                        scope.parentCtrl.updateFacetColumn(scope.index);
                     }
 
                     // clear the search, if reference has search then fire update
+                    // TODO
                     scope.clearSearch = function() {
                         scope.searchTerm = null;
                         if (scope.reference.location.searchTerm) {
-                            updateFacetColumn(scope);
+                            // updateFacetColumn(scope);
+                            scope.parentCtrl.updateFacetColumn(scope.index);
                         }
                     };
 
                     scope.$watch(function () {
-                        return scope.isOpen[scope.index] && scope.initialized[scope.index];
+                        return scope.facetModel.isOpen && scope.facetModel.initialized;
                     }, function (newVal, oldVal) {
                         var findMoreHeight = 30;
                         if (newVal) {
