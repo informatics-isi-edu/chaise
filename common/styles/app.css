@@ -1,4 +1,4 @@
-/****************** GLOBAL ******************/
+©/****************** GLOBAL ******************/
 html, body {
     height: 100%;
 }
@@ -865,7 +865,7 @@ footer .container1 {
      margin-bottom: 5px;
      display: inline-block;
      position: relative;
-     border: 0.1px solid #ccc;
+     border: 1px solid #ccc;
      overflow: hidden;
      max-width: 300px;
      text-overflow: ellipsis;
