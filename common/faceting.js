@@ -146,8 +146,7 @@
             };
         }])
 
-        .directive('stringPicker', ['$window', 'DataUtils', function ($window, DataUtils) {
-            var PAGE_SIZE = 5;
+        .directive('stringPicker', ['$window', 'DataUtils', 'tableConstants', function ($window, DataUtils, tableConstants) {
             
             /**
              * Should be called each time facetColumn has been modified.
@@ -203,7 +202,7 @@
                 
                 var model = isSelect ? scope.selectModel : scope.searchModel;
                 
-                model.reference.read(PAGE_SIZE).then(function getPseudoData(page) {
+                model.reference.read(tableConstants.PAGE_SIZE).then(function getPseudoData(page) {
                     
                     model.hasLoaded = true;
                     model.initialized = true;
@@ -240,7 +239,7 @@
                         enableSort: true,
                         sortby: "c1",
                         sortOrder: "asc",
-                        pageLimit: PAGE_SIZE,
+                        pageLimit: tableConstants.PAGE_SIZE,
                         config: {
                             viewable: false, editable: false, deletable: false, selectMode: "multi-select",
                             hideTotalCount: true, hideSelectedRows: true, hidePageSettings: true
@@ -253,7 +252,7 @@
                         enableSort: true,
                         sortby: "c1",
                         sortOrder: "asc",
-                        pageLimit: PAGE_SIZE,
+                        pageLimit: tableConstants.PAGE_SIZE,
                         config: {
                             viewable: false, editable: false, deletable: false, selectMode: "no-select",
                             hideTotalCount: true, hideSelectedRows: true, hidePageSettings: true
@@ -558,8 +557,7 @@
             };
         }])
         
-        .directive('choicePicker', ['$q', '$timeout', '$uibModal', function ($q, $timeout, $uibModal) {
-            var PAGE_SIZE = 10;
+        .directive('choicePicker', ['$q', '$timeout', '$uibModal', 'tableConstants', function ($q, $timeout, $uibModal, tableConstants) {
             
             // TODO right now I am keeping multiple boolean 
             // it can be in a single object! (facetModel)
@@ -595,13 +593,13 @@
                 }
                 
                 var appliedLen = scope.facetColumn.choiceFilters.length;
-                if (appliedLen >= PAGE_SIZE) {
+                if (appliedLen >= tableConstants.PAGE_SIZE) {
                     scope.checkboxRows = alreadyAppliedRows();
                     defer.resolve(true);
                 } else {
                     // read new data if neede                
                     (function (uri) {
-                        scope.reference.read(appliedLen + PAGE_SIZE).then(function (page) {
+                        scope.reference.read(appliedLen + tableConstants.PAGE_SIZE).then(function (page) {
                             // if this is not the result of latest facet change
                             if (scope.reference.uri !== uri) {
                                 defer.resolve(false);
@@ -609,7 +607,7 @@
                                 scope.checkboxRows = alreadyAppliedRows();
                                 page.tuples.forEach(function (tuple) {
                                     // if we're showing enough rows
-                                    if (scope.checkboxRows.length == PAGE_SIZE) {
+                                    if (scope.checkboxRows.length == tableConstants.PAGE_SIZE) {
                                         return;
                                     }
                                     

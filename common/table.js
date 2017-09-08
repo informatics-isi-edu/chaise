@@ -2,6 +2,11 @@
     'use strict';
 
     angular.module('chaise.record.table', ['chaise.ellipses'])
+    
+    .constant('tableConstants', {
+        MAX_CONCURENT_REQUEST: 4,
+        PAGE_SIZE: 10
+    })
 
     /**
      * Ways to use recordTable directive:
@@ -73,9 +78,7 @@
      * 4. `record-modified`: one of the records in the recordset table has been
      * modified. ellipses will fire this event and recordset directive will use it.
      */
-    .factory('recordTableUtils', ['DataUtils', '$timeout','Session', '$q', function(DataUtils, $timeout, Session, $q) {
-        
-        var MAX_CONCURENT_REQUEST = 4;
+    .factory('recordTableUtils', ['DataUtils', '$timeout','Session', '$q', 'tableConstants', function(DataUtils, $timeout, Session, $q, tableConstants) {
 
         // This method sets backgroundSearch states depending upon various parameters
         // If it returns true then we should render the data
@@ -290,10 +293,10 @@
         // pass the vm instead of scope!
         function updatePage(scope) {
             var haveFreeSlot = function () {
-                return scope.vm.occupiedSlots < MAX_CONCURENT_REQUEST;
+                return scope.vm.occupiedSlots < tableConstants.MAX_CONCURENT_REQUEST;
             }
             
-            if (!haveFreeSlot) {
+            if (!haveFreeSlot()) {
                 return;
             }
             
@@ -322,9 +325,10 @@
             
             // update the facets
             scope.vm.facetModels.forEach(function (fm, index) {
-                if (!haveFreeSlot|| fm.processed) {
+                if (!haveFreeSlot() || fm.processed) {
                     return;
                 }
+                
                 scope.vm.occupiedSlots++;
                 fm.processed = true;
                 
