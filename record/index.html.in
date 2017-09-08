@@ -6,14 +6,14 @@
     <script src="/gtm-id.js"></script>
     %ASSETS%
 </head>
-<body>
+<body style="overflow-y: hidden;">
     <navbar></navbar>
     <loading-spinner ng-show="!displayReady"></loading-spinner>
-    <div id="main-content" class="container-fluid">
+    <div id="main-content" class="container-fluid" style="height: 94vh; overflow-y: hidden;">
         <div ng-controller="RecordController as ctrl">
             <div class="row smaller-margin">
-                <div id="bookmark-container" class="col-md-12 meta-icons">
-                    <div ng-if="recordDisplayname" id="page-title" class="pull-left col-md-5">
+                <div id="bookmark-container" class="col-xs-12 meta-icons">
+                    <div ng-if="recordDisplayname" id="page-title" class="pull-left col-xs-5">
                         <div id="entity-title">
                             <span ng-if="::recordDisplayname.isHTML" ng-bind-html="::recordDisplayname.value"></span>
                             <span ng-if="::!recordDisplayname.isHTML" ng-bind="::recordDisplayname.value"></span>
@@ -23,7 +23,7 @@
                             <span ng-if="::!reference.displayname.isHTML" ng-bind="::reference.displayname.value"></span>
                         </div>
                     </div>
-                    <div class="pull-right col-md-7">
+                    <div class="pull-right col-xs-7">
                         <a id="create-record" ng-click="::ctrl.createRecord()" ng-if="::ctrl.canCreate()" uib-tooltip="Click here to create a record." tooltip-placement="bottom">
                             <span class="glyphicon glyphicon-plus"></span> <strong>Create</strong>
                         </a>&nbsp;&nbsp;

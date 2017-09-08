@@ -4,8 +4,8 @@
     <div id="main-content" class="container-fluid">
 
         <div class="row smaller-margin">
-            <div id="bookmark-container" class="col-md-12">
-                <div class="pull-left col-md-7">
+            <div id="bookmark-container" class="col-xs-12">
+                <div class="pull-left col-xs-7">
                     <h2 id="page-title">
                         <span ng-if="::vm.tableDisplayname.isHTML" ng-bind-html="vm.tableDisplayName.value"></span>
                         <span ng-if="::!vm.tableDisplayname.isHTML" ng-bind="vm.tableDisplayName.value"></span>
@@ -16,7 +16,7 @@
                             uib-tooltip="Show unfiltered list" id="show-unfiltered">Show Unfiltered</a>
                     </div>
                 </div>
-                <div class="pull-right col-md-5">
+                <div class="pull-right col-xs-5">
                     <a id="create-link" ng-if="vm.reference.canCreate && vm.config.editable" ng-href="{{create()}}" uib-tooltip="Click here to create a record." tooltip-placement="bottom">
                         <span class="glyphicon glyphicon-plus"></span> <strong>Create</strong>
                     </a>&nbsp;&nbsp;

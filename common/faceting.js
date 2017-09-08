@@ -695,7 +695,7 @@
                             resolve: {
                                 params: params
                             },
-                            size: "lg",
+                            size: "xl",
                             templateUrl: "../common/templates/searchPopup.modal.html"
                         });
 
