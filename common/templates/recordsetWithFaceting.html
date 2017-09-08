@@ -1,6 +1,6 @@
 <div class="recordset-container" ng-class="vm.config.hasFaceting ? 'row with-faceting':'without-faceting'">
     <loading-spinner ng-show="!vm.hasLoaded"></loading-spinner>
-    <div class="faceting-resizable" resizable r-directions=["right"] r-flex="true" ng-if="vm.config.hasFaceting">
+    <div ng-show="vm.initialized" class="faceting-resizable" resizable r-directions=["right"] r-flex="true" ng-if="vm.config.hasFaceting">
         <faceting vm="vm"></faceting>
     </div>
     <div class="main-container">
