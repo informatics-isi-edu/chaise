@@ -132,7 +132,7 @@
         };
         
         $scope.create = function() {
-            return recordsetModel.reference.contextualize.entryCreate.appLink;
+            return recordsetModel.reference.unfilteredReference.contextualize.entryCreate.appLink;
         };
 
         $scope.unfiltered = function () {
