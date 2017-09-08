@@ -117,7 +117,7 @@
 
                 if (isUpdate) {
 
-                    var data = checkUpdate(submissionRowsCopy);
+                    var data = checkUpdate(submissionRowsCopy, rootScope);
 
                     // submit rootScope.tuples because we are changing and
                     // comparing data from the old data set for the tuple with the updated data set from the UI
@@ -132,12 +132,12 @@
                     // the returned reference is contextualized and we don't need to contextualize it again
                     var resultsReference = page.reference;
                     if (isUpdate) {
-                        var data = checkUpdate(submissionRowsCopy);
+                        var data = checkUpdate(submissionRowsCopy, rootScope);
                         // check if there is a window that opened the current one
                         // make sure the update function is defined for that window
                         // verify whether we still have a valid vaue to call that function with
-                        if (window.opener && window.opener.updated && context.queryParams.invalidate) {
-                            window.opener.updated(context.queryParams.invalidate);
+                        if (window.opener && window.opener.updated && rootScope.context.queryParams.invalidate) {
+                            window.opener.updated(rootScope.context.queryParams.invalidate);
                         }
                     } else {
                         if (!isModalUpdate) {
