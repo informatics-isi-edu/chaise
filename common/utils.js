@@ -907,12 +907,22 @@
 
     // directive to show tooltip when data in the row is truncated
     .directive('chaiseEnableTooltip', ['$timeout', function ($timeout) {
+        function toggleTooltip (scope, elem) {
+            scope.tooltipEnabled = elem[0].scrollWidth > elem[0].offsetWidth;
+        }
+        
         return {
             restrict: 'A',
             link: function (scope, elem, attrs) {
                 $timeout(function () {
-                    if (elem[0].scrollWidth > elem[0].offsetWidth) scope.tooltipEnabled = true;
+                    toggleTooltip(scope, elem);
                 }, 0);
+                
+                scope.$watch(function () {
+                    return elem[0].offsetWidth;
+                }, function (value) {
+                    toggleTooltip(scope, elem);
+                });
             }
         }
     }])
