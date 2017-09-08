@@ -1,7 +1,7 @@
 (function() {
     'use strict';
-    angular.module('chaise.recordcreate', ['chaise.errors','chaise.utils']).factory("recordCreate", ['$cookies', '$log', '$window', '$uibModal', 'AlertsService', 'DataUtils', 'MathUtils', 'UriUtils', 'modalBox',
-     function($cookies, $log, $window, $uibModal, AlertsService, DataUtils, MathUtils, UriUtils, modalBox) {
+    angular.module('chaise.recordcreate', ['chaise.errors','chaise.utils']).factory("recordCreate", ['$cookies', '$log', '$window', '$uibModal', 'AlertsService', 'DataUtils', 'UriUtils', 'modalBox',
+     function($cookies, $log, $window, $uibModal, AlertsService, DataUtils, UriUtils, modalBox) {
 
         var viewModel = {};
         var GV_recordEditModel = {},
@@ -287,6 +287,7 @@
          * @param  {bool} readyToSubmit             if ready to call create function
          * @param  {obj} recordsetLink              after update link should be redirected
          * @param  {bool} submissionButtonDisabled  disable submission button
+         * @param  {object} rootScope               object contains global values from calling function
          * @param  {callback} onSuccess             callback
          */
         function addRelatedRecordFact(isModalUpdate, ref, rowIdx, modelObject, editMode, formContainer, readyToSubmit, recordsetLink, submissionButtonDisabled, rootScope, onSuccess) {
