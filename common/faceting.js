@@ -675,8 +675,9 @@
                     scope.openSearchPopup = function() {
                         var params = {};
                         // TODO since emrest cnt has bug, we should not sort based on count
+                        params.reference = scope.reference;
                         if (!scope.facetColumn.isEntityMode) {
-                            params.reference = scope.reference.sort([{
+                            params.reference = params.reference.sort([{
                                 "column": "value", "descending": false
                             }]); 
                         }
