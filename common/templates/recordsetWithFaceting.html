@@ -81,8 +81,8 @@
                     <a class="remove-link" ng-click="vm.removeFilter(fc)" tooltip-placement="bottom" uib-tooltip="Clear All Filters"><i class="glyphicon glyphicon-remove"></i></a>
                     <a tooltip-placement="bottom" ng-click="vm.openFacet($index)" ng-if="::fc.displayname.isHTML"  uib-tooltip-html="{{fc.displayname.value}}" ng-bind-html="::fc.displayname.value"></a>
                     <a tooltip-placement="bottom" ng-click="vm.openFacet($index)" ng-if="::!fc.displayname.isHTML" uib-tooltip="{{fc.displayname.value}}" ng-bind="::fc.displayname.value"></a>:
-                    <span ng-if="::fc.filtersString.isHTML" ng-bind-html="::fc.filtersString.value" tooltip-placement="bottom" uib-tooltip="{{fc.filtersString.value}}"></span>
-                    <span ng-if="::!fc.filtersString.isHTML" ng-bind="::fc.filtersString.value" tooltip-placement="bottom" uib-tooltip="{{fc.filtersString.value}}"></span>
+                    <span ng-if="::fc.filtersString.isHTML" ng-bind-html="::fc.filtersString.value" tooltip-placement="bottom-left" uib-tooltip="{{fc.filtersString.value}}"></span>
+                    <span ng-if="::!fc.filtersString.isHTML" ng-bind="::fc.filtersString.value" tooltip-placement="bottom-left" uib-tooltip="{{fc.filtersString.value}}"></span>
                     <!-- <span ng-repeat="filter in fc.filters track by $index">
                         <span ng-if="::filter.displayname.isHTML" ng-bind-html="::filter.displayname.value"></span>
                         <span ng-if="::!filter.displayname.isHTML" ng-bind="::filter.displayname.value"></span>
