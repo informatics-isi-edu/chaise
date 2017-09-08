@@ -1181,3 +1181,15 @@ footer .container1 {
     font-size: 11px;
     color: #555555;
 }
+
+/******* range inputs ***********/
+range-inputs  .input-clearbtn{
+    cursor: pointer;
+    right: 4px;
+    pointer-events: all;
+    z-index: 5;
+}
+
+range-inputs  .input-container {
+    position: relative;
+}

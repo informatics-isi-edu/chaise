@@ -3,24 +3,44 @@
         <label for="from-val">From:</label>
         <!-- int, float, numeric -->
         <div ng-show="displayType(type) == 'number'" id="from-val">
-            <input type="text" class="form-control" placeholder="{{absMin}}" ng-model="min" />
+            <div class="input-container">
+                <input type="text" class="form-control" placeholder="{{absMin}}" ng-model="min" />
+                <div class="form-control-feedback input-clearbtn" ng-show="min">
+                    <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="min=''" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
+                </div>
+            </div>
         </div>
         <!-- date -->
         <div ng-show="displayType(type) == 'date'" id="from-val">
-            <input type="text" class="form-control" placeholder="{{absMin}}" ng-model="min" />
+            <div class="input-container">
+                <input type="text" class="form-control" placeholder="{{absMin}}" ng-model="min" />
+                <div class="form-control-feedback input-clearbtn" ng-show="min">
+                    <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="min=''" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
+                </div>
+            </div>
         </div>
         <!-- timestamp[tz] -->
         <div ng-show="displayType(type) == 'datetime'" id="from-val">
             <div>
                 <div class="input-group">
                     <span class="input-group-addon">Date</span>
-                    <input type="text" class="form-control" placeholder="{{absMin.date}}" ng-model="min.date" />
+                    <div class="input-container">
+                        <input type="text" class="form-control" placeholder="{{absMin.date}}" ng-model="min.date" />
+                        <div class="form-control-feedback input-clearbtn" ng-show="min.date">
+                            <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="min.date=''" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div>
                 <div class="input-group">
                     <span class="input-group-addon">Time</span>
-                    <input type="text" class="form-control" placeholder="{{absMin.time}}" ng-model="min.time" />
+                    <div class="input-container">
+                        <input type="text" class="form-control" placeholder="{{absMin.time}}" ng-model="min.time" />
+                        <div class="form-control-feedback input-clearbtn" ng-show="min.time">
+                            <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="min.time=''" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -29,24 +49,44 @@
         <label for="to-val">To:</label>
         <!-- int, float, numeric -->
         <div ng-show="displayType(type) == 'number'" id="to-val">
-            <input type="text" class="form-control" placeholder="{{absMax}}" ng-model="max" />
+            <div class="input-container">
+                <input type="text" class="form-control" placeholder="{{absMax}}" ng-model="max" />
+                <div class="form-control-feedback input-clearbtn" ng-show="max">
+                    <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="max=''" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
+                </div>
+            </div>
         </div>
         <!-- date -->
         <div ng-show="displayType(type) == 'date'" id="to-val">
-            <input type="text" class="form-control" placeholder="{{absMax}}" ng-model="max" />
+            <div class="input-container">
+                <input type="text" class="form-control" placeholder="{{absMax}}" ng-model="max" />
+                <div class="form-control-feedback input-clearbtn" ng-show="max">
+                    <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="max=''" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
+                </div>
+            </div>
         </div>
         <!-- timestamp[tz] -->
         <div ng-show="displayType(type) == 'datetime'" id="to-val">
             <div>
                 <div class="input-group">
                     <span class="input-group-addon">Date</span>
-                    <input type="text" class="form-control" placeholder="{{absMax.date}}" ng-model="max.date" />
+                    <div class="input-container">
+                        <input type="text" class="form-control" placeholder="{{absMax.date}}" ng-model="max.date" />
+                        <div class="form-control-feedback input-clearbtn" ng-show="max.date">
+                            <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="max.date=''" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div>
                 <div class="input-group">
                     <span class="input-group-addon">Time</span>
-                    <input type="text" class="form-control" placeholder="{{absMax.time}}" ng-model="max.time" />
+                    <div class="input-container">
+                        <input type="text" class="form-control" placeholder="{{absMax.time}}" ng-model="max.time" />
+                        <div class="form-control-feedback input-clearbtn" ng-show="max.time">
+                            <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="max.time=''" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
