@@ -637,6 +637,11 @@ input.search-progress {
 
 /*=============Popup modal for login instructions********/
 
+.modal-xl {
+    max-width: 80vw;
+    width: 1200px;
+}
+
 .modal-login .modal-backdrop {
     opacity: 0.7 !important;
 }
@@ -920,8 +925,8 @@ footer .container1 {
      border-left: 25px solid white;
      overflow-x: hidden;
      overflow-y: auto;
-     max-height: 100vh;
-     padding-bottom: 140px;
+     max-height: 90vh;
+     padding-bottom: 10px;
  }
  /*.recordset-container.with-faceting > .main-container {
      overflow-x: auto;
@@ -933,7 +938,7 @@ footer .container1 {
 
  .faceting-container {
      overflow-y: auto;
-     max-height: 100vh;
+     max-height: 90vh;
  }
 
  .faceting-container .divider {
@@ -1038,7 +1043,7 @@ footer .container1 {
  .faceting-container .panel-group {
      margin-right: 5px;
      margin-top: 5px;
-     margin-bottom: 150px;
+     margin-bottom: 20px;
  }
 
  .faceting-container .applied-filters {
