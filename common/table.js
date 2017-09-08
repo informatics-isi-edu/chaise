@@ -500,9 +500,9 @@
                 rows: '=' // each row: {uniqueId, displayname, count, selected}
             },
             link: function (scope, elem, attr) {
-                scope.onSelect = function (row) {
+                scope.onSelect = function (row, $event) {
                     row.selected = !row.selected;
-                    scope.onRowClick(row);
+                    scope.onRowClick(row, $event);
                 }
 
                 scope.$watch('initialized', function (newVal, oldVal) {
@@ -733,8 +733,9 @@
     }])
     
     //TODO This is used in recrodset app, eventually it should be used everywhere
-    .directive('recordsetWithFaceting', ['recordTableUtils', '$window', '$cookies', 'DataUtils', 'MathUtils', 'UriUtils','$timeout', function(recordTableUtils, $window, $cookies, DataUtils, MathUtils, UriUtils, $timeout) {
-
+    .directive('recordsetWithFaceting', ['recordTableUtils', '$window', '$cookies', 'DataUtils', 'MathUtils', 'UriUtils','$timeout', 'AlertsService', function(recordTableUtils, $window, $cookies, DataUtils, MathUtils, UriUtils, $timeout, AlertsService) {
+        var MAX_LENGTH = 2000;
+        
         return {
             restrict: 'E',
             templateUrl: '../common/templates/recordsetWithFaceting.html',
@@ -749,12 +750,24 @@
                 var updated = false; // table refresh used by ellipses' edit action (new method)
 
                 scope.pageLimits = [10, 25, 50, 75, 100, 200];
-                scope.vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr
+                scope.$root.alerts = AlertsService.alerts;
+                scope.vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
                 scope.vm.isIdle = true;
                 scope.vm.facetModels = [];
                 scope.vm.dirtyResult = false;
                 scope.vm.occupiedSlots = 0;
+                
+                scope.$root.checkReferenceURL = function (ref) {
+                    if (ref.location.ermrestUri.length > MAX_LENGTH) {
+                        $timeout(function () {
+                            $window.scrollTo(0, 0);
+                        }, 0)
+                        AlertsService.addAlert('Maximum URL length reached. Cannot perform the requested action.', 'warning');
+                        return false;
+                    }
+                    return true;
+                }
 
                 scope.setPageLimit = function(limit) {
                     scope.vm.pageLimit = limit;
@@ -763,16 +776,15 @@
 
                 scope.before = function() {
                     var previous = scope.vm.page.previous;
-                    if (previous) {
-                        scope.vm.reference = previous;
-                        recordTableUtils.update(scope, true, false, false);
-
+                    if (previous && scope.$root.checkReferenceURL(previous)) {
+                            scope.vm.reference = previous;
+                            recordTableUtils.update(scope, true, false, false);
                     }
                 };
 
                 scope.after = function() {
                     var next = scope.vm.page.next;
-                    if (next) {
+                    if (next && scope.$root.checkReferenceURL(next)) {
                         scope.vm.reference = next;
                         recordTableUtils.update(scope, true, false, false);
                     }
@@ -820,9 +832,12 @@
 
                     if (term) term = term.trim();
 
-                    scope.vm.search = term;
-                    scope.vm.reference = scope.vm.reference.search(term); // this will clear previous search first
-                    recordTableUtils.update(scope, true, true, true);
+                    var ref = scope.vm.reference.search(term); // this will clear previous search first
+                     if (scope.$root.checkReferenceURL(ref)) {
+                         scope.vm.search = term;
+                         scope.vm.reference = ref;
+                         recordTableUtils.update(scope, true, true, true);
+                     }
                 };
 
                 scope.clearSearch = function() {

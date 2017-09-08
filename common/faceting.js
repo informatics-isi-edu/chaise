@@ -35,7 +35,7 @@
                     };
                     
                     ctrl.updateVMReference = function (reference, index) {
-                        $scope.updateReference(reference, index);
+                        return $scope.updateReference(reference, index);
                     };
                     
                     ctrl.setInitialized = function () {
@@ -55,9 +55,13 @@
                 link: function (scope, element, attr, currentCtrl) {
                     
                     scope.updateReference = function (reference, index) {
+                        if (!scope.$root.checkReferenceURL(reference)) {
+                            return false;
+                        }
                         scope.vm.lastActiveFacet = index;
                         scope.vm.reference = reference;
                         scope.$emit('facet-modified');
+                        return true;
                     };
                     
                     scope.hasFilter = function (col) {
@@ -671,9 +675,11 @@
                     scope.openSearchPopup = function() {
                         var params = {};
                         // TODO since emrest cnt has bug, we should not sort based on count
-                        params.reference = scope.reference.sort([{
-                            "column": "value", "descending": false
-                        }]);    
+                        if (!scope.facetColumn.isEntityMode) {
+                            params.reference = scope.reference.sort([{
+                                "column": "value", "descending": false
+                            }]); 
+                        }
                         params.reference.session = scope.$root.session;
                         params.displayname = scope.facetColumn.displayname;
                         params.context = "compact/select";
@@ -708,37 +714,43 @@
                         });
                     }
 
-                    scope.onRowClick = function(row) {
+                    scope.onRowClick = function(row, $event) {
                         var ref;
                         if (row.selected) {
+                            console.log('selected!');
                             ref = scope.facetColumn.addChoiceFilters([{
                                 value: row.uniqueId,
                                 displayvalue: row.displayname.value,
                                 isHTML: row.displayname.isHTML
                             }]);
                         } else {
+                            console.log('unselected!');
                             ref = scope.facetColumn.removeChoiceFilters([row.uniqueId]);
                         }
-                        scope.parentCtrl.updateVMReference(ref, scope.index);
+                        
+                        if (!scope.parentCtrl.updateVMReference(ref, scope.index)) {
+                            row.selected = !row.selected;
+                            $event.preventDefault();
+                        }
                     };
 
                     // change the searchTerm and fire the updateFacetColumn
-                    // TODO
                     scope.enterPressed = function() {
-                        //TODO should it go through the dispatcher?!
                         var term = null;
                         if (scope.searchTerm) {
                             term = scope.searchTerm.trim();
                         } 
-                        scope.searchTerm = term;
-                        scope.parentCtrl.updateFacetColumn(scope.index);
+                        var ref = scope.reference.search(term);
+                        if (scope.$root.checkReferenceURL(ref)) {
+                            scope.searchTerm = term;
+                            scope.parentCtrl.updateFacetColumn(scope.index);
+                        }
                     }
 
                     // clear the search, if reference has search then fire update
                     scope.clearSearch = function() {
                         scope.searchTerm = null;
                         if (scope.reference.location.searchTerm) {
-                            // updateFacetColumn(scope);
                             scope.parentCtrl.updateFacetColumn(scope.index);
                         }
                     };
