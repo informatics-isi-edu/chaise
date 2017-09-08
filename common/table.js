@@ -280,10 +280,12 @@
             }
             
             // if it's true change, otherwise don't change.
-            scope.vm.dirtyResult = updateResult || vm.dirtyResult;
-            scope.vm.dirtyCount = updateCount || vm.dirtyCount;
+            scope.vm.dirtyResult = updateResult || scope.vm.dirtyResult;
+            scope.vm.dirtyCount = updateCount || scope.vm.dirtyCount;
             
-            updatePage(scope);
+            $timeout(function () {
+                updatePage(scope);
+            }, 0);
         }
         // pass the vm instead of scope!
         function updatePage(scope) {
@@ -542,10 +544,8 @@
 
                 scope.vm.backgroundSearchPendingTerm = null;
                 scope.vm.currentPageSelected = false;
-                scope.vm.isIdle = true;
-                scope.vm.facetModels = [];
-                scope.vm.dirtyResult = false;
-                scope.vm.occupiedSlots = 0;
+                //TODO this is forced here
+                scope.vm.hasFaceting = false;
 
                 scope.setPageLimit = function(limit) {
                     scope.vm.pageLimit = limit;
@@ -702,7 +702,6 @@
                 }
 
                 scope.$on('data-modified', function($event) {
-                    
                     console.log('data-modified in recordset directive, getting count');
                     if (!scope.vm.config.hideTotalCount && scope.vm.search == scope.vm.reference.location.searchTerm) {
                         // get the total row count to display above the table
@@ -722,14 +721,6 @@
                     }
                 });
                 
-                scope.$on('facet-modified', function ($event) {
-                    console.log('facet-modified in recordset directive');
-                    // recordTableUtils.read(scope, false, true);
-                    // recordTableUtils.newRead(scope, true);
-                    recordTableUtils.update(scope, true, true, true);
-                    // $event.stopPropagation();
-                });
-                
                 // row data has been modified (from ellipses)
                 // do a read
                 scope.$on('record-modified', function($event) {
@@ -739,5 +730,179 @@
                 });
             }
         };
-    }]);
+    }])
+    
+    //TODO This is used in recrodset app, eventually it should be used everywhere
+    .directive('recordsetWithFaceting', ['recordTableUtils', '$window', '$cookies', 'DataUtils', 'MathUtils', 'UriUtils','$timeout', function(recordTableUtils, $window, $cookies, DataUtils, MathUtils, UriUtils, $timeout) {
+
+        return {
+            restrict: 'E',
+            templateUrl: '../common/templates/recordsetWithFaceting.html',
+            scope: {
+                vm: '=',
+                onRowClick: '&?',       // set row click function
+                allowCreate: '=?'       // if undefined, assume false
+            },
+            link: function (scope, elem, attr) {
+
+                var addRecordRequests = {}; // table refresh used by add record implementation with cookie (old method)
+                var updated = false; // table refresh used by ellipses' edit action (new method)
+
+                scope.pageLimits = [10, 25, 50, 75, 100, 200];
+                scope.vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr
+
+                scope.vm.isIdle = true;
+                scope.vm.facetModels = [];
+                scope.vm.dirtyResult = false;
+                scope.vm.occupiedSlots = 0;
+
+                scope.setPageLimit = function(limit) {
+                    scope.vm.pageLimit = limit;
+                    recordTableUtils.update(scope, true, false, false);
+                };
+
+                scope.before = function() {
+                    var previous = scope.vm.page.previous;
+                    if (previous) {
+                        scope.vm.reference = previous;
+                        recordTableUtils.update(scope, true, false, false);
+
+                    }
+                };
+
+                scope.after = function() {
+                    var next = scope.vm.page.next;
+                    if (next) {
+                        scope.vm.reference = next;
+                        recordTableUtils.update(scope, true, false, false);
+                    }
+
+                };
+
+                var inputChangedPromise;
+
+                /*
+                    The search fires at most one active "background"
+                    search at a time and, i.e. for opportunistic type-ahead search. It should never send
+                    another before the previous terminates. The delay for firing the search is
+                    1 second, when the user has stopeed typing.
+                */
+                // On change in user input
+                scope.inputChanged = function() {
+                    if (scope.vm.enableAutoSearch) {
+
+                        // Cancel previous promise for background search that was queued to be called
+                        if (inputChangedPromise) {
+                            $timeout.cancel(inputChangedPromise);
+                        }
+
+                        // Wait for the user to stop typing for a second and then fire the search
+                        inputChangedPromise = $timeout(function() {
+                            inputChangedPromise = null;
+                            scope.search(scope.vm.search);
+                        }, 1000);
+                    }
+                };
+
+                scope.enterPressed = function() {
+                    /* If user has pressed enter then foreground search starts,
+                    the input is supposed to be frozen w/ a spinner to show that it is busy doing what the user
+                    asked for. Any existing background search result completing during that time is to be discarded
+                    to avoid confusing the UX.
+                    */
+                    $timeout.cancel(inputChangedPromise);
+
+                    // Trigger search
+                    scope.search(scope.vm.search);
+                };
+
+                scope.search = function(term) {
+
+                    if (term) term = term.trim();
+
+                    scope.vm.search = term;
+                    scope.vm.reference = scope.vm.reference.search(term); // this will clear previous search first
+                    recordTableUtils.update(scope, true, true, true);
+                };
+
+                scope.clearSearch = function() {
+                    if (scope.vm.reference.location.searchTerm)
+                        scope.search();
+
+                    scope.vm.search = null;
+                };
+
+                scope.addRecord = function() {
+
+                    // Generate a unique id for this request
+                    // append it to the URL
+                    var referrer_id = 'recordset-' + MathUtils.getRandomInt(0, Number.MAX_SAFE_INTEGER);
+                    addRecordRequests[referrer_id] = 0;
+
+                    // open a new tab
+                    var newRef = scope.vm.reference.table.reference.contextualize.entryCreate;
+                    var appLink = newRef.appLink;
+                    appLink = appLink + (appLink.indexOf("?") === -1 ? "?" : "&") +
+                        'invalidate=' + UriUtils.fixedEncodeURIComponent(referrer_id);
+
+                    // open url in a new tab
+                    $window.open(appLink, '_blank');
+                };
+
+                // function for removing a single pill and it's corresponding selected row
+                scope.removePill = function(key) {
+                    var index = scope.vm.selectedRows.findIndex(function (obj) {
+                        return obj.uniqueId == key;
+                    });
+                    scope.vm.selectedRows.splice(index, 1);
+                };
+
+                // function for removing all pills regardless of what page they are on, clears the whole selectedRows array
+                scope.removeAllPills = function() {
+                    scope.vm.selectedRows.clear();
+                    scope.vm.currentPageSelected = false;
+                };
+
+                // on window focus, if has pending add record requests
+                // check if any are complete 1) delete requests, 2) delete cookies, 3) do a read
+                $window.onfocus = function() {
+
+                    var completed = 0; // completed add record requests
+                    for (var id in addRecordRequests) {
+                        var cookie = $cookies.getObject(id);
+                        if (cookie) {
+                            delete addRecordRequests[id];
+                            $cookies.remove(id);
+                            completed += 1;
+                        }
+                    }
+
+                    // read
+                    if (completed > 0 || updated) {
+                        updated = false;
+                        recordTableUtils.update(scope, true, true, true);
+                    }
+
+                };
+
+                // allow child window to call to indicate table has been updated
+                // called from form.controller.js to communicate that an entity was just updated
+                window.updated = function() {
+                    updated = true;
+                }
+                
+                scope.$on('facet-modified', function ($event) {
+                    console.log('facet-modified in recordset directive');
+                    recordTableUtils.update(scope, true, true, true);
+                });
+                
+                // row data has been modified (from ellipses)
+                // do a read
+                scope.$on('record-modified', function($event) {
+                    console.log('record-modified in recordset directive');
+                    recordTableUtils.update(scope, true, true, true);
+                });
+            }
+        };
+    }])
 })();
