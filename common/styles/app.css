@@ -867,7 +867,7 @@ footer .container1 {
      position: relative;
      border: 0.1px solid #ccc;
      overflow: hidden;
-     max-width: 30vw;
+     max-width: 300px;
      text-overflow: ellipsis;
  }
  
@@ -1034,7 +1034,7 @@ footer .container1 {
  }
  
  .faceting-container .panel .panel-body {
-     padding: 5px 25px !important;
+     padding: 5px 25px 10px !important;
      /*border: 1px solid #ddd;*/
      border-top: none !important;
      border: none;
