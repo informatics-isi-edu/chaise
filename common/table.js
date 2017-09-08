@@ -38,9 +38,9 @@
      *       }
      *
      *      config.selectMode can be one of the following:
-     *          no-select       // do not allow selection of the rows
-     *          single-select   // only allow one row to be selected
-     *          multi-select    // allow the user to select as many rows as they want
+     *          no-select       // do not allow selection of the rows. {modalBox.noSelect}
+     *          single-select   // only allow one row to be selected. {modalBox.singleSelectMode}
+     *          multi-select    // allow the user to select as many rows as they want. {modalBox.multiSelectMode}
      *
      *
      * Handle recordset/recordTable events in your controller:
@@ -156,7 +156,7 @@
         }
     }])
 
-    .directive('recordTable', ['AlertsService', 'recordTableUtils', function(AlertsService, recordTableUtils) {
+    .directive('recordTable', ['AlertsService', 'recordTableUtils', 'modalBox',function(AlertsService, recordTableUtils, modalBox) {
 
         return {
             restrict: 'E',
@@ -167,7 +167,9 @@
                 onRowClick: '&?'      // set row click function
             },
             link: function (scope, elem, attr) {
-
+                scope.noSelect = modalBox.noSelect;
+                scope.singleSelect = modalBox.singleSelectMode;
+                scope.multiSelect = modalBox.multiSelectMode;
                 // row data has been modified (from ellipses)
                 // do a read
                 scope.$on('record-modified', function() {

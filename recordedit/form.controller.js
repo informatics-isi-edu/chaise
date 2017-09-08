@@ -3,7 +3,7 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'DataUtils', 'ErrorService', 'recordEditModel', 'UiUtils', 'UriUtils', '$cookies', '$log', '$rootScope', '$timeout', '$uibModal', '$window' , 'Session', 'messageMap', 'recordCreate',function FormController(AlertsService, DataUtils, ErrorService, recordEditModel, UiUtils, UriUtils, $cookies, $log, $rootScope, $timeout, $uibModal, $window, Session, messageMap, recordCreate) {
+    .controller('FormController', ['AlertsService', 'DataUtils', 'ErrorService', 'recordEditModel', 'UiUtils', 'UriUtils', '$cookies', '$log', '$rootScope', '$timeout', '$uibModal', '$window' , 'Session', 'messageMap', 'recordCreate', 'modalBox', function FormController(AlertsService, DataUtils, ErrorService, recordEditModel, UiUtils, UriUtils, $cookies, $log, $rootScope, $timeout, $uibModal, $window, Session, messageMap, recordCreate, modalBox) {
         var vm = this;
         var context = $rootScope.context;
 
@@ -70,10 +70,6 @@
         };
         vm.prefillCookie = $cookies.getObject(context.queryParams.prefill);
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
-
-        this.testShare = function(){
-            $log.info("My name is what?");
-        }
 
         // Takes a page object and uses the uri generated for the reference to construct a chaise uri
         function redirectAfterSubmission(page) {
@@ -285,7 +281,7 @@
             params.reference = column.filteredRef(submissionRow).contextualize.compactSelect;
             params.reference.session = $rootScope.session;
             params.context = "compact/select";
-            params.selectMode = "single-select";
+            params.selectMode = modalBox.singleSelectMode;
 
             var modalInstance = $uibModal.open({
                 animation: false,

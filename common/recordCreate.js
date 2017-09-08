@@ -1,6 +1,7 @@
 (function() {
     'use strict';
-    angular.module('chaise.recordcreate', ['chaise.errors']).factory("recordCreate", ['$rootScope', '$cookies', '$log', '$window', '$uibModal', 'AlertsService', 'DataUtils', 'MathUtils', 'UriUtils', function($rootScope, $cookies, $log, $window, $uibModal, AlertsService, DataUtils, MathUtils, UriUtils) {
+    angular.module('chaise.recordcreate', ['chaise.errors','chaise.utils']).factory("recordCreate", ['$rootScope', '$cookies', '$log', '$window', '$uibModal', 'AlertsService', 'DataUtils', 'MathUtils', 'UriUtils', 'modalBox',
+     function($rootScope, $cookies, $log, $window, $uibModal, AlertsService, DataUtils, MathUtils, UriUtils, modalBox) {
 
         var viewModel = {};
         var GV_recordEditModel = {},
@@ -217,7 +218,7 @@
             params.reference = ref1.contextualize.compactSelect;
             params.reference.session = $rootScope.session;
             params.context = "compact/select";
-            params.selectMode = isModalUpdate ? "multi-select" : "single-select";
+            params.selectMode = isModalUpdate ? modalBox.multiSelectMode : modalBox.singleSelectMode;
 
             var modalInstance = $uibModal.open({
                 animation: false,

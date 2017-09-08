@@ -3,7 +3,7 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', '$cookies', '$log', 'UriUtils', 'DataUtils', 'ErrorService', 'MathUtils', 'messageMap', '$rootScope', '$window', '$scope', '$uibModal','$controller','recordCreate', function RecordController(AlertsService, $cookies, $log, UriUtils, DataUtils, ErrorService, MathUtils, messageMap, $rootScope, $window, $scope, $uibModal, $controller, recordCreate) {
+    .controller('RecordController', ['AlertsService', '$cookies', '$log', 'UriUtils', 'DataUtils', 'ErrorService', 'MathUtils', 'messageMap', '$rootScope', '$window', '$scope', '$uibModal','$controller','recordCreate', 'modalBox', function RecordController(AlertsService, $cookies, $log, UriUtils, DataUtils, ErrorService, MathUtils, messageMap, $rootScope, $window, $scope, $uibModal, $controller, recordCreate, modalBox) {
         var vm = this;
         var addRecordRequests = {}; // <generated unique id : reference of related table>
         var editRecordRequests = {}; // generated id: {schemaName, tableName}
@@ -141,7 +141,7 @@
                     viewable: false,
                     editable: false,
                     deletable: false,
-                    selectMode: 'no-select'
+                    selectMode: modalBox.noSelect //'no-select'
                 }
             };
 
@@ -165,7 +165,7 @@
                         viewable: false,
                         editable: false,
                         deletable: false,
-                        selectMode: 'no-select'
+                        selectMode: modalBox.noSelect
                     }
                 };
             }

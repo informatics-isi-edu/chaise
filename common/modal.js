@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    angular.module('chaise.modal', [])
+    angular.module('chaise.modal', ['chaise.utils'])
 
     .controller('ConfirmDeleteController', ['$uibModalInstance', function ConfirmDeleteController($uibModalInstance) {
         var vm = this;
@@ -60,7 +60,7 @@
         }
 
     }])
-    .controller('SearchPopupController', ['$scope', '$uibModalInstance', 'DataUtils', 'params', 'Session', function SearchPopupController($scope, $uibModalInstance, DataUtils, params, Session) {
+    .controller('SearchPopupController', ['$scope', '$uibModalInstance', 'DataUtils', 'params', 'Session','modalBox', function SearchPopupController($scope, $uibModalInstance, DataUtils, params, Session, modalBox) {
         var vm = this;
 
         vm.params = params;
@@ -71,8 +71,8 @@
         var reference = params.reference;
         vm.hasLoaded = false;
         var reference = vm.reference = params.reference;
-        var selectMode = params.selectMode?params.selectMode:"single-select";
-        
+        var selectMode = params.selectMode?params.selectMode:modalBox.singleSelectMode;
+
         vm.tableModel = {
             hasLoaded:          false,
             reference:          reference,
@@ -107,7 +107,7 @@
         fetchRecords();
 
         function ok(tuple) {
-            if(selectMode!="multi-select")
+            if(selectMode!=modalBox.multiSelectMode)
                 $uibModalInstance.close(tuple);
         }
         function submitMutliSelection() {
