@@ -1,7 +1,7 @@
 (function() {
     'use strict';
-    angular.module('chaise.recordcreate', ['chaise.errors','chaise.utils']).factory("recordCreate", ['$rootScope', '$cookies', '$log', '$window', '$uibModal', 'AlertsService', 'DataUtils', 'MathUtils', 'UriUtils', 'modalBox',
-     function($rootScope, $cookies, $log, $window, $uibModal, AlertsService, DataUtils, MathUtils, UriUtils, modalBox) {
+    angular.module('chaise.recordcreate', ['chaise.errors','chaise.utils']).factory("recordCreate", ['$cookies', '$log', '$window', '$uibModal', 'AlertsService', 'DataUtils', 'MathUtils', 'UriUtils', 'modalBox',
+     function($cookies, $log, $window, $uibModal, AlertsService, DataUtils, MathUtils, UriUtils, modalBox) {
 
         var viewModel = {};
         var GV_recordEditModel = {},
@@ -13,10 +13,11 @@
         /**
          * checkUpdate - to check all recrds are updated; passed as callback to uploadFiles().
          *
-         * @param  {array} submissionRowsCopy array contains updated recrds attributes
-         * @return  {array} data key-value pair of updated records
+         * @param  {array} submissionRowsCopy   array contains updated recrds attributes
+         * @param  {object} rootScope           object contains global values from calling function
+         * @return  {array} data                key-value pair of updated records
          */
-        function checkUpdate(submissionRowsCopy){
+        function checkUpdate(submissionRowsCopy, rootScope){
             /**
              * After uploading files, the returned submissionRowsCopy contains
              * new file data. This includes filename, filebyte, and md5.
@@ -27,7 +28,7 @@
              */
             for (var i = 0; i < submissionRowsCopy.length; i++) {
                 var row = submissionRowsCopy[i];
-                var data = $rootScope.tuples[i].data;
+                var data = rootScope.tuples[i].data;
                 // assign each value from the form to the data object on tuple
                 for (var key in row) {
                     data[key] = (row[key] === '' ? null : row[key]);
@@ -39,10 +40,11 @@
         /**
          * uploadFiles - uploading files
          *
-         * @param  {array} submissionRowsCopy data that is going to be uploaded
-         * @param  {object} onSuccess          callback
+         * @param  {array} submissionRowsCopy   data that is going to be uploaded
+         * @param  {object} rootScope           object contains global values from calling function
+         * @param  {object} onSuccess           callback
          */
-        function uploadFiles(submissionRowsCopy, onSuccess) {
+        function uploadFiles(submissionRowsCopy, rootScope, onSuccess) {
 
                 $uibModal.open({
                     templateUrl: "../common/templates/uploadProgress.modal.html",
@@ -53,7 +55,7 @@
                     keyboard: false,
                     resolve: {
                         params: {
-                            reference: $rootScope.reference,
+                            reference: rootScope.reference,
                             rows: submissionRowsCopy
                         }
                     }
@@ -68,13 +70,14 @@
         /**
          * addRecords - Function that calls ermrestjs method to add data
          *
-         * @param  {bool} isUpdate            flag
-         * @param  {object} derivedref        derived referene of the column that is being added
-         * @param  {array} recordEditModel   data array
-         * @param  {bool} isModalUpdate     if updating through record app
-         * @param  {object} onSuccessFunction callback
+         * @param  {bool} isUpdate              flag
+         * @param  {object} derivedref          derived referene of the column that is being added
+         * @param  {array} recordEditModel      data array
+         * @param  {bool} isModalUpdate         if updating through record app
+         * @param  {object} rootScope           object contains global values from calling function
+         * @param  {object} onSuccessFunction   callback
          */
-        function addRecords(isUpdate, derivedref, recordEditModel, isModalUpdate, onSuccessFunction) {
+        function addRecords(isUpdate, derivedref, recordEditModel, isModalUpdate, rootScope, onSuccessFunction) {
             var model = isModalUpdate ? GV_recordEditModel : recordEditModel;
             var form = viewModel.formContainer;
 
@@ -95,7 +98,7 @@
             if (isUpdate) {
                 for (var i = 0; i < submissionRowsCopy.length; i++) {
                     var newData = submissionRowsCopy[i];
-                    var oldData = $rootScope.tuples[i].data;
+                    var oldData = rootScope.tuples[i].data;
 
                     // make sure submissionRowsCopy has all the data
                     for (var key in oldData) {
@@ -106,19 +109,19 @@
             }
 
             //call uploadFiles which will upload files and callback on success
-            uploadFiles(submissionRowsCopy, function() {
+            uploadFiles(submissionRowsCopy, rootScope, function() {
 
                 var fn = "create",
                     args = [submissionRowsCopy];
-                var fnScope = isModalUpdate ? derivedref.unfilteredReference.contextualize.entryCreate : $rootScope.reference.unfilteredReference.contextualize.entryCreate;
+                var fnScope = isModalUpdate ? derivedref.unfilteredReference.contextualize.entryCreate : rootScope.reference.unfilteredReference.contextualize.entryCreate;
 
                 if (isUpdate) {
 
                     var data = checkUpdate(submissionRowsCopy);
 
-                    // submit $rootScope.tuples because we are changing and
+                    // submit rootScope.tuples because we are changing and
                     // comparing data from the old data set for the tuple with the updated data set from the UI
-                    fn = "update", fnScope = $rootScope.reference, args = [$rootScope.tuples];
+                    fn = "update", fnScope = rootScope.reference, args = [rootScope.tuples];
                 }
 
                 fnScope[fn].apply(fnScope, args).then(function success(result) {
@@ -138,12 +141,12 @@
                         }
                     } else {
                         if (!isModalUpdate) {
-                            $cookies.remove($rootScope.context.queryParams.prefill);
+                            $cookies.remove(rootScope.context.queryParams.prefill);
 
 
                             // add cookie indicating record added
-                            if ($rootScope.context.queryParams.invalidate) {
-                                $cookies.put($rootScope.context.queryParams.invalidate, submissionRowsCopy.length, {
+                            if (rootScope.context.queryParams.invalidate) {
+                                $cookies.put(rootScope.context.queryParams.invalidate, submissionRowsCopy.length, {
                                     expires: new Date(Date.now() + (60 * 60 * 24 * 1000))
                                 });
                             }
@@ -201,8 +204,9 @@
          * @param  {int} rowIndex           row index
          * @param  {object} derivedref      derived referene of the column that is being added
          * @param  {bool} isModalUpdate     flag
+         * @param  {object} rootScope       object contains global values from calling function
          */
-        var addPopup = function(ref, rowIndex, derivedref, isModalUpdate) {
+        var addPopup = function(ref, rowIndex, derivedref, isModalUpdate, rootScope) {
             var column = ref;
 
             var originalTuple, nullArr = [],
@@ -210,14 +214,14 @@
                 params = {};
 
             if (viewModel.editMode) {
-                originalTuple = $rootScope.tuples[rowIndex];
+                originalTuple = rootScope.tuples[rowIndex];
             } else {
                 originalTuple = null;
                 editOrCopy = false;
             }
-            var ref1 = ref.unfilteredReference.contextualize.compact;
-            params.reference = ref1.contextualize.compactSelect;
-            params.reference.session = $rootScope.session;
+            var ref_temp = ref.unfilteredReference.contextualize.compact;
+            params.reference = ref_temp.contextualize.compactSelect;
+            params.reference.session = rootScope.session;
             params.context = "compact/select";
             params.selectMode = isModalUpdate ? modalBox.multiSelectMode : modalBox.singleSelectMode;
 
@@ -250,7 +254,7 @@
 
                 }
                 if (isModalUpdate)
-                    addRecords(viewModel.editMode, derivedref, nullArr, isModalUpdate, viewModel.onSuccess);
+                    addRecords(viewModel.editMode, derivedref, nullArr, isModalUpdate, rootScope, viewModel.onSuccess);
 
             });
         }
@@ -258,16 +262,17 @@
         /**
          * var addRelatedRecord - begining of the record addition
          *
-         * @param  {object} ref         column object
-         * @param  {int} rowIndex       row index
-         * @param  {object} modelObject object holds peripheral attributes
-         * @param  {bool} isModal       if creating via record app
+         * @param  {object} ref             column object
+         * @param  {int} rowIndex           row index
+         * @param  {object} modelObject     object holds peripheral attributes
+         * @param  {bool} isModal           if creating via record app
+         * @param  {object} rootScope       object contains global values from calling function
          */
-        var addRelatedRecord = function(ref, rowIndex, modelObject, isModal) {
+        var addRelatedRecord = function(ref, rowIndex, modelObject, isModal, rootScope) {
 
             updateViewModel(modelObject);
             var derivedref = isModal ? ref.derivedAssociationReference : null;
-            addPopup(ref, 0, derivedref, isModal);
+            addPopup(ref, 0, derivedref, isModal, rootScope);
         };
 
         /**
@@ -284,14 +289,14 @@
          * @param  {bool} submissionButtonDisabled  disable submission button
          * @param  {callback} onSuccess             callback
          */
-        function addRelatedRecordFact(isModalUpdate, ref, rowIdx, modelObject, editMode, formContainer, readyToSubmit, recordsetLink, submissionButtonDisabled, onSuccess) {
+        function addRelatedRecordFact(isModalUpdate, ref, rowIdx, modelObject, editMode, formContainer, readyToSubmit, recordsetLink, submissionButtonDisabled, rootScope, onSuccess) {
             viewModel.onSuccess = onSuccess;
             viewModel.editMode = editMode;
             viewModel.formContainer = formContainer;
             viewModel.readyToSubmit = readyToSubmit;
             viewModel.recordsetLink = recordsetLink;
             viewModel.submissionButtonDisabled = submissionButtonDisabled;
-            addRelatedRecord(ref, rowIdx, modelObject, isModalUpdate);
+            addRelatedRecord(ref, rowIdx, modelObject, isModalUpdate, rootScope);
         }
 
         return {

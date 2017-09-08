@@ -221,7 +221,7 @@
                 }
                 populateSubmissionRow(model.rows[j], model.submissionRows[j], originalTuple, $rootScope.reference.columns, editOrCopy);
             }
-            recordCreate.addRecords(vm.editMode, null, vm.recordEditModel, false, vm.redirectAfterSubmission);
+            recordCreate.addRecords(vm.editMode, null, vm.recordEditModel, false, $rootScope, vm.redirectAfterSubmission);
         }
 
         function deleteRecord() {
