@@ -10,15 +10,39 @@
         var editRecordRequests = {}; // generated id: {schemaName, tableName}
         var updated = {};
 
+        /**
+         * checkUpdate - to check all recrds are updated; passed as callback to uploadFiles().
+         *
+         * @param  {array} submissionRowsCopy array contains updated recrds attributes
+         * @return  {array} data key-value pair of updated records
+         */
+        function checkUpdate(submissionRowsCopy){
+            /**
+             * After uploading files, the returned submissionRowsCopy contains
+             * new file data. This includes filename, filebyte, and md5.
+             * The following makes sure that all the data are updated.
+             * That's why this for loop must be after uploading files and not before.
+             * And we cannot just pass submissionRowsCopy to update function, because
+             * update function only accepts array of tuples (and not just key-value pair).
+             */
+            for (var i = 0; i < submissionRowsCopy.length; i++) {
+                var row = submissionRowsCopy[i];
+                var data = $rootScope.tuples[i].data;
+                // assign each value from the form to the data object on tuple
+                for (var key in row) {
+                    data[key] = (row[key] === '' ? null : row[key]);
+                }
+            }
+            return data;
+        }
 
         /**
          * uploadFiles - uploading files
          *
          * @param  {array} submissionRowsCopy data that is going to be uploaded
-         * @param  {bool} isUpdate           flag to check if it is an update call
          * @param  {object} onSuccess          callback
          */
-        function uploadFiles(submissionRowsCopy, isUpdate, onSuccess) {
+        function uploadFiles(submissionRowsCopy, onSuccess) {
 
                 $uibModal.open({
                     templateUrl: "../common/templates/uploadProgress.modal.html",
@@ -82,7 +106,7 @@
             }
 
             //call uploadFiles which will upload files and callback on success
-            uploadFiles(submissionRowsCopy, isUpdate, function() {
+            uploadFiles(submissionRowsCopy, function() {
 
                 var fn = "create",
                     args = [submissionRowsCopy];
@@ -90,22 +114,7 @@
 
                 if (isUpdate) {
 
-                    /**
-                     * After uploading files, the returned submissionRowsCopy contains
-                     * new file data. This includes filename, filebyte, and md5.
-                     * The following makes sure that all the data are updated.
-                     * That's why this for loop must be after uploading files and not before.
-                     * And we cannot just pass submissionRowsCopy to update function, because
-                     * update function only accepts array of tuples (and not just key-value pair).
-                     */
-                    for (var i = 0; i < submissionRowsCopy.length; i++) {
-                        var row = submissionRowsCopy[i];
-                        var data = $rootScope.tuples[i].data;
-                        // assign each value from the form to the data object on tuple
-                        for (var key in row) {
-                            data[key] = (row[key] === '' ? null : row[key]);
-                        }
-                    }
+                    var data = checkUpdate(submissionRowsCopy);
 
                     // submit $rootScope.tuples because we are changing and
                     // comparing data from the old data set for the tuple with the updated data set from the UI
@@ -120,15 +129,7 @@
                     // the returned reference is contextualized and we don't need to contextualize it again
                     var resultsReference = page.reference;
                     if (isUpdate) {
-                        for (var i = 0; i < submissionRowsCopy.length; i++) {
-                            var row = submissionRowsCopy[i];
-                            var data = $rootScope.tuples[i].data;
-                            // assign each value from the form to the data object on tuple
-                            for (var key in row) {
-                                data[key] = (row[key] === '' ? null : row[key]);
-                            }
-                        }
-
+                        var data = checkUpdate(submissionRowsCopy);
                         // check if there is a window that opened the current one
                         // make sure the update function is defined for that window
                         // verify whether we still have a valid vaue to call that function with
