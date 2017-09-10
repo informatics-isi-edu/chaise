@@ -1,5 +1,6 @@
 <div ng-class="{'pull-right':tabtype=='related',actionBarRTStyle:tabtype=='related'}">
 <div ng-class="{actionBarEntityStyle:tabtype=='entity' && tabModelDisplay!='table', actionBarEntityStyleWithMargin:tabtype=='entity' && tabModelDisplay == 'table'}">
+    {{tabModelDisplay}}
     <span ng-if="relatedTableRefDisplay == 'markdown'">
         <a class="toggle-display-link" ng-click="toggleRelatedTableDisplayType({dataModel:dataModel})">
             <span ng-show="tabModelDisplay == 'markdown'">
