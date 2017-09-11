@@ -87,6 +87,10 @@ img.spinner-sm {
 
 /****************** HEADER ******************/
 
+#mainnav {
+    border-radius: 0;
+}
+
 .navbar {
     margin-bottom: 0px;
 }
