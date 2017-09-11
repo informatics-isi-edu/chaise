@@ -81,6 +81,12 @@
                         if (typeof col === 'undefined') {
                             // // delete all filters
                             newRef = scope.vm.reference.removeAllFacetFilters();
+                            
+                            scope.vm.search = null;
+                            if (scope.vm.reference.location.searchTerm) {
+                                newRef = newRef.search();
+                            }
+                            
                         } else if (typeof filterIndex === "undefined") {
                             // delete all fitler for one column
                             newRef = col.removeAllFilters();
