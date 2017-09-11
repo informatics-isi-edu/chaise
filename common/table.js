@@ -764,7 +764,8 @@
                 scope.vm.occupiedSlots = 0;
                 
                 scope.$root.checkReferenceURL = function (ref) {
-                    if (ref.location.ermrestUri.length > MAX_LENGTH) {
+                    var refUri = ref.isAttributeGroup ? ref.uri : ref.location.ermrestUri;
+                    if (refUri.length > MAX_LENGTH) {
                         $timeout(function () {
                             $window.scrollTo(0, 0);
                         }, 0)
