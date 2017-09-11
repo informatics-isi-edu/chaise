@@ -79,7 +79,7 @@
         <div ng-if="vm.hasLoaded">
             <div class="total-filters" ng-if="vm.config.showFaceting && (vm.reference.location.facets || vm.reference.location.searchTerm)">
                 <a class="remove-link" ng-click="vm.removeFilter()" ng-if="vm.hasFilter() || vm.reference.location.searchTerm">
-                    <span class="filter-label label label-primary">
+                    <span class="filter-label label label-primary" uib-tooltip="Clear all Facets" tooltip-placement="bottom">
                         Clear All
                     </span>
                 </a>
@@ -89,7 +89,7 @@
                     <span ng-bind="vm.reference.location.searchTerm"></span>
                 </div>
                 <div class="filter-label label label-default" ng-repeat="fc in vm.reference.facetColumns track by $index" ng-if="vm.hasFilter(fc)">
-                    <a class="remove-link" ng-click="vm.removeFilter(fc)" tooltip-placement="bottom" uib-tooltip="Clear All Filters"><i class="glyphicon glyphicon-remove"></i></a>
+                    <a class="remove-link" ng-click="vm.removeFilter(fc)" tooltip-placement="bottom" uib-tooltip="Clear Facet"><i class="glyphicon glyphicon-remove"></i></a>
                     <a tooltip-placement="bottom" ng-click="vm.openFacet($index)" ng-if="::fc.displayname.isHTML"  uib-tooltip="Go to the Facet" ng-bind-html="::fc.displayname.value"></a>
                     <a tooltip-placement="bottom" ng-click="vm.openFacet($index)" ng-if="::!fc.displayname.isHTML" uib-tooltip="Go to the Facet" ng-bind="::fc.displayname.value"></a>:
                     <span ng-if="::fc.filtersString.isHTML" ng-bind-html="::fc.filtersString.value" tooltip-placement="bottom-left" uib-tooltip="{{fc.filtersString.value}}"></span>
