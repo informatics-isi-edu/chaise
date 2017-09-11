@@ -399,6 +399,8 @@
                     ctrl.updateFacet = function () {
                         if (!$scope.facetModel.initialized) {
                             $scope.initialRows();
+                        } else {
+                            $scope.syncSelected();
                         }
                         return $scope.updateFacetData();
                     }
@@ -468,7 +470,18 @@
                         var res = scope.facetColumn.addRangeFilter(min, max);
                         if (!res) return;
 
-                        scope.ranges.push(createChoiceDisplay(res.filter, true));
+                        var rowIndex = scope.ranges.findIndex(function (obj) {
+                            return obj.uniqueId == res.filter.uniqueId;
+                        });
+                        
+                        if (rowIndex === -1) {
+                            //we should create a new filter
+                            scope.ranges.push(createChoiceDisplay(res.filter, true));
+                        } else {
+                            // filter already exists, we should just change it to selected
+                            scope.ranges[rowIndex].selected = true;
+                        }
+                        
                         scope.parentCtrl.updateVMReference(res.reference, scope.index);
                     };
 
@@ -476,8 +489,8 @@
                     scope.initialRows = function () {
                         scope.ranges = [];
                         
-                        for (var i = 0; i < scope.facetColumn.filters.length; i++) {
-                            var filter = scope.facetColumn.filters[i];
+                        for (var i = 0; i < scope.facetColumn.rangeFilters.length; i++) {
+                            var filter = scope.facetColumn.rangeFilters[i];
 
                             var rowIndex = scope.ranges.findIndex(function (obj) {
                                 return obj.uniqueId == filter.uniqueId;
@@ -486,6 +499,22 @@
                             // if the row is not in the set of choices, add it
                             if (rowIndex == -1) {
                                 scope.ranges.push(createChoiceDisplay(filter, true));
+                            }
+                        }
+                    };
+                    
+                    // some of the facets might have been cleared, this function will unselect those
+                    scope.syncSelected = function () {
+                        var filterIndex = function (uniqueId) {
+                            return scope.facetColumn.rangeFilters.findIndex(function (f) {
+                                return f.uniqueId = uniqueId;
+                            });
+                        }
+                        
+                        for (var i = 0; i < scope.ranges.length; i++) {
+                            // if couldn't find the filter, then it should be unselected
+                            if (filterIndex(scope.ranges[i].uniqueId) === -1) {
+                                scope.ranges[i].selected = false;
                             }
                         }
                     };
