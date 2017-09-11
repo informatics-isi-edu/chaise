@@ -779,7 +779,22 @@
                             scope.searchTerm = term;
                             scope.parentCtrl.updateFacetColumn(scope.index);
                         }
-                    }
+                    };
+                    
+                    var inputChangedPromise;
+                    
+                    scope.inputChanged = function() {
+                        // Cancel previous promise for background search that was queued to be called
+                        if (inputChangedPromise) {
+                            $timeout.cancel(inputChangedPromise);
+                        }
+
+                        // Wait for the user to stop typing for a second and then fire the search
+                        inputChangedPromise = $timeout(function() {
+                            inputChangedPromise = null;
+                            scope.parentCtrl.updateFacetColumn(scope.index);
+                        }, 1000);
+                    };
 
                     // clear the search, if reference has search then fire update
                     scope.clearSearch = function() {
