@@ -5,6 +5,7 @@
                ng-model="searchTerm"
                class="form-control"
                on-enter="enterPressed()"
+               ng-change="inputChanged()"
                placeholder="Search"
                autofocus>
         <div class="form-control-feedback coltooltip" ng-show="searchTerm" ng-style="{'cursor': 'pointer', 'right': '50px', 'pointer-events': 'all', 'z-index': '5'}"><!-- form-control:focus changes the z-index of the form control from 2 to 3. form-control-feedback has z-index of 2. Overriding that z index to 5 so it isn't hidden when focused-->
