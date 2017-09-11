@@ -59,7 +59,7 @@
      *          - hideSelectedRows
      *          - hideTotalCount
      *          - hidePageSettings
-     *          - hasFaceting
+     *          - showFaceting
      *
      * The events that are being used by directives in this file and their children:
      * 1. `reference-modified`: data model has been updated.
@@ -549,7 +549,7 @@
                 scope.vm.backgroundSearchPendingTerm = null;
                 scope.vm.currentPageSelected = false;
                 //TODO this is forced here
-                scope.vm.hasFaceting = false;
+                scope.vm.showFaceting = false;
 
                 scope.setPageLimit = function(limit) {
                     scope.vm.pageLimit = limit;

@@ -709,7 +709,7 @@
                                 return {value: value, displayvalue: t.displayname.value, isHTML: t.displayname.isHTML};
                             }));
                             scope.parentCtrl.setInitialized();
-                            scope.parentCtrl.updateVMReference(ref, scope.index);
+                            scope.parentCtrl.updateVMReference(ref, -1);
                         });
                     }
 

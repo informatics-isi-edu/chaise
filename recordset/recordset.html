@@ -38,6 +38,11 @@
             </div>
         </div>
         
-        <recordset-with-faceting vm="vm" allow-create="false"></recordset-with-faceting>
+        <div ng-if="!showFaceting">
+            <recordset vm="vm" allow-create="false"></recordset>
+        </div>
+        <div ng-if="showFaceting">
+            <recordset-with-faceting vm="vm" allow-create="false"></recordset-with-faceting>
+        </div>
     </div>
 </div>

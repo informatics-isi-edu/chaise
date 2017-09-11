@@ -83,6 +83,7 @@
         $scope.navbarBrand = (chaiseConfig['navbarBrand'] !== undefined? chaiseConfig.navbarBrand : "");
         $scope.navbarBrandImage = (chaiseConfig['navbarBrandImage'] !== undefined? chaiseConfig.navbarBrandImage : "");
         $scope.navbarBrandText = (chaiseConfig['navbarBrandText'] !== undefined? chaiseConfig.navbarBrandText : "Chaise");
+        $scope.showFaceting = (chaiseConfig.showFaceting === true) ? true : false;
         
         function updateLocation() {
             $window.scrollTo(0, 0);
@@ -155,13 +156,14 @@
             context.chaiseBaseURL = $window.location.href.replace($window.location.hash, '');
             var modifyEnabled = chaiseConfig.editRecord === false ? false : true;
             var deleteEnabled = chaiseConfig.deleteRecord === true ? true : false;
+            var showFaceting = chaiseConfig.showFaceting === true ? true : false;
 
             recordsetModel.config = {
                 viewable: true,
                 editable: modifyEnabled,
                 deletable: modifyEnabled && deleteEnabled,
                 selectMode: "no-select",
-                hasFaceting: true
+                showFaceting: showFaceting,
             };
 
 
