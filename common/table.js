@@ -257,8 +257,8 @@
                     if (scope.vm.reference.uri !== uri) {
                         defer.resolve(false);
                     } else {
+                        // fail silently
                         scope.vm.totalRowsCnt = null;
-                        defer.reject(err);
                     }
                 });
             })(scope.vm.reference.uri);
@@ -720,7 +720,8 @@
                             // at least the UI doesn't show any misleading information.
                             scope.vm.totalRowsCnt = response[0];
                         }, function error(response) {
-                            throw response;
+                            //fail silently
+                            scope.vm.totalRowsCn = null;
                         });
                     }
                 });
