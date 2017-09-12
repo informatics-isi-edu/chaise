@@ -74,7 +74,7 @@
         * @param {bool} accordionOpen if paased as TRUE accordion should be expanded
         * @param {callback} callback to be called after function processing
         */
-        function getRelatedTableData(refObj, accordionOpen, callback){
+        function getRelatedTableData(refObj, accordionOpen, context, callback){
 
             var pageSize = getPageSize(refObj);
             refObj.read(pageSize).then(function (page) {
@@ -93,7 +93,7 @@
                     selectedRows: [],           // array of selected rows, needs to be defined even if not used
                     search: null,                // search term
                     displayType: refObj.display.type,
-                    context: "compact/brief",
+                    context: context, //"compact/brief",
                     fromTuple: $rootScope.tuple
                 };
                 model.rowValues = DataUtils.getRowValuesFromPage(page);
@@ -188,15 +188,15 @@
                 $rootScope.inboundFKCols = allInbFKCols;
                 $rootScope.inboundFKColsIdx = allInbFKColsIdx;
                 if(allInbFKCols.length>0){
-                   
+
                     $rootScope.rtrefDisTypetable = [];
                     $rootScope.colTableModels = [];
 
                     for(var i =0;i<allInbFKCols.length;i++){
-                        allInbFKCols[i].reference = allInbFKCols[i].reference.contextualize.compactBrief;
+                        allInbFKCols[i].reference = allInbFKCols[i].reference.contextualize.compactBriefInline;
                         var ifkPageSize = getPageSize(allInbFKCols[i].reference);
                         (function(i) {
-                            getRelatedTableData(allInbFKCols[i].reference, true, function(model){
+                            getRelatedTableData(allInbFKCols[i].reference, true, "compact/brief/inline", function(model){
 
                                 $rootScope.colTableModels[allInbFKColsIdx[i]] = model;
                                 $rootScope.rtrefDisTypetable[allInbFKColsIdx[i]] = allInbFKCols[i].reference;
@@ -222,7 +222,7 @@
                         if ($rootScope.relatedReferences[i].canCreate && $rootScope.modifyRecord && !$rootScope.showEmptyRelatedTables) {
                             $rootScope.showEmptyRelatedTables = true;
                         }
-                        getRelatedTableData($rootScope.relatedReferences[i], boolIsOpen, function(model){
+                        getRelatedTableData($rootScope.relatedReferences[i], boolIsOpen, "compact/brief", function(model){
                             $rootScope.tableModels[i] = model;
                             $rootScope.displayReady = true;
                         });
