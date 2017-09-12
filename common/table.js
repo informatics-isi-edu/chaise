@@ -337,7 +337,7 @@
                     var currFm = scope.vm.facetModels[i];
                     currFm.initialized = res || currFm.initialized;
                     currFm.isLoading = !res;
-                    currFm.processed = res || currFm.processed;                      
+                    currFm.processed = res || currFm.processed;
                 };
                 
                 (function (i) {

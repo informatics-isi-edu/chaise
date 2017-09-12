@@ -1,4 +1,4 @@
-©/****************** GLOBAL ******************/
+/****************** GLOBAL ******************/
 html, body {
     height: 100%;
 }
@@ -27,6 +27,10 @@ a .glyphicon-trash {
 
 span[uib-tooltip] {
     border-bottom: 1px dotted black;
+}
+
+.tooltip-inner {
+    text-align: left;
 }
 
 .btn.btn-primary.btn-inverted {
@@ -1116,6 +1120,7 @@ footer .container1 {
 .chaise-list-container {
     padding-left: 0px;
     margin-top: 10px;
+    margin-bottom: 0px;
 }
 .chaise-checkbox {
     position: relative;
