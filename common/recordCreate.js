@@ -14,10 +14,10 @@
          * checkUpdate - to check all recrds are updated; passed as callback to uploadFiles().
          *
          * @param  {array} submissionRowsCopy   array contains updated recrds attributes
-         * @param  {object} rootScope           object contains global values from calling function
+         * @param  {array} rsTuples             array with data tuples value from calling function
          * @return  {array} data                key-value pair of updated records
          */
-        function checkUpdate(submissionRowsCopy, rootScope){
+        function checkUpdate(submissionRowsCopy, rsTuples){
             /**
              * After uploading files, the returned submissionRowsCopy contains
              * new file data. This includes filename, filebyte, and md5.
@@ -28,7 +28,7 @@
              */
             for (var i = 0; i < submissionRowsCopy.length; i++) {
                 var row = submissionRowsCopy[i];
-                var data = rootScope.tuples[i].data;
+                var data = rsTuples[i].data;
                 // assign each value from the form to the data object on tuple
                 for (var key in row) {
                     data[key] = (row[key] === '' ? null : row[key]);
@@ -41,10 +41,10 @@
          * uploadFiles - uploading files
          *
          * @param  {array} submissionRowsCopy   data that is going to be uploaded
-         * @param  {object} rootScope           object contains global values from calling function
+         * @param  {object} rsReference         rootscope reference from calling function
          * @param  {object} onSuccess           callback
          */
-        function uploadFiles(submissionRowsCopy, rootScope, onSuccess) {
+        function uploadFiles(submissionRowsCopy, rsReference, onSuccess) {
 
                 $uibModal.open({
                     templateUrl: "../common/templates/uploadProgress.modal.html",
@@ -55,7 +55,7 @@
                     keyboard: false,
                     resolve: {
                         params: {
-                            reference: rootScope.reference,
+                            reference: rsReference,
                             rows: submissionRowsCopy
                         }
                     }
@@ -74,10 +74,12 @@
          * @param  {object} derivedref          derived referene of the column that is being added
          * @param  {array} recordEditModel      data array
          * @param  {bool} isModalUpdate         if updating through record app
-         * @param  {object} rootScope           object contains global values from calling function
+         * @param  {object} rsReference         rootscope reference from calling function
+         * @param  {array} rsTuples             ootscope tuples array from calling function
+         * @param  {object} rsQueryParams       object contains queryparams of context from calling function
          * @param  {object} onSuccessFunction   callback
          */
-        function addRecords(isUpdate, derivedref, recordEditModel, isModalUpdate, rootScope, onSuccessFunction) {
+        function addRecords(isUpdate, derivedref, recordEditModel, isModalUpdate, rsReference, rsTuples, rsQueryParams, onSuccessFunction) {
             var model = isModalUpdate ? GV_recordEditModel : recordEditModel;
             var form = viewModel.formContainer;
 
@@ -98,7 +100,7 @@
             if (isUpdate) {
                 for (var i = 0; i < submissionRowsCopy.length; i++) {
                     var newData = submissionRowsCopy[i];
-                    var oldData = rootScope.tuples[i].data;
+                    var oldData = rsTuples[i].data;
 
                     // make sure submissionRowsCopy has all the data
                     for (var key in oldData) {
@@ -109,19 +111,19 @@
             }
 
             //call uploadFiles which will upload files and callback on success
-            uploadFiles(submissionRowsCopy, rootScope, function() {
+            uploadFiles(submissionRowsCopy, rsReference, function() {
 
                 var fn = "create",
                     args = [submissionRowsCopy];
-                var fnScope = isModalUpdate ? derivedref.unfilteredReference.contextualize.entryCreate : rootScope.reference.unfilteredReference.contextualize.entryCreate;
+                var fnScope = isModalUpdate ? derivedref.unfilteredReference.contextualize.entryCreate : rsReference.unfilteredReference.contextualize.entryCreate;
 
                 if (isUpdate) {
 
-                    var data = checkUpdate(submissionRowsCopy, rootScope);
+                    var data = checkUpdate(submissionRowsCopy, rsTuples);
 
                     // submit rootScope.tuples because we are changing and
                     // comparing data from the old data set for the tuple with the updated data set from the UI
-                    fn = "update", fnScope = rootScope.reference, args = [rootScope.tuples];
+                    fn = "update", fnScope = rsReference, args = [rsTuples];
                 }
 
                 fnScope[fn].apply(fnScope, args).then(function success(result) {
@@ -132,21 +134,21 @@
                     // the returned reference is contextualized and we don't need to contextualize it again
                     var resultsReference = page.reference;
                     if (isUpdate) {
-                        var data = checkUpdate(submissionRowsCopy, rootScope);
+                        var data = checkUpdate(submissionRowsCopy, rsTuples);
                         // check if there is a window that opened the current one
                         // make sure the update function is defined for that window
                         // verify whether we still have a valid vaue to call that function with
                         if (window.opener && window.opener.updated && rootScope.context.queryParams.invalidate) {
-                            window.opener.updated(rootScope.context.queryParams.invalidate);
+                            window.opener.updated(rsQueryParams.invalidate);
                         }
                     } else {
                         if (!isModalUpdate) {
-                            $cookies.remove(rootScope.context.queryParams.prefill);
+                            $cookies.remove(rsQueryParams.prefill);
 
 
                             // add cookie indicating record added
-                            if (rootScope.context.queryParams.invalidate) {
-                                $cookies.put(rootScope.context.queryParams.invalidate, submissionRowsCopy.length, {
+                            if (rsQueryParams.invalidate) {
+                                $cookies.put(rsQueryParams.invalidate, submissionRowsCopy.length, {
                                     expires: new Date(Date.now() + (60 * 60 * 24 * 1000))
                                 });
                             }
@@ -204,9 +206,12 @@
          * @param  {int} rowIndex           row index
          * @param  {object} derivedref      derived referene of the column that is being added
          * @param  {bool} isModalUpdate     flag
-         * @param  {object} rootScope       object contains global values from calling function
+         * @param  {object} rsReference     object contains rootscope reference from calling function
+         * @param  {array} rsTuples         rootscope tuples array from calling function
+         * @param  {object} rsSession       contains session object from calling function
+         * @param  {object} rsQueryParams   object contains queryparams of context from calling function
          */
-        var addPopup = function(ref, rowIndex, derivedref, isModalUpdate, rootScope) {
+        var addPopup = function(ref, rowIndex, derivedref, isModalUpdate, rsReference, rsTuples, rsSession, rsQueryParams) {
             var column = ref;
 
             var originalTuple, nullArr = [],
@@ -214,14 +219,14 @@
                 params = {};
 
             if (viewModel.editMode) {
-                originalTuple = rootScope.tuples[rowIndex];
+                originalTuple = rsTuples[rowIndex];
             } else {
                 originalTuple = null;
                 editOrCopy = false;
             }
             var ref_temp = ref.unfilteredReference.contextualize.compact;
             params.reference = ref_temp.contextualize.compactSelect;
-            params.reference.session = rootScope.session;
+            params.reference.session = rsSession;
             params.context = "compact/select";
             params.selectMode = isModalUpdate ? modalBox.multiSelectMode : modalBox.singleSelectMode;
 
@@ -254,7 +259,7 @@
 
                 }
                 if (isModalUpdate)
-                    addRecords(viewModel.editMode, derivedref, nullArr, isModalUpdate, rootScope, viewModel.onSuccess);
+                    addRecords(viewModel.editMode, derivedref, nullArr, isModalUpdate, rsReference, rsTuples, rsQueryParams, viewModel.onSuccess);
 
             });
         }
@@ -266,13 +271,16 @@
          * @param  {int} rowIndex           row index
          * @param  {object} modelObject     object holds peripheral attributes
          * @param  {bool} isModal           if creating via record app
-         * @param  {object} rootScope       object contains global values from calling function
+         * @param  {object} rsReference     object contains rootscope reference from calling function
+         * @param  {array} rsTuples         rootscope tuples array from calling function
+         * @param  {object} rsSession       contains session object from calling function
+         * @param  {object} rsQueryParams   object contains queryparams of context from calling function
          */
-        var addRelatedRecord = function(ref, rowIndex, modelObject, isModal, rootScope) {
+        var addRelatedRecord = function(ref, rowIndex, modelObject, isModal, rsReference, rsTuples, rsSession, rsQueryParams) {
 
             updateViewModel(modelObject);
             var derivedref = isModal ? ref.derivedAssociationReference : null;
-            addPopup(ref, 0, derivedref, isModal, rootScope);
+            addPopup(ref, 0, derivedref, isModal, rsReference, rsTuples, rsSession, rsQueryParams);
         };
 
         /**
@@ -287,17 +295,20 @@
          * @param  {bool} readyToSubmit             if ready to call create function
          * @param  {obj} recordsetLink              after update link should be redirected
          * @param  {bool} submissionButtonDisabled  disable submission button
-         * @param  {object} rootScope               object contains global values from calling function
+         * @param  {object} rsReference             object contains rootscope reference from calling function
+         * @param  {array} rsTuples                 rootscope tuples array from calling function
+         * @param  {object} rsSession               contains session object from calling function
+         * @param  {object} rsQueryParams           object contains queryparams of context from calling function
          * @param  {callback} onSuccess             callback
          */
-        function addRelatedRecordFact(isModalUpdate, ref, rowIdx, modelObject, editMode, formContainer, readyToSubmit, recordsetLink, submissionButtonDisabled, rootScope, onSuccess) {
+        function addRelatedRecordFact(isModalUpdate, ref, rowIdx, modelObject, editMode, formContainer, readyToSubmit, recordsetLink, submissionButtonDisabled, rsReference, rsTuples, rsSession, rsQueryParams, onSuccess) {
             viewModel.onSuccess = onSuccess;
             viewModel.editMode = editMode;
             viewModel.formContainer = formContainer;
             viewModel.readyToSubmit = readyToSubmit;
             viewModel.recordsetLink = recordsetLink;
             viewModel.submissionButtonDisabled = submissionButtonDisabled;
-            addRelatedRecord(ref, rowIdx, modelObject, isModalUpdate, rootScope);
+            addRelatedRecord(ref, rowIdx, modelObject, isModalUpdate, rsReference, rsTuples, rsSession, rsQueryParams);
         }
 
         return {

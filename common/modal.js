@@ -60,7 +60,7 @@
         }
 
     }])
-    .controller('SearchPopupController', ['$scope', '$uibModalInstance', 'DataUtils', 'params', 'Session','modalBox', function SearchPopupController($scope, $uibModalInstance, DataUtils, params, Session, modalBox) {
+    .controller('SearchPopupController', ['$scope', '$uibModalInstance', 'DataUtils', 'params', 'Session', 'modalBox', function SearchPopupController($scope, $uibModalInstance, DataUtils, params, Session, modalBox) {
         var vm = this;
 
         vm.params = params;
@@ -71,7 +71,7 @@
         var reference = params.reference;
         vm.hasLoaded = false;
         var reference = vm.reference = params.reference;
-        var selectMode = params.selectMode?params.selectMode:modalBox.singleSelectMode;
+        var selectMode = params.selectMode;
 
         vm.tableModel = {
             hasLoaded:          false,
