@@ -114,62 +114,8 @@
         };
 
         // Send user to RecordEdit to create a new row in this related table
-        function onSuccess (model, page, result){
-            var page = result.successful;
-            var failedPage = result.failed;
-            var resultsReference = page.reference;
-
+        function onSuccess (){    
             AlertsService.addAlert("Your data has been submitted. Showing you the result set...","success");
-
-            // can't use page.reference because it reflects the specific values that were inserted
-            vm.recordsetLink = $rootScope.reference.contextualize.compact.appLink;
-            //set values for the view to flip to recordedit resultset view
-            vm.resultsetModel = {
-                hasLoaded: true,
-                reference: resultsReference,
-                tableDisplayName: resultsReference.displayname,
-                columns: resultsReference.columns,
-                enableSort: false,
-                sortby: null,
-                sortOrder: null,
-                page: page,
-                pageLimit: model.rows.length,
-                rowValues: DataUtils.getRowValuesFromTuples(page.tuples),
-                selectedRows: [],
-                search: null,
-                config: {
-                    viewable: false,
-                    editable: false,
-                    deletable: false,
-                    selectMode: modalBox.noSelect //'no-select'
-                }
-            };
-
-            // NOTE: This case is for a pseudo-failure case
-            // When multiple rows are updated and a smaller set is returned, the user doesn't have permission to update those rows based on row-level security
-            if (failedPage !== null) {
-                vm.omittedResultsetModel = {
-                    hasLoaded: true,
-                    reference: resultsReference,
-                    tableDisplayName: resultsReference.displayname,
-                    columns: resultsReference.columns,
-                    enableSort: false,
-                    sortby: null,
-                    sortOrder: null,
-                    page: page,
-                    pageLimit: model.rows.length,
-                    rowValues: DataUtils.getRowValuesFromTuples(failedPage.tuples),
-                    selectedRows: [],
-                    search: null,
-                    config: {
-                        viewable: false,
-                        editable: false,
-                        deletable: false,
-                        selectMode: modalBox.noSelect
-                    }
-                };
-            }
-
             vm.resultset = true;
             onfocusEventCall(true);
         }

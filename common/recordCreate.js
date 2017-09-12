@@ -156,10 +156,10 @@
                     }
                     viewModel.readyToSubmit = false; // form data has already been submitted to ERMrest
 
-                    if (!isModalUpdate) {
-                        onSuccessFunction(page);
+                    if (isModalUpdate) {
+                        onSuccessFunction();
                     } else {
-                        onSuccessFunction(model, page, result);
+                        onSuccessFunction(model, result);
 
                     }
                 }).catch(function(exception) {
