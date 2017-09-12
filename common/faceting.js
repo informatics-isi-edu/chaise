@@ -51,6 +51,10 @@
                         fm.isLoading = true;
                         recordTableUtils.updatePage($scope);
                     };
+                    
+                    ctrl.focusOnFacet = function (index) {
+                        $scope.focusOnFacet(index);
+                    }
                 }],
                 require: 'faceting',
                 link: function (scope, element, attr, currentCtrl) {
@@ -128,7 +132,7 @@
                         container.scrollToElementAnimated(el);
                     }
                     
-                    scope.vm.focusOnFacet = function (index) {
+                    scope.focusOnFacet = function (index) {
                         var fm = scope.vm.facetModels[index];
                         
                         if (!fm.isOpen) {
@@ -138,6 +142,10 @@
                         
                         scope.scrollToFacet(index);
                     };
+                    
+                    scope.vm.focusOnFacet = function (index) {
+                        return scope.focusOnFacet(index);
+                    }
                     
                     // TODO I am attaching the removeFilter to the vm here, maybe I shouldn't?
                     scope.vm.hasFilter = function (col) {
@@ -746,6 +754,7 @@
                             }));
                             scope.parentCtrl.setInitialized();
                             scope.parentCtrl.updateVMReference(ref, -1);
+                            scope.parentCtrl.focusOnFacet(scope.index);
                         });
                     }
 
