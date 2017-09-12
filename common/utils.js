@@ -905,23 +905,45 @@
         }
     })
 
-    // directive to show tooltip when data in the row is truncated
-    .directive('chaiseEnableTooltip', ['$timeout', function ($timeout) {
-        function toggleTooltip (scope, elem) {
+    // directive to show tooltip when data in the row is truncated because of width limitations
+    .directive('chaiseEnableTooltipWidth', ['$timeout', function ($timeout) {
+        function toggleTooltipWidth (scope, elem) {
             scope.tooltipEnabled = elem[0].scrollWidth > elem[0].offsetWidth;
         }
-        
+
         return {
             restrict: 'A',
             link: function (scope, elem, attrs) {
                 $timeout(function () {
-                    toggleTooltip(scope, elem);
+                    toggleTooltipWidth(scope, elem);
                 }, 0);
                 
                 scope.$watch(function () {
                     return elem[0].offsetWidth;
                 }, function (value) {
-                    toggleTooltip(scope, elem);
+                    toggleTooltipWidth(scope, elem);
+                });
+            }
+        }
+    }])
+
+    // directive to show tooltip when data in the row is truncated because of height limitations
+    .directive('chaiseEnableTooltipHeight', ['$timeout', function ($timeout) {
+        function toggleTooltipHeight (scope, elem) {
+            scope.tooltipEnabled = elem[0].scrollHeight > elem[0].offsetHeight;
+        }
+
+        return {
+            restrict: 'A',
+            link: function (scope, elem, attrs) {
+                $timeout(function () {
+                    toggleTooltipHeight(scope, elem);
+                }, 0);
+                
+                scope.$watch(function () {
+                    return elem[0].offsetHeight;
+                }, function (value) {
+                    toggleTooltipHeight(scope, elem);
                 });
             }
         }
