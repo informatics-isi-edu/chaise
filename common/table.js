@@ -352,7 +352,7 @@
             });
             
             // update the count
-            if (scope.vm.config.hideTotalCount) {
+            if (scope.vm.config.hideTotalCount || scope.vm.reference.isAttributeGroup) {
                 scope.vm.totalRowsCnt = null;
             } else if (scope.vm.dirtyCount && haveFreeSlot) {
                 scope.vm.occupiedSlots++;
@@ -707,7 +707,7 @@
 
                 scope.$on('data-modified', function($event) {
                     console.log('data-modified in recordset directive, getting count');
-                    if (!scope.vm.config.hideTotalCount && scope.vm.search == scope.vm.reference.location.searchTerm) {
+                    if (!scope.vm.reference.isAttributeGroup && !scope.vm.config.hideTotalCount && scope.vm.search == scope.vm.reference.location.searchTerm) {
                         // get the total row count to display above the table
                         console.log("Data-updated: ", scope.vm);
                         scope.vm.reference.getAggregates([scope.vm.reference.aggregate.countAgg]).then(function getAggregateCount(response) {
