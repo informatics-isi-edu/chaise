@@ -11,7 +11,7 @@
                                 <span ng-if="::fc.displayname.isHTML" ng-bind-html="::fc.displayname.value"></span>
                                 <span ng-if="::!fc.displayname.isHTML" ng-bind="::fc.displayname.value"></span>
                             </a>
-                            <img ng-if="vm.facetModels[$index].isLoading" src="../common/styles/images/loader.gif" class="spinner spinner-sm"/>
+                            <img ng-if="vm.facetModels[$index].isLoading" src="../common/styles/images/loader.gif" class="spinner spinner-sm pull-right"/>
                         </h4>
                     </uib-accordion-heading>
                 <div ng-switch="fc.preferredMode">

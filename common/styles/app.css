@@ -1017,7 +1017,6 @@ footer .container1 {
  }
  
  .faceting-container .panel .panel-title {
-     margin-bottom: 7px;
      font-size: 1.15em;
      color: #337ab7;
      font-weight: 600;
@@ -1034,7 +1033,7 @@ footer .container1 {
  }
  
  .faceting-container .panel .panel-body {
-     padding: 5px 25px 10px !important;
+     padding: 0px 10px 10px !important;
      border-top: none !important;
      border: none;
  }
