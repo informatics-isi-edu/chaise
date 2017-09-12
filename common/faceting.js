@@ -807,20 +807,33 @@
                     scope.$watch(function () {
                         return scope.facetModel.isOpen && scope.facetModel.initialized;
                     }, function (newVal, oldVal) {
-                        var findMoreHeight = 30;
+                        var findMoreHeight = 25;
                         if (newVal) {
                             $timeout(function () {
                                 var choicePickerElem = element[0].getElementsByClassName("choice-picker")[0];
                                 var addedHeight = choicePickerElem.scrollHeight;
                                 // if the load more text link isn't present, save some space for it
-                                if (!scope.hasMore) addedHeight += findMoreHeight;
+                                // TODO: seems like showFindMore solved the case of adding the extra height twice
+                                //   - i think because the below (isOpen and !isLoading) watch event fires off first
+                                if (!scope.hasMore && !scope.showFindMore) addedHeight += findMoreHeight;
                                 choicePickerElem.style.height = addedHeight + "px";
                             }, 0);
                         } else if (newVal == false) {
                             var choicePickerElem = element[0].getElementsByClassName("choice-picker")[0];
                             choicePickerElem.style.height = "";
                         }
-                    })
+                    });
+                    
+                    scope.$watch(function() {
+                        return scope.facetModel.isOpen && !scope.facetModel.isLoading;
+                    }, function (newVal, oldVal) {
+                        if (newVal) {
+                            $timeout(function () {
+                                var listElem = element[0].getElementsByClassName("chaise-list-container")[0];
+                                scope.showFindMore = listElem.scrollHeight > listElem.offsetHeight
+                            });
+                        }
+                    });
                 }
             };
             
