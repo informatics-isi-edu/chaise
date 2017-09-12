@@ -72,6 +72,7 @@
         * that is needed by <record-table>, <record-action-bar> and <record-display> diretives.
         * @param {object} refObj Reference object with component details
         * @param {bool} accordionOpen if paased as TRUE accordion should be expanded
+        * @param {string} context  context for reading page reference
         * @param {callback} callback to be called after function processing
         */
         function getRelatedTableData(refObj, accordionOpen, context, callback){
@@ -93,7 +94,7 @@
                     selectedRows: [],           // array of selected rows, needs to be defined even if not used
                     search: null,                // search term
                     displayType: refObj.display.type,
-                    context: context, //"compact/brief",
+                    context: context,
                     fromTuple: $rootScope.tuple
                 };
                 model.rowValues = DataUtils.getRowValuesFromPage(page);
