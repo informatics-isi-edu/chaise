@@ -31,6 +31,7 @@
                         
                         if (facetColumn.filters.length > 0 || (index === 0 && !$scope.hasFilter())) {
                             $scope.vm.facetModels[index].isOpen = true;
+                            $scope.vm.facetModels[index].isLoading = true;
                             $scope.toggleFacet(index);
                         }
                     };
@@ -835,6 +836,7 @@
                     });
                     
                     scope.$watch(function() {
+                        // NOTE initialized = false & isOpen=true -> isLoading must be true
                         return scope.facetModel.isOpen && !scope.facetModel.isLoading;
                     }, function (newVal, oldVal) {
                         if (newVal) {
