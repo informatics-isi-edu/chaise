@@ -1,5 +1,4 @@
 <div class="recordset-container" ng-class="vm.config.showFaceting ? 'row with-faceting':'without-faceting'">
-    <loading-spinner ng-show="!vm.hasLoaded"></loading-spinner>
     <div ng-show="vm.initialized" class="faceting-resizable" resizable r-directions=["right"] r-flex="true" ng-if="vm.config.showFaceting">
         <faceting vm="vm"></faceting>
     </div>
@@ -76,7 +75,7 @@
             </div>
         </div>
         
-        <div ng-if="vm.hasLoaded">
+        <div ng-if="vm.initialized">
             <div class="total-filters" ng-if="vm.config.showFaceting && (vm.reference.location.facets || vm.reference.location.searchTerm)">
                 <a class="remove-link" ng-click="vm.removeFilter()" ng-if="vm.hasFilter() || vm.reference.location.searchTerm">
                     <span class="filter-label label label-primary">
@@ -90,8 +89,8 @@
                 </div>
                 <div class="filter-label label label-default" ng-repeat="fc in vm.reference.facetColumns track by $index" ng-if="vm.hasFilter(fc)">
                     <a class="remove-link" ng-click="vm.removeFilter(fc)" tooltip-placement="bottom" uib-tooltip="Clear All Filters"><i class="glyphicon glyphicon-remove"></i></a>
-                    <a tooltip-placement="bottom" ng-click="vm.openFacet($index)" ng-if="::fc.displayname.isHTML"  uib-tooltip="Go to the Facet" ng-bind-html="::fc.displayname.value"></a>
-                    <a tooltip-placement="bottom" ng-click="vm.openFacet($index)" ng-if="::!fc.displayname.isHTML" uib-tooltip="Go to the Facet" ng-bind="::fc.displayname.value"></a>:
+                    <a tooltip-placement="bottom" ng-click="vm.focusOnFacet($index)" ng-if="::fc.displayname.isHTML"  uib-tooltip="Go to the Facet" ng-bind-html="::fc.displayname.value"></a>
+                    <a tooltip-placement="bottom" ng-click="vm.focusOnFacet($index)" ng-if="::!fc.displayname.isHTML" uib-tooltip="Go to the Facet" ng-bind="::fc.displayname.value"></a>:
                     <span ng-if="::fc.filtersString.isHTML" ng-bind-html="::fc.filtersString.value" tooltip-placement="bottom-left" uib-tooltip="{{fc.filtersString.value}}"></span>
                     <span ng-if="::!fc.filtersString.isHTML" ng-bind="::fc.filtersString.value" tooltip-placement="bottom-left" uib-tooltip="{{fc.filtersString.value}}"></span>
                     <!-- <span ng-repeat="filter in fc.filters track by $index">
@@ -104,15 +103,16 @@
         </div>
         
         <!-- record table -->
-        <div ng-if="vm.hasLoaded">
+        <div ng-if="vm.initialized">
             <h4 ng-if="!vm.config.hideTotalCount" id="rs-total-count">Displaying {{vm.rowValues.length}}{{vm.totalRowsCnt ? " of " + vm.totalRowsCnt : ''}} Records</h4>
         </div>
-        <div ng-if="vm.hasLoaded">
+        <div ng-if="vm.initialized" style="position: relative">
+            <loading-spinner ng-show="!vm.hasLoaded"></loading-spinner>
             <record-table id="rs-{{vm.makeSafeIdAttr(vm.tableDisplayName.value)}}" vm="vm" on-row-click-bind="onRowClick"></record-table>
         </div>
 
         <!-- bottom pagination -->
-        <div class="pager" ng-show="vm.initialized && vm.hasLoaded">
+        <div class="pager" ng-show="vm.initialized">
             <button id="rs-previous-btn" type="button" class="btn btn-primary btn-xs" ng-click="before()" ng-disabled="!vm.hasLoaded || !vm.page.hasPrevious">
                 <span class="glyphicon glyphicon-chevron-left"></span>
             </button>

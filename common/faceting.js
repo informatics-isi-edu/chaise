@@ -29,8 +29,9 @@
                             updateFacet: childCtrl.updateFacet
                         };
                         
-                        if (facetColumn.filters.length > 0) {
-                            $scope.vm.openFacet(index);
+                        if (facetColumn.filters.length > 0 || (index === 0 && !$scope.hasFilter())) {
+                            $scope.vm.facetModels[index].isOpen = true;
+                            $scope.toggleFacet(index);
                         }
                     };
                     
@@ -102,40 +103,40 @@
                      * @param  {int} index index of facet
                      */
                     scope.toggleFacet = function (index) {
-                        var fm = scope.vm.facetModels[index];
-                        
-                        // toggle the isOpen booelan
-                        fm.isOpen = !fm.isOpen;
-                        
-                        if (!fm.isOpen) {
-                            // make sure to get the result again later
-                            if (fm.isLoading) {
-                                fm.initialized = false;
-                            }
+                        $timeout(function() {
+                            var fm = scope.vm.facetModels[index];
                             
-                            // hide the spinner
-                            fm.isLoading = false;
-                        } else if (!fm.initialized) {
-                            // send a request
-                            // TODO should have priority
-                            currentCtrl.updateFacetColumn(index);
-                        } 
+                            if (!fm.isOpen) {
+                                // make sure to get the result again later
+                                if (fm.isLoading) {
+                                    fm.initialized = false;
+                                }
+                                
+                                // hide the spinner
+                                fm.isLoading = false;
+                            } else if (!fm.initialized) {
+                                // send a request
+                                // TODO should have priority
+                                currentCtrl.updateFacetColumn(index);
+                            } 
+                        });
                     };
                     
-                    /**
-                     * Open the facet by clicking on its header
-                     * //TODO change be changed to use the index
-                     * @param  {FacetColumn} fc the facet column
-                     */
-                    scope.vm.openFacet = function (index) {
-                        var el = document.getElementById('ft-heading-1-' + index);
-                        var container = document.getElementsByClassName('faceting-container')[0];
-                        $timeout(function() {
-                            container.scrollTop = el.offsetTop - 50;
-                            if (!scope.vm.facetModels[index].isOpen) {
-                                el.click();
-                            }
-                        }, 0);
+                    scope.scrollToFacet = function (index) {
+                        var container = angular.element(document.getElementsByClassName('faceting-container')[0]);
+                        var el = angular.element(document.getElementById('fc-'+index));
+                        container.scrollToElementAnimated(el);
+                    }
+                    
+                    scope.vm.focusOnFacet = function (index) {
+                        var fm = scope.vm.facetModels[index];
+                        
+                        if (!fm.isOpen) {
+                            fm.isOpen = true;
+                            scope.toggleFacet(index);
+                        }
+                        
+                        scope.scrollToFacet(index);
                     };
                     
                     // TODO I am attaching the removeFilter to the vm here, maybe I shouldn't?
@@ -821,6 +822,7 @@
                             choicePickerElem.style.height = "";
                         }
                     })
+
                 }
             };
             

@@ -964,7 +964,8 @@ footer .container1 {
 
  .faceting-container .panel-default>.panel-heading {
      text-transform: none;
-     background-color: #f5f5f5;
+     border: 0;
+     margin: 1px 0;
  }
 
  .faceting-container .update-btn {
@@ -1007,25 +1008,10 @@ footer .container1 {
     to { -moz-transform: rotate(360deg);}
 }
 
- .faceting-container .panel .accordion-toggle {
-     cursor: pointer;
- }
-
- .faceting-container .panel-heading .accordion-toggle:after {
-     /* symbol for "opening" panels */
-     font-family: 'Glyphicons Halflings'; 
-     content: "\e114";   
-     float: left;        
-     color: #286090;        
+ .faceting-container .toggle-icon {
      margin-right: 5px;
  }
-
- .faceting-container .panel-heading .accordion-toggle.collapsed:after {
-     /* symbol for "collapsed" panels */
-     content: "\e080";
- }
-
-
+ 
  .faceting-container .panel .panel-title {
      margin-bottom: 7px;
      font-size: 1.15em;
@@ -1037,9 +1023,14 @@ footer .container1 {
      border: 1px solid #ddd !important;
  }
  
+ .faceting-container .panel.focused {
+     border-color: darkblue !important;
+     -webkit-transition: all 1s;
+     transition: all 1s;
+ }
+ 
  .faceting-container .panel .panel-body {
      padding: 5px 25px 10px !important;
-     /*border: 1px solid #ddd;*/
      border-top: none !important;
      border: none;
  }

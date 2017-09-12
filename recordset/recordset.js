@@ -33,6 +33,8 @@
         'ermrestjs',
         'ngCookies',
         'ngSanitize',
+        'ngAnimate',
+        'duScroll',
         'ui.bootstrap'])
 
     .config(['$cookiesProvider', function($cookiesProvider) {

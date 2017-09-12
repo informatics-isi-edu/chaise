@@ -1,43 +1,24 @@
-<div class="faceting-container">
+<div class="faceting-container" du-scroll-container>
     <div class="columns-container">
-        <div class="panel-group" id="ft-cols-1">
-            <div class="panel" ng-repeat="fc in vm.reference.facetColumns track by $index">
-                <div class="panel-heading">
-                    <h4 class="panel-title accordion-toggle collapsed" data-toggle="collapse" href="#ft-col-1-{{$index}}" id="ft-heading-1-{{$index}}" ng-click="toggleFacet($index)">
-                        <!-- data-parent="#ft-cols-1" -->
-                        <a ng-attr-uib-tooltip="{{::(fc.comment) ? fc.comment : undefined}}" ng-attr-tooltip-placement="{{::(fc.comment) ? 'top' : undefined}}" title="{{fc.comment}}">
-                            <span ng-if="::fc.displayname.isHTML" ng-bind-html="::fc.displayname.value"></span>
-                            <span ng-if="::!fc.displayname.isHTML" ng-bind="::fc.displayname.value"></span>
-                        </a>
-                        <img ng-if="vm.facetModels[$index].isLoading" src="../common/styles/images/loader.gif" class="spinner spinner-sm"/>
-                    </h4>
-                    <!-- <div class="applied-filters row" ng-show="hasFilter(fc)">
-                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                            <a class="remove-link" ng-click="removeFilter(fc)">
-                                <span class="filter-label label label-primary">
-                                    Clear All
-                                </span>
+        <uib-accordion close-others="false">
+            <!-- TODO test this last active  -->
+            <div uib-accordion-group ng-repeat="fc in vm.reference.facetColumns track by $index" is-open="vm.facetModels[$index].isOpen" id="fc-{{$index}}" class="{{lastActiveFacet == $index ? 'focused': ''}}">
+                    <uib-accordion-heading>
+                        <h4 class="panel-title accordion-toggle" id="fc-heading-{{$index}}"  ng-click="toggleFacet($index)">
+                            <i class="pull-left glyphicon toggle-icon" ng-class="{'glyphicon-chevron-down': vm.facetModels[$index].isOpen, 'glyphicon-chevron-right': !vm.facetModels[$index].isOpen}"></i>
+                                
+                            <a ng-attr-uib-tooltip="{{::(fc.comment) ? fc.comment : undefined}}" ng-attr-tooltip-placement="{{::(fc.comment) ? 'top' : undefined}}" title="{{fc.comment}}">
+                                <span ng-if="::fc.displayname.isHTML" ng-bind-html="::fc.displayname.value"></span>
+                                <span ng-if="::!fc.displayname.isHTML" ng-bind="::fc.displayname.value"></span>
                             </a>
-                            <div class="label label-default filter-label" ng-repeat="filter in fc.filters track by $index">
-                                <a class="remove-link" ng-click="removeFilter(fc, $index)"><i class="glyphicon glyphicon-remove"></i></a>
-                                <span ng-switch="filter.facetFilterKey">
-                                    <i ng-switch-when="choices" class="filter-icon glyphicon glyphicon-check" tooltip-placement="bottom" uib-tooltip="Exact value"></i>
-                                    <i ng-switch-when="search" class="filter-icon glyphicon glyphicon-search" tooltip-placement="bottom" uib-tooltip="Pattern"></i>
-                                    <i ng-switch-when="ranges" class="filter-icon glyphicon glyphicon-stats" tooltip-placement="bottom" uib-tooltip="Range"></i>
-                                </span>
-                                <span ng-if="::filter.displayname.isHTML" ng-bind-html="::filter.displayname.value"></span>
-                                <span ng-if="::!filter.displayname.isHTML" ng-bind="::filter.displayname.value"></span>
-                            </div>
-                        </div>
-                    </div> -->
-                </div>
-                <div id="ft-col-1-{{$index}}" class="panel-collapse collapse">
-                    <div class="panel-body" ng-switch="fc.preferredMode">
-                        <range-picker ng-switch-when="range" vm="vm" facet-column="fc" facet-model="vm.facetModels[$index]" index="$index"></range-picker>
-                        <choice-picker ng-switch-default facet-column="fc" facet-model="vm.facetModels[$index]" index="$index"></string-picker>
-                    </div>
+                            <img ng-if="vm.facetModels[$index].isLoading" src="../common/styles/images/loader.gif" class="spinner spinner-sm"/>
+                        </h4>
+                    </uib-accordion-heading>
+                <div ng-switch="fc.preferredMode">
+                    <range-picker ng-switch-when="range" vm="vm" facet-column="fc" facet-model="vm.facetModels[$index]" index="$index"></range-picker>
+                    <choice-picker ng-switch-default facet-column="fc" facet-model="vm.facetModels[$index]" index="$index"></string-picker>
                 </div>
             </div>
-        </div>
+        </uib-accordion>
     </div>
 </div>

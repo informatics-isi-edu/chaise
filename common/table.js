@@ -923,6 +923,10 @@
                     console.log('record-modified in recordset directive');
                     recordTableUtils.update(scope, true, true, true);
                 });
+                
+                scope.$on('page-loaded', function ($event) {
+                    recordTableUtils.update(scope, true, true, true);
+                })
             }
         };
     }])
