@@ -20,7 +20,7 @@
                                   </td>
                               </tr>
                               
-                              <tr ng-repeat="(key, value) in ctrl.client">
+                              <tr ng-repeat="(key, value) in ctrl.client" ng-if="key != 'identities'">
                                   <td class="text-left" ><strong>{{key | underscoreToSpace | toTitleCase}} </strong></td>
                                   <td class="text-left profileValue">{{value}}</td>
                                   
