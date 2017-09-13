@@ -52,7 +52,6 @@
                 scope.menu = chaiseConfig.navbarMenu.children || [];
                 scope.signUpURL = chaiseConfig.signUpURL;
                 scope.profileURL = chaiseConfig.profileURL;
-                scope.groupList = [];
                  
                 Session.subscribeOnChange(function() {
                     $rootScope.session = Session.getSessionValue();
@@ -113,5 +112,4 @@
             }
         };
     }])
-    
 })();
