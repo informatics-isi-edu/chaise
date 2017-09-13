@@ -237,7 +237,7 @@
                     } else {
                         scope.vm.hasLoaded = true;
                         scope.vm.initialized = true;
-                        throw error;
+                        throw err;
                     }
                 });
                 //TODO what about error
@@ -265,6 +265,14 @@
                 });
             })(scope.vm.reference.uri);
             return defer.promise;
+        }
+        
+        function initialize (scope) {
+            scope.vm.initialized = false;
+            scope.vm.dirtyResult = true;
+            scope.vm.dirtyCount = true;
+            
+            update(scope);
         }
         
         function update (scope, updateResult, updateCount, updateFacets) {
@@ -326,37 +334,50 @@
             }
             
             // update the facets
-            scope.vm.facetModels.forEach(function (fm, index) {
-                if (!haveFreeSlot() || fm.processed) {
-                    return;
-                }
-                
+            if (scope.vm.facetsToInitialize.length === 0) {
+                scope.vm.facetModels.forEach(function (fm, index) {
+                    if (!haveFreeSlot() || fm.processed) {
+                        return;
+                    }
+                    
+                    scope.vm.occupiedSlots++;
+                    fm.processed = true;
+                    
+                    var afterFacetUpdate = function (i, res, hasError) {
+                        scope.vm.occupiedSlots--;
+                        var currFm = scope.vm.facetModels[i];
+                        currFm.initialized = res || currFm.initialized;
+                        currFm.isLoading = !res;
+                        currFm.processed = res || currFm.processed;
+                    };
+                    
+                    (function (i) {
+                        scope.vm.facetModels[i].updateFacet().then(function (res) {
+                            afterFacetUpdate(i, res);
+                            updatePage(scope);
+                        }).catch(function (err) {
+                            afterFacetUpdate(i, false);
+                            throw err;
+                        });
+                    })(index);
+                });
+            } 
+            // initialize facets
+            else if (haveFreeSlot()){
                 scope.vm.occupiedSlots++;
-                fm.processed = true;
-                
-                var afterFacetUpdate = function (i, res, hasError) {
+                var index = scope.vm.facetsToInitialize.shift();
+                scope.vm.facetModels[index].initializeFacet().then(function (res) {
                     scope.vm.occupiedSlots--;
-                    var currFm = scope.vm.facetModels[i];
-                    currFm.initialized = res || currFm.initialized;
-                    currFm.isLoading = !res;
-                    currFm.processed = res || currFm.processed;
-                };
-                
-                (function (i) {
-                    scope.vm.facetModels[i].updateFacet().then(function (res) {
-                        afterFacetUpdate(i, res);
-                        updatePage(scope);
-                    }).catch(function (err) {
-                        afterFacetUpdate(i, false);
-                        throw err;
-                    });
-                })(index);
-            });
+                    updatePage(scope);
+                }).catch(function (err) {
+                    throw err;
+                });
+            }
             
             // update the count
             if (scope.vm.config.hideTotalCount || scope.vm.reference.isAttributeGroup) {
                 scope.vm.totalRowsCnt = null;
-            } else if (scope.vm.dirtyCount && haveFreeSlot) {
+            } else if (scope.vm.dirtyCount && haveFreeSlot()) {
                 scope.vm.occupiedSlots++;
                 scope.vm.dirtyCount = false;
                 
@@ -378,6 +399,7 @@
         return {
             read: read,
             newRead: newRead,
+            initialize: initialize,
             update: update,
             updatePage: updatePage
         }
@@ -764,6 +786,7 @@
                 scope.vm.facetModels = [];
                 scope.vm.dirtyResult = false;
                 scope.vm.occupiedSlots = 0;
+                scope.vm.facetsToInitialize = [];
                 
                 scope.$root.checkReferenceURL = function (ref) {
                     var refUri = ref.isAttributeGroup ? ref.uri : ref.location.ermrestUri;
@@ -926,9 +949,26 @@
                     recordTableUtils.update(scope, true, true, true);
                 });
                 
-                scope.$on('page-modified', function ($event) {
-                    recordTableUtils.update(scope, true, true, true);
-                })
+                scope.$on('page-loaded', function ($event) {
+                    // to make sure that we're running this after registering the updateFacet callback
+                    $timeout(function () {
+                        var firstOpen = -1;
+                        // create the facetsToInitialize and also open facets
+                        scope.vm.reference.facetColumns.forEach(function (fc, index) {
+                            if (fc.isOpen) {
+                                firstOpen = (firstOpen == -1 || firstOpen > index) ? index : firstOpen;
+                                scope.vm.facetsToInitialize.push(index);
+                                scope.vm.facetModels[index].processed = false;
+                                scope.vm.facetModels[index].isOpen = true;
+                            }
+                        });
+                        
+                        firstOpen = (firstOpen !== -1) ? firstOpen : 0;
+                        scope.vm.focusOnFacet(firstOpen);
+                        
+                        recordTableUtils.initialize(scope);
+                    });
+                });
             }
         };
     }])

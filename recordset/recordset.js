@@ -227,7 +227,7 @@
                     recordsetModel.search = recordsetModel.reference.location.searchTerm;
                     
                     if (showFaceting) {
-                        $rootScope.$broadcast('page-modified');
+                        $rootScope.$broadcast('page-loaded');
                     } else {
                         recordsetModel.reference.read(recordsetModel.pageLimit).then(function () {
                             recordsetModel.page = page;
