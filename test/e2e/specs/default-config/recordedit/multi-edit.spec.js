@@ -203,15 +203,13 @@ describe('Edit multiple existing record,', function() {
 
                     it("should change the view to the resultset table and verify the count.", function(done) {
                         browser.driver.getCurrentUrl().then(function(url) {
-                            console.log(url);
-                            expect(url.startsWith(process.env.CHAISE_BASE_URL + "/recordset/")).toBe(true);
+                            expect(url.startsWith(process.env.CHAISE_BASE_URL + "/recordedit/")).toBe(true);
                             done();
                         });
                     });
 
                     describe("result page", function () {
-                        xit("should have the correct title.", function() {
-                            browser.pause();
+                        it("should have the correct title.", function() {
                             expect(chaisePage.recordEditPage.getResultTitle().getText()).toBe(tableParams.results.length + "/" + tableParams.results.length + " "+ tableParams.table_name +" Records Updated Successfully");
                         });
 
