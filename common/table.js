@@ -797,7 +797,7 @@
 
                 };
 
-                var inputChangedPromise;
+                scope.inputChangedPromise = undefined;
 
                 /*
                     The search fires at most one active "background"
@@ -810,13 +810,13 @@
                     if (scope.vm.enableAutoSearch) {
 
                         // Cancel previous promise for background search that was queued to be called
-                        if (inputChangedPromise) {
-                            $timeout.cancel(inputChangedPromise);
+                        if (scope.inputChangedPromise) {
+                            $timeout.cancel(scope.inputChangedPromise);
                         }
 
                         // Wait for the user to stop typing for a second and then fire the search
-                        inputChangedPromise = $timeout(function() {
-                            inputChangedPromise = null;
+                        scope.inputChangedPromise = $timeout(function() {
+                            scope.inputChangedPromise = null;
                             scope.search(scope.vm.search);
                         }, 1000);
                     }

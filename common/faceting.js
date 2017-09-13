@@ -792,17 +792,17 @@
                         }
                     };
                     
-                    var inputChangedPromise;
+                    scope.inputChangedPromise = undefined;
                     
                     scope.inputChanged = function() {
                         // Cancel previous promise for background search that was queued to be called
-                        if (inputChangedPromise) {
-                            $timeout.cancel(inputChangedPromise);
+                        if (scope.inputChangedPromise) {
+                            $timeout.cancel(scope.inputChangedPromise);
                         }
 
                         // Wait for the user to stop typing for a second and then fire the search
-                        inputChangedPromise = $timeout(function() {
-                            inputChangedPromise = null;
+                        scope.inputChangedPromise = $timeout(function() {
+                            scope.inputChangedPromise = null;
                             scope.parentCtrl.updateFacetColumn(scope.index);
                         }, 1000);
                     };
