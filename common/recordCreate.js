@@ -110,7 +110,7 @@
                 }
             }
 
-            //call uploadFiles which will upload files and callback on success
+            //call uploadFiles which will upload files and callback on success 
             uploadFiles(submissionRowsCopy, rsReference, function() {
 
                 var fn = "create",
