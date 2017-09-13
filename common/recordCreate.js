@@ -11,7 +11,7 @@
         var updated = {};
 
         /**
-         * checkUpdate - to check all recrds are updated; passed as callback to uploadFiles().
+         * checkUpdate - to check all recrds are updated; passed as callback to uploadFiles(). 
          *
          * @param  {array} submissionRowsCopy   array contains updated recrds attributes
          * @param  {array} rsTuples             array with data tuples value from calling function
@@ -118,9 +118,7 @@
                 var fnScope = isModalUpdate ? derivedref.unfilteredReference.contextualize.entryCreate : rsReference.unfilteredReference.contextualize.entryCreate;
 
                 if (isUpdate) {
-
                     var data = checkUpdate(submissionRowsCopy, rsTuples);
-
                     // submit rootScope.tuples because we are changing and
                     // comparing data from the old data set for the tuple with the updated data set from the UI
                     fn = "update", fnScope = rsReference, args = [rsTuples];
