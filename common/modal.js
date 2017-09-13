@@ -128,7 +128,7 @@
         for(var i = 0; i<  $rootScope.session.client.identities.length; i++){
             vm.identities[i] = $rootScope.session.client.identities[i];
         }
-        delete $rootScope.session.client["identities"];
+        
         var index = 0;
         for(var i = 0; i<  $rootScope.session.attributes.length; i++){
             if($rootScope.session.attributes[i].display_name && $rootScope.session.attributes[i].display_name !== user.display_name){
