@@ -6,7 +6,7 @@
         'chaise.authen',
         'ui.bootstrap'
     ])
-    .directive('navbar', ['$window', '$rootScope', 'Session', function($window, $rootScope, Session) {
+    .directive('navbar', ['$window', '$rootScope', 'Session', '$uibModal', function($window, $rootScope, Session, $uibModal) {
 
     // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
         var root = chaiseConfig.navbarMenu = chaiseConfig.navbarMenu || {};
@@ -52,16 +52,18 @@
                 scope.menu = chaiseConfig.navbarMenu.children || [];
                 scope.signUpURL = chaiseConfig.signUpURL;
                 scope.profileURL = chaiseConfig.profileURL;
-
+                scope.groupList = [];
+                 
                 Session.subscribeOnChange(function() {
                     $rootScope.session = Session.getSessionValue();
-
+                    
                     if ($rootScope.session == null) {
                         scope.user = null;
                     } else {
                         var user = $rootScope.session.client;
                         scope.user = user.display_name || user.full_name || user.email || user;
                     }
+                    
                 });
 
                 Session.getSession();
@@ -77,10 +79,19 @@
                 scope.logout = function logout() {
                     Session.logout();
                 };
+                
+                scope.openProfile = function openProfile() {
+                    $uibModal.open({
+                        templateUrl: "../common/templates/profile.modal.html",
+                        controller: "profileModalDialogController",
+                        controllerAs: "ctrl"
+                    });
+                };
+                
             }
         };
     }])
-
+    
     .directive('navbarMenu', ['$compile', function($compile) {
         return {
             restrict: 'EA',
@@ -101,5 +112,6 @@
                 };
             }
         };
-    }]);
+    }])
+    
 })();
