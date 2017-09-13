@@ -935,6 +935,7 @@ footer .container1 {
      -webkit-box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
     -moz-box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
     box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
+    z-index: 2;
  }
  .recordset-container.with-faceting > .main-container {
      flex:1;
@@ -943,6 +944,8 @@ footer .container1 {
      overflow-y: auto;
      max-height: 90vh;
      padding-bottom: 10px;
+     position: relative;
+     z-index: 1;
  }
  /*.recordset-container.with-faceting > .main-container {
      overflow-x: auto;

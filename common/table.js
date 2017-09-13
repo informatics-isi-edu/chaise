@@ -228,6 +228,7 @@
                         scope.vm.page = page;
                         scope.vm.rowValues = DataUtils.getRowValuesFromPage(page);
                         scope.vm.hasLoaded = true;
+                        scope.vm.initialized = true;
                         defer.resolve(true);
                     }
                 }).catch(function(err) {
@@ -235,6 +236,7 @@
                         defer.resolve(false);
                     } else {
                         scope.vm.hasLoaded = true;
+                        scope.vm.initialized = true;
                         throw error;
                     }
                 });
@@ -924,7 +926,7 @@
                     recordTableUtils.update(scope, true, true, true);
                 });
                 
-                scope.$on('page-loaded', function ($event) {
+                scope.$on('page-modified', function ($event) {
                     recordTableUtils.update(scope, true, true, true);
                 })
             }

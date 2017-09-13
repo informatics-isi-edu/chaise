@@ -3,6 +3,7 @@
         <faceting vm="vm"></faceting>
     </div>
     <div class="main-container">
+        <loading-spinner ng-show="!vm.hasLoaded"></loading-spinner>
         <div ng-show="vm.initialized" style="margin-bottom: 10px;">
             
             <div style="margin-left: 15px;margin-right: 20px;">
@@ -107,8 +108,7 @@
         <div ng-if="vm.initialized">
             <h4 ng-if="!vm.config.hideTotalCount" id="rs-total-count">Displaying {{vm.rowValues.length}}{{vm.totalRowsCnt ? " of " + vm.totalRowsCnt : ''}} Records</h4>
         </div>
-        <div ng-if="vm.initialized" style="position: relative">
-            <loading-spinner ng-show="!vm.hasLoaded"></loading-spinner>
+        <div ng-if="vm.initialized">
             <record-table id="rs-{{vm.makeSafeIdAttr(vm.tableDisplayName.value)}}" vm="vm" on-row-click-bind="onRowClick"></record-table>
         </div>
 
