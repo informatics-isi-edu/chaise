@@ -13,18 +13,27 @@
                     <span id="brand-text" ng-bind="brandText || 'Chaise'"></span>
                 </a>
             </div>
-
+            
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse navbar-inverse" id="fb-navbar-main-collapse">
                 <ul class="nav navbar-nav navbar-right">
                     <li>
                         <a id="signup-link" ng-if="user === null && signUpURL" ng-href="{{signUpURL}}">Sign Up</a>
-                        <p class="username navbar-text" ng-if="user !== null && !profileURL" ng-bind="user"></p>
                         <a class="username" ng-if="user !== null && profileURL" ng-href="{{profileURL}}" ng-bind="user"></a>
                     </li>
                     <li>
                         <a id="login-link" ng-if="user === null" ng-click="login()">Log In</a>
-                        <a id="logout-link" ng-if="user !== null" ng-click="logout()">Log Out</a>
+                    </li>
+                    <li>
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" class="username navbar-text" ng-if="user !== null && !profileURL" ><span ng-bind="user"></span><span class="caret"></span></a>
+                      <ul class="dropdown-menu"  >
+                          <li >
+                              <a id="profile-link" ng-click="openProfile()">My Profile</a>
+                          </li>                  
+                          <li ng-if="user !== null">
+                              <a id="logout-link"  ng-click="logout()">Log Out</a>
+                          </li>
+                      </ul>
                     </li>
                 </ul>
                 <ul id="navbar-menu" class="nav navbar-nav">
@@ -41,6 +50,11 @@
                     </li>
                 </ul>
             </div><!--/.nav-collapse -->
+            
+            
         </div>
     </nav>
 </header>
+
+<!--Modal Window -->
+<div profilemodal id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" class="modal fade" ></div>
