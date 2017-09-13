@@ -927,10 +927,10 @@ footer .container1 {
  }
 
  .recordset-container.with-faceting > .faceting-resizable {
-     flex:0 0 500px;
+     flex:0 0 20vw;
      position: relative;
      /*border-right: 15px solid white;*/
-     min-width: 400px;
+     min-width: 150px;
      max-width: 50vw;
      -webkit-box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
     -moz-box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
