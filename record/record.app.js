@@ -213,7 +213,7 @@
                 $rootScope.tableModels = [];
                 $rootScope.lastRendered = null;
                 var cutOff = chaiseConfig.maxRelatedTablesOpen > 0? chaiseConfig.maxRelatedTablesOpen : Infinity;
-                var boolIsOpen = $rootScope.relatedReferences.length>cutOff?false:true;
+                var boolIsOpen = $rootScope.relatedReferences.length > cutOff ? false:true;
 
                 for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
 
