@@ -225,18 +225,21 @@
 
                     recordsetModel.columns = recordsetModel.reference.columns;
                     recordsetModel.search = recordsetModel.reference.location.searchTerm;
+                    
+                    if (showFaceting) {
+                        $rootScope.$broadcast('page-loaded');
+                    } else {
+                        recordsetModel.reference.read(recordsetModel.pageLimit).then(function () {
+                            recordsetModel.page = page;
+                            recordsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
+                            recordsetModel.initialized = true;
+                            recordsetModel.hasLoaded = true;
 
-                    return recordsetModel.reference.read(recordsetModel.pageLimit);
-                }, function error(response) {
-                    throw response;
-                }).then(function getPage(page) {
-                    recordsetModel.page = page;
-                    recordsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
-                    recordsetModel.initialized = true;
-                    recordsetModel.hasLoaded = true;
-
-                    $rootScope.$broadcast('data-modified');
-
+                            $rootScope.$broadcast('data-modified');
+                        }).catch(function (err) {
+                            throw err;
+                        });
+                    }
                 }, function error(response) {
                     throw response;
                 }).catch(function genericCatch(exception) {

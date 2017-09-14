@@ -1,9 +1,11 @@
 <div class="recordset-container" ng-class="vm.config.showFaceting ? 'row with-faceting':'without-faceting'">
-    <div ng-show="vm.initialized" class="faceting-resizable" resizable r-directions=["right"] r-flex="true" ng-if="vm.config.showFaceting">
+    <loading-spinner ng-show="!vm.initialized"></loading-spinner>
+    <div class="faceting-resizable" resizable r-directions=["right"] r-flex="true" ng-if="vm.config.showFaceting">
         <faceting vm="vm"></faceting>
     </div>
     <div class="main-container">
-        <div ng-show="vm.initialized" style="margin-bottom: 10px;">
+        <loading-spinner ng-show="!vm.hasLoaded && vm.initialized"></loading-spinner>
+        <div style="margin-bottom: 10px;">
             
             <div style="margin-left: 15px;margin-right: 20px;">
                 <alerts alerts="$root.alerts"></alerts>
@@ -76,7 +78,7 @@
             </div>
         </div>
         
-        <div ng-if="vm.initialized">
+        <div>
             <div class="total-filters" ng-if="vm.config.showFaceting && (vm.reference.location.facets || vm.reference.location.searchTerm)">
                 <a class="remove-link" ng-click="vm.removeFilter()" ng-if="vm.hasFilter() || vm.reference.location.searchTerm">
                     <span class="filter-label label label-primary" uib-tooltip="Clear all Facets" tooltip-placement="bottom">
@@ -88,17 +90,24 @@
                     <a >Search</a>:
                     <span ng-bind="vm.reference.location.searchTerm"></span>
                 </div>
-                <div class="filter-label label label-default" ng-repeat="fc in vm.reference.facetColumns track by $index" ng-if="vm.hasFilter(fc)">
-                    <a class="remove-link" ng-click="vm.removeFilter(fc)" tooltip-placement="bottom" uib-tooltip="Clear Facet"><i class="glyphicon glyphicon-remove"></i></a>
+                <div class="filter-label label label-default" ng-repeat="fc in vm.reference.facetColumns track by $index" ng-if="vm.hasFilter($index)">
+                    <a class="remove-link" ng-click="vm.removeFilter($index)" tooltip-placement="bottom" uib-tooltip="Clear Facet"><i class="glyphicon glyphicon-remove"></i></a>
                     <a tooltip-placement="bottom" ng-click="vm.focusOnFacet($index)" ng-if="::fc.displayname.isHTML"  uib-tooltip="Go to the Facet" ng-bind-html="::fc.displayname.value"></a>
                     <a tooltip-placement="bottom" ng-click="vm.focusOnFacet($index)" ng-if="::!fc.displayname.isHTML" uib-tooltip="Go to the Facet" ng-bind="::fc.displayname.value"></a>:
-                    <span ng-if="::fc.filtersString.isHTML" ng-bind-html="::fc.filtersString.value" tooltip-placement="bottom-left" uib-tooltip="{{fc.filtersString.value}}"></span>
-                    <span ng-if="::!fc.filtersString.isHTML" ng-bind="::fc.filtersString.value" tooltip-placement="bottom-left" uib-tooltip="{{fc.filtersString.value}}"></span>
-                    <!-- <span ng-repeat="filter in fc.filters track by $index">
-                        <span ng-if="::filter.displayname.isHTML" ng-bind-html="::filter.displayname.value"></span>
-                        <span ng-if="::!filter.displayname.isHTML" ng-bind="::filter.displayname.value"></span>
-                        <span>{{$last ? '': ', '}}</span>
-                    </span> -->
+                    <span uib-tooltip-template="'filtersTooltipTemplate.html'" tooltip-placement="bottom-left">
+                        <span ng-repeat="filter in vm.facetModels[$index].appliedFilters">
+                            <span ng-if="::filter.displayname.isHTML" ng-bind-html="::filter.displayname.value"></span>
+                            <span ng-if="::!filter.displayname.isHTML" ng-bind="::filter.displayname.value"></span>
+                            <span>{{$last ? '': ','}}</span>
+                        </span>
+                    </span>
+                    <script type="text/ng-template" id="filtersTooltipTemplate.html">
+                        <span ng-repeat="filter in vm.facetModels[$index].appliedFilters">
+                            <span>&bull;</span>
+                            <span ng-if="::filter.displayname.isHTML" ng-bind-html="::filter.displayname.value"></span>
+                            <span ng-if="::!filter.displayname.isHTML" ng-bind="::filter.displayname.value"></span>
+                        </span>
+                    </script>
                 </div>
             </div>
         </div>
@@ -107,8 +116,7 @@
         <div ng-if="vm.initialized">
             <h4 ng-if="!vm.config.hideTotalCount" id="rs-total-count">Displaying {{vm.rowValues.length}}{{vm.totalRowsCnt ? " of " + vm.totalRowsCnt : ''}} Records</h4>
         </div>
-        <div ng-if="vm.initialized" style="position: relative">
-            <loading-spinner ng-show="!vm.hasLoaded"></loading-spinner>
+        <div ng-if="vm.initialized">
             <record-table id="rs-{{vm.makeSafeIdAttr(vm.tableDisplayName.value)}}" vm="vm" on-row-click-bind="onRowClick"></record-table>
         </div>
 

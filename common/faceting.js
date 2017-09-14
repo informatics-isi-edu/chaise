@@ -20,20 +20,15 @@
                     ctrl.register = function (childCtrl, facetColumn, index) {
                         ctrl.childCtrls[index] = childCtrl;
                         
-                        //TODO this should be changed for openning facets when we load the page
                         $scope.vm.facetModels[index] = {
                             initialized: false,
                             isOpen: false,
                             isLoading: false,
                             processed: true,
-                            updateFacet: childCtrl.updateFacet
+                            appliedFilters: [],
+                            updateFacet: childCtrl.updateFacet,
+                            initializeFacet: childCtrl.initializeFacet
                         };
-                        
-                        if (facetColumn.filters.length > 0 || (index === 0 && !$scope.hasFilter())) {
-                            $scope.vm.facetModels[index].isOpen = true;
-                            $scope.vm.facetModels[index].isLoading = true;
-                            $scope.toggleFacet(index);
-                        }
                     };
                     
                     ctrl.updateVMReference = function (reference, index) {
@@ -70,36 +65,40 @@
                         return true;
                     };
                     
-                    scope.hasFilter = function (col) {
-                        if(scope.vm.reference == null) {
+                    scope.hasFilter = function (index) {
+                        if (!scope.vm.facetModels || (index !== undefined && !scope.vm.facetModels[index])) {
                             return false;
                         }
                         
-                        if (typeof col === 'undefined') {
-                            return scope.vm.reference.location.facets != null; //TODO
+                        if (typeof index === 'undefined') {
+                            return scope.vm.facetModels.some(function (fm) {
+                                return fm.appliedFilters.length > 0;
+                            })
                         } else {
-                            return col.filters.length !== 0;
+                            return scope.vm.facetModels[index].appliedFilters.length > 0;
                         }
                     };
 
-                    scope.removeFilter = function (col, filterIndex) {
+                    scope.removeFilter = function (index) {
                         var newRef;
-                        if (typeof col === 'undefined') {
+                        if (typeof index === 'undefined') {
                             // // delete all filters
                             newRef = scope.vm.reference.removeAllFacetFilters();
+                            scope.vm.facetModels.forEach(function (fm) {
+                                fm.appliedFilters = [];
+                            });
                             
                             scope.vm.search = null;
                             if (scope.vm.reference.location.searchTerm) {
                                 newRef = newRef.search();
                             }
                             
-                        } else if (typeof filterIndex === "undefined") {
-                            // delete all fitler for one column
-                            newRef = col.removeAllFilters();
                         } else {
-                            // delete individual filter
-                            newRef = col.removeFilter(filterIndex);
-                        }
+                            // delete all fitler for one column
+                            newRef = scope.vm.reference.facetColumns[index].removeAllFilters();
+                            scope.vm.facetModels[index].appliedFilters = [];
+                        } 
+                        
                         scope.updateReference(newRef, -1);
                     };
                     
@@ -413,12 +412,12 @@
                      * @param  {boolean} callParent if true, will call the updateFacets in faceting directive
                      */
                     ctrl.updateFacet = function () {
-                        if (!$scope.facetModel.initialized) {
-                            $scope.initialRows();
-                        } else {
-                            $scope.syncSelected();
-                        }
+                        $scope.syncSelected();
                         return $scope.updateFacetData();
+                    }
+                    
+                    ctrl.initializeFacet = function () {
+                        return $scope.initialRows();;
                     }
                 }],
                 require: ['^faceting', 'rangePicker'],
@@ -462,7 +461,7 @@
                     function createChoiceDisplay(filter, selected) { 
                         return {
                             uniqueId: filter.uniqueId,
-                            displayname: filter.displayname,
+                            displayname: {value: filter.toString(), isHTML: false},
                             selected: selected,
                             metaData: {
                                 min: filter.min,
@@ -470,26 +469,55 @@
                             }
                         };
                     };
+                    
+                    function createAppliedFilter(filter) {
+                        return {
+                            uniqueId: filter.uniqueId,
+                            displayname: {value: filter.toString(), isHTML: false}
+                        }
+                    }
 
-                    scope.onSelect = function (row) {
+                    scope.onSelect = function (row, $event) {
                         var res;
                         if (row.selected) {
                             res = scope.facetColumn.addRangeFilter(row.metaData.min, row.metaData.max);
                         } else {
                             res = scope.facetColumn.removeRangeFilter(row.metaData.min, row.metaData.max);
                         }
-                        scope.parentCtrl.updateVMReference(res.reference, scope.index);
+                        
+                        if (!scope.parentCtrl.updateVMReference(res.reference, scope.index)) {
+                            row.selected != row.selected;
+                            $event.preventDefault();
+                        } else {
+                            if (row.selected) {
+                                scope.facetModel.appliedFilters.push({
+                                    uniqueId: row.uniqueId,
+                                    displayname: row.displayname
+                                });
+                            } else {
+                                scope.facetModel.appliedFilters = scope.facetModel.appliedFilters.filter(function (f) {
+                                    return f.uniqueId !== row.uniqueId;
+                                });
+                            }
+                        }
                     };
 
                     // Add new integer filter, used as the callback function to range-inputs
                     scope.addFilter = function (min, max) {
                         var res = scope.facetColumn.addRangeFilter(min, max);
-                        if (!res) return;
+                        if (!res) {
+                            return; // duplicate filter
+                        }
+                        
+                        if (!scope.parentCtrl.updateVMReference(res.reference, scope.index)) {
+                            return; // uri limit
+                        }
 
                         var rowIndex = scope.ranges.findIndex(function (obj) {
                             return obj.uniqueId == res.filter.uniqueId;
                         });
                         
+                        scope.facetModel.appliedFilters.push(createAppliedFilter(res.filter));
                         if (rowIndex === -1) {
                             //we should create a new filter
                             scope.ranges.push(createChoiceDisplay(res.filter, true));
@@ -497,13 +525,13 @@
                             // filter already exists, we should just change it to selected
                             scope.ranges[rowIndex].selected = true;
                         }
-                        
-                        scope.parentCtrl.updateVMReference(res.reference, scope.index);
                     };
 
                     // Look at the filters available for the facet and add rows to represent the preset filters
                     scope.initialRows = function () {
+                        var defer = $q.defer();
                         scope.ranges = [];
+                        scope.facetModel.appliedFilters = [];
                         
                         for (var i = 0; i < scope.facetColumn.rangeFilters.length; i++) {
                             var filter = scope.facetColumn.rangeFilters[i];
@@ -515,8 +543,12 @@
                             // if the row is not in the set of choices, add it
                             if (rowIndex == -1) {
                                 scope.ranges.push(createChoiceDisplay(filter, true));
+                                scope.facetModel.appliedFilters.push(createAppliedFilter(filter));
                             }
                         }
+                        
+                        defer.resolve();
+                        return defer.promise;
                     };
                     
                     // some of the facets might have been cleared, this function will unselect those
@@ -603,12 +635,43 @@
         }])
         
         .directive('choicePicker', ['$q', '$timeout', '$uibModal', 'tableConstants', function ($q, $timeout, $uibModal, tableConstants) {
+            // scope.checkboxRows -> total
+            // scope.alreadyAppliedRows -> comes from the initialize
             
-            // TODO right now I am keeping multiple boolean 
-            // it can be in a single object! (facetModel)
+            
+            function initializeFacetColumn(scope) {
+                var defer = $q.defer();
+                
+                if (scope.facetColumn.choiceFilters.length === 0) {
+                    defer.resolve();
+                } else {
+                    scope.facetColumn.getChoiceDisplaynames().then(function (filters) {
+                        filters.forEach(function (f) {
+                            scope.facetModel.appliedFilters.push({
+                                uniqueId: f.uniqueId,
+                                displayname: f.displayname
+                            });
+                        });
+                        
+                        defer.resolve();
+                    }).catch(function (error) {
+                        throw error;
+                    });
+                }
+                return defer.promise;
+            }
+            
             
             function updateFacetColumn(scope, callParent) {
                 var defer = $q.defer();
+                
+                var appliedFilterToRow = function (f) {
+                    return {
+                        uniqueId: f.uniqueId,
+                        displayname: f.displayname,
+                        selected: true
+                    }
+                }
                 
                 console.log("updating FACET: " + scope.index);
                 
@@ -623,23 +686,11 @@
                 if (scope.searchTerm) {
                     scope.reference = scope.reference.search(scope.searchTerm);
                 }
+
                 
-                // get the list of applied filters
-                var currentValues;
-                var alreadyAppliedRows = function () {
-                    currentValues = {};
-                    return scope.facetColumn.choiceFilters.map(function(f) {
-                        currentValues[f.uniqueId] = true;
-                        return {
-                            selected: true, displayname: f.displayname, 
-                            uniqueId: f.uniqueId, data: {value: f.term}
-                        }; // what about the count? do we want to read or not?
-                    });
-                }
-                
-                var appliedLen = scope.facetColumn.choiceFilters.length;
+                var appliedLen = scope.facetModel.appliedFilters.length;
                 if (appliedLen >= tableConstants.PAGE_SIZE) {
-                    scope.checkboxRows = alreadyAppliedRows();
+                    scope.checkboxRows = scope.facetModel.appliedFilters.map(appliedFilterToRow);
                     defer.resolve(true);
                 } else {
                     // read new data if neede                
@@ -649,7 +700,7 @@
                             if (scope.reference.uri !== uri) {
                                 defer.resolve(false);
                             } else {
-                                scope.checkboxRows = alreadyAppliedRows();
+                                scope.checkboxRows = scope.facetModel.appliedFilters.map(appliedFilterToRow);
                                 page.tuples.forEach(function (tuple) {
                                     // if we're showing enough rows
                                     if (scope.checkboxRows.length == tableConstants.PAGE_SIZE) {
@@ -666,15 +717,19 @@
                                         value = tuple.data['value'];
                                     }
                                     
-                                    if (!(value in currentValues)) {
-                                        currentValues[value] = true;
-                                        scope.checkboxRows.push({
-                                            selected: false,
-                                            displayname: tuple.displayname,
-                                            uniqueId: value,
-                                            data: {value: value}
-                                        });
+                                    var i = scope.facetModel.appliedFilters.findIndex(function (row) {
+                                        return row.uniqueId == value;
+                                    })
+                                    if (i !== -1) {
+                                        return;
                                     }
+                                    
+                                    // currentValues[value] = true;
+                                    scope.checkboxRows.push({
+                                        selected: false,
+                                        displayname: tuple.displayname,
+                                        uniqueId: value
+                                    });
                                 });
                                 
                                 scope.hasMore = page.hasNext;    
@@ -705,6 +760,10 @@
                     ctrl.updateFacet = function () {
                         return updateFacetColumn($scope);
                     }
+                    
+                    ctrl.initializeFacet =  function () {
+                        return initializeFacetColumn($scope);
+                    }
                 }],
                 require: ['^faceting', 'choicePicker'],
                 link: function (scope, element, attr, ctrls) {
@@ -714,6 +773,8 @@
                     // register this controller in the parent
                     parentCtrl.register(currentCtrl, scope.facetColumn, scope.index);
                     scope.parentCtrl = parentCtrl;
+                    
+                    scope.checkboxRows = [];
 
                     scope.openSearchPopup = function() {
                         var params = {};
@@ -744,15 +805,22 @@
                         });
 
                         modalInstance.result.then(function dataSelected(tuples) {
-                            var ref = scope.facetColumn.replaceAllChoiceFilters(tuples.map(function (t) {
-                                var value;
+                            //TODO refactor!!!!
+                            var getTupleValue = function (t) {
                                 if (scope.facetColumn.isEntityMode) {
-                                    value = t.data[scope.facetColumn.column.name];
+                                    return t.data[scope.facetColumn.column.name];
                                 } else {
-                                    value = t.uniqueId;
+                                    return t.data['value'];
                                 }
-                                return {value: value, displayvalue: t.displayname.value, isHTML: t.displayname.isHTML};
+                            }
+                            
+                            var ref = scope.facetColumn.replaceAllChoiceFilters(tuples.map(function (t) {
+                                return getTupleValue(t);
                             }));
+                            scope.facetModel.appliedFilters = tuples.map(function (t) {
+                                return {uniqueId: getTupleValue(t), displayname: t.displayname};
+                            });
+                            
                             scope.parentCtrl.setInitialized();
                             scope.parentCtrl.updateVMReference(ref, -1);
                             scope.parentCtrl.focusOnFacet(scope.index);
@@ -762,20 +830,28 @@
                     scope.onRowClick = function(row, $event) {
                         var ref;
                         if (row.selected) {
-                            console.log('selected!');
-                            ref = scope.facetColumn.addChoiceFilters([{
-                                value: row.uniqueId,
-                                displayvalue: row.displayname.value,
-                                isHTML: row.displayname.isHTML
-                            }]);
+                            ref = scope.facetColumn.addChoiceFilters([row.uniqueId]);
                         } else {
-                            console.log('unselected!');
                             ref = scope.facetColumn.removeChoiceFilters([row.uniqueId]);
                         }
                         
                         if (!scope.parentCtrl.updateVMReference(ref, scope.index)) {
                             row.selected = !row.selected;
                             $event.preventDefault();
+                        } else {
+                            // update the appliedFilters
+                            if (row.selected) {
+                                scope.facetModel.appliedFilters.push({
+                                    selected: true,
+                                    uniqueId: row.uniqueId,
+                                    displayname: row.displayname
+                                });
+                            } else {
+                                scope.facetModel.appliedFilters = scope.facetModel.appliedFilters.filter(function (f) {
+                                    return f.uniqueId !== row.uniqueId;
+                                });
+                            }
+                            
                         }
                     };
 
