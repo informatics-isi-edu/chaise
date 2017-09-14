@@ -85,7 +85,6 @@
         $scope.navbarBrand = (chaiseConfig['navbarBrand'] !== undefined? chaiseConfig.navbarBrand : "");
         $scope.navbarBrandImage = (chaiseConfig['navbarBrandImage'] !== undefined? chaiseConfig.navbarBrandImage : "");
         $scope.navbarBrandText = (chaiseConfig['navbarBrandText'] !== undefined? chaiseConfig.navbarBrandText : "Chaise");
-        $scope.showFaceting = (chaiseConfig.showFaceting === true) ? true : false;
         
         function updateLocation() {
             $window.scrollTo(0, 0);
@@ -94,7 +93,7 @@
             $rootScope.location = $window.location.href;
         }
 
-        $scope.$on('reference-modified', function() {
+        $rootScope.$on('reference-modified', function() {
             updateLocation();
         });
 
@@ -170,7 +169,8 @@
 
 
             $rootScope.alerts = AlertsService.alerts;
-
+            
+            $rootScope.showFaceting = showFaceting;
             $rootScope.location = $window.location.href;
             recordsetModel.hasLoaded = false;
             $rootScope.context = context;
@@ -227,7 +227,7 @@
                     recordsetModel.search = recordsetModel.reference.location.searchTerm;
                     
                     if (showFaceting) {
-                        $rootScope.$broadcast('page-loaded');
+                        $rootScope.pageLoaded = true;
                     } else {
                         recordsetModel.reference.read(recordsetModel.pageLimit).then(function () {
                             recordsetModel.page = page;

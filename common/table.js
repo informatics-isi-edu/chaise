@@ -78,7 +78,7 @@
      * 4. `record-modified`: one of the records in the recordset table has been
      * modified. ellipses will fire this event and recordset directive will use it.
      */
-    .factory('recordTableUtils', ['DataUtils', '$timeout','Session', '$q', 'tableConstants', function(DataUtils, $timeout, Session, $q, tableConstants) {
+    .factory('recordTableUtils', ['DataUtils', '$timeout','Session', '$q', 'tableConstants', '$rootScope', function(DataUtils, $timeout, Session, $q, tableConstants, $rootScope) {
 
         // This method sets backgroundSearch states depending upon various parameters
         // If it returns true then we should render the data
@@ -217,68 +217,68 @@
             })(scope.vm.reference.uri, broadcast);
         }
         
-        function updateResult (scope) {
-            scope.vm.hasLoaded = false;
+        function updateResult (vm) {
+            vm.hasLoaded = false;
             var defer = $q.defer();
             (function (uri) {
-                scope.vm.reference.read(scope.vm.pageLimit).then(function (page) {
-                    if (scope.vm.reference.uri !== uri) {
+                vm.reference.read(vm.pageLimit).then(function (page) {
+                    if (vm.reference.uri !== uri) {
                         defer.resolve(false);
                     } else {
-                        scope.vm.page = page;
-                        scope.vm.rowValues = DataUtils.getRowValuesFromPage(page);
-                        scope.vm.hasLoaded = true;
-                        scope.vm.initialized = true;
+                        vm.page = page;
+                        vm.rowValues = DataUtils.getRowValuesFromPage(page);
+                        vm.hasLoaded = true;
+                        vm.initialized = true;
                         defer.resolve(true);
                     }
                 }).catch(function(err) {
-                    if (scope.vm.reference.uri !== uri) {
+                    if (vm.reference.uri !== uri) {
                         defer.resolve(false);
                     } else {
-                        scope.vm.hasLoaded = true;
-                        scope.vm.initialized = true;
+                        vm.hasLoaded = true;
+                        vm.initialized = true;
                         throw err;
                     }
                 });
                 //TODO what about error
-            }) (scope.vm.reference.uri);
+            }) (vm.reference.uri);
             return defer.promise;
         }
         
-        function updateCount (scope) {
+        function updateCount (vm) {
             var  defer = $q.defer();
             (function (uri) {
-                scope.vm.reference.getAggregates([scope.vm.reference.aggregate.countAgg]).then(function getAggregateCount(response) {
-                    if (scope.vm.reference.uri !== uri) {
+                vm.reference.getAggregates([vm.reference.aggregate.countAgg]).then(function getAggregateCount(response) {
+                    if (vm.reference.uri !== uri) {
                         defer.resolve(false);
                     } else {
-                        scope.vm.totalRowsCnt = response[0];
+                        vm.totalRowsCnt = response[0];
                         defer.resolve(true);
                     }
                 }).catch(function (err) {
-                    if (scope.vm.reference.uri !== uri) {
+                    if (vm.reference.uri !== uri) {
                         defer.resolve(false);
                     } else {
                         // fail silently
-                        scope.vm.totalRowsCnt = null;
+                        vm.totalRowsCnt = null;
                     }
                 });
-            })(scope.vm.reference.uri);
+            })(vm.reference.uri);
             return defer.promise;
         }
         
-        function initialize (scope) {
-            scope.vm.initialized = false;
-            scope.vm.dirtyResult = true;
-            scope.vm.dirtyCount = true;
+        function initialize (vm) {
+            vm.initialized = false;
+            vm.dirtyResult = true;
+            vm.dirtyCount = true;
             
-            update(scope);
+            update(vm);
         }
         
-        function update (scope, updateResult, updateCount, updateFacets) {
+        function update (vm, updateResult, updateCount, updateFacets) {
             if (updateFacets) {
-                scope.vm.facetModels.forEach(function (fm, index) {
-                    if (scope.vm.lastActiveFacet === index) {
+                vm.facetModels.forEach(function (fm, index) {
+                    if (vm.lastActiveFacet === index) {
                         return;
                     }
                     
@@ -293,17 +293,17 @@
             }
             
             // if it's true change, otherwise don't change.
-            scope.vm.dirtyResult = updateResult || scope.vm.dirtyResult;
-            scope.vm.dirtyCount = updateCount || scope.vm.dirtyCount;
+            vm.dirtyResult = updateResult || vm.dirtyResult;
+            vm.dirtyCount = updateCount || vm.dirtyCount;
             
             $timeout(function () {
-                updatePage(scope);
+                updatePage(vm);
             }, 0);
         }
-        // pass the vm instead of scope!
-        function updatePage(scope) {
+
+        function updatePage(vm) {
             var haveFreeSlot = function () {
-                return scope.vm.occupiedSlots < tableConstants.MAX_CONCURENT_REQUEST;
+                return vm.occupiedSlots < tableConstants.MAX_CONCURENT_REQUEST;
             }
             
             if (!haveFreeSlot()) {
@@ -311,22 +311,22 @@
             }
             
             // update the resultset
-            if (scope.vm.dirtyResult) {
-                scope.vm.occupiedSlots++;
-                scope.vm.dirtyResult = false;
+            if (vm.dirtyResult) {
+                vm.occupiedSlots++;
+                vm.dirtyResult = false;
                 
                 var afterUpdateResult = function (res) {
                     if (res) {
                         // we got the results, let's just update the url
-                        scope.$emit('reference-modified');
+                        $rootScope.$emit('reference-modified');
                     }
-                    scope.vm.occupiedSlots--;
-                    scope.vm.dirtyResult = !res;
+                    vm.occupiedSlots--;
+                    vm.dirtyResult = !res;
                 }
                 
-                updateResult(scope).then(function (res) {
+                updateResult(vm).then(function (res) {
                     afterUpdateResult(res);
-                    updatePage(scope);
+                    updatePage(vm);
                 }).catch(function (err) {
                     afterUpdateResult(true);
                     throw err;
@@ -334,27 +334,27 @@
             }
             
             // update the facets
-            if (scope.vm.facetsToInitialize.length === 0) {
-                scope.vm.facetModels.forEach(function (fm, index) {
+            if (vm.facetsToInitialize.length === 0) {
+                vm.facetModels.forEach(function (fm, index) {
                     if (!haveFreeSlot() || fm.processed) {
                         return;
                     }
                     
-                    scope.vm.occupiedSlots++;
+                    vm.occupiedSlots++;
                     fm.processed = true;
                     
                     var afterFacetUpdate = function (i, res, hasError) {
-                        scope.vm.occupiedSlots--;
-                        var currFm = scope.vm.facetModels[i];
+                        vm.occupiedSlots--;
+                        var currFm = vm.facetModels[i];
                         currFm.initialized = res || currFm.initialized;
                         currFm.isLoading = !res;
                         currFm.processed = res || currFm.processed;
                     };
                     
                     (function (i) {
-                        scope.vm.facetModels[i].updateFacet().then(function (res) {
+                        vm.facetModels[i].updateFacet().then(function (res) {
                             afterFacetUpdate(i, res);
-                            updatePage(scope);
+                            updatePage(vm);
                         }).catch(function (err) {
                             afterFacetUpdate(i, false);
                             throw err;
@@ -364,31 +364,31 @@
             } 
             // initialize facets
             else if (haveFreeSlot()){
-                scope.vm.occupiedSlots++;
-                var index = scope.vm.facetsToInitialize.shift();
-                scope.vm.facetModels[index].initializeFacet().then(function (res) {
-                    scope.vm.occupiedSlots--;
-                    updatePage(scope);
+                vm.occupiedSlots++;
+                var index = vm.facetsToInitialize.shift();
+                vm.facetModels[index].initializeFacet().then(function (res) {
+                    vm.occupiedSlots--;
+                    updatePage(vm);
                 }).catch(function (err) {
                     throw err;
                 });
             }
             
             // update the count
-            if (scope.vm.config.hideTotalCount || scope.vm.reference.isAttributeGroup) {
-                scope.vm.totalRowsCnt = null;
-            } else if (scope.vm.dirtyCount && haveFreeSlot()) {
-                scope.vm.occupiedSlots++;
-                scope.vm.dirtyCount = false;
+            if (vm.config.hideTotalCount || vm.reference.isAttributeGroup) {
+                vm.totalRowsCnt = null;
+            } else if (vm.dirtyCount && haveFreeSlot()) {
+                vm.occupiedSlots++;
+                vm.dirtyCount = false;
                 
                 var afterUpdateCount = function (res, hasError) {
-                    scope.vm.occupiedSlots--;
-                    scope.vm.dirtyCount = !res;
+                    vm.occupiedSlots--;
+                    vm.dirtyCount = !res;
                 }
                 
-                updateCount(scope).then(function (res) {
+                updateCount(vm).then(function (res) {
                     afterUpdateCount(res);
-                    updatePage(scope);
+                    updatePage(vm);
                 }).catch(function (err) {
                     afterUpdateCount(true);
                     throw err;
@@ -802,14 +802,14 @@
 
                 scope.setPageLimit = function(limit) {
                     scope.vm.pageLimit = limit;
-                    recordTableUtils.update(scope, true, false, false);
+                    recordTableUtils.update(scope.vm, true, false, false);
                 };
 
                 scope.before = function() {
                     var previous = scope.vm.page.previous;
                     if (previous && scope.$root.checkReferenceURL(previous)) {
                             scope.vm.reference = previous;
-                            recordTableUtils.update(scope, true, false, false);
+                            recordTableUtils.update(scope.vm, true, false, false);
                     }
                 };
 
@@ -817,7 +817,7 @@
                     var next = scope.vm.page.next;
                     if (next && scope.$root.checkReferenceURL(next)) {
                         scope.vm.reference = next;
-                        recordTableUtils.update(scope, true, false, false);
+                        recordTableUtils.update(scope.vm, true, false, false);
                     }
 
                 };
@@ -867,7 +867,7 @@
                      if (scope.$root.checkReferenceURL(ref)) {
                          scope.vm.search = term;
                          scope.vm.reference = ref;
-                         recordTableUtils.update(scope, true, true, true);
+                         recordTableUtils.update(scope.vm, true, true, true);
                      }
                 };
 
@@ -926,7 +926,7 @@
                     // read
                     if (completed > 0 || updated) {
                         updated = false;
-                        recordTableUtils.update(scope, true, true, true);
+                        recordTableUtils.update(scope.vm, true, true, true);
                     }
 
                 };
@@ -939,36 +939,16 @@
                 
                 scope.$on('facet-modified', function ($event) {
                     console.log('facet-modified in recordset directive');
-                    recordTableUtils.update(scope, true, true, true);
+                    recordTableUtils.update(scope.vm, true, true, true);
                 });
                 
                 // row data has been modified (from ellipses)
                 // do a read
                 scope.$on('record-modified', function($event) {
                     console.log('record-modified in recordset directive');
-                    recordTableUtils.update(scope, true, true, true);
+                    recordTableUtils.update(scope.vm, true, true, true);
                 });
                 
-                scope.$on('page-loaded', function ($event) {
-                    // to make sure that we're running this after registering the updateFacet callback
-                    $timeout(function () {
-                        var firstOpen = -1;
-                        // create the facetsToInitialize and also open facets
-                        scope.vm.reference.facetColumns.forEach(function (fc, index) {
-                            if (fc.isOpen) {
-                                firstOpen = (firstOpen == -1 || firstOpen > index) ? index : firstOpen;
-                                scope.vm.facetsToInitialize.push(index);
-                                scope.vm.facetModels[index].processed = false;
-                                scope.vm.facetModels[index].isOpen = true;
-                            }
-                        });
-                        
-                        firstOpen = (firstOpen !== -1) ? firstOpen : 0;
-                        scope.vm.focusOnFacet(firstOpen);
-                        
-                        recordTableUtils.initialize(scope);
-                    });
-                });
             }
         };
     }])

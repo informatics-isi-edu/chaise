@@ -3,7 +3,7 @@
 
     angular.module('chaise.faceting', ['plotly'])
 
-        .directive('faceting', ['recordTableUtils', '$timeout', function (recordTableUtils, $timeout) {
+        .directive('faceting', ['recordTableUtils', '$timeout', '$rootScope', function (recordTableUtils, $timeout, $rootScope) {
             
             return {
                 restrict: 'AE',
@@ -16,9 +16,13 @@
                     
                     ctrl.childCtrls = []; // child controllers
                     
+                    ctrl.facetingCount = 0;
+                    
                     // register a children controller in here
                     ctrl.register = function (childCtrl, facetColumn, index) {
                         ctrl.childCtrls[index] = childCtrl;
+                        ctrl.facetingCount++;
+                        console.log("registering " + index);
                         
                         $scope.vm.facetModels[index] = {
                             initialized: false,
@@ -29,6 +33,10 @@
                             updateFacet: childCtrl.updateFacet,
                             initializeFacet: childCtrl.initializeFacet
                         };
+                        
+                        if (ctrl.facetingCount === $scope.vm.reference.facetColumns.length) {
+                            $rootScope.facetsLoaded = true;
+                        }
                     };
                     
                     ctrl.updateVMReference = function (reference, index) {
@@ -45,7 +53,7 @@
                         var fm = $scope.vm.facetModels[index];
                         fm.processed = false;
                         fm.isLoading = true;
-                        recordTableUtils.updatePage($scope);
+                        recordTableUtils.updatePage($scope.vm);
                     };
                     
                     ctrl.focusOnFacet = function (index) {
@@ -54,7 +62,6 @@
                 }],
                 require: 'faceting',
                 link: function (scope, element, attr, currentCtrl) {
-                    
                     scope.updateReference = function (reference, index) {
                         if (!scope.$root.checkReferenceURL(reference)) {
                             return false;
@@ -156,6 +163,32 @@
                     scope.vm.removeFilter = function (colId, id) {
                         scope.removeFilter(colId, id);
                     }
+                    
+                    scope.$watch(function () {
+                        return $rootScope.pageLoaded && $rootScope.facetsLoaded;
+                    }, function (newValue, oldValue) {
+                        if(angular.equals(newValue, oldValue) || !newValue){
+                            return;
+                        }
+                        
+                        $timeout(function() {
+                            console.log('doing it');
+                            var firstOpen = -1;
+                            // create the facetsToInitialize and also open facets
+                            scope.vm.reference.facetColumns.forEach(function (fc, index) {
+                                if (fc.isOpen) {
+                                    firstOpen = (firstOpen == -1 || firstOpen > index) ? index : firstOpen;
+                                    scope.vm.facetsToInitialize.push(index);
+                                    scope.vm.facetModels[index].processed = false;
+                                    scope.vm.facetModels[index].isOpen = true;
+                                }
+                            });
+                            
+                            firstOpen = (firstOpen !== -1) ? firstOpen : 0;
+                            scope.focusOnFacet(firstOpen);
+                            recordTableUtils.initialize(scope.vm);
+                        });
+                    });
                     
                 }
             };
@@ -584,7 +617,7 @@
                                     defer.resolve(false);
                                 } else {
                                 
-                                    console.log("Facet " + scope.facetColumn.displayname.value + " min/max: ", response);
+                                    // console.log("Facet " + scope.facetColumn.displayname.value + " min/max: ", response);
                                     if (scope.facetColumn.column.type.name.indexOf("timestamp") > -1) {
                                         // convert and set the values if they are defined.
                                         // if values are null, undefined, false, 0, or '' we don't want to show anything
@@ -673,7 +706,7 @@
                     }
                 }
                 
-                console.log("updating FACET: " + scope.index);
+                // console.log("updating FACET: " + scope.index);
                 
                 // facetColumn has changed so create the new reference
                 if (scope.facetColumn.isEntityMode) {
@@ -767,6 +800,7 @@
                 }],
                 require: ['^faceting', 'choicePicker'],
                 link: function (scope, element, attr, ctrls) {
+                    
                     var parentCtrl = ctrls[0],
                         currentCtrl = ctrls[1];
                     

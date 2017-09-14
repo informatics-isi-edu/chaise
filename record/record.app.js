@@ -177,7 +177,7 @@
                     });
                 });
 
-                $rootScope.columns = $rootScope.reference.columns;
+                $rootScope.columns = $rootScope.reference.generateColumnsList(tuple);
                 var allInbFKColsIdx = [];
                 var allInbFKCols = $rootScope.columns.filter(function (o, i) {
                     if(o.isInboundForeignKey){
