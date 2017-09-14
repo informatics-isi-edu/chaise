@@ -853,7 +853,7 @@
                     asked for. Any existing background search result completing during that time is to be discarded
                     to avoid confusing the UX.
                     */
-                    $timeout.cancel(inputChangedPromise);
+                    $timeout.cancel(scope.inputChangedPromise);
 
                     // Trigger search
                     scope.search(scope.vm.search);
