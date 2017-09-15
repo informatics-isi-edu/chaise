@@ -3,7 +3,7 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', '$cookies', '$document', '$log', 'UriUtils', 'DataUtils', 'ErrorService', 'MathUtils', 'messageMap', '$rootScope', '$window', '$scope', '$uibModal', function RecordController(AlertsService, $cookies, $document, $log, UriUtils, DataUtils, ErrorService, MathUtils, messageMap, $rootScope, $window, $scope, $uibModal) {
+    .controller('RecordController', ['AlertsService', 'DataUtils', 'ErrorService', 'MathUtils', 'messageMap', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$uibModal', '$window', function RecordController(AlertsService, DataUtils, ErrorService, MathUtils, messageMap, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $uibModal, $window) {
         var vm = this;
         var addRecordRequests = {}; // <generated unique id : reference of related table>
         var editRecordRequests = {}; // generated id: {schemaName, tableName}
@@ -199,32 +199,32 @@
             updated[editRecordRequests[id].schema + ":" + editRecordRequests[id].table] = true;
             delete editRecordRequests[id];
         }
-        
-        function setRecordHeight() {
+
+        // fetches the height of navbar, bookmark container, and view
+        // also fetches the main container for defining the dynamic height
+        function fetchElements() {
+            var elements = {};
             // get document height
-            var docHeight = $document[0].documentElement.offsetHeight
+            elements.docHeight = $document[0].documentElement.offsetHeight
             // get navbar height
-            var navbarElHeight = $document[0].getElementById('mainnav').offsetHeight;
+            elements.navbarHeight = $document[0].getElementById('mainnav').offsetHeight;
             // get bookmark container height
-            var bookmarkElHeight = $document[0].getElementById('bookmark-container').offsetHeight;
-            // calculate remaining dom height (navbar + bookmark)/viewheight
-            // This will be a percentage out of 100
-            var fixedHeightUsed = Math.ceil( ((navbarElHeight + bookmarkElHeight)/docHeight) * 100);
-            // set height to remaining
-            var recordContainer = $document[0].getElementsByClassName('main-container')[0];
-            recordContainer.style.height = (100 - fixedHeightUsed) + 'vh';
+            elements.bookmarkHeight = $document[0].getElementById('bookmark-container').offsetHeight;
+            // get record main container
+            elements.container = $document[0].getElementsByClassName('main-container')[0];
+            return elements;
         }
 
-        $scope.$watch(function() {
-            return $rootScope.displayReady;
-        }, function (newValue, oldValue) {
+        // watch for the display to be ready before setting the main container height
+        $scope.$watch('displayReady', function (newValue, oldValue) {
             if (newValue) {
-                setRecordHeight();
+                UiUtils.setDisplayHeight(fetchElements());
             }
         });
-        
+
+        // change the main container height whenever the DOM resizes
         angular.element($window).bind('resize', function(){
-            setRecordHeight();
+            UiUtils.setDisplayHeight(fetchElements());
             $scope.$digest();
         });
     }]);

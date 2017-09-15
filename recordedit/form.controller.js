@@ -3,7 +3,7 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'DataUtils', 'ErrorService', 'recordEditModel', 'UiUtils', 'UriUtils', '$cookies', '$log', '$rootScope', '$timeout', '$uibModal', '$window' , 'Session', 'messageMap',function FormController(AlertsService, DataUtils, ErrorService, recordEditModel, UiUtils, UriUtils, $cookies, $log, $rootScope, $timeout, $uibModal, $window, Session, messageMap) {
+    .controller('FormController', ['AlertsService', 'DataUtils', 'ErrorService', 'messageMap', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$uibModal', '$window', function FormController(AlertsService, DataUtils, ErrorService, messageMap, recordEditModel, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $uibModal, $window) {
         var vm = this;
         var context = $rootScope.context;
 
@@ -712,6 +712,33 @@
         function blurElement(e) {
             e.currentTarget.blur();
         }
+
+        // fetches the height of navbar, bookmark container, and view
+        // also fetches the faceting container for defining the dynamic height
+        function fetchElements() {
+            var elements = {};
+            // get document height
+            elements.docHeight = $document[0].documentElement.offsetHeight
+            // get navbar height
+            elements.navbarHeight = $document[0].getElementById('mainnav').offsetHeight;
+            // there is no bookmark bar
+            // TODO: if bookmark bar added
+            elements.bookmarkHeight = 0;
+            // get recordset main container
+            elements.container = $document[0].getElementsByClassName('main-container')[0];
+            return elements;
+        }
+
+        $scope.$watch('displayReady', function (newValue, oldValue) {
+            if (newValue) {
+                UiUtils.setDisplayHeight(fetchElements());
+            }
+        });
+
+        angular.element($window).bind('resize', function(){
+            UiUtils.setDisplayHeight(fetchElements());
+            $scope.$digest();
+        });
 
         /*------------------------code below is for fixing the column names when scrolling -----------*/
 
