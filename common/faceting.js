@@ -172,7 +172,6 @@
                         }
                         
                         $timeout(function() {
-                            console.log('doing it');
                             var firstOpen = -1;
                             // create the facetsToInitialize and also open facets
                             scope.vm.reference.facetColumns.forEach(function (fc, index) {
@@ -814,11 +813,6 @@
                         var params = {};
                         // TODO since emrest cnt has bug, we should not sort based on count
                         params.reference = scope.reference;
-                        if (!scope.facetColumn.isEntityMode) {
-                            params.reference = params.reference.sort([{
-                                "column": "value", "descending": false
-                            }]); 
-                        }
                         params.reference.session = scope.$root.session;
                         params.displayname = scope.facetColumn.displayname;
                         params.context = "compact/select";

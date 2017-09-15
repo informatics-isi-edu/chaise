@@ -3,7 +3,7 @@
     <div class="faceting-resizable" resizable r-directions=["right"] r-flex="true" ng-if="vm.config.showFaceting">
         <faceting vm="vm"></faceting>
     </div>
-    <div class="main-container">
+    <div class="main-container" ng-if="vm.initialized">
         <loading-spinner ng-show="!vm.hasLoaded && vm.initialized"></loading-spinner>
         <div style="margin-bottom: 10px;">
             
@@ -113,15 +113,15 @@
         </div>
         
         <!-- record table -->
-        <div ng-if="vm.initialized">
+        <div>
             <h4 ng-if="!vm.config.hideTotalCount" id="rs-total-count">Displaying {{vm.rowValues.length}}{{vm.totalRowsCnt ? " of " + vm.totalRowsCnt : ''}} Records</h4>
         </div>
-        <div ng-if="vm.initialized">
+        <div>
             <record-table id="rs-{{vm.makeSafeIdAttr(vm.tableDisplayName.value)}}" vm="vm" on-row-click-bind="onRowClick"></record-table>
         </div>
 
         <!-- bottom pagination -->
-        <div class="pager" ng-show="vm.initialized">
+        <div class="pager">
             <button id="rs-previous-btn" type="button" class="btn btn-primary btn-xs" ng-click="before()" ng-disabled="!vm.hasLoaded || !vm.page.hasPrevious">
                 <span class="glyphicon glyphicon-chevron-left"></span>
             </button>
