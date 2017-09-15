@@ -949,6 +949,40 @@
                     recordTableUtils.update(scope.vm, true, true, true);
                 });
                 
+                scope.$on('page-loaded', function ($event) {
+                    scope.$root.pageLoaded = true;
+                    if (scope.vm.reference.facetColumns.length == 0) {
+                        scope.$root.facetsLoaded = true;
+                    }
+                });
+                
+                scope.$watch(function () {
+                    return scope.$root.pageLoaded && scope.$root.facetsLoaded;
+                }, function (newValue, oldValue) {
+                    if(angular.equals(newValue, oldValue) || !newValue){
+                        return;
+                    }
+                    
+                    $timeout(function() {
+                        
+                        if (scope.vm.reference.facetColumns.length > 0) {
+                            var firstOpen = -1;
+                            // create the facetsToInitialize and also open facets
+                            scope.vm.reference.facetColumns.forEach(function (fc, index) {
+                                if (fc.isOpen) {
+                                    firstOpen = (firstOpen == -1 || firstOpen > index) ? index : firstOpen;
+                                    scope.vm.facetsToInitialize.push(index);
+                                    scope.vm.facetModels[index].processed = false;
+                                    scope.vm.facetModels[index].isOpen = true;
+                                }
+                            });
+                            
+                            firstOpen = (firstOpen !== -1) ? firstOpen : 0;
+                            scope.vm.focusOnFacet(firstOpen);
+                        }
+                        recordTableUtils.initialize(scope.vm);
+                    });
+                });
             }
         };
     }])

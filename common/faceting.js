@@ -163,33 +163,6 @@
                     scope.vm.removeFilter = function (colId, id) {
                         scope.removeFilter(colId, id);
                     }
-                    
-                    scope.$watch(function () {
-                        return $rootScope.pageLoaded && $rootScope.facetsLoaded;
-                    }, function (newValue, oldValue) {
-                        if(angular.equals(newValue, oldValue) || !newValue){
-                            return;
-                        }
-                        
-                        $timeout(function() {
-                            console.log('doing it');
-                            var firstOpen = -1;
-                            // create the facetsToInitialize and also open facets
-                            scope.vm.reference.facetColumns.forEach(function (fc, index) {
-                                if (fc.isOpen) {
-                                    firstOpen = (firstOpen == -1 || firstOpen > index) ? index : firstOpen;
-                                    scope.vm.facetsToInitialize.push(index);
-                                    scope.vm.facetModels[index].processed = false;
-                                    scope.vm.facetModels[index].isOpen = true;
-                                }
-                            });
-                            
-                            firstOpen = (firstOpen !== -1) ? firstOpen : 0;
-                            scope.focusOnFacet(firstOpen);
-                            recordTableUtils.initialize(scope.vm);
-                        });
-                    });
-                    
                 }
             };
         }])
@@ -682,7 +655,7 @@
                         filters.forEach(function (f) {
                             scope.facetModel.appliedFilters.push({
                                 uniqueId: f.uniqueId,
-                                displayname: f.displayname
+                                displayname: f.displayname                                
                             });
                         });
                         
@@ -814,11 +787,6 @@
                         var params = {};
                         // TODO since emrest cnt has bug, we should not sort based on count
                         params.reference = scope.reference;
-                        if (!scope.facetColumn.isEntityMode) {
-                            params.reference = params.reference.sort([{
-                                "column": "value", "descending": false
-                            }]); 
-                        }
                         params.reference.session = scope.$root.session;
                         params.displayname = scope.facetColumn.displayname;
                         params.context = "compact/select";
@@ -841,10 +809,11 @@
                         modalInstance.result.then(function dataSelected(tuples) {
                             //TODO refactor!!!!
                             var getTupleValue = function (t) {
-                                if (scope.facetColumn.isEntityMode) {
-                                    return t.data[scope.facetColumn.column.name];
+                                var col_name = scope.facetColumn.isEntityMode ? scope.facetColumn.column.name : "value";
+                                if (t.data && col_name in t.data) {
+                                    return t.data[col_name];
                                 } else {
-                                    return t.data['value'];
+                                    return t.uniqueId;
                                 }
                             }
                             

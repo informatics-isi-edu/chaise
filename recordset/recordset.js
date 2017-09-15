@@ -272,7 +272,7 @@
                     recordsetModel.search = recordsetModel.reference.location.searchTerm;
                     
                     if (showFaceting) {
-                        $rootScope.pageLoaded = true;
+                        $rootScope.$broadcast('page-loaded');
                     } else {
                         recordsetModel.reference.read(recordsetModel.pageLimit).then(function (page) {
                             recordsetModel.page = page;
