@@ -114,16 +114,20 @@ describe('View existing record,', function() {
 
             browser.wait(function() {
                 return chaisePage.recordPage.getRelatedTablesWithPanel().count().then(function(ct) {
+                    console.log("ct: "+ct);
                     return (ct=testParams.no_related_data.tables_order.length);
                 });
             }, browser.params.defaultTimeout);
             var showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton();
 
             chaisePage.recordPage.getRelatedTablesWithPanel().count().then(function(count) {
+                browser.sleep(2000);
+                console.log(count);
                 expect(count).toBe(testParams.no_related_data.tables_order.length, "Number of related tables is not correct");
 
                 return chaisePage.recordPage.getRelatedTableTitles();
             }).then(function(headings) {
+                browser.sleep(2000);
                 expect(headings).toEqual(testParams.no_related_data.tables_order, "Related tables in the wrong order or the name is wrong");
 
                 expect(showAllRTButton.getText()).toBe("Hide Empty Related Records", "Sow all Related tables button has wrong text");

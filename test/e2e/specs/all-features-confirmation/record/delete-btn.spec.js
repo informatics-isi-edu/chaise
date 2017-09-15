@@ -101,8 +101,9 @@ describe('View existing record,', function() {
                 chaisePage.waitForElement(element(by.id('tblRecord'))).then(function() {
                     return browser.executeScript('return chaiseConfig;');
                 }).then(function(chaiseConfig) {
-                    config = chaiseConfig
-                    return chaisePage.recordPage.getDeleteRecordButton().click()
+                    config = chaiseConfig;
+                    browser.sleep(1000);
+                    return chaisePage.recordPage.getDeleteRecordButton().click();
                 }).then(function () {
                     browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
                     // expect modal to open
