@@ -78,7 +78,7 @@
     })
 
     // Register the recordset controller
-    .controller('recordsetController', ['$scope', '$rootScope', 'context', '$window', 'recordsetModel', 'UriUtils', 'DataUtils', 'Session', '$log', 'ErrorService',  function($scope, $rootScope, context, $window, recordsetModel, UriUtils, DataUtils, Session, $log, ErrorService) {
+    .controller('recordsetController', ['$document', '$scope', '$rootScope', 'context', '$window', 'recordsetModel', 'UriUtils', 'DataUtils', 'Session', '$log', 'ErrorService',  function($document, $scope, $rootScope, context, $window, recordsetModel, UriUtils, DataUtils, Session, $log, ErrorService) {
 
         $scope.vm = recordsetModel;
         recordsetModel.RECORDEDIT_MAX_ROWS = 200;
@@ -140,6 +140,27 @@
         $scope.unfiltered = function () {
             return recordsetModel.reference.unfilteredReference.contextualize.compact.appLink;
         };
+        
+        $scope.$watch(function() {
+            return $rootScope.pageLoaded || recordsetModel.hasLoaded;
+        }, function (newValue, oldValue) {
+            if (newValue) {
+                //et document height
+                var docHeight = $document[0].documentElement.offsetHeight
+                // get navbar height
+                var navbarElHeight = $document[0].getElementById('mainnav').offsetHeight;
+                // get bookmark container height
+                var bookmarkElHeight = $document[0].getElementById('bookmark-container').offsetHeight;
+                // calculate remaining dom height (navbar + bookmark)/viewheight
+                // This will be a percentage out of 100
+                var fixedHeightUsed = Math.ceil( ((navbarElHeight + bookmarkElHeight)/docHeight) * 100);
+                // set height to remaining
+                var facetContainer = $document[0].getElementsByClassName('faceting-container')[0];
+                facetContainer.style.height = (100 - fixedHeightUsed) + 'vh';
+                var tableContainer = $document[0].querySelectorAll('.recordset-container,.with-faceting')[0].getElementsByClassName('main-container')[0];
+                tableContainer.style.height = (100 - fixedHeightUsed) + 'vh';
+            }
+        });
 
     }])
 
