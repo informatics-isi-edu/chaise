@@ -940,24 +940,19 @@ footer .container1 {
  .recordset-container.with-faceting > .main-container {
      flex:1;
      border-left: 25px solid white;
-     overflow-x: hidden;
-     overflow-y: auto;
-     max-height: 90vh;
      padding-bottom: 10px;
      position: relative;
      z-index: 1;
  }
- /*.recordset-container.with-faceting > .main-container {
-     overflow-x: auto;
- }*/
  
  .recordset-container > .main-container {
+     overflow-x: hidden;
+     overflow-y: auto;
      margin-top: 10px;
  }
 
  .faceting-container {
      overflow-y: auto;
-     max-height: 90vh;
  }
 
  .faceting-container .divider {
