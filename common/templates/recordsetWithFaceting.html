@@ -3,9 +3,9 @@
     <div class="faceting-resizable" resizable r-directions=["right"] r-flex="true" ng-if="vm.config.showFaceting">
         <faceting vm="vm"></faceting>
     </div>
-    <div class="main-container" ng-if="vm.initialized">
+    <div class="main-container">
         <loading-spinner ng-show="!vm.hasLoaded && vm.initialized"></loading-spinner>
-        <div style="margin-bottom: 10px;">
+        <div style="margin-bottom: 10px;" ng-if="vm.initialized">
             
             <div style="margin-left: 15px;margin-right: 20px;">
                 <alerts alerts="$root.alerts"></alerts>
@@ -78,7 +78,7 @@
             </div>
         </div>
         
-        <div>
+        <div ng-if="vm.initialized">
             <div class="total-filters" ng-if="vm.config.showFaceting && (vm.reference.location.facets || vm.reference.location.searchTerm)">
                 <a class="remove-link" ng-click="vm.removeFilter()" ng-if="vm.hasFilter() || vm.reference.location.searchTerm">
                     <span class="filter-label label label-primary" uib-tooltip="Clear all Facets" tooltip-placement="bottom">
@@ -113,15 +113,15 @@
         </div>
         
         <!-- record table -->
-        <div>
+        <div  ng-if="vm.initialized">
             <h4 ng-if="!vm.config.hideTotalCount" id="rs-total-count">Displaying {{vm.rowValues.length}}{{vm.totalRowsCnt ? " of " + vm.totalRowsCnt : ''}} Records</h4>
         </div>
-        <div>
+        <div  ng-if="vm.initialized">
             <record-table id="rs-{{vm.makeSafeIdAttr(vm.tableDisplayName.value)}}" vm="vm" on-row-click-bind="onRowClick"></record-table>
         </div>
 
         <!-- bottom pagination -->
-        <div class="pager">
+        <div class="pager"  ng-if="vm.initialized">
             <button id="rs-previous-btn" type="button" class="btn btn-primary btn-xs" ng-click="before()" ng-disabled="!vm.hasLoaded || !vm.page.hasPrevious">
                 <span class="glyphicon glyphicon-chevron-left"></span>
             </button>
