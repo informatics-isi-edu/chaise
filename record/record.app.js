@@ -4,6 +4,7 @@
     angular.module('chaise.record', [
         'ngSanitize',
         'ngCookies',
+        'chaise.alerts',
         'chaise.delete',
         'chaise.errors',
         'chaise.modal',
@@ -14,7 +15,9 @@
         'chaise.utils',
         'ermrestjs',
         'ui.bootstrap',
-        'chaise.footer'
+        'chaise.footer',
+        'chaise.upload',
+        'chaise.recordcreate'
     ])
 
     .factory('constants', [function(){
@@ -137,7 +140,6 @@
                 // $rootScope.reference != reference after contextualization
                 $rootScope.reference = reference.contextualize.detailed;
                 $rootScope.reference.session = session;
-
                 $log.info("Reference: ", $rootScope.reference);
 
                 // There should only ever be one entity related to this reference, we are reading 2 entities now and if we get more than 1 entity than we throw a multipleRecordError.
@@ -188,6 +190,7 @@
                 });
                 $rootScope.inboundFKCols = allInbFKCols;
                 $rootScope.inboundFKColsIdx = allInbFKColsIdx;
+                $rootScope.inbFKRef = allInbFKCols;
                 if(allInbFKCols.length>0){
 
                     $rootScope.rtrefDisTypetable = [];

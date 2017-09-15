@@ -49,7 +49,11 @@
         },
         "tableMissing": "No table specified in the form of 'schema-name:table-name' and no Default is set."
     })
-
+    .constant("modalBox", {
+        noSelect: "no-select",
+        singleSelectMode:"single-select",
+        multiSelectMode:"multi-select"
+    })
     .factory('UriUtils', ['$injector', '$rootScope', '$window', 'appContextMapping', 'appTagMapping', 'ContextUtils', 'Errors', 'messageMap', 'parsedFilter',
         function($injector, $rootScope, $window, appContextMapping, appTagMapping, ContextUtils, Errors, messageMap, ParsedFilter) {
 
@@ -184,15 +188,15 @@
             }
             return url;
         }
-        
-        
+
+
         /**
          * Return query params
          * @param  {Object} location window.location object
          * @return {Object} key-value pairs of query params
          */
         function getQueryParams(location) {
-            var queryParams = {}, 
+            var queryParams = {},
                 modifierPath = location.hash,
                 q_parts, i;
 
@@ -209,7 +213,7 @@
         /**
          * NOTE: DO NOT USE THIS FUNCTION, EMRESTJS will take care of parsing.
          * old apps is using are, that's why we should still keep this function.
-         * 
+         *
          * @function
          * @deprecated
          * @param {Object} location should be $window.location object

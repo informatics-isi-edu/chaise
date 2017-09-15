@@ -9,7 +9,7 @@
         };
     }])
 
-    .directive('ellipses', ['$sce', '$timeout', 'AlertsService', 'ErrorService', '$uibModal', '$log', 'MathUtils', 'messageMap', 'UriUtils', '$window', 'UiUtils', function($sce, $timeout, AlertsService, ErrorService, $uibModal, $log, MathUtils, messageMap, UriUtils, $window, UiUtils) {
+    .directive('ellipses', ['$sce', '$timeout', 'AlertsService', 'ErrorService', '$uibModal', '$log', 'MathUtils', 'messageMap', 'UriUtils', '$window', 'UiUtils', 'modalBox', function($sce, $timeout, AlertsService, ErrorService, $uibModal, $log, MathUtils, messageMap, UriUtils, $window, UiUtils, modalBox) {
 
         function deleteTuples(scope, reference, tuples) {
             if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
@@ -66,7 +66,9 @@
                     scope.hideContent = false;
                     scope.linkText = "more";
                     scope.maxHeightStyle = { };
-
+                    scope.noSelect = modalBox.noSelect;
+                    scope.singleSelect = modalBox.singleSelectMode;
+                    scope.multiSelect = modalBox.multiSelectMode;
 
                     var editLink = null;
 

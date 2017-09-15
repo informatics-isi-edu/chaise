@@ -3,6 +3,7 @@
 var chaiseConfig = {
     name: "Sample",
     layout: 'list',
+    allowErrorDismissal: true,
     confirmDelete: true,
     headTitle: 'Chaise',
     customCSS: '/assets/css/chaise.css',

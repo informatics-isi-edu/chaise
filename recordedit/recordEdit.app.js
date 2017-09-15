@@ -24,7 +24,8 @@
         'ui.mask',
         'ui.select',
         'angular-markdown-editor',
-        'chaise.footer'
+        'chaise.footer',
+        'chaise.recordcreate'
     ])
 
     .config(['$cookiesProvider', function($cookiesProvider) {
@@ -63,19 +64,19 @@
         }
 
         var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
-        
+
         $rootScope.context = context;
-        
+
         // we are using filter to determine app mode, the logic for getting filter
         // should be in the parser and we should not duplicate it in here
         // NOTE: we might need to change this line (we're parsing the whole url just for fidinig if there's filter)
         context.filter = ERMrest.parse(ermrestUri).filter;
-        
+
         // will be used to determine the app mode (edit, create, or copy)
         // We are not passing the query parameters that are used for app mode,
         // so we cannot use the queryParams that parser is returning.
         context.queryParams = UriUtils.getQueryParams($window.location);
-        
+
         context.appName = "recordedit";
         context.pageId = MathUtils.uuid();
         context.MAX_ROWS_TO_ADD = 201;
@@ -134,6 +135,7 @@
                 if (context.queryParams.prefill) {
                     // get the cookie with the prefill value
                     var cookie = $cookies.getObject(context.queryParams.prefill);
+                    $rootScope.cookieObj = cookie;
                     if (cookie) {
                         // Update view model
                         recordEditModel.rows[recordEditModel.rows.length - 1][cookie.constraintName] = cookie.rowname.value;
