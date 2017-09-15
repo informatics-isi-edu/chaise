@@ -216,7 +216,9 @@
         }
 
         // watch for the display to be ready before setting the main container height
-        $scope.$watch('displayReady', function (newValue, oldValue) {
+        $scope.$watch(function() {
+            return $rootScope.displayReady;
+        }, function (newValue, oldValue) {
             if (newValue) {
                 UiUtils.setDisplayHeight(fetchElements());
             }

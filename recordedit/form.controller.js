@@ -729,7 +729,9 @@
             return elements;
         }
 
-        $scope.$watch('displayReady', function (newValue, oldValue) {
+        $scope.$watch(function() {
+            return $rootScope.displayReady;
+        }, function (newValue, oldValue) {
             if (newValue) {
                 UiUtils.setDisplayHeight(fetchElements());
             }
