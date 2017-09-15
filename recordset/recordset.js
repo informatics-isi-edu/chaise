@@ -161,7 +161,7 @@
         }
 
         $scope.$watch(function() {
-            return $rootScope.pageLoaded || recordsetModel.hasLoaded;
+            return ($rootScope.pageLoaded || recordsetModel.hasLoaded) && recordsetModel.initialized;
         }, function (newValue, oldValue) {
             if (newValue) {
                 setRecordsetHeights();

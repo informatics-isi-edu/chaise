@@ -3,7 +3,7 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', '$cookies', '$log', 'UriUtils', 'DataUtils', 'ErrorService', 'MathUtils', 'messageMap', '$rootScope', '$window', '$scope', '$uibModal', function RecordController(AlertsService, $cookies, $log, UriUtils, DataUtils, ErrorService, MathUtils, messageMap, $rootScope, $window, $scope, $uibModal) {
+    .controller('RecordController', ['AlertsService', '$cookies', '$document', '$log', 'UriUtils', 'DataUtils', 'ErrorService', 'MathUtils', 'messageMap', '$rootScope', '$window', '$scope', '$uibModal', function RecordController(AlertsService, $cookies, $document, $log, UriUtils, DataUtils, ErrorService, MathUtils, messageMap, $rootScope, $window, $scope, $uibModal) {
         var vm = this;
         var addRecordRequests = {}; // <generated unique id : reference of related table>
         var editRecordRequests = {}; // generated id: {schemaName, tableName}
@@ -199,5 +199,33 @@
             updated[editRecordRequests[id].schema + ":" + editRecordRequests[id].table] = true;
             delete editRecordRequests[id];
         }
+        
+        function setRecordHeight() {
+            // get document height
+            var docHeight = $document[0].documentElement.offsetHeight
+            // get navbar height
+            var navbarElHeight = $document[0].getElementById('mainnav').offsetHeight;
+            // get bookmark container height
+            var bookmarkElHeight = $document[0].getElementById('bookmark-container').offsetHeight;
+            // calculate remaining dom height (navbar + bookmark)/viewheight
+            // This will be a percentage out of 100
+            var fixedHeightUsed = Math.ceil( ((navbarElHeight + bookmarkElHeight)/docHeight) * 100);
+            // set height to remaining
+            var recordContainer = $document[0].getElementsByClassName('main-container')[0];
+            recordContainer.style.height = (100 - fixedHeightUsed) + 'vh';
+        }
+
+        $scope.$watch(function() {
+            return $rootScope.displayReady;
+        }, function (newValue, oldValue) {
+            if (newValue) {
+                setRecordHeight();
+            }
+        });
+        
+        angular.element($window).bind('resize', function(){
+            setRecordHeight();
+            $scope.$digest();
+        });
     }]);
 })();

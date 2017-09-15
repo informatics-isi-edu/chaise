@@ -12,7 +12,6 @@
 .main-container {
     overflow-y: auto;
     overflow-x: hidden;
-    max-height: 82vh;
     margin-top: 5px;
     padding-bottom: 20px;
 }

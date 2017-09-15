@@ -113,14 +113,6 @@ img.spinner-sm {
     margin-top: -7px;
 }
 
-#page-title > span {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    text-overflow: ellipsis;
-    overflow: hidden;
-}
-
 #entity-title, .entity-title{
     clear: both;
     /*padding-top: 10px;*/
