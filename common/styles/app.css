@@ -1123,6 +1123,9 @@ footer .container1 {
     position: relative;
     /*margin: 10px 0;*/
 }
+.chaise-checkbox:hover {
+    background-color: rgb(241, 241, 241);
+}
 .ellipsis-text label{
     text-overflow: ellipsis;
     white-space: nowrap;
