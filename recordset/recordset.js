@@ -134,7 +134,17 @@
         };
         
         $scope.create = function() {
-            return recordsetModel.reference.unfilteredReference.contextualize.entryCreate.appLink;
+            // TODO: Generate a unique id for this request
+            // append it to the URL
+            // var referrer_id = 'recordset-' + MathUtils.getRandomInt(0, Number.MAX_SAFE_INTEGER);
+            // addRecordRequests[referrer_id] = 0;
+            
+            // open a new tab
+            var newRef = recordsetModel.reference.unfilteredReference.contextualize.entryCreate;
+            var appLink = newRef.appLink;
+            // appLink = appLink + (appLink.indexOf("?") === -1 ? "?" : "&") + 'invalidate=' + UriUtils.fixedEncodeURIComponent(referrer_id);
+            
+            return appLink;
         };
 
         $scope.unfiltered = function () {
