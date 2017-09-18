@@ -96,16 +96,28 @@
                     <a tooltip-placement="bottom" ng-click="vm.focusOnFacet($index)" ng-if="::!fc.displayname.isHTML" uib-tooltip="Go to the Facet" ng-bind="::fc.displayname.value"></a>:
                     <span uib-tooltip-template="'filtersTooltipTemplate.html'" tooltip-placement="bottom-left">
                         <span ng-repeat="filter in vm.facetModels[$index].appliedFilters">
-                            <span ng-if="::filter.displayname.isHTML" ng-bind-html="::filter.displayname.value"></span>
-                            <span ng-if="::!filter.displayname.isHTML" ng-bind="::filter.displayname.value"></span>
+                            <span ng-if="::filter.displayname.value && filter.displayname.isHTML" ng-bind-html="::filter.displayname.value"></span>
+                            <span ng-if="::filter.displayname.value && !filter.displayname.isHTML" ng-bind="::filter.displayname.value"></span>
+                            <span ng-if="::filter.displayname.value == ''">
+                                <i>Empty</i>
+                            </span>
+                            <span ng-if="::filter.displayname.value == null">
+                                <i>No Value</i>
+                            </span>
                             <span>{{$last ? '': ','}}</span>
                         </span>
                     </span>
                     <script type="text/ng-template" id="filtersTooltipTemplate.html">
                         <span ng-repeat="filter in vm.facetModels[$index].appliedFilters">
                             <span>&bull;</span>
-                            <span ng-if="::filter.displayname.isHTML" ng-bind-html="::filter.displayname.value"></span>
-                            <span ng-if="::!filter.displayname.isHTML" ng-bind="::filter.displayname.value"></span>
+                            <span ng-if="::filter.displayname.value && filter.displayname.isHTML" ng-bind-html="::filter.displayname.value"></span>
+                            <span ng-if="::filter.displayname.value && !filter.displayname.isHTML" ng-bind="::filter.displayname.value"></span>
+                            <span ng-if="::filter.displayname.value == ''">
+                                <i>Empty</i>
+                            </span>
+                            <span ng-if="::filter.displayname.value == null">
+                                <i>No Value</i>
+                            </span>
                         </span>
                     </script>
                 </div>

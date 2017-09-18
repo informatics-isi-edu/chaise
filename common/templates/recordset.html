@@ -12,8 +12,14 @@
                     </a>
                     <div class="filter-label label label-default" ng-repeat="row in vm.selectedRows track by $index" tooltip-enable="tooltipEnabled" uib-tooltip="{{row.displayname.value}}" tooltip-placement="bottom" chaise-enable-tooltip-width>
                         <a class="remove-link" ng-click="removePill(row.uniqueId)"><i class="glyphicon glyphicon-remove"></i></a>
-                        <span ng-if="row.displayname.isHTML" ng-bind-html="row.displayname.value"></span>
-                        <span ng-if="!row.displayname.isHTML" ng-bind="row.displayname.value"></span>
+                        <span ng-if="row.displayname.value && row.displayname.isHTML" ng-bind-html="row.displayname.value"></span>
+                        <span ng-if="row.displayname.value && !row.displayname.isHTML" ng-bind="row.displayname.value"></span>
+                        <span ng-if="row.displayname.value == ''">
+                            <i>Empty</i>
+                        </span>
+                        <span ng-if="row.displayname.value == null">
+                            <i>No Value</i>
+                        </span>
                     </div>
                 </div>
             </div>

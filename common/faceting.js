@@ -733,7 +733,7 @@
                                     // currentValues[value] = true;
                                     scope.checkboxRows.push({
                                         selected: false,
-                                        displayname: tuple.displayname,
+                                        displayname: value == null ? {value: null, isHTML: false} : tuple.displayname,
                                         uniqueId: value
                                     });
                                 });
@@ -821,7 +821,8 @@
                                 return getTupleValue(t);
                             }));
                             scope.facetModel.appliedFilters = tuples.map(function (t) {
-                                return {uniqueId: getTupleValue(t), displayname: t.displayname};
+                                var val = getTupleValue(t);
+                                return {uniqueId: val, displayname: val == null ? {value: null, isHTML: false} : t.displayname};
                             });
                             
                             scope.parentCtrl.setInitialized();
