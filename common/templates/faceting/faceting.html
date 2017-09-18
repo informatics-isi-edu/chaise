@@ -4,10 +4,10 @@
             <!-- TODO test this last active  -->
             <div uib-accordion-group ng-repeat="fc in vm.reference.facetColumns track by $index" is-open="vm.facetModels[$index].isOpen" id="fc-{{$index}}" class="{{lastActiveFacet == $index ? 'focused': ''}}">
                     <uib-accordion-heading>
-                        <h4 class="panel-title accordion-toggle" id="fc-heading-{{$index}}"  ng-click="toggleFacet($index)">
+                        <h4 class="panel-title accordion-toggle ellipsis" id="fc-heading-{{$index}}" ng-click="toggleFacet($index)" tooltip-enable="tooltipEnabled" uib-tooltip-html="fc.displayname.value" tooltip-placement="bottom" chaise-enable-tooltip-width>
                             <i class="pull-left glyphicon toggle-icon" ng-class="{'glyphicon-chevron-down': vm.facetModels[$index].isOpen, 'glyphicon-chevron-right': !vm.facetModels[$index].isOpen}"></i>
                                 
-                            <a ng-attr-uib-tooltip="{{::(fc.comment) ? fc.comment : undefined}}" ng-attr-tooltip-placement="{{::(fc.comment) ? 'top' : undefined}}" title="{{fc.comment}}">
+                            <a>
                                 <span ng-if="::fc.displayname.isHTML" ng-bind-html="::fc.displayname.value"></span>
                                 <span ng-if="::!fc.displayname.isHTML" ng-bind="::fc.displayname.value"></span>
                             </a>

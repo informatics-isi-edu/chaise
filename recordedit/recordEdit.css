@@ -1,7 +1,6 @@
 .main-container {
     overflow-y: auto;
     overflow-x: hidden;
-    max-height: 92vh;
     margin-top: 5px;
 }
 

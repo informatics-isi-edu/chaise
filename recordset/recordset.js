@@ -78,7 +78,7 @@
     })
 
     // Register the recordset controller
-    .controller('recordsetController', ['$document', '$scope', '$rootScope', 'context', '$window', 'recordsetModel', 'UriUtils', 'DataUtils', 'Session', '$log', 'ErrorService',  function($document, $scope, $rootScope, context, $window, recordsetModel, UriUtils, DataUtils, Session, $log, ErrorService) {
+    .controller('recordsetController', ['context', 'DataUtils', 'ErrorService', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$document', '$log', '$rootScope', '$scope', '$window', function(context, DataUtils, ErrorService, recordsetModel, Session, UiUtils, UriUtils, $document, $log, $rootScope, $scope, $window) {
 
         $scope.vm = recordsetModel;
         recordsetModel.RECORDEDIT_MAX_ROWS = 200;
@@ -140,26 +140,50 @@
         $scope.unfiltered = function () {
             return recordsetModel.reference.unfilteredReference.contextualize.compact.appLink;
         };
-        
+
+        // fetches the height of navbar, bookmark container, and view
+        // also fetches the main container for defining the dynamic height
+        function fetchMainElements() {
+            var elements = {};
+            // get document height
+            elements.docHeight = $document[0].documentElement.offsetHeight
+            // get navbar height
+            elements.navbarHeight = $document[0].getElementById('mainnav').offsetHeight;
+            // get bookmark container height
+            elements.bookmarkHeight = $document[0].getElementById('bookmark-container').offsetHeight;
+            // get recordset main container
+            elements.container = $document[0].getElementsByClassName('recordset-container')[0].getElementsByClassName('main-container')[0];
+            return elements;
+        }
+
+        // fetches the height of navbar, bookmark container, and view
+        // also fetches the faceting container for defining the dynamic height
+        function fetchFacetingElements() {
+            var elements = {};
+            // get document height
+            elements.docHeight = $document[0].documentElement.offsetHeight
+            // get navbar height
+            elements.navbarHeight = $document[0].getElementById('mainnav').offsetHeight;
+            // get bookmark container height
+            elements.bookmarkHeight = $document[0].getElementById('bookmark-container').offsetHeight;
+            // get recordset main container
+            elements.container = $document[0].getElementsByClassName('faceting-container')[0];
+            return elements;
+        }
+
         $scope.$watch(function() {
-            return $rootScope.pageLoaded || recordsetModel.hasLoaded;
+            return ($rootScope.pageLoaded || recordsetModel.hasLoaded) && recordsetModel.initialized;
         }, function (newValue, oldValue) {
             if (newValue) {
-                //et document height
-                var docHeight = $document[0].documentElement.offsetHeight
-                // get navbar height
-                var navbarElHeight = $document[0].getElementById('mainnav').offsetHeight;
-                // get bookmark container height
-                var bookmarkElHeight = $document[0].getElementById('bookmark-container').offsetHeight;
-                // calculate remaining dom height (navbar + bookmark)/viewheight
-                // This will be a percentage out of 100
-                var fixedHeightUsed = Math.ceil( ((navbarElHeight + bookmarkElHeight)/docHeight) * 100);
-                // set height to remaining
-                var facetContainer = $document[0].getElementsByClassName('faceting-container')[0];
-                facetContainer.style.height = (100 - fixedHeightUsed) + 'vh';
-                var tableContainer = $document[0].querySelectorAll('.recordset-container,.with-faceting')[0].getElementsByClassName('main-container')[0];
-                tableContainer.style.height = (100 - fixedHeightUsed) + 'vh';
+                UiUtils.setDisplayHeight(fetchMainElements());
+                if (chaiseConfig.showFaceting) UiUtils.setDisplayHeight(fetchFacetingElements());
             }
+        });
+        
+        angular.element($window).bind('resize', function(){
+            UiUtils.setDisplayHeight(fetchMainElements());
+            if (chaiseConfig.showFaceting) UiUtils.setDisplayHeight(fetchFacetingElements());
+            $scope.$digest();
         });
 
     }])
@@ -250,7 +274,7 @@
                     if (showFaceting) {
                         $rootScope.$broadcast('page-loaded');
                     } else {
-                        recordsetModel.reference.read(recordsetModel.pageLimit).then(function () {
+                        recordsetModel.reference.read(recordsetModel.pageLimit).then(function (page) {
                             recordsetModel.page = page;
                             recordsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
                             recordsetModel.initialized = true;

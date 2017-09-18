@@ -787,8 +787,8 @@
         }
 
         /**
-         *
-         *
+         * Recursively sets the display type for inputs (currently for recordedit)
+         * @param {Object} type - the type object defining the columns type
          */
         function getDisplayType(type) {
             var displayType;
@@ -834,11 +834,28 @@
             return displayType;
         }
 
+        /**
+         * sets the height of domElements.container
+         * @param {Object} domElements - an object with the following properties:
+         *      - {integer} navbarHeight - the height of the navbar element
+         *      - {integer} bookmarkHeight - the height of the bookmark container
+         *      - {integer} docHeight - the height of the viewport
+         *      - {DOMElement} container - the main container to fix the height of
+         **/
+        function setDisplayHeight(domElements) {
+            // calculate remaining dom height (navbar + bookmark)/viewheight
+            // This will be a percentage out of 100
+            var fixedHeightUsed = Math.ceil( ((domElements.navbarHeight + domElements.bookmarkHeight)/domElements.docHeight) * 100);
+            // set height to remaining
+            domElements.container.style.height = (100 - fixedHeightUsed) + 'vh';
+        }
+
         return {
             setBootstrapDropdownButtonBehavior: setBootstrapDropdownButtonBehavior,
             getImageAndIframes: getImageAndIframes,
             humanFileSize: humanFileSize,
-            getDisplayType: getDisplayType
+            getDisplayType: getDisplayType,
+            setDisplayHeight: setDisplayHeight
         }
     }])
 
