@@ -20,7 +20,12 @@
                   </record-action-bar>
 
                 <span ng-show="recordTableModel[$index].displayType == 'markdown'" id="entity-{{$index}}-markdown">
-                    <span class="markdown-container" ng-bind-html="recordTableModel[$index].page.content | trustedHTML"></span>
+                    <span ng-if="recordTableModel[$index].page.content == '' || recordTableModel[$index].page.content == null ">
+                        <span class="markdown-container" ng-bind-html="strNone | trustedHTML"></span>                        
+                    </span>
+                    <span ng-if="recordTableModel[$index].page.content != '' ">
+                        <span class="markdown-container" ng-bind-html="recordTableModel[$index].page.content | trustedHTML"></span>
+                    </span>
                 </span>
                 <span ng-show="recordTableModel[$index].displayType != 'markdown'" id="entity-{{$index}}-recTab">
                         <record-table class="related-table" vm="::recordTableModel[$index]"></record-table>
