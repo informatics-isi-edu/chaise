@@ -22,7 +22,6 @@
                     ctrl.register = function (childCtrl, facetColumn, index) {
                         ctrl.childCtrls[index] = childCtrl;
                         ctrl.facetingCount++;
-                        console.log("registering " + index);
                         
                         $scope.vm.facetModels[index] = {
                             initialized: false,
@@ -167,6 +166,7 @@
             };
         }])
 
+        // NOTE This directive has not been used
         .directive('stringPicker', ['$window', 'DataUtils', 'tableConstants', function ($window, DataUtils, tableConstants) {
             
             /**
@@ -336,7 +336,8 @@
                 }
             };
         }])
-
+        
+        // NOTE This directive has not been used
         .directive('entityPicker', ['$uibModal', function ($uibModal) {
             /**
              * Should be called each time facetColumn has been modified.
@@ -413,11 +414,10 @@
                 controller: ['$scope', function ($scope) {
                     var ctrl = this;
                     
-                    /**
-                     * update the current parent
-                     * @param  {boolean} callParent if true, will call the updateFacets in faceting directive
-                     */
+                    // register the update facet callback
                     ctrl.updateFacet = function () {
+                        // make sure to sync the selected
+                        // when we clear a filter, this function will take care of unchecking it.
                         $scope.syncSelected();
                         return $scope.updateFacetData();
                     }
@@ -476,13 +476,15 @@
                         };
                     };
                     
+                    // convert filter to applied filter (filter has selected, applied filter doesn't)
                     function createAppliedFilter(filter) {
                         return {
                             uniqueId: filter.uniqueId,
                             displayname: {value: filter.toString(), isHTML: false}
                         }
                     }
-
+                    
+                    // callback for the list directive
                     scope.onSelect = function (row, $event) {
                         var res;
                         if (row.selected) {
@@ -641,10 +643,15 @@
         }])
         
         .directive('choicePicker', ['$q', '$timeout', '$uibModal', 'tableConstants', function ($q, $timeout, $uibModal, tableConstants) {
-            // scope.checkboxRows -> total
-            // scope.alreadyAppliedRows -> comes from the initialize
-            
-            
+
+            /**
+             * Initialzie facet column.
+             * This will take care of getting the displaynames of rows. 
+             * (If it's a entity picker, the displayname will be different than the value.).
+             *
+             * NOTE should not be used directly in this directive.
+             * @param  {obj} scope The current scope
+             */
             function initializeFacetColumn(scope) {
                 var defer = $q.defer();
                 
@@ -667,8 +674,16 @@
                 return defer.promise;
             }
             
-            
-            function updateFacetColumn(scope, callParent) {
+            /**
+             * Update facet column rows
+             * Will return a promise, which will be resolved with:
+             * - true, if the respond is the result of latest request.
+             * - false, if respond is for an outdated request (therefore should be ignored).
+             *
+             * NOTE should not be used directly in this directive.
+             * @param  {Object} scope current scope
+             */
+            function updateFacetColumn(scope) {
                 var defer = $q.defer();
                 
                 var appliedFilterToRow = function (f) {
@@ -763,10 +778,12 @@
                 controller: ['$scope', function ($scope) {
                     var ctrl = this;
                     
+                    // register the update facet function
                     ctrl.updateFacet = function () {
                         return updateFacetColumn($scope);
                     }
                     
+                    // register the initialize facet function
                     ctrl.initializeFacet =  function () {
                         return initializeFacetColumn($scope);
                     }
@@ -783,9 +800,9 @@
                     
                     scope.checkboxRows = [];
 
+                    // for the search popup selector
                     scope.openSearchPopup = function() {
                         var params = {};
-                        // TODO since emrest cnt has bug, we should not sort based on count
                         params.reference = scope.reference;
                         params.reference.session = scope.$root.session;
                         params.displayname = scope.facetColumn.displayname;
@@ -807,7 +824,10 @@
                         });
 
                         modalInstance.result.then(function dataSelected(tuples) {
-                            //TODO refactor!!!!
+                            // TODO needs refactoring.
+                            // If the data was preselected, we won't have the data object attached
+                            // to the tuples. In case of entity picker we must always get the value from data.
+                            // NOTE This might be buggy.
                             var getTupleValue = function (t) {
                                 var col_name = scope.facetColumn.isEntityMode ? scope.facetColumn.column.name : "value";
                                 if (t.data && col_name in t.data) {
@@ -822,15 +842,26 @@
                             }));
                             scope.facetModel.appliedFilters = tuples.map(function (t) {
                                 var val = getTupleValue(t);
-                                return {uniqueId: val, displayname: val == null ? {value: null, isHTML: false} : t.displayname};
+                                // NOTE displayname will always be string, but we want to treat null and empty string differently,
+                                // therefore we have a extra case for null, to just return null.
+                                return {
+                                    uniqueId: val, 
+                                    displayname: (val == null) ? {value: null, isHTML: false} : t.displayname
+                                };
                             });
                             
+                            // make sure to update all the opened facets
                             scope.parentCtrl.setInitialized();
+                            
+                            // update the reference
                             scope.parentCtrl.updateVMReference(ref, -1);
+                            
+                            // focus on the current facet
                             scope.parentCtrl.focusOnFacet(scope.index);
                         });
                     }
 
+                    // for clicking on each row (will be registerd as a callback for list directive)
                     scope.onRowClick = function(row, $event) {
                         var ref;
                         if (row.selected) {
@@ -839,6 +870,8 @@
                             ref = scope.facetColumn.removeChoiceFilters([row.uniqueId]);
                         }
                         
+                        // if the updateVMReference failed (due to url length limit),
+                        // we should revert the change back
                         if (!scope.parentCtrl.updateVMReference(ref, scope.index)) {
                             row.selected = !row.selected;
                             $event.preventDefault();
@@ -922,7 +955,9 @@
                         if (newVal) {
                             $timeout(function () {
                                 var listElem = element[0].getElementsByClassName("chaise-list-container")[0];
-                                scope.showFindMore = listElem.scrollHeight > listElem.offsetHeight
+                                if (listElem) {
+                                    scope.showFindMore = listElem.scrollHeight > listElem.offsetHeight
+                                }
                             });
                         }
                     });
