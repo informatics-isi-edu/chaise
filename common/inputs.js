@@ -43,7 +43,7 @@
                             relativeType = "number";
                             break;
                         default:
-                            relativeType = type(colType.baseType);
+                            relativeType = (colType.baseType) ? type(colType.baseType) : "number";
                             break;
                     }
                     return relativeType;
