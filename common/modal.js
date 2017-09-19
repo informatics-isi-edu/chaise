@@ -93,7 +93,7 @@
             pageLimit:          limit,
             rowValues:          [],
             selectedRows:       params.selectedRows,
-            search:             null,
+            search:             reference.location.searchTerm,
             config:             {viewable: false, editable: false, deletable: false, selectMode: params.selectMode},
             context:            params.context
         };
