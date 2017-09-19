@@ -237,6 +237,29 @@ exports.testPresentation = function (tableParams) {
             expect('Encountered an error').toBe('Please check the log', 'Inside catch block');
         })
     });
+	
+	it("visible column related table with inline inbound fk should display 'None' in markdown disply mode if no data was found.",function(){
+        chaisePage.waitForElement(element(by.id('entity-booking'))).then(function(){
+            // browser.pause();
+		// 	return browser.executeScript("return $('#actionbar-4  a.toggle-display-link')");
+        // }).then(function(editButton){
+		// 	
+		// 	editButton.click();
+            return browser.executeScript("return $('#entity-booking .btn-group .delete-action-button')");
+        }).then( function(deleteButtons){
+			// browser.pause();
+			for(var i = 0; i < deleteButtons.length; i++){
+				deleteButtons[0].click();
+				browser.executeScript("return $('#delete-confirmation').click()");
+			}
+            return browser.executeScript("return $('a.toggle-display-link').click()");
+        }).then(function(){
+            expect(element(by.id('entity-4-markdown')).getText()).toBe('None',"Incorrect text for empty markdown!");
+        }).catch(function(err){
+            console.log(err);
+            expect('Encountered an error').toBe('Please check the log', 'Inside catch block');
+        })
+    });
     // Related tables are contextualized with `compact/brief`, but if that is not specified it will inherit from `compact`
     it("should honor the page_size annotation for the table, file, in the compact context based on inheritance.", function() {
         var relatedTableName = tableParams.related_table_name_with_page_size_annotation;
@@ -284,9 +307,9 @@ exports.testPresentation = function (tableParams) {
             // empty related table should show
             expect(chaisePage.recordPage.getRelatedTable(tableDisplayname).isPresent()).toBeTruthy();
             //check the no results text appears properly
-            return chaisePage.recordPage.getNoResultsRow().getText();
-        }).then(function(text) {
-            expect(text).toBe(noResultsMessage);
+            return chaisePage.recordPage.getNoResultsRow();//.getText();
+        }).then(function(emptyTab) {
+            expect(emptyTab[1].getText()).toBe(noResultsMessage);
             return showAllRTButton.click();
         }).then(function() {
             expect(chaisePage.recordPage.getRelatedTable(tableDisplayname).isPresent()).toBeFalsy();

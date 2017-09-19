@@ -704,7 +704,7 @@ var recordPage = function() {
     };
 
     this.getNoResultsRow = function() {
-        return element(by.id("no-results-row"));
+        return element.all(by.id("no-results-row"));
     };
 
     this.getCreateRecordButton = function() {
