@@ -22,7 +22,7 @@
                     </a>&nbsp;&nbsp;
                     <!-- edit -->
                     <!-- TODO: this edit link isn't being disabled. To disable an <a> tag with an href, remove the href attribute -->
-                    <a id="edit-link" ng-if="vm.page && vm.reference.canUpdate && vm.config.editable" ng-disabled="{{vm.pageLimit > vm.RECORDEDIT_MAX_ROWS}}"
+                    <a id="edit-link" ng-if="showEdit" ng-disabled="{{vm.pageLimit > vm.RECORDEDIT_MAX_ROWS}}"
                         ng-href="{{ edit() }}" tooltip-placement="bottom" uib-tooltip="{{ ((vm.pageLimit > vm.RECORDEDIT_MAX_ROWS) ? 'Editing disabled when items per page > ' + vm.RECORDEDIT_MAX_ROWS : 'Click here to edit this page of records.' ) }}">
                         <span class="glyphicon glyphicon-pencil"></span> <strong>Edit</strong>
                     </a>&nbsp;&nbsp;
