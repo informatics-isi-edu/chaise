@@ -1018,6 +1018,13 @@ footer .container1 {
      font-size: 1.15em;
      color: #337ab7;
      font-weight: 600;
+     position: relative;
+ }
+ 
+ .faceting-container .panel .panel-title img.spinner-sm {
+     position: absolute;
+     right: 0;
+     top: 0;
  }
  
  .faceting-container .panel {
