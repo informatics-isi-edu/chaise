@@ -3,12 +3,14 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', '$cookies', '$log', 'UriUtils', 'DataUtils', 'ErrorService', 'MathUtils', 'messageMap', '$rootScope', '$window', '$scope', '$uibModal', function RecordController(AlertsService, $cookies, $log, UriUtils, DataUtils, ErrorService, MathUtils, messageMap, $rootScope, $window, $scope, $uibModal) {
+    .controller('RecordController', ['AlertsService', '$cookies', '$log', 'UriUtils', 'DataUtils', 'ErrorService', 'MathUtils', 'messageMap', '$rootScope', '$window', '$scope', '$uibModal','$controller','recordCreate', 'modalBox', function RecordController(AlertsService, $cookies, $log, UriUtils, DataUtils, ErrorService, MathUtils, messageMap, $rootScope, $window, $scope, $uibModal, $controller, recordCreate, modalBox) {
         var vm = this;
         var addRecordRequests = {}; // <generated unique id : reference of related table>
         var editRecordRequests = {}; // generated id: {schemaName, tableName}
         var updated = {};
+        var context = $rootScope.context;
         var completed = {};
+        var modalUpdate = false;
         vm.alerts = AlertsService.alerts;
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
@@ -112,8 +114,15 @@
         };
 
         // Send user to RecordEdit to create a new row in this related table
+        function onSuccess (){    
+            AlertsService.addAlert("Your data has been submitted. Showing you the result set...","success");
+            vm.resultset = true;
+            onfocusEventCall(true);
+        }
+
         vm.addRelatedRecord = function(ref) {
             // 1. Pluck required values from the ref into cookie obj by getting the values of the keys that form this FK relationship
+
             var cookie = {
                 rowname: $rootScope.recordDisplayname,
                 constraintName: ref.origColumnName
@@ -122,11 +131,18 @@
 
             // Get the column pair that form this FKR between this related table and the main entity
             cookie.keys = {};
-            mapping._from.forEach(function(fromColumn, i) {
+            mapping._from.forEach(function (fromColumn, i) {
                 var toColumn = mapping._to[i];
                 // Assign the column value into cookie
                 cookie.keys[fromColumn.name] = $rootScope.tuple.data[toColumn.name];
             });
+
+            if(ref.derivedAssociationReference){
+                recordCreate.addRelatedRecordFact(true, ref, 0, cookie, vm.editMode, vm.formContainer, vm.readyToSubmit, vm.recordsetLink, vm.submissionButtonDisabled, $rootScope.reference, $rootScope.tuples, $rootScope.session, $rootScope.context.queryParams, onSuccess);
+                return;
+            }
+
+
             // 2. Generate a unique cookie name and set it to expire after 24hrs.
             var COOKIE_NAME = 'recordedit-' + MathUtils.getRandomInt(0, Number.MAX_SAFE_INTEGER);
             $cookies.putObject(COOKIE_NAME, cookie, {
@@ -153,13 +169,14 @@
         });
 
         /**
-        * readUpdatedTable(refObj, dataModel, idx) returns model object with all updated component values
+        * readUpdatedTable(refObj, dataModel, idx, isModalUpdate) returns model object with all updated component values
         * @param {object} refObj Reference object with component details
         * @param {object} dataModel Contains value that is bind to the table columns
         * @param {int} idx Index of each reference
+        * @param {bool} isModalUpdate if update happens through modal pop up
         */
-        function readUpdatedTable(refObj, dataModel, idx){
-            if (completed[refObj.uri] || updated[refObj.location.schemaName + ":" + refObj.location.tableName]) {
+        function readUpdatedTable(refObj, dataModel, idx, isModalUpdate){
+            if (isModalUpdate || completed[refObj.uri] || updated[refObj.location.schemaName + ":" + refObj.location.tableName]) {
                 delete updated[refObj.location.schemaName + ":" + refObj.location.tableName];
                 (function (i) {
                     refObj.read(dataModel.pageLimit).then(function (page) {
@@ -179,6 +196,10 @@
         // When page gets focus, check cookie for completed requests
         // re-read the records for that table
         $window.onfocus = function() {
+            onfocusEventCall(false);
+        }
+
+        var onfocusEventCall = function(isModalUpdate) {
             if ($rootScope.loading === false) {
                 var idxInbFk;
                 completed = { };
@@ -194,15 +215,15 @@
                     } else {
                         console.log('Could not find cookie', cookie);
                     }
-                }  
+                }
                 // read updated tables
-                if (Object.keys(completed).length > 0 || updated !== {}) {
+                if (isModalUpdate || Object.keys(completed).length > 0 || updated !== {}) {
                     for (var i = 0; i < $rootScope.inboundFKCols.length; i++) {
                         idxInbFk = $rootScope.inboundFKColsIdx[i];
-                        readUpdatedTable($rootScope.inboundFKCols[i].reference, $rootScope.colTableModels[idxInbFk],idxInbFk);
+                        readUpdatedTable($rootScope.inboundFKCols[i].reference, $rootScope.colTableModels[idxInbFk], idxInbFk, isModalUpdate);
                     }
                     for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
-                        readUpdatedTable($rootScope.relatedReferences[i], $rootScope.tableModels[i],i);
+                        readUpdatedTable($rootScope.relatedReferences[i], $rootScope.tableModels[i], i, isModalUpdate);
                     }
                 }
             }
