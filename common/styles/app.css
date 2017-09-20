@@ -971,6 +971,14 @@ footer .container1 {
      border: 0;
      margin: 1px 0;
  }
+ 
+ .faceting-container .panel {
+     border: 1px solid #ddd !important;
+ }
+ 
+ .faceting-container .panel:hover, .faceting-container .panel-default.active {
+     border-color: rgb(51, 122, 183) !important;
+ }
 
  .faceting-container .update-btn {
      float: right;
@@ -1029,12 +1037,7 @@ footer .container1 {
      top: 0;
  }
  
- .faceting-container .panel {
-     border: 1px solid #ddd !important;
- }
- 
- .faceting-container .panel.focused {
-     border-color: darkblue !important;
+ .faceting-container{
      -webkit-transition: all 1s;
      transition: all 1s;
  }

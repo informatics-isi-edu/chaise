@@ -135,7 +135,14 @@
                     scope.scrollToFacet = function (index) {
                         var container = angular.element(document.getElementsByClassName('faceting-container')[0]);
                         var el = angular.element(document.getElementById('fc-'+index));
-                        container.scrollToElementAnimated(el);
+                        container.scrollToElementAnimated(el, 5).then(function () {
+                            $timeout(function () {
+                                el.addClass("active");
+                            }, 100);
+                            $timeout(function () {
+                                el.removeClass('active');
+                            }, 500);
+                        });
                     }
                     
                     scope.focusOnFacet = function (index) {
