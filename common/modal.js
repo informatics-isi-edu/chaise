@@ -118,5 +118,30 @@
             $uibModalInstance.dismiss("cancel");
         }
     }])
+    .controller('profileModalDialogController', ['$uibModalInstance','$rootScope', 'Session','UriUtils',function ($uibModalInstance, $rootScope, Session, UriUtils){
+        var vm = this;
+        vm.groupList =[];
+        vm.identities = [];
+        vm.client= {};
+        vm.cancel = function() {
+            $uibModalInstance.dismiss();
+        };
+        $rootScope.session = Session.getSessionValue();
+        vm.client =$rootScope.session.client;
+            
+        var user = $rootScope.session.client;
+        vm.user = user.full_name || user.display_name  || user.email || user.id;
+        for(var i = 0; i<  $rootScope.session.client.identities.length; i++){
+            vm.identities.push($rootScope.session.client.identities[i]);
+        }
+        
+        
+        for(var i = 0; i<  $rootScope.session.attributes.length; i++){
+            if($rootScope.session.attributes[i].display_name && $rootScope.session.attributes[i].display_name !== user.display_name){
+                $rootScope.session.attributes[i].id= $rootScope.session.attributes[i].id.substring(24);
+                vm.groupList.push($rootScope.session.attributes[i]);
+            }
+        }
+    }])
 
 })();

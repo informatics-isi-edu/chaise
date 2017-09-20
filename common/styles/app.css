@@ -708,7 +708,13 @@ footer .container1 {
     float: right;                
     margin-left: 15px;        
 }
-
+/************* Profile Card ****************/
+.modal-dialog li{
+    list-style-type : disc;
+}
+.modal-dialog .profileValue{
+    padding-left: 32px;
+}
  /********** faceting ************/
  .total-filters {
     margin-bottom: 10px;
