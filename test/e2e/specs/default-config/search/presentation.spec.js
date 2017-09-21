@@ -81,7 +81,6 @@ var testAttributes = function(attr, attrCount) {
         filterCount++;
 
         beforeAll(function() {
-            browser.pause();
             clearAttributes.forEach(function(ca) {
                  filterObj.clickFilterWrapperCancelByName(testParams.attributes[ca].text);
             });
@@ -201,7 +200,6 @@ var testFilters = function(attr, filter, attrCount, filterLen, contentCount) {
                 var el = chaisePage.resultContent.numOfRecords
                 el.getText().then(function(txt) {
                     expect(parseInt(txt)).toBe(filter.entityCount);
-                    //browser.pause();
                 });
             });
 

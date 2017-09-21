@@ -248,7 +248,7 @@ describe('View existing record,', function() {
                         return browser.executeScript("return $('[type=checkbox]').get(2);");
                     }).then(function(selectButtons) {
                         selectButtons.click();
-                        return browser.executeScript("return $('.multiAddSubmit').click();");
+                        return browser.executeScript("return $('.multi-select-submit-btn').click();");
                     }).then(function() {
                         browser.sleep(2000);
                         return browser.executeScript("return $('.alert-success')[0].innerText;");
@@ -329,7 +329,7 @@ describe('View existing record,', function() {
                     return browser.executeScript("return $('[type=checkbox]').get(1);");
                 }).then(function (selectButtons){
                     selectButtons.click();
-                    return browser.executeScript("return $('.multiAddSubmit').click();");
+                    return browser.executeScript("return $('.multi-select-submit-btn').click();");
                 }).then(function () {
                     return browser.wait(EC.presenceOf(element(by.id('entity-title'))), browser.params.defaultTimeout);
                 }).then(function (){
@@ -492,7 +492,7 @@ describe('View existing record,', function() {
                     return browser.executeScript("return $('input').get(2);");
                 }).then(function (selectButtons){
                     selectButtons.click();
-                    return browser.executeScript("return $('.multiAddSubmit').click();");
+                    return browser.executeScript("return $('.multi-select-submit-btn').click();");
                 }).then(function () {
                     return browser.wait(EC.presenceOf(element(by.id('entity-title'))), browser.params.defaultTimeout);
                 }).then(function (){
