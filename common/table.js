@@ -53,9 +53,9 @@
      *          - deletable
      *          - selectMode:
      *              can be one of the following:
-     *                  no-select       // do not allow selection of the rows
-     *                  single-select   // only allow one row to be selected
-     *                  multi-select    // allow the user to select as many rows as they want
+     *                  no-select       // do not allow selection of the rows. {modalBox.noSelect}
+     *                  single-select   // only allow one row to be selected. {modalBox.singleSelectMode}
+     *                  multi-select    // allow the user to select as many rows as they want. {modalBox.multiSelectMode}
      *          - hideSelectedRows
      *          - hideTotalCount
      *          - hidePageSettings
@@ -409,14 +409,12 @@
         
         function callOnRowClick(scope, tuples, isSelected) {
             if (scope.onRowClickBind) {
-                console.log('calling bind');
                 scope.onRowClickBind()(tuples, isSelected);
             } else if (scope.onRowClick) {
-                console.log('calling');
                 scope.onRowClick()(tuples, isSelected);
             }
         }
-        
+
         return {
             restrict: 'E',
             templateUrl: '../common/templates/table.html',
@@ -563,7 +561,7 @@
                 allowCreate: '=?'       // if undefined, assume false
             },
             link: function (scope, elem, attr) {
-
+                
                 var addRecordRequests = {}; // table refresh used by add record implementation with cookie (old method)
                 var updated = false; // table refresh used by ellipses' edit action (new method)
 
@@ -774,7 +772,7 @@
                 allowCreate: '=?'       // if undefined, assume false
             },
             link: function (scope, elem, attr) {
-
+                console.log(scope.vm.config);
                 var addRecordRequests = {}; // table refresh used by add record implementation with cookie (old method)
                 var updated = false; // table refresh used by ellipses' edit action (new method)
 

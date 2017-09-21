@@ -4,6 +4,7 @@
     angular.module('chaise.record', [
         'ngSanitize',
         'ngCookies',
+        'chaise.alerts',
         'chaise.delete',
         'chaise.errors',
         'chaise.modal',
@@ -14,7 +15,9 @@
         'chaise.utils',
         'ermrestjs',
         'ui.bootstrap',
-        'chaise.footer'
+        'chaise.footer',
+        'chaise.upload',
+        'chaise.recordcreate'
     ])
 
     .factory('constants', [function(){
@@ -34,8 +37,8 @@
         $uibTooltipProvider.options({appendToBody: true});
     }])
 
-    .run(['constants', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'MathUtils', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
-        function runApp(constants, DataUtils, ERMrest, ErrorService, headInjector, MathUtils, Session, UiUtils, UriUtils, $log, $rootScope, $window) {
+    .run(['constants', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'MathUtils', 'modalBox', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
+        function runApp(constants, DataUtils, ERMrest, ErrorService, headInjector, MathUtils, modalBox, Session, UiUtils, UriUtils, $log, $rootScope, $window) {
 
         var session,
             context = {};
@@ -101,7 +104,7 @@
                     viewable: true,
                     editable: $rootScope.modifyRecord,
                     deletable: $rootScope.modifyRecord && $rootScope.showDeleteButton,
-                    selectable: false
+                    selectMode: modalBox.noSelect
                 };
                 // return model;
                 callback(model);
@@ -136,7 +139,6 @@
                 // $rootScope.reference != reference after contextualization
                 $rootScope.reference = reference.contextualize.detailed;
                 $rootScope.reference.session = session;
-
                 $log.info("Reference: ", $rootScope.reference);
 
                 // There should only ever be one entity related to this reference, we are reading 2 entities now and if we get more than 1 entity than we throw a multipleRecordError.
@@ -185,7 +187,11 @@
                         return o;
                     }
                 });
+                $rootScope.inboundFKCols = allInbFKCols;
+                $rootScope.inboundFKColsIdx = allInbFKColsIdx;
+                $rootScope.inbFKRef = allInbFKCols;
                 if(allInbFKCols.length>0){
+
                     $rootScope.rtrefDisTypetable = [];
                     $rootScope.colTableModels = [];
 

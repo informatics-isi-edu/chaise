@@ -47,6 +47,29 @@ describe('Navbar ', function() {
             expect(count).toEqual(counter);
         });
     });
+    
+    
+    it('should open the profile card on click of My Profile link', function() {
+        var link = element(by.css('.dropdown-toggle'));    
+        browser.wait(EC.elementToBeClickable(link), browser.params.defaultTimeout).then(function() {
+            link.click();
+            var profileLink = element(by.id('profile-link'));
+            browser.wait(EC.elementToBeClickable(profileLink), browser.params.defaultTimeout).then(function() {
+                profileLink.click();
+                var modalContent = element(by.css('.modal-content'));
+                expect(modalContent.isDisplayed()).toBeTruthy();
+            });
+        });
+    });
+    
+    it('should close the profile card on click of X on the modal window', function() {
+         var closeLink = element(by.css('.modal-close'));
+         browser.wait(EC.elementToBeClickable(closeLink), browser.params.defaultTimeout).then (function(){
+            closeLink.click();
+            var modalContent = element(by.css('.modal-content'));
+            expect(modalContent.isPresent()).toEqual(false);
+         });
+    });
 
     // TODO: These tests are xit'd because we don't handle tests logging in via Globus/other services just yet
     // e.g. On Travis, the user is logged in. On local machines, you must log in manually, which changes the desired order of specs.

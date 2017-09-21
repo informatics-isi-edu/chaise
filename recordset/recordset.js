@@ -208,8 +208,8 @@
     }])
 
     // Register work to be performed after loading all modules
-    .run(['AlertsService', 'context', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'MathUtils', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
-        function(AlertsService, context, DataUtils, ERMrest, ErrorService, headInjector, MathUtils, recordsetModel, Session, UiUtils, UriUtils, $log, $rootScope, $window) {
+    .run(['AlertsService', 'context', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'MathUtils', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', 'modalBox',
+        function(AlertsService, context, DataUtils, ERMrest, ErrorService, headInjector, MathUtils, recordsetModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, modalBox) {
 
         try {
             var session;
@@ -227,10 +227,9 @@
                 viewable: true,
                 editable: modifyEnabled,
                 deletable: modifyEnabled && deleteEnabled,
-                selectMode: "no-select",
+                selectMode: modalBox.noSelect,
                 showFaceting: showFaceting,
             };
-
 
             $rootScope.alerts = AlertsService.alerts;
             

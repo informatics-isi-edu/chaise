@@ -3,7 +3,8 @@
         <!-- sortable column header -->
         <thead class="table-heading">
             <tr>
-                <th ng-switch="::vm.config.selectMode" ng-if="::(vm.config.viewable || vm.config.editable || vm.config.deletable || vm.config.selectMode != 'no-select')" ng-class="{'multi-select-width': vm.config.selectMode == 'multi-select'}">
+                <th ng-switch="vm.config.selectMode" ng-if="(vm.config.viewable || vm.config.editable || vm.config.deletable || vm.config.selectMode)" ng-class="{'multi-select-width': vm.config.selectMode == 'multi-select'}">
+                    <span ng-switch-when="no-select">Actions</span>
                     <span ng-switch-when="single-select">Select</span>
                     <div ng-switch-when="multi-select">
                         <button type="button" ng-click="::selectAll()" class="btn btn-sm btn-default btn-condensed" tooltip-placement="bottom" uib-tooltip="Select all rows in table">
@@ -13,7 +14,6 @@
                             <span class="glyphicon glyphicon-unchecked"></span> None
                         </button>
                     </div>
-                    <span ng-switch-default>Actions</span>
                 </th>
                 <th nowrap ng-repeat="col in vm.columns track by $index">
                     <span class="table-column-displayname" ng-attr-uib-tooltip="{{::(col.comment) ? col.comment : undefined}}" ng-attr-tooltip-placement="{{::(col.comment) ? 'top' : undefined}}" title="{{col.comment}}" ng-click="col.sortable && vm.enableSort && sortby(col.name)">

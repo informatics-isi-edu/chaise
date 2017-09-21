@@ -2,11 +2,13 @@
     <loading-spinner ng-show="!vm.hasLoaded && !vm.backgroundSearch"></loading-spinner>
     <div class="main-container">
         <div ng-show="vm.initialized" class="row" style="margin-bottom: 10px;">
-            
             <div ng-if="vm.config.selectMode == 'multi-select' && !vm.config.hideSelectedRows" class="row total-filters selected-rows">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                    <a class="remove-link" ng-click="removeAllPills()" ng-if="vm.selectedRows.length > 0 ">
-                        <span class="filter-label label label-primary">
+                    <a class="remove-link" ng-click="removeAllPills()" ng-disabled="vm.selectedRows.length < 1">
+                        <span class="filter-label label label-primary" ng-if="vm.selectedRows.length < 1">
+                            No Item Selected
+                        </span>
+                        <span class="filter-label label label-primary" ng-if="vm.selectedRows.length > 0">
                             Clear All
                         </span>
                     </a>

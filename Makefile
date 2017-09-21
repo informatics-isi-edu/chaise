@@ -40,6 +40,7 @@ E2EDrecordRelatedTable=test/e2e/specs/all-features/record/related-table.conf.js
 E2EDrecordset=test/e2e/specs/all-features-confirmation/recordset/presentation.conf.js
 E2EDrecordsetEdit=test/e2e/specs/default-config/recordset/edit.conf.js
 E2ErecordsetAdd=test/e2e/specs/default-config/recordset/add.conf.js
+
 # Viewer tests
 E2EDviewer=test/e2e/specs/all-features/viewer/presentation.conf.js
 # misc tests
@@ -53,6 +54,110 @@ FullFeaturesParallel=test/e2e/specs/all-features/protractor.conf.js
 FullFeaturesConfirmationParallel=test/e2e/specs/all-features-confirmation/protractor.conf.js
 DeleteProhibitedParallel=test/e2e/specs/delete-prohibited/protractor.conf.js
 DefaultConfigParallel=test/e2e/specs/default-config/protractor.conf.js
+
+
+NAVBAR_TESTS=$(E2Enavbar) $(E2EnavbarHeadTitle)
+SEARCH_TESTS=$(E2Esearch)
+DETAILED_TESTS=$(E2EDdetailed)
+RECORDSET_TESTS=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit)
+RECORD_TESTS=$(E2EDrecord) $(E2ErecordNoDeleteBtn) $(E2EDrecordRelatedTable) $(E2EDrecordCopy)
+RECORDADD_TESTS=$(E2EDIrecordAdd) $(E2EDIrecordMultiAdd) $(E2EDIrecordDefaults)
+RECORDEDIT_TESTS=$(E2EDIrecordEdit) $(E2EDIrecordMultiEdit) $(E2EDrecordEditCompositeKey) $(E2ErecordEditNoDeleteBtn) $(E2EDrecordEditSubmissionDisabled) $(E2EDIrecordEditMultiColTypes) $(E2EDrecordEditDomainFilter)
+PERMISSIONS_TESTS=$(E2EmultiPermissionsVisibility)
+FOOTER_TESTS=$(E2Efooter)
+DEFAULT_CONFIG_PARALLEL_TESTS=$(DefaultConfigParallel)
+DELETE_PROHIBITED_PARALLEL_TESTS=$(DeleteProhibitedParallel)
+FULL_FEATURES_CONFIRMATION_PARALLEL_TESTS=$(FullFeaturesConfirmationParallel)
+FULL_FEATURES_PARALLEL_TESTS=$(FullFeaturesParallel)
+PARALLEL_TESTS=$(FullFeaturesParallel) $(FullFeaturesConfirmationParallel) $(DeleteProhibitedParallel) $(DefaultConfigParallel)
+VIEWER_TESTS=$(E2EDviewer)
+
+ALL_TESTS=$(NAVBAR_TESTS) $(RECORD_TESTS) $(RECORDSET_TESTS) $(RECORDADD_TESTS) $(RECORDEDIT_TESTS) $(PERMISSIONS_TESTS) $(VIEWER_TESTS) $(SEARCH_TESTS) $(FOOTER_TESTS)
+
+define make_test
+	rc=0; \
+	for file in $(1); do \
+		$(BIN)/protractor $$file || rc=1; \
+	done; \
+	exit $$rc;
+endef
+
+test-%: deps
+	$(call make_test, $($*), "0")
+
+#### Sequential make commands - these commands will run tests in sequential order
+#Rule to run navbar tests
+.PHONY: testnavbar
+testnavbar: test-NAVBAR_TESTS
+
+#Rule to run search app tests
+.PHONY: testsearch
+testsearch: test-SEARCH_TESTS
+
+#Rule to run record app tests
+.PHONY: testrecord
+testrecord: test-RECORD_TESTS
+
+#Rule to run record add app tests
+.PHONY: testrecordadd
+testrecordadd: test-RECORDADD_TESTS
+
+# Rule to run record edit app tests
+.PHONY: testrecordedit
+testrecordedit: test-RECORDEDIT_TESTS
+
+.PHONY: testpermissions
+testpermissions:test-PERMISSIONS_TESTS
+
+#Rule to run viewer app tests
+.PHONY: testviewer
+testviewer: test-VIEWER_TESTS
+
+#Rule to run detailed app tests
+.PHONY: testdetailed
+testdetailed: test-DETAILED_TESTS
+
+#Rule to run recordset app tests
+.PHONY: testrecordset
+testrecordset: test-RECORDSET_TESTS
+
+#### Parallel make commands - these commands will run tests in parallel
+#Rule to run all parallel test configurations
+.PHONY: testparallel
+testparallel: test-PARALLEL_TESTS
+
+#Rule to run the full features chaise configuration tests in parallel
+.PHONY: testfullfeatures
+testfullfeatures: test-FULL_FEATURES_PARALLEL_TESTS
+
+#Rule to run the full features chaise configuration tests in parallel
+.PHONY: testfullfeaturesconfirmation
+testfullfeaturesconfirmation: test-FULL_FEATURES_CONFIRMATION_PARALLEL_TESTS
+
+#Rule to run the delete prohibited chaise configuration tests in parallel
+.PHONY: testdeleteprohibited
+testdeleteprohibited: test-DELETE_PROHIBITED_PARALLEL_TESTS
+
+#Rule to run the default chaise configuration tests in parallel
+.PHONY: testdefaultconfig
+testdefaultconfig: test-DEFAULT_CONFIG_PARALLEL_TESTS
+
+#Rule to run the default chaise configuration tests in parallel
+.PHONY: testfooter
+testfooter: test-FOOTER_TESTS	
+
+# Rule to run tests
+.PHONY: test
+test: test-ALL_TESTS
+
+# Rule to run karma
+.PHONY: karma
+karma: deps
+	$(BIN)/karma start
+
+# Rule to run tests
+.PHONY: testall
+testall: test karma
 
 # Rule to determine MD5 utility
 ifeq ($(shell which md5 2>/dev/null),)
@@ -236,6 +341,8 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/utils.js \
 	$(COMMON)/bindHtmlUnsafe.js \
 	$(COMMON)/footer.js \
+	$(COMMON)/upload.js \
+	$(COMMON)/recordCreate.js \
 	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/ui-bootstrap-tpls.js
 
@@ -323,6 +430,7 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/bindHtmlUnsafe.js \
 	$(COMMON)/markdownPreview.js \
 	$(COMMON)/footer.js \
+	$(COMMON)/recordCreate.js \
 	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/ui-bootstrap-tpls.js \
 	$(JS)/vendor/select.js \
@@ -474,95 +582,6 @@ clean:
 distclean: clean
 	rm -rf $(MODULES)
 
-# Rule to run tests
-.PHONY: test
-test: deps
-	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EnavbarHeadTitle) && $(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordCopy) && $(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2ErecordsetAdd) && $(BIN)/protractor $(E2EDrecordsetEdit) && $(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordDefaults) && $(BIN)/protractor $(E2EDIrecordMultiAdd) && $(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIrecordMultiEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2ErecordEditNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDIrecordEditMultiColTypes) && $(BIN)/protractor $(E2EDrecordEditDomainFilter) && $(BIN)/protractor $(E2EmultiPermissionsVisibility) && $(BIN)/protractor $(E2EDviewer) && $(BIN)/protractor $(E2Esearch) && $(BIN)/protractor $(E2Efooter)
-
-# Rule to run karma
-.PHONY: karma
-karma: deps
-	$(BIN)/karma start
-
-# Rule to run tests
-.PHONY: testall
-testall: test karma
-
-#### Sequential make commands - these commands will run tests in sequential order
-#Rule to run navbar tests
-.PHONY: testnavbar
-testnavbar: deps
-	$(BIN)/protractor $(E2Enavbar) && $(BIN)/protractor $(E2EnavbarHeadTitle)
-
-#Rule to run search app tests
-.PHONY: testsearch
-testsearch: deps
-	$(BIN)/protractor $(E2Esearch)
-
-#Rule to run detailed app tests
-.PHONY: testdetailed
-testdetailed: deps
-	$(BIN)/protractor $(E2EDdetailed)
-
-#Rule to run record app tests
-.PHONY: testrecord
-testrecord: deps
-	$(BIN)/protractor $(E2EDrecord) && $(BIN)/protractor $(E2ErecordNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordRelatedTable) && $(BIN)/protractor $(E2EDrecordCopy)
-
-#Rule to run record add app tests
-.PHONY: testrecordadd
-testrecordadd: deps
-	$(BIN)/protractor $(E2EDIrecordAdd) && $(BIN)/protractor $(E2EDIrecordMultiAdd) && $(BIN)/protractor $(E2EDIrecordDefaults)
-
-#Rule to run recordset app tests
-.PHONY: testrecordset
-testrecordset: deps
-	$(BIN)/protractor $(E2EDrecordset) && $(BIN)/protractor $(E2ErecordsetAdd) && $(BIN)/protractor $(E2EDrecordsetEdit)
-
-# Rule to run record edit app tests
-.PHONY: testrecordedit
-testrecordedit: deps
-	$(BIN)/protractor $(E2EDIrecordEdit) && $(BIN)/protractor $(E2EDIrecordMultiEdit) && $(BIN)/protractor $(E2EDrecordEditCompositeKey) && $(BIN)/protractor $(E2ErecordEditNoDeleteBtn) && $(BIN)/protractor $(E2EDrecordEditSubmissionDisabled) && $(BIN)/protractor $(E2EDIrecordEditMultiColTypes) && $(BIN)/protractor $(E2EDrecordEditDomainFilter)
-
-.PHONY: testpermissions
-testpermissions:
-	$(BIN)/protractor $(E2EmultiPermissionsVisibility)
-
-#Rule to run viewer app tests
-.PHONY: testviewer
-testviewer: deps
-	$(BIN)/protractor $(E2EDviewer)
-
-#### Parallel make commands - these commands will run tests in parallel
-#Rule to run all parallel test configurations
-.PHONY: testparallel
-testparallel: deps
-	$(BIN)/protractor $(FullFeaturesParallel) && $(BIN)/protractor $(FullFeaturesConfirmationParallel) && $(BIN)/protractor $(DeleteProhibitedParallel) && $(BIN)/protractor $(DefaultConfigParallel)
-
-#Rule to run the full features chaise configuration tests in parallel
-.PHONY: testfullfeatures
-testfullfeatures: deps
-	$(BIN)/protractor $(FullFeaturesParallel)
-
-#Rule to run the full features chaise configuration tests in parallel
-.PHONY: testfullfeaturesconfirmation
-testfullfeaturesconfirmation: deps
-	$(BIN)/protractor $(FullFeaturesConfirmationParallel)
-
-#Rule to run the delete prohibited chaise configuration tests in parallel
-.PHONY: testdeleteprohibited
-testdeleteprohibited: deps
-	$(BIN)/protractor $(DeleteProhibitedParallel)
-
-#Rule to run the default chaise configuration tests in parallel
-.PHONY: testdefaultconfig
-testdefaultconfig: deps
-	$(BIN)/protractor $(DefaultConfigParallel)
-
-#Rule to run the default chaise configuration tests in parallel
-.PHONY: testfooter
-testfooter: deps
-	$(BIN)/protractor $(E2Efooter)
 
 # Rule to make html
 .PHONY: html
@@ -792,7 +811,7 @@ $(JS_CONFIG): chaise-config-sample.js
 # Rule for installing for normal deployment
 .PHONY: install dont_install_in_root
 install: $(HTML) dont_install_in_root gitversion
-	rsync -avz --exclude='.*' --exclude='$(MODULES)' --exclude='wiki-images' --exclude=./chaise-config.js . $(CHAISEDIR)
+	rsync -avz --exclude='.*' --exclude='$(MODULES)' --exclude='wiki-images' --exclude=/chaise-config.js . $(CHAISEDIR)
 
 .PHONY: gitversion
 gitversion:

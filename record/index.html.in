@@ -48,9 +48,9 @@
                     </div>
                 </div>
             </div>
-            <alerts alerts="ctrl.alerts"></alerts>
 
             <div class="main-container">
+                <alerts alerts="ctrl.alerts"></alerts>
                 <!-- defined on $rootScope in run function -->
                 <record-display columns="::columns" values="::recordValues"  record-table-model="::colTableModels" related-reference-display-table="::rtrefDisTypetable"
                     toggle-related-table-display-type='ctrl.toggleRelatedTableDisplayType(dataModel)' can-edit-related="::ctrl.canEditRelated(ref)" can-create-related="::ctrl.canCreateRelated(ref)"

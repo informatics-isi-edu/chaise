@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    angular.module('chaise.modal', [])
+    angular.module('chaise.modal', ['chaise.utils'])
 
     .controller('ConfirmDeleteController', ['$uibModalInstance', function ConfirmDeleteController($uibModalInstance) {
         var vm = this;
@@ -60,6 +60,7 @@
         }
 
     }])
+    
     /**
      * Controller used to show the modal popup with the recordset directive for searching through entitiy sets
      * 
@@ -68,7 +69,7 @@
      *  - context {String} - the current context that the directive fetches data for
      *  - selectMode {String} - the select mode the modal uses
      */
-    .controller('SearchPopupController', ['$scope', '$uibModalInstance', 'DataUtils', 'params', 'Session', function SearchPopupController($scope, $uibModalInstance, DataUtils, params, Session) {
+    .controller('SearchPopupController', ['$scope', '$uibModalInstance', 'DataUtils', 'params', 'Session', 'modalBox', function SearchPopupController($scope, $uibModalInstance, DataUtils, params, Session, modalBox) {
         var vm = this;
 
         vm.params = params;
@@ -78,13 +79,12 @@
 
         vm.hasLoaded = false;
         var reference = vm.reference = params.reference;
-        var tableDisplayName = params.displayname ? params.displayname : reference.displayname;
         var limit = 25;
 
         vm.tableModel = {
             hasLoaded:          false,
             reference:          reference,
-            tableDisplayName:   tableDisplayName,
+            tableDisplayName:   params.displayname ? params.displayname : reference.displayname,
             columns:            reference.columns,
             sortby:             reference.location.sortObject ? reference.location.sortObject[0].column: null,
             sortOrder:          reference.location.sortObject ? (reference.location.sortObject[0].descending ? "desc" : "asc") : null,
@@ -116,7 +116,7 @@
     
         // since this is currently used for single select mode, the isSelected will always be true
         function ok(tuples, isSelected) {
-            if (params.selectMode != "multi-select") $uibModalInstance.close(tuples[0]);
+            if (params.selectMode != modalBox.multiSelectMode) $uibModalInstance.close(tuples[0]);
         }
 
         function submitMultiSelection() {
@@ -125,6 +125,32 @@
 
         function cancel() {
             $uibModalInstance.dismiss("cancel");
+        }
+    }])
+
+    .controller('profileModalDialogController', ['$uibModalInstance','$rootScope', 'Session','UriUtils',function ($uibModalInstance, $rootScope, Session, UriUtils){
+        var vm = this;
+        vm.groupList =[];
+        vm.identities = [];
+        vm.client= {};
+        vm.cancel = function() {
+            $uibModalInstance.dismiss();
+        };
+        $rootScope.session = Session.getSessionValue();
+        vm.client =$rootScope.session.client;
+            
+        var user = $rootScope.session.client;
+        vm.user = user.full_name || user.display_name  || user.email || user.id;
+        for(var i = 0; i<  $rootScope.session.client.identities.length; i++){
+            vm.identities.push($rootScope.session.client.identities[i]);
+        }
+        
+        
+        for(var i = 0; i<  $rootScope.session.attributes.length; i++){
+            if($rootScope.session.attributes[i].display_name && $rootScope.session.attributes[i].display_name !== user.display_name){
+                $rootScope.session.attributes[i].id= $rootScope.session.attributes[i].id.substring(24);
+                vm.groupList.push($rootScope.session.attributes[i]);
+            }
         }
     }])
 
