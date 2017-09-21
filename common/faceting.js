@@ -511,7 +511,7 @@
                                 });
                             } else {
                                 scope.facetModel.appliedFilters = scope.facetModel.appliedFilters.filter(function (f) {
-                                    return f.uniqueId !== row.uniqueId;
+                                    return f.uniqueId != row.uniqueId;
                                 });
                             }
                         }

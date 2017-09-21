@@ -15,7 +15,7 @@
                         </h4>
                     </uib-accordion-heading>
                 <div ng-switch="fc.preferredMode">
-                    <range-picker ng-switch-when="range" vm="vm" facet-column="fc" facet-model="vm.facetModels[$index]" index="$index"></range-picker>
+                    <range-picker ng-switch-when="ranges" vm="vm" facet-column="fc" facet-model="vm.facetModels[$index]" index="$index"></range-picker>
                     <choice-picker ng-switch-default facet-column="fc" facet-model="vm.facetModels[$index]" index="$index"></string-picker>
                 </div>
             </div>
