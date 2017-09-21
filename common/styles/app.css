@@ -908,13 +908,14 @@ footer .container1 {
  }
  
  .recordset-container {
-    margin-top: 5px; 
+    
  }
  
  .recordset-container.with-faceting {
      -webkit-box-flex: 1;
      display: flex;
      flex: 1;
+     margin-top: 5px; 
  }
 
  .recordset-container.with-faceting > .faceting-resizable {
@@ -937,12 +938,12 @@ footer .container1 {
      padding-bottom: 10px;
      position: relative;
      z-index: 1;
+     overflow-y: auto;
+     margin-top: 10px;
  }
  
  .recordset-container > .main-container {
      overflow-x: hidden;
-     overflow-y: auto;
-     margin-top: 10px;
  }
 
  .faceting-container {
@@ -1212,4 +1213,20 @@ range-inputs  .input-clearbtn{
 
 range-inputs  .input-container {
     position: relative;
+}
+
+/************** search popup **************/
+.search-popup {
+    
+}
+
+.multi-select-submit-btn {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    z-index: 2;
+}
+
+.selected-rows {
+    min-height: 45px;
 }

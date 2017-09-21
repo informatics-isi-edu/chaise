@@ -822,6 +822,7 @@
                         var modalInstance = $uibModal.open({
                             animation: false,
                             controller: "SearchPopupController",
+                            windowClass: "search-popup",
                             controllerAs: "ctrl",
                             resolve: {
                                 params: params
