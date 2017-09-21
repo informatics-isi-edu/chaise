@@ -746,7 +746,6 @@ footer .container1 {
      background-color: #F5F5F5;
  }
 
-<<<<<<< HEAD
 /************* resizable ***************/
 .resizable {
   position: relative;
@@ -909,13 +908,14 @@ footer .container1 {
  }
  
  .recordset-container {
-    margin-top: 5px; 
+    
  }
  
  .recordset-container.with-faceting {
      -webkit-box-flex: 1;
      display: flex;
      flex: 1;
+     margin-top: 5px; 
  }
 
  .recordset-container.with-faceting > .faceting-resizable {
@@ -924,23 +924,26 @@ footer .container1 {
      /*border-right: 15px solid white;*/
      min-width: 150px;
      max-width: 50vw;
+    z-index: 2;
+ }
+ .recordset-container.with-faceting > .faceting-resizable:not(.initializing) {
      -webkit-box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
     -moz-box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
     box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
-    z-index: 2;
  }
+ 
  .recordset-container.with-faceting > .main-container {
      flex:1;
      border-left: 25px solid white;
      padding-bottom: 10px;
      position: relative;
      z-index: 1;
+     overflow-y: auto;
+     margin-top: 10px;
  }
  
  .recordset-container > .main-container {
      overflow-x: hidden;
-     overflow-y: auto;
-     margin-top: 10px;
  }
 
  .faceting-container {
@@ -968,6 +971,14 @@ footer .container1 {
      text-transform: none;
      border: 0;
      margin: 1px 0;
+ }
+ 
+ .faceting-container .panel {
+     border: 1px solid #ddd !important;
+ }
+ 
+ .faceting-container .panel:hover, .faceting-container .panel-default.active {
+     border-color: rgb(51, 122, 183) !important;
  }
 
  .faceting-container .update-btn {
@@ -1027,12 +1038,7 @@ footer .container1 {
      top: 0;
  }
  
- .faceting-container .panel {
-     border: 1px solid #ddd !important;
- }
- 
- .faceting-container .panel.focused {
-     border-color: darkblue !important;
+ .faceting-container{
      -webkit-transition: all 1s;
      transition: all 1s;
  }
@@ -1207,4 +1213,20 @@ range-inputs  .input-clearbtn{
 
 range-inputs  .input-container {
     position: relative;
+}
+
+/************** search popup **************/
+.search-popup {
+    
+}
+
+.multi-select-submit-btn {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    z-index: 2;
+}
+
+.selected-rows {
+    min-height: 45px;
 }

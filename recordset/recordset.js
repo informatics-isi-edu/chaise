@@ -163,7 +163,7 @@
             // get bookmark container height
             elements.bookmarkHeight = $document[0].getElementById('bookmark-container').offsetHeight;
             // get recordset main container
-            elements.container = $document[0].getElementsByClassName('recordset-container')[0].getElementsByClassName('main-container')[0];
+            elements.container = $document[0].getElementsByClassName('recordset-container' + (chaiseConfig.showFaceting ? " with-faceting":""))[0].getElementsByClassName('main-container')[0];
             return elements;
         }
 
@@ -186,15 +186,23 @@
             return ($rootScope.pageLoaded || recordsetModel.hasLoaded) && recordsetModel.initialized;
         }, function (newValue, oldValue) {
             if (newValue) {
-                UiUtils.setDisplayHeight(fetchMainElements());
-                if (chaiseConfig.showFaceting) UiUtils.setDisplayHeight(fetchFacetingElements());
+                try {
+                    UiUtils.setDisplayHeight(fetchMainElements());
+                    if (chaiseConfig.showFaceting) UiUtils.setDisplayHeight(fetchFacetingElements());
+                } catch(exp) {
+                    // fail silently
+                }
             }
         });
         
         angular.element($window).bind('resize', function(){
-            UiUtils.setDisplayHeight(fetchMainElements());
-            if (chaiseConfig.showFaceting) UiUtils.setDisplayHeight(fetchFacetingElements());
-            $scope.$digest();
+            try {
+                UiUtils.setDisplayHeight(fetchMainElements());
+                if (chaiseConfig.showFaceting) UiUtils.setDisplayHeight(fetchFacetingElements());
+                $scope.$digest();
+            } catch(exp) {
+                // fail silently
+            }
         });
 
     }])
