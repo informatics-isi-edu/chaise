@@ -3,7 +3,8 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', '$cookies', '$log', 'UriUtils', 'DataUtils', 'ErrorService', 'MathUtils', 'messageMap', '$rootScope', '$window', '$scope', '$uibModal','$controller','recordCreate', 'modalBox', function RecordController(AlertsService, $cookies, $log, UriUtils, DataUtils, ErrorService, MathUtils, messageMap, $rootScope, $window, $scope, $uibModal, $controller, recordCreate, modalBox) {
+    .controller('RecordController', ['AlertsService', 'DataUtils', 'ErrorService', 'MathUtils', 'messageMap', 'modalBox', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$uibModal', '$window', 
+        function RecordController(AlertsService, DataUtils, ErrorService, MathUtils, messageMap, modalBox, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $uibModal, $window) {
         var vm = this;
         var addRecordRequests = {}; // <generated unique id : reference of related table>
         var editRecordRequests = {}; // generated id: {schemaName, tableName}
@@ -234,5 +235,35 @@
             updated[editRecordRequests[id].schema + ":" + editRecordRequests[id].table] = true;
             delete editRecordRequests[id];
         }
+
+        // fetches the height of navbar, bookmark container, and view
+        // also fetches the main container for defining the dynamic height
+        function fetchElements() {
+            var elements = {};
+            // get document height
+            elements.docHeight = $document[0].documentElement.offsetHeight
+            // get navbar height
+            elements.navbarHeight = $document[0].getElementById('mainnav').offsetHeight;
+            // get bookmark container height
+            elements.bookmarkHeight = $document[0].getElementById('bookmark-container').offsetHeight;
+            // get record main container
+            elements.container = $document[0].getElementsByClassName('main-container')[0];
+            return elements;
+        }
+
+        // watch for the display to be ready before setting the main container height
+        $scope.$watch(function() {
+            return $rootScope.displayReady;
+        }, function (newValue, oldValue) {
+            if (newValue) {
+                UiUtils.setDisplayHeight(fetchElements());
+            }
+        });
+
+        // change the main container height whenever the DOM resizes
+        angular.element($window).bind('resize', function(){
+            UiUtils.setDisplayHeight(fetchElements());
+            $scope.$digest();
+        });
     }]);
 })();

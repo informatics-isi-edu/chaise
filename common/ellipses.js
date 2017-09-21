@@ -27,7 +27,7 @@
                     scope.$emit('record-modified');
 
                 }, function deleteFailure(response) {
-                    throw error;
+                    throw response;
                 }).catch(function (error) {
                     throw error;
                 });

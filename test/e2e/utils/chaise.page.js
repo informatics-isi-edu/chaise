@@ -584,15 +584,15 @@ var recordPage = function() {
     };
 
     this.getEntityTitleElement = function() {
-        return element(by.id('entity-title'));
+        return element(by.id('page-title'));
     };
 
     this.getEntitySubTitle = function() {
-        return browser.executeScript("return $('#entity-subtitle > span').text();");
+        return browser.executeScript("return $('#page-subtitle > span').text();");
     };
 
     this.getEntitySubTitleElement = function() {
-        return element(by.id("entity-subtitle"));
+        return element(by.id("page-subtitle"));
     };
 
     this.getColumns = function() {

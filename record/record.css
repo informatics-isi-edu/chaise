@@ -4,10 +4,17 @@
     padding-left: 50px;
 }
 
-#main-content {
-    margin-top: 120px;
+.smaller-margin {
+    margin-left: -50px;
+    margin-right: -50px;
 }
 
+.main-container {
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin-top: 5px;
+    padding-bottom: 20px;
+}
 
 /******Related Entities**************/
 

@@ -55,7 +55,8 @@ describe('Navbar ', function() {
             link.click();
             var profileLink = element(by.id('profile-link'));
             browser.wait(EC.elementToBeClickable(profileLink), browser.params.defaultTimeout).then(function() {
-                profileLink.click();
+                return profileLink.click();
+            }).then(function () {
                 var modalContent = element(by.css('.modal-content'));
                 expect(modalContent.isDisplayed()).toBeTruthy();
             });
@@ -65,7 +66,8 @@ describe('Navbar ', function() {
     it('should close the profile card on click of X on the modal window', function() {
          var closeLink = element(by.css('.modal-close'));
          browser.wait(EC.elementToBeClickable(closeLink), browser.params.defaultTimeout).then (function(){
-            closeLink.click();
+            return closeLink.click();
+        }).then(function () {
             var modalContent = element(by.css('.modal-content'));
             expect(modalContent.isPresent()).toEqual(false);
          });
