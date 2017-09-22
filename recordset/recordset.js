@@ -85,8 +85,8 @@
         $scope.navbarBrand = (chaiseConfig['navbarBrand'] !== undefined? chaiseConfig.navbarBrand : "");
         $scope.navbarBrandImage = (chaiseConfig['navbarBrandImage'] !== undefined? chaiseConfig.navbarBrandImage : "");
         $scope.navbarBrandText = (chaiseConfig['navbarBrandText'] !== undefined? chaiseConfig.navbarBrandText : "Chaise");
-        $scope.showEdit = recordsetModel.page && recordsetModel.reference.canUpdate && recordsetModel.config.editable && !chaiseConfig.showFaceting;
-        
+        $scope.enableEditBasedOnFaceting = chaiseConfig.showFaceting == true ? false : true;
+
         function updateLocation() {
             $window.scrollTo(0, 0);
             $window.location.href = $scope.permalink();
