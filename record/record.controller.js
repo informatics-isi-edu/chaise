@@ -243,9 +243,15 @@
             // get document height
             elements.docHeight = $document[0].documentElement.offsetHeight
             // get navbar height
-            elements.navbarHeight = $document[0].getElementById('mainnav').offsetHeight;
+            var mainNav = $document[0].getElementById('mainnav');
+            if (mainNav) {
+                elements.navbarHeight = mainNav.offsetHeight;
+            }
             // get bookmark container height
-            elements.bookmarkHeight = $document[0].getElementById('bookmark-container').offsetHeight;
+            var bookmark = $document[0].getElementById('bookmark-container');
+            if (bookmark) {
+                elements.bookmarkHeight = bookmark.offsetHeight;
+            }
             // get record main container
             elements.container = $document[0].getElementsByClassName('main-container')[0];
             return elements;
@@ -256,7 +262,10 @@
             return $rootScope.displayReady;
         }, function (newValue, oldValue) {
             if (newValue) {
-                UiUtils.setDisplayHeight(fetchElements());
+                var elements = fetchElements();
+                if(elements.navbarHeight && elements.bookmarkHeight) {
+                    UiUtils.setDisplayHeight(elements);
+                }
             }
         });
 
