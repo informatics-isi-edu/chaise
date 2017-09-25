@@ -76,6 +76,19 @@
                 </button>
             </div>
         </div>
+        <div ng-if="vm.initialized && vm.filterString" class="row total-filters selected-rows">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding-left: 0;">
+                <a class="remove-link" ng-click="unfiltered()" tooltip-placement="bottom" uib-tooltip="Show unfiltered list">
+                    <span class="filter-label label label-primary">
+                        Clear All
+                    </span>
+                </a>
+                <div class="filter-label label label-default" tooltip-enable="tooltipEnabled" uib-tooltip="{{vm.filterString}}" tooltip-placement="bottom" chaise-enable-tooltip-width>
+                    <a class="remove-link" ng-click="unfiltered()"><i class="glyphicon glyphicon-remove"></i></a>
+                    <span ng-bind="vm.filterString"></span>
+                </div>
+            </div>
+        </div>
         
         <!-- record table -->
         <div ng-if="vm.hasLoaded">
