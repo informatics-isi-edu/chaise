@@ -296,7 +296,7 @@
 
                      // the additional provided name
                     if (location.queryParams && location.queryParams.subset) {
-                        recordsetModel.subTitle = location.queryParams.subset;
+                        recordsetModel.filterString = location.queryParams.subset;
                     }
 
                     recordsetModel.columns = recordsetModel.reference.columns;

@@ -577,6 +577,12 @@
                 scope.vm.currentPageSelected = false;
                 //TODO this is forced here
                 scope.vm.showFaceting = false;
+                
+                scope.unfiltered = function () {
+                    scope.vm.reference = scope.vm.reference.unfilteredReference;
+                    scope.vm.filterString = null;
+                    recordTableUtils.read(scope);
+                }
 
                 scope.setPageLimit = function(limit) {
                     scope.vm.pageLimit = limit;
