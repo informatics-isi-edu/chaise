@@ -583,15 +583,19 @@
         // also fetches the faceting container for defining the dynamic height
         function fetchElements() {
             var elements = {};
-            // get document height
-            elements.docHeight = $document[0].documentElement.offsetHeight
-            // get navbar height
-            elements.navbarHeight = $document[0].getElementById('mainnav').offsetHeight;
-            // there is no bookmark bar
-            // TODO: if bookmark bar added
-            elements.bookmarkHeight = 0;
-            // get recordset main container
-            elements.container = $document[0].getElementsByClassName('main-container')[0];
+            try {
+                // get document height
+                elements.docHeight = $document[0].documentElement.offsetHeight
+                // get navbar height
+                elements.navbarHeight = $document[0].getElementById('mainnav').offsetHeight;
+                // there is no bookmark bar
+                // TODO: if bookmark bar added
+                elements.bookmarkHeight = 0;
+                // get recordset main container
+                elements.container = $document[0].getElementsByClassName('main-container')[0];
+            } catch(error) {
+                $log.warn(error);
+            }
             return elements;
         }
 
@@ -599,7 +603,11 @@
             return $rootScope.displayReady;
         }, function (newValue, oldValue) {
             if (newValue) {
-                UiUtils.setDisplayHeight(fetchElements());
+                var elements = fetchElements();
+                // if these 2 values are not set yet, don't set the height
+                if(elements.navbarHeight && elements.bookmarkHeight) {
+                    UiUtils.setDisplayHeight(elements);
+                }
             }
         });
 

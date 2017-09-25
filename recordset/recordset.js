@@ -156,14 +156,18 @@
         // also fetches the main container for defining the dynamic height
         function fetchMainElements() {
             var elements = {};
-            // get document height
-            elements.docHeight = $document[0].documentElement.offsetHeight
-            // get navbar height
-            elements.navbarHeight = $document[0].getElementById('mainnav').offsetHeight;
-            // get bookmark container height
-            elements.bookmarkHeight = $document[0].getElementById('bookmark-container').offsetHeight;
-            // get recordset main container
-            elements.container = $document[0].getElementsByClassName('recordset-container' + (chaiseConfig.showFaceting ? " with-faceting":""))[0].getElementsByClassName('main-container')[0];
+            try {
+                // get document height
+                elements.docHeight = $document[0].documentElement.offsetHeight
+                // get navbar height
+                elements.navbarHeight = $document[0].getElementById('mainnav').offsetHeight;
+                // get bookmark container height
+                elements.bookmarkHeight = $document[0].getElementById('bookmark-container').offsetHeight;
+                // get recordset main container
+                elements.container = $document[0].getElementsByClassName('recordset-container' + (chaiseConfig.showFaceting ? " with-faceting":""))[0].getElementsByClassName('main-container')[0];
+            } catch (error) {
+                $log.warn(error);
+            }
             return elements;
         }
 
@@ -171,14 +175,18 @@
         // also fetches the faceting container for defining the dynamic height
         function fetchFacetingElements() {
             var elements = {};
-            // get document height
-            elements.docHeight = $document[0].documentElement.offsetHeight
-            // get navbar height
-            elements.navbarHeight = $document[0].getElementById('mainnav').offsetHeight;
-            // get bookmark container height
-            elements.bookmarkHeight = $document[0].getElementById('bookmark-container').offsetHeight;
-            // get recordset main container
-            elements.container = $document[0].getElementsByClassName('faceting-container')[0];
+            try {
+                // get document height
+                elements.docHeight = $document[0].documentElement.offsetHeight
+                // get navbar height
+                elements.navbarHeight = $document[0].getElementById('mainnav').offsetHeight;
+                // get bookmark container height
+                elements.bookmarkHeight = $document[0].getElementById('bookmark-container').offsetHeight;
+                // get recordset main container
+                elements.container = $document[0].getElementsByClassName('faceting-container')[0];
+            } catch (error) {
+                $log.warn(error);
+            }
             return elements;
         }
 
@@ -187,8 +195,13 @@
         }, function (newValue, oldValue) {
             if (newValue) {
                 try {
-                    UiUtils.setDisplayHeight(fetchMainElements());
-                    if (chaiseConfig.showFaceting) UiUtils.setDisplayHeight(fetchFacetingElements());
+                    var elements = fetchElements();
+                    // if these 2 values are not set yet, don't set the height
+                    if(elements.navbarHeight && elements.bookmarkHeight) {
+                        UiUtils.setDisplayHeight(elements);
+                        // no need to fetch and verify the faceting elements (navbar and bookmark are the same container as the ones used in main elements function)
+                        if (chaiseConfig.showFaceting) UiUtils.setDisplayHeight(fetchFacetingElements());
+                    }
                 } catch(exp) {
                     // fail silently
                 }

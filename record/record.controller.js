@@ -240,20 +240,20 @@
         // also fetches the main container for defining the dynamic height
         function fetchElements() {
             var elements = {};
-            // get document height
-            elements.docHeight = $document[0].documentElement.offsetHeight
-            // get navbar height
-            var mainNav = $document[0].getElementById('mainnav');
-            if (mainNav) {
+            try {
+                // get document height
+                elements.docHeight = $document[0].documentElement.offsetHeight
+                // get navbar height
+                var mainNav = $document[0].getElementById('mainnav');
                 elements.navbarHeight = mainNav.offsetHeight;
-            }
-            // get bookmark container height
-            var bookmark = $document[0].getElementById('bookmark-container');
-            if (bookmark) {
+                // get bookmark container height
+                var bookmark = $document[0].getElementById('bookmark-container');
                 elements.bookmarkHeight = bookmark.offsetHeight;
+                // get record main container
+                elements.container = $document[0].getElementsByClassName('main-container')[0];
+            } catch (error) {
+                $log.warn(error);
             }
-            // get record main container
-            elements.container = $document[0].getElementsByClassName('main-container')[0];
             return elements;
         }
 
@@ -263,6 +263,7 @@
         }, function (newValue, oldValue) {
             if (newValue) {
                 var elements = fetchElements();
+                // if these 2 values are not set yet, don't set the height
                 if(elements.navbarHeight && elements.bookmarkHeight) {
                     UiUtils.setDisplayHeight(elements);
                 }
