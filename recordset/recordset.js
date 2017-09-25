@@ -210,14 +210,16 @@
         
         angular.element($window).bind('resize', function(){
             try {
-                var elements = fetchElements();
-                // if these 2 values are not set yet, don't set the height
-                if(elements.navbarHeight && elements.bookmarkHeight) {
-                    UiUtils.setDisplayHeight(elements);
-                    // no need to fetch and verify the faceting elements (navbar and bookmark are the same container as the ones used in main elements function)
-                    if (chaiseConfig.showFaceting) UiUtils.setDisplayHeight(fetchFacetingElements());
+                if ( ($rootScope.pageLoaded || recordsetModel.hasLoaded) && recordsetModel.initialized ) {
+                    var elements = fetchElements();
+                    // if these 2 values are not set yet, don't set the height
+                    if(elements.navbarHeight && elements.bookmarkHeight) {
+                        UiUtils.setDisplayHeight(elements);
+                        // no need to fetch and verify the faceting elements (navbar and bookmark are the same container as the ones used in main elements function)
+                        if (chaiseConfig.showFaceting) UiUtils.setDisplayHeight(fetchFacetingElements());
+                    }
+                    $scope.$digest();
                 }
-                $scope.$digest();
             } catch(exp) {
                 // fail silently
             }

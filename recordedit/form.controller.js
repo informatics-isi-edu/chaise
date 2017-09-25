@@ -612,12 +612,14 @@
         });
 
         angular.element($window).bind('resize', function(){
-            var elements = fetchElements();
-            // if these values are not set yet, don't set the height
-            if(elements.navbarHeight && elements.bookmarkHeight) {
-                UiUtils.setDisplayHeight(elements);
+            if ($rootScope.displayReady) {
+                var elements = fetchElements();
+                // if these values are not set yet, don't set the height
+                if(elements.navbarHeight && elements.bookmarkHeight) {
+                    UiUtils.setDisplayHeight(elements);
+                }
+                $scope.$digest();
             }
-            $scope.$digest();
         });
 
         /*------------------------code below is for fixing the column names when scrolling -----------*/
