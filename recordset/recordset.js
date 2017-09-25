@@ -197,7 +197,7 @@
                 try {
                     var elements = fetchElements();
                     // if these 2 values are not set yet, don't set the height
-                    if(elements.navbarHeight && elements.bookmarkHeight) {
+                    if(elements.navbarHeight && elements.bookmarkHeight && elements.container) {
                         UiUtils.setDisplayHeight(elements);
                         // no need to fetch and verify the faceting elements (navbar and bookmark are the same container as the ones used in main elements function)
                         if (chaiseConfig.showFaceting) UiUtils.setDisplayHeight(fetchFacetingElements());

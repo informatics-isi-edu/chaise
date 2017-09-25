@@ -263,8 +263,8 @@
         }, function (newValue, oldValue) {
             if (newValue) {
                 var elements = fetchElements();
-                // if these 2 values are not set yet, don't set the height
-                if(elements.navbarHeight && elements.bookmarkHeight) {
+                // if these values are not set yet, don't set the height
+                if(elements.navbarHeight && elements.bookmarkHeight && elements.container) {
                     UiUtils.setDisplayHeight(elements);
                 }
             }
