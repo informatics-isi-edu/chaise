@@ -264,7 +264,7 @@
             if (newValue) {
                 var elements = fetchElements();
                 // if these values are not set yet, don't set the height
-                if(elements.navbarHeight && elements.bookmarkHeight && elements.container) {
+                if(elements.navbarHeight && elements.bookmarkHeight) {
                     UiUtils.setDisplayHeight(elements);
                 }
             }
@@ -272,7 +272,11 @@
 
         // change the main container height whenever the DOM resizes
         angular.element($window).bind('resize', function(){
-            UiUtils.setDisplayHeight(fetchElements());
+            var elements = fetchElements();
+            // if these values are not set yet, don't set the height
+            if(elements.navbarHeight && elements.bookmarkHeight) {
+                UiUtils.setDisplayHeight(elements);
+            }
             $scope.$digest();
         });
     }]);

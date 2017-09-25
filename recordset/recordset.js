@@ -197,7 +197,7 @@
                 try {
                     var elements = fetchElements();
                     // if these 2 values are not set yet, don't set the height
-                    if(elements.navbarHeight && elements.bookmarkHeight && elements.container) {
+                    if(elements.navbarHeight && elements.bookmarkHeight) {
                         UiUtils.setDisplayHeight(elements);
                         // no need to fetch and verify the faceting elements (navbar and bookmark are the same container as the ones used in main elements function)
                         if (chaiseConfig.showFaceting) UiUtils.setDisplayHeight(fetchFacetingElements());
@@ -210,8 +210,13 @@
         
         angular.element($window).bind('resize', function(){
             try {
-                UiUtils.setDisplayHeight(fetchMainElements());
-                if (chaiseConfig.showFaceting) UiUtils.setDisplayHeight(fetchFacetingElements());
+                var elements = fetchElements();
+                // if these 2 values are not set yet, don't set the height
+                if(elements.navbarHeight && elements.bookmarkHeight) {
+                    UiUtils.setDisplayHeight(elements);
+                    // no need to fetch and verify the faceting elements (navbar and bookmark are the same container as the ones used in main elements function)
+                    if (chaiseConfig.showFaceting) UiUtils.setDisplayHeight(fetchFacetingElements());
+                }
                 $scope.$digest();
             } catch(exp) {
                 // fail silently
