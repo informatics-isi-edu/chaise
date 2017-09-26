@@ -231,6 +231,9 @@
                         });
                     })(i);
                 }
+                if ($rootScope.relatedReferences.length == 0) {
+                    $rootScope.displayReady = true;
+                }
             }).catch(function genericCatch(exception) {
                 throw exception;
             });
