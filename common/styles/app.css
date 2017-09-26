@@ -913,8 +913,8 @@ footer .container1 {
      display:inline-block;
  }
  
- .recordset-container {
-    
+ .recordset-container.without-faceting {
+    margin-top: 10px;
  }
  
  .recordset-container.with-faceting {
