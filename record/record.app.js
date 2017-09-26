@@ -37,8 +37,8 @@
         $uibTooltipProvider.options({appendToBody: true});
     }])
 
-    .run(['constants', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'MathUtils', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
-        function runApp(constants, DataUtils, ERMrest, ErrorService, headInjector, MathUtils, Session, UiUtils, UriUtils, $log, $rootScope, $window) {
+    .run(['constants', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'MathUtils', 'modalBox', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
+        function runApp(constants, DataUtils, ERMrest, ErrorService, headInjector, MathUtils, modalBox, Session, UiUtils, UriUtils, $log, $rootScope, $window) {
 
         var session,
             context = {};
@@ -104,7 +104,7 @@
                     viewable: true,
                     editable: $rootScope.modifyRecord,
                     deletable: $rootScope.modifyRecord && $rootScope.showDeleteButton,
-                    selectable: false
+                    selectMode: modalBox.noSelect
                 };
                 // return model;
                 callback(model);
@@ -179,7 +179,7 @@
                     });
                 });
 
-                $rootScope.columns = $rootScope.reference.columns;
+                $rootScope.columns = $rootScope.reference.generateColumnsList(tuple);
                 var allInbFKColsIdx = [];
                 var allInbFKCols = $rootScope.columns.filter(function (o, i) {
                     if(o.isInboundForeignKey){
@@ -231,7 +231,9 @@
                         });
                     })(i);
                 }
-                $rootScope.displayReady = true;
+                if ($rootScope.relatedReferences.length == 0) {
+                    $rootScope.displayReady = true;
+                }
             }).catch(function genericCatch(exception) {
                 throw exception;
             });

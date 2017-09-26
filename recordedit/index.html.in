@@ -19,7 +19,7 @@
         </script>
     <![endif]-->
 </head>
-<body>
+<body style="overflow-y: hidden;">
     <div class="container-fluid">
         <navbar></navbar>
         <loading-spinner ng-show="!displayReady"></loading-spinner>
@@ -38,7 +38,7 @@
                             </div>
                         </div>
                         <!-- Form section -->
-                        <div class="row">
+                        <div class="row main-container">
                             <div class="col-xs-12">
                                 <div class="row">
                                     <div ng-if="displayname" class="col-xs-7">
@@ -273,7 +273,7 @@
                     <div class="side-padding-15">
                         <h3>{{ form.resultsetModel.rowValues.length }} Successful <span ng-if="::!form.editMode">Creations</span><span ng-if="::form.editMode">Updates</span></h3>
 
-                        <record-table vm="form.resultsetModel" default-row-linking="true"></record-table>
+                        <record-table vm="form.resultsetModel"></record-table>
 
                         <div ng-if="form.omittedResultsetModel">
                             <h3>{{ form.omittedResultsetModel.rowValues.length }} Failed <span ng-if="::!form.editMode">Creations</span><span ng-if="::form.editMode">Updates</span></h3>

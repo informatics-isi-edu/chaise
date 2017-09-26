@@ -580,19 +580,19 @@ var recordEditPage = function() {
 var recordPage = function() {
     var that = this;
     this.getEntityTitle = function() {
-        return browser.executeScript("return $('#entity-title > span').text();");
+        return browser.executeScript("return $('#page-title > span').text();");
     };
 
     this.getEntityTitleElement = function() {
-        return element(by.id('entity-title'));
+        return element(by.id('page-title'));
     };
 
     this.getEntitySubTitle = function() {
-        return browser.executeScript("return $('#entity-subtitle > span').text();");
+        return browser.executeScript("return $('#page-subtitle > span').text();");
     };
 
     this.getEntitySubTitleElement = function() {
-        return element(by.id("entity-subtitle"));
+        return element(by.id("page-subtitle"));
     };
 
     this.getColumns = function() {
@@ -811,6 +811,10 @@ var recordsetPage = function() {
 
     this.getSearchClearButton = function() {
         return element(by.id("search-clear"));
+    };
+
+    this.getAddRecordLink = function() {
+        return element(by.id("create-link"));
     };
 
     this.getAddRecordButton = function() {

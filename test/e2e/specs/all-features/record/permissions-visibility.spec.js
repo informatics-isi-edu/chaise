@@ -19,7 +19,7 @@ describe('When viewing Record app', function() {
     describe('as a read-only user', function() {
         beforeAll(function() {
             browser.get(browser.params.url + "/record/#" + browser.params.catalogId + "/multi-permissions:main_read_table/" + testParams.key.columnName + testParams.key.operator + testParams.key.value);
-            var title = element(by.id('entity-title'));
+            var title = chaisePage.recordPage.getEntityTitleElement();
             chaisePage.waitForElement(title).then(function() {
                 expect(title.isDisplayed()).toBe(true);
             });
@@ -60,7 +60,7 @@ describe('When viewing Record app', function() {
     describe('as a create-only user', function() {
         beforeAll(function() {
             browser.get(browser.params.url + "/record/#" + browser.params.catalogId + "/multi-permissions:main_create_table/" + testParams.key.columnName + testParams.key.operator + testParams.key.value);
-            var title = element(by.id('entity-title'));
+            var title = chaisePage.recordPage.getEntityTitleElement();
             chaisePage.waitForElement(title).then(function() {
                 expect(title.isDisplayed()).toBe(true);
             });
@@ -140,7 +140,7 @@ describe('When viewing Record app', function() {
     describe('as a user who can update (and create)', function() {
         beforeAll(function() {
             browser.get(browser.params.url + "/record/#" + browser.params.catalogId + "/multi-permissions:main_update_table/" + testParams.key.columnName + testParams.key.operator + testParams.key.value);
-            var title = element(by.id('entity-title'));
+            var title = chaisePage.recordPage.getEntityTitleElement();
             chaisePage.waitForElement(title).then(function() {
                 expect(title.isDisplayed()).toBe(true);
             });
@@ -193,7 +193,7 @@ describe('When viewing Record app', function() {
     describe('as a delete-only user', function() {
         beforeAll(function() {
             browser.get(browser.params.url + "/record/#" + browser.params.catalogId + "/multi-permissions:main_delete_table/" + testParams.key.columnName + testParams.key.operator + testParams.key.value);
-            var title = element(by.id('entity-title'));
+            var title = chaisePage.recordPage.getEntityTitleElement();
             chaisePage.waitForElement(title).then(function() {
                 expect(title.isDisplayed()).toBe(true);
             });

@@ -3,10 +3,10 @@
         <!-- sortable column header -->
         <thead class="table-heading">
             <tr>
-                <th ng-switch="::vm.config.selectMode" ng-if="(vm.config.viewable || vm.config.editable || vm.config.deletable || vm.config.selectMode)" ng-class="{'multi-select-width': vm.config.selectMode == multiSelect}">
-                    <span ng-switch-when=noSelect>Actions</span>
-                    <span ng-switch-when=singleSelect>Select</span>
-                    <div ng-switch-when=multiSelect>
+                <th ng-switch="vm.config.selectMode" ng-if="(vm.config.viewable || vm.config.editable || vm.config.deletable || vm.config.selectMode)" ng-class="{'multi-select-width': vm.config.selectMode == 'multi-select'}">
+                    <span ng-switch-when="no-select">Actions</span>
+                    <span ng-switch-when="single-select">Select</span>
+                    <div ng-switch-when="multi-select">
                         <button type="button" ng-click="::selectAll()" class="btn btn-sm btn-default btn-condensed" tooltip-placement="bottom" uib-tooltip="Select all rows in table">
                             <span class="glyphicon glyphicon-check"></span> All
                         </button>

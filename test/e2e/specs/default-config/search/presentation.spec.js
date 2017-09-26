@@ -81,7 +81,6 @@ var testAttributes = function(attr, attrCount) {
         filterCount++;
 
         beforeAll(function() {
-
             clearAttributes.forEach(function(ca) {
                  filterObj.clickFilterWrapperCancelByName(testParams.attributes[ca].text);
             });
