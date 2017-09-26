@@ -195,7 +195,7 @@
         }, function (newValue, oldValue) {
             if (newValue) {
                 try {
-                    var elements = fetchElements();
+                    var elements = fetchMainElements();
                     // if these 2 values are not set yet, don't set the height
                     if(elements.navbarHeight && elements.bookmarkHeight) {
                         UiUtils.setDisplayHeight(elements);
@@ -211,7 +211,7 @@
         angular.element($window).bind('resize', function(){
             try {
                 if ( ($rootScope.pageLoaded || recordsetModel.hasLoaded) && recordsetModel.initialized ) {
-                    var elements = fetchElements();
+                    var elements = fetchMainElements();
                     // if these 2 values are not set yet, don't set the height
                     if(elements.navbarHeight && elements.bookmarkHeight) {
                         UiUtils.setDisplayHeight(elements);
