@@ -13,7 +13,7 @@
         <div ng-controller="RecordController as ctrl">
             <div class="row smaller-margin">
                 <div id="bookmark-container" class="col-xs-12 meta-icons">
-                    <div ng-if="recordDisplayname" id="title" class="pull-left col-xs-5">
+                    <div ng-if="recordDisplayname" id="title" class="pull-left">
                         <h2 id="page-title">
                             <span ng-if="::recordDisplayname.isHTML" ng-bind-html="::recordDisplayname.value"></span>
                             <span ng-if="::!recordDisplayname.isHTML" ng-bind="::recordDisplayname.value"></span>
@@ -23,7 +23,7 @@
                             <span ng-if="::!reference.displayname.isHTML" ng-bind="::reference.displayname.value"></span>
                         </div>
                     </div>
-                    <div class="pull-right col-xs-7">
+                    <div class="pull-right">
                         <a id="create-record" ng-click="::ctrl.createRecord()" ng-if="::ctrl.canCreate()" uib-tooltip="Click here to create a record." tooltip-placement="bottom">
                             <span class="glyphicon glyphicon-plus"></span> <strong>Create</strong>
                         </a>&nbsp;&nbsp;

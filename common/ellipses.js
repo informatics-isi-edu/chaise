@@ -24,7 +24,7 @@
 
                 }).then(function deleteSuccess() {
                     // tell parent controller data updated
-                    scope.$emit('record-modified');
+                    scope.$emit('record-deleted');
 
                 }, function deleteFailure(response) {
                     throw response;
@@ -36,7 +36,7 @@
                 reference.delete(tuples).then(function deleteSuccess() {
 
                     // tell parent controller data updated
-                    scope.$emit('record-modified');
+                    scope.$emit('record-deleted');
 
                 }, function deleteFailure(response) {
                     throw response;

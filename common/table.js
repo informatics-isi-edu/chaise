@@ -511,6 +511,11 @@
                     
                     callOnRowClick(scope, [tuple], isSelected);
                 };
+
+                scope.$on('record-deleted', function() {
+                    console.log('catching the record deleted');
+                    recordTableUtils.read(scope);
+                });
             }
         };
     }])
