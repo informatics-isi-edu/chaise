@@ -7,7 +7,7 @@
         %ASSETS%
     </head>
     <body>
-        <div class="container-fluid">
+        <div class="container-fluid" style="max-height: 100vh;overflow-y: hidden;">
         %TEMPLATES%
         </div>
             <footer></footer>       

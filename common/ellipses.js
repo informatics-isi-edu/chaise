@@ -24,10 +24,10 @@
 
                 }).then(function deleteSuccess() {
                     // tell parent controller data updated
-                    scope.$emit('record-modified');
+                    scope.$emit('record-deleted');
 
                 }, function deleteFailure(response) {
-                    throw error;
+                    throw response;
                 }).catch(function (error) {
                     throw error;
                 });
@@ -36,7 +36,7 @@
                 reference.delete(tuples).then(function deleteSuccess() {
 
                     // tell parent controller data updated
-                    scope.$emit('record-modified');
+                    scope.$emit('record-deleted');
 
                 }, function deleteFailure(response) {
                     throw response;

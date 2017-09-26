@@ -296,8 +296,10 @@ describe('When editing a record', function() {
                 })(column);
             });
 
+
             // Submit the form
             recordEditPage.submitForm().then(function() {
+                
                 return recordEditPage.getAlertError();
             }).then(function(alert) {
                 // Expect there to be no error alerts

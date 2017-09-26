@@ -25,7 +25,7 @@ describe('When viewing Recordset app', function() {
         });
 
         it('should not display the add record [+] button', function() {
-            var button = recordsetPage.getAddRecordButton();
+            var button = recordsetPage.getAddRecordLink();
             expect(button.isPresent()).toBe(false);
         });
 
@@ -67,7 +67,7 @@ describe('When viewing Recordset app', function() {
         });
 
         it('should display the add record [+] button', function() {
-            var button = recordsetPage.getAddRecordButton();
+            var button = recordsetPage.getAddRecordLink();
             expect(button.isDisplayed()).toBe(true);
         });
 
@@ -109,7 +109,7 @@ describe('When viewing Recordset app', function() {
         });
 
         it('should display the add record [+] button', function() {
-            var button = recordsetPage.getAddRecordButton();
+            var button = recordsetPage.getAddRecordLink();
             expect(button.isDisplayed()).toBe(true);
         });
 
@@ -151,7 +151,7 @@ describe('When viewing Recordset app', function() {
         });
 
         it('should not display the add record [+] button', function() {
-            var button = recordsetPage.getAddRecordButton();
+            var button = recordsetPage.getAddRecordLink();
             expect(button.isPresent()).toBe(false);
         });
 

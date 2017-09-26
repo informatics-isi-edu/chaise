@@ -1,16 +1,14 @@
 <div class="modal-header">
     <button class="btn btn-default pull-right modal-close" type="button" ng-click="ctrl.cancel()">X</button>
     <h3 class="modal-title">Choose
-        <span ng-if="::ctrl.reference.displayname.isHTML" ng-bind-html="::ctrl.reference.displayname.value"></span>
-        <span ng-if="::!ctrl.reference.displayname.isHTML" ng-bind="::ctrl.reference.displayname.value"></span>
+        <span ng-if="::ctrl.tableModel.tableDisplayName.isHTML" ng-bind-html="::ctrl.tableModel.tableDisplayName.value"></span>
+        <span ng-if="::!ctrl.tableModel.tableDisplayName.isHTML" ng-bind="::ctrl.tableModel.tableDisplayName.value"></span>
     </h3>
 </div>
-
-<div class="modal-body">
+<div class="modal-body" style="overflow: auto;">
     <loading-spinner ng-show="!ctrl.tableModel.hasLoaded && !ctrl.tableModel.backgroundSearch"></loading-spinner>
-    <span ng-show="ctrl.tableModel.config.selectMode=='multi-select'">
-        <button class="btn btn-primary pull-right multiAddSubmit" type="button" ng-click="ctrl.submit(tuple)" ng-disabled="ctrl.tableModel.selectedRows.length < 1">Submit</button>
-        
+    <span ng-if="ctrl.tableModel.config.selectMode=='multi-select'">
+        <button class="btn btn-primary pull-right multi-select-submit-btn" type="button" ng-click="ctrl.submit()" ng-disabled="ctrl.tableModel.selectedRows.length < 1">Submit</button>
     </span>
-    <recordset vm="ctrl.tableModel" on-row-click="ctrl.ok(tuple)"></recordset>
+    <recordset vm="ctrl.tableModel" on-row-click="ctrl.ok" allow-create="true"></recordset>
 </div>

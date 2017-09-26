@@ -137,15 +137,16 @@ describe('View existing record,', function() {
                         return browser.switchTo().window(allWindows[1]);
                     }).then(function() {
                         // ... wait for the page to load ...
-                        newTabUrl = browser.params.url + '/recordedit/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name;
+                        newTabUrl = browser.params.url + '/recordedit/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + relatedTableName;
                         return chaisePage.waitForElement(element(by.id('submit-record-button')));
                     }).then(function() {
-
+                        
                         browser.wait(function () {
                             return browser.driver.getCurrentUrl().then(function(url) {
                                 return url.startsWith(newTabUrl);
                             });
-                        });
+                        }, browser.params.defaultTimeout);
+
                         // ... and then get the url from this new tab...
                         return browser.driver.getCurrentUrl();
                     }).then(function(url) {
@@ -172,7 +173,7 @@ describe('View existing record,', function() {
                         return chaisePage.recordEditPage.submitForm();
                     }).then(function() {
                         // wait until redirected to record page
-                        return browser.wait(EC.presenceOf(element(by.id('entity-title'))), browser.params.defaultTimeout);
+                        return browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
                     }).catch(function(error) {
                         console.log(error);
                         expect('There was an error in this promise chain').toBe('Please see error message.');
@@ -249,7 +250,7 @@ describe('View existing record,', function() {
                         return browser.executeScript("return $('[type=checkbox]').get(2);");
                     }).then(function(selectButtons) {
                         selectButtons.click();
-                        return browser.executeScript("return $('.multiAddSubmit').click();");
+                        return browser.executeScript("return $('.multi-select-submit-btn').click();");
                     }).then(function() {
                         browser.sleep(2000);
                         return browser.executeScript("return $('.alert-success')[0].innerText;");
@@ -279,9 +280,7 @@ describe('View existing record,', function() {
                 it("should have a View More link for a related table that redirects to recordset.", function() {
                     var relatedTableNameOnRecord = testParams.related_associate_table,
                         relatedTableNameOnRecordset = testParams.related_linked_table,
-                        relatedTableSubtitleOnRecordset = testParams.related_linked_subtitle,
-                        relatedTableLink = chaisePage.recordPage.getMoreResultsLink(relatedTableNameOnRecord),
-                        relatedUnfilteredLink = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + relatedTableNameOnRecordset;
+                        relatedTableLink = chaisePage.recordPage.getMoreResultsLink(relatedTableNameOnRecord);
 
                     expect(relatedTableLink.isDisplayed()).toBeTruthy();
 
@@ -293,8 +292,6 @@ describe('View existing record,', function() {
                         return chaisePage.waitForElement(element(by.id("divRecordSet")));
                     }).then(function() {
                         expect(chaisePage.recordsetPage.getPageTitleElement().getText()).toBe(relatedTableNameOnRecordset);
-                        expect(chaisePage.recordsetPage.getPageSubtitleElement().getText()).toBe(relatedTableSubtitleOnRecordset);
-                        expect(chaisePage.recordsetPage.getShowUnfilterdButton().getAttribute('href')).toEqual(relatedUnfilteredLink);
                     });
                 });
             });
@@ -330,9 +327,9 @@ describe('View existing record,', function() {
                     return browser.executeScript("return $('[type=checkbox]').get(1);");
                 }).then(function (selectButtons){
                     selectButtons.click();
-                    return browser.executeScript("return $('.multiAddSubmit').click();");
+                    return browser.executeScript("return $('.multi-select-submit-btn').click();");
                 }).then(function () {
-                    return browser.wait(EC.presenceOf(element(by.id('entity-title'))), browser.params.defaultTimeout);
+                    return browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
                 }).then(function (){
                     browser.driver.navigate().refresh();
                     chaisePage.waitForElement(element(by.id('rt-heading-association_table')));
@@ -395,7 +392,7 @@ describe('View existing record,', function() {
                    return chaisePage.recordEditPage.submitForm();
                }).then(function(){
 
-                   return browser.wait(EC.presenceOf(element(by.id('entity-title'))), browser.params.defaultTimeout);
+                   return browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
                }).then(function() {
                    browser.close();
                    return browser.switchTo().window(allWindows[0]);
@@ -441,9 +438,7 @@ describe('View existing record,', function() {
                 chaisePage.waitForElement(element(by.id('rt-heading-association_table')));
                 var relatedTableNameOnRecord = testParams.association_table_name,
                     relatedTableNameOnRecordset = testParams.leaf_table_name,
-                    relatedTableSubtitleOnRecordset = testParams.leaf_table_subtitle,
-                    relatedTableLink = chaisePage.recordPage.getMoreResultsLink(relatedTableNameOnRecord),
-                    relatedUnfilteredLink = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + relatedTableNameOnRecordset;
+                    relatedTableLink = chaisePage.recordPage.getMoreResultsLink(relatedTableNameOnRecord);
 
                 expect(relatedTableLink.isDisplayed()).toBeTruthy();
 
@@ -455,8 +450,6 @@ describe('View existing record,', function() {
                     return chaisePage.waitForElement(element(by.id("divRecordSet")));
                 }).then(function() {
                     expect(chaisePage.recordsetPage.getPageTitleElement().getText()).toBe(testParams.leaf_table_name);
-                    expect(chaisePage.recordsetPage.getPageSubtitleElement().getText()).toBe(testParams.leaf_table_subtitle);
-                    expect(chaisePage.recordsetPage.getShowUnfilterdButton().getAttribute('href')).toEqual(relatedUnfilteredLink);
                 });
 
             });
@@ -493,9 +486,9 @@ describe('View existing record,', function() {
                     return browser.executeScript("return $('input').get(2);");
                 }).then(function (selectButtons){
                     selectButtons.click();
-                    return browser.executeScript("return $('.multiAddSubmit').click();");
+                    return browser.executeScript("return $('.multi-select-submit-btn').click();");
                 }).then(function () {
-                    return browser.wait(EC.presenceOf(element(by.id('entity-title'))), browser.params.defaultTimeout);
+                    return browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
                 }).then(function (){
                      // browser.switchTo() does not work some times and the test case fails
                      return chaisePage.recordPage.getRelatedTableRows(associationTableName).count();

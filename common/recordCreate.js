@@ -136,7 +136,7 @@
                         // check if there is a window that opened the current one
                         // make sure the update function is defined for that window
                         // verify whether we still have a valid vaue to call that function with
-                        if (window.opener && window.opener.updated && rootScope.context.queryParams.invalidate) {
+                        if (window.opener && window.opener.updated && rsQueryParams.invalidate) {
                             window.opener.updated(rsQueryParams.invalidate);
                         }
                     } else {
@@ -227,6 +227,7 @@
             params.reference.session = rsSession;
             params.context = "compact/select";
             params.selectMode = isModalUpdate ? modalBox.multiSelectMode : modalBox.singleSelectMode;
+            params.selectedRows = [];
 
             var modalInstance = $uibModal.open({
                 animation: false,
