@@ -6,3 +6,7 @@
     margin-left: -30px;
     margin-right: -30px;
 }
+
+#footer {
+    top: -55px !important;
+}

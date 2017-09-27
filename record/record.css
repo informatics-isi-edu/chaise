@@ -12,6 +12,11 @@
 .main-container {
     margin-top: 10px;
     padding-bottom: 20px;
+    margin-bottom: -30px;
+}
+
+#footer {
+    top: -10px;
 }
 
 /******Related Entities**************/

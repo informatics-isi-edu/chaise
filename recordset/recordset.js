@@ -164,7 +164,11 @@
                 // get bookmark container height
                 elements.bookmarkHeight = $document[0].getElementById('bookmark-container').offsetHeight;
                 // get recordset main container
-                elements.container = $document[0].getElementsByClassName('recordset-container' + (chaiseConfig.showFaceting ? " with-faceting":""))[0].getElementsByClassName('main-container')[0];
+                if (chaiseConfig.showFaceting) { 
+                    elements.container = $document[0].getElementsByClassName("recordset-container with-faceting")[0].getElementsByClassName('main-container')[0];
+                } else {
+                    elements.container = $document[0].getElementById('main-content');
+                }
             } catch (error) {
                 $log.warn(error);
             }

@@ -22,19 +22,6 @@
 
                     function setClass() {
                          $timeout(function() {
-                            scope.posStyle = {
-                                width: 'auto',
-                                height: '30px',
-                                'background-color': '#ededed',
-                                right: 0,
-                                bottom: 0,
-                                left: 0
-                            };
-                            if ($(document).height() > $(window).height()) { //scrolling
-                                scope.posStyle.position = 'relative';
-                            } else {
-                                scope.posStyle.position = 'absolute';
-                            }
                             if (angular.isUndefinedOrNull(footerText)) {
                                 ele.hide();
                             } else {

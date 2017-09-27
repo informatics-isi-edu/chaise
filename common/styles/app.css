@@ -717,13 +717,24 @@ input.search-progress {
 .mbl { margin-bottom: 20px; }
 .marl { margin: 20px;  }
 
+#footer {
+    width: auto;
+    height: 30px;
+    background-color: #ededed;
+    top: -20px;
+    right: 0px;
+    left: 0px;
+    position: relative;
+    z-index: 1000;
+}
+
 footer .container1 {
-	padding-right: 5px;
+    padding-right: 5px;
     padding-left: 5px;
     padding-top: 5px;
     color: #595757;
     font-size: 11px;
-	line-height: 0;
+    line-height: 0;
 }
 .container1 > p{
 	margin: 8px 0 5px !important;
@@ -943,7 +954,7 @@ footer .container1 {
      flex:1;
      border-left: 25px solid white;
      padding-right: 10px;
-     padding-bottom: 10px;
+     padding-bottom: 30px;
      position: relative;
      z-index: 1;
      overflow-y: auto;
@@ -956,6 +967,7 @@ footer .container1 {
 
  .faceting-container {
      overflow-y: auto;
+     padding-bottom: 20px;
  }
 
  .faceting-container .divider {
