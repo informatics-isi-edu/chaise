@@ -19,7 +19,7 @@
         </script>
     <![endif]-->
 </head>
-<body style="overflow-y: hidden;">
+<body style="overflow: hidden;">
     <div class="container-fluid">
         <navbar></navbar>
         <loading-spinner ng-show="!displayReady"></loading-spinner>

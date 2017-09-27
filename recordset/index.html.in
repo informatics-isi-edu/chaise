@@ -6,10 +6,8 @@
         <script src="/gtm-id.js"></script>
         %ASSETS%
     </head>
-    <body>
-        <div class="container-fluid" style="max-height: 100vh;overflow-y: hidden;">
+    <body style="overflow: hidden;">
         %TEMPLATES%
-        </div>
-            <footer></footer>       
+        <footer></footer>       
     </body>
 </html>

@@ -10,8 +10,6 @@
 }
 
 .main-container {
-    overflow-y: auto;
-    overflow-x: hidden;
     margin-top: 10px;
     padding-bottom: 20px;
 }
