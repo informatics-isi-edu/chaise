@@ -581,7 +581,7 @@
                 scope.unfiltered = function () {
                     scope.vm.reference = scope.vm.reference.unfilteredReference;
                     scope.vm.filterString = null;
-                    recordTableUtils.read(scope);
+                    recordTableUtils.read(scope, false, true);
                 }
 
                 scope.setPageLimit = function(limit) {
