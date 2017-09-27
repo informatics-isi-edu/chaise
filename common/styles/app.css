@@ -718,13 +718,11 @@ input.search-progress {
 .marl { margin: 20px;  }
 
 #footer {
-    width: auto;
+    width: 100%;
     height: 30px;
     background-color: #ededed;
-    top: -20px;
-    right: 0px;
-    left: 0px;
-    position: relative;
+    bottom: 0px;
+    position: fixed;
     z-index: 1000;
 }
 
@@ -954,7 +952,7 @@ footer .container1 {
      flex:1;
      border-left: 25px solid white;
      padding-right: 10px;
-     padding-bottom: 30px;
+     padding-bottom: 40px;
      position: relative;
      z-index: 1;
      overflow-y: auto;
@@ -967,7 +965,7 @@ footer .container1 {
 
  .faceting-container {
      overflow-y: auto;
-     padding-bottom: 20px;
+     padding-bottom: 30px;
  }
 
  .faceting-container .divider {
