@@ -127,7 +127,7 @@
             // Unsubscribe onchange event to avoid this function getting called again
             Session.unsubscribeOnChange(subId);
 
-            ERMrest.resolve(ermrestUri, {cid: context.appName, pid: context.pageId, wid: $window.name}).then(function getReference(reference) {
+            ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
                 context.filter = reference.location.filter;
 
                 DataUtils.verify(context.filter, 'No filter was defined. Cannot find a record without a filter.');
