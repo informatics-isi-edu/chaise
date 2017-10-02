@@ -250,7 +250,7 @@
                 var bookmark = $document[0].getElementById('bookmark-container');
                 elements.bookmarkHeight = bookmark.offsetHeight;
                 // get record main container
-                elements.container = $document[0].getElementsByClassName('main-container')[0];
+                elements.container = $document[0].getElementById('main-content');
             } catch (error) {
                 $log.warn(error);
             }
