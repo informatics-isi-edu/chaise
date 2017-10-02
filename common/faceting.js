@@ -500,7 +500,7 @@
                             res = scope.facetColumn.removeRangeFilter(row.metaData.min, row.metaData.max);
                         }
                         
-                        if (!scope.parentCtrl.updateVMReference(res.reference, scope.index)) {
+                        if (res && !scope.parentCtrl.updateVMReference(res.reference, scope.index)) {
                             row.selected != row.selected;
                             $event.preventDefault();
                         } else {
