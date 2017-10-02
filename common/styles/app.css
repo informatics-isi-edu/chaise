@@ -964,11 +964,14 @@ footer .container1 {
      flex:1;
      border-left: 25px solid white;
      padding-right: 10px;
-     padding-bottom: 40px;
      position: relative;
      z-index: 1;
      overflow-y: auto;
      margin-top: 10px;
+ }
+ 
+ .recordset-container.with-faceting .pager {
+     margin-bottom: 50px;
  }
  
  .recordset-container > .main-container {
@@ -977,7 +980,10 @@ footer .container1 {
 
  .faceting-container {
      overflow-y: auto;
-     padding-bottom: 30px;
+ }
+ 
+ .faceting-container .columns-container {
+     margin-bottom: 50px;
  }
 
  .faceting-container .divider {
