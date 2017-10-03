@@ -128,7 +128,6 @@ describe('View existing record,', function() {
                     expect(addRelatedRecordLink.isDisplayed()).toBeTruthy();
                         browser.executeScript('window.scrollTo(0,200);').then(function() {
                         addRelatedRecordLink.click();
-                    
                         // This Add link opens in a new tab so we have to track the windows in the browser...
                         return browser.getAllWindowHandles();
                     }).then(function(handles) {

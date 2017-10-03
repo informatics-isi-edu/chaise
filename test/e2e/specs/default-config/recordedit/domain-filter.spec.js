@@ -153,8 +153,7 @@ describe("Add a record,", function() {
                     }).then(function(text) {
                         expect(text.indexOf("Choose")).toBeGreaterThan(-1);
 
-                        rows = chaisePage.recordsetPage.getRows();
-
+                        rows = chaisePage.recordsetPage.getRows();           
                         return rows.count();
                     }).then(function(ct) {
                         // set is size 7, domain filter should have evaluated to null
@@ -173,7 +172,6 @@ describe("Add a record,", function() {
                         return modalTitle.getText();
                     }).then(function(text) {
                         expect(text.indexOf("Choose")).toBeGreaterThan(-1);
-
                         rows = chaisePage.recordsetPage.getRows();
                         return rows.get(0).all(by.css(".select-action-button"));
                     }).then(function(selectButtons) {
