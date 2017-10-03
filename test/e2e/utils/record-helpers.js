@@ -245,10 +245,10 @@ exports.testPresentation = function (tableParams) {
 		chaisePage.waitForElement(element(by.id('entity-booking'))).then(function(){
             return browser.executeScript("return $('#entity-booking .btn-group .delete-action-button')");
         }).then( function(deleteButtons){
-			for(var i = 0; i < deleteButtons.length; i++){
-				deleteButtons[0].click();
-				browser.executeScript("return $('#delete-confirmation').click()");
-			}
+		for(var i = 0; i < deleteButtons.length; i++){
+			deleteButtons[0].click();
+			browser.executeScript("return $('#delete-confirmation').click()");
+		}
             return browser.executeScript("return $('a.toggle-display-link').click()");        
 		}).then(function(){
 			browser.wait(EC.visibilityOf(markdownEntity), browser.params.defaultTimeout);
