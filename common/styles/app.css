@@ -16,6 +16,22 @@ a{
     cursor: pointer;
 }
 
+.chaise-body {
+    overflow: hidden;
+}
+
+.chaise-body h1 {
+    font-size: 24px;
+}
+
+.chaise-body h2 {
+    font-size: 18px;
+}
+
+.chaise-body h3 {
+    font-size: 14px;
+}
+
 a:hover, a:focus{
     text-decoration: none;
     outline: none;
@@ -119,12 +135,11 @@ img.spinner-sm {
 }
 #page-subtitle{
     text-transform: uppercase;
-    font-size: 14px;
-    /*margin: 0px 0 12px 0;*/
+    margin: 0px 0px 0px 0px;
 }
 
 #bookmark-container {
-    padding: 15px 30px 15px 30px; /* padding-left and padding-right sides are to equal the left and right paddings of .container-fluid */
+    padding: 15px 40px 15px 40px; /* padding-left and padding-right sides are to equal the left and right paddings of .container-fluid */
     background-color: #f1f1f1;
     box-shadow: 0 4px 2px -2px rgba(0,0,0,0.4);
     z-index: 100;
@@ -165,14 +180,12 @@ img.spinner-sm {
 .panel-default>.panel-heading div:before{
     content: "+";
     float: left;
-    font-size: 23px;
     line-height: 12px;
     margin-right: 10px;
 }
 .panel-default>.panel-heading div.active:before{
     content: "-";
     float: left;
-    font-size: 23px;
     line-height: 12px;
     margin-right: 10px;
 }
@@ -477,7 +490,7 @@ th.multi-select-width {
 }
 
 .entity-key {
-    color: #999;
+    color: #333333;
     font-weight: normal;
     font-size: 1em;
 }
@@ -645,11 +658,6 @@ input.search-progress {
 
 /*=============Popup modal for login instructions********/
 
-.modal-xl {
-    max-width: 80vw;
-    width: 1200px;
-}
-
 .modal-login .modal-backdrop {
     opacity: 0.7 !important;
 }
@@ -679,6 +687,117 @@ input.search-progress {
 
 .modal-login .modal-title {
     font-size: 22px !important;
+}
+
+/*******Bootstrap  Modal styling *********/
+
+/*When the modal fills the screen it has an even 2.5% on top and bottom*/
+/*Centers the modal*/
+.modal-xl {
+    margin: 2.5vh auto;
+    width: auto !important;
+    max-width: 95vw;
+}
+
+.modal-lg {
+  margin: 2.5vh auto;
+  width: auto !important;
+  max-width: 80vw;
+}
+
+.modal-md {
+  margin: 2.5vh auto;
+  width: auto !important;
+  max-width: 60vw;
+}
+
+
+/*Sets the maximum height of the entire modal to 95% of the screen height*/
+.modal-content {
+  max-height: 95vh;
+  overflow: hidden;
+  max-width: 95vw;
+}
+
+/*Sets the maximum height of the modal body to 85% of the screen height*/
+.modal-xl .modal-body {
+  max-height: 90vh;
+  min-height: 40vh;
+}
+
+.modal-lg .modal-body {
+  max-height: 90vh;
+  min-height: 40vh;
+}
+
+/* Sets the table's maximum height to 70% of the screen height and adds a border at the bottom */
+.modal-body .outer-table {
+    max-height: 70vh;
+    border: 1px solid lightgrey;
+}
+
+/* Sets the margin-bottom for the table inside modal to 0px*/
+.modal-body .outer-table .table {
+    margin-bottom: 0px;
+    overflow: scroll;
+}
+
+@media (max-width: 800px) {
+    .modal-body .outer-table {
+        max-height: 67vh;
+    }
+}
+
+@media (max-width: 600px) {
+    .modal-body .outer-table {
+        max-height: 60vh;
+    }
+}
+
+@media (max-width: 500px) {
+    .modal-body .outer-table {
+        max-height: 55vh;
+    }
+}
+
+.modal-body #spinner {
+  width: 100%;
+  text-align: center;
+  padding: 14px 0;
+  position: absolute;
+  height: 100%;
+  top: 75px;
+  left: 75px;
+  z-index: 10;
+  border: none;
+  border-radius: 0px;
+  background: rgba(128, 128, 128, 0.25);
+}
+
+.modal-body img.spinner{
+    display: block;
+    margin: 0 auto;
+    width: 32px;
+    height: 32px;
+    opacity: 0.8;
+    position: absolute;
+    top: 40%;
+    left: 49%;
+}
+
+.popup-select-value {
+  height: auto !important;
+  max-height: 5.35em !important;
+  z-index: 0;
+  border-radius: 5px !important;
+  padding-right: 0px;
+}
+
+.modal-popup .input-group-addon {
+  padding: 0px;
+  background-color: transparent;
+  border: none;
+  vertical-align: top;
 }
 
 .pls { padding-left: 5px; }
@@ -717,13 +836,22 @@ input.search-progress {
 .mbl { margin-bottom: 20px; }
 .marl { margin: 20px;  }
 
+#footer {
+    width: 100%;
+    height: 30px;
+    background-color: #ededed;
+    bottom: 0px;
+    position: fixed;
+    z-index: 1000;
+}
+
 footer .container1 {
-	padding-right: 5px;
+    padding-right: 5px;
     padding-left: 5px;
     padding-top: 5px;
     color: #595757;
     font-size: 11px;
-	line-height: 0;
+    line-height: 0;
 }
 .container1 > p{
 	margin: 8px 0 5px !important;
@@ -889,7 +1017,6 @@ footer .container1 {
  .total-filters .remove-link .filter-label {
      background-color: #337ab7;
      color: white;
-     font-weight: 600;
      padding: .34em .4em .33em .4em;
  }
  
@@ -919,7 +1046,7 @@ footer .container1 {
      -webkit-box-flex: 1;
      display: flex;
      flex: 1;
-     margin-top: 5px; 
+     margin-top: 5px;
  }
 
  .recordset-container.with-faceting > .faceting-resizable {
@@ -928,7 +1055,8 @@ footer .container1 {
      /*border-right: 15px solid white;*/
      min-width: 150px;
      max-width: 50vw;
-    z-index: 2;
+     z-index: 2;
+     padding-left: 5px;
  }
  .recordset-container.with-faceting > .faceting-resizable:not(.initializing) {
      -webkit-box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
@@ -939,11 +1067,15 @@ footer .container1 {
  .recordset-container.with-faceting > .main-container {
      flex:1;
      border-left: 25px solid white;
-     padding-bottom: 10px;
+     padding-right: 10px;
      position: relative;
      z-index: 1;
      overflow-y: auto;
      margin-top: 10px;
+ }
+ 
+ .recordset-container.with-faceting .pager {
+     margin-bottom: 50px;
  }
  
  .recordset-container > .main-container {
@@ -952,6 +1084,10 @@ footer .container1 {
 
  .faceting-container {
      overflow-y: auto;
+ }
+ 
+ .faceting-container .columns-container {
+     margin-bottom: 50px;
  }
 
  .faceting-container .divider {
@@ -1030,8 +1166,8 @@ footer .container1 {
  }
  
  .faceting-container .panel .panel-title {
-     font-size: 1.15em;
-     color: #337ab7;
+     color: #333333;
+     font-size: 14px;
      font-weight: 600;
      position: relative;
  }
@@ -1177,7 +1313,7 @@ footer .container1 {
     height: 17px;
     left: 0;
     top:2px;
-    border: 1px solid #cccccc;
+    border: 1px solid #337ab7;
     border-radius: 3px;
     background-color: #fff;
     -webkit-transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
@@ -1185,14 +1321,14 @@ footer .container1 {
     transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
 }
 .chaise-checkbox input[type="checkbox"]:checked + label::before {
-    background-color: #5bc0de;
-    border-color: #5bc0de;
+    color: #fff;
+    border-color: #337ab7;
 }
 
 .chaise-checkbox input[type="checkbox"]:checked + label:after{
     font-family: 'Glyphicons Halflings'; 
     content:"\e013";
-    color: #fff;
+    color: #337ab7;
 }
 .chaise-checkbox label::after {
     display: inline-block;

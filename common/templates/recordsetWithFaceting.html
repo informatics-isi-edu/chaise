@@ -43,7 +43,7 @@
                             <span id="search-clear" class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="::clearSearch()" tooltip-placement="bottom" uib-tooltip="Clear Search"></span>
                         </div>
                         <span class="input-group-btn">
-                            <button id="search-submit" class="btn btn-primary" ng-click="enterPressed(vm.search)" role="button" tooltip-placement="bottom"
+                            <button id="search-submit" class="btn btn-primary btn-inverted" ng-click="enterPressed(vm.search)" role="button" tooltip-placement="bottom"
                                 uib-tooltip-html="'<p>Use space to separate between conjunctive terms, | (no spaces) to separate disjunctive terms and quotations for exact phrases.</p><p>For example, <i><b>usc 1234</b></i> returns all records containing &ldquo;usc&rdquo; and &ldquo;1234&rdquo;.</p><p><i><b>usc|1234</b></i> returns all records containing &ldquo;usc&rdquo; or &ldquo;1234&rdquo;.</b></i></p><p><i><b>&ldquo;usc 1234&rdquo;</b></i> returns all records containing &ldquo;usc 1234&rdquo;.</p>'">
                                 &nbsp;<span class="glyphicon glyphicon-search"></span>&nbsp;<!-- Added 2 non-breaking spaces to prevent btn's margins from collapsing and to center the icon-->
                             </button>
@@ -126,7 +126,7 @@
         
         <!-- record table -->
         <div  ng-if="vm.initialized">
-            <h4 ng-if="!vm.config.hideTotalCount" id="rs-total-count">Displaying {{vm.rowValues.length}}{{vm.totalRowsCnt ? " of " + vm.totalRowsCnt : ''}} Records</h4>
+            <h3 ng-if="!vm.config.hideTotalCount" id="rs-total-count">Displaying {{vm.rowValues.length}}{{vm.totalRowsCnt ? " of " + vm.totalRowsCnt : ''}} Records</h3>
         </div>
         <div  ng-if="vm.initialized">
             <record-table id="rs-{{vm.makeSafeIdAttr(vm.tableDisplayName.value)}}" vm="vm" on-row-click-bind="onRowClick"></record-table>
@@ -134,10 +134,10 @@
 
         <!-- bottom pagination -->
         <div class="pager"  ng-if="vm.initialized">
-            <button id="rs-previous-btn" type="button" class="btn btn-primary btn-xs" ng-click="before()" ng-disabled="!vm.hasLoaded || !vm.page.hasPrevious">
+            <button id="rs-previous-btn" type="button" class="btn btn-primary btn-xs btn-inverted" ng-click="before()" ng-disabled="!vm.hasLoaded || !vm.page.hasPrevious">
                 <span class="glyphicon glyphicon-chevron-left"></span>
             </button>
-            <button id="rs-next-btn" type="button" class="btn btn-primary btn-xs" ng-click="after()" ng-disabled="!vm.hasLoaded || !vm.page.hasNext">
+            <button id="rs-next-btn" type="button" class="btn btn-primary btn-xs btn-inverted" ng-click="after()" ng-disabled="!vm.hasLoaded || !vm.page.hasNext">
                 <span class="glyphicon glyphicon-chevron-right"></span>
             </button>
         </div>

@@ -99,7 +99,7 @@
             Session.unsubscribeOnChange(subId);
 
             // On resolution
-            ERMrest.resolve(ermrestUri, {cid: context.appName, pid: context.pageId, wid: $window.name}).then(function getReference(reference) {
+            ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
                 
                 
                 // we are using filter to determine app mode, the logic for getting filter

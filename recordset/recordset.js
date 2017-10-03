@@ -89,8 +89,7 @@
 
         function updateLocation() {
             $window.scrollTo(0, 0);
-            $window.location.href = $scope.permalink();
-            // $window.location.replace();
+            $window.location.replace($scope.permalink());
             $rootScope.location = $window.location.href;
         }
 
@@ -164,7 +163,11 @@
                 // get bookmark container height
                 elements.bookmarkHeight = $document[0].getElementById('bookmark-container').offsetHeight;
                 // get recordset main container
-                elements.container = $document[0].getElementsByClassName('recordset-container' + (chaiseConfig.showFaceting ? " with-faceting":""))[0].getElementsByClassName('main-container')[0];
+                if (chaiseConfig.showFaceting) { 
+                    elements.container = $document[0].getElementsByClassName("recordset-container with-faceting")[0].getElementsByClassName('main-container')[0];
+                } else {
+                    elements.container = $document[0].getElementById('main-content');
+                }
             } catch (error) {
                 $log.warn(error);
             }
@@ -271,7 +274,7 @@
                 // Unsubscribe onchange event to avoid this function getting called again
                 Session.unsubscribeOnChange(subId);
 
-                ERMrest.resolve(ermrestUri, {cid: context.appName, pid: context.pageId, wid: $window.name}).then(function getReference(reference) {
+                ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
                     session = Session.getSessionValue();
 
                     var location = reference.location;
