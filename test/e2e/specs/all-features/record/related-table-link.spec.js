@@ -122,8 +122,8 @@ describe('View existing record,', function() {
                         relatedTableName = testParams.related_regular_table,
                         addRelatedRecordLink = chaisePage.recordPage.getAddRecordLink(relatedTableName);
 
-                    // Should make sure user is logged in
-                    browser.wait(EC.elementToBeClickable(addRelatedRecordLink), browser.params.defaultTimeout);
+                    // Should make sure user is logged in                    
+                    browser.wait(EC.elementToBeClickable(addRelatedRecordLink), browser.params.defaultTimeout); 
 
                     expect(addRelatedRecordLink.isDisplayed()).toBeTruthy();
                         browser.executeScript('window.scrollTo(0,200);').then(function() {
