@@ -705,7 +705,7 @@
                 
                 // facetColumn has changed so create the new reference
                 if (scope.facetColumn.isEntityMode) {
-                    scope.reference = scope.facetColumn.sourceReference.contextualize.compact;
+                    scope.reference = scope.facetColumn.sourceReference.contextualize.compactSelect;
                 } else {
                     scope.reference = scope.facetColumn.column.groupAggregate.entityCounts;
                 }
