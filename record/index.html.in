@@ -50,11 +50,11 @@
         <div class="main-container">
             <alerts alerts="ctrl.alerts"></alerts>
             <!-- defined on $rootScope in run function -->
-            <record-display columns="::columns" values="::recordValues"  record-table-model="::colTableModels" related-reference-display-table="::rtrefDisTypetable"
+                <record-display columns="::columns" values="::recordValues"  record-table-model="::colTableModels" related-reference-display-table="::rtrefDisTypetable"
                 toggle-related-table-display-type='ctrl.toggleRelatedTableDisplayType(dataModel)' can-edit-related="::ctrl.canEditRelated(ref)" can-create-related="::ctrl.canCreateRelated(ref)"
-                add-related-record="ctrl.addRelatedRecord(ref)" to-record-set="ctrl.toRecordSet(ref)">
-            </record-display>
-
+                add-related-record="ctrl.addRelatedRecord(ref)" to-record-set="ctrl.toRecordSet(ref)" last-rendered="lastRendered" show-empty-related-tables="showEmptyRelatedTables">
+                </record-display>
+            
             <!-- used to delay empty accordions from displaying before simple record display -->
             <div ng-if="displayReady">
                 <uib-accordion close-others="false">
