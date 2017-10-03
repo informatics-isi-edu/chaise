@@ -239,18 +239,21 @@ exports.testPresentation = function (tableParams) {
     });
 	
 	it("visible column related table with inline inbound fk should display 'None' in markdown disply mode if no data was found.",function(){
-        chaisePage.waitForElement(element(by.id('entity-booking'))).then(function(){
+		var EC = protractor.ExpectedConditions,
+		    markdownEntity = element(by.id('entity-4-markdown'));
+        
+		chaisePage.waitForElement(element(by.id('entity-booking'))).then(function(){
             return browser.executeScript("return $('#entity-booking .btn-group .delete-action-button')");
         }).then( function(deleteButtons){
-			// browser.pause();
 			for(var i = 0; i < deleteButtons.length; i++){
 				deleteButtons[0].click();
 				browser.executeScript("return $('#delete-confirmation').click()");
 			}
-            return browser.executeScript("return $('a.toggle-display-link').click()");
-        }).then(function(){
-            expect(element(by.id('entity-4-markdown')).getText()).toBe('None',"Incorrect text for empty markdown!");
-        }).catch(function(err){
+            return browser.executeScript("return $('a.toggle-display-link').click()");        
+		}).then(function(){
+			browser.wait(EC.visibilityOf(markdownEntity), browser.params.defaultTimeout);
+			expect(markdownEntity.getText()).toBe('None',"Incorrect text for empty markdown!");        
+		}).catch(function(err){
             console.log(err);
             expect('Encountered an error').toBe('Please check the log', 'Inside catch block');
         })
