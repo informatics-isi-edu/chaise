@@ -1,3 +1,5 @@
+var chaisePage = require('../../../utils/chaise.page.js');
+
 describe('Navbar ', function() {
     var navbar, menu, chaiseConfig, EC = protractor.ExpectedConditions;
 
@@ -68,8 +70,13 @@ describe('Navbar ', function() {
          browser.wait(EC.elementToBeClickable(closeLink), browser.params.defaultTimeout).then (function(){
             return closeLink.click();
         }).then(function () {
-            var modalContent = element(by.css('.modal-content'));
-            expect(modalContent.isPresent()).toEqual(false);
+            //Adding extra wait for condition as the modal close triggers an animation while closing
+            chaisePage.waitForElementInverse(element(by.css('.modal-content')));
+            chaisePage.waitForElement(element(by.id("divRecordSet"))).then(function(){
+                var modalContent = element(by.css('.modal-content'));
+                expect(modalContent.isPresent()).toEqual(false);
+            });
+            
          });
     });
 
