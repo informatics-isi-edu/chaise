@@ -969,17 +969,15 @@ footer .container1 {
 .actionBarRTStyle{
     margin-top: -25px;
 }
-.actionBarEntityStyle{                  
+.actionBarEntityStyle{
     padding-left: 5px;
     padding-bottom: 5px;
     float: right;
-    margin-right: -10px;    
+    margin-right: -10px;
 }
-.actionBarEntityStyleWithMargin{  
-    padding-left: 5px;
+.actionBarEntityStyleWithMargin{
     padding-bottom: 5px;
-    float: right;                
-    margin-left: 15px;        
+    text-align: right;
 }
 /************* Profile Card ****************/
 .modal-dialog li{
