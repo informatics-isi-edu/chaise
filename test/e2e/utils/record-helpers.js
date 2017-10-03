@@ -240,11 +240,6 @@ exports.testPresentation = function (tableParams) {
 	
 	it("visible column related table with inline inbound fk should display 'None' in markdown disply mode if no data was found.",function(){
         chaisePage.waitForElement(element(by.id('entity-booking'))).then(function(){
-            // browser.pause();
-		// 	return browser.executeScript("return $('#actionbar-4  a.toggle-display-link')");
-        // }).then(function(editButton){
-		// 	
-		// 	editButton.click();
             return browser.executeScript("return $('#entity-booking .btn-group .delete-action-button')");
         }).then( function(deleteButtons){
 			// browser.pause();
@@ -307,9 +302,9 @@ exports.testPresentation = function (tableParams) {
             // empty related table should show
             expect(chaisePage.recordPage.getRelatedTable(tableDisplayname).isPresent()).toBeTruthy();
             //check the no results text appears properly
-            return chaisePage.recordPage.getNoResultsRow();//.getText();
+            return chaisePage.recordPage.getNoResultsRow(tableDisplayname);
         }).then(function(emptyTab) {
-            expect(emptyTab[1].getText()).toBe(noResultsMessage);
+            expect(emptyTab.getText()).toBe(noResultsMessage);
             return showAllRTButton.click();
         }).then(function() {
             expect(chaisePage.recordPage.getRelatedTable(tableDisplayname).isPresent()).toBeFalsy();

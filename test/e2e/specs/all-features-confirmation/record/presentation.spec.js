@@ -120,7 +120,6 @@ describe('View existing record,', function() {
             var showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton();
 
             chaisePage.recordPage.getRelatedTablesWithPanel().count().then(function(count) {
-                browser.sleep(400);
                 expect(count).toBe(testParams.no_related_data.tables_order.length, "Number of related tables is not correct");
 
                 return chaisePage.recordPage.getRelatedTableTitles();

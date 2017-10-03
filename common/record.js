@@ -39,9 +39,6 @@
                 templateUrl: '../common/templates/record.html',
                 controller: function($scope) {
                     $scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;                        
-                },
-                link:function(scope){
-                    scope.strNone = "<em><strong>None</strong></em>";
                 }
             };
         }])
