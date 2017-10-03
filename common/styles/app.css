@@ -54,6 +54,11 @@ span[uib-tooltip] {
     background-color: white;
 }
 
+.btn.btn-primary.btn-inverted[disabled] {
+    color: #f1f1f1;
+    border-color: #f1f1f1;
+}
+
 /**************** SPINNER **************/
 
 #spinner{
