@@ -175,7 +175,6 @@ describe("Add a record,", function() {
                         expect(text.indexOf("Choose")).toBeGreaterThan(-1);
 
                         rows = chaisePage.recordsetPage.getRows();
-                        browser.sleep(3000);
                         return rows.get(0).all(by.css(".select-action-button"));
                     }).then(function(selectButtons) {
                         

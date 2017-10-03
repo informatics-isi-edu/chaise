@@ -58,8 +58,6 @@ exports.testPresentation = function (tableParams) {
 	it("should render columns which are specified to be visible and in order", function() {
 		var columns = tableParams.columns.filter(function(c) {return c.value != null;});
 		chaisePage.recordPage.getAllColumnCaptions().then(function(pageColumns) {
-			browser.sleep(2000);
-			browser.pause();
 			expect(pageColumns.length).toBe(columns.length);
 			var index = 0;
 			pageColumns.forEach(function(c) {

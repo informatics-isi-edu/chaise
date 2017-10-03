@@ -96,14 +96,16 @@ describe('View existing record,', function() {
 
             it("should redirect to data browser if ETags match (like normal).", function () {
                 var modalTitle = chaisePage.recordPage.getConfirmDeleteTitle(),
+                    deleteReccordBtn = chaisePage.recordPage.getDeleteRecordButton(),
                     config;
 
                 chaisePage.waitForElement(element(by.id('tblRecord'))).then(function() {
                     return browser.executeScript('return chaiseConfig;');
                 }).then(function(chaiseConfig) {
                     config = chaiseConfig;
-                    browser.sleep(1000);
-                    return chaisePage.recordPage.getDeleteRecordButton().click();
+                    
+                    browser.wait(EC.visibilityOf(deleteReccordBtn), browser.params.defaultTimeout);
+                    return deleteReccordBtn.click();
                 }).then(function () {
                     browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
                     // expect modal to open
