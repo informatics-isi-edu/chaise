@@ -4,7 +4,7 @@
             <!-- TODO test this last active  -->
             <div uib-accordion-group ng-repeat="fc in vm.reference.facetColumns track by $index" is-open="vm.facetModels[$index].isOpen" id="fc-{{$index}}" class="{{lastActiveFacet == $index ? 'focused': ''}}">
                     <uib-accordion-heading>
-                        <h4 class="panel-title accordion-toggle ellipsis" id="fc-heading-{{$index}}" ng-click="toggleFacet($index)" tooltip-enable="tooltipEnabled" uib-tooltip-html="fc.displayname.value" tooltip-placement="bottom" chaise-enable-tooltip-width>
+                        <h3 class="panel-title accordion-toggle ellipsis" id="fc-heading-{{$index}}" ng-click="toggleFacet($index)" tooltip-enable="tooltipEnabled" uib-tooltip-html="fc.displayname.value" tooltip-placement="bottom" chaise-enable-tooltip-width>
                             <i class="pull-left glyphicon toggle-icon" ng-class="{'glyphicon-chevron-down': vm.facetModels[$index].isOpen, 'glyphicon-chevron-right': !vm.facetModels[$index].isOpen}"></i>
                                 
                             <a>
@@ -12,7 +12,7 @@
                                 <span ng-if="::!fc.displayname.isHTML" ng-bind="::fc.displayname.value"></span>
                             </a>
                             <img ng-if="vm.facetModels[$index].isLoading" src="../common/styles/images/loader.gif" class="spinner spinner-sm pull-right"/>
-                        </h4>
+                        </h3>
                     </uib-accordion-heading>
                 <div ng-switch="fc.preferredMode">
                     <range-picker ng-switch-when="ranges" vm="vm" facet-column="fc" facet-model="vm.facetModels[$index]" index="$index"></range-picker>

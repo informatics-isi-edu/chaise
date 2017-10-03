@@ -1,43 +1,40 @@
 <div ng-controller="recordsetController">
     <navbar></navbar>
-
-    <div id="main-content" class="container-fluid">
-
-        <div class="row smaller-margin">
-            <div id="bookmark-container" class="col-xs-12">
-                <div class="pull-left">
-                    <h2 id="page-title">
-                        <span ng-if="::vm.tableDisplayname.isHTML" ng-bind-html="vm.tableDisplayName.value"></span>
-                        <span ng-if="::!vm.tableDisplayname.isHTML" ng-bind="vm.tableDisplayName.value"></span>
-                    </h2>
-                    <div ng-if="::vm.subTitle" class="page-filters">
-                        <span id="page-subtitle" class="sub-title" ng-bind="vm.subTitle"></span>
-                        <a ng-if="::vm.reference" class="btn btn-sm btn-primary" ng-href="{{ unfiltered() }}" tooltip-placement="bottom"
-                            uib-tooltip="Show unfiltered list" id="show-unfiltered">Show Unfiltered</a>
-                    </div>
-                </div>
-                <div class="pull-right">
-                    <a id="create-link" ng-if="vm.reference.canCreate && vm.config.editable" ng-href="{{create()}}" uib-tooltip="Click here to create a record." tooltip-placement="bottom">
-                        <span class="glyphicon glyphicon-plus"></span> <strong>Create</strong>
-                    </a>&nbsp;&nbsp;
-                    <!-- edit -->
-                    <!-- TODO: this edit link isn't being disabled. To disable an <a> tag with an href, remove the href attribute -->
-                    <a id="edit-link" ng-if="vm.page && vm.reference.canUpdate && vm.config.editable && enableEditBasedOnFaceting" ng-disabled="{{vm.pageLimit > vm.RECORDEDIT_MAX_ROWS}}"
-                        ng-href="{{ edit() }}" tooltip-placement="bottom" uib-tooltip="{{ ((vm.pageLimit > vm.RECORDEDIT_MAX_ROWS) ? 'Editing disabled when items per page > ' + vm.RECORDEDIT_MAX_ROWS : 'Click here to edit this page of records.' ) }}">
-                        <span class="glyphicon glyphicon-pencil"></span> <strong>Edit</strong>
-                    </a>&nbsp;&nbsp;
-                    <!-- Download Link -->
-                    <a id="downloadCSV-link" ng-if="vm.rowValues.length>0" ng-href={{vm.reference.csvDownloadLink}} tooltip-placement="bottom" uib-tooltip="Click to download all results">
-                        <span class="glyphicon glyphicon-download-alt"></span> <strong>Download CSV</strong>
-                    </a>&nbsp;&nbsp;
-                    <!-- permalink -->
-                    <a id="permalink" ng-href="{{ permalink() }}">
-                        <span class="glyphicon glyphicon-bookmark"></span> <strong>Permalink</strong>
-                    </a>
-                </div>
+    <div class="row">
+        <div id="bookmark-container" class="col-xs-12 meta-icons">
+            <div class="pull-left">
+                <h1 id="page-title">
+                    <span ng-if="::vm.tableDisplayname.isHTML" ng-bind-html="vm.tableDisplayName.value"></span>
+                    <span ng-if="::!vm.tableDisplayname.isHTML" ng-bind="vm.tableDisplayName.value"></span>
+                </h1>
+                <h3 ng-if="::vm.subTitle" class="page-filters">
+                    <span id="page-subtitle" class="sub-title" ng-bind="vm.subTitle"></span>
+                    <a ng-if="::vm.reference" class="btn btn-sm btn-primary" ng-href="{{ unfiltered() }}" tooltip-placement="bottom"
+                        uib-tooltip="Show unfiltered list" id="show-unfiltered">Show Unfiltered</a>
+                </h3>
+            </div>
+            <div class="pull-right">
+                <a id="create-link" ng-if="vm.reference.canCreate && vm.config.editable" ng-href="{{create()}}" uib-tooltip="Click here to create a record." tooltip-placement="bottom">
+                    <span class="glyphicon glyphicon-plus"></span> <strong>Create</strong>
+                </a>&nbsp;&nbsp;
+                <!-- edit -->
+                <!-- TODO: this edit link isn't being disabled. To disable an <a> tag with an href, remove the href attribute -->
+                <a id="edit-link" ng-if="vm.page && vm.reference.canUpdate && vm.config.editable && enableEditBasedOnFaceting" ng-disabled="{{vm.pageLimit > vm.RECORDEDIT_MAX_ROWS}}"
+                    ng-href="{{ edit() }}" tooltip-placement="bottom" uib-tooltip="{{ ((vm.pageLimit > vm.RECORDEDIT_MAX_ROWS) ? 'Editing disabled when items per page > ' + vm.RECORDEDIT_MAX_ROWS : 'Click here to edit this page of records.' ) }}">
+                    <span class="glyphicon glyphicon-pencil"></span> <strong>Edit</strong>
+                </a>&nbsp;&nbsp;
+                <!-- Download Link -->
+                <a id="downloadCSV-link" ng-if="vm.rowValues.length>0" ng-href={{vm.reference.csvDownloadLink}} tooltip-placement="bottom" uib-tooltip="Click to download all results">
+                    <span class="glyphicon glyphicon-download-alt"></span> <strong>Download CSV</strong>
+                </a>&nbsp;&nbsp;
+                <!-- permalink -->
+                <a id="permalink" ng-href="{{ permalink() }}">
+                    <span class="glyphicon glyphicon-bookmark"></span> <strong>Permalink</strong>
+                </a>
             </div>
         </div>
-        
+    </div>
+    <div id="main-content" class="container-fluid" style="padding-bottom: 20px;" ng-style="{ 'overflow-y': !showFaceting ? 'auto' : ''}">
         <div ng-if="!showFaceting">
             <recordset vm="vm" allow-create="false"></recordset>
         </div>
