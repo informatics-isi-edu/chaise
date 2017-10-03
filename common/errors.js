@@ -146,11 +146,11 @@
             if (ERMrest && exception instanceof ERMrest.UnauthorizedError || exception.code == errorNames.unauthorized) {
                 Session.loginInAModal(reloadCb);
             }
-            if (exception.code && exception.code == errorNames.multipleRecords){
+            else if (exception.code && exception.code == errorNames.multipleRecords){
                 errorPopup(messageMap.multipleDataMessage, messageMap.multipleDataErrorCode,"Recordset ", exception.redirectUrl);
             }
             
-            if (ERMrest && exception instanceof ERMrest.UnauthorizedError || exception.code == errorNames.forbidden) {
+            else if (ERMrest && exception instanceof ERMrest.UnauthorizedError || exception.code == errorNames.forbidden) {
                 errorPopup( messageMap.unauthorizedMessage, messageMap.unauthorizedErrorCode ,"Home Page", $window.location.origin);
             } 
             else {
