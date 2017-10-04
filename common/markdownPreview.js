@@ -47,7 +47,7 @@
                     size: "lg",
                     template: '<div class="modal-header"> \
                                   <button class="btn btn-default pull-right modal-close" type="button" ng-click="ctrl.cancel()">X</button> \
-                                  <h3 class="modal-title">{{ctrl.params.heading}}</h3> \
+                                  <h2 class="modal-title">{{ctrl.params.heading}}</h2> \
                                </div> \
                                 <div class="modal-body"> \
                                     <div class="outer-table"> \

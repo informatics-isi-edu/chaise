@@ -21,7 +21,7 @@
          * @param {array} relatedReferenceDisplayTable: related reference table to determine display type
          * @param {callback} toggleRelatedTableDisplayType: function to determine object display type
          */
-        .directive('recordDisplay', ['DataUtils', function(DataUtils) {
+        .directive('recordDisplay', ['DataUtils','$timeout', function(DataUtils, $timeout) {
             return {
                 restrict: 'E',
                 transclude: true,

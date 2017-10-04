@@ -6,19 +6,19 @@
     <script src="/gtm-id.js"></script>
     %ASSETS%
 </head>
-<body ng-controller="RecordController as ctrl" style="overflow: hidden;">
+<body ng-controller="RecordController as ctrl" class="chaise-body">
     <navbar></navbar>
     <div class="row">
         <div id="bookmark-container" class="col-xs-12 meta-icons">
             <div ng-if="recordDisplayname" id="title" class="pull-left">
-                <h2 id="page-title">
+                <h1 id="page-title">
                     <span ng-if="::recordDisplayname.isHTML" ng-bind-html="::recordDisplayname.value"></span>
                     <span ng-if="::!recordDisplayname.isHTML" ng-bind="::recordDisplayname.value"></span>
-                </h2>
-                <div id="page-subtitle" class="pull-left">
+                </h1>
+                <h3 id="page-subtitle" class="pull-left">
                     <span ng-if="::reference.displayname.isHTML" ng-bind-html="::reference.displayname.value"></span>
                     <span ng-if="::!reference.displayname.isHTML" ng-bind="::reference.displayname.value"></span>
-                </div>
+                </h3>
             </div>
             <div class="pull-right">
                 <a id="create-record" ng-click="::ctrl.createRecord()" ng-if="::ctrl.canCreate()" uib-tooltip="Click here to create a record." tooltip-placement="bottom">

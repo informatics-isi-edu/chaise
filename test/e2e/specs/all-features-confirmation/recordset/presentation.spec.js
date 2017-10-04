@@ -48,7 +48,7 @@ var testParams = {
                 rating: "2.8000",
                 opened_on: "2013-06-11 00:00:00",
                 luxurious: "false",
-                json_col: JSON.stringify({"name": "Testing","age": 25},undefined,2),
+                json_col: JSON.stringify({"age": 25,"name": "Testing"},undefined,2),
                 json_col_with_markdown: "Status is: “Processing”"
             },
             {

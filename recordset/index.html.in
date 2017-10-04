@@ -6,7 +6,7 @@
         <script src="/gtm-id.js"></script>
         %ASSETS%
     </head>
-    <body style="overflow: hidden;">
+    <body class="chaise-body">
         %TEMPLATES%
         <footer></footer>       
     </body>
