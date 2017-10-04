@@ -89,8 +89,7 @@
 
         function updateLocation() {
             $window.scrollTo(0, 0);
-            $window.location.href = $scope.permalink();
-            // $window.location.replace();
+            $window.location.replace($scope.permalink());
             $rootScope.location = $window.location.href;
         }
 

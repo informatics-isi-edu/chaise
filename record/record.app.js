@@ -75,9 +75,10 @@
         * that is needed by <record-table>, <record-action-bar> and <record-display> diretives.
         * @param {object} refObj Reference object with component details
         * @param {bool} accordionOpen if paased as TRUE accordion should be expanded
+        * @param {string} context  context for reading page reference
         * @param {callback} callback to be called after function processing
         */
-        function getRelatedTableData(refObj, accordionOpen, callback){
+        function getRelatedTableData(refObj, accordionOpen, context, callback){
 
             var pageSize = getPageSize(refObj);
             refObj.read(pageSize).then(function (page) {
@@ -96,7 +97,7 @@
                     selectedRows: [],           // array of selected rows, needs to be defined even if not used
                     search: null,                // search term
                     displayType: refObj.display.type,
-                    context: "compact/brief",
+                    context: context,
                     fromTuple: $rootScope.tuple
                 };
                 model.rowValues = DataUtils.getRowValuesFromPage(page);
@@ -196,10 +197,10 @@
                     $rootScope.colTableModels = [];
 
                     for(var i =0;i<allInbFKCols.length;i++){
-                        allInbFKCols[i].reference = allInbFKCols[i].reference.contextualize.compactBrief;
+                        allInbFKCols[i].reference = allInbFKCols[i].reference.contextualize.compactBriefInline;
                         var ifkPageSize = getPageSize(allInbFKCols[i].reference);
                         (function(i) {
-                            getRelatedTableData(allInbFKCols[i].reference, true, function(model){
+                            getRelatedTableData(allInbFKCols[i].reference, true, "compact/brief/inline", function(model){
 
                                 $rootScope.colTableModels[allInbFKColsIdx[i]] = model;
                                 $rootScope.rtrefDisTypetable[allInbFKColsIdx[i]] = allInbFKCols[i].reference;
@@ -215,7 +216,7 @@
                 $rootScope.tableModels = [];
                 $rootScope.lastRendered = null;
                 var cutOff = chaiseConfig.maxRelatedTablesOpen > 0? chaiseConfig.maxRelatedTablesOpen : Infinity;
-                var boolIsOpen = $rootScope.relatedReferences.length>cutOff?false:true;
+                var boolIsOpen = $rootScope.relatedReferences.length > cutOff ? false:true;
 
                 for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
 
@@ -225,7 +226,7 @@
                         if ($rootScope.relatedReferences[i].canCreate && $rootScope.modifyRecord && !$rootScope.showEmptyRelatedTables) {
                             $rootScope.showEmptyRelatedTables = true;
                         }
-                        getRelatedTableData($rootScope.relatedReferences[i], boolIsOpen, function(model){
+                        getRelatedTableData($rootScope.relatedReferences[i], boolIsOpen, "compact/brief", function(model){
                             $rootScope.tableModels[i] = model;
                             $rootScope.displayReady = true;
                         });

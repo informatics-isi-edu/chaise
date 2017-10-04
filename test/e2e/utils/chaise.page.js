@@ -703,8 +703,9 @@ var recordPage = function() {
         return that.getRelatedTableRows(displayName).all(by.tagName("td"));
     };
 
-    this.getNoResultsRow = function() {
-        return element(by.id("no-results-row"));
+    this.getNoResultsRow = function(displayName) {
+        displayName = makeSafeIdAttr(displayName);
+        return element(by.id("rt-" + displayName)).element(by.id("no-results-row")); 
     };
 
     this.getCreateRecordButton = function() {

@@ -18,11 +18,15 @@
                   can-create-related="canCreateRelated({ref:relatedReferenceDisplayTable[$index]})"
                   add-related-record="addRelatedRecord({ref:relatedReferenceDisplayTable[$index]})" to-record-set="toRecordSet({ref:relatedReferenceDisplayTable[$index]})">
                   </record-action-bar>
-
                 <span ng-show="recordTableModel[$index].displayType == 'markdown'" id="entity-{{$index}}-markdown">
-                    <span class="markdown-container" ng-bind-html="recordTableModel[$index].page.content | trustedHTML"></span>
+                    <span ng-if="recordTableModel[$index].page.content == '' || recordTableModel[$index].page.content == null ">
+                        <span class="markdown-container"><em><strong>None</strong></em></span>                        
+                    </span>
+                    <span ng-if="recordTableModel[$index].page.content != '' ">
+                        <span class="markdown-container" ng-bind-html="recordTableModel[$index].page.content | trustedHTML"></span>
+                    </span>
                 </span>
-                <span ng-show="recordTableModel[$index].displayType != 'markdown'" id="entity-{{$index}}-recTab">
+                <span ng-show="recordTableModel[$index].displayType == 'table'" id="entity-{{$index}}-recTab">
                         <record-table class="related-table" vm="::recordTableModel[$index]"></record-table>
                 </span>
          </span>
