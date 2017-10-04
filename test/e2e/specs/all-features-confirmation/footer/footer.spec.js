@@ -10,12 +10,12 @@ describe('Page Footer', function() {
                         browser.ignoreSynchronization = true;
                         url = browser.params.url + location;
                         browser.get(url);
-                        footerMain = element(by.id('footerStyle'));
+                        footerMain = element(by.id('footer'));
                         browser.wait(EC.visibilityOf(footerMain),browser.params.defaultTimeout,'No footer');
                     });
 
                     it('Page footer link should match with "privacy-policy"', function() {
-                        var footerLink = element(by.id('footerStyle')).element(by.tagName('a'));
+                        var footerLink = element(by.id('footer')).element(by.tagName('a'));
                         chaisePage.waitForElementCondition(EC.visibilityOf(footerLink));
                         footerLink.getAttribute('href').then(function(prevLink) {
                             var plink = prevLink.slice(0, -1);

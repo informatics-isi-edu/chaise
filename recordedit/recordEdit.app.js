@@ -16,6 +16,7 @@
         'chaise.modal',
         'chaise.navbar',
         'chaise.record.table',
+        'chaise.recordcreate',
         'chaise.upload',
         'chaise.utils',
         'chaise.validators',
@@ -64,19 +65,14 @@
         }
 
         var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
-        
+
         $rootScope.context = context;
-        
-        // we are using filter to determine app mode, the logic for getting filter
-        // should be in the parser and we should not duplicate it in here
-        // NOTE: we might need to change this line (we're parsing the whole url just for fidinig if there's filter)
-        context.filter = ERMrest.parse(ermrestUri).filter;
-        
+
         // will be used to determine the app mode (edit, create, or copy)
         // We are not passing the query parameters that are used for app mode,
         // so we cannot use the queryParams that parser is returning.
         context.queryParams = UriUtils.getQueryParams($window.location);
-        
+
         context.appName = "recordedit";
         context.pageId = MathUtils.uuid();
         context.MAX_ROWS_TO_ADD = 201;
@@ -95,17 +91,6 @@
         // mode defaults to create
         context.mode = context.modes.CREATE;
 
-        // Mode can be any 3 with a filter
-        if (context.filter) {
-            // prefill always means create
-            // copy means copy regardless of a limit defined
-            // edit is everything else with a filter
-            context.mode = (context.queryParams.prefill ? context.modes.CREATE : (context.queryParams.copy ? context.modes.COPY : context.modes.EDIT));
-        } else if (context.queryParams.limit) {
-            context.mode = context.modes.EDIT;
-        }
-        context.appContext = (context.mode == context.modes.EDIT ? "entry/edit" : "entry/create");
-
         ERMrest.appLinkFn(UriUtils.appTagToURL);
 
         // Subscribe to on change event for session
@@ -115,7 +100,24 @@
             Session.unsubscribeOnChange(subId);
 
             // On resolution
-            ERMrest.resolve(ermrestUri, {cid: context.appName, pid: context.pageId, wid: $window.name}).then(function getReference(reference) {
+            ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
+                
+                
+                // we are using filter to determine app mode, the logic for getting filter
+                // should be in the parser and we should not duplicate it in here
+                // NOTE: we might need to change this line (we're parsing the whole url just for fidinig if there's filter)
+                var location = ERMrest.parse(ermrestUri);
+                
+                // Mode can be any 3 with a filter
+                if (location.filter || location.facets) {
+                    // prefill always means create
+                    // copy means copy regardless of a limit defined
+                    // edit is everything else with a filter
+                    context.mode = (context.queryParams.prefill ? context.modes.CREATE : (context.queryParams.copy ? context.modes.COPY : context.modes.EDIT));
+                } else if (context.queryParams.limit) {
+                    context.mode = context.modes.EDIT;
+                }
+                context.appContext = (context.mode == context.modes.EDIT ? "entry/edit" : "entry/create");
 
                 //contextualize the reference based on the mode (determined above) recordedit is in
                 if (context.mode == context.modes.EDIT) {
@@ -135,6 +137,7 @@
                 if (context.queryParams.prefill) {
                     // get the cookie with the prefill value
                     var cookie = $cookies.getObject(context.queryParams.prefill);
+                    $rootScope.cookieObj = cookie;
                     if (cookie) {
                         // Update view model
                         recordEditModel.rows[recordEditModel.rows.length - 1][cookie.constraintName] = cookie.rowname.value;
@@ -171,7 +174,8 @@
                             $log.info("Page: ", page);
 
                             if (page.tuples.length < 1) {
-                                var noDataError = ErrorService.noRecordError(context.filter.filters);
+                                // TODO: understand the filter that was used and relate that information to the user (it oucld be a facet filter now)
+                                var noDataError = ErrorService.noRecordError();
                                 throw noDataError;
                             }
 

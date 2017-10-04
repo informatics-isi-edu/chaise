@@ -22,18 +22,22 @@ TITLE="**************************CHAISE BUILD INFO******************************
 
 CHAISECOMMIT="\n\nCHAISE : $(parse_git_branch)\n$(parse_git_hash)"
 
+if [ -d "../ermrestjs" ]
+then
 cd ../ermrestjs
-
 ERMRESTJSCOMMIT="\n\nEMRESTJS : $(parse_git_branch)\n$(parse_git_hash)"
+cd ../chaise
+else
+ERMRESTJSCOMMIT=""
+fi
 
-
-if [ -n "$TRAVIS"]
+if [ -d "../ermrest" ]
 then
 cd ../ermrest
 ERMRESTCOMMIT="\n\nEMREST : $(parse_git_branch)\n$(parse_git_hash)"
+cd ../chaise
 else
 ERMRESTCOMMIT=""
 fi
 
-cd ../chaise
 echo "${TITLE}${CHAISECOMMIT}${ERMRESTJSCOMMIT}${ERMRESTCOMMIT}" > $VERSION

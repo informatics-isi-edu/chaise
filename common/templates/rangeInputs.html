@@ -1,0 +1,106 @@
+<div class="form-inline" ng-form="minMaxForm">
+    <div class="form-group">
+        <label for="from-val">From:</label>
+        <!-- int, float, numeric -->
+        <div ng-show="displayType(type) == 'number'" id="from-val">
+            <div class="input-container" ng-form="numericMin">
+                <input type="text" class="form-control" placeholder="{{absMin}}" ng-model="min" integer />
+                <div class="form-control-feedback input-clearbtn" ng-show="min">
+                    <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="min=''" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
+                </div>
+            </div>
+        </div>
+        <!-- date -->
+        <div ng-show="displayType(type) == 'date'" id="from-val">
+            <div class="input-container" ng-form="dateMin">
+                <input type="text" class="form-control" placeholder="{{absMin}}" ng-model="min" date />
+                <div class="form-control-feedback input-clearbtn" ng-show="min">
+                    <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="min=''" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
+                </div>
+            </div>
+        </div>
+        <!-- timestamp[tz] -->
+        <div ng-show="displayType(type) == 'datetime'" id="from-val">
+            <div>
+                <div class="input-group">
+                    <span class="input-group-addon">Date</span>
+                    <div class="input-container" ng-form="tsDateMin">
+                        <input type="text" class="form-control" placeholder="{{absMin.date}}" ng-model="min.date" date />
+                        <div class="form-control-feedback input-clearbtn" ng-show="min.date">
+                            <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="min.date=''" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="input-group">
+                    <span class="input-group-addon">Time</span>
+                    <div class="input-container" ng-form="timeMin">
+                        <input type="text" class="form-control" placeholder="{{absMin.time}}" ng-model="min.time" time />
+                        <div class="form-control-feedback input-clearbtn" ng-show="min.time">
+                            <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="min.time=''" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="to-val">To:</label>
+        <!-- int, float, numeric -->
+        <div ng-show="displayType(type) == 'number'" id="to-val">
+            <div class="input-container" ng-form="numericMax">
+                <input type="text" class="form-control" placeholder="{{absMax}}" ng-model="max" integer />
+                <div class="form-control-feedback input-clearbtn" ng-show="max">
+                    <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="max=''" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
+                </div>
+            </div>
+        </div>
+        <!-- date -->
+        <div ng-show="displayType(type) == 'date'" id="to-val">
+            <div class="input-container" ng-form="dateMax">
+                <input type="text" class="form-control" placeholder="{{absMax}}" ng-model="max" date />
+                <div class="form-control-feedback input-clearbtn" ng-show="max">
+                    <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="max=''" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
+                </div>
+            </div>
+        </div>
+        <!-- timestamp[tz] -->
+        <div ng-show="displayType(type) == 'datetime'" id="to-val">
+            <div>
+                <div class="input-group">
+                    <span class="input-group-addon">Date</span>
+                    <div class="input-container" ng-form="tsDateMax">
+                        <input type="text" class="form-control" placeholder="{{absMax.date}}" ng-model="max.date" date />
+                        <div class="form-control-feedback input-clearbtn" ng-show="max.date">
+                            <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="max.date=''" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="input-group">
+                    <span class="input-group-addon">Time</span>
+                    <div class="input-container" ng-form="timeMax">
+                        <input type="text" class="form-control" placeholder="{{absMax.time}}" ng-model="max.time" time />
+                        <div class="form-control-feedback input-clearbtn" ng-show="max.time">
+                            <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="max.time=''" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary btn-inverted" ng-click="addRange()" ng-disabled="disableAdd()" style="vertical-align: bottom;">
+        <span class="glyphicon glyphicon-plus"></span>
+    </button>
+    <div ng-messages="numericError()" ng-show="showNumericError()" class="text-danger" role="alert">
+        <div ng-message="integer">Please enter an integer value.</div>
+    </div>
+    <div ng-messages="dateError()" ng-show="showDateError()" class="text-danger" role="alert">
+        <div ng-message="date">Please enter a date value in YYYY-MM-DD format.</div>
+    </div>
+    <div ng-messages="timeError()" ng-show="showTimeError()" class="text-danger" role="alert">
+        <div ng-message="time">Please enter a time value in 24-hr HH:MM:SS format.</div>
+    </div>
+</div>

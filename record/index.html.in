@@ -6,12 +6,21 @@
     <script src="/gtm-id.js"></script>
     %ASSETS%
 </head>
-<body>
+<body ng-controller="RecordController as ctrl" class="chaise-body">
     <navbar></navbar>
-    <loading-spinner ng-show="!displayReady"></loading-spinner>
-    <div id="main-content" class="container-fluid">
-        <div ng-controller="RecordController as ctrl">
-            <div id="bookmark-container" class="col-xs-12 meta-icons">
+    <div class="row">
+        <div id="bookmark-container" class="col-xs-12 meta-icons">
+            <div ng-if="recordDisplayname" id="title" class="pull-left">
+                <h1 id="page-title">
+                    <span ng-if="::recordDisplayname.isHTML" ng-bind-html="::recordDisplayname.value"></span>
+                    <span ng-if="::!recordDisplayname.isHTML" ng-bind="::recordDisplayname.value"></span>
+                </h1>
+                <h3 id="page-subtitle" class="pull-left">
+                    <span ng-if="::reference.displayname.isHTML" ng-bind-html="::reference.displayname.value"></span>
+                    <span ng-if="::!reference.displayname.isHTML" ng-bind="::reference.displayname.value"></span>
+                </h3>
+            </div>
+            <div class="pull-right">
                 <a id="create-record" ng-click="::ctrl.createRecord()" ng-if="::ctrl.canCreate()" uib-tooltip="Click here to create a record." tooltip-placement="bottom">
                     <span class="glyphicon glyphicon-plus"></span> <strong>Create</strong>
                 </a>&nbsp;&nbsp;
@@ -27,36 +36,27 @@
                     <strong>
                         <span ng-show="!showEmptyRelatedTables">Show All</span>
                         <span ng-show="showEmptyRelatedTables">Hide Empty</span>
-                         Related Records
+                        Related Records
                     </strong>
                 </a>&nbsp;&nbsp;
                 <a id="permalink" ng-href="{{::ctrl.permalink()}}" uib-tooltip="This link stores your search criteria as a URL. Right click and save." tooltip-placement="bottom">
                     <span class="glyphicon glyphicon-bookmark"></span><strong> Permalink</strong>
                 </a>
             </div>
+        </div>
+    </div>
+    <loading-spinner ng-show="!displayReady"></loading-spinner>
+    <div id="main-content" class="container-fluid" style="overflow-y: auto;">
+        <div class="main-container">
             <alerts alerts="ctrl.alerts"></alerts>
-
-            <div ng-if="recordDisplayname">
-                <div id="entity-title">
-                    <span ng-if="::recordDisplayname.isHTML" ng-bind-html="::recordDisplayname.value"></span>
-                    <span ng-if="::!recordDisplayname.isHTML" ng-bind="::recordDisplayname.value"></span>
-                </div>
-                <div id="entity-subtitle">
-                    <span ng-if="::reference.displayname.isHTML" ng-bind-html="::reference.displayname.value"></span>
-                    <span ng-if="::!reference.displayname.isHTML" ng-bind="::reference.displayname.value"></span>
-                </div>
-            </div>
-
             <!-- defined on $rootScope in run function -->
-            <div ng-if="recordValues">
-                <record-display columns="::columns" values="::recordValues"  record-table-model="::colTableModels" related-reference-display-table="::rtrefDisTypetable"
+            <record-display columns="::columns" values="::recordValues"  record-table-model="::colTableModels" related-reference-display-table="::rtrefDisTypetable"
                 toggle-related-table-display-type='ctrl.toggleRelatedTableDisplayType(dataModel)' can-edit-related="::ctrl.canEditRelated(ref)" can-create-related="::ctrl.canCreateRelated(ref)"
                 add-related-record="ctrl.addRelatedRecord(ref)" to-record-set="ctrl.toRecordSet(ref)">
-                </record-display>
+            </record-display>
 
-            </div>
-            <!-- used to delay empty accordions from displaying before simple record display -->            
-            <div ng-if="recDisplayReady">
+            <!-- used to delay empty accordions from displaying before simple record display -->
+            <div ng-if="displayReady">
                 <uib-accordion close-others="false">
                     <div uib-accordion-group class="related-table-heading" id="rt-heading-{{::ctrl.makeSafeIdAttr(relatedRef.displayname.value)}}" ng-repeat="relatedRef in relatedReferences track by $index"  ng-if="ctrl.showRelatedTable($index)" is-open="tableModels[$index].open">
                         <uib-accordion-heading>
@@ -66,13 +66,13 @@
 
                         <!-- for different elements inside the accordion -->
                         <record-action-bar tabtype="related" related-table-ref-display="relatedRef.display.type" tab-model-display="tableModels[$index].displayType"
-                        toggle-related-table-display-type='::ctrl.toggleRelatedTableDisplayType(tableModels[$index])' can-edit-related="::ctrl.canEditRelated(relatedRef)" can-create-related="::ctrl.canCreateRelated(relatedRef)"
-                        add-related-record="::ctrl.addRelatedRecord(relatedRef)" to-record-set="::ctrl.toRecordSet(relatedRef)" dummytest="::ctrl.dummytest(k)">
+                            toggle-related-table-display-type='::ctrl.toggleRelatedTableDisplayType(tableModels[$index])' can-edit-related="::ctrl.canEditRelated(relatedRef)" can-create-related="::ctrl.canCreateRelated(relatedRef)"
+                            add-related-record="::ctrl.addRelatedRecord(relatedRef)" to-record-set="::ctrl.toRecordSet(relatedRef)" dummytest="::ctrl.dummytest(k)">
                         </record-action-bar>
                         <div class="row">
                             <div class="col-xs-12">
                                 <div ng-show="tableModels[$index].displayType == 'markdown'">
-                                    <span class="markdown-container" ng-bind-html="::tableModels[$index].page.content | trustedHTML"></span>
+                                    <span class="markdown-container" ng-bind-html="tableModels[$index].page.content | trustedHTML"></span>
                                 </div>
                                 <div ng-show="tableModels[$index].displayType != 'markdown'">
                                     <record-table class="related-table" id="rt-{{::ctrl.makeSafeIdAttr(relatedRef.displayname.value)}}" vm="::tableModels[$index]"></record-table>
@@ -82,8 +82,8 @@
                     </div>
                 </uib-accordion>
             </div>
-            <span id="rt-loading" ng-show="loading">Loading...</span>
         </div>
+        <span id="rt-loading" ng-show="loading">Loading...</span>
     </div>
     <footer></footer>
 </body>

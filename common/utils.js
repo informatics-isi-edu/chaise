@@ -49,7 +49,11 @@
         },
         "tableMissing": "No table specified in the form of 'schema-name:table-name' and no Default is set."
     })
-
+    .constant("modalBox", {
+        noSelect: "no-select",
+        singleSelectMode:"single-select",
+        multiSelectMode:"multi-select"
+    })
     .factory('UriUtils', ['$injector', '$rootScope', '$window', 'appContextMapping', 'appTagMapping', 'ContextUtils', 'Errors', 'messageMap', 'parsedFilter',
         function($injector, $rootScope, $window, appContextMapping, appTagMapping, ContextUtils, Errors, messageMap, ParsedFilter) {
 
@@ -184,15 +188,15 @@
             }
             return url;
         }
-        
-        
+
+
         /**
          * Return query params
          * @param  {Object} location window.location object
          * @return {Object} key-value pairs of query params
          */
         function getQueryParams(location) {
-            var queryParams = {}, 
+            var queryParams = {},
                 modifierPath = location.hash,
                 q_parts, i;
 
@@ -209,7 +213,7 @@
         /**
          * NOTE: DO NOT USE THIS FUNCTION, EMRESTJS will take care of parsing.
          * old apps is using are, that's why we should still keep this function.
-         * 
+         *
          * @function
          * @deprecated
          * @param {Object} location should be $window.location object
@@ -787,8 +791,8 @@
         }
 
         /**
-         *
-         *
+         * Recursively sets the display type for inputs (currently for recordedit)
+         * @param {Object} type - the type object defining the columns type
          */
         function getDisplayType(type) {
             var displayType;
@@ -834,11 +838,28 @@
             return displayType;
         }
 
+        /**
+         * sets the height of domElements.container
+         * @param {Object} domElements - an object with the following properties:
+         *      - {integer} navbarHeight - the height of the navbar element
+         *      - {integer} bookmarkHeight - the height of the bookmark container
+         *      - {integer} docHeight - the height of the viewport
+         *      - {DOMElement} container - the main container to fix the height of
+         **/
+        function setDisplayHeight(domElements) {
+            // calculate remaining dom height (navbar + bookmark)/viewheight
+            // This will be a percentage out of 100
+            var fixedHeightUsed = Math.ceil( ((domElements.navbarHeight + domElements.bookmarkHeight)/domElements.docHeight) * 100);
+            // set height to remaining
+            domElements.container.style.height = (100 - fixedHeightUsed) + 'vh';
+        }
+
         return {
             setBootstrapDropdownButtonBehavior: setBootstrapDropdownButtonBehavior,
             getImageAndIframes: getImageAndIframes,
             humanFileSize: humanFileSize,
-            getDisplayType: getDisplayType
+            getDisplayType: getDisplayType,
+            setDisplayHeight: setDisplayHeight
         }
     }])
 
@@ -895,6 +916,59 @@
             templateUrl: '../common/templates/spinner.html'
         }
     })
+
+    // directive for including a smaller loading spinner with less styling
+    .directive('loadingSpinnerSm', function () {
+        return {
+            restrict: 'A',
+            transclude: true,
+            templateUrl: '../common/templates/spinner-sm.html'
+        }
+    })
+
+    // directive to show tooltip when data in the row is truncated because of width limitations
+    .directive('chaiseEnableTooltipWidth', ['$timeout', function ($timeout) {
+        function toggleTooltipWidth (scope, elem) {
+            scope.tooltipEnabled = elem[0].scrollWidth > elem[0].offsetWidth;
+        }
+
+        return {
+            restrict: 'A',
+            link: function (scope, elem, attrs) {
+                $timeout(function () {
+                    toggleTooltipWidth(scope, elem);
+                }, 0);
+                
+                scope.$watch(function () {
+                    return elem[0].offsetWidth;
+                }, function (value) {
+                    toggleTooltipWidth(scope, elem);
+                });
+            }
+        }
+    }])
+
+    // directive to show tooltip when data in the row is truncated because of height limitations
+    .directive('chaiseEnableTooltipHeight', ['$timeout', function ($timeout) {
+        function toggleTooltipHeight (scope, elem) {
+            scope.tooltipEnabled = elem[0].scrollHeight > elem[0].offsetHeight;
+        }
+
+        return {
+            restrict: 'A',
+            link: function (scope, elem, attrs) {
+                $timeout(function () {
+                    toggleTooltipHeight(scope, elem);
+                }, 0);
+                
+                scope.$watch(function () {
+                    return elem[0].offsetHeight;
+                }, function (value) {
+                    toggleTooltipHeight(scope, elem);
+                });
+            }
+        }
+    }])
 
     // if a view value is empty string (''), change it to null before submitting to the database
     .directive('emptyToNull', function () {

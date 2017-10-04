@@ -211,7 +211,7 @@ window.onerror = function() {
             + '<div class="modal-content" uib-modal-transclude="">'
                 + '<div class="modal-header">'
                     + (canClose ? '<button class="btn btn-default pull-right modal-close" type="button" onclick="document.getElementById(\"divErrorModal\").remove();">X</button>' : '')
-                    + '<h3 class="modal-title ">Error: ' + errName + '</h3>'
+                    + '<h2 class="modal-title ">Error: ' + errName + '</h2>'
                 + '</div>'
                 + '<div class="modal-body ">'
                     + 'An unexpected error has occurred. Please report this problem to your system administrators.'

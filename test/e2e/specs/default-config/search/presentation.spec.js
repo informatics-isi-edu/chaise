@@ -81,7 +81,6 @@ var testAttributes = function(attr, attrCount) {
         filterCount++;
 
         beforeAll(function() {
-
             clearAttributes.forEach(function(ca) {
                  filterObj.clickFilterWrapperCancelByName(testParams.attributes[ca].text);
             });
@@ -198,10 +197,9 @@ var testFilters = function(attr, filter, attrCount, filterLen, contentCount) {
             });
 
             it('should have the number of results shown to be consistent with the total numbers of rows satisying the search criteria.', function() {
-                var el = chaisePage.resultContent.numOfRecords
+                var el = chaisePage.resultContent.numOfRecords;
                 el.getText().then(function(txt) {
-                    expect(parseInt(txt)).toBe(filter.entityCount);
-                    //browser.pause();
+                    expect(parseInt(txt)).toBe(filter.entityCount);                    
                 });
             });
 

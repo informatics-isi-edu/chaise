@@ -6,10 +6,8 @@
         <script src="/gtm-id.js"></script>
         %ASSETS%
     </head>
-    <body>
-        <div class="container-fluid">
+    <body class="chaise-body">
         %TEMPLATES%
-        </div>
-            <footer></footer>       
+        <footer></footer>       
     </body>
 </html>

@@ -3,6 +3,7 @@
 var chaiseConfig = {
     name: "Sample",
     layout: 'list',
+    allowErrorDismissal: true,
     confirmDelete: true,
     headTitle: 'Chaise',
     customCSS: '/assets/css/chaise.css',
@@ -25,6 +26,7 @@ var chaiseConfig = {
     editRecord: true,
     deleteRecord: true,
     maxRecordsetRowHeight: 160,
+    showFaceting: true,
     tour: {
       pickRandom: false,
       searchInputAttribute: "Data",

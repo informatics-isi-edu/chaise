@@ -19,18 +19,23 @@
 
     // The Chaise RecordSet module
     angular.module('recordset', [
-        'ermrestjs',
-        'chaise.navbar',
-        'chaise.utils',
         'chaise.authen',
         'chaise.errors',
-        'chaise.modal',
-        'chaise.html',
+        'chaise.faceting',
         'chaise.footer',
+        'chaise.html',
+        'chaise.inputs',
+        'chaise.modal',
+        'chaise.navbar',
         'chaise.record.table',
-        'ui.bootstrap',
+        'chaise.resizable', 
+        'chaise.utils',
+        'ermrestjs',
         'ngCookies',
-        'ngSanitize'])
+        'ngSanitize',
+        'ngAnimate',
+        'duScroll',
+        'ui.bootstrap'])
 
     .config(['$cookiesProvider', function($cookiesProvider) {
         $cookiesProvider.defaults.path = '/';
@@ -73,20 +78,23 @@
     })
 
     // Register the recordset controller
-    .controller('recordsetController', ['$scope', '$rootScope', 'context', '$window', 'recordsetModel', 'UriUtils', 'DataUtils', 'Session', '$log', 'ErrorService',  function($scope, $rootScope, context, $window, recordsetModel, UriUtils, DataUtils, Session, $log, ErrorService) {
+    .controller('recordsetController', ['context', 'DataUtils', 'ErrorService', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$document', '$log', '$rootScope', '$scope', '$window', function(context, DataUtils, ErrorService, recordsetModel, Session, UiUtils, UriUtils, $document, $log, $rootScope, $scope, $window) {
 
         $scope.vm = recordsetModel;
         recordsetModel.RECORDEDIT_MAX_ROWS = 200;
         $scope.navbarBrand = (chaiseConfig['navbarBrand'] !== undefined? chaiseConfig.navbarBrand : "");
         $scope.navbarBrandImage = (chaiseConfig['navbarBrandImage'] !== undefined? chaiseConfig.navbarBrandImage : "");
         $scope.navbarBrandText = (chaiseConfig['navbarBrandText'] !== undefined? chaiseConfig.navbarBrandText : "Chaise");
+        $scope.enableEditBasedOnFaceting = chaiseConfig.showFaceting == true ? false : true;
 
-        // row data updated from directive
-        // update permalink, address bar without reload
-        $scope.$on('recordset-update', function() {
+        function updateLocation() {
             $window.scrollTo(0, 0);
             $window.location.replace($scope.permalink());
             $rootScope.location = $window.location.href;
+        }
+
+        $rootScope.$on('reference-modified', function() {
+            updateLocation();
         });
 
         $scope.permalink = function() {
@@ -124,16 +132,107 @@
 
             return link;
         };
+        
+        $scope.create = function() {
+            // TODO: Generate a unique id for this request
+            // append it to the URL
+            // var referrer_id = 'recordset-' + MathUtils.getRandomInt(0, Number.MAX_SAFE_INTEGER);
+            // addRecordRequests[referrer_id] = 0;
+            
+            // open a new tab
+            var newRef = recordsetModel.reference.unfilteredReference.contextualize.entryCreate;
+            var appLink = newRef.appLink;
+            // appLink = appLink + (appLink.indexOf("?") === -1 ? "?" : "&") + 'invalidate=' + UriUtils.fixedEncodeURIComponent(referrer_id);
+            
+            return appLink;
+        };
 
         $scope.unfiltered = function () {
             return recordsetModel.reference.unfilteredReference.contextualize.compact.appLink;
         };
 
+        // fetches the height of navbar, bookmark container, and view
+        // also fetches the main container for defining the dynamic height
+        function fetchMainElements() {
+            var elements = {};
+            try {
+                // get document height
+                elements.docHeight = $document[0].documentElement.offsetHeight
+                // get navbar height
+                elements.navbarHeight = $document[0].getElementById('mainnav').offsetHeight;
+                // get bookmark container height
+                elements.bookmarkHeight = $document[0].getElementById('bookmark-container').offsetHeight;
+                // get recordset main container
+                if (chaiseConfig.showFaceting) { 
+                    elements.container = $document[0].getElementsByClassName("recordset-container with-faceting")[0].getElementsByClassName('main-container')[0];
+                } else {
+                    elements.container = $document[0].getElementById('main-content');
+                }
+            } catch (error) {
+                $log.warn(error);
+            }
+            return elements;
+        }
+
+        // fetches the height of navbar, bookmark container, and view
+        // also fetches the faceting container for defining the dynamic height
+        function fetchFacetingElements() {
+            var elements = {};
+            try {
+                // get document height
+                elements.docHeight = $document[0].documentElement.offsetHeight
+                // get navbar height
+                elements.navbarHeight = $document[0].getElementById('mainnav').offsetHeight;
+                // get bookmark container height
+                elements.bookmarkHeight = $document[0].getElementById('bookmark-container').offsetHeight;
+                // get recordset main container
+                elements.container = $document[0].getElementsByClassName('faceting-container')[0];
+            } catch (error) {
+                $log.warn(error);
+            }
+            return elements;
+        }
+
+        $scope.$watch(function() {
+            return ($rootScope.pageLoaded || recordsetModel.hasLoaded) && recordsetModel.initialized;
+        }, function (newValue, oldValue) {
+            if (newValue) {
+                try {
+                    var elements = fetchMainElements();
+                    // if these 2 values are not set yet, don't set the height
+                    if(elements.navbarHeight && elements.bookmarkHeight) {
+                        UiUtils.setDisplayHeight(elements);
+                        // no need to fetch and verify the faceting elements (navbar and bookmark are the same container as the ones used in main elements function)
+                        if (chaiseConfig.showFaceting) UiUtils.setDisplayHeight(fetchFacetingElements());
+                    }
+                } catch(exp) {
+                    // fail silently
+                }
+            }
+        });
+        
+        angular.element($window).bind('resize', function(){
+            try {
+                if ( ($rootScope.pageLoaded || recordsetModel.hasLoaded) && recordsetModel.initialized ) {
+                    var elements = fetchMainElements();
+                    // if these 2 values are not set yet, don't set the height
+                    if(elements.navbarHeight && elements.bookmarkHeight) {
+                        UiUtils.setDisplayHeight(elements);
+                        // no need to fetch and verify the faceting elements (navbar and bookmark are the same container as the ones used in main elements function)
+                        if (chaiseConfig.showFaceting) UiUtils.setDisplayHeight(fetchFacetingElements());
+                    }
+                    $scope.$digest();
+                }
+            } catch(exp) {
+                // fail silently
+            }
+        });
+
     }])
 
     // Register work to be performed after loading all modules
-    .run(['AlertsService', 'context', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'MathUtils', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
-        function(AlertsService, context, DataUtils, ERMrest, ErrorService, headInjector, MathUtils, recordsetModel, Session, UiUtils, UriUtils, $log, $rootScope, $window) {
+    .run(['AlertsService', 'context', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'MathUtils', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', 'modalBox',
+        function(AlertsService, context, DataUtils, ERMrest, ErrorService, headInjector, MathUtils, recordsetModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, modalBox) {
 
         try {
             var session;
@@ -145,17 +244,19 @@
             context.chaiseBaseURL = $window.location.href.replace($window.location.hash, '');
             var modifyEnabled = chaiseConfig.editRecord === false ? false : true;
             var deleteEnabled = chaiseConfig.deleteRecord === true ? true : false;
+            var showFaceting = chaiseConfig.showFaceting === true ? true : false;
 
             recordsetModel.config = {
                 viewable: true,
                 editable: modifyEnabled,
                 deletable: modifyEnabled && deleteEnabled,
-                selectMode: "no-select"
+                selectMode: modalBox.noSelect,
+                showFaceting: showFaceting,
             };
 
-
             $rootScope.alerts = AlertsService.alerts;
-
+            
+            $rootScope.showFaceting = showFaceting;
             $rootScope.location = $window.location.href;
             recordsetModel.hasLoaded = false;
             $rootScope.context = context;
@@ -173,7 +274,7 @@
                 // Unsubscribe onchange event to avoid this function getting called again
                 Session.unsubscribeOnChange(subId);
 
-                ERMrest.resolve(ermrestUri, {cid: context.appName, pid: context.pageId, wid: $window.name}).then(function getReference(reference) {
+                ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
                     session = Session.getSessionValue();
 
                     var location = reference.location;
@@ -189,6 +290,8 @@
                     recordsetModel.reference = reference.contextualize.compact;
                     recordsetModel.context = "compact";
                     recordsetModel.reference.session = session;
+                    //TODO should remove this:
+                    baseRef = recordsetModel.reference;
 
                     $log.info("Reference:", recordsetModel.reference);
 
@@ -203,23 +306,26 @@
 
                      // the additional provided name
                     if (location.queryParams && location.queryParams.subset) {
-                        recordsetModel.subTitle = location.queryParams.subset;
+                        recordsetModel.filterString = location.queryParams.subset;
                     }
 
                     recordsetModel.columns = recordsetModel.reference.columns;
                     recordsetModel.search = recordsetModel.reference.location.searchTerm;
+                    
+                    if (showFaceting) {
+                        $rootScope.$broadcast('page-loaded');
+                    } else {
+                        recordsetModel.reference.read(recordsetModel.pageLimit).then(function (page) {
+                            recordsetModel.page = page;
+                            recordsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
+                            recordsetModel.initialized = true;
+                            recordsetModel.hasLoaded = true;
 
-                    return recordsetModel.reference.read(recordsetModel.pageLimit);
-                }, function error(response) {
-                    throw response;
-                }).then(function getPage(page) {
-                    recordsetModel.page = page;
-                    recordsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
-                    recordsetModel.initialized = true;
-                    recordsetModel.hasLoaded = true;
-
-                    $rootScope.$broadcast('recordset-update');
-
+                            $rootScope.$broadcast('data-modified');
+                        }).catch(function (err) {
+                            throw err;
+                        });
+                    }
                 }, function error(response) {
                     throw response;
                 }).catch(function genericCatch(exception) {

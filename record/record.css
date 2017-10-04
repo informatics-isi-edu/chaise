@@ -4,10 +4,16 @@
     padding-left: 50px;
 }
 
-#main-content {
-    margin-top: 120px;
+.smaller-margin {
+    margin-left: -50px;
+    margin-right: -50px;
 }
 
+.main-container {
+    margin-top: 10px;
+    padding-bottom: 20px;
+    margin-bottom: -50px;
+}
 
 /******Related Entities**************/
 
@@ -87,7 +93,7 @@
 }
 
 .panel a.accordion-toggle span {
-    color: #999;
+    color: #333333;
     font-weight: normal;
     font-size: 17px;
 }

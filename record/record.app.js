@@ -4,6 +4,7 @@
     angular.module('chaise.record', [
         'ngSanitize',
         'ngCookies',
+        'chaise.alerts',
         'chaise.delete',
         'chaise.errors',
         'chaise.modal',
@@ -14,7 +15,9 @@
         'chaise.utils',
         'ermrestjs',
         'ui.bootstrap',
-        'chaise.footer'
+        'chaise.footer',
+        'chaise.upload',
+        'chaise.recordcreate'
     ])
 
     .factory('constants', [function(){
@@ -34,8 +37,8 @@
         $uibTooltipProvider.options({appendToBody: true});
     }])
 
-    .run(['constants', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'MathUtils', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
-        function runApp(constants, DataUtils, ERMrest, ErrorService, headInjector, MathUtils, Session, UiUtils, UriUtils, $log, $rootScope, $window) {
+    .run(['constants', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'MathUtils', 'modalBox', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
+        function runApp(constants, DataUtils, ERMrest, ErrorService, headInjector, MathUtils, modalBox, Session, UiUtils, UriUtils, $log, $rootScope, $window) {
 
         var session,
             context = {};
@@ -72,9 +75,10 @@
         * that is needed by <record-table>, <record-action-bar> and <record-display> diretives.
         * @param {object} refObj Reference object with component details
         * @param {bool} accordionOpen if paased as TRUE accordion should be expanded
+        * @param {string} context  context for reading page reference
         * @param {callback} callback to be called after function processing
         */
-        function getRelatedTableData(refObj, accordionOpen, callback){
+        function getRelatedTableData(refObj, accordionOpen, context, callback){
 
             var pageSize = getPageSize(refObj);
             refObj.read(pageSize).then(function (page) {
@@ -93,7 +97,7 @@
                     selectedRows: [],           // array of selected rows, needs to be defined even if not used
                     search: null,                // search term
                     displayType: refObj.display.type,
-                    context: "compact/brief",
+                    context: context,
                     fromTuple: $rootScope.tuple
                 };
                 model.rowValues = DataUtils.getRowValuesFromPage(page);
@@ -101,7 +105,7 @@
                     viewable: true,
                     editable: $rootScope.modifyRecord,
                     deletable: $rootScope.modifyRecord && $rootScope.showDeleteButton,
-                    selectable: false
+                    selectMode: modalBox.noSelect
                 };
                 // return model;
                 callback(model);
@@ -124,7 +128,7 @@
             // Unsubscribe onchange event to avoid this function getting called again
             Session.unsubscribeOnChange(subId);
 
-            ERMrest.resolve(ermrestUri, {cid: context.appName, pid: context.pageId, wid: $window.name}).then(function getReference(reference) {
+            ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
                 context.filter = reference.location.filter;
 
                 DataUtils.verify(context.filter, 'No filter was defined. Cannot find a record without a filter.');
@@ -136,7 +140,6 @@
                 // $rootScope.reference != reference after contextualization
                 $rootScope.reference = reference.contextualize.detailed;
                 $rootScope.reference.session = session;
-
                 $log.info("Reference: ", $rootScope.reference);
 
                 // There should only ever be one entity related to this reference, we are reading 2 entities now and if we get more than 1 entity than we throw a multipleRecordError.
@@ -177,7 +180,7 @@
                     });
                 });
 
-                $rootScope.columns = $rootScope.reference.columns;
+                $rootScope.columns = $rootScope.reference.generateColumnsList(tuple);
                 var allInbFKColsIdx = [];
                 var allInbFKCols = $rootScope.columns.filter(function (o, i) {
                     if(o.isInboundForeignKey){
@@ -185,15 +188,19 @@
                         return o;
                     }
                 });
+                $rootScope.inboundFKCols = allInbFKCols;
+                $rootScope.inboundFKColsIdx = allInbFKColsIdx;
+                $rootScope.inbFKRef = allInbFKCols;
                 if(allInbFKCols.length>0){
+
                     $rootScope.rtrefDisTypetable = [];
                     $rootScope.colTableModels = [];
 
                     for(var i =0;i<allInbFKCols.length;i++){
-                        allInbFKCols[i].reference = allInbFKCols[i].reference.contextualize.compactBrief;
+                        allInbFKCols[i].reference = allInbFKCols[i].reference.contextualize.compactBriefInline;
                         var ifkPageSize = getPageSize(allInbFKCols[i].reference);
                         (function(i) {
-                            getRelatedTableData(allInbFKCols[i].reference, true, function(model){
+                            getRelatedTableData(allInbFKCols[i].reference, true, "compact/brief/inline", function(model){
 
                                 $rootScope.colTableModels[allInbFKColsIdx[i]] = model;
                                 $rootScope.rtrefDisTypetable[allInbFKColsIdx[i]] = allInbFKCols[i].reference;
@@ -209,7 +216,7 @@
                 $rootScope.tableModels = [];
                 $rootScope.lastRendered = null;
                 var cutOff = chaiseConfig.maxRelatedTablesOpen > 0? chaiseConfig.maxRelatedTablesOpen : Infinity;
-                var boolIsOpen = $rootScope.relatedReferences.length>cutOff?false:true;
+                var boolIsOpen = $rootScope.relatedReferences.length > cutOff ? false:true;
 
                 for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
 
@@ -219,13 +226,15 @@
                         if ($rootScope.relatedReferences[i].canCreate && $rootScope.modifyRecord && !$rootScope.showEmptyRelatedTables) {
                             $rootScope.showEmptyRelatedTables = true;
                         }
-                        getRelatedTableData($rootScope.relatedReferences[i], boolIsOpen, function(model){
+                        getRelatedTableData($rootScope.relatedReferences[i], boolIsOpen, "compact/brief", function(model){
                             $rootScope.tableModels[i] = model;
                             $rootScope.displayReady = true;
                         });
                     })(i);
                 }
-                $rootScope.displayReady = true;
+                if ($rootScope.relatedReferences.length == 0) {
+                    $rootScope.displayReady = true;
+                }
             }).catch(function genericCatch(exception) {
                 throw exception;
             });
