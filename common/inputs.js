@@ -12,7 +12,7 @@
             require: "?ngModel",
             restrict: 'E',
             scope: {
-                column: '=',                // column associated with the input
+                column: '=?',                // column associated with the input
                 elePlaceholder: '=?',       // placeholder text
                 formContainerInput: '=',    // input field on the for container
                 inputId: '@',               // id for the input used by e2e tests
@@ -60,7 +60,7 @@
     .directive('rangeInputs', function() {
         return {
             restrict: 'E',
-            templateUrl: '../common/templates/rangeInputs.html',
+            templateUrl: '../common/templates/inputs/rangeInputs.html',
             scope: {
                 type: '=',
                 addRangeCb: '=',
