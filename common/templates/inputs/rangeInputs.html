@@ -198,6 +198,9 @@
             </div>
         </div>
     </div>
+    <div ng-messages="minMaxForm.$error" ng-show="minMaxForm.$dirty || minMaxForm.$submitted" class="text-danger" role="alert">
+        <div ng-message="improperRange" ng-show="minMaxForm.$error.improperRange">'From' value cannot be greater than the 'To' value.</div>
+    </div>
     <button type="submit" class="btn btn-primary btn-inverted" ng-click="addRange()" ng-disabled="disableAdd()" style="vertical-align: bottom;">
         <span class="glyphicon glyphicon-plus"></span>
     </button>

@@ -84,11 +84,19 @@
                     scope.isDirty = true;
                     // data for timestamp[tz] needs to be formatted properly
                     if (scope.displayType(scope.type) == "datetime") {
-                        min = (scope.model.min.date) ? moment(scope.model.min.date + scope.model.min.time, 'YYYY-MM-DDHH:mm:ss').format('YYYY-MM-DDTHH:mm:ss.SSSZ') : '';
-                        max = (scope.model.max.date) ? moment(scope.model.max.date + scope.model.max.time, 'YYYY-MM-DDHH:mm:ss').format('YYYY-MM-DDTHH:mm:ss.SSSZ') : '';
+                        min = (scope.model.min.date) ? moment(scope.model.min.date + scope.model.min.time, 'YYYY-MM-DDHH:mm:ss') : '';
+                        max = (scope.model.max.date) ? moment(scope.model.max.date + scope.model.max.time, 'YYYY-MM-DDHH:mm:ss') : '';
+                        if ((min && max) && max.isBefore(min)) {
+                            scope.minMaxForm.$error.improperRange = true;
+                            return;
+                        }
                     } else {
                         min = scope.model.min;
                         max = scope.model.max;
+                        if ((min && max) && min > max) {
+                            scope.minMaxForm.$error.improperRange = true;
+                            return;
+                        }
                     }
 
                     if (min == '') min = null;
