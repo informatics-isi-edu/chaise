@@ -41,7 +41,7 @@
                     </div>
                     <!-- float4/float8/numeric -->
                     <div ng-switch-default>
-                        <input type="number" class="form-control" placeholder="{{absMin}}" ng-model="model.min" float>
+                        <input type="text" class="form-control" placeholder="{{absMin}}" ng-model="model.min" float>
                         <div class="form-control-feedback input-clearbtn" ng-show="model.min || (numericMin.$invalid && numericMin.$dirty)">
                             <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="model.min=''" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
                         </div>
@@ -142,7 +142,7 @@
                     </div>
                     <!-- float4/float8/numeric -->
                     <div ng-switch-default>
-                        <input type="number" class="form-control" placeholder="{{absMax}}" ng-model="model.max" float>
+                        <input type="text" class="form-control" placeholder="{{absMax}}" ng-model="model.max" float>
                         <div class="form-control-feedback input-clearbtn" ng-show="model.max || (numericMax.$invalid && numericMax.$dirty)">
                             <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="model.max=''" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
                         </div>
