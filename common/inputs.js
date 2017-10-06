@@ -89,13 +89,19 @@
                         if ((min && max) && max.isBefore(min)) {
                             scope.minMaxForm.$error.improperRange = true;
                             return;
+                        } else {
+                            scope.minMaxForm.$error.improperRange = false;
                         }
+                        if (min) min = min.format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+                        if (max) max = max.format('YYYY-MM-DDTHH:mm:ss.SSSZ');
                     } else {
                         min = scope.model.min;
                         max = scope.model.max;
                         if ((min && max) && min > max) {
                             scope.minMaxForm.$error.improperRange = true;
                             return;
+                        } else {
+                            scope.minMaxForm.$error.improperRange = false;
                         }
                     }
 
