@@ -263,14 +263,13 @@
                             throw response;
                         });
                     } else if (session) {
-                        var notAuthorizedError = new Error(notAuthorizedMessage);
+                        var notAuthorizedError = new ERMrest.ForbiddenError();
                         // user logged in but not allowed (forbidden)
                         notAuthorizedError.code = errorNames.forbidden;
 
                         throw notAuthorizedError;
                     } else {
-                        var notAuthorizedMessage = "You are not authorized to Update entities.";
-                        var notAuthorizedError = new Error(notAuthorizedMessage);
+                        var notAuthorizedError = new ERMrest.UnauthorizedError()
                         // user not logged in (unauthorized)
                         notAuthorizedError.code = errorNames.unauthorized;
 
@@ -331,17 +330,12 @@
                         $rootScope.displayReady = true;
                         // if there is a session, user isn't allowed to create
                     } else if (session) {
-                        var forbiddenMessage = "You are not authorized to Create entities.";
-                        var forbiddenError = new Error(forbiddenMessage);
-
+                        var forbiddenError = new ERMrest.ForbiddenError();
                         forbiddenError.code = errorNames.forbidden;
-
                         throw forbiddenError;
                         // user isn't logged in and needs permissions to create
                     } else {
-                        var notAuthorizedMessage = "You are not authorized to Create entities.";
-                        var notAuthorizedError = new Error(notAuthorizedMessage);
-
+                        var notAuthorizedError = new ERMrest.UnauthorizedError();
                         notAuthorizedError.code = errorNames.unauthorized;
 
                         throw notAuthorizedError;
