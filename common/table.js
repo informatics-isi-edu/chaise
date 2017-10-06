@@ -986,6 +986,7 @@
                                     scope.vm.facetsToInitialize.push(index);
                                     scope.vm.facetModels[index].processed = false;
                                     scope.vm.facetModels[index].isOpen = true;
+                                    scope.vm.facetModels[index].isLoading = true;
                                 }
                             });
                             
