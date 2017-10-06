@@ -269,6 +269,7 @@
 
                         throw notAuthorizedError;
                     } else {
+                        var notAuthorizedMessage = "You are not authorized to Update entities.";
                         var notAuthorizedError = new Error(notAuthorizedMessage);
                         // user not logged in (unauthorized)
                         notAuthorizedError.code = errorNames.unauthorized;
