@@ -200,6 +200,9 @@
                         allInbFKCols[i].reference = allInbFKCols[i].reference.contextualize.compactBriefInline;
                         var ifkPageSize = getPageSize(allInbFKCols[i].reference);
                         (function(i) {
+                            if (allInbFKCols[i].reference.canCreate && $rootScope.modifyRecord && !$rootScope.showEmptyRelatedTables) {
+                                $rootScope.showEmptyRelatedTables = true;
+                            }
                             getRelatedTableData(allInbFKCols[i].reference, true, "compact/brief/inline", function(model){
 
                                 $rootScope.colTableModels[allInbFKColsIdx[i]] = model;

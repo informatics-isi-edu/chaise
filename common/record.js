@@ -40,13 +40,13 @@
                 },
                 templateUrl: '../common/templates/record.html',
                 controller: function($scope) {
-                    showRelatedTables();
                     $scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
-                    $scope.showRelatedTables = function(i){
-                        //show/hide empty RTs
-                        console.log("I: "+i);
-                        if ($scope.recordTableModel && $scope.recordTableModel[i]) {
-                            if($scope.recordTableModel[i].rowValues.length > 0 && $scope.showEmptyRelatedTables){
+                },
+                link: function(scope){
+                    scope.showRelatedTables = function(i){
+                        //show/hide empty Related Tables
+                        if (scope.recordTableModel && scope.recordTableModel[i]) {
+                            if(scope.recordTableModel[i].rowValues.length > 0 || scope.showEmptyRelatedTables){
                                 return true;
                             }
                             else{
@@ -56,21 +56,7 @@
                             return true;
                         }
                     }
-                },
-                link: function(scope){
-                    //scope.showRT = false;
-                    // scope.fun = function(k){
-                    //     console.log("K: "+k);
-                    // }
-                    
-                        // scope.$watch(scope.showEmptyRelatedTables,function(){
-                        //     if(scope.recordTableModel[i].rowValues.length > 0 || (scope.recordTableModel[i].rowValues.length < 1 && scope.showEmptyRelatedTables)){
-                        //         scope.showRT = true;
-                        //     }else {
-                        //         scope.showRT = false;
-                        //     }
-                        // })
-                    }
+                }
             };
         }])
         /**
