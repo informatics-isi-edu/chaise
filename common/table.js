@@ -876,6 +876,7 @@
                      if (scope.$root.checkReferenceURL(ref)) {
                          scope.vm.search = term;
                          scope.vm.reference = ref;
+                         scope.vm.lastActiveFacet = -1;
                          recordTableUtils.update(scope.vm, true, true, true);
                      }
                 };
