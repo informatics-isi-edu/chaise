@@ -71,10 +71,11 @@ describe('Navbar ', function() {
             return closeLink.click();
         }).then(function () {
             //Adding extra wait for condition as the modal close triggers an animation while closing
-            chaisePage.waitForElementInverse(element(by.css('.modal-content')));
-            chaisePage.waitForElement(element(by.id("divRecordSet"))).then(function(){
-                var modalContent = element(by.css('.modal-content'));
-                expect(modalContent.isPresent()).toEqual(false);
+            chaisePage.waitForElementInverse(element(by.css('.modal-content'))).then(function (){
+                chaisePage.waitForElement(element(by.id("divRecordSet"))).then(function(){
+                    var modalContent = element(by.css('.modal-content'));
+                    expect(modalContent.isPresent()).toEqual(false);
+                });
             });
             
          });
