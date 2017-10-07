@@ -35,7 +35,6 @@
                     canCreateRelated: '&',
                     addRelatedRecord: '&',
                     toRecordSet: '&',
-                    lastRendered: '=',
                     showEmptyRelatedTables: '='
                 },
                 templateUrl: '../common/templates/record.html',

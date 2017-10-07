@@ -52,7 +52,7 @@
             <!-- defined on $rootScope in run function -->
                 <record-display columns="::columns" values="::recordValues"  record-table-model="::colTableModels" related-reference-display-table="::rtrefDisTypetable"
                 toggle-related-table-display-type='ctrl.toggleRelatedTableDisplayType(dataModel)' can-edit-related="::ctrl.canEditRelated(ref)" can-create-related="::ctrl.canCreateRelated(ref)"
-                add-related-record="ctrl.addRelatedRecord(ref)" to-record-set="ctrl.toRecordSet(ref)" last-rendered="lastRendered" show-empty-related-tables="showEmptyRelatedTables">
+                add-related-record="ctrl.addRelatedRecord(ref)" to-record-set="ctrl.toRecordSet(ref)" show-empty-related-tables="showEmptyRelatedTables">
                 </record-display>
             
             <!-- used to delay empty accordions from displaying before simple record display -->
