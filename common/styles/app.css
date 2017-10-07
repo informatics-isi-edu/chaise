@@ -1254,8 +1254,6 @@ footer .container1 {
   width: 1px;
  }
  .faceting-container .range-picker .form-inline input {
-     min-width: 100px;
-     max-width: 300px;
      width: 100%;
      margin-right: 10px;
      padding: 6px;
@@ -1351,13 +1349,27 @@ footer .container1 {
 /******* range inputs ***********/
 range-inputs  .input-clearbtn{
     cursor: pointer;
-    right: 4px;
+    right: -4px;
     pointer-events: all;
     z-index: 5;
 }
 
 range-inputs  .input-container {
     position: relative;
+}
+
+range-inputs .range-inputs-width {
+    min-width: 100px;
+    max-width: 300px;
+    width: 100%;
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    margin: 0;
 }
 
 /************** search popup **************/

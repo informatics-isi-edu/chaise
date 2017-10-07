@@ -1004,6 +1004,24 @@
         };
     })
 
+    // This directive is meant to be used on inputs of type="number"
+    // This disables the actions that HTML attaches to those input types for up/down
+    // arrow key presses. When an integer field errors out (because it's too long),
+    // pressing the down arrow changes the input value to scientific notation
+    .directive('disableArrows', function() {
+        function disableArrows(event) {
+            if (event.keyCode === 38 || event.keyCode === 40) {
+                event.preventDefault();
+            }
+        }
+
+        return {
+            link: function(scope, element, attrs) {
+                element.on('keydown', disableArrows);
+            }
+        };  
+    })
+
     // An "autofocus" directive that applies focus on an element when it becomes visible.
     // A directive is necessary because the HTML5 autofocus attribute (1) isn't
     // uniformly implemented across major modern browsers; (2) doesn't focus the
