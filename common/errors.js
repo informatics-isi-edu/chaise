@@ -143,6 +143,7 @@
             }; 
             if (exceptionFlag || window.location.pathname.indexOf('/search/') != -1 || window.location.pathname.indexOf('/viewer/') != -1) return;
             
+            // we decided to deal with the OR condition later
             if ( (ERMrest && exception instanceof ERMrest.UnauthorizedError) || exception.code == errorNames.unauthorized) {
                 Session.loginInAModal(reloadCb);
             }
@@ -150,8 +151,9 @@
                 errorPopup(messageMap.multipleDataMessage, messageMap.multipleDataErrorCode,"Recordset ", exception.redirectUrl);
             }
             
-            else if ( (ERMrest && exception instanceof ERMrest.UnauthorizedError) || exception.code == errorNames.forbidden) {
-                errorPopup( messageMap.unauthorizedMessage, messageMap.unauthorizedErrorCode ,"Home Page", $window.location.origin);
+            // we decided to deal with the OR condition later
+            else if ( (ERMrest && exception instanceof ERMrest.ForbiddenError) || exception.code == errorNames.forbidden) {
+                errorPopup( exception.message, exception.status ,"Home Page", $window.location.origin);
             } 
             else {
                 var errName = exception.constructor.name;
