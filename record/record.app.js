@@ -142,8 +142,10 @@
                 $rootScope.reference.session = session;
                 $log.info("Reference: ", $rootScope.reference);
 
-                // There should only ever be one entity related to this reference, we are reading 2 entities now and if we get more than 1 entity than we throw a multipleRecordError.
-                return $rootScope.reference.read(2);
+                // There should only ever be one entity related to this reference, we are 
+                // reading 2 entities (the second is added in ermrest.read) and if we get 
+                // more than 1 entity then we throw a multipleRecordError.
+                return $rootScope.reference.read(1);
             }, function error(exception) {
                 throw exception;
             }).then(function getPage(page) {
@@ -153,7 +155,7 @@
                     var noDataError = ErrorService.noRecordError(context.filter.filters);
                     throw noDataError;
                 }
-                else if(page.tuples.length > 1){
+                else if(page.hasNext){
                     var recordSetLink = page.reference.contextualize.compact.appLink;
                     var multipleRecordError = ErrorService.multipleRecordError();
                     multipleRecordError.redirectUrl=recordSetLink;
