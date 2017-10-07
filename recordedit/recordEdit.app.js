@@ -39,8 +39,8 @@
         $uibTooltipProvider.options({appendToBody: true});
     }])
 
-    .run(['AlertsService', 'ERMrest', 'errorNames', 'ErrorService', 'headInjector', 'MathUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies',
-        function runRecordEditApp(AlertsService, ERMrest, errorNames, ErrorService, headInjector, MathUtils, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies) {
+    .run(['AlertsService', 'ERMrest', 'errorNames', 'ErrorService', 'headInjector', 'MathUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', 'messageMap',
+        function runRecordEditApp(AlertsService, ERMrest, errorNames, ErrorService, headInjector, MathUtils, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies, messageMap) {
 
         var session,
             context = { booleanValues: ['', true, false] };
@@ -263,13 +263,13 @@
                             throw response;
                         });
                     } else if (session) {
-                        var notAuthorizedError = new ERMrest.ForbiddenError();
+                        var notAuthorizedError = new ERMrest.ForbiddenError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
                         // user logged in but not allowed (forbidden)
                         notAuthorizedError.code = errorNames.forbidden;
 
                         throw notAuthorizedError;
                     } else {
-                        var notAuthorizedError = new ERMrest.UnauthorizedError()
+                        var notAuthorizedError = new ERMrest.UnauthorizedError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage)
                         // user not logged in (unauthorized)
                         notAuthorizedError.code = errorNames.unauthorized;
 
@@ -330,12 +330,12 @@
                         $rootScope.displayReady = true;
                         // if there is a session, user isn't allowed to create
                     } else if (session) {
-                        var forbiddenError = new ERMrest.ForbiddenError();
+                        var forbiddenError = new ERMrest.ForbiddenError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
                         forbiddenError.code = errorNames.forbidden;
                         throw forbiddenError;
                         // user isn't logged in and needs permissions to create
                     } else {
-                        var notAuthorizedError = new ERMrest.UnauthorizedError();
+                        var notAuthorizedError = new ERMrest.UnauthorizedError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
                         notAuthorizedError.code = errorNames.unauthorized;
 
                         throw notAuthorizedError;
