@@ -36,6 +36,7 @@ describe('When viewing Recordset app', function() {
 
         describe('the action column', function() {
             it('should display the view button', function() {
+                
                 var button = recordsetPage.getViewActionButtons().first();
                 // There's only 1 button because the table only has 1 row
                 expect(button.isDisplayed()).toBe(true);
@@ -109,6 +110,7 @@ describe('When viewing Recordset app', function() {
         });
 
         it('should display the add record [+] button', function() {
+            chaisePage.waitForElementInverse(element(by.id("spinner")));
             var button = recordsetPage.getAddRecordLink();
             expect(button.isDisplayed()).toBe(true);
         });
@@ -162,6 +164,7 @@ describe('When viewing Recordset app', function() {
 
         describe('the action column', function() {
             it('should display the view button', function() {
+                chaisePage.waitForElementInverse(element(by.id("spinner")));
                 var button = recordsetPage.getViewActionButtons().first();
                 // There's only 1 button because the table only has 1 row
                 expect(button.isDisplayed()).toBe(true);
