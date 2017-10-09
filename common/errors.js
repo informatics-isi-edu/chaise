@@ -142,12 +142,18 @@
                 window.location.reload();
             }; 
             if (exceptionFlag || window.location.pathname.indexOf('/search/') != -1 || window.location.pathname.indexOf('/viewer/') != -1) return;
-
-            if (ERMrest && exception instanceof ERMrest.UnauthorizedError || exception.code == errorNames.unauthorized) {
+            
+            // we decided to deal with the OR condition later
+            if ( (ERMrest && exception instanceof ERMrest.UnauthorizedError) || exception.code == errorNames.unauthorized) {
                 Session.loginInAModal(reloadCb);
             }
             else if (exception.code && exception.code == errorNames.multipleRecords){
                 errorPopup(messageMap.multipleDataMessage, messageMap.multipleDataErrorCode,"Recordset ", exception.redirectUrl);
+            }
+            
+            // we decided to deal with the OR condition later
+            else if ( (ERMrest && exception instanceof ERMrest.ForbiddenError) || exception.code == errorNames.forbidden) {
+                errorPopup( exception.message, exception.status ,"Home Page", $window.location.origin);
             } 
             else {
                 var errName = exception.constructor.name;
