@@ -1304,7 +1304,7 @@
           toggle: true,
           hotkey: 'Ctrl+P',
           title: 'Preview',
-          btnClass: 'btn btn-primary btn-sm',
+          btnClass: 'btn btn-primary btn-inverted btn-sm',
           icon: { glyph: 'glyphicon glyphicon-eye-open', fa: 'fa fa-eye', 'fa-3': 'icon-eye-open' },
           callback: function(e){
             // Check the preview mode and toggle based on this flag
