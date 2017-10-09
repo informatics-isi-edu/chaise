@@ -263,16 +263,12 @@
                             throw response;
                         });
                     } else if (session) {
-                        var notAuthorizedError = new ERMrest.ForbiddenError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
+                        var forbiddenError = new ERMrest.ForbiddenError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
                         // user logged in but not allowed (forbidden)
-                        notAuthorizedError.code = errorNames.forbidden;
-
-                        throw notAuthorizedError;
+                        throw forbiddenError;
                     } else {
                         var notAuthorizedError = new ERMrest.UnauthorizedError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage)
                         // user not logged in (unauthorized)
-                        notAuthorizedError.code = errorNames.unauthorized;
-
                         throw notAuthorizedError;
                     }
                 } else if (context.mode == context.modes.CREATE) {
@@ -331,13 +327,10 @@
                         // if there is a session, user isn't allowed to create
                     } else if (session) {
                         var forbiddenError = new ERMrest.ForbiddenError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
-                        forbiddenError.code = errorNames.forbidden;
                         throw forbiddenError;
                         // user isn't logged in and needs permissions to create
                     } else {
                         var notAuthorizedError = new ERMrest.UnauthorizedError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
-                        notAuthorizedError.code = errorNames.unauthorized;
-
                         throw notAuthorizedError;
                     }
                 }
