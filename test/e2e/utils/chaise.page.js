@@ -875,6 +875,23 @@ var recordsetPage = function() {
     this.getDownloadButton = function (limit) {
         return element(by.css("downloadCSV-link"));
     };
+
+    /******* Facet selectors for recordset with faceting ********/
+    this.getOpenFacets = function () {
+        return element.all(by.css(".panel-open"));
+    }
+
+    this.getOpenFacetTitles = function () {
+        return browser.executeScript("return $('.panel-open h3 a').map(function(i, a) { return a.textContent.trim(); });");
+    }
+    
+    this.getFilters = function () {
+        return element.all(by.css(".filter-label.label-default"));
+    }
+    
+    this.getClearAllFilters = function () {
+        return element(by.id("clear-all-filters"));
+    }
 };
 
 // Makes a string safe and valid for use in an HTML element's id attribute.

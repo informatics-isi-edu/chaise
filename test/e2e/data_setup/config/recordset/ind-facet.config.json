@@ -1,0 +1,19 @@
+{
+    "catalog": {
+        "acls": {
+            "write": ["*"]
+        }
+    },
+    "schema": {
+        "name": "faceting",
+        "createNew": true,
+        "path": "test/e2e/data_setup/schema/recordset/faceting.json"
+    },
+    "tables": {
+        "createNew": true
+    },
+    "entities": {
+        "createNew": true,
+        "path": "test/e2e/data_setup/data/faceting"
+    }
+}

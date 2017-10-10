@@ -4,7 +4,7 @@
         <faceting vm="vm"></faceting>
     </div>
     <div class="main-container">
-        <loading-spinner ng-show="!vm.hasLoaded && vm.initialized"></loading-spinner>
+        <loading-spinner id="main-spinner" ng-show="!vm.hasLoaded && vm.initialized"></loading-spinner>
         <div style="margin-bottom: 10px;" ng-if="vm.initialized">
             
             <div style="margin-left: 15px;margin-right: 20px;">
@@ -80,7 +80,7 @@
         
         <div ng-if="vm.initialized">
             <div class="total-filters" ng-if="vm.config.showFaceting && (vm.reference.location.facets || vm.reference.location.searchTerm)">
-                <a class="remove-link" ng-click="vm.removeFilter()" ng-if="vm.hasFilter() || vm.reference.location.searchTerm">
+                <a id="clear-all-filters" class="remove-link" ng-click="vm.removeFilter()" ng-if="vm.hasFilter() || vm.reference.location.searchTerm">
                     <span class="filter-label label label-primary" uib-tooltip="Clear all Facets" tooltip-placement="bottom">
                         Clear All
                     </span>
