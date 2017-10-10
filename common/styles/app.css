@@ -1245,6 +1245,12 @@ footer .container1 {
      color: white;
  }
  
+ .filter-label.label-primary.label-inverted {
+     color: #337ab7;
+     background-color: white;
+     border-color: #337ab7;
+ }
+ 
  .filter-label {
      background-color: white;
      color: #333;
