@@ -47,18 +47,18 @@
                                     </div>
                                     <div class="col-xs-5 padding-top-10">
                                         <div class="pull-right">
-                                            <button ng-if="::(form.editMode && form.showDeleteButton && reference.canDelete)" id="delete-button" class="btn btn-default" type="button" ng-disabled="::form.submissionButtonDisabled" ng-click="::form.deleteRecord();">Delete Record</button>
-                                            <button id="submit-record-button" class="btn" ng-class="::form.submissionButtonDisabled ? 'btn-default' : 'btn-primary'" type="submit" ng-disabled="::form.submissionButtonDisabled" ng-click="::form.submit();">Submit Data</button>
+                                            <button ng-if="::(form.editMode && form.showDeleteButton && reference.canDelete)" id="delete-button" class="btn btn-primary btn-inverted" type="button" ng-disabled="::form.submissionButtonDisabled" ng-click="::form.deleteRecord();">Delete Record</button>
+                                            <button id="submit-record-button" class="btn btn-primary btn-inverted" type="submit" ng-disabled="::form.submissionButtonDisabled" ng-click="::form.submit();">Submit Data</button>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="row padding-right-15" ng-show="::!form.editMode">
                                     <div class="btn-group pull-right">
-                                        <button id="copy-record-btn" class="btn btn-primary center-block" ng-click="::form.copyFormRow();" ng-if="::!form.editMode" type="button"
+                                        <button id="copy-record-btn" class="btn btn-primary btn-inverted center-block" ng-click="::form.copyFormRow();" ng-if="::!form.editMode" type="button"
                                             tooltip-placement="bottom" uib-tooltip="Click to add 1 record.">
                                             <span class="glyphicon glyphicon-plus"></span>
                                         </button>
-                                        <button id="copy-x-rows-btn" class="btn btn-primary center-block" ng-click="::(form.showMultiInsert = !form.showMultiInsert)" type="button"
+                                        <button id="copy-x-rows-btn" class="btn btn-primary btn-inverted center-block" ng-click="::(form.showMultiInsert = !form.showMultiInsert)" type="button"
                                             tooltip-placement="bottom-right" uib-tooltip="Click to add a maximum of {{::form.MAX_ROWS_TO_ADD-1}} records.">
                                             <span class="glyphicon glyphicon-chevron-down"></span>
                                         </button>
@@ -69,7 +69,7 @@
                                         <div class="input-group">
                                             <input id="copy-rows-input" type="number" class="form-control " ng-model="form.numberRowsToAdd">
                                             <span class="input-group-btn">
-                                                <button id="copy-rows-submit" class="btn btn-sm btn-primary center-block" ng-click="::form.copyFormRow()" type="button"
+                                                <button id="copy-rows-submit" class="btn btn-sm btn-primary btn-inverted center-block" ng-click="::form.copyFormRow()" type="button"
                                                     tooltip-placement="bottom" uib-tooltip="Submit">
                                                     <span class="glyphicon glyphicon-ok"></span>
                                                 </button>
@@ -114,8 +114,8 @@
                                                             <input class="form-control" type="text" ng-model="form.recordEditModel.rows[rowIndex][column.name]" placeholder="YYYY-MM-DD" name="{{::column.name}}"
                                                                 ui-mask="9999-19-39" ui-options="form.maskOptions.date" model-view-value="true" ng-required="::form.isRequired(column);" ng-disabled="::form.isDisabled(column);" date>
                                                             <span class="input-group-btn">
-                                                                <button type="button" class="btn btn-primary" ng-click="::form.applyCurrentDatetime(rowIndex, column.name, column.type.name);" ng-disabled="::form.isDisabled(column);">Today</button>
-                                                                <button type="button" class="btn btn-danger" ng-click="::form.clearModel(rowIndex, column.name, column.type.name);" ng-disabled="::form.isDisabled(column);">Clear</button>
+                                                                <button type="button" class="btn btn-primary btn-inverted" ng-click="::form.applyCurrentDatetime(rowIndex, column.name, column.type.name);" ng-disabled="::form.isDisabled(column);">Today</button>
+                                                                <button type="button" class="btn btn-danger btn-inverted" ng-click="::form.clearModel(rowIndex, column.name, column.type.name);" ng-disabled="::form.isDisabled(column);">Clear</button>
                                                             </span>
                                                         </div>
                                                     </div>
@@ -138,14 +138,14 @@
                                                                     <input class="form-control" type="text" ng-model="form.recordEditModel.rows[rowIndex][column.name].time" placeholder="HH:MM:SS" name="{{::column.name}}"
                                                                          model-view-value="true" ng-disabled="::form.isDisabled(column);" time timestamp validate-values="form.recordEditModel.rows[rowIndex][column.name]">
                                                                     <span class="input-group-btn">
-                                                                        <button class="btn btn-primary" name="{{::column.name}}" type="button" ng-click="::form.toggleMeridiem(rowIndex, column.name);" ng-bind="form.recordEditModel.rows[rowIndex][column.name].meridiem || 'AM'" ng-disabled="::form.isDisabled(column);">AM</button>
+                                                                        <button class="btn btn-primary btn-inverted" name="{{::column.name}}" type="button" ng-click="::form.toggleMeridiem(rowIndex, column.name);" ng-bind="form.recordEditModel.rows[rowIndex][column.name].meridiem || 'AM'" ng-disabled="::form.isDisabled(column);">AM</button>
                                                                     </span>
                                                                 </div>
                                                             </div>
                                                             <div class="col-xs-12">
                                                                 <div class="btn-group" role="group" ng-if="::!form.isDisabled(column);">
-                                                                    <button type="button" name="{{::column.name}}-now" class="btn btn-primary" ng-click="::form.applyCurrentDatetime(rowIndex, column.name, column.type.name);">Now</button>
-                                                                    <button type="button" name="{{::column.name}}-clear" class="btn btn-danger" ng-click="::form.clearModel(rowIndex, column.name, column.type.name);">Clear</button>
+                                                                    <button type="button" name="{{::column.name}}-now" class="btn btn-primary btn-inverted" ng-click="::form.applyCurrentDatetime(rowIndex, column.name, column.type.name);">Now</button>
+                                                                    <button type="button" name="{{::column.name}}-clear" class="btn btn-danger btn-inverted" ng-click="::form.clearModel(rowIndex, column.name, column.type.name);">Clear</button>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -160,7 +160,7 @@
                                                             <span class="glyphicon glyphicon-remove coltooltiptext foreignkey-remove" ng-click="::form.clearForeignKey(rowIndex, column)" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
                                                         </div>
                                                         <span class="input-group-addon" ng-show="::!form.isDisabled(column);">
-                                                            <button ng-focus="::form.blurElement($event);" id="row-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-button" class="btn btn-default modal-popup-btn" type="button" ng-click="::form.searchPopup(rowIndex, column)" ng-disabled="::form.isDisabled(column);" tooltip-placement="bottom" uib-tooltip="Choose from an existing value.">
+                                                            <button ng-focus="::form.blurElement($event);" id="row-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-button" class="btn btn-primary btn-inverted modal-popup-btn" type="button" ng-click="::form.searchPopup(rowIndex, column)" ng-disabled="::form.isDisabled(column);" tooltip-placement="bottom" uib-tooltip="Choose from an existing value.">
                                                                 <span class="glyphicon glyphicon-chevron-down"></span>
                                                             </button>
                                                         </span>

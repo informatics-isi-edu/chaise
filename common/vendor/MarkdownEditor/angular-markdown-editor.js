@@ -183,7 +183,7 @@ function addNewButtons() {
         data: [{
           name: "cmdModalPrev",
           title: "Fullscreen Preview",
-          btnClass: 'btn btn-primary',
+          btnClass: 'btn btn-primary btn-inverted',
           icon: {
             fa: "fa fa-arrows-alt",
             glyph: "glyphicon glyphicon-fullscreen"

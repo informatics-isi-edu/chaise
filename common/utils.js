@@ -47,7 +47,9 @@
             title: "Your need to be logged in to continue.",
             message: "To open the login window press"
         },
-        "tableMissing": "No table specified in the form of 'schema-name:table-name' and no Default is set."
+        "tableMissing": "No table specified in the form of 'schema-name:table-name' and no Default is set.",
+        "unauthorizedMessage" : "You are not authorized to perform this action. Please report this problem to your system administrators.",
+        "unauthorizedErrorCode" : "Unauthorized Access"
     })
     .constant("modalBox", {
         noSelect: "no-select",

@@ -54,6 +54,11 @@ span[uib-tooltip] {
     background-color: white;
 }
 
+.btn.btn-danger.btn-inverted {
+    color: #d43f3a;
+    background-color: white;
+}
+
 .btn.btn-primary.btn-inverted[disabled] {
     color: #f1f1f1;
     border-color: #f1f1f1;
@@ -1238,6 +1243,12 @@ footer .container1 {
  .remove-link .filter-label {
      background-color: #337ab7;
      color: white;
+ }
+ 
+ .filter-label.label-primary.label-inverted {
+     color: #337ab7;
+     background-color: white;
+     border-color: #337ab7;
  }
  
  .filter-label {

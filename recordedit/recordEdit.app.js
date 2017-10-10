@@ -39,8 +39,8 @@
         $uibTooltipProvider.options({appendToBody: true});
     }])
 
-    .run(['AlertsService', 'ERMrest', 'errorNames', 'ErrorService', 'headInjector', 'MathUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies',
-        function runRecordEditApp(AlertsService, ERMrest, errorNames, ErrorService, headInjector, MathUtils, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies) {
+    .run(['AlertsService', 'ERMrest', 'errorNames', 'ErrorService', 'headInjector', 'MathUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', 'messageMap',
+        function runRecordEditApp(AlertsService, ERMrest, errorNames, ErrorService, headInjector, MathUtils, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies, messageMap) {
 
         var session,
             context = { booleanValues: ['', true, false] };
@@ -263,18 +263,12 @@
                             throw response;
                         });
                     } else if (session) {
-                        var notAuthorizedMessage = "You are not authorized to Update entities.";
-                        var notAuthorizedError = new Error(notAuthorizedMessage);
+                        var forbiddenError = new ERMrest.ForbiddenError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
                         // user logged in but not allowed (forbidden)
-                        notAuthorizedError.code = errorNames.forbidden;
-
-                        throw notAuthorizedError;
+                        throw forbiddenError;
                     } else {
-                        var notAuthorizedMessage = "You are not authorized to Update entities.";
-                        var notAuthorizedError = new Error(notAuthorizedMessage);
+                        var notAuthorizedError = new ERMrest.UnauthorizedError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage)
                         // user not logged in (unauthorized)
-                        notAuthorizedError.code = errorNames.unauthorized;
-
                         throw notAuthorizedError;
                     }
                 } else if (context.mode == context.modes.CREATE) {
@@ -332,19 +326,11 @@
                         $rootScope.displayReady = true;
                         // if there is a session, user isn't allowed to create
                     } else if (session) {
-                        var forbiddenMessage = "You are not authorized to Create entities.";
-                        var forbiddenError = new Error(forbiddenMessage);
-
-                        forbiddenError.code = errorNames.forbidden;
-
+                        var forbiddenError = new ERMrest.ForbiddenError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
                         throw forbiddenError;
                         // user isn't logged in and needs permissions to create
                     } else {
-                        var notAuthorizedMessage = "You are not authorized to Create entities.";
-                        var notAuthorizedError = new Error(notAuthorizedMessage);
-
-                        notAuthorizedError.code = errorNames.unauthorized;
-
+                        var notAuthorizedError = new ERMrest.UnauthorizedError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
                         throw notAuthorizedError;
                     }
                 }
