@@ -77,10 +77,12 @@
          * @param  {object} rsReference         rootscope reference from calling function
          * @param  {array} rsTuples             ootscope tuples array from calling function
          * @param  {object} rsQueryParams       object contains queryparams of context from calling function
+         * @param  {object} vm                  recoredit view model
          * @param  {object} onSuccessFunction   callback
          */
-        function addRecords(isUpdate, derivedref, recordEditModel, isModalUpdate, rsReference, rsTuples, rsQueryParams, onSuccessFunction) {
+        function addRecords(isUpdate, derivedref, recordEditModel, isModalUpdate, rsReference, rsTuples, rsQueryParams, vm, onSuccessFunction) {
             var model = isModalUpdate ? GV_recordEditModel : recordEditModel;
+            viewModel = vm;
             var form = viewModel.formContainer;
 
             // this will include updated and previous raw values.
@@ -258,7 +260,7 @@
 
                 }
                 if (isModalUpdate)
-                    addRecords(viewModel.editMode, derivedref, nullArr, isModalUpdate, rsReference, rsTuples, rsQueryParams, viewModel.onSuccess);
+                    addRecords(viewModel.editMode, derivedref, nullArr, isModalUpdate, rsReference, rsTuples, rsQueryParams, viewModel, viewModel.onSuccess);
 
             });
         }
