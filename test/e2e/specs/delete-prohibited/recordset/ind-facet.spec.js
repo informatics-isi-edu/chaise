@@ -62,26 +62,18 @@ describe("Viewing Recordset with Faceting,", function() {
         });
 
         describe("selecting individual filters for each facet type", function () {
-            
 
-            it("should open the facet, select a value, and verify the data is filtered.", function () {
-                browser.pause();
+            beforeAll(function () {
+                var openFacets = chaisePage.recordsetPage.getOpenFacets();
+                // need to implement
+                var allFacets = chaisePage.recordsetPage.getAllFacets();
+                
+                for (var i=0; i<openFacets.length; i++) {
+                    // close the facets
+                    openFacets[i].click();
+                }
             });
-        });
-        
-        describe("Simple facet searching with one facet and 1 filter,", function() {
-           
-           beforeAll(function () {
-               var openFacets = chaisePage.recordsetPage.getOpenFacets();
-               // need to implement
-               var allFacets = chaisePage.recordsetPage.getAllFacets();
-               
-               for (var i=0; i<openFacets.length; i++) {
-                   // close the facets
-                   openFacets[i].click();
-               }
-           });
-           
+
             for (var j=0; j<allFacets.length; j++) {
                 it("should open the facet, select a value to filter on, and update the search criteria.", function () {
                     var facet = allFacets[j];
