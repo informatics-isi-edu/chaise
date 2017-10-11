@@ -10,10 +10,10 @@
 <body>
 	<!-- Overlay for fixed sidebar -->
 	<div class="sidebar-overlay"></div>
-	<div id="main-wrapper" class="container">
+	<div id="main-wrapper" ng-app="ermrestApp">
 		<!-- Row 1: Logo and Main navigation -->
-		<div id="main-content" class="col-xs-6 col-sm-6 col-md-7 col-lg-8 col-xl-9" ng-app="ermrestApp">
-            <navbar></navbar>
+        <navbar></navbar>
+		<div id="main-content" class="col-xs-6 col-sm-6 col-md-7 col-lg-8 col-xl-9" style="margin-left: 40px;">
 			%TEMPLATES%
 		</div>
 	</div>
