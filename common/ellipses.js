@@ -21,13 +21,14 @@
                 }).result.then(function success() {
                     // user accepted prompt to delete
                     return reference.delete(tuples);
-
                 }).then(function deleteSuccess() {
                     // tell parent controller data updated
                     scope.$emit('record-deleted');
 
                 }, function deleteFailure(response) {
-                    throw response;
+                    if (typeof response !== "string") {
+                        throw response;
+                    }
                 }).catch(function (error) {
                     throw error;
                 });
