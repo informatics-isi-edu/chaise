@@ -881,6 +881,18 @@ var recordsetPage = function() {
         return element.all(by.css(".panel-open"));
     }
 
+    this.getOpenFacetsClickable = function () {
+        return element.all(by.css(".panel-open .panel-title a"));
+    };
+
+    this.getFacetById = function (id) {
+        return element(by.id(id));
+    }
+
+    this.getAllFacets = function (){
+        return element.all(by.css(".panel-default"));
+    }
+
     this.getOpenFacetTitles = function () {
         return browser.executeScript("return $('.panel-open h3 a').map(function(i, a) { return a.textContent.trim(); });");
     }
