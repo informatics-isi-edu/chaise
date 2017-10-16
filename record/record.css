@@ -79,19 +79,6 @@
     color: #2364AB;
 }
 
-.table>thead>tr>th, .table>tbody>tr>th, .table>tfoot>tr>th, .table>thead>tr>td, .table>tbody>tr>td, .table>tfoot>tr>td{
-    border-top: none;
-    border-bottom: 1px solid #ddd;
-    max-width: 500px;
-    word-wrap: break-word;
-}
-
-#detailed-bookmark-container{
-    text-align: right;
-    position: absolute;
-    top: 20px;
-}
-
 .panel a.accordion-toggle span {
     color: #333333;
     font-weight: normal;

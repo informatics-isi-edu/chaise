@@ -293,8 +293,21 @@
             recordCreate.addRecords(vm.editMode, null, vm.recordEditModel, false, $rootScope.reference, $rootScope.tuples, $rootScope.context.queryParams, vm, onSuccess);
         }
 
+        function onDelete() {
+            var uri;
+            var ref = $rootScope.reference.unfilteredReference.contextualize.compact;
+
+            if (chaiseConfig.showFaceting) {
+                uri = ref.appLink;
+            } else {
+                var location = ref.location;
+                uri = "../search/#" + location.catalog + '/' + location.schemaName + ':' + location.tableName;
+            }
+
+            $window.location.href = uri;
+        }
+
         function deleteRecord() {
-            var location = $rootScope.reference.location;
             if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
                 $uibModal.open({
                     templateUrl: "../common/templates/delete-link/confirm_delete.modal.html",
@@ -303,22 +316,16 @@
                     size: "sm"
                 }).result.then(function success() {
                     // user accepted prompt to delete
-                    return $rootScope.reference.delete($rootScope.tuples);
-                }).then(function deleteSuccess() {
-                    // redirect after successful delete
-                    $window.location.href = "../search/#" + location.catalog + '/' + location.schemaName + ':' + location.tableName;
-                }, function deleteFailure(response) {
-                    if (response !== 'cancel') {
+                    return $rootScope.reference.delete();
+                }).then(onDelete, function deleteFailure(response) {
+                    if (typeof response !== "string") {
                         throw response;
                     }
                 }).catch(function (exception) {
                     AlertsService.addAlert(exception.message, 'error');
                 });
             } else {
-                $rootScope.reference.delete($rootScope.tuples).then(function deleteSuccess() {
-                    // redirect after successful delete
-                    $window.location.href = "../search/#" + location.catalog + '/' + location.schemaName + ':' + location.tableName;
-                }, function deleteFailure(response) {
+                $rootScope.reference.delete().then(onDelete, function deleteFailure(response) {
                     throw response;
                 }).catch(function (exception) {
                     AlertsService.addAlert(exception.message, 'error');

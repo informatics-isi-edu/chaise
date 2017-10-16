@@ -44,7 +44,7 @@
         };
 
         vm.deleteRecord = function() {
-            $rootScope.reference.delete([$rootScope.tuple]).then(function deleteSuccess() {
+            $rootScope.reference.delete().then(function deleteSuccess() {
                 // Get an appLink from a reference to the table that the existing reference came from
                 var unfilteredRefAppLink = $rootScope.reference.table.reference.contextualize.compact.appLink;
                 $window.location.href = unfilteredRefAppLink;

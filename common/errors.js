@@ -99,10 +99,12 @@
 
         function noRecordError(filters) {
             var noDataMessage = messageMap.noDataMessage;
-            for (var k = 0; k < filters.length; k++) {
-                noDataMessage += filters[k].column + filters[k].operator + filters[k].value;
-                if (k != filters.length-1) {
-                    noDataMessage += " or ";
+            if (filters) {
+                for (var k = 0; k < filters.length; k++) {
+                    noDataMessage += filters[k].column + filters[k].operator + filters[k].value;
+                    if (k != filters.length-1) {
+                        noDataMessage += " or ";
+                    }
                 }
             }
             var error = new Error(noDataMessage);
