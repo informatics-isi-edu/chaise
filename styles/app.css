@@ -735,7 +735,7 @@ dt, dd {
 .footer {
 	height: 70px;
 	background-color: #F5F5F5;
-    position: absolute;
+    position: fixed;
     left: 0;
     right: 0;
     bottom: 0;

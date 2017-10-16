@@ -7,18 +7,18 @@
   <script src="/gtm-id.js"></script>
   %ASSETS%
 </head>
-<body>
-	<!-- Overlay for fixed sidebar -->
-	<div class="sidebar-overlay"></div>
-	<div id="main-wrapper" ng-app="ermrestApp">
-		<!-- Row 1: Logo and Main navigation -->
-        <navbar></navbar>
-		<div id="main-content" class="col-xs-6 col-sm-6 col-md-7 col-lg-8 col-xl-9" style="margin-left: 40px;">
-			%TEMPLATES%
-		</div>
-	</div>
-	<!-- Row 3: Footer -->
-	<div id="ermrestFooter"></div>
+<body ng-app="ermrestApp" style="overflow:hidden;">
+    <!-- Overlay for fixed sidebar -->
+    <div class="sidebar-overlay"></div>
+    <!-- Row 1: Logo and Main navigation -->
+    <navbar></navbar>
+    <div id="main-wrapper" style="height:100vh; overflow-y:auto;">
+        <div id="main-content" class="col-xs-6 col-sm-6 col-md-7 col-lg-8 col-xl-9" style="margin-left:40px;">
+            %TEMPLATES%
+        </div>
+        <!-- Row 3: Footer -->
+        <div id="ermrestFooter"></div>
+    </div>
     <script>
 	$(function(){
         var wrapper = $("#main-wrapper");
@@ -40,7 +40,7 @@
 	function checkWidth(content){
 	    var viewportWidth = $(window).width();
 
-	    if(viewportWidth >= 1696){
+	    if(viewportWidth >= 2400){
 	        if( content.hasClass("col-xl-9") ){
 	            content.removeClass("col-xl-9").addClass("col-xl-10");
 	        }
