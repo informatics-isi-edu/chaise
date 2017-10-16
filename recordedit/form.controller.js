@@ -316,7 +316,7 @@
                     size: "sm"
                 }).result.then(function success() {
                     // user accepted prompt to delete
-                    return $rootScope.reference.delete($rootScope.tuples);
+                    return $rootScope.reference.delete();
                 }).then(onDelete, function deleteFailure(response) {
                     if (typeof response !== "string") {
                         throw response;
@@ -325,7 +325,7 @@
                     AlertsService.addAlert(exception.message, 'error');
                 });
             } else {
-                $rootScope.reference.delete($rootScope.tuples).then(onDelete, function deleteFailure(response) {
+                $rootScope.reference.delete().then(onDelete, function deleteFailure(response) {
                     throw response;
                 }).catch(function (exception) {
                     AlertsService.addAlert(exception.message, 'error');

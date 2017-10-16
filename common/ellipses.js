@@ -11,7 +11,7 @@
 
     .directive('ellipses', ['$sce', '$timeout', 'AlertsService', 'ErrorService', '$uibModal', '$log', 'MathUtils', 'messageMap', 'UriUtils', '$window', 'UiUtils', 'modalBox', function($sce, $timeout, AlertsService, ErrorService, $uibModal, $log, MathUtils, messageMap, UriUtils, $window, UiUtils, modalBox) {
 
-        function deleteTuples(scope, reference, tuples) {
+        function deleteReference(scope, reference) {
             if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
                 $uibModal.open({
                     templateUrl: "../common/templates/delete-link/confirm_delete.modal.html",
@@ -20,7 +20,7 @@
                     size: "sm"
                 }).result.then(function success() {
                     // user accepted prompt to delete
-                    return reference.delete(tuples);
+                    return reference.delete();
                 }).then(function deleteSuccess() {
                     // tell parent controller data updated
                     scope.$emit('record-deleted');
@@ -34,7 +34,7 @@
                 });
             } else {
 
-                reference.delete(tuples).then(function deleteSuccess() {
+                reference.delete().then(function deleteSuccess() {
 
                     // tell parent controller data updated
                     scope.$emit('record-deleted');
@@ -92,26 +92,21 @@
                             var link = editLink + '?invalidate=' + UriUtils.fixedEncodeURIComponent(id);
                             $window.open(link, '_blank');
                             scope.$emit("edit-request", {"id": id, "schema": scope.tuple.reference.location.schemaName, "table": scope.tuple.reference.location.tableName});
-                        }
+                        };
                     }
 
                     // define unlink function
                     if (scope.config.deletable && scope.context === "compact/brief" && scope.associationRef) {
                         var associatedRefTuples = [];
-                        scope.associationRef.read(1).then(function(page) {
-                            associatedRefTuples = page.tuples;
-                            scope.unlink = function() {
-                                deleteTuples(scope, scope.associationRef, associatedRefTuples)
-                            };
-                        }).catch(function(e) {
-                            throw e;
-                        });
+                        scope.unlink = function() {
+                            deleteReference(scope, scope.associationRef);
+                        };
                     }
 
                     // define delete function
                     else if (scope.config.deletable) {
                         scope.delete = function() {
-                            deleteTuples(scope, scope.tuple.reference, [scope.tuple])
+                            deleteReference(scope, scope.tuple.reference);
                         };
                     }
                 };
