@@ -10,18 +10,18 @@ var testParams = {
         pageSize: 25
     },
     facets: [
-        {name: "id", type: "choice", option: 2, filter: "id: 3", numRows: 1},
+        {name: "id", type: "choice", totalNumOptions: 10, option: 2, filter: "id: 3", numRows: 1},
         {name: "int_col", type: "range"},
         {name: "float_col", type: "range"},
         {name: "date_col", type: "range"},
         {name: "timestamp_col", type: "range"},
-        {name: "text_col", type: "choice"},
-        {name: "longtext_col", type: "choice"},
-        {name: "markdown_col", type: "choice"},
-        {name: "F1", type: "choice"},
-        {name: "to_name", type: "choice"},
-        {name: "f3 (term)", type: "choice"},
-        {name: "from_name", type: "choice"}
+        {name: "text_col", type: "choice", totalNumOptions: 10, option: 1, filter: "text_col: one", numRows: 5},
+        {name: "longtext_col", type: "choice", totalNumOptions: 10, option: 2, filter: "longtext_col: two", numRows: 5},
+        {name: "markdown_col", type: "choice", totalNumOptions: 10, option: 4, filter: "markdown_col: eight", numRows: 1},
+        {name: "F1", type: "choice", totalNumOptions: 10, option: 1, filter: "F1 : two", numRows: 10},
+        {name: "to_name", type: "choice", totalNumOptions: 10, option: 0, filter: "to_name: one", numRows: 10},
+        {name: "f3 (term)", type: "choice", totalNumOptions: 2, option: 0, filter: "f3 (term): one", numRows: 6},
+        {name: "from_name", type: "choice", totalNumOptions: 10, option: 4, filter: "from_name: 5", numRows: 1}
     ]
 }
 
@@ -98,21 +98,36 @@ describe("Viewing Recordset with Faceting,", function() {
                 });
             });
 
-            for (var j=0; j<1; j++) {
+            for (var j=0; j<testParams.totalNumFacets; j++) {
                 // anon function to capture looping variable
                 (function(facetParams, idx) {
                     it("for " + facetParams.name + ", it should open the facet, select a value to filter on, and update the search criteria.", function () {
-                        var facetElem = chaisePage.recordsetPage.getFacetById(idx),
-                            clearAll = chaisePage.recordsetPage.getClearAllFilters();
+                        var clearAll = chaisePage.recordsetPage.getClearAllFilters();
 
                         if (facetParams.type == "choice") {
-                            // open facet
-                            facetElem.click().then(function(facet) {
+                            // wait for all facets to be closed
+                            browser.wait(function () {
+                                return chaisePage.recordsetPage.getClosedFacets().count().then(function(ct) {
+                                    return ct == testParams.totalNumFacets;
+                                });
+                            }).then(function() {
+                                // open facet
+                                return chaisePage.recordsetPage.getFacetById(idx).click();
+                            }).then(function(facet) {
                                 // wait for facet to open
-                                return chaisePage.recordsetPage.getFacetOptions(idx);
-                            }).then(function (options) {
+                                browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
 
-                                return options[facetParams.option].click()
+                                // wait for facet checkboxes to load
+                                browser.wait(function () {
+                                    return chaisePage.recordsetPage.getFacetOptions(idx).count().then(function(ct) {
+                                        return ct == facetParams.totalNumOptions;
+                                    });
+                                });
+
+                                // wait for list to be fully visible
+                                browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(idx)), browser.params.defaultTimeout);
+
+                                return chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(idx, facetParams.option));
                             }).then(function () {
                                 // wait for request to return
                                 browser.wait(EC.visibilityOf(clearAll), browser.params.defaultTimeout);
@@ -134,8 +149,11 @@ describe("Viewing Recordset with Faceting,", function() {
                                 
                                 return clearAll.click();
                             }).then(function () {
+                                browser.wait(EC.not(EC.visibilityOf(clearAll)), browser.params.defaultTimeout);
                                 // close the facet
-                                return facetElem.click();
+                                return chaisePage.recordsetPage.getFacetById(idx).click();
+                            }).catch(function (exc) {
+                                console.dir(exc);
                             });
                         } else {
                             //     //range facet test

@@ -882,8 +882,16 @@ var recordsetPage = function() {
         return element.all(by.css(".panel-open"));
     }
 
+    this.getClosedFacets = function () {
+        return element.all(by.css("div[aria-expanded=false][style='height: 0px;']"));
+    }
+
     this.getFacetById = function (idx) {
         return element(by.id("fc-heading-" + idx));
+    }
+
+    this.getFacetCollapse = function (idx) {
+        return element(by.id("fc-" + idx)).element(by.css("div[aria-expanded=true]"));
     }
 
     this.getAllFacets = function (){
@@ -893,17 +901,25 @@ var recordsetPage = function() {
     this.getOpenFacetTitles = function () {
         return browser.executeScript("return $('.panel-open h3 a').map(function(i, a) { return a.textContent.trim(); });");
     }
-    
+
     this.getFilters = function () {
         return element.all(by.css(".filter-label.label-default"));
     }
-    
+
     this.getClearAllFilters = function () {
         return element(by.id("clear-all-filters"));
     }
-    
+
     this.getFacetOptions = function (idx) {
         return element(by.id("fc-" + idx)).all(by.css(".chaise-checkbox input"));
+    }
+
+    this.getFacetOption = function (idx, option) {
+        return element(by.id("fc-" + idx)).element(by.id("checkbox-" + option));
+    }
+    
+    this.getList = function (idx) {
+        return element(by.id("fc-" + idx)).element(by.css(".chaise-list-container"));
     }
 };
 
