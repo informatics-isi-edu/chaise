@@ -280,7 +280,7 @@
                         throw notAuthorizedError;
                     }
                 } else if (context.mode == context.modes.CREATE) {
-                    if ($rootScope.reference.canCreate) {
+                    if ($rootScope.reference.canInsert) {
                         $rootScope.displayname = $rootScope.reference.displayname;
 
                         // populate defaults

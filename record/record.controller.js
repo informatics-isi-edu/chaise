@@ -15,8 +15,8 @@
         vm.alerts = AlertsService.alerts;
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
-        vm.canCreate = function() {
-            return ($rootScope.reference && $rootScope.reference.canCreate && $rootScope.modifyRecord);
+        vm.canInsert = function() {
+            return ($rootScope.reference && $rootScope.reference.canInsert && $rootScope.modifyRecord);
         };
 
         vm.createRecord = function() {
@@ -111,7 +111,7 @@
             if(angular.isUndefined(relatedRef))
             return false;
            var ref = (relatedRef.derivedAssociationReference ? relatedRef.derivedAssociationReference : relatedRef);
-           return (ref.canCreate && $rootScope.modifyRecord);
+           return (ref.canInsert && $rootScope.modifyRecord);
         };
 
         // Send user to RecordEdit to create a new row in this related table

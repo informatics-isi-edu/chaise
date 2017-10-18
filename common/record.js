@@ -69,7 +69,7 @@
         * @param {string} relatedTableRefDisplay: Related table ref. display type
         * @param {string} tabModelDisplay: Display type of individual model
         * @param {callback} canEditRelated: function to check canEdit()
-        * @param {callback} canCreateRelated: function to check canCreate()
+        * @param {callback} canCreateRelated: function to check canInsert()
         * @param {callback} addRelatedRecord: function to check add feature
         * @param {callback} toRecordSet:view more record function
         */

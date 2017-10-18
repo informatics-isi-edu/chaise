@@ -21,7 +21,7 @@
                 </h3>
             </div>
             <div class="pull-right">
-                <a id="create-record" ng-click="::ctrl.createRecord()" ng-if="::ctrl.canCreate()" uib-tooltip="Click here to create a record." tooltip-placement="bottom">
+                <a id="create-record" ng-click="::ctrl.createRecord()" ng-if="::ctrl.canInsert()" uib-tooltip="Click here to create a record." tooltip-placement="bottom">
                     <span class="glyphicon glyphicon-plus"></span> <strong>Create</strong>
                 </a>&nbsp;&nbsp;
                 <a id="edit-record" ng-click="::ctrl.editRecord()" ng-if="::ctrl.canEdit()" uib-tooltip="Click here to edit this record." tooltip-placement="bottom">
