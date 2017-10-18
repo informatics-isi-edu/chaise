@@ -9,7 +9,6 @@ var testParams = {
     }
 };
 
-
 describe('When viewing RecordEdit app', function() {
     var EC = protractor.ExpectedConditions, baseUrl, url, modalBody;
     beforeAll(function() {
@@ -18,7 +17,7 @@ describe('When viewing RecordEdit app', function() {
     });
 
     it('as a create-only user, the app should not load the form and displays error modal instead', function() {
-        url = baseUrl + ':main_create_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value
+        url = baseUrl + ':main_create_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value;
         modalBody = element(by.css('.modal-body'));
 
         browser.get(url);
@@ -29,7 +28,7 @@ describe('When viewing RecordEdit app', function() {
     });
 
     it('as a read-only user, the app should not load the form and displays error modal instead', function() {
-        url = baseUrl + ':main_read_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value
+        url = baseUrl + ':main_read_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value;
         modalBody = element(by.css('.modal-body'));
 
         browser.get(url);
@@ -40,7 +39,7 @@ describe('When viewing RecordEdit app', function() {
     });
 
     it('as a delete-only user, the app should not load the form and displays error modal instead', function() {
-        url = baseUrl + ':main_delete_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value
+        url = baseUrl + ':main_delete_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value;
         modalBody = element(by.css('.modal-body'));
 
         browser.get(url);
@@ -115,5 +114,40 @@ describe('When viewing RecordEdit app', function() {
             });
         });
 
+    });
+
+    describe('user should be shown login modal', function() {
+        beforeAll(function(done) {
+            chaisePage.performLogin(process.env.AUTH_COOKIE + "expires=Thu, 01 Jan 1970 00:00:01 GMT;").then(function() {
+                browser.ignoreSynchronization = true;
+                done();
+            }, function(err) {
+                browser.ignoreSynchronization = true;
+                console.log(err);
+                done.fail();
+            });
+        });
+
+        it("as anonymous user", function() {
+            url = baseUrl + ':main_create_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value;
+            modalBody = element(by.css('.modal-body'));
+
+            browser.get(url);
+            chaisePage.waitForElement(modalBody).then(function() {
+                expect(element(by.id('entity-title')).isPresent()).toBe(false);
+                expect(modalBody.isDisplayed()).toBe(true);
+                expect(element(by.css('.modal-title')).isPresent()).toBe(true);
+                expect(element(by.css('.modal-title')).getText()).toBe('You need to be logged in to continue.');
+            });
+        });
+
+        afterAll(function(done) {
+            chaisePage.performLogin(process.env.AUTH_COOKIE).then(function() {
+                done();
+            }, function(err) {
+                console.log(err);
+                done.fail();
+            });
+        });
     });
 });
