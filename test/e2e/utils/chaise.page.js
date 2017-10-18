@@ -754,6 +754,7 @@ var recordPage = function() {
 };
 
 var recordsetPage = function() {
+    var that = this;
     this.getPageTitle = function() {
         return browser.executeScript("return $('#page-title').text();");
     };
@@ -881,12 +882,8 @@ var recordsetPage = function() {
         return element.all(by.css(".panel-open"));
     }
 
-    this.getOpenFacetsClickable = function () {
-        return element.all(by.css(".panel-open .panel-title a"));
-    };
-
-    this.getFacetById = function (id) {
-        return element(by.id(id));
+    this.getFacetById = function (idx) {
+        return element(by.id("fc-heading-" + idx));
     }
 
     this.getAllFacets = function (){
@@ -903,6 +900,10 @@ var recordsetPage = function() {
     
     this.getClearAllFilters = function () {
         return element(by.id("clear-all-filters"));
+    }
+    
+    this.getFacetOptions = function (idx) {
+        return element(by.id("fc-" + idx)).all(by.css(".chaise-checkbox input"));
     }
 };
 
