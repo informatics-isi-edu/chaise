@@ -202,7 +202,7 @@
                         allInbFKCols[i].reference = allInbFKCols[i].reference.contextualize.compactBriefInline;
                         var ifkPageSize = getPageSize(allInbFKCols[i].reference);
                         (function(i) {
-                            if (allInbFKCols[i].reference.canCreate && $rootScope.modifyRecord && !$rootScope.showEmptyRelatedTables) {
+                            if (allInbFKCols[i].reference.canInsert && $rootScope.modifyRecord && !$rootScope.showEmptyRelatedTables) {
                                 $rootScope.showEmptyRelatedTables = true;
                             }
                             getRelatedTableData(allInbFKCols[i].reference, true, "compact/brief/inline", function(model){
@@ -228,7 +228,7 @@
                     $rootScope.relatedReferences[i] = $rootScope.relatedReferences[i].contextualize.compactBrief;
                     var pageSize = getPageSize($rootScope.relatedReferences[i]);
                     (function(i) {
-                        if ($rootScope.relatedReferences[i].canCreate && $rootScope.modifyRecord && !$rootScope.showEmptyRelatedTables) {
+                        if ($rootScope.relatedReferences[i].canInsert && $rootScope.modifyRecord && !$rootScope.showEmptyRelatedTables) {
                             $rootScope.showEmptyRelatedTables = true;
                         }
                         getRelatedTableData($rootScope.relatedReferences[i], boolIsOpen, "compact/brief", function(model){

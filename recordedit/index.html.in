@@ -23,7 +23,7 @@
     <div class="container-fluid">
         <navbar></navbar>
         <loading-spinner ng-show="!displayReady"></loading-spinner>
-        <div ng-if="reference && (reference.canCreate || reference.canUpdate)">
+        <div ng-if="reference && (reference.canInsert || reference.canUpdate)">
             <div ng-controller="FormController as form" class="row">
                 <div ng-show="!form.resultset">
                     <loading-spinner ng-show="form.submissionButtonDisabled"></loading-spinner>
