@@ -94,9 +94,22 @@
                         }
                         if (min) min = min.format('YYYY-MM-DDTHH:mm:ss.SSSZ');
                         if (max) max = max.format('YYYY-MM-DDTHH:mm:ss.SSSZ');
-                    } else {
-                        min = scope.model.min;
-                        max = scope.model.max;
+                    // data for date needs to be formatted properly for a proper comparison
+                    } else if (scope.displayType(scope.type) == "date") {
+                        min = (scope.model.min) ? moment(scope.model.min, 'YYYY-MM-DD') : '';
+                        max = (scope.model.max) ? moment(scope.model.max, 'YYYY-MM-DD') : '';
+                        if ((min && max) && max.isBefore(min)) {
+                            scope.minMaxForm.$error.improperRange = true;
+                            return;
+                        } else {
+                            scope.minMaxForm.$error.improperRange = false;
+                        }
+                        if (min) min = min.format('YYYY-MM-DD');
+                        if (max) max = max.format('YYYY-MM-DD');
+                    // date for numeric should be formatted as Number() for a proper comparison
+                    } else if (scope.displayType(scope.type) == "number") {
+                        min = Number(scope.model.min);
+                        max = Number(scope.model.max);
                         if ((min && max) && min > max) {
                             scope.minMaxForm.$error.improperRange = true;
                             return;

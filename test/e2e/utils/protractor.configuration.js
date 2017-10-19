@@ -6,8 +6,8 @@ exports.getConfig = function(options) {
     capabilities: {
       //browserName: 'internet explorer',
       //browserName: 'firefox',
-      //version: '40.0', //to specify the browser version
       browserName: 'chrome',
+      version: '60.0', //to specify the browser version
       //using firefox causes problems - not showing the right result and -
       //Apache log shows firefox is not requesting the server.
       'chromeOptions' : {

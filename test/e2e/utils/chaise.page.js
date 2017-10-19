@@ -878,6 +878,10 @@ var recordsetPage = function() {
     };
 
     /******* Facet selectors for recordset with faceting ********/
+    this.getAllFacets = function (){
+        return element.all(by.css(".panel-default"));
+    }
+
     this.getOpenFacets = function () {
         return element.all(by.css(".panel-open"));
     }
@@ -894,8 +898,8 @@ var recordsetPage = function() {
         return element(by.id("fc-" + idx)).element(by.css("div[aria-expanded=true]"));
     }
 
-    this.getAllFacets = function (){
-        return element.all(by.css(".panel-default"));
+    this.getFacetTitles = function () {
+        return browser.executeScript("return $('.panel h3 a').map(function(i, a) { return a.textContent.trim(); });");
     }
 
     this.getOpenFacetTitles = function () {
@@ -914,12 +918,32 @@ var recordsetPage = function() {
         return element(by.id("fc-" + idx)).all(by.css(".chaise-checkbox input"));
     }
 
+    this.getCheckedFacetOptions = function (idx) {
+        return element(by.id("fc-" + idx)).all(by.css(".chaise-checkbox input[checked=checked]"));
+    }
+
+    this.getFacetOptionsText = function (idx) {
+        return browser.executeScript("return $('#fc-" + idx + " .chaise-checkbox label').map(function(i, a) { return a.textContent.trim(); });");
+    }
+
     this.getFacetOption = function (idx, option) {
         return element(by.id("fc-" + idx)).element(by.id("checkbox-" + option));
     }
-    
+
     this.getList = function (idx) {
         return element(by.id("fc-" + idx)).element(by.css(".chaise-list-container"));
+    }
+
+    this.getRangeMinInput = function (idx, className) {
+        return element(by.id("fc-" + idx)).element(by.css("." + className));
+    }
+
+    this.getRangeMaxInput = function (idx, className) {
+        return element(by.id("fc-" + idx)).element(by.css("." + className));
+    }
+
+    this.getRangeSubmit = function (idx) {
+        return element(by.id("fc-" + idx)).element(by.css("button[type=submit]"));
     }
 };
 
