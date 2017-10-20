@@ -984,7 +984,7 @@ footer .container1 {
     text-align: right;
 }
 /************* Profile Card ****************/
-.modal-dialog li{
+#profile-modal li{
     list-style-type : disc;
 }
 .modal-dialog .profileValue{
