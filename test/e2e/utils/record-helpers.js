@@ -258,6 +258,18 @@ exports.testPresentation = function (tableParams) {
             expect('Encountered an error').toBe('Please check the log', 'Inside catch block');
         })
     });
+
+    it("visible column related table with inline inbound fk should disappear when 'Hide All Related Records' was clicked.",function(){
+         var markdownEntityRow = element(by.id('row-product-record_fk_booking_accommodation')).all(by.tagName('td')),
+            showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton();
+         showAllRTButton.click();
+         // multiple td returns [] when isDisplayed() is resolved; therefore length is being used to check if it is displayed.
+         markdownEntityRow.isDisplayed().then(function(err){
+            expect(err.length).toBe(0);
+         })
+         showAllRTButton.click();     // reverse the status of the page 
+    });
+
     
     // Related tables are contextualized with `compact/brief`, but if that is not specified it will inherit from `compact`
     it("should honor the page_size annotation for the table, file, in the compact context based on inheritance.", function() {

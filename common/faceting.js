@@ -600,7 +600,7 @@
                                 } else {
                                 
                                     // console.log("Facet " + scope.facetColumn.displayname.value + " min/max: ", response);
-                                    if (scope.facetColumn.column.type.name.indexOf("timestamp") > -1) {
+                                    if (scope.facetColumn.column.type.rootName.indexOf("timestamp") > -1) {
                                         // convert and set the values if they are defined.
                                         // if values are null, undefined, false, 0, or '' we don't want to show anything
                                         if (response[0] && response[1]) { 

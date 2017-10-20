@@ -520,7 +520,7 @@ LINT=.make-lint
 all: $(HTML)
 
 .PHONY: build
-build: $(PKG) $(MIN) $(HTML)
+build: $(PKG) $(MIN) $(HTML) $(gitversion)
 
 # Rule to build the full library
 $(PKG): $(JS_SOURCE) $(BIN)

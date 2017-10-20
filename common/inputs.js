@@ -52,7 +52,7 @@
                             relativeType = "number";
                             break;
                         default:
-                            relativeType = (colType.baseType) ? type(colType.baseType) : "number";
+                            relativeType = (colType.baseType) ? scope.displayType(colType.baseType) : "number";
                             break;
                     }
                     return relativeType;
@@ -94,7 +94,7 @@
                         }
                         if (min) min = min.format('YYYY-MM-DDTHH:mm:ss.SSSZ');
                         if (max) max = max.format('YYYY-MM-DDTHH:mm:ss.SSSZ');
-                    // data for date needs to be formatted properly for a proper comparison
+                        // data for date needs to be formatted properly for a proper comparison
                     } else if (scope.displayType(scope.type) == "date") {
                         min = (scope.model.min) ? moment(scope.model.min, 'YYYY-MM-DD') : '';
                         max = (scope.model.max) ? moment(scope.model.max, 'YYYY-MM-DD') : '';
@@ -106,7 +106,7 @@
                         }
                         if (min) min = min.format('YYYY-MM-DD');
                         if (max) max = max.format('YYYY-MM-DD');
-                    // date for numeric should be formatted as Number() for a proper comparison
+                        // date for numeric should be formatted as Number() for a proper comparison
                     } else if (scope.displayType(scope.type) == "number") {
                         min = Number(scope.model.min);
                         max = Number(scope.model.max);

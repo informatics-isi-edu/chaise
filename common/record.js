@@ -34,11 +34,27 @@
                     canEditRelated: '&',
                     canCreateRelated: '&',
                     addRelatedRecord: '&',
-                    toRecordSet: '&'
+                    toRecordSet: '&',
+                    showEmptyRelatedTables: '='
                 },
                 templateUrl: '../common/templates/record.html',
                 controller: function($scope) {
-                    $scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;                        
+                    $scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
+                },
+                link: function(scope){
+                    scope.showRelatedTables = function(i){
+                        //show/hide empty Related Tables
+                        if (scope.recordTableModel && scope.recordTableModel[i]) {
+                            if(scope.recordTableModel[i].rowValues.length > 0 || scope.showEmptyRelatedTables){
+                                return true;
+                            }
+                            else{
+                                return false;
+                            }                      
+                        }else {
+                            return true;
+                        }
+                    }
                 }
             };
         }])

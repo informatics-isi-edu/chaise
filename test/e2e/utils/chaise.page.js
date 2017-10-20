@@ -1084,7 +1084,7 @@ function chaisePage() {
             defer.reject();
         });
 
-        return defer;
+        return defer.promise;
     };
 };
 
