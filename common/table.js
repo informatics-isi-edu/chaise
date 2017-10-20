@@ -831,6 +831,10 @@
                     }
 
                 };
+                
+                scope.focusOnSearchInput = function () {
+                    angular.element("#search-input.main-search-input").focus();
+                };
 
                 scope.inputChangedPromise = undefined;
 
