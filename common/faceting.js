@@ -729,9 +729,12 @@
                                 defer.resolve(false);
                             } else {
                                 scope.checkboxRows = scope.facetModel.appliedFilters.map(appliedFilterToRow);
+                                scope.hasMore = page.hasNext;
+                                
                                 page.tuples.forEach(function (tuple) {
                                     // if we're showing enough rows
                                     if (scope.checkboxRows.length == tableConstants.PAGE_SIZE) {
+                                        scope.hasMore = true;
                                         return;
                                     }
                                     
@@ -747,7 +750,8 @@
                                     
                                     var i = scope.facetModel.appliedFilters.findIndex(function (row) {
                                         return row.uniqueId == value;
-                                    })
+                                    });
+                                    
                                     if (i !== -1) {
                                         return;
                                     }
@@ -758,9 +762,7 @@
                                         displayname: value == null ? {value: null, isHTML: false} : tuple.displayname,
                                         uniqueId: value
                                     });
-                                });
-                                
-                                scope.hasMore = page.hasNext;    
+                                }); 
                                 
                                 defer.resolve(true);
                             }
