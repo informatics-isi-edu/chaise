@@ -52,7 +52,7 @@
                             relativeType = "number";
                             break;
                         default:
-                            relativeType = (colType.baseType) ? type(colType.baseType) : "number";
+                            relativeType = (colType.baseType) ? scope.displayType(colType.baseType) : "number";
                             break;
                     }
                     return relativeType;

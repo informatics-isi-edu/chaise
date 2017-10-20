@@ -268,6 +268,7 @@
         }
         
         function initialize (vm) {
+            vm.search = vm.reference.location.searchTerm;
             vm.initialized = false;
             vm.dirtyResult = true;
             vm.dirtyCount = true;
