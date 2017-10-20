@@ -95,11 +95,21 @@
         // Subscribe to on change event for session
         var subId = Session.subscribeOnChange(function() {
 
+            // Get existing session value
+            session = Session.getSessionValue();
+
+            // If session is not defined or null (Anonymous user) prompt the user to login
+            if (!session) {
+                var notAuthorizedError = new ERMrest.UnauthorizedError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
+                throw notAuthorizedError;
+                return;
+            }
+
             // Unsubscribe onchange event to avoid this function getting called again
             Session.unsubscribeOnChange(subId);
 
             // On resolution
-            ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
+            ERMrest.resolve(ermrestUri, { cid: context.appName }).then(function getReference(reference) {
                 
                 
                 // we are using filter to determine app mode, the logic for getting filter
@@ -124,8 +134,6 @@
                 } else if (context.mode == context.modes.CREATE || context.mode == context.modes.COPY) {
                     $rootScope.reference = reference.contextualize.entryCreate;
                 }
-
-                session = Session.getSessionValue();
 
                 $rootScope.reference.session = session;
                 $rootScope.session = session;
