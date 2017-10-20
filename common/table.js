@@ -803,12 +803,12 @@
                     if (refUri.length > MAX_LENGTH) {
                         $timeout(function () {
                             $window.scrollTo(0, 0);
-                        }, 0)
+                        }, 0);
                         AlertsService.addAlert('Maximum URL length reached. Cannot perform the requested action.', 'warning');
                         return false;
                     }
                     return true;
-                }
+                };
 
                 scope.setPageLimit = function(limit) {
                     scope.vm.pageLimit = limit;
@@ -937,6 +937,7 @@
                     // read
                     if (completed > 0 || updated) {
                         updated = false;
+                        scope.vm.lastActiveFacet = -1;
                         recordTableUtils.update(scope.vm, true, true, true);
                     }
 
@@ -946,17 +947,26 @@
                 // called from form.controller.js to communicate that an entity was just updated
                 window.updated = function() {
                     updated = true;
-                }
+                };
                 
                 scope.$on('facet-modified', function ($event) {
                     console.log('facet-modified in recordset directive');
                     recordTableUtils.update(scope.vm, true, true, true);
                 });
                 
-                // row data has been modified (from ellipses)
-                // do a read
+                
+                scope.$on('record-deleted', function ($event) {
+                    console.log('record-deleted in recordset directive');
+                    scope.vm.lastActiveFacet = -1;
+                    recordTableUtils.update(scope.vm, true, true, true);
+                });
+                
+                
+                // This is not used now, but we should change the record-deleted to this.
+                // row data has been modified (from ellipses) do read
                 scope.$on('record-modified', function($event) {
                     console.log('record-modified in recordset directive');
+                    scope.vm.lastActiveFacet = -1;
                     recordTableUtils.update(scope.vm, true, true, true);
                 });
                 
