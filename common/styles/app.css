@@ -984,7 +984,7 @@ footer .container1 {
     text-align: right;
 }
 /************* Profile Card ****************/
-.modal-dialog li{
+#profile-modal li{
     list-style-type : disc;
 }
 .modal-dialog .profileValue{
@@ -1062,7 +1062,7 @@ footer .container1 {
      flex:0 0 20vw;
      position: relative;
      /*border-right: 15px solid white;*/
-     min-width: 150px;
+     min-width: 170px;
      max-width: 50vw;
      z-index: 2;
      padding-left: 5px;
@@ -1357,14 +1357,14 @@ footer .container1 {
 }
 
 /******* range inputs ***********/
-range-inputs  .input-clearbtn{
+range-inputs .input-clearbtn{
     cursor: pointer;
     right: -4px;
     pointer-events: all;
     z-index: 5;
 }
 
-range-inputs  .input-container {
+range-inputs .input-container {
     position: relative;
 }
 
@@ -1372,6 +1372,15 @@ range-inputs .range-inputs-width {
     min-width: 100px;
     max-width: 300px;
     width: 100%;
+}
+
+range-inputs .input-group {
+    width: 100%;
+}
+
+range-inputs .input-group-addon {
+    padding-left: 4px;
+    padding-right: 4px;
 }
 
 input[type=number]::-webkit-inner-spin-button,

@@ -409,7 +409,7 @@
             };
         }])
 
-        .directive('rangePicker', ['$timeout', '$q', function ($timeout, $q) {
+        .directive('rangePicker', ['$timeout', '$q', '$log', function ($timeout, $q, $log) {
             return {
                 restrict: 'AE',
                 templateUrl: '../common/templates/faceting/range-picker.html',
@@ -500,7 +500,10 @@
                             res = scope.facetColumn.removeRangeFilter(row.metaData.min, row.metaData.max);
                         }
                         
+                        $log.debug("request for facet (index="+scope.facetColumn.index+") range " + (row.selected ? "add" : "remove") + '. min=' + row.metaData.min + ", max=" + row.metaData.max);
+                        
                         if (res && !scope.parentCtrl.updateVMReference(res.reference, scope.index)) {
+                            $log.debug("rejected because of url length limit.");
                             row.selected != row.selected;
                             $event.preventDefault();
                         } else {
@@ -525,12 +528,15 @@
                         }
                         
                         if (!scope.parentCtrl.updateVMReference(res.reference, scope.index)) {
+                            $log.debug("rejected because of url length limit.");
                             return; // uri limit
                         }
 
                         var rowIndex = scope.ranges.findIndex(function (obj) {
                             return obj.uniqueId == res.filter.uniqueId;
                         });
+                        
+                        $log.debug("request for facet (index="+scope.facetColumn.index +") range add. min='" + min + ", max=" + max);
                         
                         scope.facetModel.appliedFilters.push(createAppliedFilter(res.filter));
                         if (rowIndex === -1) {
@@ -649,7 +655,7 @@
             };
         }])
         
-        .directive('choicePicker', ['$q', '$timeout', '$uibModal', 'tableConstants', function ($q, $timeout, $uibModal, tableConstants) {
+        .directive('choicePicker', ['$q', '$timeout', '$uibModal', 'tableConstants', "$log", function ($q, $timeout, $uibModal, tableConstants, $log) {
 
             /**
              * Initialzie facet column.
@@ -729,9 +735,12 @@
                                 defer.resolve(false);
                             } else {
                                 scope.checkboxRows = scope.facetModel.appliedFilters.map(appliedFilterToRow);
+                                scope.hasMore = page.hasNext;
+                                
                                 page.tuples.forEach(function (tuple) {
                                     // if we're showing enough rows
                                     if (scope.checkboxRows.length == tableConstants.PAGE_SIZE) {
+                                        scope.hasMore = true;
                                         return;
                                     }
                                     
@@ -747,7 +756,8 @@
                                     
                                     var i = scope.facetModel.appliedFilters.findIndex(function (row) {
                                         return row.uniqueId == value;
-                                    })
+                                    });
+                                    
                                     if (i !== -1) {
                                         return;
                                     }
@@ -758,9 +768,7 @@
                                         displayname: value == null ? {value: null, isHTML: false} : tuple.displayname,
                                         uniqueId: value
                                     });
-                                });
-                                
-                                scope.hasMore = page.hasNext;    
+                                }); 
                                 
                                 defer.resolve(true);
                             }
@@ -878,6 +886,8 @@
                             ref = scope.facetColumn.removeChoiceFilters([row.uniqueId]);
                         }
                         
+                        $log.debug("request for facet (index=" + scope.facetColumn.index + ") choice add. uniqueId='" + row.uniqueId);
+                        
                         // if the updateVMReference failed (due to url length limit),
                         // we should revert the change back
                         if (!scope.parentCtrl.updateVMReference(ref, scope.index)) {
@@ -900,6 +910,7 @@
                         }
                     };
 
+                    // TODO all these search functions can be refactored to have just one point of sending request.
                     // change the searchTerm and fire the updateFacetColumn
                     scope.enterPressed = function() {
                         var term = null;
@@ -909,6 +920,8 @@
                         var ref = scope.reference.search(term);
                         if (scope.$root.checkReferenceURL(ref)) {
                             scope.searchTerm = term;
+                            
+                            $log.debug("request for facet (index=" + scope.facetColumn.index + ") update. new search=" + term);
                             scope.parentCtrl.updateFacetColumn(scope.index);
                         }
                     };
@@ -924,6 +937,7 @@
                         // Wait for the user to stop typing for a second and then fire the search
                         scope.inputChangedPromise = $timeout(function() {
                             scope.inputChangedPromise = null;
+                            $log.debug("request for facet (index=" + scope.facetColumn.index + ") update. new search=" + scope.searchTerm);
                             scope.parentCtrl.updateFacetColumn(scope.index);
                         }, 1000);
                     };
@@ -932,6 +946,7 @@
                     scope.clearSearch = function() {
                         scope.searchTerm = null;
                         if (scope.reference.location.searchTerm) {
+                            $log.debug("request for facet (index=" + scope.facetColumn.index + ") update. new search=null");
                             scope.parentCtrl.updateFacetColumn(scope.index);
                         }
                     };

@@ -78,7 +78,7 @@
      * 4. `record-modified`: one of the records in the recordset table has been
      * modified. ellipses will fire this event and recordset directive will use it.
      */
-    .factory('recordTableUtils', ['DataUtils', '$timeout','Session', '$q', 'tableConstants', '$rootScope', function(DataUtils, $timeout, Session, $q, tableConstants, $rootScope) {
+    .factory('recordTableUtils', ['DataUtils', '$timeout','Session', '$q', 'tableConstants', '$rootScope', '$log', function(DataUtils, $timeout, Session, $q, tableConstants, $rootScope, $log) {
 
         // This method sets backgroundSearch states depending upon various parameters
         // If it returns true then we should render the data
@@ -252,7 +252,7 @@
                     if (vm.reference.uri !== uri) {
                         defer.resolve(false);
                     } else {
-                        vm.totalRowsCnt = response[0];
+                        vm.totalRowsCnt = (vm.rowValues.length > response[0]) ? vm.rowValues.length : response[0];
                         defer.resolve(true);
                     }
                 }).catch(function (err) {
@@ -304,8 +304,12 @@
 
         function updatePage(vm) {
             var haveFreeSlot = function () {
-                return vm.occupiedSlots < tableConstants.MAX_CONCURENT_REQUEST;
-            }
+                var res = vm.occupiedSlots < tableConstants.MAX_CONCURENT_REQUEST;
+                if (!res) {
+                    $log.debug("No free slot available.");
+                }
+                return res;
+            };
             
             if (!haveFreeSlot()) {
                 return;
@@ -323,8 +327,10 @@
                     }
                     vm.occupiedSlots--;
                     vm.dirtyResult = !res;
-                }
+                    $log.debug("after result update: " + (res ? "successful." : "unsuccessful."));
+                };
                 
+                $log.debug("updating result");
                 updateResult(vm).then(function (res) {
                     afterUpdateResult(res);
                     updatePage(vm);
@@ -337,7 +343,7 @@
             // update the facets
             if (vm.facetsToInitialize.length === 0) {
                 vm.facetModels.forEach(function (fm, index) {
-                    if (!haveFreeSlot() || fm.processed) {
+                    if (fm.processed || !haveFreeSlot()) {
                         return;
                     }
                     
@@ -350,9 +356,12 @@
                         currFm.initialized = res || currFm.initialized;
                         currFm.isLoading = !res;
                         currFm.processed = res || currFm.processed;
+                        
+                        $log.debug("after facet (index="+i+") update: " + (res ? "successful." : "unsuccessful."));
                     };
                     
                     (function (i) {
+                        $log.debug("updating facet (index="+i+")");
                         vm.facetModels[i].updateFacet().then(function (res) {
                             afterFacetUpdate(i, res);
                             updatePage(vm);
@@ -367,12 +376,16 @@
             else if (haveFreeSlot()){
                 vm.occupiedSlots++;
                 var index = vm.facetsToInitialize.shift();
-                vm.facetModels[index].initializeFacet().then(function (res) {
-                    vm.occupiedSlots--;
-                    updatePage(vm);
-                }).catch(function (err) {
-                    throw err;
-                });
+                (function (i) {
+                    $log.debug("initializing facet (index="+index+")");
+                    vm.facetModels[i].initializeFacet().then(function (res) {
+                        $log.debug("after facet (index="+ i +") initialize: " + (res ? "successful." : "unsuccessful."));
+                        vm.occupiedSlots--;
+                        updatePage(vm);
+                    }).catch(function (err) {
+                        throw err;
+                    });
+                })(index);
             }
             
             // update the count
@@ -385,8 +398,10 @@
                 var afterUpdateCount = function (res, hasError) {
                     vm.occupiedSlots--;
                     vm.dirtyCount = !res;
-                }
+                    $log.debug("after count update: " + (res ? "successful." : "unsuccessful."));
+                };
                 
+                $log.debug("updating count");
                 updateCount(vm).then(function (res) {
                     afterUpdateCount(res);
                     updatePage(vm);
@@ -752,7 +767,7 @@
                             // set the value to null so the count displayed is just the count of the shown rows until the latter
                             // aggregate count request returns. If the latter one never returns (because of a server error or something),
                             // at least the UI doesn't show any misleading information.
-                            scope.vm.totalRowsCnt = response[0];
+                            scope.vm.totalRowsCnt = (scope.vm.rowValues.length > response[0]) ? scope.vm.rowValues.length : response[0];
                         }, function error(response) {
                             //fail silently
                             scope.vm.totalRowsCn = null;
@@ -772,7 +787,7 @@
     }])
     
     //TODO This is used in recrodset app, eventually it should be used everywhere
-    .directive('recordsetWithFaceting', ['recordTableUtils', '$window', '$cookies', 'DataUtils', 'MathUtils', 'UriUtils','$timeout', 'AlertsService', function(recordTableUtils, $window, $cookies, DataUtils, MathUtils, UriUtils, $timeout, AlertsService) {
+    .directive('recordsetWithFaceting', ['recordTableUtils', '$window', '$cookies', 'DataUtils', 'MathUtils', 'UriUtils','$timeout', 'AlertsService', '$log', function(recordTableUtils, $window, $cookies, DataUtils, MathUtils, UriUtils, $timeout, AlertsService, $log) {
         var MAX_LENGTH = 2000;
         
         return {
@@ -803,12 +818,12 @@
                     if (refUri.length > MAX_LENGTH) {
                         $timeout(function () {
                             $window.scrollTo(0, 0);
-                        }, 0)
+                        }, 0);
                         AlertsService.addAlert('Maximum URL length reached. Cannot perform the requested action.', 'warning');
                         return false;
                     }
                     return true;
-                }
+                };
 
                 scope.setPageLimit = function(limit) {
                     scope.vm.pageLimit = limit;
@@ -818,8 +833,9 @@
                 scope.before = function() {
                     var previous = scope.vm.page.previous;
                     if (previous && scope.$root.checkReferenceURL(previous)) {
-                            scope.vm.reference = previous;
-                            recordTableUtils.update(scope.vm, true, false, false);
+                        scope.vm.reference = previous;
+                        $log.debug('going to previous page. updating..');
+                        recordTableUtils.update(scope.vm, true, false, false);
                     }
                 };
 
@@ -827,9 +843,14 @@
                     var next = scope.vm.page.next;
                     if (next && scope.$root.checkReferenceURL(next)) {
                         scope.vm.reference = next;
+                        $log.debug('going to next page. updating..');
                         recordTableUtils.update(scope.vm, true, false, false);
                     }
 
+                };
+                
+                scope.focusOnSearchInput = function () {
+                    angular.element("#search-input.main-search-input").focus();
                 };
 
                 scope.inputChangedPromise = undefined;
@@ -878,6 +899,7 @@
                          scope.vm.search = term;
                          scope.vm.reference = ref;
                          scope.vm.lastActiveFacet = -1;
+                         $log.debug("search changed to `" + term + "`. updating..");
                          recordTableUtils.update(scope.vm, true, true, true);
                      }
                 };
@@ -936,7 +958,9 @@
 
                     // read
                     if (completed > 0 || updated) {
+                        $log.debug("fouced on page after change, updating...");
                         updated = false;
+                        scope.vm.lastActiveFacet = -1;
                         recordTableUtils.update(scope.vm, true, true, true);
                     }
 
@@ -946,17 +970,29 @@
                 // called from form.controller.js to communicate that an entity was just updated
                 window.updated = function() {
                     updated = true;
-                }
+                };
                 
                 scope.$on('facet-modified', function ($event) {
-                    console.log('facet-modified in recordset directive');
+                    $log.debug("-----------------------------");
+                    $log.debug('facet-modified in recordset directive');
                     recordTableUtils.update(scope.vm, true, true, true);
                 });
                 
-                // row data has been modified (from ellipses)
-                // do a read
+                
+                scope.$on('record-deleted', function ($event) {
+                    $log.debug("-----------------------------");
+                    $log.debug('record-deleted in recordset directive');
+                    scope.vm.lastActiveFacet = -1;
+                    recordTableUtils.update(scope.vm, true, true, true);
+                });
+                
+                
+                // This is not used now, but we should change the record-deleted to this.
+                // row data has been modified (from ellipses) do read
                 scope.$on('record-modified', function($event) {
-                    console.log('record-modified in recordset directive');
+                    $log.debug("-----------------------------");
+                    $log.debug('record-modified in recordset directive');
+                    scope.vm.lastActiveFacet = -1;
                     recordTableUtils.update(scope.vm, true, true, true);
                 });
                 

@@ -37,6 +37,11 @@
         $uibTooltipProvider.options({appendToBody: true});
     }])
 
+    //  Enable log system, if in debug mode
+    .config(['$logProvider', function($logProvider) {
+        $logProvider.debugEnabled(chaiseConfig.debug === true);
+    }])
+
     .run(['constants', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'MathUtils', 'modalBox', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
         function runApp(constants, DataUtils, ERMrest, ErrorService, headInjector, MathUtils, modalBox, Session, UiUtils, UriUtils, $log, $rootScope, $window) {
 
