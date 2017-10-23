@@ -33,7 +33,7 @@
                         <input type="text"
                                id="search-input"
                                ng-model="vm.search"
-                               class="form-control"
+                               class="form-control main-search-input"
                                ng-class="{'search-progress': inputChangedPromise }"
                                on-enter="enterPressed()"
                                ng-change="inputChanged()"
@@ -87,7 +87,7 @@
                 </a>
                 <div class="filter-label label label-default" ng-if="vm.reference.location.searchTerm">
                     <a class="remove-link" ng-click="::clearSearch()" tooltip-placement="bottom" uib-tooltip="Clear Search"><i class="glyphicon glyphicon-remove"></i></a>
-                    <a >Search</a>:
+                    <a ng-click="focusOnSearchInput()">Search</a>:
                     <span ng-bind="vm.reference.location.searchTerm"></span>
                 </div>
                 <div class="filter-label label label-default" ng-repeat="fc in vm.reference.facetColumns track by $index" ng-if="vm.hasFilter($index)">
