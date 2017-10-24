@@ -595,10 +595,10 @@
                 scope.vm.showFaceting = false;
                 
                 scope.unfiltered = function () {
-                    scope.vm.reference = scope.vm.reference.unfilteredReference;
+                    scope.vm.reference = scope.vm.reference.unfilteredReference.contextualize.compact;
                     scope.vm.filterString = null;
                     recordTableUtils.read(scope, false, true);
-                }
+                };
 
                 scope.setPageLimit = function(limit) {
                     scope.vm.pageLimit = limit;

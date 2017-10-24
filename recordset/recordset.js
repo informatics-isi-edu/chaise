@@ -152,10 +152,6 @@
             return appLink;
         };
 
-        $scope.unfiltered = function () {
-            return recordsetModel.reference.unfilteredReference.contextualize.compact.appLink;
-        };
-
         // fetches the height of navbar, bookmark container, and view
         // also fetches the main container for defining the dynamic height
         function fetchMainElements() {
