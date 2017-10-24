@@ -26,9 +26,6 @@
     .constant("messageMap", {
         "catalogMissing": "No catalog specified and no Default is set.",
         "generalPreconditionFailed": "This page is out of sync with the server. Please refresh the page and try again.",
-        "noDataMessage": "No entity exists with ",
-        "multipleDataErrorCode" : "Multiple Records Found",
-        "multipleDataMessage" : "There are more than 1 record found for the filters provided.",
         "onePagingModifier": "Invalid URL. Only one paging modifier allowed",
         "pageRefreshRequired": {
             title: "Page Refresh Required",

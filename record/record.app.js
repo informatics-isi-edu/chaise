@@ -37,8 +37,8 @@
         $uibTooltipProvider.options({appendToBody: true});
     }])
 
-    .run(['constants', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'MathUtils', 'modalBox', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
-        function runApp(constants, DataUtils, ERMrest, ErrorService, headInjector, MathUtils, modalBox, Session, UiUtils, UriUtils, $log, $rootScope, $window) {
+    .run(['constants', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'MathUtils', 'modalBox', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', 'Errors',
+        function runApp(constants, DataUtils, ERMrest, ErrorService, headInjector, MathUtils, modalBox, Session, UiUtils, UriUtils, $log, $rootScope, $window, Errors) {
 
         var session,
             context = {};
@@ -152,15 +152,14 @@
                 $log.info("Page: ", page);
 
                 if (page.tuples.length < 1) {
-                    var noDataError = ErrorService.noRecordError(context.filter.filters);
-                    throw noDataError;
+                    throw new Errors.noRecordError(context.filter.filters);
                 }
                 else if(page.tuples.length > 1){
                     var recordSetLink = page.reference.contextualize.compact.appLink;
-                    var multipleRecordError = ErrorService.multipleRecordError();
-                    multipleRecordError.redirectUrl=recordSetLink;
+                    // var multipleRecordError = Errors.multipleRecordError();
+                    // multipleRecordError.redirectUrl=recordSetLink;
                     $rootScope.displayReady = true;
-                    throw multipleRecordError;
+                    throw new Errors.multipleRecordError(recordSetLink);
                 }
 
                 var tuple = $rootScope.tuple = page.tuples[0];

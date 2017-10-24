@@ -7,10 +7,22 @@
         unauthorized: "Unauthorized",
         forbidden: "Forbidden",
         notFound: "Not Found",
-        multipleRecords: "Multiple Records Found"
+        multipleRecords: "Multiple Records Found",
+        noDataMessage: "No entity exists",
+        multipleDataErrorCode : "Multiple Records Found",
+        multipleDataMessage : "There are more than 1 record found for the filters provided."
+    })
+    .constant('errorMessages', {
+        unauthorized: "Unauthorized",
+        forbidden: "Forbidden",
+        notFound: "Not Found",
+        multipleRecords: "Multiple Records Found",
+        noDataMessage: "No entity exists with ",
+        multipleDataErrorCode : "Multiple Records Found",
+        multipleDataMessage : "There are more than 1 record found for the filters provided."
     })
 
-    .factory('Errors', [function() {
+    .factory('Errors', ['errorNames', 'errorMessages', function(errorNames, errorMessages) {
         function MalformedUriError(message) {
             this.message = message;
         }
@@ -25,14 +37,44 @@
         InvalidInputError.prototype = Object.create(Error.prototype);
         InvalidInputError.prototype.constructor = MalformedUriError;
 
+        function multipleRecordError(redirectUrl, message) {
+            this.errorData = {}
+            this.status = errorNames.multipleRecords;  
+            this.message = (message === undefined ? errorMessages.multipleDataMessage : message);    //errorMessages is constant of all error message
+            this.errorData.stack = (new Error()).stack;
+            this.errorData.redirectUrl = redirectUrl;
+        }
+        multipleRecordError.prototype = Object.create(Error.prototype);
+        multipleRecordError.prototype.constructor = multipleRecordError;
+
+        function noRecordError(filters) {
+            this.errorData = {};
+            var noDataMessageDesc = errorMessages.noDataMessage;
+            if (filters) {
+                for (var k = 0; k < filters.length; k++) {
+                    noDataMessage += filters[k].column + filters[k].operator + filters[k].value;
+                    if (k != filters.length-1) {
+                        noDataMessage += " or ";
+                    }
+                }
+            }
+            this.status = errorNames.notFound; 
+            this.message = noDataMessageDesc;
+            this.errorData = (new Error()).stack;
+        }
+        noRecordError.prototype = Object.create(Error.prototype);
+        noRecordError.prototype.constructor = noRecordError;
+
         return {
             InvalidInputError: InvalidInputError,
-            MalformedUriError: MalformedUriError
+            MalformedUriError: MalformedUriError,
+            multipleRecordError: multipleRecordError,
+            noRecordError:noRecordError
         };
     }])
 
     // Factory for each error type
-    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', 'messageMap', '$log', '$rootScope', '$uibModal', '$window', function ErrorService(AlertsService, errorNames, Session, messageMap, $log, $rootScope, $uibModal, $window) {
+    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$uibModal', '$window', function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $uibModal, $window) {
 
         function errorPopup(message, errorCode, pageName, redirectLink, subMessage, stackTrace) {
             var providedLink = true;
@@ -97,43 +139,6 @@
             });
         }
 
-        function noRecordError(filters) {
-            var noDataMessage = messageMap.noDataMessage;
-            if (filters) {
-                for (var k = 0; k < filters.length; k++) {
-                    noDataMessage += filters[k].column + filters[k].operator + filters[k].value;
-                    if (k != filters.length-1) {
-                        noDataMessage += " or ";
-                    }
-                }
-            }
-            var error = new Error(noDataMessage);
-            error.code = errorNames.notFound;
-
-            return error;
-        }
-        
-        function multipleRecordError() {
-            var multipleDataMessage = messageMap.multipleDataMessage;
-            var error = new Error(multipleDataMessage);
-            error.code = errorNames.multipleRecords;
-            return error;
-        }
-
-        function MalformedUriError(message) {
-            this.message = message;
-        }
-
-        MalformedUriError.prototype = Object.create(Error.prototype);
-        MalformedUriError.prototype.constructor = MalformedUriError;
-
-        function InvalidInputError(message) {
-            this.message = message;
-        }
-
-        InvalidInputError.prototype = Object.create(Error.prototype);
-        InvalidInputError.prototype.constructor = MalformedUriError;
-
         var exceptionFlag = false;
 
         // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
@@ -149,8 +154,8 @@
             if ( (ERMrest && exception instanceof ERMrest.UnauthorizedError) || exception.code == errorNames.unauthorized) {
                 Session.loginInAModal(reloadCb);
             }
-            else if (exception.code && exception.code == errorNames.multipleRecords){
-                errorPopup(messageMap.multipleDataMessage, messageMap.multipleDataErrorCode,"Recordset ", exception.redirectUrl);
+            else if (exception.status && exception.status == errorNames.multipleRecords){
+                errorPopup(errorNames.multipleDataMessage, errorNames.multipleDataErrorCode,"Recordset ", exception.errorData.redirectUrl);
             }
             
             // we decided to deal with the OR condition later
@@ -158,10 +163,10 @@
                 errorPopup( exception.message, exception.status ,"Home Page", $window.location.origin);
             } 
             else {
-                var errName = exception.constructor.name;
+                var errName = exception.status;
                 errName = (errName.toLowerCase() !== 'error') ? errName : "Terminal Error";
 
-                errorPopup("An unexpected error has occurred. Please report this problem to your system administrators.", errName, "Home Page", $window.location.origin,  exception.message , exception.stack);
+                errorPopup("An unexpected error has occurred. Please report this problem to your system administrators.", errName, "Home Page", $window.location.origin,  exception.message , exception.errorData.stack);
             }
             
             exceptionFlag = true;
@@ -169,8 +174,6 @@
 
         return {
             errorPopup: errorPopup,
-            noRecordError: noRecordError,
-            multipleRecordError: multipleRecordError,
             handleException: handleException
         };
     }])
