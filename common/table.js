@@ -252,7 +252,7 @@
                     if (vm.reference.uri !== uri) {
                         defer.resolve(false);
                     } else {
-                        vm.totalRowsCnt = (vm.rowValues.length > response[0]) ? vm.rowValues.length : response[0];
+                        vm.totalRowsCnt = response[0];
                         defer.resolve(true);
                     }
                 }).catch(function (err) {
@@ -767,7 +767,7 @@
                             // set the value to null so the count displayed is just the count of the shown rows until the latter
                             // aggregate count request returns. If the latter one never returns (because of a server error or something),
                             // at least the UI doesn't show any misleading information.
-                            scope.vm.totalRowsCnt = (scope.vm.rowValues.length > response[0]) ? scope.vm.rowValues.length : response[0];
+                            scope.vm.totalRowsCnt = response[0];
                         }, function error(response) {
                             //fail silently
                             scope.vm.totalRowsCn = null;
