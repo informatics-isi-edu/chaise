@@ -915,7 +915,7 @@ var recordsetPage = function() {
     }
 
     this.getFacetOptions = function (idx) {
-        return element(by.id("fc-" + idx)).all(by.css(".chaise-checkbox input"));
+        return element(by.id("fc-" + idx)).all(by.css(".chaise-checkbox label"));
     }
 
     this.getCheckedFacetOptions = function (idx) {
@@ -930,15 +930,44 @@ var recordsetPage = function() {
         return element(by.id("fc-" + idx)).element(by.id("checkbox-" + option));
     }
 
+    this.getFacetSearchBox = function (idx) {
+        return element(by.id("fc-" + idx)).element(by.id("search-input"));
+    }
+
+    this.getFacetSearchBoxClear = function (idx) {
+        return element(by.id("fc-" + idx)).element(by.id("search-clear"));
+    }
+
     this.getList = function (idx) {
         return element(by.id("fc-" + idx)).element(by.css(".chaise-list-container"));
     }
 
+    this.getShowMore = function (idx) {
+        return element(by.id("fc-" + idx)).element(by.id("show-more"));
+    }
+
+    this.getCheckedModalOptions = function () {
+        return element(by.css(".modal-body")).all(by.css(".chaise-checkbox input[checked=checked]"));
+    }
+
+    this.getModalOptions = function () {
+        return element(by.css(".modal-body")).all(by.css(".chaise-checkbox input"));
+    }
+
+    this.getModalSubmit = function () {
+        return element(by.css(".modal-body")).element(by.css(".multi-select-submit-btn"));
+    }
+
+    // there's integer/float/date/timestamp inputs
     this.getRangeMinInput = function (idx, className) {
         return element(by.id("fc-" + idx)).element(by.css("." + className));
     }
 
     this.getRangeMaxInput = function (idx, className) {
+        return element(by.id("fc-" + idx)).element(by.css("." + className));
+    }
+
+    this.getInputClear = function (idx, className) {
         return element(by.id("fc-" + idx)).element(by.css("." + className));
     }
 

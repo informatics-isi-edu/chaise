@@ -20,5 +20,5 @@
         </span>
     </div>
     <record-list rows='checkboxRows' on-row-click='onRowClick' initialized='facetModel.initialized && facetModel.isOpen'></record-list>
-    <a ng-if="hasMore || showFindMore" ng-click="openSearchPopup()"><b>Show More ...</b></a>
+    <a id="show-more" ng-if="hasMore || showFindMore" ng-click="openSearchPopup()"><b>Show More ...</b></a>
 </div>
