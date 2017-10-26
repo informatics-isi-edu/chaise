@@ -133,7 +133,9 @@ describe('When editing a record', function() {
                 // Compare tuple data with expected data
                 var tuple = page.tuples[0].data;
                 var row = testParams.table_1.row;
-                expect(Object.keys(tuple).length).toEqual(row.length);
+
+                // We compare it with row.length + 5, to take 5 system columns in account
+                expect(Object.keys(tuple).length).toEqual(row.length + 5);
                 row.forEach(function(column) {
                     var expectedValue = column.value;
                     // Convert both the ERMrest value and expected value to the same time zone to test.
@@ -313,7 +315,8 @@ describe('When editing a record', function() {
             }).then(function(page) {
                 // Compare tuple data with expected new data
                 var tuple = page.tuples[0].data;
-                expect(Object.keys(tuple).length).toBe(Object.keys(newRowData).length);
+                // We compare it with Object.keys(newRowData).length + 5, to take 5 system columns in account
+                expect(Object.keys(tuple).length).toBe(Object.keys(newRowData).length + 5);
                 for (var colName in newRowData) {
                     if (colName === 'timestamptz_null_col') {
                         var tupleValue = moment(tuple[colName], "YYYY-MM-DDTHH:mm:ssZ").format("YYYY-MM-DDTHH:mm:ssZ");

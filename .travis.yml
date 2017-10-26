@@ -8,6 +8,7 @@ dist: trusty
 branches:
   only:
     - master
+    - system-columns
 
 addons:
   sauce_connect: true
@@ -39,7 +40,9 @@ before_install:
   - sudo apt-get -y purge python-psycopg2
   - sudo pip install web.py
   - sudo pip install psycopg2
+  - pip install requests
   - sudo ln -s /etc/apache2/conf-enabled /etc/apache2/conf.d
+  - sudo ln -s /var/run/apache2 /var/run/httpd
   - sudo a2enmod ssl
   - sudo a2ensite default-ssl
   - cd ..
@@ -66,6 +69,7 @@ before_install:
   - cd ..
   - git clone https://github.com/informatics-isi-edu/ermrest.git
   - cd ermrest
+  - git checkout stateful-model
   - sudo make install PLATFORM=ubuntu1204
   - sudo make deploy PLATFORM=ubuntu1204
   - cd ..
@@ -73,10 +77,12 @@ before_install:
   - sudo apt-get install -y nodejs
   - git clone https://github.com/informatics-isi-edu/ErmrestDataUtils.git
   - cd ErmrestDataUtils
+  - git checkout system-columns
   - sudo npm install
   - cd ..
   - git clone https://github.com/informatics-isi-edu/ermrestjs.git
   - cd ermrestjs
+  - git checkout system_columns
   - sudo npm install
   - bower install
   - sudo make build

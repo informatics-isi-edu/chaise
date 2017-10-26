@@ -191,8 +191,12 @@ exports.testPresentation = function (tableParams) {
                 // verify all columns are present
                 (function(i, displayName, title) {
                     chaisePage.recordPage.getRelatedTableColumnNamesByTable(displayName).getAttribute('innerHTML').then(function(columnNames) {
+                        var index = 0, systemColumns = ["RID", "RCT", "RMT", "RCB", "RMB"];
                         for (var j = 0; j < columnNames.length; j++) {
-                            expect(columnNames[j]).toBe(relatedTables[i].columns[j]);
+                            if (systemColumns.indexOf(columnNames[j]) === -1) {
+                                expect(columnNames[j]).toBe(relatedTables[i].columns[index]);
+                                index++;
+                            }
                         }
 
                         // verify all rows are present
