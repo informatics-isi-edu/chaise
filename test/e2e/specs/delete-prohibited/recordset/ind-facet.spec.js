@@ -19,18 +19,144 @@ var testParams = {
     tsMaxDateInputClass: "ts-date-range-max",
     tsMaxTimeInputClass: "ts-time-range-max",
     facets: [
-        {name: "id", type: "choice", totalNumOptions: 10, option: 2, filter: "id: 3", numRows: 1, options: [ '1', '2', '3', '4', '5', '6', '7', '8', '9', '10' ]},
-        {name: "int_col", type: "numeric", listElems: 1, min: 5, max: 10, filter: "int_col: 5 to 10", numRows: 4, justMin: 6, justMinFilter: "int_col: > 6", justMinRows: 16},
-        {name: "float_col", type: "numeric", listElems: 0, min: 6.5, max: 12.2, filter: "float_col: 6.5000 to 12.2000", numRows: 12, justMin: 8.9, justMinFilter: "float_col: > 8.9000", justMinRows: 14},
-        {name: "date_col", type: "date", listElems: 0, min: "2002-06-14", max: "2007-12-12", filter: "date_col: 2002-06-14 to 2007-12-12", numRows: 5, justMin: "2009-12-14", justMinFilter: "date_col: > 2009-12-14", justMinRows: 3},
-        {name: "timestamp_col", type: "timestamp", listElems: 0, minDate: "2004-05-20", minTime: "10:08:00", maxDate: "2007-12-06", maxTime: "17:26:12", filter: "timestamp_col: 2004-05-20 10:08:00 to 2007-12-06 17:26:12", numRows: 3},
-        {name: "text_col", type: "choice", totalNumOptions: 10, option: 1, filter: "text_col: one", numRows: 5, options: [ 'Empty', 'one', 'two', 'No Value', 'eight', 'eleven', 'five', 'four', 'nine', 'seven' ]},
-        {name: "longtext_col", type: "choice", totalNumOptions: 10, option: 2, filter: "longtext_col: two", numRows: 5, options: [ 'Empty', 'one', 'two', 'No Value', 'eight', 'eleven', 'five', 'four', 'nine', 'seven' ]},
-        {name: "markdown_col", type: "choice", totalNumOptions: 10, option: 4, filter: "markdown_col: eight", numRows: 1, options: [ 'Empty', 'one', 'two', 'No Value', 'eight', 'eleven', 'five', 'four', 'nine', 'seven' ]},
-        {name: "F1", type: "choice", totalNumOptions: 10, option: 1, filter: "F1 : two", numRows: 10, options: [ 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten' ]},
-        {name: "to_name", type: "choice", totalNumOptions: 10, option: 0, filter: "to_name: one", numRows: 10, options: [ 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten' ]},
-        {name: "f3 (term)", type: "choice", totalNumOptions: 2, option: 0, filter: "f3 (term): one", numRows: 6, options: [ 'one', 'two' ]},
-        {name: "from_name", type: "choice", totalNumOptions: 10, option: 4, filter: "from_name: 5", numRows: 1, options: [ '1', '2', '3', '4', '5', '6', '7', '8', '9', '10' ]}
+        {
+            name: "id", 
+            type: "choice", 
+            totalNumOptions: 10, 
+            option: 2, 
+            filter: "id: 3", 
+            numRows: 1, 
+            options: [ '1', '2', '3', '4', '5', '6', '7', '8', '9', '10' ]
+        },
+        {
+            name: "int_col", 
+            type: "numeric", 
+            listElems: 1,
+            range: { 
+                min: 5, 
+                max: 10, 
+                filter: "int_col: 5 to 10", 
+                numRows: 4
+            },
+            justMin: {
+                min: 6, 
+                filter: "int_col: > 6", 
+                numRows: 16
+            },
+            justMin: {
+                min: 6, 
+                filter: "int_col: > 6", 
+                numRows: 16
+            }
+        },
+        {
+            name: "float_col", 
+            type: "numeric", 
+            listElems: 0, 
+            range: {
+                min: 6.5, 
+                max: 12.2, 
+                filter: "float_col: 6.5000 to 12.2000", 
+                numRows: 12
+            },
+            justMin: {
+                min: 8.9, 
+                filter: "float_col: > 8.9000", 
+                numRows: 14
+            }
+        },
+        {
+            name: "date_col", 
+            type: "date", 
+            listElems: 0, 
+            range: {
+                min: "2002-06-14", 
+                max: "2007-12-12", 
+                filter: "date_col: 2002-06-14 to 2007-12-12", 
+                numRows: 5
+            },
+            justMin: {
+                min: "2009-12-14", 
+                filter: "date_col: > 2009-12-14", 
+                numRows: 3
+            }
+        },
+        {
+            name: "timestamp_col", 
+            type: "timestamp", 
+            listElems: 0, 
+            range: {
+                minDate: "2004-05-20", 
+                minTime: "10:08:00", 
+                maxDate: "2007-12-06", 
+                maxTime: "17:26:12", 
+                filter: "timestamp_col: 2004-05-20 10:08:00 to 2007-12-06 17:26:12", 
+                numRows: 3
+            }
+        },
+        {
+            name: "text_col", 
+            type: "choice", 
+            totalNumOptions: 10, 
+            option: 1, 
+            filter: "text_col: one", 
+            numRows: 5, 
+            options: [ 'Empty', 'one', 'two', 'No Value', 'eight', 'eleven', 'five', 'four', 'nine', 'seven' ]
+        },
+        {
+            name: "longtext_col", 
+            type: "choice", 
+            totalNumOptions: 10, 
+            option: 2, 
+            filter: "longtext_col: two", 
+            numRows: 5, 
+            options: [ 'Empty', 'one', 'two', 'No Value', 'eight', 'eleven', 'five', 'four', 'nine', 'seven' ]
+        },
+        {
+            name: "markdown_col", 
+            type: "choice", 
+            totalNumOptions: 10, 
+            option: 4, 
+            filter: "markdown_col: eight", 
+            numRows: 1, 
+            options: [ 'Empty', 'one', 'two', 'No Value', 'eight', 'eleven', 'five', 'four', 'nine', 'seven' ]
+        },
+        {
+            name: "F1", 
+            type: "choice", 
+            totalNumOptions: 10, 
+            option: 1, 
+            filter: "F1 : two", 
+            numRows: 10, 
+            options: [ 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten' ]
+        },
+        {
+            name: "to_name", 
+            type: "choice", 
+            totalNumOptions: 10, 
+            option: 0, 
+            filter: "to_name: one", 
+            numRows: 10, 
+            options: [ 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten' ]
+        },
+        {
+            name: "f3 (term)", 
+            type: "choice", 
+            totalNumOptions: 2, 
+            option: 0, 
+            filter: "f3 (term): one", 
+            numRows: 6, 
+            options: [ 'one', 'two' ]
+        },
+        {
+            name: "from_name", 
+            type: "choice", 
+            totalNumOptions: 10, 
+            option: 4, 
+            filter: "from_name: 5", 
+            numRows: 1, 
+            options: [ '1', '2', '3', '4', '5', '6', '7', '8', '9', '10' ]
+        }
     ]
 }
 
@@ -261,8 +387,8 @@ describe("Viewing Recordset with Faceting,", function() {
                                     maxInput = chaisePage.recordsetPage.getRangeMaxInput(idx, testParams.maxInputClass);
 
                                     // define test params values
-                                    minInput.sendKeys(facetParams.min);
-                                    maxInput.sendKeys(facetParams.max);
+                                    minInput.sendKeys(facetParams.range.min);
+                                    maxInput.sendKeys(facetParams.range.max);
 
                                     // let validation message disappear
                                     browser.sleep(10);
@@ -281,18 +407,18 @@ describe("Viewing Recordset with Faceting,", function() {
                                 }).then(function (filters) {
                                     return filters[0].getText();
                                 }).then(function(text) {
-                                    expect(text).toBe(facetParams.filter, "filter name is incorrect for '" + facetParams.name + "' facet");
+                                    expect(text).toBe(facetParams.range.filter, "filter name is incorrect for '" + facetParams.name + "' facet");
 
                                     // wait for table rows to load
                                     browser.wait(function () {
                                         return chaisePage.recordsetPage.getRows().count().then(function(ct) {
-                                            return ct == facetParams.numRows;
+                                            return ct == facetParams.range.numRows;
                                         });
                                     });
 
                                     return chaisePage.recordsetPage.getRows().count();
                                 }).then(function(ct) {
-                                    expect(ct).toBe(facetParams.numRows, "number of rows is incorrect for '" + facetParams.name + "' facet");
+                                    expect(ct).toBe(facetParams.range.numRows, "number of rows is incorrect for '" + facetParams.name + "' facet");
 
                                     return clearAll.click();
                                 }).then(function () {
@@ -305,7 +431,7 @@ describe("Viewing Recordset with Faceting,", function() {
                                     return maxClear.click();
                                 }).then(function () {
                                     // test just min being set
-                                    minInput.sendKeys(facetParams.justMin);
+                                    minInput.sendKeys(facetParams.justMin.min);
                                     
                                     // let validation message disappear
                                     browser.sleep(10);
@@ -320,18 +446,18 @@ describe("Viewing Recordset with Faceting,", function() {
                                 }).then(function (filters) {
                                     return filters[0].getText();
                                 }).then(function(text) {
-                                    expect(text).toBe(facetParams.justMinFilter, "filter name is incorrect for '" + facetParams.name + "' facet with just min value");
+                                    expect(text).toBe(facetParams.justMin.filter, "filter name is incorrect for '" + facetParams.name + "' facet with just min value");
 
                                     // wait for table rows to load
                                     browser.wait(function () {
                                         return chaisePage.recordsetPage.getRows().count().then(function(ct) {
-                                            return ct == facetParams.justMinRows;
+                                            return ct == facetParams.justMin.numRows;
                                         });
                                     });
 
                                     return chaisePage.recordsetPage.getRows().count();
                                 }).then(function(ct) {
-                                    expect(ct).toBe(facetParams.justMinRows, "number of rows is incorrect for '" + facetParams.name + "' facet with just min value");
+                                    expect(ct).toBe(facetParams.justMin.numRows, "number of rows is incorrect for '" + facetParams.name + "' facet with just min value");
 
                                     return clearAll.click();
                                 }).then(function () {
