@@ -43,10 +43,10 @@ var testParams = {
                 filter: "int_col: > 6", 
                 numRows: 16
             },
-            justMin: {
-                min: 6, 
-                filter: "int_col: > 6", 
-                numRows: 16
+            justMax: {
+                max: 12, 
+                filter: "int_col: < 12", 
+                numRows: 14
             }
         },
         {
@@ -63,6 +63,11 @@ var testParams = {
                 min: 8.9, 
                 filter: "float_col: > 8.9000", 
                 numRows: 14
+            },
+            justMax: {
+                max: 7.45, 
+                filter: "float_col: < 7.45", 
+                numRows: 4
             }
         },
         {
@@ -79,6 +84,11 @@ var testParams = {
                 min: "2009-12-14", 
                 filter: "date_col: > 2009-12-14", 
                 numRows: 3
+            },
+            justMax: {
+                max: "2007-04-18", 
+                filter: "date_col: < 2007-04-18", 
+                numRows: 14
             }
         },
         {
