@@ -6,7 +6,7 @@
     .constant('errorNames', {
         unauthorized: "Unauthorized",
         forbidden: "Forbidden",
-        notFound: "Not Found",
+        notFound: "Not Found window",
         multipleRecords: "Multiple Records Found",
         noDataMessage: "No entity exists",
         multipleDataErrorCode : "Multiple Records Found",
@@ -39,7 +39,7 @@
 
         function multipleRecordError(redirectUrl, message) {
             this.errorData = {}
-            this.status = errorNames.multipleRecords;  
+            this.status = errorNames.multipleRecords;
             this.message = (message === undefined ? errorMessages.multipleDataMessage : message);    //errorMessages is constant of all error message
             this.errorData.stack = (new Error()).stack;
             this.errorData.redirectUrl = redirectUrl;
@@ -58,7 +58,7 @@
                     }
                 }
             }
-            this.status = errorNames.notFound; 
+            this.status = errorNames.notFound;
             this.message = noDataMessageDesc;
             this.errorData = (new Error()).stack;
         }
@@ -119,20 +119,20 @@
                 delete modalProperties.backdrop;
                 params.canClose = true;
             }
-            
+
             var modalInstance = $uibModal.open(modalProperties);
 
             var reloadCb = function(){
                 window.location.reload();
-            }; 
-                    
+            };
+
             modalInstance.result.then(function () {
                 if (errorCode == errorNames.unauthorized && !providedLink) {
                     var x = window.innerWidth/2 - 800/2;
                     var y = window.innerHeight/2 - 600/2;
 
                     var win = window.open("", '_blank','width=800,height=600,left=' + x + ',top=' + y);
-                    Session.loginInAPopUp(win, reloadCb);                
+                    Session.loginInAPopUp(win, reloadCb);
                 } else {
                     $window.location.replace(redirectLink);
                 }
@@ -144,12 +144,12 @@
         // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
         function handleException(exception) {
             $log.info(exception);
-            
+
             var reloadCb = function() {
                 window.location.reload();
-            }; 
+            };
             if (exceptionFlag || window.location.pathname.indexOf('/search/') != -1 || window.location.pathname.indexOf('/viewer/') != -1) return;
-            
+
             // we decided to deal with the OR condition later
             if ( (ERMrest && exception instanceof ERMrest.UnauthorizedError) || exception.code == errorNames.unauthorized) {
                 Session.loginInAModal(reloadCb);
@@ -157,18 +157,18 @@
             else if (exception.status && exception.status == errorNames.multipleRecords){
                 errorPopup(errorNames.multipleDataMessage, errorNames.multipleDataErrorCode,"Recordset ", exception.errorData.redirectUrl);
             }
-            
+
             // we decided to deal with the OR condition later
             else if ( (ERMrest && exception instanceof ERMrest.ForbiddenError) || exception.code == errorNames.forbidden) {
                 errorPopup( exception.message, exception.status ,"Home Page", $window.location.origin);
-            } 
+            }
             else {
                 var errName = exception.status;
                 errName = (errName.toLowerCase() !== 'error') ? errName : "Terminal Error";
 
                 errorPopup("An unexpected error has occurred. Please report this problem to your system administrators.", errName, "Home Page", $window.location.origin,  exception.message , exception.errorData.stack);
             }
-            
+
             exceptionFlag = true;
         }
 
