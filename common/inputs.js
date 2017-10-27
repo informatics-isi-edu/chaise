@@ -122,6 +122,45 @@
                     if (max == '') max = null;
                     scope.addRangeCb(min, max);
                 };
+
+                // if timestamp inputs are emptied or changed
+                if (scope.displayType(scope.type) == "datetime") {
+                    scope.$watch('model.min.date', function (newValue, oldValue) {
+                        if (scope.minMaxForm.$error.improperRange) {
+                            scope.minMaxForm.$error.improperRange = false;
+                        }
+                    });
+
+                    scope.$watch('model.min.time', function (newValue, oldValue) {
+                        if (scope.minMaxForm.$error.improperRange) {
+                            scope.minMaxForm.$error.improperRange = false;
+                        }
+                    });
+
+                    scope.$watch('model.max.date', function (newValue, oldValue) {
+                        if (scope.minMaxForm.$error.improperRange) {
+                            scope.minMaxForm.$error.improperRange = false;
+                        }
+                    });
+
+                    scope.$watch('model.max.time', function (newValue, oldValue) {
+                        if (scope.minMaxForm.$error.improperRange) {
+                            scope.minMaxForm.$error.improperRange = false;
+                        }
+                    });
+                } else {
+                    scope.$watch('model.min', function (newValue, oldValue) {
+                        if (scope.minMaxForm.$error.improperRange) {
+                            scope.minMaxForm.$error.improperRange = false;
+                        }
+                    });
+
+                    scope.$watch('model.max', function (newValue, oldValue) {
+                        if (scope.minMaxForm.$error.improperRange) {
+                            scope.minMaxForm.$error.improperRange = false;
+                        }
+                    });
+                }
             }
         }
     });

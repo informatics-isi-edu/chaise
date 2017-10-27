@@ -37,6 +37,11 @@
         $uibTooltipProvider.options({appendToBody: true});
     }])
 
+    //  Enable log system, if in debug mode
+    .config(['$logProvider', function($logProvider) {
+        $logProvider.debugEnabled(chaiseConfig.debug === true);
+    }])
+    
     .run(['constants', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'MathUtils', 'modalBox', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', 'Errors',
         function runApp(constants, DataUtils, ERMrest, ErrorService, headInjector, MathUtils, modalBox, Session, UiUtils, UriUtils, $log, $rootScope, $window, Errors) {
 
@@ -142,8 +147,8 @@
                 $rootScope.reference.session = session;
                 $log.info("Reference: ", $rootScope.reference);
 
-                // There should only ever be one entity related to this reference, we are 
-                // reading 2 entities (the second is added in ermrest.read) and if we get 
+                // There should only ever be one entity related to this reference, we are
+                // reading 2 entities (the second is added in ermrest.read) and if we get
                 // more than 1 entity then we throw a multipleRecordError.
                 return $rootScope.reference.read(2);
             }, function error(exception) {

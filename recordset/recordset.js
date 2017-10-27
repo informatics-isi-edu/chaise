@@ -57,6 +57,11 @@
     .config(['$uibTooltipProvider', function($uibTooltipProvider) {
         $uibTooltipProvider.options({appendToBody: true});
     }])
+    
+    //  Enable log system, if in debug mode
+    .config(['$logProvider', function($logProvider) {
+        $logProvider.debugEnabled(chaiseConfig.debug === true);
+    }])
 
     // Register the 'recordsetModel' object, which can be accessed by other
     // services, but cannot be access by providers (and config, apparently).
@@ -145,10 +150,6 @@
             // appLink = appLink + (appLink.indexOf("?") === -1 ? "?" : "&") + 'invalidate=' + UriUtils.fixedEncodeURIComponent(referrer_id);
             
             return appLink;
-        };
-
-        $scope.unfiltered = function () {
-            return recordsetModel.reference.unfilteredReference.contextualize.compact.appLink;
         };
 
         // fetches the height of navbar, bookmark container, and view
@@ -290,8 +291,6 @@
                     recordsetModel.reference = reference.contextualize.compact;
                     recordsetModel.context = "compact";
                     recordsetModel.reference.session = session;
-                    //TODO should remove this:
-                    baseRef = recordsetModel.reference;
 
                     $log.info("Reference:", recordsetModel.reference);
 
@@ -313,6 +312,7 @@
                     recordsetModel.search = recordsetModel.reference.location.searchTerm;
                     
                     if (showFaceting) {
+                        $log.debug("sending page-loaded message");
                         $rootScope.$broadcast('page-loaded');
                     } else {
                         recordsetModel.reference.read(recordsetModel.pageLimit).then(function (page) {

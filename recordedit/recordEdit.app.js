@@ -38,6 +38,11 @@
     .config(['$uibTooltipProvider', function($uibTooltipProvider) {
         $uibTooltipProvider.options({appendToBody: true});
     }])
+    
+    //  Enable log system, if in debug mode
+    .config(['$logProvider', function($logProvider) {
+        $logProvider.debugEnabled(chaiseConfig.debug === true);
+    }])
 
     .run(['AlertsService', 'ERMrest', 'ErrorService', 'headInjector', 'MathUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', 'messageMap', 'Errors',
         function runRecordEditApp(AlertsService, ERMrest, ErrorService, headInjector, MathUtils, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies, messageMap, Errors) {
