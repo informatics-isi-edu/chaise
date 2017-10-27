@@ -6,7 +6,7 @@
     .constant('errorNames', {
         unauthorized: "Unauthorized",
         forbidden: "Forbidden",
-        notFound: "Not Found window",
+        notFound: "Not Found",
         multipleRecords: "Multiple Records Found",
         noDataMessage: "No entity exists",
         multipleDataErrorCode : "Multiple Records Found",
@@ -157,7 +157,6 @@
             else if (exception.status && exception.status == errorNames.multipleRecords){
                 errorPopup(errorNames.multipleDataMessage, errorNames.multipleDataErrorCode,"Recordset ", exception.errorData.redirectUrl);
             }
-
             // we decided to deal with the OR condition later
             else if ( (ERMrest && exception instanceof ERMrest.ForbiddenError) || exception.code == errorNames.forbidden) {
                 errorPopup( exception.message, exception.status ,"Home Page", $window.location.origin);
@@ -165,7 +164,6 @@
             else {
                 var errName = exception.status;
                 errName = (errName.toLowerCase() !== 'error') ? errName : "Terminal Error";
-
                 errorPopup("An unexpected error has occurred. Please report this problem to your system administrators.", errName, "Home Page", $window.location.origin,  exception.message , exception.errorData.stack);
             }
 
