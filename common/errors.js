@@ -19,7 +19,8 @@
         multipleRecords: "Multiple Records Found",
         noDataMessage: "No entity exists with ",
         multipleDataErrorCode : "Multiple Records Found",
-        multipleDataMessage : "There are more than 1 record found for the filters provided."
+        multipleDataMessage : "There are more than 1 record found for the filters provided.",
+        systemAdminMessage : "An unexpected error has occurred. Please report this problem to your system administrators."
     })
 
     .factory('Errors', ['errorNames', 'errorMessages', function(errorNames, errorMessages) {
@@ -36,7 +37,14 @@
 
         InvalidInputError.prototype = Object.create(Error.prototype);
         InvalidInputError.prototype.constructor = MalformedUriError;
-
+        // errorData object hilds additional information viz. stacktrace, redirectUrl
+        // Make sure to check cross-browser cmpatibility for stack attribute of Error Object
+        /**
+         * multipleRecordError - throw incase of multiple records
+         *
+         * @param  {string} redirectUrl redirect to recordset
+         * @param  {string} message     Error message
+         */
         function multipleRecordError(redirectUrl, message) {
             this.errorData = {}
             this.status = errorNames.multipleRecords;
@@ -47,9 +55,9 @@
         multipleRecordError.prototype = Object.create(Error.prototype);
         multipleRecordError.prototype.constructor = multipleRecordError;
 
-        function noRecordError(filters) {
+        function noRecordError(filters, message) {
             this.errorData = {};
-            var noDataMessageDesc = errorMessages.noDataMessage;
+            var noDataMessageDesc = (message === undefined) ? errorMessages.noDataMessage : message;
             if (filters) {
                 for (var k = 0; k < filters.length; k++) {
                     noDataMessage += filters[k].column + filters[k].operator + filters[k].value;
@@ -60,7 +68,7 @@
             }
             this.status = errorNames.notFound;
             this.message = noDataMessageDesc;
-            this.errorData = (new Error()).stack;
+            this.errorData.stack = (new Error()).stack;
         }
         noRecordError.prototype = Object.create(Error.prototype);
         noRecordError.prototype.constructor = noRecordError;
@@ -74,7 +82,7 @@
     }])
 
     // Factory for each error type
-    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$uibModal', '$window', function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $uibModal, $window) {
+    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$uibModal', '$window', 'errorMessages', function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $uibModal, $window, errorMessages) {
 
         function errorPopup(message, errorCode, pageName, redirectLink, subMessage, stackTrace) {
             var providedLink = true;
@@ -87,7 +95,8 @@
 
             var isFirefox = typeof InstallTrigger !== 'undefined';
             var isChrome = !!window.chrome && !!window.chrome.webstore;
-            // If browser is chrome then
+            // If browser is chrome then use stack trace which has "Error"  appended before the trace
+            // Else append subMessage before the tarce to complete the message as FF does not generate sufficient error text
             if (subMessage && stackTrace) {
                 if (isChrome) {
                     subMessage = stackTrace;
@@ -162,9 +171,19 @@
                 errorPopup( exception.message, exception.status ,"Home Page", $window.location.origin);
             }
             else {
-                var errName = exception.status;
+                var errName = exception.status,
+                    errorText = exception.message,
+                    systemAdminMessage = errorMessages.systemAdminMessage,
+                    stackTrace =  (exception.errorData && exception.errorData.stack)? exception.errorData.stack: undefined;
                 errName = (errName.toLowerCase() !== 'error') ? errName : "Terminal Error";
-                errorPopup("An unexpected error has occurred. Please report this problem to your system administrators.", errName, "Home Page", $window.location.origin,  exception.message , exception.errorData.stack);
+                errorPopup(
+                    systemAdminMessage,
+                    errName,
+                    "Home Page",
+                    $window.location.origin,
+                    errorText,
+                    stackTrace
+                );
             }
 
             exceptionFlag = true;
