@@ -27,20 +27,41 @@
 
         // errorData object holds additional information viz. stacktrace, redirectUrl
         // Make sure to check cross-browser cmpatibility for stack attribute of Error Object
-        
+
         /**
-         * multipleRecordError - throw incase of multiple records
+         * multipleRecordError - throw in case of multiple records.
          *
-         * @param  {string} redirectUrl redirect to recordset
-         * @param  {string} message     Error message
-         * @return {object}             Error Object
+         * @param  {string} redirectUrl  redirect to recordset app
+         * @param  {string} message      Error message
+         * @return {object}              Error Object
          */
         function multipleRecordError(redirectUrl, message) {
+
+            /**
+             * @type {object}
+             * @desc  custom object to store miscelleneous elements viz. stacktrace, redirectUrl
+             */
             this.errorData = {}
+
+            /**
+            * @type {string}
+            * @desc   Error message status; acts as Title text for error dialog
+             */
             this.status = errorNames.multipleRecords;
+
+            /**
+            * @type {string}
+            * @desc   Error message
+             */
             this.message = (message === undefined ? errorMessages.multipleDataMessage : message);    //errorMessages is constant of all error message
             this.errorData.stack = (new Error()).stack;
+
+            /**
+             * @type {string}
+             * @desc URL that redirects users to recordset app
+             */
             this.errorData.redirectUrl = redirectUrl;
+
         }
         multipleRecordError.prototype = Object.create(Error.prototype);
         multipleRecordError.prototype.constructor = multipleRecordError;
@@ -54,7 +75,12 @@
          * @return {object}         Error Object
          */
         function noRecordError(filters, message) {
+          /**
+           * @type {object}
+           * @desc  custom object to store miscelleneous elemets viz. stacktrace, redirectUrl
+           */
             this.errorData = {};
+
             var noDataMessageDesc = (message === undefined) ? errorMessages.noDataMessage : message;
             if (filters) {
                 for (var k = 0; k < filters.length; k++) {
@@ -64,8 +90,18 @@
                     }
                 }
             }
+            /**
+            * @type {string}
+            * @desc   Error message status; acts as Title text for error dialog
+             */
             this.status = errorNames.notFound;
+
+            /**
+            * @type {string}
+            * @desc   Error message
+             */
             this.message = noDataMessageDesc;
+
             this.errorData.stack = (new Error()).stack;
         }
         noRecordError.prototype = Object.create(Error.prototype);
