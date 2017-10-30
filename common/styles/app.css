@@ -1383,12 +1383,16 @@ range-inputs .input-group-addon {
     padding-right: 4px;
 }
 
+/* Rule for Chrome */
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {
     -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
     margin: 0;
+}
+
+/* Rule for FF */
+input[type=number] {
+    -moz-appearance: textfield;
 }
 
 /************** search popup **************/
