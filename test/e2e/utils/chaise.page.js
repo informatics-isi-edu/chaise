@@ -971,6 +971,10 @@ var recordsetPage = function() {
         return element(by.id("fc-" + idx)).element(by.css("." + className));
     }
 
+    this.getValidationError = function (idx) {
+        return element(by.id("fc-" + idx)).element(by.css(".validation-error div:not(.ng-hide)"));
+    }
+
     this.getRangeSubmit = function (idx) {
         return element(by.id("fc-" + idx)).element(by.css("button[type=submit]"));
     }

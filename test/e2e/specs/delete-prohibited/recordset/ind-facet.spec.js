@@ -32,6 +32,8 @@ var testParams = {
             name: "int_col", 
             type: "numeric", 
             listElems: 1,
+            invalid: 1.1,
+            error: "Please enter an integer value.",
             range: { 
                 min: 5, 
                 max: 10, 
@@ -52,7 +54,9 @@ var testParams = {
         {
             name: "float_col", 
             type: "numeric", 
-            listElems: 0, 
+            listElems: 0,
+            invalid: "1.1.1",
+            error: "Please enter a decimal value.",
             range: {
                 min: 6.5, 
                 max: 12.2, 
@@ -73,7 +77,9 @@ var testParams = {
         {
             name: "date_col", 
             type: "date", 
-            listElems: 0, 
+            listElems: 0,
+            invalid: "2006-14-22",
+            error: "Please enter a date value in YYYY-MM-DD format.",
             range: {
                 min: "2002-06-14", 
                 max: "2007-12-12", 
@@ -242,6 +248,12 @@ describe("Viewing Recordset with Faceting,", function() {
                 }).then(function () {
                     return chaisePage.recordsetPage.getModalSubmit().click();
                 }).then(function () {
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getCheckedFacetOptions(0).count().then(function(ct) {
+                            return ct == 2;
+                        });
+                    });
+                    
                     return chaisePage.recordsetPage.getCheckedFacetOptions(0).count();
                 }).then(function (ct) {
                     expect(ct).toBe(2, "Number of facet options is incorrect after returning from modal");
@@ -396,6 +408,21 @@ describe("Viewing Recordset with Faceting,", function() {
                                     minInput = chaisePage.recordsetPage.getRangeMinInput(idx, testParams.minInputClass);
                                     maxInput = chaisePage.recordsetPage.getRangeMaxInput(idx, testParams.maxInputClass);
 
+                    // test validators
+                                    minInput.sendKeys(facetParams.invalid);
+
+                                    browser.sleep(20);
+
+                                    return chaisePage.recordsetPage.getValidationError(idx).getText();
+                                }).then(function (text) {
+                                    expect(text).toBe(facetParams.error);
+
+                                    minClear = chaisePage.recordsetPage.getInputClear(idx, testParams.minInputClearClass);
+                                    maxClear = chaisePage.recordsetPage.getInputClear(idx, testParams.maxInputClearClass);
+                                    return minClear.click();
+                                }).then(function () {
+
+                    // test min and max being set
                                     // define test params values
                                     minInput.sendKeys(facetParams.range.min);
                                     maxInput.sendKeys(facetParams.range.max);
@@ -434,17 +461,15 @@ describe("Viewing Recordset with Faceting,", function() {
                                 }).then(function () {
                                     browser.wait(EC.not(EC.visibilityOf(clearAll)), browser.params.defaultTimeout);
 
-                                    minClear = chaisePage.recordsetPage.getInputClear(idx, testParams.minInputClearClass);
                                     return minClear.click();
                                 }).then(function () {
-                                    maxClear = chaisePage.recordsetPage.getInputClear(idx, testParams.maxInputClearClass);
                                     return maxClear.click();
                                 }).then(function () {
-                                    // test just min being set
+                    // test just min being set
                                     minInput.sendKeys(facetParams.justMin.min);
                                     
                                     // let validation message disappear
-                                    browser.sleep(10);
+                                    browser.sleep(20);
 
                                     return chaisePage.recordsetPage.getRangeSubmit(idx).click();
                                 }).then(function () {
@@ -468,6 +493,41 @@ describe("Viewing Recordset with Faceting,", function() {
                                     return chaisePage.recordsetPage.getRows().count();
                                 }).then(function(ct) {
                                     expect(ct).toBe(facetParams.justMin.numRows, "number of rows is incorrect for '" + facetParams.name + "' facet with just min value");
+
+                                    return clearAll.click();
+                                }).then(function () {
+                                    browser.wait(EC.not(EC.visibilityOf(clearAll)), browser.params.defaultTimeout);
+
+                                    return minClear.click();
+                                }).then(function () {
+                    // test just max being set
+                                    maxInput.sendKeys(facetParams.justMax.max);
+
+                                    // let validation message disappear
+                                    browser.sleep(20);
+
+                                    return chaisePage.recordsetPage.getRangeSubmit(idx).click();
+                                }).then(function () {
+                                    // wait for request to return
+                                    browser.wait(EC.visibilityOf(clearAll), browser.params.defaultTimeout);
+
+                                    //should only be one
+                                    return chaisePage.recordsetPage.getFilters();
+                                }).then(function (filters) {
+                                    return filters[0].getText();
+                                }).then(function(text) {
+                                    expect(text).toBe(facetParams.justMax.filter, "filter name is incorrect for '" + facetParams.name + "' facet with just min value");
+
+                                    // wait for table rows to load
+                                    browser.wait(function () {
+                                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                                            return ct == facetParams.justMax.numRows;
+                                        });
+                                    });
+
+                                    return chaisePage.recordsetPage.getRows().count();
+                                }).then(function(ct) {
+                                    expect(ct).toBe(facetParams.justMax.numRows, "number of rows is incorrect for '" + facetParams.name + "' facet with just min value");
 
                                     return clearAll.click();
                                 }).then(function () {
@@ -505,7 +565,7 @@ describe("Viewing Recordset with Faceting,", function() {
                                     maxTimeInput.sendKeys(facetParams.maxTime);
 
                                     // let validation message disappear
-                                    browser.sleep(10);
+                                    browser.sleep(20);
 
                                     // get submit button
                                     return chaisePage.recordsetPage.getRangeSubmit(idx).click();

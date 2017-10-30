@@ -48,7 +48,7 @@
                     </div>
                 </div>
             </div>
-            <div ng-messages="numericMin.$error" ng-show="numericMin.$dirty || minMaxForm.$submitted" class="text-danger" role="alert">
+            <div ng-messages="numericMin.$error" ng-show="numericMin.$dirty || minMaxForm.$submitted" class="text-danger validation-error" role="alert">
                 <div ng-message="integer" ng-show="numericMin.$error.integer">Please enter an integer value.</div>
                 <div ng-message="float" ng-show="numericMin.$error.float">Please enter a decimal value.</div>
             </div>
@@ -60,7 +60,7 @@
                 <div class="form-control-feedback min-clear input-clearbtn" ng-show="model.min || (dateMin.$invalid && dateMin.$dirty)">
                     <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="model.min=''" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
                 </div>
-                <div ng-messages="dateMin.$error" ng-show="dateMin.$dirty || minMaxForm.$submitted" class="text-danger" role="alert">
+                <div ng-messages="dateMin.$error" ng-show="dateMin.$dirty || minMaxForm.$submitted" class="text-danger validation-error" role="alert">
                     <div ng-message="date" ng-show="dateMin.$error.date">Please enter a date value in YYYY-MM-DD format.</div>
                 </div>
             </div>
@@ -77,7 +77,7 @@
                         </div>
                     </div>
                 </div>
-                <div ng-messages="tsDateMin.$error" ng-show="tsDateMin.$dirty || minMaxForm.$submitted" class="text-danger" role="alert">
+                <div ng-messages="tsDateMin.$error" ng-show="tsDateMin.$dirty || minMaxForm.$submitted" class="text-danger validation-error" role="alert">
                     <div ng-message="date" ng-show="tsDateMin.$error.date">Please enter a date value in YYYY-MM-DD format.</div>
                 </div>
             </div>
@@ -91,7 +91,7 @@
                         </div>
                     </div>
                 </div>
-                <div ng-messages="timeMin.$error" ng-show="timeMin.$dirty || minMaxForm.$submitted" class="text-danger" role="alert">
+                <div ng-messages="timeMin.$error" ng-show="timeMin.$dirty || minMaxForm.$submitted" class="text-danger validation-error" role="alert">
                     <div ng-message="time" ng-show="timeMin.$error.time">Please enter a time value in 24-hr HH:MM:SS format.</div>
                 </div>
             </div>
@@ -149,7 +149,7 @@
                     </div>
                 </div>
             </div>
-            <div ng-messages="numericMax.$error" ng-show="numericMax.$dirty || minMaxForm.$submitted" class="text-danger" role="alert">
+            <div ng-messages="numericMax.$error" ng-show="numericMax.$dirty || minMaxForm.$submitted" class="text-danger validation-error" role="alert">
                 <div ng-message="integer" ng-show="numericMax.$error.integer">Please enter an integer value.</div>
                 <div ng-message="float" ng-show="numericMax.$error.float">Please enter a decimal value.</div>
             </div>
@@ -161,7 +161,7 @@
                 <div class="form-control-feedback max-clear input-clearbtn" ng-show="model.max || (dateMax.$invalid && dateMax.$dirty)">
                     <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="model.max=''" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
                 </div>
-                <div ng-messages="dateMax.$error" ng-show="dateMax.$dirty || minMaxForm.$submitted" class="text-danger" role="alert">
+                <div ng-messages="dateMax.$error" ng-show="dateMax.$dirty || minMaxForm.$submitted" class="text-danger validation-error" role="alert">
                     <div ng-message="date" ng-show="dateMax.$error.date">Please enter a date value in YYYY-MM-DD format.</div>
                 </div>
             </div>
@@ -178,7 +178,7 @@
                         </div>
                     </div>
                 </div>
-                <div ng-messages="tsDateMax.$error" ng-show="tsDateMax.$dirty || minMaxForm.$submitted" class="text-danger" role="alert">
+                <div ng-messages="tsDateMax.$error" ng-show="tsDateMax.$dirty || minMaxForm.$submitted" class="text-danger validation-error" role="alert">
                     <div ng-message="date" ng-show="tsDateMax.$error.date">Please enter a date value in YYYY-MM-DD format.</div>
                 </div>
             </div>
@@ -192,7 +192,7 @@
                         </div>
                     </div>
                 </div>
-                <div ng-messages="timeMax.$error" ng-show="timeMax.$dirty || minMaxForm.$submitted" class="text-danger" role="alert">
+                <div ng-messages="timeMax.$error" ng-show="timeMax.$dirty || minMaxForm.$submitted" class="text-danger validation-error" role="alert">
                     <div ng-message="time" ng-show="timeMax.$error.time">Please enter a time value in 24-hr HH:MM:SS format.</div>
                 </div>
             </div>
@@ -201,7 +201,7 @@
     <button type="submit" class="btn btn-primary btn-inverted" ng-click="addRange()" ng-disabled="disableAdd()" style="vertical-align: bottom;">
         <span class="glyphicon glyphicon-plus"></span>
     </button>
-    <div ng-messages="minMaxForm.$error" ng-show="minMaxForm.$dirty || minMaxForm.$submitted" class="text-danger" role="alert">
+    <div ng-messages="minMaxForm.$error" ng-show="minMaxForm.$dirty || minMaxForm.$submitted" class="text-danger form-validation-error" role="alert">
         <div ng-message="improperRange" ng-show="minMaxForm.$error.improperRange">'From' value cannot be greater than the 'To' value.</div>
     </div>
 </div>
