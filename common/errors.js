@@ -24,26 +24,16 @@
     })
 
     .factory('Errors', ['errorNames', 'errorMessages', function(errorNames, errorMessages) {
-        function MalformedUriError(message) {
-            this.message = message;
-        }
 
-        MalformedUriError.prototype = Object.create(Error.prototype);
-        MalformedUriError.prototype.constructor = MalformedUriError;
-
-        function InvalidInputError(message) {
-            this.message = message;
-        }
-
-        InvalidInputError.prototype = Object.create(Error.prototype);
-        InvalidInputError.prototype.constructor = MalformedUriError;
-        // errorData object hilds additional information viz. stacktrace, redirectUrl
+        // errorData object holds additional information viz. stacktrace, redirectUrl
         // Make sure to check cross-browser cmpatibility for stack attribute of Error Object
+        
         /**
          * multipleRecordError - throw incase of multiple records
          *
          * @param  {string} redirectUrl redirect to recordset
          * @param  {string} message     Error message
+         * @return {object}             Error Object
          */
         function multipleRecordError(redirectUrl, message) {
             this.errorData = {}
@@ -55,6 +45,14 @@
         multipleRecordError.prototype = Object.create(Error.prototype);
         multipleRecordError.prototype.constructor = multipleRecordError;
 
+
+        /**
+         * noRecordError - In case URI returns empty set
+         *
+         * @param  {array} filters  Filters used during retrival of data
+         * @param  {string} message Error message
+         * @return {object}         Error Object
+         */
         function noRecordError(filters, message) {
             this.errorData = {};
             var noDataMessageDesc = (message === undefined) ? errorMessages.noDataMessage : message;
@@ -74,8 +72,6 @@
         noRecordError.prototype.constructor = noRecordError;
 
         return {
-            InvalidInputError: InvalidInputError,
-            MalformedUriError: MalformedUriError,
             multipleRecordError: multipleRecordError,
             noRecordError:noRecordError
         };
