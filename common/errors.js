@@ -223,7 +223,7 @@
                 errorPopup( exception.message, exception.status ,"Home Page", $window.location.origin);
             }
             else {
-                var errName = exception.status,
+                var errName = exception.status? exception.status:"Terminal Error",
                     errorText = exception.message,
                     systemAdminMessage = errorMessages.systemAdminMessage,
                     stackTrace =  (exception.errorData && exception.errorData.stack)? exception.errorData.stack: undefined;
