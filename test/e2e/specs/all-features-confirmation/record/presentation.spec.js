@@ -13,7 +13,7 @@ var testParams = {
     related_table_name_with_page_size_annotation: "accommodation_image",
     page_size: 2,
     related_tables: [
-       
+
         {
             title: "accommodation_image",
             displayname: "accommodation_image",
@@ -56,7 +56,7 @@ var testParams = {
         tables_order: ["accommodation_image (no results found)", "media (no results found)"]
     },
     multipleData: {
-        title : "Error: Multiple Records Found"
+        title : "Multiple Records Found"
     }
 };
 
