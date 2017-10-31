@@ -1,7 +1,7 @@
 (function() {
     'use strict';
 
-    angular.module('chaise.utils', ['chaise.errors', 'ermrestjs'])
+    angular.module('chaise.utils', ['chaise.errors'])
 
     .constant("appTagMapping", {
         "tag:isrd.isi.edu,2016:chaise:record": "/record",
@@ -53,8 +53,8 @@
         singleSelectMode:"single-select",
         multiSelectMode:"multi-select"
     })
-    .factory('UriUtils', ['$injector', 'ERMrest', '$rootScope', '$window', 'appContextMapping', 'appTagMapping', 'ContextUtils', 'Errors', 'messageMap', 'parsedFilter',
-        function($injector, ERMrest, $rootScope, $window, appContextMapping, appTagMapping, ContextUtils, Errors, messageMap, ParsedFilter) {
+    .factory('UriUtils', ['$injector', 'Errors', '$rootScope', '$window', 'appContextMapping', 'appTagMapping', 'ContextUtils', 'Errors', 'messageMap', 'parsedFilter',
+        function($injector, Errors, $rootScope, $window, appContextMapping, appTagMapping, ContextUtils, Errors, messageMap, ParsedFilter) {
 
         var chaiseBaseURL;
         /**
@@ -100,15 +100,28 @@
                             hash = '/' + fixedEncodeURIComponent(tableConfig.schema) + ':' + fixedEncodeURIComponent(tableConfig.table);
                         } else {
                             // no defined or default schema:table for catalogId
-                            throw new ERMrest.MalformedURIError(tableMissing);
+                            if(ERMrest){
+                                throw new ERMrest.MalformedURIError(tableMissing);
+                            } else{
+                                throw new Errors.MalformedUriError(tableMissing);
+                            }
+
                         }
                     } else {
                         // no defined or default schema:table
-                        throw new ERMrest.MalformedURIError(tableMissing);
+                        if(ERMrest){
+                            throw new ERMrest.MalformedURIError(tableMissing);
+                        } else{
+                            throw new Errors.MalformedUriError(tableMissing);
+                        }
                     }
                 } else {
                     // no defined or default catalog
-                    throw new ERMrest.MalformedURIError(catalogMissing);
+                    if(ERMrest){
+                        throw new ERMrest.MalformedURIError(catalogMissing);
+                    } else{
+                        throw new Errors.MalformedUriError(catalogMissing);
+                    }
                 }
             } else {
                 // pull off the catalog ID
@@ -121,7 +134,11 @@
                         catalogId = chaiseConfig.defaultCatalog;
                     } else {
                         // no defined or default catalog
-                        throw new ERMrest.MalformedURIError(catalogMissing);
+                        if(ERMrest){
+                            throw new ERMrest.MalformedURIError(catalogMissing);
+                        } else{
+                            throw new Errors.MalformedUriError(catalogMissing);
+                        }
                     }
                 }
 
@@ -134,11 +151,19 @@
                             hash = '/' + fixedEncodeURIComponent(tableConfig.schema) + ':' + fixedEncodeURIComponent(tableConfig.table);
                         } else {
                             // no defined or default schema:table for catalogId
-                            throw new ERMrest.MalformedURIError(tableMissing);
+                            if(ERMrest){
+                                throw new ERMrest.MalformedURIError(tableMissing);
+                            } else{
+                                throw new Errors.MalformedUriError(tableMissing);
+                            }
                         }
                     } else {
                         // no defined or default schema:table
-                        throw new ERMrest.MalformedURIError(tableMissing);
+                        if(ERMrest){
+                            throw new ERMrest.MalformedURIError(tableMissing);
+                        } else{
+                            throw new Errors.MalformedUriError(tableMissing);
+                        }
 
                     }
                 } else {
@@ -284,7 +309,11 @@
                             context.paging.row[context.sort[i].column] = value;
                         }
                     } else {
-                        throw new ERMrest.MalformedURIError(messageMap.pagingModifierRequiresSort);
+                        if(ERMrest){
+                            throw new ERMrest.MalformedURIError(messageMap.pagingModifierRequiresSort);
+                        } else{
+                            throw new Errors.MalformedUriError(messageMap.pagingModifierRequiresSort);
+                        }
                     }
 
                 }
@@ -292,7 +321,7 @@
                 // extract @after
                 if (modifierPath.indexOf("@after(") !== -1) {
                     if (context.paging)
-                        throw new ERMrest.MalformedURIError(messageMap.onePagingModifier);
+                        throw new Errors.MalformedUriError(messageMap.onePagingModifier);
                     if (context.sort) {
                         context.paging = {};
                         context.paging.before = false;
@@ -304,7 +333,12 @@
                             context.paging.row[context.sort[i].column] = value;
                         }
                     } else {
-                        throw new ERMrest.MalformedURIError(messageMap.pagingModifierRequiresSort);
+                        if(ERMrest){
+                            throw new ERMrest.MalformedURIError(messageMap.pagingModifierRequiresSort);
+                        } else{
+                            throw new Errors.MalformedUriError(messageMap.pagingModifierRequiresSort);
+                        }
+
                     }
                 }
 
@@ -382,10 +416,20 @@
                             type = "Disjunction";
                         } else if (type === "Conjunction" && items[i] === ";") {
                             // using combination of ! and & without ()
-                            throw new ERMrest.MalformedURIError("Invalid filter " + parts[2]);
+                            throw new Errors.MalformedUriError("Invalid filter " + parts[2]);
+                            if(ERMrest){
+                                throw new ERMrest.MalformedURIError("Invalid filter " + parts[2]);
+                            } else{
+                                throw new Errors.MalformedUriError("Invalid filter " + parts[2]);
+                            }
+
                         } else if (type === "Disjunction" && items[i] === "&") {
                             // using combination of ! and & without ()
-                            throw new ERMrest.MalformedURIError("Invalid filter " + parts[2]);
+                            if(ERMrest){
+                                throw new ERMrest.MalformedURIError("Invalid filter " + parts[2]);
+                            } else{
+                                throw new Errors.MalformedUriError("Invalid filter " + parts[2]);
+                            }
                         } else if (items[i] !== "&" && items[i] !== ";") {
                             // single filter on the first level
                             var binaryFilter = processSingleFilterString(items[i]);
@@ -424,7 +468,12 @@
                     return filter;
                 }
                 // invalid filter
-                throw new ERMrest.MalformedURIError("Invalid filter " + filterString);
+
+                if(ERMrest){
+                    throw new ERMrest.MalformedURIError("Invalid filter " + filterString);
+                } else{
+                    throw new Errors.MalformedUriError("Invalid filter " + filterString);
+                }
             } else {
                 var f = filterString.split("::");
                 if (f.length === 3) {
@@ -433,7 +482,11 @@
                     return filter;
                 }
                 // invalid filter error
-                throw new ERMrest.MalformedURIError("Invalid filter " + filterString);
+                if(ERMrest){
+                    throw new ERMrest.MalformedURIError("Invalid filter " + filterString);
+                } else{
+                    throw new Errors.MalformedUriError("Invalid filter " + filterString);
+                }
             }
         }
 
@@ -456,10 +509,18 @@
                     type = "Disjunction";
                 } else if (type === "Conjunction" && filterStrings[i] === ";") {
                     // TODO throw invalid filter error (using combination of ! and &)
-                    throw new ERMrest.MalformedURIError("Invalid filter " + filterStrings);
+                    if(ERMrest){
+                        throw new ERMrest.MalformedURIError("Invalid filter " + filterStrings);
+                    } else{
+                        throw new Errors.MalformedUriError("Invalid filter " + filterStrings);
+                    }
                 } else if (type === "Disjunction" && filterStrings[i] === "&") {
                     // TODO throw invalid filter error (using combination of ! and &)
-                    throw new ERMrest.MalformedURIError("Invalid filter " + filterStrings);
+                    if(ERMrest){
+                        throw new ERMrest.MalformedURIError("Invalid filter " + filterStrings);
+                    } else{
+                        throw new Errors.MalformedUriError("Invalid filter " + filterStrings);
+                    }
                 } else if (filterStrings[i] !== "&" && filterStrings[i] !== ";") {
                     // single filter on the first level
                     var binaryFilter = processSingleFilterString(filterStrings[i]);
@@ -717,7 +778,7 @@
          */
         function verify(test, message) {
             if (!test) {
-                throw new ERMrest.InvalidInputError(message);
+                throw new Errors.InvalidInputError(message);
             }
         }
 

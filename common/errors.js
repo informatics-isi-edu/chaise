@@ -107,9 +107,29 @@
         noRecordError.prototype = Object.create(Error.prototype);
         noRecordError.prototype.constructor = noRecordError;
 
+        //TODO
+        // InvalidInputError and MalformedUriError should be going away as they are redundant
+        // They have definition in ERMrestjs and should be reused. utils.js doe not inject ermrestJS
+        // module which causes dependency injection issue
+        function MalformedUriError(message) {
+            this.message = message;
+        }
+
+        MalformedUriError.prototype = Object.create(Error.prototype);
+        MalformedUriError.prototype.constructor = MalformedUriError;
+
+        function InvalidInputError(message) {
+            this.message = message;
+        }
+
+        InvalidInputError.prototype = Object.create(Error.prototype);
+        InvalidInputError.prototype.constructor = InvalidInputError;
+
         return {
             multipleRecordError: multipleRecordError,
-            noRecordError:noRecordError
+            noRecordError:noRecordError,
+            InvalidInputError: InvalidInputError,
+            MalformedUriError: MalformedUriError
         };
     }])
 
