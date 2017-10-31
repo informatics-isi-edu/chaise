@@ -77,7 +77,7 @@
         function noRecordError(filters, message) {
           /**
            * @type {object}
-           * @desc  custom object to store miscelleneous elemets viz. stacktrace, redirectUrl
+           * @desc  custom object to store miscellaneous elements viz. stacktrace
            */
             this.errorData = {};
 
