@@ -416,7 +416,7 @@
                             type = "Disjunction";
                         } else if (type === "Conjunction" && items[i] === ";") {
                             // using combination of ! and & without ()
-                            throw new Errors.MalformedUriError("Invalid filter " + parts[2]);
+                  
                             if(ERMrest){
                                 throw new ERMrest.MalformedURIError("Invalid filter " + parts[2]);
                             } else{
