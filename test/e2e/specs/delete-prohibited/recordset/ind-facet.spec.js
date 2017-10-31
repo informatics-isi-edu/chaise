@@ -677,10 +677,10 @@ describe("Viewing Recordset with Faceting,", function() {
                                     maxTimeInput = chaisePage.recordsetPage.getRangeMaxInput(idx, testParams.tsMaxTimeInputClass);
 
                                     // define test params values
-                                    minDateInput.sendKeys(facetParams.minDate);
-                                    minTimeInput.sendKeys(facetParams.minTime);
-                                    maxDateInput.sendKeys(facetParams.maxDate);
-                                    maxTimeInput.sendKeys(facetParams.maxTime);
+                                    minDateInput.sendKeys(facetParams.range.minDate);
+                                    minTimeInput.sendKeys(facetParams.range.minTime);
+                                    maxDateInput.sendKeys(facetParams.range.maxDate);
+                                    maxTimeInput.sendKeys(facetParams.range.maxTime);
 
                                     // let validation message disappear
                                     browser.sleep(20);
@@ -700,18 +700,18 @@ describe("Viewing Recordset with Faceting,", function() {
                                 }).then(function (filters) {
                                     return filters[0].getText();
                                 }).then(function(text) {
-                                    expect(text).toBe(facetParams.filter, "filter name is inccorect for '" + facetParams.name + "' facet");
+                                    expect(text).toBe(facetParams.range.filter, "filter name is inccorect for '" + facetParams.name + "' facet");
 
                                     // wait for table rows to load
                                     browser.wait(function () {
                                         return chaisePage.recordsetPage.getRows().count().then(function(ct) {
-                                            return ct == facetParams.numRows;
+                                            return ct == facetParams.range.numRows;
                                         });
                                     });
 
                                     return chaisePage.recordsetPage.getRows().count();
                                 }).then(function(ct) {
-                                    expect(ct).toBe(facetParams.numRows, "number of rows is incorrect for '" + facetParams.name + "' facet");
+                                    expect(ct).toBe(facetParams.range.numRows, "number of rows is incorrect for '" + facetParams.name + "' facet");
 
                                     return clearAll.click();
                                 }).then(function () {
