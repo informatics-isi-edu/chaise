@@ -931,11 +931,11 @@ var recordsetPage = function() {
     }
 
     this.getFacetSearchBox = function (idx) {
-        return element(by.id("fc-" + idx)).element(by.id("search-input"));
+        return element(by.id("fc-" + idx)).element(by.css(".facet-search-input"));
     }
 
     this.getFacetSearchBoxClear = function (idx) {
-        return element(by.id("fc-" + idx)).element(by.id("search-clear"));
+        return element(by.id("fc-" + idx)).element(by.css(".facet-search-clear"));
     }
 
     this.getList = function (idx) {

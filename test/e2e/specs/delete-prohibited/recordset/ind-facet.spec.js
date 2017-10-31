@@ -10,6 +10,16 @@ var testParams = {
         numRows: 1,
         pageSize: 25
     },
+    searchBox: {
+        term: "ne",
+        filter: "Search: ne",
+        numRows: 6,
+        term2: "ve",
+        term2Rows: 4,
+        term3: "n",
+        term3Filter: "Search: ven",
+        term3Rows: 2
+    },
     minInputClass: "range-min",
     minInputClearClass: "min-clear",
     maxInputClass: "range-max",
@@ -55,7 +65,7 @@ var testParams = {
             name: "float_col", 
             type: "numeric", 
             listElems: 0,
-            invalid: "1.1.1",
+            invalid: "1.1.",
             error: "Please enter a decimal value.",
             range: {
                 min: 6.5, 
@@ -108,6 +118,18 @@ var testParams = {
                 maxTime: "17:26:12", 
                 filter: "timestamp_col: 2004-05-20 10:08:00 to 2007-12-06 17:26:12", 
                 numRows: 3
+            },
+            justMin: {
+                minDate: "2004-05-20", 
+                minTime: "10:08:00", 
+                filter: "timestamp_col: > 2004-05-20 10:08:00", 
+                numRows: 8
+            },
+            justMax: {
+                maxDate: "2007-12-06", 
+                maxTime: "17:26:12", 
+                filter: "timestamp_col: < 2007-12-06T17:26:12.000-", 
+                numRows: 15
             }
         },
         {
@@ -173,7 +195,13 @@ var testParams = {
             numRows: 1, 
             options: [ '1', '2', '3', '4', '5', '6', '7', '8', '9', '10' ]
         }
-    ]
+    ],
+    multipleFacets: {
+        first: { facetIdx: 8, option: 2, numRows: 10 },
+        second: { facetIdx: 9, option: 0, numRows: 5 },
+        third: { facetIdx: 10, option: 0, numRows: 5 },
+        fourth: { facetIdx: 11, option: 1, numRows: 1 }
+    }
 }
 
 describe("Viewing Recordset with Faceting,", function() {
@@ -201,6 +229,8 @@ describe("Viewing Recordset with Faceting,", function() {
             });
             
             it("should have 3 facets open", function () {
+                
+                browser.pause();
                 chaisePage.recordsetPage.getOpenFacets().count().then(function (ct) {
                     expect(ct).toBe(testParams.defaults.openFacetNames.length, "Number of open facets is incorrect");
                     
@@ -278,7 +308,95 @@ describe("Viewing Recordset with Faceting,", function() {
                     return chaisePage.recordsetPage.getFacetSearchBoxClear(0).click();
                 });
             });
-            
+
+            it("search using the global search box should search automatically, show the search phrase as a filter, and show the set of results", function () {
+                var mainSearch = chaisePage.recordsetPage.getSearchBox();
+
+                chaisePage.recordsetPage.getClearAllFilters().click().then(function () {
+                    return chaisePage.waitForElementInverse(element(by.id("spinner")));
+                }).then(function () {
+                    mainSearch.sendKeys(testParams.searchBox.term);
+
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                            return ct == testParams.searchBox.numRows;
+                        });
+                    });
+
+                    return chaisePage.recordsetPage.getFilters();
+                }).then(function (filters) {
+                    return filters[0].getText();
+                }).then(function (text) {
+                    expect(text).toBe(testParams.searchBox.filter, "Filter for global search input is incorrect");
+
+                    return chaisePage.recordsetPage.getRows().count();
+                }).then(function (ct) {
+                    expect(ct).toBe(testParams.searchBox.numRows, "Number of rows for search input is incorrect");
+
+                    return chaisePage.recordsetPage.getSearchClearButton().click();
+                }).then(function () {
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                            return ct == testParams.defaults.pageSize;
+                        });
+                    });
+
+                    return chaisePage.recordsetPage.getRows().count();
+                }).then(function (ct) {
+                    expect(ct).toBe(testParams.defaults.pageSize, "Number of rows after clearing search input via search clear button");
+
+                    return mainSearch.getText();
+                }).then(function (text) {
+                    expect(text).toBe("", "Main search did not clear properly after clicking the remove search button in the search input");
+
+                    mainSearch.sendKeys(testParams.searchBox.term);
+
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                            return ct == testParams.searchBox.numRows;
+                        });
+                    });
+
+                    return chaisePage.recordsetPage.getFilters();
+                }).then(function (filters) {
+                    return filters[0].element(by.css(".remove-link")).click();
+                }).then(function () {
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                            return ct == testParams.defaults.pageSize;
+                        });
+                    });
+
+                    return chaisePage.recordsetPage.getRows().count();
+                }).then(function (ct) {
+                    expect(ct).toBe(testParams.defaults.pageSize, "Number of rows after clearing search input via search clear button");
+
+                    return mainSearch.getText();
+                }).then(function (text) {
+                    expect(text).toBe("", "Main search did not clear properly after clicking the 'x' in the filter");
+
+                    mainSearch.sendKeys(testParams.searchBox.term2);
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                            return ct == testParams.searchBox.term2Rows;
+                        });
+                    });
+
+                    mainSearch.sendKeys(testParams.searchBox.term3);
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                            return ct == testParams.searchBox.term3Rows;
+                        });
+                    });
+
+                    return chaisePage.recordsetPage.getFilters();
+                }).then(function (filters) {
+                    return filters[0].getText();
+                }).then(function (text) {
+                    expect(text).toBe(testParams.searchBox.term3Filter, "adding another character to an existing search did not update the filter properly");
+                });
+            });
+
             it("should show 25 rows and 0 filters after clicking 'clear all'", function () {
                 var sortString = "@sort(id)";
                 chaisePage.recordsetPage.getClearAllFilters().click().then(function () {
@@ -411,7 +529,7 @@ describe("Viewing Recordset with Faceting,", function() {
                     // test validators
                                     minInput.sendKeys(facetParams.invalid);
 
-                                    browser.sleep(20);
+                                    browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getValidationError(idx)), browser.params.defaultTimeout);
 
                                     return chaisePage.recordsetPage.getValidationError(idx).getText();
                                 }).then(function (text) {
