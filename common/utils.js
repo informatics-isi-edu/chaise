@@ -321,7 +321,11 @@
                 // extract @after
                 if (modifierPath.indexOf("@after(") !== -1) {
                     if (context.paging)
-                        throw new Errors.MalformedUriError(messageMap.onePagingModifier);
+                        if(ERMrest){
+                            throw new ERMrest.MalformedURIError(messageMap.onePagingModifier);
+                        } else{
+                            throw new Errors.MalformedUriError(messageMap.onePagingModifier);
+                        }
                     if (context.sort) {
                         context.paging = {};
                         context.paging.before = false;
@@ -416,7 +420,7 @@
                             type = "Disjunction";
                         } else if (type === "Conjunction" && items[i] === ";") {
                             // using combination of ! and & without ()
-                  
+
                             if(ERMrest){
                                 throw new ERMrest.MalformedURIError("Invalid filter " + parts[2]);
                             } else{
@@ -778,7 +782,12 @@
          */
         function verify(test, message) {
             if (!test) {
-                throw new Errors.InvalidInputError(message);
+              if(ERMrest){
+                  throw new ERMrest.InvalidInputError(message);
+              } else{
+                  throw new Errors.InvalidInputError(message);
+              }
+
             }
         }
 
