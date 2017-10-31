@@ -53,8 +53,8 @@
         singleSelectMode:"single-select",
         multiSelectMode:"multi-select"
     })
-    .factory('UriUtils', ['$injector', 'Errors', '$rootScope', '$window', 'appContextMapping', 'appTagMapping', 'ContextUtils', 'Errors', 'messageMap', 'parsedFilter',
-        function($injector, Errors, $rootScope, $window, appContextMapping, appTagMapping, ContextUtils, Errors, messageMap, ParsedFilter) {
+    .factory('UriUtils', ['$injector', '$rootScope', '$window', 'appContextMapping', 'appTagMapping', 'ContextUtils', 'Errors', 'messageMap', 'parsedFilter',
+        function($injector, $rootScope, $window, appContextMapping, appTagMapping, ContextUtils, Errors, messageMap, ParsedFilter) {
 
         var chaiseBaseURL;
         /**
