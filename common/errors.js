@@ -7,32 +7,114 @@
         unauthorized: "Unauthorized",
         forbidden: "Forbidden",
         notFound: "Not Found",
-        multipleRecords: "Multiple Records Found"
+        multipleRecords: "Multiple Records Found",
+        noDataMessage: "No entity exists",
+        multipleDataErrorCode : "Multiple Records Found",
+        multipleDataMessage : "There are more than 1 record found for the filters provided."
+    })
+    .constant('errorMessages', {
+        unauthorized: "Unauthorized",
+        forbidden: "Forbidden",
+        notFound: "Not Found",
+        multipleRecords: "Multiple Records Found",
+        noDataMessage: "No entity exists with ",
+        multipleDataErrorCode : "Multiple Records Found",
+        multipleDataMessage : "There are more than 1 record found for the filters provided.",
+        systemAdminMessage : "An unexpected error has occurred. Please report this problem to your system administrators."
     })
 
-    .factory('Errors', [function() {
-        function MalformedUriError(message) {
-            this.message = message;
+    .factory('Errors', ['errorNames', 'errorMessages', function(errorNames, errorMessages) {
+
+        // errorData object holds additional information viz. stacktrace, redirectUrl
+        // Make sure to check cross-browser cmpatibility for stack attribute of Error Object
+
+        /**
+         * multipleRecordError - throw in case of multiple records.
+         *
+         * @param  {string} redirectUrl  redirect to recordset app
+         * @param  {string} message      Error message
+         * @return {object}              Error Object
+         */
+        function multipleRecordError(redirectUrl, message) {
+
+            /**
+             * @type {object}
+             * @desc  custom object to store miscelleneous elements viz. stacktrace, redirectUrl
+             */
+            this.errorData = {}
+
+            /**
+            * @type {string}
+            * @desc   Error message status; acts as Title text for error dialog
+             */
+            this.status = errorNames.multipleRecords;
+
+            /**
+            * @type {string}
+            * @desc   Error message
+             */
+            this.message = (message === undefined ? errorMessages.multipleDataMessage : message);    //errorMessages is constant of all error message
+            this.errorData.stack = (new Error()).stack;
+
+            /**
+             * @type {string}
+             * @desc URL that redirects users to recordset app
+             */
+            this.errorData.redirectUrl = redirectUrl;
+
         }
+        multipleRecordError.prototype = Object.create(Error.prototype);
+        multipleRecordError.prototype.constructor = multipleRecordError;
 
-        MalformedUriError.prototype = Object.create(Error.prototype);
-        MalformedUriError.prototype.constructor = MalformedUriError;
 
-        function InvalidInputError(message) {
-            this.message = message;
+        /**
+         * noRecordError - In case URI returns empty set
+         *
+         * @param  {array} filters  Filters used during retrival of data
+         * @param  {string} message Error message
+         * @return {object}         Error Object
+         */
+        function noRecordError(filters, message) {
+          /**
+           * @type {object}
+           * @desc  custom object to store miscellaneous elements viz. stacktrace
+           */
+            this.errorData = {};
+
+            var noDataMessageDesc = (message === undefined) ? errorMessages.noDataMessage : message;
+            if (filters) {
+                for (var k = 0; k < filters.length; k++) {
+                    noDataMessage += filters[k].column + filters[k].operator + filters[k].value;
+                    if (k != filters.length-1) {
+                        noDataMessage += " or ";
+                    }
+                }
+            }
+            /**
+            * @type {string}
+            * @desc   Error message status; acts as Title text for error dialog
+             */
+            this.status = errorNames.notFound;
+
+            /**
+            * @type {string}
+            * @desc   Error message
+             */
+            this.message = noDataMessageDesc;
+
+            this.errorData.stack = (new Error()).stack;
         }
-
-        InvalidInputError.prototype = Object.create(Error.prototype);
-        InvalidInputError.prototype.constructor = MalformedUriError;
+        noRecordError.prototype = Object.create(Error.prototype);
+        noRecordError.prototype.constructor = noRecordError;
 
         return {
-            InvalidInputError: InvalidInputError,
-            MalformedUriError: MalformedUriError
+            multipleRecordError: multipleRecordError,
+            noRecordError:noRecordError
         };
     }])
 
     // Factory for each error type
-    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', 'messageMap', '$log', '$rootScope', '$uibModal', '$window', function ErrorService(AlertsService, errorNames, Session, messageMap, $log, $rootScope, $uibModal, $window) {
+    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$uibModal', '$window', 'errorMessages', function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $uibModal, $window, errorMessages) {
 
         function errorPopup(message, errorCode, pageName, redirectLink, subMessage, stackTrace) {
             var providedLink = true;
@@ -45,7 +127,8 @@
 
             var isFirefox = typeof InstallTrigger !== 'undefined';
             var isChrome = !!window.chrome && !!window.chrome.webstore;
-            // If browser is chrome then
+            // If browser is chrome then use stack trace which has "Error"  appended before the trace
+            // Else append subMessage before the tarce to complete the message as FF does not generate sufficient error text
             if (subMessage && stackTrace) {
                 if (isChrome) {
                     subMessage = stackTrace;
@@ -77,100 +160,69 @@
                 delete modalProperties.backdrop;
                 params.canClose = true;
             }
-            
+
             var modalInstance = $uibModal.open(modalProperties);
 
             var reloadCb = function(){
                 window.location.reload();
-            }; 
-                    
+            };
+
             modalInstance.result.then(function () {
                 if (errorCode == errorNames.unauthorized && !providedLink) {
                     var x = window.innerWidth/2 - 800/2;
                     var y = window.innerHeight/2 - 600/2;
 
                     var win = window.open("", '_blank','width=800,height=600,left=' + x + ',top=' + y);
-                    Session.loginInAPopUp(win, reloadCb);                
+                    Session.loginInAPopUp(win, reloadCb);
                 } else {
                     $window.location.replace(redirectLink);
                 }
             });
         }
 
-        function noRecordError(filters) {
-            var noDataMessage = messageMap.noDataMessage;
-            if (filters) {
-                for (var k = 0; k < filters.length; k++) {
-                    noDataMessage += filters[k].column + filters[k].operator + filters[k].value;
-                    if (k != filters.length-1) {
-                        noDataMessage += " or ";
-                    }
-                }
-            }
-            var error = new Error(noDataMessage);
-            error.code = errorNames.notFound;
-
-            return error;
-        }
-        
-        function multipleRecordError() {
-            var multipleDataMessage = messageMap.multipleDataMessage;
-            var error = new Error(multipleDataMessage);
-            error.code = errorNames.multipleRecords;
-            return error;
-        }
-
-        function MalformedUriError(message) {
-            this.message = message;
-        }
-
-        MalformedUriError.prototype = Object.create(Error.prototype);
-        MalformedUriError.prototype.constructor = MalformedUriError;
-
-        function InvalidInputError(message) {
-            this.message = message;
-        }
-
-        InvalidInputError.prototype = Object.create(Error.prototype);
-        InvalidInputError.prototype.constructor = MalformedUriError;
-
         var exceptionFlag = false;
 
         // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
         function handleException(exception) {
             $log.info(exception);
-            
+
             var reloadCb = function() {
                 window.location.reload();
-            }; 
+            };
             if (exceptionFlag || window.location.pathname.indexOf('/search/') != -1 || window.location.pathname.indexOf('/viewer/') != -1) return;
-            
+
             // we decided to deal with the OR condition later
             if ( (ERMrest && exception instanceof ERMrest.UnauthorizedError) || exception.code == errorNames.unauthorized) {
                 Session.loginInAModal(reloadCb);
             }
-            else if (exception.code && exception.code == errorNames.multipleRecords){
-                errorPopup(messageMap.multipleDataMessage, messageMap.multipleDataErrorCode,"Recordset ", exception.redirectUrl);
+            else if (exception.status && exception.status == errorNames.multipleRecords){
+                errorPopup(errorNames.multipleDataMessage, errorNames.multipleDataErrorCode,"Recordset ", exception.errorData.redirectUrl);
             }
-            
             // we decided to deal with the OR condition later
             else if ( (ERMrest && exception instanceof ERMrest.ForbiddenError) || exception.code == errorNames.forbidden) {
                 errorPopup( exception.message, exception.status ,"Home Page", $window.location.origin);
-            } 
-            else {
-                var errName = exception.constructor.name;
-                errName = (errName.toLowerCase() !== 'error') ? errName : "Terminal Error";
-
-                errorPopup("An unexpected error has occurred. Please report this problem to your system administrators.", errName, "Home Page", $window.location.origin,  exception.message , exception.stack);
             }
-            
+            else {
+                var errName = exception.status,
+                    errorText = exception.message,
+                    systemAdminMessage = errorMessages.systemAdminMessage,
+                    stackTrace =  (exception.errorData && exception.errorData.stack)? exception.errorData.stack: undefined;
+                errName = (errName.toLowerCase() !== 'error') ? errName : "Terminal Error";
+                errorPopup(
+                    systemAdminMessage,
+                    errName,
+                    "Home Page",
+                    $window.location.origin,
+                    errorText,
+                    stackTrace
+                );
+            }
+
             exceptionFlag = true;
         }
 
         return {
             errorPopup: errorPopup,
-            noRecordError: noRecordError,
-            multipleRecordError: multipleRecordError,
             handleException: handleException
         };
     }])
