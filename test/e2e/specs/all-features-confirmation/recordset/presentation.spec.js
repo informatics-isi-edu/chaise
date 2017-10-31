@@ -597,7 +597,7 @@ describe('View recordset,', function() {
                     chaisePage.waitForElement(modalTitle, browser.params.defaultTimeout).then(function() {
                         return modalTitle.getText();
                     }).then(function (title) {
-                        expect(title).toBe("Error: MalformedUriError");
+                        expect(title).toBe("Error: MalformedURIError");
                     });
                 });
             });
