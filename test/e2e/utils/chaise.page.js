@@ -320,7 +320,7 @@ var recordEditPage = function() {
 
     this.getDropdown = function(el, index) {
         index = index || 0;
-        return browser.executeScript("return $(arguments[0]).parents('tr').find('.select2-container')[" + index + "];", el);
+        return browser.executeScript("return $(arguments[0]).parents('tr').find('.select2-container:visible')[" + index + "];", el);
     };
 
     this.selectDropdownValue = function(el, value) {

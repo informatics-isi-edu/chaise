@@ -111,14 +111,11 @@ exports.testPresentation = function (tableParams) {
             var index = -1, columnUrl, aTag;
             columns.forEach(function (column) {
                 var columnEls;
-                if (column.title=='booking')
-                    {
-                    expect(element(by.id('entity-4-markdown')).element(by.tagName('span')).getAttribute('innerHTML')).toContain(column.value);
-                    }
-                else if (column.match=='html'){
+                if (column.title=='booking') {
+                    expect(element(by.id('entity-4-markdown')).element(by.css('.markdown-container')).getAttribute('innerHTML')).toContain(column.value);
+                } else if (column.match=='html') {
                     expect(chaisePage.recordPage.getEntityRelatedTableScope(column.title).getAttribute('innerHTML')).toBe(column.value);
-                }
-                else if (column.title == 'User Rating'){
+                } else if (column.title == 'User Rating'){
                     expect(chaisePage.recordPage.getEntityRelatedTableScope('&lt;strong&gt;User&nbsp;Rating&lt;/strong&gt;',true).getAttribute('innerHTML')).toBe(column.value);
                 }
                 else {

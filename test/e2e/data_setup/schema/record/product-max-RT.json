@@ -881,7 +881,7 @@
       ],
       "foreign_keys": [
         {
-          "names" : [["product-max-RT", "fk_media_accommodation"]],
+          "names" : [["product-max-RT", "fk_more_media_accommodation"]],
           "comment": null,
           "foreign_key_columns": [
             {
@@ -936,7 +936,7 @@
           "display": "More Media"
         },
         "tag:isrd.isi.edu,2016:visible-columns": {
-          "*": ["id", ["product-max-RT", "fk_media_accommodation"]]
+          "*": ["id", ["product-max-RT", "fk_more_media_accommodation"]]
         }
       }
     },
@@ -1020,7 +1020,7 @@
       ],
       "foreign_keys": [
         {
-          "names" : [["product-max-RT", "fk_media_accommodation"]],
+          "names" : [["product-max-RT", "fk_more_files_accommodation"]],
           "comment": null,
           "foreign_key_columns": [
             {
@@ -1075,7 +1075,7 @@
           "display": "More Files"
         },
         "tag:isrd.isi.edu,2016:visible-columns": {
-          "*": ["id", ["product-max-RT", "fk_media_accommodation"]]
+          "*": ["id", ["product-max-RT", "fk_more_files_accommodation"]]
         }
       }
     }

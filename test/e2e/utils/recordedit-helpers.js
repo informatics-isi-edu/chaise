@@ -469,17 +469,16 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     it("should show a dropdown", function() {
                         pageColumns.forEach(function(pc) {
                             chaisePage.recordEditPage.getDropdown(pc, recordIndex).then(function(dropdown) {
-                                    expect(dropdown.isDisplayed()).toBeTruthy();
-                                    dropdown.column = pc.column;
+                                expect(dropdown.isDisplayed()).toBeTruthy();
+                                dropdown.column = pc.column;
 
-                                    var value = getRecordValue(dropdown.column.name);
-                                    if (value != undefined) {
-                                        expect(chaisePage.recordEditPage.getDropdownText(dropdown)).toBe(value.length == 0 ? 'Select a value' : (value + ""), colError(dropdown.column.name, "Doesn't have the expected value."));
-                                    }
+                                var value = getRecordValue(dropdown.column.name);
+                                if (value != undefined) {
+                                    expect(chaisePage.recordEditPage.getDropdownText(dropdown)).toBe(value.length == 0 ? 'Select a value' : (value + ""), colError(dropdown.column.name, "Doesn't have the expected value."));
+                                }
 
-                                    dropdowns.push(dropdown);
-                                    booleanDataTypeFields.push(dropdown);
-
+                                dropdowns.push(dropdown);
+                                booleanDataTypeFields.push(dropdown);
                             });
                         });
                     });
