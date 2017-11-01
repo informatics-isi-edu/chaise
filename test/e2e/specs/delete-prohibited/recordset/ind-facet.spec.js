@@ -25,9 +25,13 @@ var testParams = {
     maxInputClass: "range-max",
     maxInputClearClass: "max-clear",
     tsMinDateInputClass: "ts-date-range-min",
+    tsMinDateInputClearClass: "min-date-clear",
     tsMinTimeInputClass: "ts-time-range-min",
+    tsMinTimeInputClearClass: "min-time-clear",
     tsMaxDateInputClass: "ts-date-range-max",
+    tsMaxDateInputClearClass: "max-date-clear",
     tsMaxTimeInputClass: "ts-time-range-max",
+    tsMaxTimeInputClearClass: "max-time-clear",
     facets: [
         {
             name: "id", 
@@ -110,7 +114,13 @@ var testParams = {
         {
             name: "timestamp_col", 
             type: "timestamp", 
-            listElems: 0, 
+            listElems: 0,
+            invalid: {
+                date: "2001-14-04",
+                dateError: "Please enter a date value in YYYY-MM-DD format.",
+                time: "22:64:12",
+                timeError: "Please enter a time value in 24-hr HH:MM:SS format."
+            },
             range: {
                 minDate: "2004-05-20", 
                 minTime: "10:08:00", 
@@ -516,10 +526,10 @@ describe("Viewing Recordset with Faceting,", function() {
                                     // wait for facet to open
                                     browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
                                     browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getRangeSubmit(idx)), browser.params.defaultTimeout);
-                                    
+
                                     return chaisePage.recordsetPage.getFacetOptions(idx).count();
                                 }).then(function (ct) {
-                                    expect(ct).toBe(facetParams.listElems, "There are list elements for '" + facetParams.name + "' facet");
+                                    expect(ct).toBe(facetParams.listElems, "There are more list elements for '" + facetParams.name + "' facet than expected");
 
                                     minInput = chaisePage.recordsetPage.getRangeMinInput(idx, testParams.minInputClass);
                                     maxInput = chaisePage.recordsetPage.getRangeMaxInput(idx, testParams.maxInputClass);
@@ -655,7 +665,8 @@ describe("Viewing Recordset with Faceting,", function() {
                                 });
                                 // TODO: there's currently an issue with chrome 62 that causes this test case to open a new tab and stop running
                             } else if (facetParams.type == "timestamp") {
-                                var minDateInput, minTimeInput, maxDateInput, maxTimeInput;
+                                var minDateInput, minTimeInput, maxDateInput, maxTimeInput,
+                                    minDateClear, minTimeClear, maxDateClear, maxTimeClear;
 
                                 browser.wait(function () {
                                     return chaisePage.recordsetPage.getClosedFacets().count().then(function(ct) {
@@ -669,11 +680,37 @@ describe("Viewing Recordset with Faceting,", function() {
                                     browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
                                     browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getRangeSubmit(idx)), browser.params.defaultTimeout);
 
+                                    return chaisePage.recordsetPage.getFacetOptions(idx).count();
+                                }).then(function (ct) {
+                                    expect(ct).toBe(facetParams.listElems, "There are more list elements for '" + facetParams.name + "' facet than expected");
+
                                     minDateInput = chaisePage.recordsetPage.getRangeMinInput(idx, testParams.tsMinDateInputClass);
                                     minTimeInput = chaisePage.recordsetPage.getRangeMinInput(idx, testParams.tsMinTimeInputClass);
                                     maxDateInput = chaisePage.recordsetPage.getRangeMaxInput(idx, testParams.tsMaxDateInputClass);
                                     maxTimeInput = chaisePage.recordsetPage.getRangeMaxInput(idx, testParams.tsMaxTimeInputClass);
 
+                    // test validators
+                                    minDateInput.sendKeys(facetParams.invalid.date);
+
+                                    browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getValidationError(idx)), browser.params.defaultTimeout);
+
+                                    return chaisePage.recordsetPage.getValidationError(idx).getText();
+                                }).then(function (text) {
+                                    expect(text).toBe(facetParams.invalid.dateError, "The date validation message did not show up or is incorrect");
+
+                                    minDateClear = chaisePage.recordsetPage.getInputClear(idx, testParams.minInputClearClass);
+                                    minTimeClear = chaisePage.recordsetPage.getInputClear(idx, testParams.minInputClearClass);
+                                    maxDateClear = chaisePage.recordsetPage.getInputClear(idx, testParams.maxInputClearClass);
+                                    maxTimeClear = chaisePage.recordsetPage.getInputClear(idx, testParams.maxInputClearClass);
+                                    return minClear.click();
+                                }).then(function () {
+
+                    
+                                    
+                                    
+                                    
+                                    //TODO
+                    // test min and max being set
                                     // define test params values
                                     minDateInput.sendKeys(facetParams.range.minDate);
                                     minTimeInput.sendKeys(facetParams.range.minTime);
