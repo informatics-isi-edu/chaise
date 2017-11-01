@@ -41,9 +41,9 @@
     .config(['$logProvider', function($logProvider) {
         $logProvider.debugEnabled(chaiseConfig.debug === true);
     }])
-
-    .run(['constants', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'MathUtils', 'modalBox', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
-        function runApp(constants, DataUtils, ERMrest, ErrorService, headInjector, MathUtils, modalBox, Session, UiUtils, UriUtils, $log, $rootScope, $window) {
+    
+    .run(['constants', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'MathUtils', 'modalBox', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', 'Errors',
+        function runApp(constants, DataUtils, ERMrest, ErrorService, headInjector, MathUtils, modalBox, Session, UiUtils, UriUtils, $log, $rootScope, $window, Errors) {
 
         var session,
             context = {};
@@ -147,8 +147,8 @@
                 $rootScope.reference.session = session;
                 $log.info("Reference: ", $rootScope.reference);
 
-                // There should only ever be one entity related to this reference, we are 
-                // reading 2 entities (the second is added in ermrest.read) and if we get 
+                // There should only ever be one entity related to this reference, we are
+                // reading 2 entities (the second is added in ermrest.read) and if we get
                 // more than 1 entity then we throw a multipleRecordError.
                 return $rootScope.reference.read(2);
             }, function error(exception) {
@@ -157,15 +157,14 @@
                 $log.info("Page: ", page);
 
                 if (page.tuples.length < 1) {
-                    var noDataError = ErrorService.noRecordError(context.filter.filters);
-                    throw noDataError;
+                    throw new Errors.noRecordError(context.filter.filters);
                 }
                 else if(page.tuples.length > 1){
                     var recordSetLink = page.reference.contextualize.compact.appLink;
-                    var multipleRecordError = ErrorService.multipleRecordError();
-                    multipleRecordError.redirectUrl=recordSetLink;
+                    // var multipleRecordError = Errors.multipleRecordError();
+                    // multipleRecordError.redirectUrl=recordSetLink;
                     $rootScope.displayReady = true;
-                    throw multipleRecordError;
+                    throw new Errors.multipleRecordError(recordSetLink);
                 }
 
                 var tuple = $rootScope.tuple = page.tuples[0];

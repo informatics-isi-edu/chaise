@@ -796,12 +796,12 @@
                     // register the update facet function
                     ctrl.updateFacet = function () {
                         return updateFacetColumn($scope);
-                    }
+                    };
                     
                     // register the initialize facet function
                     ctrl.initializeFacet =  function () {
                         return initializeFacetColumn($scope);
-                    }
+                    };
                 }],
                 require: ['^faceting', 'choicePicker'],
                 link: function (scope, element, attr, ctrls) {
@@ -812,6 +812,9 @@
                     // register this controller in the parent
                     parentCtrl.register(currentCtrl, scope.facetColumn, scope.index);
                     scope.parentCtrl = parentCtrl;
+                    
+                    // This can eventually be in the annotation, that's why I created this attribute
+                    scope.showSearch = (scope.facetColumn.column.type.name !== "boolean");
                     
                     scope.checkboxRows = [];
 

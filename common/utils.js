@@ -26,9 +26,6 @@
     .constant("messageMap", {
         "catalogMissing": "No catalog specified and no Default is set.",
         "generalPreconditionFailed": "This page is out of sync with the server. Please refresh the page and try again.",
-        "noDataMessage": "No entity exists with ",
-        "multipleDataErrorCode" : "Multiple Records Found",
-        "multipleDataMessage" : "There are more than 1 record found for the filters provided.",
         "onePagingModifier": "Invalid URL. Only one paging modifier allowed",
         "pageRefreshRequired": {
             title: "Page Refresh Required",
@@ -103,15 +100,28 @@
                             hash = '/' + fixedEncodeURIComponent(tableConfig.schema) + ':' + fixedEncodeURIComponent(tableConfig.table);
                         } else {
                             // no defined or default schema:table for catalogId
-                            throw new Errors.MalformedUriError(tableMissing);
+                            if(ERMrest){
+                                throw new ERMrest.MalformedURIError(tableMissing);
+                            } else{
+                                throw new Errors.MalformedUriError(tableMissing);
+                            }
+
                         }
                     } else {
                         // no defined or default schema:table
-                        throw new Errors.MalformedUriError(tableMissing);
+                        if(ERMrest){
+                            throw new ERMrest.MalformedURIError(tableMissing);
+                        } else{
+                            throw new Errors.MalformedUriError(tableMissing);
+                        }
                     }
                 } else {
                     // no defined or default catalog
-                    throw new Errors.MalformedUriError(catalogMissing);
+                    if(ERMrest){
+                        throw new ERMrest.MalformedURIError(catalogMissing);
+                    } else{
+                        throw new Errors.MalformedUriError(catalogMissing);
+                    }
                 }
             } else {
                 // pull off the catalog ID
@@ -124,7 +134,11 @@
                         catalogId = chaiseConfig.defaultCatalog;
                     } else {
                         // no defined or default catalog
-                        throw new Errors.MalformedUriError(catalogMissing);
+                        if(ERMrest){
+                            throw new ERMrest.MalformedURIError(catalogMissing);
+                        } else{
+                            throw new Errors.MalformedUriError(catalogMissing);
+                        }
                     }
                 }
 
@@ -137,11 +151,20 @@
                             hash = '/' + fixedEncodeURIComponent(tableConfig.schema) + ':' + fixedEncodeURIComponent(tableConfig.table);
                         } else {
                             // no defined or default schema:table for catalogId
-                            throw new Errors.MalformedUriError(tableMissing);
+                            if(ERMrest){
+                                throw new ERMrest.MalformedURIError(tableMissing);
+                            } else{
+                                throw new Errors.MalformedUriError(tableMissing);
+                            }
                         }
                     } else {
                         // no defined or default schema:table
-                        throw new Errors.MalformedUriError(tableMissing);
+                        if(ERMrest){
+                            throw new ERMrest.MalformedURIError(tableMissing);
+                        } else{
+                            throw new Errors.MalformedUriError(tableMissing);
+                        }
+
                     }
                 } else {
                     // grab the end of the hash from: '.../<schema-name>...'
@@ -286,7 +309,11 @@
                             context.paging.row[context.sort[i].column] = value;
                         }
                     } else {
-                        throw new Errors.MalformedUriError(messageMap.pagingModifierRequiresSort);
+                        if(ERMrest){
+                            throw new ERMrest.MalformedURIError(messageMap.pagingModifierRequiresSort);
+                        } else{
+                            throw new Errors.MalformedUriError(messageMap.pagingModifierRequiresSort);
+                        }
                     }
 
                 }
@@ -294,7 +321,11 @@
                 // extract @after
                 if (modifierPath.indexOf("@after(") !== -1) {
                     if (context.paging)
-                        throw new Errors.MalformedUriError(messageMap.onePagingModifier);
+                        if(ERMrest){
+                            throw new ERMrest.MalformedURIError(messageMap.onePagingModifier);
+                        } else{
+                            throw new Errors.MalformedUriError(messageMap.onePagingModifier);
+                        }
                     if (context.sort) {
                         context.paging = {};
                         context.paging.before = false;
@@ -306,7 +337,12 @@
                             context.paging.row[context.sort[i].column] = value;
                         }
                     } else {
-                        throw new Errors.MalformedUriError(messageMap.pagingModifierRequiresSort);
+                        if(ERMrest){
+                            throw new ERMrest.MalformedURIError(messageMap.pagingModifierRequiresSort);
+                        } else{
+                            throw new Errors.MalformedUriError(messageMap.pagingModifierRequiresSort);
+                        }
+
                     }
                 }
 
@@ -384,10 +420,20 @@
                             type = "Disjunction";
                         } else if (type === "Conjunction" && items[i] === ";") {
                             // using combination of ! and & without ()
-                            throw new Errors.MalformedUriError("Invalid filter " + parts[2]);
+
+                            if(ERMrest){
+                                throw new ERMrest.MalformedURIError("Invalid filter " + parts[2]);
+                            } else{
+                                throw new Errors.MalformedUriError("Invalid filter " + parts[2]);
+                            }
+
                         } else if (type === "Disjunction" && items[i] === "&") {
                             // using combination of ! and & without ()
-                            throw new Errors.MalformedUriError("Invalid filter " + parts[2]);
+                            if(ERMrest){
+                                throw new ERMrest.MalformedURIError("Invalid filter " + parts[2]);
+                            } else{
+                                throw new Errors.MalformedUriError("Invalid filter " + parts[2]);
+                            }
                         } else if (items[i] !== "&" && items[i] !== ";") {
                             // single filter on the first level
                             var binaryFilter = processSingleFilterString(items[i]);
@@ -426,7 +472,12 @@
                     return filter;
                 }
                 // invalid filter
-                throw new Errors.MalformedUriError("Invalid filter " + filterString);
+
+                if(ERMrest){
+                    throw new ERMrest.MalformedURIError("Invalid filter " + filterString);
+                } else{
+                    throw new Errors.MalformedUriError("Invalid filter " + filterString);
+                }
             } else {
                 var f = filterString.split("::");
                 if (f.length === 3) {
@@ -435,7 +486,11 @@
                     return filter;
                 }
                 // invalid filter error
-                throw new Errors.MalformedUriError("Invalid filter " + filterString);
+                if(ERMrest){
+                    throw new ERMrest.MalformedURIError("Invalid filter " + filterString);
+                } else{
+                    throw new Errors.MalformedUriError("Invalid filter " + filterString);
+                }
             }
         }
 
@@ -458,10 +513,18 @@
                     type = "Disjunction";
                 } else if (type === "Conjunction" && filterStrings[i] === ";") {
                     // TODO throw invalid filter error (using combination of ! and &)
-                    throw new Errors.MalformedUriError("Invalid filter " + filterStrings);
+                    if(ERMrest){
+                        throw new ERMrest.MalformedURIError("Invalid filter " + filterStrings);
+                    } else{
+                        throw new Errors.MalformedUriError("Invalid filter " + filterStrings);
+                    }
                 } else if (type === "Disjunction" && filterStrings[i] === "&") {
                     // TODO throw invalid filter error (using combination of ! and &)
-                    throw new Errors.MalformedUriError("Invalid filter " + filterStrings);
+                    if(ERMrest){
+                        throw new ERMrest.MalformedURIError("Invalid filter " + filterStrings);
+                    } else{
+                        throw new Errors.MalformedUriError("Invalid filter " + filterStrings);
+                    }
                 } else if (filterStrings[i] !== "&" && filterStrings[i] !== ";") {
                     // single filter on the first level
                     var binaryFilter = processSingleFilterString(filterStrings[i]);
@@ -719,7 +782,12 @@
          */
         function verify(test, message) {
             if (!test) {
-                throw new Errors.InvalidInputError(message);
+              if(ERMrest){
+                  throw new ERMrest.InvalidInputError(message);
+              } else{
+                  throw new Errors.InvalidInputError(message);
+              }
+
             }
         }
 
@@ -940,7 +1008,7 @@
                 $timeout(function () {
                     toggleTooltipWidth(scope, elem);
                 }, 0);
-                
+
                 scope.$watch(function () {
                     return elem[0].offsetWidth;
                 }, function (value) {
@@ -962,7 +1030,7 @@
                 $timeout(function () {
                     toggleTooltipHeight(scope, elem);
                 }, 0);
-                
+
                 scope.$watch(function () {
                     return elem[0].offsetHeight;
                 }, function (value) {
@@ -1021,7 +1089,7 @@
             link: function(scope, element, attrs) {
                 element.on('keydown', disableArrows);
             }
-        };  
+        };
     })
 
     // An "autofocus" directive that applies focus on an element when it becomes visible.

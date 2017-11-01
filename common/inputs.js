@@ -15,7 +15,8 @@
             },
             link: function(scope, elem, attr) {
                 function emptyOrNull(val) {
-                    return (val == '' || val == null || val == undefined);
+                    
+                    return (val === '' || val == null || val == undefined);
                 }
                 
                 scope.int2min = -32768;
@@ -118,8 +119,8 @@
                         }
                     }
 
-                    if (min == '') min = null;
-                    if (max == '') max = null;
+                    if (min === '') min = null;
+                    if (max === '') max = null;
                     scope.addRangeCb(min, max);
                 };
 

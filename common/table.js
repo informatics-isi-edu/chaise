@@ -879,13 +879,6 @@
                 };
 
                 scope.enterPressed = function() {
-                    /* If user has pressed enter then foreground search starts,
-                    the input is supposed to be frozen w/ a spinner to show that it is busy doing what the user
-                    asked for. Any existing background search result completing during that time is to be discarded
-                    to avoid confusing the UX.
-                    */
-                    $timeout.cancel(scope.inputChangedPromise);
-
                     // Trigger search
                     scope.search(scope.vm.search);
                 };
