@@ -229,8 +229,6 @@ describe("Viewing Recordset with Faceting,", function() {
             });
             
             it("should have 3 facets open", function () {
-                
-                browser.pause();
                 chaisePage.recordsetPage.getOpenFacets().count().then(function (ct) {
                     expect(ct).toBe(testParams.defaults.openFacetNames.length, "Number of open facets is incorrect");
                     
@@ -656,7 +654,7 @@ describe("Viewing Recordset with Faceting,", function() {
                                     console.dir(exc);
                                 });
                                 // TODO: there's currently an issue with chrome 62 that causes this test case to open a new tab and stop running
-                            } else if (false && facetParams.type == "timestamp") {
+                            } else if (facetParams.type == "timestamp") {
                                 var minDateInput, minTimeInput, maxDateInput, maxTimeInput;
 
                                 browser.wait(function () {
