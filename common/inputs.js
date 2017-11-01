@@ -109,8 +109,8 @@
                         if (max) max = max.format('YYYY-MM-DD');
                         // date for numeric should be formatted as Number() for a proper comparison
                     } else if (scope.displayType(scope.type) == "number") {
-                        min = Number(scope.model.min);
-                        max = Number(scope.model.max);
+                        min = !emptyOrNull(scope.model.min) ? Number(scope.model.min) : '';
+                        max = !emptyOrNull(scope.model.max) ? Number(scope.model.max) : '';
                         if ((min && max) && min > max) {
                             scope.minMaxForm.$error.improperRange = true;
                             return;
