@@ -200,7 +200,7 @@ describe('Record Add', function() {
                     },
                     keys: {id: 1}
                 };
-                browser.manage().addCookie('test', JSON.stringify(testCookie));
+                browser.manage().addCookie({name: 'test', value: JSON.stringify(testCookie)});
             });
 
         });
