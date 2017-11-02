@@ -5,8 +5,8 @@
 <div class="modal-body">
     {{::ctrl.params.message}}
     <br><br>
-    <span ng-if="ctrl.params.errorCode == 'Multiple Records Found'">Click OK to show all the matched records.</span>
-    <span ng-if="ctrl.params.errorCode != 'Multiple Records Found'">Click OK to go to the {{::ctrl.params.pageName}}. </span>
+    <span ng-if="ctrl.params.errorCode == 'Multiple Records Found'">Click <b>OK</b> to show all the matched records.</span>
+    <span ng-if="ctrl.params.errorCode != 'Multiple Records Found'">Click <b>OK</b> to go to the {{::ctrl.params.pageName}}. </span>
 
     <a ng-show="ctrl.params.subMessage" ng-click="ctrl.showDetails()">{{ctrl.linkText}}</a>
     <br>

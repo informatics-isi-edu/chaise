@@ -6,7 +6,7 @@
     .constant('errorNames', {
         unauthorized: "Unauthorized",
         forbidden: "Forbidden",
-        notFound: "Not Found",
+        notFound: "Record Not Found",
         multipleRecords: "Multiple Records Found",
         noDataMessage: "No entity exists",
         multipleDataErrorCode : "Multiple Records Found",
@@ -17,7 +17,7 @@
         forbidden: "Forbidden",
         notFound: "No data",
         multipleRecords: "Multiple Records Found",
-        noDataMessage: "No entity exists with ",
+        noDataMessage: "Invalid Id or No matching record exists for the given Id.",
         multipleDataErrorCode : "Multiple Records Found",
         multipleDataMessage : "There are more than 1 record found for the filters provided.",
         systemAdminMessage : "An unexpected error has occurred. Please report this problem to your system administrators."
@@ -211,7 +211,7 @@
         // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
         function handleException(exception) {
             $log.info(exception);
-
+            var stackTrace =  (exception.errorData && exception.errorData.stack)? exception.errorData.stack: undefined;
             var reloadCb = function() {
                 window.location.reload();
             };
@@ -222,7 +222,7 @@
                 Session.loginInAModal(reloadCb);
             }
             else if ((exception.status && exception.status == errorNames.multipleRecords) || exception.constructor.name === "noRecordError"){
-                errorPopup(exception.message, exception.status,"Recordset ", exception.errorData.redirectUrl);
+                errorPopup(exception.message, exception.status, "Recordset ", exception.errorData.redirectUrl, stackTrace);
             }
             // we decided to deal with the OR condition later
             else if ( (ERMrest && exception instanceof ERMrest.ForbiddenError) || exception.code == errorNames.forbidden) {
@@ -231,8 +231,8 @@
             else {
                 var errName = exception.status? exception.status:"Terminal Error",
                     errorText = exception.message,
-                    systemAdminMessage = errorMessages.systemAdminMessage,
-                    stackTrace =  (exception.errorData && exception.errorData.stack)? exception.errorData.stack: undefined;
+                    systemAdminMessage = errorMessages.systemAdminMessage;
+
                 errName = (errName.toLowerCase() !== 'error') ? errName : "Terminal Error";
                 errorPopup(
                     systemAdminMessage,
