@@ -104,6 +104,18 @@
                     }
                 },
                 {
+                    "name": "boolean_col",
+                    "type": {
+                        "typename": "boolean"
+                    }
+                },
+                {
+                    "name": "jsonb_col",
+                    "type": {
+                        "typename": "jsonb"
+                    }
+                },
+                {
                     "name": "fk_to_f1",
                     "type": {
                         "typename": "serial4"
@@ -130,6 +142,8 @@
                             {"source": "text_col"},
                             {"source": "longtext_col"},
                             {"source": "markdown_col"},
+                            {"source": "boolean_col"},
+                            {"source": "jsonb_col"},
                             {"source": [{"outbound": ["faceting", "main_fk1"]}, "id"], "markdown_name": "**F1**"},
                             {"source": [{"outbound": ["faceting", "main_fk2"]}, "id"], "open": true},
                             {"source": [{"inbound": ["faceting", "main_f3_assoc_fk1"]}, {"outbound": ["faceting", "main_f3_assoc_fk2"]}, "term"]},

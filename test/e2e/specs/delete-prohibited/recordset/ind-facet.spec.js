@@ -2,8 +2,8 @@ var chaisePage = require('../../../utils/chaise.page.js');
 var EC = protractor.ExpectedConditions;
 var testParams = {
     table_name: "main",
-    totalNumFacets: 12,
-    facetNames: [ "id", "int_col", "float_col", "date_col", "timestamp_col", "text_col", "longtext_col", "markdown_col", "F1", "to_name", "f3 (term)", "from_name" ],
+    totalNumFacets: 14,
+    facetNames: [ "id", "int_col", "float_col", "date_col", "timestamp_col", "text_col", "longtext_col", "markdown_col", "boolean_col", "jsonb_col", "F1", "to_name", "f3 (term)", "from_name" ],
     defaults: {
         openFacetNames: [ "id", "int_col", "to_name" ],
         numFilters: 2,
@@ -170,6 +170,24 @@ var testParams = {
             options: [ 'Empty', 'one', 'two', 'No Value', 'eight', 'eleven', 'five', 'four', 'nine', 'seven' ]
         },
         {
+            name: "boolean_col", 
+            type: "choice", 
+            totalNumOptions: 3, 
+            option: 1, 
+            filter: "boolean_col: true", 
+            numRows: 10, 
+            options: [ 'false', 'true', 'No Value' ]
+        },
+        {
+            name: "jsonb_col", 
+            type: "choice", 
+            totalNumOptions: 10, 
+            option: 6, 
+            filter: 'jsonb_col: { "key": "four" }', 
+            numRows: 1, 
+            options: [ 'No Value', '{"key":"one"}', '{"key":"two"}', '{"key":"eight"}', '{"key":"eleven"}', '{"key":"five"}', '{"key":"four"}', '{"key":"nine"}', '{"key":"seven"}', '{"key":"six"}' ]
+        },
+        {
             name: "F1", 
             type: "choice", 
             totalNumOptions: 10, 
@@ -207,10 +225,10 @@ var testParams = {
         }
     ],
     multipleFacets: {
-        first: { facetIdx: 8, option: 2, numRows: 10 },
-        second: { facetIdx: 9, option: 0, numRows: 5 },
-        third: { facetIdx: 10, option: 0, numRows: 5 },
-        fourth: { facetIdx: 11, option: 1, numRows: 1 }
+        first: { facetIdx: 10, option: 2, numRows: 10 },
+        second: { facetIdx: 11, option: 0, numRows: 5 },
+        third: { facetIdx: 12, option: 0, numRows: 5 },
+        fourth: { facetIdx: 13, option: 1, numRows: 1 }
     }
 }
 
@@ -261,7 +279,7 @@ describe("Viewing Recordset with Faceting,", function() {
                     expect(ct).toBe(testParams.defaults.numFilters, "Number of visible filters is incorrect");
                 });
             });
-            
+
             it("should have 1 row visible", function () {
                 chaisePage.recordsetPage.getRows().count().then(function (ct) {
                     expect(ct).toBe(testParams.defaults.numRows, "Number of visible rows is incorrect");
@@ -314,6 +332,19 @@ describe("Viewing Recordset with Faceting,", function() {
                     expect(ct).toBe(3, "Facet values after search are incorrect");
 
                     return chaisePage.recordsetPage.getFacetSearchBoxClear(0).click();
+                });
+            });
+
+            it("boolean facet should not have a search box present", function () {
+                // idx 8 is for boolean facet
+                var booleanFacet = chaisePage.recordsetPage.getFacetById(8);
+
+                booleanFacet.click().then(function () {
+                    return chaisePage.recordsetPage.getFacetSearchBox(8).isDisplayed();
+                }).then(function (bool) {
+                    expect(bool).toBeFalsy();
+
+                    return booleanFacet.click();
                 });
             });
 
@@ -431,7 +462,7 @@ describe("Viewing Recordset with Faceting,", function() {
             beforeAll(function () {
                 // close the facets in opposite order so they dont move when trying to click others
                 //close first facet
-                chaisePage.recordsetPage.getFacetById(9).click().then(function() {
+                chaisePage.recordsetPage.getFacetById(11).click().then(function() {
 
                     //close second facet
                     return chaisePage.recordsetPage.getFacetById(1).click();
@@ -471,7 +502,8 @@ describe("Viewing Recordset with Faceting,", function() {
                                 // wait for list to be fully visible
                                 browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(idx)), browser.params.defaultTimeout);
 
-                                return chaisePage.recordsetPage.getFacetOptionsText(idx);
+                                // special case for 'jsonb'
+                                return (facetParams.name == "jsonb_col" ? chaisePage.recordsetPage.getJsonbFacetOptionsText(idx) : chaisePage.recordsetPage.getFacetOptionsText(idx));
                             }).then(function (text) {
                                 expect(text).toEqual(facetParams.options, "facet options are incorrect for '" + facetParams.name + "' facet");
 

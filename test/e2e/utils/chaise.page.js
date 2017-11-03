@@ -926,6 +926,12 @@ var recordsetPage = function() {
         return browser.executeScript("return $('#fc-" + idx + " .chaise-checkbox label').map(function(i, a) { return a.textContent.trim(); });");
     }
 
+    // just getting the text content returns a stringified JSON value (that is not properly stringified) with hidden characters, stringifying that shows the hidden characters
+    // but if we parse the odd stringfied version to JSON then stringify it, we can effectively clean up those hidden characters and get a simple string reprsentation
+    this.getJsonbFacetOptionsText = function (idx) {
+        return browser.executeScript("return $('#fc-" + idx + " .chaise-checkbox label').map(function(i, a) { return (i != 0 ? JSON.stringify(JSON.parse(a.textContent.trim())) : a.textContent.trim() ); });");
+    }
+
     this.getFacetOption = function (idx, option) {
         return element(by.id("fc-" + idx)).element(by.id("checkbox-" + option));
     }

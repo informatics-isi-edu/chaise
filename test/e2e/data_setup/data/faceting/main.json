@@ -1,122 +1,152 @@
 [
     {
         "id": "1", "fk_to_f1": "1", "fk_to_f2": "1", 
-        "int_col": 11, "float_col": 11.11, "date_col": "2001-01-01", "timestamp_col": "2001-01-01 01:01:01", "text_col": "one", "shorttext_col": "one", "longtext_col": "one", "markdown_col": "**one**" 
+        "int_col": 11, "float_col": 11.11, "date_col": "2001-01-01", "timestamp_col": "2001-01-01 01:01:01", "text_col": "one", "shorttext_col": "one", "longtext_col": "one", "markdown_col": "**one**" ,
+        "boolean_col": true, "jsonb_col": {"key": "one"}
     },
     {
         "id": "2", "fk_to_f1": "1", "fk_to_f2": "1",
-        "int_col": 11, "float_col": 11.11, "date_col": "2001-01-01", "timestamp_col": "2001-01-01 01:01:01", "text_col": "one", "shorttext_col": "one", "longtext_col": "one", "markdown_col": "**one**" 
+        "int_col": 11, "float_col": 11.11, "date_col": "2001-01-01", "timestamp_col": "2001-01-01 01:01:01", "text_col": "one", "shorttext_col": "one", "longtext_col": "one", "markdown_col": "**one**",
+        "boolean_col": true, "jsonb_col": {"key": "one"}
     },
     {
         "id": "3", "fk_to_f1": "1", "fk_to_f2": "1",
-        "int_col": 11, "float_col": 11.11, "date_col": "2001-01-01", "timestamp_col": "2001-01-01 01:01:01", "text_col": "one", "shorttext_col": "one", "longtext_col": "one", "markdown_col": "**one**" 
+        "int_col": 11, "float_col": 11.11, "date_col": "2001-01-01", "timestamp_col": "2001-01-01 01:01:01", "text_col": "one", "shorttext_col": "one", "longtext_col": "one", "markdown_col": "**one**",
+        "boolean_col": true, "jsonb_col": {"key": "one"}
     },
     {
         "id": "4", "fk_to_f1": "1", "fk_to_f2": "1",
-        "int_col": 11, "float_col": 11.11, "date_col": "2001-01-01", "timestamp_col": "2001-01-01 01:01:01", "text_col": "one", "shorttext_col": "one", "longtext_col": "one", "markdown_col": "**one**" 
+        "int_col": 11, "float_col": 11.11, "date_col": "2001-01-01", "timestamp_col": "2001-01-01 01:01:01", "text_col": "one", "shorttext_col": "one", "longtext_col": "one", "markdown_col": "**one**",
+        "boolean_col": true, "jsonb_col": {"key": "one"}
     },
     {
         "id": "5", "fk_to_f1": "1", "fk_to_f2": "1",
-        "int_col": 11, "float_col": 11.11, "date_col": "2001-01-01", "timestamp_col": "2001-01-01 01:01:01", "text_col": "one", "shorttext_col": "one", "longtext_col": "one", "markdown_col": "**one**" 
+        "int_col": 11, "float_col": 11.11, "date_col": "2001-01-01", "timestamp_col": "2001-01-01 01:01:01", "text_col": "one", "shorttext_col": "one", "longtext_col": "one", "markdown_col": "**one**",
+        "boolean_col": true, "jsonb_col": {"key": "one"}
     },
     {
         "id": "6", "fk_to_f1": "1", "fk_to_f2": "1",
-        "int_col": 22, "float_col": 22.22, "date_col": "2002-02-02", "timestamp_col": "2002-02-02 02:02:02", "text_col": "two", "shorttext_col": "two", "longtext_col": "two", "markdown_col": "**two**" 
+        "int_col": 22, "float_col": 22.22, "date_col": "2002-02-02", "timestamp_col": "2002-02-02 02:02:02", "text_col": "two", "shorttext_col": "two", "longtext_col": "two", "markdown_col": "**two**",
+        "boolean_col": true, "jsonb_col": {"key": "two"}
     },
     {
         "id": "7", "fk_to_f1": "1", "fk_to_f2": "1",
-        "int_col": 22, "float_col": 22.22, "date_col": "2002-02-02", "timestamp_col": "2002-02-02 02:02:02", "text_col": "two", "shorttext_col": "two", "longtext_col": "two", "markdown_col": "**two**" 
+        "int_col": 22, "float_col": 22.22, "date_col": "2002-02-02", "timestamp_col": "2002-02-02 02:02:02", "text_col": "two", "shorttext_col": "two", "longtext_col": "two", "markdown_col": "**two**",
+        "boolean_col": true, "jsonb_col": {"key": "two"}
     },
     {
         "id": "8", "fk_to_f1": "1", "fk_to_f2": "1",
-        "int_col": 22, "float_col": 22.22, "date_col": "2002-02-02", "timestamp_col": "2002-02-02 02:02:02", "text_col": "two", "shorttext_col": "two", "longtext_col": "two", "markdown_col": "**two**" 
+        "int_col": 22, "float_col": 22.22, "date_col": "2002-02-02", "timestamp_col": "2002-02-02 02:02:02", "text_col": "two", "shorttext_col": "two", "longtext_col": "two", "markdown_col": "**two**",
+        "boolean_col": true, "jsonb_col": {"key": "two"}
     },
     {
         "id": "9", "fk_to_f1": "1", "fk_to_f2": "1",
-        "int_col": 22, "float_col": 22.22, "date_col": "2002-02-02", "timestamp_col": "2002-02-02 02:02:02", "text_col": "two", "shorttext_col": "two", "longtext_col": "two", "markdown_col": "**two**" 
+        "int_col": 22, "float_col": 22.22, "date_col": "2002-02-02", "timestamp_col": "2002-02-02 02:02:02", "text_col": "two", "shorttext_col": "two", "longtext_col": "two", "markdown_col": "**two**",
+        "boolean_col": true, "jsonb_col": {"key": "two"}
     },
     {
         "id": "10", "fk_to_f1": "1", "fk_to_f2": "1",
-        "int_col": 22, "float_col": 22.22, "date_col": "2002-02-02", "timestamp_col": "2002-02-02 02:02:02", "text_col": "two", "shorttext_col": "two", "longtext_col": "two", "markdown_col": "**two**" 
+        "int_col": 22, "float_col": 22.22, "date_col": "2002-02-02", "timestamp_col": "2002-02-02 02:02:02", "text_col": "two", "shorttext_col": "two", "longtext_col": "two", "markdown_col": "**two**",
+        "boolean_col": true, "jsonb_col": {"key": "two"}
     },
     {
         "id": "11", "fk_to_f1": "2", "fk_to_f2": "2",
-        "int_col": 3, "float_col": 3.3, "date_col": "2003-03-03", "timestamp_col": "2003-03-03 03:03:03", "text_col": "three", "shorttext_col": "three", "longtext_col": "three", "markdown_col": "**three**" 
+        "int_col": 3, "float_col": 3.3, "date_col": "2003-03-03", "timestamp_col": "2003-03-03 03:03:03", "text_col": "three", "shorttext_col": "three", "longtext_col": "three", "markdown_col": "**three**",
+        "boolean_col": false, "jsonb_col": {"key": "three"}
     },
     {
         "id": "12", "fk_to_f1": "2", "fk_to_f2": "2",
-        "int_col": 4, "float_col": 4.4, "date_col": "2004-04-04", "timestamp_col": "2004-04-04 04:04:04", "text_col": "four", "shorttext_col": "four", "longtext_col": "four", "markdown_col": "**four**" 
+        "int_col": 4, "float_col": 4.4, "date_col": "2004-04-04", "timestamp_col": "2004-04-04 04:04:04", "text_col": "four", "shorttext_col": "four", "longtext_col": "four", "markdown_col": "**four**",
+        "boolean_col": false, "jsonb_col": {"key": "four"}
     },
     {
         "id": "13", "fk_to_f1": "2", "fk_to_f2": "2",
-        "int_col": 5, "float_col": 5.5, "date_col": "2005-05-05", "timestamp_col": "2005-05-05 05:05:05", "text_col": "five", "shorttext_col": "five", "longtext_col": "five", "markdown_col": "**five**" 
+        "int_col": 5, "float_col": 5.5, "date_col": "2005-05-05", "timestamp_col": "2005-05-05 05:05:05", "text_col": "five", "shorttext_col": "five", "longtext_col": "five", "markdown_col": "**five**",
+        "boolean_col": false, "jsonb_col": {"key": "five"}
     },
     {
         "id": "14", "fk_to_f1": "2", "fk_to_f2": "2",
-        "int_col": 6, "float_col": 6.6, "date_col": "2006-06-06", "timestamp_col": "2006-06-06 06:06:06", "text_col": "six", "shorttext_col": "six", "longtext_col": "six", "markdown_col": "**six**" 
+        "int_col": 6, "float_col": 6.6, "date_col": "2006-06-06", "timestamp_col": "2006-06-06 06:06:06", "text_col": "six", "shorttext_col": "six", "longtext_col": "six", "markdown_col": "**six**",
+        "boolean_col": false, "jsonb_col": {"key": "six"}
     },
     {
         "id": "15", "fk_to_f1": "2", "fk_to_f2": "2",
-        "int_col": 7, "float_col": 7.7, "date_col": "2007-07-07", "timestamp_col": "2007-07-07 07:07:07", "text_col": "seven", "shorttext_col": "seven", "longtext_col": "seven", "markdown_col": "**seven**" 
+        "int_col": 7, "float_col": 7.7, "date_col": "2007-07-07", "timestamp_col": "2007-07-07 07:07:07", "text_col": "seven", "shorttext_col": "seven", "longtext_col": "seven", "markdown_col": "**seven**",
+        "boolean_col": false, "jsonb_col": {"key": "seven"}
     },
     {
         "id": "16", "fk_to_f1": "2", "fk_to_f2": "3",
-        "int_col": 8, "float_col": 8.8, "date_col": "2008-08-08", "timestamp_col": "2008-08-08 08:08:08", "text_col": "eight", "shorttext_col": "eight", "longtext_col": "eight", "markdown_col": "**eight**" 
+        "int_col": 8, "float_col": 8.8, "date_col": "2008-08-08", "timestamp_col": "2008-08-08 08:08:08", "text_col": "eight", "shorttext_col": "eight", "longtext_col": "eight", "markdown_col": "**eight**",
+        "boolean_col": false, "jsonb_col": {"key": "eight"}
     },
     {
         "id": "17", "fk_to_f1": "2", "fk_to_f2": "3",
-        "int_col": 9, "float_col": 9.9, "date_col": "2009-09-09", "timestamp_col": "2009-09-09 09:09:09", "text_col": "nine", "shorttext_col": "nine", "longtext_col": "nine", "markdown_col": "**nine**" 
+        "int_col": 9, "float_col": 9.9, "date_col": "2009-09-09", "timestamp_col": "2009-09-09 09:09:09", "text_col": "nine", "shorttext_col": "nine", "longtext_col": "nine", "markdown_col": "**nine**",
+        "boolean_col": false, "jsonb_col": {"key": "nine"}
     },
     {
         "id": "18", "fk_to_f1": "2", "fk_to_f2": "3",
-        "int_col": 10, "float_col": 10.10, "date_col": "2010-10-10", "timestamp_col": "2010-10-10 10:10:10", "text_col": "ten", "shorttext_col": "ten", "longtext_col": "ten", "markdown_col": "**ten**" 
+        "int_col": 10, "float_col": 10.10, "date_col": "2010-10-10", "timestamp_col": "2010-10-10 10:10:10", "text_col": "ten", "shorttext_col": "ten", "longtext_col": "ten", "markdown_col": "**ten**",
+        "boolean_col": false, "jsonb_col": {"key": "ten"}
     },
     {
         "id": "19", "fk_to_f1": "2", "fk_to_f2": "3",
-        "int_col": 11, "float_col": 11.11, "date_col": "2011-11-11", "timestamp_col": "2011-11-11 11:11:11", "text_col": "eleven", "shorttext_col": "eleven", "longtext_col": "eleven", "markdown_col": "**eleven**"
+        "int_col": 11, "float_col": 11.11, "date_col": "2011-11-11", "timestamp_col": "2011-11-11 11:11:11", "text_col": "eleven", "shorttext_col": "eleven", "longtext_col": "eleven", "markdown_col": "**eleven**",
+        "boolean_col": false, "jsonb_col": {"key": "eleven"}
     },
     {
         "id": "20", "fk_to_f1": "2", "fk_to_f2": "3",
-        "int_col": 12, "float_col": 12.12, "date_col": "2012-12-12", "timestamp_col": "2012-12-12 12:12:12", "text_col": "twelve", "shorttext_col": "twelve", "longtext_col": "twelve", "markdown_col": "**twelve**"
+        "int_col": 12, "float_col": 12.12, "date_col": "2012-12-12", "timestamp_col": "2012-12-12 12:12:12", "text_col": "twelve", "shorttext_col": "twelve", "longtext_col": "twelve", "markdown_col": "**twelve**",
+        "boolean_col": false, "jsonb_col": {"key": "twelve"}
     },
     {
         "id": "21", "fk_to_f1": "3", "fk_to_f2": "4",
-        "int_col": null, "float_col": null, "date_col": null, "timestamp_col": null, "text_col": "", "shorttext_col": "", "longtext_col": "", "markdown_col": ""
+        "int_col": null, "float_col": null, "date_col": null, "timestamp_col": null, "text_col": "", "shorttext_col": "", "longtext_col": "", "markdown_col": "",
+        "boolean_col": null, "jsonb_col": null
     },
     {
         "id": "22", "fk_to_f1": "4", "fk_to_f2": "5",
-        "int_col": null, "float_col": null, "date_col": null, "timestamp_col": null, "text_col": "", "shorttext_col": "", "longtext_col": "", "markdown_col": ""
+        "int_col": null, "float_col": null, "date_col": null, "timestamp_col": null, "text_col": "", "shorttext_col": "", "longtext_col": "", "markdown_col": "",
+        "boolean_col": null, "jsonb_col": null
     },
     {
         "id": "23", "fk_to_f1": "5", "fk_to_f2": "6",
-        "int_col": null, "float_col": null, "date_col": null, "timestamp_col": null, "text_col": "", "shorttext_col": "", "longtext_col": "", "markdown_col": ""
+        "int_col": null, "float_col": null, "date_col": null, "timestamp_col": null, "text_col": "", "shorttext_col": "", "longtext_col": "", "markdown_col": "",
+        "boolean_col": null, "jsonb_col": null
     },
     {
         "id": "24", "fk_to_f1": "6", "fk_to_f2": "7",
-        "int_col": null, "float_col": null, "date_col": null, "timestamp_col": null, "text_col": "", "shorttext_col": "", "longtext_col": "", "markdown_col": ""
+        "int_col": null, "float_col": null, "date_col": null, "timestamp_col": null, "text_col": "", "shorttext_col": "", "longtext_col": "", "markdown_col": "",
+        "boolean_col": null, "jsonb_col": null
     },
     {
         "id": "25", "fk_to_f1": "7", "fk_to_f2": "8",
-        "int_col": null, "float_col": null, "date_col": null, "timestamp_col": null, "text_col": "", "shorttext_col": "", "longtext_col": "", "markdown_col": ""
+        "int_col": null, "float_col": null, "date_col": null, "timestamp_col": null, "text_col": "", "shorttext_col": "", "longtext_col": "", "markdown_col": "",
+        "boolean_col": null, "jsonb_col": null
     },
     {
         "id": "26", "fk_to_f1": "8", "fk_to_f2": "9",
-        "int_col": null, "float_col": null, "date_col": null, "timestamp_col": null, "text_col": null, "shorttext_col": null, "longtext_col": null, "markdown_col": null
+        "int_col": null, "float_col": null, "date_col": null, "timestamp_col": null, "text_col": null, "shorttext_col": null, "longtext_col": null, "markdown_col": null,
+        "boolean_col": null, "jsonb_col": null
     },
     {
         "id": "27", "fk_to_f1": "9", "fk_to_f2": "10",
-        "int_col": null, "float_col": null, "date_col": null, "timestamp_col": null, "text_col": null, "shorttext_col": null, "longtext_col": null, "markdown_col": null
+        "int_col": null, "float_col": null, "date_col": null, "timestamp_col": null, "text_col": null, "shorttext_col": null, "longtext_col": null, "markdown_col": null,
+        "boolean_col": null, "jsonb_col": null
     },
     {
         "id": "28", "fk_to_f1": "10", "fk_to_f2": "11",
-        "int_col": null, "float_col": null, "date_col": null, "timestamp_col": null, "text_col": null, "shorttext_col": null, "longtext_col": null, "markdown_col": null
+        "int_col": null, "float_col": null, "date_col": null, "timestamp_col": null, "text_col": null, "shorttext_col": null, "longtext_col": null, "markdown_col": null,
+        "boolean_col": null, "jsonb_col": null
     },
     {
         "id": "29", "fk_to_f1": "11", "fk_to_f2": "12",
-        "int_col": null, "float_col": null, "date_col": null, "timestamp_col": null, "text_col": null, "shorttext_col": null, "longtext_col": null, "markdown_col": null
+        "int_col": null, "float_col": null, "date_col": null, "timestamp_col": null, "text_col": null, "shorttext_col": null, "longtext_col": null, "markdown_col": null,
+        "boolean_col": null, "jsonb_col": null
     },
     {
         "id": "30", "fk_to_f1": "12", "fk_to_f2": "13",
-        "int_col": null, "float_col": null, "date_col": null, "timestamp_col": null, "text_col": null, "shorttext_col": null, "longtext_col": null, "markdown_col": null
+        "int_col": null, "float_col": null, "date_col": null, "timestamp_col": null, "text_col": null, "shorttext_col": null, "longtext_col": null, "markdown_col": null,
+        "boolean_col": null, "jsonb_col": null
     }
 ]
