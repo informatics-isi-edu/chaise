@@ -23,6 +23,15 @@
         vm.details = false;
         vm.linkText = "Show Error Details";
 
+        if(vm.params.errorCode == 'Multiple Records Found'){
+          vm.clickActionMessage = "Click <b>OK</b> to show all the matched records."
+        } else if(vm.params.errorCode == 'Record Not Found'){
+          vm.clickActionMessage = "Click <b>OK</b> to show the list of all records."
+        } else {
+          vm.clickActionMessage = "Click <b>OK</b> to go to the "+vm.params.pageName;
+        }
+
+
         vm.showDetails = function() {
             vm.details = !vm.details;
             vm.linkText = (vm.details) ? "Hide Error Details" : "Show Error Details";
