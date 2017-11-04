@@ -2,7 +2,8 @@
     "setup": {
         "schemaConfigurations": [
             "record/config.json",
-            "recordedit/delete.config.json"
+            "recordedit/delete.config.json",
+            "recordset/ind-facet.config.json"
         ]
     },
     "cleanup" : true
