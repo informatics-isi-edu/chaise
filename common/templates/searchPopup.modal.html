@@ -10,5 +10,5 @@
     <span ng-if="ctrl.tableModel.config.selectMode=='multi-select'">
         <button class="btn btn-primary btn-inverted pull-right multi-select-submit-btn" type="button" ng-click="ctrl.submit()" ng-disabled="ctrl.tableModel.selectedRows.length < 1">Submit</button>
     </span>
-    <recordset vm="ctrl.tableModel" on-row-click="ctrl.ok" allow-create="true"></recordset>
+    <recordset vm="ctrl.tableModel" on-row-click="ctrl.ok" allow-create="true" get-disabled-tuples="getDisabledTuples"></recordset>
 </div>

@@ -59,9 +59,22 @@ span[uib-tooltip] {
     background-color: white;
 }
 
-.btn.btn-primary.btn-inverted[disabled] {
-    color: #f1f1f1;
-    border-color: #f1f1f1;
+.btn.btn-primary.btn-inverted[disabled],
+.chaise-checkbox input[disabled][type="checkbox"] + label:before {
+    color: #f1f1f1 !important;
+    border-color: #f1f1f1 !important;
+}
+
+.chaise-checkbox input[disabled][type="checkbox"]:checked + label:after {
+    color: #ccc !important;
+}
+
+.disabled-row {
+    color: #ccc;
+}
+
+.disabled-row * {
+    color: inherit;
 }
 
 /**************** SPINNER **************/
@@ -1176,6 +1189,7 @@ footer .container1 {
  
  .faceting-container .panel .panel-title {
      color: #333333;
+     line-height: 1.35;
      font-size: 14px;
      font-weight: 600;
      position: relative;
@@ -1393,6 +1407,10 @@ input[type=number]::-webkit-outer-spin-button {
 /* Rule for FF */
 input[type=number] {
     -moz-appearance: textfield;
+}
+
+input[type=number]::-moz-placeholder {
+    line-height: 1.2;
 }
 
 /************** search popup **************/

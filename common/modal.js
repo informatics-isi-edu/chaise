@@ -85,6 +85,7 @@
         vm.ok = ok;
         vm.cancel = cancel;
         vm.submit = submitMultiSelection;
+        vm.getDisabledTuples = params.getDisabledTuples ? params.getDisabledTuples : undefined;
 
         vm.hasLoaded = false;
         var reference = vm.reference = params.reference;
@@ -109,17 +110,32 @@
 
         var fetchRecords = function() {
             // TODO this should not be a hardcoded value, either need a pageInfo object across apps or part of user settings
+            // The new recordset (recordsetWithFaceting) doesn't require read first. It will take care of this.
             reference.read(limit).then(function getPseudoData(page) {
-                vm.tableModel.hasLoaded = true;
-                vm.tableModel.initialized = true;
-                vm.tableModel.page = page;
-                vm.tableModel.rowValues = DataUtils.getRowValuesFromPage(page);
-
-                $scope.$broadcast('data-modified');
-            }, function(exception) {
+                var afterRead = function () {
+                    vm.tableModel.hasLoaded = true;
+                    vm.tableModel.initialized = true;
+                    vm.tableModel.page = page;
+                    vm.tableModel.rowValues = DataUtils.getRowValuesFromPage(page);
+                    $scope.$broadcast('data-modified');
+                };
+                
+                // get disabled tuple.
+                if (vm.getDisabledTuples) {
+                    vm.getDisabledTuples(page, vm.tableModel.pageLimit).then(function (rows) {
+                        vm.tableModel.disabledRows = rows;
+                        afterRead();
+                    }).catch(function (err) {
+                        throw err;
+                    });
+                } else {
+                    afterRead();
+                }
+                
+            }).catch(function(exception) {
                 throw exception;
             });
-        }
+        };
 
         fetchRecords();
 

@@ -1,7 +1,7 @@
 (function() {
     'use strict';
-    angular.module('chaise.recordcreate', ['chaise.errors','chaise.utils']).factory("recordCreate", ['$cookies', '$log', '$window', '$uibModal', 'AlertsService', 'DataUtils', 'UriUtils', 'modalBox',
-     function($cookies, $log, $window, $uibModal, AlertsService, DataUtils, UriUtils, modalBox) {
+    angular.module('chaise.recordcreate', ['chaise.errors','chaise.utils']).factory("recordCreate", ['$cookies', '$log', '$window', '$uibModal', 'AlertsService', 'DataUtils', 'UriUtils', 'modalBox', '$q',
+     function($cookies, $log, $window, $uibModal, AlertsService, DataUtils, UriUtils, modalBox, $q) {
 
         var viewModel = {};
         var GV_recordEditModel = {},
@@ -202,6 +202,12 @@
         /**
          * var addPopup - Create pop-up for user to select values
          *
+         * NOTE This function currently only used in record app for adding association.
+         * TODO needs refactoring, eventhough it is used only in one case
+         * it contains some logic to be used in recordedit too. Also some of the passed arguments
+         * are not being used, and some of them are not even available in case of adding association.
+         *
+         *
          * @param  {object} ref             column reference
          * @param  {int} rowIndex           row index
          * @param  {object} derivedref      derived referene of the column that is being added
@@ -211,21 +217,47 @@
          * @param  {object} rsSession       contains session object from calling function
          * @param  {object} rsQueryParams   object contains queryparams of context from calling function
          */
-        var addPopup = function(ref, rowIndex, derivedref, isModalUpdate, rsReference, rsTuples, rsSession, rsQueryParams) {
-            var column = ref;
-
+        var addPopup = function(domainRef, rowIndex, derivedref, isModalUpdate, rsReference, rsTuples, rsSession, rsQueryParams) {
             var originalTuple, nullArr = [],
                 editOrCopy = true,
                 params = {};
 
+            //TODO needs refactoring
             if (viewModel.editMode) {
                 originalTuple = rsTuples[rowIndex];
             } else {
                 originalTuple = null;
                 editOrCopy = false;
             }
-            var ref_temp = ref.unfilteredReference.contextualize.compact;
-            params.reference = ref_temp.contextualize.compactSelect;
+            
+            /**
+             * Callback to get the list of disabled tuples.
+             * This is only applicable in case of adding related entities.
+             * @param  {ERMrest.Page} page     the page object.
+             * @param  {int} pageSize the page size for read request.
+             * @return {Promise} Promise is resolved with a list of disabled rows (array of tuple objects).
+             */
+            params.getDisabledTuples = function (page, pageSize) {
+                var defer = $q.defer();
+                var disabledRows = [], index;
+                
+                domainRef.setSamePaging(page).read(pageSize).then(function (newPage) {
+                    newPage.tuples.forEach(function (newTuple) {
+                        index = page.tuples.findIndex(function (tuple) {
+                            return tuple.uniqueId == newTuple.uniqueId;
+                        });
+                        if (index > -1) disabledRows.push(page.tuples[index]);
+                    });
+                    
+                    defer.resolve(disabledRows);
+                }).catch(function (err) {
+                    throw err;
+                });
+                
+                return defer.promise;
+            };
+
+            params.reference = domainRef.unfilteredReference.contextualize.compactSelect;
             params.reference.session = rsSession;
             params.context = "compact/select";
             params.selectMode = isModalUpdate ? modalBox.multiSelectMode : modalBox.singleSelectMode;

@@ -57,7 +57,8 @@
                 config: '=',    // {viewable, editable, deletable, selectMode}
                 onRowClickBind: '=?',
                 fromTuple: '=?',
-                selected: '='
+                selected: '=',
+                selectDisabled: "=?"
             },
             link: function (scope, element) {
 
@@ -73,8 +74,9 @@
 
                     var editLink = null;
 
-                    if (scope.fromTuple)
+                    if (scope.fromTuple) {
                         scope.associationRef = scope.tuple.getAssociationRef(scope.fromTuple.data);
+                    }
 
                     if (scope.config.viewable)
                         scope.viewLink = scope.tuple.reference.contextualize.detailed.appLink;
