@@ -17,15 +17,24 @@
             $uibModalInstance.dismiss('cancel');
         }
     }])
-    .controller('ErrorModalController', ['$uibModalInstance', 'params', function ErrorModalController($uibModalInstance, params) {
+    .controller('ErrorModalController', ['$uibModalInstance', 'params', 'messageMap', function ErrorModalController($uibModalInstance, params, messageMap) {
         var vm = this;
         vm.params = params;
         vm.details = false;
-        vm.linkText = "Show Details";
+        vm.linkText = messageMap.showErrDetails;
+
+        if(vm.params.errorCode == 'Multiple Records Found'){
+          vm.clickActionMessage =  messageMap.recordAvailabilityError.multipleRecords;
+        } else if(vm.params.errorCode == 'Record Not Found'){
+          vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
+        } else {
+          vm.clickActionMessage = messageMap.recordAvailabilityError.pageRedirect + vm.params.pageName;
+        }
+
 
         vm.showDetails = function() {
             vm.details = !vm.details;
-            vm.linkText = (vm.details) ? "Hide Details" : "Show Details";
+            vm.linkText = (vm.details) ? messageMap.hideErrDetails : messageMap.showErrDetails;
         };
 
         vm.ok = function () {
@@ -60,10 +69,10 @@
         }
 
     }])
-    
+
     /**
      * Controller used to show the modal popup with the recordset directive for searching through entitiy sets
-     * 
+     *
      * params must include:
      *  - reference {ERMrest.Reference} - the reference backing the set of data shown
      *  - context {String} - the current context that the directive fetches data for
@@ -129,7 +138,7 @@
         };
 
         fetchRecords();
-    
+
         // since this is currently used for single select mode, the isSelected will always be true
         function ok(tuples, isSelected) {
             if (params.selectMode != modalBox.multiSelectMode) $uibModalInstance.close(tuples[0]);
@@ -154,14 +163,14 @@
         };
         $rootScope.session = Session.getSessionValue();
         vm.client =$rootScope.session.client;
-            
+
         var user = $rootScope.session.client;
         vm.user = user.full_name || user.display_name  || user.email || user.id;
         for(var i = 0; i<  $rootScope.session.client.identities.length; i++){
             vm.identities.push($rootScope.session.client.identities[i]);
         }
-        
-        
+
+
         for(var i = 0; i<  $rootScope.session.attributes.length; i++){
             if($rootScope.session.attributes[i].display_name && $rootScope.session.attributes[i].display_name !== user.display_name){
                 $rootScope.session.attributes[i].id= $rootScope.session.attributes[i].id.substring(24);
