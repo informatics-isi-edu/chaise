@@ -30,7 +30,7 @@
     "jasmine-core": "2.4.1",
     "jasmine-spec-reporter": "^2.5.0",
     "jsdoc": "x",
-    "jsdoc-to-markdown": "x",
+    "jsdoc-to-markdown": "^3.0.1",
     "jshint": "x",
     "jsonfile": "x",
     "karma": "^0.13.9",
@@ -52,9 +52,9 @@
     "protractor": "x",
     "q": "^1.4.1",
     "request": "x",
+    "request-q": "x",
     "set-cookie-parser": "x",
-    "webdriver-manager": "x",
-    "request-q": "x"
+    "webdriver-manager": "x"
   },
   "dependencies": {
     "markdown-it-editor": "^1.1.4"

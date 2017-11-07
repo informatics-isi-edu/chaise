@@ -151,28 +151,42 @@
             }
 
             scope.vm.reference.read(scope.vm.pageLimit).then(function (page) {
-                // This method sets the
                 if (!setSearchStates(scope, isBackground, searchTerm)) return;
-
-                scope.vm.page = page;
-                scope.vm.rowValues = DataUtils.getRowValuesFromPage(page);
-                scope.vm.hasLoaded = true;
-
-                $timeout(function() {
-                    if (scope.vm.foregroundSearch) scope.vm.foregroundSearch = false;
-                }, 200);
-
-                if (!isBackground) {
-                    // tell parent controller data modified
-                    scope.$emit('reference-modified');
-                }
                 
-                // tell children that data modified
-                if (broadcast) {
-                    scope.$broadcast('data-modified');
+                var afterRead = function () { 
+                    scope.vm.page = page;
+                    
+                    scope.vm.rowValues = DataUtils.getRowValuesFromPage(page);
+                    scope.vm.hasLoaded = true;
+
+                    $timeout(function() {
+                        if (scope.vm.foregroundSearch) scope.vm.foregroundSearch = false;
+                    }, 200);
+
+                    if (!isBackground) {
+                        // tell parent controller data modified
+                        scope.$emit('reference-modified');
+                    }
+                    
+                    // tell children that data modified
+                    if (broadcast) {
+                        scope.$broadcast('data-modified');
+                    }
+                };
+                
+                if (scope.getDisabledTuples) {
+                    scope.getDisabledTuples(page, scope.vm.pageLimit).then(function (rows) {
+                        if (!setSearchStates(scope, isBackground, searchTerm)) return;
+                        scope.vm.disabledRows = rows;
+                        afterRead();
+                    }).catch(function (err) {
+                        throw err;
+                    });
+                } else {
+                    afterRead();
                 }
 
-            }, function error(exception) {
+            }).catch(function error(exception) {
                 scope.vm.hasLoaded = true;
                 setSearchStates(scope, isBackground);
                 if (!isBackground && scope.vm.foregroundSearch) scope.vm.foregroundSearch = false;
@@ -460,6 +474,16 @@
                     scope.vm.reference = scope.vm.reference.sort([{"column":scope.vm.sortby, "descending":(scope.vm.sortOrder === "desc")}]);
                     recordTableUtils.read(scope);
                 };
+                
+                scope.isDisabled = function (key) {
+                    if (!scope.vm.disabledRows || scope.vm.disabledRows.length == 0) {
+                        return false;
+                    }
+
+                    return scope.vm.disabledRows.findIndex(function (obj) {
+                        return obj.uniqueId == key;
+                    }) > -1;
+                };
 
                 // verifies whether or not the current key value is in the set of selected rows or not
                 scope.isSelected = function (key) {
@@ -579,7 +603,8 @@
             scope: {
                 vm: '=',
                 onRowClick: '&?',       // set row click function
-                allowCreate: '=?'       // if undefined, assume false
+                allowCreate: '=?',       // if undefined, assume false
+                getDisabledTuples: "=?" // callback to get the disabled tuples
             },
             link: function (scope, elem, attr) {
                 

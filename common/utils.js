@@ -44,9 +44,16 @@
             title: "You need to be logged in to continue.",
             message: "To open the login window press"
         },
+        "recordAvailabilityError" : {
+          "multipleRecords": "Click <b>OK</b> to show all the matched records.",
+          "noRecordsFound": "Click <b>OK</b> to show the list of all records.",
+          "pageRedirect": "Click <b>OK</b> to go to the "
+        },
         "tableMissing": "No table specified in the form of 'schema-name:table-name' and no Default is set.",
         "unauthorizedMessage" : "You are not authorized to perform this action. Please report this problem to your system administrators.",
-        "unauthorizedErrorCode" : "Unauthorized Access"
+        "unauthorizedErrorCode" : "Unauthorized Access",
+        "showErrDetails" : "Show Error Details",
+        "hideErrDetails" : "Hide Error Details"
     })
     .constant("modalBox", {
         noSelect: "no-select",

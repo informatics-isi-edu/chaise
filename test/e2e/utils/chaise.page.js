@@ -751,6 +751,14 @@ var recordPage = function() {
     this.getErrorModalOkButton = function(){
         return browser.executeScript("return $('button')[1]");
     };
+    
+    this.getModalDisabledRows = function () {
+        return browser.executeScript("return $('.modal-body tr.disabled-row')");
+    };
+    
+    this.getSuccessAlert = function () {
+        return element(by.css(".alert-success"));
+    };
 };
 
 var recordsetPage = function() {
@@ -789,6 +797,10 @@ var recordsetPage = function() {
 
     this.getRows = function() {
         return element.all(by.css('.table-row'));
+    };
+    
+    this.getModalRows = function () {
+        return element.all(by.css('.modal-body .table-row'));
     };
 
     this.getNoResultsRow = function() {
