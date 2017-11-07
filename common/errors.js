@@ -17,7 +17,7 @@
         forbidden: "Forbidden",
         notFound: "No data",
         multipleRecords: "Multiple Records Found",
-        noDataMessage: "No matching record found for the given Id.",
+        noDataMessage: "No matching record found for the given ID.",
         multipleDataErrorCode : "Multiple Records Found",
         multipleDataMessage : "There are more than 1 record found for the filters provided.",
         systemAdminMessage : "An unexpected error has occurred. Please report this problem to your system administrators."

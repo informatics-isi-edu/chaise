@@ -17,18 +17,18 @@
             $uibModalInstance.dismiss('cancel');
         }
     }])
-    .controller('ErrorModalController', ['$uibModalInstance', 'params', function ErrorModalController($uibModalInstance, params) {
+    .controller('ErrorModalController', ['$uibModalInstance', 'params', 'messageMap', function ErrorModalController($uibModalInstance, params, messageMap) {
         var vm = this;
         vm.params = params;
         vm.details = false;
-        vm.linkText = "Show Error Details";
+        vm.linkText = messageMap.showErrDetails;
 
         if(vm.params.errorCode == 'Multiple Records Found'){
-          vm.clickActionMessage = "Click <b>OK</b> to show all the matched records."
+          vm.clickActionMessage =  messageMap.recordAvailabilityError.multipleRecords;  
         } else if(vm.params.errorCode == 'Record Not Found'){
-          vm.clickActionMessage = "Click <b>OK</b> to show the list of all records."
+          vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
         } else {
-          vm.clickActionMessage = "Click <b>OK</b> to go to the "+vm.params.pageName;
+          vm.clickActionMessage = messageMap.recordAvailabilityError.pageRedirect + vm.params.pageName;
         }
 
 
