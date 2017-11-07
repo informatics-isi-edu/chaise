@@ -24,7 +24,7 @@
         vm.linkText = messageMap.showErrDetails;
 
         if(vm.params.errorCode == 'Multiple Records Found'){
-          vm.clickActionMessage =  messageMap.recordAvailabilityError.multipleRecords;  
+          vm.clickActionMessage =  messageMap.recordAvailabilityError.multipleRecords;
         } else if(vm.params.errorCode == 'Record Not Found'){
           vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
         } else {
@@ -34,7 +34,7 @@
 
         vm.showDetails = function() {
             vm.details = !vm.details;
-            vm.linkText = (vm.details) ? "Hide Error Details" : "Show Error Details";
+            vm.linkText = (vm.details) ? messageMap.hideErrDetails : messageMap.showErrDetails;
         };
 
         vm.ok = function () {
