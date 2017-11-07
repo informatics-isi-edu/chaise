@@ -498,11 +498,19 @@ describe("Viewing Recordset with Faceting,", function() {
                 // close the facets in opposite order so they dont move when trying to click others
                 //close first facet
                 chaisePage.recordsetPage.getFacetById(11).click().then(function() {
-                    
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getClosedFacets().count().then(function(ct) {
+                            return ct == testParams.totalNumFacets-2;
+                        });
+                    }, browser.params.defaultTimeout)
                     //close second facet
                     return chaisePage.recordsetPage.getFacetById(1).click();
                 }).then(function () {
-                    
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getClosedFacets().count().then(function(ct) {
+                            return ct == testParams.totalNumFacets-1;
+                        });
+                    }, browser.params.defaultTimeout)
                     //close third facet
                     return chaisePage.recordsetPage.getFacetById(0).click();
                 });
@@ -510,84 +518,106 @@ describe("Viewing Recordset with Faceting,", function() {
         });
         
         describe("selecting individual filters for each facet type", function () {
-            
-            beforeEach(function () {
-                browser.wait(function () {
-                    return chaisePage.recordsetPage.getClosedFacets().count().then(function(ct) {
-                        return ct == testParams.totalNumFacets;
-                    });
-                }, browser.params.defaultTimeout)
+
+            var clearAll;
+
+            beforeAll(function () {
+                clearAll = chaisePage.recordsetPage.getClearAllFilters();
             });
-            
+
             for (var j=0; j<testParams.totalNumFacets; j++) {
                 // anon function to capture looping variable
                 (function(facetParams, idx) {
-                    it("for " + facetParams.name + ", it should open the facet, select a value to filter on, and update the search criteria.", function () {
-                        var clearAll = chaisePage.recordsetPage.getClearAllFilters();
-                        
-                        if (facetParams.type == "choice") {
-                            // open facet
-                            chaisePage.recordsetPage.getFacetById(idx).click().then(function() {
-                                // wait for facet to open
-                                browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
-                                
-                                // wait for facet checkboxes to load
+                    if (facetParams.type == "choice") {
+                        // tests for choice facets
+                        describe("for choice facet: " + facetParams.name + ",", function () {
+                            it("should open the facet, select a value to filter on, and update the search criteria.", function () {
                                 browser.wait(function () {
-                                    return chaisePage.recordsetPage.getFacetOptions(idx).count().then(function(ct) {
-                                        return ct == facetParams.totalNumOptions;
+                                    return chaisePage.recordsetPage.getClosedFacets().count().then(function(ct) {
+                                        return ct == testParams.totalNumFacets;
                                     });
-                                }, browser.params.defaultTimeout);
-                                
-                                // wait for list to be fully visible
-                                browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(idx)), browser.params.defaultTimeout);
-                                
-                                // special case for 'jsonb'
-                                return (facetParams.name == "jsonb_col" ? chaisePage.recordsetPage.getJsonbFacetOptionsText(idx) : chaisePage.recordsetPage.getFacetOptionsText(idx));
-                            }).then(function (text) {
-                                expect(text).toEqual(facetParams.options, "facet options are incorrect for '" + facetParams.name + "' facet");
-                                
-                                return chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(idx, facetParams.option));
-                            }).then(function () {
-                                // wait for request to return
-                                browser.wait(EC.visibilityOf(clearAll), browser.params.defaultTimeout);
-                                
-                                return chaisePage.recordsetPage.getFilters().count();
-                            }).then(function (ct) {
-                                expect(ct).toBe(1, "number of filters is incorrect for '" + facetParams.name + "' facet");
-                                
-                                //should only be one
-                                return chaisePage.recordsetPage.getFilters();
-                            }).then(function (filters) {
-                                return filters[0].getText();
-                            }).then(function(text) {
-                                expect(text).toBe(facetParams.filter, "filter name is inccorect for '" + facetParams.name + "' facet");
-                                
-                                // wait for table rows to load
-                                browser.wait(function () {
-                                    return chaisePage.recordsetPage.getRows().count().then(function(ct) {
-                                        return ct == facetParams.numRows;
-                                    });
-                                }, browser.params.defaultTimeout);
-                                
-                                return chaisePage.recordsetPage.getRows().count();
-                            }).then(function(ct) {
-                                expect(ct).toBe(facetParams.numRows, "number of rows is incorrect for '" + facetParams.name + "' facet");
-                                
-                                return clearAll.click();
-                            }).then(function () {
-                                browser.wait(EC.not(EC.visibilityOf(clearAll)), browser.params.defaultTimeout);
-                                // close the facet
-                                return chaisePage.recordsetPage.getFacetById(idx).click();
-                            }).catch(function (exc) {
-                                console.dir(exc);
+                                }, browser.params.defaultTimeout).then(function () {
+                                    // open facet
+                                    return chaisePage.recordsetPage.getFacetById(idx).click();
+                                }).then(function() {
+                                    // wait for facet to open
+                                    browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
+                                    
+                                    // wait for facet checkboxes to load
+                                    browser.wait(function () {
+                                        return chaisePage.recordsetPage.getFacetOptions(idx).count().then(function(ct) {
+                                            return ct == facetParams.totalNumOptions;
+                                        });
+                                    }, browser.params.defaultTimeout);
+                                    
+                                    // wait for list to be fully visible
+                                    browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(idx)), browser.params.defaultTimeout);
+                                    
+                                    // special case for 'jsonb'
+                                    return (facetParams.name == "jsonb_col" ? chaisePage.recordsetPage.getJsonbFacetOptionsText(idx) : chaisePage.recordsetPage.getFacetOptionsText(idx));
+                                }).then(function (text) {
+                                    expect(text).toEqual(facetParams.options, "facet options are incorrect for '" + facetParams.name + "' facet");
+                                    
+                                    return chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(idx, facetParams.option));
+                                }).then(function () {
+                                    // wait for request to return
+                                    browser.wait(EC.visibilityOf(clearAll), browser.params.defaultTimeout);
+                                    
+                                    return chaisePage.recordsetPage.getFilters().count();
+                                }).then(function (ct) {
+                                    expect(ct).toBe(1, "number of filters is incorrect for '" + facetParams.name + "' facet");
+                                    
+                                    //should only be one
+                                    return chaisePage.recordsetPage.getFilters();
+                                }).then(function (filters) {
+                                    return filters[0].getText();
+                                }).then(function(text) {
+                                    expect(text).toBe(facetParams.filter, "filter name is inccorect for '" + facetParams.name + "' facet");
+                                    
+                                    // wait for table rows to load
+                                    browser.wait(function () {
+                                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                                            return ct == facetParams.numRows;
+                                        });
+                                    }, browser.params.defaultTimeout);
+                                    
+                                    return chaisePage.recordsetPage.getRows().count();
+                                }).then(function(ct) {
+                                    expect(ct).toBe(facetParams.numRows, "number of rows is incorrect for '" + facetParams.name + "' facet");
+                                    
+                                    return clearAll.click();
+                                }).then(function () {
+                                    browser.wait(EC.not(EC.visibilityOf(clearAll)), browser.params.defaultTimeout);
+                                    // close the facet
+                                    return chaisePage.recordsetPage.getFacetById(idx).click();
+                                }).catch(function (exc) {
+                                    console.dir(exc);
+                                });
                             });
-                        } else {
-                            //range facet test
-                            if (facetParams.type == "numeric" || facetParams.type == "date" ) {
-                                var minInput, maxInput, minClear, maxClear;
-                                
+                        });
+
+                    } else if (facetParams.type == "numeric" || facetParams.type == "date" ) {
+                        describe("for range facet: " + facetParams.name + ",", function () {
+                            var minInput, maxInput, minClear, maxClear;
+
+                            beforeAll(function () {
+                                // inputs
+                                minInput = chaisePage.recordsetPage.getRangeMinInput(idx, testParams.minInputClass);
+                                maxInput = chaisePage.recordsetPage.getRangeMaxInput(idx, testParams.maxInputClass);
+                                // clear buttons
+                                minClear = chaisePage.recordsetPage.getInputClear(idx, testParams.minInputClearClass);
+                                maxClear = chaisePage.recordsetPage.getInputClear(idx, testParams.maxInputClearClass);
+                            });
+
+                            it("should open the facet, test validators, filter on a range, and update the search criteria.", function () {
                                 // open facet
-                                chaisePage.recordsetPage.getFacetById(idx).click().then(function(facet) {
+                                browser.wait(function () {
+                                    return chaisePage.recordsetPage.getClosedFacets().count().then(function(ct) {
+                                        return ct == testParams.totalNumFacets;
+                                    });
+                                }, browser.params.defaultTimeout).then(function () {
+                                    return chaisePage.recordsetPage.getFacetById(idx).click();
+                                }).then(function(facet) {
                                     // wait for facet to open
                                     browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
                                     browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getRangeSubmit(idx)), browser.params.defaultTimeout);
@@ -595,10 +625,6 @@ describe("Viewing Recordset with Faceting,", function() {
                                     return chaisePage.recordsetPage.getFacetOptions(idx).count();
                                 }).then(function (ct) {
                                     expect(ct).toBe(facetParams.listElems, "There are more list elements for '" + facetParams.name + "' facet than expected");
-                                    
-                                    minInput = chaisePage.recordsetPage.getRangeMinInput(idx, testParams.minInputClass);
-                                    maxInput = chaisePage.recordsetPage.getRangeMaxInput(idx, testParams.maxInputClass);
-                                    
                                     // test validators
                                     minInput.sendKeys(facetParams.invalid);
                                     
@@ -608,8 +634,6 @@ describe("Viewing Recordset with Faceting,", function() {
                                 }).then(function (text) {
                                     expect(text).toBe(facetParams.error, "Validation error for '" + facetParams.name + "' did not show up or the message is incorrect");
                                     
-                                    minClear = chaisePage.recordsetPage.getInputClear(idx, testParams.minInputClearClass);
-                                    maxClear = chaisePage.recordsetPage.getInputClear(idx, testParams.maxInputClearClass);
                                     return minClear.click();
                                 }).then(function () {
                                     
@@ -655,15 +679,20 @@ describe("Viewing Recordset with Faceting,", function() {
                                     return minClear.click();
                                 }).then(function () {
                                     return maxClear.click();
-                                }).then(function () {
-                                    // test just min being set
-                                    minInput.sendKeys(facetParams.justMin.min);
-                                    
-                                    // let validation message disappear
-                                    browser.sleep(20);
-                                    
-                                    return chaisePage.recordsetPage.getRangeSubmit(idx).click();
-                                }).then(function () {
+                                });
+                            });
+                            
+                            it("should filter on just a min value and update the search criteria.", function () {
+                                var minInput = chaisePage.recordsetPage.getRangeMinInput(idx, testParams.minInputClass),
+                                minClear = chaisePage.recordsetPage.getInputClear(idx, testParams.minInputClearClass);
+                                
+                                // test just min being set
+                                minInput.sendKeys(facetParams.justMin.min);
+                                
+                                // let validation message disappear
+                                browser.sleep(20);
+                                
+                                chaisePage.recordsetPage.getRangeSubmit(idx).click().then(function () {
                                     // wait for request to return
                                     browser.wait(EC.visibilityOf(clearAll), browser.params.defaultTimeout);
                                     
@@ -690,15 +719,20 @@ describe("Viewing Recordset with Faceting,", function() {
                                     browser.wait(EC.not(EC.visibilityOf(clearAll)), browser.params.defaultTimeout);
                                     
                                     return minClear.click();
-                                }).then(function () {
-                                    // test just max being set
-                                    maxInput.sendKeys(facetParams.justMax.max);
-                                    
-                                    // let validation message disappear
-                                    browser.sleep(20);
-                                    
-                                    return chaisePage.recordsetPage.getRangeSubmit(idx).click();
-                                }).then(function () {
+                                });
+                            });
+                            
+                            it("should filter on just a max value and update the search criteria.", function () {
+                                var maxInput = chaisePage.recordsetPage.getRangeMaxInput(idx, testParams.maxInputClass),
+                                maxClear = chaisePage.recordsetPage.getInputClear(idx, testParams.maxInputClearClass);
+                                
+                                // test just max being set
+                                maxInput.sendKeys(facetParams.justMax.max);
+                                
+                                // let validation message disappear
+                                browser.sleep(20);
+                                
+                                chaisePage.recordsetPage.getRangeSubmit(idx).click().then(function () {
                                     // wait for request to return
                                     browser.wait(EC.visibilityOf(clearAll), browser.params.defaultTimeout);
                                     
@@ -728,12 +762,36 @@ describe("Viewing Recordset with Faceting,", function() {
                                 }).catch(function (exc) {
                                     console.dir(exc);
                                 });
-                            } else if (facetParams.type == "timestamp") {
-                                var minDateInput, minTimeInput, maxDateInput, maxTimeInput,
+                            });
+                        });
+
+                    } else if (facetParams.type == "timestamp") {
+                        describe("for range facet: " + facetParams.name + ",", function () {
+                            var minDateInput, minTimeInput, maxDateInput, maxTimeInput,
                                 minDateClear, minTimeClear, maxDateClear, maxTimeClear;
-                                
-                                // open facet
-                                chaisePage.recordsetPage.getFacetById(idx).click().then(function(facet) {
+
+                            beforeAll(function () {
+                                // inputs
+                                minDateInput = chaisePage.recordsetPage.getRangeMinInput(idx, testParams.tsMinDateInputClass);
+                                minTimeInput = chaisePage.recordsetPage.getRangeMinInput(idx, testParams.tsMinTimeInputClass);
+                                maxDateInput = chaisePage.recordsetPage.getRangeMaxInput(idx, testParams.tsMaxDateInputClass);
+                                maxTimeInput = chaisePage.recordsetPage.getRangeMaxInput(idx, testParams.tsMaxTimeInputClass);
+                                // clear buttons
+                                minDateClear = chaisePage.recordsetPage.getInputClear(idx, testParams.tsMinDateInputClearClass);
+                                minTimeClear = chaisePage.recordsetPage.getInputClear(idx, testParams.tsMinTimeInputClearClass);
+                                maxDateClear = chaisePage.recordsetPage.getInputClear(idx, testParams.tsMaxDateInputClearClass);
+                                maxTimeClear = chaisePage.recordsetPage.getInputClear(idx, testParams.tsMaxTimeInputClearClass);
+                            });
+
+                            it("should open the facet, test validators, filter on a range, and update the search criteria.", function () {
+                                browser.wait(function () {
+                                    return chaisePage.recordsetPage.getClosedFacets().count().then(function(ct) {
+                                        return ct == testParams.totalNumFacets;
+                                    });
+                                }, browser.params.defaultTimeout).then(function () {
+                                    // open facet
+                                    return chaisePage.recordsetPage.getFacetById(idx).click();
+                                }).then(function(facet) {
                                     // wait for facet to open
                                     browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
                                     browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getRangeSubmit(idx)), browser.params.defaultTimeout);
@@ -741,11 +799,6 @@ describe("Viewing Recordset with Faceting,", function() {
                                     return chaisePage.recordsetPage.getFacetOptions(idx).count();
                                 }).then(function (ct) {
                                     expect(ct).toBe(facetParams.listElems, "There are more list elements for '" + facetParams.name + "' facet than expected");
-                                    
-                                    minDateInput = chaisePage.recordsetPage.getRangeMinInput(idx, testParams.tsMinDateInputClass);
-                                    minTimeInput = chaisePage.recordsetPage.getRangeMinInput(idx, testParams.tsMinTimeInputClass);
-                                    maxDateInput = chaisePage.recordsetPage.getRangeMaxInput(idx, testParams.tsMaxDateInputClass);
-                                    maxTimeInput = chaisePage.recordsetPage.getRangeMaxInput(idx, testParams.tsMaxTimeInputClass);
                                     
                                     // test validators
                                     minDateInput.sendKeys(facetParams.invalid.date);
@@ -761,10 +814,6 @@ describe("Viewing Recordset with Faceting,", function() {
                                 }).then(function (text) {
                                     expect(text).toBe(facetParams.invalid.dateError, "The date validation message did not show up or is incorrect");
                                     
-                                    minDateClear = chaisePage.recordsetPage.getInputClear(idx, testParams.tsMinDateInputClearClass);
-                                    minTimeClear = chaisePage.recordsetPage.getInputClear(idx, testParams.tsMinTimeInputClearClass);
-                                    maxDateClear = chaisePage.recordsetPage.getInputClear(idx, testParams.tsMaxDateInputClearClass);
-                                    maxTimeClear = chaisePage.recordsetPage.getInputClear(idx, testParams.tsMaxTimeInputClearClass);
                                     return minDateClear.click();
                                 }).then(function () {
                                     minTimeInput.sendKeys(facetParams.invalid.time);
@@ -833,17 +882,19 @@ describe("Viewing Recordset with Faceting,", function() {
                                     return maxDateClear.click();
                                 }).then(function () {
                                     return maxTimeClear.click();
-                                }).then(function () {
-                                    // test just min being set
-                                    minDateInput.sendKeys(facetParams.justMin.date);
-                                    minTimeInput.sendKeys(facetParams.justMin.time);
-                                    
-                                    //let validation dissappear
-                                    browser.sleep(20);
-                                    
-                                    // get submit button
-                                    return chaisePage.recordsetPage.getRangeSubmit(idx).click();
-                                }).then(function () {
+                                })
+                            });
+                            
+                            it("should filter on just a min value and update the search criteria.", function () {
+                                // test just min being set
+                                minDateInput.sendKeys(facetParams.justMin.date);
+                                minTimeInput.sendKeys(facetParams.justMin.time);
+                                
+                                //let validation dissappear
+                                browser.sleep(20);
+                                
+                                // get submit button
+                                chaisePage.recordsetPage.getRangeSubmit(idx).click().then(function () {
                                     // wait for request to return
                                     browser.wait(EC.visibilityOf(clearAll), browser.params.defaultTimeout);
                                     
@@ -873,17 +924,19 @@ describe("Viewing Recordset with Faceting,", function() {
                                     return minDateClear.click();
                                 }).then(function () {
                                     return minTimeClear.click();
-                                }).then(function () {
-                                    // test just max being set
-                                    maxDateInput.sendKeys(facetParams.justMax.date);
-                                    maxTimeInput.sendKeys(facetParams.justMax.time);
-                                    
-                                    //let validation dissappear
-                                    browser.sleep(20);
-                                    
-                                    // get submit button
-                                    return chaisePage.recordsetPage.getRangeSubmit(idx).click();
-                                }).then(function () {
+                                })
+                            });
+                            
+                            it("should filter on just a max value and update the search criteria.", function () {
+                                // test just max being set
+                                maxDateInput.sendKeys(facetParams.justMax.date);
+                                maxTimeInput.sendKeys(facetParams.justMax.time);
+                                
+                                //let validation dissappear
+                                browser.sleep(20);
+                                
+                                // get submit button
+                                chaisePage.recordsetPage.getRangeSubmit(idx).click().then(function () {
                                     // wait for request to return
                                     browser.wait(EC.visibilityOf(clearAll), browser.params.defaultTimeout);
                                     
@@ -914,9 +967,9 @@ describe("Viewing Recordset with Faceting,", function() {
                                 }).catch(function (exc) {
                                     console.dir(exc);
                                 });
-                            }
-                        }
-                    });
+                            });
+                        });
+                    }
                 })(testParams.facets[j], j);
             }
         });
