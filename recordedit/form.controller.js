@@ -304,10 +304,12 @@
                 uri = "../search/#" + location.catalog + '/' + location.schemaName + ':' + location.tableName;
             }
 
+            vm.submissionButtonDisabled = false;
             $window.location.href = uri;
         }
 
         function deleteRecord() {
+            vm.submissionButtonDisabled = true;
             if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
                 $uibModal.open({
                     templateUrl: "../common/templates/delete-link/confirm_delete.modal.html",
@@ -318,6 +320,7 @@
                     // user accepted prompt to delete
                     return $rootScope.reference.delete();
                 }).then(onDelete, function deleteFailure(response) {
+                    vm.submissionButtonDisabled = false;
                     if (typeof response !== "string") {
                         throw response;
                     }
@@ -326,6 +329,7 @@
                 });
             } else {
                 $rootScope.reference.delete().then(onDelete, function deleteFailure(response) {
+                    vm.submissionButtonDisabled = false;
                     throw response;
                 }).catch(function (exception) {
                     AlertsService.addAlert(exception.message, 'error');
