@@ -9,7 +9,7 @@
         };
     }])
 
-    .directive('ellipses', ['$sce', '$timeout', 'AlertsService', 'ErrorService', '$uibModal', '$log', 'MathUtils', 'messageMap', 'UriUtils', '$window', 'UiUtils', 'modalBox', function($sce, $timeout, AlertsService, ErrorService, $uibModal, $log, MathUtils, messageMap, UriUtils, $window, UiUtils, modalBox) {
+    .directive('ellipses', ['AlertsService', 'ErrorService', 'MathUtils', 'messageMap', 'modalBox', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$uibModal', '$window', function(AlertsService, ErrorService, MathUtils, messageMap, modalBox, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $uibModal, $window) {
 
         function deleteReference(scope, reference) {
             if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
@@ -19,13 +19,16 @@
                     controllerAs: "ctrl",
                     size: "sm"
                 }).result.then(function success() {
+                    scope.$root.showSpinner = true;
                     // user accepted prompt to delete
                     return reference.delete();
                 }).then(function deleteSuccess() {
+                    scope.$root.showSpinner = false;
                     // tell parent controller data updated
                     scope.$emit('record-deleted');
 
                 }, function deleteFailure(response) {
+                    scope.$root.showSpinner = false;
                     if (typeof response !== "string") {
                         throw response;
                     }
@@ -33,13 +36,14 @@
                     throw error;
                 });
             } else {
-
+                scope.$root.showSpinner = true;
                 reference.delete().then(function deleteSuccess() {
-
+                    scope.$root.showSpinner = false;
                     // tell parent controller data updated
                     scope.$emit('record-deleted');
 
                 }, function deleteFailure(response) {
+                    scope.$root.showSpinner = false;
                     throw response;
                 }).catch(function (error) {
                     throw error;

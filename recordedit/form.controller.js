@@ -309,7 +309,6 @@
         }
 
         function deleteRecord() {
-            vm.submissionButtonDisabled = true;
             if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
                 $uibModal.open({
                     templateUrl: "../common/templates/delete-link/confirm_delete.modal.html",
@@ -317,6 +316,7 @@
                     controllerAs: "ctrl",
                     size: "sm"
                 }).result.then(function success() {
+                    vm.submissionButtonDisabled = true;
                     // user accepted prompt to delete
                     return $rootScope.reference.delete();
                 }).then(onDelete, function deleteFailure(response) {
@@ -328,6 +328,7 @@
                     AlertsService.addAlert(exception.message, 'error');
                 });
             } else {
+                vm.submissionButtonDisabled = true;
                 $rootScope.reference.delete().then(onDelete, function deleteFailure(response) {
                     vm.submissionButtonDisabled = false;
                     throw response;
