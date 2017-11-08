@@ -30,6 +30,7 @@ var testParams = {
     associationTable_key_filter:"2004",
     booking_count: 6,
     association_count: 1,
+    associationDisabledRows: ["1"],
     page_size: 2,
     price: "247.00"
 };
@@ -218,67 +219,157 @@ describe('View existing record,', function() {
                     });
                 });
             });
+            
+            describe("For a related entity with an association table", function() {
 
-            describe("for a related entity without an association table", function() {
-                it("should have a \"Add\" link for a related table that opens up a pop-up for adding new entries.", function() {
-                    var EC = protractor.ExpectedConditions, rows,
-                        modalTitle = chaisePage.recordEditPage.getModalTitle(),
-                        relatedTableName = testParams.related_associate_table,
-                        addRelatedRecordLink = chaisePage.recordPage.getAddRecordLink(relatedTableName);
-
+                it("on click of Add button should let you add a new relationship", function(){
+                    var associationTableName = testParams.association_table_name;
+                    var addRelatedRecordLink = chaisePage.recordPage.getAddRecordLink(associationTableName);
+                    var EC = protractor.ExpectedConditions, newTabUrl, foreignKeyInputs;
                     browser.wait(EC.elementToBeClickable(addRelatedRecordLink), browser.params.defaultTimeout);
 
-                    expect(addRelatedRecordLink.isDisplayed()).toBeTruthy();
-                    expect(addRelatedRecordLink.getText()).toBe("Add");
-
-                    addRelatedRecordLink.click().then(function() {
+                    expect(addRelatedRecordLink.isDisplayed()).toBeTruthy("add link not available.");
+                    expect(addRelatedRecordLink.getText()).toBe("Add", "add link text missmatch.");
+                    
+                    addRelatedRecordLink.click().then(function(){
                         chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
                         return chaisePage.recordEditPage.getModalTitle().getText();
-                    }).then(function(text) {
-                        var title = "Choose file";
-                        expect(text).toBe(title);
+                    }).then(function (title) {
+                        expect(title).toBe("Choose related_table", "titlte missmatch.");
+                        
                         browser.wait(function () {
-                            return chaisePage.recordsetPage.getRows().count().then(function (ct) {
-                                return (ct > 0);
+                               return chaisePage.recordsetPage.getRows().count().then(function (ct) {
+                                   return (ct > 0);
+                               });
+                           });
+                        return chaisePage.recordsetPage.getModalRows().count();
+                    }).then(function(ct){
+                        expect(ct).toBe(4, "association count missmatch.");
+                        return chaisePage.recordPage.getModalDisabledRows();
+                    }).then(function (disabledRows) {
+                        expect(disabledRows.length).toBe(testParams.associationDisabledRows.length, "disabled length missmatch.");
+                        
+                        // go through the list and check their first column (which is the id)
+                        disabledRows.forEach(function (r, index) {
+                            r.findElement(by.css("td:not(.actions-layout)")).then(function (el) {
+                                expect(el.getText()).toMatch(testParams.associationDisabledRows[index], "missmatch disabled row index=" + index);
                             });
                         });
-                        rows = chaisePage.recordsetPage.getRows();
-                        return rows.count();
-                    }).then(function(ct) {
-                        expect(ct).toBeGreaterThan(0);
-                        return browser.executeScript("return $('[type=checkbox]').get(2);");
-                    }).then(function(selectButtons) {
+                        
+                        return browser.executeScript("return $('.modal-body tr input[type=checkbox]').get(1);");
+                    }).then(function (selectButtons){
                         selectButtons.click();
                         return browser.executeScript("return $('.multi-select-submit-btn').click();");
-                    }).then(function() {
-                        browser.sleep(2000);
-                        return browser.executeScript("return $('.alert-success')[0].innerText;");
-                    }).then(function(successMsg){
-                        expect(successMsg).toBe("×Success Your data has been submitted. Showing you the result set...");
+                    }).then(function () {
+                        return browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
+                    }).then(function (){
+                        browser.driver.navigate().refresh();
+                        chaisePage.waitForElement(element(by.id('rt-heading-association_table')));
+                        browser.wait(function() {
+                            return chaisePage.recordPage.getRelatedTableRows(associationTableName).count().then(function(ct) {
+                                return ct == testParams.association_count + 1;
+                            });
+                        }, browser.params.defaultTimeout);
+                         return chaisePage.recordPage.getRelatedTableRows(associationTableName).count();
+                    }).then(function (count){
+                        expect(count).toBe(testParams.association_count + 1)
                     }).catch(function(error) {
                         console.log(error);
                         expect('There was an error in this promise chain').toBe('Please see error message.');
                     });
                 });
 
-                it("should not have a new record because of page size annotation.", function() {
-                    // browser.close();
-                    // browser.switchTo().window(allWindows[0]);
+                it("on click of Edit button should let you edit an existing relationship", function(){
+                    var associationTableName = testParams.association_table_name;
+                    var associationTableKey = testParams.associationTable_key_filter;
 
-                    var EC = protractor.ExpectedConditions,
-                        relatedTableName = testParams.related_associate_table,
-                        relatedTableLink = chaisePage.recordPage.getMoreResultsLink(relatedTableName);
+                    var EC = protractor.ExpectedConditions;
+                    var e = element(by.id('rt-' + associationTableName));
+                    browser.wait(EC.presenceOf(e), browser.params.defaultTimeout);
 
-                    browser.wait(EC.visibilityOf(relatedTableLink), browser.params.defaultTimeout);
+                    chaisePage.recordPage.getRelatedTableRows(associationTableName).then(function(rows) {
+                        return rows[0].all(by.tagName("td"));
+                    }).then(function(cell) {
+                        return cell[0].all(by.css(".edit-action-button"));
+                    }).then(function(editButtons) {
+                        return chaisePage.clickButton(editButtons[0]);
+                    }).then(function() {
+                        return browser.getAllWindowHandles();
+                    }).then(function(handles) {
+                        allWindows = handles;
+                        return browser.switchTo().window(allWindows[1]);
+                    }).then(function() {
+                        var result = '/recordedit/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + associationTableName + "/id_base=" + associationTableKey;
+                        expect(browser.driver.getCurrentUrl()).toContain(result);
+                        return chaisePage.waitForElement(element(by.id('submit-record-button')));
+                    }).then(function(){
+                        return chaisePage.recordEditPage.getForeignKeyInputs();
+                    }).then(function(inputs) {
+                        foreignKeyInputs = inputs;
+                        return chaisePage.recordEditPage.getModalPopupBtnsUsingScript();
+                    }).then(function(popupBtns){
+                        return chaisePage.clickButton(popupBtns[0]);
+                    }).then (function () {
+                        browser.wait(function () {
+                              return chaisePage.recordsetPage.getRows().count().then(function (ct) {
+                                  return (ct > 0);
+                              });
+                          });
+                       rows = chaisePage.recordsetPage.getRows();
+                   }).then(function(ct){
+                       return rows.get(3).all(by.css(".select-action-button"));
+                   }).then(function(selectButtons){
+                       return selectButtons[0].click();
+                   }).then(function() {
+                       return chaisePage.recordEditPage.submitForm();
+                   }).then(function(){
 
-                    chaisePage.recordPage.getRelatedTableRows(relatedTableName).count().then(function(count) {
-                        expect(count).toBe(testParams.page_size);
+                       return browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
+                   }).then(function() {
+                       browser.close();
+                       return browser.switchTo().window(allWindows[0]);
+                   }).then(function (){
+                       browser.driver.navigate().refresh();
+                       chaisePage.waitForElement(element(by.id('rt-heading-association_table')));
+                       return chaisePage.recordPage.getRelatedTableRows(associationTableName);
+                   }).then(function(rows){
+                       return rows[1].all(by.tagName("td"));
+                   }).then(function (cells){
+                       return cells[1].all(by.css("a"));;
+                   }).then(function(cell){
+                      return cell[0].getAttribute('innerHTML');
+                  }).then(function(id){
+                      expect(id).toBe('4');
+                  }).catch(function(error) {
+                      console.log(error);
+                      expect('There was an error in this promise chain').toBe('Please see error message.');
+                  });
+                });
+
+                it("on click of View button should redirect to record page of related entity", function(){
+                    var relatedTableName = testParams.association_table_name; // association table
+                    var linkedToTableName = testParams.leaf_table; // linked to table
+                    var linkedToTableFilter = testParams.leaf_table_filter;
+
+                    chaisePage.recordPage.getRelatedTableRows(relatedTableName).then(function(rows) {
+                        return rows[0].all(by.tagName("td"));
+                    }).then(function(cell){
+                        return cell[0].all(by.css(".view-action-button"));
+                    }).then(function(actionButtons) {
+                        return actionButtons[0].click();
+                    }).then(function() {
+                        var result = '/record/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + linkedToTableName + "/id=" + linkedToTableFilter;
+                        chaisePage.waitForUrl(result, browser.params.defaultTimeout).finally(function() {
+                            expect(browser.driver.getCurrentUrl()).toContain(result);
+                            browser.navigate().back();
+                        });
                     });
                 });
 
-                it("should have a View More link for a related table that redirects to recordset.", function() {
-                    var relatedTableNameOnRecord = testParams.related_associate_table,
-                        relatedTableNameOnRecordset = testParams.related_linked_table,
+                it("on click of View more button should redirect to recordset page of association table", function(){
+                    chaisePage.waitForElement(element(by.id('rt-heading-association_table')));
+                    var relatedTableNameOnRecord = testParams.association_table_name,
+                        relatedTableNameOnRecordset = testParams.leaf_table_name,
                         relatedTableLink = chaisePage.recordPage.getMoreResultsLink(relatedTableNameOnRecord);
 
                     expect(relatedTableLink.isDisplayed()).toBeTruthy();
@@ -290,214 +381,56 @@ describe('View existing record,', function() {
                         // check entity title is for related table, not asociation table
                         return chaisePage.waitForElement(element(by.id("divRecordSet")));
                     }).then(function() {
-                        expect(chaisePage.recordsetPage.getPageTitleElement().getText()).toBe(relatedTableNameOnRecordset);
-                    });
-                });
-            });
-
-        });
-
-        describe("For a related entity with an association table", function() {
-            beforeAll(function() {
-                var keys = [];
-                keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
-                browser.ignoreSynchronization=true;
-                var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/" + keys.join("&");
-                browser.get(url);
-                chaisePage.waitForElement(element(by.id('rt-heading-association_table')));
-            });
-
-            it("on click of Add button should let you add a new relationship", function(){
-                var associationTableName = testParams.association_table_name;
-                var addRelatedRecordLink = chaisePage.recordPage.getAddRecordLink(associationTableName);
-                var EC = protractor.ExpectedConditions, newTabUrl, foreignKeyInputs;
-                browser.wait(EC.elementToBeClickable(addRelatedRecordLink), browser.params.defaultTimeout);
-
-                expect(addRelatedRecordLink.isDisplayed()).toBeTruthy();
-                expect(addRelatedRecordLink.getText()).toBe("Add");
-                addRelatedRecordLink.click().then(function(){
-                    browser.wait(function () {
-                           return chaisePage.recordsetPage.getRows().count().then(function (ct) {
-                               return (ct > 0);
-                           });
-                       });
-                    rows = chaisePage.recordsetPage.getRows();
-                }).then(function(ct){
-                    return browser.executeScript("return $('[type=checkbox]').get(1);");
-                }).then(function (selectButtons){
-                    selectButtons.click();
-                    return browser.executeScript("return $('.multi-select-submit-btn').click();");
-                }).then(function () {
-                    return browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
-                }).then(function (){
-                    browser.driver.navigate().refresh();
-                    chaisePage.waitForElement(element(by.id('rt-heading-association_table')));
-                    browser.wait(function() {
-                        return chaisePage.recordPage.getRelatedTableRows(associationTableName).count().then(function(ct) {
-                            return ct == testParams.association_count + 1;
-                        });
-                    }, browser.params.defaultTimeout);
-                     return chaisePage.recordPage.getRelatedTableRows(associationTableName).count();
-                }).then(function (count){
-                    expect(count).toBe(testParams.association_count + 1)
-                }).catch(function(error) {
-                    console.log(error);
-                    expect('There was an error in this promise chain').toBe('Please see error message.');
-                });
-            });
-
-            it("on click of Edit button should let you edit an existing relationship", function(){
-                var associationTableName = testParams.association_table_name;
-                var associationTableKey = testParams.associationTable_key_filter;
-
-                var EC = protractor.ExpectedConditions;
-                var e = element(by.id('rt-' + associationTableName));
-                browser.wait(EC.presenceOf(e), browser.params.defaultTimeout);
-
-                chaisePage.recordPage.getRelatedTableRows(associationTableName).then(function(rows) {
-                    return rows[0].all(by.tagName("td"));
-                }).then(function(cell) {
-                    return cell[0].all(by.css(".edit-action-button"));
-                }).then(function(editButtons) {
-                    return chaisePage.clickButton(editButtons[0]);
-                }).then(function() {
-                    return browser.getAllWindowHandles();
-                }).then(function(handles) {
-                    allWindows = handles;
-                    return browser.switchTo().window(allWindows[1]);
-                }).then(function() {
-                    var result = '/recordedit/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + associationTableName + "/id_base=" + associationTableKey;
-                    expect(browser.driver.getCurrentUrl()).toContain(result);
-                    return chaisePage.waitForElement(element(by.id('submit-record-button')));
-                }).then(function(){
-                    return chaisePage.recordEditPage.getForeignKeyInputs();
-                }).then(function(inputs) {
-                    foreignKeyInputs = inputs;
-                    return chaisePage.recordEditPage.getModalPopupBtnsUsingScript();
-                }).then(function(popupBtns){
-                    return chaisePage.clickButton(popupBtns[0]);
-                }).then (function () {
-                    browser.wait(function () {
-                          return chaisePage.recordsetPage.getRows().count().then(function (ct) {
-                              return (ct > 0);
-                          });
-                      });
-                   rows = chaisePage.recordsetPage.getRows();
-               }).then(function(ct){
-                   return rows.get(3).all(by.css(".select-action-button"));
-               }).then(function(selectButtons){
-                   return selectButtons[0].click();
-               }).then(function() {
-                   return chaisePage.recordEditPage.submitForm();
-               }).then(function(){
-
-                   return browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
-               }).then(function() {
-                   browser.close();
-                   return browser.switchTo().window(allWindows[0]);
-               }).then(function (){
-                   browser.driver.navigate().refresh();
-                   chaisePage.waitForElement(element(by.id('rt-heading-association_table')));
-                   return chaisePage.recordPage.getRelatedTableRows(associationTableName);
-               }).then(function(rows){
-                   return rows[1].all(by.tagName("td"));
-               }).then(function (cells){
-                   return cells[1].all(by.css("a"));;
-               }).then(function(cell){
-                  return cell[0].getAttribute('innerHTML');
-              }).then(function(id){
-                  expect(id).toBe('4');
-              }).catch(function(error) {
-                  console.log(error);
-                  expect('There was an error in this promise chain').toBe('Please see error message.');
-              });
-            });
-
-            it("on click of View button should redirect to record page of related entity", function(){
-                var relatedTableName = testParams.association_table_name; // association table
-                var linkedToTableName = testParams.leaf_table; // linked to table
-                var linkedToTableFilter = testParams.leaf_table_filter;
-
-                chaisePage.recordPage.getRelatedTableRows(relatedTableName).then(function(rows) {
-                    return rows[0].all(by.tagName("td"));
-                }).then(function(cell){
-                    return cell[0].all(by.css(".view-action-button"));
-                }).then(function(actionButtons) {
-                    return actionButtons[0].click();
-                }).then(function() {
-                    var result = '/record/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + linkedToTableName + "/id=" + linkedToTableFilter;
-                    chaisePage.waitForUrl(result, browser.params.defaultTimeout).finally(function() {
-                        expect(browser.driver.getCurrentUrl()).toContain(result);
+                        expect(chaisePage.recordsetPage.getPageTitleElement().getText()).toBe(testParams.leaf_table_name);
                         browser.navigate().back();
                     });
+
                 });
             });
 
-            it("on click of View more button should redirect to recordset page of association table", function(){
-                chaisePage.waitForElement(element(by.id('rt-heading-association_table')));
-                var relatedTableNameOnRecord = testParams.association_table_name,
-                    relatedTableNameOnRecordset = testParams.leaf_table_name,
-                    relatedTableLink = chaisePage.recordPage.getMoreResultsLink(relatedTableNameOnRecord);
+            describe("For a related entity wuth an association table and markdown display", function () {
 
-                expect(relatedTableLink.isDisplayed()).toBeTruthy();
+                it("on adding new relationship should update the table display", function (){
+                    var associationTableName = testParams.association_table_name_markdown;
+                    var addRelatedRecordLink = chaisePage.recordPage.getAddRecordLink(associationTableName);
+                    var EC = protractor.ExpectedConditions, newTabUrl, foreignKeyInputs;
+                    browser.wait(EC.elementToBeClickable(addRelatedRecordLink), browser.params.defaultTimeout);
 
-                relatedTableLink.click().then(function() {
-                    return browser.driver.getCurrentUrl();
-                }).then(function(url) {
-                    expect(url.indexOf('recordset')).toBeGreaterThan(-1);
-                    // check entity title is for related table, not asociation table
-                    return chaisePage.waitForElement(element(by.id("divRecordSet")));
-                }).then(function() {
-                    expect(chaisePage.recordsetPage.getPageTitleElement().getText()).toBe(testParams.leaf_table_name);
+                    expect(addRelatedRecordLink.isDisplayed()).toBeTruthy("The Add button is not displayed");
+                    expect(addRelatedRecordLink.getText()).toBe("Add", "The Add button is not displayed as Add");
+
+                    addRelatedRecordLink.click().then(function(){
+                    }).then(function(){
+                        browser.wait(function () {
+                               return chaisePage.recordsetPage.getRows().count().then(function (ct) {
+                                   return (ct > 0);
+                               });
+                           });
+                        rows = chaisePage.recordsetPage.getRows();
+                    }).then(function(ct){
+                        return browser.executeScript("return $('.modal-body tr input[type=checkbox]').get(2);");
+                    }).then(function (selectButtons){
+                        selectButtons.click();
+                        return browser.executeScript("return $('.multi-select-submit-btn').click();");
+                    }).then(function () {
+                        return browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
+                    }).then(function (){
+                         // browser.switchTo() does not work some times and the test case fails
+                         browser.wait(function() {
+                             return chaisePage.recordPage.getRelatedTableRows(associationTableName).count().then(function(ct) {
+                                 return ct == testParams.association_count + 1;
+                             });
+                         }, browser.params.defaultTimeout);
+                         return chaisePage.recordPage.getRelatedTableRows(associationTableName).count();
+                    }).then(function (count){
+                        expect(count).toBe(testParams.association_count + 1);
+                    }).catch(function(error) {
+                        console.log(error);
+                        expect('There was an error in this promise chain').toBe('Please see error message.');
+                    });
                 });
-
-            });
+            })
         });
 
-        describe("For a related entity wuth an association table and markdown display", function () {
-            beforeAll(function() {
-                var keys = [];
-                keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
-                browser.ignoreSynchronization=true;
-                var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/" + keys.join("&");
-                browser.get(url);
-                chaisePage.waitForElement(element(by.id('rt-heading-association_table_markdown')));
-            });
-
-            it("on adding new relationship should update the table display", function (){
-                var associationTableName = testParams.association_table_name_markdown;
-                var addRelatedRecordLink = chaisePage.recordPage.getAddRecordLink(associationTableName);
-                var EC = protractor.ExpectedConditions, newTabUrl, foreignKeyInputs;
-                browser.wait(EC.elementToBeClickable(addRelatedRecordLink), browser.params.defaultTimeout);
-
-                expect(addRelatedRecordLink.isDisplayed()).toBeTruthy("The Add button is not displayed");
-                expect(addRelatedRecordLink.getText()).toBe("Add", "The Add button is not displayed as Add");
-
-                addRelatedRecordLink.click().then(function(){
-                }).then(function(){
-                    browser.wait(function () {
-                           return chaisePage.recordsetPage.getRows().count().then(function (ct) {
-                               return (ct > 0);
-                           });
-                       });
-                    rows = chaisePage.recordsetPage.getRows();
-                }).then(function(ct){
-                    return browser.executeScript("return $('input').get(2);");
-                }).then(function (selectButtons){
-                    selectButtons.click();
-                    return browser.executeScript("return $('.multi-select-submit-btn').click();");
-                }).then(function () {
-                    return browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
-                }).then(function (){
-                     // browser.switchTo() does not work some times and the test case fails
-                     return chaisePage.recordPage.getRelatedTableRows(associationTableName).count();
-                }).then(function (count){
-                    expect(count).toBe(testParams.association_count + 1);
-                }).catch(function(error) {
-                    console.log(error);
-                    expect('There was an error in this promise chain').toBe('Please see error message.');
-                });
-            });
-        })
     });
 });

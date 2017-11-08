@@ -6,7 +6,7 @@
     .constant('errorNames', {
         unauthorized: "Unauthorized",
         forbidden: "Forbidden",
-        notFound: "Not Found",
+        notFound: "Record Not Found",
         multipleRecords: "Multiple Records Found",
         noDataMessage: "No entity exists",
         multipleDataErrorCode : "Multiple Records Found",
@@ -15,9 +15,9 @@
     .constant('errorMessages', {
         unauthorized: "Unauthorized",
         forbidden: "Forbidden",
-        notFound: "Not Found",
+        notFound: "No data",
         multipleRecords: "Multiple Records Found",
-        noDataMessage: "No entity exists with ",
+        noDataMessage: "No matching record found for the given ID.",
         multipleDataErrorCode : "Multiple Records Found",
         multipleDataMessage : "There are more than 1 record found for the filters provided.",
         systemAdminMessage : "An unexpected error has occurred. Please report this problem to your system administrators."
@@ -74,7 +74,7 @@
          * @param  {string} message Error message
          * @return {object}         Error Object
          */
-        function noRecordError(filters, message) {
+        function noRecordError(filters, redirectUrl, message) {
           /**
            * @type {object}
            * @desc  custom object to store miscellaneous elements viz. stacktrace
@@ -103,6 +103,11 @@
             this.message = noDataMessageDesc;
 
             this.errorData.stack = (new Error()).stack;
+            /**
+             * @type {string}
+             * @desc URL that redirects users to recordset app
+             */
+            this.errorData.redirectUrl = redirectUrl;
         }
         noRecordError.prototype = Object.create(Error.prototype);
         noRecordError.prototype.constructor = noRecordError;
@@ -134,7 +139,8 @@
     }])
 
     // Factory for each error type
-    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$uibModal', '$window', 'errorMessages', function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $uibModal, $window, errorMessages) {
+    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$uibModal', '$window', 'errorMessages', 'Errors',
+          function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $uibModal, $window, errorMessages, Errors) {
 
         function errorPopup(message, errorCode, pageName, redirectLink, subMessage, stackTrace) {
             var providedLink = true;
@@ -205,7 +211,7 @@
         // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
         function handleException(exception) {
             $log.info(exception);
-
+            var stackTrace =  (exception.errorData && exception.errorData.stack)? exception.errorData.stack: undefined;
             var reloadCb = function() {
                 window.location.reload();
             };
@@ -215,8 +221,8 @@
             if ( (ERMrest && exception instanceof ERMrest.UnauthorizedError) || exception.code == errorNames.unauthorized) {
                 Session.loginInAModal(reloadCb);
             }
-            else if (exception.status && exception.status == errorNames.multipleRecords){
-                errorPopup(errorNames.multipleDataMessage, errorNames.multipleDataErrorCode,"Recordset ", exception.errorData.redirectUrl);
+            else if ((exception.status && exception.status == errorNames.multipleRecords) || exception.constructor.name === "noRecordError"){
+                errorPopup(exception.message, exception.status, "Recordset ", exception.errorData.redirectUrl, stackTrace);
             }
             // we decided to deal with the OR condition later
             else if ( (ERMrest && exception instanceof ERMrest.ForbiddenError) || exception.code == errorNames.forbidden) {
@@ -225,8 +231,8 @@
             else {
                 var errName = exception.status? exception.status:"Terminal Error",
                     errorText = exception.message,
-                    systemAdminMessage = errorMessages.systemAdminMessage,
-                    stackTrace =  (exception.errorData && exception.errorData.stack)? exception.errorData.stack: undefined;
+                    systemAdminMessage = errorMessages.systemAdminMessage;
+
                 errName = (errName.toLowerCase() !== 'error') ? errName : "Terminal Error";
                 errorPopup(
                     systemAdminMessage,

@@ -41,7 +41,7 @@
     .config(['$logProvider', function($logProvider) {
         $logProvider.debugEnabled(chaiseConfig.debug === true);
     }])
-    
+
     .run(['constants', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'MathUtils', 'modalBox', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', 'Errors',
         function runApp(constants, DataUtils, ERMrest, ErrorService, headInjector, MathUtils, modalBox, Session, UiUtils, UriUtils, $log, $rootScope, $window, Errors) {
 
@@ -155,14 +155,16 @@
                 throw exception;
             }).then(function getPage(page) {
                 $log.info("Page: ", page);
+                /*
+                *  recordSetLink should be used to present user with  an option in case of no data found/more data found(>1)
+                *  This could be link to RECORDSET or SEARCH.
+                */
+                var recordSetLink = page.reference.contextualize.compact.appLink;
 
                 if (page.tuples.length < 1) {
-                    throw new Errors.noRecordError(context.filter.filters);
+                    throw new Errors.noRecordError(context.filter.filters, recordSetLink);
                 }
                 else if(page.tuples.length > 1){
-                    var recordSetLink = page.reference.contextualize.compact.appLink;
-                    // var multipleRecordError = Errors.multipleRecordError();
-                    // multipleRecordError.redirectUrl=recordSetLink;
                     $rootScope.displayReady = true;
                     throw new Errors.multipleRecordError(recordSetLink);
                 }
