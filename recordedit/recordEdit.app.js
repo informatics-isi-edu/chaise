@@ -217,7 +217,8 @@
                                     if (column.getInputDisabled(context.appContext)) {
                                         // if not copy, populate the field without transforming it
                                         if (context.mode != context.modes.COPY) {
-                                            recordEditModel.rows[j][column.name] = values[i];
+                                            // the structure for asset type columns is an object with a 'url' property
+                                            recordEditModel.rows[j][column.name] = column.isAsset ? { url: values[i] || "" } : values[i];
                                         }
                                         continue;
                                     }
