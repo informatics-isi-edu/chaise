@@ -51,6 +51,7 @@
             context = { booleanValues: ['', true, false] };
 
         $rootScope.displayReady = false;
+        $rootScope.showSpinner = false;
 
         UriUtils.setOrigin();
         headInjector.setupHead();
