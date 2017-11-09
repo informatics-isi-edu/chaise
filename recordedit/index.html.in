@@ -26,19 +26,19 @@
         <div ng-if="reference && (reference.canCreate || reference.canUpdate)">
             <div ng-controller="FormController as form" class="row">
                 <div ng-show="!form.resultset">
-                    <loading-spinner ng-show="form.submissionButtonDisabled"></loading-spinner>
+                    <loading-spinner ng-show="form.submissionButtonDisabled || showSpinner"></loading-spinner>
                     <div class="col-xs-12">
-                        <!-- Alerts section -->
-                        <div ng-repeat="alert in form.alerts" class="row">
-                            <div class="col-xs-12">
-                                <div class="alert alert-dismissible" ng-class="{'alert-danger': alert.type == 'error', 'alert-success': alert.type == 'success', 'alert-warning': alert.type == 'warning'}" role="alert">
-                                    <button type="button" class="close" ng-click="::form.closeAlert(alert);" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                    <strong>{{alert.type | toTitleCase}}</strong> {{alert.message}}
+                        <div class="row main-container">
+                            <!-- Alerts section -->
+                            <div ng-repeat="alert in form.alerts" class="row">
+                                <div class="col-xs-12">
+                                    <div class="alert alert-dismissible" ng-class="{'alert-danger': alert.type == 'error', 'alert-success': alert.type == 'success', 'alert-warning': alert.type == 'warning'}" role="alert">
+                                        <button type="button" class="close" ng-click="::form.closeAlert(alert);" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                        <strong>{{alert.type | toTitleCase}}</strong> {{alert.message}}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <!-- Form section -->
-                        <div class="row main-container">
+                            <!-- Form section -->
                             <div class="col-xs-12">
                                 <div class="row">
                                     <div ng-if="displayname" class="col-xs-7">

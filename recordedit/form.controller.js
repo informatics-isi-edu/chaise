@@ -304,6 +304,7 @@
                 uri = "../search/#" + location.catalog + '/' + location.schemaName + ':' + location.tableName;
             }
 
+            $rootScope.showSpinner = false;
             $window.location.href = uri;
         }
 
@@ -315,9 +316,11 @@
                     controllerAs: "ctrl",
                     size: "sm"
                 }).result.then(function success() {
+                    $rootScope.showSpinner = true;
                     // user accepted prompt to delete
                     return $rootScope.reference.delete();
                 }).then(onDelete, function deleteFailure(response) {
+                    $rootScope.showSpinner = false;
                     if (typeof response !== "string") {
                         throw response;
                     }
@@ -325,7 +328,9 @@
                     AlertsService.addAlert(exception.message, 'error');
                 });
             } else {
+                $rootScope.showSpinner = true;
                 $rootScope.reference.delete().then(onDelete, function deleteFailure(response) {
+                    $rootScope.showSpinner = false;
                     throw response;
                 }).catch(function (exception) {
                     AlertsService.addAlert(exception.message, 'error');

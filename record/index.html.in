@@ -45,7 +45,7 @@
             </div>
         </div>
     </div>
-    <loading-spinner ng-show="!displayReady"></loading-spinner>
+    <loading-spinner ng-show="!displayReady || showSpinner"></loading-spinner>
     <div id="main-content" class="container-fluid" style="overflow-y: auto;">
         <div class="main-container">
             <alerts alerts="ctrl.alerts"></alerts>
