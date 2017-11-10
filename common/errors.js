@@ -228,6 +228,9 @@
             else if ( (ERMrest && exception instanceof ERMrest.ForbiddenError) || exception.code == errorNames.forbidden) {
                 errorPopup( exception.message, exception.status ,"Home Page", $window.location.origin);
             }
+            else if ( ERMrest && exception instanceof ERMrest.ConflictError) {
+                errorPopup( exception.message, exception.status ,"Home Page", $window.location.origin, exception.subMessage);
+            }
             else {
                 var errName = exception.status? exception.status:"Terminal Error",
                     errorText = exception.message,
