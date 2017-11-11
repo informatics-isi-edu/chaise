@@ -2,8 +2,7 @@ var chaisePage = require('../../../utils/chaise.page.js');
 var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
 var testParams = {
     // for verifying data is present
-    column_names: ["text", "text_disabled", "markdown", "markdown_disabled", "defaults_fk_text", "defaults_fk_text_disabled", "int", "int_disabled", "float", "float_disabled", "boolean_true", "boolean_false", "boolean_disabled", "date", "date_disabled", "timestamptz", "timestamptz_disabled",
-                    "json", "json_disabled"],
+    column_names: ["text", "text_disabled", "markdown", "markdown_disabled", "defaults_fk_text", "defaults_fk_text_disabled", "int", "int_disabled", "float", "float_disabled", "boolean_true", "boolean_false", "boolean_disabled", "date", "date_disabled", "timestamptz", "timestamptz_disabled", "json", "json_disabled", "json_disabled_no_default"],
     table_name: "defaults-table",
     default_column_values: {
     // data values
@@ -34,7 +33,7 @@ var testParams = {
         timestamptz_disabled_no_default_value: "Automatically generated",
         json_value:JSON.stringify({"name":"testing_json"}),
         json_disabled_value:JSON.stringify(98.786),
-        json_disabled_no_default_value: "Automatically generated",
+        json_disabled_no_default_value: "Automatically generated"
     },
     record_column_values: {
     // data values
@@ -59,8 +58,25 @@ var testParams = {
         timestamp_disabled: "2012-06-22 18:36:00",
         timestamptz: "2014-05-07 14:40:00",
         timestamptz_disabled: "2010-06-13 17:22:00",
-        json:JSON.stringify({"name":"testing_json"},undefined,2),
-        json_disabled:JSON.stringify(98.786)
+        json: JSON.stringify({"name":"testing_json"},undefined,2),
+        json_disabled: JSON.stringify(98.786),
+        json_disabled_no_default: JSON.stringify(null)
+    },
+    edit_key: { name: "id", value: "2", operator: "="},
+    re_column_names: ["text_disabled", "markdown_disabled", "foreign_key_disabled", "int_disabled", "float_disabled", "boolean_disabled", "date_disabled", "timestamp_disabled", "timestamptz_disabled", "json_disabled", "asset_disabled"],
+    re_column_values: {
+        text_disabled: "Disabled input",
+        markdown_disabled: "*italics*",
+        // Value of "name" column on foreign related entity
+        foreign_key_disabled: "Default for foreign_key_disabled column",
+        int_disabled: "20",
+        float_disabled: "93.2182",
+        boolean_disabled: "false",
+        date_disabled: "2014-05-12",
+        timestamp_disabled: "2012-06-22T18:36:00",
+        timestamptz_disabled: "2010-06-13T17:22:00-07:00",
+        json_disabled: JSON.stringify(98.786),
+        asset_disabled: "http://images.trvl-media.com/hotels/1000000/30000/28200/28110/28110_191_z.jpg"
     }
 };
 
@@ -198,5 +214,50 @@ describe('Record Add with defaults', function() {
                 });
             });
         });
+    });
+});
+
+describe("Record Edit with immutable columns", function() {
+
+    describe("should verify the presentation of data", function () {
+
+        beforeAll(function () {
+            var keys = [];
+            keys.push(testParams.edit_key.name + testParams.edit_key.operator + testParams.edit_key.value);
+            browser.ignoreSynchronization=true;
+            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/defaults:" + testParams.table_name + "/"  + keys.join("&"));
+
+            chaisePage.waitForElement(element(by.id("submit-record-button")));
+        });
+
+        for (var i=0; i < testParams.re_column_names.length; i++) {
+            (function(columnName) {
+                if (columnName == "foreign_key_disabled") {
+                    // foreign key input has value under input with id ending in "display"
+                    it("should initialize foreign key select input column: " + columnName + " with the proper value", function () {
+                        var input = chaisePage.recordEditPage.getForeignKeyInputDisplay(columnName, 0);
+                        expect(input.getText()).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
+                    });
+                } else if (columnName == "asset_disabled") {
+                    // upload input has a different css structure than other inputs because of directive
+                    it("should initialize file upload select input column: " + columnName + " with the proper value", function () {
+                        var input = chaisePage.recordEditPage.getUploadInput(columnName, 0);
+                        expect(input.getAttribute('value')).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
+                    });
+                } else if (columnName == "boolean_disabled") {
+                    // boolean input has a dropdown list with text in it
+                    it("should initialize select input column: " + columnName + " with the proper value", function () {
+                        var input = chaisePage.recordEditPage.getInputById(0, columnName);
+                        expect(chaisePage.recordEditPage.getDropdownText(input)).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
+                    });
+                } else {
+                    // normal inputs with values in input under value attribute
+                    it("should initialize text input column: " + columnName + " with the proper value", function () {
+                        var input = chaisePage.recordEditPage.getInputById(0, columnName);
+                        expect(input.getAttribute('value')).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
+                    });
+                }
+            })(testParams.re_column_names[i]);
+        };
     });
 });
