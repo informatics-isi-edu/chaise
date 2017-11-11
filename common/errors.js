@@ -6,6 +6,7 @@
     .constant('errorNames', {
         unauthorized: "Unauthorized",
         forbidden: "Forbidden",
+        conflict: "Conflict",
         notFound: "Record Not Found",
         multipleRecords: "Multiple Records Found",
         noDataMessage: "No entity exists",
@@ -200,6 +201,8 @@
 
                     var win = window.open("", '_blank','width=800,height=600,left=' + x + ',top=' + y);
                     Session.loginInAPopUp(win, reloadCb);
+                }else if(errorCode == errorNames.conflict){
+                   $window.open(redirectLink, '_blank');
                 } else {
                     $window.location.replace(redirectLink);
                 }
@@ -229,7 +232,7 @@
                 errorPopup( exception.message, exception.status ,"Home Page", $window.location.origin);
             }
             else if ( ERMrest && exception instanceof ERMrest.ConflictError) {
-                errorPopup( exception.message, exception.status ,"Home Page", $window.location.origin, exception.subMessage);
+                errorPopup( exception.message, exception.status ,"Record Page", exception.errorData.redirectUrl, exception.subMessage);
             }
             else {
                 var errName = exception.status? exception.status:"Terminal Error",

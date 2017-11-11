@@ -3,7 +3,7 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', 'DataUtils', 'ErrorService', 'MathUtils', 'messageMap', 'modalBox', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$uibModal', '$window', 
+    .controller('RecordController', ['AlertsService', 'DataUtils', 'ErrorService', 'MathUtils', 'messageMap', 'modalBox', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$uibModal', '$window',
         function RecordController(AlertsService, DataUtils, ErrorService, MathUtils, messageMap, modalBox, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $uibModal, $window) {
         var vm = this;
         var addRecordRequests = {}; // <generated unique id : reference of related table>
@@ -44,6 +44,7 @@
         };
 
         vm.deleteRecord = function() {
+            var errorData = {};
             $rootScope.reference.delete().then(function deleteSuccess() {
                 // Get an appLink from a reference to the table that the existing reference came from
                 var unfilteredRefAppLink = $rootScope.reference.table.reference.contextualize.compact.appLink;
@@ -51,6 +52,8 @@
                 $window.location.href = unfilteredRefAppLink;
             }, function deleteFail(error) {
                 $rootScope.showSpinner = false;
+                errorData.redirectUrl = $rootScope.reference.contextualize.detailed.appLink;
+                error.errorData = errorData;
                 throw error;
             });
         };
@@ -117,7 +120,7 @@
         };
 
         // Send user to RecordEdit to create a new row in this related table
-        function onSuccess (){    
+        function onSuccess (){
             AlertsService.addAlert("Your data has been submitted. Showing you the result set...","success");
             vm.resultset = true;
             onfocusEventCall(true);

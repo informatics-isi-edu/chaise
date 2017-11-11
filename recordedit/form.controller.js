@@ -3,7 +3,7 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'DataUtils', 'ErrorService', 'messageMap', 'modalBox', 'recordCreate', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$uibModal', '$window', 
+    .controller('FormController', ['AlertsService', 'DataUtils', 'ErrorService', 'messageMap', 'modalBox', 'recordCreate', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$uibModal', '$window',
         function FormController(AlertsService, DataUtils, ErrorService, messageMap, modalBox, recordCreate, recordEditModel, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $uibModal, $window) {
         var vm = this;
         var context = $rootScope.context;
@@ -193,20 +193,20 @@
 
             return isValid;
         }
-        
-        /**        
-         * onSuccess - callback after results are added 
-         *          
-         * @param  {object} model  model contains updated record object                   
-         * @param  {object} result object has result messages          
-         */         
+
+        /**
+         * onSuccess - callback after results are added
+         *
+         * @param  {object} model  model contains updated record object
+         * @param  {object} result object has result messages
+         */
         function onSuccess (model, result){
             var page = result.successful;
             var failedPage = result.failed;
             var resultsReference = page.reference;
             if (model.rows.length == 1) {
                 vm.redirectAfterSubmission(page);
-            } 
+            }
             else {
                 AlertsService.addAlert("Your data has been submitted. Showing you the result set...","success");
 
@@ -261,7 +261,7 @@
                 vm.resultset = true;
         }
     }
-        
+
         function submit() {
             var originalTuple,
                 editOrCopy = true,
@@ -309,6 +309,7 @@
         }
 
         function deleteRecord() {
+            var errorData = {};
             if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
                 $uibModal.open({
                     templateUrl: "../common/templates/delete-link/confirm_delete.modal.html",
@@ -322,7 +323,9 @@
                 }).then(onDelete, function deleteFailure(response) {
                     $rootScope.showSpinner = false;
                     if (typeof response !== "string") {
-                        throw response;
+                      errorData.redirectUrl = $rootScope.reference.contextualize.detailed.appLink;
+                      response.errorData = errorData;
+                      throw response;
                     }
                 }).catch(function (exception) {
                     AlertsService.addAlert(exception.message, 'error');
@@ -331,6 +334,8 @@
                 $rootScope.showSpinner = true;
                 $rootScope.reference.delete().then(onDelete, function deleteFailure(response) {
                     $rootScope.showSpinner = false;
+                    errorData.redirectUrl = $rootScope.reference.contextualize.detailed.appLink;
+                    response.errorData = errorData;
                     throw response;
                 }).catch(function (exception) {
                     AlertsService.addAlert(exception.message, 'error');
