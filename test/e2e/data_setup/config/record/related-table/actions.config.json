@@ -1,9 +1,5 @@
 {
-    "catalog": {
-        "acls": {
-            "write": ["*"]
-        }
-    },
+    "catalog": {},
     "schema": {
         "name": "product-unordered-related-tables-actions",
         "createNew": true,

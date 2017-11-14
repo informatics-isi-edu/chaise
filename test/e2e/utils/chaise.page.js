@@ -759,6 +759,11 @@ var recordPage = function() {
     this.getSuccessAlert = function () {
         return element(by.css(".alert-success"));
     };
+
+    this.getDeleteActionButtons = function (displayname) {
+        return element(by.id("rt-" + displayname)).all(by.css(".btn-group .delete-action-button"));
+        // return browser.executeScript("return $('#" + displayname + " .btn-group .delete-action-button')");
+    };
 };
 
 var recordsetPage = function() {

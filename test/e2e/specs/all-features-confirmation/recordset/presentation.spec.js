@@ -387,6 +387,7 @@ describe('View recordset,', function() {
                     var EC = protractor.ExpectedConditions;
                     browser.wait(EC.stalenessOf(deleteButton), browser.params.defaultTimeout);
                 }).then(function() {
+                    browser.pause();
                     return chaisePage.recordsetPage.getRows();
                 }).then(function(rows) {
                     expect(rows.length).toBe(3);
