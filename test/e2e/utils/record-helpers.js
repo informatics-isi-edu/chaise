@@ -1,5 +1,6 @@
 var chaisePage = require('../utils/chaise.page.js');
 var mustache = require('../../../../ermrestjs/vendor/mustache.min.js');
+var EC = protractor.ExpectedConditions;
 
 exports.testPresentation = function (tableParams) {
 	it("should have '" + tableParams.title +  "' as title", function() {
@@ -23,8 +24,7 @@ exports.testPresentation = function (tableParams) {
 	});
 
     it("should show the action buttons properly", function() {
-        var EC = protractor.ExpectedConditions,
-            editButton = chaisePage.recordPage.getEditRecordButton(),
+        var editButton = chaisePage.recordPage.getEditRecordButton(),
             createButton = chaisePage.recordPage.getCreateRecordButton(),
             deleteButton = chaisePage.recordPage.getDeleteRecordButton(),
             showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton();
@@ -166,6 +166,7 @@ exports.testPresentation = function (tableParams) {
         var displayName, tableCount, title,
             relatedTables = tableParams.related_tables;
 
+        browser.wait(EC.not(EC.visibilityOf(chaisePage.recordPage.getLoadingElement())), browser.params.defaultTimeout);
         browser.wait(function() {
             return chaisePage.recordPage.getRelatedTablesWithPanel().count().then(function(ct) {
                 return (ct=relatedTables.length);

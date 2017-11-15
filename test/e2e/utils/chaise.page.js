@@ -762,8 +762,11 @@ var recordPage = function() {
 
     this.getDeleteActionButtons = function (displayname) {
         return element(by.id("rt-" + displayname)).all(by.css(".btn-group .delete-action-button"));
-        // return browser.executeScript("return $('#" + displayname + " .btn-group .delete-action-button')");
     };
+
+    this.getLoadingElement = function () {
+        return element(by.id("rt-loading"));
+    }
 };
 
 var recordsetPage = function() {

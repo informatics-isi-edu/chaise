@@ -371,6 +371,8 @@ describe('View recordset,', function() {
 
             it("action columns should show delete button that deletes record", function() {
                 var deleteButton;
+                var EC = protractor.ExpectedConditions;
+
                 chaisePage.waitForElementInverse(element(by.id("spinner"))).then(function() {
                     return chaisePage.recordsetPage.getDeleteActionButtons();
                 }).then(function(deleteButtons) {
@@ -378,19 +380,20 @@ describe('View recordset,', function() {
                     deleteButton = deleteButtons[3];
                     return deleteButton.click();
                 }).then(function() {
-                    var EC = protractor.ExpectedConditions;
                     var confirmButton = chaisePage.recordsetPage.getConfirmDeleteButton();
                     browser.wait(EC.visibilityOf(confirmButton), browser.params.defaultTimeout);
 
                     return confirmButton.click();
                 }).then(function() {
-                    var EC = protractor.ExpectedConditions;
-                    browser.wait(EC.stalenessOf(deleteButton), browser.params.defaultTimeout);
-                }).then(function() {
-                    browser.pause();
-                    return chaisePage.recordsetPage.getRows();
-                }).then(function(rows) {
-                    expect(rows.length).toBe(3);
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getRows().count().then(function (ct) {
+                            return (ct==3)
+                        });
+                    });
+
+                    return chaisePage.recordsetPage.getRows().count();
+                }).then(function(ct) {
+                    expect(ct).toBe(3);
                 });
             });
 
