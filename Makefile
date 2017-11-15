@@ -23,7 +23,7 @@ E2EDdetailed=test/e2e/specs/detailed/data-dependent/protractor.conf.js
 # Recordedit tests
 E2EDIrecordAdd=test/e2e/specs/all-features-confirmation/recordedit/add.conf.js
 E2EDIrecordEditMultiColTypes=test/e2e/specs/default-config/recordedit/multi-col-types.conf.js
-E2EDIrecordDefaults=test/e2e/specs/default-config/recordedit/add-defaults.conf.js
+E2EDIrecordDefaults=test/e2e/specs/default-config/recordedit/immutable-inputs.conf.js
 E2EDIrecordEdit=test/e2e/specs/all-features-confirmation/recordedit/edit-delete.conf.js
 E2ErecordEditNoDeleteBtn=test/e2e/specs/delete-prohibited/recordedit/no-delete-btn.conf.js
 E2EDIrecordMultiAdd=test/e2e/specs/default-config/recordedit/add-x-forms.conf.js

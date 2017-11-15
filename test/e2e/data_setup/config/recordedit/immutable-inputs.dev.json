@@ -1,7 +1,7 @@
 {
     "setup": {
         "schemaConfigurations": [
-            "recordedit/add-defaults.config.json"
+            "recordedit/immutable-inputs.config.json"
         ],
         "schema": "defaults"
     },

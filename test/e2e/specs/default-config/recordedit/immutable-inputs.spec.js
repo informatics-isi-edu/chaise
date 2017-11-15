@@ -232,30 +232,35 @@ describe("Record Edit with immutable columns", function() {
 
         for (var i=0; i < testParams.re_column_names.length; i++) {
             (function(columnName) {
-                if (columnName == "foreign_key_disabled") {
-                    // foreign key input has value under input with id ending in "display"
-                    it("should initialize foreign key select input column: " + columnName + " with the proper value", function () {
-                        var input = chaisePage.recordEditPage.getForeignKeyInputDisplay(columnName, 0);
-                        expect(input.getText()).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
-                    });
-                } else if (columnName == "asset_disabled") {
-                    // upload input has a different css structure than other inputs because of directive
-                    it("should initialize file upload select input column: " + columnName + " with the proper value", function () {
-                        var input = chaisePage.recordEditPage.getUploadInput(columnName, 0);
-                        expect(input.getAttribute('value')).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
-                    });
-                } else if (columnName == "boolean_disabled") {
-                    // boolean input has a dropdown list with text in it
-                    it("should initialize select input column: " + columnName + " with the proper value", function () {
-                        var input = chaisePage.recordEditPage.getInputById(0, columnName);
-                        expect(chaisePage.recordEditPage.getDropdownText(input)).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
-                    });
-                } else {
-                    // normal inputs with values in input under value attribute
-                    it("should initialize text input column: " + columnName + " with the proper value", function () {
-                        var input = chaisePage.recordEditPage.getInputById(0, columnName);
-                        expect(input.getAttribute('value')).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
-                    });
+                switch (columnName) {
+                    case "foreign_key_disabled":
+                        // foreign key input has value under input with id ending in "display"
+                        it("should initialize foreign key select input column: " + columnName + " with the proper value", function () {
+                            var input = chaisePage.recordEditPage.getForeignKeyInputDisplay(columnName, 0);
+                            expect(input.getText()).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
+                        });
+                        break;
+                    case "asset_disabled":
+                        // upload input has a different css structure than other inputs because of directive
+                        it("should initialize file upload select input column: " + columnName + " with the proper value", function () {
+                            var input = chaisePage.recordEditPage.getUploadInput(columnName, 0);
+                            expect(input.getAttribute('value')).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
+                        });
+                        break;
+                    case "boolean_disabled":
+                        // boolean input has a dropdown list with text in it
+                        it("should initialize select input column: " + columnName + " with the proper value", function () {
+                            var input = chaisePage.recordEditPage.getInputById(0, columnName);
+                            expect(chaisePage.recordEditPage.getDropdownText(input)).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
+                        });
+                        break;
+                    default:
+                        // normal inputs with values in input under value attribute
+                        it("should initialize text input column: " + columnName + " with the proper value", function () {
+                            var input = chaisePage.recordEditPage.getInputById(0, columnName);
+                            expect(input.getAttribute('value')).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
+                        });
+                        break;
                 }
             })(testParams.re_column_names[i]);
         };
