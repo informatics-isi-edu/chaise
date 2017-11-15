@@ -1,6 +1,5 @@
 {
-    "catalog": {
-    },
+    "catalog": {},
     "schema": {
         "name": "product-search",
         "createNew": true,
