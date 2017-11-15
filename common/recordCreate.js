@@ -10,6 +10,56 @@
         var editRecordRequests = {}; // generated id: {schemaName, tableName}
         var updated = {};
 
+
+        /**
+         * areFilesValid - checks whether file columns are getting the correct url and are not null if nullok is false
+         *
+         * @param  {array} rows   array contains updated recrds attributes
+         * @return {boolean} whether rows have valid file columns or not 
+         */
+        function areFilesValid(rows, rsReference) {
+            var isValid = true, index = 0;
+            // Iterate over all rows that are passed as parameters to the modal controller
+            rows.forEach(function(row) {
+
+                index++;
+
+                // Iterate over each property/column of a row
+                for(var k in row) {
+
+                    // If the column type is object and has a file property inside it
+                    // Then increment the count for no of files and create an uploadFile Object for it
+                    // Push this to the tuple array for the row
+                    // NOTE: each file object has an hatracObj property which is an hatrac object
+                    try {
+                        var column = rsReference.columns.find(function(c) { return c.name == k;  });
+                        if (column.isAsset) {
+
+                            if (row[k].url == "" && !column.nullok) {
+                                isValid = false;
+                                AlertsService.addAlert("Please select file for column " + k + " for record " + index, 'error');
+                            } else if (row[k] != null && typeof row[k] == 'object' && row[k].file) {
+                                try {
+                                    if (!row[k].hatracObj.validateURL(row)) {
+                                        isValid = false;
+                                        AlertsService.addAlert("Invalid url template for column " + k + " for record " + index, 'error');
+                                    }
+                                } catch(e) {
+                                    isValid = false;
+                                    AlertsService.addAlert("Invalid url template for column " + k + " for record " + index, 'error');
+                                }
+                            }
+                        }
+                    } catch(e) {
+                        //NOthing to do
+                    }
+                }
+            });
+
+            return isValid;
+        }
+        
+
         /**
          * checkUpdate - to check all recrds are updated; passed as callback to uploadFiles(). 
          *
@@ -46,6 +96,8 @@
          */
         function uploadFiles(submissionRowsCopy, rsReference, onSuccess) {
 
+            // If url is valid
+            if (areFilesValid(viewModel.recordEditModel.submissionRows, rsReference)) {
                 $uibModal.open({
                     templateUrl: "../common/templates/uploadProgress.modal.html",
                     controller: "UploadModalDialogController",
@@ -65,6 +117,10 @@
 
                     if (exception) AlertsService.addAlert(exception.message, 'error');
                 });
+            } else {
+                viewModel.readyToSubmit = false;
+                viewModel.submissionButtonDisabled = false;
+            }
         }
 
         /**
