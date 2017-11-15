@@ -415,6 +415,12 @@ describe('View recordset,', function() {
             var e = element(by.id("custom-page-size"));
 
             browser.wait(EC.presenceOf(e), browser.params.defaultTimeout).then(function() {
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getRows().count().then(function (ct) {
+                        return (ct==fileParams.custom_page_size)
+                    });
+                });
+
                 return chaisePage.recordsetPage.getRows().count();
             }).then(function(ct) {
                 expect(ct).toBe(fileParams.custom_page_size);
