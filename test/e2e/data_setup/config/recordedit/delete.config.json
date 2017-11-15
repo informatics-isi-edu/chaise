@@ -1,9 +1,5 @@
 {
-    "catalog": {
-        "acls": {
-            "write": ["*"]
-        }
-    },
+    "catalog": {},
     "schema": {
         "name": "product-delete",
         "createNew": true,

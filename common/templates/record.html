@@ -27,7 +27,7 @@
                         </span>
                     </span>
                     <span ng-show="recordTableModel[$index].displayType == 'table'" id="entity-{{$index}}-recTab">
-                            <record-table class="related-table" vm="::recordTableModel[$index]"></record-table>
+                            <record-table class="related-table" id="rt-{{::makeSafeIdAttr(column.displayname.value)}}" vm="::recordTableModel[$index]"></record-table>
                     </span>
          </span>
         </td>

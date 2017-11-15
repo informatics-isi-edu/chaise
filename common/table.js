@@ -616,6 +616,7 @@
 
                 scope.vm.backgroundSearchPendingTerm = null;
                 scope.vm.currentPageSelected = false;
+                scope.$root.showSpinner = false; // this property is set from common modules for controlling the spinner at a global level that is out of the scope of the app
                 //TODO this is forced here
                 scope.vm.showFaceting = false;
                 
@@ -812,7 +813,7 @@
     }])
     
     //TODO This is used in recrodset app, eventually it should be used everywhere
-    .directive('recordsetWithFaceting', ['recordTableUtils', '$window', '$cookies', 'DataUtils', 'MathUtils', 'UriUtils','$timeout', 'AlertsService', '$log', function(recordTableUtils, $window, $cookies, DataUtils, MathUtils, UriUtils, $timeout, AlertsService, $log) {
+    .directive('recordsetWithFaceting', ['recordTableUtils', '$window', '$cookies', 'DataUtils', 'MathUtils', 'UriUtils', '$timeout', 'AlertsService', '$log', function(recordTableUtils, $window, $cookies, DataUtils, MathUtils, UriUtils, $timeout, AlertsService, $log) {
         var MAX_LENGTH = 2000;
         
         return {
@@ -824,12 +825,12 @@
                 allowCreate: '=?'       // if undefined, assume false
             },
             link: function (scope, elem, attr) {
-                console.log(scope.vm.config);
                 var addRecordRequests = {}; // table refresh used by add record implementation with cookie (old method)
                 var updated = false; // table refresh used by ellipses' edit action (new method)
 
                 scope.pageLimits = [10, 25, 50, 75, 100, 200];
                 scope.$root.alerts = AlertsService.alerts;
+                scope.$root.showSpinner = false; // this property is set from common modules for controlling the spinner at a global level that is out of the scope of the app
                 scope.vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
                 scope.vm.isIdle = true;

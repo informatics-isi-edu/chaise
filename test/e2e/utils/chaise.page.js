@@ -763,9 +763,18 @@ var recordPage = function() {
     this.getSuccessAlert = function () {
         return element(by.css(".alert-success"));
     };
+
+    this.getDeleteActionButtons = function (displayname) {
+        return element(by.id("rt-" + displayname)).all(by.css(".btn-group .delete-action-button"));
+    };
+
+    this.getLoadingElement = function () {
+        return element(by.id("rt-loading"));
+    }
 };
 
 var recordsetPage = function() {
+    var that = this;
     this.getPageTitle = function() {
         return browser.executeScript("return $('#page-title').text();");
     };
@@ -891,6 +900,114 @@ var recordsetPage = function() {
     this.getDownloadButton = function (limit) {
         return element(by.css("downloadCSV-link"));
     };
+
+    /******* Facet selectors for recordset with faceting ********/
+    this.getAllFacets = function (){
+        return element.all(by.css(".panel-default"));
+    }
+
+    this.getOpenFacets = function () {
+        return element.all(by.css(".panel-open"));
+    }
+
+    this.getClosedFacets = function () {
+        return element.all(by.css("div[aria-expanded=false][style='height: 0px;']"));
+    }
+
+    this.getFacetById = function (idx) {
+        return element(by.id("fc-heading-" + idx));
+    }
+
+    this.getFacetCollapse = function (idx) {
+        return element(by.id("fc-" + idx)).element(by.css("div[aria-expanded=true]"));
+    }
+
+    this.getFacetTitles = function () {
+        return browser.executeScript("return $('.panel h3 a').map(function(i, a) { return a.textContent.trim(); });");
+    }
+
+    this.getOpenFacetTitles = function () {
+        return browser.executeScript("return $('.panel-open h3 a').map(function(i, a) { return a.textContent.trim(); });");
+    }
+
+    this.getFilters = function () {
+        return element.all(by.css(".filter-label.label-default"));
+    }
+
+    this.getClearAllFilters = function () {
+        return element(by.id("clear-all-filters"));
+    }
+
+    this.getFacetOptions = function (idx) {
+        return element(by.id("fc-" + idx)).all(by.css(".chaise-checkbox label"));
+    }
+
+    this.getCheckedFacetOptions = function (idx) {
+        return element(by.id("fc-" + idx)).all(by.css(".chaise-checkbox input[checked=checked]"));
+    }
+
+    this.getFacetOptionsText = function (idx) {
+        return browser.executeScript("return $('#fc-" + idx + " .chaise-checkbox label').map(function(i, a) { return a.textContent.trim(); });");
+    }
+
+    // just getting the text content returns a stringified JSON value (that is not properly stringified) with hidden characters, stringifying that shows the hidden characters
+    // but if we parse the odd stringfied version to JSON then stringify it, we can effectively clean up those hidden characters and get a simple string reprsentation
+    this.getJsonbFacetOptionsText = function (idx) {
+        return browser.executeScript("return $('#fc-" + idx + " .chaise-checkbox label').map(function(i, a) { return (i != 0 ? JSON.stringify(JSON.parse(a.textContent.trim())) : a.textContent.trim() ); });");
+    }
+
+    this.getFacetOption = function (idx, option) {
+        return element(by.id("fc-" + idx)).element(by.id("checkbox-" + option));
+    }
+
+    this.getFacetSearchBox = function (idx) {
+        return element(by.id("fc-" + idx)).element(by.css(".facet-search-input"));
+    }
+
+    this.getFacetSearchBoxClear = function (idx) {
+        return element(by.id("fc-" + idx)).element(by.css(".facet-search-clear"));
+    }
+
+    this.getList = function (idx) {
+        return element(by.id("fc-" + idx)).element(by.css(".chaise-list-container"));
+    }
+
+    this.getShowMore = function (idx) {
+        return element(by.id("fc-" + idx)).element(by.id("show-more"));
+    }
+
+    this.getCheckedModalOptions = function () {
+        return element(by.css(".modal-body")).all(by.css(".chaise-checkbox input[checked=checked]"));
+    }
+
+    this.getModalOptions = function () {
+        return element(by.css(".modal-body")).all(by.css(".chaise-checkbox input"));
+    }
+
+    this.getModalSubmit = function () {
+        return element(by.css(".modal-body")).element(by.css(".multi-select-submit-btn"));
+    }
+
+    // there's integer/float/date/timestamp inputs
+    this.getRangeMinInput = function (idx, className) {
+        return element(by.id("fc-" + idx)).element(by.css("." + className));
+    }
+
+    this.getRangeMaxInput = function (idx, className) {
+        return element(by.id("fc-" + idx)).element(by.css("." + className));
+    }
+
+    this.getInputClear = function (idx, className) {
+        return element(by.id("fc-" + idx)).element(by.css("." + className));
+    }
+
+    this.getValidationError = function (idx) {
+        return element(by.id("fc-" + idx)).element(by.css(".validation-error div:not(.ng-hide)"));
+    }
+
+    this.getRangeSubmit = function (idx) {
+        return element(by.id("fc-" + idx)).element(by.css("button[type=submit]"));
+    }
 };
 
 // Makes a string safe and valid for use in an HTML element's id attribute.

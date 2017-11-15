@@ -47,10 +47,12 @@
             link: function(scope) {
                 scope.deleteFn = function deleteFn() {
                     if (!CONFIRM_DELETE) {
+                        scope.$root.showSpinner = true;
                         return scope.callback();
                     }
                     var modalInstance = createModal();
                     modalInstance.result.then(function success() {
+                        scope.$root.showSpinner = true;
                         return scope.callback();
                     });
                 }
