@@ -391,22 +391,26 @@ var recordEditPage = function() {
 
     this.getForeignKeyInputDisplay = function(columnDisplayName, index) {
         columnDisplayName = makeSafeIdAttr(columnDisplayName);
-        return element(by.id("row-" + index + '-' + columnDisplayName + "-display"));
+        return element(by.id("form-" + index + '-' + columnDisplayName + "-display"));
     };
 
     this.getForeignKeyInputValue = function(columnDisplayName, index) {
         columnDisplayName = makeSafeIdAttr(columnDisplayName);
-        return element(by.id("row-" + index + '-' + columnDisplayName + "-input"));
+        return element(by.id("form-" + index + '-' + columnDisplayName + "-input"));
     };
 
     this.getForeignKeyInputButton = function(columnDisplayName, index) {
         columnDisplayName = makeSafeIdAttr(columnDisplayName);
-        return element(by.id("row-" + index + '-' + columnDisplayName + "-button"));
+        return element(by.id("form-" + index + '-' + columnDisplayName + "-button"));
     };
 
     this.getForeignKeyInputs = function() {
         return element.all(by.css(".popup-select-value"));
     };
+
+    this.getUploadInput = function (columnName, index) {
+        return element(by.id("form-" + index + '-' + columnName + "-input")).element(by.css("input[name='txt" + columnName + "']"));
+    }
 
     this.getInputValue = function(columnName, index) {
         index = index || 0;
