@@ -90,7 +90,6 @@
         $scope.navbarBrand = (chaiseConfig['navbarBrand'] !== undefined? chaiseConfig.navbarBrand : "");
         $scope.navbarBrandImage = (chaiseConfig['navbarBrandImage'] !== undefined? chaiseConfig.navbarBrandImage : "");
         $scope.navbarBrandText = (chaiseConfig['navbarBrandText'] !== undefined? chaiseConfig.navbarBrandText : "Chaise");
-        $scope.enableEditBasedOnFaceting = chaiseConfig.showFaceting == true ? false : true;
 
         function updateLocation() {
             $window.scrollTo(0, 0);
