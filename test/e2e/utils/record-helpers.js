@@ -1,5 +1,6 @@
 var chaisePage = require('../utils/chaise.page.js');
 var mustache = require('../../../../ermrestjs/vendor/mustache.min.js');
+var EC = protractor.ExpectedConditions;
 
 exports.testPresentation = function (tableParams) {
 	it("should have '" + tableParams.title +  "' as title", function() {
@@ -23,8 +24,7 @@ exports.testPresentation = function (tableParams) {
 	});
 
     it("should show the action buttons properly", function() {
-        var EC = protractor.ExpectedConditions,
-            editButton = chaisePage.recordPage.getEditRecordButton(),
+        var editButton = chaisePage.recordPage.getEditRecordButton(),
             createButton = chaisePage.recordPage.getCreateRecordButton(),
             deleteButton = chaisePage.recordPage.getDeleteRecordButton(),
             showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton();
@@ -166,6 +166,7 @@ exports.testPresentation = function (tableParams) {
         var displayName, tableCount, title,
             relatedTables = tableParams.related_tables;
 
+        browser.wait(EC.not(EC.visibilityOf(chaisePage.recordPage.getLoadingElement())), browser.params.defaultTimeout);
         browser.wait(function() {
             return chaisePage.recordPage.getRelatedTablesWithPanel().count().then(function(ct) {
                 return (ct=relatedTables.length);
@@ -240,15 +241,35 @@ exports.testPresentation = function (tableParams) {
 
     it("visible column related table with inline inbound fk should display 'None' in markdown disply mode if no data was found.",function(){
         var EC = protractor.ExpectedConditions,
-            markdownEntity = element(by.id('entity-4-markdown'));
-        
-        chaisePage.waitForElement(element(by.id('entity-booking'))).then(function(){
-            return browser.executeScript("return $('#entity-booking .btn-group .delete-action-button')");
-        }).then( function(deleteButtons){
-            for(var i = 0; i < deleteButtons.length; i++){
-                deleteButtons[0].click();
-                browser.executeScript("return $('#delete-confirmation').click()");
-            }
+            markdownEntity = element(by.id('entity-4-markdown')),
+            bookingName = "booking";
+
+
+        chaisePage.waitForElement(element(by.id("rt-" + bookingName))).then(function(){
+            return chaisePage.recordPage.getDeleteActionButtons(bookingName);
+        }).then(function(deleteButtons) {
+            return deleteButtons[0].click();
+        }).then(function () {
+            return chaisePage.recordPage.getConfirmDeleteButton().click();
+        }).then(function () {
+            browser.wait(function () {
+                return chaisePage.recordPage.getDeleteActionButtons(bookingName).count().then(function (ct) {
+                    return (ct==1);
+                });
+            });
+
+            return chaisePage.recordPage.getDeleteActionButtons(bookingName);
+        }).then(function (deleteButtons) {
+            return deleteButtons[0].click();
+        }).then(function () {
+            return chaisePage.recordPage.getConfirmDeleteButton().click();
+        }).then(function () {
+            browser.wait(function() {
+                return chaisePage.recordPage.getRelatedTableRows(bookingName).count().then(function(ct) {
+                    return (ct==0);
+                });
+            }, browser.params.defaultTimeout);
+
             return browser.executeScript("return $('a.toggle-display-link').click()");        
         }).then(function(){
             browser.wait(EC.visibilityOf(markdownEntity), browser.params.defaultTimeout);

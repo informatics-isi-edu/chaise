@@ -149,51 +149,6 @@
             return transformedRow;
         }
 
-        // This function checks whether file columns are getting the correct url and
-        // are not nul if nullok is false
-        function areFilesValid(rows) {
-            var isValid = true, index = 0;
-            // Iterate over all rows that are passed as parameters to the modal controller
-            rows.forEach(function(row) {
-
-                index++;
-
-                // Iterate over each property/column of a row
-                for(var k in row) {
-
-                    // If the column type is object and has a file property inside it
-                    // Then increment the count for no of files and create an uploadFile Object for it
-                    // Push this to the tuple array for the row
-                    // NOTE: each file object has an hatracObj property which is an hatrac object
-                    try {
-                        var column = $rootScope.reference.columns.find(function(c) { return c.name == k;  });
-                        if (column.isAsset) {
-
-                            if (row[k].url == "" && !column.nullok) {
-                                isValid = false;
-                                AlertsService.addAlert({type: 'error', message: "Please select file for column " + k + " for record " + index });
-                            } else if (row[k] != null && typeof row[k] == 'object' && row[k].file) {
-                                try {
-                                    if (!row[k].hatracObj.validateURL(row)) {
-                                        isValid = false;
-                                        AlertsService.addAlert({type: 'error', message: "Invalid url template for column " + k + " for record " + index });
-                                    }
-                                } catch(e) {
-                                    isValid = false;
-                                    AlertsService.addAlert({type: 'error', message: "Invalid url template for column " + k + " for record " + index });
-                                }
-                            }
-                        }
-                    } catch(e) {
-                        //NOthing to do
-                    }
-
-                }
-            });
-
-            return isValid;
-        }
-
         /**
          * onSuccess - callback after results are added
          *

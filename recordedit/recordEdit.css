@@ -144,6 +144,16 @@ td.entity-key, #formEdit >  table > tbody >  tr:first-child >  td:first-child {
   cursor: not-allowed !important;
 }
 
+.form-control[readonly] {
+    background-color: #fff;
+    opacity: 1;
+}
+
+.form-control[readonly][disabled] {
+    background-color: #eee;
+    opacity: 1;
+}
+
 #formEdit.editMode >  table > tbody >  tr >  td:last-child {
   border-right: 0px;
 }

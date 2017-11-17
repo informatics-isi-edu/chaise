@@ -1,7 +1,7 @@
 {
     "setup": {
         "schemaConfigurations": [
-            "recordedit/add-defaults.config.json",
+            "recordedit/immutable-inputs.config.json",
             "recordedit/add-multi.config.json",
             "recordedit/composite-key.config.json",
             "recordedit/domain-filter.config.json",

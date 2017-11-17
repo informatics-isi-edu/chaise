@@ -84,7 +84,8 @@
                         "typename": "text"
                     },
                     "annotations": {
-                        "tag:isrd.isi.edu,2016:generated": null
+                        "tag:isrd.isi.edu,2016:generated": null,
+                        "tag:isrd.isi.edu,2016:immutable": null
                     }
                 }, {
                     "name": "markdown",
@@ -101,7 +102,8 @@
                         "typename": "markdown"
                     },
                     "annotations": {
-                        "tag:isrd.isi.edu,2016:generated": null
+                        "tag:isrd.isi.edu,2016:generated": null,
+                        "tag:isrd.isi.edu,2016:immutable": null
                     }
                 }, {
                     "name": "foreign_key",
@@ -118,7 +120,8 @@
                         "typename": "int4"
                     },
                     "annotations": {
-                        "tag:isrd.isi.edu,2016:generated": null
+                        "tag:isrd.isi.edu,2016:generated": null,
+                        "tag:isrd.isi.edu,2016:immutable": null
                     }
                 }, {
                     "name": "int",
@@ -135,7 +138,8 @@
                         "typename": "int"
                     },
                     "annotations": {
-                        "tag:isrd.isi.edu,2016:generated": null
+                        "tag:isrd.isi.edu,2016:generated": null,
+                        "tag:isrd.isi.edu,2016:immutable": null
                     }
                 }, {
                     "name": "float",
@@ -152,10 +156,10 @@
                         "typename": "float4"
                     },
                     "annotations": {
-                        "tag:isrd.isi.edu,2016:generated": null
+                        "tag:isrd.isi.edu,2016:generated": null,
+                        "tag:isrd.isi.edu,2016:immutable": null
                     }
-                },
-                {
+                }, {
                     "name": "json",
                     "default": "{\"name\":\"testing_json\"}",
                     "nullok": true,
@@ -170,10 +174,10 @@
                         "typename": "json"
                     },
                     "annotations": {
-                        "tag:isrd.isi.edu,2016:generated": null
+                        "tag:isrd.isi.edu,2016:generated": null,
+                        "tag:isrd.isi.edu,2016:immutable": null
                     }
-                }, 
-                {
+                }, {
                    "name": "json_disabled_no_default",
                    "default": null,
                    "nullok": true,
@@ -181,10 +185,10 @@
                        "typename": "json"
                    },
                    "annotations": {
-                       "tag:isrd.isi.edu,2016:generated": null
+                       "tag:isrd.isi.edu,2016:generated": null,
+                       "tag:isrd.isi.edu,2016:immutable": null
                    }
-               },
-                {
+               }, {
                     "name": "boolean_true",
                     "default": "true",
                     "nullok": true,
@@ -206,7 +210,8 @@
                         "typename": "boolean"
                     },
                     "annotations": {
-                        "tag:isrd.isi.edu,2016:generated": null
+                        "tag:isrd.isi.edu,2016:generated": null,
+                        "tag:isrd.isi.edu,2016:immutable": null
                     }
                 }, {
                     "name": "date",
@@ -223,7 +228,8 @@
                         "typename": "date"
                     },
                     "annotations": {
-                        "tag:isrd.isi.edu,2016:generated": null
+                        "tag:isrd.isi.edu,2016:generated": null,
+                        "tag:isrd.isi.edu,2016:immutable": null
                     }
                 }, {
                     "name": "timestamp",
@@ -240,7 +246,8 @@
                         "typename": "timestamp"
                     },
                     "annotations": {
-                        "tag:isrd.isi.edu,2016:generated": null
+                        "tag:isrd.isi.edu,2016:generated": null,
+                        "tag:isrd.isi.edu,2016:immutable": null
                     }
                 }, {
                     "name": "timestamp_disabled_no_default",
@@ -250,7 +257,8 @@
                         "typename": "timestamp"
                     },
                     "annotations": {
-                        "tag:isrd.isi.edu,2016:generated": null
+                        "tag:isrd.isi.edu,2016:generated": null,
+                        "tag:isrd.isi.edu,2016:immutable": null
                     }
                 }, {
                     "name": "timestamptz",
@@ -267,7 +275,8 @@
                         "typename": "timestamptz"
                     },
                     "annotations": {
-                        "tag:isrd.isi.edu,2016:generated": null
+                        "tag:isrd.isi.edu,2016:generated": null,
+                        "tag:isrd.isi.edu,2016:immutable": null
                     }
                 }, {
                     "name": "timestamptz_disabled_no_default",
@@ -277,10 +286,55 @@
                         "typename": "timestamptz"
                     },
                     "annotations": {
-                        "tag:isrd.isi.edu,2016:generated": null
+                        "tag:isrd.isi.edu,2016:generated": null,
+                        "tag:isrd.isi.edu,2016:immutable": null
+                    }
+                }, {
+                    "name": "asset_disabled",
+                    "default": null,
+                    "nullok": true,
+                    "type": {
+                        "typename": "text"
+                    },
+                    "annotations": {
+                        "tag:isrd.isi.edu,2017:asset": {
+                            "url_pattern": "/hatrac/js/chaise/{{{_timestamptz}}}/{{{_asset.md5_hex}}}",
+                            "filename_column": "filename",
+                            "byte_count_column": "bytes",
+                            "md5": "md5"
+                        },
+                        "tag:isrd.isi.edu,2016:immutable": null
+                    }
+                }, {
+                    "name": "filename",
+                    "default": null,
+                    "nullok": true,
+                    "type": {
+                        "typename": "text"
+                    }
+                }, {
+                    "name": "bytes",
+                    "default": null,
+                    "nullok": true,
+                    "type": {
+                        "typename": "int8"
+                    }
+                }, {
+                    "name": "md5",
+                    "default": null,
+                    "nullok": true,
+                    "type": {
+                        "typename": "text"
                     }
                 }
-            ]
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:visible-columns": {
+                    "entry/create": ["text", "text_disabled", "markdown", "markdown_disabled", ["defaults", "fk_text"], ["defaults", "fk_text_disabled"], "int", "int_disabled", "float", "float_disabled", "boolean_true", "boolean_false", "boolean_disabled", "date", "date_disabled", "timestamp", "timestamp_disabled", "timestamp_disabled_no_default", "timestamptz", "timestamptz_disabled", "timestamptz_disabled_no_default", "json", "json_disabled", "json_disabled_no_default"],
+                    "entry/edit": ["text", "text_disabled", "markdown_disabled", ["defaults", "fk_text_disabled"], "int_disabled", "float_disabled", "boolean_disabled", "date_disabled", "timestamp_disabled", "timestamptz_disabled", "json_disabled", "asset_disabled"],
+                    "detailed": ["text", "text_disabled", "markdown", "markdown_disabled", ["defaults", "fk_text"], ["defaults", "fk_text_disabled"], "int", "int_disabled", "float", "float_disabled", "boolean_true", "boolean_false", "boolean_disabled", "date", "date_disabled", "timestamp", "timestamp_disabled", "timestamp_disabled_no_default", "timestamptz", "timestamptz_disabled", "timestamptz_disabled_no_default", "json", "json_disabled", "json_disabled_no_default"]
+                }
+            }
         },
         "foreign-text-table": {
             "comment": "Table to represent a foreign related entity.",

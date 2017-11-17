@@ -1,9 +1,5 @@
 {
-    "catalog": {
-        "acls": {
-            "write": ["*"]
-        }
-    },
+    "catalog": {},
     "schema": {
         "name": "fk-filter-pattern",
         "createNew": true,

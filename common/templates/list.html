@@ -1,7 +1,7 @@
 <ul class="chaise-list-container">
     <span ng-if="initialized && rows.length === 0">No Results Found</span>
     <li ng-repeat="row in rows track by $index" class="chaise-checkbox ellipsis-text">
-        <input type="checkbox" ng-checked="row.selected" ng-click="onSelect(row, $event)" />
+        <input id="checkbox-{{$index}}" type="checkbox" ng-checked="row.selected" ng-click="onSelect(row, $event)" />
         <label ng-if="row.displayname.value && row.displayname.isHTML" ng-bind-html="row.displayname.value" tooltip-enable="tooltipEnabled" uib-tooltip-html="row.displayname.value" tooltip-placement="bottom" chaise-enable-width></label>
         <label ng-if="row.displayname.value && !row.displayname.isHTML" ng-bind="row.displayname.value" tooltip-enable="tooltipEnabled" uib-tooltip="{{row.displayname.value}}" tooltip-placement="bottom" chaise-enable-tooltip-width></label>
         <label ng-if="row.displayname.value == ''" tooltip-enable="tooltipEnabled" uib-tooltip="Empty" tooltip-placement="bottom" chaise-enable-tooltip-width>

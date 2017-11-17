@@ -27,15 +27,17 @@
                         scope.fileEl
                             .bind('change', function (event) {
 
-                                // set the reference value object with selected file, url/filename
-                                // and also create an Upload object and save it as hatracObj in the value object
-                                scope.value.file = event.target.files[0];
-                                scope.value.hatracObj = new ERMrest.Upload(scope.value.file, {
-                                    column: scope.column,
-                                    reference: scope.reference
-                                });
-                                scope.value.url = scope.value.file.name;
-                                scope.$apply();
+                                if (event.target.files.length) {
+                                    // set the reference value object with selected file, url/filename
+                                    // and also create an Upload object and save it as hatracObj in the value object
+                                    scope.value.file = event.target.files[0];
+                                    scope.value.hatracObj = new ERMrest.Upload(scope.value.file, {
+                                        column: scope.column,
+                                        reference: scope.reference
+                                    });
+                                    scope.value.url = scope.value.file.name;
+                                    scope.$apply();
+                                }
                             });
 
                     }, 10);
