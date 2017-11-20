@@ -168,6 +168,7 @@
                 }
                 else if(page.tuples.length > 1){
                     $rootScope.displayReady = true;
+                    // TODO this will break going to recordset with filters/facets, make sure RS has proper data visible
                     throw new Errors.multipleRecordError(recordSetLink);
                 }
 
