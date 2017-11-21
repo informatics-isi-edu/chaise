@@ -1119,7 +1119,6 @@ describe("Viewing Recordset with Faceting,", function() {
 
                 return chaisePage.recordEditPage.getForms().count();
             }).then(function(count) {
-                browser.pause();
                 expect(count).toBe(25);
             });
         });
