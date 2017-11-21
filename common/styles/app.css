@@ -1428,3 +1428,26 @@ input[type=number]::-moz-placeholder {
 .selected-rows {
     min-height: 45px;
 }
+
+@media print {
+    #main-content {
+        height: auto !important;
+    }
+
+    #footer {
+        display: none;
+    }
+
+    a[href]:after {
+        content: none !important;
+    }
+
+    .entity-key {
+        width: auto;
+        max-width: 100px;
+    }
+
+    .entity-value {
+        width: auto;
+    }
+}
