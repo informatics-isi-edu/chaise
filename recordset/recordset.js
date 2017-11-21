@@ -274,7 +274,7 @@
                 // Unsubscribe onchange event to avoid this function getting called again
                 Session.unsubscribeOnChange(subId);
 
-                ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
+                ERMrest.resolve(ermrestUri, { cid: context.appName, pid: context.pageId, wid: $window.name }).then(function getReference(reference) {
                     session = Session.getSessionValue();
 
                     var location = reference.location;

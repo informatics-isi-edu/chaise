@@ -14,8 +14,9 @@
         /**
          * areFilesValid - checks whether file columns are getting the correct url and are not null if nullok is false
          *
-         * @param  {array} rows   array contains updated recrds attributes
-         * @return {boolean} whether rows have valid file columns or not 
+         * @param  {array} rows           array contains updated recrds attributes
+         * @param  {object} rsReference   record reference object
+         * @return {boolean}              whether rows have valid file columns or not 
          */
         function areFilesValid(rows, rsReference) {
             var isValid = true, index = 0;
