@@ -1444,7 +1444,7 @@ input[type=number]::-moz-placeholder {
 
     .entity-key {
         width: auto;
-        max-width: 100px;
+        max-width: 120px;
     }
 
     .entity-value {
