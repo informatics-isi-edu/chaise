@@ -161,7 +161,7 @@
                 *  recordSetLink should be used to present user with  an option in case of no data found/more data found(>1)
                 *  This could be link to RECORDSET or SEARCH.
                 */
-                var recordSetLink = page.reference.contextualize.compact.appLink;
+                var recordSetLink = page.reference.unfiltered.contextualize.compact.appLink;
 
                 if (page.tuples.length < 1) {
                     throw new Errors.noRecordError({}, recordSetLink);
@@ -169,6 +169,8 @@
                 else if(page.tuples.length > 1){
                     $rootScope.displayReady = true;
                     // TODO this will break going to recordset with filters/facets, make sure RS has proper data visible
+                    // the problem is that if there's a filter in the URL, the app will redirect to recordset and understand the filter, but the app won't show anything
+                    // selected inside the facet. So we will have a recordset page that is filtered by a filter you cant remove unless the URL is changed
                     throw new Errors.multipleRecordError(recordSetLink);
                 }
 
