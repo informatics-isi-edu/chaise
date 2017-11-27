@@ -1,4 +1,5 @@
 var chaisePage = require('../../../utils/chaise.page.js');
+var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
 var EC = protractor.ExpectedConditions;
 var testParams = {
     schema_name: "faceting",
@@ -230,7 +231,21 @@ var testParams = {
         { facetIdx: 11, option: 0, numOptions: 2, numRows: 5 },
         { facetIdx: 12, option: 0, numOptions: 1, numRows: 5 },
         { facetIdx: 13, option: 1, numOptions: 5, numRows: 1 }
-    ]
+    ],
+    recordColumns: [ "text_col", "longtext_col", "markdown_col", "int_col", "float_col", "date_col", "timestamp_col", "boolean_col", "jsonb_col", "faceting_main_fk1", "faceting_main_fk2" ],
+    recordValues: {
+        text_col: "one",
+        longtext_col: "one",
+        markdown_col: "one",
+        int_col: "11",
+        float_col: "11.1100",
+        date_col: "2001-01-01",
+        timestamp_col: "2001-01-01 01:01:01",
+        boolean_col: "true",
+        jsonb_col: JSON.stringify({"key":"one"},undefined,2),
+        faceting_main_fk1: "one",
+        faceting_main_fk2: "one"
+    }
 }
 
 describe("Viewing Recordset with Faceting,", function() {
@@ -1099,7 +1114,7 @@ describe("Viewing Recordset with Faceting,", function() {
 
         var uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
 
-        beforeAll(function () {
+        beforeEach(function () {
             browser.ignoreSynchronization=true;
             browser.get(uri);
             chaisePage.waitForElementInverse(element(by.id("spinner")));
@@ -1120,6 +1135,16 @@ describe("Viewing Recordset with Faceting,", function() {
                 return chaisePage.recordEditPage.getForms().count();
             }).then(function(count) {
                 expect(count).toBe(25);
+            });
+        });
+
+        it("navigating to record with a facet url", function () {
+            browser.getCurrentUrl().then(function (url) {
+                var uri = url.replace("recordset", "record");
+                browser.get(uri);
+
+                chaisePage.waitForElement(element(by.id('tblRecord')));
+                recordEditHelpers.testRecordAppValuesAfterSubmission(testParams.recordColumns, testParams.recordValues);
             });
         });
     });

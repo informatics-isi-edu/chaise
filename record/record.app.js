@@ -161,7 +161,7 @@
                 *  recordSetLink should be used to present user with  an option in case of no data found/more data found(>1)
                 *  This could be link to RECORDSET or SEARCH.
                 */
-                var recordSetLink = page.reference.unfiltered.contextualize.compact.appLink;
+                var recordSetLink = page.reference.unfilteredReference.contextualize.compact.appLink;
 
                 if (page.tuples.length < 1) {
                     throw new Errors.noRecordError({}, recordSetLink);
