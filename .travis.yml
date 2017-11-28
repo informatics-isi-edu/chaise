@@ -96,7 +96,6 @@ install:
   - sudo cat /var/www/html/chaise/version.txt
 
 before_script:
-  - export TZ=America/Los_Angeles
   - sudo -H -u webauthn webauthn2-manage adduser test1
   - sudo -H -u webauthn webauthn2-manage passwd test1 dummypassword
   - sudo -H -u webauthn webauthn2-manage addattr admin
