@@ -98,7 +98,7 @@
         function uploadFiles(submissionRowsCopy, rsReference, onSuccess) {
 
             // If url is valid
-            if (areFilesValid(viewModel.recordEditModel.submissionRows, rsReference)) {
+            if (areFilesValid(submissionRowsCopy, rsReference)) {
                 $uibModal.open({
                     templateUrl: "../common/templates/uploadProgress.modal.html",
                     controller: "UploadModalDialogController",

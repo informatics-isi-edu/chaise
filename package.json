@@ -48,6 +48,7 @@
     "karma-sinon-chai": "x",
     "mocha": "x",
     "moment": "^2.15.1",
+    "moment-timezone": "x",
     "phantomjs-prebuilt": "x",
     "protractor": "x",
     "q": "^1.4.1",
