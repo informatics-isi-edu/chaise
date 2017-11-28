@@ -616,7 +616,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                         // wait for the text to display before verifying it
                                         browser.wait(function() {
                                             return chaisePage.recordsetPage.getTotalCount().getText().then(function(text) {
-                                                return (text="Displaying " + col.count + " of " + col.totalCount + " Records");
+                                                return (text=="Displaying " + col.count + " of " + col.totalCount + " Records");
                                             });
                                         }, browser.params.defaultTimeout);
 
