@@ -82,8 +82,8 @@
                     </div>
                 </uib-accordion>
             </div>
+            <span id="rt-loading" ng-show="loading">Loading...</span>
         </div>
-        <span id="rt-loading" ng-show="loading">Loading...</span>
     </div>
     <footer></footer>
 </body>
