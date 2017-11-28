@@ -1,5 +1,6 @@
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
+var momentTz = require('moment-timezone');
 var testParams = {
     // for verifying data is present
     column_names: ["text", "text_disabled", "markdown", "markdown_disabled", "defaults_fk_text", "defaults_fk_text_disabled", "int", "int_disabled", "float", "float_disabled", "boolean_true", "boolean_false", "boolean_disabled", "date", "date_disabled", "timestamptz", "timestamptz_disabled", "json", "json_disabled", "json_disabled_no_default"],
@@ -252,6 +253,16 @@ describe("Record Edit with immutable columns", function() {
                         it("should initialize select input column: " + columnName + " with the proper value", function () {
                             var input = chaisePage.recordEditPage.getInputById(0, columnName);
                             expect(chaisePage.recordEditPage.getDropdownText(input)).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
+                        });
+                        break;
+                    case "timestamptz_disabled":
+                        // TODO: input value is being generated with GMT time because of travis server issues
+                        // do we want to use moment-timezone over moment?
+                        it("should initialize timestamptz input column: " + columnName + " with the proper value", function () {
+                            var input = chaisePage.recordEditPage.getInputById(0, columnName);
+                            input.getAttribute('value').then(function (val) {
+                                expect(momentTz(val, 'YYYY-MM-DDThh:mm:ssZ').tz("America/Los_Angeles").format('YYYY-MM-DDTHH:mm:ssZ')).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
+                            });
                         });
                         break;
                     default:
