@@ -49,6 +49,8 @@ E2EnavbarHeadTitle=test/e2e/specs/all-features-confirmation/navbar/protractor.co
 E2EmultiPermissionsVisibility=test/e2e/specs/all-features/permissions-visibility.conf.js
 # footer test
 E2Efooter=test/e2e/specs/all-features-confirmation/footer/protractor.conf.js
+# errors test
+E2Eerrors=test/e2e/specs/all-features-confirmation/errors/protractor.conf.js
 ## Parallel protractor scripts
 FullFeaturesParallel=test/e2e/specs/all-features/protractor.conf.js
 FullFeaturesConfirmationParallel=test/e2e/specs/all-features-confirmation/protractor.conf.js
@@ -65,6 +67,7 @@ RECORDADD_TESTS=$(E2EDIrecordAdd) $(E2EDIrecordMultiAdd) $(E2EDIrecordImmutable)
 RECORDEDIT_TESTS=$(E2EDIrecordEdit) $(E2EDIrecordMultiEdit) $(E2EDrecordEditCompositeKey) $(E2ErecordEditNoDeleteBtn) $(E2EDrecordEditSubmissionDisabled) $(E2EDIrecordEditMultiColTypes) $(E2EDrecordEditDomainFilter)
 PERMISSIONS_TESTS=$(E2EmultiPermissionsVisibility)
 FOOTER_TESTS=$(E2Efooter)
+ERRORS_TESTS=$(E2Eerrors)
 DEFAULT_CONFIG_PARALLEL_TESTS=$(DefaultConfigParallel)
 DELETE_PROHIBITED_PARALLEL_TESTS=$(DeleteProhibitedParallel)
 FULL_FEATURES_CONFIRMATION_PARALLEL_TESTS=$(FullFeaturesConfirmationParallel)
@@ -72,7 +75,7 @@ FULL_FEATURES_PARALLEL_TESTS=$(FullFeaturesParallel)
 PARALLEL_TESTS=$(FullFeaturesParallel) $(FullFeaturesConfirmationParallel) $(DeleteProhibitedParallel) $(DefaultConfigParallel)
 VIEWER_TESTS=$(E2EDviewer)
 
-ALL_TESTS=$(NAVBAR_TESTS) $(RECORD_TESTS) $(RECORDSET_TESTS) $(RECORDADD_TESTS) $(RECORDEDIT_TESTS) $(PERMISSIONS_TESTS) $(VIEWER_TESTS) $(SEARCH_TESTS) $(FOOTER_TESTS)
+ALL_TESTS=$(NAVBAR_TESTS) $(RECORD_TESTS) $(RECORDSET_TESTS) $(RECORDADD_TESTS) $(RECORDEDIT_TESTS) $(PERMISSIONS_TESTS) $(VIEWER_TESTS) $(SEARCH_TESTS) $(FOOTER_TESTS) $(ERRORS_TESTS)
 
 define make_test
 	rc=0; \
@@ -144,7 +147,11 @@ testdefaultconfig: test-DEFAULT_CONFIG_PARALLEL_TESTS
 
 #Rule to run the default chaise configuration tests in parallel
 .PHONY: testfooter
-testfooter: test-FOOTER_TESTS	
+testfooter: test-FOOTER_TESTS
+
+#Rule to run the default chaise configuration tests in parallel
+.PHONY: testerrors
+testerrors: test-ERRORS_TESTS
 
 # Rule to run tests
 .PHONY: test

@@ -59,6 +59,9 @@ var testParams = {
         title : "Multiple Records Found"
     }
 };
+errorTexts = {
+  deletionErrText : "This entry cannot be deleted as it is still referenced from the Image table. All dependent entries must be removed before this item can be deleted.\n\nClick OK to go to the Record Page Show Error Details"
+};
 
 
 
@@ -156,33 +159,6 @@ describe('View existing record,', function() {
                 return browser.driver.getCurrentUrl();
             }).then (function(currentUrl) {
                 expect(currentUrl).toContain("recordset", "The redirection from record page to recordset in case of multiple records failed");
-            }).catch( function(err) {
-                console.log(error);
-            });
-        });
-    });
-
-    describe("For no record found in Record app", function() {
-
-        beforeAll(function() {
-            var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + testParams.table_name +  "/id=11223312121";
-            browser.get(url);
-            chaisePage.waitForElement(element(by.css('.modal-dialog ')));
-        });
-
-        it('A error modal window should appear with Record Not Found title', function(){
-            var modalTitle = chaisePage.recordPage.getErrorModalTitle();
-            expect(modalTitle).toBe("Record Not Found", "The title of no record error pop is not correct");
-
-        });
-
-        it('On click of OK button the page should redirect to recordset/search page', function(){
-            chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
-                return btn.click();
-            }).then (function (){
-                return browser.driver.getCurrentUrl();
-            }).then (function(currentUrl) {
-                expect(currentUrl).toContain("recordset", "The redirection from record page to recordset/search in case of multiple records failed");
             }).catch( function(err) {
                 console.log(error);
             });
