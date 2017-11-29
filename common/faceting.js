@@ -761,8 +761,7 @@
                                     if (i !== -1) {
                                         return;
                                     }
-                                    
-                                    // currentValues[value] = true;
+
                                     scope.checkboxRows.push({
                                         selected: false,
                                         displayname: value == null ? {value: null, isHTML: false} : tuple.displayname,
@@ -829,6 +828,10 @@
                         params.selectedRows = scope.checkboxRows.filter(function (row) {
                             return row.selected;
                         });
+                        
+                        if (!scope.facetColumn.isEntityMode) {
+                            params.showNull = true;
+                        }
 
                         var modalInstance = $uibModal.open({
                             animation: false,

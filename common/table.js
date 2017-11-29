@@ -60,6 +60,7 @@
      *          - hideTotalCount
      *          - hidePageSettings
      *          - showFaceting
+     *          - showNull: if this is available and equal to `true`, we will differentiate between `null` and empty string.
      *
      * The events that are being used by directives in this file and their children:
      * 1. `reference-modified`: data model has been updated.
