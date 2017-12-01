@@ -222,7 +222,7 @@
                                             if (column.isAsset) {
                                                 recordEditModel.rows[j][column.name] = { url: values[i] || "" };
                                             } else if (column.type.name == "timestamptz") {
-                                                recordEditModel.rows[j][column.name] = moment(values[i]).format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+                                                recordEditModel.rows[j][column.name] = moment(values[i]).format('YYYY-MM-DDTHH:mm:ssZ');
                                             } else {
                                                 recordEditModel.rows[j][column.name] = values[i];
                                             }
