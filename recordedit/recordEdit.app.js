@@ -219,7 +219,13 @@
                                         // if not copy, populate the field without transforming it
                                         if (context.mode != context.modes.COPY) {
                                             // the structure for asset type columns is an object with a 'url' property
-                                            recordEditModel.rows[j][column.name] = column.isAsset ? { url: values[i] || "" } : values[i];
+                                            if (column.isAsset) {
+                                                recordEditModel.rows[j][column.name] = { url: values[i] || "" };
+                                            } else if (column.type.name == "timestamptz") {
+                                                recordEditModel.rows[j][column.name] = moment(values[i]).format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+                                            } else {
+                                                recordEditModel.rows[j][column.name] = values[i];
+                                            }
                                         }
                                         continue;
                                     }
