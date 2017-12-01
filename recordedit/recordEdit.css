@@ -2,7 +2,13 @@
     overflow-y: auto;
     overflow-x: hidden;
     margin-top: 5px;
-    padding-bottom: 40px;
+}
+
+.main-container:after {
+    content: "";
+    height: 40px;
+    display: block;
+    opacity: 0;
 }
 
 .padding-top-10 {
