@@ -7,7 +7,8 @@ exports.getConfig = function(options) {
       //browserName: 'internet explorer',
       //browserName: 'firefox',
       browserName: 'chrome',
-      //version: '62.0', //to specify the browser version
+      version: 'latest', //to specify the browser version
+      timeZone: "Los Angeles", // specify the timezone the browser should execute in
       //using firefox causes problems - not showing the right result and -
       //Apache log shows firefox is not requesting the server.
       'chromeOptions' : {
