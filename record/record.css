@@ -14,13 +14,6 @@
     margin-bottom: -50px;
 }
 
-.main-container:after {
-    content: "";
-    height: 40px;
-    display: block;
-    opacity: 0;
-}
-
 /******Related Entities**************/
 
 .panel{
