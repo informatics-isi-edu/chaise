@@ -75,7 +75,8 @@ before_install:
   - cd ErmrestDataUtils
   - sudo npm install
   - cd ..
-  - git clone https://github.com/informatics-isi-edu/ermrestjs.git
+  # - git clone https://github.com/informatics-isi-edu/ermrestjs.git
+  - git clone -b moment-tz --single-branch https://github.com/informatics-isi-edu/ermrestjs.git
   - cd ermrestjs
   - sudo npm install
   - bower install
