@@ -255,16 +255,16 @@ describe("Record Edit with immutable columns", function() {
                             expect(chaisePage.recordEditPage.getDropdownText(input)).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
                         });
                         break;
-                    case "timestamptz_disabled":
-                        // TODO: input value is being generated with GMT time because of travis server issues
-                        // do we want to use moment-timezone over moment?
-                        it("should initialize timestamptz input column: " + columnName + " with the proper value", function () {
-                            var input = chaisePage.recordEditPage.getInputById(0, columnName);
-                            input.getAttribute('value').then(function (val) {
-                                expect(momentTz(val, 'YYYY-MM-DDThh:mm:ssZ').tz("America/Los_Angeles").format('YYYY-MM-DDTHH:mm:ssZ')).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
-                            });
-                        });
-                        break;
+                    // case "timestamptz_disabled":
+                    //     // TODO: input value is being generated with GMT time because of travis server issues
+                    //     // do we want to use moment-timezone over moment?
+                    //     it("should initialize timestamptz input column: " + columnName + " with the proper value", function () {
+                    //         var input = chaisePage.recordEditPage.getInputById(0, columnName);
+                    //         input.getAttribute('value').then(function (val) {
+                    //             expect(momentTz(val, 'YYYY-MM-DDThh:mm:ssZ').tz("America/Los_Angeles").format('YYYY-MM-DDTHH:mm:ssZ')).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
+                    //         });
+                    //     });
+                    //     break;
                     default:
                         // normal inputs with values in input under value attribute
                         it("should initialize text input column: " + columnName + " with the proper value", function () {
