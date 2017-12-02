@@ -59,9 +59,7 @@ var testParams = {
         title : "Multiple Records Found"
     }
 };
-errorTexts = {
-  deletionErrText : "This entry cannot be deleted as it is still referenced from the Image table. All dependent entries must be removed before this item can be deleted.\n\nClick OK to go to the Record Page Show Error Details"
-};
+
 
 
 

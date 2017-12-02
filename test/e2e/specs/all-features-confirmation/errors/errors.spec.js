@@ -38,7 +38,7 @@ describe('Error related to Record App,', function() {
             }).then (function (){
                 return browser.driver.getCurrentUrl();
             }).then (function(currentUrl) {
-              var recordsetUrl = url.replace("record", "recordset") + "@sort(id)";
+                var recordsetUrl = url.replace("record", "recordset") + "@sort(id)";
                 expect(currentUrl).toBe(recordsetUrl, "The redirection from record page to recordset/search in case of multiple records failed");
             }).catch( function(err) {
                 console.log(error);
@@ -56,26 +56,22 @@ describe('Error related to Record App,', function() {
 
       it("should be returned as a 409 error with deletion conflict.", function () {
           var modalTitle = chaisePage.recordPage.getConfirmDeleteTitle(),
-              deleteReccordBtn = chaisePage.recordPage.getDeleteRecordButton(),
-              config;
+              deleteReccordBtn = chaisePage.recordPage.getDeleteRecordButton();
+
           chaisePage.waitForElement(element(by.id('tblRecord'))).then(function() {
-              return browser.executeScript('return chaiseConfig;');
-          }).then(function(chaiseConfig) {
-              config = chaiseConfig;
               chaisePage.waitForElement(deleteReccordBtn);
               return deleteReccordBtn.click();
           }).then(function () {
               chaisePage.waitForElement(modalTitle);
-              // expect modal to open
               return modalTitle.getText();
           }).then(function (text) {
-              expect(text).toBe("Confirm Delete");
+              expect(text).toBe("Confirm Delete", "Deleteion confirmation pop-up could not be opened!");
               chaisePage.recordPage.getConfirmDeleteButton().click();
               errModalClass =  chaisePage.recordPage.getModalText();
               chaisePage.waitForElement(errModalClass);
               return errModalClass.getText();
           }).then(function (errorText) {
-              expect(errorText).toBe(errorTexts.deletionErrText);
+              expect(errorText).toBe(errorTexts.deletionErrText, "409 Conflict could not be matched! Check conflict during deletion.");
           }).catch(function(error) {
               console.log(error);
               expect('Something went wrong with this promise chain.').toBe('Please see error message.');
