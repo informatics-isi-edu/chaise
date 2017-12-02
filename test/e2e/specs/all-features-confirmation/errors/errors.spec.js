@@ -2,7 +2,8 @@ var chaisePage = require('../../../utils/chaise.page.js');
 var recordHelpers = require('../../../utils/record-helpers.js');
 var testParams = {
     table_name: "accommodation",
-};
+},
+schemaName = "product-record",
 errorTexts = {
   deletionErrText : "This entry cannot be deleted as it is still referenced from the booking table. All dependent entries must be removed before this item can be deleted.\n\nClick OK to go to the Record Page Show Error Details",
   uniqueConstraint : "Error The entry cannot be created/updated. Please use a different ID for this record."
@@ -19,10 +20,9 @@ describe('Error related to Record App,', function() {
 
         beforeAll(function() {
           browser.ignoreSynchronization=true;
-            var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + testParams.table_name +  "/id=11223312121";
+            url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + schemaName + ":" + testParams.table_name +  "/id=11223312121";
             browser.get(url);
             chaisePage.waitForElement(element(by.css('.modal-dialog ')));
-            //  browser.sleep(15000);
         });
 
         it('A error modal window should appear with Record Not Found title', function(){
@@ -38,9 +38,11 @@ describe('Error related to Record App,', function() {
             }).then (function (){
                 return browser.driver.getCurrentUrl();
             }).then (function(currentUrl) {
-                expect(currentUrl).toContain("recordset", "The redirection from record page to recordset/search in case of multiple records failed");
+              var recordsetUrl = url.replace("record", "recordset") + "@sort(id)";
+                expect(currentUrl).toBe(recordsetUrl, "The redirection from record page to recordset/search in case of multiple records failed");
             }).catch( function(err) {
                 console.log(error);
+                expect('Something went wrong with this promise chain.').toBe('Please see error message.');
             });
         });
     });
@@ -48,7 +50,7 @@ describe('Error related to Record App,', function() {
     describe("Error formatting during 409 check", function(){
 
       beforeAll(function() {
-          var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + testParams.table_name +  "/id=2002";
+          var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + schemaName + ":" + testParams.table_name +  "/id=2002";
           browser.get(url);
       });
 
