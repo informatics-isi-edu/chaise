@@ -104,7 +104,7 @@
             rowValues:          [],
             selectedRows:       params.selectedRows,
             search:             reference.location.searchTerm,
-            config:             {viewable: false, editable: false, deletable: false, selectMode: params.selectMode},
+            config:             {viewable: false, editable: false, deletable: false, selectMode: params.selectMode, showNull: params.showNull === true},
             context:            params.context
         };
 

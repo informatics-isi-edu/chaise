@@ -60,6 +60,7 @@
      *          - hideTotalCount
      *          - hidePageSettings
      *          - showFaceting
+     *          - showNull: if this is available and equal to `true`, we will differentiate between `null` and empty string.
      *
      * The events that are being used by directives in this file and their children:
      * 1. `reference-modified`: data model has been updated.
@@ -435,7 +436,7 @@
         }
     }])
 
-    .directive('recordTable', ['AlertsService', 'recordTableUtils', function(AlertsService, recordTableUtils) {
+    .directive('recordTable', ['AlertsService', 'modalBox', 'recordTableUtils', function(AlertsService, modalBox, recordTableUtils) {
         
         function callOnRowClick(scope, tuples, isSelected) {
             if (scope.onRowClickBind) {
@@ -458,6 +459,9 @@
                 onRowClick: '&?'      // set row click function
             },
             link: function (scope, elem, attr) {
+                scope.noSelect = modalBox.noSelect;
+                scope.singleSelect = modalBox.singleSelectMode;
+                scope.multiSelect = modalBox.multiSelectMode;
 
                 scope.sortby = function(column) {
                     if (scope.vm.sortby !== column) {
