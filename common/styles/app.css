@@ -265,6 +265,13 @@ img.spinner-sm {
     top: 20px;
 }
 
+.main-container:after {
+    content: "";
+    height: 40px;
+    display: block;
+    opacity: 0;
+}
+
 
 /*** NESTED TABLES ***/
 
