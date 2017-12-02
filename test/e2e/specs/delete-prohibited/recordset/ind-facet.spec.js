@@ -240,7 +240,7 @@ var testParams = {
         int_col: "11",
         float_col: "11.1100",
         date_col: "2001-01-01",
-        timestamp_col: "2001-01-01 01:01:01",
+        timestamp_col: "2001-01-01 00:01:01",
         boolean_col: "true",
         jsonb_col: JSON.stringify({"key":"one"},undefined,2),
         faceting_main_fk1: "one",
