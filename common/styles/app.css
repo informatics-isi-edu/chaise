@@ -1414,17 +1414,6 @@ input[type=number]::-moz-placeholder {
 }
 
 /************** search popup **************/
-.search-popup {
-    
-}
-
-.multi-select-submit-btn {
-    position: absolute;
-    right: 10px;
-    top: 10px;
-    z-index: 2;
-}
-
 .selected-rows {
     min-height: 45px;
 }

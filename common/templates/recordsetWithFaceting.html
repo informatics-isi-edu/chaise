@@ -27,7 +27,7 @@
             </div>
             
             <div class="row">
-                <div ng-class="vm.config.hidePageSettings ? 'col-lg-8 col-md-8 col-sm-8 col-xs-8': 'col-lg-4 col-md-5 col-sm-6 col-xs-7'">
+                <div ng-class="vm.config.hidePageSettings ? 'col-lg-8 col-md-8 col-sm-8 col-xs-8': 'col-lg-4 col-md-5 col-sm-6 col-xs-6'">
                     <!-- search box -->
                     <div class="input-group has-feedback">
                         <input type="text"
@@ -51,30 +51,31 @@
                     </div>
                 </div>
                 
-                <div style="height: 34px;" ng-if="!vm.config.hidePageSettings">
-                <!-- pagination -->
-                <span class="dropdown" style="margin-left: 5px">
-                    <button id="page-size-dropdown" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Items per page
-                        <span class="caret"></span></button>
-                    <ul class="dropdown-menu dropdown-menu-right">
-                        <li ng-if="pageLimits.indexOf(vm.pageLimit) === -1"><a id="custom-page-size" href ng-click="setPageLimit(vm.pageLimit)">
-                            <span class="glyphicon glyphicon-ok"></span>
-                            {{ vm.pageLimit }} (Custom)</a>
-                        </li>
-                        <li ng-repeat="limit in pageLimits"><a id="page-size-{{limit}}" href ng-click="setPageLimit(limit)">
-                            <span class="glyphicon" ng-class="vm.pageLimit === limit ? 'glyphicon-ok' : 'glyphicon-invisible'"></span>
-                            {{ limit }}</a>
-                        </li>
-                    </ul>
-                </span>
-            </div>
-            </div>
-            
-            <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1 pull-right" align="right">
-                <!-- add record -->
-                <button id="add-record-btn" type="button" class="btn btn-primary btn-inverted" ng-if="vm.reference.canCreate && allowCreate" ng-click="addRecord()"  tooltip-placement="bottom" uib-tooltip="Create new record">
-                    <span class="glyphicon glyphicon-plus"></span>
-                </button>
+                <div style="height: 34px;" class="col-lg-3 col-md-4 col-sm-4 col-xs-4" ng-if="!vm.config.hidePageSettings">
+                    <!-- pagination -->
+                    <span class="dropdown" style="margin-left: 5px">
+                        <button id="page-size-dropdown" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Items per page
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-right">
+                            <li ng-if="pageLimits.indexOf(vm.pageLimit) === -1"><a id="custom-page-size" href ng-click="setPageLimit(vm.pageLimit)">
+                                <span class="glyphicon glyphicon-ok"></span>
+                                {{ vm.pageLimit }} (Custom)</a>
+                            </li>
+                            <li ng-repeat="limit in pageLimits"><a id="page-size-{{limit}}" href ng-click="setPageLimit(limit)">
+                                <span class="glyphicon" ng-class="vm.pageLimit === limit ? 'glyphicon-ok' : 'glyphicon-invisible'"></span>
+                                {{ limit }}</a>
+                            </li>
+                        </ul>
+                    </span>
+                </div>
+
+                <div class="col-lg-1 col-md-1 col-sm-2 col-xs-2 pull-right" align="right">
+                    <!-- add record -->
+                    <button id="add-record-btn" type="button" class="btn btn-primary btn-inverted" ng-if="vm.reference.canCreate && allowCreate" ng-click="addRecord()"  tooltip-placement="bottom" uib-tooltip="Create new record">
+                        <span class="glyphicon glyphicon-plus"></span>
+                    </button>
+                </div>
             </div>
         </div>
         
