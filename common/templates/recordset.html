@@ -72,7 +72,7 @@
             <div class="col-lg-2 col-md-2 col-sm-3 col-xs-3 pull-right" align="right">
                 <!-- submit selection -->
                 <span ng-if="vm.config.selectMode=='multi-select'">
-                    <button class="btn btn-primary btn-inverted pull-right multi-select-submit-btn" type="button" ng-click="ctrl.submit()" ng-disabled="vm.selectedRows.length < 1">Submit</button>
+                    <button class="btn btn-primary btn-inverted pull-right multi-select-submit-btn" type="button" ng-click="submitMulti()()" ng-disabled="vm.selectedRows.length < 1">Submit</button>
                 </span>
                 <!-- add record -->
                 <button id="add-record-btn" type="button" class="btn btn-primary btn-inverted" ng-if="vm.reference.canCreate && allowCreate" ng-click="addRecord()"  tooltip-placement="bottom" uib-tooltip="Create new record">
