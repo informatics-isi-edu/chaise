@@ -49,6 +49,8 @@
 
         var session,
             context = { booleanValues: ['', true, false] };
+        
+        $rootScope.showColumnSpinner = [{}];
 
         $rootScope.displayReady = false;
         $rootScope.showSpinner = false;
@@ -150,16 +152,31 @@
                 if (context.queryParams.prefill) {
                     // get the cookie with the prefill value
                     var cookie = $cookies.getObject(context.queryParams.prefill);
+                    var newRow = recordEditModel.rows.length - 1;
                     $rootScope.cookieObj = cookie;
                     if (cookie) {
                         // Update view model
-                        recordEditModel.rows[recordEditModel.rows.length - 1][cookie.constraintName] = cookie.rowname.value;
+                        recordEditModel.rows[newRow][cookie.columnName] = cookie.rowname.value;
+                        
+                        // the foreignkey data that we already have
+                        recordEditModel.foreignKeyData[newRow][cookie.constraintName] = cookie.keys;
+                        
+                        // show the spinner that means we're waiting for data.
+                        $rootScope.showColumnSpinner[newRow][cookie.columnName] = true;
+                        
+                        // get the actual foreignkey data
+                        ERMrest.resolve(cookie.origUrl, {cid: context.appName}).then(function (ref) {
+                            getForeignKeyData(newRow, cookie.columnName, cookie.constraintName, ref);
+                        }).catch(function (err) {
+                            $rootScope.showColumnSpinner[newRow][cookie.columnName] = false;
+                            console.log(err);
+                        });
 
                         // Update submission model
                         var columnNames = Object.keys(cookie.keys);
                         columnNames.forEach(function(colName) {
                             var colValue = cookie.keys[colName];
-                            recordEditModel.submissionRows[recordEditModel.submissionRows.length - 1][colName] = colValue;
+                            recordEditModel.submissionRows[newRow][colName] = colValue;
                         });
                     }
                     $log.info('Model: ', recordEditModel);
@@ -192,6 +209,7 @@
                             }
 
                             var column, value;
+                        
 
                             // $rootScope.tuples is used for keeping track of changes in the tuple data before it is submitted for update
                             $rootScope.tuples = [];
@@ -205,6 +223,9 @@
 
                                 var tuple = page.tuples[j],
                                     values = tuple.values;
+                                
+                                // attach the foreign key data of the tuple
+                                recordEditModel.foreignKeyData[j] = tuple.linkedData;
 
                                 // We don't want to mutate the actual tuples associated with the page returned from `reference.read`
                                 // The submission data is copied back to the tuples object before submitted in the PUT request
@@ -327,6 +348,15 @@
                                     // If there are no defaults, then just initialize asset columns with the app's default obj
                                     initialModelValue = { url: "" }
                                 }
+                            } else if (column.isForeignKey) {
+                                if (defaultSet) {
+                                    initialModelValue =  column.default;
+                                    recordEditModel.foreignKeyData[0][column.foreignKey.name] = column.defaultValues;
+                                    
+                                    // get the actual foreign key data
+                                    getForeignKeyData(0, column.name, column.foreignKey.name, column.defaultReference);
+                                    
+                                }
                             } else {
                                 // all other column types
                                 if (defaultSet) {
@@ -335,23 +365,42 @@
                             }
 
                             recordEditModel.rows[0][column.name] = initialModelValue;
-                        };
+                        }
 
                         $rootScope.displayReady = true;
                         // if there is a session, user isn't allowed to create
                     } else if (session) {
-                        var forbiddenError = new ERMrest.ForbiddenError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
-                        throw forbiddenError;
+                        throw new ERMrest.ForbiddenError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
                         // user isn't logged in and needs permissions to create
                     } else {
-                        var notAuthorizedError = new ERMrest.UnauthorizedError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
-                        throw notAuthorizedError;
+                        throw new ERMrest.UnauthorizedError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
                     }
                 }
             }, function error(response) {
                 throw response;
             });
         });
+        
+        
+        function getForeignKeyData (rowIndex, colName, fkName, fkRef) {
+            fkRef.contextualize.compactSelect.read(1).then(function (page) {
+                $rootScope.showColumnSpinner[rowIndex][colName] = true;
+                if ($rootScope.showColumnSpinner[rowIndex][colName]) {
+                    // default value is validated
+                    if (page.tuples.length > 0) {
+                        recordEditModel.foreignKeyData[rowIndex][colName] = page.tuples[rowIndex].data;
+                        recordEditModel.rows[rowIndex][colName] = page.tuples[rowIndex].displayname.value;
+                    } else {
+                        recordEditModel.foreignKeyData[rowIndex][fkName] = null;
+                        recordEditModel.rows[rowIndex][colName] = null;
+                    }
+                }
+                $rootScope.showColumnSpinner[rowIndex][colName] = false;
+            }).catch(function (err) {
+                $rootScope.showColumnSpinner[rowIndex][colName] = false;
+                console.log(err);
+            });
+        }
 
     }]);
 })();

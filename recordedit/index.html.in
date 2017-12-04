@@ -55,11 +55,11 @@
                                 <div class="row padding-right-15" ng-show="::!form.editMode">
                                     <div class="btn-group pull-right">
                                         <button id="copy-record-btn" class="btn btn-primary btn-inverted center-block" ng-click="::form.copyFormRow();" ng-if="::!form.editMode" type="button"
-                                            tooltip-placement="bottom" uib-tooltip="Click to add 1 record.">
+                                            ng-disabled="!form.canAddMore" tooltip-placement="bottom" uib-tooltip="Click to add 1 record.">
                                             <span class="glyphicon glyphicon-plus"></span>
                                         </button>
                                         <button id="copy-x-rows-btn" class="btn btn-primary btn-inverted center-block" ng-click="::(form.showMultiInsert = !form.showMultiInsert)" type="button"
-                                            tooltip-placement="bottom-right" uib-tooltip="Click to add a maximum of {{::form.MAX_ROWS_TO_ADD-1}} records.">
+                                            ng-disabled="!form.canAddMore" tooltip-placement="bottom-right" uib-tooltip="Click to add a maximum of {{::form.MAX_ROWS_TO_ADD-1}} records.">
                                             <span class="glyphicon glyphicon-chevron-down"></span>
                                         </button>
                                     </div>
@@ -158,6 +158,9 @@
                                                             ng-bind-html="(form.recordEditModel.rows[rowIndex][column.name] ? form.recordEditModel.rows[rowIndex][column.name] : form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]))"></div>
                                                         <div class="form-control-feedback coltooltip" ng-hide="(form.isDisabled(column)) || (!form.recordEditModel.rows[rowIndex][column.name])" ng-style="{'cursor': 'pointer', 'right': '40px', 'pointer-events': 'all'}">
                                                             <span class="glyphicon glyphicon-remove coltooltiptext foreignkey-remove" ng-click="::form.clearForeignKey(rowIndex, column)" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
+                                                        </div>
+                                                        <div class="form-control-feedback" ng-show="showColumnSpinner[rowIndex][column.name]" ng-style="{'right': '60px', 'pointer-events': 'all', 'color': '#C3C3C3'}">
+                                                            <span class="glyphicon glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
                                                         </div>
                                                         <span class="input-group-addon" ng-show="::!form.isDisabled(column);">
                                                             <button ng-focus="::form.blurElement($event);" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-button" class="btn btn-primary btn-inverted modal-popup-btn" type="button" ng-click="::form.searchPopup(rowIndex, column)" ng-disabled="::form.isDisabled(column);" tooltip-placement="bottom" uib-tooltip="Choose from an existing value.">

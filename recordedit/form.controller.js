@@ -3,7 +3,7 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'DataUtils', 'ErrorService', 'messageMap', 'modalBox', 'recordCreate', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$uibModal', '$window', 
+    .controller('FormController', ['AlertsService', 'DataUtils', 'ErrorService', 'messageMap', 'modalBox', 'recordCreate', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$uibModal', '$window',
         function FormController(AlertsService, DataUtils, ErrorService, messageMap, modalBox, recordCreate, recordEditModel, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $uibModal, $window) {
         var vm = this;
         var context = $rootScope.context;
@@ -149,19 +149,19 @@
             return transformedRow;
         }
 
-        /**        
-         * onSuccess - callback after results are added 
-         *          
-         * @param  {object} model  model contains updated record object                   
-         * @param  {object} result object has result messages          
-         */         
+        /**
+         * onSuccess - callback after results are added
+         *
+         * @param  {object} model  model contains updated record object
+         * @param  {object} result object has result messages
+         */
         function onSuccess (model, result){
             var page = result.successful;
             var failedPage = result.failed;
             var resultsReference = page.reference;
             if (model.rows.length == 1) {
                 vm.redirectAfterSubmission(page);
-            } 
+            }
             else {
                 AlertsService.addAlert("Your data has been submitted. Showing you the result set...","success");
 
@@ -216,7 +216,7 @@
                 vm.resultset = true;
         }
     }
-        
+
         function submit() {
             var originalTuple,
                 editOrCopy = true,
@@ -314,7 +314,7 @@
 
             var submissionRow = populateSubmissionRow(vm.recordEditModel.rows[rowIndex], vm.recordEditModel.submissionRows[rowIndex], originalTuple, $rootScope.reference.columns, editOrCopy);
 
-            params.reference = column.filteredRef(submissionRow).contextualize.compactSelect;
+            params.reference = column.filteredRef(submissionRow, vm.recordEditModel.foreignKeyData[rowIndex]).contextualize.compactSelect;
             params.reference.session = $rootScope.session;
             params.context = "compact/select";
             params.selectedRows = [];
@@ -335,6 +335,14 @@
                 // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
                 // set data in view model (model.rows) and submission model (model.submissionRows)
 
+                // udpate the foreign key data
+                vm.recordEditModel.foreignKeyData[rowIndex][column.foreignKey.name] = tuple.data;
+
+                // make sure the spinner is not showing
+                if ($rootScope.showColumnSpinner[rowIndex] && $rootScope.showColumnSpinner[rowIndex][column.name]) {
+                    $rootScope.showColumnSpinner[rowIndex][column.name] = false;
+                }
+
                 var foreignKeyColumns = column.foreignKey.colset.columns;
                 for (var i = 0; i < foreignKeyColumns.length; i++) {
                     var referenceCol = foreignKeyColumns[i];
@@ -349,6 +357,11 @@
 
         function clearForeignKey(rowIndex, column) {
             var model = vm.recordEditModel;
+
+            model.foreignKeyData[rowIndex][column.foreignKey.name] = null;
+            if ($rootScope.showColumnSpinner[rowIndex] && $rootScope.showColumnSpinner[rowIndex][column.name]) {
+                $rootScope.showColumnSpinner[rowIndex][column.name] = false;
+            }
 
             var foreignKeyColumns = column.foreignKey.colset.columns;
             for (var i = 0; i < foreignKeyColumns.length; i++) {
@@ -393,9 +406,11 @@
                     // transform row values to avoid parsing issues with null values
                     var transformedRow = transformRowValues(row);
                     var submissionRow = angular.copy(vm.recordEditModel.submissionRows[index]);
+                    var foreignKeyData = angular.copy(vm.recordEditModel.foreignKeyData[index]);
 
                     rowset.push(transformedRow);
                     vm.recordEditModel.submissionRows.push(submissionRow);
+                    vm.recordEditModel.foreignKeyData.push(foreignKeyData);
                 }
                 vm.showMultiInsert = false;
                 vm.numberRowsToAdd = 1;
@@ -576,6 +591,18 @@
                 if(elements.navbarHeight) {
                     UiUtils.setDisplayHeight(elements);
                 }
+            }
+        });
+
+        // if any of the columns is showing spinner, that means it's waiting for some
+        // data and therefore we should just disable the addMore button.
+        $rootScope.$watchCollection(function () {
+            return $rootScope.showColumnSpinner[$rootScope.showColumnSpinner.length-1];
+        }, function (newValue, oldValue) {
+            if (newValue && Object.values(newValue).some(function (v) {return v;})) {
+                vm.canAddMore = false;
+            } else {
+                vm.canAddMore = true;
             }
         });
 
