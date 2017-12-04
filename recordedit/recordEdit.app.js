@@ -38,7 +38,7 @@
     .config(['$uibTooltipProvider', function($uibTooltipProvider) {
         $uibTooltipProvider.options({appendToBody: true});
     }])
-    
+
     //  Enable log system, if in debug mode
     .config(['$logProvider', function($logProvider) {
         $logProvider.debugEnabled(chaiseConfig.debug === true);
@@ -49,7 +49,7 @@
 
         var session,
             context = { booleanValues: ['', true, false] };
-        
+
         $rootScope.showColumnSpinner = [{}];
 
         $rootScope.displayReady = false;
@@ -118,13 +118,13 @@
 
             // On resolution
             ERMrest.resolve(ermrestUri, { cid: context.appName, pid: context.pageId, wid: $window.name }).then(function getReference(reference) {
-                
-                
+
+
                 // we are using filter to determine app mode, the logic for getting filter
                 // should be in the parser and we should not duplicate it in here
                 // NOTE: we might need to change this line (we're parsing the whole url just for fidinig if there's filter)
                 var location = ERMrest.parse(ermrestUri);
-                
+
                 // Mode can be any 3 with a filter
                 if (location.filter || location.facets) {
                     // prefill always means create
@@ -153,17 +153,23 @@
                     // get the cookie with the prefill value
                     var cookie = $cookies.getObject(context.queryParams.prefill);
                     var newRow = recordEditModel.rows.length - 1;
-                    $rootScope.cookieObj = cookie;
-                    if (cookie) {
+
+                    // make sure cookie is correct
+                    var hasAllKeys = cookie && ["constraintName", "columnName", "origUrl", "rowname"].every(function (k) {
+                        return cookie.hasOwnProperty(k);
+                    });
+                    if (hasAllKeys) {
+                        $rootScope.cookieObj = cookie;
+
                         // Update view model
                         recordEditModel.rows[newRow][cookie.columnName] = cookie.rowname.value;
-                        
+
                         // the foreignkey data that we already have
                         recordEditModel.foreignKeyData[newRow][cookie.constraintName] = cookie.keys;
-                        
+
                         // show the spinner that means we're waiting for data.
                         $rootScope.showColumnSpinner[newRow][cookie.columnName] = true;
-                        
+
                         // get the actual foreignkey data
                         ERMrest.resolve(cookie.origUrl, {cid: context.appName}).then(function (ref) {
                             getForeignKeyData(newRow, cookie.columnName, cookie.constraintName, ref);
@@ -209,7 +215,7 @@
                             }
 
                             var column, value;
-                        
+
 
                             // $rootScope.tuples is used for keeping track of changes in the tuple data before it is submitted for update
                             $rootScope.tuples = [];
@@ -223,7 +229,7 @@
 
                                 var tuple = page.tuples[j],
                                     values = tuple.values;
-                                
+
                                 // attach the foreign key data of the tuple
                                 recordEditModel.foreignKeyData[j] = tuple.linkedData;
 
@@ -358,10 +364,10 @@
                                 if (defaultSet) {
                                     initialModelValue =  column.default;
                                     recordEditModel.foreignKeyData[0][column.foreignKey.name] = column.defaultValues;
-                                    
+
                                     // get the actual foreign key data
                                     getForeignKeyData(0, column.name, column.foreignKey.name, column.defaultReference);
-                                    
+
                                 }
                             } else {
                                 // all other column types
@@ -386,8 +392,8 @@
                 throw response;
             });
         });
-        
-        
+
+
         function getForeignKeyData (rowIndex, colName, fkName, fkRef) {
             fkRef.contextualize.compactSelect.read(1).then(function (page) {
                 $rootScope.showColumnSpinner[rowIndex][colName] = true;

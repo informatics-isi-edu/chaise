@@ -45,7 +45,7 @@
                     ],
                     "annotations": {
                         "tag:isrd.isi.edu,2016:foreign-key": {
-                            "domain_filter_pattern": "fk2={{{fk1}}}"
+                            "domain_filter_pattern": "fk2={{{_fk1}}}"
                         }
                     },
                     "referenced_columns": [
@@ -91,7 +91,7 @@
                     ],
                     "annotations": {
                         "tag:isrd.isi.edu,2016:foreign-key": {
-                            "domain_filter_pattern": "position_type_col={{{position_text_col}}}"
+                            "domain_filter_pattern": "position_type_col={{{_position_text_col}}}"
                         }
                     },
                     "referenced_columns": [
@@ -114,7 +114,7 @@
                     ],
                     "annotations": {
                         "tag:isrd.isi.edu,2016:foreign-key": {
-                            "domain_filter_pattern": "fk2={{{fk1}}}&position_col={{{position_text_col}}}"
+                            "domain_filter_pattern": "fk2={{{_fk1}}}&position_col={{{_position_text_col}}}"
                         }
                     },
                     "referenced_columns": [

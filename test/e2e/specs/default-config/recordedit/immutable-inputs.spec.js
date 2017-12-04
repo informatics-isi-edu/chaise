@@ -11,8 +11,8 @@ var testParams = {
         text_disabled_value: "Disabled input",
         markdown_value: "**bold**",
         markdown_disabled_value: "*italics*",
-        foreign_key_value: "2",
-        foreign_key_disabled_value: "5",
+        foreign_key_value: "Default for foreign_key column", // rowname of the fk
+        foreign_key_disabled_value: "Default for foreign_key_disabled column", // rowname of the fk
         int_value: "25",
         int_disabled_value: "20",
         float_value: "1.6478",
@@ -141,7 +141,7 @@ describe('Record Add with defaults', function() {
             expect(jsonInputDisabled.getAttribute("value")).toBe(values.json_disabled_value, "JSON disabled input default is incorrect");
 
         });
-        
+
         //JOSN columns
         it("should initialize json columns properly if they are disabled without a default.", function() {
             jsonDisabledNoDefaultInput = chaisePage.recordEditPage.getInputById(0, "json_disabled_no_default");
@@ -149,7 +149,7 @@ describe('Record Add with defaults', function() {
             expect(jsonDisabledNoDefaultInput.getAttribute("value")).toBe("", "The disabled json value is incorrect");
             expect(jsonDisabledNoDefaultInput.getAttribute("placeholder")).toBe(values.json_disabled_no_default_value, "The disabled json placeholder is incorrect");
         });
-        
+
         // Timestamp columns
         it("should intialize timestamp columns properly with a default value.", function() {
             timestampInputs = chaisePage.recordEditPage.getTimestampInputsForAColumn("timestamp", 0);
@@ -188,13 +188,16 @@ describe('Record Add with defaults', function() {
 
         // Foreign key columns
         it("should initialize foreign key inputs with their default value.", function() {
+            // the copy btn will be disabled while data is loading.
+            browser.wait(EC.elementToBeClickable(element(by.id("copy-record-btn"))));
+
             foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputDisplay("foreign_key", 0);
             foreignKeyDisabledInput = chaisePage.recordEditPage.getForeignKeyInputDisplay("foreign_key_disabled", 0);
 
             expect(foreignKeyInput.getText()).toBe(values.foreign_key_value, "Foreign key input default is incorrect");
             expect(foreignKeyDisabledInput.getText()).toBe(values.foreign_key_disabled_value, "Foreign key disabled default is incorrect");
         });
-        
+
         // TODO write tests for default values for composite foreign keys when implemented
 
         describe("Submit the form", function() {
