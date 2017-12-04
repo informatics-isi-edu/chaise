@@ -117,7 +117,7 @@
             Session.unsubscribeOnChange(subId);
 
             // On resolution
-            ERMrest.resolve(ermrestUri, { cid: context.appName }).then(function getReference(reference) {
+            ERMrest.resolve(ermrestUri, { cid: context.appName, pid: context.pageId, wid: $window.name }).then(function getReference(reference) {
                 
                 
                 // we are using filter to determine app mode, the logic for getting filter
@@ -240,7 +240,13 @@
                                         // if not copy, populate the field without transforming it
                                         if (context.mode != context.modes.COPY) {
                                             // the structure for asset type columns is an object with a 'url' property
-                                            recordEditModel.rows[j][column.name] = column.isAsset ? { url: values[i] || "" } : values[i];
+                                            if (column.isAsset) {
+                                                recordEditModel.rows[j][column.name] = { url: values[i] || "" };
+                                            } else if (column.type.name == "timestamptz") {
+                                                recordEditModel.rows[j][column.name] = moment(values[i]).format('YYYY-MM-DDTHH:mm:ssZ');
+                                            } else {
+                                                recordEditModel.rows[j][column.name] = values[i];
+                                            }
                                         }
                                         continue;
                                     }

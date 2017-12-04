@@ -1,6 +1,8 @@
 var chaisePage = require('../../../utils/chaise.page.js');
+var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
 var EC = protractor.ExpectedConditions;
 var testParams = {
+    schema_name: "faceting",
     table_name: "main",
     totalNumFacets: 14,
     facetNames: [ "id", "int_col", "float_col", "date_col", "timestamp_col", "text_col", "longtext_col", "markdown_col", "boolean_col", "jsonb_col", "F1", "to_name", "f3 (term)", "from_name" ],
@@ -229,7 +231,21 @@ var testParams = {
         { facetIdx: 11, option: 0, numOptions: 2, numRows: 5 },
         { facetIdx: 12, option: 0, numOptions: 1, numRows: 5 },
         { facetIdx: 13, option: 1, numOptions: 5, numRows: 1 }
-    ]
+    ],
+    recordColumns: [ "text_col", "longtext_col", "markdown_col", "int_col", "float_col", "date_col", "timestamp_col", "boolean_col", "jsonb_col", "faceting_main_fk1", "faceting_main_fk2" ],
+    recordValues: {
+        text_col: "one",
+        longtext_col: "one",
+        markdown_col: "one",
+        int_col: "11",
+        float_col: "11.1100",
+        date_col: "2001-01-01",
+        timestamp_col: "2001-01-01 00:01:01",
+        boolean_col: "true",
+        jsonb_col: JSON.stringify({"key":"one"},undefined,2),
+        faceting_main_fk1: "one",
+        faceting_main_fk2: "one"
+    }
 }
 
 describe("Viewing Recordset with Faceting,", function() {
@@ -237,7 +253,7 @@ describe("Viewing Recordset with Faceting,", function() {
     describe("For table " + testParams.table_name + ",", function() {
         
         var table, record,
-        uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/faceting:" + testParams.table_name;
+        uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
         
         beforeAll(function () {
             browser.ignoreSynchronization=true;
@@ -455,10 +471,10 @@ describe("Viewing Recordset with Faceting,", function() {
                     expect(ct).toBe(0, "Number of visible filters is incorrect");
                 });
             });
-
+    
             it("should have 1 row selected in show more popup for entity.", function () {
                 var showMore = chaisePage.recordsetPage.getShowMore(11);
-
+    
                 chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(11, 0)).then(function () {
                     // open show more, verify only 1 row checked, check another and submit
                     return showMore.click()
@@ -489,7 +505,7 @@ describe("Viewing Recordset with Faceting,", function() {
                     return chaisePage.recordsetPage.getRows().count();
                 }).then(function (ct) {
                     expect(ct).toBe(15, "Number of visible rows after selecting a second option from the modal is incorrect");
-
+    
                     return chaisePage.recordsetPage.getClearAllFilters().click();
                 });
             });
@@ -518,13 +534,13 @@ describe("Viewing Recordset with Faceting,", function() {
         });
         
         describe("selecting individual filters for each facet type", function () {
-
+    
             var clearAll;
-
+    
             beforeAll(function () {
                 clearAll = chaisePage.recordsetPage.getClearAllFilters();
             });
-
+    
             for (var j=0; j<testParams.totalNumFacets; j++) {
                 // anon function to capture looping variable
                 (function(facetParams, idx) {
@@ -595,11 +611,11 @@ describe("Viewing Recordset with Faceting,", function() {
                                 });
                             });
                         });
-
+    
                     } else if (facetParams.type == "numeric" || facetParams.type == "date" ) {
                         describe("for range facet: " + facetParams.name + ",", function () {
                             var minInput, maxInput, minClear, maxClear;
-
+    
                             beforeAll(function () {
                                 // inputs
                                 minInput = chaisePage.recordsetPage.getRangeMinInput(idx, testParams.minInputClass);
@@ -608,7 +624,7 @@ describe("Viewing Recordset with Faceting,", function() {
                                 minClear = chaisePage.recordsetPage.getInputClear(idx, testParams.minInputClearClass);
                                 maxClear = chaisePage.recordsetPage.getInputClear(idx, testParams.maxInputClearClass);
                             });
-
+    
                             it("should open the facet, test validators, filter on a range, and update the search criteria.", function () {
                                 // open facet
                                 browser.wait(function () {
@@ -764,12 +780,12 @@ describe("Viewing Recordset with Faceting,", function() {
                                 });
                             });
                         });
-
+    
                     } else if (facetParams.type == "timestamp") {
                         describe("for range facet: " + facetParams.name + ",", function () {
                             var minDateInput, minTimeInput, maxDateInput, maxTimeInput,
                                 minDateClear, minTimeClear, maxDateClear, maxTimeClear;
-
+    
                             beforeAll(function () {
                                 // inputs
                                 minDateInput = chaisePage.recordsetPage.getRangeMinInput(idx, testParams.tsMinDateInputClass);
@@ -782,7 +798,7 @@ describe("Viewing Recordset with Faceting,", function() {
                                 maxDateClear = chaisePage.recordsetPage.getInputClear(idx, testParams.tsMaxDateInputClearClass);
                                 maxTimeClear = chaisePage.recordsetPage.getInputClear(idx, testParams.tsMaxTimeInputClearClass);
                             });
-
+    
                             it("should open the facet, test validators, filter on a range, and update the search criteria.", function () {
                                 browser.wait(function () {
                                     return chaisePage.recordsetPage.getClosedFacets().count().then(function(ct) {
@@ -1037,18 +1053,18 @@ describe("Viewing Recordset with Faceting,", function() {
                 chaisePage.recordsetPage.getClearAllFilters().click();
             });
         });
-
+    
         describe("selecting facet options in sequence and verifying the data after all selections.", function () {
             beforeAll(function () {
                 browser.wait(EC.not(EC.visibilityOf(chaisePage.recordsetPage.getClearAllFilters())), browser.params.defaultTimeout);
-
+    
                 browser.wait(function () {
                     return chaisePage.recordsetPage.getClosedFacets().count().then(function(ct) {
                         return ct == testParams.totalNumFacets;
                     });
                 }, browser.params.defaultTimeout);
             });
-
+    
             it("should open facets, click an option in each, and verify the data after", function () {
                 // open the four facets
                 chaisePage.recordsetPage.getFacetById(testParams.multipleFacets[3].facetIdx).click().then(function () {
@@ -1063,7 +1079,7 @@ describe("Viewing Recordset with Faceting,", function() {
                             return ct == testParams.totalNumFacets-4;
                         });
                     }, browser.params.defaultTimeout);
-
+    
                     return chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(testParams.multipleFacets[0].facetIdx, testParams.multipleFacets[0].option));
                 }).then(function () {
                     return chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(testParams.multipleFacets[1].facetIdx, testParams.multipleFacets[1].option));
@@ -1074,11 +1090,11 @@ describe("Viewing Recordset with Faceting,", function() {
                 }).then(function () {
                     // wait for request to return
                     browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getClearAllFilters()), browser.params.defaultTimeout);
-
+    
                     return chaisePage.recordsetPage.getFilters().count();
                 }).then(function (ct) {
                     expect(ct).toBe(4, "Number of filters is incorrect after making 4 selections");
-
+    
                     // wait for table rows to load
                     browser.wait(function () {
                         return chaisePage.recordsetPage.getRows().count().then(function(ct) {
@@ -1090,6 +1106,45 @@ describe("Viewing Recordset with Faceting,", function() {
                 }).then(function(ct) {
                     expect(ct).toBe(testParams.multipleFacets[3].numRows, "number of rows is incorrect after making multiple consecutive selections");
                 });
+            });
+        });
+    });
+
+    describe("For table " + testParams.table_name + ",", function() {
+
+        var uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
+
+        beforeEach(function () {
+            browser.ignoreSynchronization=true;
+            browser.get(uri);
+            chaisePage.waitForElementInverse(element(by.id("spinner")));
+        });
+
+        it("clicking edit should show the same number of forms as rows.", function () {
+            chaisePage.recordsetPage.getClearAllFilters().click().then(function () {
+                return chaisePage.waitForElementInverse(element(by.id("spinner")));
+            }).then(function () {
+                return chaisePage.recordsetPage.getEditRecordLink().click()
+            }).then(function() {
+                browser.wait(function() {
+                    return chaisePage.recordEditPage.getForms().count().then(function(ct) {
+                        return (ct == 25);
+                    });
+                }, browser.params.defaultTimeout);
+
+                return chaisePage.recordEditPage.getForms().count();
+            }).then(function(count) {
+                expect(count).toBe(25);
+            });
+        });
+
+        it("navigating to record with a facet url", function () {
+            browser.getCurrentUrl().then(function (url) {
+                var uri = url.replace("recordset", "record");
+                browser.get(uri);
+
+                chaisePage.waitForElement(element(by.id('tblRecord')));
+                recordEditHelpers.testRecordAppValuesAfterSubmission(testParams.recordColumns, testParams.recordValues);
             });
         });
     });

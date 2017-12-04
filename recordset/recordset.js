@@ -90,7 +90,6 @@
         $scope.navbarBrand = (chaiseConfig['navbarBrand'] !== undefined? chaiseConfig.navbarBrand : "");
         $scope.navbarBrandImage = (chaiseConfig['navbarBrandImage'] !== undefined? chaiseConfig.navbarBrandImage : "");
         $scope.navbarBrandText = (chaiseConfig['navbarBrandText'] !== undefined? chaiseConfig.navbarBrandText : "Chaise");
-        $scope.enableEditBasedOnFaceting = chaiseConfig.showFaceting == true ? false : true;
 
         function updateLocation() {
             $window.scrollTo(0, 0);
@@ -275,7 +274,7 @@
                 // Unsubscribe onchange event to avoid this function getting called again
                 Session.unsubscribeOnChange(subId);
 
-                ERMrest.resolve(ermrestUri, {cid: context.appName}).then(function getReference(reference) {
+                ERMrest.resolve(ermrestUri, { cid: context.appName, pid: context.pageId, wid: $window.name }).then(function getReference(reference) {
                     session = Session.getSessionValue();
 
                     var location = reference.location;
