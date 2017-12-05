@@ -394,6 +394,15 @@
         });
 
 
+        /**
+         * In case of prefill and default we only have a reference to the foreignkey,
+         * we should do extra reads to get the actual data.
+         *
+         * @param  {int} rowIndex The row index that this data is for (it's usually zero, first row)
+         * @param  {string} colName The name of the foreignkey pseudo column.
+         * @param  {string} fkName  The constraint name of the foreign key
+         * @param  {ERMrest.Refernece} fkRef   Reference to the foreign key table
+         */
         function getForeignKeyData (rowIndex, colName, fkName, fkRef) {
             fkRef.contextualize.compactSelect.read(1).then(function (page) {
                 $rootScope.showColumnSpinner[rowIndex][colName] = true;
