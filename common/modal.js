@@ -145,7 +145,7 @@
         }
 
         function submitMultiSelection() {
-            $uibModalInstance.close(vm.tableModel.selectedRows);
+            $uibModalInstance.close(this.tableModel.selectedRows);
         }
 
         function cancel() {

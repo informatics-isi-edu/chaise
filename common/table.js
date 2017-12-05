@@ -27,8 +27,6 @@
      * - onRowClick(tuple, isSelected): 
      *   - A callback for when in select mode a row is selected.
      *   - If isSelected is false, that means the row has been deselected.
-     * - submitMulti:
-     *   - A callback for submitting multiple selected rows to be applied
      * 
      * - vm: The table model, should have this format:
      *

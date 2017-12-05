@@ -7,5 +7,8 @@
 </div>
 <div class="modal-body" style="overflow: auto;">
     <loading-spinner ng-show="!ctrl.tableModel.hasLoaded && !ctrl.tableModel.backgroundSearch"></loading-spinner>
+    <span ng-if="ctrl.tableModel.config.selectMode=='multi-select'">
+        <button id="multi-select-submit-btn" class="btn btn-primary btn-inverted pull-right" type="button" ng-click="ctrl.submit()" ng-disabled="ctrl.tableModel.selectedRows.length < 1">Submit</button>
+    </span>
     <recordset vm="ctrl.tableModel" on-row-click="ctrl.ok" allow-create="true" get-disabled-tuples="getDisabledTuples"></recordset>
 </div>
