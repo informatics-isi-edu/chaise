@@ -271,6 +271,7 @@ describe("Domain filter pattern support,", function() {
                     }).then(function(ct) {
                         expect(ct).toBe(7, "count missmatch.");
                         chaisePage.recordEditPage.getModalCloseBtn().click();
+                        browser.sleep(sleepTimer);
                     }).catch(function (err) {
                         console.log(err);
                     });
@@ -361,6 +362,64 @@ describe("Domain filter pattern support,", function() {
 
             });
 
+        });
+
+        describe("In edit mode, ", function () {
+            beforeAll(function() {
+                browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/fk-filter-pattern:" + testParams.table_name + "/id=1");
+
+                browser.wait(EC.elementToBeClickable(element(by.id("submit-record-button"))));
+            });
+
+            describe("with a domain filter with a dynamic value from other foreignkey tables.", function () {
+                it ("if foreign key has value, the foreignkey that is using its value should be limited.", function (done) {
+                    chaisePage.recordEditPage.getForeignKeyInputButton(colWFkeysDefault, 0).click().then(function () {
+                        browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
+
+                        return modalTitle.getText();
+                    }).then(function(text) {
+                        expect(text.indexOf("Choose")).toBeGreaterThan(-1);
+
+                        browser.wait(function () {
+                            return chaisePage.recordsetPage.getRows().count().then(function (ct) {
+                                return (ct > 0);
+                            });
+                        });
+                        return chaisePage.recordsetPage.getRows().count();
+                    }).then(function(ct) {
+                        expect(ct).toBe(1, "count missmatch.");
+                        chaisePage.recordEditPage.getModalCloseBtn().click();
+                        done();
+                    }).catch(function (err) {
+                        console.log(err);
+                        done.fail();
+                    });
+                });
+
+                it ("otherwise it should not be limited.", function (done) {
+                    chaisePage.recordEditPage.getForeignKeyInputButton(colWFkeys, 0).click().then(function () {
+                        browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
+
+                        return modalTitle.getText();
+                    }).then(function(text) {
+                        expect(text.indexOf("Choose")).toBeGreaterThan(-1);
+
+                        browser.wait(function () {
+                            return chaisePage.recordsetPage.getRows().count().then(function (ct) {
+                                return (ct > 0);
+                            });
+                        });
+                        return chaisePage.recordsetPage.getRows().count();
+                    }).then(function(ct) {
+                        expect(ct).toBe(7, "count missmatch.");
+                        chaisePage.recordEditPage.getModalCloseBtn().click();
+                        done();
+                    }).catch(function (err) {
+                        console.log(err);
+                        done.fail();
+                    });
+                });
+            });
         });
     });
 });

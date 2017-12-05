@@ -1,1 +1,3 @@
-[]
+[
+    {"id": 1, "fk1": 1, "fk_constrained_col":1, "position_fixed_col":1, "position_text_col": 1, "col_w_default": 6}
+]
