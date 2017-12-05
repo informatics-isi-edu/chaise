@@ -259,7 +259,7 @@ describe('View existing record,', function() {
                         return browser.executeScript("return $('.modal-body tr input[type=checkbox]').get(1);");
                     }).then(function (selectButtons){
                         selectButtons.click();
-                        return browser.executeScript("return $('.multi-select-submit-btn').click();");
+                        return browser.executeScript("return $('#multi-select-submit-btn').click();");
                     }).then(function () {
                         return browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
                     }).then(function (){
@@ -411,7 +411,7 @@ describe('View existing record,', function() {
                         return browser.executeScript("return $('.modal-body tr input[type=checkbox]').get(2);");
                     }).then(function (selectButtons){
                         selectButtons.click();
-                        return browser.executeScript("return $('.multi-select-submit-btn').click();");
+                        return browser.executeScript("return $('#multi-select-submit-btn').click();");
                     }).then(function () {
                         return browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
                     }).then(function (){

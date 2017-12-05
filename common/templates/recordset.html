@@ -54,7 +54,7 @@
             <div style="height: 34px;" class="col-lg-3 col-md-3 col-sm-3 col-xs-3" ng-if="!vm.config.hidePageSettings">
                 <!-- pagination -->
                 <span class="dropdown" style="margin-left: 5px">
-                    <button id="page-size-dropdown" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Items per page
+                    <button id="page-size-dropdown" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">{{vm.pageLimit}} Items per page
                         <span class="caret"></span></button>
                     <ul class="dropdown-menu dropdown-menu-right">
                         <li ng-if="pageLimits.indexOf(vm.pageLimit) === -1"><a id="custom-page-size" href ng-click="setPageLimit(vm.pageLimit)">
@@ -69,11 +69,9 @@
                 </span>
             </div>
             
-            <div class="col-lg-2 col-md-2 col-sm-3 col-xs-3 pull-right" align="right">
+            <div class="col-lg-2 col-md-2 col-sm-3 col-xs-3 pull-right">
                 <!-- submit selection -->
-                <span ng-if="vm.config.selectMode=='multi-select'">
-                    <button class="btn btn-primary btn-inverted pull-right multi-select-submit-btn" type="button" ng-click="submitMulti()()" ng-disabled="vm.selectedRows.length < 1">Submit</button>
-                </span>
+                <button id="multi-select-submit-btn" type="button" class="btn btn-primary btn-inverted" ng-if="vm.config.selectMode=='multi-select'" ng-click="submitMulti()()" ng-disabled="vm.selectedRows.length < 1">Submit</button>
                 <!-- add record -->
                 <button id="add-record-btn" type="button" class="btn btn-primary btn-inverted" ng-if="vm.reference.canCreate && allowCreate" ng-click="addRecord()"  tooltip-placement="bottom" uib-tooltip="Create new record">
                     <span class="glyphicon glyphicon-plus"></span>

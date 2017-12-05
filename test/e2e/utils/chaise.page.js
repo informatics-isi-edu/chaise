@@ -985,7 +985,7 @@ var recordsetPage = function() {
     }
 
     this.getModalSubmit = function () {
-        return element(by.css(".modal-body")).element(by.css(".multi-select-submit-btn"));
+        return element(by.css(".modal-body")).element(by.id("multi-select-submit-btn"));
     }
 
     // there's integer/float/date/timestamp inputs
