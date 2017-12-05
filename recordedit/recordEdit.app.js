@@ -38,7 +38,7 @@
     .config(['$uibTooltipProvider', function($uibTooltipProvider) {
         $uibTooltipProvider.options({appendToBody: true});
     }])
-    
+
     //  Enable log system, if in debug mode
     .config(['$logProvider', function($logProvider) {
         $logProvider.debugEnabled(chaiseConfig.debug === true);
@@ -49,6 +49,8 @@
 
         var session,
             context = { booleanValues: ['', true, false] };
+
+        $rootScope.showColumnSpinner = [{}];
 
         $rootScope.displayReady = false;
         $rootScope.showSpinner = false;
@@ -116,13 +118,13 @@
 
             // On resolution
             ERMrest.resolve(ermrestUri, { cid: context.appName, pid: context.pageId, wid: $window.name }).then(function getReference(reference) {
-                
-                
+
+
                 // we are using filter to determine app mode, the logic for getting filter
                 // should be in the parser and we should not duplicate it in here
                 // NOTE: we might need to change this line (we're parsing the whole url just for fidinig if there's filter)
                 var location = ERMrest.parse(ermrestUri);
-                
+
                 // Mode can be any 3 with a filter
                 if (location.filter || location.facets) {
                     // prefill always means create
@@ -150,16 +152,37 @@
                 if (context.queryParams.prefill) {
                     // get the cookie with the prefill value
                     var cookie = $cookies.getObject(context.queryParams.prefill);
-                    $rootScope.cookieObj = cookie;
-                    if (cookie) {
+                    var newRow = recordEditModel.rows.length - 1;
+
+                    // make sure cookie is correct
+                    var hasAllKeys = cookie && ["constraintName", "columnName", "origUrl", "rowname"].every(function (k) {
+                        return cookie.hasOwnProperty(k);
+                    });
+                    if (hasAllKeys) {
+                        $rootScope.cookieObj = cookie;
+
                         // Update view model
-                        recordEditModel.rows[recordEditModel.rows.length - 1][cookie.constraintName] = cookie.rowname.value;
+                        recordEditModel.rows[newRow][cookie.columnName] = cookie.rowname.value;
+
+                        // the foreignkey data that we already have
+                        recordEditModel.foreignKeyData[newRow][cookie.constraintName] = cookie.keys;
+
+                        // show the spinner that means we're waiting for data.
+                        $rootScope.showColumnSpinner[newRow][cookie.columnName] = true;
+
+                        // get the actual foreignkey data
+                        ERMrest.resolve(cookie.origUrl, {cid: context.appName}).then(function (ref) {
+                            getForeignKeyData(newRow, cookie.columnName, cookie.constraintName, ref);
+                        }).catch(function (err) {
+                            $rootScope.showColumnSpinner[newRow][cookie.columnName] = false;
+                            console.log(err);
+                        });
 
                         // Update submission model
                         var columnNames = Object.keys(cookie.keys);
                         columnNames.forEach(function(colName) {
                             var colValue = cookie.keys[colName];
-                            recordEditModel.submissionRows[recordEditModel.submissionRows.length - 1][colName] = colValue;
+                            recordEditModel.submissionRows[newRow][colName] = colValue;
                         });
                     }
                     $log.info('Model: ', recordEditModel);
@@ -193,6 +216,7 @@
 
                             var column, value;
 
+
                             // $rootScope.tuples is used for keeping track of changes in the tuple data before it is submitted for update
                             $rootScope.tuples = [];
                             $rootScope.displayname = ((context.queryParams.copy || page.tuples.length > 1) ? $rootScope.reference.displayname : page.tuples[0].displayname);
@@ -205,6 +229,9 @@
 
                                 var tuple = page.tuples[j],
                                     values = tuple.values;
+
+                                // attach the foreign key data of the tuple
+                                recordEditModel.foreignKeyData[j] = tuple.linkedData;
 
                                 // We don't want to mutate the actual tuples associated with the page returned from `reference.read`
                                 // The submission data is copied back to the tuples object before submitted in the PUT request
@@ -333,6 +360,15 @@
                                     // If there are no defaults, then just initialize asset columns with the app's default obj
                                     initialModelValue = { url: "" }
                                 }
+                            } else if (column.isForeignKey) {
+                                if (defaultSet) {
+                                    initialModelValue =  column.default;
+                                    recordEditModel.foreignKeyData[0][column.foreignKey.name] = column.defaultValues;
+
+                                    // get the actual foreign key data
+                                    getForeignKeyData(0, column.name, column.foreignKey.name, column.defaultReference);
+
+                                }
                             } else {
                                 // all other column types
                                 if (defaultSet) {
@@ -341,23 +377,51 @@
                             }
 
                             recordEditModel.rows[0][column.name] = initialModelValue;
-                        };
+                        }
 
                         $rootScope.displayReady = true;
                         // if there is a session, user isn't allowed to create
                     } else if (session) {
-                        var forbiddenError = new ERMrest.ForbiddenError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
-                        throw forbiddenError;
+                        throw new ERMrest.ForbiddenError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
                         // user isn't logged in and needs permissions to create
                     } else {
-                        var notAuthorizedError = new ERMrest.UnauthorizedError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
-                        throw notAuthorizedError;
+                        throw new ERMrest.UnauthorizedError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
                     }
                 }
             }, function error(response) {
                 throw response;
             });
         });
+
+
+        /**
+         * In case of prefill and default we only have a reference to the foreignkey,
+         * we should do extra reads to get the actual data.
+         *
+         * @param  {int} rowIndex The row index that this data is for (it's usually zero, first row)
+         * @param  {string} colName The name of the foreignkey pseudo column.
+         * @param  {string} fkName  The constraint name of the foreign key
+         * @param  {ERMrest.Refernece} fkRef   Reference to the foreign key table
+         */
+        function getForeignKeyData (rowIndex, colName, fkName, fkRef) {
+            fkRef.contextualize.compactSelect.read(1).then(function (page) {
+                $rootScope.showColumnSpinner[rowIndex][colName] = true;
+                if ($rootScope.showColumnSpinner[rowIndex][colName]) {
+                    // default value is validated
+                    if (page.tuples.length > 0) {
+                        recordEditModel.foreignKeyData[rowIndex][colName] = page.tuples[rowIndex].data;
+                        recordEditModel.rows[rowIndex][colName] = page.tuples[rowIndex].displayname.value;
+                    } else {
+                        recordEditModel.foreignKeyData[rowIndex][fkName] = null;
+                        recordEditModel.rows[rowIndex][colName] = null;
+                    }
+                }
+                $rootScope.showColumnSpinner[rowIndex][colName] = false;
+            }).catch(function (err) {
+                $rootScope.showColumnSpinner[rowIndex][colName] = false;
+                console.log(err);
+            });
+        }
 
     }]);
 })();

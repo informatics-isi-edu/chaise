@@ -195,10 +195,12 @@ describe('Record Add', function() {
                 // Write a dummy cookie for creating a record in Accommodation table
                 testCookie = {
                     constraintName: 'product-add_fk_category', // A FK that Accommodation table has with Category table
+                    columnName: 'product-add_fk_category',
                     rowname: {
                         value: chance.sentence()
                     },
-                    keys: {id: 1}
+                    keys: {id: 1},
+                    origUrl: browser.params.url + "/record/#" + browser.params.catalogId + "/product-add:category/id=1"
                 };
                 browser.manage().addCookie({name: 'test', value: JSON.stringify(testCookie)});
             });
