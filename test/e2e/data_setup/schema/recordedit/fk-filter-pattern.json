@@ -124,6 +124,71 @@
                             "column_name": "id"
                         }
                     ]
+                },
+                {
+                    "comment": "Foreign key that its constituent columns have default value.",
+                    "names": [["fk-filter-pattern", "fk_w_default"]],
+                    "foreign_key_columns": [
+                        {
+                            "table_name": "main-entity-table",
+                            "schema_name": "fk-filter-pattern",
+                            "column_name": "col_w_default"
+                        }
+                    ],
+                    "annotations": {},
+                    "referenced_columns": [
+                        {
+                            "table_name": "fk-constrained-table",
+                            "schema_name": "fk-filter-pattern",
+                            "column_name": "id"
+                        }
+                    ]
+                },
+                {
+                    "comment": "Foreign key with domain_filter_pattern using fk_w_default values.",
+                    "names": [["fk-filter-pattern", "fk_w_fkeys_default"]],
+                    "foreign_key_columns": [
+                        {
+                            "table_name": "main-entity-table",
+                            "schema_name": "fk-filter-pattern",
+                            "column_name": "col_w_fkeys_default"
+                        }
+                    ],
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:foreign-key": {
+                            "domain_filter_pattern": "{{# $fkeys.fk-filter-pattern.fk_w_default}}fk2={{{values._fk2}}}&position_col={{{values._position_col}}}{{/$fkeys.fk-filter-pattern.fk_w_default}}"
+                        }
+                    },
+                    "referenced_columns": [
+                        {
+                            "table_name": "fk-constrained-table",
+                            "schema_name": "fk-filter-pattern",
+                            "column_name": "id"
+                        }
+                    ]
+                },
+                {
+                    "comment": "Foreign key that its constituent columns have default value.",
+                    "names": [["fk-filter-pattern", "fk_w_fkeys"]],
+                    "foreign_key_columns": [
+                        {
+                            "table_name": "main-entity-table",
+                            "schema_name": "fk-filter-pattern",
+                            "column_name": "col_w_fkeys"
+                        }
+                    ],
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:foreign-key": {
+                            "domain_filter_pattern": "{{# $fkeys.fk-filter-pattern.fk_w_fkeys_default}}fk2={{{values._fk2}}}&position_col={{{values._position_col}}}{{/$fkeys.fk-filter-pattern.fk_w_fkeys_default}}"
+                        }
+                    },
+                    "referenced_columns": [
+                        {
+                            "table_name": "fk-constrained-table",
+                            "schema_name": "fk-filter-pattern",
+                            "column_name": "id"
+                        }
+                    ]
                 }
             ],
             "table_name": "main-entity-table",
@@ -182,6 +247,28 @@
                     "comment": "Column constrained by 2 values.",
                     "name": "multi_constrained_col",
                     "nullok": true,
+                    "type": {
+                        "typename": "int4"
+                    }
+                },
+                {
+                    "comment": "foreign key column with default value",
+                    "name": "col_w_default",
+                    "default": 4,
+                    "type": {
+                        "typename": "int4"
+                    }
+                },
+                {
+                    "comment": "foreign key column",
+                    "name": "col_w_fkeys_default",
+                    "type": {
+                        "typename": "int4"
+                    }
+                },
+                {
+                    "comment": "foreign key column",
+                    "name": "col_w_fkeys",
                     "type": {
                         "typename": "int4"
                     }

@@ -3,22 +3,30 @@ var testParams = {
     table_name: "main-entity-table"
 };
 
-describe("Add a record,", function() {
+describe("Domain filter pattern support,", function() {
 
     var EC = protractor.ExpectedConditions,
         sleepTimer = 200;
 
     describe("For table " + testParams.table_name + ',', function() {
 
-        beforeAll(function() {
+        var rows, modalTitle,
+            multiColName = "multi_constrained_col",
+            colWFkeys = "col_w_fkeys",
+            colWFkeysDefault = "col_w_fkeys_default";
+
+        beforeAll(function () {
             browser.ignoreSynchronization = true;
-            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/fk-filter-pattern:" + testParams.table_name);
         });
 
-        describe("The domain filter pattern annotation should limit foreign key search sets,", function() {
+        describe("In create mode, ", function() {
 
-            var rows, modalTitle,
-                multiColName = "multi_constrained_col";
+            beforeAll(function() {
+                browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/fk-filter-pattern:" + testParams.table_name);
+
+                // the copy btn will be disabled while data is loading.
+                browser.wait(EC.elementToBeClickable(element(by.id("copy-record-btn"))));
+            });
 
             beforeEach(function () {
                 modalTitle = chaisePage.recordEditPage.getModalTitle();
@@ -47,6 +55,8 @@ describe("Add a record,", function() {
                 }).then(function(selectButtons) {
                     selectButtons[0].click();
                     browser.sleep(sleepTimer);
+                }).catch(function (err) {
+                    console.log(err);
                 });
             });
 
@@ -67,6 +77,8 @@ describe("Add a record,", function() {
 
                     chaisePage.recordEditPage.getModalCloseBtn().click();
                     browser.sleep(sleepTimer);
+                }).catch(function (err) {
+                    console.log(err);
                 });
             });
 
@@ -90,6 +102,8 @@ describe("Add a record,", function() {
 
                         chaisePage.recordEditPage.getModalCloseBtn().click();
                         browser.sleep(sleepTimer);
+                    }).catch(function (err) {
+                        console.log(err);
                     });
                 });
 
@@ -118,6 +132,8 @@ describe("Add a record,", function() {
                     }).then(function(selectButtons) {
                         selectButtons[0].click();
                         browser.sleep(sleepTimer);
+                    }).catch(function (err) {
+                        console.log(err);
                     });
                 });
             });
@@ -139,6 +155,8 @@ describe("Add a record,", function() {
 
                     chaisePage.recordEditPage.getModalCloseBtn().click();
                     browser.sleep(sleepTimer);
+                }).catch(function (err) {
+                    console.log(err);
                 });
             });
 
@@ -152,8 +170,12 @@ describe("Add a record,", function() {
                         return modalTitle.getText();
                     }).then(function(text) {
                         expect(text.indexOf("Choose")).toBeGreaterThan(-1);
-
-                        rows = chaisePage.recordsetPage.getRows();           
+                        browser.wait(function () {
+                            return chaisePage.recordsetPage.getRows().count().then(function (ct) {
+                                return (ct > 0);
+                            });
+                        });
+                        rows = chaisePage.recordsetPage.getRows();
                         return rows.count();
                     }).then(function(ct) {
                         // set is size 7, domain filter should have evaluated to null
@@ -161,6 +183,8 @@ describe("Add a record,", function() {
 
                         chaisePage.recordEditPage.getModalCloseBtn().click();
                         browser.sleep(sleepTimer);
+                    }).catch(function (err) {
+                        console.log(err);
                     });
                 });
 
@@ -175,7 +199,7 @@ describe("Add a record,", function() {
                         rows = chaisePage.recordsetPage.getRows();
                         return rows.get(0).all(by.css(".select-action-button"));
                     }).then(function(selectButtons) {
-                        
+
                         return selectButtons[0].click();
                     }).then(function() {
                         // this browser.wait triggers before the formTitle is actually visible (to the eyes). It appears to
@@ -202,6 +226,8 @@ describe("Add a record,", function() {
                     }).then(function(selectButtons) {
                         selectButtons[0].click();
                         browser.sleep(sleepTimer);
+                    }).catch(function (err) {
+                        console.log(err);
                     });
                 });
             });
@@ -226,6 +252,115 @@ describe("Add a record,", function() {
                     browser.sleep(sleepTimer);
                 });
             });
+
+            describe("with a domain filter with a dynamic value from other foreignkey tables.", function () {
+                // open col_w_fkeys
+                it ("should not limit the set before setting the value for other foreignkey in absence of default value.", function () {
+                    chaisePage.recordEditPage.getForeignKeyInputButton(colWFkeys, 0).click().then(function () {
+                        browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
+                        return modalTitle.getText();
+                    }).then(function(text) {
+                        expect(text.indexOf("Choose")).toBeGreaterThan(-1);
+                        browser.wait(function () {
+                            return chaisePage.recordsetPage.getRows().count().then(function (ct) {
+                                return (ct > 0);
+                            });
+                        });
+                        rows = chaisePage.recordsetPage.getRows();
+                        return rows.count();
+                    }).then(function(ct) {
+                        expect(ct).toBe(7, "count missmatch.");
+                        chaisePage.recordEditPage.getModalCloseBtn().click();
+                    }).catch(function (err) {
+                        console.log(err);
+                    });
+                });
+
+                // open col_w_fkeys_default, select something.
+                it ("should limit the set before setting the value if other foreignkey has default value.", function () {
+                    chaisePage.recordEditPage.getForeignKeyInputButton(colWFkeysDefault, 0).click().then(function () {
+                        browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
+
+                        return modalTitle.getText();
+                    }).then(function(text) {
+                        expect(text.indexOf("Choose")).toBeGreaterThan(-1);
+                        browser.wait(function () {
+                            return chaisePage.recordsetPage.getRows().count().then(function (ct) {
+                                return (ct > 0);
+                            });
+                        });
+
+                        rows = chaisePage.recordsetPage.getRows();
+                        return rows.count();
+                    }).then(function(ct) {
+                        // this is filtered to be two rows
+                        expect(ct).toBe(2, "count missmatch.");
+
+                        return rows.get(0).all(by.css(".select-action-button"));
+                    }).then(function(selectButtons) {
+                        // select the row
+                        selectButtons[0].click();
+                    }).catch(function (err) {
+                        console.log(err);
+                    });
+                });
+
+                //open col_w_fkeys again
+                it ("should limit the set after choosing a foreign key.", function (done) {
+                    chaisePage.recordEditPage.getForeignKeyInputButton(colWFkeys, 0).click().then(function () {
+                        browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
+
+                        return modalTitle.getText();
+                    }).then(function(text) {
+                        expect(text.indexOf("Choose")).toBeGreaterThan(-1);
+
+                        browser.wait(function () {
+                            return chaisePage.recordsetPage.getRows().count().then(function (ct) {
+                                return (ct > 0);
+                            });
+                        });
+                        return chaisePage.recordsetPage.getRows().count();
+                    }).then(function(ct) {
+                        expect(ct).toBe(2, "count missmatch.");
+                        chaisePage.recordEditPage.getModalCloseBtn().click();
+                        done();
+                    }).catch(function (err) {
+                        console.log(err);
+                        done.fail();
+                    });
+                });
+
+
+                // clear col_w_fkeys_default, open col_w_fkeys
+                it ("after clearing the foreignkey, it should not limit the set.", function (done) {
+                    chaisePage.recordEditPage.getForeignKeyInputRemoveBtns().then(function(btns) {
+                        // NOTE this is not the best way to find the button, it's by index
+                        return chaisePage.clickButton(btns[btns.length-2]);
+                    }).then(function() {
+                        return chaisePage.recordEditPage.getForeignKeyInputButton(colWFkeys, 0).click();
+                    }).then(function () {
+                        browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
+                        return modalTitle.getText();
+                    }).then(function(text) {
+                        expect(text.indexOf("Choose")).toBeGreaterThan(-1);
+                        browser.wait(function () {
+                            return chaisePage.recordsetPage.getRows().count().then(function (ct) {
+                                return (ct > 0);
+                            });
+                        });
+                        return chaisePage.recordsetPage.getRows().count();
+                    }).then(function(ct) {
+                        expect(ct).toBe(7);
+                        chaisePage.recordEditPage.getModalCloseBtn().click();
+                        done();
+                    }).catch(function (err) {
+                        console.log(err);
+                        done.fail();
+                    });
+                });
+
+            });
+
         });
     });
 });
