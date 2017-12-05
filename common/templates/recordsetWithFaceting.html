@@ -6,11 +6,11 @@
     <div class="main-container">
         <loading-spinner id="main-spinner" ng-show="!vm.hasLoaded && vm.initialized"></loading-spinner>
         <div style="margin-bottom: 10px;" ng-if="vm.initialized">
-            
+
             <div style="margin-left: 15px;margin-right: 20px;">
                 <alerts alerts="$root.alerts"></alerts>
             </div>
-            
+
             <div ng-if="vm.selectedRows.length > 0 && vm.config.selectMode == 'multi-select' && !vm.config.hideSelectedRows" class="row total-filters">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                     <a class="remove-link" ng-click="removeAllPills()">
@@ -25,7 +25,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="row">
                 <div ng-class="vm.config.hidePageSettings ? 'col-lg-8 col-md-8 col-sm-8 col-xs-8': 'col-lg-4 col-md-5 col-sm-6 col-xs-6'">
                     <!-- search box -->
@@ -50,8 +50,8 @@
                         </span>
                     </div>
                 </div>
-                
-                <div style="height: 34px;" class="col-lg-3 col-md-4 col-sm-4 col-xs-4" ng-if="!vm.config.hidePageSettings">
+
+                <div style="height: 34px;" class="col-lg-4 col-md-4 col-sm-4 col-xs-4" ng-if="!vm.config.hidePageSettings">
                     <!-- pagination -->
                     <span class="dropdown" style="margin-left: 5px">
                         <button id="page-size-dropdown" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">{{vm.pageLimit}} Items per page
@@ -70,15 +70,15 @@
                     </span>
                 </div>
 
-                <div class="col-lg-1 col-md-1 col-sm-2 col-xs-2 pull-right">
+                <div class="col-lg-4 col-md-3 col-sm-2 col-xs-2">
                     <!-- add record -->
-                    <button id="add-record-btn" type="button" class="btn btn-primary btn-inverted" ng-if="vm.reference.canCreate && allowCreate" ng-click="addRecord()"  tooltip-placement="bottom" uib-tooltip="Create new record">
+                    <button id="add-record-btn" type="button" class="btn btn-primary btn-inverted pull-right" ng-if="vm.reference.canCreate && allowCreate" ng-click="addRecord()"  tooltip-placement="bottom" uib-tooltip="Create new record">
                         <span class="glyphicon glyphicon-plus"></span>
                     </button>
                 </div>
             </div>
         </div>
-        
+
         <div ng-if="vm.initialized">
             <div class="total-filters" ng-if="vm.config.showFaceting && (vm.reference.location.facets || vm.reference.location.searchTerm)">
                 <a id="clear-all-filters" class="remove-link" ng-click="vm.removeFilter()" ng-if="vm.hasFilter() || vm.reference.location.searchTerm">
@@ -124,7 +124,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- record table -->
         <div  ng-if="vm.initialized">
             <h3 ng-if="!vm.config.hideTotalCount" id="rs-total-count">Displaying {{vm.rowValues.length}}{{vm.totalRowsCnt ? " of " + (vm.totalRowsCnt > vm.rowValues.length ? vm.totalRowsCnt : vm.rowValues.length) : ''}} Records</h3>
