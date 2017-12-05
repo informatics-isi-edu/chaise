@@ -7,5 +7,5 @@
 </div>
 <div class="modal-body" style="overflow: auto;">
     <loading-spinner ng-show="!ctrl.tableModel.hasLoaded && !ctrl.tableModel.backgroundSearch"></loading-spinner>
-    <recordset vm="ctrl.tableModel" on-row-click="ctrl.ok" submit-multi="ctrl.submit" allow-create="true" get-disabled-tuples="getDisabledTuples"></recordset>
+    <recordset vm="ctrl.tableModel" on-row-click="ctrl.ok" allow-create="true" get-disabled-tuples="getDisabledTuples"></recordset>
 </div>

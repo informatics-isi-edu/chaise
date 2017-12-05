@@ -17,13 +17,10 @@
      * 2. Selectable table only with select function
      *    <record-table vm="vm" on-row-click="gotoRowLink(tuple)"></record-table>
      *
-     * 3. Multi Selectable table only with select function
-     *    <record-table vm="vm" on-row-click="gotoRowLink(tuple)" submit-multi="ctrl.submit"></record-table>
-     *
-     * 4. Table with search, page size, previous/next
+     * 3. Table with search, page size, previous/next
      *    <recordset vm="vm"></recordset>
      *
-     * 5. Selectable table with search, page size, previous/next
+     * 4. Selectable table with search, page size, previous/next
      *    <recordset vm="vm" on-row-click="gotoRowLink(tuple)"></recordset>
      *
      * These are recordset and record-table directive parameters:
@@ -611,7 +608,6 @@
             scope: {
                 vm: '=',
                 onRowClick: '&?',       // set row click function
-                submitMulti: '&?',      // set multi selection submit
                 allowCreate: '=?',      // if undefined, assume false
                 getDisabledTuples: "=?" // callback to get the disabled tuples
             },
