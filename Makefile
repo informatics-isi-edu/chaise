@@ -144,7 +144,7 @@ testdefaultconfig: test-DEFAULT_CONFIG_PARALLEL_TESTS
 
 #Rule to run the default chaise configuration tests in parallel
 .PHONY: testfooter
-testfooter: test-FOOTER_TESTS	
+testfooter: test-FOOTER_TESTS
 
 # Rule to run tests
 .PHONY: test
