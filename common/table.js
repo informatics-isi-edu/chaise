@@ -27,7 +27,6 @@
      * - onRowClick(tuple, isSelected): 
      *   - A callback for when in select mode a row is selected.
      *   - If isSelected is false, that means the row has been deselected.
-     * - 
      * 
      * - vm: The table model, should have this format:
      *
@@ -607,7 +606,7 @@
             scope: {
                 vm: '=',
                 onRowClick: '&?',       // set row click function
-                allowCreate: '=?',       // if undefined, assume false
+                allowCreate: '=?',      // if undefined, assume false
                 getDisabledTuples: "=?" // callback to get the disabled tuples
             },
             link: function (scope, elem, attr) {

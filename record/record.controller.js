@@ -128,10 +128,14 @@
 
         vm.addRelatedRecord = function(ref) {
             // 1. Pluck required values from the ref into cookie obj by getting the values of the keys that form this FK relationship
-
+            // Another option is just passing the column name,
+            // but if the column is not in the list of visible columns in entry/create that can cause problems.
+            // This will work even if the column is not visible in the create mode.
             var cookie = {
-                rowname: $rootScope.recordDisplayname,
-                constraintName: ref.origColumnName
+                rowname: $rootScope.recordDisplayname, // used for display value
+                columnName: ref.origColumnName, // used to find the column that this blongs to
+                constraintName: ref.origFKR.name, // used for attaching the foreignkey data
+                origUrl: $rootScope.reference.uri // used for getting foreignkey data
             };
             var mapping = ref.contextualize.entryCreate.origFKR.mapping;
 
@@ -161,7 +165,7 @@
             addRecordRequests[referrer_id] = ref.uri;
 
             // 3. Get appLink, append ?prefill=[COOKIE_NAME]&referrer=[referrer_id]
-            var appLink = (ref.derivedAssociationReference ? ref.derivedAssociationReference.contextualize.entryCreate.appLink : ref.contextualize.entryCreate.appLink);
+            var appLink = ref.unfilteredReference.contextualize.entryCreate.appLink;
             appLink = appLink + (appLink.indexOf("?") === -1? "?" : "&") +
                 'prefill=' + UriUtils.fixedEncodeURIComponent(COOKIE_NAME) +
                 '&invalidate=' + UriUtils.fixedEncodeURIComponent(referrer_id);

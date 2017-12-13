@@ -2,11 +2,9 @@ var chaisePage = require('../../../utils/chaise.page.js');
 var recordHelpers = require('../../../utils/record-helpers.js');
 var testParams = {
     table_name: "accommodation",
-},
-schemaName = "product-record",
-errorTexts = {
-  deletionErrText : "This entry cannot be deleted as it is still referenced from the booking table. All dependent entries must be removed before this item can be deleted.\n\nClick OK to go to the Record Page Show Error Details",
-  uniqueConstraint : "Error The entry cannot be created/updated. Please use a different ID for this record."
+    schemaName = "product-record",
+    deletionErrText : "This entry cannot be deleted as it is still referenced from the booking table. All dependent entries must be removed before this item can be deleted.\n\nClick OK to go to the Record Page Show Error Details",
+    uniqueConstraint : "Error The entry cannot be created/updated. Please use a different ID for this record."
 };
 
 /*
@@ -20,7 +18,7 @@ describe('Error related to Record App,', function() {
 
         beforeAll(function() {
           browser.ignoreSynchronization=true;
-            url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + schemaName + ":" + testParams.table_name +  "/id=11223312121";
+            url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name +  "/id=11223312121";
             browser.get(url);
             chaisePage.waitForElement(element(by.css('.modal-dialog ')));
         });
@@ -50,7 +48,7 @@ describe('Error related to Record App,', function() {
     describe("Error formatting during 409 check", function(){
 
       beforeAll(function() {
-          var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + schemaName + ":" + testParams.table_name +  "/id=2002";
+          var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name +  "/id=2002";
           browser.get(url);
       });
 
@@ -71,7 +69,7 @@ describe('Error related to Record App,', function() {
               chaisePage.waitForElement(errModalClass);
               return errModalClass.getText();
           }).then(function (errorText) {
-              expect(errorText).toBe(errorTexts.deletionErrText, "409 Conflict could not be matched! Check conflict during deletion.");
+              expect(errorText).toBe(testParams.deletionErrText, "409 Conflict could not be matched! Check conflict during deletion.");
           }).catch(function(error) {
               console.log(error);
               expect('Something went wrong with this promise chain.').toBe('Please see error message.');

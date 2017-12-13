@@ -102,7 +102,8 @@
                     }
 
                     // define unlink function
-                    if (scope.config.deletable && scope.context === "compact/brief" && scope.associationRef) {
+                    // TODO why do we need to verify the context?
+                    if (scope.config.deletable && scope.context.indexOf("compact/brief") === 0 && scope.associationRef) {
                         var associatedRefTuples = [];
                         scope.unlink = function() {
                             deleteReference(scope, scope.associationRef);
