@@ -1,0 +1,15 @@
+{
+    "catalog": {},
+    "schema": {
+        "name": "product-record",
+        "createNew": true,
+        "path": "test/e2e/data_setup/schema/record/product.json"
+    },
+    "tables": {
+        "createNew": true
+    },
+    "entities": {
+        "createNew": true,
+        "path": "test/e2e/data_setup/data/product"
+    }
+}
