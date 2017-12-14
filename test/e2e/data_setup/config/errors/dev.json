@@ -1,0 +1,9 @@
+{
+    "setup": {
+        "schemaConfigurations": [
+            "errors/config.json"
+        ],
+        "schema": "product-record"
+    },
+    "cleanup": true
+}
