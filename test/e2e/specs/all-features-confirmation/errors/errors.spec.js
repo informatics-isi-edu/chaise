@@ -36,7 +36,7 @@ describe('Error related to Record App,', function() {
             }).then (function (){
                 return browser.driver.getCurrentUrl();
             }).then (function(currentUrl) {
-                var recordsetUrl = url.replace("record", "recordset") + "@sort(id)";
+                var recordsetUrl = url = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name;
                 expect(currentUrl).toBe(recordsetUrl, "The redirection from record page to recordset/search in case of multiple records failed");
             }).catch( function(err) {
                 console.log(error);
