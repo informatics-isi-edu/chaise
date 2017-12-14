@@ -158,7 +158,7 @@ describe('View existing record,', function() {
                 }, browser.params.defaultTimeout).then(function(error) {
                     return error.getText();
                 }).then(function(text) {
-                    expect(text.indexOf("409 Conflict")).toBeGreaterThan(-1);
+                    expect(text.indexOf("collides with existing entity")).toBeGreaterThan(-1, "Text for conflict error is not correct");
                 });
             });
 
