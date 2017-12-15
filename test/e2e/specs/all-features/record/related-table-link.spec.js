@@ -377,9 +377,7 @@ describe('View existing record,', function() {
                     relatedTableLink.click().then(function() {
                         return browser.driver.getCurrentUrl();
                     }).then(function(url) {
-                        expect(url.indexOf('recordset')).toBeGreaterThan(-1);
-                        // View more should not redirect to Search app
-                        expect(url.search('/search/')).not.toBeGreaterThan(-1, "View more link is redirecting to Search app! It should redirect to Recordset.");
+                        expect(url.search('/recordset/')).toBeGreaterThan(-1, "View more link is redirecting to Search app! It should redirect to Recordset.");                        
                         // check entity title is for related table, not asociation table
                         return chaisePage.waitForElement(element(by.id("divRecordSet")));
                     }).then(function() {
