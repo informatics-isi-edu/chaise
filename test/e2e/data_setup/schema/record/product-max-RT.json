@@ -803,7 +803,7 @@
       ],
       "foreign_keys": [
         {
-          "names" : [["product-max-RT", "fk_media_accommodation"]],
+          "names" : [["product-max-RT", "fk_old_media_accommodation"]],
           "comment": null,
           "foreign_key_columns": [
             {
@@ -881,7 +881,7 @@
       ],
       "foreign_keys": [
         {
-          "names" : [["product-max-RT", "fk_media_accommodation"]],
+          "names" : [["product-max-RT", "fk_more_media_accommodation"]],
           "comment": null,
           "foreign_key_columns": [
             {
@@ -1078,6 +1078,81 @@
           "*": ["id", ["product-max-RT", "fk_media_accommodation"]]
         }
       }
+    },
+    "new_media": {
+      "comment": null,
+      "kind": "table",
+      "entityCount": 0,
+      "keys": [
+        {
+          "comment": null,
+          "annotations": {},
+          "unique_columns": [
+            "id",
+            "accommodation_id"
+          ]
+        }
+      ],
+      "foreign_keys": [
+        {
+          "names" : [["product-max-RT", "fk_new_media_accommodation"]],
+          "comment": null,
+          "foreign_key_columns": [
+            {
+              "table_name": "new_media",
+              "schema_name": "product-max-RT",
+              "column_name": "accommodation_id"
+            }
+          ],
+          "annotations": {},
+          "referenced_columns": [
+            {
+              "table_name": "accommodation",
+              "schema_name": "product-max-RT",
+              "column_name": "id"
+            }
+          ]
+        }
+      ],
+      "table_name": "new_media",
+      "schema_name": "product-max-RT",
+      "column_definitions": [
+        {
+          "comment": null,
+          "name": "id",
+          "default": null,
+          "nullok": false,
+          "type": {
+            "typename": "serial4"
+          },
+          "annotations": {
+            "comment": ["hidden"]
+          }
+        },
+        {
+          "comment": null,
+          "name": "accommodation_id",
+          "default": null,
+          "nullok": false,
+          "type": {
+            "typename": "int4"
+          },
+          "annotations": {
+            "comment": ["hidden"]
+          }
+        }
+      ],
+      "annotations": {
+        "comment": [
+          "association"
+        ],
+        "description": {
+          "display": "New Media"
+        },
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "*": ["id", ["product-max-RT", "fk_media_accommodation"]]
+        }
+      }
     }
   },
   "table_names": [
@@ -1089,7 +1164,8 @@
     "media",
     "more-media",
     "more-files",
-    "more_related_table"
+    "more_related_table",
+    "new_media"
   ],
   "comment": null,
   "annotations": {

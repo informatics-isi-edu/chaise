@@ -23,11 +23,9 @@ describe('Error related to Record App,', function() {
             chaisePage.waitForElement(element(by.css('.modal-dialog ')));
         });
 
-        it('A error modal window should appear with Record Not Found title', function(){
+        it('An error modal window should appear with Record Not Found title', function(){
             var modalTitle = chaisePage.recordPage.getErrorModalTitle();
-
             expect(modalTitle).toBe("Record Not Found", "The title of no record error pop is not correct");
-
         });
 
         it('On click of OK button the page should redirect to recordset/search page', function(){
@@ -36,7 +34,38 @@ describe('Error related to Record App,', function() {
             }).then (function (){
                 return browser.driver.getCurrentUrl();
             }).then (function(currentUrl) {
-                var newapplink = url.replace("record", "recordset"),
+              var newapplink = url.replace("record", "recordset"),
+                  lastSlash = newapplink.lastIndexOf("/"),
+                  recordsetUrl = newapplink.slice(0, lastSlash);
+                expect(currentUrl).toBe(recordsetUrl, "The redirection from record page to recordset/search in case of multiple records failed");
+            }).catch( function(err) {
+                console.log(error);
+                expect('Something went wrong with this promise chain.').toBe('Please see error message.');
+            });
+        });
+    });
+
+    describe("For no record found in RecordEdit app", function() {
+
+        beforeAll(function() {
+          browser.ignoreSynchronization=true;
+            url = browser.params.url + "/recordedit/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name +  "/id=11223312121";
+            browser.get(url);
+            chaisePage.waitForElement(element(by.css('.modal-dialog ')));
+        });
+
+        it('An error modal window should appear with Record Not Found title', function(){
+            var modalTitle = chaisePage.recordPage.getErrorModalTitle();
+            expect(modalTitle).toBe("Record Not Found", "The title of no record error pop is not correct");
+        });
+
+        it('On click of OK button the page should redirect to recordset/search page', function(){
+            chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
+                return btn.click();
+            }).then (function (){
+                return browser.driver.getCurrentUrl();
+            }).then (function(currentUrl) {
+                var newapplink = url.replace("recordedit", "recordset"),
                     lastSlash = newapplink.lastIndexOf("/"),
                     recordsetUrl = newapplink.slice(0, lastSlash);
                 expect(currentUrl).toBe(recordsetUrl, "The redirection from record page to recordset/search in case of multiple records failed");

@@ -32,7 +32,8 @@ var testParams = {
     association_count: 1,
     associationDisabledRows: ["1"],
     page_size: 2,
-    price: "247.00"
+    price: "247.00",
+    schedule: "schedule"
 };
 
 describe('View existing record,', function() {
@@ -366,10 +367,10 @@ describe('View existing record,', function() {
                     });
                 });
 
-                it("on click of View more button should redirect to recordset page of association table", function(){
-                    chaisePage.waitForElement(element(by.id('rt-heading-association_table')));
-                    var relatedTableNameOnRecord = testParams.association_table_name,
-                        relatedTableNameOnRecordset = testParams.leaf_table_name,
+                it("table with defined Search app navigation in the annotation should be redirected to the Recordset page", function(){
+                    chaisePage.waitForElement(element(by.id('rt-heading-schedule')));
+                    var relatedTableNameOnRecord = testParams.schedule,
+                        relatedTableNameOnRecordset = testParams.schedule,
                         relatedTableLink = chaisePage.recordPage.getMoreResultsLink(relatedTableNameOnRecord);
 
                     expect(relatedTableLink.isDisplayed()).toBeTruthy();
@@ -377,11 +378,10 @@ describe('View existing record,', function() {
                     relatedTableLink.click().then(function() {
                         return browser.driver.getCurrentUrl();
                     }).then(function(url) {
-                        expect(url.search('/recordset/')).toBeGreaterThan(-1, "View more link is redirecting to Search app! It should redirect to Recordset.");                        
-                        // check entity title is for related table, not asociation table
+                        expect(url.search('/recordset/')).toBeGreaterThan(-1, "View more link is redirecting to Search app! It should redirect to Recordset.");
                         return chaisePage.waitForElement(element(by.id("divRecordSet")));
                     }).then(function() {
-                        expect(chaisePage.recordsetPage.getPageTitleElement().getText()).toBe(testParams.leaf_table_name);
+                        expect(chaisePage.recordsetPage.getPageTitleElement().getText()).toBe(testParams.schedule);
                         browser.navigate().back();
                     });
 

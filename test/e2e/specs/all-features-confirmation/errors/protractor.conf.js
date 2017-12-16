@@ -1,7 +1,7 @@
 var pConfig = require('./../../../utils/protractor.configuration.js');
 
 var config = pConfig.getConfig({
-    configFileName: 'parallel-configs/all-features-confirmation.dev.json',
+    configFileName: 'errors/dev.json',
     specs: [
         "errors.spec.js"
     ],
