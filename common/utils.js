@@ -56,6 +56,10 @@
           "noRecordsFound": "Click <b>OK</b> to show the list of all records.",
           "pageRedirect": "Click <b>OK</b> to go to the "
         },
+        "terminalError" : {
+          "okBtnMessage": "Click <b>OK</b> to go to the Recordset.",
+          "reloadMessage": "Click <b>Reload</b> to start over."
+        },
         "tableMissing": "No table specified in the form of 'schema-name:table-name' and no Default is set.",
         "unauthorizedMessage" : "You are not authorized to perform this action. Please report this problem to your system administrators.",
         "unauthorizedErrorCode" : "Unauthorized Access",

@@ -140,11 +140,12 @@
     }])
 
     // Factory for each error type
-    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$uibModal', '$window', 'errorMessages', 'Errors', 'UriUtils',
-          function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $uibModal, $window, errorMessages, Errors, UriUtils) {
+    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$uibModal', '$window', 'errorMessages', 'Errors', 'UriUtils', 'appNames',
+          function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $uibModal, $window, errorMessages, Errors, UriUtils, appNames) {
 
         function errorPopup(message, errorCode, pageName, redirectLink, subMessage, stackTrace) {
             var providedLink = true;
+            var appName = UriUtils.appNamefromUrlPathname($window.location.pathname);
             // if it's not defined, redirect to the dataBrowser config setting (if set) or the landing page
             if (!redirectLink) {
                 providedLink = false;
@@ -167,7 +168,8 @@
                 message: message,
                 errorCode: errorCode,
                 pageName: pageName,
-                subMessage: subMessage
+                subMessage: subMessage,
+                appName: appName
             };
 
             var modalProperties = {
@@ -211,13 +213,20 @@
 
         var exceptionFlag = false;
         function getredirectLink(appName){
+          var link = {},
+          appNameWithSlash = '/'+appName+'/',
+          currentLocation = $window.location.href;
 
+          link.ok = currentLocation.replace(appNameWithSlash, "/recordset/");
+          link.reload = currentLocation;
+          return link;
         }
         // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
         function handleException(exception) {
             $log.info(exception);
-            var appPath = UriUtils.appNamefromUrlPathname($window.location.pathname));
+            var appName = UriUtils.appNamefromUrlPathname($window.location.pathname);
             var stackTrace =  (exception.errorData && exception.errorData.stack)? exception.errorData.stack: undefined;
+
             var reloadCb = function() {
                 window.location.reload();
             };
@@ -240,18 +249,24 @@
             else {
                 var errName = exception.status? exception.status:"Terminal Error",
                     errorText = exception.message,
-                    systemAdminMessage = errorMessages.systemAdminMessage;
+                    systemAdminMessage = errorMessages.systemAdminMessage,
+                    redirectLink = $window.location.origin,
+                    pageName = "Home Page";
 
                 errName = (errName.toLowerCase() !== 'error') ? errName : "Terminal Error";
-                if (errName == "Terminal Error"){
-                  var obj = getredirectLink(appPath);
-
+                // If Uri is not valid then let the usual flow take place
+                if (errName == "Terminal Error" && !(exception instanceof ERMrest.InvalidFilterOperatorError) && (appName == appNames.RECORD || appName == appNames.RECORDEDIT)){
+                  var linkObj = getredirectLink(appName);
+                  if(linkObj.ok){
+                    redirectLink = linkObj.ok;
+                    pageName = "Recordset";
+                  }
                 }
                 errorPopup(
                     systemAdminMessage,
                     errName,
-                    "Home Page",
-                    $window.location.origin,
+                    pageName,
+                    redirectLink,
                     errorText,
                     stackTrace
                 );

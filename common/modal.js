@@ -22,14 +22,20 @@
         vm.params = params;
         vm.details = false;
         vm.linkText = messageMap.showErrDetails;
-
+        vm.reloadBtn = false;
+        var reloadMessage = ' <p>  </p>';
         if(vm.params.errorCode == 'Multiple Records Found'){
-          vm.clickActionMessage =  messageMap.recordAvailabilityError.multipleRecords;
+            vm.clickActionMessage =  messageMap.recordAvailabilityError.multipleRecords;
         } else if(vm.params.errorCode == 'Record Not Found'){
-          vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
+            vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
         } else {
-          vm.clickActionMessage = messageMap.recordAvailabilityError.pageRedirect + vm.params.pageName;
+            vm.clickActionMessage = messageMap.recordAvailabilityError.pageRedirect + vm.params.pageName;
+            if(vm.params.errorCode == 'Terminal Error' && vm.params.appName == 'recordedit'){
+              vm.reloadBtn = true;
+              reloadMessage = ' <p>' + messageMap.terminalError.reloadMessage +' </p>';
+            }
         }
+        vm.clickActionMessage += reloadMessage;
 
 
         vm.showDetails = function() {
@@ -44,6 +50,10 @@
         vm.cancel = function cancel() {
             $uibModalInstance.dismiss('cancel');
         };
+        vm.reload = function () {
+            $uibModalInstance.close();
+        };
+
 
     }])
     .controller('LoginDialogController', ['$uibModalInstance', 'params' , '$sce', function LoginDialogController($uibModalInstance, params, $sce) {
@@ -119,7 +129,7 @@
                     vm.tableModel.rowValues = DataUtils.getRowValuesFromPage(page);
                     $scope.$broadcast('data-modified');
                 };
-                
+
                 // get disabled tuple.
                 if (vm.getDisabledTuples) {
                     vm.getDisabledTuples(page, vm.tableModel.pageLimit).then(function (rows) {
@@ -131,7 +141,7 @@
                 } else {
                     afterRead();
                 }
-                
+
             }).catch(function(exception) {
                 throw exception;
             });
