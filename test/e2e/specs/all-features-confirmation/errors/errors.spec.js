@@ -3,7 +3,7 @@ var recordHelpers = require('../../../utils/record-helpers.js');
 var testParams = {
     table_name: "accommodation",
     schemaName:  "product-record",
-    deletionErrText : "This entry cannot be deleted as it is still referenced from the booking table. All dependent entries must be removed before this item can be deleted.\n\nClick OK to go to the Record Page Show Error Details",
+    deletionErrText : "This entry cannot be deleted as it is still referenced from the booking table. All dependent entries must be removed before this item can be deleted. If you have trouble removing dependencies please contact the site administrator.\n\nClick OK to go to the Record Page Show Error Details",
     uniqueConstraint : "Error The entry cannot be created/updated. Please use a different ID for this record."
 };
 
