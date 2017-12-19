@@ -36,6 +36,8 @@ var testParams = {
     schedule: "schedule"
 };
 
+var EC = protractor.ExpectedConditions;
+
 describe('View existing record,', function() {
 
     describe("For table " + testParams.table_name + ",", function() {
@@ -367,7 +369,7 @@ describe('View existing record,', function() {
                     });
                 });
 
-                it("table with defined Search app navigation in the annotation should be redirected to the Recordset page", function(){
+                it("table with defined Search app navigation in the annotation should be redirected to the Recordset page", function(done){
                     chaisePage.waitForElement(element(by.id('rt-heading-schedule')));
                     var relatedTableNameOnRecord = testParams.schedule,
                         relatedTableNameOnRecordset = testParams.schedule,
@@ -375,6 +377,7 @@ describe('View existing record,', function() {
 
                     expect(relatedTableLink.isDisplayed()).toBeTruthy();
 
+                    browser.wait(EC.elementToBeClickable(relatedTableLink));
                     relatedTableLink.click().then(function() {
                         return browser.driver.getCurrentUrl();
                     }).then(function(url) {
@@ -383,12 +386,16 @@ describe('View existing record,', function() {
                     }).then(function() {
                         expect(chaisePage.recordsetPage.getPageTitleElement().getText()).toBe(testParams.schedule);
                         browser.navigate().back();
+                    }).then(function () {
+                        done();
+                    }).catch(function (err) {
+                        console.log(err);
+                        done.fail();
                     });
-
                 });
             });
 
-            describe("For a related entity wuth an association table and markdown display", function () {
+            describe("For a related entity with an association table and markdown display", function () {
 
                 it("on adding new relationship should update the table display", function (){
                     var associationTableName = testParams.association_table_name_markdown;
