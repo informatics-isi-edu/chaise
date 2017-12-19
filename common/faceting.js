@@ -655,7 +655,14 @@
             };
         }])
 
-        .directive('choicePicker', ['$q', '$timeout', '$uibModal', 'tableConstants', "$log", function ($q, $timeout, $uibModal, tableConstants, $log) {
+        .directive('choicePicker', ['$q', '$timeout', '$uibModal', 'tableConstants', "$log", "defaultDisplayname", function ($q, $timeout, $uibModal, tableConstants, $log, defaultDisplayname) {
+
+            // the not_null filter with appropriate attributes
+            var notNullFilter = {
+                selected: true,
+                isNotNull: true,
+                displayname: {"value": defaultDisplayname.notNull, "isHTML": true}
+            };
 
             /**
              * Initialzie facet column.
@@ -668,22 +675,28 @@
             function initializeFacetColumn(scope) {
                 var defer = $q.defer();
 
+                // if not_null exist, other filters are not relevant
+                if (scope.facetColumn.hasNotNullFilter) {
+                    scope.facetModel.appliedFilters.push(notNullFilter);
+                    defer.resolve();
+                }
+
                 if (scope.facetColumn.choiceFilters.length === 0) {
                     defer.resolve();
-                } else {
-                    scope.facetColumn.getChoiceDisplaynames().then(function (filters) {
-                        filters.forEach(function (f) {
-                            scope.facetModel.appliedFilters.push({
-                                uniqueId: f.uniqueId,
-                                displayname: f.displayname
-                            });
-                        });
-
-                        defer.resolve();
-                    }).catch(function (error) {
-                        throw error;
-                    });
                 }
+
+                scope.facetColumn.getChoiceDisplaynames().then(function (filters) {
+                    filters.forEach(function (f) {
+                        scope.facetModel.appliedFilters.push({
+                            uniqueId: f.uniqueId,
+                            displayname: f.displayname
+                        });
+                    });
+
+                    defer.resolve();
+                }).catch(function (error) {
+                    throw error;
+                });
                 return defer.promise;
             }
 
@@ -701,6 +714,7 @@
 
                 var appliedFilterToRow = function (f) {
                     return {
+                        isNotNull: f.isNotNull,
                         uniqueId: f.uniqueId,
                         displayname: f.displayname,
                         selected: true
@@ -726,57 +740,62 @@
                 if (appliedLen >= tableConstants.PAGE_SIZE) {
                     scope.checkboxRows = scope.facetModel.appliedFilters.map(appliedFilterToRow);
                     defer.resolve(true);
-                } else {
-                    // read new data if neede
-                    (function (uri) {
-                        scope.reference.read(appliedLen + tableConstants.PAGE_SIZE).then(function (page) {
-                            // if this is not the result of latest facet change
-                            if (scope.reference.uri !== uri) {
-                                defer.resolve(false);
-                            } else {
-                                scope.checkboxRows = scope.facetModel.appliedFilters.map(appliedFilterToRow);
-                                scope.hasMore = page.hasNext;
+                }
 
-                                page.tuples.forEach(function (tuple) {
-                                    // if we're showing enough rows
-                                    if (scope.checkboxRows.length == tableConstants.PAGE_SIZE) {
-                                        scope.hasMore = true;
-                                        return;
-                                    }
 
-                                    var value;
-                                    if (scope.facetColumn.isEntityMode) {
-                                        // the filter might not be on the shortest key,
-                                        // therefore the uniqueId is not correct.
-                                        value = tuple.data ? tuple.data[scope.facetColumn.column.name] : null;
-                                    } else {
-                                        // The name of column is value
-                                        value = tuple.data ? tuple.data['value'] : null;
-                                    }
+                // read new data if neede
+                (function (uri) {
+                    scope.reference.read(appliedLen + tableConstants.PAGE_SIZE).then(function (page) {
+                        // if this is not the result of latest facet change
+                        if (scope.reference.uri !== uri) {
+                            defer.resolve(false);
+                        }
 
-                                    var i = scope.facetModel.appliedFilters.findIndex(function (row) {
-                                        return row.uniqueId == value;
-                                    });
+                        scope.checkboxRows = scope.facetModel.appliedFilters.map(appliedFilterToRow);
 
-                                    if (i !== -1) {
-                                        return;
-                                    }
+                        // always show the "show details button"
+                        scope.hasMore = true;
 
-                                    scope.checkboxRows.push({
-                                        selected: false,
-                                        displayname: value == null ? {value: null, isHTML: false} : tuple.displayname,
-                                        uniqueId: value
-                                    });
-                                });
-
-                                defer.resolve(true);
+                        page.tuples.forEach(function (tuple) {
+                            // if we're showing enough rows
+                            if (scope.checkboxRows.length == tableConstants.PAGE_SIZE) {
+                                return;
                             }
 
-                        }).catch(function (err) {
-                            defer.reject(err);
+                            var value;
+                            if (scope.facetColumn.isEntityMode) {
+                                // the filter might not be on the shortest key,
+                                // therefore the uniqueId is not correct.
+                                value = tuple.data ? tuple.data[scope.facetColumn.column.name] : null;
+                            } else {
+                                // The name of column is value
+                                value = tuple.data ? tuple.data['value'] : null;
+                            }
+
+                            var i = scope.facetModel.appliedFilters.findIndex(function (row) {
+                                return row.uniqueId == value && !row.isNotNull;
+                            });
+
+                            // duplicate filter
+                            if (i !== -1) {
+                                return;
+                            }
+
+                            // if we have a not_null filter, other filters must be disabled.
+                            scope.checkboxRows.push({
+                                selected: false,
+                                disabled: scope.facetColumn.hasNotNullFilter,
+                                displayname: (value == null) ? {value: null, isHTML: false} : tuple.displayname,
+                                uniqueId: value,
+                            });
                         });
-                    })(scope.reference.uri);
-                }
+
+                        defer.resolve(true);
+
+                    }).catch(function (err) {
+                        defer.reject(err);
+                    });
+                })(scope.reference.uri);
 
                 return defer.promise;
             }
@@ -825,6 +844,14 @@
                         params.displayname = scope.facetColumn.displayname;
                         params.context = "compact/select";
                         params.selectMode = "multi-select";
+
+                        // to choose the correct directive
+                        params.mode = "selectFaceting";
+
+                        if (scope.facetColumn.hasNotNullFilter) {
+                            params.matchNotNull = true;
+                        }
+
                         params.selectedRows = scope.checkboxRows.filter(function (row) {
                             return row.selected;
                         });
@@ -845,32 +872,47 @@
                             templateUrl: "../common/templates/searchPopup.modal.html"
                         });
 
-                        modalInstance.result.then(function dataSelected(tuples) {
+                        modalInstance.result.then(function dataSelected(res) {
                             // TODO needs refactoring.
-                            // If the data was preselected, we won't have the data object attached
-                            // to the tuples. In case of entity picker we must always get the value from data.
-                            // NOTE This might be buggy.
-                            var getTupleValue = function (t) {
-                                var col_name = scope.facetColumn.isEntityMode ? scope.facetColumn.column.name : "value";
-                                if (t.data && col_name in t.data) {
-                                    return t.data[col_name];
-                                } else {
-                                    return t.uniqueId;
-                                }
-                            }
+                            var ref;
 
-                            var ref = scope.facetColumn.replaceAllChoiceFilters(tuples.map(function (t) {
-                                return getTupleValue(t);
-                            }));
-                            scope.facetModel.appliedFilters = tuples.map(function (t) {
-                                var val = getTupleValue(t);
-                                // NOTE displayname will always be string, but we want to treat null and empty string differently,
-                                // therefore we have a extra case for null, to just return null.
-                                return {
-                                    uniqueId: val,
-                                    displayname: (val == null) ? {value: null, isHTML: false} : t.displayname
+                            if (!res) return;
+
+                            // if the value returned is an object with matchNotNull
+                            if (res.matchNotNull) {
+                                ref = scope.facetColumn.addNotNullFilter();
+                                scope.facetModel.appliedFilters = [notNullFilter];
+                            } else if (Array.isArray(res)){
+                                var tuples = res;
+
+                                // If the data was preselected, we won't have the data object attached
+                                // to the tuples. In case of entity picker we must always get the value from data.
+                                // NOTE This might be buggy.
+                                var getTupleValue = function (t) {
+                                    var col_name = scope.facetColumn.isEntityMode ? scope.facetColumn.column.name : "value";
+                                    if (t.data && col_name in t.data) {
+                                        return t.data[col_name];
+                                    } else {
+                                        return t.uniqueId;
+                                    }
                                 };
-                            });
+
+                                ref = scope.facetColumn.replaceAllChoiceFilters(tuples.map(function (t) {
+                                    return getTupleValue(t);
+                                }));
+                                scope.facetModel.appliedFilters = tuples.map(function (t) {
+                                    var val = getTupleValue(t);
+                                    // NOTE displayname will always be string, but we want to treat null and empty string differently,
+                                    // therefore we have a extra case for null, to just return null.
+                                    return {
+                                        uniqueId: val,
+                                        displayname: (val == null) ? {value: null, isHTML: false} : t.displayname
+                                    };
+                                });
+                            } else {
+                                // invalid result from the callback.
+                                return;
+                            }
 
                             // make sure to update all the opened facets
                             scope.parentCtrl.setInitialized();
@@ -881,38 +923,70 @@
                             // focus on the current facet
                             scope.parentCtrl.focusOnFacet(scope.index);
                         });
-                    }
+                    };
 
                     // for clicking on each row (will be registerd as a callback for list directive)
                     scope.onRowClick = function(row, $event) {
+
+                        // get the new reference based on the operation
                         var ref;
-                        if (row.selected) {
-                            ref = scope.facetColumn.addChoiceFilters([row.uniqueId]);
+                        if (row.isNotNull) {
+                            if (row.selected) {
+                                ref = scope.facetColumn.addNotNullFilter();
+                            } else {
+                                ref = scope.facetColumn.removeNotNullFilter();
+                            }
+                            $log.debug("request for facet (index=" + scope.facetColumn.index + ") choice add. Not null filter.'");
                         } else {
-                            ref = scope.facetColumn.removeChoiceFilters([row.uniqueId]);
+                            if (row.selected) {
+                                ref = scope.facetColumn.addChoiceFilters([row.uniqueId]);
+                            } else {
+                                ref = scope.facetColumn.removeChoiceFilters([row.uniqueId]);
+                            }
+                            $log.debug("request for facet (index=" + scope.facetColumn.index + ") choice add. uniqueId='" + row.uniqueId);
                         }
 
-                        $log.debug("request for facet (index=" + scope.facetColumn.index + ") choice add. uniqueId='" + row.uniqueId);
 
                         // if the updateVMReference failed (due to url length limit),
                         // we should revert the change back
                         if (!scope.parentCtrl.updateVMReference(ref, scope.index)) {
+                            $log.debug("URL limit reached. Reverting the change.");
                             row.selected = !row.selected;
                             $event.preventDefault();
-                        } else {
-                            // update the appliedFilters
-                            if (row.selected) {
-                                scope.facetModel.appliedFilters.push({
-                                    selected: true,
-                                    uniqueId: row.uniqueId,
-                                    displayname: row.displayname
-                                });
-                            } else {
-                                scope.facetModel.appliedFilters = scope.facetModel.appliedFilters.filter(function (f) {
-                                    return f.uniqueId !== row.uniqueId;
-                                });
-                            }
+                            return;
+                        }
 
+                        // if the changed row is not-null
+                        if (row.isNotNull) {
+                            var i;
+                            if (row.selected) {
+                                // if user selects not_null, we must deselect and disable other options
+                                scope.facetModel.appliedFilters = [notNullFilter];
+                                for (i = 1; i < scope.checkboxRows.length; i++) {
+                                    scope.checkboxRows[i].selected = false;
+                                    scope.checkboxRows[i].disabled = true;
+                                }
+                            } else {
+                                // if user deselects not_null, we must enable all the options
+                                scope.facetModel.appliedFilters = [];
+                                for (i = 1; i < scope.checkboxRows.length; i++) {
+                                    scope.checkboxRows[i].disabled = false;
+                                }
+                            }
+                            return;
+                        }
+
+                        // if the changed row is not not-null
+                        if (row.selected) {
+                            scope.facetModel.appliedFilters.push({
+                                selected: true,
+                                uniqueId: row.uniqueId,
+                                displayname: row.displayname
+                            });
+                        } else {
+                            scope.facetModel.appliedFilters = scope.facetModel.appliedFilters.filter(function (f) {
+                                return f.uniqueId !== row.uniqueId;
+                            });
                         }
                     };
 

@@ -17,7 +17,7 @@
         </button>
     </div>
     <div ng-if="config.selectMode == multiSelect" class="chaise-checkbox">
-        <input type="checkbox" ng-checked="selected || selectDisabled" ng-click="onSelect()" ng-disabled="selectDisabled">
+        <input type="checkbox" ng-checked="selected" ng-click="onSelect()" ng-disabled="selectDisabled">
         <label />
     </div>
 </td>
@@ -28,8 +28,8 @@
             <span ng-switch-default ng-if="!config.showNull" ng-bind="val.value"></span>
             <span ng-switch-default ng-if="config.showNull">
                 <span ng-if="val.value" ng-bind="val.value"></span>
-                <span ng-if="val.value == ''"><i>Empty</i></span>
-                <span ng-if="val.value == null"><i>No Value</i></span>
+                <span ng-if="val.value == ''" ng-bind-html="defaultDisplayname.empty"></span>
+                <span ng-if="val.value == null" ng-bind-html="defaultDisplayname.null"></span>
             </span>
         </div>
         <div ng-if="overflow[$index+1]" style="display:inline;">
@@ -38,6 +38,4 @@
         </div>
     </div>
 </td>
-<td ng-show="!config.showNull && !tuple.uniqueId" colspan="{{rowValues.length}}">
-    <i>No Value</i>
-</td>
+<td ng-show="!config.showNull && !tuple.uniqueId" colspan="{{rowValues.length}}" ng-bind-html="defaultDisplayname.null"></td>

@@ -9,7 +9,8 @@
         };
     }])
 
-    .directive('ellipses', ['AlertsService', 'ErrorService', 'MathUtils', 'messageMap', 'modalBox', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$uibModal', '$window', function(AlertsService, ErrorService, MathUtils, messageMap, modalBox, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $uibModal, $window) {
+    .directive('ellipses', ['AlertsService', 'ErrorService', 'MathUtils', 'messageMap', 'modalBox', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$uibModal', '$window', 'defaultDisplayname',
+        function(AlertsService, ErrorService, MathUtils, messageMap, modalBox, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $uibModal, $window, defaultDisplayname) {
 
         function deleteReference(scope, reference) {
             if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
@@ -75,6 +76,7 @@
                     scope.noSelect = modalBox.noSelect;
                     scope.singleSelect = modalBox.singleSelectMode;
                     scope.multiSelect = modalBox.multiSelectMode;
+                    scope.defaultDisplayname = defaultDisplayname;
 
                     var editLink = null;
 
