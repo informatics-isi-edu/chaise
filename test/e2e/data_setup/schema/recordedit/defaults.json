@@ -326,11 +326,35 @@
                     "type": {
                         "typename": "text"
                     }
+                }, {
+                    "name": "RID",
+                    "default": "someFunc()",
+                    "type": { "typename": "text" }
+                },
+                {
+                    "name": "RCB",
+                    "default": "someFunc()",
+                    "type": { "typename": "text" }
+                },
+                {
+                    "name": "RMB",
+                    "default": "someFunc()",
+                    "type": { "typename": "text" }
+                },
+                {
+                    "name": "RCT",
+                    "default": "",
+                    "type": { "typename": "timestamptz" }
+                },
+                {
+                    "name": "RMT",
+                    "default": "",
+                    "type": { "typename": "timestamptz" }
                 }
             ],
             "annotations": {
                 "tag:isrd.isi.edu,2016:visible-columns": {
-                    "entry/create": ["text", "text_disabled", "markdown", "markdown_disabled", ["defaults", "fk_text"], ["defaults", "fk_text_disabled"], "int", "int_disabled", "float", "float_disabled", "boolean_true", "boolean_false", "boolean_disabled", "date", "date_disabled", "timestamp", "timestamp_disabled", "timestamp_disabled_no_default", "timestamptz", "timestamptz_disabled", "timestamptz_disabled_no_default", "json", "json_disabled", "json_disabled_no_default"],
+                    "entry/create": ["text", "text_disabled", "markdown", "markdown_disabled", ["defaults", "fk_text"], ["defaults", "fk_text_disabled"], "int", "int_disabled", "float", "float_disabled", "boolean_true", "boolean_false", "boolean_disabled", "date", "date_disabled", "timestamp", "timestamp_disabled", "timestamp_disabled_no_default", "timestamptz", "timestamptz_disabled", "timestamptz_disabled_no_default", "json", "json_disabled", "json_disabled_no_default", "RID", "RCB", "RMB", "RCT", "RMT"],
                     "entry/edit": ["text", "text_disabled", "markdown_disabled", ["defaults", "fk_text_disabled"], "int_disabled", "float_disabled", "boolean_disabled", "date_disabled", "timestamp_disabled", "timestamptz_disabled", "json_disabled", "asset_disabled"],
                     "detailed": ["text", "text_disabled", "markdown", "markdown_disabled", ["defaults", "fk_text"], ["defaults", "fk_text_disabled"], "int", "int_disabled", "float", "float_disabled", "boolean_true", "boolean_false", "boolean_disabled", "date", "date_disabled", "timestamp", "timestamp_disabled", "timestamp_disabled_no_default", "timestamptz", "timestamptz_disabled", "timestamptz_disabled_no_default", "json", "json_disabled", "json_disabled_no_default"]
                 }
