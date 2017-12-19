@@ -11,6 +11,7 @@
         multipleRecords: "Multiple Records Found",
         noDataMessage: "No entity exists",
         multipleDataErrorCode : "Multiple Records Found",
+        facetFilterMissing : "No filter or facet was defined.",
         multipleDataMessage : "There are more than 1 record found for the filters provided."
     })
     .constant('errorMessages', {
@@ -21,6 +22,7 @@
         noDataMessage: "No matching record found for the given filter or facet.",
         multipleDataErrorCode : "Multiple Records Found",
         multipleDataMessage : "There are more than 1 record found for the filters provided.",
+        facetFilterMissing : "No filtering criteria was specified to identify a specific record.",
         systemAdminMessage : "An unexpected error has occurred. Please report this problem to your system administrators."
     })
 
@@ -196,7 +198,8 @@
                 window.location.reload();
             };
 
-            modalInstance.result.then(function () {
+            modalInstance.result.then(function (actionBtnIdentifier) {
+
                 if (errorCode == errorNames.unauthorized && !providedLink) {
                     var x = window.innerWidth/2 - 800/2;
                     var y = window.innerHeight/2 - 600/2;
@@ -206,12 +209,27 @@
                 }else if(errorCode == errorNames.conflict){
                    $window.open(redirectLink, '_blank');
                 } else {
-                    $window.location.replace(redirectLink);
+                    if(actionBtnIdentifier == "reload"){
+                        reloadCb();
+                    } else{
+                        $window.location.replace(redirectLink);
+                    }
+
                 }
             });
         }
 
         var exceptionFlag = false;
+
+        function getSpecialMessages(exception){
+          if( ERMrest && exception instanceof ERMrest.InvalidInputError && (exception.message.search(errorNames.facetFilterMissing) > -1)){
+              return errorMessages.facetFilterMissing;
+          }
+        }
+        function isUrlRelatedException(exception){
+          return (exception instanceof ERMrest.InvalidFilterOperatorError || exception instanceof ERMrest.InvalidFacetOperatorError || exception instanceof ERMrest.MalformedURIError);
+        }
+
         function getredirectLink(appName){
           var link = {},
           appNameWithSlash = '/'+appName+'/',
@@ -221,10 +239,12 @@
           link.reload = currentLocation;
           return link;
         }
+
         // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
         function handleException(exception) {
             $log.info(exception);
-            var appName = UriUtils.appNamefromUrlPathname($window.location.pathname);
+            var appName = UriUtils.appNamefromUrlPathname($window.location.pathname),
+            reloadLink;
             var stackTrace =  (exception.errorData && exception.errorData.stack)? exception.errorData.stack: undefined;
 
             var reloadCb = function() {
@@ -246,16 +266,22 @@
             else if ( ERMrest && exception instanceof ERMrest.ConflictError) {
                 errorPopup( exception.message, exception.status ,"Record Page", exception.errorData.redirectUrl, exception.subMessage);
             }
+
             else {
                 var errName = exception.status? exception.status:"Terminal Error",
                     errorText = exception.message,
                     systemAdminMessage = errorMessages.systemAdminMessage,
                     redirectLink = $window.location.origin,
-                    pageName = "Home Page";
+                    pageName = "Home Page",
+                    specialMessage;
 
                 errName = (errName.toLowerCase() !== 'error') ? errName : "Terminal Error";
                 // If Uri is not valid then let the usual flow take place
-                if (errName == "Terminal Error" && !(exception instanceof ERMrest.InvalidFilterOperatorError) && (appName == appNames.RECORD || appName == appNames.RECORDEDIT)){
+                specialMessage = getSpecialMessages(exception);
+                if(specialMessage != 'undefined' && specialMessage != ''){
+                  systemAdminMessage = specialMessage;
+                }
+                if (errName == "Terminal Error" && !isUrlRelatedException(exception) && (appName == appNames.RECORD || appName == appNames.RECORDEDIT)){
                   var linkObj = getredirectLink(appName);
                   if(linkObj.ok){
                     redirectLink = linkObj.ok;
@@ -269,6 +295,7 @@
                     redirectLink,
                     errorText,
                     stackTrace
+
                 );
             }
 

@@ -17,26 +17,27 @@
             $uibModalInstance.dismiss('cancel');
         }
     }])
-    .controller('ErrorModalController', ['$uibModalInstance', 'params', 'messageMap', function ErrorModalController($uibModalInstance, params, messageMap) {
+    .controller('ErrorModalController', ['$uibModalInstance', 'params', 'messageMap', '$window', function ErrorModalController($uibModalInstance, params, messageMap, $window) {
         var vm = this;
         vm.params = params;
         vm.details = false;
         vm.linkText = messageMap.showErrDetails;
         vm.reloadBtn = false;
         var reloadMessage = ' <p>  </p>';
+
         if(vm.params.errorCode == 'Multiple Records Found'){
             vm.clickActionMessage =  messageMap.recordAvailabilityError.multipleRecords;
         } else if(vm.params.errorCode == 'Record Not Found'){
             vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
         } else {
-            vm.clickActionMessage = messageMap.recordAvailabilityError.pageRedirect + vm.params.pageName;
+            vm.clickActionMessage = messageMap.recordAvailabilityError.pageRedirect + vm.params.pageName + '. ';
+            vm.reloadBtn = false;
             if(vm.params.errorCode == 'Terminal Error' && vm.params.appName == 'recordedit'){
               vm.reloadBtn = true;
               reloadMessage = ' <p>' + messageMap.terminalError.reloadMessage +' </p>';
             }
         }
         vm.clickActionMessage += reloadMessage;
-
 
         vm.showDetails = function() {
             vm.details = !vm.details;
@@ -45,13 +46,15 @@
 
         vm.ok = function () {
             $uibModalInstance.close();
+            return "p";
         };
 
         vm.cancel = function cancel() {
             $uibModalInstance.dismiss('cancel');
         };
         vm.reload = function () {
-            $uibModalInstance.close();
+            $uibModalInstance.close("reload");
+
         };
 
 

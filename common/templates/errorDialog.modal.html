@@ -6,7 +6,7 @@
   <span ng-bind-html="ctrl.params.message"></span>
     <br><br>
     <span ng-bind-html="ctrl.clickActionMessage"></span>
-    <br><a ng-show="ctrl.params.subMessage" ng-click="ctrl.showDetails()">
+    <a ng-show="ctrl.params.subMessage" ng-click="ctrl.showDetails()">
       <i class="pull-left glyphicon glyphicon-triangle-right" ng-class="{'glyphicon-triangle-bottom': ctrl.details, 'glyphicon-triangle-right': !ctrl.details}"></i>
     {{ctrl.linkText}}</a>
 
@@ -18,6 +18,6 @@
     </span>
 </div>
 <div class="modal-footer">
-    <button ng-show = "ctrl.reload" class="btn btn-default" type="button" ng-click="ctrl.reload()">Reload</button>
+    <button ng-show = "ctrl.reloadBtn" class="btn btn-default" type="button" ng-click="ctrl.reload()">Reload</button>
     <button class="btn btn-danger" type="button" ng-click="ctrl.ok()">OK</button>
 </div>
