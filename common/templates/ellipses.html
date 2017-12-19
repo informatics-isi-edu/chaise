@@ -21,7 +21,7 @@
         <label />
     </div>
 </td>
-<td ng-show="config.showNull || tuple.uniqueId" ng-repeat="val in rowValues track by $index">
+<td ng-if="config.showNull || tuple.uniqueId" ng-repeat="val in rowValues track by $index">
     <div ng-switch="val.isHTML">
         <div ng-class="{'hideContent': hideContent == true, 'showContent': hideContent == false}" ng-style="overflow[$index+1] && maxHeightStyle">
             <span ng-switch-when="true" class="markdown-container" ng-bind-html="val.value | trustedHTML"></span>
@@ -38,4 +38,4 @@
         </div>
     </div>
 </td>
-<td ng-show="!config.showNull && !tuple.uniqueId" colspan="{{rowValues.length}}" ng-bind-html="defaultDisplayname.null"></td>
+<td ng-if="!config.showNull && !tuple.uniqueId" colspan="{{rowValues.length}}" ng-bind-html="defaultDisplayname.null"></td>
