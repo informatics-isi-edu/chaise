@@ -20,6 +20,13 @@
         "*": "/record"
     })
 
+    .constant("appNames", {
+        "RECORD": "record",
+        "RECORDSET": "recordset",
+        "RECORDEDIT": "recordedit",
+        "SEARCH": "search"
+    })
+
     // this constant is used to keep track of our strings that the user is shown
     // so that when one is changed, it is changed in all places.
     // this will make localization easier if we go that route
@@ -618,6 +625,12 @@
             return /*@cc_on!@*/false || !!document.documentMode;
         }
 
+        function appNamefromUrlPathname(path){
+          var newPath = path.slice(0, -1);
+          var lastSlash = newPath.lastIndexOf('/');
+          return newPath.substring(lastSlash + 1, newPath.length);
+        }
+
         return {
             queryStringToJSON: queryStringToJSON,
             appTagToURL: appTagToURL,
@@ -628,7 +641,8 @@
             parsedFilterToERMrestFilter: parsedFilterToERMrestFilter,
             setLocationChangeHandling: setLocationChangeHandling,
             isBrowserIE: isBrowserIE,
-            getQueryParams: getQueryParams
+            getQueryParams: getQueryParams,
+            appNamefromUrlPathname: appNamefromUrlPathname
         }
     }])
 

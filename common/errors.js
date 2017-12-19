@@ -140,8 +140,8 @@
     }])
 
     // Factory for each error type
-    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$uibModal', '$window', 'errorMessages', 'Errors',
-          function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $uibModal, $window, errorMessages, Errors) {
+    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$uibModal', '$window', 'errorMessages', 'Errors', 'UriUtils',
+          function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $uibModal, $window, errorMessages, Errors, UriUtils) {
 
         function errorPopup(message, errorCode, pageName, redirectLink, subMessage, stackTrace) {
             var providedLink = true;
@@ -210,10 +210,13 @@
         }
 
         var exceptionFlag = false;
+        function getredirectLink(appName){
 
+        }
         // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
         function handleException(exception) {
             $log.info(exception);
+            var appPath = UriUtils.appNamefromUrlPathname($window.location.pathname));
             var stackTrace =  (exception.errorData && exception.errorData.stack)? exception.errorData.stack: undefined;
             var reloadCb = function() {
                 window.location.reload();
@@ -240,6 +243,10 @@
                     systemAdminMessage = errorMessages.systemAdminMessage;
 
                 errName = (errName.toLowerCase() !== 'error') ? errName : "Terminal Error";
+                if (errName == "Terminal Error"){
+                  var obj = getredirectLink(appPath);
+
+                }
                 errorPopup(
                     systemAdminMessage,
                     errName,
