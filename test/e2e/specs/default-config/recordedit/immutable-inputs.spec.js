@@ -34,7 +34,12 @@ var testParams = {
         timestamptz_disabled_no_default_value: "Automatically generated",
         json_value:JSON.stringify({"name":"testing_json"}),
         json_disabled_value:JSON.stringify(98.786),
-        json_disabled_no_default_value: "Automatically generated"
+        json_disabled_no_default_value: "Automatically generated",
+        rid_disabled_value: "Automatically generated",
+        rcb_disabled_value: "Automatically generated",
+        rmb_disabled_value: "Automatically generated",
+        rct_disabled_value: "Automatically generated",
+        rmt_disabled_value: "Automatically generated"
     },
     record_column_values: {
     // data values
@@ -196,6 +201,21 @@ describe('Record Add with defaults', function() {
 
             expect(foreignKeyInput.getText()).toBe(values.foreign_key_value, "Foreign key input default is incorrect");
             expect(foreignKeyDisabledInput.getText()).toBe(values.foreign_key_disabled_value, "Foreign key disabled default is incorrect");
+        });
+
+        // System columns
+        it("should initialize system column inputs with 'Automatically Generated'.", function() {
+            var ridDisabledInput = chaisePage.recordEditPage.getInputById(0, "RID"),
+                rcbDisabledInput = chaisePage.recordEditPage.getInputById(0, "RCB"),
+                rmbDisabledInput = chaisePage.recordEditPage.getInputById(0, "RMB"),
+                rctDisabledInput = chaisePage.recordEditPage.getInputById(0, "RCT"),
+                rmtDisabledInput = chaisePage.recordEditPage.getInputById(0, "RMT");
+
+            expect(ridDisabledInput.getAttribute("placeholder")).toBe(values.rid_disabled_value, "RID disabled input default is incorrect");
+            expect(rcbDisabledInput.getAttribute("placeholder")).toBe(values.rcb_disabled_value, "RCB disabled input default is incorrect");
+            expect(rmbDisabledInput.getAttribute("placeholder")).toBe(values.rmb_disabled_value, "RMB disabled input default is incorrect");
+            expect(rctDisabledInput.getAttribute("placeholder")).toBe(values.rct_disabled_value, "RCT disabled input default is incorrect");
+            expect(rmtDisabledInput.getAttribute("placeholder")).toBe(values.rmt_disabled_value, "RMT disabled input default is incorrect");
         });
 
         // TODO write tests for default values for composite foreign keys when implemented

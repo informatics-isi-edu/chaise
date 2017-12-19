@@ -44,6 +44,7 @@
         };
 
         vm.deleteRecord = function() {
+            var errorData = {};
             $rootScope.reference.delete().then(function deleteSuccess() {
                 // Get an appLink from a reference to the table that the existing reference came from
                 var unfilteredRefAppLink = $rootScope.reference.table.reference.contextualize.compact.appLink;
@@ -51,6 +52,8 @@
                 $window.location.href = unfilteredRefAppLink;
             }, function deleteFail(error) {
                 $rootScope.showSpinner = false;
+                errorData.redirectUrl = $rootScope.reference.contextualize.detailed.appLink;
+                error.errorData = errorData;
                 throw error;
             });
         };

@@ -3,7 +3,7 @@
     <h2 class="modal-title">{{::ctrl.params.errorCode}}</h2>
 </div>
 <div class="modal-body">
-    {{::ctrl.params.message}}
+  <span ng-bind-html="ctrl.params.message"></span>
     <br><br>
     <span ng-bind-html="ctrl.clickActionMessage"></span>
     <a ng-show="ctrl.params.subMessage" ng-click="ctrl.showDetails()">{{ctrl.linkText}}</a>

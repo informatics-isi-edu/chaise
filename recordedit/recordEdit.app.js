@@ -211,7 +211,8 @@
 
                             if (page.tuples.length < 1) {
                                 // TODO: understand the filter that was used and relate that information to the user (it oucld be a facet filter now)
-                                throw new Errors.noRecordError();
+                                var recordSetLink = page.reference.unfilteredReference.contextualize.compact.appLink;
+                                throw new Errors.noRecordError({}, recordSetLink);
                             }
 
                             var column, value;
