@@ -500,7 +500,6 @@
 
             // Facilitates the multi select functionality for multi edit by storing the tuple in the selectedRows array
             scope.onSelect = function(args) {
-                console.log(args);
                 var tuple = args.tuple;
 
                 var rowIndex = scope.vm.selectedRows.findIndex(function (obj) {
