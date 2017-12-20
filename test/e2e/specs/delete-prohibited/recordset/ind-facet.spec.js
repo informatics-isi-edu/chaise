@@ -1158,6 +1158,8 @@ describe("Viewing Recordset with Faceting,", function() {
                     });
                     expect(chaisePage.recordsetPage.getModalDisabledRows().count()).toBe(testParams.not_null.modal_available_options, "number of disabled rows missmatch.");
                     expect(chaisePage.recordsetPage.getCheckedModalOptions().count()).toBe(0, "number of checked rows missmatch.");
+                    return chaisePage.recordsetPage.getModalSubmit().click();
+                }).then(function () {
                     done();
                 }).catch(function (err) {
                     console.log(err);
@@ -1166,16 +1168,14 @@ describe("Viewing Recordset with Faceting,", function() {
             });
 
             it ("After submitting the filters, `All Records With Value` should be on top of the list with the rest of options being disabled", function (done) {
-                chaisePage.recordsetPage.getModalSubmit().click().then(function () {
-                    chaisePage.waitForElementInverse(chaisePage.recordsetPage.getFacetSpinner(testParams.not_null.option));
-                    browser.wait(function () {
-                        return chaisePage.recordsetPage.getCheckedFacetOptions(testParams.not_null.option).count().then(function(ct) {
-                            return ct == 1;
-                        });
-                    }, browser.params.defaultTimeout);
+                chaisePage.waitForElementInverse(chaisePage.recordsetPage.getFacetSpinner(testParams.not_null.option));
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getCheckedFacetOptions(testParams.not_null.option).count().then(function(ct) {
+                        return ct == 1;
+                    });
+                }, browser.params.defaultTimeout);
 
-                    return chaisePage.recordsetPage.getCheckedFacetOptions(testParams.not_null.option).count();
-                }).then(function (count) {
+                chaisePage.recordsetPage.getCheckedFacetOptions(testParams.not_null.option).count().then(function (count) {
                     expect(count).toBe(1, "number of selected filters missmatch.");
 
                     return chaisePage.recordsetPage.getFacetOptionsText(testParams.not_null.option);
@@ -1265,15 +1265,19 @@ describe("Viewing Recordset with Faceting,", function() {
     describe("For table " + testParams.table_name + ",", function() {
 
         var uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
+        var clearAll;
 
         beforeEach(function () {
             browser.ignoreSynchronization=true;
             browser.get(uri);
             chaisePage.waitForElementInverse(element(by.id("spinner")));
+
+            clearAll = chaisePage.recordsetPage.getClearAllFilters();
         });
 
         it("clicking edit should show the same number of forms as rows.", function () {
-            chaisePage.recordsetPage.getClearAllFilters().click().then(function () {
+            browser.wait(EC.elementToBeClickable(clearAll));
+            clearAll.click().then(function () {
                 return chaisePage.waitForElementInverse(element(by.id("spinner")));
             }).then(function () {
                 return chaisePage.recordsetPage.getEditRecordLink().click()
@@ -1287,7 +1291,9 @@ describe("Viewing Recordset with Faceting,", function() {
                 return chaisePage.recordEditPage.getForms().count();
             }).then(function(count) {
                 expect(count).toBe(25);
-            });
+            }).catch(function (err) {
+                console.log(err);
+            })
         });
 
         it("navigating to record with a facet url", function () {
