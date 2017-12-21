@@ -64,7 +64,15 @@
         };
 
         vm.toRecordSet = function(ref) {
-            return $window.location.href = ref.appLink;
+          // Search app might be broken and should not be linked from here.
+            var appUrl = ref.appLink,
+                recordSetUrl;
+            if(appUrl.search("/search/") > 0){
+              recordSetUrl = appUrl.replace("/search/", "/recordset/");
+            } else{
+              recordSetUrl = appUrl;
+            }
+            return $window.location.href = recordSetUrl;
         };
 
         vm.showRelatedTable = function(i) {
