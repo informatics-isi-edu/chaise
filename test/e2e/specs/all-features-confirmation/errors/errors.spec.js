@@ -3,7 +3,7 @@ var recordHelpers = require('../../../utils/record-helpers.js');
 var testParams = {
     table_name: "accommodation",
     schemaName:  "product-record",
-    deletionErrText : "This entry cannot be deleted as it is still referenced from the booking table. All dependent entries must be removed before this item can be deleted. If you have trouble removing dependencies please contact the site administrator.\n\nClick OK to go to the Record Page Show Error Details",
+    deletionErrText : "This entry cannot be deleted as it is still referenced from the booking table. All dependent entries must be removed before this item can be deleted. If you have trouble removing dependencies please contact the site administrator.\n\nClick OK to go to the Accommodations.\nShow Error Details",
     uniqueConstraint : "Error The entry cannot be created/updated. Please use a different ID for this record."
 };
 
@@ -29,7 +29,7 @@ describe('Error related to Record App,', function() {
         });
 
         it('On click of OK button the page should redirect to recordset/search page', function(){
-            chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
+            chaisePage.recordPage.getErrorModalOkButton().then(function(btn){                
                 return btn.click();
             }).then (function (){
                 return browser.driver.getCurrentUrl();
@@ -39,7 +39,7 @@ describe('Error related to Record App,', function() {
                   recordsetUrl = newapplink.slice(0, lastSlash);
                 expect(currentUrl).toBe(recordsetUrl, "The redirection from record page to recordset/search in case of multiple records failed");
             }).catch( function(err) {
-                console.log(error);
+                console.log(err);
                 expect('Something went wrong with this promise chain.').toBe('Please see error message.');
             });
         });
@@ -70,7 +70,7 @@ describe('Error related to Record App,', function() {
                     recordsetUrl = newapplink.slice(0, lastSlash);
                 expect(currentUrl).toBe(recordsetUrl, "The redirection from record page to recordset/search in case of multiple records failed");
             }).catch( function(err) {
-                console.log(error);
+                console.log(err);
                 expect('Something went wrong with this promise chain.').toBe('Please see error message.');
             });
         });

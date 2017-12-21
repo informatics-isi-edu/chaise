@@ -654,7 +654,7 @@ var recordPage = function() {
         displayName = safeId?displayName:makeSafeIdAttr(displayName);
         return element(by.id("entity-" + displayName)).element(by.css(".ng-scope")).element(by.css(".ng-scope"));
     };
-    
+
 
     this.getRelatedTableHeadings = function() {
         return element.all(by.css(".related-table-heading"));
@@ -709,7 +709,7 @@ var recordPage = function() {
 
     this.getNoResultsRow = function(displayName) {
         displayName = makeSafeIdAttr(displayName);
-        return element(by.id("rt-" + displayName)).element(by.id("no-results-row")); 
+        return element(by.id("rt-" + displayName)).element(by.id("no-results-row"));
     };
 
     this.getCreateRecordButton = function() {
@@ -753,13 +753,13 @@ var recordPage = function() {
     };
 
     this.getErrorModalOkButton = function(){
-        return browser.executeScript("return $('button')[1]");
+        return browser.executeScript("return $('button')[2]");  //changed to second index as "Reload" btn was added
     };
-    
+
     this.getModalDisabledRows = function () {
         return browser.executeScript("return $('.modal-body tr.disabled-row')");
     };
-    
+
     this.getSuccessAlert = function () {
         return element(by.css(".alert-success"));
     };
@@ -810,7 +810,7 @@ var recordsetPage = function() {
     this.getRows = function() {
         return element.all(by.css('.table-row'));
     };
-    
+
     this.getModalRows = function () {
         return element.all(by.css('.modal-body .table-row'));
     };
