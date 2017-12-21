@@ -46,7 +46,8 @@
         function runApp(constants, DataUtils, ERMrest, ErrorService, headInjector, MathUtils, modalBox, Session, UiUtils, UriUtils, $log, $rootScope, $window, Errors) {
 
         var session,
-            context = {};
+            context = {},
+            errorData = {};
         $rootScope.displayReady = false;
         $rootScope.recDisplayReady = false;
         $rootScope.showSpinner = false; // this property is set from common modules for controlling the spinner at a global level that is out of the scope of the app
@@ -121,10 +122,16 @@
                     };
                     // return model;
                     callback(model);
+                    errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
+                    errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
+                    error.errorData = errorData;
                     throw error;
                 }).catch(function(e) {
                     // The .catch from the outer promise won't catch errors from this closure
                     // so a .catch needs to be appended here.
+                    errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
+                    errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
+                    e.errorData = errorData;
                     throw e;
                 });
         }
@@ -162,16 +169,16 @@
                 *  This could be link to RECORDSET or SEARCH.
                 */
                 var recordSetLink = page.reference.unfilteredReference.contextualize.compact.appLink;
-
+                var tableDisplayName = page.reference.displayname.value;
                 if (page.tuples.length < 1) {
-                    throw new Errors.noRecordError({}, recordSetLink);
+                    throw new Errors.noRecordError({}, tableDisplayName, recordSetLink);
                 }
                 else if(page.tuples.length > 1){
                     $rootScope.displayReady = true;
                     // TODO this will break going to recordset with filters/facets, make sure RS has proper data visible
                     // the problem is that if there's a filter in the URL, the app will redirect to recordset and understand the filter, but the app won't show anything
                     // selected inside the facet. So we will have a recordset page that is filtered by a filter you cant remove unless the URL is changed
-                    throw new Errors.multipleRecordError(recordSetLink);
+                    throw new Errors.multipleRecordError(tableDisplayName, recordSetLink);
                 }
 
                 var tuple = $rootScope.tuple = page.tuples[0];

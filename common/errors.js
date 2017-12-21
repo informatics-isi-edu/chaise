@@ -38,7 +38,7 @@
          * @param  {string} message      Error message
          * @return {object}              Error Object
          */
-        function multipleRecordError(redirectUrl, message) {
+        function multipleRecordError(tableDisplayName, redirectUrl, message) {
 
             /**
              * @type {object}
@@ -64,7 +64,7 @@
              * @desc URL that redirects users to recordset app
              */
             this.errorData.redirectUrl = redirectUrl;
-
+            this.errorData.gotoTableDisplayname = tableDisplayName;
         }
         multipleRecordError.prototype = Object.create(Error.prototype);
         multipleRecordError.prototype.constructor = multipleRecordError;
@@ -77,7 +77,7 @@
          * @param  {string} message Error message
          * @return {object}         Error Object
          */
-        function noRecordError(filters, redirectUrl, message) {
+        function noRecordError(filters, tableDisplayName, redirectUrl, message) {
           /**
            * @type {object}
            * @desc  custom object to store miscellaneous elements viz. stacktrace
@@ -111,6 +111,7 @@
              * @desc URL that redirects users to recordset app
              */
             this.errorData.redirectUrl = redirectUrl;
+            this.errorData.gotoTableDisplayname = tableDisplayName;
         }
         noRecordError.prototype = Object.create(Error.prototype);
         noRecordError.prototype.constructor = noRecordError;
@@ -221,37 +222,41 @@
 
         var exceptionFlag = false;
 
-        function getSpecialMessages(exception){
-          if( ERMrest && exception instanceof ERMrest.InvalidInputError && (exception.message.search(errorNames.facetFilterMissing) > -1)){
-              return errorMessages.facetFilterMissing;
-          }
-        }
-        function isUrlRelatedException(exception){
-          return (exception instanceof ERMrest.InvalidFilterOperatorError || exception instanceof ERMrest.InvalidFacetOperatorError || exception instanceof ERMrest.MalformedURIError);
-        }
+        // function getSpecialMessages(exception){
+        //   if( ERMrest && exception instanceof ERMrest.InvalidInputError && (exception.message.search(errorNames.facetFilterMissing) > -1)){
+        //       return errorMessages.facetFilterMissing;
+        //   }
+        // }
+        // function isUrlRelatedException(exception){
+        //   return (exception instanceof ERMrest.InvalidFilterOperatorError || exception instanceof ERMrest.InvalidFacetOperatorError || exception instanceof ERMrest.MalformedURIError);
+        // }
 
-        function getredirectLink(appName){
-          var link = {},
-          appNameWithSlash = '/'+appName+'/',
-          currentLocation = $window.location.href;
-
-          link.ok = currentLocation.replace(appNameWithSlash, "/recordset/");
-          link.reload = currentLocation;
-          return link;
-        }
+        // function getredirectLink(appName){
+        //   var link = {},
+        //   appNameWithSlash = '/'+appName+'/',
+        //   currentLocation = $window.location.href;
+        //
+        //   link.ok = currentLocation.replace(appNameWithSlash, "/recordset/");
+        //   link.reload = currentLocation;
+        //   return link;
+        // }
 
         // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
         function handleException(exception) {
             $log.info(exception);
             var appName = UriUtils.appNamefromUrlPathname($window.location.pathname),
-            reloadLink;
+            reloadLink,
+            redirectLink = $window.location.origin,
+            gotoLocation = "Home Page";
+
             var stackTrace =  (exception.errorData && exception.errorData.stack)? exception.errorData.stack: undefined;
 
             var reloadCb = function() {
                 window.location.reload();
             };
-            if (exceptionFlag || window.location.pathname.indexOf('/search/') != -1 || window.location.pathname.indexOf('/viewer/') != -1) return;
-
+            if (exceptionFlag || window.location.pathname.indexOf('/search/') != -1 || window.location.pathname.indexOf('/viewer/') != -1){
+              return;
+            }
             // we decided to deal with the OR condition later
             if ( (ERMrest && exception instanceof ERMrest.UnauthorizedError) || exception.code == errorNames.unauthorized) {
                 Session.loginInAModal(reloadCb);
@@ -264,9 +269,17 @@
                 errorPopup( exception.message, exception.status ,"Home Page", $window.location.origin);
             }
             else if ( ERMrest && exception instanceof ERMrest.ConflictError) {
-                errorPopup( exception.message, exception.status ,"Record Page", exception.errorData.redirectUrl, exception.subMessage);
+                errorPopup( exception.message, exception.status, exception.errorData.gotoTableDisplayname, exception.errorData.redirectUrl, exception.subMessage);
             }
-
+            else if (ERMrest && exception instanceof ERMrest.ErmrestjsError ) {
+              if(exception.errorData && exception.errorData.gotoTableDisplayname != 'undeifned' && exception.errorData.gotoTableDisplayname != ''){
+                gotoLocation = exception.errorData.gotoTableDisplayname;
+              }
+              if(exception.errorData && exception.errorData.redirectUrl != 'undeifned' && exception.errorData.redirectUrl != ''){
+                redirectLink = exception.errorData.redirectUrl;
+              }
+                errorPopup( exception.message, exception.status, gotoLocation, redirectLink, exception.subMessage);
+            }
             else {
                 var errName = exception.status? exception.status:"Terminal Error",
                     errorText = exception.message,
@@ -276,18 +289,7 @@
                     specialMessage;
 
                 errName = (errName.toLowerCase() !== 'error') ? errName : "Terminal Error";
-                // If Uri is not valid then let the usual flow take place
-                specialMessage = getSpecialMessages(exception);
-                if(specialMessage != 'undefined' && specialMessage != ''){
-                  systemAdminMessage = specialMessage;
-                }
-                if (errName == "Terminal Error" && !isUrlRelatedException(exception) && (appName == appNames.RECORD || appName == appNames.RECORDEDIT)){
-                  var linkObj = getredirectLink(appName);
-                  if(linkObj.ok){
-                    redirectLink = linkObj.ok;
-                    pageName = "Recordset";
-                  }
-                }
+
                 errorPopup(
                     systemAdminMessage,
                     errName,
@@ -295,7 +297,6 @@
                     redirectLink,
                     errorText,
                     stackTrace
-
                 );
             }
 

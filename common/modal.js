@@ -32,7 +32,7 @@
         } else {
             vm.clickActionMessage = messageMap.recordAvailabilityError.pageRedirect + vm.params.pageName + '. ';
             vm.reloadBtn = false;
-            if(vm.params.errorCode == 'Terminal Error' && vm.params.appName == 'recordedit'){
+            if(vm.params.appName == 'recordedit'){
               vm.reloadBtn = true;
               reloadMessage = ' <p>' + messageMap.terminalError.reloadMessage +' </p>';
             }
@@ -46,7 +46,6 @@
 
         vm.ok = function () {
             $uibModalInstance.close();
-            return "p";
         };
 
         vm.cancel = function cancel() {

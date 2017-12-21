@@ -52,7 +52,8 @@
                 $window.location.href = unfilteredRefAppLink;
             }, function deleteFail(error) {
                 $rootScope.showSpinner = false;
-                errorData.redirectUrl = $rootScope.reference.contextualize.detailed.appLink;
+                errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
+                errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
                 error.errorData = errorData;
                 throw error;
             });
@@ -186,17 +187,25 @@
         * @param {bool} isModalUpdate if update happens through modal pop up
         */
         function readUpdatedTable(refObj, dataModel, idx, isModalUpdate){
+            var errorData = {};
             if (isModalUpdate || completed[refObj.uri] || updated[refObj.location.schemaName + ":" + refObj.location.tableName]) {
                 delete updated[refObj.location.schemaName + ":" + refObj.location.tableName];
+
                 (function (i) {
                     refObj.read(dataModel.pageLimit).then(function (page) {
                         dataModel.page = page;
                         dataModel.rowValues = DataUtils.getRowValuesFromPage(page);
                     }, function (error) {
                         console.log(error);
+                        errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
+                        errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
+                        error.errorData = errorData;
                         throw error;
                     }).catch(function (error) {
                         console.log(error);
+                        errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
+                        errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
+                        error.errorData = errorData;
                         throw error;
                     });
                 })(i);
