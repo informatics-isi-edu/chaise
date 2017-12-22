@@ -322,8 +322,9 @@
 
                             $rootScope.$broadcast('data-modified');
                         }).catch(function (err) {
-                          var errorData = {};                          
-                          errorData.gotoTableDisplayname = recordsetModel.reference.displayname.value;
+                          var errorData = {};
+                          errorData.gotoTableDisplayname = "Home Page";
+                          errorData.redirectUrl = $window.location.origin;
                           err.errorData = errorData;
                           throw err;
                         });

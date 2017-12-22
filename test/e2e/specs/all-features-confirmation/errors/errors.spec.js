@@ -3,8 +3,16 @@ var recordHelpers = require('../../../utils/record-helpers.js');
 var testParams = {
     table_name: "accommodation",
     schemaName:  "product-record",
+    multipleRecordsTable : "multiple_records",
+    tableNotFound : "accommodation_not_found",
     deletionErrText : "This entry cannot be deleted as it is still referenced from the booking table. All dependent entries must be removed before this item can be deleted. If you have trouble removing dependencies please contact the site administrator.\n\nClick OK to go to the Accommodations.\nShow Error Details",
-    uniqueConstraint : "Error The entry cannot be created/updated. Please use a different ID for this record."
+    uniqueConstraint : "Error The entry cannot be created/updated. Please use a different ID for this record.",
+    recordNotFoundModalText : "No matching record found for the given filter or facet.\n\nClick OK to show the list of all records.\nShow Error Details",
+    multipleRecordFoundModalText : "There are more than 1 record found for the filters provided.\n\nClick OK to show all the matched records.\nShow Error Details",
+    tableNotFoundModalText : function() { return "Table " + this.tableNotFound + " not found in schema.\n\nClick OK to go to the Home Page."},
+    sizeNotValidModalText : function() { return "'limit' must be greater than 0\n\nClick OK to go to the " + this.multipleRecordsTable + ".\nClick Reload to start over."},
+    negativeLimitErrorText : "'limit' must be greater than 0\n\nClick OK to go to the Home Page.",
+    hideErrors : "Hide Error Details"
 };
 
 /*
@@ -12,7 +20,7 @@ var testParams = {
 *  Test cases from other apps would be collated in future
 */
 
-describe('Error related to Record App,', function() {
+describe('Error related test cases,', function() {
 
     describe("For no record found in Record app", function() {
 
@@ -28,8 +36,23 @@ describe('Error related to Record App,', function() {
             expect(modalTitle).toBe("Record Not Found", "The title of no record error pop is not correct");
         });
 
+        it('Error modal text indicates users about error and provides them with navigation options', function(){
+            var modalText = chaisePage.recordPage.getModalText();
+            expect(modalText.getText()).toBe(testParams.recordNotFoundModalText, "The message in modal pop is not correct");
+        });
+
+        it('Error modal should Show Error Details', function(){
+            var showErrorLinkIcon =  element.all(by.xpath("//div/a")).get(0);
+            var errorSpan = element(by.xpath("//div/span/pre"));
+            showErrorLinkIcon.click().then(function(){
+              expect(showErrorLinkIcon.getText()).toBe(testParams.hideErrors, "The Show/Hide message in modal pop is not correct");
+              expect(errorSpan.getText()).toContain("Error");
+            })
+
+        });
+
         it('On click of OK button the page should redirect to recordset/search page', function(){
-            chaisePage.recordPage.getErrorModalOkButton().then(function(btn){                
+            chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
                 return btn.click();
             }).then (function (){
                 return browser.driver.getCurrentUrl();
@@ -38,6 +61,160 @@ describe('Error related to Record App,', function() {
                   lastSlash = newapplink.lastIndexOf("/"),
                   recordsetUrl = newapplink.slice(0, lastSlash);
                 expect(currentUrl).toBe(recordsetUrl, "The redirection from record page to recordset/search in case of multiple records failed");
+            }).catch( function(err) {
+                console.log(err);
+                expect('Something went wrong with this promise chain.').toBe('Please see error message.');
+            });
+        });
+    });
+
+    describe("For multiple records error in Record app", function() {
+
+        beforeAll(function() {
+          browser.ignoreSynchronization=true;
+            url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.multipleRecordsTable +  "/id=10007";
+            browser.get(url);
+            chaisePage.waitForElement(element(by.css('.modal-dialog ')));
+        });
+
+        it('An error modal window should appear with Multiple Records Found title', function(){
+            var modalTitle = chaisePage.recordPage.getErrorModalTitle();
+            expect(modalTitle).toBe("Multiple Records Found", "The title of no record error pop is not correct");
+        });
+
+        it('Error modal text indicates users about error and provides them with navigation options', function(){
+            var modalText = chaisePage.recordPage.getModalText();
+            expect(modalText.getText()).toBe(testParams.multipleRecordFoundModalText, "The message in modal pop is not correct");
+        });
+
+        it('Error modal should Show Error Details', function(){
+            var showErrorLinkIcon =  element.all(by.xpath("//div/a")).get(0);
+            var errorSpan = element(by.xpath("//div/span/pre"));
+            showErrorLinkIcon.click().then(function(){
+              expect(showErrorLinkIcon.getText()).toBe(testParams.hideErrors, "The Show/Hide message in modal pop is not correct");
+              expect(errorSpan.getText()).toContain("Error");
+            })
+
+        });
+
+        it('On click of OK button the page should redirect to recordset/search page', function(){
+            chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
+                return btn.click();
+            }).then (function (){
+                return browser.driver.getCurrentUrl();
+            }).then (function(currentUrl) {
+              var newapplink = url.replace("record", "recordset"),
+                  lastSlash = newapplink.lastIndexOf("/"),
+                  recordsetUrl = newapplink.slice(0, lastSlash);
+                expect(currentUrl).toBe(recordsetUrl, "The redirection from record page to recordset/search in case of multiple records failed");
+            }).catch( function(err) {
+                console.log(err);
+                expect('Something went wrong with this promise chain.').toBe('Please see error message.');
+            });
+        });
+    });
+
+    describe("For table not found error in Record app", function() {
+
+        beforeAll(function() {
+          browser.ignoreSynchronization=true;
+            url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.tableNotFound +  "/id=10007";
+            browser.get(url);
+            chaisePage.waitForElement(element(by.css('.modal-dialog ')));
+        });
+
+        it('An error modal window should appear with Item Not Found title', function(){
+            var modalTitle = chaisePage.recordPage.getErrorModalTitle();
+            expect(modalTitle).toBe("Item Not Found", "The title of no table error pop is not correct");
+        });
+
+        it('Error modal text indicates users about error and provides them with navigation options', function(){
+            var modalText = chaisePage.recordPage.getModalText();
+            expect(modalText.getText()).toBe(testParams.tableNotFoundModalText(), "The message in modal pop is not correct");
+        });
+
+        it('On click of OK button the page should redirect Home page', function(){
+            chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
+                return btn.click();
+            }).then (function (){
+                return browser.driver.getCurrentUrl();
+            }).then (function(currentUrl) {
+              var homeAppUrl = browser.params.url,
+                  homePage =   homeAppUrl.slice(0, homeAppUrl.slice(0, homeAppUrl.lastIndexOf("/")).lastIndexOf("/") + 1);
+
+                expect(currentUrl).toBe(homePage, "The redirection from record page to Home page failed");
+            }).catch( function(err) {
+                console.log(err);
+                expect('Something went wrong with this promise chain.').toBe('Please see error message.');
+            });
+        });
+    });
+
+    describe("For negative page size in schema definition in Recordset app", function() {
+
+        beforeAll(function() {
+          browser.ignoreSynchronization=true;
+            url = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.multipleRecordsTable;
+            browser.get(url);
+            chaisePage.waitForElement(element(by.css('.modal-dialog ')));
+        });
+
+        it('An error modal window should appear with Invalid Input title', function(){
+            var modalTitle = chaisePage.recordPage.getErrorModalTitle();
+            expect(modalTitle).toBe("Invalid Input", "The title of Invalid Input error pop is not correct");
+        });
+
+        it('Error modal text indicates users about error and provides them with navigation options to Home Page', function(){
+            var modalText = chaisePage.recordPage.getModalText();
+            expect(modalText.getText()).toBe(testParams.negativeLimitErrorText, "The message in modal pop is not correct");
+        });
+
+        it('On click of OK button the page should redirect to Home page', function(){
+            chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
+                return btn.click();
+            }).then (function (){
+                return browser.driver.getCurrentUrl();
+            }).then (function(currentUrl) {
+              var homeAppUrl = browser.params.url,
+                  homePage =   homeAppUrl.slice(0, homeAppUrl.slice(0, homeAppUrl.lastIndexOf("/")).lastIndexOf("/") + 1);
+
+                expect(currentUrl).toBe(homePage, "The redirection from recordset page to Home page failed");
+            }).catch( function(err) {
+                console.log(err);
+                expect('Something went wrong with this promise chain.').toBe('Please see error message.');
+            });
+        });
+    });
+
+    describe("For negative page limit in Recordedit app", function() {
+
+        beforeAll(function() {
+          browser.ignoreSynchronization=true;
+            url = browser.params.url + "/recordedit/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.multipleRecordsTable +"/?limit=-1";
+            browser.get(url);
+            chaisePage.waitForElement(element(by.css('.modal-dialog ')));
+        });
+
+        it('An error modal window should appear with Invalid Input title', function(){
+            var modalTitle = chaisePage.recordPage.getErrorModalTitle();
+            expect(modalTitle).toBe("Invalid Input", "The title of Invalid Input error pop is not correct");
+        });
+
+        it('Error modal text indicates users about error and provides them with navigation options to Home Page', function(){
+            var modalText = chaisePage.recordPage.getModalText();
+            expect(modalText.getText()).toBe(testParams.sizeNotValidModalText(), "The message in modal pop is not correct");
+        });
+
+        it('On click of OK button the page should redirect to RecordSet', function(){
+            chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
+                return btn.click();
+            }).then (function (){
+                return browser.driver.getCurrentUrl();
+            }).then (function(currentUrl) {
+              var newapplink = url.replace("recordedit", "recordset"),
+                  lastSlash = newapplink.lastIndexOf("/"),
+                  recordsetUrl = newapplink.slice(0, lastSlash);
+                expect(currentUrl).toBe(recordsetUrl, "The redirection from recordedit page to recordset failed");
             }).catch( function(err) {
                 console.log(err);
                 expect('Something went wrong with this promise chain.').toBe('Please see error message.');

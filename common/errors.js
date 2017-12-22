@@ -268,10 +268,10 @@
             else if ( (ERMrest && exception instanceof ERMrest.ForbiddenError) || exception.code == errorNames.forbidden) {
                 errorPopup( exception.message, exception.status ,"Home Page", $window.location.origin);
             }
-            else if ( ERMrest && exception instanceof ERMrest.ConflictError) {
-                errorPopup( exception.message, exception.status, exception.errorData.gotoTableDisplayname, exception.errorData.redirectUrl, exception.subMessage);
-            }
-            else if (ERMrest && exception instanceof ERMrest.ErmrestjsError ) {
+            // else if ( ERMrest && exception instanceof ERMrest.ConflictError) {
+            //     errorPopup( exception.message, exception.status, exception.errorData.gotoTableDisplayname, exception.errorData.redirectUrl, exception.subMessage);
+            // }
+            else if (ERMrest && exception instanceof ERMrest.ErmrestError ) {
               if(exception.errorData && exception.errorData.gotoTableDisplayname != 'undeifned' && exception.errorData.gotoTableDisplayname != ''){
                 gotoLocation = exception.errorData.gotoTableDisplayname;
               }
