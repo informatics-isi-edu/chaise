@@ -223,10 +223,9 @@
         // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
         function handleException(exception) {
             $log.info(exception);
-            var appName = UriUtils.appNamefromUrlPathname($window.location.pathname),
-            reloadLink,
-            redirectLink = $window.location.origin,
-            gotoLocation = "Home Page";
+            var reloadLink,
+                redirectLink = $window.location.origin,
+                gotoLocation = "Home Page";
 
             var stackTrace =  (exception.errorData && exception.errorData.stack)? exception.errorData.stack: undefined;
 

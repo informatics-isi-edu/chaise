@@ -636,6 +636,7 @@
             return /*@cc_on!@*/false || !!document.documentMode;
         }
 
+        // takes URL path and returns app name
         function appNamefromUrlPathname(path){
           var newPath = path.slice(0, -1);
           var lastSlash = newPath.lastIndexOf('/');
