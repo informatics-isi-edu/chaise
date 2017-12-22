@@ -207,8 +207,6 @@
 
                     var win = window.open("", '_blank','width=800,height=600,left=' + x + ',top=' + y);
                     Session.loginInAPopUp(win, reloadCb);
-                }else if(errorCode == errorNames.conflict){
-                   $window.open(redirectLink, '_blank');
                 } else {
                     if(actionBtnIdentifier == "reload"){
                         reloadCb();
@@ -221,25 +219,6 @@
         }
 
         var exceptionFlag = false;
-
-        // function getSpecialMessages(exception){
-        //   if( ERMrest && exception instanceof ERMrest.InvalidInputError && (exception.message.search(errorNames.facetFilterMissing) > -1)){
-        //       return errorMessages.facetFilterMissing;
-        //   }
-        // }
-        // function isUrlRelatedException(exception){
-        //   return (exception instanceof ERMrest.InvalidFilterOperatorError || exception instanceof ERMrest.InvalidFacetOperatorError || exception instanceof ERMrest.MalformedURIError);
-        // }
-
-        // function getredirectLink(appName){
-        //   var link = {},
-        //   appNameWithSlash = '/'+appName+'/',
-        //   currentLocation = $window.location.href;
-        //
-        //   link.ok = currentLocation.replace(appNameWithSlash, "/recordset/");
-        //   link.reload = currentLocation;
-        //   return link;
-        // }
 
         // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
         function handleException(exception) {
@@ -261,17 +240,11 @@
             if ( (ERMrest && exception instanceof ERMrest.UnauthorizedError) || exception.code == errorNames.unauthorized) {
                 Session.loginInAModal(reloadCb);
             }
-            else if ((exception.status && exception.status == errorNames.multipleRecords) || exception.constructor.name === "noRecordError"){
-                errorPopup(exception.message, exception.status, "Recordset ", exception.errorData.redirectUrl, stackTrace);
-            }
             // we decided to deal with the OR condition later
             else if ( (ERMrest && exception instanceof ERMrest.ForbiddenError) || exception.code == errorNames.forbidden) {
                 errorPopup( exception.message, exception.status ,"Home Page", $window.location.origin);
-            }
-            // else if ( ERMrest && exception instanceof ERMrest.ConflictError) {
-            //     errorPopup( exception.message, exception.status, exception.errorData.gotoTableDisplayname, exception.errorData.redirectUrl, exception.subMessage);
-            // }
-            else if (ERMrest && exception instanceof ERMrest.ErmrestError ) {
+            }            
+            else if (ERMrest && exception instanceof ERMrest.ERMrestError ) {
               if(exception.errorData && exception.errorData.gotoTableDisplayname != 'undeifned' && exception.errorData.gotoTableDisplayname != ''){
                 gotoLocation = exception.errorData.gotoTableDisplayname;
               }

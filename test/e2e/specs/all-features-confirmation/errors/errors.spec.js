@@ -5,6 +5,7 @@ var testParams = {
     schemaName:  "product-record",
     multipleRecordsTable : "multiple_records",
     tableNotFound : "accommodation_not_found",
+    conflict : "Conflict",
     deletionErrText : "This entry cannot be deleted as it is still referenced from the booking table. All dependent entries must be removed before this item can be deleted. If you have trouble removing dependencies please contact the site administrator.\n\nClick OK to go to the Accommodations.\nShow Error Details",
     uniqueConstraint : "Error The entry cannot be created/updated. Please use a different ID for this record.",
     recordNotFoundModalText : "No matching record found for the given filter or facet.\n\nClick OK to show the list of all records.\nShow Error Details",
@@ -12,7 +13,8 @@ var testParams = {
     tableNotFoundModalText : function() { return "Table " + this.tableNotFound + " not found in schema.\n\nClick OK to go to the Home Page."},
     sizeNotValidModalText : function() { return "'limit' must be greater than 0\n\nClick OK to go to the " + this.multipleRecordsTable + ".\nClick Reload to start over."},
     negativeLimitErrorText : "'limit' must be greater than 0\n\nClick OK to go to the Home Page.",
-    hideErrors : "Hide Error Details"
+    hideErrors : "Hide Error Details",
+    conflictRecordEditError : "This entry cannot be deleted as it is still referenced from the booking table. All dependent entries must be removed before this item can be deleted.\n\nClick OK to go to the Accommodations.\nClick Reload to start over.\nShow Error Details"
 };
 
 /*
@@ -94,7 +96,6 @@ describe('Error related test cases,', function() {
               expect(showErrorLinkIcon.getText()).toBe(testParams.hideErrors, "The Show/Hide message in modal pop is not correct");
               expect(errorSpan.getText()).toContain("Error");
             })
-
         });
 
         it('On click of OK button the page should redirect to recordset/search page', function(){
@@ -215,6 +216,49 @@ describe('Error related test cases,', function() {
                   lastSlash = newapplink.lastIndexOf("/"),
                   recordsetUrl = newapplink.slice(0, lastSlash);
                 expect(currentUrl).toBe(recordsetUrl, "The redirection from recordedit page to recordset failed");
+            }).catch( function(err) {
+                console.log(err);
+                expect('Something went wrong with this promise chain.').toBe('Please see error message.');
+            });
+        });
+    });
+
+    describe("For reload button to start over in Recordedit app", function() {
+
+        beforeAll(function() {
+          browser.ignoreSynchronization=true;
+            url = browser.params.url + "/recordedit/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name +"/id=2002";
+            browser.get(url);
+            chaisePage.waitForElement(chaisePage.recordEditPage.getEntityTitleElement());
+        });
+
+        it("An error modal window should appear with Conflict.", function () {
+            var modalTitle = chaisePage.recordPage.getConfirmDeleteTitle(),
+                deleteReccordBtn = chaisePage.recordEditPage.getDeleteRecordButton();
+            deleteReccordBtn.click().then(function () {
+                chaisePage.waitForElement(modalTitle);
+                return modalTitle.getText();
+            }).then(function (text) {
+                expect(text).toBe("Confirm Delete", "Deleteion confirmation pop-up could not be opened!");
+                chaisePage.recordPage.getConfirmDeleteButton().click();
+                errModalClass =  chaisePage.recordPage.getModalText();
+                chaisePage.waitForElement(errModalClass);
+                return errModalClass.getText();
+            }).then(function (errorText) {
+                expect(errorText).toBe(testParams.conflictRecordEditError, "409 Conflict could not be matched! Check conflict during deletion in RecordEdit.");
+            }).catch(function(error) {
+                console.log(error);
+                expect('Something went wrong with this promise chain.').toBe('Please see error message.');
+            });
+        });
+
+        it('On click of Reload button the page should reload itself in Recordedit app', function(){
+            chaisePage.recordPage.getErrorModalReloadButton().then(function(btn){
+                return btn.click();
+            }).then (function (){
+                return browser.driver.getCurrentUrl();
+            }).then (function(currentUrl) {
+                expect(currentUrl).toBe(currentUrl, "Reload button could not refresh the recordedit page.");
             }).catch( function(err) {
                 console.log(err);
                 expect('Something went wrong with this promise chain.').toBe('Please see error message.');
