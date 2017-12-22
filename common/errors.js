@@ -240,10 +240,13 @@
             if ( (ERMrest && exception instanceof ERMrest.UnauthorizedError) || exception.code == errorNames.unauthorized) {
                 Session.loginInAModal(reloadCb);
             }
+            else if ((exception.status && exception.status == errorNames.multipleRecords) || exception.constructor.name === "noRecordError"){
+               errorPopup(exception.message, exception.status, "Recordset ", exception.errorData.redirectUrl, stackTrace);
+           }
             // we decided to deal with the OR condition later
             else if ( (ERMrest && exception instanceof ERMrest.ForbiddenError) || exception.code == errorNames.forbidden) {
                 errorPopup( exception.message, exception.status ,"Home Page", $window.location.origin);
-            }            
+            }
             else if (ERMrest && exception instanceof ERMrest.ERMrestError ) {
               if(exception.errorData && exception.errorData.gotoTableDisplayname != 'undeifned' && exception.errorData.gotoTableDisplayname != ''){
                 gotoLocation = exception.errorData.gotoTableDisplayname;
