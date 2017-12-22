@@ -71,6 +71,13 @@
         singleSelectMode:"single-select",
         multiSelectMode:"multi-select"
     })
+
+    .constant("defaultDisplayname", {
+        null: "<i>No Value</i>",
+        empty: "<i>Empty</i>",
+        notNull: "<i>All Records With Value</i>"
+    })
+
     .factory('UriUtils', ['$injector', '$rootScope', '$window', 'appContextMapping', 'appTagMapping', 'ContextUtils', 'Errors', 'messageMap', 'parsedFilter',
         function($injector, $rootScope, $window, appContextMapping, appTagMapping, ContextUtils, Errors, messageMap, ParsedFilter) {
 

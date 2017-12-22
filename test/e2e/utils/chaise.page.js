@@ -981,7 +981,7 @@ var recordsetPage = function() {
     }
 
     this.getCheckedModalOptions = function () {
-        return element(by.css(".modal-body")).all(by.css(".chaise-checkbox input[checked=checked]"));
+        return element(by.css(".modal-body .recordset-table")).all(by.css(".chaise-checkbox input[checked=checked]"));
     }
 
     this.getModalOptions = function () {
@@ -1012,6 +1012,22 @@ var recordsetPage = function() {
     this.getRangeSubmit = function (idx) {
         return element(by.id("fc-" + idx)).element(by.css("button[type=submit]"));
     }
+
+    this.getModalMatchNotNullInput = function () {
+        return element(by.id("rs-match-not-null"));
+    };
+
+    this.getModalDisabledRows = function () {
+        return element.all(by.css('.modal-body tr.disabled-row'));
+    };
+
+    this.getFacetSpinner= function (idx) {
+        return element(by.id("fc-" + idx)).element(by.css(".spinner"));
+    };
+
+    this.getDisabledFacetOptions = function (idx) {
+        return element(by.id("fc-" + idx)).all(by.css(".chaise-checkbox input[disabled=disabled]"));
+    };
 };
 
 // Makes a string safe and valid for use in an HTML element's id attribute.

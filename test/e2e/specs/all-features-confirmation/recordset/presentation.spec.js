@@ -110,20 +110,20 @@ describe('View recordset,', function() {
 
             it("should show correct table rows", function() {
                 chaisePage.recordsetPage.getRows().then(function(rows) {
-                    expect(rows.length).toBe(4);
+                    expect(rows.length).toBe(4, "rows length missmatch.");
                     for (var i = 0; i < rows.length; i++) {
                         (function(index) {
                             rows[index].all(by.tagName("td")).then(function (cells) {
-                                expect(cells.length).toBe(accommodationParams.columns.length + 1);
-                                expect(cells[1].getText()).toBe(accommodationParams.data[index].title);
-                                expect(cells[2].element(by.tagName("a")).getAttribute("href")).toBe(accommodationParams.data[index].website);
-                                expect(cells[2].element(by.tagName("a")).getText()).toBe("Link to Website");
-                                expect(cells[3].getText()).toBe(accommodationParams.data[index].rating);
-                                expect(cells[4].getText()).toBe(accommodationParams.data[index].summary);
-                                expect(cells[5].getText()).toBe(accommodationParams.data[index].opened_on);
-                                expect(cells[6].getText()).toBe(accommodationParams.data[index].luxurious);
-                                expect(cells[7].getText()).toBe(accommodationParams.data[index].json_col);
-                                expect(cells[8].getText()).toBe(accommodationParams.data[index].json_col_with_markdown);
+                                expect(cells.length).toBe(accommodationParams.columns.length + 1, "cells length missmatch for row=" + index);
+                                expect(cells[1].getText()).toBe(accommodationParams.data[index].title, "title column missmatch for row=" + index);
+                                expect(cells[2].element(by.tagName("a")).getAttribute("href")).toBe(accommodationParams.data[index].website, "website column link missmatch for row=" + index);
+                                expect(cells[2].element(by.tagName("a")).getText()).toBe("Link to Website", "website column caption missmatch for row=" + index);
+                                expect(cells[3].getText()).toBe(accommodationParams.data[index].rating, "rating column missmatch for row=" + index);
+                                expect(cells[4].getText()).toBe(accommodationParams.data[index].summary, "summary column missmatch for row=" + index);
+                                expect(cells[5].getText()).toBe(accommodationParams.data[index].opened_on, "opened_on column missmatch for row=" + index);
+                                expect(cells[6].getText()).toBe(accommodationParams.data[index].luxurious, "luxurious column missmatch for row=" + index);
+                                expect(cells[7].getText()).toBe(accommodationParams.data[index].json_col, "json_col column missmatch for row=" + index);
+                                expect(cells[8].getText()).toBe(accommodationParams.data[index].json_col_with_markdown, "json_col_with_markdown column missmatch for row=" + index);
                             });
                         }(i))
                     }

@@ -98,6 +98,7 @@
         vm.cancel = cancel;
         vm.submit = submitMultiSelection;
         vm.getDisabledTuples = params.getDisabledTuples ? params.getDisabledTuples : undefined;
+        vm.mode = params.mode;
 
         vm.hasLoaded = false;
         var reference = vm.reference = params.reference;
@@ -115,6 +116,7 @@
             pageLimit:          limit,
             rowValues:          [],
             selectedRows:       params.selectedRows,
+            matchNotNull:       params.matchNotNull,
             search:             reference.location.searchTerm,
             config:             {viewable: false, editable: false, deletable: false, selectMode: params.selectMode, showNull: params.showNull === true},
             context:            params.context
@@ -156,8 +158,17 @@
             if (params.selectMode != modalBox.multiSelectMode) $uibModalInstance.close(tuples[0]);
         }
 
+        /**
+         * Will call the close modal with the appropriate results.
+         * If we had the matchNotNull, then we just need to pass that attribute.
+         */
         function submitMultiSelection() {
-            $uibModalInstance.close(this.tableModel.selectedRows);
+            var res = vm.tableModel.selectedRows;
+            if (!Array.isArray(res)) res = [];
+            if (vm.tableModel.matchNotNull) {
+                res = {matchNotNull: true};
+            }
+            $uibModalInstance.close(res);
         }
 
         function cancel() {

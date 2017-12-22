@@ -1,4 +1,5 @@
 <div class="recordset-container" ng-class="vm.config.showFaceting ? 'row with-faceting':'without-faceting'">
+    <div ng-bind="whatever"></div>
     <loading-spinner ng-show="!vm.initialized || $root.showSpinner"></loading-spinner>
     <div class="faceting-resizable" resizable r-directions=["right"] r-flex="true" ng-if="vm.config.showFaceting" ng-class="{'initializing': !vm.initialized}">
         <faceting vm="vm"></faceting>
@@ -99,12 +100,8 @@
                         <span ng-repeat="filter in vm.facetModels[$index].appliedFilters">
                             <span ng-if="::filter.displayname.value && filter.displayname.isHTML" ng-bind-html="::filter.displayname.value"></span>
                             <span ng-if="::filter.displayname.value && !filter.displayname.isHTML" ng-bind="::filter.displayname.value"></span>
-                            <span ng-if="::filter.displayname.value == ''">
-                                <i>Empty</i>
-                            </span>
-                            <span ng-if="::filter.displayname.value == null">
-                                <i>No Value</i>
-                            </span>
+                            <span ng-if="::filter.displayname.value == ''" ng-bind-html="defaultDisplayname.empty"></span>
+                            <span ng-if="::filter.displayname.value == null" ng-bind-html="defaultDisplayname.null"></span>
                             <span>{{$last ? '': ','}}</span>
                         </span>
                     </span>
@@ -113,12 +110,8 @@
                             <span>&bull;</span>
                             <span ng-if="::filter.displayname.value && filter.displayname.isHTML" ng-bind-html="::filter.displayname.value"></span>
                             <span ng-if="::filter.displayname.value && !filter.displayname.isHTML" ng-bind="::filter.displayname.value"></span>
-                            <span ng-if="::filter.displayname.value == ''">
-                                <i>Empty</i>
-                            </span>
-                            <span ng-if="::filter.displayname.value == null">
-                                <i>No Value</i>
-                            </span>
+                            <span ng-if="::filter.displayname.value == ''" ng-bind-html="defaultDisplayname.empty"></span>
+                            <span ng-if="::filter.displayname.value == null" ng-bind-html="defaultDisplayname.null"></span>
                         </span>
                     </script>
                 </div>
