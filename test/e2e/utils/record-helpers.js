@@ -239,32 +239,32 @@ exports.testPresentation = function (tableParams) {
         })
     });
 
-		it("click event on image_id in inline display should open new tab with file details",function(){
-				var allHandle;
-				chaisePage.waitForElement(element(by.id('entity-booking'))).then(function(){
-						return browser.executeScript("return $('#divRecordSet > table > tbody > tr:nth-child(1) > td:nth-child(5) > div > div > span > a')");
-				}).then(function(imageLinks){						
-						browser.executeScript("return window.open(arguments[0], '_blank')", imageLinks[0]);
-						return browser.getAllWindowHandles();
-				}).then(function (handles){
-						allHandle = handles;
-						browser.switchTo().window(allHandle[1]);
-						chaisePage.waitForElement(chaisePage.recordPage.getEntityTitleElement());
-						return chaisePage.recordPage.getEntityTitle();
-				}).then(function (pageTitle) {
-						expect(pageTitle).toBe("3,005", "Page title did not match. Invalid image id");
-						return chaisePage.recordPage.getEntitySubTitle();
-				}).then(function (pageSubTitle){
-						expect(pageSubTitle).toBe("file", "Page subtitle did not match. Invalid image id");
-						browser.close();
-						browser.switchTo().window(allHandle[0]);
-				}).catch(function(err){
-						console.log(err);
-						expect('Encountered an error').toBe('Please check the log', 'Inside catch block');
-						browser.close();
-						browser.switchTo().window(allHandle[0]);
-				})
-		});
+    it("click event on image_id in inline display should open new tab with file details",function(){
+        var allHandle;
+        chaisePage.waitForElement(element(by.id('entity-booking'))).then(function(){
+           return browser.executeScript("return $('#divRecordSet > table > tbody > tr:nth-child(1) > td:nth-child(5) > div > div > span > a')");
+        }).then(function(imageLinks){
+            browser.executeScript("return window.open(arguments[0], '_blank')", imageLinks[0]);
+            return browser.getAllWindowHandles();
+        }).then(function (handles){
+            allHandle = handles;
+            browser.switchTo().window(allHandle[1]);
+            chaisePage.waitForElement(chaisePage.recordPage.getEntityTitleElement());
+            return chaisePage.recordPage.getEntityTitle();
+        }).then(function (pageTitle) {
+            expect(pageTitle).toBe("3,005", "Page title did not match. Invalid image id");
+            return chaisePage.recordPage.getEntitySubTitle();
+        }).then(function (pageSubTitle){
+            expect(pageSubTitle).toBe("file", "Page subtitle did not match. Invalid image id");
+            browser.close();
+            browser.switchTo().window(allHandle[0]);
+        }).catch(function(err){
+            console.log(err);
+            expect('Encountered an error').toBe('Please check the log', 'Inside catch block');
+            browser.close();
+            browser.switchTo().window(allHandle[0]);
+        })
+    });
 
     it("visible column related table with inline inbound fk should display 'None' in markdown display mode if no data was found.",function(){
         var EC = protractor.ExpectedConditions,
@@ -277,7 +277,7 @@ exports.testPresentation = function (tableParams) {
         }).then(function(deleteButtons) {
             return deleteButtons[0].click();
         }).then(function () {
-						chaisePage.waitForElement(element(by.id("delete-confirmation")));
+            chaisePage.waitForElement(element(by.id("delete-confirmation")));
             return chaisePage.recordPage.getConfirmDeleteButton().click();
         }).then(function () {
             browser.wait(function () {
@@ -291,8 +291,8 @@ exports.testPresentation = function (tableParams) {
             return deleteButtons[0].click();
         }).then(function () {
             return chaisePage.recordPage.getConfirmDeleteButton();//.click();
-				}).then(function(confirmationBtn){
-						return confirmationBtn.click();
+        }).then(function(confirmationBtn){
+           return confirmationBtn.click();
         }).then(function () {
             browser.wait(function() {
                 return chaisePage.recordPage.getRelatedTableRows(bookingName).count().then(function(ct) {
@@ -344,7 +344,7 @@ exports.testPresentation = function (tableParams) {
             return tableHeading.getAttribute("class");
         }).then(function(attribute) {
             expect(attribute).toMatch("panel-open");
-						chaisePage.waitForElement(element(by.css(".accordion-toggle")));
+            chaisePage.waitForElement(element(by.css(".accordion-toggle")));
             return tableHeading.element(by.css(".accordion-toggle")).click();
         }).then(function() {
             return tableHeading.getAttribute("heading");
