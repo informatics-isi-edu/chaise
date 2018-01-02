@@ -408,6 +408,25 @@
               "column_name": "id"
             }
           ]
+        },
+        {
+          "names" : [["product-record", "fk_booking_accommodation_image"]],
+          "comment": null,
+          "foreign_key_columns": [
+            {
+              "table_name": "booking",
+              "schema_name": "product-record",
+              "column_name": "image_id"
+            }
+          ],
+          "annotations": {},
+          "referenced_columns": [
+            {
+              "table_name": "file",
+              "schema_name": "product-record",
+              "column_name": "id"
+            }
+          ]
         }
       ],
       "table_name": "booking",
@@ -466,6 +485,20 @@
             },
             "facetOrder": ["5"]
           }
+        },
+        {
+          "comment": "this is an asset/thumbnail",
+          "name": "image_id",
+          "default": null,
+          "nullok": true,
+          "type": {
+            "typename": "int4"
+          },
+          "annotations": {
+            "description": {
+              "display": "Image"
+            }
+          }
         }
       ],
       "annotations": {
@@ -475,7 +508,7 @@
         "description": {
           "display": "Bookings"
         },
-         
+
         "tag:isrd.isi.edu,2016:table-display": {
           "*": {
             "separator_markdown": " ",
