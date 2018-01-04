@@ -57,6 +57,13 @@ var testParams = {
     },
     multipleData: {
         title : "Multiple Records Found"
+    },
+    sidePanelTest: {
+      schemaName: "product-record",
+      tableName: "accommodation_collection",
+      id: "2003",
+      tocCount: 7,
+      tableToShow: 'Categories_5'
     }
 };
 
@@ -158,9 +165,71 @@ describe('View existing record,', function() {
             }).then (function(currentUrl) {
                 expect(currentUrl).toContain("recordset", "The redirection from record page to recordset in case of multiple records failed");
             }).catch( function(err) {
-                console.log(error);
+                console.log(err);
             });
         });
+    });
+
+    describe("For side panel table of contents in Record App", function() {
+
+        beforeAll(function() {
+            var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.sidePanelTest.schemaName + ":" + testParams.sidePanelTest.tableName +  "/id=" + testParams.sidePanelTest.id;
+            browser.get(url);
+            recSidePan = chaisePage.recordPage.getElementById('recordSidePan-5');
+            chaisePage.waitForElement(recSidePan);
+        });
+
+        it('Table of contents should match all related table', function(){
+            var modalTitle = element.all(by.xpath("//div[contains(@id,'recordSidePan')]"));
+            expect(modalTitle.count()).toBe(testParams.sidePanelTest.tocCount, "Table of contents count did not match!");
+
+        });
+
+        it('On click of Related table name in TOC page should move to the contents and open the table details', function(){
+            var rtTableHeading = chaisePage.recordPage.getRelatedTableHeading(testParams.sidePanelTest.tableToShow);
+
+            recSidePan.getAttribute('class').then(function(className) {
+              expect(className).toContain('panel', 'Side pan does not have proper display');
+                return recSidePan.click();
+            }).then (function (){
+              // related table should be visible
+              rtTableHeading.isDisplayed().then(function (bool) {
+                  expect(bool).toBeTruthy();
+              });
+              return rtTableHeading.getAttribute("class");
+            }).then (function(className) {
+                expect(className).toContain("panel-open", "Related table panel is not open when clicked through TOC.");
+            }).catch( function(err) {
+                console.log(err);
+            });
+        });
+
+        it('Side panel should hide/show by clicking pull button', function(){
+            var rtTableHeading = chaisePage.recordPage.getRelatedTableHeading(testParams.sidePanelTest.tableToShow),
+                recPan =  chaisePage.recordPage.getElementById('record-side-pan'),
+            fiddlerBtn = element(by.className('sidePanFiddler')).element(by.tagName('i'));
+            chaisePage.waitForElement(fiddlerBtn);
+
+            recSidePan.getAttribute('class').then(function(className) {
+              return  fiddlerBtn.getAttribute("class");
+            }).then (function (className){
+                expect(className).toContain('glyphicon-chevron-left', 'Side Pan Pull button is not pointing in the right direction');
+                recPan.isDisplayed().then(function (bool) {
+                    expect(bool).toBeTruthy();
+                });
+              return fiddlerBtn.click();
+            }).then (function() {
+              return  fiddlerBtn.getAttribute("class");
+            }).then(function(className){
+                expect(className).toContain("glyphicon-chevron-right", "Side Pan Pull button is not pointing in the right direction.");
+                recPan.isDisplayed().then(function (bool) {
+                    expect(bool).toBeFalsy();
+                });
+            }).catch( function(err) {
+                console.log(err);
+            });
+        });
+
     });
 
 });

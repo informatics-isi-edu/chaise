@@ -55,8 +55,8 @@
 
         <div class="faceting-container"  du-scroll-container>
             <div class="columns-container">
-                    <div  class="panel" ng-repeat="relatedRef in relatedReferences track by $index"  id="fcTab-{{$index}}" ng-if="ctrl.showRelatedTable($index)" class="{{lastActiveFacet == $index ? 'focused': ''}}">
-                                <h3 class="panel-title accordion-toggle ellipsis" id="fc-heading-{{$index}}" ng-click="ctrl.gotoRelatedTable(relatedRef.displayname.value, $index)" tooltip-enable="tooltipEnabled" uib-tooltip-html="relatedRef.displayname.value" tooltip-placement="bottom" chaise-enable-tooltip-width>
+                    <div  class="panel" ng-repeat="relatedRef in relatedReferences track by $index"  id="recordSidePan-{{$index}}" ng-if="ctrl.showRelatedTable($index)" class="{{lastActiveFacet == $index ? 'focused': ''}}" ng-click="ctrl.gotoRelatedTable(relatedRef.displayname.value, $index)">
+                                <h3 class="panel-title accordion-toggle ellipsis" id="recordSidePan-heading-{{$index}}" tooltip-enable="tooltipEnabled" uib-tooltip-html="relatedRef.displayname.value" tooltip-placement="bottom" chaise-enable-tooltip-width>
                                     <a>
                                         <span ng-if="::relatedRef.displayname.isHTML" ng-bind-html="::relatedRef.displayname.value"></span>
                                         <span ng-if="::!relatedRef.displayname.isHTML" ng-bind="::relatedRef.displayname.value"></span>

@@ -774,6 +774,10 @@ var recordPage = function() {
     this.getLoadingElement = function () {
         return element(by.id("rt-loading"));
     }
+
+    this.getElementById = function (id) {
+        return element(by.id(id));
+    }
 };
 
 var recordsetPage = function() {

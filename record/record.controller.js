@@ -4,8 +4,8 @@
     angular.module('chaise.record')
 
 
-    .controller('RecordController', ['AlertsService',  'DataUtils', 'ErrorService', 'MathUtils', 'messageMap', 'modalBox', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$uibModal', '$window',
-        function RecordController(AlertsService, DataUtils, ErrorService, MathUtils, messageMap, modalBox, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $uibModal, $window) {
+    .controller('RecordController', ['AlertsService',  'DataUtils', 'ErrorService', 'MathUtils', 'messageMap', 'modalBox', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$uibModal', '$window','$timeout',
+        function RecordController(AlertsService, DataUtils, ErrorService, MathUtils, messageMap, modalBox, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $uibModal, $window, $timeout) {
         var vm = this;
 
         var addRecordRequests = {}; // <generated unique id : reference of related table>
@@ -17,19 +17,23 @@
         vm.alerts = AlertsService.alerts;
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
         vm.recordSidePanOpen = true;
-        
+
         vm.gotoRelatedTable = function(sectionId, index){
           var safeSectionId = vm.makeSafeIdAttr(sectionId);
           var pageSection = "rt-heading-" + safeSectionId;
-          document.getElementById(pageSection).scrollIntoView(true);
-          $rootScope.tableModels[index].open = true;
+          var pageSectionwithhash = JSON.stringify('#'+pageSection);
+          document.getElementById(pageSection).scrollIntoView({behavior: "smooth", block: "start"});
+          $timeout(function(){
+              $rootScope.tableModels[index].open = true;
+          }, 200);
+
         }
 
         vm.togglePan = function() {
           if(vm.recordSidePanOpen){
-            $("#record-side-pan").hide("slow");
+            $("#record-side-pan").hide();
           } else{
-            $("#record-side-pan").show("slow");
+            $("#record-side-pan").show();
           }
           vm.recordSidePanOpen = !vm.recordSidePanOpen;
         }
