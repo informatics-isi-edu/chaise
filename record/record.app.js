@@ -41,25 +41,9 @@
     .config(['$logProvider', function($logProvider) {
         $logProvider.debugEnabled(chaiseConfig.debug === true);
     }])
-    .value('recordPanModel', {
-        hasLoaded: false,
-        reference: null,
-        tableDisplayName: null,
-        columns: [],
-        sortby: null,       // column name, user selected or null
-        sortOrder: null,    // asc (default) or desc
-        enableAutoSearch: true,
-        enableSort: true,   // allow sorting
-        page: null,         // current page
-        rowValues: [],      // array of rows values, each value has this structure {isHTML:boolean, value:value}
-        selectedRows: [],   // array of selected rows
-        search: null,       // search term
-        pageLimit: 25,      // number of rows per page
-        config: {}
-    })
 
-    .run(['constants', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'MathUtils', 'modalBox', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', 'Errors', 'recordPanModel',
-        function runApp(constants, DataUtils, ERMrest, ErrorService, headInjector, MathUtils, modalBox, Session, UiUtils, UriUtils, $log, $rootScope, $window, Errors, recordPanModel) {
+    .run(['constants', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'MathUtils', 'modalBox', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', 'Errors',
+        function runApp(constants, DataUtils, ERMrest, ErrorService, headInjector, MathUtils, modalBox, Session, UiUtils, UriUtils, $log, $rootScope, $window, Errors) {
 
         var session,
             context = {};
@@ -69,9 +53,6 @@
 
         UriUtils.setOrigin();
         headInjector.setupHead();
-
-        $rootScope.recordVM = recordPanModel;
-
 
         $rootScope.showEmptyRelatedTables = false;
         $rootScope.modifyRecord = chaiseConfig.editRecord === false ? false : true;
@@ -168,17 +149,6 @@
                 $rootScope.reference.session = session;
                 $log.info("Reference: ", $rootScope.reference);
 
-                recordPanModel.reference = $rootScope.reference.contextualize.compactBrief;
-                recordPanModel.context = "compact/brief";
-                recordPanModel.reference.session = $rootScope.reference.session;
-                recordPanModel.config = {
-                    viewable: true,
-                    editable: true,
-                    deletable: true,
-                    selectMode: modalBox.noSelect,
-                    showFaceting: true,
-                    recordsetApp: false
-                };
                 // There should only ever be one entity related to this reference, we are
                 // reading 2 entities (the second is added in ermrest.read) and if we get
                 // more than 1 entity then we throw a multipleRecordError.
