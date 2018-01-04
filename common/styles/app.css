@@ -1479,3 +1479,45 @@ input[type=number]::-moz-placeholder {
         width: auto;
     }
 }
+
+/************************record side pan**************/
+.record-container {
+    -webkit-box-flex: 1;
+    display: flex;
+    flex: 1;
+    margin-top: 5px;
+    padding-right: 0px !important;
+    padding-left: 0px !important;
+}
+.record-container > .faceting-resizable {
+    flex:0 0 20vw;
+    position: relative;
+    /*border-right: 15px solid white;*/
+    min-width: 170px;
+    max-width: 50vw;
+    z-index: 2;
+    padding-left: 5px;
+    overflow-x: auto;
+}
+.record-container > .faceting-resizable  .panel {
+  margin-bottom: 5px !important;
+  padding: 8px !important;
+}
+.record-container > .faceting-resizable:not(.initializing) {
+    -webkit-box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
+   -moz-box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
+   box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
+}
+.record-container > .main-container {
+    flex:1;
+    border-left: 25px solid white;
+    padding-right: 10px;
+    position: relative;
+    z-index: 1;
+    overflow-x: hidden;
+    overflow-y: auto;
+    margin-top: 10px;
+}
+.sidePanFiddler{
+  overflow: hidden;
+}
