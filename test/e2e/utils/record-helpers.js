@@ -103,7 +103,7 @@ exports.testPresentation = function (tableParams) {
             });
         });
     });
-	
+
     it("should validate the values of each column", function () {
         var columns = tableParams.columns.filter(function (c) { return c.value != null; });
         expect(element.all(by.className('entity-value')).count()).toEqual(columns.length);
@@ -168,12 +168,11 @@ exports.testPresentation = function (tableParams) {
 
         browser.wait(EC.not(EC.visibilityOf(chaisePage.recordPage.getLoadingElement())), browser.params.defaultTimeout);
         browser.wait(function() {
-            return chaisePage.recordPage.getRelatedTablesWithPanel().count().then(function(ct) {
+            return chaisePage.recordPage.getRelatedTablesWithPanelandHeading().count().then(function(ct) {
                 return (ct=relatedTables.length);
             });
         }, browser.params.defaultTimeout);
-
-        chaisePage.recordPage.getRelatedTablesWithPanel().count().then(function(count) {
+        chaisePage.recordPage.getRelatedTablesWithPanelandHeading().count().then(function(count) {
             expect(count).toBe(relatedTables.length,'Mismatch in Related table count!');
             tableCount = count;
 
@@ -270,10 +269,10 @@ exports.testPresentation = function (tableParams) {
                 });
             }, browser.params.defaultTimeout);
 
-            return browser.executeScript("return $('a.toggle-display-link').click()");        
+            return browser.executeScript("return $('a.toggle-display-link').click()");
         }).then(function(){
             browser.wait(EC.visibilityOf(markdownEntity), browser.params.defaultTimeout);
-            expect(markdownEntity.getText()).toBe('None',"Incorrect text for empty markdown!");        
+            expect(markdownEntity.getText()).toBe('None',"Incorrect text for empty markdown!");
         }).catch(function(err){
             console.log(err);
             expect('Encountered an error').toBe('Please check the log', 'Inside catch block');
@@ -288,10 +287,10 @@ exports.testPresentation = function (tableParams) {
          markdownEntityRow.isDisplayed().then(function(err){
             expect(err.length).toBe(0);
          })
-         showAllRTButton.click();     // reverse the status of the page 
+         showAllRTButton.click();     // reverse the status of the page
     });
 
-    
+
     // Related tables are contextualized with `compact/brief`, but if that is not specified it will inherit from `compact`
     it("should honor the page_size annotation for the table, file, in the compact context based on inheritance.", function() {
         var relatedTableName = tableParams.related_table_name_with_page_size_annotation;

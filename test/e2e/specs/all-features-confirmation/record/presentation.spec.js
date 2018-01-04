@@ -114,13 +114,13 @@ describe('View existing record,', function() {
         it("should show all of the related tables in the correct order.", function() {
 
             browser.wait(function() {
-                return chaisePage.recordPage.getRelatedTablesWithPanel().count().then(function(ct) {
+                return chaisePage.recordPage.getRelatedTablesWithPanelandHeading().count().then(function(ct) {
                     return (ct=testParams.no_related_data.tables_order.length);
                 });
             }, browser.params.defaultTimeout);
             var showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton();
 
-            chaisePage.recordPage.getRelatedTablesWithPanel().count().then(function(count) {
+            chaisePage.recordPage.getRelatedTablesWithPanelandHeading().count().then(function(count) {
                 expect(count).toBe(testParams.no_related_data.tables_order.length, "Number of related tables is not correct");
 
                 return chaisePage.recordPage.getRelatedTableTitles();
@@ -130,8 +130,8 @@ describe('View existing record,', function() {
                 expect(showAllRTButton.getText()).toBe("Hide Empty Related Records", "Sow all Related tables button has wrong text");
                 return showAllRTButton.click();
             }).then(function() {
-                expect(chaisePage.recordPage.getRelatedTablesWithPanel().count()).toBe(0, "Not all the related tables were hidden");
-                expect(chaisePage.recordPage.getRelatedTablesWithPanel().count()).not.toBe(testParams.no_related_data.tables_order.length, "The full set of related tables were not properly hidden");
+                expect(chaisePage.recordPage.getRelatedTablesWithPanelandHeading().count()).toBe(0, "Not all the related tables were hidden");
+                expect(chaisePage.recordPage.getRelatedTablesWithPanelandHeading().count()).not.toBe(testParams.no_related_data.tables_order.length, "The full set of related tables were not properly hidden");
             })
         });
     });

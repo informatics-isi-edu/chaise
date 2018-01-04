@@ -641,6 +641,9 @@ var recordPage = function() {
     this.getRelatedTablesWithPanel = function () {
         return element.all(by.css(".panel"));
     };
+    this.getRelatedTablesWithPanelandHeading = function () {
+        return element.all(by.css(".related-table-heading.panel"));
+    };
 
     this.getRelatedTable = function(displayName) {
         displayName = makeSafeIdAttr(displayName);
