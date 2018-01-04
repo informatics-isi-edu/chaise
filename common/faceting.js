@@ -655,10 +655,14 @@
                     scope.plotlyEvents = function (graph) {
                         graph.on('plotly_relayout', function (event) {
                             $timeout(function () {
-                                scope.min = Math.floor(event['xaxis.range[0]']);
-                                scope.max = Math.ceil(event['xaxis.range[1]']);
+                                scope.min = event['xaxis.range[0]'];
+                                scope.max = event['xaxis.range[1]'];
                                 console.log(scope.min);
                                 console.log(scope.max);
+                                // min/max is index of column bar is in
+                                // actualMin = scope.plot.data[0].x[scope.min]
+                                // actualMax = scope.plot.data[0].x[scope.max]
+                                // call update facet data
                             });
                         });
 
