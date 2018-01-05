@@ -185,18 +185,20 @@ describe('View existing record,', function() {
 
         });
 
-        it('On click of Related table name in TOC page should move to the contents and open the table details', function(){
-            var rtTableHeading = chaisePage.recordPage.getRelatedTableHeading(testParams.sidePanelTest.tableToShow);
+        it('On click of Related table name in TOC, page should move to the contents and open the table details', function(){
+            var rtTableHeading = chaisePage.recordPage.getRelatedTableHeading(testParams.sidePanelTest.tableToShow),
+                lastRow = element(by.id('rt-heading-Categories_5')).all(by.tagName('tr')).get(5);
 
             recSidePan.getAttribute('class').then(function(className) {
-              expect(className).toContain('panel', 'Side pan does not have proper display');
+                expect(className).toContain('panel', 'Side pan does not have proper display');
                 return recSidePan.click();
             }).then (function (){
               // related table should be visible
-              rtTableHeading.isDisplayed().then(function (bool) {
+                rtTableHeading.isDisplayed().then(function (bool) {
                   expect(bool).toBeTruthy();
-              });
-              return rtTableHeading.getAttribute("class");
+                });
+                chaisePage.waitForElement(lastRow);
+                return rtTableHeading.getAttribute("class");
             }).then (function(className) {
                 expect(className).toContain("panel-open", "Related table panel is not open when clicked through TOC.");
             }).catch( function(err) {
