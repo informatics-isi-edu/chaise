@@ -1457,29 +1457,6 @@ input[type=number]::-moz-placeholder {
     min-height: 45px;
 }
 
-@media print {
-    #main-content {
-        height: auto !important;
-    }
-
-    #footer {
-        display: none;
-    }
-
-    a[href]:after {
-        content: none !important;
-    }
-
-    .entity-key {
-        width: auto;
-        max-width: 120px;
-    }
-
-    .entity-value {
-        width: auto;
-    }
-}
-
 /************************record side pan**************/
 .record-container {
     -webkit-box-flex: 1;
@@ -1492,7 +1469,6 @@ input[type=number]::-moz-placeholder {
 .record-container > .faceting-resizable {
     flex:0 0 20vw;
     position: relative;
-    /*border-right: 15px solid white;*/
     min-width: 170px;
     max-width: 50vw;
     z-index: 2;
