@@ -101,10 +101,10 @@ describe('View existing record,', function() {
 
         });
 
-        describe("Presentation ,", function() {
-            var params = recordHelpers.testPresentation(testParams);
-        });
-
+    //     describe("Presentation ,", function() {
+    //         var params = recordHelpers.testPresentation(testParams);
+    //     });
+    //
     });
 
     describe("For a record with all of it's related tables as empty", function() {
@@ -180,8 +180,8 @@ describe('View existing record,', function() {
         });
 
         it('Table of contents should match all related table', function(){
-            var modalTitle = element.all(by.xpath("//div[contains(@id,'recordSidePan')]"));
-            expect(modalTitle.count()).toBe(testParams.sidePanelTest.tocCount, "Table of contents count did not match!");
+            var allPan = element.all(by.xpath("//div[contains(@id,'recordSidePan')]"));
+            expect(allPan.count()).toBe(testParams.sidePanelTest.tocCount, "Table of contents count did not match!");
 
         });
 
@@ -200,6 +200,21 @@ describe('View existing record,', function() {
             }).then (function(className) {
                 expect(className).toContain("panel-open", "Related table panel is not open when clicked through TOC.");
             }).catch( function(err) {
+                console.log(err);
+            });
+        });
+
+        it('Record count should match for pan and related table content', function(){
+            var rtRow = browser.executeScript("return $('#rt-Categories_5 tbody tr')"),
+                rtPanRecordCount = element(by.id('recordSidePan-heading-5')).all(by.tagName('span')).get(1),
+                rtCount;
+
+            rtRow.then(function(rt){
+              rtCount = rt;
+              return rtPanRecordCount.getText();
+            }).then(function(panRecordCount){
+               expect(parseInt(panRecordCount.slice(1, 2))).toBe(rtCount.length, "Record count did not match with side pan");
+             }).catch( function(err) {
                 console.log(err);
             });
         });
