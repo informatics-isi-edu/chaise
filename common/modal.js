@@ -20,9 +20,9 @@
     .controller('ErrorModalController', ['$uibModalInstance', 'params', 'messageMap', '$window', function ErrorModalController($uibModalInstance, params, messageMap, $window) {
         var vm = this;
         vm.params = params;
-        vm.details = false;
+        vm.displayDetails = false;
         vm.linkText = messageMap.showErrDetails;
-        vm.reloadBtn = false;
+        vm.showReloadBtn = false;
         var reloadMessage = ' <p>  </p>';
 
         if(vm.params.errorCode == 'Multiple Records Found'){
@@ -31,17 +31,18 @@
             vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
         } else {
             vm.clickActionMessage = messageMap.recordAvailabilityError.pageRedirect + vm.params.pageName + '. ';
-            vm.reloadBtn = false;
             if(vm.params.appName == 'recordedit'){
-              vm.reloadBtn = true;
+              vm.showReloadBtn = true;
               reloadMessage = ' <p>' + messageMap.terminalError.reloadMessage +' </p>';
             }
         }
+        // <p> tag is added to maintain the space between click action message and buttons
+        // Also maintains consistency  in their placement irrespective of reload message
         vm.clickActionMessage += reloadMessage;
 
         vm.showDetails = function() {
-            vm.details = !vm.details;
-            vm.linkText = (vm.details) ? messageMap.hideErrDetails : messageMap.showErrDetails;
+            vm.displayDetails = !vm.displayDetails;
+            vm.linkText = (vm.displayDetails) ? messageMap.hideErrDetails : messageMap.showErrDetails;
         };
 
         vm.ok = function () {

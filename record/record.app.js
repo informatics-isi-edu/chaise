@@ -122,9 +122,6 @@
                     };
                     // return model;
                     callback(model);
-                    errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
-                    errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
-                    error.errorData = errorData;
                     throw error;
                 }).catch(function(e) {
                     // The .catch from the outer promise won't catch errors from this closure

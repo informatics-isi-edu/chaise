@@ -143,8 +143,8 @@
     }])
 
     // Factory for each error type
-    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$uibModal', '$window', 'errorMessages', 'Errors', 'UriUtils', 'appNames',
-          function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $uibModal, $window, errorMessages, Errors, UriUtils, appNames) {
+    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$uibModal', '$window', 'errorMessages', 'Errors', 'UriUtils',
+          function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $uibModal, $window, errorMessages, Errors, UriUtils) {
 
         function errorPopup(message, errorCode, pageName, redirectLink, subMessage, stackTrace) {
             var providedLink = true;
@@ -210,7 +210,7 @@
                 } else {
                     if(actionBtnIdentifier == "reload"){
                         reloadCb();
-                    } else{
+                    } else{             //default action i.e. redirect link for OK button
                         $window.location.replace(redirectLink);
                     }
 
@@ -247,10 +247,10 @@
                 errorPopup( exception.message, exception.status ,"Home Page", $window.location.origin);
             }
             else if (ERMrest && exception instanceof ERMrest.ERMrestError ) {
-              if(exception.errorData && exception.errorData.gotoTableDisplayname != 'undeifned' && exception.errorData.gotoTableDisplayname != ''){
+              if(exception.errorData && exception.errorData.gotoTableDisplayname != 'undefined' && exception.errorData.gotoTableDisplayname != ''){
                 gotoLocation = exception.errorData.gotoTableDisplayname;
               }
-              if(exception.errorData && exception.errorData.redirectUrl != 'undeifned' && exception.errorData.redirectUrl != ''){
+              if(exception.errorData && exception.errorData.redirectUrl != 'undefined' && exception.errorData.redirectUrl != ''){
                 redirectLink = exception.errorData.redirectUrl;
               }
                 errorPopup( exception.message, exception.status, gotoLocation, redirectLink, exception.subMessage);
@@ -260,8 +260,8 @@
                     errorText = exception.message,
                     systemAdminMessage = errorMessages.systemAdminMessage,
                     redirectLink = $window.location.origin,
-                    pageName = "Home Page",
-                    specialMessage;
+                    pageName = "Home Page";
+
 
                 errName = (errName.toLowerCase() !== 'error') ? errName : "Terminal Error";
 

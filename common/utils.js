@@ -20,13 +20,6 @@
         "*": "/record"
     })
 
-    .constant("appNames", {
-        "RECORD": "record",
-        "RECORDSET": "recordset",
-        "RECORDEDIT": "recordedit",
-        "SEARCH": "search"
-    })
-
     // this constant is used to keep track of our strings that the user is shown
     // so that when one is changed, it is changed in all places.
     // this will make localization easier if we go that route
@@ -636,7 +629,8 @@
             return /*@cc_on!@*/false || !!document.documentMode;
         }
 
-        // takes URL path and returns app name
+        // takes pathname attribute of window.location object and returns app name
+        // path should be a string literal which appears before #catalog id in URL (/chaise/recordset/)
         function appNamefromUrlPathname(path){
           var newPath = path.slice(0, -1);
           var lastSlash = newPath.lastIndexOf('/');
