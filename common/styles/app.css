@@ -1476,13 +1476,13 @@ input[type=number]::-moz-placeholder {
     overflow-x: auto;
 }
 .record-container > .faceting-resizable  .panel {
-  margin-bottom: 5px !important;
-  padding: 8px !important;
+    margin-bottom: 5px !important;
+    padding: 8px !important;
 }
 .record-container > .faceting-resizable:not(.initializing) {
     -webkit-box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
-   -moz-box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
-   box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
+    -moz-box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
+    box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
 }
 .record-container > .main-container {
     flex:1;
@@ -1495,6 +1495,6 @@ input[type=number]::-moz-placeholder {
     margin-top: 10px;
 }
 .sidePanFiddler{
-  margin-left: 15px;
-  overflow: hidden;
+    margin-left: 15px;
+    overflow: hidden;
 }
