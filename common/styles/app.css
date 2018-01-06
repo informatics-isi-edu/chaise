@@ -61,8 +61,8 @@ span[uib-tooltip] {
 
 .btn.btn-primary.btn-inverted[disabled],
 .chaise-checkbox input[disabled][type="checkbox"] + label:before {
-    color: #f1f1f1 !important;
-    border-color: #f1f1f1 !important;
+    color: #ccc !important;
+    border-color: #ccc !important;
 }
 
 .chaise-checkbox input[disabled][type="checkbox"]:checked + label:after {

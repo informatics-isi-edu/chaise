@@ -438,6 +438,8 @@
                     var parentCtrl = ctrls[0],
                         currentCtrl = ctrls[1];
 
+                    scope.relayout = false;
+
                     // register this controller in the parent
                     parentCtrl.register(currentCtrl, scope.facetColumn, scope.index);
                     scope.parentCtrl = parentCtrl;
@@ -451,21 +453,27 @@
                             type: "bar"
                         }],
                         options: {
-                            displayLogo: false
+                            displayModeBar: false
                         },
                         layout: {
                             autosize: false,
-                            width: 400,
+                            width: 280,
                             height: 150,
                             margin: {
-                                l: 15,
-                                r: 10,
-                                b: 20,
+                                l: 30,
+                                r: 20,
+                                b: 60,
                                 t: 20,
                                 pad: 2
                             },
+                            xaxis: {
+                                ticks: 'inside',
+                                tickangle: 45,
+                                type: 'linear'
+                            },
                             yaxis: {
-                                fixedrange: true
+                                fixedrange: true,
+                                tickformat: ',d'
                             },
                             bargap: 0
                         }
@@ -632,15 +640,11 @@
                                     if (response[0] == response[1]) {
                                         numBuckets = 1;
                                     }
+
                                     // get histogram data
-                                    return scope.facetColumn.column.groupAggregate.histogram(numBuckets, response[0], response[1]).read();
+                                    return histogramData(numBuckets);
                                 }
-                            }).then(function (response) {
-                                scope.plot.data[0].x = response.x;
-                                scope.plot.data[0].y = response.y;
-
-                                console.log(scope.plot.data);
-
+                            }).then(function () {
 
                                 defer.resolve(true);
                             }).catch(function (err) {
@@ -651,18 +655,75 @@
                         return defer.promise;
                     };
 
+                    function histogramData(bucketCount) {
+                        var defer = $q.defer();
+
+                        scope.facetColumn.column.groupAggregate.histogram(bucketCount, scope.rangeOptions.absMin, scope.rangeOptions.absMax).read().then(function (response) {
+
+                            // after zooming in, we don't care about displaying values beyond the set the user sees
+                            if (scope.relayout) {
+                                // no need to splice off labels because they are used for lookup
+                                // i.e. response.labels.(min/max)
+                                response.x.splice(-1,1);
+                                response.y.splice(-1,1);
+                            }
+
+                            scope.plot.data[0].x = response.x;
+                            scope.plot.data[0].y = response.y;
+
+                            scope.plot.labels = response.labels;
+
+                            defer.resolve(true);
+                        });
+
+                        return defer.promise;
+                    }
+
                     //  all the events related to the plot
                     scope.plotlyEvents = function (graph) {
                         graph.on('plotly_relayout', function (event) {
                             $timeout(function () {
-                                scope.min = event['xaxis.range[0]'];
-                                scope.max = event['xaxis.range[1]'];
-                                console.log(scope.min);
-                                console.log(scope.max);
+                                scope.relayout = true;
+                                var options = {};
+
                                 // min/max is index of column bar is in
-                                // actualMin = scope.plot.data[0].x[scope.min]
-                                // actualMax = scope.plot.data[0].x[scope.max]
-                                // call update facet data
+                                // var min = scope.plot.labels.min[Math.round( event['xaxis.range[0]'] )];
+                                // var max = scope.plot.labels.min[Math.round( event['xaxis.range[1]'] )];
+                                var min = event['xaxis.range[0]'];
+                                var max = event['xaxis.range[1]'];
+
+                                console.log(min);
+                                console.log(max);
+                                // if either is undefined, don't re-fetch data
+                                // NOTE: I have only seen both be undefined or 1 of them be null
+                                if (typeof min === "undefined" || typeof max === "undefined") {
+                                    scope.relayout = false;
+                                    return;
+                                }
+
+                                // if not null, update the value
+                                if (min !== null) {
+                                    scope.rangeOptions.absMin = Math.round(min);
+                                }
+
+                                if (max !== null) {
+                                    scope.rangeOptions.absMax = Math.round(max);
+                                }
+
+                                var range = scope.rangeOptions.absMax - scope.rangeOptions.absMin,
+                                    numBuckets = 10;
+
+                                if (scope.rangeOptions.absMin == scope.rangeOptions.absMax) {
+                                    numBuckets = 1;
+                                } else if ( scope.facetColumn.column.type.rootName.indexOf("int") > -1 && range < 10 ) {
+                                    numBuckets = range + 1;
+                                }
+
+                                return histogramData(numBuckets);
+                            }).then(function () {
+                                // range is defined by the indices of the bar graph, not the values
+                                scope.plot.layout.xaxis.range = [scope.rangeOptions.absMin, scope.rangeOptions.absMax];
+                                console.log("new range: ", scope.plot.layout.xaxis.range);
                             });
                         });
 
