@@ -242,13 +242,15 @@ exports.testPresentation = function (tableParams) {
     it("click event on image_id in inline display should open new tab with file details",function(){
         var allHandle;
         chaisePage.waitForElement(element(by.id('entity-booking'))).then(function(){
-           return browser.executeScript("return $('#divRecordSet > table > tbody > tr:nth-child(1) > td:nth-child(5) > div > div > span > a')");
+          // This selector captures link of first record under image_id column of booking inline entry in
+          // accommodation table of product-record schema with id 2002;
+            return browser.executeScript("return $('#divRecordSet  td:nth-child(5) a')");
         }).then(function(imageLinks){
             browser.executeScript("return window.open(arguments[0], '_blank')", imageLinks[0]);
             return browser.getAllWindowHandles();
         }).then(function (handles){
             allHandle = handles;
-            browser.switchTo().window(allHandle[1]);
+            browser.switchTo().window(allHandle[1]); browser.sleep(5000);
             chaisePage.waitForElement(chaisePage.recordPage.getEntityTitleElement());
             return chaisePage.recordPage.getEntityTitle();
         }).then(function (pageTitle) {
