@@ -278,7 +278,8 @@
                 }).then(onDelete, function deleteFailure(response) {
                     $rootScope.showSpinner = false;
                     if (typeof response !== "string") {
-                      errorData.redirectUrl = $rootScope.reference.contextualize.detailed.appLink;
+                      errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
+                      errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
                       response.errorData = errorData;
                       throw response;
                     }
@@ -289,7 +290,8 @@
                 $rootScope.showSpinner = true;
                 $rootScope.reference.delete().then(onDelete, function deleteFailure(response) {
                     $rootScope.showSpinner = false;
-                    errorData.redirectUrl = $rootScope.reference.contextualize.detailed.appLink;
+                    errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
+                    errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
                     response.errorData = errorData;
                     throw response;
                 }).catch(function (exception) {

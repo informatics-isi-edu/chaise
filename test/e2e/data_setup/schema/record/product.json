@@ -475,7 +475,7 @@
         "description": {
           "display": "Bookings"
         },
-         
+
         "tag:isrd.isi.edu,2016:table-display": {
           "*": {
             "separator_markdown": " ",
@@ -878,6 +878,83 @@
           "markdown_name": "**media**"
         }
       }
+    },
+    "multiple_records": {
+      "comment": "domain",
+      "kind": "table",
+      "keys": [
+        {
+          "comment": "vocabulary",
+          "annotations": {},
+          "unique_columns": [
+            "id",
+            "telno"
+          ]
+        },
+        {
+          "comment": "vocabulary",
+          "annotations": {},
+          "unique_columns": [
+            "term"
+          ]
+        }
+      ],
+      "entityCount": 0,
+      "foreign_keys": [],
+      "table_name": "multiple_records",
+      "schema_name": "product-record",
+      "column_definitions": [
+        {
+          "comment": null,
+          "name": "id",
+          "default": null,
+          "nullok": false,
+          "type": {
+            "typename": "int4"
+          },
+          "annotations": {
+            "comment": [
+              "hidden"
+            ]
+          }
+        },
+        {
+          "comment": null,
+          "name": "telno",
+          "default": null,
+          "nullok": false,
+          "type": {
+            "typename": "int8"
+          },
+          "annotations": {
+            "comment": [
+              "hidden"
+            ]
+          }
+        },
+        {
+          "comment": null,
+          "name": "term",
+          "default": null,
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          },
+          "annotations": {
+            "comment": ["top"]
+          }
+        }
+      ],
+      "annotations": {
+        "tag:isrd.isi.edu,2016:table-display": {
+          "*": {
+            "page_size": -2
+          }
+        },
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "*": ["id", "telno", "term"]
+        }
+      }
     }
   },
   "table_names": [
@@ -886,7 +963,8 @@
     "accommodation",
     "accommodation_image",
     "booking",
-    "media"
+    "media",
+    "multiple_records"
   ],
   "comment": null,
   "annotations": {
