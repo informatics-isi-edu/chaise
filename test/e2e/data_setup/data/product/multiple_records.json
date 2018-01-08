@@ -1,0 +1,5 @@
+[
+  {"id":10007, "telno":12345678, "term":"Castle"},
+  {"id":10007, "telno":90345678, "term":"Resort"},
+  {"id":10003, "telno":12345678, "term":"Hotel"}
+ ]

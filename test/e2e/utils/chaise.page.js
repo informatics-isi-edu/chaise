@@ -752,8 +752,12 @@ var recordPage = function() {
         return browser.executeScript("return $('.modal-title')[0].innerHTML;");
     };
 
+    this.getErrorModalReloadButton = function(){
+        return browser.executeScript("return $('button')[1]");  
+    };
+
     this.getErrorModalOkButton = function(){
-        return browser.executeScript("return $('button')[1]");
+        return browser.executeScript("return $('button')[2]");  //changed to second index as "Reload" btn was added
     };
 
     this.getModalDisabledRows = function () {

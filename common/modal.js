@@ -17,24 +17,32 @@
             $uibModalInstance.dismiss('cancel');
         }
     }])
-    .controller('ErrorModalController', ['$uibModalInstance', 'params', 'messageMap', function ErrorModalController($uibModalInstance, params, messageMap) {
+    .controller('ErrorModalController', ['$uibModalInstance', 'params', 'messageMap', '$window', function ErrorModalController($uibModalInstance, params, messageMap, $window) {
         var vm = this;
         vm.params = params;
-        vm.details = false;
+        vm.displayDetails = false;
         vm.linkText = messageMap.showErrDetails;
+        vm.showReloadBtn = false;
+        var reloadMessage = ' <p>  </p>';
 
         if(vm.params.errorCode == 'Multiple Records Found'){
-          vm.clickActionMessage =  messageMap.recordAvailabilityError.multipleRecords;
+            vm.clickActionMessage =  messageMap.recordAvailabilityError.multipleRecords;
         } else if(vm.params.errorCode == 'Record Not Found'){
-          vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
+            vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
         } else {
-          vm.clickActionMessage = messageMap.recordAvailabilityError.pageRedirect + vm.params.pageName;
+            vm.clickActionMessage = messageMap.recordAvailabilityError.pageRedirect + vm.params.pageName + '. ';
+            if(vm.params.appName == 'recordedit'){
+              vm.showReloadBtn = true;
+              reloadMessage = ' <p>' + messageMap.terminalError.reloadMessage +' </p>';
+            }
         }
-
+        // <p> tag is added to maintain the space between click action message and buttons
+        // Also maintains consistency  in their placement irrespective of reload message
+        vm.clickActionMessage += reloadMessage;
 
         vm.showDetails = function() {
-            vm.details = !vm.details;
-            vm.linkText = (vm.details) ? messageMap.hideErrDetails : messageMap.showErrDetails;
+            vm.displayDetails = !vm.displayDetails;
+            vm.linkText = (vm.displayDetails) ? messageMap.hideErrDetails : messageMap.showErrDetails;
         };
 
         vm.ok = function () {
@@ -44,6 +52,11 @@
         vm.cancel = function cancel() {
             $uibModalInstance.dismiss('cancel');
         };
+        vm.reload = function () {
+            $uibModalInstance.close("reload");
+
+        };
+
 
     }])
     .controller('LoginDialogController', ['$uibModalInstance', 'params' , '$sce', function LoginDialogController($uibModalInstance, params, $sce) {

@@ -212,7 +212,9 @@
                             if (page.tuples.length < 1) {
                                 // TODO: understand the filter that was used and relate that information to the user (it oucld be a facet filter now)
                                 var recordSetLink = page.reference.unfilteredReference.contextualize.compact.appLink;
-                                throw new Errors.noRecordError({}, recordSetLink);
+                                var tableDisplayName = page.reference.displayname.value;
+
+                                throw new Errors.noRecordError({}, tableDisplayName, recordSetLink);
                             }
 
                             var column, value;
@@ -308,6 +310,10 @@
                             // Keep a copy of the initial rows data so that we can see if user has made any changes later
                             recordEditModel.oldRows = angular.copy(recordEditModel.rows);
                         }, function error(response) {
+                          var errorData = {};
+                            errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
+                            errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
+                            response.errorData = errorData;
                             throw response;
                         });
                     } else if (session) {
