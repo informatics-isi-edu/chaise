@@ -640,6 +640,15 @@ th.multi-select-width {
     margin : 5px 5px 5px 0px;
 }
 
+.markdown-container table {
+    border-collapse: collapse;
+}
+
+.markdown-container table,.markdown-container td,.markdown-container th {
+    border: 1px solid grey;
+    padding : 4px;
+}
+
 /***************** ellipses ***************/
 
 .hideContent {
