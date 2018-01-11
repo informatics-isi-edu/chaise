@@ -350,6 +350,7 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/footer.js \
 	$(COMMON)/upload.js \
 	$(COMMON)/recordCreate.js \
+	$(COMMON)/resizable.js \
 	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/ui-bootstrap-tpls.js
 

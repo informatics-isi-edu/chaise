@@ -16,6 +16,7 @@
         'ermrestjs',
         'ui.bootstrap',
         'chaise.footer',
+        'chaise.resizable',
         'chaise.upload',
         'chaise.recordcreate'
     ])

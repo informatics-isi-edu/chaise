@@ -47,27 +47,30 @@
     </div>
     <loading-spinner ng-show="!displayReady || showSpinner"></loading-spinner>
 
-    <div id="main-content" class="container-fluid record-container" style="overflow-y: auto;">
-      <div class="sidePanFiddler">
-        <i ng-class="{'glyphicon glyphicon-chevron-left': ctrl.recordSidePanOpen, 'glyphicon glyphicon-chevron-right': !ctrl.recordSidePanOpen}" ng-click="ctrl.togglePan()"></i>
-      </div>
-      <div class="faceting-resizable" id="record-side-pan">
+    <div id="main-content" class="container-fluid record-container">
+      <!-- <span class="sidePanFiddler">
+        <i ng-class="{'glyphicon glyphicon-forward': ctrl.recordSidePanOpen, 'glyphicon glyphicon-backward': !ctrl.recordSidePanOpen}" ng-click="ctrl.togglePan()"></i>
+      </span>
+      <div class="faceting-resizable" resizable r-directions=["right"] r-flex="true" id="record-side-pan">
 
-        <div class="faceting-container"  du-scroll-container>
+        <div class="faceting-container" style="height: 100%;" du-scroll-container>
             <div class="columns-container">
-                    <div  class="panel" ng-repeat="relatedRef in relatedReferences track by $index"  id="recordSidePan-{{$index}}" ng-if="ctrl.showRelatedTable($index)" class="{{lastActiveFacet == $index ? 'focused': ''}}" ng-click="ctrl.gotoRelatedTable(relatedRef.displayname.value, $index)">
-                                <h3 class="panel-title accordion-toggle ellipsis" id="recordSidePan-heading-{{$index}}" tooltip-enable="tooltipEnabled" uib-tooltip-html="relatedRef.displayname.value" tooltip-placement="bottom" chaise-enable-tooltip-width>
+                  <ul>
+                    <div  ng-repeat="relatedRef in relatedReferences track by $index"  id="recordSidePan-{{$index}}" ng-if="ctrl.showRelatedTable($index)" class="{{lastActiveFacet == $index ? 'focused': ''}}" ng-click="ctrl.gotoRelatedTable(relatedRef.displayname.value, $index)">
+
+                                <li  id="recordSidePan-heading-{{$index}}" tooltip-enable="tooltipEnabled" uib-tooltip-html="relatedRef.displayname.value" tooltip-placement="bottom" style="padding:5px" chaise-enable-tooltip-width>
                                     <a>
                                         <span ng-if="::relatedRef.displayname.isHTML" ng-bind-html="::relatedRef.displayname.value"></span>
                                         <span ng-if="::!relatedRef.displayname.isHTML" ng-bind="::relatedRef.displayname.value"></span>
                                         <span>({{tableModels[$index].rowValues.length}})</span>
                                     </a>
                                     <img ng-if="vm.facetModels[$index].isLoading" src="../common/styles/images/loader.gif" class="spinner spinner-sm pull-right"/>
-                                </h3>
+                                </li>
                     </div>
+                      </ul>
             </div>
         </div>
-      </div>
+      </div> -->
         <div class="main-container">
             <alerts alerts="ctrl.alerts"></alerts>
 
@@ -80,10 +83,13 @@
             <!-- used to delay empty accordions from displaying before simple record display -->
             <div ng-if="displayReady">
                 <uib-accordion close-others="false">
-                    <div uib-accordion-group class="related-table-heading" id="rt-heading-{{::ctrl.makeSafeIdAttr(relatedRef.displayname.value)}}" ng-repeat="relatedRef in relatedReferences track by $index"  ng-if="ctrl.showRelatedTable($index)" is-open="tableModels[$index].open">
+                    <div uib-accordion-group class="related-table-heading" id="rt-heading-{{::ctrl.makeSafeIdAttr(relatedRef.displayname.value)}}"  ng-repeat="relatedRef in relatedReferences track by $index"  ng-if="ctrl.showRelatedTable($index)" is-open="tableModels[$index].open">
+                      <!-- <div id="rt-heading1-{{::ctrl.makeSafeIdAttr(relatedRef.displayname.value)}}"> -->
                         <uib-accordion-heading>
                             <i class="pull-left glyphicon" style="margin-right: 5px;" ng-class="{'glyphicon-chevron-down': tableModels[$index].open, 'glyphicon-chevron-right': !tableModels[$index].open}"></i>
-                            <span ng-if="::relatedRef.displayname.isHTML" ng-bind-html="::relatedRef.displayname.value"></span><span ng-if="::!relatedRef.displayname.isHTML" ng-bind="::relatedRef.displayname.value"></span> <span ng-if="tableModels[$index].rowValues.length==0">(no results found)</span><span ng-if="tableModels[$index].rowValues.length!=0">(showing {{::tableModels[$index].hasNext ? 'first' : 'all'}} {{tableModels[$index].rowValues.length}} results)</span>
+                             <!-- <span ng-class="{'rowFocus': ctrl.rowFocus[$index]}"> -->
+                               <span ng-if="::relatedRef.displayname.isHTML" ng-bind-html="::relatedRef.displayname.value"></span><span ng-if="::!relatedRef.displayname.isHTML" ng-bind="::relatedRef.displayname.value"></span> <span ng-if="tableModels[$index].rowValues.length==0">(no results found)</span><span ng-if="tableModels[$index].rowValues.length!=0">(showing {{::tableModels[$index].hasNext ? 'first' : 'all'}} {{tableModels[$index].rowValues.length}} results)</span>
+                             <!-- </span> -->
                         </uib-accordion-heading>
 
                         <!-- for different elements inside the accordion -->
@@ -101,11 +107,37 @@
                                 </div>
                             </div>
                         </div>
+                      <!-- </div> -->
                     </div>
                 </uib-accordion>
             </div>
             <span id="rt-loading" ng-show="loading">Loading...</span>
         </div>
+        <!-- <div class="rg-right"><span></span></div> -->
+        <span class="sidePanFiddler">
+          <i ng-class="{'glyphicon glyphicon-forward': ctrl.recordSidePanOpen, 'glyphicon glyphicon-backward': !ctrl.recordSidePanOpen}" ng-click="ctrl.togglePan()"></i>
+        </span>
+        <div class="faceting-resizable" resizable r-directions=["left"] r-flex="true" id="record-side-pan">
+
+          <div class="faceting-container" style="height: 100%;"  du-scroll-container>
+              <div class="columns-container">
+                    <ul>
+                      <div  ng-repeat="relatedRef in relatedReferences track by $index"  id="recordSidePan-{{$index}}" ng-if="ctrl.showRelatedTable($index)" class="{{lastActiveFacet == $index ? 'focused': ''}}" ng-click="ctrl.gotoRelatedTable(relatedRef.displayname.value, $index)">
+
+                                  <li  id="recordSidePan-heading-{{$index}}" tooltip-enable="tooltipEnabled" uib-tooltip-html="relatedRef.displayname.value" tooltip-placement="bottom" style="padding:5px" chaise-enable-tooltip-width>
+                                      <a>
+                                          <span ng-if="::relatedRef.displayname.isHTML" ng-bind-html="::relatedRef.displayname.value"></span>
+                                          <span ng-if="::!relatedRef.displayname.isHTML" ng-bind="::relatedRef.displayname.value"></span>
+                                          <span>({{tableModels[$index].rowValues.length}})</span>
+                                      </a>
+                                      <img ng-if="vm.facetModels[$index].isLoading" src="../common/styles/images/loader.gif" class="spinner spinner-sm pull-right"/>
+                                  </li>
+                      </div>
+                        </ul>
+              </div>
+          </div>
+        </div>
+
     </div>
     <footer></footer>
 </body>

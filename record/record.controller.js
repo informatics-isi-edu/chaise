@@ -17,16 +17,23 @@
         vm.alerts = AlertsService.alerts;
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
         vm.recordSidePanOpen = true;
-
+        vm.rowFocus = {};
         vm.gotoRelatedTable = function(sectionId, index){
           var safeSectionId = vm.makeSafeIdAttr(sectionId);
           var pageSection = "rt-heading-" + safeSectionId;
-          var pageSectionwithhash = JSON.stringify('#'+pageSection);
-          document.getElementById(pageSection).scrollIntoView({behavior: "smooth", block: "start"});
+          
+          $rootScope.tableModels[index].open = true;
+          vm.rowFocus[index] = false;
           $timeout(function(){
-              $rootScope.tableModels[index].open = true;
-          }, 200);
+                document.getElementById(pageSection).scrollIntoView({behavior: "smooth", block: "start"});
+                document.getElementById(pageSection).focus();
+                vm.rowFocus[index] = true;
+                document.getElementById(pageSection).classList.add("rowFocus");
 
+          }, 200);
+          $timeout(function(){
+            document.getElementById(pageSection).classList.remove("rowFocus");
+          }, 1500);
         }
 
         vm.togglePan = function() {

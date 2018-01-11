@@ -1173,6 +1173,7 @@ footer .container1 {
 
  .faceting-container .panel:hover, .faceting-container .panel-default.active {
      border-color: rgb(51, 122, 183) !important;
+     animation-duration: 4s;
  }
 
  .faceting-container .update-btn {
@@ -1473,7 +1474,9 @@ input[type=number]::-moz-placeholder {
     max-width: 50vw;
     z-index: 2;
     padding-left: 5px;
-    overflow-x: auto;
+    /*overflow-y: auto;*/
+    margin-left: 5px;
+    font-weight: bold;
 }
 .record-container > .faceting-resizable  .panel {
     margin-bottom: 5px !important;
@@ -1492,9 +1495,33 @@ input[type=number]::-moz-placeholder {
     z-index: 1;
     overflow-x: hidden;
     overflow-y: auto;
-    margin-top: 10px;
+    /*margin-top: 10px;*/
 }
 .sidePanFiddler{
-    margin-left: 15px;
+    /*margin-left: 15px;*/
+    cursor: pointer;
     overflow: hidden;
+}
+
+@keyframes rtbg {
+    /*0%   {background-color: #fff;}
+    10%   {background-color: #337ab7;}
+    25%  {background-color: #337ab7;}
+    50%  {background-color: #337ab7;}
+    100% {background-color: #fff;}*/
+
+    0%   {border-color: #fff;}
+   10%   {border-color: #337ab7;}
+   25%  {border-color: #337ab7;}
+   50%  {border-color: #337ab7;}
+   100% {border-color: #fff;}
+}
+
+.rowFocus1{
+    /*background-color: #FFF;*/
+    border-color: rgb(51, 122, 183) !important;
+    /*animation: background-fade 10s infinite;*/
+    /*animation-name: rtbg;*/
+    animation-duration: 3s;
+    animation-delay: 0.3s;
 }

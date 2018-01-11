@@ -9,11 +9,6 @@
     margin-right: -50px;
 }
 
-.main-container {
-    margin-top: 10px;
-    margin-bottom: -50px;
-}
-
 /******Related Entities**************/
 
 .panel{
@@ -86,6 +81,13 @@
 
 .panel-title >a:hover span, .panel-title>a:focus span{
     color: rgb(63, 124, 184);
+}
+
+.rowFocus{
+    border: 1px solid rgb(51, 122, 183) !important;
+    /*border-color: rgb(51, 122, 183) !important;*/
+    /*border-bottom-color: rgb(51, 122, 183) !important;*/
+    border-radius: 1px !important;
 }
 
 @media print {
