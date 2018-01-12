@@ -11,6 +11,7 @@
         multipleRecords: "Multiple Records Found",
         noDataMessage: "No entity exists",
         multipleDataErrorCode : "Multiple Records Found",
+        facetFilterMissing : "No filter or facet was defined.",
         multipleDataMessage : "There are more than 1 record found for the filters provided."
     })
     .constant('errorMessages', {
@@ -21,6 +22,7 @@
         noDataMessage: "No matching record found for the given filter or facet.",
         multipleDataErrorCode : "Multiple Records Found",
         multipleDataMessage : "There are more than 1 record found for the filters provided.",
+        facetFilterMissing : "No filtering criteria was specified to identify a specific record.",
         systemAdminMessage : "An unexpected error has occurred. Please report this problem to your system administrators."
     })
 
@@ -36,7 +38,7 @@
          * @param  {string} message      Error message
          * @return {object}              Error Object
          */
-        function multipleRecordError(redirectUrl, message) {
+        function multipleRecordError(tableDisplayName, redirectUrl, message) {
 
             /**
              * @type {object}
@@ -62,7 +64,7 @@
              * @desc URL that redirects users to recordset app
              */
             this.errorData.redirectUrl = redirectUrl;
-
+            this.errorData.gotoTableDisplayname = tableDisplayName;
         }
         multipleRecordError.prototype = Object.create(Error.prototype);
         multipleRecordError.prototype.constructor = multipleRecordError;
@@ -75,7 +77,7 @@
          * @param  {string} message Error message
          * @return {object}         Error Object
          */
-        function noRecordError(filters, redirectUrl, message) {
+        function noRecordError(filters, tableDisplayName, redirectUrl, message) {
           /**
            * @type {object}
            * @desc  custom object to store miscellaneous elements viz. stacktrace
@@ -109,6 +111,7 @@
              * @desc URL that redirects users to recordset app
              */
             this.errorData.redirectUrl = redirectUrl;
+            this.errorData.gotoTableDisplayname = tableDisplayName;
         }
         noRecordError.prototype = Object.create(Error.prototype);
         noRecordError.prototype.constructor = noRecordError;
@@ -140,11 +143,12 @@
     }])
 
     // Factory for each error type
-    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$uibModal', '$window', 'errorMessages', 'Errors',
-          function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $uibModal, $window, errorMessages, Errors) {
+    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$uibModal', '$window', 'errorMessages', 'Errors', 'UriUtils',
+          function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $uibModal, $window, errorMessages, Errors, UriUtils) {
 
         function errorPopup(message, errorCode, pageName, redirectLink, subMessage, stackTrace) {
             var providedLink = true;
+            var appName = UriUtils.appNamefromUrlPathname($window.location.pathname);
             // if it's not defined, redirect to the dataBrowser config setting (if set) or the landing page
             if (!redirectLink) {
                 providedLink = false;
@@ -167,7 +171,8 @@
                 message: message,
                 errorCode: errorCode,
                 pageName: pageName,
-                subMessage: subMessage
+                subMessage: subMessage,
+                appName: appName
             };
 
             var modalProperties = {
@@ -194,17 +199,21 @@
                 window.location.reload();
             };
 
-            modalInstance.result.then(function () {
+            modalInstance.result.then(function (actionBtnIdentifier) {
+
                 if (errorCode == errorNames.unauthorized && !providedLink) {
                     var x = window.innerWidth/2 - 800/2;
                     var y = window.innerHeight/2 - 600/2;
 
                     var win = window.open("", '_blank','width=800,height=600,left=' + x + ',top=' + y);
                     Session.loginInAPopUp(win, reloadCb);
-                }else if(errorCode == errorNames.conflict){
-                   $window.open(redirectLink, '_blank');
                 } else {
-                    $window.location.replace(redirectLink);
+                    if(actionBtnIdentifier == "reload"){
+                        reloadCb();
+                    } else{             //default action i.e. redirect link for OK button
+                        $window.location.replace(redirectLink);
+                    }
+
                 }
             });
         }
@@ -214,37 +223,53 @@
         // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
         function handleException(exception) {
             $log.info(exception);
+            var reloadLink,
+                redirectLink = $window.location.origin,
+                gotoLocation = "Home Page";
+
             var stackTrace =  (exception.errorData && exception.errorData.stack)? exception.errorData.stack: undefined;
+
             var reloadCb = function() {
                 window.location.reload();
             };
-            if (exceptionFlag || window.location.pathname.indexOf('/search/') != -1 || window.location.pathname.indexOf('/viewer/') != -1) return;
-
+            if (exceptionFlag || window.location.pathname.indexOf('/search/') != -1 || window.location.pathname.indexOf('/viewer/') != -1){
+              return;
+            }
             // we decided to deal with the OR condition later
             if ( (ERMrest && exception instanceof ERMrest.UnauthorizedError) || exception.code == errorNames.unauthorized) {
                 Session.loginInAModal(reloadCb);
             }
             else if ((exception.status && exception.status == errorNames.multipleRecords) || exception.constructor.name === "noRecordError"){
-                errorPopup(exception.message, exception.status, "Recordset ", exception.errorData.redirectUrl, stackTrace);
-            }
+               errorPopup(exception.message, exception.status, "Recordset ", exception.errorData.redirectUrl, stackTrace);
+           }
             // we decided to deal with the OR condition later
             else if ( (ERMrest && exception instanceof ERMrest.ForbiddenError) || exception.code == errorNames.forbidden) {
                 errorPopup( exception.message, exception.status ,"Home Page", $window.location.origin);
             }
-            else if ( ERMrest && exception instanceof ERMrest.ConflictError) {
-                errorPopup( exception.message, exception.status ,"Record Page", exception.errorData.redirectUrl, exception.subMessage);
+            else if (ERMrest && exception instanceof ERMrest.ERMrestError ) {
+              if(exception.errorData && exception.errorData.gotoTableDisplayname != 'undefined' && exception.errorData.gotoTableDisplayname != ''){
+                gotoLocation = exception.errorData.gotoTableDisplayname;
+              }
+              if(exception.errorData && exception.errorData.redirectUrl != 'undefined' && exception.errorData.redirectUrl != ''){
+                redirectLink = exception.errorData.redirectUrl;
+              }
+                errorPopup( exception.message, exception.status, gotoLocation, redirectLink, exception.subMessage);
             }
             else {
                 var errName = exception.status? exception.status:"Terminal Error",
                     errorText = exception.message,
-                    systemAdminMessage = errorMessages.systemAdminMessage;
+                    systemAdminMessage = errorMessages.systemAdminMessage,
+                    redirectLink = $window.location.origin,
+                    pageName = "Home Page";
+
 
                 errName = (errName.toLowerCase() !== 'error') ? errName : "Terminal Error";
+
                 errorPopup(
                     systemAdminMessage,
                     errName,
-                    "Home Page",
-                    $window.location.origin,
+                    pageName,
+                    redirectLink,
                     errorText,
                     stackTrace
                 );

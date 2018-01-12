@@ -115,7 +115,7 @@ describe('View existing record,', function() {
 
             browser.wait(function() {
                 return chaisePage.recordPage.getRelatedTablesWithPanel().count().then(function(ct) {
-                    return (ct=testParams.no_related_data.tables_order.length);
+                    return (ct == testParams.no_related_data.tables_order.length);
                 });
             }, browser.params.defaultTimeout);
             var showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton();
@@ -158,7 +158,7 @@ describe('View existing record,', function() {
             }).then (function(currentUrl) {
                 expect(currentUrl).toContain("recordset", "The redirection from record page to recordset in case of multiple records failed");
             }).catch( function(err) {
-                console.log(error);
+                console.log(err);
             });
         });
     });
