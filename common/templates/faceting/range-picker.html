@@ -2,5 +2,16 @@
     <record-list on-row-click="onSelect" range-options="rangeOptions" rows="ranges"></record-list>
     <range-inputs type="rangeOptions.type" add-range-cb="rangeOptions.callback" abs-min="rangeOptions.absMin" abs-max="rangeOptions.absMax"></range-inputs>
     <div class="divider"></div>
+    <div class="plotly-actions btn-group" style="left: 30px;">
+        <button type="button" class="zoom-plotly-button btn btn-xs btn-primary btn-inverted btn-no-focus" ng-click="zoomInPlot()" ng-disabled="histogramDataStack.length >= 20" tooltip-placement="bottom" uib-tooltip="Zoom graph data">
+            <span class="glyphicon glyphicon-plus"></span>
+        </button>
+        <button type="button" class="unzoom-plotly-button btn btn-xs btn-primary btn-inverted btn-no-focus" ng-click="zoomOutPlot()" tooltip-placement="bottom" uib-tooltip="Unzoom graph data">
+            <span class="glyphicon glyphicon-minus"></span>
+        </button>
+        <button type="button" class="reset-plotly-button btn btn-xs btn-primary btn-inverted btn-no-focus" ng-click="resetPlot()" tooltip-placement="bottom" uib-tooltip="Reset the graph data">
+            <span class="glyphicon glyphicon-refresh"></span>
+        </button>
+    </div>
     <plotly plotly-data="plot.data" plotly-layout="plot.layout" plotly-options="plot.options" plotly-events="plotlyEvents"></plotly>
 </div>
