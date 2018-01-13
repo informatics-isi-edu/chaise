@@ -1,6 +1,6 @@
 (function() {
     'use strict';
-    
+
     angular.module('chaise.inputs', ['chaise.validators'])
 
     .directive('rangeInputs', function() {
@@ -11,21 +11,22 @@
                 type: '=',
                 addRangeCb: '=',
                 absMin: '=?',
-                absMax: '=?'
+                absMax: '=?',
+                model: '=?'
             },
             link: function(scope, elem, attr) {
                 function emptyOrNull(val) {
-                    
+
                     return (val === '' || val == null || val == undefined);
                 }
-                
+
                 scope.int2min = -32768;
                 scope.int2max = 32767;
                 scope.int4min = -2147483648;
                 scope.int4max = 2147483647;
                 scope.int8min = -9223372036854775808
                 scope.int8max = 9223372036854775807;
-                
+
                 scope.model = {};
 
                 /**
@@ -70,8 +71,8 @@
                         time: null
                     };
                 } else {
-                    scope.model.min = null;
-                    scope.model.max = null;
+                    scope.model.min = scope.modelMin;
+                    scope.model.max = scope.modelMax;
                 }
 
                 // returns a boolean to disable the add button if both min and max are not set
