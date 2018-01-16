@@ -113,13 +113,18 @@
             </div>
             <span id="rt-loading" ng-show="loading">Loading...</span>
         </div>
-        <!-- <div class="rg-right"><span></span></div> -->
-        <span class="sidePanFiddler">
+
+        <!-- <span class="sidePanFiddler">
           <i ng-class="{'glyphicon glyphicon-forward': ctrl.recordSidePanOpen, 'glyphicon glyphicon-backward': !ctrl.recordSidePanOpen}" ng-click="ctrl.togglePan()"></i>
-        </span>
+        </span> -->
         <div class="faceting-resizable" resizable r-directions=["left"] r-flex="true" id="record-side-pan">
 
           <div class="faceting-container" style="height: 100%;"  du-scroll-container>
+            <h2 class="sidePanelHeading">
+              <span class="sidePanFiddler">
+                <i ng-class="{'glyphicon glyphicon-forward': ctrl.recordSidePanOpen, 'glyphicon glyphicon-backward': !ctrl.recordSidePanOpen}" ng-click="ctrl.togglePan()"></i>
+              </span>
+              Related Tables</h2>
               <div class="columns-container">
                     <ul>
                       <div  ng-repeat="relatedRef in relatedReferences track by $index"  id="recordSidePan-{{$index}}" ng-if="ctrl.showRelatedTable($index)" class="{{lastActiveFacet == $index ? 'focused': ''}}" ng-click="ctrl.gotoRelatedTable(relatedRef.displayname.value, $index)">

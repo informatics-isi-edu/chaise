@@ -89,7 +89,12 @@
     /*border-bottom-color: rgb(51, 122, 183) !important;*/
     border-radius: 1px !important;
 }
-
+.sidePanelHeading{
+    background-color: rgba(201, 201, 201, 0.5);
+    font-weight: bold;
+    padding: 9px 10px 10px !important;
+    margin: 0px !important;
+}
 @media print {
     #main-content {
         height: auto !important;

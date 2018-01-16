@@ -1463,12 +1463,12 @@ input[type=number]::-moz-placeholder {
     -webkit-box-flex: 1;
     display: flex;
     flex: 1;
-    margin-top: 5px;
+    /* margin-top: 5px; */
     padding-right: 0px !important;
     padding-left: 0px !important;
 }
 .record-container > .faceting-resizable {
-    flex:0 0 20vw;
+    flex:0 0 15vw;
     position: relative;
     min-width: 170px;
     max-width: 50vw;
@@ -1485,11 +1485,12 @@ input[type=number]::-moz-placeholder {
 .record-container > .faceting-resizable:not(.initializing) {
     -webkit-box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
     -moz-box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
-    box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
+    box-shadow: -11px 3px 16px -2px rgba(204,204,204,1);
 }
 .record-container > .main-container {
     flex:1;
-    border-left: 25px solid white;
+    border-left: 10px solid white;
+    border-right: 25px solid white;
     padding-right: 10px;
     position: relative;
     z-index: 1;
@@ -1501,6 +1502,8 @@ input[type=number]::-moz-placeholder {
     /*margin-left: 15px;*/
     cursor: pointer;
     overflow: hidden;
+    /* z-index: 10; */
+    /* position: absolute; */
 }
 
 @keyframes rtbg {
