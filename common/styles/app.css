@@ -1490,7 +1490,7 @@ input[type=number]::-moz-placeholder {
 .record-container > .main-container {
     flex:1;
     border-left: 10px solid white;
-    border-right: 10px solid white;
+    border-right: 2px solid white;
     padding-right: 10px;
     position: relative;
     z-index: 1;
