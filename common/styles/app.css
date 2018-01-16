@@ -1463,7 +1463,7 @@ input[type=number]::-moz-placeholder {
     -webkit-box-flex: 1;
     display: flex;
     flex: 1;
-    /* margin-top: 5px; */
+    margin-top: 5px;
     padding-right: 0px !important;
     padding-left: 0px !important;
 }
@@ -1473,9 +1473,9 @@ input[type=number]::-moz-placeholder {
     min-width: 170px;
     max-width: 50vw;
     z-index: 2;
-    padding-left: 5px;
+    /* padding-left: 5px; */
     /*overflow-y: auto;*/
-    margin-left: 5px;
+    /* margin-left: 5px; */
     font-weight: bold;
 }
 .record-container > .faceting-resizable  .panel {
@@ -1490,7 +1490,7 @@ input[type=number]::-moz-placeholder {
 .record-container > .main-container {
     flex:1;
     border-left: 10px solid white;
-    border-right: 25px solid white;
+    border-right: 10px solid white;
     padding-right: 10px;
     position: relative;
     z-index: 1;
@@ -1502,8 +1502,14 @@ input[type=number]::-moz-placeholder {
     /*margin-left: 15px;*/
     cursor: pointer;
     overflow: hidden;
-    /* z-index: 10; */
-    /* position: absolute; */
+    z-index: 50;
+    border: 2px solid rgba(51, 51, 51, 0.51);
+    border-radius: 20px;
+    max-height: 40px;
+    min-width: 35px;
+    padding: 6px 9px 6px 9px;
+    background-color: #dddcdc;
+    font-size: 20px;
 }
 
 @keyframes rtbg {
@@ -1522,7 +1528,9 @@ input[type=number]::-moz-placeholder {
 
 .rowFocus1{
     /*background-color: #FFF;*/
+    /* border: 1px; */
     border-color: rgb(51, 122, 183) !important;
+    border-radius: 5px;
     /*animation: background-fade 10s infinite;*/
     /*animation-name: rtbg;*/
     animation-duration: 3s;

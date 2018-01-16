@@ -114,23 +114,19 @@
             <span id="rt-loading" ng-show="loading">Loading...</span>
         </div>
 
-        <!-- <span class="sidePanFiddler">
-          <i ng-class="{'glyphicon glyphicon-forward': ctrl.recordSidePanOpen, 'glyphicon glyphicon-backward': !ctrl.recordSidePanOpen}" ng-click="ctrl.togglePan()"></i>
-        </span> -->
+        <div class="sidePanFiddler" ng-click="ctrl.togglePan()" uib-tooltip="{{'Click here to ' + ((ctrl.recordSidePanOpen) ? 'hide' : 'show') + ' the side panel.'}}" tooltip-placement="bottom">
+          <i ng-class="{'glyphicon glyphicon-forward': ctrl.recordSidePanOpen, 'glyphicon glyphicon-backward': !ctrl.recordSidePanOpen}"></i>
+        </div>
         <div class="faceting-resizable" resizable r-directions=["left"] r-flex="true" id="record-side-pan">
 
           <div class="faceting-container" style="height: 100%;"  du-scroll-container>
-            <h2 class="sidePanelHeading">
-              <span class="sidePanFiddler">
-                <i ng-class="{'glyphicon glyphicon-forward': ctrl.recordSidePanOpen, 'glyphicon glyphicon-backward': !ctrl.recordSidePanOpen}" ng-click="ctrl.togglePan()"></i>
-              </span>
-              Related Tables</h2>
+            <h2 class="sidePanelHeading">Related Tables List</h2>
               <div class="columns-container">
                     <ul>
                       <div  ng-repeat="relatedRef in relatedReferences track by $index"  id="recordSidePan-{{$index}}" ng-if="ctrl.showRelatedTable($index)" class="{{lastActiveFacet == $index ? 'focused': ''}}" ng-click="ctrl.gotoRelatedTable(relatedRef.displayname.value, $index)">
 
-                                  <li  id="recordSidePan-heading-{{$index}}" tooltip-enable="tooltipEnabled" uib-tooltip-html="relatedRef.displayname.value" tooltip-placement="bottom" style="padding:5px" chaise-enable-tooltip-width>
-                                      <a>
+                                  <li  id="recordSidePan-heading-{{$index}}" style="padding:5px">
+                                      <a uib-tooltip="{{relatedRef.displayname.value}}" tooltip-placement="bottom">
                                           <span ng-if="::relatedRef.displayname.isHTML" ng-bind-html="::relatedRef.displayname.value"></span>
                                           <span ng-if="::!relatedRef.displayname.isHTML" ng-bind="::relatedRef.displayname.value"></span>
                                           <span>({{tableModels[$index].rowValues.length}})</span>

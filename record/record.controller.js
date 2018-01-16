@@ -18,10 +18,12 @@
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
         vm.recordSidePanOpen = true;
         vm.rowFocus = {};
+        vm.sidePanToggleBtnIndicator = "Show";
+
         vm.gotoRelatedTable = function(sectionId, index){
           var safeSectionId = vm.makeSafeIdAttr(sectionId);
           var pageSection = "rt-heading-" + safeSectionId;
-          
+
           $rootScope.tableModels[index].open = true;
           vm.rowFocus[index] = false;
           $timeout(function(){
@@ -33,14 +35,16 @@
           }, 200);
           $timeout(function(){
             document.getElementById(pageSection).classList.remove("rowFocus");
-          }, 1500);
+          }, 2000);
         }
 
         vm.togglePan = function() {
           if(vm.recordSidePanOpen){
             $("#record-side-pan").hide();
+            vm.sidePanToggleBtnIndicator = "Show";
           } else{
             $("#record-side-pan").show();
+            vm.sidePanToggleBtnIndicator = "Hide";
           }
           vm.recordSidePanOpen = !vm.recordSidePanOpen;
         }
