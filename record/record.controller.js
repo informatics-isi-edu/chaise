@@ -44,6 +44,7 @@
         };
 
         vm.deleteRecord = function() {
+            var errorData = {};
             $rootScope.reference.delete().then(function deleteSuccess() {
                 // Get an appLink from a reference to the table that the existing reference came from
                 var unfilteredRefAppLink = $rootScope.reference.table.reference.contextualize.compact.appLink;
@@ -51,6 +52,9 @@
                 $window.location.href = unfilteredRefAppLink;
             }, function deleteFail(error) {
                 $rootScope.showSpinner = false;
+                errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
+                errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
+                error.errorData = errorData;
                 throw error;
             });
         };
@@ -60,7 +64,15 @@
         };
 
         vm.toRecordSet = function(ref) {
-            return $window.location.href = ref.appLink;
+          // Search app might be broken and should not be linked from here.
+            var appUrl = ref.appLink,
+                recordSetUrl;
+            if(appUrl.search("/search/") > 0){
+              recordSetUrl = appUrl.replace("/search/", "/recordset/");
+            } else{
+              recordSetUrl = appUrl;
+            }
+            return $window.location.href = recordSetUrl;
         };
 
         vm.showRelatedTable = function(i) {
@@ -183,8 +195,10 @@
         * @param {bool} isModalUpdate if update happens through modal pop up
         */
         function readUpdatedTable(refObj, dataModel, idx, isModalUpdate){
+            var errorData = {};
             if (isModalUpdate || completed[refObj.uri] || updated[refObj.location.schemaName + ":" + refObj.location.tableName]) {
                 delete updated[refObj.location.schemaName + ":" + refObj.location.tableName];
+
                 (function (i) {
                     refObj.read(dataModel.pageLimit).then(function (page) {
                         dataModel.page = page;
@@ -194,6 +208,9 @@
                         throw error;
                     }).catch(function (error) {
                         console.log(error);
+                        errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
+                        errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
+                        error.errorData = errorData;
                         throw error;
                     });
                 })(i);

@@ -264,6 +264,7 @@
         }
 
         function deleteRecord() {
+            var errorData = {};
             if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
                 $uibModal.open({
                     templateUrl: "../common/templates/delete-link/confirm_delete.modal.html",
@@ -277,7 +278,10 @@
                 }).then(onDelete, function deleteFailure(response) {
                     $rootScope.showSpinner = false;
                     if (typeof response !== "string") {
-                        throw response;
+                      errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
+                      errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
+                      response.errorData = errorData;
+                      throw response;
                     }
                 }).catch(function (exception) {
                     AlertsService.addAlert(exception.message, 'error');
@@ -286,6 +290,9 @@
                 $rootScope.showSpinner = true;
                 $rootScope.reference.delete().then(onDelete, function deleteFailure(response) {
                     $rootScope.showSpinner = false;
+                    errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
+                    errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
+                    response.errorData = errorData;
                     throw response;
                 }).catch(function (exception) {
                     AlertsService.addAlert(exception.message, 'error');

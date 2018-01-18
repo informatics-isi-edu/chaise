@@ -210,11 +210,11 @@ var testParams = {
         {
             name: "f3 (term)",
             type: "choice",
-            totalNumOptions: 2,
+            totalNumOptions: 3,
             option: 0,
             filter: "f3 (term): one",
             numRows: 6,
-            options: [ 'one', 'two' ]
+            options: [ 'one', 'two', "No Value" ]
         },
         {
             name: "from_name",
@@ -245,8 +245,20 @@ var testParams = {
         jsonb_col: JSON.stringify({"key":"one"},undefined,2),
         faceting_main_fk1: "one",
         faceting_main_fk2: "one"
+    },
+    not_null: {
+        option: 0,
+        result_num_w_not_null: 20,
+        modal_available_options: 20,
+        disabled_rows_w_not_null: 9,
+        options_w_not_null: [
+            'All Records With Value', '1', '2', '3', '4', '5', '6', '7', '8', '9'
+        ],
+        options_wo_not_null: [
+            '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'
+        ]
     }
-}
+};
 
 describe("Viewing Recordset with Faceting,", function() {
 
@@ -1109,20 +1121,164 @@ describe("Viewing Recordset with Faceting,", function() {
                 });
             });
         });
+
+        describe("Records With Value (not-null) filter, ", function () {
+            var notNullBtn, showMore;
+
+            beforeAll(function () {
+                var uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
+
+                browser.ignoreSynchronization=true;
+                browser.get(uri);
+                chaisePage.waitForElementInverse(element(by.id("spinner")));
+
+                clearAll = chaisePage.recordsetPage.getClearAllFilters();
+                showMore = chaisePage.recordsetPage.getShowMore(testParams.not_null.option);
+            });
+
+            it ("`All Records With Value` option must be available in modal picker.", function (done) {
+                browser.wait(EC.elementToBeClickable(showMore));
+                showMore.click().then(function () {
+                    chaisePage.waitForElementInverse(element(by.id("spinner")));
+                    notNullBtn = chaisePage.recordsetPage.getModalMatchNotNullInput();
+                    expect(notNullBtn.isPresent()).toEqual(true);
+                    done();
+                }).catch(function (err) {
+                    console.log(err);
+                    done.fail();
+                });
+
+            });
+
+            it ("Selecting `All Records With Value` should disable all the rows.", function (done) {
+                notNullBtn.click().then(function () {
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getModalDisabledRows().count().then(function (ct) {
+                            return (ct > 0);
+                        });
+                    });
+                    expect(chaisePage.recordsetPage.getModalDisabledRows().count()).toBe(testParams.not_null.modal_available_options, "number of disabled rows missmatch.");
+                    expect(chaisePage.recordsetPage.getCheckedModalOptions().count()).toBe(0, "number of checked rows missmatch.");
+                    return chaisePage.recordsetPage.getModalSubmit().click();
+                }).then(function () {
+                    done();
+                }).catch(function (err) {
+                    console.log(err);
+                    done.fail();
+                });
+            });
+
+            it ("After submitting the filters, `All Records With Value` should be on top of the list with the rest of options being disabled", function (done) {
+                chaisePage.waitForElementInverse(chaisePage.recordsetPage.getFacetSpinner(testParams.not_null.option));
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getCheckedFacetOptions(testParams.not_null.option).count().then(function(ct) {
+                        return ct == 1;
+                    });
+                }, browser.params.defaultTimeout);
+
+                chaisePage.recordsetPage.getCheckedFacetOptions(testParams.not_null.option).count().then(function (count) {
+                    expect(count).toBe(1, "number of selected filters missmatch.");
+
+                    return chaisePage.recordsetPage.getFacetOptionsText(testParams.not_null.option);
+                }).then(function (text) {
+                    expect(text).toEqual(testParams.not_null.options_w_not_null, "the text of selected faacet missmatch.");
+                    expect(chaisePage.recordsetPage.getDisabledFacetOptions(testParams.not_null.option).count()).toBe(testParams.not_null.disabled_rows_w_not_null, "numer of disabled filters missmatch.");
+                    expect(chaisePage.recordsetPage.getRows().count()).toBe(testParams.not_null.result_num_w_not_null, "number of results missmatch.");
+
+                    done();
+                }).catch(function (err) {
+                    console.log(err);
+                    done.fail();
+                });
+            });
+
+            it ("Deselecting `All Records With Value` should enable all the values on the list.", function (done) {
+                chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(testParams.not_null.option, 0)).then(function () {
+                    return chaisePage.recordsetPage.getFacetOptionsText(testParams.not_null.option);
+                }).then(function (text) {
+                    // make sure the options havn't changed
+                    expect(text).toEqual(testParams.not_null.options_w_not_null, "the text of selected faacet missmatch.");
+
+                    expect(chaisePage.recordsetPage.getCheckedFacetOptions(testParams.not_null.option).count()).toBe(0, "number of selected filters missmatch.");
+                    expect(chaisePage.recordsetPage.getDisabledFacetOptions(testParams.not_null.option).count()).toBe(0, "numer of disabled filters missmatch.");
+
+                    done();
+                }).catch(function (err) {
+                    console.log(err);
+                    done.fail();
+                });
+            });
+
+            it ("should be able to select other filters on the facet.", function (done) {
+                chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(testParams.not_null.option, 1)).then(function () {
+                    return chaisePage.recordsetPage.getFacetOptionsText(testParams.not_null.option);
+                }).then(function (text) {
+                    // make sure the options havn't changed
+                    expect(text).toEqual(testParams.not_null.options_w_not_null, "the text of selected faacet missmatch.");
+
+                    expect(chaisePage.recordsetPage.getCheckedFacetOptions(testParams.not_null.option).count()).toBe(1, "Number of selected filters missmatch.");
+                    expect(chaisePage.recordsetPage.getDisabledFacetOptions(testParams.not_null.option).count()).toBe(0, "numer of disabled filters missmatch.");
+
+                    done();
+                }).catch(function (err) {
+                    console.log(err);
+                    done.fail();
+                });
+            });
+
+            it ("Selecting `All Records With Value` in the list, should remove all the checked filters on facet.", function (done) {
+                chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(testParams.not_null.option, 0)).then(function () {
+                    return chaisePage.recordsetPage.getFacetOptionsText(testParams.not_null.option);
+                }).then(function (text) {
+                    // make sure the options haven't changed
+                    expect(text).toEqual(testParams.not_null.options_w_not_null, "the text of selected faacet missmatch.");
+
+                    expect(chaisePage.recordsetPage.getCheckedFacetOptions(testParams.not_null.option).count()).toBe(1, "number of selected filters missmatch.");
+                    expect(chaisePage.recordsetPage.getDisabledFacetOptions(testParams.not_null.option).count()).toBe(testParams.not_null.disabled_rows_w_not_null, "numer of disabled filters missmatch.");
+
+                    done();
+                }).catch(function (err) {
+                    console.log(err);
+                    done.fail();
+                });
+            });
+
+            it ("going to modal picker with `All Records With Value`, the checkmark for `All Records With Value` must be checked.", function (done) {
+                browser.wait(EC.elementToBeClickable(showMore));
+                showMore.click().then(function () {
+                    chaisePage.waitForElementInverse(element(by.id("spinner")));
+                    notNullBtn = chaisePage.recordsetPage.getModalMatchNotNullInput();
+                    expect(notNullBtn.isPresent()).toBeTruthy("not-null is not present");
+                    expect(notNullBtn.isSelected()).toBeTruthy("not-null not checked.");
+                    expect(chaisePage.recordsetPage.getModalDisabledRows().count()).toBe(testParams.not_null.modal_available_options, "number of disabled rows missmatch.");
+                    expect(chaisePage.recordsetPage.getCheckedModalOptions().count()).toBe(0, "number of checked rows missmatch.");
+
+                    // NOTE after this test case the modal is still open, the next test cases should just start a new url.
+                    done();
+                }).catch(function (err) {
+                    console.log(err);
+                    done.fail();
+                });
+            });
+        });
     });
 
     describe("For table " + testParams.table_name + ",", function() {
 
         var uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
+        var clearAll;
 
         beforeEach(function () {
             browser.ignoreSynchronization=true;
             browser.get(uri);
             chaisePage.waitForElementInverse(element(by.id("spinner")));
+
+            clearAll = chaisePage.recordsetPage.getClearAllFilters();
         });
 
         it("clicking edit should show the same number of forms as rows.", function () {
-            chaisePage.recordsetPage.getClearAllFilters().click().then(function () {
+            browser.wait(EC.elementToBeClickable(clearAll));
+            clearAll.click().then(function () {
                 return chaisePage.waitForElementInverse(element(by.id("spinner")));
             }).then(function () {
                 return chaisePage.recordsetPage.getEditRecordLink().click()
@@ -1136,7 +1292,9 @@ describe("Viewing Recordset with Faceting,", function() {
                 return chaisePage.recordEditPage.getForms().count();
             }).then(function(count) {
                 expect(count).toBe(25);
-            });
+            }).catch(function (err) {
+                console.log(err);
+            })
         });
 
         it("navigating to record with a facet url", function () {
@@ -1149,4 +1307,5 @@ describe("Viewing Recordset with Faceting,", function() {
             });
         });
     });
+
 });

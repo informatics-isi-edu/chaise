@@ -654,7 +654,7 @@ var recordPage = function() {
         displayName = safeId?displayName:makeSafeIdAttr(displayName);
         return element(by.id("entity-" + displayName)).element(by.css(".ng-scope")).element(by.css(".ng-scope"));
     };
-    
+
 
     this.getRelatedTableHeadings = function() {
         return element.all(by.css(".related-table-heading"));
@@ -709,7 +709,7 @@ var recordPage = function() {
 
     this.getNoResultsRow = function(displayName) {
         displayName = makeSafeIdAttr(displayName);
-        return element(by.id("rt-" + displayName)).element(by.id("no-results-row")); 
+        return element(by.id("rt-" + displayName)).element(by.id("no-results-row"));
     };
 
     this.getCreateRecordButton = function() {
@@ -752,14 +752,18 @@ var recordPage = function() {
         return browser.executeScript("return $('.modal-title')[0].innerHTML;");
     };
 
-    this.getErrorModalOkButton = function(){
-        return browser.executeScript("return $('button')[1]");
+    this.getErrorModalReloadButton = function(){
+        return browser.executeScript("return $('button')[1]");  
     };
-    
+
+    this.getErrorModalOkButton = function(){
+        return browser.executeScript("return $('button')[2]");  //changed to second index as "Reload" btn was added
+    };
+
     this.getModalDisabledRows = function () {
         return browser.executeScript("return $('.modal-body tr.disabled-row')");
     };
-    
+
     this.getSuccessAlert = function () {
         return element(by.css(".alert-success"));
     };
@@ -810,7 +814,7 @@ var recordsetPage = function() {
     this.getRows = function() {
         return element.all(by.css('.table-row'));
     };
-    
+
     this.getModalRows = function () {
         return element.all(by.css('.modal-body .table-row'));
     };
@@ -977,7 +981,7 @@ var recordsetPage = function() {
     }
 
     this.getCheckedModalOptions = function () {
-        return element(by.css(".modal-body")).all(by.css(".chaise-checkbox input[checked=checked]"));
+        return element(by.css(".modal-body .recordset-table")).all(by.css(".chaise-checkbox input[checked=checked]"));
     }
 
     this.getModalOptions = function () {
@@ -1008,6 +1012,22 @@ var recordsetPage = function() {
     this.getRangeSubmit = function (idx) {
         return element(by.id("fc-" + idx)).element(by.css("button[type=submit]"));
     }
+
+    this.getModalMatchNotNullInput = function () {
+        return element(by.id("rs-match-not-null"));
+    };
+
+    this.getModalDisabledRows = function () {
+        return element.all(by.css('.modal-body tr.disabled-row'));
+    };
+
+    this.getFacetSpinner= function (idx) {
+        return element(by.id("fc-" + idx)).element(by.css(".spinner"));
+    };
+
+    this.getDisabledFacetOptions = function (idx) {
+        return element(by.id("fc-" + idx)).all(by.css(".chaise-checkbox input[disabled=disabled]"));
+    };
 };
 
 // Makes a string safe and valid for use in an HTML element's id attribute.

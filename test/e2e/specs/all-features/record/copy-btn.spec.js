@@ -34,9 +34,9 @@ describe('View existing record,', function() {
             chaisePage.waitForElement(chaisePage.recordPage.getEntityTitleElement(), browser.params.defaultTimeout);
         });
 
-        it("should load chaise-config.js and have maxRelatedTablesOpen=5", function() {
+        it("should load chaise-config.js and have maxRelatedTablesOpen=6", function() {
             browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
-                expect(chaiseConfig.maxRelatedTablesOpen).toBe(5);
+                expect(chaiseConfig.maxRelatedTablesOpen).toBe(6);
             });
         });
 
@@ -158,7 +158,7 @@ describe('View existing record,', function() {
                 }, browser.params.defaultTimeout).then(function(error) {
                     return error.getText();
                 }).then(function(text) {
-                    expect(text.indexOf("409 Conflict")).toBeGreaterThan(-1);
+                    expect(text.indexOf("collides with existing entity")).toBeGreaterThan(-1, "Text for conflict error is not correct");
                 });
             });
 

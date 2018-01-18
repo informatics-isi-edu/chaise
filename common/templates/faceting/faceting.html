@@ -6,7 +6,7 @@
                     <uib-accordion-heading>
                         <h3 class="panel-title accordion-toggle ellipsis" id="fc-heading-{{$index}}" ng-click="toggleFacet($index)" tooltip-enable="tooltipEnabled" uib-tooltip-html="fc.displayname.value" tooltip-placement="bottom" chaise-enable-tooltip-width>
                             <i class="pull-left glyphicon toggle-icon" ng-class="{'glyphicon-chevron-down': vm.facetModels[$index].isOpen, 'glyphicon-chevron-right': !vm.facetModels[$index].isOpen}"></i>
-                                
+
                             <a>
                                 <span ng-if="::fc.displayname.isHTML" ng-bind-html="::fc.displayname.value"></span>
                                 <span ng-if="::!fc.displayname.isHTML" ng-bind="::fc.displayname.value"></span>

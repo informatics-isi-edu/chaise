@@ -9,13 +9,13 @@
         vm.params = params;
         vm.ok = ok;
 
-        vm.details = false;
+        vm.displayDetails = false;
         vm.showDetails = showDetails;
         vm.linkText = "Show Details";
-        
+
         function showDetails() {
-            vm.details = !vm.details;
-            if(vm.details) vm.linkText = "Hide Details";
+            vm.displayDetails = !vm.displayDetails;
+            if(vm.displayDetails) vm.linkText = "Hide Details";
             else vm.linkText = "Show Details";
         };
 

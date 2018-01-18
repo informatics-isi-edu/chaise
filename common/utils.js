@@ -49,6 +49,10 @@
           "noRecordsFound": "Click <b>OK</b> to show the list of all records.",
           "pageRedirect": "Click <b>OK</b> to go to the "
         },
+        "terminalError" : {
+          "okBtnMessage": "Click <b>OK</b> to go to the Recordset.",
+          "reloadMessage": "Click <b>Reload</b> to start over."
+        },
         "tableMissing": "No table specified in the form of 'schema-name:table-name' and no Default is set.",
         "unauthorizedMessage" : "You are not authorized to perform this action. Please report this problem to your system administrators.",
         "unauthorizedErrorCode" : "Unauthorized Access",
@@ -60,6 +64,13 @@
         singleSelectMode:"single-select",
         multiSelectMode:"multi-select"
     })
+
+    .constant("defaultDisplayname", {
+        null: "<i>No Value</i>",
+        empty: "<i>Empty</i>",
+        notNull: "<i>All Records With Value</i>"
+    })
+
     .factory('UriUtils', ['$injector', '$rootScope', '$window', 'appContextMapping', 'appTagMapping', 'ContextUtils', 'Errors', 'messageMap', 'parsedFilter',
         function($injector, $rootScope, $window, appContextMapping, appTagMapping, ContextUtils, Errors, messageMap, ParsedFilter) {
 
@@ -618,6 +629,14 @@
             return /*@cc_on!@*/false || !!document.documentMode;
         }
 
+        // takes pathname attribute of window.location object and returns app name
+        // path should be a string literal which appears before #catalog id in URL (/chaise/recordset/)
+        function appNamefromUrlPathname(path){
+          var newPath = path.slice(0, -1);
+          var lastSlash = newPath.lastIndexOf('/');
+          return newPath.substring(lastSlash + 1, newPath.length);
+        }
+
         return {
             queryStringToJSON: queryStringToJSON,
             appTagToURL: appTagToURL,
@@ -628,7 +647,8 @@
             parsedFilterToERMrestFilter: parsedFilterToERMrestFilter,
             setLocationChangeHandling: setLocationChangeHandling,
             isBrowserIE: isBrowserIE,
-            getQueryParams: getQueryParams
+            getQueryParams: getQueryParams,
+            appNamefromUrlPathname: appNamefromUrlPathname
         }
     }])
 

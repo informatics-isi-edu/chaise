@@ -896,7 +896,7 @@
             "annotations": {
                 "tag:isrd.isi.edu,2016:table-display": {
                "*": {
-                 "separator_markdown": " ", 
+                 "separator_markdown": " ",
                  "row_markdown_pattern": " **{{id}}:{{facility}}**{.vocab} "
                }
              }
@@ -1033,9 +1033,101 @@
             }
           ],
           "annotations": {}
+        },
+        "schedule": {
+          "comment": null,
+          "kind": "table",
+          "entityCount": 0,
+          "keys": [
+            {
+              "comment": null,
+              "annotations": {},
+              "unique_columns": [
+                "id",
+                "accn_id",
+                "summary"
+              ]
+            }
+          ],
+          "foreign_keys": [
+            {
+              "names" : [["product-unordered-related-tables-links", "fk_schedule_accommodation"]],
+              "comment": null,
+              "foreign_key_columns": [
+                {
+                  "table_name": "schedule",
+                  "schema_name": "product-unordered-related-tables-links",
+                  "column_name": "accn_id"
+                }
+              ],
+              "annotations": {},
+              "referenced_columns": [
+                {
+                  "table_name": "accommodation",
+                  "schema_name": "product-unordered-related-tables-links",
+                  "column_name": "id"
+                }
+              ]
+            }
+          ],
+          "table_name": "schedule",
+          "schema_name": "product-unordered-related-tables-links",
+          "column_definitions": [
+            {
+              "comment": null,
+              "name": "id",
+              "default": null,
+              "nullok": false,
+              "type": {
+                "typename": "serial4"
+              },
+              "annotations": {
+                "comment": ["hidden"]
+              }
+            },
+            {
+              "comment": null,
+              "name": "accn_id",
+              "default": null,
+              "nullok": false,
+              "type": {
+                "typename": "int4"
+              },
+              "annotations": {
+                "comment": ["hidden"]
+              }
+            },
+            {
+              "comment": null,
+              "name": "summary",
+              "default": null,
+              "nullok": false,
+              "type": {
+                "typename": "text"
+              },
+              "annotations": {
+                "comment": ["hidden"]
+              }
+            }
+          ],
+          "annotations": {
+            "comment": [
+              "association"
+            ],
+            "description": {
+              "display": "Schedule"
+            },
+            "tag:isrd.isi.edu,2016:table-display": {
+                "compact": {}
+            },
+            "tag:isrd.isi.edu,2016:app-links": {
+              "compact": "tag:isrd.isi.edu,2016:chaise:search"
+            }
+
+          }
         }
       },
-  
+
   "table_names": [
     "category",
     "file",
@@ -1046,13 +1138,15 @@
     "related_table",
     "association_table",
     "association_table_markdown",
-    "related_table_markdown"
+    "related_table_markdown",
+    "schedule"
   ],
   "comment": null,
   "annotations": {
     "tag:misd.isi.edu,2015:display": {
       "name": "accommodation"
     }
+
   },
   "schema_name": "product-unordered-related-tables-links"
 }
