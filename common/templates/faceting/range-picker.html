@@ -1,17 +1,19 @@
 <div class="range-picker">
     <record-list on-row-click="onSelect" range-options="rangeOptions" rows="ranges"></record-list>
     <range-inputs type="rangeOptions.type" add-range-cb="rangeOptions.callback" abs-min="rangeOptions.absMin" abs-max="rangeOptions.absMax" model="rangeOptions.model"></range-inputs>
-    <div class="divider"></div>
-    <div class="plotly-actions btn-group pull-right" style="z-index: 1">
-        <button type="button" class="zoom-plotly-button btn btn-xs btn-primary btn-inverted btn-no-focus" ng-click="zoomInPlot()" ng-disabled="histogramDataStack.length >= 20 || (facetColumn.column.type.rootName.indexOf('int') > -1 && (rangeOptions.absMax-rangeOptions.absMin) <= 10)" tooltip-placement="bottom" uib-tooltip="Zoom">
-            <span class="glyphicon glyphicon-plus"></span>
-        </button>
-        <button type="button" class="unzoom-plotly-button btn btn-xs btn-primary btn-inverted btn-no-focus" ng-click="zoomOutPlot()" ng-disabled="histogramDataStack.length <= 1" tooltip-placement="bottom" uib-tooltip="Unzoom">
-            <span class="glyphicon glyphicon-minus"></span>
-        </button>
-        <button type="button" class="reset-plotly-button btn btn-xs btn-primary btn-inverted btn-no-focus" ng-click="resetPlot()" tooltip-placement="bottom" uib-tooltip="Reset">
-            <span class="glyphicon glyphicon-refresh"></span>
-        </button>
+    <div ng-if="facetColumn.showHistogram">
+        <div class="divider"></div>
+        <div class="plotly-actions btn-group pull-right" style="z-index: 1">
+            <button type="button" class="zoom-plotly-button btn btn-xs btn-primary btn-inverted btn-no-focus" ng-click="zoomInPlot()" ng-disabled="histogramDataStack.length >= 20 || (facetColumn.column.type.rootName.indexOf('int') > -1 && (rangeOptions.absMax-rangeOptions.absMin) <= 10)" tooltip-placement="bottom" uib-tooltip="Zoom">
+                <span class="glyphicon glyphicon-plus"></span>
+            </button>
+            <button type="button" class="unzoom-plotly-button btn btn-xs btn-primary btn-inverted btn-no-focus" ng-click="zoomOutPlot()" ng-disabled="histogramDataStack.length <= 1" tooltip-placement="bottom" uib-tooltip="Unzoom">
+                <span class="glyphicon glyphicon-minus"></span>
+            </button>
+            <button type="button" class="reset-plotly-button btn btn-xs btn-primary btn-inverted btn-no-focus" ng-click="resetPlot()" tooltip-placement="bottom" uib-tooltip="Reset">
+                <span class="glyphicon glyphicon-refresh"></span>
+            </button>
+        </div>
+        <plotly plotly-data="plot.data" plotly-layout="plot.layout" plotly-options="plot.options" plotly-events="plotlyEvents"></plotly>
     </div>
-    <plotly plotly-data="plot.data" plotly-layout="plot.layout" plotly-options="plot.options" plotly-events="plotlyEvents"></plotly>
 </div>
