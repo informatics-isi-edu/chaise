@@ -190,7 +190,7 @@ describe('View existing record,', function() {
                 lastRow = element(by.id('rt-heading-Categories_5')).all(by.tagName('tr')).get(5);
 
             recSidePan.getAttribute('class').then(function(className) {
-                expect(className).toContain('panel', 'Side pan does not have proper display');
+                // expect(className).toContain('panel', 'Side pan does not have proper display');
                 return recSidePan.click();
             }).then (function (){
               // related table should be visible
@@ -230,7 +230,7 @@ describe('View existing record,', function() {
             recSidePan.getAttribute('class').then(function(className) {
               return  fiddlerBtn.getAttribute("class");
             }).then (function (className){
-                expect(className).toContain('glyphicon-chevron-left', 'Side Pan Pull button is not pointing in the right direction');
+                expect(className).toContain('glyphicon glyphicon-forward', 'Side Pan Pull button is not pointing in the right direction');
                 recPan.isDisplayed().then(function (bool) {
                     expect(bool).toBeTruthy();
                 });
@@ -238,7 +238,7 @@ describe('View existing record,', function() {
             }).then (function() {
               return  fiddlerBtn.getAttribute("class");
             }).then(function(className){
-                expect(className).toContain("glyphicon-chevron-right", "Side Pan Pull button is not pointing in the right direction.");
+                expect(className).toContain("glyphicon glyphicon-backward", "Side Pan Pull button is not pointing in the right direction.");
                 recPan.isDisplayed().then(function (bool) {
                     expect(bool).toBeFalsy();
                 });
