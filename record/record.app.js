@@ -42,8 +42,8 @@
         $logProvider.debugEnabled(chaiseConfig.debug === true);
     }])
 
-    .run(['constants', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'MathUtils', 'modalBox', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', 'Errors',
-        function runApp(constants, DataUtils, ERMrest, ErrorService, headInjector, MathUtils, modalBox, Session, UiUtils, UriUtils, $log, $rootScope, $window, Errors) {
+    .run(['constants', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'logActions', 'MathUtils', 'modalBox', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', 'Errors',
+        function runApp(constants, DataUtils, ERMrest, ErrorService, headInjector, logActions, MathUtils, modalBox, Session, UiUtils, UriUtils, $log, $rootScope, $window, Errors) {
 
         var session,
             context = {},
@@ -88,7 +88,7 @@
         function getRelatedTableData(refObj, accordionOpen, context, callback){
 
             var pageSize = getPageSize(refObj);
-            refObj.read(pageSize).then(function (page) {
+            refObj.read(pageSize, {action: logActions.recordRelatedRead}).then(function (page) {
                 var model = {
                     reference: refObj,
                     columns: refObj.columns,
@@ -153,10 +153,7 @@
                 $rootScope.reference.session = session;
                 $log.info("Reference: ", $rootScope.reference);
 
-                // There should only ever be one entity related to this reference, we are
-                // reading 2 entities (the second is added in ermrest.read) and if we get
-                // more than 1 entity then we throw a multipleRecordError.
-                return $rootScope.reference.read(2);
+                return $rootScope.reference.read(1, {action: logActions.recordRead});
             }, function error(exception) {
                 throw exception;
             }).then(function getPage(page) {
@@ -170,7 +167,7 @@
                 if (page.tuples.length < 1) {
                     throw new Errors.noRecordError({}, tableDisplayName, recordSetLink);
                 }
-                else if(page.tuples.length > 1){
+                else if(page.hasNext || page.hasPrevious){
                     $rootScope.displayReady = true;
                     // TODO this will break going to recordset with filters/facets, make sure RS has proper data visible
                     // the problem is that if there's a filter in the URL, the app will redirect to recordset and understand the filter, but the app won't show anything

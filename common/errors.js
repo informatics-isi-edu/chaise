@@ -256,6 +256,8 @@
                 errorPopup( exception.message, exception.status, gotoLocation, redirectLink, exception.subMessage);
             }
             else {
+                logError(exception);
+
                 var errName = exception.status? exception.status:"Terminal Error",
                     errorText = exception.message,
                     systemAdminMessage = errorMessages.systemAdminMessage,
@@ -295,6 +297,22 @@
 
 })();
 
+
+/**
+ * Log the error in ermrest
+ * @param  {object} error the error object
+ */
+var logError = function (error) {
+    if (!ERMrest) return;
+    try {
+        var ermrestUri = chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : window.location.origin + '/ermrest';
+        ERMrest.logError(error, ermrestUri).then(function () {
+            console.log("logged the error");
+        }).catch(function (err) {});
+    } catch (exp) {
+        console.log("couldn't log the error.");
+    }
+};
 
 window.onerror = function() {
 
@@ -355,5 +373,7 @@ window.onerror = function() {
     } else {
         document.body.innerHTML = html;
     }
+
+    logError(error);
 
 };

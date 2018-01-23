@@ -83,8 +83,8 @@
      * modified. ellipses will fire this event and recordset directive will use it.
      */
     .factory('recordTableUtils',
-            ['AlertsService', 'modalBox', 'DataUtils', '$timeout','Session', '$q', 'tableConstants', '$rootScope', '$log', '$window', '$cookies', 'defaultDisplayname', 'MathUtils', 'UriUtils',
-            function(AlertsService, modalBox, DataUtils, $timeout, Session, $q, tableConstants, $rootScope, $log, $window, $cookies, defaultDisplayname, MathUtils, UriUtils) {
+            ['AlertsService', 'modalBox', 'DataUtils', '$timeout','Session', '$q', 'tableConstants', '$rootScope', '$log', '$window', '$cookies', 'defaultDisplayname', 'MathUtils', 'UriUtils', 'logActions',
+            function(AlertsService, modalBox, DataUtils, $timeout, Session, $q, tableConstants, $rootScope, $log, $window, $cookies, defaultDisplayname, MathUtils, UriUtils, logActions) {
 
         // This method sets backgroundSearch states depending upon various parameters
         // If it returns true then we should render the data
@@ -98,6 +98,7 @@
                 if (scope.vm.backgroundSearchPendingTerm && !scope.vm.foregroundSearch) {
                     scope.vm.search = scope.vm.backgroundSearchPendingTerm
                     scope.vm.backgroundSearchPendingTerm = null;
+                    scope.vm.logObject = {action: logActions.recordsetFacet};
                     read(scope, true);
                     return false;
                 } else {
@@ -156,7 +157,7 @@
                 scope.vm.backgroundSearchPendingTerm = null;
             }
 
-            scope.vm.reference.read(scope.vm.pageLimit).then(function (page) {
+            scope.vm.reference.read(scope.vm.pageLimit, scope.vm.logObject).then(function (page) {
                 if (!setSearchStates(scope, isBackground, searchTerm)) return;
 
                 var afterRead = function () {
@@ -204,7 +205,7 @@
             vm.hasLoaded = false;
             var defer = $q.defer();
             (function (uri) {
-                vm.reference.read(vm.pageLimit).then(function (page) {
+                vm.reference.read(vm.pageLimit, vm.logObject).then(function (page) {
                     if (vm.reference.uri !== uri) {
                         defer.resolve(false);
                     } else {
@@ -231,7 +232,10 @@
         function updateCount (vm) {
             var  defer = $q.defer();
             (function (uri) {
-                vm.reference.getAggregates([vm.reference.aggregate.countAgg]).then(function getAggregateCount(response) {
+                vm.reference.getAggregates(
+                    [vm.reference.aggregate.countAgg],
+                    {action: logActions.recordsetCount}
+                ).then(function getAggregateCount(response) {
                     if (vm.reference.uri !== uri) {
                         defer.resolve(false);
                     } else {
@@ -424,20 +428,48 @@
             scope.singleSelect = modalBox.singleSelectMode;
             scope.multiSelect = modalBox.multiSelectMode;
 
+            scope.$root.checkReferenceURL = function (ref) {
+                var refUri = ref.isAttributeGroup ? ref.uri : ref.location.ermrestUri;
+                if (refUri.length > tableConstants.MAX_URL_LENGTH) {
+                    $timeout(function () {
+                        $window.scrollTo(0, 0);
+                    }, 0);
+                    AlertsService.addAlert('Maximum URL length reached. Cannot perform the requested action.', 'warning');
+                    return false;
+                }
+                return true;
+            };
+
+            var changeSort = function (sortOrder, sortBy) {
+                if (sortBy) {
+                    scope.vm.sortby = sortBy;
+                }
+                scope.vm.sortOrder = sortOrder;
+                var ref = scope.vm.reference.sort([{"column":scope.vm.sortby, "descending":(scope.vm.sortOrder === "desc")}]);
+
+                if (scope.$root.checkReferenceURL(ref)) {
+                    scope.vm.reference = ref;
+                    scope.vm.logObject = {
+                        action: logActions.recordsetSort,
+                        sort: ref.location.sortObject
+                    };
+
+                    if (chaiseConfig.showFaceting === true) {
+                        update(scope.vm, true, false, false);
+                    } else {
+                        read(scope);
+                    }
+                }
+            };
+
             scope.sortby = function(column) {
                 if (scope.vm.sortby !== column) {
-                    scope.vm.sortby = column;
-                    scope.vm.sortOrder = "asc";
-                    scope.vm.reference = scope.vm.reference.sort([{"column":scope.vm.sortby, "descending":(scope.vm.sortOrder === "desc")}]);
-                    read(scope);
+                    changeSort("asc", column);
                 }
-
             };
 
             scope.toggleSortOrder = function () {
-                scope.vm.sortOrder = (scope.vm.sortOrder === 'asc' ? scope.vm.sortOrder = 'desc' : scope.vm.sortOrder = 'asc');
-                scope.vm.reference = scope.vm.reference.sort([{"column":scope.vm.sortby, "descending":(scope.vm.sortOrder === "desc")}]);
-                read(scope);
+                changeSort((scope.vm.sortOrder === 'asc' ? scope.vm.sortOrder = 'desc' : scope.vm.sortOrder = 'asc'));
             };
 
             scope.isDisabled = function (tuple) {
@@ -520,6 +552,12 @@
 
             scope.$on('record-deleted', function() {
                 console.log('catching the record deleted');
+                // if there is a parent reference then this is for related
+                if (scope.parentReference) {
+                    scope.vm.logObject = {action: logActions.recordRelatedUpdate};
+                } else {
+                    scope.vm.logObject = {action: logActions.recordsetUpdate};
+                }
                 read(scope);
             });
         }
@@ -542,19 +580,26 @@
             scope.unfiltered = function () {
                 scope.vm.reference = scope.vm.reference.unfilteredReference.contextualize.compact;
                 scope.vm.filterString = null;
+                scope.vm.logObject = {action: logActions.recordsetFacet};
                 read(scope, false, true);
             };
 
             scope.setPageLimit = function(limit) {
                 scope.vm.pageLimit = limit;
+                scope.vm.logObject = {action: logActions.recordsetLimit};
                 read(scope);
             };
 
             scope.before = function() {
                 var previous = scope.vm.page.previous;
                 if (previous) {
-
                     scope.vm.reference = previous;
+                    scope.vm.logObject = {
+                        action: logActions.recordsetPage,
+                        sort: previous.location.sortObject,
+                        page: previous.location.beforeObject,
+                        type: "before"
+                    };
                     read(scope);
 
                 }
@@ -563,8 +608,13 @@
             scope.after = function() {
                 var next = scope.vm.page.next;
                 if (next) {
-
                     scope.vm.reference = next;
+                    scope.vm.logObject = {
+                        action: logActions.recordsetPage,
+                        sort: next.location.sortObject,
+                        page: next.location.afterObject,
+                        type: "after"
+                    };
                     read(scope);
                 }
 
@@ -630,6 +680,7 @@
 
                 scope.vm.search = term;
                 scope.vm.reference = scope.vm.reference.search(term); // this will clear previous search first
+                scope.vm.logObject = {action: logActions.recordsetFacet};
                 read(scope, isBackground, true);
             };
 
@@ -688,6 +739,11 @@
                 // read
                 if (completed > 0 || updated) {
                     updated = false;
+                    if (scope.parentReference) {
+                        scope.vm.logObject = {action: logActions.recordRelatedUpdate};
+                    } else {
+                        scope.vm.logObject = {action: logActions.recordsetUpdate};
+                    }
                     read(scope);
                 }
 
@@ -704,7 +760,10 @@
                 if (!scope.vm.config.hideTotalCount && scope.vm.search == scope.vm.reference.location.searchTerm) {
                     // get the total row count to display above the table
                     console.log("Data-updated: ", scope.vm);
-                    scope.vm.reference.getAggregates([scope.vm.reference.aggregate.countAgg]).then(function getAggregateCount(response) {
+                    scope.vm.reference.getAggregates(
+                        [scope.vm.reference.aggregate.countAgg],
+                        {action: logActions.recordsetCount}
+                    ).then(function (response) {
                         // NOTE: scenario: A user triggered a foreground search. Once it returns the aggregate count request is queued.
                         // While that request is running, the user triggers another foreground search.
                         // How do we avoid one aggregate count query to not show when it isn't relevant to the displayed data?
@@ -724,6 +783,11 @@
             // do a read
             scope.$on('record-modified', function($event) {
                 console.log('record-modified in recordset directive');
+                if (scope.parentReference) {
+                    scope.vm.logObject = {action: logActions.recordRelatedUpdate};
+                } else {
+                    scope.vm.logObject = {action: logActions.recordsetUpdate};
+                }
                 read(scope, false, true);
                 // $event.stopPropagation();
             });
@@ -751,7 +815,8 @@
                  * The recordset has a onRowClick which will be passed to this onRowClickBind.
                  */
                 onRowClickBind: '=?',
-                onRowClick: '&?'      // set row click function
+                onRowClick: '&?',      // set row click function
+                parentReference: "=?" // if this is used for related references, this will be the main reference
             },
             link: function (scope, elem, attr) {
                 recordTableUtils.registerTableCallbacks(scope);
@@ -912,8 +977,8 @@
     }])
 
     //TODO This is used in recrodset app, eventually it should be used everywhere
-    .directive('recordsetWithFaceting', ['recordTableUtils', '$window', '$cookies', 'DataUtils', 'MathUtils', 'UriUtils', '$timeout', 'AlertsService', '$log', 'tableConstants', 'defaultDisplayname',
-        function(recordTableUtils, $window, $cookies, DataUtils, MathUtils, UriUtils, $timeout, AlertsService, $log, tableConstants, defaultDisplayname) {
+    .directive('recordsetWithFaceting', ['recordTableUtils', '$window', '$cookies', 'DataUtils', 'MathUtils', 'UriUtils', '$timeout', 'AlertsService', '$log', 'tableConstants', 'defaultDisplayname', 'logActions',
+        function(recordTableUtils, $window, $cookies, DataUtils, MathUtils, UriUtils, $timeout, AlertsService, $log, tableConstants, defaultDisplayname, logActions) {
 
         return {
             restrict: 'E',
@@ -940,20 +1005,10 @@
                 scope.vm.occupiedSlots = 0;
                 scope.vm.facetsToInitialize = [];
 
-                scope.$root.checkReferenceURL = function (ref) {
-                    var refUri = ref.isAttributeGroup ? ref.uri : ref.location.ermrestUri;
-                    if (refUri.length > tableConstants.MAX_URL_LENGTH) {
-                        $timeout(function () {
-                            $window.scrollTo(0, 0);
-                        }, 0);
-                        AlertsService.addAlert('Maximum URL length reached. Cannot perform the requested action.', 'warning');
-                        return false;
-                    }
-                    return true;
-                };
-
                 scope.setPageLimit = function(limit) {
                     scope.vm.pageLimit = limit;
+
+                    scope.vm.logObject = {action: logActions.recordsetLimit};
                     recordTableUtils.update(scope.vm, true, false, false);
                 };
 
@@ -962,6 +1017,13 @@
                     if (previous && scope.$root.checkReferenceURL(previous)) {
                         scope.vm.reference = previous;
                         $log.debug('going to previous page. updating..');
+
+                        scope.vm.logObject = {
+                            action: logActions.recordsetPage,
+                            sort: previous.location.sortObject,
+                            page: previous.location.beforeObject,
+                            type: "before"
+                        };
                         recordTableUtils.update(scope.vm, true, false, false);
                     }
                 };
@@ -971,6 +1033,13 @@
                     if (next && scope.$root.checkReferenceURL(next)) {
                         scope.vm.reference = next;
                         $log.debug('going to next page. updating..');
+
+                        scope.vm.logObject = {
+                            action: logActions.recordsetPage,
+                            sort: next.location.sortObject,
+                            page: next.location.afterObject,
+                            type: "after"
+                        };
                         recordTableUtils.update(scope.vm, true, false, false);
                     }
 
@@ -1019,6 +1088,7 @@
                          scope.vm.search = term;
                          scope.vm.reference = ref;
                          scope.vm.lastActiveFacet = -1;
+                         scope.vm.logObject = {action: logActions.recordsetFacet};
                          $log.debug("search changed to `" + term + "`. updating..");
                          recordTableUtils.update(scope.vm, true, true, true);
                      }
@@ -1081,6 +1151,11 @@
                         $log.debug("fouced on page after change, updating...");
                         updated = false;
                         scope.vm.lastActiveFacet = -1;
+                        if (scope.parentReference) {
+                            scope.vm.logObject = {action: logActions.recordRelatedUpdate};
+                        } else {
+                            scope.vm.logObject = {action: logActions.recordsetUpdate};
+                        }
                         recordTableUtils.update(scope.vm, true, true, true);
                     }
 
@@ -1095,6 +1170,7 @@
                 scope.$on('facet-modified', function ($event) {
                     $log.debug("-----------------------------");
                     $log.debug('facet-modified in recordset directive');
+                    scope.vm.logObject = {action: logActions.recordsetFacet};
                     recordTableUtils.update(scope.vm, true, true, true);
                 });
 
@@ -1102,6 +1178,7 @@
                     $log.debug("-----------------------------");
                     $log.debug('record-deleted in recordset directive');
                     scope.vm.lastActiveFacet = -1;
+                    scope.vm.logObject = {action: logActions.recordsetUpdate};
                     recordTableUtils.update(scope.vm, true, true, true);
                 });
 
@@ -1111,6 +1188,7 @@
                     $log.debug("-----------------------------");
                     $log.debug('record-modified in recordset directive');
                     scope.vm.lastActiveFacet = -1;
+                    scope.vm.logObject = {action: logActions.recordsetUpdate};
                     recordTableUtils.update(scope.vm, true, true, true);
                 });
 
@@ -1149,10 +1227,12 @@
                             firstOpen = (firstOpen !== -1) ? firstOpen : 0;
                             scope.vm.focusOnFacet(firstOpen);
                         }
+
+                        scope.vm.logObject = {action: logActions.recordsetLoad};
                         recordTableUtils.initialize(scope.vm);
                     });
                 });
             }
         };
-    }])
+    }]);
 })();

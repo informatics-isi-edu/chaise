@@ -91,7 +91,7 @@
      *  - context {String} - the current context that the directive fetches data for
      *  - selectMode {String} - the select mode the modal uses
      */
-    .controller('SearchPopupController', ['$scope', '$uibModalInstance', 'DataUtils', 'params', 'Session', 'modalBox', function SearchPopupController($scope, $uibModalInstance, DataUtils, params, Session, modalBox) {
+    .controller('SearchPopupController', ['$scope', '$uibModalInstance', 'DataUtils', 'params', 'Session', 'modalBox', 'logActions', function SearchPopupController($scope, $uibModalInstance, DataUtils, params, Session, modalBox, logActions) {
         var vm = this;
 
         vm.params = params;
@@ -126,7 +126,8 @@
         var fetchRecords = function() {
             // TODO this should not be a hardcoded value, either need a pageInfo object across apps or part of user settings
             // The new recordset (recordsetWithFaceting) doesn't require read first. It will take care of this.
-            reference.read(limit).then(function getPseudoData(page) {
+            var logObject = params.logObject ? params.logObject : {action: logActions.recordsetLoad};
+            reference.read(limit, logObject).then(function getPseudoData(page) {
                 var afterRead = function () {
                     vm.tableModel.hasLoaded = true;
                     vm.tableModel.initialized = true;
