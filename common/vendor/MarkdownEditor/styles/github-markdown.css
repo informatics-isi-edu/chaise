@@ -1,5 +1,8 @@
-/* Markdown rendering style is based on github styling
-  change this file override any default style */
+/*
+  Markdown rendering style is based on github styling from https://github.com/sindresorhus/github-markdown-css/blob/gh-pages/github-markdown.css
+  Changing this file will override any default style.
+  Original code has a different name for the class, this has been changed to  markdown-container for chaise application.
+*/
 
 .markdown-container hr::after,
 .markdown-container::after {
