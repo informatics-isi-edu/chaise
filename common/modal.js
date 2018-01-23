@@ -91,7 +91,7 @@
      *  - context {String} - the current context that the directive fetches data for
      *  - selectMode {String} - the select mode the modal uses
      */
-    .controller('SearchPopupController', ['$scope', '$uibModalInstance', 'DataUtils', 'params', 'Session', 'modalBox', 'logActions', function SearchPopupController($scope, $uibModalInstance, DataUtils, params, Session, modalBox, logActions) {
+    .controller('SearchPopupController', ['$scope', '$uibModalInstance', 'DataUtils', 'params', 'Session', 'modalBox', 'logActions', '$timeout', function SearchPopupController($scope, $uibModalInstance, DataUtils, params, Session, modalBox, logActions, $timeout) {
         var vm = this;
 
         vm.params = params;
@@ -153,7 +153,10 @@
             });
         };
 
-        fetchRecords();
+        // make sure to fetch the records after having the recordset directive
+        $timeout(function() {
+            fetchRecords();
+        });
 
         // since this is currently used for single select mode, the isSelected will always be true
         function ok(tuples, isSelected) {
