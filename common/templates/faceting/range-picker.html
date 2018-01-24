@@ -4,6 +4,9 @@
     <div ng-if="facetColumn.showHistogram">
         <div class="divider"></div>
         <div class="plotly-actions btn-group pull-right" style="z-index: 1">
+            <button type="button" class="btn btn-xs btn-primary btn-inverted btn-no-focus" style="border-color: white;" tooltip-placement="bottom" uib-tooltip-html="'<p>You can interact with the histogram in 2 ways: zooming and panning.</p><p>Clicking and holding anywhere in the graph display will allow you to zoom into a smaller subset of data. Drag the left or right bound to encapsulate the  </p><p>Interacting with the histogram does not automatically apply the filter, it will fill in the min/max input fields for you based on the histogram\'s current range.</p>'">
+                <span class="glyphicon glyphicon-question-sign"></span>
+            </button>
             <button type="button" class="zoom-plotly-button btn btn-xs btn-primary btn-inverted btn-no-focus" ng-click="zoomInPlot()" ng-disabled="histogramDataStack.length >= 20 || (facetColumn.column.type.rootName.indexOf('int') > -1 && (rangeOptions.absMax-rangeOptions.absMin) <= 10)" tooltip-placement="bottom" uib-tooltip="Zoom">
                 <span class="glyphicon glyphicon-plus"></span>
             </button>
