@@ -275,7 +275,6 @@ describe("Viewing Recordset with Faceting,", function() {
 
         describe("default presentation based on facets annotation ", function () {
             it("should have 12 facets", function () {
-                browser.pause();
                 chaisePage.recordsetPage.getAllFacets().count().then(function (ct) {
                     expect(ct).toBe(testParams.totalNumFacets, "Number of all facets is incorrect");
 
@@ -654,6 +653,12 @@ describe("Viewing Recordset with Faceting,", function() {
                                     return chaisePage.recordsetPage.getFacetOptions(idx).count();
                                 }).then(function (ct) {
                                     expect(ct).toBe(facetParams.listElems, "There are more list elements for '" + facetParams.name + "' facet than expected");
+
+                                    // clear inputs
+                                    return minClear.click();
+                                }).then(function () {
+                                    return maxClear.click();
+                                }).then(function () {
                                     // test validators
                                     minInput.sendKeys(facetParams.invalid);
 
@@ -748,6 +753,8 @@ describe("Viewing Recordset with Faceting,", function() {
                                     browser.wait(EC.not(EC.visibilityOf(clearAll)), browser.params.defaultTimeout);
 
                                     return minClear.click();
+                                }).then(function () {
+                                    return maxClear.click();
                                 });
                             });
 
@@ -829,6 +836,15 @@ describe("Viewing Recordset with Faceting,", function() {
                                 }).then(function (ct) {
                                     expect(ct).toBe(facetParams.listElems, "There are more list elements for '" + facetParams.name + "' facet than expected");
 
+                                    // clear inputs
+                                    return minDateClear.click();
+                                }).then(function () {
+                                    return minTimeClear.click();
+                                }).then(function () {
+                                    return maxDateClear.click();
+                                }).then(function () {
+                                    return maxTimeClear.click();
+                                }).then(function () {
                                     // test validators
                                     minDateInput.sendKeys(facetParams.invalid.date);
                                     browser.wait(function () {
@@ -949,10 +965,14 @@ describe("Viewing Recordset with Faceting,", function() {
                                 }).then(function () {
                                     browser.wait(EC.not(EC.visibilityOf(clearAll)), browser.params.defaultTimeout);
 
-                                    //clear the min inputs
+                                    //clear inputs
                                     return minDateClear.click();
                                 }).then(function () {
                                     return minTimeClear.click();
+                                }).then(function () {
+                                    return maxDateClear.click();
+                                }).then(function () {
+                                    return maxTimeClear.click();
                                 })
                             });
 
