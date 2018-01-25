@@ -54,7 +54,7 @@
                 toggle-related-table-display-type='ctrl.toggleRelatedTableDisplayType(dataModel)' can-edit-related="::ctrl.canEditRelated(ref)" can-create-related="::ctrl.canCreateRelated(ref)"
                 add-related-record="ctrl.addRelatedRecord(ref)" to-record-set="ctrl.toRecordSet(ref)" show-empty-related-tables="showEmptyRelatedTables">
                 </record-display>
-            
+
             <!-- used to delay empty accordions from displaying before simple record display -->
             <div ng-if="displayReady">
                 <uib-accordion close-others="false">
@@ -75,7 +75,7 @@
                                     <span class="markdown-container" ng-bind-html="tableModels[$index].page.content | trustedHTML"></span>
                                 </div>
                                 <div ng-show="tableModels[$index].displayType != 'markdown'">
-                                    <record-table class="related-table" id="rt-{{::ctrl.makeSafeIdAttr(relatedRef.displayname.value)}}" vm="::tableModels[$index]"></record-table>
+                                    <record-table class="related-table" id="rt-{{::ctrl.makeSafeIdAttr(relatedRef.displayname.value)}}" vm="::tableModels[$index]" parent-reference="reference"></record-table>
                                 </div>
                             </div>
                         </div>

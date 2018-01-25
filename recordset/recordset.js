@@ -231,9 +231,8 @@
     }])
 
     // Register work to be performed after loading all modules
-    .run(['AlertsService', 'context', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'MathUtils', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', 'modalBox',
-        function(AlertsService, context, DataUtils, ERMrest, ErrorService, headInjector, MathUtils, recordsetModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, modalBox) {
-
+    .run(['AlertsService', 'context', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'MathUtils', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', 'modalBox', 'logActions',
+        function(AlertsService, context, DataUtils, ERMrest, ErrorService, headInjector, MathUtils, recordsetModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, modalBox, logActions) {
         try {
             var session;
 
@@ -310,11 +309,13 @@
                     recordsetModel.columns = recordsetModel.reference.columns;
                     recordsetModel.search = recordsetModel.reference.location.searchTerm;
 
+                    recordsetModel.logObject = {action: logActions.recordsetLoad};
+
                     if (showFaceting) {
                         $log.debug("sending page-loaded message");
                         $rootScope.$broadcast('page-loaded');
                     } else {
-                        recordsetModel.reference.read(recordsetModel.pageLimit).then(function (page) {
+                        recordsetModel.reference.read(recordsetModel.pageLimit, recordsetModel.logObject).then(function (page) {
                             recordsetModel.page = page;
                             recordsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
                             recordsetModel.initialized = true;

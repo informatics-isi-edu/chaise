@@ -44,8 +44,8 @@
         $logProvider.debugEnabled(chaiseConfig.debug === true);
     }])
 
-    .run(['AlertsService', 'ERMrest', 'ErrorService', 'headInjector', 'MathUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', 'messageMap', 'Errors',
-        function runRecordEditApp(AlertsService, ERMrest, ErrorService, headInjector, MathUtils, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies, messageMap, Errors) {
+    .run(['AlertsService', 'ERMrest', 'ErrorService', 'headInjector', 'logActions', 'MathUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', 'messageMap', 'Errors',
+        function runRecordEditApp(AlertsService, ERMrest, ErrorService, headInjector, logActions, MathUtils, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies, messageMap, Errors) {
 
         var session,
             context = { booleanValues: ['', true, false] };
@@ -110,7 +110,6 @@
             if (!session) {
                 var notAuthorizedError = new ERMrest.UnauthorizedError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
                 throw notAuthorizedError;
-                return;
             }
 
             // Unsubscribe onchange event to avoid this function getting called again
@@ -148,6 +147,25 @@
 
                 $log.info("Reference: ", $rootScope.reference);
 
+
+                // create the extra information that we want to log in ermrest
+                // NOTE currently we're only setting the action, we might need to add extra information here
+                var logObj = {action: logActions.update};
+                if (context.mode == context.modes.COPY) {
+                    logObj = {action: logActions.copy};
+                } else if (context.mode == context.modes.CREATE){
+                    if (context.queryParams.invalidate) {
+                        if (context.queryParams.prefill) {
+                            logObj = {action: logActions.createPrefill};
+                        } else {
+                            logObj = {action: logActions.createModal};
+                        }
+                    } else {
+                        logObj = {action: logActions.create};
+                    }
+                }
+                context.logObject = logObj;
+
                 // Case for creating an entity, with prefilled values
                 if (context.queryParams.prefill) {
                     // get the cookie with the prefill value
@@ -172,7 +190,11 @@
 
                         // get the actual foreignkey data
                         ERMrest.resolve(cookie.origUrl, {cid: context.appName}).then(function (ref) {
-                            getForeignKeyData(newRow, cookie.columnName, cookie.constraintName, ref);
+                            // the table that we're logging is not the same table in url (it's the referrer that is the same)
+                            var logObject = $rootScope.reference.defaultLogInfo;
+                            logObject.referrer = ref.defaultLogInfo;
+                            logObject.action = logActions.preCreatePrefill;
+                            getForeignKeyData(newRow, cookie.columnName, cookie.constraintName, ref, logObject);
                         }).catch(function (err) {
                             $rootScope.showColumnSpinner[newRow][cookie.columnName] = false;
                             console.log(err);
@@ -206,7 +228,8 @@
                             numberRowsToRead = context.MAX_ROWS_TO_ADD;
                         }
 
-                        $rootScope.reference.read(numberRowsToRead).then(function getPage(page) {
+                        var readAction = context.mode == context.modes.EDIT ? logActions.preUpdate : logActions.preCopy;
+                        $rootScope.reference.read(numberRowsToRead, {action: readAction}).then(function getPage(page) {
                             $log.info("Page: ", page);
 
                             if (page.tuples.length < 1) {
@@ -373,7 +396,7 @@
                                     recordEditModel.foreignKeyData[0][column.foreignKey.name] = column.defaultValues;
 
                                     // get the actual foreign key data
-                                    getForeignKeyData(0, column.name, column.foreignKey.name, column.defaultReference);
+                                    getForeignKeyData(0, column.name, column.foreignKey.name, column.defaultReference, {action: logActions.recordeditDefault});
 
                                 }
                             } else {
@@ -409,9 +432,10 @@
          * @param  {string} colName The name of the foreignkey pseudo column.
          * @param  {string} fkName  The constraint name of the foreign key
          * @param  {ERMrest.Refernece} fkRef   Reference to the foreign key table
+         * @param  {Object} contextHeaderParams the object will be passed to read as contextHeaderParams
          */
-        function getForeignKeyData (rowIndex, colName, fkName, fkRef) {
-            fkRef.contextualize.compactSelect.read(1).then(function (page) {
+        function getForeignKeyData (rowIndex, colName, fkName, fkRef, logObject) {
+            fkRef.contextualize.compactSelect.read(1, logObject).then(function (page) {
                 $rootScope.showColumnSpinner[rowIndex][colName] = true;
                 if ($rootScope.showColumnSpinner[rowIndex][colName]) {
                     // default value is validated
