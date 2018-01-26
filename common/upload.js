@@ -13,7 +13,9 @@
                     column: '=',
                     values: '=',
                     value: '=',
-                    reference: '='
+                    reference: '=',
+                    isDisabled: "=",
+                    placeholder: "="
                 },
                 link: function (scope, element,attrs, ngModel) {
                     scope.fileEl;
@@ -346,7 +348,7 @@
                 });
 
                 vm.checksumProgress = (progress/vm.totalSize)*100;
-                
+
                 $timeout(function() {
                     try {
                         $scope.$apply();

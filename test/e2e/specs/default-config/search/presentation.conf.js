@@ -4,7 +4,7 @@ var config = pConfig.getConfig({
     configFileName: 'search/dev.json',
     chaiseConfigFilePath: 'test/e2e/specs/default-config/chaise-config.js',
     specs: [
-        "presentation.spec.js"
+        "presentation.spec.ignored.js"
     ],
     setBaseUrl: function(browser, data) {
         browser.params.url = process.env.CHAISE_BASE_URL;

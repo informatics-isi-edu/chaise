@@ -75,7 +75,7 @@ FULL_FEATURES_PARALLEL_TESTS=$(FullFeaturesParallel)
 PARALLEL_TESTS=$(FullFeaturesParallel) $(FullFeaturesConfirmationParallel) $(DeleteProhibitedParallel) $(DefaultConfigParallel)
 VIEWER_TESTS=$(E2EDviewer)
 
-ALL_TESTS=$(NAVBAR_TESTS) $(RECORD_TESTS) $(RECORDSET_TESTS) $(RECORDADD_TESTS) $(RECORDEDIT_TESTS) $(PERMISSIONS_TESTS) $(VIEWER_TESTS) $(SEARCH_TESTS) $(FOOTER_TESTS) $(ERRORS_TESTS)
+ALL_TESTS=$(NAVBAR_TESTS) $(RECORD_TESTS) $(RECORDSET_TESTS) $(RECORDADD_TESTS) $(RECORDEDIT_TESTS) $(PERMISSIONS_TESTS) $(FOOTER_TESTS) $(ERRORS_TESTS)
 
 define make_test
 	rc=0; \
@@ -196,7 +196,8 @@ COMMON=common
 # Markdown Editor dependencies
 MDEDIT_CSS_DEPS=$(COMMON)/vendor/MarkdownEditor/styles/bootstrap-markdown.min.css \
 	$(COMMON)/vendor/MarkdownEditor/styles/github.min.css \
-	$(COMMON)/vendor/MarkdownEditor/styles/angular-markdown-editor.min.css
+	$(COMMON)/vendor/MarkdownEditor/styles/angular-markdown-editor.min.css \
+	$(COMMON)/vendor/MarkdownEditor/styles/github-markdown.css
 
 MDEDIT_JS_DEPS=$(COMMON)/vendor/MarkdownEditor/bootstrap-markdown.js \
 	$(COMMON)/vendor/MarkdownEditor/highlight.min.js \
@@ -358,7 +359,9 @@ RECORD_JS_SOURCE=$(RECORD_ASSETS)/record.app.js \
 
 RECORD_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(COMMON)/styles/app.css \
+	$(COMMON)/vendor/MarkdownEditor/styles/github-markdown.css \
 	$(COMMON)/styles/appheader.css
+
 
 RECORD_CSS_SOURCE=$(RECORD_ASSETS)/record.css
 
@@ -406,7 +409,8 @@ VIEWER_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/vendor/select.css \
 	$(CSS)/vendor/select2.css \
 	$(COMMON)/styles/app.css \
-	$(COMMON)/styles/appheader.css
+	$(COMMON)/styles/appheader.css \
+	$(COMMON)/vendor/MarkdownEditor/styles/github-markdown.css
 
 VIEWER_CSS_SOURCE=$(VIEWER_ASSETS)/viewer.css
 
@@ -501,7 +505,8 @@ RECSET_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css
 
 RECSET_CSS_SOURCE=$(COMMON)/styles/app.css \
-    $(COMMON)/styles/appheader.css
+    $(COMMON)/styles/appheader.css \
+		$(COMMON)/vendor/MarkdownEditor/styles/github-markdown.css
 
 # Config file
 JS_CONFIG=chaise-config.js

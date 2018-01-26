@@ -51,3 +51,7 @@ The following are the config parameters that recordedit uses:
 * Boolean
 * Date
 * Timestampz
+
+### Markdown styles
+Markdown component uses [Markdown-It](https://github.com/markdown-it/markdown-it) for rendering elements and [github css](https://github.com/sindresorhus/github-markdown-css/blob/gh-pages/github-markdown.css) for styling.
+Styling can be altered for specific elements using custom css file. More information can be found [here](https://github.com/informatics-isi-edu/chaise/wiki/Towards-a-style-guide#custom-markdown-styles) for custom css classes and attributes.

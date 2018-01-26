@@ -143,8 +143,8 @@
     }])
 
     // Factory for each error type
-    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$uibModal', '$window', 'errorMessages', 'Errors', 'UriUtils', 'appNames',
-          function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $uibModal, $window, errorMessages, Errors, UriUtils, appNames) {
+    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$uibModal', '$window', 'errorMessages', 'Errors', 'UriUtils',
+          function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $uibModal, $window, errorMessages, Errors, UriUtils) {
 
         function errorPopup(message, errorCode, pageName, redirectLink, subMessage, stackTrace) {
             var providedLink = true;
@@ -210,7 +210,7 @@
                 } else {
                     if(actionBtnIdentifier == "reload"){
                         reloadCb();
-                    } else{
+                    } else{             //default action i.e. redirect link for OK button
                         $window.location.replace(redirectLink);
                     }
 
@@ -223,10 +223,9 @@
         // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
         function handleException(exception) {
             $log.info(exception);
-            var appName = UriUtils.appNamefromUrlPathname($window.location.pathname),
-            reloadLink,
-            redirectLink = $window.location.origin,
-            gotoLocation = "Home Page";
+            var reloadLink,
+                redirectLink = $window.location.origin,
+                gotoLocation = "Home Page";
 
             var stackTrace =  (exception.errorData && exception.errorData.stack)? exception.errorData.stack: undefined;
 
@@ -260,12 +259,14 @@
                 errorPopup( exception.message, exception.status, gotoLocation, redirectLink, exception.subMessage);
             }
             else {
+                logError(exception);
+
                 var errName = exception.status? exception.status:"Terminal Error",
                     errorText = exception.message,
                     systemAdminMessage = errorMessages.systemAdminMessage,
                     redirectLink = $window.location.origin,
-                    pageName = "Home Page",
-                    specialMessage;
+                    pageName = "Home Page";
+
 
                 errName = (errName.toLowerCase() !== 'error') ? errName : "Terminal Error";
 
@@ -299,6 +300,22 @@
 
 })();
 
+
+/**
+ * Log the error in ermrest
+ * @param  {object} error the error object
+ */
+var logError = function (error) {
+    if (!ERMrest) return;
+    try {
+        var ermrestUri = chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : window.location.origin + '/ermrest';
+        ERMrest.logError(error, ermrestUri).then(function () {
+            console.log("logged the error");
+        }).catch(function (err) {});
+    } catch (exp) {
+        console.log("couldn't log the error.");
+    }
+};
 
 window.onerror = function() {
 
@@ -359,5 +376,7 @@ window.onerror = function() {
     } else {
         document.body.innerHTML = html;
     }
+
+    logError(error);
 
 };

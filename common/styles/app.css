@@ -636,10 +636,6 @@ th.multi-select-width {
     border-radius: 4px;
 }
 
-.markdown-container img {
-    margin : 5px 5px 5px 0px;
-}
-
 /***************** ellipses ***************/
 
 .hideContent {
@@ -1455,27 +1451,4 @@ input[type=number]::-moz-placeholder {
 
 .selected-rows {
     min-height: 45px;
-}
-
-@media print {
-    #main-content {
-        height: auto !important;
-    }
-
-    #footer {
-        display: none;
-    }
-
-    a[href]:after {
-        content: none !important;
-    }
-
-    .entity-key {
-        width: auto;
-        max-width: 120px;
-    }
-
-    .entity-value {
-        width: auto;
-    }
 }

@@ -3,8 +3,8 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', 'DataUtils', 'ErrorService', 'MathUtils', 'messageMap', 'modalBox', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$uibModal', '$window',
-        function RecordController(AlertsService, DataUtils, ErrorService, MathUtils, messageMap, modalBox, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $uibModal, $window) {
+    .controller('RecordController', ['AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$uibModal', '$window',
+        function RecordController(AlertsService, DataUtils, ErrorService, logActions, MathUtils, messageMap, modalBox, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $uibModal, $window) {
         var vm = this;
         var addRecordRequests = {}; // <generated unique id : reference of related table>
         var editRecordRequests = {}; // generated id: {schemaName, tableName}
@@ -45,7 +45,7 @@
 
         vm.deleteRecord = function() {
             var errorData = {};
-            $rootScope.reference.delete().then(function deleteSuccess() {
+            $rootScope.reference.delete({action: logActions.recordDelete}).then(function deleteSuccess() {
                 // Get an appLink from a reference to the table that the existing reference came from
                 var unfilteredRefAppLink = $rootScope.reference.table.reference.contextualize.compact.appLink;
                 $rootScope.showSpinner = false;
@@ -200,7 +200,7 @@
                 delete updated[refObj.location.schemaName + ":" + refObj.location.tableName];
 
                 (function (i) {
-                    refObj.read(dataModel.pageLimit).then(function (page) {
+                    refObj.read(dataModel.pageLimit, {action: logActions.recordRelatedUpdate}).then(function (page) {
                         dataModel.page = page;
                         dataModel.rowValues = DataUtils.getRowValuesFromPage(page);
                     }, function (error) {
