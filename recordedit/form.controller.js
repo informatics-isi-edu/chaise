@@ -517,6 +517,8 @@
                     return '';
                 } else if (column.isForeignKey) {
                     return 'Select a value';
+                } else if (column.isAsset) {
+                    return "No file Selected";
                 }
             } catch (e) {
                 $log.info(e);
