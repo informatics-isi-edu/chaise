@@ -254,6 +254,9 @@
               if(exception.errorData && exception.errorData.redirectUrl != 'undeifned' && exception.errorData.redirectUrl != ''){
                 redirectLink = exception.errorData.redirectUrl;
               }
+              if(exception.errorData && exception.errorData.redirectPath != 'undeifned' && exception.errorData.redirectPath != ''){
+                redirectLink = $window.location.origin + $window.location.pathname + exception.errorData.redirectPath;
+              }
                 errorPopup( exception.message, exception.status, gotoLocation, redirectLink, exception.subMessage);
             }
             else {
