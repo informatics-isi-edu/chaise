@@ -438,7 +438,7 @@
                     var parentCtrl = ctrls[0],
                         currentCtrl = ctrls[1];
 
-                    var numBuckets = 10;
+                    var numBuckets = scope.facetColumn.histogramBucketCount;
 
                     function isColumnOfType(columnType) {
                         return (scope.facetColumn.column.type.rootName.indexOf(columnType) > -1)
@@ -653,7 +653,7 @@
                                 } else {
                                     // after zooming in, we don't care about displaying values beyond the set the user sees
                                     // if set is greater than size 10, remove last bin (we should only see this when the max+ bin is present)
-                                    if (relayout && response.x.length > 10) {
+                                    if (relayout && response.x.length > bucketCount) {
                                         // no need to splice off labels because they are used for lookup
                                         // i.e. response.labels.(min/max)
                                         response.x.splice(-1,1);
@@ -754,22 +754,45 @@
                             // we don't want the user to keep zooming in infinitely to save memory space
                             if (scope.histogramDataStack.length >= 20) { throw new Error("Maximum data stack size reached"); }
                             if (isColumnOfType("int")) {
-                                if (scope.rangeOptions.absMax - scope.rangeOptions.absMin <= 10) {
+                                if (scope.rangeOptions.absMax - scope.rangeOptions.absMin <= numBuckets) {
                                     throw new Error("Can't zoom anymore");
                                 }
                             } else if (isColumnOfType("date")) {
                                 var minMoment = moment(scope.rangeOptions.absMin);
                                 var maxMoment = moment(scope.rangeOptions.absMax);
 
-                                if (moment.duration( maxMoment.diff(minMoment) ).asDays() <= 10) {
+                                if (moment.duration( maxMoment.diff(minMoment) ).asDays() <= numBuckets) {
                                     throw new Error("Can't zoom anymore");
                                 }
                             }
 
+
+                            // NOTE: x[x.length-1] may not be representative of the absolute max
+                            // range is based on the index of the bucket representing the max value
+                            var maxIndex = scope.plot.data[0].x.findIndex(function (value) {
+                                return value >= scope.rangeOptions.absMax;
+                            });
+
+                            // the last bucket is a value less than the max but includes max in it
+                            if (maxIndex < 0) {
+                                maxIndex = scope.plot.data[0].x.length;
+                            }
+
+                            // zooming in should increase clarity by 50%
+                            // range is applied to both min and max so use half of 50%
+                            var zoomRange = Math.ceil(maxIndex * 0.25);
+                            // middle bucket rounded down
+                            var median = Math.floor(maxIndex/2);
+                            var minBinIndex = median - zoomRange;
+                            var maxBinIndex = median + zoomRange;
+
+                            console.log(maxBinIndex);
+                            console.log(minBinIndex);
+
                             // timestamp needs special formatting
                             if (isColumnOfType("timestamp")) {
-                                var minMoment = moment(scope.plot.data[0].x[2]);
-                                var maxMoment = moment(scope.plot.data[0].x[scope.plot.data[0].x.length-3]);
+                                var minMoment = moment(scope.plot.data[0].x[minBinIndex]);
+                                var maxMoment = moment(scope.plot.data[0].x[maxBinIndex]);
 
                                 scope.rangeOptions.absMin = {
                                     date: minMoment.format('YYYY-MM-DD'),
@@ -780,8 +803,8 @@
                                     time: maxMoment.format('HH:mm:ss')
                                 }
                             } else {
-                                scope.rangeOptions.absMin = scope.plot.data[0].x[2];
-                                scope.rangeOptions.absMax = scope.plot.data[0].x[scope.plot.data[0].x.length-3];
+                                scope.rangeOptions.absMin = scope.plot.data[0].x[minBinIndex];
+                                scope.rangeOptions.absMax = scope.plot.data[0].x[maxBinIndex];
                             }
 
                             histogramData(numBuckets, true);
