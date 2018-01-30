@@ -737,7 +737,7 @@
                                     }
 
                                     // if - the max/min are null
-                                    //    - barPlot in annotation is 'false'
+                                    //    - bar_plot in annotation is 'false'
                                     //    - histogram not supported for column type
                                     if (!scope.showHistogram()) {
                                         return;
