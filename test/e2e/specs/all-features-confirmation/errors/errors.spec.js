@@ -35,17 +35,17 @@ describe('Error related test cases,', function() {
             chaisePage.waitForElement(element(by.css('.modal-dialog ')));
         });
 
-        it('An error modal window should appear with Record Not Found title', function(){
+        xit('An error modal window should appear with Record Not Found title', function(){
             var modalTitle = chaisePage.recordPage.getErrorModalTitle();
             expect(modalTitle).toBe("Record Not Found", "The title of no record error pop is not correct");
         });
 
-        it('Error modal text indicates users about error and provides them with navigation options', function(){
+        xit('Error modal text indicates users about error and provides them with navigation options', function(){
             var modalText = chaisePage.recordPage.getModalText();
             expect(modalText.getText()).toBe(testParams.recordNotFoundModalText, "The message in modal pop is not correct");
         });
 
-        it('Error modal should Show Error Details', function(){
+        xit('Error modal should Show Error Details', function(){
             var showErrorLinkIcon =  element.all(by.xpath("//div/a")).get(0);
             var errorSpan = element(by.xpath("//div/span/pre"));
             showErrorLinkIcon.click().then(function(){
@@ -55,7 +55,7 @@ describe('Error related test cases,', function() {
 
         });
 
-        it('On click of OK button the page should redirect to recordset/search page', function(){
+        xit('On click of OK button the page should redirect to recordset/search page', function(){
             chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
                 return btn.click();
             }).then (function (){
@@ -81,17 +81,17 @@ describe('Error related test cases,', function() {
             chaisePage.waitForElement(element(by.css('.modal-dialog ')));
         });
 
-        it('An error modal window should appear with Multiple Records Found title', function(){
+        xit('An error modal window should appear with Multiple Records Found title', function(){
             var modalTitle = chaisePage.recordPage.getErrorModalTitle();
             expect(modalTitle).toBe("Multiple Records Found", "The title of no record error pop is not correct");
         });
 
-        it('Error modal text indicates users about error and provides them with navigation options', function(){
+        xit('Error modal text indicates users about error and provides them with navigation options', function(){
             var modalText = chaisePage.recordPage.getModalText();
             expect(modalText.getText()).toBe(testParams.multipleRecordFoundModalText, "The message in modal pop is not correct");
         });
 
-        it('Error modal should Show Error Details', function(){
+        xit('Error modal should Show Error Details', function(){
             var showErrorLinkIcon =  element.all(by.xpath("//div/a")).get(0);
             var errorSpan = element(by.xpath("//div/span/pre"));
             showErrorLinkIcon.click().then(function(){
@@ -100,7 +100,7 @@ describe('Error related test cases,', function() {
             })
         });
 
-        it('On click of OK button the page should redirect to recordset/search page', function(){
+        xit('On click of OK button the page should redirect to recordset/search page', function(){
             chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
                 return btn.click();
             }).then (function (){
@@ -126,17 +126,17 @@ describe('Error related test cases,', function() {
             chaisePage.waitForElement(element(by.css('.modal-dialog ')));
         });
 
-        it('An error modal window should appear with Item Not Found title', function(){
+        xit('An error modal window should appear with Item Not Found title', function(){
             var modalTitle = chaisePage.recordPage.getErrorModalTitle();
             expect(modalTitle).toBe("Item Not Found", "The title of no table error pop is not correct");
         });
 
-        it('Error modal text indicates users about error and provides them with navigation options', function(){
+        xit('Error modal text indicates users about error and provides them with navigation options', function(){
             var modalText = chaisePage.recordPage.getModalText();
             expect(modalText.getText()).toBe(testParams.tableNotFoundModalText(), "The message in modal pop is not correct");
         });
 
-        it('On click of OK button the page should redirect Home page', function(){
+        xit('On click of OK button the page should redirect Home page', function(){
             chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
                 return btn.click();
             }).then (function (){
@@ -165,17 +165,17 @@ describe('Error related test cases,', function() {
             chaisePage.waitForElement(element(by.css('.modal-dialog ')));
         });
 
-        it('An error modal window should appear with Invalid Input title', function(){
+        xit('An error modal window should appear with Invalid Input title', function(){
             var modalTitle = chaisePage.recordPage.getErrorModalTitle();
             expect(modalTitle).toBe("Invalid Input", "The title of Invalid Input error pop is not correct");
         });
 
-        it('Error modal text indicates users about error and provides them with navigation options to Home Page', function(){
+        xit('Error modal text indicates users about error and provides them with navigation options to Home Page', function(){
             var modalText = chaisePage.recordPage.getModalText();
             expect(modalText.getText()).toBe(testParams.negativeLimitErrorText, "The message in modal pop is not correct");
         });
 
-        it('On click of OK button the page should redirect to Home page', function(){
+        xit('On click of OK button the page should redirect to Home page', function(){
             chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
                 return btn.click();
             }).then (function (){
@@ -204,17 +204,17 @@ describe('Error related test cases,', function() {
             chaisePage.waitForElement(element(by.css('.modal-dialog ')));
         });
 
-        it('An error modal window should appear with Invalid Input title', function(){
+        xit('An error modal window should appear with Invalid Input title', function(){
             var modalTitle = chaisePage.recordPage.getErrorModalTitle();
             expect(modalTitle).toBe("Invalid Input", "The title of Invalid Input error pop is not correct");
         });
 
-        it('Error modal text indicates users about error and provides them with navigation options to Home Page', function(){
+        xit('Error modal text indicates users about error and provides them with navigation options to Home Page', function(){
             var modalText = chaisePage.recordPage.getModalText();
             expect(modalText.getText()).toBe(testParams.sizeNotValidModalText(), "The message in modal pop is not correct");
         });
 
-        it('On click of OK button the page should redirect to RecordSet', function(){
+        xit('On click of OK button the page should redirect to RecordSet', function(){
             chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
                 return btn.click();
             }).then (function (){
@@ -240,7 +240,7 @@ describe('Error related test cases,', function() {
             chaisePage.waitForElement(chaisePage.recordEditPage.getEntityTitleElement());
         });
 
-        it("An error modal window should appear with Conflict.", function () {
+        xit("An error modal window should appear with Conflict.", function () {
             var modalTitle = chaisePage.recordPage.getConfirmDeleteTitle(),
                 deleteReccordBtn = chaisePage.recordEditPage.getDeleteRecordButton();
             deleteReccordBtn.click().then(function () {
@@ -261,7 +261,7 @@ describe('Error related test cases,', function() {
             });
         });
 
-        it('On click of Reload button the page should reload itself in Recordedit app', function(){
+        xit('On click of Reload button the page should reload itself in Recordedit app', function(){
             chaisePage.recordPage.getErrorModalReloadButton().then(function(btn){
                 return btn.click();
             }).then (function (){
@@ -284,12 +284,12 @@ describe('Error related test cases,', function() {
             chaisePage.waitForElement(element(by.css('.modal-dialog ')));
         });
 
-        it('An error modal window should appear with Record Not Found title', function(){
+        xit('An error modal window should appear with Record Not Found title', function(){
             var modalTitle = chaisePage.recordPage.getErrorModalTitle();
             expect(modalTitle).toBe("Record Not Found", "The title of no record error pop is not correct");
         });
 
-        it('On click of OK button the page should redirect to recordset/search page', function(){
+        xit('On click of OK button the page should redirect to recordset/search page', function(){
             chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
                 return btn.click();
             }).then (function (){
@@ -313,7 +313,7 @@ describe('Error related test cases,', function() {
           browser.get(url);
       });
 
-      it("should be returned as a 409 error with deletion conflict.", function () {
+      xit("should be returned as a 409 error with deletion conflict.", function () {
           var modalTitle = chaisePage.recordPage.getConfirmDeleteTitle(),
               deleteReccordBtn = chaisePage.recordPage.getDeleteRecordButton();
 
@@ -332,6 +332,35 @@ describe('Error related test cases,', function() {
           }).then(function (errorText) {
               // Added OR case to avoid discrepancy in error message when table is deleted
               expect(errorText == testParams.deletionErrTextBooking || errorText == testParams.deletionErrTextAccommodationImg).toBe(true, "409 Conflict could not be matched! Check conflict during deletion.");
+          }).catch(function(error) {
+              console.log(error);
+              expect('Something went wrong with this promise chain.').toBe('Please see error message.');
+          });
+      });
+
+    });
+
+    describe("Error check for facet changes", function(){
+
+      beforeAll(function() {
+          var url = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name +  "/id=2002@after()";
+          browser.get(url);
+      });
+
+      it("should be returned Invalid Page Criteria", function () {
+          var modalTitle = element(by.css('.modal-title ')),
+              modalActionBody =  element(by.css('.modal-body')).all(by.tagName('span')).get(1);
+
+          chaisePage.waitForElement(modalTitle).then(function(){
+              return modalTitle.getText();
+          }).then(function (text) {
+              expect(text).toBe("Invalid Page Criteria", "Invalid Page Criteria error pop-up could not be opened!");
+              // return browser.executeScript("return ('.modal-body span')[1]");
+              return modalActionBody.getText();
+          }).then(function (errorText) {
+              // Added OR case to avoid discrepancy in error message when table is deleted
+              console.log(errorText);
+              expect(errorText).toBe("Click OK to reload this page without Invalid Page Criteria.", "409 Conflict could not be matched! Check conflict during deletion.");
           }).catch(function(error) {
               console.log(error);
               expect('Something went wrong with this promise chain.').toBe('Please see error message.');
