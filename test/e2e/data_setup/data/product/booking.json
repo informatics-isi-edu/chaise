@@ -9,7 +9,8 @@
         "id": 2,
         "accommodation_id": 2002,
         "price": 350,
-        "booking_date": "2016-04-18T00:00:00-07:00"
+        "booking_date": "2016-04-18T00:00:00-07:00",
+        "image_id":3005
     },
     {
         "id": 3,
@@ -21,7 +22,8 @@
         "id": 4,
         "accommodation_id": 2002,
         "price": 200,
-        "booking_date": "2016-05-31T00:00:00-07:00"
+        "booking_date": "2016-05-31T00:00:00-07:00",
+        "image_id":3006
     },
     {
         "id": 5,

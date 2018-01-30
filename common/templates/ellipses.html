@@ -17,15 +17,20 @@
         </button>
     </div>
     <div ng-if="config.selectMode == multiSelect" class="chaise-checkbox">
-        <input type="checkbox" ng-checked="selected || selectDisabled" ng-click="onSelect()" ng-disabled="selectDisabled">
+        <input type="checkbox" ng-checked="selected" ng-click="onSelect()" ng-disabled="selectDisabled">
         <label />
     </div>
 </td>
-<td ng-repeat="val in rowValues track by $index">
+<td ng-if="config.showNull || tuple.uniqueId" ng-repeat="val in rowValues track by $index">
     <div ng-switch="val.isHTML">
         <div ng-class="{'hideContent': hideContent == true, 'showContent': hideContent == false}" ng-style="overflow[$index+1] && maxHeightStyle">
             <span ng-switch-when="true" class="markdown-container" ng-bind-html="val.value | trustedHTML"></span>
-            <span ng-switch-default ng-bind="val.value"></span>
+            <span ng-switch-default ng-if="!config.showNull" ng-bind="val.value"></span>
+            <span ng-switch-default ng-if="config.showNull">
+                <span ng-if="val.value" ng-bind="val.value"></span>
+                <span ng-if="val.value == ''" ng-bind-html="defaultDisplayname.empty"></span>
+                <span ng-if="val.value == null" ng-bind-html="defaultDisplayname.null"></span>
+            </span>
         </div>
         <div ng-if="overflow[$index+1]" style="display:inline;">
             ...
@@ -33,3 +38,4 @@
         </div>
     </div>
 </td>
+<td ng-if="!config.showNull && !tuple.uniqueId" colspan="{{rowValues.length}}" ng-bind-html="defaultDisplayname.null"></td>

@@ -3,8 +3,8 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', 'DataUtils', 'ErrorService', 'MathUtils', 'messageMap', 'modalBox', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$uibModal', '$window', 
-        function RecordController(AlertsService, DataUtils, ErrorService, MathUtils, messageMap, modalBox, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $uibModal, $window) {
+    .controller('RecordController', ['AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$uibModal', '$window',
+        function RecordController(AlertsService, DataUtils, ErrorService, logActions, MathUtils, messageMap, modalBox, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $uibModal, $window) {
         var vm = this;
         var addRecordRequests = {}; // <generated unique id : reference of related table>
         var editRecordRequests = {}; // generated id: {schemaName, tableName}
@@ -44,11 +44,17 @@
         };
 
         vm.deleteRecord = function() {
-            $rootScope.reference.delete().then(function deleteSuccess() {
+            var errorData = {};
+            $rootScope.reference.delete({action: logActions.recordDelete}).then(function deleteSuccess() {
                 // Get an appLink from a reference to the table that the existing reference came from
                 var unfilteredRefAppLink = $rootScope.reference.table.reference.contextualize.compact.appLink;
+                $rootScope.showSpinner = false;
                 $window.location.href = unfilteredRefAppLink;
             }, function deleteFail(error) {
+                $rootScope.showSpinner = false;
+                errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
+                errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
+                error.errorData = errorData;
                 throw error;
             });
         };
@@ -58,7 +64,15 @@
         };
 
         vm.toRecordSet = function(ref) {
-            return $window.location.href = ref.appLink;
+          // Search app might be broken and should not be linked from here.
+            var appUrl = ref.appLink,
+                recordSetUrl;
+            if(appUrl.search("/search/") > 0){
+              recordSetUrl = appUrl.replace("/search/", "/recordset/");
+            } else{
+              recordSetUrl = appUrl;
+            }
+            return $window.location.href = recordSetUrl;
         };
 
         vm.showRelatedTable = function(i) {
@@ -115,7 +129,7 @@
         };
 
         // Send user to RecordEdit to create a new row in this related table
-        function onSuccess (){    
+        function onSuccess (){
             AlertsService.addAlert("Your data has been submitted. Showing you the result set...","success");
             vm.resultset = true;
             onfocusEventCall(true);
@@ -123,10 +137,14 @@
 
         vm.addRelatedRecord = function(ref) {
             // 1. Pluck required values from the ref into cookie obj by getting the values of the keys that form this FK relationship
-
+            // Another option is just passing the column name,
+            // but if the column is not in the list of visible columns in entry/create that can cause problems.
+            // This will work even if the column is not visible in the create mode.
             var cookie = {
-                rowname: $rootScope.recordDisplayname,
-                constraintName: ref.origColumnName
+                rowname: $rootScope.recordDisplayname, // used for display value
+                columnName: ref.origColumnName, // used to find the column that this blongs to
+                constraintName: ref.origFKR.name, // used for attaching the foreignkey data
+                origUrl: $rootScope.reference.uri // used for getting foreignkey data
             };
             var mapping = ref.contextualize.entryCreate.origFKR.mapping;
 
@@ -156,7 +174,7 @@
             addRecordRequests[referrer_id] = ref.uri;
 
             // 3. Get appLink, append ?prefill=[COOKIE_NAME]&referrer=[referrer_id]
-            var appLink = (ref.derivedAssociationReference ? ref.derivedAssociationReference.contextualize.entryCreate.appLink : ref.contextualize.entryCreate.appLink);
+            var appLink = ref.unfilteredReference.contextualize.entryCreate.appLink;
             appLink = appLink + (appLink.indexOf("?") === -1? "?" : "&") +
                 'prefill=' + UriUtils.fixedEncodeURIComponent(COOKIE_NAME) +
                 '&invalidate=' + UriUtils.fixedEncodeURIComponent(referrer_id);
@@ -177,10 +195,12 @@
         * @param {bool} isModalUpdate if update happens through modal pop up
         */
         function readUpdatedTable(refObj, dataModel, idx, isModalUpdate){
+            var errorData = {};
             if (isModalUpdate || completed[refObj.uri] || updated[refObj.location.schemaName + ":" + refObj.location.tableName]) {
                 delete updated[refObj.location.schemaName + ":" + refObj.location.tableName];
+
                 (function (i) {
-                    refObj.read(dataModel.pageLimit).then(function (page) {
+                    refObj.read(dataModel.pageLimit, {action: logActions.recordRelatedUpdate}).then(function (page) {
                         dataModel.page = page;
                         dataModel.rowValues = DataUtils.getRowValuesFromPage(page);
                     }, function (error) {
@@ -188,6 +208,9 @@
                         throw error;
                     }).catch(function (error) {
                         console.log(error);
+                        errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
+                        errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
+                        error.errorData = errorData;
                         throw error;
                     });
                 })(i);

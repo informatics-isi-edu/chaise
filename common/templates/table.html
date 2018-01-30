@@ -3,14 +3,14 @@
         <!-- sortable column header -->
         <thead class="table-heading">
             <tr>
-                <th ng-switch="vm.config.selectMode" ng-if="(vm.config.viewable || vm.config.editable || vm.config.deletable || vm.config.selectMode)" ng-class="{'multi-select-width': vm.config.selectMode == 'multi-select'}">
+                <th ng-switch="vm.config.selectMode" ng-if="(vm.config.viewable || vm.config.editable || vm.config.deletable || vm.config.selectMode != noSelect)" ng-class="{'multi-select-width': vm.config.selectMode == 'multi-select'}">
                     <span ng-switch-when="no-select">Actions</span>
                     <span ng-switch-when="single-select">Select</span>
                     <div ng-switch-when="multi-select">
-                        <button type="button" ng-click="::selectAll()" class="btn btn-sm btn-primary btn-inverted btn-condensed" tooltip-placement="bottom" uib-tooltip="Select all rows in table">
+                        <button type="button" ng-click="::selectAll()" class="btn btn-sm btn-primary btn-inverted btn-condensed" tooltip-placement="bottom" uib-tooltip="Select all rows in table" ng-disabled="vm.matchNotNull">
                             <span class="glyphicon glyphicon-check"></span> All
                         </button>
-                        <button type="button" ng-click="::selectNone()" class="btn btn-sm btn-primary btn-inverted btn-condensed" tooltip-placement="bottom" uib-tooltip="Deselect all rows in table">
+                        <button type="button" ng-click="::selectNone()" class="btn btn-sm btn-primary btn-inverted btn-condensed" tooltip-placement="bottom" uib-tooltip="Deselect all rows in table"  ng-disabled="vm.matchNotNull">
                             <span class="glyphicon glyphicon-unchecked"></span> None
                         </button>
                     </div>
@@ -29,9 +29,9 @@
 
         <!-- rows -->
         <tbody>
-            <tr class="table-row" ng-class="{'disabled-row': isDisabled(vm.page.tuples[$index].uniqueId)}"
-                ellipses ng-repeat="row in vm.rowValues track by $index" tuple="vm.page.tuples[$index]" from-tuple="vm.fromTuple" row-values="row" 
-                config="vm.config" context="vm.context" on-row-click-bind="onSelect" selected="isSelected(vm.page.tuples[$index].uniqueId)" select-disabled="isDisabled(vm.page.tuples[$index].uniqueId)">
+            <tr class="table-row" ng-class="{'disabled-row': isDisabled(vm.page.tuples[$index])}"
+                ellipses ng-repeat="row in vm.rowValues track by $index" tuple="vm.page.tuples[$index]" from-tuple="vm.fromTuple" row-values="row" parent-reference="parentReference"
+                config="vm.config" context="vm.context" on-row-click-bind="onSelect" selected="isSelected(vm.page.tuples[$index])" select-disabled="isDisabled(vm.page.tuples[$index])">
             </tr>
             <tr ng-if="vm.rowValues.length < 1">
                 <td id="no-results-row" colspan="{{vm.columns.length + 1}}" style="text-align: center;">No Results Found</td>

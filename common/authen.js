@@ -163,10 +163,19 @@
             });
         };
 
+        var shouldReloadPageAfterLogin = function(newSession) {
+            if (_session === null) return true;
+            return false;
+        };
+
         return {
 
-            getSession: function() {
+            getSession: function(context) {
                 return $http.get(serviceURL + "/authn/session").then(function(response) {
+                    if (context === "401" && shouldReloadPageAfterLogin(response.data)) {
+                        window.location.reload();
+                        return;
+                    }
                     _session = response.data;
                     _executeListeners();
                     return response.data;
@@ -243,7 +252,7 @@
                     // Once the user has logged in fetch the new session and set the session value
                     // and resolve the promise to notify ermrestjs that the user has logged in
                     // and it can continue firing other queued calls
-                    Session.getSession().then(function(_session) {
+                    Session.getSession("401").then(function(_session) {
                         defer.resolve();
                     }, function(exception) {
                         throw exception;

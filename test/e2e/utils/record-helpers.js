@@ -1,5 +1,6 @@
 var chaisePage = require('../utils/chaise.page.js');
 var mustache = require('../../../../ermrestjs/vendor/mustache.min.js');
+var EC = protractor.ExpectedConditions;
 
 exports.testPresentation = function (tableParams) {
 	it("should have '" + tableParams.title +  "' as title", function() {
@@ -23,8 +24,7 @@ exports.testPresentation = function (tableParams) {
 	});
 
     it("should show the action buttons properly", function() {
-        var EC = protractor.ExpectedConditions,
-            editButton = chaisePage.recordPage.getEditRecordButton(),
+        var editButton = chaisePage.recordPage.getEditRecordButton(),
             createButton = chaisePage.recordPage.getCreateRecordButton(),
             deleteButton = chaisePage.recordPage.getDeleteRecordButton(),
             showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton();
@@ -103,7 +103,7 @@ exports.testPresentation = function (tableParams) {
             });
         });
     });
-	
+
     it("should validate the values of each column", function () {
         var columns = tableParams.columns.filter(function (c) { return c.value != null; });
         expect(element.all(by.className('entity-value')).count()).toEqual(columns.length);
@@ -163,6 +163,7 @@ exports.testPresentation = function (tableParams) {
         var displayName, tableCount, title,
             relatedTables = tableParams.related_tables;
 
+        browser.wait(EC.not(EC.visibilityOf(chaisePage.recordPage.getLoadingElement())), browser.params.defaultTimeout);
         browser.wait(function() {
             return chaisePage.recordPage.getRelatedTablesWithPanel().count().then(function(ct) {
                 return (ct=relatedTables.length);
@@ -239,21 +240,73 @@ exports.testPresentation = function (tableParams) {
         })
     });
 
-    it("visible column related table with inline inbound fk should display 'None' in markdown disply mode if no data was found.",function(){
-        var EC = protractor.ExpectedConditions,
-            markdownEntity = element(by.id('entity-4-markdown'));
-        
+    it("click event on image_id in inline display should open new tab with file details",function(){
+        var allHandle;
         chaisePage.waitForElement(element(by.id('entity-booking'))).then(function(){
-            return browser.executeScript("return $('#entity-booking .btn-group .delete-action-button')");
-        }).then( function(deleteButtons){
-            for(var i = 0; i < deleteButtons.length; i++){
-                deleteButtons[0].click();
-                browser.executeScript("return $('#delete-confirmation').click()");
-            }
-            return browser.executeScript("return $('a.toggle-display-link').click()");        
+          // This selector captures link of first record under image_id column of booking inline entry in
+          // accommodation table of product-record schema with id 2002;
+            return browser.executeScript("return $('#divRecordSet  td:nth-child(5) a')");
+        }).then(function(imageLinks){
+            browser.executeScript("return window.open(arguments[0], '_blank')", imageLinks[0]);
+            return browser.getAllWindowHandles();
+        }).then(function (handles){
+            allHandle = handles;
+            browser.switchTo().window(allHandle[1]); browser.sleep(5000);
+            chaisePage.waitForElement(chaisePage.recordPage.getEntityTitleElement());
+            return chaisePage.recordPage.getEntityTitle();
+        }).then(function (pageTitle) {
+            expect(pageTitle).toBe("3,005", "Page title did not match. Invalid image id");
+            return chaisePage.recordPage.getEntitySubTitle();
+        }).then(function (pageSubTitle){
+            expect(pageSubTitle).toBe("file", "Page subtitle did not match. Invalid image id");
+            browser.close();
+            browser.switchTo().window(allHandle[0]);
+        }).catch(function(err){
+            console.log(err);
+            expect('Encountered an error').toBe('Please check the log', 'Inside catch block');
+            browser.close();
+            browser.switchTo().window(allHandle[0]);
+        })
+    });
+
+    it("visible column related table with inline inbound fk should display 'None' in markdown display mode if no data was found.",function(){
+        var EC = protractor.ExpectedConditions,
+            markdownEntity = element(by.id('entity-4-markdown')),
+            bookingName = "booking";
+
+
+        chaisePage.waitForElement(element(by.id("rt-" + bookingName))).then(function(){
+            return chaisePage.recordPage.getDeleteActionButtons(bookingName);
+        }).then(function(deleteButtons) {
+            return deleteButtons[0].click();
+        }).then(function () {
+            chaisePage.waitForElement(element(by.id("delete-confirmation")));
+            return chaisePage.recordPage.getConfirmDeleteButton().click();
+        }).then(function () {
+            browser.wait(function () {
+                return chaisePage.recordPage.getDeleteActionButtons(bookingName).count().then(function (ct) {
+                    return (ct==1);
+                });
+            });
+
+            return chaisePage.recordPage.getDeleteActionButtons(bookingName);
+        }).then(function (deleteButtons) {
+            return deleteButtons[0].click();
+        }).then(function () {
+            return chaisePage.recordPage.getConfirmDeleteButton();//.click();
+        }).then(function(confirmationBtn){
+           return confirmationBtn.click();
+        }).then(function () {
+            browser.wait(function() {
+                return chaisePage.recordPage.getRelatedTableRows(bookingName).count().then(function(ct) {
+                    return (ct==0);
+                });
+            }, browser.params.defaultTimeout);
+
+            return browser.executeScript("return $('a.toggle-display-link').click()");
         }).then(function(){
             browser.wait(EC.visibilityOf(markdownEntity), browser.params.defaultTimeout);
-            expect(markdownEntity.getText()).toBe('None',"Incorrect text for empty markdown!");        
+            expect(markdownEntity.getText()).toBe('None',"Incorrect text for empty markdown!");
         }).catch(function(err){
             console.log(err);
             expect('Encountered an error').toBe('Please check the log', 'Inside catch block');
@@ -268,10 +321,10 @@ exports.testPresentation = function (tableParams) {
          markdownEntityRow.isDisplayed().then(function(err){
             expect(err.length).toBe(0);
          })
-         showAllRTButton.click();     // reverse the status of the page 
+         showAllRTButton.click();     // reverse the status of the page
     });
 
-    
+
     // Related tables are contextualized with `compact/brief`, but if that is not specified it will inherit from `compact`
     it("should honor the page_size annotation for the table, file, in the compact context based on inheritance.", function() {
         var relatedTableName = tableParams.related_table_name_with_page_size_annotation;
@@ -294,7 +347,7 @@ exports.testPresentation = function (tableParams) {
             return tableHeading.getAttribute("class");
         }).then(function(attribute) {
             expect(attribute).toMatch("panel-open");
-
+            chaisePage.waitForElement(element(by.css(".accordion-toggle")));
             return tableHeading.element(by.css(".accordion-toggle")).click();
         }).then(function() {
             return tableHeading.getAttribute("heading");

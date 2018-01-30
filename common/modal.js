@@ -17,24 +17,32 @@
             $uibModalInstance.dismiss('cancel');
         }
     }])
-    .controller('ErrorModalController', ['$uibModalInstance', 'params', 'messageMap', function ErrorModalController($uibModalInstance, params, messageMap) {
+    .controller('ErrorModalController', ['$uibModalInstance', 'params', 'messageMap', '$window', function ErrorModalController($uibModalInstance, params, messageMap, $window) {
         var vm = this;
         vm.params = params;
-        vm.details = false;
+        vm.displayDetails = false;
         vm.linkText = messageMap.showErrDetails;
+        vm.showReloadBtn = false;
+        var reloadMessage = ' <p>  </p>';
 
         if(vm.params.errorCode == 'Multiple Records Found'){
-          vm.clickActionMessage =  messageMap.recordAvailabilityError.multipleRecords;
+            vm.clickActionMessage =  messageMap.recordAvailabilityError.multipleRecords;
         } else if(vm.params.errorCode == 'Record Not Found'){
-          vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
+            vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
         } else {
-          vm.clickActionMessage = messageMap.recordAvailabilityError.pageRedirect + vm.params.pageName;
+            vm.clickActionMessage = messageMap.recordAvailabilityError.pageRedirect + vm.params.pageName + '. ';
+            if(vm.params.appName == 'recordedit'){
+              vm.showReloadBtn = true;
+              reloadMessage = ' <p>' + messageMap.terminalError.reloadMessage +' </p>';
+            }
         }
-
+        // <p> tag is added to maintain the space between click action message and buttons
+        // Also maintains consistency  in their placement irrespective of reload message
+        vm.clickActionMessage += reloadMessage;
 
         vm.showDetails = function() {
-            vm.details = !vm.details;
-            vm.linkText = (vm.details) ? messageMap.hideErrDetails : messageMap.showErrDetails;
+            vm.displayDetails = !vm.displayDetails;
+            vm.linkText = (vm.displayDetails) ? messageMap.hideErrDetails : messageMap.showErrDetails;
         };
 
         vm.ok = function () {
@@ -44,6 +52,11 @@
         vm.cancel = function cancel() {
             $uibModalInstance.dismiss('cancel');
         };
+        vm.reload = function () {
+            $uibModalInstance.close("reload");
+
+        };
+
 
     }])
     .controller('LoginDialogController', ['$uibModalInstance', 'params' , '$sce', function LoginDialogController($uibModalInstance, params, $sce) {
@@ -78,7 +91,7 @@
      *  - context {String} - the current context that the directive fetches data for
      *  - selectMode {String} - the select mode the modal uses
      */
-    .controller('SearchPopupController', ['$scope', '$uibModalInstance', 'DataUtils', 'params', 'Session', 'modalBox', function SearchPopupController($scope, $uibModalInstance, DataUtils, params, Session, modalBox) {
+    .controller('SearchPopupController', ['$scope', '$uibModalInstance', 'DataUtils', 'params', 'Session', 'modalBox', 'logActions', '$timeout', function SearchPopupController($scope, $uibModalInstance, DataUtils, params, Session, modalBox, logActions, $timeout) {
         var vm = this;
 
         vm.params = params;
@@ -86,6 +99,7 @@
         vm.cancel = cancel;
         vm.submit = submitMultiSelection;
         vm.getDisabledTuples = params.getDisabledTuples ? params.getDisabledTuples : undefined;
+        vm.mode = params.mode;
 
         vm.hasLoaded = false;
         var reference = vm.reference = params.reference;
@@ -103,15 +117,17 @@
             pageLimit:          limit,
             rowValues:          [],
             selectedRows:       params.selectedRows,
+            matchNotNull:       params.matchNotNull,
             search:             reference.location.searchTerm,
-            config:             {viewable: false, editable: false, deletable: false, selectMode: params.selectMode},
+            config:             {viewable: false, editable: false, deletable: false, selectMode: params.selectMode, showNull: params.showNull === true},
             context:            params.context
         };
 
         var fetchRecords = function() {
             // TODO this should not be a hardcoded value, either need a pageInfo object across apps or part of user settings
             // The new recordset (recordsetWithFaceting) doesn't require read first. It will take care of this.
-            reference.read(limit).then(function getPseudoData(page) {
+            var logObject = params.logObject ? params.logObject : {action: logActions.recordsetLoad};
+            reference.read(limit, logObject).then(function getPseudoData(page) {
                 var afterRead = function () {
                     vm.tableModel.hasLoaded = true;
                     vm.tableModel.initialized = true;
@@ -119,7 +135,7 @@
                     vm.tableModel.rowValues = DataUtils.getRowValuesFromPage(page);
                     $scope.$broadcast('data-modified');
                 };
-                
+
                 // get disabled tuple.
                 if (vm.getDisabledTuples) {
                     vm.getDisabledTuples(page, vm.tableModel.pageLimit).then(function (rows) {
@@ -131,21 +147,33 @@
                 } else {
                     afterRead();
                 }
-                
+
             }).catch(function(exception) {
                 throw exception;
             });
         };
 
-        fetchRecords();
+        // make sure to fetch the records after having the recordset directive
+        $timeout(function() {
+            fetchRecords();
+        });
 
         // since this is currently used for single select mode, the isSelected will always be true
         function ok(tuples, isSelected) {
             if (params.selectMode != modalBox.multiSelectMode) $uibModalInstance.close(tuples[0]);
         }
 
+        /**
+         * Will call the close modal with the appropriate results.
+         * If we had the matchNotNull, then we just need to pass that attribute.
+         */
         function submitMultiSelection() {
-            $uibModalInstance.close(this.tableModel.selectedRows);
+            var res = vm.tableModel.selectedRows;
+            if (!Array.isArray(res)) res = [];
+            if (vm.tableModel.matchNotNull) {
+                res = {matchNotNull: true};
+            }
+            $uibModalInstance.close(res);
         }
 
         function cancel() {

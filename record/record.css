@@ -11,7 +11,6 @@
 
 .main-container {
     margin-top: 10px;
-    padding-bottom: 20px;
     margin-bottom: -50px;
 }
 
@@ -87,4 +86,39 @@
 
 .panel-title >a:hover span, .panel-title>a:focus span{
     color: rgb(63, 124, 184);
+}
+
+@media print {
+    #main-content {
+        height: auto !important;
+    }
+
+    .container-fluid {
+        padding-left: 0px;
+    }
+
+    .row {
+        margin-left: 0px;
+    }
+
+    #bookmark-container {
+        padding-left: 0px;
+    }
+
+    #footer {
+        display: none;
+    }
+
+    a[href]:after {
+        content: none !important;
+    }
+
+    .entity-key {
+        width: auto;
+        max-width: 120px;
+    }
+
+    .entity-value {
+        width: auto;
+    }
 }

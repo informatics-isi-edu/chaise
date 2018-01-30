@@ -1,5 +1,5 @@
 <div class="recordset-container without-faceting">
-    <loading-spinner ng-show="!vm.hasLoaded && !vm.backgroundSearch"></loading-spinner>
+    <loading-spinner ng-show="(!vm.hasLoaded && !vm.backgroundSearch) || showSpinner"></loading-spinner>
     <div class="main-container">
         <div ng-show="vm.initialized" class="row" style="margin-bottom: 10px;">
             <div ng-if="vm.config.selectMode == 'multi-select' && !vm.config.hideSelectedRows" class="row total-filters selected-rows">
@@ -16,17 +16,13 @@
                         <a class="remove-link" ng-click="removePill(row.uniqueId)"><i class="glyphicon glyphicon-remove"></i></a>
                         <span ng-if="row.displayname.value && row.displayname.isHTML" ng-bind-html="row.displayname.value"></span>
                         <span ng-if="row.displayname.value && !row.displayname.isHTML" ng-bind="row.displayname.value"></span>
-                        <span ng-if="row.displayname.value == ''">
-                            <i>Empty</i>
-                        </span>
-                        <span ng-if="row.displayname.value == null">
-                            <i>No Value</i>
-                        </span>
+                        <span ng-if="row.displayname.value == '' && row.uniqueId != null" ng-bind-html="defaultDisplayname.empty"></span>
+                        <span ng-if="row.displayname.value == null || row.uniqueId === null" ng-bind-html="defaultDisplayname.null"></span>
                     </div>
                 </div>
             </div>
-            
-            <div ng-class="vm.config.hidePageSettings ? 'col-lg-8 col-md-8 col-sm-8 col-xs-8': 'col-lg-4 col-md-5 col-sm-6 col-xs-7'">
+
+            <div ng-class="vm.config.hidePageSettings ? 'col-lg-8 col-md-8 col-sm-8 col-xs-8': 'col-lg-4 col-md-5 col-sm-6 col-xs-6'">
                 <!-- search box -->
                 <div class="input-group has-feedback">
                     <input type="text"
@@ -50,11 +46,11 @@
                     </span>
                 </div>
             </div>
-            
-            <div style="height: 34px;" ng-if="!vm.config.hidePageSettings">
+
+            <div style="height: 34px;" class="col-lg-4 col-md-4 col-sm-4 col-xs-4" ng-if="!vm.config.hidePageSettings">
                 <!-- pagination -->
                 <span class="dropdown" style="margin-left: 5px">
-                    <button id="page-size-dropdown" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Items per page
+                    <button id="page-size-dropdown" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">{{vm.pageLimit}} Items per page
                         <span class="caret"></span></button>
                     <ul class="dropdown-menu dropdown-menu-right">
                         <li ng-if="pageLimits.indexOf(vm.pageLimit) === -1"><a id="custom-page-size" href ng-click="setPageLimit(vm.pageLimit)">
@@ -68,10 +64,10 @@
                     </ul>
                 </span>
             </div>
-            
-            <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1 pull-right" align="right">
+
+            <div class="col-lg-4 col-md-3 col-sm-2 col-xs-2">
                 <!-- add record -->
-                <button id="add-record-btn" type="button" class="btn btn-primary btn-inverted" ng-if="vm.reference.canCreate && allowCreate" ng-click="addRecord()"  tooltip-placement="bottom" uib-tooltip="Create new record">
+                <button id="add-record-btn" type="button" class="btn btn-primary btn-inverted pull-right" ng-if="vm.reference.canCreate && allowCreate" ng-click="addRecord()"  tooltip-placement="bottom" uib-tooltip="Create new record">
                     <span class="glyphicon glyphicon-plus"></span>
                 </button>
             </div>
@@ -89,7 +85,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- record table -->
         <div ng-if="vm.hasLoaded">
             <h3 ng-if="!vm.config.hideTotalCount" id="rs-total-count">Displaying {{vm.rowValues.length}}{{vm.totalRowsCnt ? " of " + (vm.totalRowsCnt > vm.rowValues.length ? vm.totalRowsCnt : vm.rowValues.length) : ''}} Records</h3>

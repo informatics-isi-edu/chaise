@@ -1,10 +1,10 @@
 var pConfig = require('./../../../utils/protractor.configuration.js');
 
 var config = pConfig.getConfig({
-    configFileName: 'recordedit/add-defaults.dev.json',
-    chaiseConfigFilePath: 'test/e2e/specs/default-config/chaise-config.js',
+    configFileName: 'recordset/ind-facet.dev.json',
+    chaiseConfigFilePath: 'test/e2e/specs/delete-prohibited/chaise-config.js',
     specs: [
-        "add-defaults.spec.js"
+        "ind-facet.spec.js"
     ],
     setBaseUrl: function(browser, data) {
       browser.params.url = process.env.CHAISE_BASE_URL;

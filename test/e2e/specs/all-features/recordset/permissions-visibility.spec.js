@@ -36,10 +36,12 @@ describe('When viewing Recordset app', function() {
 
         describe('the action column', function() {
             it('should display the view button', function() {
-                
+
                 var button = recordsetPage.getViewActionButtons().first();
                 // There's only 1 button because the table only has 1 row
+                chaisePage.waitForElement(button).then(function(){
                 expect(button.isDisplayed()).toBe(true);
+              });
                 // The test for whether it links to the correct url is tested in Recordset app tests.
             });
 
@@ -69,12 +71,14 @@ describe('When viewing Recordset app', function() {
 
         it('should display the add record [+] button', function() {
             var button = recordsetPage.getAddRecordLink();
+            chaisePage.waitForElement(button).then(function(){
             expect(button.isDisplayed()).toBe(true);
+          });
         });
 
         it('should not display the Edit link', function() {
             var link = recordsetPage.getEditRecordLink();
-            expect(link.isPresent()).toBe(false);
+            expect(link.isPresent()).toBe(false);          
         });
 
         describe('the action column', function() {

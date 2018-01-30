@@ -1,7 +1,7 @@
 (function() {
     'use strict';
-    angular.module('chaise.recordcreate', ['chaise.errors','chaise.utils']).factory("recordCreate", ['$cookies', '$log', '$window', '$uibModal', 'AlertsService', 'DataUtils', 'UriUtils', 'modalBox', '$q',
-     function($cookies, $log, $window, $uibModal, AlertsService, DataUtils, UriUtils, modalBox, $q) {
+    angular.module('chaise.recordcreate', ['chaise.errors','chaise.utils']).factory("recordCreate", ['$cookies', '$log', '$window', '$uibModal', 'AlertsService', 'DataUtils', 'UriUtils', 'modalBox', '$q', 'logActions',
+     function($cookies, $log, $window, $uibModal, AlertsService, DataUtils, UriUtils, modalBox, $q, logActions) {
 
         var viewModel = {};
         var GV_recordEditModel = {},
@@ -10,8 +10,59 @@
         var editRecordRequests = {}; // generated id: {schemaName, tableName}
         var updated = {};
 
+
         /**
-         * checkUpdate - to check all recrds are updated; passed as callback to uploadFiles(). 
+         * areFilesValid - checks whether file columns are getting the correct url and are not null if nullok is false
+         *
+         * @param  {array} rows           array contains updated recrds attributes
+         * @param  {object} rsReference   record reference object
+         * @return {boolean}              whether rows have valid file columns or not
+         */
+        function areFilesValid(rows, rsReference) {
+            var isValid = true, index = 0;
+            // Iterate over all rows that are passed as parameters to the modal controller
+            rows.forEach(function(row) {
+
+                index++;
+
+                // Iterate over each property/column of a row
+                for(var k in row) {
+
+                    // If the column type is object and has a file property inside it
+                    // Then increment the count for no of files and create an uploadFile Object for it
+                    // Push this to the tuple array for the row
+                    // NOTE: each file object has an hatracObj property which is an hatrac object
+                    try {
+                        var column = rsReference.columns.find(function(c) { return c.name == k;  });
+                        if (column.isAsset) {
+
+                            if (row[k].url == "" && !column.nullok) {
+                                isValid = false;
+                                AlertsService.addAlert("Please select file for column " + k + " for record " + index, 'error');
+                            } else if (row[k] != null && typeof row[k] == 'object' && row[k].file) {
+                                try {
+                                    if (!row[k].hatracObj.validateURL(row)) {
+                                        isValid = false;
+                                        AlertsService.addAlert("Invalid url template for column " + k + " for record " + index, 'error');
+                                    }
+                                } catch(e) {
+                                    isValid = false;
+                                    AlertsService.addAlert("Invalid url template for column " + k + " for record " + index, 'error');
+                                }
+                            }
+                        }
+                    } catch(e) {
+                        //NOthing to do
+                    }
+                }
+            });
+
+            return isValid;
+        }
+
+
+        /**
+         * checkUpdate - to check all recrds are updated; passed as callback to uploadFiles().
          *
          * @param  {array} submissionRowsCopy   array contains updated recrds attributes
          * @param  {array} rsTuples             array with data tuples value from calling function
@@ -46,6 +97,8 @@
          */
         function uploadFiles(submissionRowsCopy, rsReference, onSuccess) {
 
+            // If url is valid
+            if (areFilesValid(submissionRowsCopy, rsReference)) {
                 $uibModal.open({
                     templateUrl: "../common/templates/uploadProgress.modal.html",
                     controller: "UploadModalDialogController",
@@ -65,6 +118,10 @@
 
                     if (exception) AlertsService.addAlert(exception.message, 'error');
                 });
+            } else {
+                viewModel.readyToSubmit = false;
+                viewModel.submissionButtonDisabled = false;
+            }
         }
 
         /**
@@ -79,8 +136,9 @@
          * @param  {object} rsQueryParams       object contains queryparams of context from calling function
          * @param  {object} vm                  recoredit view model
          * @param  {object} onSuccessFunction   callback
+         * @param  {object} logObject           The object that we want to log in the create/update request
          */
-        function addRecords(isUpdate, derivedref, recordEditModel, isModalUpdate, rsReference, rsTuples, rsQueryParams, vm, onSuccessFunction) {
+        function addRecords(isUpdate, derivedref, recordEditModel, isModalUpdate, rsReference, rsTuples, rsQueryParams, vm, onSuccessFunction, logObject) {
             var model = isModalUpdate ? GV_recordEditModel : recordEditModel;
             viewModel = vm;
             var form = viewModel.formContainer;
@@ -112,18 +170,18 @@
                 }
             }
 
-            //call uploadFiles which will upload files and callback on success 
+            //call uploadFiles which will upload files and callback on success
             uploadFiles(submissionRowsCopy, rsReference, function() {
 
                 var fn = "create",
-                    args = [submissionRowsCopy];
+                    args = [submissionRowsCopy, logObject];
                 var fnScope = isModalUpdate ? derivedref.unfilteredReference.contextualize.entryCreate : rsReference.unfilteredReference.contextualize.entryCreate;
 
                 if (isUpdate) {
                     var data = checkUpdate(submissionRowsCopy, rsTuples);
                     // submit rootScope.tuples because we are changing and
                     // comparing data from the old data set for the tuple with the updated data set from the UI
-                    fn = "update", fnScope = rsReference, args = [rsTuples];
+                    fn = "update", fnScope = rsReference, args = [rsTuples, logObject];
                 }
 
                 fnScope[fn].apply(fnScope, args).then(function success(result) {
@@ -229,7 +287,7 @@
                 originalTuple = null;
                 editOrCopy = false;
             }
-            
+
             /**
              * Callback to get the list of disabled tuples.
              * This is only applicable in case of adding related entities.
@@ -240,20 +298,20 @@
             params.getDisabledTuples = function (page, pageSize) {
                 var defer = $q.defer();
                 var disabledRows = [], index;
-                
-                domainRef.setSamePaging(page).read(pageSize).then(function (newPage) {
+
+                domainRef.setSamePaging(page).read(pageSize, {action: logActions.preCreateAssociationSelected}).then(function (newPage) {
                     newPage.tuples.forEach(function (newTuple) {
                         index = page.tuples.findIndex(function (tuple) {
                             return tuple.uniqueId == newTuple.uniqueId;
                         });
                         if (index > -1) disabledRows.push(page.tuples[index]);
                     });
-                    
+
                     defer.resolve(disabledRows);
                 }).catch(function (err) {
                     throw err;
                 });
-                
+
                 return defer.promise;
             };
 
@@ -262,6 +320,11 @@
             params.context = "compact/select";
             params.selectMode = isModalUpdate ? modalBox.multiSelectMode : modalBox.singleSelectMode;
             params.selectedRows = [];
+            //NOTE assumption is that this function is only is called for adding pure and binary association
+            params.logObject = {
+                action: logActions.preCreateAssociation,
+                referrer: rsReference.defaultLogInfo
+            };
 
             var modalInstance = $uibModal.open({
                 animation: false,
@@ -291,8 +354,15 @@
                     });
 
                 }
-                if (isModalUpdate)
-                    addRecords(viewModel.editMode, derivedref, nullArr, isModalUpdate, rsReference, rsTuples, rsQueryParams, viewModel, viewModel.onSuccess);
+
+                // NOTE this if case is unnecessary, this is always modal update
+                if (isModalUpdate) {
+                    var logObject = {
+                        action: logActions.createAssociation,
+                        referrer: rsReference.defaultLogInfo
+                    };
+                    addRecords(viewModel.editMode, derivedref, nullArr, isModalUpdate, rsReference, rsTuples, rsQueryParams, viewModel, viewModel.onSuccess, logObject);
+                }
 
             });
         }

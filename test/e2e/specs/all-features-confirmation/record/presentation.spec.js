@@ -63,6 +63,7 @@ var testParams = {
 
 
 
+
 describe('View existing record,', function() {
 
     describe("For table " + testParams.table_name + ",", function() {
@@ -114,7 +115,7 @@ describe('View existing record,', function() {
 
             browser.wait(function() {
                 return chaisePage.recordPage.getRelatedTablesWithPanel().count().then(function(ct) {
-                    return (ct=testParams.no_related_data.tables_order.length);
+                    return (ct == testParams.no_related_data.tables_order.length);
                 });
             }, browser.params.defaultTimeout);
             var showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton();
@@ -157,34 +158,7 @@ describe('View existing record,', function() {
             }).then (function(currentUrl) {
                 expect(currentUrl).toContain("recordset", "The redirection from record page to recordset in case of multiple records failed");
             }).catch( function(err) {
-                console.log(error);
-            });
-        });
-    });
-
-    describe("For no record found in Record app", function() {
-
-        beforeAll(function() {
-            var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + testParams.table_name +  "/id=11223312121";
-            browser.get(url);
-            chaisePage.waitForElement(element(by.css('.modal-dialog ')));
-        });
-
-        it('A error modal window should appear with Record Not Found title', function(){
-            var modalTitle = chaisePage.recordPage.getErrorModalTitle();
-            expect(modalTitle).toBe("Record Not Found", "The title of no record error pop is not correct");
-
-        });
-
-        it('On click of OK button the page should redirect to recordset/search page', function(){
-            chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
-                return btn.click();
-            }).then (function (){
-                return browser.driver.getCurrentUrl();
-            }).then (function(currentUrl) {
-                expect(currentUrl).toContain("recordset", "The redirection from record page to recordset/search in case of multiple records failed");
-            }).catch( function(err) {
-                console.log(error);
+                console.log(err);
             });
         });
     });

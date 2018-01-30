@@ -49,17 +49,67 @@
           "noRecordsFound": "Click <b>OK</b> to show the list of all records.",
           "pageRedirect": "Click <b>OK</b> to go to the "
         },
+        "terminalError" : {
+          "okBtnMessage": "Click <b>OK</b> to go to the Recordset.",
+          "reloadMessage": "Click <b>Reload</b> to start over."
+        },
         "tableMissing": "No table specified in the form of 'schema-name:table-name' and no Default is set.",
         "unauthorizedMessage" : "You are not authorized to perform this action. Please report this problem to your system administrators.",
         "unauthorizedErrorCode" : "Unauthorized Access",
         "showErrDetails" : "Show Error Details",
         "hideErrDetails" : "Hide Error Details"
     })
+
+    .constant("logActions", {
+        "recordRead": "record/main", // read the main entity (record)
+        "recordRelatedRead": "record/related", // secondary
+        "recordRelatedUpdate": "record/related/update", // secondary
+
+
+        "createPrefill": "create/prefill", // create with inbound related prefilled (recordedit) -> does it need referrer? (the pre should have it)
+        "createAssociation": "create/prefill/association", // batch create association (record) -> does itneed referrer? (the pre should have it)
+        "createModal": "create/modal", // create entity coming from plus button in modal of foreignkey (recordedit)
+        "copy": "create/copy", // create entity by copying another (recordedit)
+        "create": "create/new", // create entity (recordedit)
+
+        "preCreatePrefill": "pre-create/prefill", // read the foreignkey value for the prefill (recoredit) has referrer -> read is on the fk, .. it's fine. we are not looking at url anyways.
+        "preCreateAssociation": "pre-create/prefill/association", // read the association values to add new ones (record) has referrer
+        "preCreateAssociationSelected": "pre-create/prefill/association/disabled", // secondary
+        "preCopy": "pre-create/copy", // read the current data before copy (recordedit)
+        "recordeditDefault": "recordedit/default",
+
+        "update": "update", // update entity (recordedit)
+        "preUpdate": "pre-update", // read entity to be updated (recordedit)
+
+        "recordsetCount": "recordset/main/count", // secondary
+        "recordsetLoad": "recordset/main/load", // recordset main data read on load (recordset)
+        "recordsetUpdate": "recordset/main/update", // recordset main data read on update (edit or delete) secondary
+        "recordsetSort": "recordset/main/sort", // recordset main data read on changing sort (recordset) has sort
+        "recordsetPage": "recordset/main/page", // recordset main data read on changing page (recordset) has page
+        "recordsetLimit": "recordset/main/limit", // recordset main data read on changing page limit (recordset)
+        "recordsetFacet": "recordset/main/facet", // recordset main data read on changing facet (recordset)
+        "recordsetFacetDetails": "recordset/viewmore", // getting facet details in modal (recordset)
+        "recordsetFacetRead": "recordset/facet", // secondary
+
+        "recordDelete": "delete/record", // delete record (record)
+        "recordEditDelete": "delete/recordedit", // delete record (recordedit)
+        "recordsetDelete": "delete/recordset", // delete a row (recordset)
+        "recordRelatedDelete": "delete/recordset/related" // delete a row from related entities (record) has referrer
+
+    })
+
     .constant("modalBox", {
         noSelect: "no-select",
         singleSelectMode:"single-select",
         multiSelectMode:"multi-select"
     })
+
+    .constant("defaultDisplayname", {
+        null: "<i>No Value</i>",
+        empty: "<i>Empty</i>",
+        notNull: "<i>All Records With Value</i>"
+    })
+
     .factory('UriUtils', ['$injector', '$rootScope', '$window', 'appContextMapping', 'appTagMapping', 'ContextUtils', 'Errors', 'messageMap', 'parsedFilter',
         function($injector, $rootScope, $window, appContextMapping, appTagMapping, ContextUtils, Errors, messageMap, ParsedFilter) {
 
@@ -618,6 +668,14 @@
             return /*@cc_on!@*/false || !!document.documentMode;
         }
 
+        // takes pathname attribute of window.location object and returns app name
+        // path should be a string literal which appears before #catalog id in URL (/chaise/recordset/)
+        function appNamefromUrlPathname(path){
+          var newPath = path.slice(0, -1);
+          var lastSlash = newPath.lastIndexOf('/');
+          return newPath.substring(lastSlash + 1, newPath.length);
+        }
+
         return {
             queryStringToJSON: queryStringToJSON,
             appTagToURL: appTagToURL,
@@ -628,7 +686,8 @@
             parsedFilterToERMrestFilter: parsedFilterToERMrestFilter,
             setLocationChangeHandling: setLocationChangeHandling,
             isBrowserIE: isBrowserIE,
-            getQueryParams: getQueryParams
+            getQueryParams: getQueryParams,
+            appNamefromUrlPathname: appNamefromUrlPathname
         }
     }])
 

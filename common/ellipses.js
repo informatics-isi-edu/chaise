@@ -9,9 +9,19 @@
         };
     }])
 
-    .directive('ellipses', ['$sce', '$timeout', 'AlertsService', 'ErrorService', '$uibModal', '$log', 'MathUtils', 'messageMap', 'UriUtils', '$window', 'UiUtils', 'modalBox', function($sce, $timeout, AlertsService, ErrorService, $uibModal, $log, MathUtils, messageMap, UriUtils, $window, UiUtils, modalBox) {
+    .directive('ellipses', ['AlertsService', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$uibModal', '$window', 'defaultDisplayname',
+        function(AlertsService, ErrorService, logActions, MathUtils, messageMap, modalBox, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $uibModal, $window, defaultDisplayname) {
 
         function deleteReference(scope, reference) {
+            var logObject = {action: logActions.recordsetDelete};
+            // if parentReference exists then it's in the related entities section
+            if (scope.parentReference) {
+                logObject = {
+                    action: logActions.recordRelatedDelete,
+                    referrer: scope.parentReference.defaultLogInfo
+                };
+            }
+
             if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
                 $uibModal.open({
                     templateUrl: "../common/templates/delete-link/confirm_delete.modal.html",
@@ -19,13 +29,16 @@
                     controllerAs: "ctrl",
                     size: "sm"
                 }).result.then(function success() {
+                    scope.$root.showSpinner = true;
                     // user accepted prompt to delete
-                    return reference.delete();
+                    return reference.delete(logObject);
                 }).then(function deleteSuccess() {
+                    scope.$root.showSpinner = false;
                     // tell parent controller data updated
                     scope.$emit('record-deleted');
 
                 }, function deleteFailure(response) {
+                    scope.$root.showSpinner = false;
                     if (typeof response !== "string") {
                         throw response;
                     }
@@ -33,13 +46,14 @@
                     throw error;
                 });
             } else {
-
-                reference.delete().then(function deleteSuccess() {
-
+                scope.$root.showSpinner = true;
+                reference.delete(logObject).then(function deleteSuccess() {
+                    scope.$root.showSpinner = false;
                     // tell parent controller data updated
                     scope.$emit('record-deleted');
 
                 }, function deleteFailure(response) {
+                    scope.$root.showSpinner = false;
                     throw response;
                 }).catch(function (error) {
                     throw error;
@@ -58,7 +72,8 @@
                 onRowClickBind: '=?',
                 fromTuple: '=?',
                 selected: '=',
-                selectDisabled: "=?"
+                selectDisabled: "=?",
+                parentReference: "=?"
             },
             link: function (scope, element) {
 
@@ -71,6 +86,7 @@
                     scope.noSelect = modalBox.noSelect;
                     scope.singleSelect = modalBox.singleSelectMode;
                     scope.multiSelect = modalBox.multiSelectMode;
+                    scope.defaultDisplayname = defaultDisplayname;
 
                     var editLink = null;
 
@@ -98,7 +114,8 @@
                     }
 
                     // define unlink function
-                    if (scope.config.deletable && scope.context === "compact/brief" && scope.associationRef) {
+                    // TODO why do we need to verify the context?
+                    if (scope.config.deletable && scope.context.indexOf("compact/brief") === 0 && scope.associationRef) {
                         var associatedRefTuples = [];
                         scope.unlink = function() {
                             deleteReference(scope, scope.associationRef);

@@ -110,20 +110,20 @@ describe('View recordset,', function() {
 
             it("should show correct table rows", function() {
                 chaisePage.recordsetPage.getRows().then(function(rows) {
-                    expect(rows.length).toBe(4);
+                    expect(rows.length).toBe(4, "rows length missmatch.");
                     for (var i = 0; i < rows.length; i++) {
                         (function(index) {
                             rows[index].all(by.tagName("td")).then(function (cells) {
-                                expect(cells.length).toBe(accommodationParams.columns.length + 1);
-                                expect(cells[1].getText()).toBe(accommodationParams.data[index].title);
-                                expect(cells[2].element(by.tagName("a")).getAttribute("href")).toBe(accommodationParams.data[index].website);
-                                expect(cells[2].element(by.tagName("a")).getText()).toBe("Link to Website");
-                                expect(cells[3].getText()).toBe(accommodationParams.data[index].rating);
-                                expect(cells[4].getText()).toBe(accommodationParams.data[index].summary);
-                                expect(cells[5].getText()).toBe(accommodationParams.data[index].opened_on);
-                                expect(cells[6].getText()).toBe(accommodationParams.data[index].luxurious);
-                                expect(cells[7].getText()).toBe(accommodationParams.data[index].json_col);
-                                expect(cells[8].getText()).toBe(accommodationParams.data[index].json_col_with_markdown);
+                                expect(cells.length).toBe(accommodationParams.columns.length + 1, "cells length missmatch for row=" + index);
+                                expect(cells[1].getText()).toBe(accommodationParams.data[index].title, "title column missmatch for row=" + index);
+                                expect(cells[2].element(by.tagName("a")).getAttribute("href")).toBe(accommodationParams.data[index].website, "website column link missmatch for row=" + index);
+                                expect(cells[2].element(by.tagName("a")).getText()).toBe("Link to Website", "website column caption missmatch for row=" + index);
+                                expect(cells[3].getText()).toBe(accommodationParams.data[index].rating, "rating column missmatch for row=" + index);
+                                expect(cells[4].getText()).toBe(accommodationParams.data[index].summary, "summary column missmatch for row=" + index);
+                                expect(cells[5].getText()).toBe(accommodationParams.data[index].opened_on, "opened_on column missmatch for row=" + index);
+                                expect(cells[6].getText()).toBe(accommodationParams.data[index].luxurious, "luxurious column missmatch for row=" + index);
+                                expect(cells[7].getText()).toBe(accommodationParams.data[index].json_col, "json_col column missmatch for row=" + index);
+                                expect(cells[8].getText()).toBe(accommodationParams.data[index].json_col_with_markdown, "json_col_with_markdown column missmatch for row=" + index);
                             });
                         }(i))
                     }
@@ -371,6 +371,8 @@ describe('View recordset,', function() {
 
             it("action columns should show delete button that deletes record", function() {
                 var deleteButton;
+                var EC = protractor.ExpectedConditions;
+
                 chaisePage.waitForElementInverse(element(by.id("spinner"))).then(function() {
                     return chaisePage.recordsetPage.getDeleteActionButtons();
                 }).then(function(deleteButtons) {
@@ -378,18 +380,20 @@ describe('View recordset,', function() {
                     deleteButton = deleteButtons[3];
                     return deleteButton.click();
                 }).then(function() {
-                    var EC = protractor.ExpectedConditions;
                     var confirmButton = chaisePage.recordsetPage.getConfirmDeleteButton();
                     browser.wait(EC.visibilityOf(confirmButton), browser.params.defaultTimeout);
 
                     return confirmButton.click();
                 }).then(function() {
-                    var EC = protractor.ExpectedConditions;
-                    browser.wait(EC.stalenessOf(deleteButton), browser.params.defaultTimeout);
-                }).then(function() {
-                    return chaisePage.recordsetPage.getRows();
-                }).then(function(rows) {
-                    expect(rows.length).toBe(3);
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getRows().count().then(function (ct) {
+                            return (ct==3)
+                        });
+                    });
+
+                    return chaisePage.recordsetPage.getRows().count();
+                }).then(function(ct) {
+                    expect(ct).toBe(3);
                 });
             });
 
@@ -411,6 +415,12 @@ describe('View recordset,', function() {
             var e = element(by.id("custom-page-size"));
 
             browser.wait(EC.presenceOf(e), browser.params.defaultTimeout).then(function() {
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getRows().count().then(function (ct) {
+                        return (ct==fileParams.custom_page_size)
+                    });
+                });
+
                 return chaisePage.recordsetPage.getRows().count();
             }).then(function(ct) {
                 expect(ct).toBe(fileParams.custom_page_size);

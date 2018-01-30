@@ -32,8 +32,11 @@ var testParams = {
     association_count: 1,
     associationDisabledRows: ["1"],
     page_size: 2,
-    price: "247.00"
+    price: "247.00",
+    schedule: "schedule"
 };
+
+var EC = protractor.ExpectedConditions;
 
 describe('View existing record,', function() {
 
@@ -123,8 +126,8 @@ describe('View existing record,', function() {
                         relatedTableName = testParams.related_regular_table,
                         addRelatedRecordLink = chaisePage.recordPage.getAddRecordLink(relatedTableName);
 
-                    // Should make sure user is logged in                    
-                    browser.wait(EC.elementToBeClickable(addRelatedRecordLink), browser.params.defaultTimeout); 
+                    // Should make sure user is logged in
+                    browser.wait(EC.elementToBeClickable(addRelatedRecordLink), browser.params.defaultTimeout);
 
                     expect(addRelatedRecordLink.isDisplayed()).toBeTruthy();
                         browser.executeScript('window.scrollTo(0,200);').then(function() {
@@ -140,7 +143,7 @@ describe('View existing record,', function() {
                         newTabUrl = browser.params.url + '/recordedit/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + relatedTableName;
                         return chaisePage.waitForElement(element(by.id('submit-record-button')));
                     }).then(function() {
-                        
+
                         browser.wait(function () {
                             return browser.driver.getCurrentUrl().then(function(url) {
                                 return url.startsWith(newTabUrl);
@@ -219,7 +222,7 @@ describe('View existing record,', function() {
                     });
                 });
             });
-            
+
             describe("For a related entity with an association table", function() {
 
                 it("on click of Add button should let you add a new relationship", function(){
@@ -230,13 +233,13 @@ describe('View existing record,', function() {
 
                     expect(addRelatedRecordLink.isDisplayed()).toBeTruthy("add link not available.");
                     expect(addRelatedRecordLink.getText()).toBe("Add", "add link text missmatch.");
-                    
+
                     addRelatedRecordLink.click().then(function(){
                         chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
                         return chaisePage.recordEditPage.getModalTitle().getText();
                     }).then(function (title) {
                         expect(title).toBe("Choose related_table", "titlte missmatch.");
-                        
+
                         browser.wait(function () {
                                return chaisePage.recordsetPage.getRows().count().then(function (ct) {
                                    return (ct > 0);
@@ -248,18 +251,18 @@ describe('View existing record,', function() {
                         return chaisePage.recordPage.getModalDisabledRows();
                     }).then(function (disabledRows) {
                         expect(disabledRows.length).toBe(testParams.associationDisabledRows.length, "disabled length missmatch.");
-                        
+
                         // go through the list and check their first column (which is the id)
                         disabledRows.forEach(function (r, index) {
                             r.findElement(by.css("td:not(.actions-layout)")).then(function (el) {
                                 expect(el.getText()).toMatch(testParams.associationDisabledRows[index], "missmatch disabled row index=" + index);
                             });
                         });
-                        
+
                         return browser.executeScript("return $('.modal-body tr input[type=checkbox]').get(1);");
                     }).then(function (selectButtons){
                         selectButtons.click();
-                        return browser.executeScript("return $('.multi-select-submit-btn').click();");
+                        return browser.executeScript("return $('#multi-select-submit-btn').click();");
                     }).then(function () {
                         return browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
                     }).then(function (){
@@ -366,29 +369,33 @@ describe('View existing record,', function() {
                     });
                 });
 
-                it("on click of View more button should redirect to recordset page of association table", function(){
-                    chaisePage.waitForElement(element(by.id('rt-heading-association_table')));
-                    var relatedTableNameOnRecord = testParams.association_table_name,
-                        relatedTableNameOnRecordset = testParams.leaf_table_name,
+                it("table with defined Search app navigation in the annotation should be redirected to the Recordset page", function(done){
+                    chaisePage.waitForElement(element(by.id('rt-heading-schedule')));
+                    var relatedTableNameOnRecord = testParams.schedule,
+                        relatedTableNameOnRecordset = testParams.schedule,
                         relatedTableLink = chaisePage.recordPage.getMoreResultsLink(relatedTableNameOnRecord);
 
                     expect(relatedTableLink.isDisplayed()).toBeTruthy();
 
+                    browser.wait(EC.elementToBeClickable(relatedTableLink));
                     relatedTableLink.click().then(function() {
                         return browser.driver.getCurrentUrl();
                     }).then(function(url) {
-                        expect(url.indexOf('recordset')).toBeGreaterThan(-1);
-                        // check entity title is for related table, not asociation table
+                        expect(url.search('/recordset/')).toBeGreaterThan(-1, "View more link is redirecting to Search app! It should redirect to Recordset.");
                         return chaisePage.waitForElement(element(by.id("divRecordSet")));
                     }).then(function() {
-                        expect(chaisePage.recordsetPage.getPageTitleElement().getText()).toBe(testParams.leaf_table_name);
+                        expect(chaisePage.recordsetPage.getPageTitleElement().getText()).toBe(testParams.schedule);
                         browser.navigate().back();
+                    }).then(function () {
+                        done();
+                    }).catch(function (err) {
+                        console.log(err);
+                        done.fail();
                     });
-
                 });
             });
 
-            describe("For a related entity wuth an association table and markdown display", function () {
+            describe("For a related entity with an association table and markdown display", function () {
 
                 it("on adding new relationship should update the table display", function (){
                     var associationTableName = testParams.association_table_name_markdown;
@@ -411,7 +418,7 @@ describe('View existing record,', function() {
                         return browser.executeScript("return $('.modal-body tr input[type=checkbox]').get(2);");
                     }).then(function (selectButtons){
                         selectButtons.click();
-                        return browser.executeScript("return $('.multi-select-submit-btn').click();");
+                        return browser.executeScript("return $('#multi-select-submit-btn').click();");
                     }).then(function () {
                         return browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
                     }).then(function (){

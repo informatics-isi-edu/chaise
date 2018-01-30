@@ -23,7 +23,7 @@ E2EDdetailed=test/e2e/specs/detailed/data-dependent/protractor.conf.js
 # Recordedit tests
 E2EDIrecordAdd=test/e2e/specs/all-features-confirmation/recordedit/add.conf.js
 E2EDIrecordEditMultiColTypes=test/e2e/specs/default-config/recordedit/multi-col-types.conf.js
-E2EDIrecordDefaults=test/e2e/specs/default-config/recordedit/add-defaults.conf.js
+E2EDIrecordImmutable=test/e2e/specs/default-config/recordedit/immutable-inputs.conf.js
 E2EDIrecordEdit=test/e2e/specs/all-features-confirmation/recordedit/edit-delete.conf.js
 E2ErecordEditNoDeleteBtn=test/e2e/specs/delete-prohibited/recordedit/no-delete-btn.conf.js
 E2EDIrecordMultiAdd=test/e2e/specs/default-config/recordedit/add-x-forms.conf.js
@@ -40,7 +40,7 @@ E2EDrecordRelatedTable=test/e2e/specs/all-features/record/related-table.conf.js
 E2EDrecordset=test/e2e/specs/all-features-confirmation/recordset/presentation.conf.js
 E2EDrecordsetEdit=test/e2e/specs/default-config/recordset/edit.conf.js
 E2ErecordsetAdd=test/e2e/specs/default-config/recordset/add.conf.js
-
+E2EDrecordsetIndFacet=test/e2e/specs/delete-prohibited/recordset/ind-facet.conf.js
 # Viewer tests
 E2EDviewer=test/e2e/specs/all-features/viewer/presentation.conf.js
 # misc tests
@@ -49,6 +49,8 @@ E2EnavbarHeadTitle=test/e2e/specs/all-features-confirmation/navbar/protractor.co
 E2EmultiPermissionsVisibility=test/e2e/specs/all-features/permissions-visibility.conf.js
 # footer test
 E2Efooter=test/e2e/specs/all-features-confirmation/footer/protractor.conf.js
+# errors test
+E2Eerrors=test/e2e/specs/all-features-confirmation/errors/protractor.conf.js
 ## Parallel protractor scripts
 FullFeaturesParallel=test/e2e/specs/all-features/protractor.conf.js
 FullFeaturesConfirmationParallel=test/e2e/specs/all-features-confirmation/protractor.conf.js
@@ -59,12 +61,13 @@ DefaultConfigParallel=test/e2e/specs/default-config/protractor.conf.js
 NAVBAR_TESTS=$(E2Enavbar) $(E2EnavbarHeadTitle)
 SEARCH_TESTS=$(E2Esearch)
 DETAILED_TESTS=$(E2EDdetailed)
-RECORDSET_TESTS=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit)
+RECORDSET_TESTS=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit) $(E2EDrecordsetIndFacet)
 RECORD_TESTS=$(E2EDrecord) $(E2ErecordNoDeleteBtn) $(E2EDrecordRelatedTable) $(E2EDrecordCopy)
-RECORDADD_TESTS=$(E2EDIrecordAdd) $(E2EDIrecordMultiAdd) $(E2EDIrecordDefaults)
+RECORDADD_TESTS=$(E2EDIrecordAdd) $(E2EDIrecordMultiAdd) $(E2EDIrecordImmutable)
 RECORDEDIT_TESTS=$(E2EDIrecordEdit) $(E2EDIrecordMultiEdit) $(E2EDrecordEditCompositeKey) $(E2ErecordEditNoDeleteBtn) $(E2EDrecordEditSubmissionDisabled) $(E2EDIrecordEditMultiColTypes) $(E2EDrecordEditDomainFilter)
 PERMISSIONS_TESTS=$(E2EmultiPermissionsVisibility)
 FOOTER_TESTS=$(E2Efooter)
+ERRORS_TESTS=$(E2Eerrors)
 DEFAULT_CONFIG_PARALLEL_TESTS=$(DefaultConfigParallel)
 DELETE_PROHIBITED_PARALLEL_TESTS=$(DeleteProhibitedParallel)
 FULL_FEATURES_CONFIRMATION_PARALLEL_TESTS=$(FullFeaturesConfirmationParallel)
@@ -72,7 +75,7 @@ FULL_FEATURES_PARALLEL_TESTS=$(FullFeaturesParallel)
 PARALLEL_TESTS=$(FullFeaturesParallel) $(FullFeaturesConfirmationParallel) $(DeleteProhibitedParallel) $(DefaultConfigParallel)
 VIEWER_TESTS=$(E2EDviewer)
 
-ALL_TESTS=$(NAVBAR_TESTS) $(RECORD_TESTS) $(RECORDSET_TESTS) $(RECORDADD_TESTS) $(RECORDEDIT_TESTS) $(PERMISSIONS_TESTS) $(VIEWER_TESTS) $(SEARCH_TESTS) $(FOOTER_TESTS)
+ALL_TESTS=$(NAVBAR_TESTS) $(RECORD_TESTS) $(RECORDSET_TESTS) $(RECORDADD_TESTS) $(RECORDEDIT_TESTS) $(PERMISSIONS_TESTS) $(FOOTER_TESTS) $(ERRORS_TESTS)
 
 define make_test
 	rc=0; \
@@ -144,7 +147,11 @@ testdefaultconfig: test-DEFAULT_CONFIG_PARALLEL_TESTS
 
 #Rule to run the default chaise configuration tests in parallel
 .PHONY: testfooter
-testfooter: test-FOOTER_TESTS	
+testfooter: test-FOOTER_TESTS
+
+#Rule to run the default chaise configuration tests in parallel
+.PHONY: testerrors
+testerrors: test-ERRORS_TESTS
 
 # Rule to run tests
 .PHONY: test
@@ -189,7 +196,8 @@ COMMON=common
 # Markdown Editor dependencies
 MDEDIT_CSS_DEPS=$(COMMON)/vendor/MarkdownEditor/styles/bootstrap-markdown.min.css \
 	$(COMMON)/vendor/MarkdownEditor/styles/github.min.css \
-	$(COMMON)/vendor/MarkdownEditor/styles/angular-markdown-editor.min.css
+	$(COMMON)/vendor/MarkdownEditor/styles/angular-markdown-editor.min.css \
+	$(COMMON)/vendor/MarkdownEditor/styles/github-markdown.css
 
 MDEDIT_JS_DEPS=$(COMMON)/vendor/MarkdownEditor/bootstrap-markdown.js \
 	$(COMMON)/vendor/MarkdownEditor/highlight.min.js \
@@ -351,7 +359,9 @@ RECORD_JS_SOURCE=$(RECORD_ASSETS)/record.app.js \
 
 RECORD_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(COMMON)/styles/app.css \
+	$(COMMON)/vendor/MarkdownEditor/styles/github-markdown.css \
 	$(COMMON)/styles/appheader.css
+
 
 RECORD_CSS_SOURCE=$(RECORD_ASSETS)/record.css
 
@@ -399,7 +409,8 @@ VIEWER_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/vendor/select.css \
 	$(CSS)/vendor/select2.css \
 	$(COMMON)/styles/app.css \
-	$(COMMON)/styles/appheader.css
+	$(COMMON)/styles/appheader.css \
+	$(COMMON)/vendor/MarkdownEditor/styles/github-markdown.css
 
 VIEWER_CSS_SOURCE=$(VIEWER_ASSETS)/viewer.css
 
@@ -494,7 +505,8 @@ RECSET_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css
 
 RECSET_CSS_SOURCE=$(COMMON)/styles/app.css \
-    $(COMMON)/styles/appheader.css
+    $(COMMON)/styles/appheader.css \
+		$(COMMON)/vendor/MarkdownEditor/styles/github-markdown.css
 
 # Config file
 JS_CONFIG=chaise-config.js

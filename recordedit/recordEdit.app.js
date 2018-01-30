@@ -38,19 +38,22 @@
     .config(['$uibTooltipProvider', function($uibTooltipProvider) {
         $uibTooltipProvider.options({appendToBody: true});
     }])
-    
+
     //  Enable log system, if in debug mode
     .config(['$logProvider', function($logProvider) {
         $logProvider.debugEnabled(chaiseConfig.debug === true);
     }])
 
-    .run(['AlertsService', 'ERMrest', 'ErrorService', 'headInjector', 'MathUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', 'messageMap', 'Errors',
-        function runRecordEditApp(AlertsService, ERMrest, ErrorService, headInjector, MathUtils, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies, messageMap, Errors) {
+    .run(['AlertsService', 'ERMrest', 'ErrorService', 'headInjector', 'logActions', 'MathUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', 'messageMap', 'Errors',
+        function runRecordEditApp(AlertsService, ERMrest, ErrorService, headInjector, logActions, MathUtils, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies, messageMap, Errors) {
 
         var session,
             context = { booleanValues: ['', true, false] };
 
+        $rootScope.showColumnSpinner = [{}];
+
         $rootScope.displayReady = false;
+        $rootScope.showSpinner = false;
 
         UriUtils.setOrigin();
         headInjector.setupHead();
@@ -107,21 +110,20 @@
             if (!session) {
                 var notAuthorizedError = new ERMrest.UnauthorizedError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
                 throw notAuthorizedError;
-                return;
             }
 
             // Unsubscribe onchange event to avoid this function getting called again
             Session.unsubscribeOnChange(subId);
 
             // On resolution
-            ERMrest.resolve(ermrestUri, { cid: context.appName }).then(function getReference(reference) {
-                
-                
+            ERMrest.resolve(ermrestUri, { cid: context.appName, pid: context.pageId, wid: $window.name }).then(function getReference(reference) {
+
+
                 // we are using filter to determine app mode, the logic for getting filter
                 // should be in the parser and we should not duplicate it in here
                 // NOTE: we might need to change this line (we're parsing the whole url just for fidinig if there's filter)
                 var location = ERMrest.parse(ermrestUri);
-                
+
                 // Mode can be any 3 with a filter
                 if (location.filter || location.facets) {
                     // prefill always means create
@@ -145,20 +147,64 @@
 
                 $log.info("Reference: ", $rootScope.reference);
 
+
+                // create the extra information that we want to log in ermrest
+                // NOTE currently we're only setting the action, we might need to add extra information here
+                var logObj = {action: logActions.update};
+                if (context.mode == context.modes.COPY) {
+                    logObj = {action: logActions.copy};
+                } else if (context.mode == context.modes.CREATE){
+                    if (context.queryParams.invalidate) {
+                        if (context.queryParams.prefill) {
+                            logObj = {action: logActions.createPrefill};
+                        } else {
+                            logObj = {action: logActions.createModal};
+                        }
+                    } else {
+                        logObj = {action: logActions.create};
+                    }
+                }
+                context.logObject = logObj;
+
                 // Case for creating an entity, with prefilled values
                 if (context.queryParams.prefill) {
                     // get the cookie with the prefill value
                     var cookie = $cookies.getObject(context.queryParams.prefill);
-                    $rootScope.cookieObj = cookie;
-                    if (cookie) {
+                    var newRow = recordEditModel.rows.length - 1;
+
+                    // make sure cookie is correct
+                    var hasAllKeys = cookie && ["constraintName", "columnName", "origUrl", "rowname"].every(function (k) {
+                        return cookie.hasOwnProperty(k);
+                    });
+                    if (hasAllKeys) {
+                        $rootScope.cookieObj = cookie;
+
                         // Update view model
-                        recordEditModel.rows[recordEditModel.rows.length - 1][cookie.constraintName] = cookie.rowname.value;
+                        recordEditModel.rows[newRow][cookie.columnName] = cookie.rowname.value;
+
+                        // the foreignkey data that we already have
+                        recordEditModel.foreignKeyData[newRow][cookie.constraintName] = cookie.keys;
+
+                        // show the spinner that means we're waiting for data.
+                        $rootScope.showColumnSpinner[newRow][cookie.columnName] = true;
+
+                        // get the actual foreignkey data
+                        ERMrest.resolve(cookie.origUrl, {cid: context.appName}).then(function (ref) {
+                            // the table that we're logging is not the same table in url (it's the referrer that is the same)
+                            var logObject = $rootScope.reference.defaultLogInfo;
+                            logObject.referrer = ref.defaultLogInfo;
+                            logObject.action = logActions.preCreatePrefill;
+                            getForeignKeyData(newRow, cookie.columnName, cookie.constraintName, ref, logObject);
+                        }).catch(function (err) {
+                            $rootScope.showColumnSpinner[newRow][cookie.columnName] = false;
+                            console.log(err);
+                        });
 
                         // Update submission model
                         var columnNames = Object.keys(cookie.keys);
                         columnNames.forEach(function(colName) {
                             var colValue = cookie.keys[colName];
-                            recordEditModel.submissionRows[recordEditModel.submissionRows.length - 1][colName] = colValue;
+                            recordEditModel.submissionRows[newRow][colName] = colValue;
                         });
                     }
                     $log.info('Model: ', recordEditModel);
@@ -182,15 +228,20 @@
                             numberRowsToRead = context.MAX_ROWS_TO_ADD;
                         }
 
-                        $rootScope.reference.read(numberRowsToRead).then(function getPage(page) {
+                        var readAction = context.mode == context.modes.EDIT ? logActions.preUpdate : logActions.preCopy;
+                        $rootScope.reference.read(numberRowsToRead, {action: readAction}).then(function getPage(page) {
                             $log.info("Page: ", page);
 
                             if (page.tuples.length < 1) {
                                 // TODO: understand the filter that was used and relate that information to the user (it oucld be a facet filter now)
-                                throw new Errors.noRecordError();
+                                var recordSetLink = page.reference.unfilteredReference.contextualize.compact.appLink;
+                                var tableDisplayName = page.reference.displayname.value;
+
+                                throw new Errors.noRecordError({}, tableDisplayName, recordSetLink);
                             }
 
                             var column, value;
+
 
                             // $rootScope.tuples is used for keeping track of changes in the tuple data before it is submitted for update
                             $rootScope.tuples = [];
@@ -205,6 +256,9 @@
                                 var tuple = page.tuples[j],
                                     values = tuple.values;
 
+                                // attach the foreign key data of the tuple
+                                recordEditModel.foreignKeyData[j] = tuple.linkedData;
+
                                 // We don't want to mutate the actual tuples associated with the page returned from `reference.read`
                                 // The submission data is copied back to the tuples object before submitted in the PUT request
                                 var shallowTuple = tuple.copy();
@@ -217,7 +271,14 @@
                                     if (column.getInputDisabled(context.appContext)) {
                                         // if not copy, populate the field without transforming it
                                         if (context.mode != context.modes.COPY) {
-                                            recordEditModel.rows[j][column.name] = values[i];
+                                            // the structure for asset type columns is an object with a 'url' property
+                                            if (column.isAsset) {
+                                                recordEditModel.rows[j][column.name] = { url: values[i] || "" };
+                                            } else if (column.type.name == "timestamptz") {
+                                                recordEditModel.rows[j][column.name] = moment(values[i]).format('YYYY-MM-DDTHH:mm:ssZ');
+                                            } else {
+                                                recordEditModel.rows[j][column.name] = values[i];
+                                            }
                                         }
                                         continue;
                                     }
@@ -272,6 +333,10 @@
                             // Keep a copy of the initial rows data so that we can see if user has made any changes later
                             recordEditModel.oldRows = angular.copy(recordEditModel.rows);
                         }, function error(response) {
+                          var errorData = {};
+                            errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
+                            errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
+                            response.errorData = errorData;
                             throw response;
                         });
                     } else if (session) {
@@ -325,6 +390,15 @@
                                     // If there are no defaults, then just initialize asset columns with the app's default obj
                                     initialModelValue = { url: "" }
                                 }
+                            } else if (column.isForeignKey) {
+                                if (defaultSet) {
+                                    initialModelValue =  column.default;
+                                    recordEditModel.foreignKeyData[0][column.foreignKey.name] = column.defaultValues;
+
+                                    // get the actual foreign key data
+                                    getForeignKeyData(0, column.name, column.foreignKey.name, column.defaultReference, {action: logActions.recordeditDefault});
+
+                                }
                             } else {
                                 // all other column types
                                 if (defaultSet) {
@@ -333,23 +407,52 @@
                             }
 
                             recordEditModel.rows[0][column.name] = initialModelValue;
-                        };
+                        }
 
                         $rootScope.displayReady = true;
                         // if there is a session, user isn't allowed to create
                     } else if (session) {
-                        var forbiddenError = new ERMrest.ForbiddenError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
-                        throw forbiddenError;
+                        throw new ERMrest.ForbiddenError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
                         // user isn't logged in and needs permissions to create
                     } else {
-                        var notAuthorizedError = new ERMrest.UnauthorizedError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
-                        throw notAuthorizedError;
+                        throw new ERMrest.UnauthorizedError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
                     }
                 }
             }, function error(response) {
                 throw response;
             });
         });
+
+
+        /**
+         * In case of prefill and default we only have a reference to the foreignkey,
+         * we should do extra reads to get the actual data.
+         *
+         * @param  {int} rowIndex The row index that this data is for (it's usually zero, first row)
+         * @param  {string} colName The name of the foreignkey pseudo column.
+         * @param  {string} fkName  The constraint name of the foreign key
+         * @param  {ERMrest.Refernece} fkRef   Reference to the foreign key table
+         * @param  {Object} contextHeaderParams the object will be passed to read as contextHeaderParams
+         */
+        function getForeignKeyData (rowIndex, colName, fkName, fkRef, logObject) {
+            fkRef.contextualize.compactSelect.read(1, logObject).then(function (page) {
+                $rootScope.showColumnSpinner[rowIndex][colName] = true;
+                if ($rootScope.showColumnSpinner[rowIndex][colName]) {
+                    // default value is validated
+                    if (page.tuples.length > 0) {
+                        recordEditModel.foreignKeyData[rowIndex][colName] = page.tuples[rowIndex].data;
+                        recordEditModel.rows[rowIndex][colName] = page.tuples[rowIndex].displayname.value;
+                    } else {
+                        recordEditModel.foreignKeyData[rowIndex][fkName] = null;
+                        recordEditModel.rows[rowIndex][colName] = null;
+                    }
+                }
+                $rootScope.showColumnSpinner[rowIndex][colName] = false;
+            }).catch(function (err) {
+                $rootScope.showColumnSpinner[rowIndex][colName] = false;
+                console.log(err);
+            });
+        }
 
     }]);
 })();

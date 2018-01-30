@@ -3,8 +3,8 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'DataUtils', 'ErrorService', 'messageMap', 'modalBox', 'recordCreate', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$uibModal', '$window', 
-        function FormController(AlertsService, DataUtils, ErrorService, messageMap, modalBox, recordCreate, recordEditModel, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $uibModal, $window) {
+    .controller('FormController', ['AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'messageMap', 'modalBox', 'recordCreate', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$uibModal', '$window',
+        function FormController(AlertsService, DataUtils, ErrorService, logActions, messageMap, modalBox, recordCreate, recordEditModel, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $uibModal, $window) {
         var vm = this;
         var context = $rootScope.context;
 
@@ -149,64 +149,19 @@
             return transformedRow;
         }
 
-        // This function checks whether file columns are getting the correct url and
-        // are not nul if nullok is false
-        function areFilesValid(rows) {
-            var isValid = true, index = 0;
-            // Iterate over all rows that are passed as parameters to the modal controller
-            rows.forEach(function(row) {
-
-                index++;
-
-                // Iterate over each property/column of a row
-                for(var k in row) {
-
-                    // If the column type is object and has a file property inside it
-                    // Then increment the count for no of files and create an uploadFile Object for it
-                    // Push this to the tuple array for the row
-                    // NOTE: each file object has an hatracObj property which is an hatrac object
-                    try {
-                        var column = $rootScope.reference.columns.find(function(c) { return c.name == k;  });
-                        if (column.isAsset) {
-
-                            if (row[k].url == "" && !column.nullok) {
-                                isValid = false;
-                                AlertsService.addAlert({type: 'error', message: "Please select file for column " + k + " for record " + index });
-                            } else if (row[k] != null && typeof row[k] == 'object' && row[k].file) {
-                                try {
-                                    if (!row[k].hatracObj.validateURL(row)) {
-                                        isValid = false;
-                                        AlertsService.addAlert({type: 'error', message: "Invalid url template for column " + k + " for record " + index });
-                                    }
-                                } catch(e) {
-                                    isValid = false;
-                                    AlertsService.addAlert({type: 'error', message: "Invalid url template for column " + k + " for record " + index });
-                                }
-                            }
-                        }
-                    } catch(e) {
-                        //NOthing to do
-                    }
-
-                }
-            });
-
-            return isValid;
-        }
-        
-        /**        
-         * onSuccess - callback after results are added 
-         *          
-         * @param  {object} model  model contains updated record object                   
-         * @param  {object} result object has result messages          
-         */         
+        /**
+         * onSuccess - callback after results are added
+         *
+         * @param  {object} model  model contains updated record object
+         * @param  {object} result object has result messages
+         */
         function onSuccess (model, result){
             var page = result.successful;
             var failedPage = result.failed;
             var resultsReference = page.reference;
             if (model.rows.length == 1) {
                 vm.redirectAfterSubmission(page);
-            } 
+            }
             else {
                 AlertsService.addAlert("Your data has been submitted. Showing you the result set...","success");
 
@@ -261,7 +216,7 @@
                 vm.resultset = true;
         }
     }
-        
+
         function submit() {
             var originalTuple,
                 editOrCopy = true,
@@ -290,7 +245,7 @@
                 }
                 populateSubmissionRow(model.rows[j], model.submissionRows[j], originalTuple, $rootScope.reference.columns, editOrCopy);
             }
-            recordCreate.addRecords(vm.editMode, null, vm.recordEditModel, false, $rootScope.reference, $rootScope.tuples, $rootScope.context.queryParams, vm, onSuccess);
+            recordCreate.addRecords(vm.editMode, null, vm.recordEditModel, false, $rootScope.reference, $rootScope.tuples, $rootScope.context.queryParams, vm, onSuccess, $rootScope.context.logObject);
         }
 
         function onDelete() {
@@ -304,10 +259,12 @@
                 uri = "../search/#" + location.catalog + '/' + location.schemaName + ':' + location.tableName;
             }
 
+            $rootScope.showSpinner = false;
             $window.location.href = uri;
         }
 
         function deleteRecord() {
+            var errorData = {};
             if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
                 $uibModal.open({
                     templateUrl: "../common/templates/delete-link/confirm_delete.modal.html",
@@ -315,17 +272,27 @@
                     controllerAs: "ctrl",
                     size: "sm"
                 }).result.then(function success() {
+                    $rootScope.showSpinner = true;
                     // user accepted prompt to delete
-                    return $rootScope.reference.delete();
+                    return $rootScope.reference.delete({action: logActions.recordEditDelete});
                 }).then(onDelete, function deleteFailure(response) {
+                    $rootScope.showSpinner = false;
                     if (typeof response !== "string") {
-                        throw response;
+                      errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
+                      errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
+                      response.errorData = errorData;
+                      throw response;
                     }
                 }).catch(function (exception) {
                     AlertsService.addAlert(exception.message, 'error');
                 });
             } else {
+                $rootScope.showSpinner = true;
                 $rootScope.reference.delete().then(onDelete, function deleteFailure(response) {
+                    $rootScope.showSpinner = false;
+                    errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
+                    errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
+                    response.errorData = errorData;
                     throw response;
                 }).catch(function (exception) {
                     AlertsService.addAlert(exception.message, 'error');
@@ -354,7 +321,7 @@
 
             var submissionRow = populateSubmissionRow(vm.recordEditModel.rows[rowIndex], vm.recordEditModel.submissionRows[rowIndex], originalTuple, $rootScope.reference.columns, editOrCopy);
 
-            params.reference = column.filteredRef(submissionRow).contextualize.compactSelect;
+            params.reference = column.filteredRef(submissionRow, vm.recordEditModel.foreignKeyData[rowIndex]).contextualize.compactSelect;
             params.reference.session = $rootScope.session;
             params.context = "compact/select";
             params.selectedRows = [];
@@ -375,6 +342,14 @@
                 // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
                 // set data in view model (model.rows) and submission model (model.submissionRows)
 
+                // udpate the foreign key data
+                vm.recordEditModel.foreignKeyData[rowIndex][column.foreignKey.name] = tuple.data;
+
+                // make sure the spinner is not showing
+                if ($rootScope.showColumnSpinner[rowIndex] && $rootScope.showColumnSpinner[rowIndex][column.name]) {
+                    $rootScope.showColumnSpinner[rowIndex][column.name] = false;
+                }
+
                 var foreignKeyColumns = column.foreignKey.colset.columns;
                 for (var i = 0; i < foreignKeyColumns.length; i++) {
                     var referenceCol = foreignKeyColumns[i];
@@ -389,6 +364,11 @@
 
         function clearForeignKey(rowIndex, column) {
             var model = vm.recordEditModel;
+
+            model.foreignKeyData[rowIndex][column.foreignKey.name] = null;
+            if ($rootScope.showColumnSpinner[rowIndex] && $rootScope.showColumnSpinner[rowIndex][column.name]) {
+                $rootScope.showColumnSpinner[rowIndex][column.name] = false;
+            }
 
             var foreignKeyColumns = column.foreignKey.colset.columns;
             for (var i = 0; i < foreignKeyColumns.length; i++) {
@@ -433,9 +413,11 @@
                     // transform row values to avoid parsing issues with null values
                     var transformedRow = transformRowValues(row);
                     var submissionRow = angular.copy(vm.recordEditModel.submissionRows[index]);
+                    var foreignKeyData = angular.copy(vm.recordEditModel.foreignKeyData[index]);
 
                     rowset.push(transformedRow);
                     vm.recordEditModel.submissionRows.push(submissionRow);
+                    vm.recordEditModel.foreignKeyData.push(foreignKeyData);
                 }
                 vm.showMultiInsert = false;
                 vm.numberRowsToAdd = 1;
@@ -535,6 +517,8 @@
                     return '';
                 } else if (column.isForeignKey) {
                     return 'Select a value';
+                } else if (column.isAsset) {
+                    return "No file Selected";
                 }
             } catch (e) {
                 $log.info(e);
@@ -616,6 +600,18 @@
                 if(elements.navbarHeight) {
                     UiUtils.setDisplayHeight(elements);
                 }
+            }
+        });
+
+        // if any of the columns is showing spinner, that means it's waiting for some
+        // data and therefore we should just disable the addMore button.
+        $rootScope.$watchCollection(function () {
+            return $rootScope.showColumnSpinner[$rootScope.showColumnSpinner.length-1];
+        }, function (newValue, oldValue) {
+            if (newValue && Object.values(newValue).some(function (v) {return v;})) {
+                vm.canAddMore = false;
+            } else {
+                vm.canAddMore = true;
             }
         });
 

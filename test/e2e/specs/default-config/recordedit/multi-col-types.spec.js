@@ -61,7 +61,8 @@ var testParams = {
             {"name": "timestamp_col_gen", value: "2016-01-18T13:00:00", displayType: "disabled"},
             {"name": "timestamptz_col_gen", value: "2016-01-18T00:00:00-08:00", displayType: "disabled"},
             {"name": "date_col_gen", value: "2016-08-15", displayType: "disabled"},
-            {"name": "fk_col_gen", value: "1", displayType: "disabled"}
+            {"name": "fk_col_gen", value: "1", displayType: "disabled"},
+            {"name": "asset_col_gen", value: "http://test.com/hatract/test", displayType: "disabled"}
         ]
     }
 };
@@ -80,29 +81,53 @@ describe('When editing a record', function() {
     });
 
     // Tests that check the values for regular, non-disabled input fields are in 01-recordedit.edit.spec.js
-    it('should display the correct values in disabled input fields', function() {
+    it('should display the correct values in disabled input fields', function(done) {
         testParams.table_w_generated_columns.row.forEach(function checkInput(col) {
             (function(col) {
                 if (col.name == 'bool_true_col_gen' || col.name == 'bool_false_col_gen') {
                     var dropdown = recordEditPage.getInputById(0, col.name);
                     recordEditPage.getDropdownText(dropdown).then(function(text) {
-                        expect(text).toBe(col.value.toString());
+                        expect(text).toBe(col.value.toString(), "col " + col.name + " value missmatch.");
+                        done();
+                    }).catch(function (err) {
+                        console.log(err);
+                        done.fail();
                     });
                 } else if (col.name == 'fk_col_gen') {
                     recordEditPage.getForeignKeyInputs().first().getAttribute('innerText').then(function(text) {
-                        expect(text).toBe('Abraham Lincoln');
+                        expect(text).toBe('Abraham Lincoln', "col " + col.name + " value missmatch.");
+                        done();
+                    }).catch(function (err) {
+                        console.log(err);
+                        done.fail();
+                    });
+                } else if (col.name == "asset_col_gen") {
+                    recordEditPage.getInputForAColumn(col.name, 0).then(function (fileInput) {
+                        expect(fileInput.isEnabled()).toBe(false, "col " + col.name + " file input was not disabled.");
+                        return recordEditPage.getInputForAColumn("txt" + col.name, 0);
+                    }).then(function (txtInput) {
+                        expect(txtInput.isEnabled()).toBe(false, "col " + col.name + " text input was not disabled.");
+                        expect(txtInput.getAttribute('value')).toBe(col.value, "col " + col.name + " value missmatch.");
+                        done();
+                    }).catch(function (err) {
+                        console.log(err);
+                        done.fail();
                     });
                 } else {
                     var input = recordEditPage.getInputById(0, col.name);
-                    expect(input.isEnabled()).toBe(false);
+                    expect(input.isEnabled()).toBe(false, "col " + col.name + " was not disabled.");
                     input.getAttribute('value').then(function(value) {
                         if (col.name == 'timestamp_col_gen' || col.name == 'timestamptz_col_gen') {
                             var actualValue = moment(value, "YYYY-MM-DDTHH:mm:ssZ").format("YYYY-MM-DDTHH:mm:ssZ");
                             var expectedValue = moment(col.value.toString(), "YYYY-MM-DDTHH:mm:ssZ").format("YYYY-MM-DDTHH:mm:ssZ");
-                            expect(actualValue).toBe(expectedValue);
+                            expect(actualValue).toBe(expectedValue, "col " + col.name + " value missmatch.");
                         } else {
-                            expect(value).toBe(col.value.toString());
+                            expect(value).toBe(col.value.toString(), "col " + col.name + " value missmatch.");
                         }
+                        done();
+                    }).catch(function (err) {
+                        console.log(err);
+                        done.fail();
                     });
                 }
             })(col);
@@ -283,7 +308,7 @@ describe('When editing a record', function() {
                                 newValue = '';
                             }
                             recordEditPage.selectDropdownValue(dropdown, newValue);
-                            break;                           
+                            break;
                         default:
                             var input = recordEditPage.getInputById(0, column.name);
                             input.clear().then(function() {
@@ -301,7 +326,7 @@ describe('When editing a record', function() {
 
             // Submit the form
             recordEditPage.submitForm().then(function() {
-                
+
                 return recordEditPage.getAlertError();
             }).then(function(alert) {
                 // Expect there to be no error alerts

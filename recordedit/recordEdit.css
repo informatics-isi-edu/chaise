@@ -2,7 +2,6 @@
     overflow-y: auto;
     overflow-x: hidden;
     margin-top: 5px;
-    padding-bottom: 40px;
 }
 
 .padding-top-10 {
@@ -142,6 +141,16 @@ td.entity-key, #formEdit >  table > tbody >  tr:first-child >  td:first-child {
 .form-control[disabled] {
   color: #888888;
   cursor: not-allowed !important;
+}
+
+.form-control[readonly] {
+    background-color: #fff;
+    opacity: 1;
+}
+
+.form-control[readonly][disabled] {
+    background-color: #eee;
+    opacity: 1;
 }
 
 #formEdit.editMode >  table > tbody >  tr >  td:last-child {
