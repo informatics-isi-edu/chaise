@@ -87,10 +87,10 @@ var fetchSchemas = function(testConfiguration, catalogId) {
 };
 exports.fetchSchemas = fetchSchemas;
 
-var importSchemas = function(configs, defer, authCookie, catalogId) {
+var importSchemas = function(configs, defer, authCookie, catalogId, entities) {
 
     if (configs.length == 0) {
-        defer.resolve(catalogId);
+        defer.resolve({catalogId: catalogId, entities: entities});
         return;
     }
 
@@ -105,7 +105,15 @@ var importSchemas = function(configs, defer, authCookie, catalogId) {
         authCookie: authCookie
     }).then(function (data) {
         process.env.catalogId = data.catalogId;
-        importSchemas(configs, defer, authCookie, data.catalogId);
+        if (data.schema) {
+            entities[data.schema.name] = {};
+            for (var t in data.schema.tables) {
+                if (!data.schema.tables.hasOwnProperty(t)) continue;
+                entities[data.schema.name][t] = data.schema.tables[t].entities;
+            }
+            console.log("Attached entities of " + data.schema.name + " schema");
+        }
+        importSchemas(configs, defer, authCookie, data.catalogId, entities);
     }, function (err) {
         defer.reject(err);
     }).catch(function(err) {
@@ -116,7 +124,7 @@ var importSchemas = function(configs, defer, authCookie, catalogId) {
 
 exports.importSchemas = function(schemaConfigurations, catalogId) {
     var defer = q.defer();
-    importSchemas(schemaConfigurations.slice(0), defer, catalogId);
+    importSchemas(schemaConfigurations.slice(0), defer, catalogId, {});
     return defer.promise;
 };
 
@@ -128,16 +136,19 @@ exports.setup = function(testConfiguration) {
 
     if (!schemaConfigurations || schemaConfigurations.length == 0) throw new Error("No schemaConfiguration provided in testConfiguration.setup.");
 
-    var setupDone = false, successful = false, catalogId;
+    var setupDone = false, successful = false, catalogId, entities = {};
 
     var defer1 = Q.defer();
     // Call setup to import data for tests as specified in the configuration
-    importSchemas(schemaConfigurations.slice(0), defer1, testConfiguration.authCookie);
+    importSchemas(schemaConfigurations.slice(0), defer1, testConfiguration.authCookie, undefined, entities);
 
-    defer1.promise.then(function(catId) {
+    defer1.promise.then(function(res) {
 
         // Set catalogId in browser params for future reference to delete it if required
-        catalogId = catId;
+        catalogId = res.catalogId;
+
+        // Set the entities object will contain the entities
+        entities = res.entities;
 
         // Set successful to determine data import was done successfully
         successful = true;
@@ -161,6 +172,7 @@ exports.setup = function(testConfiguration) {
         // and set the default Schema and default Table in browser parameters
         if (successful) {
             exports.fetchSchemas(testConfiguration, catalogId).then(function(data) {
+                data.entities = entities;
                 defer.resolve(data);
             }, function(err) {
                 defer.reject({ catalogId: catalogId });
@@ -207,12 +219,12 @@ exports.tear = function(testConfiguration, catalogId, defer) {
  * @param  {String} authCookie webauthn cookie
  * @param  {String[]} namespaces Array of namespaces. They must be absolute path.
  */
-exports.deleteHatracNamespaces = function (authCookie, namespaces) {    
+exports.deleteHatracNamespaces = function (authCookie, namespaces) {
     var promises = [];
     http.setDefaults({headers: {'Cookie': authCookie}});
     namespaces.forEach(function (ns) {
         var defer = Q.defer();
-        
+
         http.delete(ns).then(function() {
             console.log("namespace " + ns + " deleted from hatrac.");
             defer.resolve();
@@ -221,9 +233,9 @@ exports.deleteHatracNamespaces = function (authCookie, namespaces) {
             console.log(error)
             defer.reject(error);
         });
-        
+
         promises.push(defer.promise);
     });
-    
+
     return Q.all(promises);
 }

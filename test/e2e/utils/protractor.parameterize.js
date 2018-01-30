@@ -1,4 +1,5 @@
 var Q = require("q");
+var fs = require("fs");
 
 exports.parameterize = function(config, configParams) {
 
@@ -13,6 +14,13 @@ exports.parameterize = function(config, configParams) {
 
   var catalogId = null, Q = require('q');
 
+  // This is where we're writing the entities to.
+  // There are some system generated columns that we might want to know the value of,
+  // entities will have those. The problem is that we cannot just attach this variable
+  // to `global` since we might run test specs in multiple threads via sharding.
+  // Therefore we are writing these data this file, and then removing the file
+  var entities_path = "entities.json";
+
   var launchPromise;
 
   if (process.env.TRAVIS) {
@@ -25,15 +33,27 @@ exports.parameterize = function(config, configParams) {
   }
 
   var onErmrestLogin = function(defer) {
-
     testConfiguration.setup.url = process.env.ERMREST_URL;
     testConfiguration.setup.authCookie = testConfiguration.authCookie;
 
     pImport.setup(testConfiguration).then(function(data) {
-
       process.env.CATALOGID = data.catalogId;
+      if (data.entities) {
+          entities = data.entities;
+          fs.writeFile(entities_path, JSON.stringify(entities), 'utf8', function (err) {
+              if (err) {
+                  console.log("couldn't write entities.");
+                  console.log(err);
+                  defer.reject(new Error("Unable to import data"));
+              } else {
+                  console.log("created entities file for schemas");
+                  defer.resolve();
+              }
+          });
 
-      defer.resolve();
+      } else {
+        defer.resolve();
+      }
 
     }, function(err) {
       process.env.CATALOGID = catalogId = err.catalogId;
@@ -106,7 +126,17 @@ exports.parameterize = function(config, configParams) {
         browser.params.defaultSchema = data.defaultSchema;
         browser.params.defaultTable = data.defaultTable;
         browser.params.catalogId = data.catalogId;
-        
+
+        // read the entities from the file
+        fs.readFile(entities_path, 'utf8', function (err, data) {
+            if (err) {
+                console.log("couldn't read entities");
+                defer.reject({catalogId: catalogId});
+            } else {
+                browser.params.entities = JSON.parse(data);
+            }
+        });
+
         // Set hatrac namespaces that should be deleted (test cases will add to this)
         testConfiguration.hatracNamespaces = [];
 
@@ -135,7 +165,7 @@ exports.parameterize = function(config, configParams) {
   // This method will be called after executing the test suite
   config.afterLaunch = function(exitCode) {
     var promises = [];
-    
+
     if (testConfiguration.hatracNamespaces && testConfiguration.hatracNamespaces.length > 0) {
         // cleanup the hatrac namespaces
         promises.push(pImport.deleteHatracNamespaces(testConfiguration.authCookie, testConfiguration.hatracNamespaces));
@@ -148,7 +178,10 @@ exports.parameterize = function(config, configParams) {
     if (testConfiguration.cleanup && testConfiguration.setup && catalogId != null) {
         promises.push(pImport.tear(testConfiguration, catalogId));
     }
-    
+
+    // delete the entities file
+    fs.unlinkSync(entities_path);
+
     return Q.all(promises);
   };
 
