@@ -519,6 +519,11 @@
                         }
                     }
 
+                    // absMin/absMax are undefined when the min/max come back as null
+                    scope.showHistogram = function () {
+                        return scope.facetColumn.showHistogram && (scope.rangeOptions.absMin !== null && scope.rangeOptions.absMax !== null);
+                    }
+
                     // callback for the list directive
                     scope.onSelect = function (row, $event) {
                         var res;
@@ -709,7 +714,6 @@
                                 if (scope.facetColumn.sourceReference.uri !== uri) {
                                     defer.resolve(false);
                                 } else {
-
                                     // initiailize the min/max values
                                     if (isColumnOfType("timestamp")) {
                                         // convert and set the values if they are defined.
@@ -732,13 +736,19 @@
                                         scope.rangeOptions.absMax = response[1];
                                     }
 
+                                    // if - the max/min are null
+                                    //    - barPlot in annotation is 'false'
+                                    //    - histogram not supported for column type
+                                    if (!scope.showHistogram()) {
+                                        return;
+                                    }
+
                                     scope.histogramDataStack = [];
 
                                     // get initial histogram data
                                     return histogramData(numBuckets, false);
                                 }
                             }).then(function () {
-
                                 defer.resolve(true);
                             }).catch(function (err) {
                                 defer.reject(err);
@@ -785,9 +795,6 @@
                             var median = Math.floor(maxIndex/2);
                             var minBinIndex = median - zoomRange;
                             var maxBinIndex = median + zoomRange;
-
-                            console.log(maxBinIndex);
-                            console.log(minBinIndex);
 
                             // timestamp needs special formatting
                             if (isColumnOfType("timestamp")) {
