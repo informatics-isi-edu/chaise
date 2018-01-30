@@ -247,12 +247,12 @@
                 errorPopup( exception.message, exception.status ,"Home Page", $window.location.origin);
             }
             else if (ERMrest && exception instanceof ERMrest.ERMrestError ) {
-              if(exception.errorData && exception.errorData.gotoTableDisplayname != 'undeifned' && exception.errorData.gotoTableDisplayname != ''){
+              if(exception.errorData && exception.errorData.gotoTableDisplayname != undefined && exception.errorData.gotoTableDisplayname != ''){
                 gotoLocation = exception.errorData.gotoTableDisplayname;
               }
-              if(exception.errorData && exception.errorData.redirectUrl != 'undeifned'  && exception.errorData.redirectUrl != ''){
+              if(exception.errorData && exception.errorData.redirectUrl != undefined  && exception.errorData.redirectUrl != ''){
                 redirectLink = exception.errorData.redirectUrl;
-              }else if(exception.errorData && exception.errorData.redirectPath != 'undeifned' && exception.errorData.redirectPath != ''){
+              }else if(exception.errorData && exception.errorData.redirectPath != undefined && exception.errorData.redirectPath != ''){
                 redirectLink = $window.location.origin + $window.location.pathname + exception.errorData.redirectPath;
               }else{
                 redirectLink = $window.location.origin;
