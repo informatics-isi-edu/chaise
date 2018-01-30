@@ -34,6 +34,7 @@ describe('View existing record,', function() {
                 var relatedTableName = testParams.related_associate_table; // association table
                 var linkedToTableName = testParams.related_linked_table; // linked to table
                 var linkedToTableFilter = testParams.related_linked_table_key_filter;
+                console.log(browser.params.entities[testParams.schemaName][linkedToTableName]);
 
                 chaisePage.recordPage.getRelatedTableRows(relatedTableName).then(function(rows) {
                     return rows[0].all(by.tagName("td"));
@@ -83,13 +84,13 @@ describe('View existing record,', function() {
                 var relatedTableName = testParams.related_regular_table;
                 var count, rowCells, oldValue;
                 var relatedTableHeading = chaisePage.recordPage.getRelatedTableHeadingTitle(relatedTableName);
-            
+
                 var EC = protractor.ExpectedConditions;
                 var e = element(by.id('rt-' + relatedTableName));
                 browser.wait(EC.presenceOf(e), browser.params.defaultTimeout);
-            
+
                 var table = chaisePage.recordPage.getRelatedTable(relatedTableName);
-            
+
                 chaisePage.recordPage.getRelatedTableRows(relatedTableName).then(function(rows) {
                     count = rows.length;
                     return rows[count - 1].all(by.tagName("td"));
@@ -107,7 +108,7 @@ describe('View existing record,', function() {
                     var EC = protractor.ExpectedConditions;
                     var confirmButton = chaisePage.recordPage.getConfirmDeleteButton();
                     browser.wait(EC.visibilityOf(confirmButton), browser.params.defaultTimeout);
-            
+
                     return confirmButton.click();
                 }).then(function() {
                     browser.wait(EC.stalenessOf(rowCells[1]), browser.params.defaultTimeout);
