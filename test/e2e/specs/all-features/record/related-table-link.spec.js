@@ -321,7 +321,7 @@ describe('View existing record,', function() {
                        rows = chaisePage.recordsetPage.getRows();
                    }).then(function(ct){
                        // click sort on column header to get consistent order
-                       return chaisePage.recordSetPage.getRecordsetColumnHeader("id");
+                       return chaisePage.recordsetPage.getRecordsetColumnHeader("id");
                    }).then(function(header) {
                        return header.click();
                    }).then(function() {
@@ -425,7 +425,7 @@ describe('View existing record,', function() {
                         rows = chaisePage.recordsetPage.getRows();
                     }).then(function(ct){
                         // click sort on column header to get consistent order
-                        return chaisePage.recordSetPage.getRecordsetColumnHeader("id");
+                        return chaisePage.recordsetPage.getRecordsetColumnHeader("id");
                     }).then(function(header) {
                         return header.click();
                     }).then(function() {

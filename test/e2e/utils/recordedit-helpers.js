@@ -624,7 +624,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                         expect(text).toBe("Displaying " + col.count + " of " + col.totalCount + " Records", colError(col.name, "The total count display in the foreign key popup is incorrect"));
 
                                         // click sort on column header to get consistent order
-                                        return chaisePage.recordSetPage.getRecordsetColumnHeader("term");
+                                        return chaisePage.recordsetPage.getRecordsetColumnHeader("term");
                                     }).then(function(header) {
                                         return header.click();
                                     }).then(function() {
