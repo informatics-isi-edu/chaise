@@ -84,24 +84,17 @@ describe('Add a record,', function() {
 
             it("should be redirected to record page with correct values.", function() {
                 if (!hasErrors) {
-                    var dataRow = browser.params.entities["product-person"][testParams.table_name].find(function (entity) {
-                        return entity.id == 1;
+                    var redirectUrl = browser.params.url + "/record/#" + browser.params.catalogId + "/product-person:" + testParams.table_name + "/RID=";
+
+                    browser.wait(function () {
+                        return browser.driver.getCurrentUrl().then(function(url) {
+                            return url.startsWith(redirectUrl);
+                        });
                     });
-                    var filter = "RID=" + dataRow.RID;
 
-                    // After submitting 1 record in RecordEdit, the expected record
-                    // page url will have a id of 1 because it'll always be the first
-                    // row of this table in the new catalog created by this set of composite key tests.
-                    var redirectUrl = browser.params.url + "/record/#" + browser.params.catalogId + "/product-person:" + testParams.table_name + '/' + filter;
+                    expect(browser.driver.getCurrentUrl()).toContain(redirectUrl);
 
-                    chaisePage.waitForUrl(redirectUrl, browser.params.defaultTimeout).then(function() {
-                        expect(browser.driver.getCurrentUrl()).toBe(redirectUrl);
-
-                        recordEditHelpers.testRecordAppValuesAfterSubmission(testParams.column_names, testParams.column_values);
-                    }, function() {
-                        console.log("          Timed out while waiting for the url to be the new one");
-                        expect(browser.driver.getCurrentUrl()).toBe(redirectUrl);
-                    });
+                    recordEditHelpers.testRecordAppValuesAfterSubmission(testParams.column_names, testParams.column_values);
                 }
             });
         });

@@ -177,7 +177,7 @@
                         "typename": "text"
                     }
                 }
-            ]    
+            ]
         },
         "f2": {
             "kind": "table",
@@ -191,7 +191,7 @@
             "foreign_keys": [],
             "column_definitions": [
                 {
-                    "name": "id", 
+                    "name": "id",
                     "nullok": false,
                     "type": {
                         "typename": "serial4"
@@ -206,6 +206,9 @@
             ],
             "annotations": {
                 "tag:isrd.isi.edu,2016:table-display": {
+                    "compact/brief": {
+                        "row_order": [{"column": "id"}]
+                    },
                     "row_name": {
                         "row_markdown_pattern": "{{term}}"
                     }
@@ -258,7 +261,7 @@
             ],
             "column_definitions": [
                 {
-                    "name": "id_main", 
+                    "name": "id_main",
                     "nullok": false,
                     "type": {
                         "typename": "serial4"
@@ -284,7 +287,7 @@
             "foreign_keys": [],
             "column_definitions": [
                 {
-                    "name": "id", 
+                    "name": "id",
                     "nullok": false,
                     "type": {
                         "typename": "serial4"
@@ -333,7 +336,7 @@
             ],
             "column_definitions": [
                 {
-                    "name": "id", 
+                    "name": "id",
                     "nullok": false,
                     "type": {
                         "typename": "serial4"

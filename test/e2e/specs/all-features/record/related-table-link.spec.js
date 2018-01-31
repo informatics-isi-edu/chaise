@@ -314,45 +314,45 @@ describe('View existing record,', function() {
                         return chaisePage.clickButton(popupBtns[0]);
                     }).then (function () {
                         browser.wait(function () {
-                              return chaisePage.recordsetPage.getRows().count().then(function (ct) {
-                                  return (ct > 0);
-                              });
-                          });
-                       rows = chaisePage.recordsetPage.getRows();
-                   }).then(function(ct){
-                       // click sort on column header to get consistent order
-                       return chaisePage.recordsetPage.getRecordsetColumnHeader("id");
-                   }).then(function(header) {
-                       return header.click();
-                   }).then(function() {
-                       // get the 4th displayed rows select action button
-                       return rows.get(3).all(by.css(".select-action-button"));
-                   }).then(function(selectButtons){
-                       return selectButtons[0].click();
-                   }).then(function() {
-                       return chaisePage.recordEditPage.submitForm();
-                   }).then(function(){
+                            return chaisePage.recordsetPage.getRows().count().then(function (ct) {
+                                return (ct > 0);
+                            });
+                        });
+                        // click sort on column header to get consistent order
+                        return chaisePage.recordsetPage.getRecordsetColumnHeader("id");
+                    }).then(function(header) {
+                        return header.click();
+                    }).then(function() {
+                        return chaisePage.recordsetPage.getRows();
+                    }).then(function (rows) {
+                        // get the 4th displayed rows select action button
+                        return rows.get(3).all(by.css(".select-action-button"));
+                    }).then(function(selectButtons){
+                        return selectButtons[0].click();
+                    }).then(function() {
+                        return chaisePage.recordEditPage.submitForm();
+                    }).then(function(){
 
-                       return browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
-                   }).then(function() {
-                       browser.close();
-                       return browser.switchTo().window(allWindows[0]);
-                   }).then(function (){
-                       browser.driver.navigate().refresh();
-                       chaisePage.waitForElement(element(by.id('rt-heading-association_table')));
-                       return chaisePage.recordPage.getRelatedTableRows(associationTableName);
-                   }).then(function(rows){
-                       return rows[1].all(by.tagName("td"));
-                   }).then(function (cells){
-                       return cells[1].all(by.css("a"));;
-                   }).then(function(cell){
-                      return cell[0].getAttribute('innerHTML');
-                  }).then(function(id){
-                      expect(id).toBe('4');
-                  }).catch(function(error) {
-                      console.log(error);
-                      expect('There was an error in this promise chain').toBe('Please see error message.');
-                  });
+                        return browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
+                    }).then(function() {
+                        browser.close();
+                        return browser.switchTo().window(allWindows[0]);
+                    }).then(function (){
+                        browser.driver.navigate().refresh();
+                        chaisePage.waitForElement(element(by.id('rt-heading-association_table')));
+                        return chaisePage.recordPage.getRelatedTableRows(associationTableName);
+                    }).then(function(rows){
+                        return rows[1].all(by.tagName("td"));
+                    }).then(function (cells){
+                        return cells[1].all(by.css("a"));;
+                    }).then(function(cell){
+                        return cell[0].getAttribute('innerHTML');
+                    }).then(function(id){
+                        expect(id).toBe('4');
+                    }).catch(function(error) {
+                        console.log(error);
+                        expect('There was an error in this promise chain').toBe('Please see error message.');
+                    });
                 });
 
                 it("on click of View button should redirect to record page of related entity", function(){

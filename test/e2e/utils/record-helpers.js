@@ -124,7 +124,7 @@ exports.testPresentation = function (tableParams) {
                     if (column.presentation && column.presentation.type == "url") {
                         try {
                             console.log(browser.params.entities["product-record"][tableParams.table_name]);
-                            console.log(column.presentation.key_value);
+                            console.log(column.presentation);
                             var dataRow = browser.params.entities["product-record"][tableParams.table_name].find(function (entity) {
                                 return entity.id == column.presentation.key_value;
                             });

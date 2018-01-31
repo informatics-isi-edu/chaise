@@ -509,7 +509,7 @@
           "display": "Bookings"
         },
         "tag:isrd.isi.edu,2016:visible-columns":{
-          "compact/brief": ["id", "accommodation_id", "price", "booking_date", "image_id"]
+          "compact/brief": ["id", ["product-record", "fk_booking_accommodation"], "price", "booking_date", ["product-record", "fk_booking_accommodation_image"]]
         },
         "tag:isrd.isi.edu,2016:table-display": {
           "*": {

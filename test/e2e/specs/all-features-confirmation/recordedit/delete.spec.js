@@ -55,7 +55,7 @@ describe('Edit existing record,', function() {
                     expect(chaiseConfig.confirmDelete).toBe(true);
                 });
             });
-            
+
             xit("should display a modal when attempting to delete a record that has been modified by someone else beforehand", function() {
                 var EC = protractor.ExpectedConditions, allWindows;
                 // Set up a mismatching ETag scenario before attempting delete to ensure that
@@ -138,7 +138,7 @@ describe('Edit existing record,', function() {
                     browser.wait(function () {
                         return browser.driver.getCurrentUrl().then(function(url) {
                             return url.startsWith(redirectUrl);
-                        })
+                        });
                     });
 
                     return browser.driver.getCurrentUrl();

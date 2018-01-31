@@ -438,6 +438,11 @@
         ],
         "description": {
           "display": "Bookings"
+        },
+        "tag:isrd.isi.edu,2016:table-display": {
+          "compact/brief": {
+            "row_order": [{"column": "id"}]
+          }
         }
       }
     },
@@ -589,7 +594,8 @@
         ],
         "tag:isrd.isi.edu,2016:table-display": {
           "compact/brief": {
-            "page_size": 2
+            "page_size": 2,
+            "row_order": [{"column": "id"}]
           }
         }
       }

@@ -55,7 +55,6 @@ describe('View existing record,', function() {
             });
 
             it("action columns should show edit button that redirects to the recordedit page", function() {
-
                 var relatedTableName = testParams.related_regular_table;
                 var relatedTableKey = testParams.related_regular_table_key_value;
                 var dataRow = browser.params.entities[testParams.schemaName][relatedTableName].find(function (entity) {
@@ -79,7 +78,7 @@ describe('View existing record,', function() {
                     allWindows = handles;
                     return browser.switchTo().window(allWindows[1]);
                 }).then(function() {
-                    var result = '/recordedit/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + relatedTableName + "/" + relatedTableKey;
+                    var result = '/recordedit/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + relatedTableName + "/" + relatedTableFilter;
                     expect(browser.driver.getCurrentUrl()).toBe(result);
                     browser.close();
 
