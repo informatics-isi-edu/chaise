@@ -79,7 +79,7 @@ describe('View existing record,', function() {
                     return browser.switchTo().window(allWindows[1]);
                 }).then(function() {
                     var result = '/recordedit/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + relatedTableName + "/" + relatedTableFilter;
-                    expect(browser.driver.getCurrentUrl()).toBe(result);
+                    expect(browser.driver.getCurrentUrl()).toContain(result);
                     browser.close();
 
                     return browser.switchTo().window(allWindows[0]);

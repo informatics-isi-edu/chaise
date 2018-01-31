@@ -318,11 +318,7 @@ describe('View existing record,', function() {
                                 return (ct > 0);
                             });
                         });
-                        // click sort on column header to get consistent order
-                        return chaisePage.recordsetPage.getRecordsetColumnHeader("id");
-                    }).then(function(header) {
-                        return header.click();
-                    }).then(function() {
+
                         return chaisePage.recordsetPage.getRows();
                     }).then(function (rows) {
                         // get the 4th displayed rows select action button

@@ -738,6 +738,11 @@
         },
         "tag:isrd.isi.edu,2016:visible-columns": {
           "*": ["id", "term"]
+        },
+        "tag:isrd.isi.edu,2016:table-display": {
+          "compact/brief": {
+            "row_order": [{"column": "id"}]
+          }
         }
       }
     }

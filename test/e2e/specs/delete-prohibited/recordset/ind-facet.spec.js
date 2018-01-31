@@ -266,7 +266,7 @@ describe("Viewing Recordset with Faceting,", function() {
     describe("For table " + testParams.table_name + ",", function() {
 
         var table, record,
-        uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name + "/" + testParams.sort;
+        uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name + testParams.sort;
 
         beforeAll(function () {
             browser.ignoreSynchronization=true;
@@ -472,7 +472,7 @@ describe("Viewing Recordset with Faceting,", function() {
                     //verify there's no facet string in url
                     return browser.getCurrentUrl();
                 }).then(function (url) {
-                    expect(url).toBe(uri + testParams.sort, "uri after clear all is incorrect");
+                    expect(url).toBe(uri, "uri after clear all is incorrect");
 
                     return chaisePage.recordsetPage.getRows().count();
                 }).then(function (ct) {

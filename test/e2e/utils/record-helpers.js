@@ -122,15 +122,9 @@ exports.testPresentation = function (tableParams) {
                     columnEls = chaisePage.recordPage.getEntityRelatedTable(column.title);
 
                     if (column.presentation && column.presentation.type == "url") {
-                        try {
-                            console.log(browser.params.entities["product-record"][tableParams.table_name]);
-                            console.log(column.presentation);
-                            var dataRow = browser.params.entities["product-record"][tableParams.table_name].find(function (entity) {
-                                return entity.id == column.presentation.key_value;
-                            });
-                        } catch (err) {
-                            console.dir(err);
-                        }
+                        var dataRow = browser.params.entities["product-record"][col.presentation.table_name].find(function (entity) {
+                            return entity.id == column.presentation.key_value;
+                        });
                         chaisePage.recordPage.getLinkChild(columnEls).then(function (aTag) {
                             columnUrl = mustache.render(column.presentation.template, {
                                 "catalog_id": process.env.catalogId,
@@ -261,7 +255,7 @@ exports.testPresentation = function (tableParams) {
             return browser.getAllWindowHandles();
         }).then(function (handles){
             allHandle = handles;
-            browser.switchTo().window(allHandle[1]); browser.sleep(5000);
+            browser.switchTo().window(allHandle[1]);
             chaisePage.waitForElement(chaisePage.recordPage.getEntityTitleElement());
             return chaisePage.recordPage.getEntityTitle();
         }).then(function (pageTitle) {

@@ -318,6 +318,11 @@
             "annotations": {
                 "tag:isrd.isi.edu,2016:visible-columns" : {
                     "*": ["id", "alpha_id", "int_value"]
+                },
+                "tag:isrd.isi.edu,2016:table-display": {
+                    "compact/brief": {
+                        "row_order": [{"column": "id"}]
+                    }
                 }
             }
         },
@@ -383,6 +388,11 @@
             "annotations": {
                 "tag:isrd.isi.edu,2016:visible-columns" : {
                     "*": ["id", "fk2", "position_col"]
+                },
+                "tag:isrd.isi.edu,2016:table-display": {
+                    "compact/brief": {
+                        "row_order": [{"column": "id"}]
+                    }
                 }
             }
         },
@@ -428,6 +438,11 @@
             "annotations": {
                 "tag:isrd.isi.edu,2016:visible-columns" : {
                     "*": ["id", "position_type_col, int_value"]
+                },
+                "tag:isrd.isi.edu,2016:table-display": {
+                    "compact/brief": {
+                        "row_order": [{"column": "id"}]
+                    }
                 }
             }
         }
