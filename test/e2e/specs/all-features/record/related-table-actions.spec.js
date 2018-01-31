@@ -7,11 +7,12 @@ var testParams = {
         value: "2004",
         operator: "="
     },
+    shortest_key_filter: "RID=",
     related_associate_table: "accommodation_image",
     related_linked_table: "file",
-    related_linked_table_key_filter: "id=3009",
+    related_linked_table_key_value: "3009",
     related_regular_table: "booking",
-    related_regular_table_key_filter: "accommodation_id=2004"
+    related_regular_table_key_value: "2004"
 };
 
 describe('View existing record,', function() {
@@ -33,8 +34,10 @@ describe('View existing record,', function() {
             it("action columns should show view button that redirects to the record page", function() {
                 var relatedTableName = testParams.related_associate_table; // association table
                 var linkedToTableName = testParams.related_linked_table; // linked to table
-                var linkedToTableFilter = testParams.related_linked_table_key_filter;
-                console.log(browser.params.entities[testParams.schemaName][linkedToTableName]);
+                var dataRow = browser.params.entities[testParams.schemaName][linkedToTableName].find(function (entity) {
+                    return entity.id == testParams.related_linked_table_key_value;
+                });
+                var linkedToTableFilter = testParams.shortest_key_filter + dataRow.RID;
 
                 chaisePage.recordPage.getRelatedTableRows(relatedTableName).then(function(rows) {
                     return rows[0].all(by.tagName("td"));
@@ -54,6 +57,11 @@ describe('View existing record,', function() {
             it("action columns should show edit button that redirects to the recordedit page", function() {
 
                 var relatedTableName = testParams.related_regular_table;
+                var relatedTableKey = testParams.related_regular_table_key_value;
+                var dataRow = browser.params.entities[testParams.schemaName][relatedTableName].find(function (entity) {
+                    return entity.accommodation_id == relatedTableKey;
+                });
+                var relatedTableFilter = testParams.shortest_key_filter + dataRow.RID;
 
                 var EC = protractor.ExpectedConditions;
                 var e = element(by.id('rt-' + relatedTableName));
@@ -71,8 +79,8 @@ describe('View existing record,', function() {
                     allWindows = handles;
                     return browser.switchTo().window(allWindows[1]);
                 }).then(function() {
-                    var result = '/recordedit/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + relatedTableName + "/RID";
-                    expect(browser.driver.getCurrentUrl()).toContain(result);
+                    var result = '/recordedit/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + relatedTableName + "/" + relatedTableKey;
+                    expect(browser.driver.getCurrentUrl()).toBe(result);
                     browser.close();
 
                     return browser.switchTo().window(allWindows[0]);

@@ -6,6 +6,7 @@ var testParams = {
         displayName: "Accommodations",
         title: "Accommodations",
         key: { name: "id", value: "2001", operator: "::gt::"},
+        shortest_key_filter: "RID=",
         sortby: "no_of_rooms",
         columns: [
             { title: "Name of Accommodation", value: "Sherathon Hotel", type: "text"},
@@ -271,13 +272,18 @@ describe('View recordset,', function() {
             });
 
             it("action columns should show view button that redirects to the record page", function() {
+                var dataRow = browser.params.entities[accommodationParams.schemaName][accommodationParams.table_name].find(function (entity) {
+                    return entity.id == accommodationParams.data[0].id;
+                });
+                var filter = accommodationParams.shortest_key_filter + dataRow.RID;
+
                 chaisePage.waitForElementInverse(element(by.id("spinner"))).then(function() {
                     return chaisePage.recordsetPage.getViewActionButtons();
                 }).then(function(viewButtons) {
                     expect(viewButtons.length).toBe(4);
                     return viewButtons[0].click();
                 }).then(function() {
-                    var result = '/record/#' + browser.params.catalogId + "/" + accommodationParams.schemaName + ":" + accommodationParams.table_name + "/id=" + accommodationParams.data[0].id;
+                    var result = '/record/#' + browser.params.catalogId + "/" + accommodationParams.schemaName + ":" + accommodationParams.table_name + "/" + filter;
                     chaisePage.waitForUrl(result, browser.params.defaultTimeout).finally(function() {
                         expect(browser.driver.getCurrentUrl()).toContain(result);
                         browser.navigate().back();
@@ -286,7 +292,12 @@ describe('View recordset,', function() {
             });
 
             it("action columns should show edit button that redirects to the recordedit page", function() {
+                var dataRow = browser.params.entities[accommodationParams.schemaName][accommodationParams.table_name].find(function (entity) {
+                    return entity.id == accommodationParams.data[0].id;
+                });
+                var filter = accommodationParams.shortest_key_filter + dataRow.RID;
                 var allWindows;
+
                 chaisePage.waitForElementInverse(element(by.id("spinner"))).then(function() {
                     return chaisePage.recordsetPage.getEditActionButtons();
                 }).then(function(editButtons) {
@@ -298,7 +309,7 @@ describe('View recordset,', function() {
                     allWindows = handles;
                     return browser.switchTo().window(allWindows[1]);
                 }).then(function() {
-                    var result = '/recordedit/#' + browser.params.catalogId + "/" + accommodationParams.schemaName + ":" + accommodationParams.table_name + "/id=" + accommodationParams.data[0].id;
+                    var result = '/recordedit/#' + browser.params.catalogId + "/" + accommodationParams.schemaName + ":" + accommodationParams.table_name + "/" + filter;
                     browser.driver.getCurrentUrl().then(function(url) {
                         // Store this for use in later spec.
                         recEditUrl = url;
@@ -502,10 +513,15 @@ describe('View recordset,', function() {
         });
 
         it("clicking view action should change current window with the same window ID and a new page ID.", function () {
+            var dataRow = browser.params.entities[accommodationParams.schemaName][accommodationParams.table_name].find(function (entity) {
+                return entity.id == accommodationParams.data[0].id;
+            });
+            var filter = accommodationParams.shortest_key_filter + dataRow.RID;
+
             chaisePage.recordsetPage.getViewActionButtons().then(function(viewButtons) {
                 return viewButtons[0].click();
             }).then(function() {
-                var result = '/record/#' + browser.params.catalogId + "/" + accommodationParams.schemaName + ":" + accommodationParams.table_name + "/id=" + accommodationParams.data[0].id;
+                var result = '/record/#' + browser.params.catalogId + "/" + accommodationParams.schemaName + ":" + accommodationParams.table_name + "/" + filter;
                 return chaisePage.waitForUrl(result, browser.params.defaultTimeout);
             }).finally(function() {
                 expect(chaisePage.getWindowName()).toBe(windowId);
@@ -521,6 +537,10 @@ describe('View recordset,', function() {
         });
 
         it("clicking edit action should open a new window with a new window ID and a new page ID.", function () {
+            var dataRow = browser.params.entities[accommodationParams.schemaName][accommodationParams.table_name].find(function (entity) {
+                return entity.id == accommodationParams.data[0].id;
+            });
+            var filter = accommodationParams.shortest_key_filter + dataRow.RID;
             var allWindows;
 
             chaisePage.recordsetPage.getEditActionButtons().then(function(editButtons) {
@@ -531,7 +551,7 @@ describe('View recordset,', function() {
                 allWindows = handles;
                 return browser.switchTo().window(allWindows[1]);
             }).then(function() {
-                var result = '/recordedit/#' + browser.params.catalogId + "/" + accommodationParams.schemaName + ":" + accommodationParams.table_name + "/id=" + accommodationParams.data[0].id;
+                var result = '/recordedit/#' + browser.params.catalogId + "/" + accommodationParams.schemaName + ":" + accommodationParams.table_name + "/" + filter;
                 return chaisePage.waitForUrl(result, browser.params.defaultTimeout);
             }).finally(function() {
                 expect(chaisePage.getWindowName()).not.toBe(windowId);

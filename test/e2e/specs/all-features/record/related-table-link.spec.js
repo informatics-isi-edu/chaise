@@ -320,6 +320,12 @@ describe('View existing record,', function() {
                           });
                        rows = chaisePage.recordsetPage.getRows();
                    }).then(function(ct){
+                       // click sort on column header to get consistent order
+                       return chaisePage.recordSetPage.getRecordsetColumnHeader("id");
+                   }).then(function(header) {
+                       return header.click();
+                   }).then(function() {
+                       // get the 4th displayed rows select action button
                        return rows.get(3).all(by.css(".select-action-button"));
                    }).then(function(selectButtons){
                        return selectButtons[0].click();
@@ -352,7 +358,10 @@ describe('View existing record,', function() {
                 it("on click of View button should redirect to record page of related entity", function(){
                     var relatedTableName = testParams.association_table_name; // association table
                     var linkedToTableName = testParams.leaf_table; // linked to table
-                    var linkedToTableFilter = testParams.leaf_table_filter;
+                    var dataRow = browser.params.entities[testParams.schemaName][linkedToTableName].find(function (entity) {
+                        return entity.id == testParams.leaf_table_filter;
+                    });
+                    var linkedToTableFilter = "RID=" + dataRow.RID;
 
                     chaisePage.recordPage.getRelatedTableRows(relatedTableName).then(function(rows) {
                         return rows[0].all(by.tagName("td"));
@@ -361,7 +370,7 @@ describe('View existing record,', function() {
                     }).then(function(actionButtons) {
                         return actionButtons[0].click();
                     }).then(function() {
-                        var result = '/record/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + linkedToTableName + "/id=" + linkedToTableFilter;
+                        var result = '/record/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + linkedToTableName + "/" + linkedToTableFilter;
                         chaisePage.waitForUrl(result, browser.params.defaultTimeout).finally(function() {
                             expect(browser.driver.getCurrentUrl()).toContain(result);
                             browser.navigate().back();
@@ -415,6 +424,12 @@ describe('View existing record,', function() {
                            });
                         rows = chaisePage.recordsetPage.getRows();
                     }).then(function(ct){
+                        // click sort on column header to get consistent order
+                        return chaisePage.recordSetPage.getRecordsetColumnHeader("id");
+                    }).then(function(header) {
+                        return header.click();
+                    }).then(function() {
+                        // click the third row, the first one should already be selected after sorting
                         return browser.executeScript("return $('.modal-body tr input[type=checkbox]').get(2);");
                     }).then(function (selectButtons){
                         selectButtons.click();

@@ -38,8 +38,8 @@ var testParams = {
             "title", "website", "product-add_fk_category", "rating", "summary", "description", "no_of_rooms", "opened_on", "date_col", "luxurious"
         ],
         results: [
-            ["new title 1",  {"link":"https://example1.com/", "value":"Link to Website"}, {"link":"{{{chaise_url}}}/record/#{{catalog_id}}/product-add:category/term=Hotel", "value":"Hotel"}, "1.0000", "This is the summary of this column 1.", "Description 1", "1", "2017-01-01 01:01:01", "2017-01-01", "false"],
-            ["new title 2",  {"link":"https://example2.com/", "value":"Link to Website"}, {"link":"{{{chaise_url}}}/record/#{{catalog_id}}/product-add:category/term=Ranch", "value":"Ranch"}, "2.0000", "This is the summary of this column 2.", "Description 2", "2", "2017-02-02 02:02:02", "2017-02-02", "true"]
+            ["new title 1",  {"link":"https://example1.com/", "value":"Link to Website"}, {"link":"{{{chaise_url}}}/record/#{{catalog_id}}/product-add:category/term=Castle", "value":"Castle"}, "1.0000", "This is the summary of this column 1.", "Description 1", "1", "2017-01-01 01:01:01", "2017-01-01", "false"],
+            ["new title 2",  {"link":"https://example2.com/", "value":"Link to Website"}, {"link":"{{{chaise_url}}}/record/#{{catalog_id}}/product-add:category/term=Castle", "value":"Castle"}, "2.0000", "This is the summary of this column 2.", "Description 2", "2", "2017-02-02 02:02:02", "2017-02-02", "true"]
         ],
         files: []
     }, {

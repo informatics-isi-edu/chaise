@@ -47,7 +47,7 @@ var testParams = {
         ],
         results: [
             ["new title 1",  {"link":"https://example1.com/", "value":"Link to Website"},
-            {"link":"{{{chaise_url}}}/record/#{{catalog_id}}/product-edit:category/id=10004", "value":"Ranch"},
+            {"link":"{{{chaise_url}}}/record/#{{catalog_id}}/product-edit:category/id=10004", "value":"Castle"},
             "1.0000", "This is the summary of this column 1.", "Description 1", "1", "2017-01-01 01:01:01", "2017-01-01", "false"]
         ],
         files: []

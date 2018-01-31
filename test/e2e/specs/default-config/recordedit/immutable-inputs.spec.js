@@ -226,10 +226,14 @@ describe('Record Add with defaults', function() {
             });
 
             it("and redirect to a record page with the default values.", function() {
+                var dataRow = browser.params.entities["defaults"][testParams.table_name].find(function (entity) {
+                    return entity.id == 1;
+                });
+                var filter = "RID=" + dataRow.RID;
                 // After submitting 1 record in RecordEdit, the expected record
                 // page url will have a id of 1 because it'll always be the first
                 // row of this table in the new catalog created by the defaults tests.
-                var redirectUrl = browser.params.url + "/record/#" + browser.params.catalogId + "/defaults:" + testParams.table_name + '/id=1';
+                var redirectUrl = browser.params.url + "/record/#" + browser.params.catalogId + "/defaults:" + testParams.table_name + '/' + filter;
 
                 chaisePage.waitForUrl(redirectUrl).then(function() {
                     expect(browser.driver.getCurrentUrl()).toBe(redirectUrl);

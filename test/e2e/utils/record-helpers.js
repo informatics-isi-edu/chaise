@@ -122,11 +122,15 @@ exports.testPresentation = function (tableParams) {
                     columnEls = chaisePage.recordPage.getEntityRelatedTable(column.title);
 
                     if (column.presentation && column.presentation.type == "url") {
+                        var dataRow = browser.params.entities["product-record"][tableParams.table_name].find(function (entity) {
+                            return entity.id == column.presentation.key_value;
+                        })
                         chaisePage.recordPage.getLinkChild(columnEls).then(function (aTag) {
                             columnUrl = mustache.render(column.presentation.template, {
                                 "catalog_id": process.env.catalogId,
                                 "chaise_url": process.env.CHAISE_BASE_URL,
                             });
+                            columnUrl += "RID=" + dataRow.RID;
 
                             expect(aTag.getAttribute('href')).toEqual(columnUrl);
                             expect(aTag.getText()).toEqual(column.value);

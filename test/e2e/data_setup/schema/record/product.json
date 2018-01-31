@@ -508,11 +508,16 @@
         "description": {
           "display": "Bookings"
         },
-
+        "tag:isrd.isi.edu,2016:visible-columns":{
+          "compact/brief": ["id", "accommodation_id", "price", "booking_date", "image_id"]
+        },
         "tag:isrd.isi.edu,2016:table-display": {
           "*": {
             "separator_markdown": " ",
             "row_markdown_pattern": "**{{id}}**{.vocab} **{{price}}**{.vocab} **{{booking_date}}**{.vocab}"
+          },
+          "compact/brief": {
+            "row_order": [{"column": "id"}]
           }
         }
       }

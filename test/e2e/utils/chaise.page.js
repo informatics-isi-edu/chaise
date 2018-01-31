@@ -753,7 +753,7 @@ var recordPage = function() {
     };
 
     this.getErrorModalReloadButton = function(){
-        return browser.executeScript("return $('button')[1]");  
+        return browser.executeScript("return $('button')[1]");
     };
 
     this.getErrorModalOkButton = function(){
@@ -903,6 +903,10 @@ var recordsetPage = function() {
 
     this.getDownloadButton = function (limit) {
         return element(by.css("downloadCSV-link"));
+    };
+
+    this.getRecordsetColumnHeader = function (name) {
+        return element(by.id(name + "-header"));
     };
 
     /******* Facet selectors for recordset with faceting ********/
