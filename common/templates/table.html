@@ -16,7 +16,7 @@
                     </div>
                 </th>
                 <th nowrap ng-repeat="col in vm.columns track by $index">
-                    <span id="{{col.name}}-header" class="table-column-displayname" ng-attr-uib-tooltip="{{::(col.comment) ? col.comment : undefined}}" ng-attr-tooltip-placement="{{::(col.comment) ? 'top' : undefined}}" title="{{col.comment}}" ng-click="col.sortable && vm.enableSort && sortby(col.name)">
+                    <span class="table-column-displayname" ng-attr-uib-tooltip="{{::(col.comment) ? col.comment : undefined}}" ng-attr-tooltip-placement="{{::(col.comment) ? 'top' : undefined}}" title="{{col.comment}}" ng-click="col.sortable && vm.enableSort && sortby(col.name)">
                         <span ng-if="::col.displayname.isHTML" ng-bind-html="::col.displayname.value"></span>
                         <span ng-if="::!col.displayname.isHTML" ng-bind="::col.displayname.value"></span>
                     </span>

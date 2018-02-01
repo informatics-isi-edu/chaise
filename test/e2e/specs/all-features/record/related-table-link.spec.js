@@ -319,8 +319,8 @@ describe('View existing record,', function() {
                             });
                         });
 
-                        return chaisePage.recordsetPage.getRows();
-                    }).then(function (rows) {
+                        rows = chaisePage.recordsetPage.getRows();
+
                         // get the 4th displayed rows select action button
                         return rows.get(3).all(by.css(".select-action-button"));
                     }).then(function(selectButtons){

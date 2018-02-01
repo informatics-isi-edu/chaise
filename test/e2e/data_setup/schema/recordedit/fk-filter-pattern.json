@@ -320,7 +320,7 @@
                     "*": ["id", "alpha_id", "int_value"]
                 },
                 "tag:isrd.isi.edu,2016:table-display": {
-                    "compact/brief": {
+                    "compact": {
                         "row_order": [{"column": "id"}]
                     }
                 }
@@ -390,7 +390,7 @@
                     "*": ["id", "fk2", "position_col"]
                 },
                 "tag:isrd.isi.edu,2016:table-display": {
-                    "compact/brief": {
+                    "compact": {
                         "row_order": [{"column": "id"}]
                     }
                 }

@@ -122,7 +122,7 @@ exports.testPresentation = function (tableParams) {
                     columnEls = chaisePage.recordPage.getEntityRelatedTable(column.title);
 
                     if (column.presentation && column.presentation.type == "url") {
-                        var dataRow = browser.params.entities["product-record"][col.presentation.table_name].find(function (entity) {
+                        var dataRow = browser.params.entities["product-record"][column.presentation.table_name].find(function (entity) {
                             return entity.id == column.presentation.key_value;
                         });
                         chaisePage.recordPage.getLinkChild(columnEls).then(function (aTag) {
@@ -249,7 +249,7 @@ exports.testPresentation = function (tableParams) {
         chaisePage.waitForElement(element(by.id('entity-booking'))).then(function(){
           // This selector captures link of first record under image_id column of booking inline entry in
           // accommodation table of product-record schema with id 2002;
-            return browser.executeScript("return $('#divRecordSet  td:nth-child(5) a')");
+            return browser.executeScript("return $('#divRecordSet  td:nth-child(6) a')");
         }).then(function(imageLinks){
             browser.executeScript("return window.open(arguments[0], '_blank')", imageLinks[0]);
             return browser.getAllWindowHandles();

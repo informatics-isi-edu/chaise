@@ -30,7 +30,7 @@ var testParams = {
             {"title": "new title 1", "website": "https://example1.com", "category": {index: 0, value: "Castle"},
              "rating": "1", "summary": "This is the summary of this column 1.", "description": "## Description 1",
              "no_of_rooms": "1", "opened_on": moment("2017-01-01 01:01:01", "YYYY-MM-DD hh:mm:ss"), "date_col": "2017-01-01", "luxurious": false},
-            {"title": "new title 2", "website": "https://example2.com", "category": {index: 1, value: "Castle"},
+            {"title": "new title 2", "website": "https://example2.com", "category": {index: 1, value: "Resort"},
              "rating": "2",  "summary": "This is the summary of this column 2.", "description": "## Description 2",
              "no_of_rooms": "2", "opened_on": moment("2017-02-02 02:02:02", "YYYY-MM-DD hh:mm:ss"), "date_col": "2017-02-02", "luxurious":  true}
         ],
