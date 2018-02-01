@@ -320,7 +320,7 @@ describe('View existing record,', function() {
                         });
 
                         rows = chaisePage.recordsetPage.getRows();
-
+                    }).then(function(ct){
                         // get the 4th displayed rows select action button
                         return rows.get(3).all(by.css(".select-action-button"));
                     }).then(function(selectButtons){
@@ -374,7 +374,7 @@ describe('View existing record,', function() {
                     });
                 });
 
-                it("table with defined Search app navigation in the annotation should be redirected to the Recordset page", function(done){
+                it("table with defined Search app navigation in the annotation should be redirected to the Recordset page", function(){
                     chaisePage.waitForElement(element(by.id('rt-heading-schedule')));
                     var relatedTableNameOnRecord = testParams.schedule,
                         relatedTableNameOnRecordset = testParams.schedule,
@@ -391,11 +391,6 @@ describe('View existing record,', function() {
                     }).then(function() {
                         expect(chaisePage.recordsetPage.getPageTitleElement().getText()).toBe(testParams.schedule);
                         browser.navigate().back();
-                    }).then(function () {
-                        done();
-                    }).catch(function (err) {
-                        console.log(err);
-                        done.fail();
                     });
                 });
             });

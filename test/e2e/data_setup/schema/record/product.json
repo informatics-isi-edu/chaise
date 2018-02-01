@@ -514,9 +514,7 @@
         "tag:isrd.isi.edu,2016:table-display": {
           "*": {
             "separator_markdown": " ",
-            "row_markdown_pattern": "**{{id}}**{.vocab} **{{price}}**{.vocab} **{{booking_date}}**{.vocab}"
-          },
-          "compact/brief": {
+            "row_markdown_pattern": "**{{id}}**{.vocab} **{{price}}**{.vocab} **{{booking_date}}**{.vocab}",
             "row_order": [{"column": "id"}]
           }
         }

@@ -27,10 +27,10 @@ var testParams = {
             { name: "json_col", title: "json_col", type:"json"}
         ],
         inputs: [
-            {"title": "new title 1", "website": "https://example1.com", "category": {index: 0, value: "Castle"},
+            {"title": "new title 1", "website": "https://example1.com", "category": {index: 0, value: "Hotel"},
              "rating": "1", "summary": "This is the summary of this column 1.", "description": "## Description 1",
              "no_of_rooms": "1", "opened_on": moment("2017-01-01 01:01:01", "YYYY-MM-DD hh:mm:ss"), "date_col": "2017-01-01", "luxurious": false},
-            {"title": "new title 2", "website": "https://example2.com", "category": {index: 1, value: "Resort"},
+            {"title": "new title 2", "website": "https://example2.com", "category": {index: 1, value: "Ranch"},
              "rating": "2",  "summary": "This is the summary of this column 2.", "description": "## Description 2",
              "no_of_rooms": "2", "opened_on": moment("2017-02-02 02:02:02", "YYYY-MM-DD hh:mm:ss"), "date_col": "2017-02-02", "luxurious":  true}
         ],
@@ -38,8 +38,8 @@ var testParams = {
             "title", "website", "product-add_fk_category", "rating", "summary", "description", "no_of_rooms", "opened_on", "date_col", "luxurious"
         ],
         results: [
-            ["new title 1",  {"link":"https://example1.com/", "value":"Link to Website"}, {"link":"{{{chaise_url}}}/record/#{{catalog_id}}/product-add:category/term=Castle", "value":"Castle"}, "1.0000", "This is the summary of this column 1.", "Description 1", "1", "2017-01-01 01:01:01", "2017-01-01", "false"],
-            ["new title 2",  {"link":"https://example2.com/", "value":"Link to Website"}, {"link":"{{{chaise_url}}}/record/#{{catalog_id}}/product-add:category/term=Castle", "value":"Castle"}, "2.0000", "This is the summary of this column 2.", "Description 2", "2", "2017-02-02 02:02:02", "2017-02-02", "true"]
+            ["new title 1",  {"link":"https://example1.com/", "value":"Link to Website"}, {"link":"{{{chaise_url}}}/record/#{{catalog_id}}/product-add:category/term=Hotel", "value":"Hotel"}, "1.0000", "This is the summary of this column 1.", "Description 1", "1", "2017-01-01 01:01:01", "2017-01-01", "false"],
+            ["new title 2",  {"link":"https://example2.com/", "value":"Link to Website"}, {"link":"{{{chaise_url}}}/record/#{{catalog_id}}/product-add:category/term=Ranch", "value":"Ranch"}, "2.0000", "This is the summary of this column 2.", "Description 2", "2", "2017-02-02 02:02:02", "2017-02-02", "true"]
         ],
         files: []
     }, {
