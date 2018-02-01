@@ -861,7 +861,13 @@
                     }
                 }
             ],
-            "annotations": {}
+            "annotations": {
+                "tag:isrd.isi.edu,2016:table-display": {
+                    "compact": {
+                        "row_order": [{"column": "id"}]
+                    }
+                }
+            }
         },
         "related_table_markdown": {
             "comment":"This is a related table with markdown annotations",
