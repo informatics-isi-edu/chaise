@@ -407,7 +407,6 @@ describe('View existing record,', function() {
                     expect(addRelatedRecordLink.getText()).toBe("Add", "The Add button is not displayed as Add");
 
                     addRelatedRecordLink.click().then(function(){
-                    }).then(function(){
                         browser.wait(function () {
                                return chaisePage.recordsetPage.getRows().count().then(function (ct) {
                                    return (ct > 0);
@@ -415,11 +414,6 @@ describe('View existing record,', function() {
                            });
                         rows = chaisePage.recordsetPage.getRows();
                     }).then(function(ct){
-                        // click sort on column header to get consistent order
-                        return chaisePage.recordsetPage.getRecordsetColumnHeader("id");
-                    }).then(function(header) {
-                        return header.click();
-                    }).then(function() {
                         // click the third row, the first one should already be selected after sorting
                         return browser.executeScript("return $('.modal-body tr input[type=checkbox]').get(2);");
                     }).then(function (selectButtons){
