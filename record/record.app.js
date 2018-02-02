@@ -43,11 +43,12 @@
         $logProvider.debugEnabled(chaiseConfig.debug === true);
     }])
 
-    .run(['constants', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'MathUtils', 'modalBox', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', 'Errors',
-        function runApp(constants, DataUtils, ERMrest, ErrorService, headInjector, MathUtils, modalBox, Session, UiUtils, UriUtils, $log, $rootScope, $window, Errors) {
+    .run(['constants', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'logActions', 'MathUtils', 'modalBox', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', 'Errors',
+        function runApp(constants, DataUtils, ERMrest, ErrorService, headInjector, logActions, MathUtils, modalBox, Session, UiUtils, UriUtils, $log, $rootScope, $window, Errors) {
 
         var session,
-            context = {};
+            context = {},
+            errorData = {};
         $rootScope.displayReady = false;
         $rootScope.recDisplayReady = false;
         $rootScope.showSpinner = false; // this property is set from common modules for controlling the spinner at a global level that is out of the scope of the app
@@ -88,7 +89,7 @@
         function getRelatedTableData(refObj, accordionOpen, context, callback){
 
             var pageSize = getPageSize(refObj);
-            refObj.read(pageSize).then(function (page) {
+            refObj.read(pageSize, {action: logActions.recordRelatedRead}).then(function (page) {
                 var model = {
                     reference: refObj,
                     columns: refObj.columns,
@@ -126,6 +127,9 @@
                 }).catch(function(e) {
                     // The .catch from the outer promise won't catch errors from this closure
                     // so a .catch needs to be appended here.
+                    errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
+                    errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
+                    e.errorData = errorData;
                     throw e;
                 });
         }
@@ -150,10 +154,7 @@
                 $rootScope.reference.session = session;
                 $log.info("Reference: ", $rootScope.reference);
 
-                // There should only ever be one entity related to this reference, we are
-                // reading 2 entities (the second is added in ermrest.read) and if we get
-                // more than 1 entity then we throw a multipleRecordError.
-                return $rootScope.reference.read(2);
+                return $rootScope.reference.read(1, {action: logActions.recordRead});
             }, function error(exception) {
                 throw exception;
             }).then(function getPage(page) {
@@ -163,16 +164,16 @@
                 *  This could be link to RECORDSET or SEARCH.
                 */
                 var recordSetLink = page.reference.unfilteredReference.contextualize.compact.appLink;
-
+                var tableDisplayName = page.reference.displayname.value;
                 if (page.tuples.length < 1) {
-                    throw new Errors.noRecordError({}, recordSetLink);
+                    throw new Errors.noRecordError({}, tableDisplayName, recordSetLink);
                 }
-                else if(page.tuples.length > 1){
+                else if(page.hasNext || page.hasPrevious){
                     $rootScope.displayReady = true;
                     // TODO this will break going to recordset with filters/facets, make sure RS has proper data visible
                     // the problem is that if there's a filter in the URL, the app will redirect to recordset and understand the filter, but the app won't show anything
                     // selected inside the facet. So we will have a recordset page that is filtered by a filter you cant remove unless the URL is changed
-                    throw new Errors.multipleRecordError(recordSetLink);
+                    throw new Errors.multipleRecordError(tableDisplayName, recordSetLink);
                 }
 
                 var tuple = $rootScope.tuple = page.tuples[0];

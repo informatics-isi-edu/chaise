@@ -103,7 +103,7 @@
                                     <span class="markdown-container" ng-bind-html="tableModels[$index].page.content | trustedHTML"></span>
                                 </div>
                                 <div ng-show="tableModels[$index].displayType != 'markdown'">
-                                    <record-table class="related-table" id="rt-{{::ctrl.makeSafeIdAttr(relatedRef.displayname.value)}}" vm="::tableModels[$index]"></record-table>
+                                    <record-table class="related-table" id="rt-{{::ctrl.makeSafeIdAttr(relatedRef.displayname.value)}}" vm="::tableModels[$index]" parent-reference="reference"></record-table>
                                 </div>
                             </div>
                         </div>

@@ -1,7 +1,7 @@
 (function() {
     'use strict';
-    angular.module('chaise.recordcreate', ['chaise.errors','chaise.utils']).factory("recordCreate", ['$cookies', '$log', '$window', '$uibModal', 'AlertsService', 'DataUtils', 'UriUtils', 'modalBox', '$q',
-     function($cookies, $log, $window, $uibModal, AlertsService, DataUtils, UriUtils, modalBox, $q) {
+    angular.module('chaise.recordcreate', ['chaise.errors','chaise.utils']).factory("recordCreate", ['$cookies', '$log', '$window', '$uibModal', 'AlertsService', 'DataUtils', 'UriUtils', 'modalBox', '$q', 'logActions',
+     function($cookies, $log, $window, $uibModal, AlertsService, DataUtils, UriUtils, modalBox, $q, logActions) {
 
         var viewModel = {};
         var GV_recordEditModel = {},
@@ -16,7 +16,7 @@
          *
          * @param  {array} rows           array contains updated recrds attributes
          * @param  {object} rsReference   record reference object
-         * @return {boolean}              whether rows have valid file columns or not 
+         * @return {boolean}              whether rows have valid file columns or not
          */
         function areFilesValid(rows, rsReference) {
             var isValid = true, index = 0;
@@ -59,10 +59,10 @@
 
             return isValid;
         }
-        
+
 
         /**
-         * checkUpdate - to check all recrds are updated; passed as callback to uploadFiles(). 
+         * checkUpdate - to check all recrds are updated; passed as callback to uploadFiles().
          *
          * @param  {array} submissionRowsCopy   array contains updated recrds attributes
          * @param  {array} rsTuples             array with data tuples value from calling function
@@ -136,8 +136,9 @@
          * @param  {object} rsQueryParams       object contains queryparams of context from calling function
          * @param  {object} vm                  recoredit view model
          * @param  {object} onSuccessFunction   callback
+         * @param  {object} logObject           The object that we want to log in the create/update request
          */
-        function addRecords(isUpdate, derivedref, recordEditModel, isModalUpdate, rsReference, rsTuples, rsQueryParams, vm, onSuccessFunction) {
+        function addRecords(isUpdate, derivedref, recordEditModel, isModalUpdate, rsReference, rsTuples, rsQueryParams, vm, onSuccessFunction, logObject) {
             var model = isModalUpdate ? GV_recordEditModel : recordEditModel;
             viewModel = vm;
             var form = viewModel.formContainer;
@@ -169,18 +170,18 @@
                 }
             }
 
-            //call uploadFiles which will upload files and callback on success 
+            //call uploadFiles which will upload files and callback on success
             uploadFiles(submissionRowsCopy, rsReference, function() {
 
                 var fn = "create",
-                    args = [submissionRowsCopy];
+                    args = [submissionRowsCopy, logObject];
                 var fnScope = isModalUpdate ? derivedref.unfilteredReference.contextualize.entryCreate : rsReference.unfilteredReference.contextualize.entryCreate;
 
                 if (isUpdate) {
                     var data = checkUpdate(submissionRowsCopy, rsTuples);
                     // submit rootScope.tuples because we are changing and
                     // comparing data from the old data set for the tuple with the updated data set from the UI
-                    fn = "update", fnScope = rsReference, args = [rsTuples];
+                    fn = "update", fnScope = rsReference, args = [rsTuples, logObject];
                 }
 
                 fnScope[fn].apply(fnScope, args).then(function success(result) {
@@ -192,11 +193,17 @@
                     var resultsReference = page.reference;
                     if (isUpdate) {
                         var data = checkUpdate(submissionRowsCopy, rsTuples);
-                        // check if there is a window that opened the current one
-                        // make sure the update function is defined for that window
-                        // verify whether we still have a valid vaue to call that function with
-                        if (window.opener && window.opener.updated && rsQueryParams.invalidate) {
-                            window.opener.updated(rsQueryParams.invalidate);
+                        try {
+                            // check if there is a window that opened the current one
+                            // make sure the update function is defined for that window
+                            // verify whether we still have a valid vaue to call that function with
+                            if (window.opener && window.opener.updated && rsQueryParams.invalidate) {
+                                window.opener.updated(rsQueryParams.invalidate);
+                            }
+                        } catch (exp) {
+                          // if window.opener is from another origin, this will result in error on accessing any attribute in window.opener
+                          // And if it's from another origin, we don't need to call updated since it's not
+                          // the same row that we wanted to update in recordset (table directive)
                         }
                     } else {
                         if (!isModalUpdate) {
@@ -286,7 +293,7 @@
                 originalTuple = null;
                 editOrCopy = false;
             }
-            
+
             /**
              * Callback to get the list of disabled tuples.
              * This is only applicable in case of adding related entities.
@@ -297,20 +304,20 @@
             params.getDisabledTuples = function (page, pageSize) {
                 var defer = $q.defer();
                 var disabledRows = [], index;
-                
-                domainRef.setSamePaging(page).read(pageSize).then(function (newPage) {
+
+                domainRef.setSamePaging(page).read(pageSize, {action: logActions.preCreateAssociationSelected}).then(function (newPage) {
                     newPage.tuples.forEach(function (newTuple) {
                         index = page.tuples.findIndex(function (tuple) {
                             return tuple.uniqueId == newTuple.uniqueId;
                         });
                         if (index > -1) disabledRows.push(page.tuples[index]);
                     });
-                    
+
                     defer.resolve(disabledRows);
                 }).catch(function (err) {
                     throw err;
                 });
-                
+
                 return defer.promise;
             };
 
@@ -319,6 +326,11 @@
             params.context = "compact/select";
             params.selectMode = isModalUpdate ? modalBox.multiSelectMode : modalBox.singleSelectMode;
             params.selectedRows = [];
+            //NOTE assumption is that this function is only is called for adding pure and binary association
+            params.logObject = {
+                action: logActions.preCreateAssociation,
+                referrer: rsReference.defaultLogInfo
+            };
 
             var modalInstance = $uibModal.open({
                 animation: false,
@@ -348,8 +360,15 @@
                     });
 
                 }
-                if (isModalUpdate)
-                    addRecords(viewModel.editMode, derivedref, nullArr, isModalUpdate, rsReference, rsTuples, rsQueryParams, viewModel, viewModel.onSuccess);
+
+                // NOTE this if case is unnecessary, this is always modal update
+                if (isModalUpdate) {
+                    var logObject = {
+                        action: logActions.createAssociation,
+                        referrer: rsReference.defaultLogInfo
+                    };
+                    addRecords(viewModel.editMode, derivedref, nullArr, isModalUpdate, rsReference, rsTuples, rsQueryParams, viewModel, viewModel.onSuccess, logObject);
+                }
 
             });
         }

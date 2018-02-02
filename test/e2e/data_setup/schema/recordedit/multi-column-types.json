@@ -555,6 +555,18 @@
                     "annotations": {
                         "tag:isrd.isi.edu,2016:generated": null
                     }
+                },
+                {
+                    "comment": "A generated asset column with an initial non-null value",
+                    "name": "asset_col_gen",
+                    "default": null,
+                    "nullok": true,
+                    "type": {
+                        "typename": "text"
+                    },
+                    "annotations": {
+                        "tag:isrd.isi.edu,2017:asset": null
+                    }
                 }
             ],
             "keys": [

@@ -15,6 +15,7 @@
         "timestamptz_col_gen": "2016-01-18T00:00:00-08:00",
         "date_col_gen": "2016-08-15",
         "json_col_gen":  "82.89",
-        "fk_col_gen": 1
+        "fk_col_gen": 1,
+        "asset_col_gen": "http://test.com/hatract/test"
     }
 ]

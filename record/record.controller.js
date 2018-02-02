@@ -3,9 +3,8 @@
 
     angular.module('chaise.record')
 
-
-    .controller('RecordController', ['AlertsService',  'DataUtils', 'ErrorService', 'MathUtils', 'messageMap', 'modalBox', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$uibModal', '$window','$timeout',
-        function RecordController(AlertsService, DataUtils, ErrorService, MathUtils, messageMap, modalBox, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $uibModal, $window, $timeout) {
+    .controller('RecordController', ['AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$uibModal', '$window',
+        function RecordController(AlertsService, DataUtils, ErrorService, logActions, MathUtils, messageMap, modalBox, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $uibModal, $window) {
         var vm = this;
 
         var addRecordRequests = {}; // <generated unique id : reference of related table>
@@ -79,14 +78,15 @@
 
         vm.deleteRecord = function() {
             var errorData = {};
-            $rootScope.reference.delete().then(function deleteSuccess() {
+            $rootScope.reference.delete({action: logActions.recordDelete}).then(function deleteSuccess() {
                 // Get an appLink from a reference to the table that the existing reference came from
                 var unfilteredRefAppLink = $rootScope.reference.table.reference.contextualize.compact.appLink;
                 $rootScope.showSpinner = false;
                 $window.location.href = unfilteredRefAppLink;
             }, function deleteFail(error) {
                 $rootScope.showSpinner = false;
-                errorData.redirectUrl = $rootScope.reference.contextualize.detailed.appLink;
+                errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
+                errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
                 error.errorData = errorData;
                 throw error;
             });
@@ -228,10 +228,12 @@
         * @param {bool} isModalUpdate if update happens through modal pop up
         */
         function readUpdatedTable(refObj, dataModel, idx, isModalUpdate){
+            var errorData = {};
             if (isModalUpdate || completed[refObj.uri] || updated[refObj.location.schemaName + ":" + refObj.location.tableName]) {
                 delete updated[refObj.location.schemaName + ":" + refObj.location.tableName];
+
                 (function (i) {
-                    refObj.read(dataModel.pageLimit).then(function (page) {
+                    refObj.read(dataModel.pageLimit, {action: logActions.recordRelatedUpdate}).then(function (page) {
                         dataModel.page = page;
                         dataModel.rowValues = DataUtils.getRowValuesFromPage(page);
                     }, function (error) {
@@ -239,6 +241,9 @@
                         throw error;
                     }).catch(function (error) {
                         console.log(error);
+                        errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
+                        errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
+                        error.errorData = errorData;
                         throw error;
                     });
                 })(i);

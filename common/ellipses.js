@@ -9,10 +9,19 @@
         };
     }])
 
-    .directive('ellipses', ['AlertsService', 'ErrorService', 'MathUtils', 'messageMap', 'modalBox', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$uibModal', '$window', 'defaultDisplayname',
-        function(AlertsService, ErrorService, MathUtils, messageMap, modalBox, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $uibModal, $window, defaultDisplayname) {
+    .directive('ellipses', ['AlertsService', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$uibModal', '$window', 'defaultDisplayname',
+        function(AlertsService, ErrorService, logActions, MathUtils, messageMap, modalBox, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $uibModal, $window, defaultDisplayname) {
 
         function deleteReference(scope, reference) {
+            var logObject = {action: logActions.recordsetDelete};
+            // if parentReference exists then it's in the related entities section
+            if (scope.parentReference) {
+                logObject = {
+                    action: logActions.recordRelatedDelete,
+                    referrer: scope.parentReference.defaultLogInfo
+                };
+            }
+
             if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
                 $uibModal.open({
                     templateUrl: "../common/templates/delete-link/confirm_delete.modal.html",
@@ -22,7 +31,7 @@
                 }).result.then(function success() {
                     scope.$root.showSpinner = true;
                     // user accepted prompt to delete
-                    return reference.delete();
+                    return reference.delete(logObject);
                 }).then(function deleteSuccess() {
                     scope.$root.showSpinner = false;
                     // tell parent controller data updated
@@ -38,7 +47,7 @@
                 });
             } else {
                 scope.$root.showSpinner = true;
-                reference.delete().then(function deleteSuccess() {
+                reference.delete(logObject).then(function deleteSuccess() {
                     scope.$root.showSpinner = false;
                     // tell parent controller data updated
                     scope.$emit('record-deleted');
@@ -63,7 +72,8 @@
                 onRowClickBind: '=?',
                 fromTuple: '=?',
                 selected: '=',
-                selectDisabled: "=?"
+                selectDisabled: "=?",
+                parentReference: "=?"
             },
             link: function (scope, element) {
 

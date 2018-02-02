@@ -6,13 +6,18 @@
   <span ng-bind-html="ctrl.params.message"></span>
     <br><br>
     <span ng-bind-html="ctrl.clickActionMessage"></span>
-    <a ng-show="ctrl.params.subMessage" ng-click="ctrl.showDetails()">{{ctrl.linkText}}</a>
+    <a ng-show="ctrl.params.subMessage" ng-click="ctrl.showDetails()">
+      <i class="pull-left glyphicon glyphicon-triangle-right" ng-class="{'glyphicon-triangle-bottom': ctrl.displayDetails, 'glyphicon-triangle-right': !ctrl.displayDetails}"></i>
+    {{ctrl.linkText}}</a>
+
     <br>
-    <span ng-show="ctrl.details">
+
+    <span ng-show="ctrl.displayDetails">
     	<br>
     	<pre ng-bind="ctrl.params.subMessage" style="word-wrap: unset;"></pre>
     </span>
 </div>
 <div class="modal-footer">
+    <button ng-show = "ctrl.showReloadBtn" class="btn btn-default" type="button" ng-click="ctrl.reload()">Reload</button>
     <button class="btn btn-danger" type="button" ng-click="ctrl.ok()">OK</button>
 </div>

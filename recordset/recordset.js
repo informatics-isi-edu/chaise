@@ -28,7 +28,7 @@
         'chaise.modal',
         'chaise.navbar',
         'chaise.record.table',
-        'chaise.resizable', 
+        'chaise.resizable',
         'chaise.utils',
         'ermrestjs',
         'ngCookies',
@@ -57,7 +57,7 @@
     .config(['$uibTooltipProvider', function($uibTooltipProvider) {
         $uibTooltipProvider.options({appendToBody: true});
     }])
-    
+
     //  Enable log system, if in debug mode
     .config(['$logProvider', function($logProvider) {
         $logProvider.debugEnabled(chaiseConfig.debug === true);
@@ -136,18 +136,18 @@
 
             return link;
         };
-        
+
         $scope.create = function() {
             // TODO: Generate a unique id for this request
             // append it to the URL
             // var referrer_id = 'recordset-' + MathUtils.getRandomInt(0, Number.MAX_SAFE_INTEGER);
             // addRecordRequests[referrer_id] = 0;
-            
+
             // open a new tab
             var newRef = recordsetModel.reference.unfilteredReference.contextualize.entryCreate;
             var appLink = newRef.appLink;
             // appLink = appLink + (appLink.indexOf("?") === -1 ? "?" : "&") + 'invalidate=' + UriUtils.fixedEncodeURIComponent(referrer_id);
-            
+
             return appLink;
         };
 
@@ -163,7 +163,7 @@
                 // get bookmark container height
                 elements.bookmarkHeight = $document[0].getElementById('bookmark-container').offsetHeight;
                 // get recordset main container
-                if (chaiseConfig.showFaceting) { 
+                if (chaiseConfig.showFaceting) {
                     elements.container = $document[0].getElementsByClassName("recordset-container with-faceting")[0].getElementsByClassName('main-container')[0];
                 } else {
                     elements.container = $document[0].getElementById('main-content');
@@ -210,7 +210,7 @@
                 }
             }
         });
-        
+
         angular.element($window).bind('resize', function(){
             try {
                 if ( ($rootScope.pageLoaded || recordsetModel.hasLoaded) && recordsetModel.initialized ) {
@@ -231,9 +231,8 @@
     }])
 
     // Register work to be performed after loading all modules
-    .run(['AlertsService', 'context', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'MathUtils', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', 'modalBox',
-        function(AlertsService, context, DataUtils, ERMrest, ErrorService, headInjector, MathUtils, recordsetModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, modalBox) {
-
+    .run(['AlertsService', 'context', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'MathUtils', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', 'modalBox', 'logActions',
+        function(AlertsService, context, DataUtils, ERMrest, ErrorService, headInjector, MathUtils, recordsetModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, modalBox, logActions) {
         try {
             var session;
 
@@ -255,7 +254,7 @@
             };
 
             $rootScope.alerts = AlertsService.alerts;
-            
+
             $rootScope.showFaceting = showFaceting;
             $rootScope.location = $window.location.href;
             recordsetModel.hasLoaded = false;
@@ -309,12 +308,14 @@
 
                     recordsetModel.columns = recordsetModel.reference.columns;
                     recordsetModel.search = recordsetModel.reference.location.searchTerm;
-                    
+
+                    recordsetModel.logObject = {action: logActions.recordsetLoad};
+
                     if (showFaceting) {
                         $log.debug("sending page-loaded message");
                         $rootScope.$broadcast('page-loaded');
                     } else {
-                        recordsetModel.reference.read(recordsetModel.pageLimit).then(function (page) {
+                        recordsetModel.reference.read(recordsetModel.pageLimit, recordsetModel.logObject).then(function (page) {
                             recordsetModel.page = page;
                             recordsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
                             recordsetModel.initialized = true;
@@ -322,7 +323,11 @@
 
                             $rootScope.$broadcast('data-modified');
                         }).catch(function (err) {
-                            throw err;
+                          var errorData = {};
+                          errorData.gotoTableDisplayname = "Home Page";
+                          errorData.redirectUrl = $window.location.origin;
+                          err.errorData = errorData;
+                          throw err;
                         });
                     }
                 }, function error(response) {

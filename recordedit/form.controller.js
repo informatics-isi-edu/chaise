@@ -3,8 +3,8 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'DataUtils', 'ErrorService', 'messageMap', 'modalBox', 'recordCreate', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$uibModal', '$window',
-        function FormController(AlertsService, DataUtils, ErrorService, messageMap, modalBox, recordCreate, recordEditModel, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $uibModal, $window) {
+    .controller('FormController', ['AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'messageMap', 'modalBox', 'recordCreate', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$uibModal', '$window',
+        function FormController(AlertsService, DataUtils, ErrorService, logActions, messageMap, modalBox, recordCreate, recordEditModel, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $uibModal, $window) {
         var vm = this;
         var context = $rootScope.context;
 
@@ -245,7 +245,7 @@
                 }
                 populateSubmissionRow(model.rows[j], model.submissionRows[j], originalTuple, $rootScope.reference.columns, editOrCopy);
             }
-            recordCreate.addRecords(vm.editMode, null, vm.recordEditModel, false, $rootScope.reference, $rootScope.tuples, $rootScope.context.queryParams, vm, onSuccess);
+            recordCreate.addRecords(vm.editMode, null, vm.recordEditModel, false, $rootScope.reference, $rootScope.tuples, $rootScope.context.queryParams, vm, onSuccess, $rootScope.context.logObject);
         }
 
         function onDelete() {
@@ -274,11 +274,12 @@
                 }).result.then(function success() {
                     $rootScope.showSpinner = true;
                     // user accepted prompt to delete
-                    return $rootScope.reference.delete();
+                    return $rootScope.reference.delete({action: logActions.recordEditDelete});
                 }).then(onDelete, function deleteFailure(response) {
                     $rootScope.showSpinner = false;
                     if (typeof response !== "string") {
-                      errorData.redirectUrl = $rootScope.reference.contextualize.detailed.appLink;
+                      errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
+                      errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
                       response.errorData = errorData;
                       throw response;
                     }
@@ -289,7 +290,8 @@
                 $rootScope.showSpinner = true;
                 $rootScope.reference.delete().then(onDelete, function deleteFailure(response) {
                     $rootScope.showSpinner = false;
-                    errorData.redirectUrl = $rootScope.reference.contextualize.detailed.appLink;
+                    errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
+                    errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
                     response.errorData = errorData;
                     throw response;
                 }).catch(function (exception) {
@@ -515,6 +517,8 @@
                     return '';
                 } else if (column.isForeignKey) {
                     return 'Select a value';
+                } else if (column.isAsset) {
+                    return "No file Selected";
                 }
             } catch (e) {
                 $log.info(e);

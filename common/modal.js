@@ -17,24 +17,32 @@
             $uibModalInstance.dismiss('cancel');
         }
     }])
-    .controller('ErrorModalController', ['$uibModalInstance', 'params', 'messageMap', function ErrorModalController($uibModalInstance, params, messageMap) {
+    .controller('ErrorModalController', ['$uibModalInstance', 'params', 'messageMap', '$window', function ErrorModalController($uibModalInstance, params, messageMap, $window) {
         var vm = this;
         vm.params = params;
-        vm.details = false;
+        vm.displayDetails = false;
         vm.linkText = messageMap.showErrDetails;
+        vm.showReloadBtn = false;
+        var reloadMessage = ' <p>  </p>';
 
         if(vm.params.errorCode == 'Multiple Records Found'){
-          vm.clickActionMessage =  messageMap.recordAvailabilityError.multipleRecords;
+            vm.clickActionMessage =  messageMap.recordAvailabilityError.multipleRecords;
         } else if(vm.params.errorCode == 'Record Not Found'){
-          vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
+            vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
         } else {
-          vm.clickActionMessage = messageMap.recordAvailabilityError.pageRedirect + vm.params.pageName;
+            vm.clickActionMessage = messageMap.recordAvailabilityError.pageRedirect + vm.params.pageName + '. ';
+            if(vm.params.appName == 'recordedit'){
+              vm.showReloadBtn = true;
+              reloadMessage = ' <p>' + messageMap.terminalError.reloadMessage +' </p>';
+            }
         }
-
+        // <p> tag is added to maintain the space between click action message and buttons
+        // Also maintains consistency  in their placement irrespective of reload message
+        vm.clickActionMessage += reloadMessage;
 
         vm.showDetails = function() {
-            vm.details = !vm.details;
-            vm.linkText = (vm.details) ? messageMap.hideErrDetails : messageMap.showErrDetails;
+            vm.displayDetails = !vm.displayDetails;
+            vm.linkText = (vm.displayDetails) ? messageMap.hideErrDetails : messageMap.showErrDetails;
         };
 
         vm.ok = function () {
@@ -44,6 +52,11 @@
         vm.cancel = function cancel() {
             $uibModalInstance.dismiss('cancel');
         };
+        vm.reload = function () {
+            $uibModalInstance.close("reload");
+
+        };
+
 
     }])
     .controller('LoginDialogController', ['$uibModalInstance', 'params' , '$sce', function LoginDialogController($uibModalInstance, params, $sce) {
@@ -78,7 +91,7 @@
      *  - context {String} - the current context that the directive fetches data for
      *  - selectMode {String} - the select mode the modal uses
      */
-    .controller('SearchPopupController', ['$scope', '$uibModalInstance', 'DataUtils', 'params', 'Session', 'modalBox', function SearchPopupController($scope, $uibModalInstance, DataUtils, params, Session, modalBox) {
+    .controller('SearchPopupController', ['$scope', '$uibModalInstance', 'DataUtils', 'params', 'Session', 'modalBox', 'logActions', '$timeout', function SearchPopupController($scope, $uibModalInstance, DataUtils, params, Session, modalBox, logActions, $timeout) {
         var vm = this;
 
         vm.params = params;
@@ -113,7 +126,8 @@
         var fetchRecords = function() {
             // TODO this should not be a hardcoded value, either need a pageInfo object across apps or part of user settings
             // The new recordset (recordsetWithFaceting) doesn't require read first. It will take care of this.
-            reference.read(limit).then(function getPseudoData(page) {
+            var logObject = params.logObject ? params.logObject : {action: logActions.recordsetLoad};
+            reference.read(limit, logObject).then(function getPseudoData(page) {
                 var afterRead = function () {
                     vm.tableModel.hasLoaded = true;
                     vm.tableModel.initialized = true;
@@ -139,7 +153,10 @@
             });
         };
 
-        fetchRecords();
+        // make sure to fetch the records after having the recordset directive
+        $timeout(function() {
+            fetchRecords();
+        });
 
         // since this is currently used for single select mode, the isSelected will always be true
         function ok(tuples, isSelected) {

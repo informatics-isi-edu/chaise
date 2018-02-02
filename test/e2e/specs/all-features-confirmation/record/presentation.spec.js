@@ -121,8 +121,8 @@ describe('View existing record,', function() {
         it("should show all of the related tables in the correct order.", function() {
 
             browser.wait(function() {
-                return chaisePage.recordPage.getRelatedTablesWithPanelandHeading().count().then(function(ct) {
-                    return (ct=testParams.no_related_data.tables_order.length);
+                return chaisePage.recordPage.getRelatedTablesWithPanel().count().then(function(ct) {
+                    return (ct == testParams.no_related_data.tables_order.length);
                 });
             }, browser.params.defaultTimeout);
             var showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton();
