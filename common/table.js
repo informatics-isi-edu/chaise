@@ -454,7 +454,7 @@
                         sort: ref.location.sortObject
                     };
 
-                    if (chaiseConfig.showFaceting === true) {
+                    if (scope.vm.showFaceting === true) {
                         update(scope.vm, true, false, false);
                     } else {
                         read(scope);
