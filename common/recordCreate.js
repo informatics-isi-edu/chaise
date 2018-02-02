@@ -193,11 +193,17 @@
                     var resultsReference = page.reference;
                     if (isUpdate) {
                         var data = checkUpdate(submissionRowsCopy, rsTuples);
-                        // check if there is a window that opened the current one
-                        // make sure the update function is defined for that window
-                        // verify whether we still have a valid vaue to call that function with
-                        if (window.opener && window.opener.updated && rsQueryParams.invalidate) {
-                            window.opener.updated(rsQueryParams.invalidate);
+                        try {
+                            // check if there is a window that opened the current one
+                            // make sure the update function is defined for that window
+                            // verify whether we still have a valid vaue to call that function with
+                            if (window.opener && window.opener.updated && rsQueryParams.invalidate) {
+                                window.opener.updated(rsQueryParams.invalidate);
+                            }
+                        } catch (exp) {
+                          // if window.opener is from another origin, this will result in error on accessing any attribute in window.opener
+                          // And if it's from another origin, we don't need to call updated since it's not
+                          // the same row that we wanted to update in recordset (table directive)
                         }
                     } else {
                         if (!isModalUpdate) {
