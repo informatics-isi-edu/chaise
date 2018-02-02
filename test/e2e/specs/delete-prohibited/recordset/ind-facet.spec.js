@@ -274,7 +274,7 @@ describe("Viewing Recordset with Faceting,", function() {
         });
 
         describe("default presentation based on facets annotation ", function () {
-            it("should have 12 facets", function () {
+            it("should have 14 facets", function () {
                 chaisePage.recordsetPage.getAllFacets().count().then(function (ct) {
                     expect(ct).toBe(testParams.totalNumFacets, "Number of all facets is incorrect");
 

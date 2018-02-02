@@ -1,0 +1,65 @@
+{
+    "schema_name": "histogram-faceting",
+    "tables": {
+        "main": {
+            "kind": "table",
+            "table_name": "main",
+            "schema_name": "histogram-faceting",
+            "comment": "main table for the faceting",
+            "keys": [
+                {
+                    "unique_columns": ["id"],
+                    "names": [["faceting", "main_key1"]]
+                }
+            ],
+            "foreign_keys": [],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": {
+                        "typename": "serial4"
+                    }
+                },
+                {
+                    "name": "int_col",
+                    "type": {
+                        "typename": "int4"
+                    }
+                },
+                {
+                    "name": "float_col",
+                    "type": {
+                        "typename": "float4"
+                    }
+                },
+                {
+                    "name": "date_col",
+                    "type": {
+                        "typename": "date"
+                    }
+                },
+                {
+                    "name": "timestamp_col",
+                    "type": {
+                        "typename": "timestamptz"
+                    }
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:visible-columns" : {
+                    "compact": ["id", "int_col", "date_col"],
+                    "filter": {
+                        "and": [
+                            {"source": "id", "ux_mode": "choices"},
+                            {"source": "int_col"},
+                            {"source": "float_col"},
+                            {"source": "date_col"},
+                            {"source": "timestamp_col"}
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}
