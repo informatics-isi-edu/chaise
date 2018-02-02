@@ -176,13 +176,25 @@ describe('View existing record,', function() {
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.sidePanelTest.schemaName + ":" + testParams.sidePanelTest.tableName +  "/id=" + testParams.sidePanelTest.id;
             browser.get(url);
             recSidePan = chaisePage.recordPage.getElementById('recordSidePan-5');
-            chaisePage.waitForElement(recSidePan);
+            fiddlerBtn = element(by.className('sidePanFiddler')).element(by.tagName('i')),
+            chaisePage.waitForElement(fiddlerBtn);
+        });
+        it('Table of contents should be collapsed by default', function(){
+            var recordSidePan = chaisePage.recordPage.getElementById('record-side-pan');
+            recordSidePan.isDisplayed().then(function (bool) {
+                expect(bool).toBeFalsy();
+            });
         });
 
         it('Table of contents should match all related table', function(){
-            var allPan = element.all(by.xpath("//div[contains(@id,'recordSidePan')]"));
-            expect(allPan.count()).toBe(testParams.sidePanelTest.tocCount, "Table of contents count did not match!");
-
+            var  allPan = element.all(by.xpath("//div[contains(@id,'recordSidePan')]"));
+            chaisePage.waitForElement(fiddlerBtn).then(function(){
+              return fiddlerBtn.click();
+            }).then(function(){
+              expect(allPan.count()).toBe(testParams.sidePanelTest.tocCount, "Table of contents count did not match!");
+            }).catch( function(err) {
+               console.log(err);
+           });
         });
 
         it('On click of Related table name in TOC, page should move to the contents and open the table details', function(){
@@ -190,7 +202,6 @@ describe('View existing record,', function() {
                 lastRow = element(by.id('rt-heading-Categories_5')).all(by.tagName('tr')).get(5);
 
             recSidePan.getAttribute('class').then(function(className) {
-                // expect(className).toContain('panel', 'Side pan does not have proper display');
                 return recSidePan.click();
             }).then (function (){
               // related table should be visible
@@ -223,9 +234,7 @@ describe('View existing record,', function() {
 
         it('Side panel should hide/show by clicking pull button', function(){
             var rtTableHeading = chaisePage.recordPage.getRelatedTableHeading(testParams.sidePanelTest.tableToShow),
-                recPan =  chaisePage.recordPage.getElementById('record-side-pan'),
-            fiddlerBtn = element(by.className('sidePanFiddler')).element(by.tagName('i'));
-            chaisePage.waitForElement(fiddlerBtn);
+                recPan =  chaisePage.recordPage.getElementById('record-side-pan');
 
             recSidePan.getAttribute('class').then(function(className) {
               return  fiddlerBtn.getAttribute("class");
