@@ -3,8 +3,8 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$uibModal', '$window',
-        function RecordController(AlertsService, DataUtils, ErrorService, logActions, MathUtils, messageMap, modalBox, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $uibModal, $window) {
+    .controller('RecordController', ['AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$uibModal', '$window', '$timeout',
+        function RecordController(AlertsService, DataUtils, ErrorService, logActions, MathUtils, messageMap, modalBox, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $uibModal, $window, $timeout) {
         var vm = this;
 
         var addRecordRequests = {}; // <generated unique id : reference of related table>
@@ -15,9 +15,11 @@
         var modalUpdate = false;
         vm.alerts = AlertsService.alerts;
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
-        vm.recordSidePanOpen = true;
+
         vm.rowFocus = {};
         vm.sidePanToggleBtnIndicator = "Show";
+
+        vm.recordSidePanOpen = chaiseConfig.showTableOfContents != undefined? !chaiseConfig.showTableOfContents : true;
 
         vm.gotoRelatedTable = function(sectionId, index){
           var safeSectionId = vm.makeSafeIdAttr(sectionId);
@@ -47,7 +49,7 @@
           }
           vm.recordSidePanOpen = !vm.recordSidePanOpen;
         }
-
+        vm.togglePan();
         vm.canCreate = function() {
             return ($rootScope.reference && $rootScope.reference.canCreate && $rootScope.modifyRecord);
         };
