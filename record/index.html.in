@@ -48,7 +48,7 @@
     <loading-spinner ng-show="!displayReady || showSpinner"></loading-spinner>
 
     <div id="main-content" class="container-fluid record-container">
-    
+
         <div class="main-container">
             <alerts alerts="ctrl.alerts"></alerts>
 
@@ -86,19 +86,21 @@
                             </div>
                         </div>
                       <!-- </div> -->
+                      <!-- <hr> -->
                     </div>
+
                 </uib-accordion>
             </div>
             <span id="rt-loading" ng-show="loading">Loading...</span>
         </div>
 
-        <div class="sidePanFiddler" ng-click="ctrl.togglePan()" uib-tooltip="{{'Click here to ' + ((ctrl.recordSidePanOpen) ? 'hide' : 'show') + ' the side panel.'}}" tooltip-placement="bottom">
-          <i ng-class="{'glyphicon glyphicon-forward': ctrl.recordSidePanOpen, 'glyphicon glyphicon-backward': !ctrl.recordSidePanOpen}"></i>
+        <div class="sidePanFiddler" ng-click="ctrl.togglePan()" uib-tooltip="{{'Click to ' + ((ctrl.recordSidePanOpen) ? 'hide' : 'show') + ' the panel.'}}" tooltip-placement="bottom" ng-show="ctrl.showSidePan==true">
+          <i ng-class="{'glyphicon glyphicon-triangle-right': ctrl.recordSidePanOpen, 'glyphicon glyphicon-triangle-left': !ctrl.recordSidePanOpen}"></i>
         </div>
-        <div class="faceting-resizable" resizable r-directions=["left"] r-flex="true" id="record-side-pan">
+        <div class="faceting-resizable" resizable r-directions=["left"] r-flex="true" id="record-side-pan" ng-show="ctrl.showSidePan">
 
-          <div class="faceting-container" style="height: 100%;"  du-scroll-container>
-            <h2 class="sidePanelHeading">Related Tables List</h2>
+          <div class="faceting-container" style="height: 100%;" ng-show="ctrl.showSidePan"  du-scroll-container>
+            <h2 class="sidePanelHeading">Related Tables</h2>
               <div class="columns-container">
                     <ul>
                       <div  ng-repeat="relatedRef in relatedReferences track by $index"  id="recordSidePan-{{$index}}" ng-if="ctrl.showRelatedTable($index)" class="{{lastActiveFacet == $index ? 'focused': ''}}" ng-click="ctrl.gotoRelatedTable(relatedRef.displayname.value, $index)">

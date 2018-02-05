@@ -1496,16 +1496,21 @@ input[type=number]::-moz-placeholder {
 }
 .sidePanFiddler{
     /*margin-left: 15px;*/
+         color: #337ab7;
     cursor: pointer;
     overflow: hidden;
     z-index: 50;
-    border: 2px solid rgba(51, 51, 51, 0.51);
-    border-radius: 20px;
+    /* border: 2px solid rgba(51, 51, 51, 0.51); */
+    /* border-radius: 20px; */
     max-height: 40px;
     min-width: 35px;
-    padding: 6px 9px 6px 9px;
-    background-color: #dddcdc;
-    font-size: 20px;
+    /* padding-right: -5px; */
+    /* padding: 6px 9px 6px 9px; */
+    /* background-color: #dddcdc; */
+    font-size: 25px;
+    margin-right: -15px;
+    margin-left: -3px;
+    margin-top: 5px;
 }
 
 @keyframes rtbg {

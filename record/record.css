@@ -87,7 +87,7 @@
     border: 2px solid rgb(51, 122, 183) !important;
     /*border-color: rgb(51, 122, 183) !important;*/
     /*border-bottom-color: rgb(51, 122, 183) !important;*/
-    border-radius: 5px !important;
+    border-radius: 3px !important;
 }
 .sidePanelHeading{
     background-color: rgba(201, 201, 201, 0.5);

@@ -19,7 +19,7 @@
         vm.rowFocus = {};
         vm.sidePanToggleBtnIndicator = "Show";
 
-        vm.recordSidePanOpen = chaiseConfig.showTableOfContents != undefined? !chaiseConfig.showTableOfContents : true;
+        vm.recordSidePanOpen = chaiseConfig.showTableOfContents != undefined? !chaiseConfig.showTableOfContents : false;
 
         vm.gotoRelatedTable = function(sectionId, index){
           var safeSectionId = vm.makeSafeIdAttr(sectionId);
@@ -28,6 +28,7 @@
           $rootScope.tableModels[index].open = true;
           vm.rowFocus[index] = false;
           $timeout(function(){
+
                 document.getElementById(pageSection).scrollIntoView({behavior: "smooth", block: "start"});
                 document.getElementById(pageSection).focus();
                 vm.rowFocus[index] = true;
@@ -38,6 +39,9 @@
             document.getElementById(pageSection).classList.remove("rowFocus");
           }, 2000);
         }
+        $timeout(function () {
+          vm.showSidePan = true;
+        }, 1700);
 
         vm.togglePan = function() {
           if(vm.recordSidePanOpen){
