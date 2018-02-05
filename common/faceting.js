@@ -409,7 +409,7 @@
             };
         }])
 
-        .directive('rangePicker', ['$timeout', '$q', '$log', function ($timeout, $q, $log) {
+        .directive('rangePicker', ['$timeout', '$q', '$log', 'logActions', function ($timeout, $q, $log, logActions) {
             return {
                 restrict: 'AE',
                 templateUrl: '../common/templates/faceting/range-picker.html',
@@ -710,7 +710,11 @@
                                 agg.maxAgg
                             ];
 
-                            scope.facetColumn.sourceReference.getAggregates(aggregateList).then(function(response) {
+                            var facetLog = scope.facetColumn.sourceReference.defaultLogInfo;
+                            facetLog.referrer = scope.facetColumn.reference.defaultLogInfo;
+                            facetLog.source = scope.facetColumn.dataSource;
+                            facetLog.action = logActions.recordsetFacetRead,
+                            scope.facetColumn.sourceReference.getAggregates(aggregateList, facetLog).then(function(response) {
                                 if (scope.facetColumn.sourceReference.uri !== uri) {
                                     defer.resolve(false);
                                 } else {
@@ -947,7 +951,7 @@
             };
         }])
 
-        .directive('choicePicker', ['$q', '$timeout', '$uibModal', 'tableConstants', "$log", "defaultDisplayname", function ($q, $timeout, $uibModal, tableConstants, $log, defaultDisplayname) {
+        .directive('choicePicker', ["defaultDisplayname", 'logActions', "$log", '$q', 'tableConstants', '$timeout', '$uibModal', function (defaultDisplayname, logActions, $log, $q, tableConstants, $timeout, $uibModal) {
 
             // the not_null filter with appropriate attributes
             var notNullFilter = {
@@ -1034,10 +1038,11 @@
                     defer.resolve(true);
                 }
 
-
-                // read new data if neede
+                // read new data if needed
                 (function (uri) {
-                    scope.reference.read(appliedLen + tableConstants.PAGE_SIZE).then(function (page) {
+                    var facetLog = getDefaultLogInfo(scope);
+                    facetLog.action = logActions.recordsetFacetRead;
+                    scope.reference.read(appliedLen + tableConstants.PAGE_SIZE, facetLog).then(function (page) {
                         // if this is not the result of latest facet change
                         if (scope.reference.uri !== uri) {
                             defer.resolve(false);
@@ -1092,6 +1097,19 @@
                 return defer.promise;
             }
 
+            /**
+             * Generate the object that we want to be logged alongside the action
+             * This function does not attach action, after calling this function
+             * we should attach the action.
+             * @param  {object} scope the scope object
+             */
+            function getDefaultLogInfo(scope) {
+                var res = scope.facetColumn.sourceReference.defaultLogInfo;
+                res.referrer = scope.facetColumn.reference.defaultLogInfo;
+                res.source = scope.facetColumn.dataSource;
+                return res;
+            }
+
             return {
                 restrict: 'AE',
                 templateUrl: '../common/templates/faceting/choice-picker.html',
@@ -1131,6 +1149,11 @@
                     // for the search popup selector
                     scope.openSearchPopup = function() {
                         var params = {};
+
+                        // what we want to be logged on the first read
+                        params.logObject = getDefaultLogInfo(scope);
+                        params.logObject.action = logActions.recordsetFacetDetails;
+
                         params.reference = scope.reference;
                         params.reference.session = scope.$root.session;
                         params.displayname = scope.facetColumn.displayname;

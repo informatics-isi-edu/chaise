@@ -30,7 +30,7 @@
         <!-- rows -->
         <tbody>
             <tr class="table-row" ng-class="{'disabled-row': isDisabled(vm.page.tuples[$index])}"
-                ellipses ng-repeat="row in vm.rowValues track by $index" tuple="vm.page.tuples[$index]" from-tuple="vm.fromTuple" row-values="row"
+                ellipses ng-repeat="row in vm.rowValues track by $index" tuple="vm.page.tuples[$index]" from-tuple="vm.fromTuple" row-values="row" parent-reference="parentReference"
                 config="vm.config" context="vm.context" on-row-click-bind="onSelect" selected="isSelected(vm.page.tuples[$index])" select-disabled="isDisabled(vm.page.tuples[$index])">
             </tr>
             <tr ng-if="vm.rowValues.length < 1">
