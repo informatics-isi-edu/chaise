@@ -753,7 +753,7 @@ var recordPage = function() {
     };
 
     this.getErrorModalReloadButton = function(){
-        return browser.executeScript("return $('button')[1]");  
+        return browser.executeScript("return $('button')[1]");
     };
 
     this.getErrorModalOkButton = function(){
@@ -972,6 +972,10 @@ var recordsetPage = function() {
         return element(by.id("fc-" + idx)).element(by.css(".facet-search-clear"));
     }
 
+    this.getHistogram = function (idx) {
+        return element(by.id("fc-" + idx)).element(by.tagName("plotly"));
+    }
+
     this.getList = function (idx) {
         return element(by.id("fc-" + idx)).element(by.css(".chaise-list-container"));
     }
@@ -1021,12 +1025,32 @@ var recordsetPage = function() {
         return element.all(by.css('.modal-body tr.disabled-row'));
     };
 
-    this.getFacetSpinner= function (idx) {
+    this.getFacetSpinner = function (idx) {
         return element(by.id("fc-" + idx)).element(by.css(".spinner"));
     };
 
     this.getDisabledFacetOptions = function (idx) {
         return element(by.id("fc-" + idx)).all(by.css(".chaise-checkbox input[disabled=disabled]"));
+    };
+
+    this.getPlotlyZoom = function (idx) {
+        return element(by.id("fc-" + idx)).element(by.css(".zoom-plotly-button"));
+    };
+
+    this.getPlotlyZoomDisabled = function (idx) {
+        return element(by.id("fc-" + idx)).all(by.css(".zoom-plotly-button[disabled=disabled]"));
+    };
+
+    this.getPlotlyUnzoom = function (idx) {
+        return element(by.id("fc-" + idx)).element(by.css(".unzoom-plotly-button"));
+    };
+
+    this.getPlotlyUnzoomDisabled = function (idx) {
+        return element(by.id("fc-" + idx)).all(by.css(".unzoom-plotly-button[disabled=disabled]"));
+    };
+
+    this.getPlotlyReset = function (idx) {
+        return element(by.id("fc-" + idx)).element(by.css(".reset-plotly-button"));
     };
 };
 

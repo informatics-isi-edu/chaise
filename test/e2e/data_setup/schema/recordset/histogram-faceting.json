@@ -48,14 +48,13 @@
             ],
             "annotations": {
                 "tag:isrd.isi.edu,2016:visible-columns" : {
-                    "compact": ["id", "int_col", "date_col"],
+                    "compact": ["int_col", "float_col", "date_col", "timestamp_col"],
                     "filter": {
                         "and": [
-                            {"source": "id", "ux_mode": "choices"},
-                            {"source": "int_col"},
-                            {"source": "float_col"},
-                            {"source": "date_col"},
-                            {"source": "timestamp_col"}
+                            {"source": "int_col", "bar_plot": { "n_bins": 10}},
+                            {"source": "float_col", "bar_plot": { "n_bins": 10}},
+                            {"source": "date_col", "bar_plot": { "n_bins": 10}},
+                            {"source": "timestamp_col", "bar_plot": { "n_bins": 10}}
                         ]
                     }
                 }

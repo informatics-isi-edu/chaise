@@ -205,6 +205,7 @@
             var defer = $q.defer();
             (function (uri) {
                 vm.reference.read(vm.pageLimit).then(function (page) {
+                    console.log(page);
                     if (vm.reference.uri !== uri) {
                         defer.resolve(false);
                     } else {
