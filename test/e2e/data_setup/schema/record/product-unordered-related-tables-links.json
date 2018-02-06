@@ -337,6 +337,11 @@
         "tag:isrd.isi.edu,2016:visible-columns" : {
           "detailed" : ["id", "title", "website", ["product-unordered-related-tables-links", "fk_category"], "rating", "summary", "description", "no_of_rooms", ["product-unordered-related-tables-links", "fk_cover"], ["product-unordered-related-tables-links", "fk_thumbnail"], "opened_on", "luxurious"]
         }
+      },
+      "tag:isrd.isi.edu,2016:table-display": {
+        "*": {
+          "page_size": 2
+        }
       }
     },
     "booking": {
@@ -688,6 +693,11 @@
         ],
         "description": {
           "display": "Accommodation Images"
+        }
+      },
+      "tag:isrd.isi.edu,2016:table-display": {
+        "*": {
+          "page_size": 2
         }
       }
     },
