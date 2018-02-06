@@ -393,6 +393,33 @@ describe('View existing record,', function() {
                         done.fail();
                     });
                 });
+
+                it("Page size annotation on domain table should be respected when adding records through Add button in multi-picker", function(){
+                    var related_associate_table = testParams.related_associate_table;
+                    var addRelatedRecordLink = chaisePage.recordPage.getAddRecordLink(related_associate_table);
+                    var EC = protractor.ExpectedConditions, newTabUrl, foreignKeyInputs;
+                    browser.wait(EC.elementToBeClickable(addRelatedRecordLink), browser.params.defaultTimeout);
+
+                    addRelatedRecordLink.click().then(function(){
+                        chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
+                        return chaisePage.recordEditPage.getModalTitle().getText();
+                    }).then(function (title) {
+                        expect(title).toBe("Choose file", "titlte missmatch.");
+
+                        browser.wait(function () {
+                               return chaisePage.recordsetPage.getRows().count().then(function (ct) {
+                                   return (ct > 0);
+                               });
+                           });
+                        return chaisePage.recordsetPage.getModalRows().count();
+                    }).then(function(ct){
+                        expect(ct).toBe(2, "association count missmatch for file domain table.");
+                        return browser.executeScript("return $('.modal-close').click();");
+                    }).catch(function(error) {
+                        console.log(error);
+                        expect('There was an error in this promise chain').toBe('Please see error message.');
+                    });
+                });
             });
 
             describe("For a related entity with an association table and markdown display", function () {
