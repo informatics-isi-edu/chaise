@@ -1327,6 +1327,14 @@ footer .container1 {
     padding: 5px 15px;
 }
 
+.plotly-how-to {
+    border-color: white !important;
+    cursor: default;
+}
+
+.plotly-how-to:hover {
+    z-index: auto !important;
+}
 
 /*************** LIST ***************************/
 .chaise-list-container {
