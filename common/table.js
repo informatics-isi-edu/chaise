@@ -1070,7 +1070,7 @@
                         scope.inputChangedPromise = $timeout(function() {
                             scope.inputChangedPromise = null;
                             scope.search(scope.vm.search);
-                        }, 1000);
+                        }, 2000);
                     }
                 };
 

@@ -186,10 +186,6 @@ img.spinner-sm {
     box-shadow: none;
 }
 
-.panel-group .panel{
-    border: none;
-}
-
 .panel-title>a:hover, .panel-title>a:focus{
     text-decoration: none;
     color: rgb(63, 124, 184);
@@ -211,10 +207,6 @@ img.spinner-sm {
     float: left;
     line-height: 12px;
     margin-right: 10px;
-}
-
-.panel-group .panel+.panel{
-    border: none;
 }
 
 .panel-default>.panel-heading+.panel-collapse>.panel-body{
@@ -961,6 +953,9 @@ footer .container1 {
   margin: -10px 0 0 0.8px;
   height: 20px;
   width: 30px;
+  top: 50%;
+  color: #a5a5a5;
+  font-weight: 400;
 }
 
 .rg-right span:before, .rg-left span:before {
@@ -1109,9 +1104,13 @@ footer .container1 {
      padding-left: 5px;
  }
  .recordset-container.with-faceting > .faceting-resizable:not(.initializing) {
-     -webkit-box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
-    -moz-box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
-    box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
+    -webkit-box-shadow: 11px 0px 16px -2px rgba(204,204,204,1);
+    -moz-box-shadow: 11px 0px 16px -2px rgba(204,204,204,1);
+    box-shadow: 11px 0px 16px -2px rgba(204,204,204,1);
+ }
+
+ .recordset-container.with-faceting > .faceting-resizable.initializing > .rg-right > span{
+    display: none;
  }
 
  .recordset-container.with-faceting > .main-container {
@@ -1452,88 +1451,4 @@ input[type=number]::-moz-placeholder {
 
 .selected-rows {
     min-height: 45px;
-}
-
-/************************record side pan**************/
-.record-container {
-    -webkit-box-flex: 1;
-    display: flex;
-    flex: 1;
-    margin-top: 5px;
-    padding-right: 0px !important;
-    padding-left: 0px !important;
-}
-.record-container > .faceting-resizable {
-    flex:0 0 15vw;
-    position: relative;
-    min-width: 170px;
-    max-width: 50vw;
-    z-index: 2;
-    /* padding-left: 5px; */
-    /*overflow-y: auto;*/
-    /* margin-left: 5px; */
-    font-weight: bold;
-}
-.record-container > .faceting-resizable  .panel {
-    margin-bottom: 5px !important;
-    padding: 8px !important;
-}
-.record-container > .faceting-resizable:not(.initializing) {
-    -webkit-box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
-    -moz-box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
-    box-shadow: -11px 3px 16px -2px rgba(204,204,204,1);
-}
-.record-container > .main-container {
-    flex:1;
-    border-left: 10px solid white;
-    border-right: 2px solid white;
-    padding-right: 10px;
-    position: relative;
-    z-index: 1;
-    overflow-x: hidden;
-    overflow-y: auto;
-    /*margin-top: 10px;*/
-}
-.sidePanFiddler{
-    /*margin-left: 15px;*/
-         color: #337ab7;
-    cursor: pointer;
-    overflow: hidden;
-    z-index: 50;
-    /* border: 2px solid rgba(51, 51, 51, 0.51); */
-    /* border-radius: 20px; */
-    max-height: 40px;
-    min-width: 35px;
-    /* padding-right: -5px; */
-    /* padding: 6px 9px 6px 9px; */
-    /* background-color: #dddcdc; */
-    font-size: 25px;
-    margin-right: -15px;
-    margin-left: -3px;
-    margin-top: 5px;
-}
-
-@keyframes rtbg {
-    /*0%   {background-color: #fff;}
-    10%   {background-color: #337ab7;}
-    25%  {background-color: #337ab7;}
-    50%  {background-color: #337ab7;}
-    100% {background-color: #fff;}*/
-
-    0%   {border-color: #fff;}
-   10%   {border-color: #337ab7;}
-   25%  {border-color: #337ab7;}
-   50%  {border-color: #337ab7;}
-   100% {border-color: #fff;}
-}
-
-.rowFocus1{
-    /*background-color: #FFF;*/
-    /* border: 1px; */
-    border-color: rgb(51, 122, 183) !important;
-    border-radius: 5px;
-    /*animation: background-fade 10s infinite;*/
-    /*animation-name: rtbg;*/
-    animation-duration: 3s;
-    animation-delay: 0.3s;
 }

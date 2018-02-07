@@ -19,41 +19,36 @@
         vm.rowFocus = {};
         vm.sidePanToggleBtnIndicator = "Show";
 
-        vm.recordSidePanOpen = chaiseConfig.showTableOfContents != undefined? !chaiseConfig.showTableOfContents : false;
+        $rootScope.recordSidePanOpen = false;
 
         vm.gotoRelatedTable = function(sectionId, index){
-          var safeSectionId = vm.makeSafeIdAttr(sectionId);
-          var pageSection = "rt-heading-" + safeSectionId;
+            var safeSectionId = vm.makeSafeIdAttr(sectionId);
+            var pageSection = "rt-heading-" + safeSectionId;
 
-          $rootScope.tableModels[index].open = true;
-          vm.rowFocus[index] = false;
-          $timeout(function(){
+            $rootScope.tableModels[index].open = true;
+            vm.rowFocus[index] = false;
+          var container = angular.element(document.getElementsByClassName('main-container')[0]);
+          var el = angular.element(document.getElementById(pageSection));
+          container.scrollToElementAnimated(el, 40).then(function () {
+              $timeout(function () {
+                  el.addClass("rowFocus");
+              }, 100);
+              $timeout(function () {
+                  el.removeClass('rowFocus');
+              }, 1600);
+          });
 
-                document.getElementById(pageSection).scrollIntoView({behavior: "smooth", block: "start"});
-                document.getElementById(pageSection).focus();
-                vm.rowFocus[index] = true;
-                document.getElementById(pageSection).classList.add("rowFocus");
-
-          }, 200);
-          $timeout(function(){
-            document.getElementById(pageSection).classList.remove("rowFocus");
-          }, 2000);
         }
-        $timeout(function () {
-          vm.showSidePan = true;
-        }, 1700);
 
         vm.togglePan = function() {
-          if(vm.recordSidePanOpen){
-            $("#record-side-pan").hide();
-            vm.sidePanToggleBtnIndicator = "Show";
-          } else{
-            $("#record-side-pan").show();
-            vm.sidePanToggleBtnIndicator = "Hide";
-          }
-          vm.recordSidePanOpen = !vm.recordSidePanOpen;
+            if($rootScope.recordSidePanOpen){
+              vm.sidePanToggleBtnIndicator = "Show";
+            } else{
+              vm.sidePanToggleBtnIndicator = "Hide";
+            }
+            $rootScope.recordSidePanOpen = !$rootScope.recordSidePanOpen;
         }
-        vm.togglePan();
+
         vm.canCreate = function() {
             return ($rootScope.reference && $rootScope.reference.canCreate && $rootScope.modifyRecord);
         };
@@ -140,6 +135,15 @@
                 }
                 return false;
             }
+        };
+
+        vm.noVisibleRleatedTables = function () {
+            if ($rootScope.tableModels) {
+                return !$rootScope.tableModels.some(function (tm, index) {
+                    return vm.showRelatedTable(index);
+                });
+            }
+            return true;
         };
 
         vm.toggleRelatedTableDisplayType = function(dataModel) {
@@ -324,6 +328,8 @@
             return $rootScope.displayReady;
         }, function (newValue, oldValue) {
             if (newValue) {
+                $rootScope.recordSidePanOpen = chaiseConfig.hideTableOfContents === true ? false : true;
+
                 var elements = fetchElements();
                 // if these values are not set yet, don't set the height
                 if(elements.navbarHeight && elements.bookmarkHeight) {

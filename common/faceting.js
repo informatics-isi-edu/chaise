@@ -141,7 +141,7 @@
                             }, 100);
                             $timeout(function () {
                                 el.removeClass('active');
-                            }, 500);
+                            }, 1600);
                         });
                     }
 

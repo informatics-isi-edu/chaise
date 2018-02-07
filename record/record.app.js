@@ -4,6 +4,8 @@
     angular.module('chaise.record', [
         'ngSanitize',
         'ngCookies',
+        'ngAnimate',
+        'duScroll',
         'chaise.alerts',
         'chaise.delete',
         'chaise.errors',
