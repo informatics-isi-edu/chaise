@@ -54,17 +54,17 @@ var testParams = {
                 min: 5,
                 max: 10,
                 filter: "int_col: 5 to 10",
-                numRows: 4
+                numRows: 6
             },
             justMin: {
                 min: 6,
                 filter: "int_col: > 6",
-                numRows: 16
+                numRows: 17
             },
             justMax: {
                 max: 12,
                 filter: "int_col: < 12",
-                numRows: 14
+                numRows: 15
             }
         },
         {
@@ -600,7 +600,7 @@ describe("Viewing Recordset with Faceting,", function() {
                                 }).then(function (filters) {
                                     return filters[0].getText();
                                 }).then(function(text) {
-                                    expect(text).toBe(facetParams.filter, "filter name is inccorect for '" + facetParams.name + "' facet");
+                                    expect(text).toBe(facetParams.filter, "filter name is incorrect for '" + facetParams.name + "' facet");
 
                                     // wait for table rows to load
                                     browser.wait(function () {
