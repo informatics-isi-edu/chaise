@@ -147,7 +147,8 @@
                             {"source": [{"outbound": ["faceting", "main_fk1"]}, "id"], "markdown_name": "**F1**"},
                             {"source": [{"outbound": ["faceting", "main_fk2"]}, "id"], "open": true},
                             {"source": [{"inbound": ["faceting", "main_f3_assoc_fk1"]}, {"outbound": ["faceting", "main_f3_assoc_fk2"]}, "term"]},
-                            {"source": [{"inbound": ["faceting", "f4_fk1"]}, "id"], "entity": false, "ux_mode": "choices"}
+                            {"source": [{"inbound": ["faceting", "f4_fk1"]}, "id"], "entity": false, "ux_mode": "choices"},
+                            {"source": [{"outbound": ["faceting", "main_fk1"]}, "term"], "markdown_name": "F1 with Term"}
                         ]
                     }
                 }
@@ -173,11 +174,12 @@
                 },
                 {
                     "name": "term",
+                    "nullok": false,
                     "type": {
                         "typename": "text"
                     }
                 }
-            ]    
+            ]
         },
         "f2": {
             "kind": "table",
@@ -191,7 +193,7 @@
             "foreign_keys": [],
             "column_definitions": [
                 {
-                    "name": "id", 
+                    "name": "id",
                     "nullok": false,
                     "type": {
                         "typename": "serial4"
@@ -258,7 +260,7 @@
             ],
             "column_definitions": [
                 {
-                    "name": "id_main", 
+                    "name": "id_main",
                     "nullok": false,
                     "type": {
                         "typename": "serial4"
@@ -284,7 +286,7 @@
             "foreign_keys": [],
             "column_definitions": [
                 {
-                    "name": "id", 
+                    "name": "id",
                     "nullok": false,
                     "type": {
                         "typename": "serial4"
@@ -333,7 +335,7 @@
             ],
             "column_definitions": [
                 {
-                    "name": "id", 
+                    "name": "id",
                     "nullok": false,
                     "type": {
                         "typename": "serial4"
