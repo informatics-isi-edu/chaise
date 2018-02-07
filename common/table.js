@@ -6,7 +6,8 @@
     .constant('tableConstants', {
         MAX_CONCURENT_REQUEST: 4,
         MAX_URL_LENGTH: 2000,
-        PAGE_SIZE: 10
+        PAGE_SIZE: 10,
+        AUTO_SEARCH_TIMEOUT: 2000
     })
 
     /**
@@ -654,7 +655,7 @@
                                 scope.vm.backgroundSearchPendingTerm = null;
                             }
                         }
-                    }, 1000);
+                    }, tableConstants.AUTO_SEARCH_TIMEOUT);
                 }
             };
 
@@ -1070,7 +1071,7 @@
                         scope.inputChangedPromise = $timeout(function() {
                             scope.inputChangedPromise = null;
                             scope.search(scope.vm.search);
-                        }, 1000);
+                        }, tableConstants.AUTO_SEARCH_TIMEOUT);
                     }
                 };
 
