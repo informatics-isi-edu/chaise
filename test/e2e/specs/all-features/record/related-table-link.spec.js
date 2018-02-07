@@ -407,17 +407,12 @@ describe('View existing record,', function() {
                     expect(addRelatedRecordLink.getText()).toBe("Add", "The Add button is not displayed as Add");
 
                     addRelatedRecordLink.click().then(function(){
-                    }).then(function(){
-                        browser.wait(function () {
-                               return chaisePage.recordsetPage.getRows().count().then(function (ct) {
-                                   return (ct > 0);
-                               });
-                           });
-                        rows = chaisePage.recordsetPage.getRows();
-                    }).then(function(ct){
+                        chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
+
                         return browser.executeScript("return $('.modal-body tr input[type=checkbox]').get(2);");
                     }).then(function (selectButtons){
-                        selectButtons.click();
+                        return selectButtons.click();
+                    }).then(function () {
                         return browser.executeScript("return $('#multi-select-submit-btn').click();");
                     }).then(function () {
                         return browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
