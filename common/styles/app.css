@@ -594,6 +594,10 @@ th.multi-select-width {
     background-color: #F5F5F5;
 }
 
+.markdown-container img {
+    margin: 5px 5px 5px 0px;
+}
+
 .markdown-container .vocab {
     color:darkblue;
     background-color:rgba(220, 220, 220, 0.68);
