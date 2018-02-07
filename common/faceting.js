@@ -521,7 +521,7 @@
 
                     // function used in ng-show based on annotation value and both min and max being present
                     scope.showHistogram = function () {
-                        return scope.facetColumn.showHistogram && (scope.rangeOptions.absMin !== null && scope.rangeOptions.absMax !== null);
+                        return scope.facetColumn.barPlot && (scope.rangeOptions.absMin !== null && scope.rangeOptions.absMax !== null);
                     }
 
                     // callback for the list directive
