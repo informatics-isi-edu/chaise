@@ -407,8 +407,8 @@ describe('View existing record,', function() {
                         expect(title).toBe("Choose file", "titlte missmatch.");
 
                         browser.wait(function () {
-                               return chaisePage.recordsetPage.getRows().count().then(function (ct) {
-                                   return (ct > 0);
+                               return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
+                                   return (ct == 2);
                                });
                            });
                         return chaisePage.recordsetPage.getModalRows().count();
