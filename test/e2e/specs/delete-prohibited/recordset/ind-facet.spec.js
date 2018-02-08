@@ -121,7 +121,7 @@ var testParams = {
                 date: "2001-14-04",
                 dateError: "Please enter a date value in YYYY-MM-DD format.",
                 time: "25:64:12",
-                timeError: "Please enter a time value in 24-hr HH:MM:SS format."
+                timeError: "Please enter a time value in 24-hr HH:mm:ss format."
             },
             range: {
                 minDate: "2004-05-20",
