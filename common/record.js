@@ -42,6 +42,18 @@
                     $scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
                 },
                 link: function(scope){
+                   scope.checkSingleListItem = function(pageContent){
+                        if(pageContent != "" && typeof(pageContent) == 'string' && pageContent.search(/<li.*?>/g) > -1 && pageContent.match(/<li.*?>/g).length == 1){
+                           pageContent = pageContent.replace(/<ul.*?>/g,"");
+                           pageContent = pageContent.replace("</ul>","");
+                           pageContent = pageContent.replace(/<ol.*?>/g,"");
+                           pageContent = pageContent.replace("</ol>","");
+                           pageContent = pageContent.replace(/<li.*?>/g,"");
+                           pageContent = pageContent.replace("</li>","");
+                         }
+                         return pageContent;
+                   }
+
                     scope.showRelatedTables = function(i){
                         //show/hide empty Related Tables
                         if (scope.recordTableModel && scope.recordTableModel[i]) {
@@ -50,7 +62,7 @@
                             }
                             else{
                                 return false;
-                            }                      
+                            }
                         }else {
                             return true;
                         }

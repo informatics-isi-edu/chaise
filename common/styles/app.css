@@ -1456,3 +1456,12 @@ input[type=number]::-moz-placeholder {
 .selected-rows {
     min-height: 45px;
 }
+#tblRecord .markdown-container li>p {
+    margin-top: 7px !important;
+    margin-bottom: 7px !important;
+}
+
+#tblRecord .markdown-container ol,
+#tblRecord .markdown-container ul {
+    padding-left: 1em !important;
+}
