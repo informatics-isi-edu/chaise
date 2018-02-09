@@ -97,11 +97,11 @@
 
             <div class="sidePanFiddler btn btn-primary btn-inverted" ng-class="{'open-panel': recordSidePanOpen, 'close-panel': !recordSidePanOpen}" ng-click="ctrl.togglePan()">
                 <i ng-class="{'glyphicon glyphicon-triangle-right': recordSidePanOpen, 'glyphicon glyphicon-triangle-left': !recordSidePanOpen}"
-                   uib-tooltip="{{'Click to ' + ((recordSidePanOpen) ? 'hide' : 'show') + ' list of related tables.'}}" tooltip-placement="left"></i>
+                   uib-tooltip="{{'Click to ' + ((recordSidePanOpen) ? 'hide' : 'show') + ' list of related records.'}}" tooltip-placement="left"></i>
             </div>
 
             <div class="faceting-container" style="height: 100%;" >
-                <h2 class="sidePanelHeading">Related Tables</h2>
+                <h2 class="sidePanelHeading">Related Records</h2>
                 <div class="columns-container">
                     <ul>
                         <div ng-repeat="relatedRef in relatedReferences track by $index"  id="recordSidePan-{{$index}}" ng-if="ctrl.showRelatedTable($index)" class="{{lastActiveFacet == $index ? 'focused': ''}}" ng-click="ctrl.gotoRelatedTable(relatedRef.displayname.value, $index)">
