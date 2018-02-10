@@ -42,6 +42,10 @@
                     $scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
                 },
                 link: function(scope){
+
+                  // This function check if only List item is available.
+                  // It removes the <li> and its order/unorder html element to make it appear as non-bullet item
+
                    scope.checkSingleListItem = function(pageContent){
                         if(pageContent != "" && typeof(pageContent) == 'string' && pageContent.search(/<li.*?>/g) > -1 && pageContent.match(/<li.*?>/g).length == 1){
                            pageContent = pageContent.replace(/<ul.*?>/g,"");
