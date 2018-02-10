@@ -802,6 +802,7 @@
                                 maxIndex = scope.plot.data[0].x.length;
                             }
 
+                            scope.debugMaxIndex = maxIndex;
                             // zooming in should increase clarity by 50%
                             // range is applied to both min and max so use half of 50%
                             var zoomRange = Math.ceil(maxIndex * 0.25);

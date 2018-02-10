@@ -1,4 +1,5 @@
 <div class="range-picker">
+    <span>{{debugMaxIndex}}</span>
     <record-list on-row-click="onSelect" range-options="rangeOptions" rows="ranges"></record-list>
     <range-inputs type="rangeOptions.type" add-range-cb="rangeOptions.callback" abs-min="rangeOptions.absMin" abs-max="rangeOptions.absMax" model="rangeOptions.model"></range-inputs>
     <div ng-if="showHistogram()">

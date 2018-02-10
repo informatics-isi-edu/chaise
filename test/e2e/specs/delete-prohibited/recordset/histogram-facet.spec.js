@@ -133,7 +133,7 @@ describe("Viewing Recordset with Faceting,", function() {
                                     expect(minDateInput.getAttribute("value")).toBe(facetParams.zoom1.min.date, "min date input after zoom 1 is incorrect");
                                     expect(minTimeInput.getAttribute("value")).toBe(facetParams.zoom1.min.time, "min time input after zoom 1 is incorrect");
                                     expect(maxDateInput.getAttribute("value")).toBe(facetParams.zoom1.max.date, "max date input after zoom 1 is incorrect");
-                                    expect(maxTimeInput.getAttribute("value")).toBe(facetParams.zoom1.max.time, "max date input after zoom 1 is incorrect");
+                                    expect(maxTimeInput.getAttribute("value")).toBe(facetParams.zoom1.max.time, "max time input after zoom 1 is incorrect");
 
                                     return unzoomBtnDisabled.count();
                                 }).then(function (ct) {
@@ -146,7 +146,7 @@ describe("Viewing Recordset with Faceting,", function() {
                                     expect(minDateInput.getAttribute("value")).toBe(facetParams.zoom2.min.date, "min date input after zoom 2 is incorrect");
                                     expect(minTimeInput.getAttribute("value")).toBe(facetParams.zoom2.min.time, "min time input after zoom 2 is incorrect");
                                     expect(maxDateInput.getAttribute("value")).toBe(facetParams.zoom2.max.date, "max date input after zoom 2 is incorrect");
-                                    expect(maxTimeInput.getAttribute("value")).toBe(facetParams.zoom2.max.time, "max date input after zoom 2 is incorrect");
+                                    expect(maxTimeInput.getAttribute("value")).toBe(facetParams.zoom2.max.time, "max time input after zoom 2 is incorrect");
 
                                     return chaisePage.recordsetPage.getRangeSubmit(idx).click();
                                 }).then(function () {
@@ -165,21 +165,21 @@ describe("Viewing Recordset with Faceting,", function() {
                                     expect(minDateInput.getAttribute("value")).toBe(facetParams.zoom3.min.date, "min date input after zoom 3 is incorrect");
                                     expect(minTimeInput.getAttribute("value")).toBe(facetParams.zoom3.min.time, "min time input after zoom 3 is incorrect");
                                     expect(maxDateInput.getAttribute("value")).toBe(facetParams.zoom3.max.date, "max date input after zoom 3 is incorrect");
-                                    expect(maxTimeInput.getAttribute("value")).toBe(facetParams.zoom3.max.time, "max date input after zoom 3 is incorrect");
+                                    expect(maxTimeInput.getAttribute("value")).toBe(facetParams.zoom3.max.time, "max time input after zoom 3 is incorrect");
 
                                     return unzoomBtn.click();
                                 }).then(function () {
                                     expect(minDateInput.getAttribute("value")).toBe(facetParams.zoom2.min.date, "min date input after unzoom is incorrect");
                                     expect(minTimeInput.getAttribute("value")).toBe(facetParams.zoom2.min.time, "min time input after unzoom is incorrect");
                                     expect(maxDateInput.getAttribute("value")).toBe(facetParams.zoom2.max.date, "max date input after unzoom is incorrect");
-                                    expect(maxTimeInput.getAttribute("value")).toBe(facetParams.zoom2.max.time, "max date input after unzoom is incorrect");
+                                    expect(maxTimeInput.getAttribute("value")).toBe(facetParams.zoom2.max.time, "max time input after unzoom is incorrect");
 
                                     return chaisePage.recordsetPage.getPlotlyReset(idx).click();
                                 }).then(function () {
                                     expect(minDateInput.getAttribute("value")).toBe(facetParams.absMin.date, "min date input after reset is incorrect");
                                     expect(minTimeInput.getAttribute("value")).toBe(facetParams.absMin.time, "min time input after reset is incorrect");
                                     expect(maxDateInput.getAttribute("value")).toBe(facetParams.absMax.date, "max date input after reset is incorrect");
-                                    expect(maxTimeInput.getAttribute("value")).toBe(facetParams.absMax.time, "max date input after reset is incorrect");
+                                    expect(maxTimeInput.getAttribute("value")).toBe(facetParams.absMax.time, "max time input after reset is incorrect");
                                 });
                             });
 
@@ -188,7 +188,7 @@ describe("Viewing Recordset with Faceting,", function() {
                                     expect(minDateInput.getAttribute("value")).toBe(facetParams.zoom1.min.date, "min date input after zoom 1 is incorrect");
                                     expect(minTimeInput.getAttribute("value")).toBe(facetParams.zoom1.min.time, "min time input after zoom 1 is incorrect");
                                     expect(maxDateInput.getAttribute("value")).toBe(facetParams.zoom1.max.date, "max date input after zoom 1 is incorrect");
-                                    expect(maxTimeInput.getAttribute("value")).toBe(facetParams.zoom1.max.time, "max date input after zoom 1 is incorrect");
+                                    expect(maxTimeInput.getAttribute("value")).toBe(facetParams.zoom1.max.time, "max time input after zoom 1 is incorrect");
 
                                     return chaisePage.recordsetPage.getClearAllFilters().click();
                                 }).then(function () {
@@ -197,7 +197,7 @@ describe("Viewing Recordset with Faceting,", function() {
                                     expect(minDateInput.getAttribute("value")).toBe(facetParams.absMin.date, "min date input after clear all is incorrect");
                                     expect(minTimeInput.getAttribute("value")).toBe(facetParams.absMin.time, "min time input after clear all is incorrect");
                                     expect(maxDateInput.getAttribute("value")).toBe(facetParams.absMax.date, "max date input after clear all is incorrect");
-                                    expect(maxTimeInput.getAttribute("value")).toBe(facetParams.absMax.time, "max date input after clear all is incorrect");
+                                    expect(maxTimeInput.getAttribute("value")).toBe(facetParams.absMax.time, "max time input after clear all is incorrect");
                                 });
                             });
 
