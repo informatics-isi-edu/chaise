@@ -54,17 +54,17 @@ var testParams = {
                 min: 5,
                 max: 10,
                 filter: "int_col: 5 to 10",
-                numRows: 4
+                numRows: 6
             },
             justMin: {
                 min: 6,
                 filter: "int_col: > 6",
-                numRows: 16
+                numRows: 17
             },
             justMax: {
                 max: 12,
                 filter: "int_col: < 12",
-                numRows: 14
+                numRows: 15
             }
         },
         {
@@ -121,7 +121,7 @@ var testParams = {
                 date: "2001-14-04",
                 dateError: "Please enter a date value in YYYY-MM-DD format.",
                 time: "25:64:12",
-                timeError: "Please enter a time value in 24-hr HH:MM:SS format."
+                timeError: "Please enter a time value in 24-hr HH:mm:ss format."
             },
             range: {
                 minDate: "2004-05-20",

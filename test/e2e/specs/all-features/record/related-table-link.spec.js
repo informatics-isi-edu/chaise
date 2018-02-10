@@ -241,10 +241,11 @@ describe('View existing record,', function() {
                         expect(title).toBe("Choose related_table", "titlte missmatch.");
 
                         browser.wait(function () {
-                               return chaisePage.recordsetPage.getRows().count().then(function (ct) {
-                                   return (ct > 0);
-                               });
-                           });
+                            return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
+                                return (ct == 4);
+                            });
+                        });
+
                         return chaisePage.recordsetPage.getModalRows().count();
                     }).then(function(ct){
                         expect(ct).toBe(4, "association count missmatch.");
@@ -273,9 +274,10 @@ describe('View existing record,', function() {
                                 return ct == testParams.association_count + 1;
                             });
                         }, browser.params.defaultTimeout);
-                         return chaisePage.recordPage.getRelatedTableRows(associationTableName).count();
+
+                        return chaisePage.recordPage.getRelatedTableRows(associationTableName).count();
                     }).then(function (count){
-                        expect(count).toBe(testParams.association_count + 1)
+                        expect(count).toBe(testParams.association_count + 1);
                     }).catch(function(error) {
                         console.log(error);
                         expect('There was an error in this promise chain').toBe('Please see error message.');
@@ -313,13 +315,16 @@ describe('View existing record,', function() {
                     }).then(function(popupBtns){
                         return chaisePage.clickButton(popupBtns[0]);
                     }).then (function () {
+                        chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
+
                         browser.wait(function () {
-                              return chaisePage.recordsetPage.getRows().count().then(function (ct) {
-                                  return (ct > 0);
-                              });
-                          });
+                            return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
+                                return (ct == 4);
+                            });
+                        });
+
                        rows = chaisePage.recordsetPage.getRows();
-                   }).then(function(ct){
+
                        return rows.get(3).all(by.css(".select-action-button"));
                    }).then(function(selectButtons){
                        return selectButtons[0].click();
@@ -434,17 +439,19 @@ describe('View existing record,', function() {
                     expect(addRelatedRecordLink.getText()).toBe("Add", "The Add button is not displayed as Add");
 
                     addRelatedRecordLink.click().then(function(){
-                    }).then(function(){
+
                         browser.wait(function () {
-                               return chaisePage.recordsetPage.getRows().count().then(function (ct) {
-                                   return (ct > 0);
-                               });
-                           });
+                            return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
+                                return (ct == 4);
+                            });
+                        });
+
                         rows = chaisePage.recordsetPage.getRows();
-                    }).then(function(ct){
+
                         return browser.executeScript("return $('.modal-body tr input[type=checkbox]').get(2);");
                     }).then(function (selectButtons){
-                        selectButtons.click();
+                        return selectButtons.click();
+                    }).then(function () {
                         return browser.executeScript("return $('#multi-select-submit-btn').click();");
                     }).then(function () {
                         return browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
