@@ -134,10 +134,10 @@
                     "filter": {
                         "and": [
                             {"source": "id", "ux_mode": "choices", "choices": ["1"]},
-                            {"source": "int_col", "ranges": [{"min": "-2"}]},
-                            {"source": "float_col"},
-                            {"source": "date_col"},
-                            {"source": "timestamp_col"},
+                            {"source": "int_col", "ranges": [{"min": "-2"}], "bar_plot": false},
+                            {"source": "float_col", "bar_plot": false},
+                            {"source": "date_col", "bar_plot": false},
+                            {"source": "timestamp_col", "bar_plot": false},
                             {"source": "shorttext_col"},
                             {"source": "text_col"},
                             {"source": "longtext_col"},
@@ -177,7 +177,7 @@
                         "typename": "text"
                     }
                 }
-            ]    
+            ]
         },
         "f2": {
             "kind": "table",
@@ -191,7 +191,7 @@
             "foreign_keys": [],
             "column_definitions": [
                 {
-                    "name": "id", 
+                    "name": "id",
                     "nullok": false,
                     "type": {
                         "typename": "serial4"
@@ -258,7 +258,7 @@
             ],
             "column_definitions": [
                 {
-                    "name": "id_main", 
+                    "name": "id_main",
                     "nullok": false,
                     "type": {
                         "typename": "serial4"
@@ -284,7 +284,7 @@
             "foreign_keys": [],
             "column_definitions": [
                 {
-                    "name": "id", 
+                    "name": "id",
                     "nullok": false,
                     "type": {
                         "typename": "serial4"
@@ -333,7 +333,7 @@
             ],
             "column_definitions": [
                 {
-                    "name": "id", 
+                    "name": "id",
                     "nullok": false,
                     "type": {
                         "typename": "serial4"
