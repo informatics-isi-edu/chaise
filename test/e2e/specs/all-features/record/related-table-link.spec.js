@@ -419,7 +419,7 @@ describe('View existing record,', function() {
                         return chaisePage.recordsetPage.getModalRows().count();
                     }).then(function(ct){
                         expect(ct).toBe(2, "association count missmatch for file domain table.");
-                        return browser.executeScript("return $('.modal-close').click();");
+                        return chaisePage.recordEditPage.getModalCloseBtn().click();
                     }).catch(function(error) {
                         console.log(error);
                         expect('There was an error in this promise chain').toBe('Please see error message.');
