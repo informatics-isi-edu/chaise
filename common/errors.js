@@ -225,7 +225,8 @@
             $log.info(exception);
             var reloadLink,
                 redirectLink = $window.location.origin,
-                gotoLocation = "Home Page";
+                gotoLocation = "Home Page",
+                catalogString = $window.location.hash.slice(0, $window.location.hash.search("/"));
 
             var stackTrace =  (exception.errorData && exception.errorData.stack)? exception.errorData.stack: undefined;
 
@@ -253,7 +254,7 @@
               if(exception.errorData && exception.errorData.redirectUrl != undefined  && exception.errorData.redirectUrl != ''){
                 redirectLink = exception.errorData.redirectUrl;
               }else if(exception.errorData && exception.errorData.redirectPath != undefined && exception.errorData.redirectPath != ''){
-                redirectLink = $window.location.origin + $window.location.pathname + exception.errorData.redirectPath;
+                redirectLink = $window.location.origin + $window.location.pathname + catalogString + "/" + exception.errorData.redirectPath;
               }else{
                 redirectLink = $window.location.origin;
               }
