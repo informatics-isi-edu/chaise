@@ -302,6 +302,13 @@ describe("Viewing Recordset with Faceting,", function() {
                 });
             });
 
+            it("'int_col' facet should not show the histogram", function () {
+                // use 1 index
+                browser.wait(EC.not(EC.visibilityOf(chaisePage.recordsetPage.getHistogram(1)))).then(function () {
+                    expect(true).toBeTruthy("The histogram is displayed");
+                });
+            });
+
             it("should have 2 filters selected", function () {
                 chaisePage.recordsetPage.getFilters().count().then(function (ct) {
                     expect(ct).toBe(testParams.defaults.numFilters, "Number of visible filters is incorrect");
@@ -654,11 +661,6 @@ describe("Viewing Recordset with Faceting,", function() {
                                 }).then(function (ct) {
                                     expect(ct).toBe(facetParams.listElems, "There are more list elements for '" + facetParams.name + "' facet than expected");
 
-                                    // clear inputs
-                                    return minClear.click();
-                                }).then(function () {
-                                    return maxClear.click();
-                                }).then(function () {
                                     // test validators
                                     minInput.sendKeys(facetParams.invalid);
 
@@ -753,8 +755,6 @@ describe("Viewing Recordset with Faceting,", function() {
                                     browser.wait(EC.not(EC.visibilityOf(clearAll)), browser.params.defaultTimeout);
 
                                     return minClear.click();
-                                }).then(function () {
-                                    return maxClear.click();
                                 });
                             });
 
@@ -836,15 +836,6 @@ describe("Viewing Recordset with Faceting,", function() {
                                 }).then(function (ct) {
                                     expect(ct).toBe(facetParams.listElems, "There are more list elements for '" + facetParams.name + "' facet than expected");
 
-                                    // clear inputs
-                                    return minDateClear.click();
-                                }).then(function () {
-                                    return minTimeClear.click();
-                                }).then(function () {
-                                    return maxDateClear.click();
-                                }).then(function () {
-                                    return maxTimeClear.click();
-                                }).then(function () {
                                     // test validators
                                     minDateInput.sendKeys(facetParams.invalid.date);
                                     browser.wait(function () {
@@ -965,15 +956,11 @@ describe("Viewing Recordset with Faceting,", function() {
                                 }).then(function () {
                                     browser.wait(EC.not(EC.visibilityOf(clearAll)), browser.params.defaultTimeout);
 
-                                    //clear inputs
+                                    //clear the min inputs
                                     return minDateClear.click();
                                 }).then(function () {
                                     return minTimeClear.click();
-                                }).then(function () {
-                                    return maxDateClear.click();
-                                }).then(function () {
-                                    return maxTimeClear.click();
-                                })
+                                });
                             });
 
                             it("should filter on just a max value and update the search criteria.", function () {

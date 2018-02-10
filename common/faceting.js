@@ -473,6 +473,7 @@
                                 pad: 2
                             },
                             xaxis: {
+                                fixedrange: false,
                                 ticks: 'inside',
                                 tickangle: 45,
                                 // set to "linear" for int/float graphs
@@ -669,6 +670,11 @@
                     function setRangeVars() {
                         setHistogramRange();
                         setInputs();
+
+                        var plotEl = element[0].getElementsByClassName("js-plotly-plot")[0];
+                        if (plotEl) {
+                            Plotly.relayout(plotEl, {'xaxis.fixedrange': scope.disableZoomIn()});
+                        }
                     }
 
                     function histogramData() {
@@ -710,6 +716,11 @@
 
                                 // push the data on the stack to be used for unzoom and reset
                                 scope.histogramDataStack.push(response);
+
+                                var plotEl = element[0].getElementsByClassName("js-plotly-plot")[0];
+                                if (plotEl) {
+                                    Plotly.relayout(plotEl, {'xaxis.fixedrange': scope.disableZoomIn()});
+                                }
 
                                 return defer.resolve(true);
                             }).catch(function (err) {
@@ -780,25 +791,6 @@
                     // Zoom the set into the middle 50% of the buckets
                     scope.zoomInPlot = function () {
                         try {
-                            // we don't want the user to keep zooming in infinitely to save memory space
-                            if (scope.histogramDataStack.length >= 20) { throw new Error("Maximum data stack size reached"); }
-
-                            // If the range between min/max is less than the number of buckets, no reason to zoom more
-                            // the bars will only get bigger without any more precision being offered
-                            if (isColumnOfType("int")) {
-                                if (scope.rangeOptions.absMax - scope.rangeOptions.absMin <= numBuckets) {
-                                    throw new Error("Can't zoom anymore");
-                                }
-                            } else if (isColumnOfType("date")) {
-                                var minMoment = moment(scope.rangeOptions.absMin);
-                                var maxMoment = moment(scope.rangeOptions.absMax);
-
-                                if (moment.duration( maxMoment.diff(minMoment) ).asDays() <= numBuckets) {
-                                    throw new Error("Can't zoom anymore");
-                                }
-                            }
-
-
                             // NOTE: x[x.length-1] may not be representative of the absolute max
                             // range is based on the index of the bucket representing the max value
                             var maxIndex = scope.plot.data[0].x.findIndex(function (value) {
@@ -831,13 +823,20 @@
                     scope.disableZoomIn = function() {
                         var limitedRange = false;
 
-                        if (isColumnOfType("int")) {
-                            limitedRange = (scope.rangeOptions.absMax-scope.rangeOptions.absMin) <= numBuckets;
-                        } else if (isColumnOfType("date")) {
-                            var minMoment = moment(scope.rangeOptions.absMin);
-                            var maxMoment = moment(scope.rangeOptions.absMax);
+                        if (scope.rangeOptions.absMin && scope.rangeOptions.absMax) {
+                            if (isColumnOfType("int")) {
+                                limitedRange = (scope.rangeOptions.absMax-scope.rangeOptions.absMin) <= numBuckets;
+                            } else if (isColumnOfType("date")) {
+                                var minMoment = moment(scope.rangeOptions.absMin);
+                                var maxMoment = moment(scope.rangeOptions.absMax);
 
-                            limitedRange = moment.duration( (maxMoment.diff(minMoment)) ).asDays() <= numBuckets;
+                                limitedRange = moment.duration( (maxMoment.diff(minMoment)) ).asDays() <= numBuckets;
+                            } else if(isColumnOfType("timestamp")) {
+                                limitedRange = (scope.rangeOptions.absMin.date+scope.rangeOptions.absMin.time) == (scope.rangeOptions.absMax.date+scope.rangeOptions.absMax.time);
+                            } else {
+                                // handles float for now
+                                limitedRange = scope.rangeOptions.absMin == scope.rangeOptions.absMax;
+                            }
                         }
 
                         return scope.histogramDataStack.length >= 20 || limitedRange;
@@ -882,21 +881,23 @@
                     };
 
                     //  all the events related to the plot
+                    // defines listeners on those events
                     scope.plotlyEvents = function (graph) {
                         // this event is triggered when the:
                         //      plot is zoomed/double clicked
                         //      xaxis is panned/stretched/shrunk
                         graph.on('plotly_relayout', function (event) {
                             try {
-                                if (scope.histogramDataStack.length >= 20) { throw new Error("Maximum data stack size reached"); }
                                 $timeout(function () {
                                     scope.relayout = true;
                                     // min/max is value interpretted by plotly by position of range in respect to x axis values
                                     var min = event['xaxis.range[0]'];
                                     var max = event['xaxis.range[1]'];
 
-                                    // This case is when the user double clicks the plot
-                                    // or when the relayout event is called because the element was resized
+                                    // This case can happen when:
+                                    //   - the user double clicks the plot
+                                    //   - the relayout event is called because the element was resized (panel stretched or shrunk)
+                                    //   - Plotly.relayout is called to update xaxis.fixedrange
                                     // if both undefined, don't re-fetch data
                                     if (typeof min === "undefined" && typeof max === "undefined") {
                                         scope.relayout = false;

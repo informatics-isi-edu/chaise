@@ -1033,6 +1033,10 @@ var recordsetPage = function() {
         return element(by.id("fc-" + idx)).all(by.css(".chaise-checkbox input[disabled=disabled]"));
     };
 
+    this.getHistogram = function (idx) {
+        return element(by.id("fc-" + idx)).element(by.css(".js-plotly-plot"));
+    };
+
     this.getPlotlyZoom = function (idx) {
         return element(by.id("fc-" + idx)).element(by.css(".zoom-plotly-button"));
     };
