@@ -112,9 +112,12 @@ exports.testPresentation = function (tableParams) {
             columns.forEach(function (column) {
                 var columnEls;
                 if (column.title=='booking')
-                    {
+                  {
                     expect(element(by.id('entity-4-markdown')).element(by.tagName('span')).getAttribute('innerHTML')).toContain(column.value);
-                    }
+                  }
+								else if(column.title =='booking_new_inline'){
+									 expect(element(by.id('entity-5-markdown')).element(by.tagName('span')).getAttribute('innerHTML')).toContain(column.value);
+								}
                 else if (column.match=='html'){
                     expect(chaisePage.recordPage.getEntityRelatedTableScope(column.title).getAttribute('innerHTML')).toBe(column.value);
                 }
@@ -225,7 +228,7 @@ exports.testPresentation = function (tableParams) {
             return element(by.id('actionbar-4'));
         }).then( function(actionBar){
             expect(actionBar.getAttribute('innerText')).toBe('Edit  | Add  | View More\n','Action bar text did not match.');
-            return browser.executeScript("return $('a.toggle-display-link').click()");
+            return browser.executeScript("return $('a.toggle-display-link')[0].click()");
         }).then(function(editLink){
             return element(by.id('entity-4-recTab'));
         }).then(function (RecordTab) {
@@ -302,7 +305,7 @@ exports.testPresentation = function (tableParams) {
                 });
             }, browser.params.defaultTimeout);
 
-            return browser.executeScript("return $('a.toggle-display-link').click()");
+            return browser.executeScript("return $('a.toggle-display-link')[0].click()");
         }).then(function(){
             browser.wait(EC.visibilityOf(markdownEntity), browser.params.defaultTimeout);
             expect(markdownEntity.getText()).toBe('None',"Incorrect text for empty markdown!");
@@ -311,6 +314,36 @@ exports.testPresentation = function (tableParams) {
             expect('Encountered an error').toBe('Please check the log', 'Inside catch block');
         })
     });
+
+		it("visible column related table with inline inbound fk should show entry without bullet point in case of only one entry",function(){
+				var EC = protractor.ExpectedConditions,
+						markdownEntity = element(by.id('entity-5-markdown')),
+						bookingName = "booking_new_inline";
+
+				browser.executeScript("return $('a.toggle-display-link')[1].click()").then(function(){
+					return chaisePage.waitForElement(element(by.id("rt-" + bookingName)));
+				 }).then(function(){
+					 return chaisePage.recordPage.getDeleteActionButtons(bookingName);
+				}).then(function(deleteButtons) {
+						return deleteButtons[0].click();
+				}).then(function () {
+						chaisePage.waitForElement(element(by.id("delete-confirmation")));
+						return chaisePage.recordPage.getConfirmDeleteButton().click();
+				}).then(function () {
+						browser.wait(function () {
+								return chaisePage.recordPage.getDeleteActionButtons(bookingName).count().then(function (ct) {
+										return (ct==1);
+								});
+						});
+						return browser.executeScript("return $('a.toggle-display-link')[1].click()");
+				}).then(function(){
+						browser.wait(EC.visibilityOf(markdownEntity), browser.params.defaultTimeout);
+						expect(markdownEntity.getText()).not.toContain('<ul>\n<li>',"Bullet point was not removed");
+				}).catch(function(err){
+						console.log(err);
+						expect('Encountered an error').toBe('Please check the log', 'Inside catch block');
+				})
+		});
 
     it("visible column related table with inline inbound fk should disappear when 'Hide All Related Records' was clicked.",function(){
          var markdownEntityRow = element(by.id('row-product-record_fk_booking_accommodation')).all(by.tagName('td')),
