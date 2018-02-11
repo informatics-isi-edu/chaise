@@ -226,7 +226,7 @@
             var reloadLink,
                 redirectLink = $window.location.origin,
                 gotoLocation = "Home Page",
-                catalogString = $window.location.hash.slice(0, $window.location.hash.search("/"));
+                appName = UriUtils.appNamefromUrlPathname($window.location.pathname);
 
             var stackTrace =  (exception.errorData && exception.errorData.stack)? exception.errorData.stack: undefined;
 
@@ -253,9 +253,15 @@
               }
               if(exception.errorData && exception.errorData.redirectUrl != undefined  && exception.errorData.redirectUrl != ''){
                 redirectLink = exception.errorData.redirectUrl;
-              }else if(exception.errorData && exception.errorData.redirectPath != undefined && exception.errorData.redirectPath != ''){
-                redirectLink = $window.location.origin + $window.location.pathname + catalogString + "/" + exception.errorData.redirectPath;
-              }else{
+              }
+              else if(exception.errorData && exception.errorData.redirectPath != undefined && exception.errorData.redirectPath != ''){
+                redirectLink = UriUtils.createRedirectLinkFromPath(exception.errorData.redirectPath);
+                if(exception instanceof ERMrest.InvalidFilterOperatorError && (appName == 'record' || appName == 'recordedit')){
+                  redirectLink = redirectLink.replace('record', 'recordset');
+                  redirectLink = redirectLink.replace('recordedit', 'recordset');
+                }
+              }
+              else{
                 redirectLink = $window.location.origin;
               }
                 errorPopup( exception.message, exception.status, gotoLocation, redirectLink, exception.subMessage);

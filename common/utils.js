@@ -690,6 +690,12 @@
           return newPath.substring(lastSlash + 1, newPath.length);
         }
 
+        // Takes path and creates full redirect links with catalogId
+        function createRedirectLinkFromPath(path){
+          var catalogString = $window.location.hash.slice(0, $window.location.hash.search("/"));
+          return $window.location.origin + $window.location.pathname + catalogString + "/" + path;
+        }
+
         return {
             queryStringToJSON: queryStringToJSON,
             appTagToURL: appTagToURL,
@@ -701,7 +707,8 @@
             setLocationChangeHandling: setLocationChangeHandling,
             isBrowserIE: isBrowserIE,
             getQueryParams: getQueryParams,
-            appNamefromUrlPathname: appNamefromUrlPathname
+            appNamefromUrlPathname: appNamefromUrlPathname,
+            createRedirectLinkFromPath: createRedirectLinkFromPath
         }
     }])
 
