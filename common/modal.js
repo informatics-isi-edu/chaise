@@ -105,7 +105,7 @@
 
         vm.hasLoaded = false;
         var reference = vm.reference = params.reference;
-        var limit = 25;
+        var limit = (!angular.isUndefined(reference) && !angular.isUndefined(reference.display) && reference.display.defaultPageSize) ? reference.display.defaultPageSize : 25;
 
         vm.tableModel = {
             hasLoaded:          false,

@@ -250,7 +250,7 @@ exports.testPresentation = function (tableParams) {
             return browser.getAllWindowHandles();
         }).then(function (handles){
             allHandle = handles;
-            browser.switchTo().window(allHandle[1]); browser.sleep(5000);
+            browser.switchTo().window(allHandle[1]);
             chaisePage.waitForElement(chaisePage.recordPage.getEntityTitleElement());
             return chaisePage.recordPage.getEntityTitle();
         }).then(function (pageTitle) {
