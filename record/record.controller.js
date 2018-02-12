@@ -350,7 +350,7 @@
         };
 
         mainContainerEl.on('scroll', $scope.$apply.bind($scope, function () {
-            if (mainContainerEl.scrollTop() > 500) {
+            if (mainContainerEl.scrollTop() > 300) {
               $scope.showTopBtn = true;
             } else {
               $scope.showTopBtn = false;
