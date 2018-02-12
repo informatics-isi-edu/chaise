@@ -94,6 +94,9 @@
         </div>
 
         <div class="faceting-resizable record-toc" resizable r-directions=["left"] r-flex="true" id="record-side-pan" ng-class="{'open-panel': recordSidePanOpen, 'close-panel': !recordSidePanOpen, 'empty-panel': ctrl.noVisibleRleatedTables()}">
+            <div class="btn btn-primary btn-inverted" id="back-to-top" ng-click="scrollToTop()" ng-class="{'show': showTopBtn,'hide': !showTopBtn}">
+                <i uib-tooltip="Scroll To Top" tooltip-placement="left" class="glyphicon glyphicon-triangle-top"></i>
+            </div>
 
             <div class="sidePanFiddler btn btn-primary btn-inverted" ng-class="{'open-panel': recordSidePanOpen, 'close-panel': !recordSidePanOpen}" ng-click="ctrl.togglePan()">
                 <i ng-class="{'glyphicon glyphicon-triangle-right': recordSidePanOpen, 'glyphicon glyphicon-triangle-left': !recordSidePanOpen}"

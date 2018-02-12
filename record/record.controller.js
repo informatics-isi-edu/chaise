@@ -7,6 +7,7 @@
         function RecordController(AlertsService, DataUtils, ErrorService, logActions, MathUtils, messageMap, modalBox, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $uibModal, $window, $timeout) {
         var vm = this;
 
+        var mainContainerEl = angular.element(document.getElementsByClassName('main-container')[0]);
         var addRecordRequests = {}; // <generated unique id : reference of related table>
         var editRecordRequests = {}; // generated id: {schemaName, tableName}
         var updated = {};
@@ -19,35 +20,28 @@
         vm.rowFocus = {};
         vm.sidePanToggleBtnIndicator = "Show";
 
-        $rootScope.recordSidePanOpen = false;
+        $scope.recordSidePanOpen = false;
 
-        vm.gotoRelatedTable = function(sectionId, index){
+        vm.gotoRelatedTable = function(sectionId, index) {
             var safeSectionId = vm.makeSafeIdAttr(sectionId);
             var pageSection = "rt-heading-" + safeSectionId;
 
             $rootScope.tableModels[index].open = true;
             vm.rowFocus[index] = false;
-          var container = angular.element(document.getElementsByClassName('main-container')[0]);
-          var el = angular.element(document.getElementById(pageSection));
-          container.scrollToElementAnimated(el, 40).then(function () {
-              $timeout(function () {
-                  el.addClass("rowFocus");
-              }, 100);
-              $timeout(function () {
-                  el.removeClass('rowFocus');
-              }, 1600);
-          });
-
-        }
+            var el = angular.element(document.getElementById(pageSection));
+            mainContainerEl.scrollToElementAnimated(el, 40).then(function () {
+                $timeout(function () {
+                    el.addClass("rowFocus");
+                }, 100);
+                $timeout(function () {
+                    el.removeClass('rowFocus');
+                }, 1600);
+            });
+        };
 
         vm.togglePan = function() {
-            if($rootScope.recordSidePanOpen){
-              vm.sidePanToggleBtnIndicator = "Show";
-            } else{
-              vm.sidePanToggleBtnIndicator = "Hide";
-            }
-            $rootScope.recordSidePanOpen = !$rootScope.recordSidePanOpen;
-        }
+            $scope.recordSidePanOpen = !$scope.recordSidePanOpen;
+        };
 
         vm.canCreate = function() {
             return ($rootScope.reference && $rootScope.reference.canCreate && $rootScope.modifyRecord);
@@ -328,7 +322,7 @@
             return $rootScope.displayReady;
         }, function (newValue, oldValue) {
             if (newValue) {
-                $rootScope.recordSidePanOpen = chaiseConfig.hideTableOfContents === true ? false : true;
+                $scope.recordSidePanOpen = chaiseConfig.hideTableOfContents === true ? false : true;
 
                 var elements = fetchElements();
                 // if these values are not set yet, don't set the height
@@ -349,5 +343,19 @@
                 $scope.$digest();
             }
         });
+
+        // scroll to top button
+        $scope.scrollToTop = function () {
+            mainContainerEl.scrollTo(0,0, 500);
+        };
+
+        mainContainerEl.on('scroll', $scope.$apply.bind($scope, function () {
+            if (mainContainerEl.scrollTop() > 500) {
+              $scope.showTopBtn = true;
+            } else {
+              $scope.showTopBtn = false;
+            }
+            console.log(mainContainerEl.scrollTop());
+        }));
     }]);
 })();

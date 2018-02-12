@@ -138,17 +138,19 @@
   padding-left: 10px;
 }
 
-.sidePanFiddler{
-    color: white;
+.sidePanFiddler, #back-to-top {
     cursor: pointer;
     overflow: hidden;
     z-index: 50;
     font-size: 25px;
-    padding: 0 4px 0 0;
-    border-radius: 2px 0 0 2px;
-    position: absolute;
+    padding: 1px 0 1px 5px;
+    border-radius: 2px 0 0px 2px;
     height: 35px;
     width: 35px;
+}
+
+.sidePanFiddler{
+    position: absolute;
     left: -51px;
     top: 5px;
 }
@@ -173,9 +175,24 @@
   flex:0 0 15vw;
 }
 
+
+#record-side-pan.close-panel .sidePanFiddler {
+    padding: 1px 4px 0 0px;
+}
+
 #record-side-pan.open-panel .sidePanFiddler {
   left: -66px;
-  padding: 1px 6px;
+}
+
+#back-to-top {
+  position: absolute;
+  left: -51px;
+  bottom: 1em;
+  padding: 1px 4px;
+}
+
+#record-side-pan.open-panel #back-to-top {
+  left: -66px;
 }
 
 @media print {
