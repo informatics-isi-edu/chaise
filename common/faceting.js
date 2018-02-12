@@ -1069,7 +1069,7 @@
                             scope.inputChangedPromise = null;
                             $log.debug("request for facet (index=" + scope.facetColumn.index + ") update. new search=" + scope.searchTerm);
                             scope.parentCtrl.updateFacetColumn(scope.index);
-                        }, 1000);
+                        }, tableConstants.AUTO_SEARCH_TIMEOUT);
                     };
 
                     // clear the search, if reference has search then fire update

@@ -54,17 +54,17 @@ var testParams = {
                 min: 5,
                 max: 10,
                 filter: "int_col: 5 to 10",
-                numRows: 4
+                numRows: 6
             },
             justMin: {
                 min: 6,
                 filter: "int_col: > 6",
-                numRows: 16
+                numRows: 17
             },
             justMax: {
                 max: 12,
                 filter: "int_col: < 12",
-                numRows: 14
+                numRows: 15
             }
         },
         {
