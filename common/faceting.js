@@ -409,7 +409,7 @@
             };
         }])
 
-        .directive('rangePicker', ['$timeout', '$q', '$log', 'dataFormats', 'logActions', function ($timeout, $q, $log, dataFormats, logActions) {
+        .directive('rangePicker', ['$timeout', '$q', '$log', 'dataFormats', 'logActions', 'AlertsService', function ($timeout, $q, $log, dataFormats, logActions, AlertsService) {
             return {
                 restrict: 'AE',
                 templateUrl: '../common/templates/faceting/range-picker.html',
@@ -447,6 +447,7 @@
                     // register this controller in the parent
                     parentCtrl.register(currentCtrl, scope.facetColumn, scope.index);
                     scope.parentCtrl = parentCtrl;
+                    scope.$root.alerts = AlertsService.alerts;
 
                     scope.relayout = false;
                     scope.ranges = [];
@@ -809,6 +810,11 @@
                             var median = Math.floor(maxIndex/2);
                             var minBinIndex = median - zoomRange;
                             var maxBinIndex = median + zoomRange;
+
+                            if (isColumnOfType("timestamp")) {
+                                AlertsService.addAlert("Index of max value " + maxIndex, 'error');
+                                AlertsService.addAlert("Index of new max value " + maxBinIndex, 'error');
+                            }
 
                             setRangeMinMax(scope.plot.data[0].x[minBinIndex], scope.plot.data[0].x[maxBinIndex]);
 
