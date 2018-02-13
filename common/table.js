@@ -166,7 +166,6 @@
 
                     scope.vm.rowValues = DataUtils.getRowValuesFromPage(page);
                     scope.vm.hasLoaded = true;
-                    AlertsService.addAlert("Index 0: " + page[0].timestamp_col + ".\n Index 5: " + page[5].timestamp_col + ".\n Index 10: " + page[10].timestamp_col);
 
                     $timeout(function() {
                         if (scope.vm.foregroundSearch) scope.vm.foregroundSearch = false;
@@ -213,6 +212,7 @@
                     } else {
                         vm.page = page;
                         vm.rowValues = DataUtils.getRowValuesFromPage(page);
+                        AlertsService.addAlert("Index 0: " + page._data[0].timestamp_col + ".\n Index 5: " + page._data[5].timestamp_col + ".\n Index 10: " + page._data[10].timestamp_col);
                         vm.hasLoaded = true;
                         vm.initialized = true;
                         defer.resolve(true);
