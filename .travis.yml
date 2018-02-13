@@ -32,7 +32,10 @@ services:
   - postgresql
 
 before_install:
+  - timedatectl
+  - sudo timedatectl set-timezone America/Los_Angeles
   - export TZ=America/Los_Angeles
+  - timedatectl
   - sudo apt-get -y update
   - sudo apt-get -y install libpq-dev python-dev
   - sudo apt-get -y install apache2 apache2-dev libjson-c-dev ssl-cert libapache2-mod-wsgi python python-dateutil python-ply python-tz
