@@ -77,6 +77,7 @@ before_install:
   - cd ..
   - git clone https://github.com/informatics-isi-edu/ermrestjs.git
   - cd ermrestjs
+  - git checkout histogram-ts-bug
   - sudo npm install
   - bower install
   - sudo make build
@@ -103,10 +104,11 @@ before_script:
 
 script:
   - make build
-  - make testfullfeaturesconfirmation
-  - make testdefaultconfig
-  - make testfullfeatures
-  - make testdeleteprohibited
+  - make testrecordset
+  # - make testfullfeaturesconfirmation
+  # - make testdefaultconfig
+  # - make testfullfeatures
+  # - make testdeleteprohibited
 
 after_failure:
   - sudo cat ${HTTPD_ERROR_LOG}
