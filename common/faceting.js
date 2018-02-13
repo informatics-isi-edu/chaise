@@ -685,11 +685,15 @@
                             var requestMin = isColumnOfType("timestamp") ? moment(scope.rangeOptions.absMin.date + scope.rangeOptions.absMin.time, dataFormats.date + dataFormats.time24).format(dataFormats.datetime.submission) : scope.rangeOptions.absMin,
                                 requestMax = isColumnOfType("timestamp") ? moment(scope.rangeOptions.absMax.date + scope.rangeOptions.absMax.time, dataFormats.date + dataFormats.time24).format(dataFormats.datetime.submission) : scope.rangeOptions.absMax;
 
+                            if (isColumnOfType("timestamp")) {
+                                AlertsService.addAlert("Request Max before submission: " + requestMax, 'error');
+                            }
                             scope.facetColumn.column.groupAggregate.histogram(numBuckets, requestMin, requestMax).read().then(function (response) {
                                 if (scope.facetColumn.sourceReference.uri !== uri) {
                                     // return breaks out of the current callback function
                                     return defer.resolve(false);
                                 }
+
                                 // after zooming in, we don't care about displaying values beyond the set the user sees
                                 // if set is greater than bucketCount, remove last bin (we should only see this when the max+ bin is present)
                                 if (scope.relayout && response.x.length > numBuckets) {
@@ -713,6 +717,10 @@
                                 } else {
                                     response.min = scope.rangeOptions.absMin;
                                     response.max = scope.rangeOptions.absMax;
+                                }
+
+                                if (isColumnOfType("timestamp")) {
+                                    AlertsService.addAlert("Request Max after submission: " + response.max, 'error');
                                 }
 
                                 // push the data on the stack to be used for unzoom and reset
@@ -812,8 +820,7 @@
                             var maxBinIndex = median + zoomRange;
 
                             if (isColumnOfType("timestamp")) {
-                                AlertsService.addAlert("Index of max value " + maxIndex, 'error');
-                                AlertsService.addAlert("Index of new max value " + maxBinIndex, 'error');
+                                AlertsService.addAlert("new max value " + scope.plot.data[0].x[maxBinIndex], 'error');
                             }
 
                             setRangeMinMax(scope.plot.data[0].x[minBinIndex], scope.plot.data[0].x[maxBinIndex]);
