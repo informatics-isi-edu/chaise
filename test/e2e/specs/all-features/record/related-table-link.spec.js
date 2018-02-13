@@ -277,7 +277,7 @@ describe('View existing record,', function() {
 
                         return chaisePage.recordPage.getRelatedTableRows(associationTableName).count();
                     }).then(function (count){
-                        expect(count).toBe(testParams.association_count + 1)
+                        expect(count).toBe(testParams.association_count + 1);
                     }).catch(function(error) {
                         console.log(error);
                         expect('There was an error in this promise chain').toBe('Please see error message.');
@@ -322,6 +322,7 @@ describe('View existing record,', function() {
                                 return (ct == 4);
                             });
                         });
+
                        rows = chaisePage.recordsetPage.getRows();
 
                        return rows.get(3).all(by.css(".select-action-button"));
@@ -397,6 +398,33 @@ describe('View existing record,', function() {
                         done.fail();
                     });
                 });
+
+                it("Page size annotation on domain table should be respected when adding records through Add button in multi-picker", function(){
+                    var related_associate_table = testParams.related_associate_table;
+                    var addRelatedRecordLink = chaisePage.recordPage.getAddRecordLink(related_associate_table);
+                    var EC = protractor.ExpectedConditions, newTabUrl, foreignKeyInputs;
+                    browser.wait(EC.elementToBeClickable(addRelatedRecordLink), browser.params.defaultTimeout);
+
+                    addRelatedRecordLink.click().then(function(){
+                        chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
+                        return chaisePage.recordEditPage.getModalTitle().getText();
+                    }).then(function (title) {
+                        expect(title).toBe("Choose file", "titlte missmatch.");
+
+                        browser.wait(function () {
+                               return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
+                                   return (ct == 2);
+                               });
+                           });
+                        return chaisePage.recordsetPage.getModalRows().count();
+                    }).then(function(ct){
+                        expect(ct).toBe(2, "association count missmatch for file domain table.");
+                        return chaisePage.recordEditPage.getModalCloseBtn().click();
+                    }).catch(function(error) {
+                        console.log(error);
+                        expect('There was an error in this promise chain').toBe('Please see error message.');
+                    });
+                });
             });
 
             describe("For a related entity with an association table and markdown display", function () {
@@ -419,9 +447,12 @@ describe('View existing record,', function() {
                             });
                         });
 
+                        rows = chaisePage.recordsetPage.getRows();
+
                         return browser.executeScript("return $('.modal-body tr input[type=checkbox]').get(2);");
                     }).then(function (selectButtons){
-                        selectButtons.click();
+                        return selectButtons.click();
+                    }).then(function () {
                         return browser.executeScript("return $('#multi-select-submit-btn').click();");
                     }).then(function () {
                         return browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
