@@ -706,7 +706,6 @@
 
                                 if (isColumnOfType("timestamp")) {
                                     AlertsService.addAlert("1. data before padding " + response.xPadding, 'error');
-                                    AlertsService.addAlert("2. uri " + response.uri, 'success');
                                 }
 
                                 scope.plot.labels = response.labels;
