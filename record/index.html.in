@@ -62,12 +62,9 @@
             <div ng-if="displayReady">
                 <uib-accordion close-others="false">
                     <div uib-accordion-group class="related-table-heading" id="rt-heading-{{::ctrl.makeSafeIdAttr(relatedRef.displayname.value)}}"  ng-repeat="relatedRef in relatedReferences track by $index"  ng-if="ctrl.showRelatedTable($index)" is-open="tableModels[$index].open">
-                      <!-- <div id="rt-heading1-{{::ctrl.makeSafeIdAttr(relatedRef.displayname.value)}}"> -->
                         <uib-accordion-heading>
                             <i class="pull-left glyphicon" style="margin-right: 5px;" ng-class="{'glyphicon-chevron-down': tableModels[$index].open, 'glyphicon-chevron-right': !tableModels[$index].open}"></i>
-                             <!-- <span ng-class="{'rowFocus': ctrl.rowFocus[$index]}"> -->
-                               <span ng-if="::relatedRef.displayname.isHTML" ng-bind-html="::relatedRef.displayname.value"></span><span ng-if="::!relatedRef.displayname.isHTML" ng-bind="::relatedRef.displayname.value"></span> <span ng-if="tableModels[$index].rowValues.length==0">(no results found)</span><span ng-if="tableModels[$index].rowValues.length!=0">(showing {{::tableModels[$index].hasNext ? 'first' : 'all'}} {{tableModels[$index].rowValues.length}} results)</span>
-                             <!-- </span> -->
+                           <span ng-if="::relatedRef.displayname.isHTML" ng-bind-html="::relatedRef.displayname.value"></span><span ng-if="::!relatedRef.displayname.isHTML" ng-bind="::relatedRef.displayname.value"></span> <span ng-if="tableModels[$index].rowValues.length==0">(no results found)</span><span ng-if="tableModels[$index].rowValues.length!=0">(showing {{::tableModels[$index].hasNext ? 'first' : 'all'}} {{tableModels[$index].rowValues.length}} results)</span>
                         </uib-accordion-heading>
 
                         <!-- for different elements inside the accordion -->
@@ -85,16 +82,14 @@
                                 </div>
                             </div>
                         </div>
-                      <!-- </div> -->
-                      <!-- <hr> -->
                     </div>
                 </uib-accordion>
             </div>
             <span id="rt-loading" ng-show="loading">Loading...</span>
         </div>
 
-        <div class="faceting-resizable record-toc" resizable r-directions=["left"] r-flex="true" id="record-side-pan" ng-class="{'open-panel': recordSidePanOpen, 'close-panel': !recordSidePanOpen, 'empty-panel': ctrl.noVisibleRleatedTables()}">
-            <div class="btn btn-primary btn-inverted" id="back-to-top" ng-click="scrollToTop()" ng-class="{'show': showTopBtn,'hide': !showTopBtn}">
+        <div class="faceting-resizable record-toc" resizable r-directions=["left"] r-flex="true" id="record-side-pan" ng-show="!ctrl.noVisibleRleatedTables()" ng-class="{'open-panel': recordSidePanOpen, 'close-panel': !recordSidePanOpen}">
+            <div class="btn btn-primary btn-inverted" id="back-to-top" ng-click="scrollToTop()" ng-show="showTopBtn">
                 <i uib-tooltip="Scroll To Top" tooltip-placement="left" class="glyphicon glyphicon-triangle-top"></i>
             </div>
 

@@ -160,10 +160,6 @@
   max-width: 0;
 }
 
-#record-side-pan.empty-panel {
-  display: none;
-}
-
 #record-side-pan.close-panel .rg-left, #record-side-pan.close-panel .rg-right {
   display: none;
 }
@@ -187,7 +183,7 @@
 #back-to-top {
   position: absolute;
   left: -51px;
-  bottom: 1em;
+  bottom: 2em;
   padding: 1px 4px;
 }
 
