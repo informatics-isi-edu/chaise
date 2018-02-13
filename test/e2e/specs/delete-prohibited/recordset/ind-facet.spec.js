@@ -275,6 +275,17 @@ var testParams = {
         options_wo_not_null: [
             '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'
         ]
+    },
+    customFilter: {
+        ermrestFilter: "id=1;id=2;int_col::geq::20",
+        numRows: 7,
+        numRowsWFacet: 1,
+        numRowsWOFilter: 1,
+        facet: 0,
+        totalNumOptions: 7,
+        options: ["1", "2", "6", "7", "8", "9", "10"],
+        optionsWOFilter: ["2", "1", "3", "4", "5", "6", "7", "8", "9", "10"],
+        option: 1
     }
 };
 
@@ -1375,6 +1386,94 @@ describe("Viewing Recordset with Faceting,", function() {
                 });
             });
         });
+
+
+        describe("navigating to recordset with filters that faceting doesn't support.", function () {
+            var customFilterParams = testParams.customFilter;
+            var idx = customFilterParams.facet;
+
+            beforeAll(function () {
+                var uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
+
+                uri += "/" + customFilterParams.ermrestFilter;
+
+                browser.ignoreSynchronization=true;
+                browser.get(uri);
+                chaisePage.waitForElementInverse(element(by.id("spinner")));
+            });
+
+            it ("should show the applied filter and clear all button.", function (done) {
+                chaisePage.recordsetPage.getFilters().then(function (filters) {
+                    expect(filters.length).toEqual(1, "filter is missing");
+
+                    expect(filters[0].getText()).toEqual("Custom Filter: " + customFilterParams.ermrestFilter);
+
+                    expect(chaisePage.recordsetPage.getClearAllFilters().isDisplayed()).toBeTruthy("`Clear All` is not visible");
+
+                    done();
+                }).catch(function (err) {
+                    console.log(err);
+                    done.fail();
+                });
+            });
+
+            it ("main and faceting data should be based on the filter, and be able to apply new filters.", function (done) {
+                // main
+                expect(chaisePage.recordsetPage.getRows().count()).toEqual(customFilterParams.numRows, "total row count missmatch.");
+
+                chaisePage.recordsetPage.getFacetById(idx).click().then(function (ct) {
+                    browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
+
+                    // wait for facet checkboxes to load
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getFacetOptions(idx).count().then(function(ct) {
+                            return ct == customFilterParams.totalNumOptions;
+                        });
+                    }, browser.params.defaultTimeout);
+
+                    // wait for list to be fully visible
+                    browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(idx)), browser.params.defaultTimeout);
+
+                    return chaisePage.recordsetPage.getFacetOptionsText(idx);
+                }).then(function (text) {
+                    expect(text).toEqual(customFilterParams.options, "options missmatch.");
+
+                    // select a new facet
+                    return chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(idx, customFilterParams.option));
+                }).then(function () {
+                    chaisePage.waitForElementInverse(element(by.id("spinner")));
+
+                    // make sure filter is there
+                    expect(chaisePage.recordsetPage.getFilters().count()).toBe(2, "facet filter missing.");
+
+                    // make sure data has been updated
+                    expect(chaisePage.recordsetPage.getRows().count()).toBe(customFilterParams.numRowsWFacet, "");
+
+                    done();
+                }).catch(function (err) {
+                    console.log(err);
+                    done.fail();
+                });
+            });
+
+            it ("clicking on `x` for Custom Filter should only clear the filter.", function (done) {
+                expect(chaisePage.recordsetPage.getClearCustomFilters().isDisplayed()).toBeTruthy("`Clear Custom Filters` is not visible.");
+
+                chaisePage.recordsetPage.getClearCustomFilters().click().then(function () {
+                    chaisePage.waitForElementInverse(element(by.id("spinner")));
+
+                    expect(chaisePage.recordsetPage.getRows().count()).toEqual(customFilterParams.numRowsWOFilter, "total row count missmatch.");
+
+                    expect(chaisePage.recordsetPage.getFacetOptionsText(idx)).toEqual(customFilterParams.optionsWOFilter, "options missmatch.");
+
+                    done();
+                }).catch(function (err) {
+                    console.log(err);
+                    done.fail();
+                });
+            });
+        });
+
     });
 
     describe("For table " + testParams.table_name + ",", function() {
