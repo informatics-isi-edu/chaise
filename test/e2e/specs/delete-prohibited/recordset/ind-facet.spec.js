@@ -5,8 +5,8 @@ var testParams = {
     schema_name: "faceting",
     table_name: "main",
     sort: "@sort(id)",
-    totalNumFacets: 14,
-    facetNames: [ "id", "int_col", "float_col", "date_col", "timestamp_col", "text_col", "longtext_col", "markdown_col", "boolean_col", "jsonb_col", "F1", "to_name", "f3 (term)", "from_name" ],
+    totalNumFacets: 15,
+    facetNames: [ "id", "int_col", "float_col", "date_col", "timestamp_col", "text_col", "longtext_col", "markdown_col", "boolean_col", "jsonb_col", "F1", "to_name", "f3 (term)", "from_name", "F1 with Term" ],
     defaults: {
         openFacetNames: [ "id", "int_col", "to_name" ],
         numFilters: 2,
@@ -55,17 +55,17 @@ var testParams = {
                 min: 5,
                 max: 10,
                 filter: "int_col: 5 to 10",
-                numRows: 4
+                numRows: 6
             },
             justMin: {
                 min: 6,
                 filter: "int_col: > 6",
-                numRows: 16
+                numRows: 17
             },
             justMax: {
                 max: 12,
                 filter: "int_col: < 12",
-                numRows: 14
+                numRows: 15
             }
         },
         {
@@ -225,6 +225,15 @@ var testParams = {
             filter: "from_name: 5",
             numRows: 1,
             options: [ '1', '2', '3', '4', '5', '6', '7', '8', '9', '10' ]
+        },
+        {
+            name: "F1 with Term",
+            type: "choice",
+            totalNumOptions: 10,
+            option: 1,
+            filter: "F1 with Term : two",
+            numRows: 10,
+            options: [ 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten' ]
         }
     ],
     multipleFacets: [
@@ -246,6 +255,15 @@ var testParams = {
         jsonb_col: JSON.stringify({"key":"one"},undefined,2),
         faceting_main_fk1: "one",
         faceting_main_fk2: "one"
+    },
+    filter_secondary_key: {
+        facetIdx: 14,
+        option: 0,
+        modalOption: 1,
+        totalNumOptions: 10,
+        numRows: 10,
+        numRowsAfterModal: 20
+
     },
     not_null: {
         option: 0,
@@ -1119,6 +1137,103 @@ describe("Viewing Recordset with Faceting,", function() {
                     expect(ct).toBe(testParams.multipleFacets[3].numRows, "number of rows is incorrect after making multiple consecutive selections");
                 });
             });
+        });
+
+        describe("selecting entity facet that is not on the shortest key.", function () {
+            var facet, idx, clearAll;
+            beforeAll(function (done) {
+                var uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
+
+                browser.ignoreSynchronization=true;
+                browser.get(uri);
+                chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
+
+                clearAll = chaisePage.recordsetPage.getClearAllFilters();
+
+                idx = testParams.filter_secondary_key.facetIdx;
+                facet = chaisePage.recordsetPage.getFacetById(idx);
+
+                done();
+            });
+
+            it ("should open the facet, select a value to filter on.", function (done) {
+                clearAll.click().then(function () {
+                    return chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
+                }).then(function () {
+                  return facet.click();
+                }).then(function () {
+                    // wait for facet to open
+                    browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
+
+                    // wait for facet checkboxes to load
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getFacetOptions(idx).count().then(function(ct) {
+                            return ct == testParams.filter_secondary_key.totalNumOptions;
+                        });
+                    }, browser.params.defaultTimeout);
+
+                    // wait for list to be fully visible
+                    browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(idx)), browser.params.defaultTimeout);
+
+                    return chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(idx, testParams.filter_secondary_key.option));
+                }).then(function () {
+                    // wait for request to return
+                    browser.wait(EC.visibilityOf(clearAll), browser.params.defaultTimeout);
+
+                    chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
+
+                    return chaisePage.recordsetPage.getRows().count();
+                }).then(function (ct) {
+                    expect(ct).toBe(testParams.filter_secondary_key.numRows, "number of rows is incorrect");
+                    done();
+                }).catch(function (err) {
+                    console.log(err);
+                    done.fail();
+                });
+
+            });
+
+            it ("the selected value should be selected on the modal.", function (done) {
+                var showMore = chaisePage.recordsetPage.getShowMore(idx);
+                browser.wait(EC.elementToBeClickable(showMore));
+                showMore.click().then(function () {
+                    chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
+
+                    expect(chaisePage.recordsetPage.getCheckedModalOptions().count()).toBe(1, "number of checked rows missmatch.");
+                    return chaisePage.recordsetPage.getModalOptions();
+                }).then(function (options) {
+                    expect(options[testParams.filter_secondary_key.option+1].isSelected()).toBeTruthy("the correct option was not selected.");
+                    done();
+                }).catch(function (err) {
+                    console.log(err);
+                    done.fail();
+                });
+            });
+
+            it ("selecting new values on the modal and submitting them, should change the filters on submit.", function (done) {
+                chaisePage.recordsetPage.getModalOptions().then(function (options) {
+                    return chaisePage.clickButton(options[testParams.filter_secondary_key.modalOption+1]);
+                }).then(function () {
+                    return chaisePage.recordsetPage.getModalSubmit().click();
+                }).then(function () {
+                    chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
+
+                    return chaisePage.recordsetPage.getCheckedFacetOptions(idx).count();
+                }).then (function (cnt) {
+                    expect(cnt).toBe(2, "Number of facet options is incorrect after returning from modal");
+
+                    return chaisePage.recordsetPage.getRows().count();
+                }).then(function (ct) {
+                    expect(ct).toBe(testParams.filter_secondary_key.numRowsAfterModal, "Number of visible rows after selecting a second option from the modal is incorrect");
+                    return chaisePage.recordsetPage.getClearAllFilters().click();
+                }).then(function () {
+                    done();
+                }).catch(function (err) {
+                    console.log(err);
+                    done.fail();
+                });
+            });
+
         });
 
         describe("Records With Value (not-null) filter, ", function () {

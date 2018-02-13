@@ -241,10 +241,11 @@ describe('View existing record,', function() {
                         expect(title).toBe("Choose related_table", "titlte missmatch.");
 
                         browser.wait(function () {
-                               return chaisePage.recordsetPage.getRows().count().then(function (ct) {
-                                   return (ct > 0);
-                               });
-                           });
+                            return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
+                                return (ct == 4);
+                            });
+                        });
+
                         return chaisePage.recordsetPage.getModalRows().count();
                     }).then(function(ct){
                         expect(ct).toBe(4, "association count missmatch.");
@@ -273,9 +274,10 @@ describe('View existing record,', function() {
                                 return ct == testParams.association_count + 1;
                             });
                         }, browser.params.defaultTimeout);
-                         return chaisePage.recordPage.getRelatedTableRows(associationTableName).count();
+
+                        return chaisePage.recordPage.getRelatedTableRows(associationTableName).count();
                     }).then(function (count){
-                        expect(count).toBe(testParams.association_count + 1)
+                        expect(count).toBe(testParams.association_count + 1);
                     }).catch(function(error) {
                         console.log(error);
                         expect('There was an error in this promise chain').toBe('Please see error message.');
@@ -313,42 +315,43 @@ describe('View existing record,', function() {
                     }).then(function(popupBtns){
                         return chaisePage.clickButton(popupBtns[0]);
                     }).then (function () {
+                        chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
+
                         browser.wait(function () {
-                            return chaisePage.recordsetPage.getRows().count().then(function (ct) {
-                                return (ct > 0);
+                            return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
+                                return (ct == 4);
                             });
                         });
 
-                        rows = chaisePage.recordsetPage.getRows();
-                    }).then(function(ct){
-                        // get the 4th displayed rows select action button
-                        return rows.get(3).all(by.css(".select-action-button"));
-                    }).then(function(selectButtons){
-                        return selectButtons[0].click();
-                    }).then(function() {
-                        return chaisePage.recordEditPage.submitForm();
-                    }).then(function(){
+                       rows = chaisePage.recordsetPage.getRows();
 
-                        return browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
-                    }).then(function() {
-                        browser.close();
-                        return browser.switchTo().window(allWindows[0]);
-                    }).then(function (){
-                        browser.driver.navigate().refresh();
-                        chaisePage.waitForElement(element(by.id('rt-heading-association_table')));
-                        return chaisePage.recordPage.getRelatedTableRows(associationTableName);
-                    }).then(function(rows){
-                        return rows[1].all(by.tagName("td"));
-                    }).then(function (cells){
-                        return cells[1].all(by.css("a"));;
-                    }).then(function(cell){
-                        return cell[0].getAttribute('innerHTML');
-                    }).then(function(id){
-                        expect(id).toBe('4');
-                    }).catch(function(error) {
-                        console.log(error);
-                        expect('There was an error in this promise chain').toBe('Please see error message.');
-                    });
+                       return rows.get(3).all(by.css(".select-action-button"));
+                   }).then(function(selectButtons){
+                       return selectButtons[0].click();
+                   }).then(function() {
+                       return chaisePage.recordEditPage.submitForm();
+                   }).then(function(){
+
+                       return browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
+                   }).then(function() {
+                       browser.close();
+                       return browser.switchTo().window(allWindows[0]);
+                   }).then(function (){
+                       browser.driver.navigate().refresh();
+                       chaisePage.waitForElement(element(by.id('rt-heading-association_table')));
+                       return chaisePage.recordPage.getRelatedTableRows(associationTableName);
+                   }).then(function(rows){
+                       return rows[1].all(by.tagName("td"));
+                   }).then(function (cells){
+                       return cells[1].all(by.css("a"));;
+                   }).then(function(cell){
+                      return cell[0].getAttribute('innerHTML');
+                  }).then(function(id){
+                      expect(id).toBe('4');
+                  }).catch(function(error) {
+                      console.log(error);
+                      expect('There was an error in this promise chain').toBe('Please see error message.');
+                  });
                 });
 
                 it("on click of View button should redirect to record page of related entity", function(){
@@ -393,6 +396,33 @@ describe('View existing record,', function() {
                         browser.navigate().back();
                     });
                 });
+
+                it("Page size annotation on domain table should be respected when adding records through Add button in multi-picker", function(){
+                    var related_associate_table = testParams.related_associate_table;
+                    var addRelatedRecordLink = chaisePage.recordPage.getAddRecordLink(related_associate_table);
+                    var EC = protractor.ExpectedConditions, newTabUrl, foreignKeyInputs;
+                    browser.wait(EC.elementToBeClickable(addRelatedRecordLink), browser.params.defaultTimeout);
+
+                    addRelatedRecordLink.click().then(function(){
+                        chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
+                        return chaisePage.recordEditPage.getModalTitle().getText();
+                    }).then(function (title) {
+                        expect(title).toBe("Choose file", "titlte missmatch.");
+
+                        browser.wait(function () {
+                               return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
+                                   return (ct == 2);
+                               });
+                           });
+                        return chaisePage.recordsetPage.getModalRows().count();
+                    }).then(function(ct){
+                        expect(ct).toBe(2, "association count missmatch for file domain table.");
+                        return chaisePage.recordEditPage.getModalCloseBtn().click();
+                    }).catch(function(error) {
+                        console.log(error);
+                        expect('There was an error in this promise chain').toBe('Please see error message.');
+                    });
+                });
             });
 
             describe("For a related entity with an association table and markdown display", function () {
@@ -407,17 +437,20 @@ describe('View existing record,', function() {
                     expect(addRelatedRecordLink.getText()).toBe("Add", "The Add button is not displayed as Add");
 
                     addRelatedRecordLink.click().then(function(){
+
                         browser.wait(function () {
-                               return chaisePage.recordsetPage.getRows().count().then(function (ct) {
-                                   return (ct > 0);
-                               });
-                           });
+                            return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
+                                return (ct == 4);
+                            });
+                        });
+
                         rows = chaisePage.recordsetPage.getRows();
-                    }).then(function(ct){
+
                         // click the third row, the first one should already be selected after sorting
                         return browser.executeScript("return $('.modal-body tr input[type=checkbox]').get(2);");
                     }).then(function (selectButtons){
-                        selectButtons.click();
+                        return selectButtons.click();
+                    }).then(function () {
                         return browser.executeScript("return $('#multi-select-submit-btn').click();");
                     }).then(function () {
                         return browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);

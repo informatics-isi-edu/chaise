@@ -669,6 +669,20 @@
             };
 
             /**
+             * Given tuple and the columnName that should be used, return
+             * the filter's uniqueId (in case of entityPicker, it might be different from the tuple's uniqueId)
+             * @param  {Object} tuple      the tuple object
+             * @param  {string} columnName name of column (in scalar it is 'value')
+             * @return {string}            filter's uniqueId
+             */
+            function getFilterUniqueId(tuple, columnName) {
+              if (tuple.data && columnName in tuple.data) {
+                  return tuple.data[columnName];
+              }
+              return tuple.uniqueId;
+            }
+
+            /**
              * Initialzie facet column.
              * This will take care of getting the displaynames of rows.
              * (If it's a entity picker, the displayname will be different than the value.).
@@ -693,7 +707,8 @@
                     filters.forEach(function (f) {
                         scope.facetModel.appliedFilters.push({
                             uniqueId: f.uniqueId,
-                            displayname: f.displayname
+                            displayname: f.displayname,
+                            tuple: f.tuple // this might be null
                         });
                     });
 
@@ -721,6 +736,7 @@
                         isNotNull: f.isNotNull,
                         uniqueId: f.uniqueId,
                         displayname: f.displayname,
+                        tuple: f.tuple, // might be null
                         selected: true
                     };
                 };
@@ -730,8 +746,11 @@
                 // facetColumn has changed so create the new reference
                 if (scope.facetColumn.isEntityMode) {
                     scope.reference = scope.facetColumn.sourceReference.contextualize.compactSelect;
+                    scope.columnName = scope.facetColumn.column.name;
                 } else {
                     scope.reference = scope.facetColumn.column.groupAggregate.entityCounts;
+                    // the first column will be the value column
+                    scope.columnName = scope.reference.columns[0].name;
                 }
 
                 // make sure to add the search term
@@ -767,15 +786,8 @@
                                 return;
                             }
 
-                            var value;
-                            if (scope.facetColumn.isEntityMode) {
-                                // the filter might not be on the shortest key,
-                                // therefore the uniqueId is not correct.
-                                value = tuple.data ? tuple.data[scope.facetColumn.column.name] : null;
-                            } else {
-                                // The name of column is value
-                                value = tuple.data ? tuple.data['value'] : null;
-                            }
+                            // filter and tuple uniqueId might be different
+                            var value = getFilterUniqueId(tuple, scope.columnName);
 
                             var i = scope.facetModel.appliedFilters.findIndex(function (row) {
                                 return row.uniqueId == value && !row.isNotNull;
@@ -788,10 +800,11 @@
 
                             // if we have a not_null filter, other filters must be disabled.
                             scope.checkboxRows.push({
-                                selected: false,
-                                disabled: scope.facetColumn.hasNotNullFilter,
-                                displayname: (value == null) ? {value: null, isHTML: false} : tuple.displayname,
                                 uniqueId: value,
+                                displayname: (value == null) ? {value: null, isHTML: false} : tuple.displayname,
+                                tuple:  tuple,
+                                disabled: scope.facetColumn.hasNotNullFilter,
+                                selected: false,
                             });
                         });
 
@@ -875,8 +888,27 @@
                             params.matchNotNull = true;
                         }
 
-                        params.selectedRows = scope.checkboxRows.filter(function (row) {
-                            return row.selected;
+                        params.selectedRows = [];
+
+                        // generate list of rows needed for modal
+                        scope.checkboxRows.forEach(function (row) {
+                            if (!row.selected) return;
+                            var newRow = {};
+
+                            // - row.uniqueId will return the filter's uniqueId and not
+                            //    the tuple's. We need tuple's uniqueId in here
+                            //    (it will be used in the logic of isSelected in modal).
+                            // - data is needed for the post process that we do on the data.
+                            if (row.tuple && scope.facetColumn.isEntityMode) {
+                                newRow.uniqueId = row.tuple.uniqueId;
+                                newRow.data =row.tuple.data;
+                            } else {
+                                newRow.uniqueId = row.uniqueId;
+                            }
+
+                            newRow.displayname = row.displayname;
+                            newRow.isNotNull = row.notNull;
+                            params.selectedRows.push(newRow);
                         });
 
                         if (!scope.facetColumn.isEntityMode) {
@@ -908,28 +940,22 @@
                             } else if (Array.isArray(res)){
                                 var tuples = res;
 
-                                // If the data was preselected, we won't have the data object attached
-                                // to the tuples. In case of entity picker we must always get the value from data.
-                                // NOTE This might be buggy.
-                                var getTupleValue = function (t) {
-                                    var col_name = scope.facetColumn.isEntityMode ? scope.facetColumn.column.name : "value";
-                                    if (t.data && col_name in t.data) {
-                                        return t.data[col_name];
-                                    } else {
-                                        return t.uniqueId;
-                                    }
-                                };
-
+                                // create the reference using filters
                                 ref = scope.facetColumn.replaceAllChoiceFilters(tuples.map(function (t) {
-                                    return getTupleValue(t);
+                                    return getFilterUniqueId(t, scope.columnName);
                                 }));
+
+                                // create the list of applied filters, this Will
+                                // be used for genreating the checkboxRows of current facet
                                 scope.facetModel.appliedFilters = tuples.map(function (t) {
-                                    var val = getTupleValue(t);
+                                    var val = getFilterUniqueId(t, scope.columnName);
+
                                     // NOTE displayname will always be string, but we want to treat null and empty string differently,
                                     // therefore we have a extra case for null, to just return null.
                                     return {
                                         uniqueId: val,
-                                        displayname: (val == null) ? {value: null, isHTML: false} : t.displayname
+                                        displayname: (val == null) ? {value: null, isHTML: false} : t.displayname,
+                                        tuple: t,
                                     };
                                 });
                             } else {
@@ -1004,7 +1030,8 @@
                             scope.facetModel.appliedFilters.push({
                                 selected: true,
                                 uniqueId: row.uniqueId,
-                                displayname: row.displayname
+                                displayname: row.displayname,
+                                tuple: row.tuple
                             });
                         } else {
                             scope.facetModel.appliedFilters = scope.facetModel.appliedFilters.filter(function (f) {
@@ -1042,7 +1069,7 @@
                             scope.inputChangedPromise = null;
                             $log.debug("request for facet (index=" + scope.facetColumn.index + ") update. new search=" + scope.searchTerm);
                             scope.parentCtrl.updateFacetColumn(scope.index);
-                        }, 1000);
+                        }, tableConstants.AUTO_SEARCH_TIMEOUT);
                     };
 
                     // clear the search, if reference has search then fire update
@@ -1089,6 +1116,5 @@
                     });
                 }
             };
-
         }]);
 })();
