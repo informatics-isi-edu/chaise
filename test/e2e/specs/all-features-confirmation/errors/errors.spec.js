@@ -354,7 +354,7 @@ describe('Error related test cases,', function() {
       });
 
       it("should be returned Invalid Page Criteria", function () {
-          var modalTitle = element(by.css('.modal-title ')),
+          var modalTitle = chaisePage.recordEditPage.getModalTitle(),
               modalActionBody =  element(by.css('.modal-body')).all(by.tagName('span')).get(1);
 
           chaisePage.waitForElement(modalTitle).then(function(){
@@ -394,7 +394,7 @@ describe('Error related test cases,', function() {
       });
 
       it("should be returned Invalid Page Criteria", function () {
-          var modalTitle = element(by.css('.modal-title ')),
+          var modalTitle = chaisePage.recordEditPage.getModalTitle(),
               modalActionBody =  element(by.css('.modal-body')).all(by.tagName('span')).get(1);
 
           chaisePage.waitForElement(modalTitle).then(function(){
@@ -433,7 +433,7 @@ describe('Error related test cases,', function() {
       });
 
       it("should be returned Invalid Page Criteria", function () {
-          var modalTitle = element(by.css('.modal-title ')),
+          var modalTitle = chaisePage.recordEditPage.getModalTitle(),
               modalActionBody =  element(by.css('.modal-body')).all(by.tagName('span')).get(1);
 
           chaisePage.waitForElement(modalTitle).then(function(){
