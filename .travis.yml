@@ -76,6 +76,7 @@ before_install:
   - sudo apt-get install -y nodejs
   - git clone https://github.com/informatics-isi-edu/ErmrestDataUtils.git
   - cd ErmrestDataUtils
+  - git checkout histogram-test
   - sudo npm install
   - cd ..
   - git clone https://github.com/informatics-isi-edu/ermrestjs.git
