@@ -705,7 +705,8 @@
                                 scope.plot.data[0].y = response.y;
 
                                 if (isColumnOfType("timestamp")) {
-                                    AlertsService.addAlert("x data " + response.x, 'error');
+                                    AlertsService.addAlert("ermrest response data " + response.test, 'error');
+                                    AlertsService.addAlert("x data " + response.x, 'warn')
                                 }
 
                                 scope.plot.labels = response.labels;
