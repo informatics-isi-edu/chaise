@@ -212,7 +212,7 @@
                     } else {
                         vm.page = page;
                         vm.rowValues = DataUtils.getRowValuesFromPage(page);
-                        AlertsService.addAlert("Index 0: " + page._data[0].timestamp_col + ".\n Index 5: " + page._data[5].timestamp_col + ".\n Index 10: " + page._data[10].timestamp_col);
+                        AlertsService.addAlert("Index 0: " + page._data[0].timestamp_col + ".\n Index 5: " + page._data[5].timestamp_col + ".\n Index 10: " + page._data[10].timestamp_col, 'success');
                         vm.hasLoaded = true;
                         vm.initialized = true;
                         defer.resolve(true);
