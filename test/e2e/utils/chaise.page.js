@@ -377,6 +377,10 @@ var recordEditPage = function() {
         return element(by.css(".modal-title"));
     };
 
+    this.getModalActionBody = function() {
+        return element(by.css('.modal-body')).all(by.tagName('span')).get(1);
+    };
+
     this.getModalCloseBtn = function() {
             return element(by.css(".modal-close"));
     };
@@ -753,7 +757,7 @@ var recordPage = function() {
     };
 
     this.getErrorModalReloadButton = function(){
-        return browser.executeScript("return $('button')[1]");  
+        return browser.executeScript("return $('button')[1]");
     };
 
     this.getErrorModalOkButton = function(){

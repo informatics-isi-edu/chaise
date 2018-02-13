@@ -21,7 +21,9 @@ var testParams = {
       invalidPageCriteriaTitle: "Invalid Page Criteria",
       invalidPageCriteriaBody: "Click OK to reload this page without Invalid Page Criteria.",
       invalidFacetFilterTitle: "Invalid Facet Filters",
-      invalidFacetFilterBody: "Click OK to reload this page without Invalid Facet Filters."
+      invalidFacetFilterBody: "Click OK to reload this page without Invalid Facet Filters.",
+      invalidFilterOperatorErrorTitle : "Invalid Filter",
+      invalidFilterOperatorErrorBody : "Click OK to go to the Recordset."
     }
 };
 
@@ -355,7 +357,7 @@ describe('Error related test cases,', function() {
 
       it("should be returned Invalid Page Criteria", function () {
           var modalTitle = chaisePage.recordEditPage.getModalTitle(),
-              modalActionBody =  element(by.css('.modal-body')).all(by.tagName('span')).get(1);
+              modalActionBody = chaisePage.recordEditPage.getModalActionBody();
 
           chaisePage.waitForElement(modalTitle).then(function(){
               return modalTitle.getText();
@@ -372,8 +374,7 @@ describe('Error related test cases,', function() {
 
       it('On click of OK button the page should reload the page without paging conditions', function(){
           chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
-              return btn.click();
-          }).then (function (){
+              btn.click();
               return browser.driver.getCurrentUrl();
           }).then (function(currentUrl) {
              recordsetPage = pageTestUrl.slice(0, pageTestUrl.search('@'));
@@ -395,7 +396,7 @@ describe('Error related test cases,', function() {
 
       it("should be returned Invalid Page Criteria", function () {
           var modalTitle = chaisePage.recordEditPage.getModalTitle(),
-              modalActionBody =  element(by.css('.modal-body')).all(by.tagName('span')).get(1);
+              modalActionBody = chaisePage.recordEditPage.getModalActionBody();
 
           chaisePage.waitForElement(modalTitle).then(function(){
               return modalTitle.getText();
@@ -412,12 +413,66 @@ describe('Error related test cases,', function() {
 
       it('On click of OK button the page should reload the page without paging conditions', function(){
           chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
-              return btn.click();
-          }).then (function (){
+              btn.click();
               return browser.driver.getCurrentUrl();
           }).then (function(currentUrl) {
              recordsetPage = pageTestUrl.slice(0, pageTestUrl.search('@'));
              expect(currentUrl).toBe(recordsetPage, "The redirection to RecordEdit page failed");
+          }).catch( function(err) {
+              console.log(err);
+              expect('Something went wrong with this promise chain.').toBe('Please see error message.');
+          });
+      });
+
+    });
+
+    describe("Error check for invalid filter in RecordEdit", function(){
+
+      beforeAll(function() {
+          pageTestUrl = browser.params.url + "/recordedit/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name +  "/id::gt:2002@after()";
+          browser.get(pageTestUrl);
+          modalTitle = chaisePage.recordEditPage.getModalTitle();
+          modalActionBody = chaisePage.recordEditPage.getModalActionBody();
+      });
+
+      it("should be returned Invalid Page Criteria", function () {
+          chaisePage.waitForElement(modalTitle).then(function(){
+              return modalTitle.getText();
+          }).then(function (text) {
+              expect(text).toBe(testParams.facetErrorstext.invalidPageCriteriaTitle, "Invalid Page Criteria error pop-up could not be opened!");
+              return modalActionBody.getText();
+          }).then(function (errorText) {
+              expect(errorText).toBe(testParams.facetErrorstext.invalidPageCriteriaBody, "Error action text did not match");
+          }).catch(function(error) {
+              console.log(error);
+              expect('Something went wrong with this promise chain.').toBe('Please see error message.');
+          });
+      });
+
+      it('On click of OK button the page should reload the page without paging condition but with invalid filter conditions', function(){
+          chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
+              btn.click();
+              return chaisePage.waitForElement(modalTitle);
+          }).then (function (){
+             return modalTitle.getText();
+          }).then(function (text) {
+               expect(text).toBe(testParams.facetErrorstext.invalidFilterOperatorErrorTitle, "Invalid Filter operator error pop-up could not be opened!");
+               return modalActionBody.getText();
+           }).then(function (errorText) {
+               expect(errorText).toBe(testParams.facetErrorstext.invalidFilterOperatorErrorBody, "Error action text did not match");
+          }).catch( function(err) {
+              console.log(err);
+              expect('Something went wrong with this promise chain.').toBe('Please see error message.');
+          });
+      });
+
+      it('On click of OK button the page should redirect to RecordSet', function(){
+          chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
+              btn.click();
+              return browser.driver.getCurrentUrl();
+          }).then (function(currentUrl) {
+             recordsetWithoutFacetUrl = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/";
+             expect(currentUrl).toBe(recordsetWithoutFacetUrl, "The redirection to Recordset page failed");
           }).catch( function(err) {
               console.log(err);
               expect('Something went wrong with this promise chain.').toBe('Please see error message.');
@@ -434,7 +489,7 @@ describe('Error related test cases,', function() {
 
       it("should be returned Invalid Page Criteria", function () {
           var modalTitle = chaisePage.recordEditPage.getModalTitle(),
-              modalActionBody =  element(by.css('.modal-body')).all(by.tagName('span')).get(1);
+              modalActionBody = chaisePage.recordEditPage.getModalActionBody();
 
           chaisePage.waitForElement(modalTitle).then(function(){
               return modalTitle.getText();
@@ -451,8 +506,7 @@ describe('Error related test cases,', function() {
 
       it('On click of OK button the page should reload the page without facet filter conditions', function(){
           chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
-              return btn.click();
-          }).then (function (){
+              btn.click();
               return browser.driver.getCurrentUrl();
           }).then (function(currentUrl) {
              recordsetWithoutFacetUrl = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name +  "/@sort(release_date::desc::,id)"

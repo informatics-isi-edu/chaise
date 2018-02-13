@@ -257,8 +257,7 @@
               else if(exception.errorData && exception.errorData.redirectPath != undefined && exception.errorData.redirectPath != ''){
                 redirectLink = UriUtils.createRedirectLinkFromPath(exception.errorData.redirectPath);
                 if(exception instanceof ERMrest.InvalidFilterOperatorError && (appName == 'record' || appName == 'recordedit')){
-                  redirectLink = redirectLink.replace('record', 'recordset');
-                  redirectLink = redirectLink.replace('recordedit', 'recordset');
+                  redirectLink = redirectLink.replace(appName, 'recordset');                  
                 }
               }
               else{
