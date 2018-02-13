@@ -706,6 +706,7 @@
 
                                 if (isColumnOfType("timestamp")) {
                                     AlertsService.addAlert("ermrest response data " + response.test, 'error');
+                                    AlertsService.addAlert("data before padding " + response.beforePadding, 'error');
                                     AlertsService.addAlert("x data " + response.x, 'warn')
                                 }
 
