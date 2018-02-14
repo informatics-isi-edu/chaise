@@ -33,8 +33,8 @@ services:
 
 before_install:
   - timedatectl
-  - sudo timedatectl set-timezone PDT
-  - export TZ=PDT
+  - sudo timedatectl set-timezone America/Los_Angeles
+  - export TZ=America/Los_Angeles
   - timedatectl
   - sudo apt-get -y update
   - sudo apt-get -y install libpq-dev python-dev
@@ -76,7 +76,6 @@ before_install:
   - sudo apt-get install -y nodejs
   - git clone https://github.com/informatics-isi-edu/ErmrestDataUtils.git
   - cd ErmrestDataUtils
-  - git checkout histogram-test
   - sudo npm install
   - cd ..
   - git clone https://github.com/informatics-isi-edu/ermrestjs.git
