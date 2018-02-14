@@ -409,7 +409,7 @@
             };
         }])
 
-        .directive('rangePicker', ['$timeout', '$q', '$log', 'dataFormats', 'logActions', 'AlertsService', function ($timeout, $q, $log, dataFormats, logActions, AlertsService) {
+        .directive('rangePicker', ['$timeout', '$q', '$log', 'dataFormats', 'logActions', function ($timeout, $q, $log, dataFormats, logActions) {
             return {
                 restrict: 'AE',
                 templateUrl: '../common/templates/faceting/range-picker.html',
@@ -703,11 +703,6 @@
 
                                 scope.plot.data[0].x = response.x;
                                 scope.plot.data[0].y = response.y;
-
-                                if (isColumnOfType("timestamp")) {
-                                    AlertsService.addAlert("1. data before padding " + response.xPadding, 'error');
-                                    AlertsService.addAlert("2. uri " + response.uri, 'success');
-                                }
 
                                 scope.plot.labels = response.labels;
 

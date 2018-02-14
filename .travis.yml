@@ -80,7 +80,6 @@ before_install:
   - cd ..
   - git clone https://github.com/informatics-isi-edu/ermrestjs.git
   - cd ermrestjs
-  - git checkout histogram-ts-bug
   - sudo npm install
   - bower install
   - sudo make build
