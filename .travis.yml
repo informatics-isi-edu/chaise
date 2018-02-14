@@ -106,11 +106,10 @@ before_script:
 
 script:
   - make build
-  - make testrecordset
-  # - make testfullfeaturesconfirmation
-  # - make testdefaultconfig
-  # - make testfullfeatures
-  # - make testdeleteprohibited
+  - make testfullfeaturesconfirmation
+  - make testdefaultconfig
+  - make testfullfeatures
+  - make testdeleteprohibited
 
 after_failure:
   - sudo cat ${HTTPD_ERROR_LOG}
