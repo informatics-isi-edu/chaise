@@ -753,7 +753,7 @@ var recordPage = function() {
     };
 
     this.getErrorModalReloadButton = function(){
-        return browser.executeScript("return $('button')[1]");  
+        return browser.executeScript("return $('button')[1]");
     };
 
     this.getErrorModalOkButton = function(){
@@ -940,6 +940,10 @@ var recordsetPage = function() {
 
     this.getClearAllFilters = function () {
         return element(by.id("clear-all-filters"));
+    }
+
+    this.getClearCustomFilters = function () {
+        return element(by.id("clear-custom-filters"));
     }
 
     this.getFacetOptions = function (idx) {
