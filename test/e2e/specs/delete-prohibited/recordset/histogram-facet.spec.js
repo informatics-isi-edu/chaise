@@ -32,20 +32,20 @@ var testParams = {
             zoom3: { min: "2012-07-30", max: "2018-12-20" }
         }, {
             name: "timestamp_col",
-            absMin: { date: "2001-01-01", time: "01:01:01" },
-            absMax: { date: "2030-06-30", time: "06:30:30" },
+            absMin: { date: "2007-04-06", time: "01:01:01" },
+            absMax: { date: "2007-09-30", time: "06:30:30" },
             zoom1: {
-                min: {date: "2006-11-25", time: "11:30:54"},
-                max: {date: "2024-08-05", time: "19:00:36"}
+                min: {date: "2007-05-11", time: "11:42:54"},
+                max: {date: "2007-08-25", time: "19:48:36"}
             },
             zoom2: {
-                min: {date: "2010-06-10", time: "03:12:50"},
-                max: {date: "2021-01-21", time: "02:18:39"}
+                min: {date: "2007-06-01", time: "18:08:02"},
+                max: {date: "2007-08-04", time: "13:23:27"}
             },
-            allRecords: "Displaying 25 of 165 Records",
+            allRecords: "Displaying 25 of 155 Records",
             zoom3: {
-                min: {date: "2012-07-24", time: "17:37:59"},
-                max: {date: "2018-12-07", time: "12:53:29"}
+                min: {date: "2007-06-14", time: "12:23:07"},
+                max: {date: "2007-07-22", time: "19:08:22"}
             }
         }
     ]

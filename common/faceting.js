@@ -447,7 +447,6 @@
                     // register this controller in the parent
                     parentCtrl.register(currentCtrl, scope.facetColumn, scope.index);
                     scope.parentCtrl = parentCtrl;
-                    scope.$root.alerts = AlertsService.alerts;
 
                     scope.relayout = false;
                     scope.ranges = [];
