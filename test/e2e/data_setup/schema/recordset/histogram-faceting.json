@@ -1,0 +1,64 @@
+{
+    "schema_name": "histogram-faceting",
+    "tables": {
+        "main": {
+            "kind": "table",
+            "table_name": "main",
+            "schema_name": "histogram-faceting",
+            "comment": "main table for the faceting",
+            "keys": [
+                {
+                    "unique_columns": ["id"],
+                    "names": [["faceting", "main_key1"]]
+                }
+            ],
+            "foreign_keys": [],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": {
+                        "typename": "serial4"
+                    }
+                },
+                {
+                    "name": "int_col",
+                    "type": {
+                        "typename": "int4"
+                    }
+                },
+                {
+                    "name": "float_col",
+                    "type": {
+                        "typename": "float4"
+                    }
+                },
+                {
+                    "name": "date_col",
+                    "type": {
+                        "typename": "date"
+                    }
+                },
+                {
+                    "name": "timestamp_col",
+                    "type": {
+                        "typename": "timestamptz"
+                    }
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:visible-columns" : {
+                    "compact": ["int_col", "float_col", "date_col", "timestamp_col"],
+                    "filter": {
+                        "and": [
+                            {"source": "int_col", "bar_plot": { "n_bins": 10}},
+                            {"source": "float_col", "bar_plot": { "n_bins": 10}},
+                            {"source": "date_col", "bar_plot": { "n_bins": 10}},
+                            {"source": "timestamp_col", "bar_plot": { "n_bins": 10}}
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}
