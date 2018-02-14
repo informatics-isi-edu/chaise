@@ -1406,7 +1406,7 @@ describe("Viewing Recordset with Faceting,", function() {
                 chaisePage.recordsetPage.getFilters().then(function (filters) {
                     expect(filters.length).toEqual(1, "filter is missing");
 
-                    expect(filters[0].getText()).toEqual("Custom Filter: " + customFilterParams.ermrestFilter);
+                    expect(filters[0].getText()).toEqual("Custom Filter: " + customFilterParams.ermrestFilter, "filter text missmatch.");
 
                     expect(chaisePage.recordsetPage.getClearAllFilters().isDisplayed()).toBeTruthy("`Clear All` is not visible");
 
@@ -1421,7 +1421,7 @@ describe("Viewing Recordset with Faceting,", function() {
                 // main
                 expect(chaisePage.recordsetPage.getRows().count()).toEqual(customFilterParams.numRows, "total row count missmatch.");
 
-                chaisePage.recordsetPage.getFacetById(idx).click().then(function (ct) {
+                chaisePage.recordsetPage.getFacetById(idx).click().then(function () {
                     browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
 
                     // wait for facet checkboxes to load
