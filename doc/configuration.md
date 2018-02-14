@@ -45,4 +45,4 @@ The below table explains the usage of the default parameters:
 | footerMarkdown | A footer markdown string | N/A | "footerMarkdown" : \<value\> | N/A | If present, it creates a footer at the bottom of the app with the markdown text.
 | maxRelatedTablesOpen | An integer | N/A | "maxRelatedTablesOpen" : \<value\> | N/A | It defines maximum number of expanded related table on a page during initial loading. If related tables exceed this value then all of them shall be collapsed.
 | showFaceting | Boolean | false | "showFaceting" : \<value\> | N/A | If true, shows the faceting panel on the recordset app.
-| showTableOfContents | Boolean | false | "showTableOfContents" : \<value\> | N/A | If true, shows the table of contents panel on the record app. If not defined in `chaise.config` then panel would be collapsed.
+| hideTableOfContents | Boolean | false | "hideTableOfContents" : \<value\> | N/A | If true, hides the table of contents panel on the record app. By default table of contents will be visible.

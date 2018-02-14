@@ -3,10 +3,11 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$uibModal', '$window', '$timeout',
-        function RecordController(AlertsService, DataUtils, ErrorService, logActions, MathUtils, messageMap, modalBox, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $uibModal, $window, $timeout) {
+    .controller('RecordController', ['AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$uibModal', '$window',
+        function RecordController(AlertsService, DataUtils, ErrorService, logActions, MathUtils, messageMap, modalBox, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $uibModal, $window) {
         var vm = this;
 
+        var mainContainerEl = angular.element(document.getElementsByClassName('main-container')[0]);
         var addRecordRequests = {}; // <generated unique id : reference of related table>
         var editRecordRequests = {}; // generated id: {schemaName, tableName}
         var updated = {};
@@ -19,41 +20,29 @@
         vm.rowFocus = {};
         vm.sidePanToggleBtnIndicator = "Show";
 
-        vm.recordSidePanOpen = chaiseConfig.showTableOfContents != undefined? !chaiseConfig.showTableOfContents : false;
+        $scope.recordSidePanOpen = false;
 
-        vm.gotoRelatedTable = function(sectionId, index){
-          var safeSectionId = vm.makeSafeIdAttr(sectionId);
-          var pageSection = "rt-heading-" + safeSectionId;
+        vm.gotoRelatedTable = function(sectionId, index) {
+            var safeSectionId = vm.makeSafeIdAttr(sectionId);
+            var pageSection = "rt-heading-" + safeSectionId;
 
-          $rootScope.tableModels[index].open = true;
-          vm.rowFocus[index] = false;
-          $timeout(function(){
-
-                document.getElementById(pageSection).scrollIntoView({behavior: "smooth", block: "start"});
-                document.getElementById(pageSection).focus();
-                vm.rowFocus[index] = true;
-                document.getElementById(pageSection).classList.add("rowFocus");
-
-          }, 200);
-          $timeout(function(){
-            document.getElementById(pageSection).classList.remove("rowFocus");
-          }, 2000);
-        }
-        $timeout(function () {
-          vm.showSidePan = true;
-        }, 1700);
+            $rootScope.tableModels[index].open = true;
+            vm.rowFocus[index] = false;
+            var el = angular.element(document.getElementById(pageSection));
+            mainContainerEl.scrollToElementAnimated(el, 40).then(function () {
+                $timeout(function () {
+                    el.addClass("rowFocus");
+                }, 100);
+                $timeout(function () {
+                    el.removeClass('rowFocus');
+                }, 1600);
+            });
+        };
 
         vm.togglePan = function() {
-          if(vm.recordSidePanOpen){
-            $("#record-side-pan").hide();
-            vm.sidePanToggleBtnIndicator = "Show";
-          } else{
-            $("#record-side-pan").show();
-            vm.sidePanToggleBtnIndicator = "Hide";
-          }
-          vm.recordSidePanOpen = !vm.recordSidePanOpen;
-        }
-        vm.togglePan();
+            $scope.recordSidePanOpen = !$scope.recordSidePanOpen;
+        };
+
         vm.canCreate = function() {
             return ($rootScope.reference && $rootScope.reference.canCreate && $rootScope.modifyRecord);
         };
@@ -140,6 +129,15 @@
                 }
                 return false;
             }
+        };
+
+        vm.noVisibleRleatedTables = function () {
+            if ($rootScope.tableModels) {
+                return !$rootScope.tableModels.some(function (tm, index) {
+                    return vm.showRelatedTable(index);
+                });
+            }
+            return true;
         };
 
         vm.toggleRelatedTableDisplayType = function(dataModel) {
@@ -324,6 +322,8 @@
             return $rootScope.displayReady;
         }, function (newValue, oldValue) {
             if (newValue) {
+                $scope.recordSidePanOpen = chaiseConfig.hideTableOfContents === true ? false : true;
+
                 var elements = fetchElements();
                 // if these values are not set yet, don't set the height
                 if(elements.navbarHeight && elements.bookmarkHeight) {
@@ -343,5 +343,18 @@
                 $scope.$digest();
             }
         });
+
+        // scroll to top button
+        $scope.scrollToTop = function () {
+            mainContainerEl.scrollTo(0,0, 500);
+        };
+
+        mainContainerEl.on('scroll', $scope.$apply.bind($scope, function () {
+            if (mainContainerEl.scrollTop() > 300) {
+              $scope.showTopBtn = true;
+            } else {
+              $scope.showTopBtn = false;
+            }
+        }));
     }]);
 })();

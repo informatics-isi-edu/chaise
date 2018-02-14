@@ -335,6 +335,7 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular-sanitize.js \
 	$(COMMON)/vendor/angular-cookies.min.js \
 	$(COMMON)/vendor/angular-animate.min.js \
+	$(COMMON)/vendor/angular-scroll.min.js \
 	$(COMMON)/alerts.js \
 	$(COMMON)/authen.js \
 	$(COMMON)/delete-link.js \
