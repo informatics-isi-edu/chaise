@@ -321,7 +321,7 @@ exports.testPresentation = function (tableParams) {
             bookingName = "booking_new_inline",
             displayLink = chaisePage.recordPage.getEntityToggleDisplayLink(bookingName);
 
-         chaisePage.waitForElement(displayLink).then(function(){
+        chaisePage.waitForElement(displayLink).then(function(){
            displayLink.click();
            chaisePage.waitForElement(element(by.id("rt-" + bookingName)));
            return chaisePage.recordPage.getDeleteActionButtons(bookingName);
