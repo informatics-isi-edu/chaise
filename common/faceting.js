@@ -627,8 +627,8 @@
                     // range is defined by the x values of the bar graph because layout.xaxis.type is `linear` or 'category'
                     function setHistogramRange() {
                         if (isColumnOfType("timestamp")) {
-                            var minMoment = moment.utc(scope.rangeOptions.absMin.date + scope.rangeOptions.absMin.time, dataFormats.date + dataFormats.time24);
-                            var maxMoment = moment.utc(scope.rangeOptions.absMax.date + scope.rangeOptions.absMax.time, dataFormats.date + dataFormats.time24);
+                            var minMoment = moment(scope.rangeOptions.absMin.date + scope.rangeOptions.absMin.time, dataFormats.date + dataFormats.time24);
+                            var maxMoment = moment(scope.rangeOptions.absMax.date + scope.rangeOptions.absMax.time, dataFormats.date + dataFormats.time24);
 
                             scope.plot.layout.xaxis.range = [minMoment.format(dataFormats.datetime.submission), maxMoment.format(dataFormats.datetime.submission)];
                         } else {
@@ -643,8 +643,8 @@
                             // convert and set the values if they are defined.
                             // if values are null, undefined, false, 0, or '' we don't want to show anything
                             if (min && max) {
-                                var minTs = moment.utc(min);
-                                var maxTs = moment.utc(max);
+                                var minTs = moment(min);
+                                var maxTs = moment(max);
 
                                 scope.rangeOptions.absMin = {
                                     date: minTs.format(dataFormats.date),
@@ -682,8 +682,8 @@
                         var defer = $q.defer();
 
                         (function (uri) {
-                            var requestMin = isColumnOfType("timestamp") ? moment.utc(scope.rangeOptions.absMin.date + scope.rangeOptions.absMin.time, dataFormats.date + dataFormats.time24).format(dataFormats.datetime.submission) : scope.rangeOptions.absMin,
-                                requestMax = isColumnOfType("timestamp") ? moment.utc(scope.rangeOptions.absMax.date + scope.rangeOptions.absMax.time, dataFormats.date + dataFormats.time24).format(dataFormats.datetime.submission) : scope.rangeOptions.absMax;
+                            var requestMin = isColumnOfType("timestamp") ? moment(scope.rangeOptions.absMin.date + scope.rangeOptions.absMin.time, dataFormats.date + dataFormats.time24).format(dataFormats.datetime.submission) : scope.rangeOptions.absMin,
+                                requestMax = isColumnOfType("timestamp") ? moment(scope.rangeOptions.absMax.date + scope.rangeOptions.absMax.time, dataFormats.date + dataFormats.time24).format(dataFormats.datetime.submission) : scope.rangeOptions.absMax;
 
                             scope.facetColumn.column.groupAggregate.histogram(numBuckets, requestMin, requestMax).read().then(function (response) {
                                 if (scope.facetColumn.sourceReference.uri !== uri) {
@@ -714,8 +714,8 @@
                                 setRangeVars();
 
                                 if (isColumnOfType("timestamp")) {
-                                    response.min = moment.utc(scope.rangeOptions.absMin.date + scope.rangeOptions.absMin.time, dataFormats.date + dataFormats.time24).format(dataFormats.datetime.submission);
-                                    response.max = moment.utc(scope.rangeOptions.absMax.date + scope.rangeOptions.absMax.time, dataFormats.date + dataFormats.time24).format(dataFormats.datetime.submission);
+                                    response.min = moment(scope.rangeOptions.absMin.date + scope.rangeOptions.absMin.time, dataFormats.date + dataFormats.time24).format(dataFormats.datetime.submission);
+                                    response.max = moment(scope.rangeOptions.absMax.date + scope.rangeOptions.absMax.time, dataFormats.date + dataFormats.time24).format(dataFormats.datetime.submission);
                                 } else {
                                     response.min = scope.rangeOptions.absMin;
                                     response.max = scope.rangeOptions.absMax;
@@ -920,7 +920,7 @@
                                         } else if(isColumnOfType("date")) {
                                             scope.rangeOptions.absMin = moment(min).format(dataFormats.date);
                                         } else if(isColumnOfType("timestamp")) {
-                                            var minMoment = moment.utc(min);
+                                            var minMoment = moment(min);
                                             scope.rangeOptions.absMin.date = minMoment.format(dataFormats.date);
                                             scope.rangeOptions.absMin.time = minMoment.format(dataFormats.time24);
                                         } else {
@@ -934,7 +934,7 @@
                                         if (isColumnOfType("int")) {
                                             scope.rangeOptions.absMax = Math.round(max);
                                         } else if(isColumnOfType("date")) {
-                                            scope.rangeOptions.absMax = moment.utc(max).format(dataFormats.date);
+                                            scope.rangeOptions.absMax = moment(max).format(dataFormats.date);
                                         } else if(isColumnOfType("timestamp")) {
                                             var maxMoment = moment(max);
                                             scope.rangeOptions.absMax.date = maxMoment.format(dataFormats.date);
