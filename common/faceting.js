@@ -87,8 +87,11 @@
 
                     scope.removeFilter = function (index) {
                         var newRef;
-                        if (typeof index === 'undefined') {
-                            // // delete all filters
+                        if (index === -1) {
+                            // only delete custom filters on the reference (not the facet)
+                            newRef = scope.vm.reference.removeAllFacetFilters(true);
+                        } else if (typeof index === 'undefined') {
+                            // // delete all filters and facets
                             newRef = scope.vm.reference.removeAllFacetFilters();
                             scope.vm.facetModels.forEach(function (fm) {
                                 fm.appliedFilters = [];
