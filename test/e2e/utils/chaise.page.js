@@ -702,6 +702,11 @@ var recordPage = function() {
         return element(by.id("rt-heading-" + displayName)).element(by.css(".toggle-display-link"));
     };
 
+    this.getEntityToggleDisplayLink = function(displayName) {
+        displayName = makeSafeIdAttr(displayName);
+        return element(by.id("entity-" + displayName)).element(by.css(".toggle-display-link"));
+    };
+
     this.getRelatedTableRowValues = function(displayName) {
         displayName = makeSafeIdAttr(displayName);
         return that.getRelatedTableRows(displayName).all(by.tagName("td"));
@@ -753,7 +758,7 @@ var recordPage = function() {
     };
 
     this.getErrorModalReloadButton = function(){
-        return browser.executeScript("return $('button')[1]");  
+        return browser.executeScript("return $('button')[1]");
     };
 
     this.getErrorModalOkButton = function(){

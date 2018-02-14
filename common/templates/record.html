@@ -23,7 +23,7 @@
                             <span class="markdown-container"><em><strong>None</strong></em></span>
                         </span>
                         <span ng-if="recordTableModel[$index].page.content != '' ">
-                            <span class="markdown-container" ng-bind-html="checkSingleListItem(recordTableModel[$index].page.content) | trustedHTML"></span>
+                            <span class="markdown-container" ng-bind-html="recordTableModel[$index].page.content | trustedHTML"></span>
                         </span>
                     </span>
                     <span ng-show="recordTableModel[$index].displayType == 'table'" id="entity-{{$index}}-recTab">

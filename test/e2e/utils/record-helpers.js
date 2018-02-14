@@ -318,11 +318,13 @@ exports.testPresentation = function (tableParams) {
 		it("visible column related table with inline inbound fk should show entry without bullet point in case of only one entry",function(){
 				var EC = protractor.ExpectedConditions,
 						markdownEntity = element(by.id('entity-5-markdown')),
-						bookingName = "booking_new_inline";
+						bookingName = "booking_new_inline",
+						displayLink = chaisePage.recordPage.getEntityToggleDisplayLink(bookingName);
 
-				browser.executeScript("return $('a.toggle-display-link')[1].click()").then(function(){
-					return chaisePage.waitForElement(element(by.id("rt-" + bookingName)));
-				 }).then(function(){
+				chaisePage.waitForElement(displayLink).then(function(){
+					 displayLink.click();
+					 chaisePage.waitForElement(element(by.id("rt-" + bookingName)));
+				 // }).then(function(){
 					 return chaisePage.recordPage.getDeleteActionButtons(bookingName);
 				}).then(function(deleteButtons) {
 						return deleteButtons[0].click();
@@ -335,10 +337,9 @@ exports.testPresentation = function (tableParams) {
 										return (ct==1);
 								});
 						});
-						return browser.executeScript("return $('a.toggle-display-link')[1].click()");
+						return displayLink.click();
 				}).then(function(){
-						browser.wait(EC.visibilityOf(markdownEntity), browser.params.defaultTimeout);
-						expect(markdownEntity.getText()).not.toContain('<ul>\n<li>',"Bullet point was not removed");
+						expect(element(by.id('entity-5-markdown')).element(by.tagName('li')).getCssValue('list-style')).toBe("none outside none", "Bullet point is not working");
 				}).catch(function(err){
 						console.log(err);
 						expect('Encountered an error').toBe('Please check the log', 'Inside catch block');
