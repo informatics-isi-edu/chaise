@@ -115,9 +115,9 @@ exports.testPresentation = function (tableParams) {
                   {
                     expect(element(by.id('entity-4-markdown')).element(by.tagName('span')).getAttribute('innerHTML')).toContain(column.value);
                   }
-								else if(column.title =='booking_new_inline'){
-									 expect(element(by.id('entity-5-markdown')).element(by.tagName('span')).getAttribute('innerHTML')).toContain(column.value);
-								}
+                else if(column.title =='booking_new_inline'){
+                    expect(element(by.id('entity-5-markdown')).element(by.tagName('span')).getAttribute('innerHTML')).toContain(column.value);
+                }
                 else if (column.match=='html'){
                     expect(chaisePage.recordPage.getEntityRelatedTableScope(column.title).getAttribute('innerHTML')).toBe(column.value);
                 }
@@ -315,36 +315,35 @@ exports.testPresentation = function (tableParams) {
         })
     });
 
-		it("visible column related table with inline inbound fk should show entry without bullet point in case of only one entry",function(){
-				var EC = protractor.ExpectedConditions,
-						markdownEntity = element(by.id('entity-5-markdown')),
-						bookingName = "booking_new_inline",
-						displayLink = chaisePage.recordPage.getEntityToggleDisplayLink(bookingName);
+   it("visible column related table with inline inbound fk should show entry without bullet point in case of only one entry",function(){
+        var EC = protractor.ExpectedConditions,
+            markdownEntity = element(by.id('entity-5-markdown')),
+            bookingName = "booking_new_inline",
+            displayLink = chaisePage.recordPage.getEntityToggleDisplayLink(bookingName);
 
-				chaisePage.waitForElement(displayLink).then(function(){
-					 displayLink.click();
-					 chaisePage.waitForElement(element(by.id("rt-" + bookingName)));
-				 // }).then(function(){
-					 return chaisePage.recordPage.getDeleteActionButtons(bookingName);
-				}).then(function(deleteButtons) {
-						return deleteButtons[0].click();
-				}).then(function () {
-						chaisePage.waitForElement(element(by.id("delete-confirmation")));
-						return chaisePage.recordPage.getConfirmDeleteButton().click();
-				}).then(function () {
-						browser.wait(function () {
-								return chaisePage.recordPage.getDeleteActionButtons(bookingName).count().then(function (ct) {
-										return (ct==1);
-								});
-						});
-						return displayLink.click();
-				}).then(function(){
-						expect(element(by.id('entity-5-markdown')).element(by.tagName('li')).getCssValue('list-style')).toBe("none outside none", "Bullet point is not working");
-				}).catch(function(err){
-						console.log(err);
-						expect('Encountered an error').toBe('Please check the log', 'Inside catch block');
-				})
-		});
+         chaisePage.waitForElement(displayLink).then(function(){
+           displayLink.click();
+           chaisePage.waitForElement(element(by.id("rt-" + bookingName)));
+           return chaisePage.recordPage.getDeleteActionButtons(bookingName);
+        }).then(function(deleteButtons) {
+           return deleteButtons[0].click();
+        }).then(function () {
+           chaisePage.waitForElement(element(by.id("delete-confirmation")));
+           return chaisePage.recordPage.getConfirmDeleteButton().click();
+        }).then(function () {
+           browser.wait(function () {
+              return chaisePage.recordPage.getDeleteActionButtons(bookingName).count().then(function (ct) {
+                   return (ct==1);
+               });
+            });
+          return displayLink.click();
+        }).then(function(){
+            expect(element(by.id('entity-5-markdown')).element(by.tagName('li')).getCssValue('list-style')).toBe("none outside none", "Bullet point is not working");
+        }).catch(function(err){
+            console.log(err);
+            expect('Encountered an error').toBe('Please check the log', 'Inside catch block');
+       })
+    });
 
     it("visible column related table with inline inbound fk should disappear when 'Hide All Related Records' was clicked.",function(){
          var markdownEntityRow = element(by.id('row-product-record_fk_booking_accommodation')).all(by.tagName('td')),
