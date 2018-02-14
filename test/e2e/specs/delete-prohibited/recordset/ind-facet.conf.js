@@ -5,7 +5,7 @@ var config = pConfig.getConfig({
     chaiseConfigFilePath: 'test/e2e/specs/delete-prohibited/chaise-config.js',
     specs: [
         "ind-facet.spec.js",
-        "misc-facet.sec.js"
+        "misc-facet.spec.js"
     ],
     setBaseUrl: function(browser, data) {
       browser.params.url = process.env.CHAISE_BASE_URL;
