@@ -439,6 +439,7 @@ describe('View existing record,', function() {
                     expect(addRelatedRecordLink.getText()).toBe("Add", "The Add button is not displayed as Add");
 
                     addRelatedRecordLink.click().then(function(){
+                        chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
 
                         browser.wait(function () {
                             return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {

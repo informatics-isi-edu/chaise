@@ -3,13 +3,14 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'messageMap', 'modalBox', 'recordCreate', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$uibModal', '$window',
-        function FormController(AlertsService, DataUtils, ErrorService, logActions, messageMap, modalBox, recordCreate, recordEditModel, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $uibModal, $window) {
+    .controller('FormController', ['AlertsService', 'dataFormats', 'DataUtils', 'ErrorService', 'logActions', 'messageMap', 'modalBox', 'recordCreate', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$uibModal', '$window',
+        function FormController(AlertsService, dataFormats, DataUtils, ErrorService, logActions, messageMap, modalBox, recordCreate, recordEditModel, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $uibModal, $window) {
         var vm = this;
         var context = $rootScope.context;
 
 
         vm.recordEditModel = recordEditModel;
+        vm.dataFormats = dataFormats;
         vm.resultset = false;
         vm.editMode = (context.mode == context.modes.EDIT ? true : false);
         vm.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
@@ -120,10 +121,10 @@
                         case "timestamptz":
                             if (vm.readyToSubmit) {
                                 if (rowVal.date && rowVal.time && rowVal.meridiem) {
-                                    rowVal = moment(rowVal.date + rowVal.time + rowVal.meridiem, 'YYYY-MM-DDhh:mm:ssA').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+                                    rowVal = moment(rowVal.date + rowVal.time + rowVal.meridiem, dataFormats.date + dataFormats.time12 + 'A').format(dataFormats.datetime.submission);
                                 } else if (rowVal.date && rowVal.time === null) {
                                     rowVal.time = '00:00:00';
-                                    rowVal = moment(rowVal.date + rowVal.time + rowVal.meridiem, 'YYYY-MM-DDhh:mm:ssA').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+                                    rowVal = moment(rowVal.date + rowVal.time + rowVal.meridiem, dataFormats.date + dataFormats.time12 + 'A').format(dataFormats.datetime.submission);
                                 // in create if the user doesn't change the timestamp field, it will be an object in form {time: null, date: null, meridiem: AM}
                                 // meridiem should never be null,time can be left empty (null) but the case above would catch that.
                                 } else if (!rowVal.date) {
@@ -529,12 +530,12 @@
         function applyCurrentDatetime(modelIndex, columnName, columnType) {
             if (columnType === 'timestamp' || columnType === 'timestamptz') {
                 return vm.recordEditModel.rows[modelIndex][columnName] = {
-                    date: moment().format('YYYY-MM-DD'),
-                    time: moment().format('hh:mm:ss'),
+                    date: moment().format(dataFormats.date),
+                    time: moment().format(dataFormats.time24),
                     meridiem: moment().format('A')
                 }
             }
-            return vm.recordEditModel.rows[modelIndex][columnName] = moment().format('YYYY-MM-DD');
+            return vm.recordEditModel.rows[modelIndex][columnName] = moment().format(dataFormats.date);
         }
 
         // Toggle between AM/PM for a time input's model

@@ -412,7 +412,7 @@
             };
         }])
 
-        .directive('rangePicker', ['$timeout', '$q', '$log', 'logActions', function ($timeout, $q, $log, logActions) {
+        .directive('rangePicker', ['$timeout', '$q', '$log', 'dataFormats', 'logActions', function ($timeout, $q, $log, dataFormats, logActions) {
             return {
                 restrict: 'AE',
                 templateUrl: '../common/templates/faceting/range-picker.html',
@@ -441,38 +441,68 @@
                     var parentCtrl = ctrls[0],
                         currentCtrl = ctrls[1];
 
+                    var numBuckets = scope.facetColumn.histogramBucketCount;
+
+                    function isColumnOfType(columnType) {
+                        return (scope.facetColumn.column.type.rootName.indexOf(columnType) > -1)
+                    }
+
                     // register this controller in the parent
                     parentCtrl.register(currentCtrl, scope.facetColumn, scope.index);
                     scope.parentCtrl = parentCtrl;
 
+                    scope.relayout = false;
                     scope.ranges = [];
+                    scope.histogramDataStack = [];
                     // draw the plot
-                    // scope.plot = {
-                    //     data: [{
-                    //         x: ["0-1", "1-2", "3-4", "5-6", "6-7", "7-8", "8-9"],
-                    //         y: [5, 10, 12, 4, 11, 4, 58],
-                    //         type: 'bar'
-                    //     }],
-                    //     options: {
-                    //         displayLogo: false
-                    //     },
-                    //     layout: {
-                    //         autosize: false,
-                    //         width: 400,
-                    //         height: 150,
-                    //         margin: {
-                    //             l: 15,
-                    //             r: 10,
-                    //             b: 20,
-                    //             t: 20,
-                    //             pad: 2
-                    //         },
-                    //         yaxis: {
-                    //             fixedrange: true
-                    //         },
-                    //         bargap: 0
-                    //     }
-                    // }
+                    scope.plot = {
+                        data: [{
+                            x: [],
+                            y: [],
+                            type: "bar"
+                        }],
+                        options: {
+                            displayModeBar: false
+                        },
+                        layout: {
+                            autosize: true,
+                            // width: 280,
+                            height: 150,
+                            margin: {
+                                l: 40,
+                                r: 0,
+                                b: 80,
+                                t: 20,
+                                pad: 2
+                            },
+                            xaxis: {
+                                fixedrange: false,
+                                ticks: 'inside',
+                                tickangle: 45,
+                                // set to "linear" for int/float graphs
+                                // set to "date" for date/timestamp graphs
+                                type: '-'
+                                // NOTE: setting the range currently to unzoom the graph because auto-range wasn't working it seemed
+                                // autorange: true // default is true. if range is provided, set to false.
+                                // rangemode: "normal"/"tozero"/"nonnegative"
+                            },
+                            yaxis: {
+                                fixedrange: true,
+                                zeroline: true,
+                                tickformat: ',d'
+                            },
+                            bargap: 0
+                        }
+                    }
+
+                    if (isColumnOfType("int")) {
+                        scope.plot.layout.margin.b = 40;
+                        scope.plot.layout.xaxis.tickformat = ',d';
+                    } else if (isColumnOfType("date")) {
+                        scope.plot.layout.xaxis.tickformat = '%Y-%m-%d';
+                    } else if (isColumnOfType("timestamp")) {
+                        scope.plot.layout.xaxis.tickformat = '%Y-%m-%d\n%H:%M';
+                    }
 
                     function createChoiceDisplay(filter, selected) {
                         return {
@@ -492,6 +522,11 @@
                             uniqueId: filter.uniqueId,
                             displayname: {value: filter.toString(), isHTML: false}
                         }
+                    }
+
+                    // function used in ng-show based on annotation value and both min and max being present
+                    scope.showHistogram = function () {
+                        return scope.facetColumn.barPlot && (scope.rangeOptions.absMin !== null && scope.rangeOptions.absMax !== null);
                     }
 
                     // callback for the list directive
@@ -591,69 +626,330 @@
                         }
                     };
 
-                    // Gets the facet data for min/max
-                    // TODO get the histogram data
-                    scope.updateFacetData = function () {
+                    // range is defined by the x values of the bar graph because layout.xaxis.type is `linear` or 'category'
+                    function setHistogramRange() {
+                        if (isColumnOfType("timestamp")) {
+                            var minMoment = moment(scope.rangeOptions.absMin.date + scope.rangeOptions.absMin.time, dataFormats.date + dataFormats.time24);
+                            var maxMoment = moment(scope.rangeOptions.absMax.date + scope.rangeOptions.absMax.time, dataFormats.date + dataFormats.time24);
+
+                            scope.plot.layout.xaxis.range = [minMoment.format(dataFormats.datetime.submission), maxMoment.format(dataFormats.datetime.submission)];
+                        } else {
+                            scope.plot.layout.xaxis.range = [scope.rangeOptions.absMin, scope.rangeOptions.absMax];
+                        }
+                    }
+
+                    // set the absMin and absMax values
+                    // all values are in their database returned format
+                    function setRangeMinMax(min, max) {
+                        if (isColumnOfType("timestamp")) {
+                            // convert and set the values if they are defined.
+                            // if values are null, undefined, false, 0, or '' we don't want to show anything
+                            if (min && max) {
+                                var minTs = moment(min);
+                                var maxTs = moment(max);
+
+                                scope.rangeOptions.absMin = {
+                                    date: minTs.format(dataFormats.date),
+                                    time: minTs.format(dataFormats.time24)
+                                };
+                                scope.rangeOptions.absMax = {
+                                    date: maxTs.format(dataFormats.date),
+                                    time: maxTs.format(dataFormats.time24)
+                                };
+                            }
+                        } else {
+                            scope.rangeOptions.absMin = min;
+                            scope.rangeOptions.absMax = max;
+                        }
+                    }
+
+                    // update the min/max model values to the min/max represented by the histogram
+                    function setInputs() {
+                        scope.rangeOptions.model.min = scope.rangeOptions.absMin;
+                        scope.rangeOptions.model.max = scope.rangeOptions.absMax;
+                    }
+
+                    // sets both the range and the inputs
+                    function setRangeVars() {
+                        setHistogramRange();
+                        setInputs();
+
+                        var plotEl = element[0].getElementsByClassName("js-plotly-plot")[0];
+                        if (plotEl) {
+                            Plotly.relayout(plotEl, {'xaxis.fixedrange': scope.disableZoomIn()});
+                        }
+                    }
+
+                    function histogramData() {
                         var defer = $q.defer();
 
                         (function (uri) {
-                            var agg = scope.facetColumn.column.aggregate;
-                            var aggregateList = [
-                                agg.minAgg,
-                                agg.maxAgg
-                            ];
+                            var requestMin = isColumnOfType("timestamp") ? moment(scope.rangeOptions.absMin.date + scope.rangeOptions.absMin.time, dataFormats.date + dataFormats.time24).format(dataFormats.datetime.submission) : scope.rangeOptions.absMin,
+                                requestMax = isColumnOfType("timestamp") ? moment(scope.rangeOptions.absMax.date + scope.rangeOptions.absMax.time, dataFormats.date + dataFormats.time24).format(dataFormats.datetime.submission) : scope.rangeOptions.absMax;
 
-                            var facetLog = scope.facetColumn.sourceReference.defaultLogInfo;
-                            facetLog.referrer = scope.facetColumn.reference.defaultLogInfo;
-                            facetLog.source = scope.facetColumn.dataSource;
-                            facetLog.action = logActions.recordsetFacetRead,
-                            scope.facetColumn.sourceReference.getAggregates(aggregateList, facetLog).then(function(response) {
+                            scope.facetColumn.column.groupAggregate.histogram(numBuckets, requestMin, requestMax).read().then(function (response) {
                                 if (scope.facetColumn.sourceReference.uri !== uri) {
-                                    defer.resolve(false);
-                                } else {
-
-                                    // console.log("Facet " + scope.facetColumn.displayname.value + " min/max: ", response);
-                                    if (scope.facetColumn.column.type.rootName.indexOf("timestamp") > -1) {
-                                        // convert and set the values if they are defined.
-                                        // if values are null, undefined, false, 0, or '' we don't want to show anything
-                                        if (response[0] && response[1]) {
-                                            var minTs = moment(response[0]);
-                                            var maxTs = moment(response[1]);
-
-                                            scope.rangeOptions.absMin = {
-                                                date: minTs.format('YYYY-MM-DD'),
-                                                time: minTs.format('hh:mm:ss')
-                                            };
-                                            scope.rangeOptions.absMax = {
-                                                date: maxTs.format('YYYY-MM-DD'),
-                                                time: maxTs.format('hh:mm:ss')
-                                            };
-                                        }
-                                    } else {
-                                        scope.rangeOptions.absMin = response[0];
-                                        scope.rangeOptions.absMax = response[1];
-                                    }
-
-                                    defer.resolve(true);
+                                    // return breaks out of the current callback function
+                                    return defer.resolve(false);
                                 }
+
+                                // after zooming in, we don't care about displaying values beyond the set the user sees
+                                // if set is greater than bucketCount, remove last bin (we should only see this when the max+ bin is present)
+                                if (scope.relayout && response.x.length > numBuckets) {
+                                    // no need to splice off labels because they are used for lookup
+                                    // i.e. response.labels.(min/max)
+                                    response.x.splice(-1,1);
+                                    response.y.splice(-1,1);
+                                    scope.relayout = false;
+                                }
+
+                                scope.plot.data[0].x = response.x;
+                                scope.plot.data[0].y = response.y;
+
+                                scope.plot.labels = response.labels;
+
+                                setRangeVars();
+
+                                if (isColumnOfType("timestamp")) {
+                                    response.min = moment(scope.rangeOptions.absMin.date + scope.rangeOptions.absMin.time, dataFormats.date + dataFormats.time24).format(dataFormats.datetime.submission);
+                                    response.max = moment(scope.rangeOptions.absMax.date + scope.rangeOptions.absMax.time, dataFormats.date + dataFormats.time24).format(dataFormats.datetime.submission);
+                                } else {
+                                    response.min = scope.rangeOptions.absMin;
+                                    response.max = scope.rangeOptions.absMax;
+                                }
+
+                                // push the data on the stack to be used for unzoom and reset
+                                scope.histogramDataStack.push(response);
+
+                                var plotEl = element[0].getElementsByClassName("js-plotly-plot")[0];
+                                if (plotEl) {
+                                    Plotly.relayout(plotEl, {'xaxis.fixedrange': scope.disableZoomIn()});
+                                }
+
+                                return defer.resolve(true);
                             }).catch(function (err) {
                                 defer.reject(err);
                             });
                         })(scope.facetColumn.sourceReference.uri);
 
                         return defer.promise;
+                    }
+
+                    // Gets the facet data for min/max
+                    scope.updateFacetData = function () {
+                        var defer = $q.defer();
+
+                        (function (uri) {
+                            if (!scope.relayout) {
+                                // the captured uri is not the same as the initial data uri so we need to refetch the min/max
+                                // this happens when another facet adds a filter that affects the facett object in the uri
+                                var agg = scope.facetColumn.column.aggregate;
+                                var aggregateList = [
+                                    agg.minAgg,
+                                    agg.maxAgg
+                                ];
+
+                                var facetLog = scope.facetColumn.sourceReference.defaultLogInfo;
+                                facetLog.referrer = scope.facetColumn.reference.defaultLogInfo;
+                                facetLog.source = scope.facetColumn.dataSource;
+                                facetLog.action = logActions.recordsetFacetRead,
+                                scope.facetColumn.sourceReference.getAggregates(aggregateList, facetLog).then(function(response) {
+                                    if (scope.facetColumn.sourceReference.uri !== uri) {
+                                        return false;
+                                    }
+                                    // initiailize the min/max values
+                                    setRangeMinMax(response[0], response[1]);
+
+                                    // if - the max/min are null
+                                    //    - bar_plot in annotation is 'false'
+                                    //    - histogram not supported for column type
+                                    if (!scope.showHistogram()) {
+                                        return true;
+                                    }
+                                    scope.relayout = false;
+
+                                    scope.histogramDataStack = [];
+
+                                    // get initial histogram data
+                                    return histogramData();
+                                }).then(function (response) {
+                                    defer.resolve(response);
+                                }).catch(function (err) {
+                                    defer.reject(err);
+                                });
+                            } else {
+                                histogramData().then(function (response) {
+                                    defer.resolve(response);
+                                }).catch(function (err) {
+                                    defer.reject(err);
+                                });
+                            }
+                        })(scope.facetColumn.sourceReference.uri);
+
+                        // // so we can check if the getAggregates request needs to be remade or we can just call histogramData
+                        // scope.initialDataUri = scope.facetColumn.sourceReference.uri;
+
+                        return defer.promise;
+                    };
+
+                    // Zoom the set into the middle 50% of the buckets
+                    scope.zoomInPlot = function () {
+                        try {
+                            // NOTE: x[x.length-1] may not be representative of the absolute max
+                            // range is based on the index of the bucket representing the max value
+                            var maxIndex = scope.plot.data[0].x.findIndex(function (value) {
+                                return value >= scope.rangeOptions.absMax;
+                            });
+
+                            // the last bucket is a value less than the max but includes max in it
+                            if (maxIndex < 0) {
+                                maxIndex = scope.plot.data[0].x.length;
+                            }
+
+                            // zooming in should increase clarity by 50%
+                            // range is applied to both min and max so use half of 50%
+                            var zoomRange = Math.ceil(maxIndex * 0.25);
+                            // middle bucket rounded down
+                            var median = Math.floor(maxIndex/2);
+                            var minBinIndex = median - zoomRange;
+                            var maxBinIndex = median + zoomRange;
+
+                            setRangeMinMax(scope.plot.data[0].x[minBinIndex], scope.plot.data[0].x[maxBinIndex]);
+
+                            scope.relayout = true;
+                            scope.parentCtrl.updateFacetColumn(scope.index);
+                        } catch (err) {
+                            $log.warn(err);
+                        }
+                    };
+
+                    // disable zoom in ifhistogram has been zoomed 20+ times or the current range is <= the number of buckets
+                    scope.disableZoomIn = function() {
+                        var limitedRange = false;
+
+                        if (scope.rangeOptions.absMin && scope.rangeOptions.absMax) {
+                            if (isColumnOfType("int")) {
+                                limitedRange = (scope.rangeOptions.absMax-scope.rangeOptions.absMin) <= numBuckets;
+                            } else if (isColumnOfType("date")) {
+                                var minMoment = moment(scope.rangeOptions.absMin);
+                                var maxMoment = moment(scope.rangeOptions.absMax);
+
+                                limitedRange = moment.duration( (maxMoment.diff(minMoment)) ).asDays() <= numBuckets;
+                            } else if(isColumnOfType("timestamp")) {
+                                limitedRange = (scope.rangeOptions.absMin.date+scope.rangeOptions.absMin.time) == (scope.rangeOptions.absMax.date+scope.rangeOptions.absMax.time);
+                            } else {
+                                // handles float for now
+                                limitedRange = scope.rangeOptions.absMin == scope.rangeOptions.absMax;
+                            }
+                        }
+
+                        return scope.histogramDataStack.length >= 20 || limitedRange;
+                    };
+
+                    function setPreviousPlotValues(data) {
+                        scope.plot.data[0].x = data.x;
+                        scope.plot.data[0].y = data.y;
+
+                        scope.plot.labels = data.labels;
+
+                        setRangeMinMax(data.min, data.max);
+                        setRangeVars();
+                    };
+
+                    scope.zoomOutPlot = function () {
+                        try {
+                            if (scope.histogramDataStack.length == 1) {
+                                setRangeVars();
+                                throw new Error();
+                            }
+                            scope.histogramDataStack.pop();
+
+                            var previousData = scope.histogramDataStack[scope.histogramDataStack.length-1];
+
+                            setPreviousPlotValues(previousData);
+                        } catch (err) {
+                            if (scope.histogramDataStack.length == 1) {
+                                $log.warn("No more data to show")
+                            } else {
+                                $log.debug("Error zooming out plot. Histogram stack data: ", scope.histogramDataStack);
+                            }
+                        }
+                    };
+
+                    scope.resetPlot = function () {
+                        scope.histogramDataStack.splice(1);
+
+                        var initialData = scope.histogramDataStack[0];
+
+                        setPreviousPlotValues(initialData);
                     };
 
                     //  all the events related to the plot
-                    // scope.plotlyEvents = function (graph) {
-                    //     graph.on('plotly_relayout', function (event) {
-                    //         $timeout(function () {
-                    //             scope.min = Math.floor(event['xaxis.range[0]']);
-                    //             scope.max = Math.ceil(event['xaxis.range[1]']);
-                    //         });
-                    //     });
-                    //
-                    // };
+                    // defines listeners on those events
+                    scope.plotlyEvents = function (graph) {
+                        // this event is triggered when the:
+                        //      plot is zoomed/double clicked
+                        //      xaxis is panned/stretched/shrunk
+                        graph.on('plotly_relayout', function (event) {
+                            try {
+                                $timeout(function () {
+                                    scope.relayout = true;
+                                    // min/max is value interpretted by plotly by position of range in respect to x axis values
+                                    var min = event['xaxis.range[0]'];
+                                    var max = event['xaxis.range[1]'];
+
+                                    // This case can happen when:
+                                    //   - the user double clicks the plot
+                                    //   - the relayout event is called because the element was resized (panel stretched or shrunk)
+                                    //   - Plotly.relayout is called to update xaxis.fixedrange
+                                    // if both undefined, don't re-fetch data
+                                    if (typeof min === "undefined" && typeof max === "undefined") {
+                                        scope.relayout = false;
+                                        return;
+                                    }
+
+
+                                    // if min is undefined, absMin remains unchanged (happens when xaxis max is stretched)
+                                    // and if not null, update the value
+                                    if (min !== null && typeof min !== "undefined") {
+                                        if (isColumnOfType("int")) {
+                                            scope.rangeOptions.absMin = Math.round(min);
+                                        } else if(isColumnOfType("date")) {
+                                            scope.rangeOptions.absMin = moment(min).format(dataFormats.date);
+                                        } else if(isColumnOfType("timestamp")) {
+                                            var minMoment = moment(min);
+                                            scope.rangeOptions.absMin.date = minMoment.format(dataFormats.date);
+                                            scope.rangeOptions.absMin.time = minMoment.format(dataFormats.time24);
+                                        } else {
+                                            scope.rangeOptions.absMin = min;
+                                        }
+                                    }
+
+                                    // if max is undefined, absMax remains unchanged (happens when xaxis min is stretched)
+                                    // and if not null, update the value
+                                    if (max !== null && typeof max !== "undefined") {
+                                        if (isColumnOfType("int")) {
+                                            scope.rangeOptions.absMax = Math.round(max);
+                                        } else if(isColumnOfType("date")) {
+                                            scope.rangeOptions.absMax = moment(max).format(dataFormats.date);
+                                        } else if(isColumnOfType("timestamp")) {
+                                            var maxMoment = moment(max);
+                                            scope.rangeOptions.absMax.date = maxMoment.format(dataFormats.date);
+                                            scope.rangeOptions.absMax.time = maxMoment.format(dataFormats.time24);
+                                        } else {
+                                            scope.rangeOptions.absMax = max;
+                                        }
+                                    }
+
+                                    scope.parentCtrl.updateFacetColumn(scope.index);
+                                });
+                            } catch (err) {
+                                setRangeVars();
+                                $log.warn(err);
+                            }
+                        });
+                    };
+
                     scope.rangeOptions = {
                         type: scope.facetColumn.column.type,
                         callback: scope.addFilter

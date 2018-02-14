@@ -121,7 +121,7 @@ var testParams = {
                 date: "2001-14-04",
                 dateError: "Please enter a date value in YYYY-MM-DD format.",
                 time: "25:64:12",
-                timeError: "Please enter a time value in 24-hr HH:MM:SS format."
+                timeError: "Please enter a time value in 24-hr HH:mm:ss format."
             },
             range: {
                 minDate: "2004-05-20",
@@ -257,7 +257,7 @@ describe("Viewing Recordset with Faceting,", function() {
         });
 
         describe("default presentation based on facets annotation ", function () {
-            it("should have 12 facets", function () {
+            it("should have 14 facets", function () {
                 chaisePage.recordsetPage.getAllFacets().count().then(function (ct) {
                     expect(ct).toBe(testParams.totalNumFacets, "Number of all facets is incorrect");
 
@@ -282,6 +282,13 @@ describe("Viewing Recordset with Faceting,", function() {
                 // use 0 index
                 chaisePage.recordsetPage.getCheckedFacetOptions(0).count().then(function (ct) {
                     expect(ct).toBe(1);
+                });
+            });
+
+            it("'int_col' facet should not show the histogram", function () {
+                // use 1 index
+                browser.wait(EC.not(EC.visibilityOf(chaisePage.recordsetPage.getHistogram(1)))).then(function () {
+                    expect(true).toBeTruthy("The histogram is displayed");
                 });
             });
 
@@ -583,7 +590,7 @@ describe("Viewing Recordset with Faceting,", function() {
                                 }).then(function (filters) {
                                     return filters[0].getText();
                                 }).then(function(text) {
-                                    expect(text).toBe(facetParams.filter, "filter name is inccorect for '" + facetParams.name + "' facet");
+                                    expect(text).toBe(facetParams.filter, "filter name is incorrect for '" + facetParams.name + "' facet");
 
                                     // wait for table rows to load
                                     browser.wait(function () {
@@ -636,6 +643,7 @@ describe("Viewing Recordset with Faceting,", function() {
                                     return chaisePage.recordsetPage.getFacetOptions(idx).count();
                                 }).then(function (ct) {
                                     expect(ct).toBe(facetParams.listElems, "There are more list elements for '" + facetParams.name + "' facet than expected");
+
                                     // test validators
                                     minInput.sendKeys(facetParams.invalid);
 
@@ -935,7 +943,7 @@ describe("Viewing Recordset with Faceting,", function() {
                                     return minDateClear.click();
                                 }).then(function () {
                                     return minTimeClear.click();
-                                })
+                                });
                             });
 
                             it("should filter on just a max value and update the search criteria.", function () {
