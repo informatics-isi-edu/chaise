@@ -779,10 +779,6 @@ var recordPage = function() {
         return element(by.id("rt-loading"));
     }
 
-    this.getElementById = function (id) {
-        return element(by.id(id));
-    }
-
     this.getSidePanel = function() {
       return element(by.id('record-side-pan'));
     }
@@ -792,7 +788,6 @@ var recordPage = function() {
     }
 
     this.getSidePanelHeading = function () {
-        // return element(by.className("sidePanelHeading"));
         return browser.executeScript('return $(".sidePanelHeading").text()');
     }
 

@@ -20,7 +20,7 @@
         vm.rowFocus = {};
         vm.sidePanToggleBtnIndicator = "Show";
 
-        $scope.recordSidePanOpen = false;
+        $scope.recordSidePanOpen = chaiseConfig.hideTableOfContents === true ? false : true;
 
         vm.gotoRelatedTable = function(sectionId, index) {
             var safeSectionId = vm.makeSafeIdAttr(sectionId);
@@ -322,7 +322,6 @@
             return $rootScope.displayReady;
         }, function (newValue, oldValue) {
             if (newValue) {
-                $scope.recordSidePanOpen = chaiseConfig.hideTableOfContents === true ? false : true;
 
                 var elements = fetchElements();
                 // if these values are not set yet, don't set the height
