@@ -63,7 +63,9 @@ var testParams = {
       tableName: "accommodation_collection",
       id: "2003",
       tocCount: 7,
-      tableToShow: 'Categories_5'
+      tableToShow: 'Categories_5',
+      sidePanelTableOrder:[ 'Categories_collection\n (5)',  'media\n \n (1)', 'Categories_collection_2\n (5)',  'Categories_3\n (5)',  'Categories_4\n (5)',  'Categories_5\n (5)',  'Categories_6\n (5)'],
+      panelHeading: "Related Records"
     }
 };
 
@@ -101,10 +103,10 @@ describe('View existing record,', function() {
 
         });
 
-    //     describe("Presentation ,", function() {
-    //         var params = recordHelpers.testPresentation(testParams);
-    //     });
-    //
+        describe("Presentation ,", function() {
+            var params = recordHelpers.testPresentation(testParams);
+        });
+
     });
 
     describe("For a record with all of it's related tables as empty", function() {
@@ -175,84 +177,64 @@ describe('View existing record,', function() {
         beforeAll(function() {
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.sidePanelTest.schemaName + ":" + testParams.sidePanelTest.tableName +  "/id=" + testParams.sidePanelTest.id;
             browser.get(url);
-            recSidePan = chaisePage.recordPage.getElementById('recordSidePan-5');
+            recSidePanelCat_5 = chaisePage.recordPage.getSidePanelItemById(5);
             fiddlerBtn = element(by.className('sidePanFiddler')).element(by.tagName('i')),
             chaisePage.waitForElement(fiddlerBtn);
         });
-        it('Table of contents should be collapsed by default', function(){
-            var recordSidePan = chaisePage.recordPage.getElementById('record-side-pan');
-            recordSidePan.isDisplayed().then(function (bool) {
-                expect(bool).toBeFalsy();
-            });
-        });
-
-        it('Table of contents should match all related table', function(){
-            var  allPan = element.all(by.xpath("//div[contains(@id,'recordSidePan')]"));
-            chaisePage.waitForElement(fiddlerBtn).then(function(){
-              return fiddlerBtn.click();
-            }).then(function(){
-              expect(allPan.count()).toBe(testParams.sidePanelTest.tocCount, "Table of contents count did not match!");
-            }).catch( function(err) {
-               console.log(err);
-           });
+        it('Table of contents should be displayed by default', function(){
+            var recordSidePan = chaisePage.recordPage.getSidePanel();
+            expect(recordSidePan.isDisplayed()).toBeTruthy("Side Panel is not visible when page loads initially.");
         });
 
         it('On click of Related table name in TOC, page should move to the contents and open the table details', function(){
-            var rtTableHeading = chaisePage.recordPage.getRelatedTableHeading(testParams.sidePanelTest.tableToShow),
-                lastRow = element(by.id('rt-heading-Categories_5')).all(by.tagName('tr')).get(5);
+            var rtTableHeading = chaisePage.recordPage.getRelatedTableHeading(testParams.sidePanelTest.tableToShow);
 
-            recSidePan.getAttribute('class').then(function(className) {
-                return recSidePan.click();
-            }).then (function (){
+            recSidePanelCat_5.click().then(function(className) {
               // related table should be visible
-                rtTableHeading.isDisplayed().then(function (bool) {
-                  expect(bool).toBeTruthy();
-                });
-                chaisePage.waitForElement(lastRow);
+                expect(rtTableHeading.isDisplayed()).toBeTruthy("Category_5 heading is not visible.");
                 return rtTableHeading.getAttribute("class");
             }).then (function(className) {
                 expect(className).toContain("panel-open", "Related table panel is not open when clicked through TOC.");
             }).catch( function(err) {
                 console.log(err);
+                expect('Encountered an error').toBe('Please check the log', 'Inside catch block');
             });
         });
 
-        it('Record count should match for pan and related table content', function(){
-            var rtRow = browser.executeScript("return $('#rt-Categories_5 tbody tr')"),
-                rtPanRecordCount = element(by.id('recordSidePan-heading-5')).all(by.tagName('span')).get(1),
-                rtCount;
-
-            rtRow.then(function(rt){
-              rtCount = rt;
-              return rtPanRecordCount.getText();
-            }).then(function(panRecordCount){
-               expect(parseInt(panRecordCount.slice(1, 2))).toBe(rtCount.length, "Record count did not match with side pan");
-             }).catch( function(err) {
+        it('Record count along with heading should match for the panel and related table content should be in correct order', function(){
+            chaisePage.recordPage.getSidePanelTableTitles().then(function(tableNames){
+              for (var i=0; i<tableNames.length; i++){
+                tableNames[i] = tableNames[i].replace(/ +/g, " ");
+              }
+                expect(tableNames).toEqual(testParams.sidePanelTest.sidePanelTableOrder,"Order is not maintained for related tables in side panel");
+                expect(tableNames.length).toEqual(testParams.sidePanelTest.tocCount, "Count mismatch for number of related tables in side panel");
+                return chaisePage.recordPage.getSidePanelHeading();
+            }).then(function(sidePanelHeading){
+                expect(sidePanelHeading).toBe(testParams.sidePanelTest.panelHeading, "Side Panel heading did not match.");
+            }).catch( function(err) {
                 console.log(err);
+                expect('Encountered an error').toBe('Please check the log', 'Inside catch block');
             });
         });
 
         it('Side panel should hide/show by clicking pull button', function(){
-            var rtTableHeading = chaisePage.recordPage.getRelatedTableHeading(testParams.sidePanelTest.tableToShow),
-                recPan =  chaisePage.recordPage.getElementById('record-side-pan');
+            var recPan =  chaisePage.recordPage.getSidePanel();
 
-            recSidePan.getAttribute('class').then(function(className) {
-              return  fiddlerBtn.getAttribute("class");
-            }).then (function (className){
-                expect(className).toContain('glyphicon glyphicon-forward', 'Side Pan Pull button is not pointing in the right direction');
-                recPan.isDisplayed().then(function (bool) {
-                    expect(bool).toBeTruthy();
-                });
-              return fiddlerBtn.click();
-            }).then (function() {
-              return  fiddlerBtn.getAttribute("class");
-            }).then(function(className){
-                expect(className).toContain("glyphicon glyphicon-backward", "Side Pan Pull button is not pointing in the right direction.");
-                recPan.isDisplayed().then(function (bool) {
-                    expect(bool).toBeFalsy();
-                });
+            fiddlerBtn.getAttribute("class").then(function(classNameRight) {
+                expect(classNameRight).toContain('glyphicon glyphicon-triangle-right', 'Side Pan Pull button is not pointing in the right direction');
+                return recPan.getAttribute("class");
+            }).then(function(openPanel){
+                expect(openPanel).toContain('open-panel', 'Side Panel is not visible when fiddler is poining in right direction');
+                fiddlerBtn.click();
+                return fiddlerBtn.getAttribute("class");
+            }).then(function(classNameLeft){
+                expect(classNameLeft).toContain("glyphicon glyphicon-triangle-left", "Side Pan Pull button is not pointing in the left direction.");
+                return recPan.getAttribute("class");
+            }).then(function(closePanel){
+                expect(closePanel).toContain('close-panel', 'Side Panel is not hidden when fiddler is poining in left direction');
             }).catch( function(err) {
                 console.log(err);
+                expect('Encountered an error').toBe('Please check the log', 'Inside catch block');
             });
         });
 

@@ -383,7 +383,7 @@ describe('View existing record,', function() {
                     expect(relatedTableLink.isDisplayed()).toBeTruthy();
 
                     browser.wait(EC.elementToBeClickable(relatedTableLink));
-                    browser.executeScript("return $('#rt-heading-schedule record-action-bar a.more-results-link').click();").then(function() {
+                    relatedTableLink.click().then(function(){
                         return browser.driver.getCurrentUrl();
                     }).then(function(url) {
                         expect(url.search('/recordset/')).toBeGreaterThan(-1, "View more link is redirecting to Search app! It should redirect to Recordset.");

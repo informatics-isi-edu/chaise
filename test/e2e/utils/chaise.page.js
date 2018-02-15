@@ -782,6 +782,23 @@ var recordPage = function() {
     this.getElementById = function (id) {
         return element(by.id(id));
     }
+
+    this.getSidePanel = function() {
+      return element(by.id('record-side-pan'));
+    }
+
+    this.getSidePanelItemById = function (idx) {
+        return element(by.id("recordSidePan-" + idx));
+    }
+
+    this.getSidePanelHeading = function () {
+        // return element(by.className("sidePanelHeading"));
+        return browser.executeScript('return $(".sidePanelHeading").text()');
+    }
+
+    this.getSidePanelTableTitles = function() {
+        return browser.executeScript("return $('.columns-container li').map(function(i, a) { return a.textContent.trim(); });");
+    }
 };
 
 var recordsetPage = function() {
