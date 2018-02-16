@@ -4,6 +4,8 @@
     angular.module('chaise.record', [
         'ngSanitize',
         'ngCookies',
+        'ngAnimate',
+        'duScroll',
         'chaise.alerts',
         'chaise.delete',
         'chaise.errors',
@@ -16,6 +18,7 @@
         'ermrestjs',
         'ui.bootstrap',
         'chaise.footer',
+        'chaise.resizable',
         'chaise.upload',
         'chaise.recordcreate'
     ])
@@ -252,6 +255,7 @@
                 if ($rootScope.relatedReferences.length == 0) {
                     $rootScope.displayReady = true;
                 }
+
             }).catch(function genericCatch(exception) {
                 throw exception;
             });

@@ -641,6 +641,9 @@ var recordPage = function() {
     this.getRelatedTablesWithPanel = function () {
         return element.all(by.css(".panel"));
     };
+    this.getRelatedTablesWithPanelandHeading = function () {
+        return element.all(by.css(".related-table-heading.panel"));
+    };
 
     this.getRelatedTable = function(displayName) {
         displayName = makeSafeIdAttr(displayName);
@@ -774,6 +777,26 @@ var recordPage = function() {
 
     this.getLoadingElement = function () {
         return element(by.id("rt-loading"));
+    }
+
+    this.getSidePanel = function() {
+      return element(by.id('record-side-pan'));
+    }
+
+    this.getSidePanelItemById = function (idx) {
+        return element(by.id("recordSidePan-" + idx));
+    }
+
+    this.getSidePanelHeading = function () {
+        return browser.executeScript('return $(".sidePanelHeading").text()');
+    }
+
+    this.getSidePanelTableTitles = function() {
+        return browser.executeScript("return $('.columns-container li').map(function(i, a) { return a.textContent.trim(); });");
+    }
+
+    this.getSidePanelFiddler = function() {
+        return element(by.className('sidePanFiddler')).element(by.tagName('i'));
     }
 };
 

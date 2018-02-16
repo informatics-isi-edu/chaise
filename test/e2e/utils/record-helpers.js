@@ -168,12 +168,11 @@ exports.testPresentation = function (tableParams) {
 
         browser.wait(EC.not(EC.visibilityOf(chaisePage.recordPage.getLoadingElement())), browser.params.defaultTimeout);
         browser.wait(function() {
-            return chaisePage.recordPage.getRelatedTablesWithPanel().count().then(function(ct) {
+            return chaisePage.recordPage.getRelatedTablesWithPanelandHeading().count().then(function(ct) {
                 return (ct=relatedTables.length);
             });
         }, browser.params.defaultTimeout);
-
-        chaisePage.recordPage.getRelatedTablesWithPanel().count().then(function(count) {
+        chaisePage.recordPage.getRelatedTablesWithPanelandHeading().count().then(function(count) {
             expect(count).toBe(relatedTables.length,'Mismatch in Related table count!');
             tableCount = count;
 
