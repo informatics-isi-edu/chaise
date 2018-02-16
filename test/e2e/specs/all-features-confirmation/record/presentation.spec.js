@@ -186,7 +186,7 @@ describe('View existing record,', function() {
             expect(recordSidePan.isDisplayed()).toBeTruthy("Side Panel is not visible when page loads initially.");
         });
 
-        it('On click of Related table name in TOC, page should move to the contents and open the table details', function(){
+        it('On click of Related table name in TOC, page should move to the contents and open the table details', function(done){
             var rtTableHeading = chaisePage.recordPage.getRelatedTableHeading(testParams.sidePanelTest.tableToShow);
 
             recSidePanelCat_5.click().then(function(className) {
@@ -195,46 +195,44 @@ describe('View existing record,', function() {
                 return rtTableHeading.getAttribute("class");
             }).then (function(className) {
                 expect(className).toContain("panel-open", "Related table panel is not open when clicked through TOC.");
+                done();
             }).catch( function(err) {
                 console.log(err);
-                expect('Encountered an error').toBe('Please check the log', 'Inside catch block');
+                done.fail();
             });
         });
 
-        it('Record count along with heading should match for the panel and related table content should be in correct order', function(){
+        it('Record count along with heading should match for the panel and related table content should be in correct order', function(done){
             chaisePage.recordPage.getSidePanelTableTitles().then(function(tableNames){
               for (var i=0; i<tableNames.length; i++){
                 tableNames[i] = tableNames[i].replace(/ +/g, " ");
               }
-                expect(tableNames).toEqual(testParams.sidePanelTest.sidePanelTableOrder,"Order is not maintained for related tables in side panel");
-                expect(tableNames.length).toEqual(testParams.sidePanelTest.tocCount, "Count mismatch for number of related tables in side panel");
+                expect(tableNames.length).toEqual(testParams.sidePanelTest.tocCount, "Count mismatch for number of related tables in the side panel");
+                expect(tableNames).toEqual(testParams.sidePanelTest.sidePanelTableOrder,"Order is not maintained for related tables in the side panel");
                 return chaisePage.recordPage.getSidePanelHeading();
             }).then(function(sidePanelHeading){
                 expect(sidePanelHeading).toBe(testParams.sidePanelTest.panelHeading, "Side Panel heading did not match.");
+                done();
             }).catch( function(err) {
                 console.log(err);
-                expect('Encountered an error').toBe('Please check the log', 'Inside catch block');
+                done.fail();
             });
         });
 
-        it('Side panel should hide/show by clicking pull button', function(){
+        it('Side panel should hide/show by clicking pull button', function(done){
             var recPan =  chaisePage.recordPage.getSidePanel();
 
             fiddlerBtn.getAttribute("class").then(function(classNameRight) {
                 expect(classNameRight).toContain('glyphicon glyphicon-triangle-right', 'Side Pan Pull button is not pointing in the right direction');
-                return recPan.getAttribute("class");
-            }).then(function(openPanel){
-                expect(openPanel).toContain('open-panel', 'Side Panel is not visible when fiddler is poining in right direction');
-                fiddlerBtn.click();
-                return fiddlerBtn.getAttribute("class");
-            }).then(function(classNameLeft){
-                expect(classNameLeft).toContain("glyphicon glyphicon-triangle-left", "Side Pan Pull button is not pointing in the left direction.");
-                return recPan.getAttribute("class");
-            }).then(function(closePanel){
-                expect(closePanel).toContain('close-panel', 'Side Panel is not hidden when fiddler is poining in left direction');
+                expect(recPan.getAttribute("class")).toContain('open-panel', 'Side Panel is not visible when fiddler is poining in right direction');
+                return fiddlerBtn.click();
+            }).then(function(){
+                expect(fiddlerBtn.getAttribute("class")).toContain("glyphicon glyphicon-triangle-left", "Side Pan Pull button is not pointing in the left direction.");
+                expect(recPan.getAttribute("class")).toContain('close-panel', 'Side Panel is not hidden when fiddler is poining in left direction');
+                done();
             }).catch( function(err) {
                 console.log(err);
-                expect('Encountered an error').toBe('Please check the log', 'Inside catch block');
+                done.fail();
             });
         });
 
