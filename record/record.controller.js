@@ -3,9 +3,11 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$uibModal', '$window',
-        function RecordController(AlertsService, DataUtils, ErrorService, logActions, MathUtils, messageMap, modalBox, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $uibModal, $window) {
+    .controller('RecordController', ['AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$uibModal', '$window',
+        function RecordController(AlertsService, DataUtils, ErrorService, logActions, MathUtils, messageMap, modalBox, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $uibModal, $window) {
         var vm = this;
+
+        var mainContainerEl = angular.element(document.getElementsByClassName('main-container')[0]);
         var addRecordRequests = {}; // <generated unique id : reference of related table>
         var editRecordRequests = {}; // generated id: {schemaName, tableName}
         var updated = {};
@@ -14,6 +16,32 @@
         var modalUpdate = false;
         vm.alerts = AlertsService.alerts;
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
+
+        vm.rowFocus = {};
+        vm.sidePanToggleBtnIndicator = "Show";
+
+        $scope.recordSidePanOpen = chaiseConfig.hideTableOfContents === true ? false : true;
+
+        vm.gotoRelatedTable = function(sectionId, index) {
+            var safeSectionId = vm.makeSafeIdAttr(sectionId);
+            var pageSection = "rt-heading-" + safeSectionId;
+
+            $rootScope.tableModels[index].open = true;
+            vm.rowFocus[index] = false;
+            var el = angular.element(document.getElementById(pageSection));
+            mainContainerEl.scrollToElementAnimated(el, 40).then(function () {
+                $timeout(function () {
+                    el.addClass("rowFocus");
+                }, 100);
+                $timeout(function () {
+                    el.removeClass('rowFocus');
+                }, 1600);
+            });
+        };
+
+        vm.togglePan = function() {
+            $scope.recordSidePanOpen = !$scope.recordSidePanOpen;
+        };
 
         vm.canCreate = function() {
             return ($rootScope.reference && $rootScope.reference.canCreate && $rootScope.modifyRecord);
@@ -101,6 +129,15 @@
                 }
                 return false;
             }
+        };
+
+        vm.noVisibleRleatedTables = function () {
+            if ($rootScope.tableModels) {
+                return !$rootScope.tableModels.some(function (tm, index) {
+                    return vm.showRelatedTable(index);
+                });
+            }
+            return true;
         };
 
         vm.toggleRelatedTableDisplayType = function(dataModel) {
@@ -288,6 +325,7 @@
             return $rootScope.displayReady;
         }, function (newValue, oldValue) {
             if (newValue) {
+
                 var elements = fetchElements();
                 // if these values are not set yet, don't set the height
                 if(elements.navbarHeight && elements.bookmarkHeight) {
@@ -307,5 +345,18 @@
                 $scope.$digest();
             }
         });
+
+        // scroll to top button
+        $scope.scrollToTop = function () {
+            mainContainerEl.scrollTo(0,0, 500);
+        };
+
+        mainContainerEl.on('scroll', $scope.$apply.bind($scope, function () {
+            if (mainContainerEl.scrollTop() > 300) {
+              $scope.showTopBtn = true;
+            } else {
+              $scope.showTopBtn = false;
+            }
+        }));
     }]);
 })();

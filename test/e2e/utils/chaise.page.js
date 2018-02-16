@@ -645,6 +645,9 @@ var recordPage = function() {
     this.getRelatedTablesWithPanel = function () {
         return element.all(by.css(".panel"));
     };
+    this.getRelatedTablesWithPanelandHeading = function () {
+        return element.all(by.css(".related-table-heading.panel"));
+    };
 
     this.getRelatedTable = function(displayName) {
         displayName = makeSafeIdAttr(displayName);
@@ -778,6 +781,26 @@ var recordPage = function() {
 
     this.getLoadingElement = function () {
         return element(by.id("rt-loading"));
+    }
+
+    this.getSidePanel = function() {
+      return element(by.id('record-side-pan'));
+    }
+
+    this.getSidePanelItemById = function (idx) {
+        return element(by.id("recordSidePan-" + idx));
+    }
+
+    this.getSidePanelHeading = function () {
+        return browser.executeScript('return $(".sidePanelHeading").text()');
+    }
+
+    this.getSidePanelTableTitles = function() {
+        return browser.executeScript("return $('.columns-container li').map(function(i, a) { return a.textContent.trim(); });");
+    }
+
+    this.getSidePanelFiddler = function() {
+        return element(by.className('sidePanFiddler')).element(by.tagName('i'));
     }
 };
 
@@ -946,6 +969,10 @@ var recordsetPage = function() {
         return element(by.id("clear-all-filters"));
     }
 
+    this.getClearCustomFilters = function () {
+        return element(by.id("clear-custom-filters"));
+    }
+
     this.getFacetOptions = function (idx) {
         return element(by.id("fc-" + idx)).all(by.css(".chaise-checkbox label"));
     }
@@ -974,6 +1001,10 @@ var recordsetPage = function() {
 
     this.getFacetSearchBoxClear = function (idx) {
         return element(by.id("fc-" + idx)).element(by.css(".facet-search-clear"));
+    }
+
+    this.getHistogram = function (idx) {
+        return element(by.id("fc-" + idx)).element(by.tagName("plotly"));
     }
 
     this.getList = function (idx) {
@@ -1025,12 +1056,36 @@ var recordsetPage = function() {
         return element.all(by.css('.modal-body tr.disabled-row'));
     };
 
-    this.getFacetSpinner= function (idx) {
+    this.getFacetSpinner = function (idx) {
         return element(by.id("fc-" + idx)).element(by.css(".spinner"));
     };
 
     this.getDisabledFacetOptions = function (idx) {
         return element(by.id("fc-" + idx)).all(by.css(".chaise-checkbox input[disabled=disabled]"));
+    };
+
+    this.getHistogram = function (idx) {
+        return element(by.id("fc-" + idx)).element(by.css(".js-plotly-plot"));
+    };
+
+    this.getPlotlyZoom = function (idx) {
+        return element(by.id("fc-" + idx)).element(by.css(".zoom-plotly-button"));
+    };
+
+    this.getPlotlyZoomDisabled = function (idx) {
+        return element(by.id("fc-" + idx)).all(by.css(".zoom-plotly-button[disabled=disabled]"));
+    };
+
+    this.getPlotlyUnzoom = function (idx) {
+        return element(by.id("fc-" + idx)).element(by.css(".unzoom-plotly-button"));
+    };
+
+    this.getPlotlyUnzoomDisabled = function (idx) {
+        return element(by.id("fc-" + idx)).all(by.css(".unzoom-plotly-button[disabled=disabled]"));
+    };
+
+    this.getPlotlyReset = function (idx) {
+        return element(by.id("fc-" + idx)).element(by.css(".reset-plotly-button"));
     };
 };
 

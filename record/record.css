@@ -1,67 +1,82 @@
-.container-fluid {
+.record-container {
     /* If changing paddings here, change the padding in #bookmark-container */
-    padding-right: 50px;
-    padding-left: 50px;
+    padding-left: 20px;
+    padding-right: 0;
+    -webkit-box-flex: 1;
+    display: flex;
+    flex: 1;
+    margin-top: 0px;
 }
 
-.smaller-margin {
+.record-container > .main-container {
+    flex:1;
+    border-left: 10px solid white;
+    border-right: 2px solid white;
+    padding-right: 10px;
+    position: relative;
+    z-index: 1;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding-top: 10px;
+}
+
+.record-container > .main-container:not(.initializing) {
+    -webkit-box-shadow: 11px 0px 16px -2px rgba(204,204,204,1);
+    -moz-box-shadow: 11px 0px 16px -2px rgba(204,204,204,1);
+    box-shadow: 11px 0px 16px -2px rgba(204,204,204,1);
+}
+
+.record-container.smaller-margin {
     margin-left: -50px;
     margin-right: -50px;
 }
 
-.main-container {
-    margin-top: 10px;
-    margin-bottom: -50px;
-}
+/******Related Entities in record **************/
 
-/******Related Entities**************/
-
-.panel{
+.record-container .panel{
     box-shadow: none;
 }
 
-.panel-group .panel{
-    border: none;
-    border-bottom: 1px solid #ddd !important;
-    border-radius: 0px;
+.record-container .panel-group .panel{
+    border-color: white;
+    border-bottom: 1px solid #ddd;
+    border-radius: 2px;
+    padding: 0 10px;
+    border-width: 2px;
 }
 
-.panel-title>a:hover, .panel-title>a:focus{
+.record-container .panel-title>a:hover, .record-container .panel-title>a:focus{
     text-decoration: none;
     color: rgb(63, 124, 184);
 }
 
-.panel-default>.panel-heading{
+.record-container .panel-default>.panel-heading{
     text-transform: inherit;
     padding: 8px 8px 8px 0px;
     color: inherit;
     border: none;
 }
 
-.panel-group .panel+.panel{
-    border: none;
-}
-
-.panel-default>.panel-heading+.panel-collapse>.panel-body{
+.record-container .panel-default>.panel-heading+.panel-collapse>.panel-body{
     padding-left: 0px;
 }
 
-.reference-views {
+.record-container .reference-views {
     padding-left: 0;
 }
-.reference-views li{
+.record-container .reference-views li{
     float: left;
 }
-.reference-views > li:nth-child(2){
+.record-container .reference-views > li:nth-child(2){
     border-right: 1px solid black;
 }
 
-.reference-views .reference-view-title{
+.record-container .reference-views .reference-view-title{
     padding: 3px 1px 5px 0;
     text-transform: uppercase;
 }
 
-.transpose-toggle{
+.record-container .transpose-toggle{
     display: inline-block;
     padding: 1px 17px;
     border-radius: 3px;
@@ -70,22 +85,110 @@
     width: 81px;
 }
 
-.panel-title {
+.record-container .panel-title {
     font-size: inherit;
 }
 
-.transpose-toggle:hover, .transpose-toggle:focus, .transpose-toggle:active{
+.record-container .transpose-toggle:hover, .record-container .transpose-toggle:focus, .record-container .transpose-toggle:active{
     color: #2364AB;
 }
 
-.panel a.accordion-toggle span {
+.record-container .panel a.accordion-toggle span {
     color: #333333;
     font-weight: normal;
     font-size: 17px;
 }
 
-.panel-title >a:hover span, .panel-title>a:focus span{
+.record-container .panel-title >a:hover span, .panel-title>a:focus span{
     color: rgb(63, 124, 184);
+}
+
+
+/************************record side pan**************/
+.record-container .rowFocus{
+    border-color: rgb(51, 122, 183) !important;
+}
+
+.record-container .panel-group .panel.rowFocus + .panel {
+    border-top: 2px solid #ddd;
+}
+
+.record-container .sidePanelHeading{
+    /* background-color: rgba(201, 201, 201, 0.5); */
+    font-weight: bold;
+    padding: 9px 10px 10px !important;
+    margin: 5px 0 0 -5px;
+}
+
+.record-container > #record-side-pan {
+    flex: 0;
+    position: relative;
+    z-index: 2;
+    /* padding-left: 5px; */
+    /*overflow-y: auto;*/
+    /* margin-left: 5px; */
+    font-weight: bold;
+}
+.record-container > #record-side-pan  .panel {
+    margin-bottom: 5px !important;
+    padding: 8px !important;
+}
+
+.record-toc .columns-container ul {
+  padding-left: 10px;
+}
+
+.sidePanFiddler, #back-to-top {
+    cursor: pointer;
+    overflow: hidden;
+    z-index: 50;
+    font-size: 25px;
+    padding: 1px 0 1px 5px;
+    border-radius: 2px 0 0px 2px;
+    height: 35px;
+    width: 35px;
+}
+
+.sidePanFiddler{
+    position: absolute;
+    left: -51px;
+    top: 5px;
+}
+
+#record-side-pan {
+  width: 0;
+  max-width: 0;
+}
+
+#record-side-pan.close-panel .rg-left, #record-side-pan.close-panel .rg-right {
+  display: none;
+}
+
+#record-side-pan.open-panel {
+  margin-left: 15px;
+  min-width: 170px;
+  max-width: 50vw;
+  flex:0 0 15vw;
+}
+
+
+#record-side-pan.close-panel .sidePanFiddler {
+    padding: 1px 4px 0 0px;
+}
+
+#record-side-pan.open-panel .sidePanFiddler {
+  left: -66px;
+}
+
+#back-to-top {
+  position: absolute;
+  left: -51px;
+  bottom: 2em;
+  padding: 1px 4px;
+}
+
+#record-side-pan.open-panel #back-to-top {
+  left: -66px;
 }
 
 @media print {
@@ -97,11 +200,11 @@
         padding-left: 0px;
     }
 
-    .row {
+    .record-container .row {
         margin-left: 0px;
     }
 
-    #bookmark-container {
+    .record-container #bookmark-container {
         padding-left: 0px;
     }
 
@@ -113,12 +216,12 @@
         content: none !important;
     }
 
-    .entity-key {
+    .record-container .entity-key {
         width: auto;
         max-width: 120px;
     }
 
-    .entity-value {
+    .record-container .entity-value {
         width: auto;
     }
 }

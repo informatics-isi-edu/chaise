@@ -61,8 +61,8 @@ span[uib-tooltip] {
 
 .btn.btn-primary.btn-inverted[disabled],
 .chaise-checkbox input[disabled][type="checkbox"] + label:before {
-    color: #f1f1f1 !important;
-    border-color: #f1f1f1 !important;
+    color: #ccc !important;
+    border-color: #ccc !important;
 }
 
 .chaise-checkbox input[disabled][type="checkbox"]:checked + label:after {
@@ -186,10 +186,6 @@ img.spinner-sm {
     box-shadow: none;
 }
 
-.panel-group .panel{
-    border: none;
-}
-
 .panel-title>a:hover, .panel-title>a:focus{
     text-decoration: none;
     color: rgb(63, 124, 184);
@@ -211,10 +207,6 @@ img.spinner-sm {
     float: left;
     line-height: 12px;
     margin-right: 10px;
-}
-
-.panel-group .panel+.panel{
-    border: none;
 }
 
 .panel-default>.panel-heading+.panel-collapse>.panel-body{
@@ -965,6 +957,9 @@ footer .container1 {
   margin: -10px 0 0 0.8px;
   height: 20px;
   width: 30px;
+  top: 50%;
+  color: #a5a5a5;
+  font-weight: 400;
 }
 
 .rg-right span:before, .rg-left span:before {
@@ -1113,9 +1108,13 @@ footer .container1 {
      padding-left: 5px;
  }
  .recordset-container.with-faceting > .faceting-resizable:not(.initializing) {
-     -webkit-box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
-    -moz-box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
-    box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
+    -webkit-box-shadow: 11px 0px 16px -2px rgba(204,204,204,1);
+    -moz-box-shadow: 11px 0px 16px -2px rgba(204,204,204,1);
+    box-shadow: 11px 0px 16px -2px rgba(204,204,204,1);
+ }
+
+ .recordset-container.with-faceting > .faceting-resizable.initializing > .rg-right > span{
+    display: none;
  }
 
  .recordset-container.with-faceting > .main-container {
@@ -1173,6 +1172,7 @@ footer .container1 {
 
  .faceting-container .panel:hover, .faceting-container .panel-default.active {
      border-color: rgb(51, 122, 183) !important;
+     animation-duration: 4s;
  }
 
  .faceting-container .update-btn {
@@ -1327,6 +1327,14 @@ footer .container1 {
     padding: 5px 15px;
 }
 
+.plotly-how-to {
+    border-color: white !important;
+    cursor: default;
+}
+
+.plotly-how-to:hover {
+    z-index: auto !important;
+}
 
 /*************** LIST ***************************/
 .chaise-list-container {
