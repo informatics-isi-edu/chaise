@@ -171,12 +171,11 @@ exports.testPresentation = function (tableParams) {
 
         browser.wait(EC.not(EC.visibilityOf(chaisePage.recordPage.getLoadingElement())), browser.params.defaultTimeout);
         browser.wait(function() {
-            return chaisePage.recordPage.getRelatedTablesWithPanel().count().then(function(ct) {
+            return chaisePage.recordPage.getRelatedTablesWithPanelandHeading().count().then(function(ct) {
                 return (ct=relatedTables.length);
             });
         }, browser.params.defaultTimeout);
-
-        chaisePage.recordPage.getRelatedTablesWithPanel().count().then(function(count) {
+        chaisePage.recordPage.getRelatedTablesWithPanelandHeading().count().then(function(count) {
             expect(count).toBe(relatedTables.length,'Mismatch in Related table count!');
             tableCount = count;
 
@@ -315,33 +314,35 @@ exports.testPresentation = function (tableParams) {
         })
     });
 
-   it("visible column related table with inline inbound fk should show entry without bullet point in case of only one entry",function(){
+   it("visible column related table with inline inbound fk should show entry without bullet point in case of only one entry",function(done){
         var EC = protractor.ExpectedConditions,
             markdownEntity = element(by.id('entity-5-markdown')),
             bookingName = "booking_new_inline",
             displayLink = chaisePage.recordPage.getEntityToggleDisplayLink(bookingName);
 
         chaisePage.waitForElement(displayLink).then(function(){
-           displayLink.click();
-           chaisePage.waitForElement(element(by.id("rt-" + bookingName)));
-           return chaisePage.recordPage.getDeleteActionButtons(bookingName);
+            return displayLink.click();
+        }).then(function() {
+            chaisePage.waitForElement(chaisePage.recordPage.getEntityRelatedTable(bookingName));
+            return chaisePage.recordPage.getDeleteActionButtons(bookingName);
         }).then(function(deleteButtons) {
-           return deleteButtons[0].click();
+            return deleteButtons[0].click();
         }).then(function () {
-           chaisePage.waitForElement(element(by.id("delete-confirmation")));
-           return chaisePage.recordPage.getConfirmDeleteButton().click();
+            chaisePage.waitForElement(element(by.id("delete-confirmation")));
+            return chaisePage.recordPage.getConfirmDeleteButton().click();
         }).then(function () {
-           browser.wait(function () {
+            browser.wait(function () {
               return chaisePage.recordPage.getDeleteActionButtons(bookingName).count().then(function (ct) {
                    return (ct==1);
                });
-            });
-          return displayLink.click();
+          });
+            return displayLink.click();
         }).then(function(){
-            expect(element(by.id('entity-5-markdown')).element(by.tagName('li')).getCssValue('list-style')).toBe("none outside none", "Bullet point is not working");
+            expect(element(by.id('entity-5-markdown')).element(by.tagName('li')).getCssValue('list-style')).toBe("none outside none", "Bullet point change is not working");
+            done();
         }).catch(function(err){
             console.log(err);
-            expect('Encountered an error').toBe('Please check the log', 'Inside catch block');
+            done.fail();
        })
     });
 

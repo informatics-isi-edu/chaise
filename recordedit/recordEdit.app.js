@@ -44,8 +44,8 @@
         $logProvider.debugEnabled(chaiseConfig.debug === true);
     }])
 
-    .run(['AlertsService', 'ERMrest', 'ErrorService', 'headInjector', 'logActions', 'MathUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', 'messageMap', 'Errors',
-        function runRecordEditApp(AlertsService, ERMrest, ErrorService, headInjector, logActions, MathUtils, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies, messageMap, Errors) {
+    .run(['AlertsService', 'dataFormats', 'ERMrest', 'ErrorService', 'headInjector', 'logActions', 'MathUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', 'messageMap', 'Errors',
+        function runRecordEditApp(AlertsService, dataFormats, ERMrest, ErrorService, headInjector, logActions, MathUtils, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies, messageMap, Errors) {
 
         var session,
             context = { booleanValues: ['', true, false] };
@@ -275,7 +275,7 @@
                                             if (column.isAsset) {
                                                 recordEditModel.rows[j][column.name] = { url: values[i] || "" };
                                             } else if (column.type.name == "timestamptz") {
-                                                recordEditModel.rows[j][column.name] = moment(values[i]).format('YYYY-MM-DDTHH:mm:ssZ');
+                                                recordEditModel.rows[j][column.name] = moment(values[i]).format(dataFormats.datetime.return);
                                             } else {
                                                 recordEditModel.rows[j][column.name] = values[i];
                                             }
@@ -290,8 +290,8 @@
                                             if (values[i]) {
                                                 var ts = moment(values[i]);
                                                 value = {
-                                                    date: ts.format('YYYY-MM-DD'),
-                                                    time: ts.format('hh:mm:ss'),
+                                                    date: ts.format(dataFormats.date),
+                                                    time: ts.format(dataFormats.time12),
                                                     meridiem: ts.format('A')
                                                 };
                                             } else {
@@ -374,9 +374,9 @@
                                 if (defaultSet) {
                                     var ts = moment(column.default);
                                     if (inputDisabled) {
-                                        initialModelValue = ( column.type.name === 'timestamp' ? ts.format("YYYY-MM-DD HH:mm:ss") : ts.format("YYYY-MM-DD HH:mm:ssZ") );
+                                        initialModelValue = ( column.type.name === 'timestamp' ? ts.format(dataFormats.datetime.display) : ts.format(dataFormats.datetime.displayZ) );
                                     } else {
-                                        initialModelValue = { date: ts.format('YYYY-MM-DD'), time: ts.format('hh:mm:ss'), meridiem: ts.format('A') };
+                                        initialModelValue = { date: ts.format(dataFormats.date), time: ts.format(dataFormats.time12), meridiem: ts.format('A') };
                                     }
                                 } else if (!inputDisabled) {
                                     // If there are no defaults, then just initialize timestamp[tz] columns with the app's default obj

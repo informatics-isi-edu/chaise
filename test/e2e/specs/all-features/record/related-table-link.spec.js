@@ -383,7 +383,7 @@ describe('View existing record,', function() {
                     expect(relatedTableLink.isDisplayed()).toBeTruthy();
 
                     browser.wait(EC.elementToBeClickable(relatedTableLink));
-                    relatedTableLink.click().then(function() {
+                    relatedTableLink.click().then(function(){
                         return browser.driver.getCurrentUrl();
                     }).then(function(url) {
                         expect(url.search('/recordset/')).toBeGreaterThan(-1, "View more link is redirecting to Search app! It should redirect to Recordset.");
@@ -439,6 +439,7 @@ describe('View existing record,', function() {
                     expect(addRelatedRecordLink.getText()).toBe("Add", "The Add button is not displayed as Add");
 
                     addRelatedRecordLink.click().then(function(){
+                        chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
 
                         browser.wait(function () {
                             return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {

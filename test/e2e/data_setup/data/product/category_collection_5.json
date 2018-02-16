@@ -1,0 +1,5 @@
+[{"id":10007,"term":"Castle","category_collection_id" : 2003},
+ {"id":10003,"term":"Hotel", "category_collection_id" : 2003},
+ {"id":10005,"term":"Motel", "category_collection_id" : 2003},
+ {"id":10004,"term":"Ranch", "category_collection_id" : 2003},
+ {"id":10006,"term":"Resort", "category_collection_id" : 2003}]

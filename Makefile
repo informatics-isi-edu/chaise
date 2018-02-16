@@ -41,6 +41,7 @@ E2EDrecordset=test/e2e/specs/all-features-confirmation/recordset/presentation.co
 E2EDrecordsetEdit=test/e2e/specs/default-config/recordset/edit.conf.js
 E2ErecordsetAdd=test/e2e/specs/default-config/recordset/add.conf.js
 E2EDrecordsetIndFacet=test/e2e/specs/delete-prohibited/recordset/ind-facet.conf.js
+E2EDrecordsetHistFacet=test/e2e/specs/delete-prohibited/recordset/histogram-facet.conf.js
 # Viewer tests
 E2EDviewer=test/e2e/specs/all-features/viewer/presentation.conf.js
 # misc tests
@@ -61,7 +62,7 @@ DefaultConfigParallel=test/e2e/specs/default-config/protractor.conf.js
 NAVBAR_TESTS=$(E2Enavbar) $(E2EnavbarHeadTitle)
 SEARCH_TESTS=$(E2Esearch)
 DETAILED_TESTS=$(E2EDdetailed)
-RECORDSET_TESTS=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit) $(E2EDrecordsetIndFacet)
+RECORDSET_TESTS=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit) $(E2EDrecordsetIndFacet) $(E2EDrecordsetHistFacet)
 RECORD_TESTS=$(E2EDrecord) $(E2ErecordNoDeleteBtn) $(E2EDrecordRelatedTable) $(E2EDrecordCopy)
 RECORDADD_TESTS=$(E2EDIrecordAdd) $(E2EDIrecordMultiAdd) $(E2EDIrecordImmutable)
 RECORDEDIT_TESTS=$(E2EDIrecordEdit) $(E2EDIrecordMultiEdit) $(E2EDrecordEditCompositeKey) $(E2ErecordEditNoDeleteBtn) $(E2EDrecordEditSubmissionDisabled) $(E2EDIrecordEditMultiColTypes) $(E2EDrecordEditDomainFilter)
@@ -335,6 +336,7 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular-sanitize.js \
 	$(COMMON)/vendor/angular-cookies.min.js \
 	$(COMMON)/vendor/angular-animate.min.js \
+	$(COMMON)/vendor/angular-scroll.min.js \
 	$(COMMON)/alerts.js \
 	$(COMMON)/authen.js \
 	$(COMMON)/delete-link.js \
@@ -351,6 +353,7 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/footer.js \
 	$(COMMON)/upload.js \
 	$(COMMON)/recordCreate.js \
+	$(COMMON)/resizable.js \
 	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/ui-bootstrap-tpls.js
 

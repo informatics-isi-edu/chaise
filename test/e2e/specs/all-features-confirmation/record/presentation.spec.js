@@ -58,6 +58,15 @@ var testParams = {
     },
     multipleData: {
         title : "Multiple Records Found"
+    },
+    sidePanelTest: {
+      schemaName: "product-record",
+      tableName: "accommodation_collection",
+      id: "2003",
+      tocCount: 7,
+      tableToShow: 'Categories_5',
+      sidePanelTableOrder:[ 'Categories_collection\n (5)',  'media\n \n (1)', 'Categories_collection_2\n (5)',  'Categories_3\n (5)',  'Categories_4\n (5)',  'Categories_5\n (5)',  'Categories_6\n (5)'],
+      panelHeading: "Related Records"
     }
 };
 
@@ -121,7 +130,7 @@ describe('View existing record,', function() {
             }, browser.params.defaultTimeout);
             var showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton();
 
-            chaisePage.recordPage.getRelatedTablesWithPanel().count().then(function(count) {
+            chaisePage.recordPage.getRelatedTablesWithPanelandHeading().count().then(function(count) {
                 expect(count).toBe(testParams.no_related_data.tables_order.length, "Number of related tables is not correct");
 
                 return chaisePage.recordPage.getRelatedTableTitles();
@@ -131,8 +140,8 @@ describe('View existing record,', function() {
                 expect(showAllRTButton.getText()).toBe("Hide Empty Related Records", "Sow all Related tables button has wrong text");
                 return showAllRTButton.click();
             }).then(function() {
-                expect(chaisePage.recordPage.getRelatedTablesWithPanel().count()).toBe(0, "Not all the related tables were hidden");
-                expect(chaisePage.recordPage.getRelatedTablesWithPanel().count()).not.toBe(testParams.no_related_data.tables_order.length, "The full set of related tables were not properly hidden");
+                expect(chaisePage.recordPage.getRelatedTablesWithPanelandHeading().count()).toBe(0, "Not all the related tables were hidden");
+                expect(chaisePage.recordPage.getRelatedTablesWithPanelandHeading().count()).not.toBe(testParams.no_related_data.tables_order.length, "The full set of related tables were not properly hidden");
             })
         });
     });
@@ -162,6 +171,72 @@ describe('View existing record,', function() {
                 console.log(err);
             });
         });
+    });
+
+    describe("For side panel table of contents in Record App", function() {
+
+        beforeAll(function() {
+            var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.sidePanelTest.schemaName + ":" + testParams.sidePanelTest.tableName +  "/id=" + testParams.sidePanelTest.id;
+            browser.get(url);
+            recSidePanelCat_5 = chaisePage.recordPage.getSidePanelItemById(5);
+            fiddlerBtn = chaisePage.recordPage.getSidePanelFiddler();
+            chaisePage.waitForElement(fiddlerBtn);
+        });
+        it('Table of contents should be displayed by default', function(){
+            var recordSidePan = chaisePage.recordPage.getSidePanel();
+            expect(recordSidePan.isDisplayed()).toBeTruthy("Side Panel is not visible when page loads initially.");
+        });
+
+        it('On click of Related table name in TOC, page should move to the contents and open the table details', function(done){
+            var rtTableHeading = chaisePage.recordPage.getRelatedTableHeading(testParams.sidePanelTest.tableToShow);
+
+            recSidePanelCat_5.click().then(function(className) {
+              // related table should be visible
+                expect(rtTableHeading.isDisplayed()).toBeTruthy("Category_5 heading is not visible.");
+                return rtTableHeading.getAttribute("class");
+            }).then (function(className) {
+                expect(className).toContain("panel-open", "Related table panel is not open when clicked through TOC.");
+                done();
+            }).catch( function(err) {
+                console.log(err);
+                done.fail();
+            });
+        });
+
+        it('Record count along with heading should match for the panel and related table content should be in correct order', function(done){
+            chaisePage.recordPage.getSidePanelTableTitles().then(function(tableNames){
+              for (var i=0; i<tableNames.length; i++){
+                tableNames[i] = tableNames[i].replace(/ +/g, " ");
+              }
+                expect(tableNames.length).toEqual(testParams.sidePanelTest.tocCount, "Count mismatch for number of related tables in the side panel");
+                expect(tableNames).toEqual(testParams.sidePanelTest.sidePanelTableOrder,"Order is not maintained for related tables in the side panel");
+                return chaisePage.recordPage.getSidePanelHeading();
+            }).then(function(sidePanelHeading){
+                expect(sidePanelHeading).toBe(testParams.sidePanelTest.panelHeading, "Side Panel heading did not match.");
+                done();
+            }).catch( function(err) {
+                console.log(err);
+                done.fail();
+            });
+        });
+
+        it('Side panel should hide/show by clicking pull button', function(done){
+            var recPan =  chaisePage.recordPage.getSidePanel();
+
+            fiddlerBtn.getAttribute("class").then(function(classNameRight) {
+                expect(classNameRight).toContain('glyphicon glyphicon-triangle-right', 'Side Pan Pull button is not pointing in the right direction');
+                expect(recPan.getAttribute("class")).toContain('open-panel', 'Side Panel is not visible when fiddler is poining in right direction');
+                return fiddlerBtn.click();
+            }).then(function(){               
+                expect(fiddlerBtn.getAttribute("class")).toContain("glyphicon glyphicon-triangle-left", "Side Pan Pull button is not pointing in the left direction.");
+                expect(recPan.getAttribute("class")).toContain('close-panel', 'Side Panel is not hidden when fiddler is poining in left direction');
+                done();
+            }).catch( function(err) {
+                console.log(err);
+                done.fail();
+            });
+        });
+
     });
 
 });
