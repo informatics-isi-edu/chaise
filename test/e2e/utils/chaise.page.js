@@ -794,6 +794,10 @@ var recordPage = function() {
     this.getSidePanelTableTitles = function() {
         return browser.executeScript("return $('.columns-container li').map(function(i, a) { return a.textContent.trim(); });");
     }
+
+    this.getSidePanelFiddler = function() {
+        return element(by.className('sidePanFiddler')).element(by.tagName('i'));
+    }
 };
 
 var recordsetPage = function() {
