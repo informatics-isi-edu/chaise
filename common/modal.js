@@ -31,7 +31,7 @@
             vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
         } else if (Object.values(messageMap.facetRelatedErrorStatus).indexOf(vm.params.errorCode) > -1) {
             if(vm.params.errorCode == messageMap.facetRelatedErrorStatus.invalidFilter){
-                vm.clickActionMessage = messageMap.terminalError.okBtnMessage;
+                vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
             } else{
             vm.clickActionMessage = messageMap.facetRelatedErrorStatus.clickActionMessage.replace('@errorStatus', vm.params.errorCode);
           }

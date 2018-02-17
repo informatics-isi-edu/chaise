@@ -23,7 +23,7 @@ var testParams = {
       invalidFacetFilterTitle: "Invalid Facet Filters",
       invalidFacetFilterBody: "Click OK to reload this page without Invalid Facet Filters.",
       invalidFilterOperatorErrorTitle : "Invalid Filter",
-      invalidFilterOperatorErrorBody : "Click OK to go to the Recordset."
+      invalidFilterOperatorErrorBody : "Click OK to show the list of all records."
     }
 };
 
