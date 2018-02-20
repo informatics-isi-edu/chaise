@@ -111,20 +111,13 @@ exports.testPresentation = function (tableParams) {
             var index = -1, columnUrl, aTag;
             columns.forEach(function (column) {
                 var columnEls;
-                if (column.title=='booking')
-                  {
+                if (column.title=='booking') {
                     expect(element(by.id('entity-4-markdown')).element(by.tagName('span')).getAttribute('innerHTML')).toContain(column.value);
-                  }
-                else if(column.title =='booking_new_inline'){
-                    expect(element(by.id('entity-5-markdown')).element(by.tagName('span')).getAttribute('innerHTML')).toContain(column.value);
-                }
-                else if (column.match=='html'){
+                } else if (column.match=='html') {
                     expect(chaisePage.recordPage.getEntityRelatedTableScope(column.title).getAttribute('innerHTML')).toBe(column.value);
-                }
-                else if (column.title == 'User Rating'){
+                } else if (column.title == 'User Rating'){
                     expect(chaisePage.recordPage.getEntityRelatedTableScope('&lt;strong&gt;User&nbsp;Rating&lt;/strong&gt;',true).getAttribute('innerHTML')).toBe(column.value);
-                }
-                else {
+                } else {
                     columnEls = chaisePage.recordPage.getEntityRelatedTable(column.title);
 
                     if (column.presentation && column.presentation.type == "url") {
@@ -137,8 +130,7 @@ exports.testPresentation = function (tableParams) {
                             expect(aTag.getAttribute('href')).toEqual(columnUrl);
                             expect(aTag.getText()).toEqual(column.value);
                         });
-                    }
-                    else {
+                    } else {
                         expect(columnEls.getAttribute('innerText')).toBe(column.value);
                     }
             }
@@ -227,7 +219,7 @@ exports.testPresentation = function (tableParams) {
             return element(by.id('actionbar-4'));
         }).then( function(actionBar){
             expect(actionBar.getAttribute('innerText')).toBe('Edit  | Add  | View More\n','Action bar text did not match.');
-            return browser.executeScript("return $('a.toggle-display-link')[0].click()");
+            return browser.executeScript("return $('a.toggle-display-link').click()");
         }).then(function(editLink){
             return element(by.id('entity-4-recTab'));
         }).then(function (RecordTab) {
@@ -304,7 +296,7 @@ exports.testPresentation = function (tableParams) {
                 });
             }, browser.params.defaultTimeout);
 
-            return browser.executeScript("return $('a.toggle-display-link')[0].click()");
+            return browser.executeScript("return $('a.toggle-display-link').click()");
         }).then(function(){
             browser.wait(EC.visibilityOf(markdownEntity), browser.params.defaultTimeout);
             expect(markdownEntity.getText()).toBe('None',"Incorrect text for empty markdown!");
@@ -312,38 +304,6 @@ exports.testPresentation = function (tableParams) {
             console.log(err);
             expect('Encountered an error').toBe('Please check the log', 'Inside catch block');
         })
-    });
-
-   it("visible column related table with inline inbound fk should show entry without bullet point in case of only one entry",function(done){
-        var EC = protractor.ExpectedConditions,
-            markdownEntity = element(by.id('entity-5-markdown')),
-            bookingName = "booking_new_inline",
-            displayLink = chaisePage.recordPage.getEntityToggleDisplayLink(bookingName);
-
-        chaisePage.waitForElement(displayLink).then(function(){
-            return displayLink.click();
-        }).then(function() {
-            chaisePage.waitForElement(chaisePage.recordPage.getEntityRelatedTable(bookingName));
-            return chaisePage.recordPage.getDeleteActionButtons(bookingName);
-        }).then(function(deleteButtons) {
-            return deleteButtons[0].click();
-        }).then(function () {
-            chaisePage.waitForElement(element(by.id("delete-confirmation")));
-            return chaisePage.recordPage.getConfirmDeleteButton().click();
-        }).then(function () {
-            browser.wait(function () {
-              return chaisePage.recordPage.getDeleteActionButtons(bookingName).count().then(function (ct) {
-                   return (ct==1);
-               });
-          });
-            return displayLink.click();
-        }).then(function(){
-            expect(element(by.id('entity-5-markdown')).element(by.tagName('li')).getCssValue('list-style')).toBe("none outside none", "Bullet point change is not working");
-            done();
-        }).catch(function(err){
-            console.log(err);
-            done.fail();
-       })
     });
 
     it("visible column related table with inline inbound fk should disappear when 'Hide All Related Records' was clicked.",function(){
