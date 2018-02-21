@@ -161,6 +161,8 @@
 
                 return $rootScope.reference.read(1, {action: logActions.recordRead});
             }, function error(exception) {
+                var redirectLink = UriUtils.createRedirectLinkFromPath(exception.errorData.redirectPath);
+                exception.errorData.redirectUrl = redirectLink.replace('record', 'recordset');
                 throw exception;
             }).then(function getPage(page) {
                 $log.info("Page: ", page);

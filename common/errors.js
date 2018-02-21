@@ -254,12 +254,12 @@
               if(exception.errorData && exception.errorData.redirectUrl != undefined  && exception.errorData.redirectUrl != ''){
                 redirectLink = exception.errorData.redirectUrl;
               }
-              else if(exception.errorData && exception.errorData.redirectPath != undefined && exception.errorData.redirectPath != ''){
-                redirectLink = UriUtils.createRedirectLinkFromPath(exception.errorData.redirectPath);
-                if(exception instanceof ERMrest.InvalidFilterOperatorError && (appName == 'record' || appName == 'recordedit')){
-                  redirectLink = redirectLink.replace(appName, 'recordset');                  
-                }
-              }
+              // else if(exception.errorData && exception.errorData.redirectPath != undefined && exception.errorData.redirectPath != ''){
+              //   redirectLink = UriUtils.createRedirectLinkFromPath(exception.errorData.redirectPath);
+              //   if(exception instanceof ERMrest.InvalidFilterOperatorError && (appName == 'record' || appName == 'recordedit')){
+              //     redirectLink = redirectLink.replace(appName, 'recordset');
+              //   }
+              // }
               else{
                 redirectLink = $window.location.origin;
               }

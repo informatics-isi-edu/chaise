@@ -323,19 +323,17 @@
 
                             $rootScope.$broadcast('data-modified');
                         }).catch(function (err) {
-                          var errorData = {};
-                          errorData.gotoTableDisplayname = "Home Page";
-                          errorData.redirectUrl = $window.location.origin;
-                          err.errorData = errorData;
+                          err.errorData.redirectUrl = UriUtils.createRedirectLinkFromPath(err.errorData.redirectPath);
                           throw err;
                         });
                     }
-                }, function error(response) {
-                    throw response;
+                  }, function error(response) {
+                     response.errorData.redirectUrl = UriUtils.createRedirectLinkFromPath(response.errorData.redirectPath);
+                     throw response;
                 }).catch(function genericCatch(exception) {
                     $log.warn(exception);
                     recordsetModel.hasLoaded = true;
-
+                    exception.errorData.redirectUrl = UriUtils.createRedirectLinkFromPath(exception.errorData.redirectPath);
                     throw exception;
                 });
 

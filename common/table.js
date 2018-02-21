@@ -198,6 +198,9 @@
                 scope.vm.hasLoaded = true;
                 setSearchStates(scope, isBackground);
                 if (!isBackground && scope.vm.foregroundSearch) scope.vm.foregroundSearch = false;
+                if(exception.errorData && exception.errorData.redirectPath && exception.errorData.redirectPath != ''){
+                  exception.errorData.redirectUrl = UriUtils.createRedirectLinkFromPath(exception.errorData.redirectPath);
+                }
                 throw exception;
             });
         }
@@ -222,6 +225,9 @@
                     } else {
                         vm.hasLoaded = true;
                         vm.initialized = true;
+                        if(err.errorData && err.errorData.redirectPath && err.errorData.redirectPath != ''){
+                          err.errorData.redirectUrl = UriUtils.createRedirectLinkFromPath(err.errorData.redirectPath);
+                        }
                         throw err;
                     }
                 });
