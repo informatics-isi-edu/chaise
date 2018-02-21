@@ -42,6 +42,7 @@
                     $scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
                 },
                 link: function(scope){
+
                     scope.showRelatedTables = function(i){
                         //show/hide empty Related Tables
                         if (scope.recordTableModel && scope.recordTableModel[i]) {
@@ -50,7 +51,7 @@
                             }
                             else{
                                 return false;
-                            }                      
+                            }
                         }else {
                             return true;
                         }

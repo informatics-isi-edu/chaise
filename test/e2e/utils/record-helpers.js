@@ -111,17 +111,13 @@ exports.testPresentation = function (tableParams) {
             var index = -1, columnUrl, aTag;
             columns.forEach(function (column) {
                 var columnEls;
-                if (column.title=='booking')
-                    {
+                if (column.title=='booking') {
                     expect(element(by.id('entity-4-markdown')).element(by.tagName('span')).getAttribute('innerHTML')).toContain(column.value);
-                    }
-                else if (column.match=='html'){
+                } else if (column.match=='html') {
                     expect(chaisePage.recordPage.getEntityRelatedTableScope(column.title).getAttribute('innerHTML')).toBe(column.value);
-                }
-                else if (column.title == 'User Rating'){
+                } else if (column.title == 'User Rating'){
                     expect(chaisePage.recordPage.getEntityRelatedTableScope('&lt;strong&gt;User&nbsp;Rating&lt;/strong&gt;',true).getAttribute('innerHTML')).toBe(column.value);
-                }
-                else {
+                } else {
                     columnEls = chaisePage.recordPage.getEntityRelatedTable(column.title);
 
                     if (column.presentation && column.presentation.type == "url") {
@@ -134,8 +130,7 @@ exports.testPresentation = function (tableParams) {
                             expect(aTag.getAttribute('href')).toEqual(columnUrl);
                             expect(aTag.getText()).toEqual(column.value);
                         });
-                    }
-                    else {
+                    } else {
                         expect(columnEls.getAttribute('innerText')).toBe(column.value);
                     }
             }

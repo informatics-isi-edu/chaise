@@ -1464,3 +1464,21 @@ input[type=number]::-moz-placeholder {
 .selected-rows {
     min-height: 45px;
 }
+
+record-display .markdown-container ul > li:only-child,
+record-display .markdown-container ol > li:only-child {
+    list-style: none;
+    padding: 0;
+    margin-left: 0;
+}
+
+record-display .markdown-container ol,
+record-display .markdown-container ul {
+    padding: 0 !important; /*existing rule is padding=2, which should be changed for the other changes*/
+}
+
+record-display .markdown-container ol > li,
+record-display .markdown-container ul > li {
+    margin-left: 1em;
+    padding-left: 0;
+ }
