@@ -333,7 +333,19 @@
                             // Keep a copy of the initial rows data so that we can see if user has made any changes later
                             recordEditModel.oldRows = angular.copy(recordEditModel.rows);
                         }, function error(response) {
-                            response.errorData.redirectUrl = UriUtils.createRedirectLinkFromPath(response.errorData.redirectPath);
+                            var errorData = {};
+                            errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
+                            errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
+                            response.errorData = errorData;
+
+                            if(response.errorData && response.errorData.redirectPath && response.errorData.redirectPath != ''){
+                               var redirectLink = UriUtils.createRedirectLinkFromPath(response.errorData.redirectPath);
+                               if(response.status == messageMap.facetRelatedErrorStatus.invalidFilter){
+                                response.errorData.redirectUrl = redirectLink.replace('recordedit', 'recordset');
+                              } else{
+                                response.errorData.redirectUrl = redirectLink;
+                              }
+                          }
                             throw response;
                         });
                     } else if (session) {
@@ -416,7 +428,14 @@
                     }
                 }
             }, function error(response) {
-                response.errorData.redirectUrl = UriUtils.createRedirectLinkFromPath(response.errorData.redirectPath);
+                if(response.errorData && response.errorData.redirectPath && response.errorData.redirectPath != ''){
+                  var redirectLink = UriUtils.createRedirectLinkFromPath(response.errorData.redirectPath);
+                  if(response.status == messageMap.facetRelatedErrorStatus.invalidFilter){
+                   response.errorData.redirectUrl = redirectLink.replace('recordedit', 'recordset');
+                 }else{
+                   response.errorData.redirectUrl = redirectLink;
+                 }
+              }
                 throw response;
             });
         });

@@ -323,17 +323,23 @@
 
                             $rootScope.$broadcast('data-modified');
                         }).catch(function (err) {
-                          err.errorData.redirectUrl = UriUtils.createRedirectLinkFromPath(err.errorData.redirectPath);
+                          if(err.errorData && err.errorData.redirectPath && err.errorData.redirectPath != ''){
+                            err.errorData.redirectUrl = UriUtils.createRedirectLinkFromPath(err.errorData.redirectPath);
+                        }
                           throw err;
                         });
                     }
                   }, function error(response) {
+                     if(response.errorData && response.errorData.redirectPath && response.errorData.redirectPath != ''){
                      response.errorData.redirectUrl = UriUtils.createRedirectLinkFromPath(response.errorData.redirectPath);
+                   }
                      throw response;
                 }).catch(function genericCatch(exception) {
                     $log.warn(exception);
                     recordsetModel.hasLoaded = true;
+                    if(exception.errorData && exception.errorData.redirectPath && exception.errorData.redirectPath != ''){
                     exception.errorData.redirectUrl = UriUtils.createRedirectLinkFromPath(exception.errorData.redirectPath);
+                  }
                     throw exception;
                 });
 
