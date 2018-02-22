@@ -355,7 +355,7 @@ describe('Error related test cases,', function() {
           browser.get(pageTestUrl);
       });
 
-      it("should be returned Invalid Page Criteria", function () {
+      it("should be returned Invalid Page Criteria", function (done) {
           var modalTitle = chaisePage.recordEditPage.getModalTitle(),
               modalActionBody = chaisePage.recordEditPage.getModalActionBody();
 
@@ -366,22 +366,24 @@ describe('Error related test cases,', function() {
               return modalActionBody.getText();
           }).then(function (errorText) {
               expect(errorText).toBe(testParams.facetErrorstext.invalidPageCriteriaBody, "Error action text did not match");
+              done();
           }).catch(function(error) {
               console.log(error);
-              expect('Something went wrong with this promise chain.').toBe('Please see error message.');
+              done.fail();
           });
       });
 
-      it('On click of OK button the page should reload the page without paging conditions', function(){
+      it('On click of OK button the page should reload the page without paging conditions', function(done){
           chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
               btn.click();
               return browser.driver.getCurrentUrl();
           }).then (function(currentUrl) {
              recordsetPage = pageTestUrl.slice(0, pageTestUrl.search('@'));
              expect(currentUrl).toBe(recordsetPage, "The redirection to Recordset page failed");
+             done()
           }).catch( function(err) {
               console.log(err);
-              expect('Something went wrong with this promise chain.').toBe('Please see error message.');
+              done.fail();
           });
       });
 
@@ -394,7 +396,7 @@ describe('Error related test cases,', function() {
           browser.get(pageTestUrl);
       });
 
-      it("should be returned Invalid Page Criteria", function () {
+      it("should be returned Invalid Page Criteria", function (done) {
           var modalTitle = chaisePage.recordEditPage.getModalTitle(),
               modalActionBody = chaisePage.recordEditPage.getModalActionBody();
 
@@ -405,22 +407,24 @@ describe('Error related test cases,', function() {
               return modalActionBody.getText();
           }).then(function (errorText) {
               expect(errorText).toBe(testParams.facetErrorstext.invalidPageCriteriaBody, "Error action text did not match");
+              done();
           }).catch(function(error) {
               console.log(error);
-              expect('Something went wrong with this promise chain.').toBe('Please see error message.');
+              done.fail();
           });
       });
 
-      it('On click of OK button the page should reload the page without paging conditions', function(){
+      it('On click of OK button the page should reload the page without paging conditions', function(done){
           chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
               btn.click();
               return browser.driver.getCurrentUrl();
           }).then (function(currentUrl) {
              recordsetPage = pageTestUrl.slice(0, pageTestUrl.search('@'));
              expect(currentUrl).toBe(recordsetPage, "The redirection to RecordEdit page failed");
+             done();
           }).catch( function(err) {
               console.log(err);
-              expect('Something went wrong with this promise chain.').toBe('Please see error message.');
+              done.fail();
           });
       });
 
@@ -435,7 +439,7 @@ describe('Error related test cases,', function() {
           modalActionBody = chaisePage.recordEditPage.getModalActionBody();
       });
 
-      it("should be returned Invalid Page Criteria", function () {
+      it("should be returned Invalid Page Criteria", function (done) {
           chaisePage.waitForElement(modalTitle).then(function(){
               return modalTitle.getText();
           }).then(function (text) {
@@ -443,13 +447,14 @@ describe('Error related test cases,', function() {
               return modalActionBody.getText();
           }).then(function (errorText) {
               expect(errorText).toBe(testParams.facetErrorstext.invalidPageCriteriaBody, "Error action text did not match");
+              done();
           }).catch(function(error) {
               console.log(error);
-              expect('Something went wrong with this promise chain.').toBe('Please see error message.');
+              done.fail();
           });
       });
 
-      it('On click of OK button the page should reload the page without paging condition but with invalid filter conditions', function(){
+      it('On click of OK button the page should reload the page without paging condition but with invalid filter conditions', function(done){
           chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
               btn.click();
               return chaisePage.waitForElement(modalTitle);
@@ -460,22 +465,24 @@ describe('Error related test cases,', function() {
                return modalActionBody.getText();
            }).then(function (errorText) {
                expect(errorText).toBe(testParams.facetErrorstext.invalidFilterOperatorErrorBody, "Error action text did not match");
+               done();
           }).catch( function(err) {
               console.log(err);
-              expect('Something went wrong with this promise chain.').toBe('Please see error message.');
+              done.fail();
           });
       });
 
-      it('On click of OK button the page should redirect to RecordSet', function(){
+      it('On click of OK button the page should redirect to RecordSet', function(done){
           chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
               btn.click();
               return browser.driver.getCurrentUrl();
           }).then (function(currentUrl) {
              recordsetWithoutFacetUrl = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/";
              expect(currentUrl).toBe(recordsetWithoutFacetUrl, "The redirection to Recordset page failed");
+             done();
           }).catch( function(err) {
               console.log(err);
-              expect('Something went wrong with this promise chain.').toBe('Please see error message.');
+              done.fail();
           });
       });
 
@@ -487,7 +494,7 @@ describe('Error related test cases,', function() {
           browser.get(facetTestUrl);
       });
 
-      it("should be returned Invalid Page Criteria", function () {
+      it("should be returned Invalid Page Criteria", function (done) {
           var modalTitle = chaisePage.recordEditPage.getModalTitle(),
               modalActionBody = chaisePage.recordEditPage.getModalActionBody();
 
@@ -498,22 +505,24 @@ describe('Error related test cases,', function() {
               return modalActionBody.getText();
           }).then(function (errorText) {
               expect(errorText).toBe(testParams.facetErrorstext.invalidFacetFilterBody, "Error action text did not match");
+              done();
           }).catch(function(error) {
               console.log(error);
-              expect('Something went wrong with this promise chain.').toBe('Please see error message.');
+              done.fail();
           });
       });
 
-      it('On click of OK button the page should reload the page without facet filter conditions', function(){
+      it('On click of OK button the page should reload the page without facet filter conditions', function(done){
           chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
               btn.click();
               return browser.driver.getCurrentUrl();
           }).then (function(currentUrl) {
              recordsetWithoutFacetUrl = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name +  "/@sort(release_date::desc::,id)"
              expect(currentUrl).toBe(recordsetWithoutFacetUrl, "The redirection to Recordset page failed");
+             done();
           }).catch( function(err) {
               console.log(err);
-              expect('Something went wrong with this promise chain.').toBe('Please see error message.');
+              done.fail();
           });
       });
     });
