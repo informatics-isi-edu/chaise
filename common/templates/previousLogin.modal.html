@@ -1,0 +1,18 @@
+<div class="modal-header">
+    <button class="btn btn-default pull-right modal-close" type="button" ng-click="ctrl.cancel()">X</button>
+    <h2 class="modal-title text-center">{{::ctrl.params.title}}</h2>
+</div>
+<div class="modal-body">
+    <div>
+        <div class="row">
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                <center>
+                    <h3>{{::ctrl.params.message1}}</h3>
+                    <a ng-click="::ctrl.openWindow();">Login</a>
+                    <h3>{{::ctrl.params.message2}}</h3>
+                    <a ng-click="::ctrl.closeModal();">Close</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

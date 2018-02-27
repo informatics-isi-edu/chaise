@@ -20,7 +20,7 @@
                 _changeCbs[k]();
             }
         };
-        
+
         /**
          * Return deployment specific path name
          * @return {String} string representation of the path name "~username/chaise", "chaise", "path/to/deployment/data"
@@ -37,7 +37,20 @@
             splits.splice(splits.length-1, 1);
             return splits.join('/');
         };
-        
+
+        var setStorage = function () {
+            var storageObj = {
+                // expired: false
+            }
+
+            $window.localStorage.session = JSON.stringify(storageObj);
+        };
+
+        var getStorage = function () {
+            var value = $window.localStorage.session;
+            return value ? JSON.parse(value) : null;
+        };
+
         var loginWindowCb = function (params, referrerId, cb, type){
             if(type.indexOf('modal')!== -1){
                 if (_session) {
@@ -60,18 +73,18 @@
                     backdrop: 'static',
                     keyboard: false
                 });
-                
+
                 var onModalClose = function() {
                     $interval.cancel(intervalId);
                     $cookies.remove("chaise-" + referrerId, { path: "/" });
                     closed = true;
                 };
-                
+
                 // To avoid problems when user explicitly close the modal
                 modalInstance.result.then(onModalClose, onModalClose);
             }
-            
-            
+
+
             /* if browser is IE then add explicit handler to watch for changes in localstorage for a particular
              * variable
              */
@@ -95,10 +108,11 @@
                         return;
                     }
                 }
-            } 
+            }
             else {
                 window.addEventListener('message', function(args) {
                     if (args && args.data && (typeof args.data == 'string')) {
+                        setStorage();
                         var obj = UriUtils.queryStringToJSON(args.data);
                         if (obj.referrerid == referrerId && (typeof cb== 'function')) {
                             if(type.indexOf('modal')!== -1){
@@ -114,11 +128,11 @@
                 });
             }
         };
-        
-        
+
+
         var logInHelper = function(logInTypeCb, win, cb, type){
-            var referrerId = (new Date().getTime());    
-            
+            var referrerId = (new Date().getTime());
+
             var url = serviceURL + '/authn/preauth?referrer='+UriUtils.fixedEncodeURIComponent($window.location.origin+"/"+getDeploymentPathName() + "/login?referrerid=" + referrerId);
             var config = {
                 headers: {
@@ -190,6 +204,27 @@
                 return _session;
             },
 
+            promptUserPreviousSession: function() {
+                if (getStorage()) {
+                    var modalInstance;
+
+                    modalInstance = $uibModal.open({
+                        windowClass: "modal-previous-login",
+                        templateUrl: "../common/templates/previousLogin.modal.html",
+                        controller: 'PreviousLoginController',
+                        controllerAs: 'ctrl',
+                        openedClass: 'previous-login',
+                        backdrop: 'static'
+                    });
+
+                    modalInstance.result.then(function () {
+
+                    }, function () {
+                        // do nothing
+                    });
+                }
+            },
+
             subscribeOnChange: function(fn) {
                 // To avoid same ids for an instance we add counter
                 var id = new Date().getTime() + (++_counter);
@@ -203,13 +238,22 @@
             unsubscribeOnChange: function(id) {
                 delete _changeCbs[id];
             },
-            
-            loginInAPopUp: function(win,reloadCb) {
-                logInHelper(loginWindowCb,win,reloadCb,'popUp');
+
+            loginInAPopUp: function() {
+                var reloadCb = function(){
+                    window.location.reload();
+                };
+
+                var x = window.innerWidth/2 - 800/2;
+                var y = window.innerHeight/2 - 600/2;
+
+                var win = window.open("", '_blank','width=800,height=600,left=' + x + ',top=' + y);
+
+                logInHelper(loginWindowCb, win, reloadCb, 'popUp');
             },
 
             loginInAModal: function(notifyErmrestCB) {
-                logInHelper(loginWindowCb,"",notifyErmrestCB,'modal');
+                logInHelper(loginWindowCb, "", notifyErmrestCB, 'modal');
             },
 
             logout: function() {

@@ -40,6 +40,11 @@
             title: "Your session has expired. Please login to continue.",
             message: "To open the login window press"
         },
+        "previousSession": {
+            title: "A previous session was detected, do you want to continue anonymously or log in?",
+            message1: "To login press",
+            message2: "or to continue anonymously press"
+        },
         "noSession": {
             title: "You need to be logged in to continue.",
             message: "To open the login window press"

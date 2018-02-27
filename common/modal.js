@@ -82,6 +82,28 @@
         }
 
     }])
+    .controller('PreviousLoginController', ['$sce', '$uibModalInstance', 'messageMap', 'Session', function LoginDialogController($sce, $uibModalInstance, messageMap, Session) {
+        var vm = this;
+        // params.login_url = $sce.trustAsResourceUrl(params.login_url);
+        var params = {
+            title: messageMap.previousSession.title,
+            message1: messageMap.previousSession.message1,
+            message2: messageMap.previousSession.message2
+        }
+
+        vm.params = params;
+
+        vm.openWindow = function() {
+            Session.loginInAPopUp();
+        };
+        //
+        // vm.params.host = $sce.trustAsResourceUrl(window.location.host);
+        //
+        // function cancel() {
+        //     $uibModalInstance.dismiss('cancel');
+        // }
+
+    }])
 
     /**
      * Controller used to show the modal popup with the recordset directive for searching through entitiy sets
