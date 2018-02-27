@@ -263,7 +263,6 @@ JS_SOURCE=$(JS)/respond.js \
 	$(COMMON)/authen.js \
 	$(COMMON)/delete-link.js \
 	$(COMMON)/errors.js \
-	$(COMMON)/errorDialog.controller.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/navbar.js \
@@ -341,7 +340,6 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/authen.js \
 	$(COMMON)/delete-link.js \
 	$(COMMON)/errors.js \
-	$(COMMON)/errorDialog.controller.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/navbar.js \
@@ -438,7 +436,6 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/upload.js \
 	$(COMMON)/validators.js \
 	$(COMMON)/navbar.js \
-	$(COMMON)/errorDialog.controller.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/delete-link.js \
 	$(COMMON)/bindHtmlUnsafe.js \
@@ -488,7 +485,6 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/bindHtmlUnsafe.js \
 	$(COMMON)/ellipses.js \
 	$(COMMON)/errors.js \
-	$(COMMON)/errorDialog.controller.js \
 	$(COMMON)/faceting.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/footer.js \

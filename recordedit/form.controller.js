@@ -3,8 +3,8 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'dataFormats', 'DataUtils', 'ErrorService', 'logActions', 'messageMap', 'modalBox', 'recordCreate', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$uibModal', '$window',
-        function FormController(AlertsService, dataFormats, DataUtils, ErrorService, logActions, messageMap, modalBox, recordCreate, recordEditModel, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $uibModal, $window) {
+    .controller('FormController', ['AlertsService', 'dataFormats', 'DataUtils', 'ErrorService', 'logActions', 'messageMap', 'modalBox', 'modalUtils', 'recordCreate', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
+        function FormController(AlertsService, dataFormats, DataUtils, ErrorService, logActions, messageMap, modalBox, modalUtils, recordCreate, recordEditModel, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
         var context = $rootScope.context;
 
@@ -267,24 +267,25 @@
         function deleteRecord() {
             var errorData = {};
             if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
-                $uibModal.open({
+                modalUtils.showModal({
                     templateUrl: "../common/templates/delete-link/confirm_delete.modal.html",
                     controller: "ConfirmDeleteController",
                     controllerAs: "ctrl",
                     size: "sm"
-                }).result.then(function success() {
+                }, function success() {
                     $rootScope.showSpinner = true;
                     // user accepted prompt to delete
-                    return $rootScope.reference.delete({action: logActions.recordEditDelete});
-                }).then(onDelete, function deleteFailure(response) {
+                    $rootScope.reference.delete({action: logActions.recordEditDelete}).then(onDelete, function deleteFailure(response) {
+                        $rootScope.showSpinner = false;
+                        if (typeof response !== "string") {
+                          errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
+                          errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
+                          response.errorData = errorData;
+                          throw response;
+                        }
+                    });
+                }, function onError (exception) {
                     $rootScope.showSpinner = false;
-                    if (typeof response !== "string") {
-                      errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
-                      errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
-                      response.errorData = errorData;
-                      throw response;
-                    }
-                }).catch(function (exception) {
                     AlertsService.addAlert(exception.message, 'error');
                 });
             } else {
@@ -296,6 +297,7 @@
                     response.errorData = errorData;
                     throw response;
                 }).catch(function (exception) {
+                    $rootScope.showSpinner = false;
                     AlertsService.addAlert(exception.message, 'error');
                 });
             }
@@ -328,7 +330,7 @@
             params.selectedRows = [];
             params.selectMode = modalBox.singleSelectMode;
 
-            var modalInstance = $uibModal.open({
+            modalUtils.showModal({
                 animation: false,
                 controller: "SearchPopupController",
                 controllerAs: "ctrl",
@@ -337,9 +339,7 @@
                 },
                 size: "lg",
                 templateUrl: "../common/templates/searchPopup.modal.html"
-            });
-
-            modalInstance.result.then(function dataSelected(tuple) {
+            }, function dataSelected(tuple) {
                 // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
                 // set data in view model (model.rows) and submission model (model.submissionRows)
 

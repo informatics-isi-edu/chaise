@@ -22,18 +22,9 @@
 (function() {
     'use strict';
     angular.module('chaise.delete', [])
-    .directive('deleteLink', ['$uibModal', function($uibModal) {
+    .directive('deleteLink', ['modalUtils', function(modalUtils) {
         var TEMPLATES_PATH = '../common/templates/delete-link/';
         var CONFIRM_DELETE =  (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) ? true : false;
-
-        function createModal() {
-            return $uibModal.open({
-                templateUrl: TEMPLATES_PATH + 'confirm_delete.modal.html',
-                controller: 'ConfirmDeleteController',
-                controllerAs: 'ctrl',
-                size: 'sm'
-            });
-        }
 
         return {
             restrict: 'EA',
@@ -50,8 +41,13 @@
                         scope.$root.showSpinner = true;
                         return scope.callback();
                     }
-                    var modalInstance = createModal();
-                    modalInstance.result.then(function success() {
+
+                    modalUtils.showModal({
+                        templateUrl: TEMPLATES_PATH + 'confirm_delete.modal.html',
+                        controller: 'ConfirmDeleteController',
+                        controllerAs: 'ctrl',
+                        size: 'sm'
+                    }, function onSuccess() {
                         scope.$root.showSpinner = true;
                         return scope.callback();
                     });
