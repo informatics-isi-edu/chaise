@@ -1,7 +1,7 @@
 (function() {
     'use strict';
-    angular.module('chaise.recordcreate', ['chaise.errors','chaise.utils']).factory("recordCreate", ['$cookies', '$log', '$window', '$uibModal', 'AlertsService', 'DataUtils', 'UriUtils', 'modalBox', '$q', 'logActions',
-     function($cookies, $log, $window, $uibModal, AlertsService, DataUtils, UriUtils, modalBox, $q, logActions) {
+    angular.module('chaise.recordcreate', ['chaise.errors','chaise.utils']).factory("recordCreate", ['$cookies', '$log', '$window', 'modalUtils', 'AlertsService', 'DataUtils', 'UriUtils', 'modalBox', '$q', 'logActions',
+     function($cookies, $log, $window, modalUtils, AlertsService, DataUtils, UriUtils, modalBox, $q, logActions) {
 
         var viewModel = {};
         var GV_recordEditModel = {},
@@ -99,7 +99,7 @@
 
             // If url is valid
             if (areFilesValid(submissionRowsCopy, rsReference)) {
-                $uibModal.open({
+                modalUtils.showModal({
                     templateUrl: "../common/templates/uploadProgress.modal.html",
                     controller: "UploadModalDialogController",
                     controllerAs: "ctrl",
@@ -112,7 +112,7 @@
                             rows: submissionRowsCopy
                         }
                     }
-                }).result.then(onSuccess, function(exception) {
+                }, onSuccess, function(exception) {
                     viewModel.readyToSubmit = false;
                     viewModel.submissionButtonDisabled = false;
 
@@ -332,7 +332,7 @@
                 referrer: rsReference.defaultLogInfo
             };
 
-            var modalInstance = $uibModal.open({
+            modalUtils.showModal({
                 animation: false,
                 controller: "SearchPopupController",
                 controllerAs: "ctrl",
@@ -341,9 +341,7 @@
                 },
                 size: "lg",
                 templateUrl: "../common/templates/searchPopup.modal.html"
-            });
-
-            modalInstance.result.then(function dataSelected(tuples) {
+            }, function dataSelected(tuples) {
                 // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
                 // set data in view model (model.rows) and submission model (model.submissionRows)
                 // we assume that the data for the main table has been populated before

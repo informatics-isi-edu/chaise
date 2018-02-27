@@ -143,8 +143,8 @@
     }])
 
     // Factory for each error type
-    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$uibModal', '$window', 'errorMessages', 'Errors', 'UriUtils',
-          function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $uibModal, $window, errorMessages, Errors, UriUtils) {
+    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$window', 'errorMessages', 'Errors', 'UriUtils', 'modalUtils',
+          function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $window, errorMessages, Errors, UriUtils, modalUtils) {
 
         function errorPopup(message, errorCode, pageName, redirectLink, subMessage, stackTrace) {
             var providedLink = true;
@@ -193,14 +193,7 @@
                 params.canClose = true;
             }
 
-            var modalInstance = $uibModal.open(modalProperties);
-
-            var reloadCb = function(){
-                window.location.reload();
-            };
-
-            modalInstance.result.then(function (actionBtnIdentifier) {
-
+            modalUtils.showModal(modalProperties, function (actionBtnIdentifier) {
                 if (errorCode == errorNames.unauthorized && !providedLink) {
                     var x = window.innerWidth/2 - 800/2;
                     var y = window.innerHeight/2 - 600/2;
@@ -216,6 +209,10 @@
 
                 }
             });
+
+            var reloadCb = function(){
+                window.location.reload();
+            };
         }
 
         var exceptionFlag = false;

@@ -3,6 +3,26 @@
 
     angular.module('chaise.modal', ['chaise.utils'])
 
+    //TODO
+    .factory('modalUtils', ["$uibModal", function ($uibModal) {
+        function showModal(params, successCB, rejectCB) {
+            var modalInstance = $uibModal.open(params);
+            modalInstance.result.then(successCB).catch(function (response) {
+                if (rejectCB) {
+                    rejectCB(response);
+                } else if (typeof response !== "string") {
+                    throw response;
+                }
+            });
+
+            return modalInstance;
+        }
+
+        return {
+            showModal: showModal
+        };
+    }])
+
     .controller('ConfirmDeleteController', ['$uibModalInstance', function ConfirmDeleteController($uibModalInstance) {
         var vm = this;
         vm.ok = ok;
@@ -193,7 +213,7 @@
         vm.identities = [];
         vm.client= {};
         vm.cancel = function() {
-            $uibModalInstance.dismiss();
+            $uibModalInstance.dismiss("cancel");
         };
         $rootScope.session = Session.getSessionValue();
         vm.client =$rootScope.session.client;

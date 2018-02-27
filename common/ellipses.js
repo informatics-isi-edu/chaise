@@ -9,8 +9,8 @@
         };
     }])
 
-    .directive('ellipses', ['AlertsService', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$uibModal', '$window', 'defaultDisplayname',
-        function(AlertsService, ErrorService, logActions, MathUtils, messageMap, modalBox, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $uibModal, $window, defaultDisplayname) {
+    .directive('ellipses', ['AlertsService', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$window', 'defaultDisplayname',
+        function(AlertsService, ErrorService, logActions, MathUtils, messageMap, modalBox, modalUtils, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $window, defaultDisplayname) {
 
         function deleteReference(scope, reference) {
             var logObject = {action: logActions.recordsetDelete};
@@ -23,28 +23,27 @@
             }
 
             if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
-                $uibModal.open({
+                var onError = function (response) {
+                    scope.$root.showSpinner = false;
+                    // if response is string, the modal has been dismissed
+                    if (typeof response !== "string") {
+                        throw response;
+                    }
+                }
+                modalUtils.showModal({
                     templateUrl: "../common/templates/delete-link/confirm_delete.modal.html",
                     controller: "ConfirmDeleteController",
                     controllerAs: "ctrl",
                     size: "sm"
-                }).result.then(function success() {
+                }, function onSuccess(res) {
                     scope.$root.showSpinner = true;
                     // user accepted prompt to delete
-                    return reference.delete(logObject);
-                }).then(function deleteSuccess() {
-                    scope.$root.showSpinner = false;
-                    // tell parent controller data updated
-                    scope.$emit('record-deleted');
-
-                }, function deleteFailure(response) {
-                    scope.$root.showSpinner = false;
-                    if (typeof response !== "string") {
-                        throw response;
-                    }
-                }).catch(function (error) {
-                    throw error;
-                });
+                    reference.delete(logObject).then(function deleteSuccess() {
+                        scope.$root.showSpinner = false;
+                        // tell parent controller data updated
+                        scope.$emit('record-deleted');
+                    }).catch(onError);
+                }, onError);
             } else {
                 scope.$root.showSpinner = true;
                 reference.delete(logObject).then(function deleteSuccess() {
