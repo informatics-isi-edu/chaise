@@ -176,242 +176,6 @@
             };
         }])
 
-        // NOTE This directive has not been used
-        .directive('stringPicker', ['$window', 'DataUtils', 'tableConstants', function ($window, DataUtils, tableConstants) {
-
-            /**
-             * Should be called each time facetColumn has been modified.
-             * Will populate the following:
-             *  - scope.selectModel.reference
-             *  - scope.selectModel.columns
-             *  - scope.selectModel.selectedRows
-             *  - scope.selectFetched
-             *  - scope.searchModel.reference
-             *  - scope.searchModel.columns
-             *  - scope.searchModel.selectedRows
-             *  - scope.searchFetched
-             */
-            function updateFacetColumn(scope) {
-
-                // update the selectModel reference
-                var ref = scope.facetColumn.column.groupAggregate.entityCounts;
-                if (scope.selectModel.search) {
-                    ref = ref.search(scope.selectModel.search);
-                }
-                scope.selectModel.reference = ref;
-                scope.selectModel.columns = ref.columns;
-                scope.selectFetched = false;
-
-                // update the selectred rows
-                scope.selectModel.selectedRows = scope.facetColumn.choiceFilters.map(function (f) {
-                    return {
-                        displayname: f.displayname,
-                        uniqueId: f.term
-                    };
-                });
-
-                // update the searchModel reference
-                ref = scope.facetColumn.column.groupAggregate.entityValues;
-                if (scope.searchModel.search) {
-                    ref = ref.search(scope.searchModel.search);
-                }
-                scope.searchModel.reference = ref;
-                scope.searchModel.columns = ref.columns;
-                scope.searchFetched = false;
-            }
-
-            /**
-             * Fetch the records for the active tab, if already not fetched
-             */
-            function fetchRecords(scope) {
-                var isSelect = scope.activeTab === scope.SELECT_TAB;
-
-                // make sure data has not been fetched before.
-                if ( (isSelect && scope.selectFetched) || (!isSelect && scope.searchFetched)) {
-                    return;
-                }
-
-                var model = isSelect ? scope.selectModel : scope.searchModel;
-
-                model.reference.read(tableConstants.PAGE_SIZE).then(function getPseudoData(page) {
-
-                    model.hasLoaded = true;
-                    model.initialized = true;
-                    model.page = page;
-                    model.rowValues = DataUtils.getRowValuesFromPage(page);
-
-                    if (isSelect) {
-                        scope.selectFetched = true;
-                    } else {
-                        scope.searchFetched = true;
-                    }
-
-                }, function(exception) {
-                    throw exception;
-                });
-            }
-
-            return {
-                restrict: 'AE',
-                templateUrl: '../common/templates/faceting/string-picker.html',
-                scope: {
-                    vm: "=",
-                    facetColumn: "=",
-                    isOpen: "="
-                },
-                link: function (scope, element, attr) {
-                    scope.SELECT_TAB = 'select';
-                    scope.SEARCH_TAB = 'search';
-
-                    // used for the scalar multi-select
-                    scope.selectModel = {
-                        selectedRows: [],
-                        enableAutoSearch: true,
-                        enableSort: true,
-                        sortby: "c1",
-                        sortOrder: "asc",
-                        pageLimit: tableConstants.PAGE_SIZE,
-                        config: {
-                            viewable: false, editable: false, deletable: false, selectMode: "multi-select",
-                            hideTotalCount: true, hideSelectedRows: true, hidePageSettings: true
-                        }
-                    };
-                    // used for the scalar search
-                    scope.searchModel = {
-                        selectedRows: [], //TODO this should be optional
-                        enableAutoSearch: true,
-                        enableSort: true,
-                        sortby: "c1",
-                        sortOrder: "asc",
-                        pageLimit: tableConstants.PAGE_SIZE,
-                        config: {
-                            viewable: false, editable: false, deletable: false, selectMode: "no-select",
-                            hideTotalCount: true, hideSelectedRows: true, hidePageSettings: true
-                        }
-                    }
-
-                    // populate the search and select model reference and selected rows
-                    updateFacetColumn(scope);
-
-                    scope.changeFilters = function (tuples, isSelected) {
-                        var ref;
-                        if (isSelected) {
-                            ref = scope.facetColumn.addChoiceFilters(tuples.map(function (t) {
-                                return {value: t.uniqueId, displayvalue: t.uniqueId, isHTML: false};
-                            }));
-                        } else {
-                            ref = scope.facetColumn.removeChoiceFilters(tuples.map(function (t) {
-                                return t.uniqueId;
-                            }));
-                        }
-
-                        scope.vm.reference = ref;
-                        scope.$emit("facet-modified");
-                    };
-
-                    scope.addSearchFilter = function (term) {
-                        var sf = scope.facetColumn.searchFilters.filter(function (f) {
-                            return f.term === term;
-                        });
-                        if (sf.length !== 0) {
-                            return; // already exists
-                        }
-                        scope.vm.reference = scope.facetColumn.addSearchFilter(term);
-                        scope.$emit("facet-modified");
-                    }
-
-                    scope.$on('data-modified', function ($event) {
-                        //TODO fix this
-                        scope.facetColumn = scope.vm.facetColumns[scope.facetColumn.index];
-
-                        updateFacetColumn(scope);
-                        if (scope.isOpen) {
-                            fetchRecords(scope);
-                        }
-                    });
-
-                    scope.$watch("isOpen", function (newValue, oldValue) {
-                        if(angular.equals(newValue, oldValue) || !newValue){
-                            return;
-                        }
-                        fetchRecords(scope);
-                    });
-
-                    scope.onTabSelected = function (tab) {
-                        scope.activeTab = tab;
-                        if (scope.isOpen) {
-                            fetchRecords(scope);
-                        }
-                    }
-                }
-            };
-        }])
-
-        // NOTE This directive has not been used
-        .directive('entityPicker', ['$uibModal', function ($uibModal) {
-            /**
-             * Should be called each time facetColumn has been modified.
-             * Will populate the following:
-             *  - scope.entityModel.selectedRows
-             */
-            function updateFacetColumn(scope) {
-                // update the selected rows
-                scope.entityModel.selectedRows = scope.facetColumn.choiceFilters.map(function (f) {
-                    return {
-                        displayname: f.displayname,
-                        uniqueId: f.term
-                    };
-                });
-            }
-
-            return {
-                restrict: 'AE',
-                templateUrl: '../common/templates/faceting/entity-picker.html',
-                scope: {
-                    vm: "=",
-                    facetColumn: "=",
-                    isOpen: "="
-                },
-                link: function (scope, element, attr) {
-                    scope.entityModel = {
-                        selectedRows: []
-                    }
-
-                    updateFacetColumn(scope);
-
-                    scope.openEntityPicker = function () {
-                        var params = {};
-
-                        params.reference = scope.facetColumn.sourceReference;
-                        params.reference.session = scope.$root.session;
-                        params.context = "compact/select";
-                        params.selectMode = "multi-select";
-                        params.selectedRows = scope.entityModel.selectedRows;
-
-                        var modalInstance = $uibModal.open({
-                            animation: false,
-                            controller: "SearchPopupController",
-                            controllerAs: "ctrl",
-                            resolve: {
-                                params: params
-                            },
-                            size: "lg",
-                            templateUrl: "../common/templates/searchPopup.modal.html"
-                        });
-
-                        modalInstance.result.then(function dataSelected(tuples) {
-                            var ref = scope.facetColumn.replaceAllChoiceFilters(tuples.map(function (t) {
-                                return {value: t.uniqueId, displayvalue: t.displayname.value, isHTML: t.displayname.isHTML};
-                            }));
-
-                            scope.vm.reference = ref;
-                            scope.$emit("facet-modified");
-                        });
-                    };
-                }
-            };
-        }])
-
         .directive('rangePicker', ['$timeout', '$q', '$log', 'dataFormats', 'logActions', function ($timeout, $q, $log, dataFormats, logActions) {
             return {
                 restrict: 'AE',
@@ -958,7 +722,7 @@
             };
         }])
 
-        .directive('choicePicker', ["defaultDisplayname", 'logActions', "$log", '$q', 'tableConstants', '$timeout', '$uibModal', function (defaultDisplayname, logActions, $log, $q, tableConstants, $timeout, $uibModal) {
+        .directive('choicePicker', ["defaultDisplayname", 'logActions', "$log", 'modalUtils', '$q', 'tableConstants', '$timeout', function (defaultDisplayname, logActions, $log, modalUtils, $q, tableConstants, $timeout) {
 
             // the not_null filter with appropriate attributes
             var notNullFilter = {
@@ -1214,7 +978,7 @@
                             params.showNull = true;
                         }
 
-                        var modalInstance = $uibModal.open({
+                        modalUtils.showModal({
                             animation: false,
                             controller: "SearchPopupController",
                             windowClass: "search-popup",
@@ -1224,9 +988,7 @@
                             },
                             size: "xl",
                             templateUrl: "../common/templates/searchPopup.modal.html"
-                        });
-
-                        modalInstance.result.then(function dataSelected(res) {
+                        }, function dataSelected(res) {
                             // TODO needs refactoring.
                             var ref;
 
