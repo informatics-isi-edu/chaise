@@ -197,7 +197,7 @@
                             getForeignKeyData(newRow, cookie.columnName, cookie.constraintName, ref, logObject);
                         }).catch(function (err) {
                             $rootScope.showColumnSpinner[newRow][cookie.columnName] = false;
-                            console.log(err);
+                            $log.warn(err);
                         });
 
                         // Update submission model
@@ -418,7 +418,9 @@
                         throw new ERMrest.UnauthorizedError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
                     }
                 }
-            }, function error(response) {
+            }).catch(function genericCatch(response) {
+                // should catch errors thrown from within the promise structure
+                // nothing specific we need to do in here for now
                 throw response;
             });
         });
@@ -450,7 +452,7 @@
                 $rootScope.showColumnSpinner[rowIndex][colName] = false;
             }).catch(function (err) {
                 $rootScope.showColumnSpinner[rowIndex][colName] = false;
-                console.log(err);
+                $log.warn(err);
             });
         }
 

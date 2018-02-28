@@ -53,6 +53,8 @@
 
                 }, function deleteFailure(response) {
                     scope.$root.showSpinner = false;
+                    // NOTE: can either use throw or use $q.reject
+                    // $q.reject doesn't make sense because we aren't returning to another surrounding promise
                     throw response;
                 }).catch(function (error) {
                     throw error;

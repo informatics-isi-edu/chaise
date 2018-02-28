@@ -301,14 +301,13 @@
  */
 var logError = function (error) {
     if (!ERMrest) return;
-    try {
-        var ermrestUri = chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : window.location.origin + '/ermrest';
-        ERMrest.logError(error, ermrestUri).then(function () {
-            console.log("logged the error");
-        }).catch(function (err) {});
-    } catch (exp) {
+
+    var ermrestUri = chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : window.location.origin + '/ermrest';
+    ERMrest.logError(error, ermrestUri).then(function () {
+        console.log("logged the error");
+    }).catch(function (err) {
         console.log("couldn't log the error.");
-    }
+    });
 };
 
 window.onerror = function() {

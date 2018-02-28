@@ -370,6 +370,8 @@
                             }
                         }
 
+                        // TODO: not exactly sure why we are using defer with resolve() here
+                        // Looks like we could just return nothing
                         defer.resolve();
                         return defer.promise;
                     };
@@ -519,6 +521,7 @@
                                 facetLog.action = logActions.recordsetFacetRead,
                                 scope.facetColumn.sourceReference.getAggregates(aggregateList, facetLog).then(function(response) {
                                     if (scope.facetColumn.sourceReference.uri !== uri) {
+                                        // return false to defer.resolve() in .then() callback
                                         return false;
                                     }
                                     // initiailize the min/max values
@@ -528,6 +531,7 @@
                                     //    - bar_plot in annotation is 'false'
                                     //    - histogram not supported for column type
                                     if (!scope.showHistogram()) {
+                                        // return true to defer.resolve() in .then() callback
                                         return true;
                                     }
                                     scope.relayout = false;
@@ -584,6 +588,8 @@
                             scope.parentCtrl.updateFacetColumn(scope.index);
                         } catch (err) {
                             $log.warn(err);
+                            // TODO: I think we want to throw the error here especially because a 500 error could occur
+                            // not sure if this try catch affects the way updateFacetColumn() behaves
                         }
                     };
 
@@ -636,6 +642,7 @@
                                 $log.warn("No more data to show")
                             } else {
                                 $log.debug("Error zooming out plot. Histogram stack data: ", scope.histogramDataStack);
+                                // TODO: I think we want to throw the error here especially because a 500 error could occur
                             }
                         }
                     };
@@ -777,7 +784,7 @@
 
                     defer.resolve();
                 }).catch(function (error) {
-                    throw error;
+                    defer.reject(error);
                 });
                 return defer.promise;
             }
@@ -825,7 +832,8 @@
                 var appliedLen = scope.facetModel.appliedFilters.length;
                 if (appliedLen >= tableConstants.PAGE_SIZE) {
                     scope.checkboxRows = scope.facetModel.appliedFilters.map(appliedFilterToRow);
-                    defer.resolve(true);
+                    // TODO: do we want to continue executing this function or return out?
+                    return defer.resolve(true);
                 }
 
                 // read new data if needed
@@ -835,7 +843,7 @@
                     scope.reference.read(appliedLen + tableConstants.PAGE_SIZE, facetLog).then(function (page) {
                         // if this is not the result of latest facet change
                         if (scope.reference.uri !== uri) {
-                            defer.resolve(false);
+                            return defer.resolve(false);
                         }
 
                         scope.checkboxRows = scope.facetModel.appliedFilters.map(appliedFilterToRow);
