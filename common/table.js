@@ -208,24 +208,23 @@
             (function (uri) {
                 vm.reference.read(vm.pageLimit, vm.logObject).then(function (page) {
                     if (vm.reference.uri !== uri) {
-                        defer.resolve(false);
-                    } else {
-                        vm.page = page;
-                        vm.rowValues = DataUtils.getRowValuesFromPage(page);
-                        vm.hasLoaded = true;
-                        vm.initialized = true;
-                        defer.resolve(true);
+                        return defer.resolve(false);
                     }
+
+                    vm.page = page;
+                    vm.rowValues = DataUtils.getRowValuesFromPage(page);
+                    vm.hasLoaded = true;
+                    vm.initialized = true;
+                    return defer.resolve(true);
                 }).catch(function(err) {
                     if (vm.reference.uri !== uri) {
-                        defer.resolve(false);
-                    } else {
-                        vm.hasLoaded = true;
-                        vm.initialized = true;
-                        throw err;
+                        return defer.resolve(false);
                     }
+
+                    vm.hasLoaded = true;
+                    vm.initialized = true;
+                    return defer.reject(err);
                 });
-                //TODO what about error
             }) (vm.reference.uri);
             return defer.promise;
         }
@@ -238,18 +237,18 @@
                     {action: logActions.recordsetCount}
                 ).then(function getAggregateCount(response) {
                     if (vm.reference.uri !== uri) {
-                        defer.resolve(false);
-                    } else {
-                        vm.totalRowsCnt = response[0];
-                        defer.resolve(true);
+                        return defer.resolve(false);
                     }
+
+                    vm.totalRowsCnt = response[0];
+                    return defer.resolve(true);
                 }).catch(function (err) {
                     if (vm.reference.uri !== uri) {
-                        defer.resolve(false);
-                    } else {
-                        // fail silently
-                        vm.totalRowsCnt = null;
+                        return defer.resolve(false);
                     }
+
+                    // fail silently
+                    vm.totalRowsCnt = null;
                 });
             })(vm.reference.uri);
             return defer.promise;

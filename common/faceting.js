@@ -370,6 +370,7 @@
                             }
                         }
 
+                        // return a promise that can be acted on
                         defer.resolve();
                         return defer.promise;
                     };
@@ -519,6 +520,7 @@
                                 facetLog.action = logActions.recordsetFacetRead,
                                 scope.facetColumn.sourceReference.getAggregates(aggregateList, facetLog).then(function(response) {
                                     if (scope.facetColumn.sourceReference.uri !== uri) {
+                                        // return false to defer.resolve() in .then() callback
                                         return false;
                                     }
                                     // initiailize the min/max values
@@ -528,6 +530,7 @@
                                     //    - bar_plot in annotation is 'false'
                                     //    - histogram not supported for column type
                                     if (!scope.showHistogram()) {
+                                        // return true to defer.resolve() in .then() callback
                                         return true;
                                     }
                                     scope.relayout = false;
@@ -558,33 +561,29 @@
 
                     // Zoom the set into the middle 50% of the buckets
                     scope.zoomInPlot = function () {
-                        try {
-                            // NOTE: x[x.length-1] may not be representative of the absolute max
-                            // range is based on the index of the bucket representing the max value
-                            var maxIndex = scope.plot.data[0].x.findIndex(function (value) {
-                                return value >= scope.rangeOptions.absMax;
-                            });
+                        // NOTE: x[x.length-1] may not be representative of the absolute max
+                        // range is based on the index of the bucket representing the max value
+                        var maxIndex = scope.plot.data[0].x.findIndex(function (value) {
+                            return value >= scope.rangeOptions.absMax;
+                        });
 
-                            // the last bucket is a value less than the max but includes max in it
-                            if (maxIndex < 0) {
-                                maxIndex = scope.plot.data[0].x.length;
-                            }
-
-                            // zooming in should increase clarity by 50%
-                            // range is applied to both min and max so use half of 50%
-                            var zoomRange = Math.ceil(maxIndex * 0.25);
-                            // middle bucket rounded down
-                            var median = Math.floor(maxIndex/2);
-                            var minBinIndex = median - zoomRange;
-                            var maxBinIndex = median + zoomRange;
-
-                            setRangeMinMax(scope.plot.data[0].x[minBinIndex], scope.plot.data[0].x[maxBinIndex]);
-
-                            scope.relayout = true;
-                            scope.parentCtrl.updateFacetColumn(scope.index);
-                        } catch (err) {
-                            $log.warn(err);
+                        // the last bucket is a value less than the max but includes max in it
+                        if (maxIndex < 0) {
+                            maxIndex = scope.plot.data[0].x.length;
                         }
+
+                        // zooming in should increase clarity by 50%
+                        // range is applied to both min and max so use half of 50%
+                        var zoomRange = Math.ceil(maxIndex * 0.25);
+                        // middle bucket rounded down
+                        var median = Math.floor(maxIndex/2);
+                        var minBinIndex = median - zoomRange;
+                        var maxBinIndex = median + zoomRange;
+
+                        setRangeMinMax(scope.plot.data[0].x[minBinIndex], scope.plot.data[0].x[maxBinIndex]);
+
+                        scope.relayout = true;
+                        scope.parentCtrl.updateFacetColumn(scope.index);
                     };
 
                     // disable zoom in ifhistogram has been zoomed 20+ times or the current range is <= the number of buckets
@@ -624,7 +623,7 @@
                         try {
                             if (scope.histogramDataStack.length == 1) {
                                 setRangeVars();
-                                throw new Error();
+                                throw new Error("No more data to show");
                             }
                             scope.histogramDataStack.pop();
 
@@ -633,9 +632,7 @@
                             setPreviousPlotValues(previousData);
                         } catch (err) {
                             if (scope.histogramDataStack.length == 1) {
-                                $log.warn("No more data to show")
-                            } else {
-                                $log.debug("Error zooming out plot. Histogram stack data: ", scope.histogramDataStack);
+                                $log.warn(err)
                             }
                         }
                     };
@@ -777,7 +774,7 @@
 
                     defer.resolve();
                 }).catch(function (error) {
-                    throw error;
+                    defer.reject(error);
                 });
                 return defer.promise;
             }
@@ -825,7 +822,7 @@
                 var appliedLen = scope.facetModel.appliedFilters.length;
                 if (appliedLen >= tableConstants.PAGE_SIZE) {
                     scope.checkboxRows = scope.facetModel.appliedFilters.map(appliedFilterToRow);
-                    defer.resolve(true);
+                    return defer.resolve(true);
                 }
 
                 // read new data if needed
@@ -835,7 +832,7 @@
                     scope.reference.read(appliedLen + tableConstants.PAGE_SIZE, facetLog).then(function (page) {
                         // if this is not the result of latest facet change
                         if (scope.reference.uri !== uri) {
-                            defer.resolve(false);
+                            return defer.resolve(false);
                         }
 
                         scope.checkboxRows = scope.facetModel.appliedFilters.map(appliedFilterToRow);
