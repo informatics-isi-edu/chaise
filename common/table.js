@@ -211,7 +211,6 @@
                         return defer.resolve(false);
                     }
 
-                    // TODO: Should I make this change here? it looks cleaner than the if/else
                     vm.page = page;
                     vm.rowValues = DataUtils.getRowValuesFromPage(page);
                     vm.hasLoaded = true;

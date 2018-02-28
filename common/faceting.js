@@ -370,8 +370,7 @@
                             }
                         }
 
-                        // TODO: not exactly sure why we are using defer with resolve() here
-                        // Looks like we could just return nothing
+                        // return a promise that can be acted on
                         defer.resolve();
                         return defer.promise;
                     };
@@ -562,35 +561,29 @@
 
                     // Zoom the set into the middle 50% of the buckets
                     scope.zoomInPlot = function () {
-                        try {
-                            // NOTE: x[x.length-1] may not be representative of the absolute max
-                            // range is based on the index of the bucket representing the max value
-                            var maxIndex = scope.plot.data[0].x.findIndex(function (value) {
-                                return value >= scope.rangeOptions.absMax;
-                            });
+                        // NOTE: x[x.length-1] may not be representative of the absolute max
+                        // range is based on the index of the bucket representing the max value
+                        var maxIndex = scope.plot.data[0].x.findIndex(function (value) {
+                            return value >= scope.rangeOptions.absMax;
+                        });
 
-                            // the last bucket is a value less than the max but includes max in it
-                            if (maxIndex < 0) {
-                                maxIndex = scope.plot.data[0].x.length;
-                            }
-
-                            // zooming in should increase clarity by 50%
-                            // range is applied to both min and max so use half of 50%
-                            var zoomRange = Math.ceil(maxIndex * 0.25);
-                            // middle bucket rounded down
-                            var median = Math.floor(maxIndex/2);
-                            var minBinIndex = median - zoomRange;
-                            var maxBinIndex = median + zoomRange;
-
-                            setRangeMinMax(scope.plot.data[0].x[minBinIndex], scope.plot.data[0].x[maxBinIndex]);
-
-                            scope.relayout = true;
-                            scope.parentCtrl.updateFacetColumn(scope.index);
-                        } catch (err) {
-                            $log.warn(err);
-                            // TODO: I think we want to throw the error here especially because a 500 error could occur
-                            // not sure if this try catch affects the way updateFacetColumn() behaves
+                        // the last bucket is a value less than the max but includes max in it
+                        if (maxIndex < 0) {
+                            maxIndex = scope.plot.data[0].x.length;
                         }
+
+                        // zooming in should increase clarity by 50%
+                        // range is applied to both min and max so use half of 50%
+                        var zoomRange = Math.ceil(maxIndex * 0.25);
+                        // middle bucket rounded down
+                        var median = Math.floor(maxIndex/2);
+                        var minBinIndex = median - zoomRange;
+                        var maxBinIndex = median + zoomRange;
+
+                        setRangeMinMax(scope.plot.data[0].x[minBinIndex], scope.plot.data[0].x[maxBinIndex]);
+
+                        scope.relayout = true;
+                        scope.parentCtrl.updateFacetColumn(scope.index);
                     };
 
                     // disable zoom in ifhistogram has been zoomed 20+ times or the current range is <= the number of buckets
@@ -630,7 +623,7 @@
                         try {
                             if (scope.histogramDataStack.length == 1) {
                                 setRangeVars();
-                                throw new Error();
+                                throw new Error("No more data to show");
                             }
                             scope.histogramDataStack.pop();
 
@@ -639,10 +632,7 @@
                             setPreviousPlotValues(previousData);
                         } catch (err) {
                             if (scope.histogramDataStack.length == 1) {
-                                $log.warn("No more data to show")
-                            } else {
-                                $log.debug("Error zooming out plot. Histogram stack data: ", scope.histogramDataStack);
-                                // TODO: I think we want to throw the error here especially because a 500 error could occur
+                                $log.warn(err)
                             }
                         }
                     };
@@ -832,7 +822,6 @@
                 var appliedLen = scope.facetModel.appliedFilters.length;
                 if (appliedLen >= tableConstants.PAGE_SIZE) {
                     scope.checkboxRows = scope.facetModel.appliedFilters.map(appliedFilterToRow);
-                    // TODO: do we want to continue executing this function or return out?
                     return defer.resolve(true);
                 }
 

@@ -90,7 +90,7 @@
         */
         function getRelatedTableData(refObj, accordionOpen, context, callback){
 
-            // TODO: I think this function should be re-written using defer
+            // TODO: function should be re-written using defer
             var pageSize = getPageSize(refObj);
             refObj.read(pageSize, {action: logActions.recordRelatedRead}).then(function (page) {
                 var model = {
@@ -159,7 +159,7 @@
 
                 return $rootScope.reference.read(1, {action: logActions.recordRead});
             }, function error(exception) {
-                // want to break out of promise change
+                // want to break out of promise chain
                 throw exception;
             }).then(function getPage(page) {
                 $log.info("Page: ", page);
