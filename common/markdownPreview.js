@@ -17,7 +17,7 @@
   'use strict';
 
   angular.module('chaise.markdown', [])
-    .directive('markdownPreview', ['$uibModal', 'ERMrest', '$sce', function($uibModal, ERMrest, $sce) {
+    .directive('markdownPreview', ['modalUtils', 'ERMrest', '$sce', function(modalUtils, ERMrest, $sce) {
 
       return {
         restrict: 'EA',
@@ -37,7 +37,7 @@
                 }
 
                 function modalBox(params) {
-                  var modalInstance = $uibModal.open({
+                  modalUtils.showModal({
                     animation: false,
                     controller: "MarkdownPreviewController",
                     controllerAs: "ctrl",

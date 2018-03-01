@@ -6,7 +6,7 @@
         'chaise.authen',
         'ui.bootstrap'
     ])
-    .directive('navbar', ['$window', '$rootScope', 'Session', '$uibModal', function($window, $rootScope, Session, $uibModal) {
+    .directive('navbar', ['$window', '$rootScope', 'Session', 'modalUtils', function($window, $rootScope, Session, modalUtils) {
 
     // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
         var root = chaiseConfig.navbarMenu = chaiseConfig.navbarMenu || {};
@@ -63,7 +63,14 @@
 
                 });
 
-                Session.getSession();
+                // NOTE this will call the subscribed functions.
+                // So it will catch the errors of the subscribed functions,
+                // therefore we should make sure to throw these errors in here.
+                // Emitting the catch callback will make angularjs to throw extra error
+                // called: `Possibly unhandled rejection`
+                Session.getSession().catch(function (err) {
+                    throw err;
+                })
 
                 scope.login = function login() {
                     Session.loginInAPopUp();
@@ -74,7 +81,7 @@
                 };
 
                 scope.openProfile = function openProfile() {
-                    $uibModal.open({
+                    modalUtils.showModal({
                         templateUrl: "../common/templates/profile.modal.html",
                         controller: "profileModalDialogController",
                         controllerAs: "ctrl"

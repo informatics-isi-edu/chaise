@@ -3,7 +3,7 @@
 
     angular.module('chaise.authen', ['chaise.utils'])
 
-    .factory('Session', ['$http', '$q', '$window', 'UriUtils', '$uibModal', '$interval', '$cookies','messageMap', function ($http, $q, $window, UriUtils, $uibModal, $interval, $cookies, messageMap) {
+    .factory('Session', ['$cookies', '$http', '$interval', '$log', 'messageMap', 'modalUtils', '$q', 'UriUtils', '$window', function ($cookies, $http, $interval, $log, messageMap, modalUtils, $q, UriUtils, $window) {
 
         // authn API no longer communicates through ermrest, removing the need to check for ermrest location
         var serviceURL = $window.location.origin;
@@ -60,8 +60,13 @@
                     params.title = messageMap.noSession.title;
                     params.message = messageMap.noSession.message;
                 }
-                var modalInstance, closed = false;
-                modalInstance = $uibModal.open({
+                var closed = false;
+                var onModalClose = function() {
+                    $interval.cancel(intervalId);
+                    $cookies.remove("chaise-" + referrerId, { path: "/" });
+                    closed = true;
+                };
+                var modalInstance = modalUtils.showModal({
                     windowClass: "modal-login-instruction",
                     templateUrl: "../common/templates/loginDialog.modal.html",
                     controller: 'LoginDialogController',
@@ -72,16 +77,7 @@
                     openedClass: 'modal-login',
                     backdrop: 'static',
                     keyboard: false
-                });
-
-                var onModalClose = function() {
-                    $interval.cancel(intervalId);
-                    $cookies.remove("chaise-" + referrerId, { path: "/" });
-                    closed = true;
-                };
-
-                // To avoid problems when user explicitly close the modal
-                modalInstance.result.then(onModalClose, onModalClose);
+                }, onModalClose, onModalClose);
             }
 
 
@@ -184,19 +180,33 @@
 
         return {
 
+            /**
+             * Will return a promise that is resolved with the session.
+             * It will also call the _executeListeners() functions and sets the _session.
+             * If we couldn't fetch the session, it will resolve with `null`.
+             *
+             * TODO needs to be revisited for 401.
+             * We want to reload the page and stop the code execution for 401,
+             *  but currently the code will continue executing and then reloads.
+             *
+             * @param  {string=} context undefined or "401"
+             */
             getSession: function(context) {
                 return $http.get(serviceURL + "/authn/session").then(function(response) {
                     if (context === "401" && shouldReloadPageAfterLogin(response.data)) {
                         window.location.reload();
-                        return;
+                        return response.data;
                     }
+
                     _session = response.data;
                     _executeListeners();
-                    return response.data;
-                }, function(response) {
+                    return _session;
+                }).catch(function(err) {
+                    $log.warn(err);
+
                     _session = null;
                     _executeListeners();
-                    return $q.reject(response);
+                    return _session;
                 });
             },
 

@@ -3,8 +3,8 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$uibModal', '$window',
-        function RecordController(AlertsService, DataUtils, ErrorService, logActions, MathUtils, messageMap, modalBox, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $uibModal, $window) {
+    .controller('RecordController', ['AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
+        function RecordController(AlertsService, DataUtils, ErrorService, logActions, MathUtils, messageMap, modalBox, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
 
         var mainContainerEl = angular.element(document.getElementsByClassName('main-container')[0]);
