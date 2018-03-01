@@ -116,13 +116,10 @@
         vm.openWindow = function() {
             Session.loginInAPopUp();
         };
-        //
-        // vm.params.host = $sce.trustAsResourceUrl(window.location.host);
-        //
-        // function cancel() {
-        //     $uibModalInstance.dismiss('cancel');
-        // }
 
+        vm.closeModal = function () {
+            $uibModalInstance.dismiss('cancel');
+        }
     }])
 
     /**

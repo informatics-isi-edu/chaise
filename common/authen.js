@@ -1,12 +1,14 @@
 (function() {
     'use strict';
 
-    angular.module('chaise.authen', ['chaise.utils'])
+    angular.module('chaise.authen', ['chaise.utils', 'chaise.storage'])
 
-    .factory('Session', ['$cookies', '$http', '$interval', '$log', 'messageMap', 'modalUtils', '$q', 'UriUtils', '$window', function ($cookies, $http, $interval, $log, messageMap, modalUtils, $q, UriUtils, $window) {
+    .factory('Session', ['messageMap', 'modalUtils', 'StorageService', '$cookies', '$http', '$interval', '$log', '$q', 'UriUtils', '$window', function (messageMap, modalUtils, StorageService, $cookies, $http, $interval, $log, $q, UriUtils, $window) {
 
         // authn API no longer communicates through ermrest, removing the need to check for ermrest location
         var serviceURL = $window.location.origin;
+        // name of object session information is stored under
+        var STORAGE_KEY_NAME = 'session';
 
         // Private variable to store current session object
         var _session = null;
@@ -36,19 +38,6 @@
             }
             splits.splice(splits.length-1, 1);
             return splits.join('/');
-        };
-
-        var setStorage = function () {
-            var storageObj = {
-                // expired: false
-            }
-
-            $window.localStorage.session = JSON.stringify(storageObj);
-        };
-
-        var getStorage = function () {
-            var value = $window.localStorage.session;
-            return value ? JSON.parse(value) : null;
         };
 
         var loginWindowCb = function (params, referrerId, cb, type){
@@ -108,7 +97,8 @@
             else {
                 window.addEventListener('message', function(args) {
                     if (args && args.data && (typeof args.data == 'string')) {
-                        setStorage();
+                        StorageService.setStorage(STORAGE_KEY_NAME, {});
+                        console.log("after storage");
                         var obj = UriUtils.queryStringToJSON(args.data);
                         if (obj.referrerid == referrerId && (typeof cb== 'function')) {
                             if(type.indexOf('modal')!== -1){
@@ -215,22 +205,18 @@
             },
 
             promptUserPreviousSession: function() {
-                if (getStorage()) {
-                    var modalInstance;
-
-                    modalInstance = $uibModal.open({
+                if (StorageService.getStorage(STORAGE_KEY_NAME)) {
+                    var modalProperties = {
                         windowClass: "modal-previous-login",
                         templateUrl: "../common/templates/previousLogin.modal.html",
                         controller: 'PreviousLoginController',
                         controllerAs: 'ctrl',
                         openedClass: 'previous-login',
                         backdrop: 'static'
-                    });
+                    }
 
-                    modalInstance.result.then(function () {
-
-                    }, function () {
-                        // do nothing
+                    modalUtils.showModal(modalProperties, function () {
+                        // success callback
                     });
                 }
             },
