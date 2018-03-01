@@ -240,11 +240,7 @@
                     refObj.read(dataModel.pageLimit, {action: logActions.recordRelatedUpdate}).then(function (page) {
                         dataModel.page = page;
                         dataModel.rowValues = DataUtils.getRowValuesFromPage(page);
-                    }, function (error) {
-                        console.log(error);
-                        throw error;
                     }).catch(function (error) {
-                        console.log(error);
                         errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
                         errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
                         error.errorData = errorData;

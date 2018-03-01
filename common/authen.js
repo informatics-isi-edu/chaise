@@ -295,7 +295,7 @@
                     Session.getSession("401").then(function(_session) {
                         defer.resolve();
                     }, function(exception) {
-                        throw exception;
+                        defer.reject(exception);
                     });
 
                 });

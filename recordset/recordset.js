@@ -333,8 +333,6 @@
                           throw err;
                         });
                     }
-                }, function error(response) {
-                    throw response;
                 }).catch(function genericCatch(exception) {
                     $log.warn(exception);
                     recordsetModel.hasLoaded = true;
