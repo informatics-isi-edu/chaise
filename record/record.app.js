@@ -264,6 +264,10 @@
                 }
 
             }).catch(function genericCatch(exception) {
+              if(exception.errorData && exception.errorData.redirectPath && exception.errorData.redirectPath != ''){
+                var redirectLink = UriUtils.createRedirectLinkFromPath(exception.errorData.redirectPath);
+                exception.errorData.redirectUrl = redirectLink.replace('record', 'recordset');
+              }
                 throw exception;
             });
 
