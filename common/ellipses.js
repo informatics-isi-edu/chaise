@@ -51,10 +51,8 @@
                     // tell parent controller data updated
                     scope.$emit('record-deleted');
 
-                }, function deleteFailure(response) {
-                    scope.$root.showSpinner = false;
-                    throw response;
                 }).catch(function (error) {
+                    scope.$root.showSpinner = false;
                     throw error;
                 });
             }

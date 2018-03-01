@@ -90,6 +90,7 @@
         */
         function getRelatedTableData(refObj, accordionOpen, context, callback){
 
+            // TODO: function should be re-written using defer
             var pageSize = getPageSize(refObj);
             refObj.read(pageSize, {action: logActions.recordRelatedRead}).then(function (page) {
                 var model = {

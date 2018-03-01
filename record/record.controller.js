@@ -247,7 +247,6 @@
                         error.errorData = errorData;
                         throw error;
                     }).catch(function (error) {
-                        console.log(error);
                         errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
                         errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
                         error.errorData = errorData;

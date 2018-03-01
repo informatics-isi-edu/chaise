@@ -197,7 +197,7 @@
                             getForeignKeyData(newRow, cookie.columnName, cookie.constraintName, ref, logObject);
                         }).catch(function (err) {
                             $rootScope.showColumnSpinner[newRow][cookie.columnName] = false;
-                            console.log(err);
+                            $log.warn(err);
                         });
 
                         // Update submission model
@@ -467,7 +467,7 @@
                 $rootScope.showColumnSpinner[rowIndex][colName] = false;
             }).catch(function (err) {
                 $rootScope.showColumnSpinner[rowIndex][colName] = false;
-                console.log(err);
+                $log.warn(err);
             });
         }
 

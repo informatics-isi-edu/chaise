@@ -315,7 +315,7 @@
 
                     defer.resolve(disabledRows);
                 }).catch(function (err) {
-                    throw err;
+                    defer.reject(err);
                 });
 
                 return defer.promise;
