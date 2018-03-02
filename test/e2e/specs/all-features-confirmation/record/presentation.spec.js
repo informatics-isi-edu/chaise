@@ -62,10 +62,10 @@ var testParams = {
       schemaName: "product-record",
       tableName: "accommodation_collection",
       id: "2003",
-      tocCount: 7,
+      tocCount: 8,
       tableToShow: 'Categories_5',
-      sidePanelTableOrder:[ 'Categories_collection\n (5)',  'media\n \n (1)', 'Categories_collection_2\n (5)',  'Categories_3\n (5)',  'Categories_4\n (5)',  'Categories_5\n (5)',  'Categories_6\n (5)'],
-      panelHeading: "Related Records"
+      sidePanelTableOrder:[ 'Main', 'Categories_collection\n (5)',  'media\n \n (1)', 'Categories_collection_2\n (5)',  'Categories_3\n (5)',  'Categories_4\n (5)',  'Categories_5\n (5)',  'Categories_6\n (5)'],
+      panelHeading: "Contents"
     }
 };
 
@@ -200,6 +200,19 @@ describe('View existing record,', function() {
                 console.log(err);
                 done.fail();
             });
+        });
+        //Main Button
+        it('after clicking Main button, page should move up', function(done){
+            var mainButton = element(by.id('main-to-top')),
+                topOfPage = element(by.id('row-id'));
+
+            mainButton.click().then(function(){
+              expect(topOfPage.getLocation()).toEqual(jasmine.objectContaining({x: 30}, "Main button did not scroll up the page"));
+              done();
+           }).catch( function(err) {
+              console.log(err);
+              done.fail();
+          });
         });
 
         it('Record count along with heading should match for the panel and related table content should be in correct order', function(done){
