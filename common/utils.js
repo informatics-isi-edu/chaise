@@ -41,9 +41,8 @@
             message: "To open the login window press"
         },
         "previousSession": {
-            title: "A previous session was detected, do you want to continue anonymously or log in?",
-            message1: "To login press",
-            message2: "or to continue anonymously press"
+            title: "A previous login was detected",
+            message: "To login press <b>Login</b><br>or to continue anonymously press <b>Close</b>"
         },
         "noSession": {
             title: "You need to be logged in to continue.",

@@ -268,6 +268,7 @@ JS_SOURCE=$(JS)/respond.js \
 	$(COMMON)/navbar.js \
 	$(COMMON)/record.js \
 	$(COMMON)/ellipses.js \
+	$(COMMON)/storage.js \
 	$(COMMON)/table.js \
 	$(COMMON)/utils.js \
 	$(COMMON)/bindHtmlUnsafe.js

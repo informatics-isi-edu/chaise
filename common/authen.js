@@ -40,6 +40,13 @@
             return splits.join('/');
         };
 
+        var resetStorageExpiration = function () {
+            var hourFromNow = new Date();
+            hourFromNow.setHours(hourFromNow.getHours() + 1);
+
+            StorageService.updateStorage(STORAGE_KEY_NAME, {expires: hourFromNow.getTime()});
+        };
+
         var loginWindowCb = function (params, referrerId, cb, type){
             if(type.indexOf('modal')!== -1){
                 if (_session) {
@@ -97,8 +104,8 @@
             else {
                 window.addEventListener('message', function(args) {
                     if (args && args.data && (typeof args.data == 'string')) {
-                        StorageService.setStorage(STORAGE_KEY_NAME, {});
-                        console.log("after storage");
+                        // store value since unix time epoch + 1 hour
+                        resetStorageExpiration();
                         var obj = UriUtils.queryStringToJSON(args.data);
                         if (obj.referrerid == referrerId && (typeof cb== 'function')) {
                             if(type.indexOf('modal')!== -1){
@@ -163,6 +170,19 @@
             });
         };
 
+        var popupLogin = function () {
+            var reloadCb = function(){
+                window.location.reload();
+            };
+
+            var x = window.innerWidth/2 - 800/2;
+            var y = window.innerHeight/2 - 600/2;
+
+            var win = window.open("", '_blank','width=800,height=600,left=' + x + ',top=' + y);
+
+            logInHelper(loginWindowCb, win, reloadCb, 'popUp');
+        };
+
         var shouldReloadPageAfterLogin = function(newSession) {
             if (_session === null) return true;
             return false;
@@ -183,6 +203,7 @@
              */
             getSession: function(context) {
                 return $http.get(serviceURL + "/authn/session").then(function(response) {
+                    resetStorageExpiration();
                     if (context === "401" && shouldReloadPageAfterLogin(response.data)) {
                         window.location.reload();
                         return response.data;
@@ -205,20 +226,25 @@
             },
 
             promptUserPreviousSession: function() {
-                if (StorageService.getStorage(STORAGE_KEY_NAME)) {
+                var storedData = StorageService.getStorage(STORAGE_KEY_NAME);
+                if (storedData && storedData.expires < moment.now()) {
                     var modalProperties = {
                         windowClass: "modal-previous-login",
                         templateUrl: "../common/templates/previousLogin.modal.html",
                         controller: 'PreviousLoginController',
                         controllerAs: 'ctrl',
-                        openedClass: 'previous-login',
-                        backdrop: 'static'
+                        openedClass: 'previous-login'
                     }
 
                     modalUtils.showModal(modalProperties, function () {
                         // success callback
+                        popupLogin();
                     });
                 }
+            },
+
+            extendPromptExpiration: function() {
+                resetStorageExpiration();
             },
 
             subscribeOnChange: function(fn) {
@@ -236,16 +262,7 @@
             },
 
             loginInAPopUp: function() {
-                var reloadCb = function(){
-                    window.location.reload();
-                };
-
-                var x = window.innerWidth/2 - 800/2;
-                var y = window.innerHeight/2 - 600/2;
-
-                var win = window.open("", '_blank','width=800,height=600,left=' + x + ',top=' + y);
-
-                logInHelper(loginWindowCb, win, reloadCb, 'popUp');
+                popupLogin();
             },
 
             loginInAModal: function(notifyErmrestCB) {
@@ -260,6 +277,7 @@
 
                 $http.delete(url).then(function(response) {
                     $window.location = response.data.logout_url;
+                    StorageService.deleteStorage(STORAGE_KEY_NAME);
                 }, function(error) {
                     // if the logout fails for some reason, send the user to the logout url as defined above
                     $window.location = logoutURL;

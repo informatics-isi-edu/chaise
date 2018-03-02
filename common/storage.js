@@ -22,8 +22,6 @@
          * @param {Object} data - data to be stored
          */
         var setStorage = function (storageLocation, data) {
-            console.log(storageLocation);
-            console.log(data);
             localStorage.setItem(storageLocation, angular.toJson(data));
         };
 
@@ -44,13 +42,13 @@
          * @param {String} storageLocation - name of object data is stored under
          */
         var updateStorage = function (storageLocation, data) {
-            var storedData = getStorage(storageLocation);
+            var storedData = getStorage(storageLocation) || {};
 
             Object.keys(data).forEach(function (key) {
                 storedData[key] = data[key];
             });
 
-            setStorage(storedData, storageLocation);
+            setStorage(storageLocation, storedData);
         };
 
         return {

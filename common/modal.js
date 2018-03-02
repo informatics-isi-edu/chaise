@@ -102,24 +102,17 @@
         }
 
     }])
-    .controller('PreviousLoginController', ['$sce', '$uibModalInstance', 'messageMap', 'Session', function LoginDialogController($sce, $uibModalInstance, messageMap, Session) {
+    .controller('PreviousLoginController', ['$uibModalInstance', 'messageMap', function LoginDialogController($uibModalInstance, messageMap) {
         var vm = this;
-        // params.login_url = $sce.trustAsResourceUrl(params.login_url);
-        var params = {
-            title: messageMap.previousSession.title,
-            message1: messageMap.previousSession.message1,
-            message2: messageMap.previousSession.message2
-        }
-
-        vm.params = params;
+        vm.params = messageMap.previousSession
 
         vm.openWindow = function() {
-            Session.loginInAPopUp();
+            $uibModalInstance.close();
         };
 
         vm.closeModal = function () {
             $uibModalInstance.dismiss('cancel');
-        }
+        };
     }])
 
     /**
