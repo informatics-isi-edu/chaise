@@ -41,7 +41,7 @@
             message: "To open the login window press"
         },
         "previousSession": {
-            message: "To access the site anonymously, click"
+            message: "To access the site anonymously with limited access, click"
         },
         "noSession": {
             title: "You need to be logged in to continue.",
