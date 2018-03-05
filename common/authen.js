@@ -260,7 +260,7 @@
                     }
 
                     var modalProperties = {
-                        windowClass: "modal-previous-login",
+                        windowClass: "modal-login-instruction",
                         templateUrl: "../common/templates/loginDialog.modal.html",
                         controller: 'LoginDialogController',
                         controllerAs: 'ctrl',
