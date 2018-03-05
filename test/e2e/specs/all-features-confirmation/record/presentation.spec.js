@@ -201,19 +201,6 @@ describe('View existing record,', function() {
                 done.fail();
             });
         });
-        //Main Button
-        it('after clicking Main button, page should move up', function(done){
-            var mainButton = element(by.id('main-to-top')),
-                topOfPage = element(by.id('row-id'));
-
-            mainButton.click().then(function(){
-              expect(topOfPage.getLocation()).toEqual(jasmine.objectContaining({x: 30}, "Main button did not scroll up the page"));
-              done();
-           }).catch( function(err) {
-              console.log(err);
-              done.fail();
-          });
-        });
 
         it('Record count along with heading should match for the panel and related table content should be in correct order', function(done){
             chaisePage.recordPage.getSidePanelTableTitles().then(function(tableNames){
