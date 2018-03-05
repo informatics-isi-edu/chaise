@@ -76,6 +76,10 @@
             $uibModalInstance.close("reload");
 
         };
+        vm.login = function () {
+            $uibModalInstance.close("login");
+
+        };
 
 
     }])

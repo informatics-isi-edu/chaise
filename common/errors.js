@@ -19,7 +19,7 @@
         forbidden: "Forbidden",
         notFound: "No data",
         multipleRecords: "Multiple Records Found",
-        noDataMessage: "No matching record found for the given filter or facet.",
+        noDataMessage: 'No authorization to view the record/No matching record found for the given filter or facet.',
         multipleDataErrorCode : "Multiple Records Found",
         multipleDataMessage : "There are more than 1 record found for the filters provided.",
         facetFilterMissing : "No filtering criteria was specified to identify a specific record.",
@@ -194,7 +194,7 @@
             }
 
             modalUtils.showModal(modalProperties, function (actionBtnIdentifier) {
-                if (errorCode == errorNames.unauthorized && !providedLink) {
+                if ((errorCode == errorNames.unauthorized && !providedLink ) || (actionBtnIdentifier === "login")) {
                     var x = window.innerWidth/2 - 800/2;
                     var y = window.innerHeight/2 - 600/2;
 
