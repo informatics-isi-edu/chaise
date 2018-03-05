@@ -1,16 +1,13 @@
 <div class="modal-header">
-	<button class="btn btn-default pull-right modal-close" type="button" ng-click="ctrl.cancel()">X</button>
+    <button class="btn btn-default pull-right modal-close" type="button" ng-click="::ctrl.cancel();">X</button>
     <h2 class="modal-title text-center">{{::ctrl.params.title}}</h2>
 </div>
 <div class="modal-body">
-	<div>
-		<div class="row">
-		    <div class="col-md-12 col-sm-12 col-xs-12">
-		    	<center>
-					<h3>{{::ctrl.params.message}}</h3>
-					<button class="btn btn-primary btn-inverted" ng-click="::ctrl.openWindow();">Login</button>
-				</div>
-			</div>
-		</div>
-	</div>
+    <center>
+        <h3 ng-bind-html="ctrl.params.message"></h3>
+        <button class="btn btn-primary btn-inverted" ng-click="::ctrl.openWindow();">Login</button>
+        <div ng-if="ctrl.params.subMessage" class="row">
+            <h3>{{ctrl.params.subMessage}} <a ng-click="::ctrl.cancel();">Anonymous Access</a></h3>
+        </div>
+    </center>
 </div>

@@ -79,38 +79,38 @@
 
 
     }])
-    .controller('LoginDialogController', ['$uibModalInstance', 'params' , '$sce', function LoginDialogController($uibModalInstance, params, $sce) {
+    // .controller('LoginDialogController', ['$uibModalInstance', 'params' , '$sce', function LoginDialogController($uibModalInstance, params, $sce) {
+    //     var vm = this;
+    //     params.login_url = $sce.trustAsResourceUrl(params.login_url);
+    //     vm.params = params;
+    //     vm.cancel = cancel;
+    //
+    //     vm.openWindow = function() {
+    //
+    //         var x = window.innerWidth/2 - 800/2;
+    //         var y = window.innerHeight/2 - 600/2;
+    //
+    //         window.open(params.login_url, '_blank','width=800,height=600,left=' + x + ',top=' + y);
+    //
+    //         return false;
+    //     }
+    //
+    //     vm.params.host = $sce.trustAsResourceUrl(window.location.host);
+    //
+    //     function cancel() {
+    //         $uibModalInstance.dismiss('cancel');
+    //     }
+    //
+    // }])
+    .controller('LoginDialogController', ['$uibModalInstance', 'params', function LoginDialogController($uibModalInstance, params) {
         var vm = this;
-        params.login_url = $sce.trustAsResourceUrl(params.login_url);
         vm.params = params;
-        vm.cancel = cancel;
-
-        vm.openWindow = function() {
-
-            var x = window.innerWidth/2 - 800/2;
-            var y = window.innerHeight/2 - 600/2;
-
-            window.open(params.login_url, '_blank','width=800,height=600,left=' + x + ',top=' + y);
-
-            return false;
-        }
-
-        vm.params.host = $sce.trustAsResourceUrl(window.location.host);
-
-        function cancel() {
-            $uibModalInstance.dismiss('cancel');
-        }
-
-    }])
-    .controller('PreviousLoginController', ['$uibModalInstance', 'messageMap', function LoginDialogController($uibModalInstance, messageMap) {
-        var vm = this;
-        vm.params = messageMap.previousSession
 
         vm.openWindow = function() {
             $uibModalInstance.close();
         };
 
-        vm.closeModal = function () {
+        vm.cancel = function () {
             $uibModalInstance.dismiss('cancel');
         };
     }])

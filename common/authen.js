@@ -40,11 +40,30 @@
             return splits.join('/');
         };
 
-        var resetStorageExpiration = function () {
+        var promptTokenExists = function () {
+            return StorageService.getStorage(STORAGE_KEY_NAME);
+        }
+
+        var promptTokenHasExpired = function () {
+            var storedData = StorageService.getStorage(STORAGE_KEY_NAME);
+
+            return (storedData && new Date().getTime() > storedData.expires);
+        };
+
+        var createPromptToken = function () {
             var hourFromNow = new Date();
             hourFromNow.setHours(hourFromNow.getHours() + 1);
 
             StorageService.updateStorage(STORAGE_KEY_NAME, {expires: hourFromNow.getTime()});
+        }
+
+        var extendPromptExpiration = function () {
+            if (promptTokenExists()) {
+                var hourFromNow = new Date();
+                hourFromNow.setHours(hourFromNow.getHours() + 1);
+
+                StorageService.updateStorage(STORAGE_KEY_NAME, {expires: hourFromNow.getTime()});
+            }
         };
 
         var loginWindowCb = function (params, referrerId, cb, type){
@@ -57,11 +76,17 @@
                     params.message = messageMap.noSession.message;
                 }
                 var closed = false;
+                var onModalCloseSuccess = function () {
+                    onModalClose();
+                    popupLogin();
+                }
+
                 var onModalClose = function() {
                     $interval.cancel(intervalId);
                     $cookies.remove("chaise-" + referrerId, { path: "/" });
                     closed = true;
                 };
+
                 var modalInstance = modalUtils.showModal({
                     windowClass: "modal-login-instruction",
                     templateUrl: "../common/templates/loginDialog.modal.html",
@@ -73,7 +98,7 @@
                     openedClass: 'modal-login',
                     backdrop: 'static',
                     keyboard: false
-                }, onModalClose, onModalClose);
+                }, onModalCloseSuccess, onModalClose);
             }
 
 
@@ -105,7 +130,7 @@
                 window.addEventListener('message', function(args) {
                     if (args && args.data && (typeof args.data == 'string')) {
                         // store value since unix time epoch + 1 hour
-                        resetStorageExpiration();
+                        StorageService.deleteStorage(STORAGE_KEY_NAME);
                         var obj = UriUtils.queryStringToJSON(args.data);
                         if (obj.referrerid == referrerId && (typeof cb== 'function')) {
                             if(type.indexOf('modal')!== -1){
@@ -203,7 +228,6 @@
              */
             getSession: function(context) {
                 return $http.get(serviceURL + "/authn/session").then(function(response) {
-                    resetStorageExpiration();
                     if (context === "401" && shouldReloadPageAfterLogin(response.data)) {
                         window.location.reload();
                         return response.data;
@@ -226,25 +250,35 @@
             },
 
             promptUserPreviousSession: function() {
-                var storedData = StorageService.getStorage(STORAGE_KEY_NAME);
-                if (storedData && storedData.expires < moment.now()) {
+                // if there's no stored data OR
+                // there's stored data but we are after it's expiration
+                if (!promptTokenExists() || promptTokenHasExpired()) {
+                    var params = {
+                        title: messageMap.sessionExpired.title,
+                        message: messageMap.sessionExpired.message,
+                        subMessage: messageMap.previousSession.message
+                    }
+
                     var modalProperties = {
                         windowClass: "modal-previous-login",
-                        templateUrl: "../common/templates/previousLogin.modal.html",
-                        controller: 'PreviousLoginController',
+                        templateUrl: "../common/templates/loginDialog.modal.html",
+                        controller: 'LoginDialogController',
                         controllerAs: 'ctrl',
+                        resolve: {
+                            params: params
+                        },
                         openedClass: 'previous-login'
                     }
 
                     modalUtils.showModal(modalProperties, function () {
                         // success callback
                         popupLogin();
+                    }, function () {
+                        // error callback
+                        // set promp expiration
+                        createPromptToken();
                     });
                 }
-            },
-
-            extendPromptExpiration: function() {
-                resetStorageExpiration();
             },
 
             subscribeOnChange: function(fn) {
@@ -261,9 +295,8 @@
                 delete _changeCbs[id];
             },
 
-            loginInAPopUp: function() {
-                popupLogin();
-            },
+            extendPromptExpiration: extendPromptExpiration,
+            loginInAPopUp: popupLogin,
 
             loginInAModal: function(notifyErmrestCB) {
                 logInHelper(loginWindowCb, "", notifyErmrestCB, 'modal');
@@ -277,7 +310,6 @@
 
                 $http.delete(url).then(function(response) {
                     $window.location = response.data.logout_url;
-                    StorageService.deleteStorage(STORAGE_KEY_NAME);
                 }, function(error) {
                     // if the logout fails for some reason, send the user to the logout url as defined above
                     $window.location = logoutURL;

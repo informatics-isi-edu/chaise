@@ -41,8 +41,7 @@
             message: "To open the login window press"
         },
         "previousSession": {
-            title: "A previous login was detected",
-            message: "To login press <b>Login</b><br>or to continue anonymously press <b>Close</b>"
+            message: "To access the site anonymously, click"
         },
         "noSession": {
             title: "You need to be logged in to continue.",
@@ -704,6 +703,17 @@
             isBrowserIE: isBrowserIE,
             getQueryParams: getQueryParams,
             appNamefromUrlPathname: appNamefromUrlPathname
+        }
+    }])
+
+    .factory('FunctionUtils', ['Session', 'UriUtils', function(Session, UriUtils) {
+        function registerErmrestCallbacks() {
+            ERMrest.appLinkFn(UriUtils.appTagToURL);
+            ERMrest.extendPromptExpiration(Session.extendPromptExpiration);
+        }
+
+        return {
+            registerErmrestCallbacks: registerErmrestCallbacks
         }
     }])
 

@@ -231,8 +231,8 @@
     }])
 
     // Register work to be performed after loading all modules
-    .run(['AlertsService', 'context', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'MathUtils', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', 'modalBox', 'logActions',
-        function(AlertsService, context, DataUtils, ERMrest, ErrorService, headInjector, MathUtils, recordsetModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, modalBox, logActions) {
+    .run(['AlertsService', 'context', 'DataUtils', 'ERMrest', 'ErrorService', 'FunctionUtils', 'headInjector', 'MathUtils', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', 'modalBox', 'logActions',
+        function(AlertsService, context, DataUtils, ERMrest, ErrorService, FunctionUtils, headInjector, MathUtils, recordsetModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, modalBox, logActions) {
         try {
             var session;
 
@@ -265,7 +265,7 @@
             var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
 
 
-            ERMrest.appLinkFn(UriUtils.appTagToURL);
+            FunctionUtils.registerErmrestCallbacks();
 
             // Subscribe to on change event for session
             var subId = Session.subscribeOnChange(function() {
