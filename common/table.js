@@ -222,17 +222,13 @@
                 }).catch(function(err) {
                     if (vm.reference.uri !== uri) {
                         defer.resolve(false);
-                    } else {
-                        vm.hasLoaded = true;
-                        vm.initialized = true;
-                        if(err.errorData && err.errorData.redirectPath && err.errorData.redirectPath != ''){
-                          err.errorData.redirectUrl = UriUtils.createRedirectLinkFromPath(err.errorData.redirectPath);
-                        }
-                        throw err;
                     }
 
                     vm.hasLoaded = true;
                     vm.initialized = true;
+                    if(err.errorData && err.errorData.redirectPath && err.errorData.redirectPath != ''){
+                      err.errorData.redirectUrl = UriUtils.createRedirectLinkFromPath(err.errorData.redirectPath);
+                    }
                     return defer.reject(err);
                 });
             }) (vm.reference.uri);
