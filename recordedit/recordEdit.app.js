@@ -44,8 +44,8 @@
         $logProvider.debugEnabled(chaiseConfig.debug === true);
     }])
 
-    .run(['AlertsService', 'dataFormats', 'ERMrest', 'ErrorService', 'headInjector', 'logActions', 'MathUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', 'messageMap', 'Errors',
-        function runRecordEditApp(AlertsService, dataFormats, ERMrest, ErrorService, headInjector, logActions, MathUtils, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies, messageMap, Errors) {
+    .run(['AlertsService', 'dataFormats', 'ERMrest', 'ErrorService', 'FunctionUtils', 'headInjector', 'logActions', 'MathUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', 'messageMap', 'Errors',
+        function runRecordEditApp(AlertsService, dataFormats, ERMrest, ErrorService, FunctionUtils, headInjector, logActions, MathUtils, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies, messageMap, Errors) {
 
         var session,
             context = { booleanValues: ['', true, false] };
@@ -98,7 +98,7 @@
         // mode defaults to create
         context.mode = context.modes.CREATE;
 
-        ERMrest.appLinkFn(UriUtils.appTagToURL);
+        FunctionUtils.registerErmrestCallbacks();
 
         // Subscribe to on change event for session
         var subId = Session.subscribeOnChange(function() {

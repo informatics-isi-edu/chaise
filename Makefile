@@ -268,6 +268,7 @@ JS_SOURCE=$(JS)/respond.js \
 	$(COMMON)/navbar.js \
 	$(COMMON)/record.js \
 	$(COMMON)/ellipses.js \
+	$(COMMON)/storage.js \
 	$(COMMON)/table.js \
 	$(COMMON)/utils.js \
 	$(COMMON)/bindHtmlUnsafe.js
@@ -345,6 +346,7 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/navbar.js \
 	$(COMMON)/record.js \
 	$(COMMON)/ellipses.js \
+	$(COMMON)/storage.js \
 	$(COMMON)/table.js \
 	$(COMMON)/utils.js \
 	$(COMMON)/bindHtmlUnsafe.js \
@@ -431,6 +433,7 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/errors.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/ellipses.js \
+	$(COMMON)/storage.js \
 	$(COMMON)/table.js \
 	$(COMMON)/utils.js \
 	$(COMMON)/upload.js \
@@ -492,6 +495,7 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/navbar.js \
 	$(COMMON)/resizable.js \
+	$(COMMON)/storage.js \
 	$(COMMON)/table.js \
 	$(COMMON)/validators.js \
 	$(COMMON)/vendor/angular-cookies.min.js
