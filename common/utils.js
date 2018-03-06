@@ -709,7 +709,7 @@
     .factory('FunctionUtils', ['Session', 'UriUtils', function(Session, UriUtils) {
         function registerErmrestCallbacks() {
             ERMrest.appLinkFn(UriUtils.appTagToURL);
-            ERMrest.extendPromptExpiration(Session.extendPromptExpiration);
+            ERMrest.onHTTPSuccess(Session.extendPromptExpiration);
         }
 
         return {
