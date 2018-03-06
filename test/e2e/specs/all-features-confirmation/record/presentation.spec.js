@@ -62,10 +62,10 @@ var testParams = {
       schemaName: "product-record",
       tableName: "accommodation_collection",
       id: "2003",
-      tocCount: 7,
+      tocCount: 8,
       tableToShow: 'Categories_5',
-      sidePanelTableOrder:[ 'Categories_collection\n (5)',  'media\n \n (1)', 'Categories_collection_2\n (5)',  'Categories_3\n (5)',  'Categories_4\n (5)',  'Categories_5\n (5)',  'Categories_6\n (5)'],
-      panelHeading: "Related Records"
+      sidePanelTableOrder:[ 'Main', 'Categories_collection\n (5)',  'media\n \n (1)', 'Categories_collection_2\n (5)',  'Categories_3\n (5)',  'Categories_4\n (5)',  'Categories_5\n (5)',  'Categories_6\n (5)'],
+      panelHeading: "Contents"
     }
 };
 
