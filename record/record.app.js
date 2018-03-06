@@ -45,8 +45,8 @@
         $logProvider.debugEnabled(chaiseConfig.debug === true);
     }])
 
-    .run(['constants', 'DataUtils', 'ERMrest', 'ErrorService', 'headInjector', 'logActions', 'MathUtils', 'modalBox', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', 'Errors',
-        function runApp(constants, DataUtils, ERMrest, ErrorService, headInjector, logActions, MathUtils, modalBox, Session, UiUtils, UriUtils, $log, $rootScope, $window, Errors) {
+    .run(['constants', 'DataUtils', 'ERMrest', 'ErrorService', 'FunctionUtils', 'headInjector', 'logActions', 'MathUtils', 'modalBox', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', 'Errors',
+        function runApp(constants, DataUtils, ERMrest, ErrorService, FunctionUtils, headInjector, logActions, MathUtils, modalBox, Session, UiUtils, UriUtils, $log, $rootScope, $window, Errors) {
 
         var session,
             context = {},
@@ -70,7 +70,7 @@
         context.appName = "record";
         context.pageId = MathUtils.uuid();
 
-        ERMrest.appLinkFn(UriUtils.appTagToURL);
+        FunctionUtils.registerErmrestCallbacks();
 
         /**
         * getPageSize(obj) returms page size of the display attribute in the object.
@@ -154,6 +154,9 @@
                 // if the user can fetch the reference, they can see the content for the rest of the page
                 // set loading to force the loading text to appear and to prevent the on focus from firing while code is initializing
                 session = Session.getSessionValue();
+                if (!session) {
+                    Session.promptUserPreviousSession();
+                }
 
                 // $rootScope.reference != reference after contextualization
                 $rootScope.reference = reference.contextualize.detailed;
