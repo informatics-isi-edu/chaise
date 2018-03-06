@@ -147,8 +147,10 @@
           function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $window, errorMessages, Errors, UriUtils, modalUtils) {
 
         function errorPopup(message, errorCode, pageName, redirectLink, subMessage, stackTrace) {
-            var providedLink = true;
-            var appName = UriUtils.appNamefromUrlPathname($window.location.pathname);
+            var providedLink = true,
+                isLoggedIn = false;
+            var appName = UriUtils.appNamefromUrlPathname($window.location.pathname),
+                session = Session.getSessionValue();
             // if it's not defined, redirect to the dataBrowser config setting (if set) or the landing page
             if (!redirectLink) {
                 providedLink = false;
@@ -167,12 +169,18 @@
                     subMessage = subMessage + "\n   " + stackTrace.split("\n").join("\n   ");
                 }
             }
+            //check if user is logged in
+            if(session && session.client !== null){
+              isLoggedIn = true;
+            }
+
             var params = {
                 message: message,
                 errorCode: errorCode,
                 pageName: pageName,
                 subMessage: subMessage,
-                appName: appName
+                appName: appName,
+                isLoggedIn: isLoggedIn
             };
 
             var modalProperties = {

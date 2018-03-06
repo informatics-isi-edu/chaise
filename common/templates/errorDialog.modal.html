@@ -4,7 +4,8 @@
 </div>
 <div class="modal-body">
   <span ng-bind-html="ctrl.params.message"></span>
-  Click <a id="login-link" ng-click="ctrl.login()">here</a> to login.
+  <br>
+  <span ng-if="!ctrl.params.isLoggedIn">Click <a id="login-link" ng-click="ctrl.login()"><b>here</b></a> to login.</span>
     <br><br>
     <span ng-bind-html="ctrl.clickActionMessage"></span>
     <a ng-show="ctrl.params.subMessage" ng-click="ctrl.showDetails()">

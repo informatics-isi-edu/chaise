@@ -49,6 +49,9 @@
             vm.clickActionMessage =  messageMap.recordAvailabilityError.multipleRecords;
         } else if(vm.params.errorCode == 'Record Not Found'){
             vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
+            if(params && !params.isLoggedIn){
+              params.message = 'You do not have authorization to view this record. Please login to continue.';
+            }
         } else {
             vm.clickActionMessage = messageMap.recordAvailabilityError.pageRedirect + vm.params.pageName + '. ';
             if(vm.params.appName == 'recordedit'){
