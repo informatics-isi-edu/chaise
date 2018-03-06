@@ -146,6 +146,10 @@
     .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$window', 'errorMessages', 'Errors', 'UriUtils', 'modalUtils',
           function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $window, errorMessages, Errors, UriUtils, modalUtils) {
 
+        var reloadCb = function(){
+            window.location.reload();
+        };
+
         function errorPopup(message, errorCode, pageName, redirectLink, subMessage, stackTrace) {
             var providedLink = true,
                 isLoggedIn = false;
@@ -202,12 +206,8 @@
             }
 
             modalUtils.showModal(modalProperties, function (actionBtnIdentifier) {
-                if ((errorCode == errorNames.unauthorized && !providedLink ) || (actionBtnIdentifier === "login")) {
-                    var x = window.innerWidth/2 - 800/2;
-                    var y = window.innerHeight/2 - 600/2;
-
-                    var win = window.open("", '_blank','width=800,height=600,left=' + x + ',top=' + y);
-                    Session.loginInAPopUp(win, reloadCb);
+                if ((errorCode == errorNames.unauthorized && !providedLink) || (actionBtnIdentifier === "login")) {
+                    Session.loginInAPopUp();
                 } else {
                     if(actionBtnIdentifier == "reload"){
                         reloadCb();
@@ -234,9 +234,6 @@
 
             var stackTrace =  (exception.errorData && exception.errorData.stack)? exception.errorData.stack: undefined;
 
-            var reloadCb = function() {
-                window.location.reload();
-            };
             if (exceptionFlag || window.location.pathname.indexOf('/search/') != -1 || window.location.pathname.indexOf('/viewer/') != -1){
               return;
             }

@@ -17,9 +17,7 @@
             }
 
             var q = [root];
-            var reloadCb = function(){
-                 window.location.reload();
-            };
+
             while (q.length > 0) {
                 var obj = q.shift();
                 var parentNewTab = obj.newTab;
@@ -75,11 +73,7 @@
                 })
 
                 scope.login = function login() {
-                    var x = window.innerWidth/2 - 800/2;
-                    var y = window.innerHeight/2 - 600/2;
-
-                    var win = window.open("", '_blank','width=800,height=600,left=' + x + ',top=' + y);
-                    Session.loginInAPopUp(win,reloadCb);
+                    Session.loginInAPopUp();
                 };
 
                 scope.logout = function logout() {

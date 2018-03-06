@@ -40,6 +40,9 @@
             title: "Your session has expired. Please login to continue.",
             message: "To open the login window press"
         },
+        "previousSession": {
+            message: "To access the site anonymously with limited access, click"
+        },
         "noSession": {
             title: "You need to be logged in to continue.",
             message: "To open the login window press"
@@ -700,6 +703,17 @@
             isBrowserIE: isBrowserIE,
             getQueryParams: getQueryParams,
             appNamefromUrlPathname: appNamefromUrlPathname
+        }
+    }])
+
+    .factory('FunctionUtils', ['Session', 'UriUtils', function(Session, UriUtils) {
+        function registerErmrestCallbacks() {
+            ERMrest.appLinkFn(UriUtils.appTagToURL);
+            ERMrest.onHTTPSuccess(Session.extendPromptExpiration);
+        }
+
+        return {
+            registerErmrestCallbacks: registerErmrestCallbacks
         }
     }])
 

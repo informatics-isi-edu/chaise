@@ -1,12 +1,14 @@
 (function() {
     'use strict';
 
-    angular.module('chaise.authen', ['chaise.utils'])
+    angular.module('chaise.authen', ['chaise.utils', 'chaise.storage'])
 
-    .factory('Session', ['$cookies', '$http', '$interval', '$log', 'messageMap', 'modalUtils', '$q', 'UriUtils', '$window', function ($cookies, $http, $interval, $log, messageMap, modalUtils, $q, UriUtils, $window) {
+    .factory('Session', ['messageMap', 'modalUtils', 'StorageService', '$cookies', '$http', '$interval', '$log', '$q', 'UriUtils', '$window', function (messageMap, modalUtils, StorageService, $cookies, $http, $interval, $log, $q, UriUtils, $window) {
 
         // authn API no longer communicates through ermrest, removing the need to check for ermrest location
         var serviceURL = $window.location.origin;
+        // name of object session information is stored under
+        var STORAGE_KEY_NAME = 'session';
 
         // Private variable to store current session object
         var _session = null;
@@ -38,6 +40,32 @@
             return splits.join('/');
         };
 
+        var promptTokenExists = function () {
+            return StorageService.getStorage(STORAGE_KEY_NAME);
+        }
+
+        var promptTokenHasExpired = function () {
+            var storedData = StorageService.getStorage(STORAGE_KEY_NAME);
+
+            return (storedData && new Date().getTime() > storedData.expires);
+        };
+
+        var createPromptToken = function () {
+            var hourFromNow = new Date();
+            hourFromNow.setHours(hourFromNow.getHours() + 1);
+
+            StorageService.updateStorage(STORAGE_KEY_NAME, {expires: hourFromNow.getTime()});
+        }
+
+        var extendPromptExpiration = function () {
+            if (promptTokenExists()) {
+                var hourFromNow = new Date();
+                hourFromNow.setHours(hourFromNow.getHours() + 1);
+
+                StorageService.updateStorage(STORAGE_KEY_NAME, {expires: hourFromNow.getTime()});
+            }
+        };
+
         var loginWindowCb = function (params, referrerId, cb, type){
             if(type.indexOf('modal')!== -1){
                 if (_session) {
@@ -48,11 +76,17 @@
                     params.message = messageMap.noSession.message;
                 }
                 var closed = false;
+                var onModalCloseSuccess = function () {
+                    onModalClose();
+                    popupLogin();
+                }
+
                 var onModalClose = function() {
                     $interval.cancel(intervalId);
                     $cookies.remove("chaise-" + referrerId, { path: "/" });
                     closed = true;
                 };
+
                 var modalInstance = modalUtils.showModal({
                     windowClass: "modal-login-instruction",
                     templateUrl: "../common/templates/loginDialog.modal.html",
@@ -64,7 +98,7 @@
                     openedClass: 'modal-login',
                     backdrop: 'static',
                     keyboard: false
-                }, onModalClose, onModalClose);
+                }, onModalCloseSuccess, onModalClose);
             }
 
 
@@ -95,6 +129,8 @@
             else {
                 window.addEventListener('message', function(args) {
                     if (args && args.data && (typeof args.data == 'string')) {
+                        // store value since unix time epoch + 1 hour
+                        StorageService.deleteStorage(STORAGE_KEY_NAME);
                         var obj = UriUtils.queryStringToJSON(args.data);
                         if (obj.referrerid == referrerId && (typeof cb== 'function')) {
                             if(type.indexOf('modal')!== -1){
@@ -159,6 +195,19 @@
             });
         };
 
+        var popupLogin = function () {
+            var reloadCb = function(){
+                window.location.reload();
+            };
+
+            var x = window.innerWidth/2 - 800/2;
+            var y = window.innerHeight/2 - 600/2;
+
+            var win = window.open("", '_blank','width=800,height=600,left=' + x + ',top=' + y);
+
+            logInHelper(loginWindowCb, win, reloadCb, 'popUp');
+        };
+
         var shouldReloadPageAfterLogin = function(newSession) {
             if (_session === null) return true;
             return false;
@@ -200,6 +249,38 @@
                 return _session;
             },
 
+            promptUserPreviousSession: function() {
+                // if there's no stored data OR
+                // there's stored data but we are after it's expiration
+                if (!promptTokenExists() || promptTokenHasExpired()) {
+                    var params = {
+                        title: messageMap.sessionExpired.title,
+                        message: messageMap.sessionExpired.message,
+                        subMessage: messageMap.previousSession.message
+                    }
+
+                    var modalProperties = {
+                        windowClass: "modal-login-instruction",
+                        templateUrl: "../common/templates/loginDialog.modal.html",
+                        controller: 'LoginDialogController',
+                        controllerAs: 'ctrl',
+                        resolve: {
+                            params: params
+                        },
+                        openedClass: 'previous-login'
+                    }
+
+                    modalUtils.showModal(modalProperties, function () {
+                        // success callback
+                        popupLogin();
+                    }, function () {
+                        // error callback
+                        // set promp expiration
+                        createPromptToken();
+                    });
+                }
+            },
+
             subscribeOnChange: function(fn) {
                 // To avoid same ids for an instance we add counter
                 var id = new Date().getTime() + (++_counter);
@@ -214,12 +295,11 @@
                 delete _changeCbs[id];
             },
 
-            loginInAPopUp: function(win,reloadCb) {
-                logInHelper(loginWindowCb,win,reloadCb,'popUp');
-            },
+            extendPromptExpiration: extendPromptExpiration,
+            loginInAPopUp: popupLogin,
 
             loginInAModal: function(notifyErmrestCB) {
-                logInHelper(loginWindowCb,"",notifyErmrestCB,'modal');
+                logInHelper(loginWindowCb, "", notifyErmrestCB, 'modal');
             },
 
             logout: function() {
