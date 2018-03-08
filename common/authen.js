@@ -42,17 +42,19 @@
             return splits.join('/');
         };
 
-        /*
+        /**
          * Functions that interact with the StorageService tokens
-         *
          * There are 2 keys stored under the LOCAL_STORAGE_KEY object, PROMPT_EXPIRATION_KEY and PREVIOUS_SESSION_KEY
          */
+
+        // verifies value exists for `keyName`
         var _tokenExists = function(keyName) {
             var sessionStorage = StorageService.getStorage(LOCAL_STORAGE_KEY);
 
             return (sessionStorage && sessionStorage[keyName]);
         };
 
+        // creates an expiration token with `keyName`
         var _createToken = function (keyName) {
             var data = {};
             var hourFromNow = new Date();
@@ -63,24 +65,28 @@
             StorageService.updateStorage(LOCAL_STORAGE_KEY, data);
         };
 
+        // removes the key/value pair at `keyName`
         var _removeToken = function (keyName) {
             if (_tokenExists(keyName)) {
                 StorageService.deleteStorageValue(LOCAL_STORAGE_KEY, keyName);
             }
         };
 
+        // checks if the expiration token with `keyName` has expired
         var _expiredToken = function (keyName) {
             var sessionStorage = StorageService.getStorage(LOCAL_STORAGE_KEY);
 
             return (sessionStorage && new Date().getTime() > sessionStorage[keyName]);
         };
 
+        // extends the expiration token with `keyName` if it hasn't expired
         var _extendToken = function (keyName) {
             if (_tokenExists(keyName) && !_expiredToken(keyName)) {
                 _createToken(keyName);
             }
         };
 
+        // creates a boolean token with `keyName`
         var _createBool = function (keyName) {
             var data = {};
 
