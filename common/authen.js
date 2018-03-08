@@ -335,6 +335,7 @@
                 url += '?logout_url=' + UriUtils.fixedEncodeURIComponent(logoutURL);
 
                 $http.delete(url).then(function(response) {
+                    StorageService.deleteStorageNamespace(LOCAL_STORAGE_KEY);
                     $window.location = response.data.logout_url;
                 }, function(error) {
                     // if the logout fails for some reason, send the user to the logout url as defined above
