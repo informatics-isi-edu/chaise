@@ -7,8 +7,10 @@
 
         // authn API no longer communicates through ermrest, removing the need to check for ermrest location
         var serviceURL = $window.location.origin;
-        // name of object session information is stored under
-        var STORAGE_KEY_NAME = 'session';
+
+        var LOCAL_STORAGE_KEY = 'session';              // name of object session information is stored under
+        var PROMPT_EXPIRATION_KEY = 'promptExpiration'  // name of key for prompt expiration value
+        var PREVIOUS_SESSION_KEY = 'previousSession'    // name of key for previous session boolean
 
         // Private variable to store current session object
         var _session = null;
@@ -40,30 +42,51 @@
             return splits.join('/');
         };
 
-        var promptTokenExists = function () {
-            return StorageService.getStorage(STORAGE_KEY_NAME);
-        }
+        /*
+         * Functions that interact with the StorageService tokens
+         *
+         * There are 2 keys stored under the LOCAL_STORAGE_KEY object, PROMPT_EXPIRATION_KEY and PREVIOUS_SESSION_KEY
+         */
+        var _tokenExists = function(keyName) {
+            var sessionStorage = StorageService.getStorage(LOCAL_STORAGE_KEY);
 
-        var promptTokenHasExpired = function () {
-            var storedData = StorageService.getStorage(STORAGE_KEY_NAME);
-
-            return (storedData && new Date().getTime() > storedData.expires);
+            return (sessionStorage && sessionStorage[keyName]);
         };
 
-        var createPromptToken = function () {
+        var _createToken = function (keyName) {
+            var data = {};
             var hourFromNow = new Date();
             hourFromNow.setHours(hourFromNow.getHours() + 1);
 
-            StorageService.updateStorage(STORAGE_KEY_NAME, {expires: hourFromNow.getTime()});
-        }
+            data[keyName] = hourFromNow.getTime();
 
-        var extendPromptExpiration = function () {
-            if (promptTokenExists()) {
-                var hourFromNow = new Date();
-                hourFromNow.setHours(hourFromNow.getHours() + 1);
+            StorageService.updateStorage(LOCAL_STORAGE_KEY, data);
+        };
 
-                StorageService.updateStorage(STORAGE_KEY_NAME, {expires: hourFromNow.getTime()});
+        var _removeToken = function (keyName) {
+            if (_tokenExists(keyName)) {
+                StorageService.deleteStorageValue(LOCAL_STORAGE_KEY, keyName);
             }
+        };
+
+        var _expiredToken = function (keyName) {
+            var sessionStorage = StorageService.getStorage(LOCAL_STORAGE_KEY);
+
+            return (sessionStorage && new Date().getTime() > sessionStorage[keyName]);
+        };
+
+        var _extendToken = function (keyName) {
+            if (_tokenExists(keyName) && !_expiredToken(keyName)) {
+                _createToken(keyName);
+            }
+        };
+
+        var _createBool = function (keyName) {
+            var data = {};
+
+            data[keyName] = true;
+
+            StorageService.updateStorage(LOCAL_STORAGE_KEY, data);
         };
 
         var loginWindowCb = function (params, referrerId, cb, type){
@@ -129,8 +152,8 @@
             else {
                 window.addEventListener('message', function(args) {
                     if (args && args.data && (typeof args.data == 'string')) {
-                        // store value since unix time epoch + 1 hour
-                        StorageService.deleteStorage(STORAGE_KEY_NAME);
+                        _createBool(PREVIOUS_SESSION_KEY);
+                        _removeToken(PROMPT_EXPIRATION_KEY);
                         var obj = UriUtils.queryStringToJSON(args.data);
                         if (obj.referrerid == referrerId && (typeof cb== 'function')) {
                             if(type.indexOf('modal')!== -1){
@@ -250,9 +273,9 @@
             },
 
             promptUserPreviousSession: function() {
-                // if there's no stored data OR
-                // there's stored data but we are after it's expiration
-                if (!promptTokenExists() || promptTokenHasExpired()) {
+                // if there's a previous login token AND
+                // the prompt expiration token does not exist OR it has expired
+                if (_tokenExists(PREVIOUS_SESSION_KEY) && (!_tokenExists(PROMPT_EXPIRATION_KEY) || _expiredToken(PROMPT_EXPIRATION_KEY))) {
                     var params = {
                         title: messageMap.sessionExpired.title,
                         message: messageMap.sessionExpired.message,
@@ -275,8 +298,8 @@
                         popupLogin();
                     }, function () {
                         // error callback
-                        // set promp expiration
-                        createPromptToken();
+                        // set prompt expiration
+                        _createToken(PROMPT_EXPIRATION_KEY);
                     });
                 }
             },
@@ -295,7 +318,10 @@
                 delete _changeCbs[id];
             },
 
-            extendPromptExpiration: extendPromptExpiration,
+            extendPromptExpirationToken: function() {
+                _extendToken(PROMPT_EXPIRATION_KEY);
+            },
+
             loginInAPopUp: popupLogin,
 
             loginInAModal: function(notifyErmrestCB) {
