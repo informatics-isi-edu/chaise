@@ -215,6 +215,7 @@
                     };
                 }
                 vm.resultset = true;
+                UiUtils.setDisplayHeight(fetchElements(1));
         }
     }
 
@@ -573,7 +574,8 @@
 
         // fetches the height of navbar, bookmark container, and view
         // also fetches the faceting container for defining the dynamic height
-        function fetchElements() {
+        // There are 2 main containers on `recordedit` app
+        function fetchElements(mainContainerIndex) {
             var elements = {};
             try {
                 // get document height
@@ -584,7 +586,7 @@
                 // TODO: if bookmark bar added
                 elements.bookmarkHeight = 0;
                 // get recordset main container
-                elements.container = $document[0].getElementsByClassName('main-container')[0];
+                elements.container = $document[0].getElementsByClassName('main-container')[mainContainerIndex];
             } catch(error) {
                 $log.warn(error);
             }
@@ -595,7 +597,11 @@
             return $rootScope.displayReady;
         }, function (newValue, oldValue) {
             if (newValue) {
-                var elements = fetchElements();
+                var idx = 0;
+                if (vm.resultset) {
+                    idx = 1;
+                }
+                var elements = fetchElements(idx);
                 // if the navbarHeight is not set yet, don't set the height
                 // no bookmark container here
                 if(elements.navbarHeight) {
@@ -618,7 +624,11 @@
 
         angular.element($window).bind('resize', function(){
             if ($rootScope.displayReady) {
-                var elements = fetchElements();
+                var idx = 0;
+                if (vm.resultset) {
+                    idx = 1;
+                }
+                var elements = fetchElements(idx);
                 // if the navbarHeight is not set yet, don't set the height
                 // no bookmark container here
                 if(elements.navbarHeight) {
