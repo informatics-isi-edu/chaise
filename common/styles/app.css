@@ -745,6 +745,13 @@ body.previous-login > *:not(.modal-login-instruction):not(navbar):not(.modal-bac
     display: none !important;
 }
 
+/******* Popup modal for error ********/
+
+/* hide the loading spinner if we have the error dialog open */
+body.error-open loading-spinner {
+    display: none !important;
+}
+
 /*******Bootstrap  Modal styling *********/
 
 /*When the modal fills the screen it has an even 2.5% on top and bottom*/
