@@ -45,7 +45,7 @@
             </div>
         </div>
     </div>
-    <loading-spinner ng-show="!displayReady || showSpinner"></loading-spinner>
+    <loading-spinner ng-show="(!displayReady || showSpinner) && !error"></loading-spinner>
 
     <div id="main-content" class="container-fluid record-container">
 

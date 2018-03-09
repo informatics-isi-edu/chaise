@@ -279,35 +279,45 @@
             },
 
             promptUserPreviousSession: function() {
+                var defer = $q.defer();
                 // if there's a previous login token AND
                 // the prompt expiration token does not exist OR it has expired
-                if (_tokenExists(PREVIOUS_SESSION_KEY) && (!_tokenExists(PROMPT_EXPIRATION_KEY) || _expiredToken(PROMPT_EXPIRATION_KEY))) {
-                    var params = {
-                        title: messageMap.sessionExpired.title,
-                        message: messageMap.sessionExpired.message,
-                        subMessage: messageMap.previousSession.message
-                    }
+                if(!_session) {
+                    if (_tokenExists(PREVIOUS_SESSION_KEY) && (!_tokenExists(PROMPT_EXPIRATION_KEY) || _expiredToken(PROMPT_EXPIRATION_KEY))) {
+                        var params = {
+                            title: messageMap.sessionExpired.title,
+                            message: messageMap.sessionExpired.message,
+                            subMessage: messageMap.previousSession.message
+                        }
 
-                    var modalProperties = {
-                        windowClass: "modal-login-instruction",
-                        templateUrl: "../common/templates/loginDialog.modal.html",
-                        controller: 'LoginDialogController',
-                        controllerAs: 'ctrl',
-                        resolve: {
-                            params: params
-                        },
-                        openedClass: 'previous-login'
-                    }
+                        var modalProperties = {
+                            windowClass: "modal-login-instruction",
+                            templateUrl: "../common/templates/loginDialog.modal.html",
+                            controller: 'LoginDialogController',
+                            controllerAs: 'ctrl',
+                            resolve: {
+                                params: params
+                            },
+                            openedClass: 'previous-login'
+                        }
 
-                    modalUtils.showModal(modalProperties, function () {
-                        // success callback
-                        popupLogin();
-                    }, function () {
-                        // error callback
-                        // set prompt expiration
-                        _createToken(PROMPT_EXPIRATION_KEY);
-                    });
+                        modalUtils.showModal(modalProperties, function () {
+                            // success callback
+                            popupLogin();
+                        }, function () {
+                            // error callback
+                            // set prompt expiration
+                            _createToken(PROMPT_EXPIRATION_KEY);
+                            defer.resolve();
+                        });
+                    } else {
+                        defer.resolve();
+                    }
+                } else {
+                    defer.resolve();
                 }
+
+                return defer.promise;
             },
 
             subscribeOnChange: function(fn) {

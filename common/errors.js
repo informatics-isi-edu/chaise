@@ -226,6 +226,8 @@
 
             var stackTrace =  (exception.errorData && exception.errorData.stack)? exception.errorData.stack: undefined;
 
+            $rootScope.error = true;    // used to hide spinner
+
             if (exceptionFlag || window.location.pathname.indexOf('/search/') != -1 || window.location.pathname.indexOf('/viewer/') != -1){
               return;
             }

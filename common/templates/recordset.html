@@ -1,5 +1,5 @@
 <div class="recordset-container without-faceting">
-    <loading-spinner ng-show="(!vm.hasLoaded && !vm.backgroundSearch) || showSpinner"></loading-spinner>
+    <loading-spinner ng-show="((!vm.hasLoaded && !vm.backgroundSearch) || showSpinner) && !error"></loading-spinner>
     <div class="main-container">
         <div ng-show="vm.initialized" class="row" style="margin-bottom: 10px;">
             <div ng-if="vm.config.selectMode == 'multi-select' && !vm.config.hideSelectedRows" class="row total-filters selected-rows">

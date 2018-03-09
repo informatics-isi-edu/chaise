@@ -420,9 +420,6 @@
             }).catch(function genericCatch(response) {
                 // should catch errors thrown from within the promise structure
                 // nothing specific we need to do in here for now
-                console.log("here");
-                $rootScope.displayReady = true;
-                $rootScope.showSpinner = false;
                 throw response;
             });
         });
