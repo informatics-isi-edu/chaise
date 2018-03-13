@@ -88,12 +88,12 @@
      * - message {String} - the message for the body of the modalBox
      * - subMessage {String} - the sub-message to display under the login button (optional)
      */
-    .controller('LoginDialogController', ['$uibModalInstance', 'params', function LoginDialogController($uibModalInstance, params) {
+    .controller('LoginDialogController', ['$uibModalInstance', 'params', 'Session', function LoginDialogController($uibModalInstance, params, Session) {
         var vm = this;
         vm.params = params;
 
         vm.openWindow = function() {
-            $uibModalInstance.close();
+            Session.loginInAPopUp();
         };
 
         vm.cancel = function () {

@@ -107,7 +107,6 @@
                 var closed = false;
                 var onModalCloseSuccess = function () {
                     onModalClose();
-                    popupLogin();
                 }
 
                 var onModalClose = function() {
@@ -303,7 +302,6 @@
 
                         modalUtils.showModal(modalProperties, function () {
                             // success callback
-                            popupLogin();
                         }, function () {
                             // error callback
                             // set prompt expiration
