@@ -7,12 +7,25 @@
         var localStorage = $window.localStorage;
 
         /**
-         * Deletes the data in local storage defined under `storageLocation`
+         * Deletes all the data in local storage defined under `storageLocation`
          *
          * @param {String} storageLocation - name of object data is stored under
          */
-        var deleteStorage = function (storageLocation) {
+        var deleteStorageNamespace = function (storageLocation) {
             localStorage.removeItem(storageLocation);
+        };
+
+        /**
+         * Deletes the data in local storage defined under `storageLocation` with `keyName`
+         *
+         * @param {String} storageLocation - name of object data is stored under
+         * @param {String} keyName - key name of the data to be deleted
+         */
+        var deleteStorageValue = function (storageLocation, keyName) {
+            var value = getStorage(storageLocation);
+
+            delete value[keyName];
+            setStorage(storageLocation, value);
         };
 
         /**
@@ -52,7 +65,8 @@
         };
 
         return {
-            deleteStorage: deleteStorage,
+            deleteStorageNamespace: deleteStorageNamespace,
+            deleteStorageValue: deleteStorageValue,
             getStorage: getStorage,
             setStorage: setStorage,
             updateStorage: updateStorage
