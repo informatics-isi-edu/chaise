@@ -340,4 +340,28 @@ describe('Error related test cases,', function() {
 
     });
 
+    describe("History for errorneous Url", function(){
+
+      beforeAll(function() {
+          var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name +  "/id=269111";
+          browser.get(url);
+          chaisePage.waitForElement(element(by.css('.modal-dialog ')));
+      });
+        it('After clicking back button initial page should appear', function(done){
+            chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
+              return btn.click();
+            }).then (function (){
+              browser.navigate().back();
+              return browser.driver.getCurrentUrl();
+            }).then (function(currentUrl) {
+              expect(currentUrl).toContain('id=269111', "The back button failed to go back to previous page.");
+              done();
+          }).catch(function(error) {
+              console.log(error);
+              done.fail();
+          });
+      });
+
+    });
+
 });
