@@ -22,7 +22,7 @@
 <body class="chaise-body">
     <div class="container-fluid">
         <navbar></navbar>
-        <loading-spinner ng-show="!displayReady"></loading-spinner>
+        <loading-spinner ng-show="!displayReady && !error"></loading-spinner>
         <div ng-if="reference && (reference.canCreate || reference.canUpdate)">
             <div ng-controller="FormController as form" class="row">
                 <div ng-show="!form.resultset">

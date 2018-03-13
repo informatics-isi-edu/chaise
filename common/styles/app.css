@@ -702,7 +702,7 @@ input.search-progress {
     border-bottom: none;
 }
 
-/*=============Popup modal for login instructions********/
+/******** Popup modal for login instructions ********/
 
 .modal-login .modal-backdrop {
     opacity: 0.7 !important;
@@ -733,6 +733,23 @@ input.search-progress {
 
 .modal-login .modal-title {
     font-size: 22px !important;
+}
+
+/******* Popup modal for previous login ********/
+
+body.previous-login > .modal-login-instruction {
+    z-index: 99999 !important;
+}
+
+body.previous-login > *:not(.modal-login-instruction):not(navbar):not(.modal-backdrop) {
+    display: none !important;
+}
+
+/******* Popup modal for error ********/
+
+/* hide the loading spinner if we have the error dialog open */
+body.error-open loading-spinner {
+    display: none !important;
 }
 
 /*******Bootstrap  Modal styling *********/
