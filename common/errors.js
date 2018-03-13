@@ -19,7 +19,7 @@
         forbidden: "Forbidden",
         notFound: "No data",
         multipleRecords: "Multiple Records Found",
-        noDataMessage: 'No authorization to view this record/No matching record found for the given filter or facet.',
+        noDataMessage: 'The record does not exist or may be hidden. If you continue to face this issue, please contact the system administrator.',
         multipleDataErrorCode : "Multiple Records Found",
         multipleDataMessage : "There are more than 1 record found for the filters provided.",
         facetFilterMissing : "No filtering criteria was specified to identify a specific record.",
