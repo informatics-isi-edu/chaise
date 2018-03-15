@@ -50,7 +50,7 @@
         } else if(vm.params.errorCode == 'Record Not Found'){
             vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
             if(params && !params.isLoggedIn){
-              params.message = 'No matching record found for the given filter or facet/You may not be authorized to view this record. Please login to continue.';
+              params.message = 'No matching record found for the given filter or facet.<br>You may not be authorized to view this record.';
             }
         } else {
             vm.clickActionMessage = messageMap.recordAvailabilityError.pageRedirect + vm.params.pageName + '. ';
