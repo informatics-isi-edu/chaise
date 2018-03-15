@@ -53,6 +53,8 @@
               params.message = 'No matching record found for the given filter or facet.<br>You may not be authorized to view this record.';
             }
         } else if (Object.values(messageMap.facetRelatedErrorStatus).indexOf(vm.params.errorCode) > -1) {
+           // Check if error prompted was found in the facetRelatedErrorStatus object and use it to
+           // generate error phrase for action message
             if(vm.params.errorCode == messageMap.facetRelatedErrorStatus.invalidFilter){
                 vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
             } else{
