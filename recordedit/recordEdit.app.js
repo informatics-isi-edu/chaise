@@ -44,8 +44,8 @@
         $logProvider.debugEnabled(chaiseConfig.debug === true);
     }])
 
-    .run(['AlertsService', 'dataFormats', 'ERMrest', 'ErrorService', 'FunctionUtils', 'headInjector', 'logActions', 'MathUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', 'messageMap', 'Errors',
-        function runRecordEditApp(AlertsService, dataFormats, ERMrest, ErrorService, FunctionUtils, headInjector, logActions, MathUtils, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies, messageMap, Errors) {
+    .run(['AlertsService', 'dataFormats', 'DataUtils', 'ERMrest', 'ErrorService', 'FunctionUtils', 'headInjector', 'logActions', 'MathUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', 'messageMap', 'Errors',
+        function runRecordEditApp(AlertsService, dataFormats, DataUtils, ERMrest, ErrorService, FunctionUtils, headInjector, logActions, MathUtils, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies, messageMap, Errors) {
 
         var session,
             context = { booleanValues: ['', true, false] };
@@ -338,14 +338,14 @@
                             errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
                             response.errorData = errorData;
 
-                            if(response.errorData && response.errorData.redirectPath && response.errorData.redirectPath != ''){
-                               var redirectLink = UriUtils.createRedirectLinkFromPath(response.errorData.redirectPath);
-                               if(response.status == messageMap.facetRelatedErrorStatus.invalidFilter){
-                                response.errorData.redirectUrl = redirectLink.replace('recordedit', 'recordset');
-                              } else{
-                                response.errorData.redirectUrl = redirectLink;
-                              }
-                          }
+                            if (DataUtils.isObjectAndKeyDefined(response.errorData, 'redirectPath')) {
+                                var redirectLink = UriUtils.createRedirectLinkFromPath(response.errorData.redirectPath);
+                                if(response.status == messageMap.facetRelatedErrorStatus.invalidFilter){
+                                    response.errorData.redirectUrl = redirectLink.replace('recordedit', 'recordset');
+                                } else{
+                                    response.errorData.redirectUrl = redirectLink;
+                                }
+                            }
                             throw response;
                         });
                     } else if (session) {
@@ -428,14 +428,14 @@
                     }
                 }
             }, function error(response) {
-                if(response.errorData && response.errorData.redirectPath && response.errorData.redirectPath != ''){
-                  var redirectLink = UriUtils.createRedirectLinkFromPath(response.errorData.redirectPath);
-                  if(response.status == messageMap.facetRelatedErrorStatus.invalidFilter){
-                   response.errorData.redirectUrl = redirectLink.replace('recordedit', 'recordset');
-                 }else{
-                   response.errorData.redirectUrl = redirectLink;
-                 }
-              }
+                if (DataUtils.isObjectAndKeyDefined(response.errorData, 'redirectPath')) {
+                    var redirectLink = UriUtils.createRedirectLinkFromPath(response.errorData.redirectPath);
+                    if(response.status == messageMap.facetRelatedErrorStatus.invalidFilter){
+                        response.errorData.redirectUrl = redirectLink.replace('recordedit', 'recordset');
+                    }else{
+                        response.errorData.redirectUrl = redirectLink;
+                    }
+                }
                 throw response;
             });
         });

@@ -867,6 +867,14 @@
         }
 
         /**
+         *
+         *
+         */
+        function isObjectAndKeyDefined(obj, keyName) {
+            return (obj && obj[keyName] != undefined && obj[keyName] != '')
+        }
+
+        /**
         *
         * @desc Converts the following characters to HTML entities for safe and
         * HTML5-valid usage in the `id` attributes of HTML elements: spaces, ampersands,
@@ -909,6 +917,7 @@
             getRowValuesFromPage: getRowValuesFromPage,
             getRowValuesFromTupleData: getRowValuesFromTupleData,
             getRowValuesFromTuples: getRowValuesFromTuples,
+            isObjectAndKeyDefined: isObjectAndKeyDefined,
             makeSafeIdAttr: makeSafeIdAttr,
             verify: verify
         };

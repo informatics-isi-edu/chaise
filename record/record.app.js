@@ -120,24 +120,21 @@
                 };
                 // return model;
                 callback(model);
-                },function readFail(error) {
-                    var model = {
-                        hasLoaded: true
-                    };
-                    // return model;
-                    callback(model);
-                    errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
-                    errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
-                    error.errorData = errorData;
-                    throw error;
-                }).catch(function(e) {
-                    // The .catch from the outer promise won't catch errors from this closure
-                    // so a .catch needs to be appended here.
-                    errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
-                    errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
-                    e.errorData = errorData;
-                    throw e;
-                });
+            }, function readFail(error) {
+                var model = {
+                    hasLoaded: true
+                };
+                // return model;
+                callback(model);
+                throw error;
+            }).catch(function(e) {
+                // The .catch from the outer promise won't catch errors from this closure
+                // so a .catch needs to be appended here.
+                errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
+                errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
+                e.errorData = errorData;
+                throw e;
+            });
         }
         // Subscribe to on change event for session
         var subId = Session.subscribeOnChange(function() {
@@ -165,10 +162,10 @@
 
                 return $rootScope.reference.read(1, {action: logActions.recordRead});
             }, function error(exception) {
-              if(exception.errorData && exception.errorData.redirectPath && exception.errorData.redirectPath != ''){
-                var redirectLink = UriUtils.createRedirectLinkFromPath(exception.errorData.redirectPath);
-                exception.errorData.redirectUrl = redirectLink.replace('record', 'recordset');
-              }
+                if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'redirectPath')) {
+                    var redirectLink = UriUtils.createRedirectLinkFromPath(exception.errorData.redirectPath);
+                    exception.errorData.redirectUrl = redirectLink.replace('record', 'recordset');
+                }
                 throw exception;
             }).then(function getPage(page) {
                 $log.info("Page: ", page);
@@ -268,10 +265,10 @@
                 }
 
             }).catch(function genericCatch(exception) {
-              if(exception.errorData && exception.errorData.redirectPath && exception.errorData.redirectPath != ''){
-                var redirectLink = UriUtils.createRedirectLinkFromPath(exception.errorData.redirectPath);
-                exception.errorData.redirectUrl = redirectLink.replace('record', 'recordset');
-              }
+                if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'redirectPath')) {
+                    var redirectLink = UriUtils.createRedirectLinkFromPath(exception.errorData.redirectPath);
+                    exception.errorData.redirectUrl = redirectLink.replace('record', 'recordset');
+                }
                 throw exception;
             });
 
