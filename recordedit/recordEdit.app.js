@@ -44,8 +44,8 @@
         $logProvider.debugEnabled(chaiseConfig.debug === true);
     }])
 
-    .run(['AlertsService', 'dataFormats', 'ERMrest', 'ErrorService', 'FunctionUtils', 'headInjector', 'logActions', 'MathUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', 'messageMap', 'Errors',
-        function runRecordEditApp(AlertsService, dataFormats, ERMrest, ErrorService, FunctionUtils, headInjector, logActions, MathUtils, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies, messageMap, Errors) {
+    .run(['AlertsService', 'dataFormats', 'DataUtils', 'ERMrest', 'ErrorService', 'FunctionUtils', 'headInjector', 'logActions', 'MathUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', 'messageMap', 'Errors',
+        function runRecordEditApp(AlertsService, dataFormats, DataUtils, ERMrest, ErrorService, FunctionUtils, headInjector, logActions, MathUtils, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies, messageMap, Errors) {
 
         var session,
             context = { booleanValues: ['', true, false] };
@@ -332,10 +332,19 @@
                             // Keep a copy of the initial rows data so that we can see if user has made any changes later
                             recordEditModel.oldRows = angular.copy(recordEditModel.rows);
                         }, function error(response) {
-                          var errorData = {};
+                            var errorData = {};
                             errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
                             errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
                             response.errorData = errorData;
+
+                            if (DataUtils.isObjectAndKeyDefined(response.errorData, 'redirectPath')) {
+                                var redirectLink = UriUtils.createRedirectLinkFromPath(response.errorData.redirectPath);
+                                if(response.status == messageMap.facetRelatedErrorStatus.invalidFilter){
+                                    response.errorData.redirectUrl = redirectLink.replace('recordedit', 'recordset');
+                                } else{
+                                    response.errorData.redirectUrl = redirectLink;
+                                }
+                            }
                             throw response;
                         });
                     } else if (session) {
@@ -417,9 +426,15 @@
                         throw new ERMrest.UnauthorizedError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
                     }
                 }
-            }).catch(function genericCatch(response) {
-                // should catch errors thrown from within the promise structure
-                // nothing specific we need to do in here for now
+            }, function error(response) {
+                if (DataUtils.isObjectAndKeyDefined(response.errorData, 'redirectPath')) {
+                    var redirectLink = UriUtils.createRedirectLinkFromPath(response.errorData.redirectPath);
+                    if(response.status == messageMap.facetRelatedErrorStatus.invalidFilter){
+                        response.errorData.redirectUrl = redirectLink.replace('recordedit', 'recordset');
+                    }else{
+                        response.errorData.redirectUrl = redirectLink;
+                    }
+                }
                 throw response;
             });
         });

@@ -304,40 +304,41 @@
                     recordsetModel.tableDisplayName = recordsetModel.reference.displayname;
 
                      // the additional provided name
-                    if (location.queryParams && location.queryParams.subset) {
-                        recordsetModel.filterString = location.queryParams.subset;
-                    }
+                     if (location.queryParams && location.queryParams.subset) {
+                         recordsetModel.filterString = location.queryParams.subset;
+                     }
 
-                    recordsetModel.columns = recordsetModel.reference.columns;
-                    recordsetModel.search = recordsetModel.reference.location.searchTerm;
+                     recordsetModel.columns = recordsetModel.reference.columns;
+                     recordsetModel.search = recordsetModel.reference.location.searchTerm;
 
-                    recordsetModel.logObject = {action: logActions.recordsetLoad};
+                     recordsetModel.logObject = {action: logActions.recordsetLoad};
 
-                    if (showFaceting) {
-                        $log.debug("sending page-loaded message");
-                        $rootScope.$broadcast('page-loaded');
-                    } else {
-                        recordsetModel.reference.read(recordsetModel.pageLimit, recordsetModel.logObject).then(function (page) {
-                            recordsetModel.page = page;
-                            recordsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
-                            recordsetModel.initialized = true;
-                            recordsetModel.hasLoaded = true;
+                     if (showFaceting) {
+                         $log.debug("sending page-loaded message");
+                         $rootScope.$broadcast('page-loaded');
+                     } else {
+                         recordsetModel.reference.read(recordsetModel.pageLimit, recordsetModel.logObject).then(function (page) {
+                             recordsetModel.page = page;
+                             recordsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
+                             recordsetModel.initialized = true;
+                             recordsetModel.hasLoaded = true;
 
-                            $rootScope.$broadcast('data-modified');
-                        }).catch(function (err) {
-                          var errorData = {};
-                          errorData.gotoTableDisplayname = "Home Page";
-                          errorData.redirectUrl = $window.location.origin;
-                          err.errorData = errorData;
-                          throw err;
-                        });
-                    }
-                }).catch(function genericCatch(exception) {
-                    $log.warn(exception);
-                    recordsetModel.hasLoaded = true;
-
-                    throw exception;
-                });
+                             $rootScope.$broadcast('data-modified');
+                         }).catch(function (err) {
+                             if (DataUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
+                                 err.errorData.redirectUrl = UriUtils.createRedirectLinkFromPath(err.errorData.redirectPath);
+                             }
+                             throw err;
+                         });
+                     }
+                 }).catch(function genericCatch(exception) {
+                     $log.warn(exception);
+                     recordsetModel.hasLoaded = true;
+                     if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'redirectPath')) {
+                         exception.errorData.redirectUrl = UriUtils.createRedirectLinkFromPath(exception.errorData.redirectPath);
+                     }
+                     throw exception;
+                 });
 
             });
 

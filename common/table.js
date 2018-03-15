@@ -198,6 +198,9 @@
                 scope.vm.hasLoaded = true;
                 setSearchStates(scope, isBackground);
                 if (!isBackground && scope.vm.foregroundSearch) scope.vm.foregroundSearch = false;
+                if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'redirectPath')) {
+                  exception.errorData.redirectUrl = UriUtils.createRedirectLinkFromPath(exception.errorData.redirectPath);
+                }
                 throw exception;
             });
         }
@@ -218,11 +221,14 @@
                     return defer.resolve(true);
                 }).catch(function(err) {
                     if (vm.reference.uri !== uri) {
-                        return defer.resolve(false);
+                        defer.resolve(false);
                     }
 
                     vm.hasLoaded = true;
                     vm.initialized = true;
+                    if (DataUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
+                      err.errorData.redirectUrl = UriUtils.createRedirectLinkFromPath(err.errorData.redirectPath);
+                    }
                     return defer.reject(err);
                 });
             }) (vm.reference.uri);

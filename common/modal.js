@@ -49,7 +49,13 @@
             vm.clickActionMessage =  messageMap.recordAvailabilityError.multipleRecords;
         } else if(vm.params.errorCode == 'Record Not Found'){
             vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
-        } else {
+        } else if (Object.values(messageMap.facetRelatedErrorStatus).indexOf(vm.params.errorCode) > -1) {
+            if(vm.params.errorCode == messageMap.facetRelatedErrorStatus.invalidFilter){
+                vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
+            } else{
+            vm.clickActionMessage = messageMap.facetRelatedErrorStatus.clickActionMessage.replace('@errorStatus', vm.params.errorCode);
+          }
+        }else {
             vm.clickActionMessage = messageMap.recordAvailabilityError.pageRedirect + vm.params.pageName + '. ';
             if(vm.params.appName == 'recordedit'){
               vm.showReloadBtn = true;
