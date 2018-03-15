@@ -102,6 +102,8 @@
 
         // Subscribe to on change event for session
         var subId = Session.subscribeOnChange(function() {
+            // Unsubscribe onchange event to avoid this function getting called again
+            Session.unsubscribeOnChange(subId);
 
             // Get existing session value
             session = Session.getSessionValue();
@@ -111,9 +113,6 @@
                 var notAuthorizedError = new ERMrest.UnauthorizedError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
                 throw notAuthorizedError;
             }
-
-            // Unsubscribe onchange event to avoid this function getting called again
-            Session.unsubscribeOnChange(subId);
 
             // On resolution
             ERMrest.resolve(ermrestUri, { cid: context.appName, pid: context.pageId, wid: $window.name }).then(function getReference(reference) {

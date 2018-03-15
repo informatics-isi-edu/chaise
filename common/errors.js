@@ -188,6 +188,7 @@
             };
 
             var modalProperties = {
+                windowClass: "modal-error",
                 templateUrl: '../common/templates/errorDialog.modal.html',
                 controller: 'ErrorModalController',
                 controllerAs: 'ctrl',
@@ -195,7 +196,8 @@
                 keyboard: false,
                 resolve: {
                     params: params
-                }
+                },
+                openedClass: 'error-open'
             };
 
 
@@ -234,6 +236,8 @@
                 gotoLocation = "Home Page";
 
             var stackTrace =  (exception.errorData && exception.errorData.stack)? exception.errorData.stack: undefined;
+
+            $rootScope.error = true;    // used to hide spinner in conjunction with a css property
 
             if (exceptionFlag || window.location.pathname.indexOf('/search/') != -1 || window.location.pathname.indexOf('/viewer/') != -1){
               return;

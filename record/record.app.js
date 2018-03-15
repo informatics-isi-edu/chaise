@@ -142,18 +142,15 @@
             // Unsubscribe onchange event to avoid this function getting called again
             Session.unsubscribeOnChange(subId);
 
-            ERMrest.resolve(ermrestUri, { cid: context.appName, pid: context.pageId, wid: $window.name }).then(function getReference(reference) {
+            Session.promptUserPreviousSession().then(function () {
+                return ERMrest.resolve(ermrestUri, { cid: context.appName, pid: context.pageId, wid: $window.name });
+            }).then(function getReference(reference) {
                 context.filter = reference.location.filter;
                 context.facets = reference.location.facets;
 
                 DataUtils.verify((context.filter || context.facets), 'No filter or facet was defined. Cannot find a record without a filter or facet.');
 
-                // if the user can fetch the reference, they can see the content for the rest of the page
-                // set loading to force the loading text to appear and to prevent the on focus from firing while code is initializing
                 session = Session.getSessionValue();
-                if (!session) {
-                    Session.promptUserPreviousSession();
-                }
 
                 // $rootScope.reference != reference after contextualization
                 $rootScope.reference = reference.contextualize.detailed;
