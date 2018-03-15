@@ -50,7 +50,7 @@
         } else if(vm.params.errorCode == 'Record Not Found'){
             vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
         } else if (Object.values(messageMap.facetRelatedErrorStatus).indexOf(vm.params.errorCode) > -1) {
-           // Check if error prompted was found in the facetRelatedErrorStatus object and use it
+           // Check if error prompted was found in the facetRelatedErrorStatus object and use it to
            // generate error phrase for action message
             if(vm.params.errorCode == messageMap.facetRelatedErrorStatus.invalidFilter){
                 vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
