@@ -37,7 +37,7 @@
             $uibModalInstance.dismiss('cancel');
         }
     }])
-    .controller('ErrorModalController', ['$uibModalInstance', 'params', 'messageMap', '$window', function ErrorModalController($uibModalInstance, params, messageMap, $window) {
+    .controller('ErrorModalController', ['$uibModalInstance', 'params', 'messageMap', '$window', 'Session', function ErrorModalController($uibModalInstance, params, messageMap, $window, Session) {
         var vm = this;
         vm.params = params;
         vm.displayDetails = false;
@@ -50,7 +50,7 @@
         } else if(vm.params.errorCode == 'Record Not Found'){
             vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
             if(params && !params.isLoggedIn){
-              params.message = 'No matching record found for the given filter or facet.<br>You may not be authorized to view this record.';
+              params.message = messageMap.noRecordForFilter + '<br>' + messageMap.unauthorizedMessage;
             }
         } else if (Object.values(messageMap.facetRelatedErrorStatus).indexOf(vm.params.errorCode) > -1) {
            // Check if error prompted was found in the facetRelatedErrorStatus object and use it to
@@ -88,7 +88,7 @@
 
         };
         vm.login = function () {
-            $uibModalInstance.close("login");
+            Session.loginInAPopUp();  //Open login pop-up without closing error modal
 
         };
 

@@ -7,8 +7,7 @@
   <span ng-if="!ctrl.params.isLoggedIn"><a id="login-link" ng-click="ctrl.login()">Please login</a> to continue.</span>
 
     <br><br>
-    <!-- <span ng-if="!ctrl.params.isLoggedIn">Click <a id="login-link" ng-click="ctrl.login()"><b>here</b></a> to login.</span> -->
-    <!-- <span ng-if="!ctrl.params.isLoggedIn"><br></span> -->
+    
     <span ng-bind-html="ctrl.clickActionMessage"></span>
     <a ng-show="ctrl.params.subMessage" ng-click="ctrl.showDetails()">
       <i class="pull-left glyphicon glyphicon-triangle-right" ng-class="{'glyphicon-triangle-bottom': ctrl.displayDetails, 'glyphicon-triangle-right': !ctrl.displayDetails}"></i>

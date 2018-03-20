@@ -214,8 +214,7 @@
                     if(actionBtnIdentifier == "reload"){
                         reloadCb();
                     } else{             //default action i.e. redirect link for OK button
-                        $window.history.pushState(null, null, $window.location.hash);  // maintain history for back/forward navigation
-                        $window.location.replace(redirectLink);
+                        $window.location = redirectLink;
                     }
 
                 }
