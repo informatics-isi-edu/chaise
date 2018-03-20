@@ -150,7 +150,7 @@
             window.location.reload();
         };
 
-        function errorPopup(message, errorCode, pageName, redirectLink, subMessage, stackTrace) {
+        function errorPopup(message, errorStatus, pageName, redirectLink, subMessage, stackTrace, errorCode) {
             var providedLink = true,
                 isLoggedIn = false;
             var appName = UriUtils.appNamefromUrlPathname($window.location.pathname),
@@ -180,7 +180,7 @@
 
             var params = {
                 message: message,
-                errorCode: errorCode,
+                errorStatus: errorStatus,
                 pageName: pageName,
                 subMessage: subMessage,
                 appName: appName,
@@ -201,14 +201,14 @@
             };
 
 
-            if (chaiseConfig && chaiseConfig.allowErrorDismissal) {
+            if (subMessage == 403 || (chaiseConfig && chaiseConfig.allowErrorDismissal)) {  //If Forbidden error then allow modal to be dismissed
                 delete modalProperties.keyboard;
                 delete modalProperties.backdrop;
                 params.canClose = true;
             }
 
             modalUtils.showModal(modalProperties, function (actionBtnIdentifier) {
-                if ((errorCode == errorNames.unauthorized && !providedLink) || (actionBtnIdentifier === "login")) {
+                if ((errorStatus == errorNames.unauthorized && !providedLink) || (actionBtnIdentifier === "login")) {
                     Session.loginInAPopUp();
                 } else {
                     if(actionBtnIdentifier == "reload"){
