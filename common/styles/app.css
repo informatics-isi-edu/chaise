@@ -1115,6 +1115,12 @@ footer .container1 {
      margin-top: 5px;
  }
 
+/******* faceting resizeable *******/
+
+ .faceting-resizable.close-panel .rg-left, .faceting-resizable.close-panel .rg-right {
+   display: none;
+ }
+
  .recordset-container.with-faceting > .faceting-resizable {
      flex:0 0 20vw;
      position: relative;
@@ -1133,6 +1139,23 @@ footer .container1 {
  .recordset-container.with-faceting > .faceting-resizable.initializing > .rg-right > span{
     display: none;
  }
+
+ .sidePanFiddler, #back-to-top {
+     cursor: pointer;
+     overflow: hidden;
+     z-index: 50;
+     font-size: 25px;
+     padding: 1px 0 1px 5px;
+     border-radius: 2px 0 0px 2px;
+     height: 35px;
+     width: 35px;
+ }
+
+ .sidePanFiddler {
+     top: 5px;
+ }
+
+ /****** RSwF main container *******/
 
  .recordset-container.with-faceting > .main-container {
      flex:1;

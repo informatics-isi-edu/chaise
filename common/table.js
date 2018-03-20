@@ -1010,6 +1010,7 @@
                 scope.vm.dirtyResult = false;
                 scope.vm.occupiedSlots = 0;
                 scope.vm.facetsToInitialize = [];
+                scope.vm.facetPanelOpen = true;
 
                 scope.setPageLimit = function(limit) {
                     scope.vm.pageLimit = limit;
@@ -1136,6 +1137,10 @@
                 scope.removeAllPills = function() {
                     scope.vm.selectedRows.clear();
                     scope.vm.currentPageSelected = false;
+                };
+
+                scope.togglePanel = function () {
+                    scope.vm.facetPanelOpen = !scope.vm.facetPanelOpen;
                 };
 
                 // on window focus, if has pending add record requests

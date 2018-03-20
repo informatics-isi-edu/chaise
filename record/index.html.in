@@ -52,11 +52,16 @@
         <div class="main-container" ng-class="{'initializing': !displayReady}">
             <alerts alerts="ctrl.alerts"></alerts>
 
+            <div class="sidePanFiddler btn btn-primary btn-inverted" ng-hide="ctrl.noVisibleRelatedTables()" ng-class="{'open-panel': recordSidePanOpen, 'close-panel': !recordSidePanOpen}" ng-click="ctrl.togglePan()">
+                <i ng-class="{'glyphicon glyphicon-triangle-right': recordSidePanOpen, 'glyphicon glyphicon-triangle-left': !recordSidePanOpen}"
+                   uib-tooltip="{{'Click to ' + ((recordSidePanOpen) ? 'hide' : 'show') + ' list of related records.'}}" tooltip-placement="left"></i>
+            </div>
+
             <!-- defined on $rootScope in run function -->
-                <record-display columns="::columns" values="::recordValues"  record-table-model="::colTableModels" related-reference-display-table="::rtrefDisTypetable"
-                toggle-related-table-display-type='ctrl.toggleRelatedTableDisplayType(dataModel)' can-edit-related="::ctrl.canEditRelated(ref)" can-create-related="::ctrl.canCreateRelated(ref)"
-                add-related-record="ctrl.addRelatedRecord(ref)" to-record-set="ctrl.toRecordSet(ref)" show-empty-related-tables="showEmptyRelatedTables">
-                </record-display>
+            <record-display columns="::columns" values="::recordValues"  record-table-model="::colTableModels" related-reference-display-table="::rtrefDisTypetable"
+            toggle-related-table-display-type='ctrl.toggleRelatedTableDisplayType(dataModel)' can-edit-related="::ctrl.canEditRelated(ref)" can-create-related="::ctrl.canCreateRelated(ref)"
+            add-related-record="ctrl.addRelatedRecord(ref)" to-record-set="ctrl.toRecordSet(ref)" show-empty-related-tables="showEmptyRelatedTables">
+            </record-display>
 
             <!-- used to delay empty accordions from displaying before simple record display -->
             <div ng-if="displayReady">
@@ -88,14 +93,9 @@
             <span id="rt-loading" ng-show="loading">Loading...</span>
         </div>
 
-        <div class="faceting-resizable record-toc" resizable r-directions=["left"] r-flex="true" id="record-side-pan" ng-show="!ctrl.noVisibleRleatedTables()" ng-class="{'open-panel': recordSidePanOpen, 'close-panel': !recordSidePanOpen}">
+        <div class="faceting-resizable record-toc" resizable r-directions=["left"] r-flex="true" id="record-side-pan" ng-hide="ctrl.hidePanel()" ng-class="{'open-panel': recordSidePanOpen, 'close-panel': !recordSidePanOpen}">
             <div class="btn btn-primary btn-inverted" id="back-to-top" ng-click="scrollToTop()" ng-show="showTopBtn">
                 <i uib-tooltip="Scroll To Top" tooltip-placement="left" class="glyphicon glyphicon-triangle-top"></i>
-            </div>
-
-            <div class="sidePanFiddler btn btn-primary btn-inverted" ng-class="{'open-panel': recordSidePanOpen, 'close-panel': !recordSidePanOpen}" ng-click="ctrl.togglePan()">
-                <i ng-class="{'glyphicon glyphicon-triangle-right': recordSidePanOpen, 'glyphicon glyphicon-triangle-left': !recordSidePanOpen}"
-                   uib-tooltip="{{'Click to ' + ((recordSidePanOpen) ? 'hide' : 'show') + ' list of related records.'}}" tooltip-placement="left"></i>
             </div>
 
             <div class="faceting-container" style="height: 100%;" >

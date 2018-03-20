@@ -1,7 +1,7 @@
-<div class="recordset-container" ng-class="vm.config.showFaceting ? 'row with-faceting':'without-faceting'">
+<div class="recordset-container" ng-class="vm.config.showFaceting ? 'row with-faceting':'without-faceting'" >
     <div ng-bind="whatever"></div>
     <loading-spinner ng-show="(!vm.initialized || $root.showSpinner) && !$root.error"></loading-spinner>
-    <div class="faceting-resizable" resizable r-directions=["right"] r-flex="true" ng-if="vm.config.showFaceting" ng-class="{'initializing': !vm.initialized}">
+    <div class="faceting-resizable" resizable r-directions=["right"] r-flex="true" ng-if="vm.config.showFaceting" ng-hide="!vm.facetPanelOpen" ng-class="{'open-panel': vm.facetPanelOpen, 'close-panel': !vm.facetPanelOpen, 'initializing': !vm.initialized}">
         <faceting vm="vm"></faceting>
     </div>
     <div class="main-container">
@@ -10,6 +10,11 @@
 
             <div style="margin-left: 15px;margin-right: 20px;">
                 <alerts alerts="$root.alerts"></alerts>
+            </div>
+
+            <div class="sidePanFiddler btn btn-primary btn-inverted" ng-class="{'open-panel': vm.facetPanelOpen, 'close-panel': !vm.facetPanelOpen}" ng-if="vm.config.showFaceting" ng-click="togglePanel()">
+                <i ng-class="{'glyphicon glyphicon-triangle-left': vm.facetPanelOpen, 'glyphicon glyphicon-triangle-right': !vm.facetPanelOpen}"
+                   uib-tooltip="{{'Click to ' + ((vm.facetPanelOpen) ? 'hide' : 'show') + ' list of available facets.'}}" tooltip-placement="right"></i>
             </div>
 
             <div ng-if="vm.selectedRows.length > 0 && vm.config.selectMode == 'multi-select' && !vm.config.hideSelectedRows" class="row total-filters">

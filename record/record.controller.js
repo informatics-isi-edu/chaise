@@ -131,7 +131,7 @@
             }
         };
 
-        vm.noVisibleRleatedTables = function () {
+        vm.noVisibleRelatedTables = function () {
             if ($rootScope.tableModels) {
                 return !$rootScope.tableModels.some(function (tm, index) {
                     return vm.showRelatedTable(index);
@@ -139,6 +139,10 @@
             }
             return true;
         };
+
+        vm.hidePanel = function () {
+            return vm.noVisibleRelatedTables() || !$scope.recordSidePanOpen;
+        }
 
         vm.toggleRelatedTableDisplayType = function(dataModel) {
             if (dataModel.displayType == 'markdown') {

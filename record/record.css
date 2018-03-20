@@ -138,39 +138,17 @@
   padding-left: 10px;
 }
 
-.sidePanFiddler, #back-to-top {
-    cursor: pointer;
-    overflow: hidden;
-    z-index: 50;
-    font-size: 25px;
-    padding: 1px 0 1px 5px;
-    border-radius: 2px 0 0px 2px;
-    height: 35px;
-    width: 35px;
-}
-
 .sidePanFiddler{
     position: absolute;
-    left: -51px;
-    top: 5px;
+    right: 10px;
 }
 
 #record-side-pan {
-  width: 0;
-  max-width: 0;
-}
-
-#record-side-pan.close-panel .rg-left, #record-side-pan.close-panel .rg-right {
-  display: none;
-}
-
-#record-side-pan.open-panel {
   margin-left: 15px;
   min-width: 170px;
   max-width: 50vw;
   flex:0 0 15vw;
 }
-
 
 #record-side-pan.close-panel .sidePanFiddler {
     padding: 1px 4px 0 0px;

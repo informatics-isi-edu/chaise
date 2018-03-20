@@ -1174,5 +1174,9 @@
                     });
                 }
             };
-        }]);
+        }])
+
+        .directive('facetingCollapse', function () {
+            
+        });
 })();
