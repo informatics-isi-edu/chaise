@@ -52,10 +52,7 @@
         <div class="main-container" ng-class="{'initializing': !displayReady}">
             <alerts alerts="ctrl.alerts"></alerts>
 
-            <div class="sidePanFiddler btn btn-primary btn-inverted" ng-hide="ctrl.noVisibleRelatedTables()" ng-class="{'open-panel': recordSidePanOpen, 'close-panel': !recordSidePanOpen}" ng-click="ctrl.togglePan()">
-                <i ng-class="{'glyphicon glyphicon-triangle-right': recordSidePanOpen, 'glyphicon glyphicon-triangle-left': !recordSidePanOpen}"
-                   uib-tooltip="{{'Click to ' + ((recordSidePanOpen) ? 'hide' : 'show') + ' list of related records.'}}" tooltip-placement="left"></i>
-            </div>
+            <faceting-collapse-btn panel-open="recordSidePanOpen" toggle-panel="ctrl.togglePan" position="right" tooltip-message="{{'Click to ' + ((recordSidePanOpen) ? 'hide' : 'show') + ' list of related records.'}}" ng-hide="ctrl.noVisibleRelatedTables()"></faceting-collapse-btn>
 
             <!-- defined on $rootScope in run function -->
             <record-display columns="::columns" values="::recordValues"  record-table-model="::colTableModels" related-reference-display-table="::rtrefDisTypetable"

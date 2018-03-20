@@ -12,10 +12,7 @@
                 <alerts alerts="$root.alerts"></alerts>
             </div>
 
-            <div class="sidePanFiddler btn btn-primary btn-inverted" ng-class="{'open-panel': vm.facetPanelOpen, 'close-panel': !vm.facetPanelOpen}" ng-if="vm.config.showFaceting" ng-click="togglePanel()">
-                <i ng-class="{'glyphicon glyphicon-triangle-left': vm.facetPanelOpen, 'glyphicon glyphicon-triangle-right': !vm.facetPanelOpen}"
-                   uib-tooltip="{{'Click to ' + ((vm.facetPanelOpen) ? 'hide' : 'show') + ' list of available facets.'}}" tooltip-placement="right"></i>
-            </div>
+            <faceting-collapse-btn panel-open="vm.facetPanelOpen" toggle-panel="togglePanel" position="left" tooltip-message="{{'Click to ' + ((vm.facetPanelOpen) ? 'hide' : 'show') + ' list of available facets.'}}" ng-hide="!vm.config.showFaceting"></faceting-collapse-btn>
 
             <div ng-if="vm.selectedRows.length > 0 && vm.config.selectMode == 'multi-select' && !vm.config.hideSelectedRows" class="row total-filters">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
