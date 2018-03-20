@@ -66,7 +66,7 @@
         "facetRelatedErrorStatus" : {
           invalidFilter : "Invalid Filter",
           facetingError: "Invalid Facet Filters",
-          invalidFacetSorting : "Invalid Facet Sorting",	
+          invalidFacetSorting : "Invalid Facet Sorting",
           invalidPageCriteria : "Invalid Page Criteria",
           InvalidSortCriteria : "Invalid Sort Criteria",
           clickActionMessage: "Click <b>OK</b> to reload this page without @errorStatus."
@@ -867,11 +867,10 @@
         }
 
         /**
-         *
-         *
+         * Verifies that the object is defined and the containing key/value pair is a non-empty string
          */
         function isObjectAndKeyDefined(obj, keyName) {
-            return (obj && obj[keyName] != undefined && obj[keyName] != '')
+            return (obj && typeof obj[keyName] == 'string' && obj[keyName] != '')
         }
 
         /**
