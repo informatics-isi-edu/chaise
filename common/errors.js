@@ -19,7 +19,7 @@
         forbidden: "Forbidden",
         notFound: "No data",
         multipleRecords: "Multiple Records Found",
-        noDataMessage: "No matching record found for the given filter or facet.",
+        noDataMessage: 'The record does not exist or may be hidden. If you continue to face this issue, please contact the system administrator.',
         multipleDataErrorCode : "Multiple Records Found",
         multipleDataMessage : "There are more than 1 record found for the filters provided.",
         facetFilterMissing : "No filtering criteria was specified to identify a specific record.",
@@ -151,8 +151,10 @@
         };
 
         function errorPopup(message, errorCode, pageName, redirectLink, subMessage, stackTrace) {
-            var providedLink = true;
-            var appName = UriUtils.appNamefromUrlPathname($window.location.pathname);
+            var providedLink = true,
+                isLoggedIn = false;
+            var appName = UriUtils.appNamefromUrlPathname($window.location.pathname),
+                session = Session.getSessionValue();
             // if it's not defined, redirect to the dataBrowser config setting (if set) or the landing page
             if (!redirectLink) {
                 providedLink = false;
@@ -171,12 +173,18 @@
                     subMessage = subMessage + "\n   " + stackTrace.split("\n").join("\n   ");
                 }
             }
+            //check if user is logged in
+            if(session && session.client !== null){
+              isLoggedIn = true;
+            }
+
             var params = {
                 message: message,
                 errorCode: errorCode,
                 pageName: pageName,
                 subMessage: subMessage,
-                appName: appName
+                appName: appName,
+                isLoggedIn: isLoggedIn
             };
 
             var modalProperties = {
@@ -200,13 +208,13 @@
             }
 
             modalUtils.showModal(modalProperties, function (actionBtnIdentifier) {
-                if (errorCode == errorNames.unauthorized && !providedLink) {
+                if ((errorCode == errorNames.unauthorized && !providedLink) || (actionBtnIdentifier === "login")) {
                     Session.loginInAPopUp();
                 } else {
                     if(actionBtnIdentifier == "reload"){
                         reloadCb();
                     } else{             //default action i.e. redirect link for OK button
-                        $window.location.replace(redirectLink);
+                        $window.location = redirectLink;
                     }
 
                 }

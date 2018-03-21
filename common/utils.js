@@ -72,7 +72,9 @@
           clickActionMessage: "Click <b>OK</b> to reload this page without @errorStatus."
         },
         "tableMissing": "No table specified in the form of 'schema-name:table-name' and no Default is set.",
-        "unauthorizedMessage" : "You are not authorized to perform this action. Please report this problem to your system administrators.",
+        "unauthorizedMessage" : "You are not authorized to perform this action. ",
+        "reportErrorToAdmin" : "Please report this problem to your system administrators.",
+        "noRecordForFilter" : "No matching record found for the given filter or facet.",
         "unauthorizedErrorCode" : "Unauthorized Access",
         "showErrDetails" : "Show Error Details",
         "hideErrDetails" : "Hide Error Details"
