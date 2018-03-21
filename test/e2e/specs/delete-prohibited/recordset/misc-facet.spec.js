@@ -73,6 +73,26 @@ describe("Other facet features, ", function() {
             done();
         });
 
+        it('Side panel should hide/show by clicking pull button', function(done){
+            var recPan =  chaisePage.recordPage.getSidePanel(),
+                fiddlerBtn = chaisePage.recordPage.getSidePanelFiddler();
+
+            expect(fiddlerBtn.getAttribute("class")).toContain('glyphicon glyphicon-triangle-left', 'Side Pan Pull button is not pointing in the left direction');
+            expect(recPan.getAttribute("class")).toContain('open-panel', 'Side Panel is not visible when fiddler is poining in left direction');
+
+            fiddlerBtn.click().then(function(){
+                expect(fiddlerBtn.getAttribute("class")).toContain("glyphicon glyphicon-triangle-right", "Side Pan Pull button is not pointing in the right direction.");
+                expect(recPan.getAttribute("class")).toContain('close-panel', 'Side Panel is not hidden when fiddler is poining in right direction');
+
+                return fiddlerBtn.click();
+            }).then(function () {
+                done();
+            }).catch( function(err) {
+                console.log(err);
+                done.fail();
+            });
+        });
+
         it ("should open the facet, select a value to filter on.", function (done) {
             clearAll.click().then(function () {
                 return chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
