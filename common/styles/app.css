@@ -1155,6 +1155,10 @@ footer .container1 {
      top: 5px;
  }
 
+ .recordset-container .sidePanFiddler {
+     margin-bottom: 10px;
+ }
+
  /****** RSwF main container *******/
 
  .recordset-container.with-faceting > .main-container {
