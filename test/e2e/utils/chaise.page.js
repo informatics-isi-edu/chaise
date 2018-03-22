@@ -789,7 +789,7 @@ var recordPage = function() {
     }
 
     this.getSidePanel = function() {
-      return element(by.id('record-side-pan'));
+      return element(by.css('.faceting-resizable'));
     }
 
     this.getSidePanelItemById = function (idx) {

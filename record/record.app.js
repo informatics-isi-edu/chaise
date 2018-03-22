@@ -9,6 +9,7 @@
         'chaise.alerts',
         'chaise.delete',
         'chaise.errors',
+        'chaise.faceting',
         'chaise.modal',
         'chaise.navbar',
         'chaise.record.display',

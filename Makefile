@@ -332,6 +332,7 @@ RECORD_ASSETS=record
 
 RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular.js \
+	$(JS)/vendor/angular-plotly.js \
 	$(JS)/vendor/angular-messages.min.js \
 	$(JS)/vendor/angular-sanitize.js \
 	$(COMMON)/vendor/angular-cookies.min.js \
@@ -341,6 +342,7 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/authen.js \
 	$(COMMON)/delete-link.js \
 	$(COMMON)/errors.js \
+	$(COMMON)/faceting.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/navbar.js \
@@ -508,8 +510,8 @@ RECSET_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css
 
 RECSET_CSS_SOURCE=$(COMMON)/styles/app.css \
-    $(COMMON)/styles/appheader.css \
-		$(COMMON)/vendor/MarkdownEditor/styles/github-markdown.css
+	$(COMMON)/styles/appheader.css \
+	$(COMMON)/vendor/MarkdownEditor/styles/github-markdown.css
 
 # Config file
 JS_CONFIG=chaise-config.js
