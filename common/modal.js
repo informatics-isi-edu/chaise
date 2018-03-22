@@ -152,7 +152,7 @@
             selectedRows:       params.selectedRows,
             matchNotNull:       params.matchNotNull,
             search:             reference.location.searchTerm,
-            config:             {viewable: false, editable: false, deletable: false, selectMode: params.selectMode, showNull: params.showNull === true},
+            config:             {viewable: false, editable: false, deletable: false, selectMode: params.selectMode, showFaceting: params.faceting, facetPanelOpen: params.facetPanelOpen, showNull: params.showNull === true},
             context:            params.context
         };
 

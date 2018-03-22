@@ -330,6 +330,8 @@
             params.context = "compact/select";
             params.selectedRows = [];
             params.selectMode = modalBox.singleSelectMode;
+            params.faceting = true;
+            params.facetPanelOpen = false;
 
             modalUtils.showModal({
                 animation: false,
@@ -338,7 +340,7 @@
                 resolve: {
                     params: params
                 },
-                size: "lg",
+                size: "xl",
                 templateUrl: "../common/templates/searchPopup.modal.html"
             }, function dataSelected(tuple) {
                 // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)

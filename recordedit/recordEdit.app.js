@@ -7,6 +7,7 @@
         'chaise.authen',
         'chaise.delete',
         'chaise.errors',
+        'chaise.faceting',
         'chaise.filters',
         'chaise.modal',
         'chaise.navbar',

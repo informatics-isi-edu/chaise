@@ -63,7 +63,8 @@
      *          - hideSelectedRows
      *          - hideTotalCount
      *          - hidePageSettings
-     *          - showFaceting
+     *          - showFaceting: if faceting should be available at all
+     *          - openFacetPanel: defines if the facet panel is open by default
      *          - showNull: if this is available and equal to `true`, we will differentiate between `null` and empty string.
      *
      * The events that are being used by directives in this file and their children:
@@ -1010,7 +1011,6 @@
                 scope.vm.dirtyResult = false;
                 scope.vm.occupiedSlots = 0;
                 scope.vm.facetsToInitialize = [];
-                scope.vm.facetPanelOpen = true;
 
                 scope.setPageLimit = function(limit) {
                     scope.vm.pageLimit = limit;
@@ -1140,7 +1140,7 @@
                 };
 
                 scope.togglePanel = function () {
-                    scope.vm.facetPanelOpen = !scope.vm.facetPanelOpen;
+                    scope.vm.config.facetPanelOpen = !scope.vm.config.facetPanelOpen;
                 };
 
                 // on window focus, if has pending add record requests

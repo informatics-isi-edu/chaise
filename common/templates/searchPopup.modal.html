@@ -11,8 +11,10 @@
         <button id="multi-select-submit-btn" class="btn btn-primary btn-inverted pull-right" type="button" ng-click="ctrl.submit()" ng-disabled="ctrl.tableModel.selectedRows.length < 1">Submit</button>
     </span>
     <div ng-switch="ctrl.mode">
+        <!-- switch when 'selectFaceting' -->
         <recordset-select-faceting ng-switch-when="selectFaceting" vm="ctrl.tableModel" on-row-click="ctrl.ok" allow-create="false"></recordset-select-faceting>
-        <recordset ng-switch-default vm="ctrl.tableModel" on-row-click="ctrl.ok" allow-create="true" get-disabled-tuples="getDisabledTuples"></recordset>
+        <!-- swtich default -->
+        <recordset-with-faceting ng-switch-default vm="ctrl.tableModel" on-row-click="ctrl.ok" allow-create="true" get-disabled-tuples="getDisabledTuples"></recordset-with-faceting>
     </div>
 
 </div>

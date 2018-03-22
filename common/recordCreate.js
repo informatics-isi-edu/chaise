@@ -326,6 +326,8 @@
             params.context = "compact/select";
             params.selectMode = isModalUpdate ? modalBox.multiSelectMode : modalBox.singleSelectMode;
             params.selectedRows = [];
+            params.faceting = true;
+            params.facetPanelOpen = false;
             //NOTE assumption is that this function is only is called for adding pure and binary association
             params.logObject = {
                 action: logActions.preCreateAssociation,
@@ -339,7 +341,7 @@
                 resolve: {
                     params: params
                 },
-                size: "lg",
+                size: "xl",
                 templateUrl: "../common/templates/searchPopup.modal.html"
             }, function dataSelected(tuples) {
                 // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)

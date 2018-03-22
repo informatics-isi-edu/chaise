@@ -251,6 +251,7 @@
                 deletable: modifyEnabled && deleteEnabled,
                 selectMode: modalBox.noSelect,
                 showFaceting: showFaceting,
+                facetPanelOpen: showFaceting
             };
 
             $rootScope.alerts = AlertsService.alerts;

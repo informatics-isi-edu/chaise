@@ -424,6 +424,7 @@ RE_ASSETS=recordedit
 
 RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular.js \
+	$(JS)/vendor/angular-plotly.js \
 	$(JS)/vendor/angular-sanitize.js \
 	$(JS)/vendor/angular-messages.min.js \
 	$(COMMON)/vendor/angular-cookies.min.js \
@@ -433,6 +434,7 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/alerts.js \
 	$(COMMON)/authen.js \
 	$(COMMON)/errors.js \
+	$(COMMON)/faceting.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/ellipses.js \
 	$(COMMON)/storage.js \
