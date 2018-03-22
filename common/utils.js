@@ -20,6 +20,13 @@
         "*": "/record"
     })
 
+    .constant("appNames", {
+        "RECORD": "record",
+        "RECORDSET": "recordset",
+        "RECORDEDIT": "recordedit",
+        "SEARCH": "search"
+    })
+
     // this constant is used to keep track of our strings that the user is shown
     // so that when one is changed, it is changed in all places.
     // this will make localization easier if we go that route
@@ -56,8 +63,18 @@
           "okBtnMessage": "Click <b>OK</b> to go to the Recordset.",
           "reloadMessage": "Click <b>Reload</b> to start over."
         },
+        "facetRelatedErrorStatus" : {
+          invalidFilter : "Invalid Filter",
+          facetingError: "Invalid Facet Filters",
+          invalidFacetSorting : "Invalid Facet Sorting",
+          invalidPageCriteria : "Invalid Page Criteria",
+          InvalidSortCriteria : "Invalid Sort Criteria",
+          clickActionMessage: "Click <b>OK</b> to reload this page without @errorStatus."
+        },
         "tableMissing": "No table specified in the form of 'schema-name:table-name' and no Default is set.",
-        "unauthorizedMessage" : "You are not authorized to perform this action. Please report this problem to your system administrators.",
+        "unauthorizedMessage" : "You are not authorized to perform this action. ",
+        "reportErrorToAdmin" : "Please report this problem to your system administrators.",
+        "noRecordForFilter" : "No matching record found for the given filter or facet.",
         "unauthorizedErrorCode" : "Unauthorized Access",
         "showErrDetails" : "Show Error Details",
         "hideErrDetails" : "Hide Error Details"
@@ -691,6 +708,12 @@
           return newPath.substring(lastSlash + 1, newPath.length);
         }
 
+        // Takes path and creates full redirect links with catalogId
+        function createRedirectLinkFromPath(path){
+          var catalogString = $window.location.hash.slice(0, $window.location.hash.search("/"));
+          return $window.location.origin + $window.location.pathname + catalogString + "/" + path;
+        }
+
         return {
             queryStringToJSON: queryStringToJSON,
             appTagToURL: appTagToURL,
@@ -702,7 +725,8 @@
             setLocationChangeHandling: setLocationChangeHandling,
             isBrowserIE: isBrowserIE,
             getQueryParams: getQueryParams,
-            appNamefromUrlPathname: appNamefromUrlPathname
+            appNamefromUrlPathname: appNamefromUrlPathname,
+            createRedirectLinkFromPath: createRedirectLinkFromPath
         }
     }])
 
@@ -845,6 +869,13 @@
         }
 
         /**
+         * Verifies that the object is defined and the containing key/value pair is a non-empty string
+         */
+        function isObjectAndKeyDefined(obj, keyName) {
+            return (obj && typeof obj[keyName] == 'string' && obj[keyName] != '')
+        }
+
+        /**
         *
         * @desc Converts the following characters to HTML entities for safe and
         * HTML5-valid usage in the `id` attributes of HTML elements: spaces, ampersands,
@@ -887,6 +918,7 @@
             getRowValuesFromPage: getRowValuesFromPage,
             getRowValuesFromTupleData: getRowValuesFromTupleData,
             getRowValuesFromTuples: getRowValuesFromTuples,
+            isObjectAndKeyDefined: isObjectAndKeyDefined,
             makeSafeIdAttr: makeSafeIdAttr,
             verify: verify
         };

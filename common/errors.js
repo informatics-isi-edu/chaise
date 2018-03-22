@@ -19,7 +19,7 @@
         forbidden: "Forbidden",
         notFound: "No data",
         multipleRecords: "Multiple Records Found",
-        noDataMessage: "No matching record found for the given filter or facet.",
+        noDataMessage: 'The record does not exist or may be hidden. If you continue to face this issue, please contact the system administrator.',
         multipleDataErrorCode : "Multiple Records Found",
         multipleDataMessage : "There are more than 1 record found for the filters provided.",
         facetFilterMissing : "No filtering criteria was specified to identify a specific record.",
@@ -143,16 +143,18 @@
     }])
 
     // Factory for each error type
-    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$window', 'errorMessages', 'Errors', 'UriUtils', 'modalUtils',
-          function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $window, errorMessages, Errors, UriUtils, modalUtils) {
+    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$window', 'errorMessages', 'Errors', 'DataUtils', 'UriUtils', 'modalUtils',
+          function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $window, errorMessages, Errors, DataUtils, UriUtils, modalUtils) {
 
         var reloadCb = function(){
             window.location.reload();
         };
 
         function errorPopup(message, errorCode, pageName, redirectLink, subMessage, stackTrace) {
-            var providedLink = true;
-            var appName = UriUtils.appNamefromUrlPathname($window.location.pathname);
+            var providedLink = true,
+                isLoggedIn = false;
+            var appName = UriUtils.appNamefromUrlPathname($window.location.pathname),
+                session = Session.getSessionValue();
             // if it's not defined, redirect to the dataBrowser config setting (if set) or the landing page
             if (!redirectLink) {
                 providedLink = false;
@@ -171,12 +173,18 @@
                     subMessage = subMessage + "\n   " + stackTrace.split("\n").join("\n   ");
                 }
             }
+            //check if user is logged in
+            if(session && session.client !== null){
+              isLoggedIn = true;
+            }
+
             var params = {
                 message: message,
                 errorCode: errorCode,
                 pageName: pageName,
                 subMessage: subMessage,
-                appName: appName
+                appName: appName,
+                isLoggedIn: isLoggedIn
             };
 
             var modalProperties = {
@@ -200,13 +208,13 @@
             }
 
             modalUtils.showModal(modalProperties, function (actionBtnIdentifier) {
-                if (errorCode == errorNames.unauthorized && !providedLink) {
+                if ((errorCode == errorNames.unauthorized && !providedLink) || (actionBtnIdentifier === "login")) {
                     Session.loginInAPopUp();
                 } else {
                     if(actionBtnIdentifier == "reload"){
                         reloadCb();
                     } else{             //default action i.e. redirect link for OK button
-                        $window.location.replace(redirectLink);
+                        $window.location = redirectLink;
                     }
 
                 }
@@ -224,36 +232,35 @@
             $log.info(exception);
             var reloadLink,
                 redirectLink = $window.location.origin,
-                gotoLocation = "Home Page";
+                gotoLocation = "Home Page",
+                appName = UriUtils.appNamefromUrlPathname($window.location.pathname);
 
             var stackTrace =  (exception.errorData && exception.errorData.stack)? exception.errorData.stack: undefined;
 
             $rootScope.error = true;    // used to hide spinner in conjunction with a css property
 
             if (exceptionFlag || window.location.pathname.indexOf('/search/') != -1 || window.location.pathname.indexOf('/viewer/') != -1){
-              return;
+                return;
             }
             // we decided to deal with the OR condition later
             if ( (ERMrest && exception instanceof ERMrest.UnauthorizedError) || exception.code == errorNames.unauthorized) {
                 Session.loginInAModal(reloadCb);
-            }
-            else if ((exception.status && exception.status == errorNames.multipleRecords) || exception.constructor.name === "noRecordError"){
-               errorPopup(exception.message, exception.status, "Recordset ", exception.errorData.redirectUrl, stackTrace);
-           }
-            // we decided to deal with the OR condition later
-            else if ( (ERMrest && exception instanceof ERMrest.ForbiddenError) || exception.code == errorNames.forbidden) {
+            } else if ((exception.status && exception.status == errorNames.multipleRecords) || exception.constructor.name === "noRecordError"){
+                errorPopup(exception.message, exception.status, "Recordset ", exception.errorData.redirectUrl, stackTrace);
+            } else if ( (ERMrest && exception instanceof ERMrest.ForbiddenError) || exception.code == errorNames.forbidden) {
+                // we decided to deal with the OR condition later
                 errorPopup( exception.message, exception.status ,"Home Page", $window.location.origin);
-            }
-            else if (ERMrest && exception instanceof ERMrest.ERMrestError ) {
-              if(exception.errorData && exception.errorData.gotoTableDisplayname != 'undefined' && exception.errorData.gotoTableDisplayname != ''){
-                gotoLocation = exception.errorData.gotoTableDisplayname;
-              }
-              if(exception.errorData && exception.errorData.redirectUrl != 'undefined' && exception.errorData.redirectUrl != ''){
-                redirectLink = exception.errorData.redirectUrl;
-              }
+            } else if (ERMrest && exception instanceof ERMrest.ERMrestError ) {
+                if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'gotoTableDisplayname')){
+                    gotoLocation = exception.errorData.gotoTableDisplayname;
+                }
+                if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'redirectUrl')) {
+                    redirectLink = exception.errorData.redirectUrl;
+                } else {
+                    redirectLink = $window.location.origin;
+                }
                 errorPopup( exception.message, exception.status, gotoLocation, redirectLink, exception.subMessage);
-            }
-            else {
+            } else {
                 logError(exception);
 
                 var errName = exception.status? exception.status:"Terminal Error",

@@ -9,14 +9,22 @@ var testParams = {
     deletionErrTextBooking : "This entry cannot be deleted as it is still referenced from the booking table. All dependent entries must be removed before this item can be deleted. If you have trouble removing dependencies please contact the site administrator.\n\nClick OK to go to the Accommodations.\nShow Error Details",
     deletionErrTextAccommodationImg : "This entry cannot be deleted as it is still referenced from the accommodation_image table. All dependent entries must be removed before this item can be deleted.\n\nClick OK to go to the Accommodations.\nShow Error Details",
     uniqueConstraint : "Error The entry cannot be created/updated. Please use a different ID for this record.",
-    recordNotFoundModalText : "No matching record found for the given filter or facet.\n\nClick OK to show the list of all records.\nShow Error Details",
+    recordNotFoundModalText : "The record does not exist or may be hidden. If you continue to face this issue, please contact the system administrator.\n\nClick OK to show the list of all records.\nShow Error Details",
     multipleRecordFoundModalText : "There are more than 1 record found for the filters provided.\n\nClick OK to show all the matched records.\nShow Error Details",
     tableNotFoundModalText : function() { return "Table " + this.tableNotFound + " not found in schema.\n\nClick OK to go to the Home Page."},
     sizeNotValidModalText : function() { return "'limit' must be greater than 0\n\nClick OK to go to the " + this.multipleRecordsTable + ".\nClick Reload to start over."},
     negativeLimitErrorText : "'limit' must be greater than 0\n\nClick OK to go to the Home Page.",
     hideErrors : "Hide Error Details",
     conflictRecordEditErrorBooking : "This entry cannot be deleted as it is still referenced from the booking table. All dependent entries must be removed before this item can be deleted.\n\nClick OK to go to the Accommodations.\nClick Reload to start over.\nShow Error Details",
-    conflictRecordEditErrorAccommodationImg : "This entry cannot be deleted as it is still referenced from the accommodation_image table. All dependent entries must be removed before this item can be deleted.\n\nClick OK to go to the Accommodations.\nClick Reload to start over.\nShow Error Details"
+    conflictRecordEditErrorAccommodationImg : "This entry cannot be deleted as it is still referenced from the accommodation_image table. All dependent entries must be removed before this item can be deleted.\n\nClick OK to go to the Accommodations.\nClick Reload to start over.\nShow Error Details",
+    facetErrorstext:{
+      invalidPageCriteriaTitle: "Invalid Page Criteria",
+      invalidPageCriteriaBody: "Click OK to reload this page without Invalid Page Criteria.",
+      invalidFacetFilterTitle: "Invalid Facet Filters",
+      invalidFacetFilterBody: "Click OK to reload this page without Invalid Facet Filters.",
+      invalidFilterOperatorErrorTitle : "Invalid Filter",
+      invalidFilterOperatorErrorBody : "Click OK to show the list of all records."
+    }
 };
 
 /*
@@ -339,5 +347,210 @@ describe('Error related test cases,', function() {
       });
 
     });
+
+    describe("Error check for invalid paging changes in RecordSet", function(){
+
+      beforeAll(function() {
+          pageTestUrl = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name +  "/id=2002@after()";
+          browser.get(pageTestUrl);
+      });
+
+      it("should be returned Invalid Page Criteria", function (done) {
+          var modalTitle = chaisePage.recordEditPage.getModalTitle(),
+              modalActionBody = chaisePage.recordEditPage.getModalActionBody();
+
+          chaisePage.waitForElement(modalTitle).then(function(){
+              return modalTitle.getText();
+          }).then(function (text) {
+              expect(text).toBe(testParams.facetErrorstext.invalidPageCriteriaTitle, "Invalid Page Criteria error pop-up could not be opened!");
+              return modalActionBody.getText();
+          }).then(function (errorText) {
+              expect(errorText).toBe(testParams.facetErrorstext.invalidPageCriteriaBody, "Error action text did not match");
+              done();
+          }).catch(function(error) {
+              console.log(error);
+              done.fail();
+          });
+      });
+
+      it('On click of OK button the page should reload the page without paging conditions', function(done){
+          chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
+              btn.click();
+              return browser.driver.getCurrentUrl();
+          }).then (function(currentUrl) {
+             recordsetPage = pageTestUrl.slice(0, pageTestUrl.search('@'));
+             expect(currentUrl).toBe(recordsetPage, "The redirection to Recordset page failed");
+             done()
+          }).catch( function(err) {
+              console.log(err);
+              done.fail();
+          });
+      });
+
+    });
+
+    describe("Error check for invalid paging changes in RecordEdit", function(){
+
+      beforeAll(function() {
+          pageTestUrl = browser.params.url + "/recordedit/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name +  "/id=2002@after()";
+          browser.get(pageTestUrl);
+      });
+
+      it("should be returned Invalid Page Criteria", function (done) {
+          var modalTitle = chaisePage.recordEditPage.getModalTitle(),
+              modalActionBody = chaisePage.recordEditPage.getModalActionBody();
+
+          chaisePage.waitForElement(modalTitle).then(function(){
+              return modalTitle.getText();
+          }).then(function (text) {
+              expect(text).toBe(testParams.facetErrorstext.invalidPageCriteriaTitle, "Invalid Page Criteria error pop-up could not be opened!");
+              return modalActionBody.getText();
+          }).then(function (errorText) {
+              expect(errorText).toBe(testParams.facetErrorstext.invalidPageCriteriaBody, "Error action text did not match");
+              done();
+          }).catch(function(error) {
+              console.log(error);
+              done.fail();
+          });
+      });
+
+      it('On click of OK button the page should reload the page without paging conditions', function(done){
+          chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
+              btn.click();
+              return browser.driver.getCurrentUrl();
+          }).then (function(currentUrl) {
+             recordsetPage = pageTestUrl.slice(0, pageTestUrl.search('@'));
+             expect(currentUrl).toBe(recordsetPage, "The redirection to RecordEdit page failed");
+             done();
+          }).catch( function(err) {
+              console.log(err);
+              done.fail();
+          });
+      });
+
+    });
+
+    describe("Error check for invalid filter in RecordEdit", function(){
+
+      beforeAll(function() {
+          pageTestUrl = browser.params.url + "/recordedit/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name +  "/id::gt:2002@after()";
+          browser.get(pageTestUrl);
+          modalTitle = chaisePage.recordEditPage.getModalTitle();
+          modalActionBody = chaisePage.recordEditPage.getModalActionBody();
+      });
+
+      it("should be returned Invalid Page Criteria", function (done) {
+          chaisePage.waitForElement(modalTitle).then(function(){
+              return modalTitle.getText();
+          }).then(function (text) {
+              expect(text).toBe(testParams.facetErrorstext.invalidPageCriteriaTitle, "Invalid Page Criteria error pop-up could not be opened!");
+              return modalActionBody.getText();
+          }).then(function (errorText) {
+              expect(errorText).toBe(testParams.facetErrorstext.invalidPageCriteriaBody, "Error action text did not match");
+              done();
+          }).catch(function(error) {
+              console.log(error);
+              done.fail();
+          });
+      });
+
+      it('On click of OK button the page should reload the page without paging condition but with invalid filter conditions', function(done){
+          chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
+              btn.click();
+              return chaisePage.waitForElement(modalTitle);
+          }).then (function (){
+             return modalTitle.getText();
+          }).then(function (text) {
+               expect(text).toBe(testParams.facetErrorstext.invalidFilterOperatorErrorTitle, "Invalid Filter operator error pop-up could not be opened!");
+               return modalActionBody.getText();
+           }).then(function (errorText) {
+               expect(errorText).toBe(testParams.facetErrorstext.invalidFilterOperatorErrorBody, "Error action text did not match");
+               done();
+          }).catch( function(err) {
+              console.log(err);
+              done.fail();
+          });
+      });
+
+      it('On click of OK button the page should redirect to RecordSet', function(done){
+          chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
+              btn.click();
+              return browser.driver.getCurrentUrl();
+          }).then (function(currentUrl) {
+             recordsetWithoutFacetUrl = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/";
+             expect(currentUrl).toBe(recordsetWithoutFacetUrl, "The redirection to Recordset page failed");
+             done();
+          }).catch( function(err) {
+              console.log(err);
+              done.fail();
+          });
+      });
+
+    });
+
+    describe("Error check for invalid facet filter changes", function(){
+      beforeAll(function() {
+          facetTestUrl = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name +  "/*::facets::N14IghgdgJiBcDaoDOB7ArgJwMYFM7i1ySQEsUIQAaELACxRKLnhADEAhABm+4EZOALCAC6AXzFA@sort(release_date::desc::,id)";
+          browser.get(facetTestUrl);
+      });
+
+      it("should be returned Invalid Page Criteria", function (done) {
+          var modalTitle = chaisePage.recordEditPage.getModalTitle(),
+              modalActionBody = chaisePage.recordEditPage.getModalActionBody();
+
+          chaisePage.waitForElement(modalTitle).then(function(){
+              return modalTitle.getText();
+          }).then(function (text) {
+              expect(text).toBe(testParams.facetErrorstext.invalidFacetFilterTitle, "Invalid Facet Filters error pop-up could not be opened!");
+              return modalActionBody.getText();
+          }).then(function (errorText) {
+              expect(errorText).toBe(testParams.facetErrorstext.invalidFacetFilterBody, "Error action text did not match");
+              done();
+          }).catch(function(error) {
+              console.log(error);
+              done.fail();
+          });
+      });
+
+      it('On click of OK button the page should reload the page without facet filter conditions', function(done){
+          chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
+              btn.click();
+              return browser.driver.getCurrentUrl();
+          }).then (function(currentUrl) {
+             recordsetWithoutFacetUrl = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name +  "/@sort(release_date::desc::,id)"
+             expect(currentUrl).toBe(recordsetWithoutFacetUrl, "The redirection to Recordset page failed");
+             done();
+          }).catch( function(err) {
+              console.log(err);
+              done.fail();
+          });
+      });
+    });
+
+    describe("History for errorneous Url", function(){
+
+      beforeAll(function() {
+          var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name +  "/id=269111";
+          browser.get(url);
+          chaisePage.waitForElement(element(by.css('.modal-dialog ')));
+      });
+        it('After clicking back button initial page should appear', function(done){
+            chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
+              return btn.click();
+            }).then (function (){
+              browser.navigate().back();
+              return browser.driver.getCurrentUrl();
+            }).then (function(currentUrl) {
+              expect(currentUrl).toContain('id=269111', "The back button failed to go back to previous page.");
+              done();
+          }).catch(function(error) {
+              console.log(error);
+              done.fail();
+          });
+      });
+
+    });
+
+
 
 });

@@ -120,7 +120,7 @@
                 };
                 // return model;
                 callback(model);
-            },function readFail(error) {
+            }, function readFail(error) {
                 var model = {
                     hasLoaded: true
                 };
@@ -159,7 +159,10 @@
 
                 return $rootScope.reference.read(1, {action: logActions.recordRead});
             }, function error(exception) {
-                // want to break out of promise chain
+                if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'redirectPath')) {
+                    var redirectLink = UriUtils.createRedirectLinkFromPath(exception.errorData.redirectPath);
+                    exception.errorData.redirectUrl = redirectLink.replace('record', 'recordset');
+                }
                 throw exception;
             }).then(function getPage(page) {
                 $log.info("Page: ", page);
@@ -260,6 +263,10 @@
                 }
 
             }).catch(function genericCatch(exception) {
+                if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'redirectPath')) {
+                    var redirectLink = UriUtils.createRedirectLinkFromPath(exception.errorData.redirectPath);
+                    exception.errorData.redirectUrl = redirectLink.replace('record', 'recordset');
+                }
                 throw exception;
             });
 

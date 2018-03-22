@@ -37,7 +37,7 @@
             $uibModalInstance.dismiss('cancel');
         }
     }])
-    .controller('ErrorModalController', ['$uibModalInstance', 'params', 'messageMap', '$window', function ErrorModalController($uibModalInstance, params, messageMap, $window) {
+    .controller('ErrorModalController', ['$uibModalInstance', 'params', 'messageMap', '$window', 'Session', function ErrorModalController($uibModalInstance, params, messageMap, $window, Session) {
         var vm = this;
         vm.params = params;
         vm.displayDetails = false;
@@ -49,7 +49,18 @@
             vm.clickActionMessage =  messageMap.recordAvailabilityError.multipleRecords;
         } else if(vm.params.errorCode == 'Record Not Found'){
             vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
-        } else {
+            if(params && !params.isLoggedIn){
+              params.message = messageMap.noRecordForFilter + '<br>' + messageMap.unauthorizedMessage;
+            }
+        } else if (Object.values(messageMap.facetRelatedErrorStatus).indexOf(vm.params.errorCode) > -1) {
+           // Check if error prompted was found in the facetRelatedErrorStatus object and use it to
+           // generate error phrase for action message
+            if(vm.params.errorCode == messageMap.facetRelatedErrorStatus.invalidFilter){
+                vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
+            } else{
+            vm.clickActionMessage = messageMap.facetRelatedErrorStatus.clickActionMessage.replace('@errorStatus', vm.params.errorCode);
+          }
+        }else {
             vm.clickActionMessage = messageMap.recordAvailabilityError.pageRedirect + vm.params.pageName + '. ';
             if(vm.params.appName == 'recordedit'){
               vm.showReloadBtn = true;
@@ -74,6 +85,10 @@
         };
         vm.reload = function () {
             $uibModalInstance.close("reload");
+
+        };
+        vm.login = function () {
+            Session.loginInAPopUp();  //Open login pop-up without closing error modal
 
         };
 

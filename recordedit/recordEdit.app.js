@@ -44,8 +44,8 @@
         $logProvider.debugEnabled(chaiseConfig.debug === true);
     }])
 
-    .run(['AlertsService', 'dataFormats', 'ERMrest', 'ErrorService', 'FunctionUtils', 'headInjector', 'logActions', 'MathUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', 'messageMap', 'Errors',
-        function runRecordEditApp(AlertsService, dataFormats, ERMrest, ErrorService, FunctionUtils, headInjector, logActions, MathUtils, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies, messageMap, Errors) {
+    .run(['AlertsService', 'dataFormats', 'DataUtils', 'ERMrest', 'ErrorService', 'FunctionUtils', 'headInjector', 'logActions', 'MathUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', 'messageMap', 'Errors',
+        function runRecordEditApp(AlertsService, dataFormats, DataUtils, ERMrest, ErrorService, FunctionUtils, headInjector, logActions, MathUtils, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies, messageMap, Errors) {
 
         var session,
             context = { booleanValues: ['', true, false] };
@@ -110,7 +110,7 @@
 
             // If session is not defined or null (Anonymous user) prompt the user to login
             if (!session) {
-                var notAuthorizedError = new ERMrest.UnauthorizedError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
+                var notAuthorizedError = new ERMrest.UnauthorizedError(messageMap.unauthorizedErrorCode, (messageMap.unauthorizedMessage + messageMap.reportErrorToAdmin));
                 throw notAuthorizedError;
             }
 
@@ -332,18 +332,27 @@
                             // Keep a copy of the initial rows data so that we can see if user has made any changes later
                             recordEditModel.oldRows = angular.copy(recordEditModel.rows);
                         }, function error(response) {
-                          var errorData = {};
+                            var errorData = {};
                             errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
                             errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
                             response.errorData = errorData;
+
+                            if (DataUtils.isObjectAndKeyDefined(response.errorData, 'redirectPath')) {
+                                var redirectLink = UriUtils.createRedirectLinkFromPath(response.errorData.redirectPath);
+                                if(response.status == messageMap.facetRelatedErrorStatus.invalidFilter){
+                                    response.errorData.redirectUrl = redirectLink.replace('recordedit', 'recordset');
+                                } else{
+                                    response.errorData.redirectUrl = redirectLink;
+                                }
+                            }
                             throw response;
                         });
                     } else if (session) {
-                        var forbiddenError = new ERMrest.ForbiddenError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
+                        var forbiddenError = new ERMrest.ForbiddenError(messageMap.unauthorizedErrorCode, (messageMap.unauthorizedMessage + messageMap.reportErrorToAdmin));
                         // user logged in but not allowed (forbidden)
                         throw forbiddenError;
                     } else {
-                        var notAuthorizedError = new ERMrest.UnauthorizedError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage)
+                        var notAuthorizedError = new ERMrest.UnauthorizedError(messageMap.unauthorizedErrorCode, (messageMap.unauthorizedMessage + messageMap.reportErrorToAdmin));
                         // user not logged in (unauthorized)
                         throw notAuthorizedError;
                     }
@@ -411,15 +420,21 @@
                         $rootScope.displayReady = true;
                         // if there is a session, user isn't allowed to create
                     } else if (session) {
-                        throw new ERMrest.ForbiddenError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
+                        throw new ERMrest.ForbiddenError(messageMap.unauthorizedErrorCode, (messageMap.unauthorizedMessage + messageMap.reportErrorToAdmin));
                         // user isn't logged in and needs permissions to create
                     } else {
-                        throw new ERMrest.UnauthorizedError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
+                        throw new ERMrest.UnauthorizedError(messageMap.unauthorizedErrorCode, (messageMap.unauthorizedMessage + messageMap.reportErrorToAdmin));
                     }
                 }
-            }).catch(function genericCatch(response) {
-                // should catch errors thrown from within the promise structure
-                // nothing specific we need to do in here for now
+            }, function error(response) {
+                if (DataUtils.isObjectAndKeyDefined(response.errorData, 'redirectPath')) {
+                    var redirectLink = UriUtils.createRedirectLinkFromPath(response.errorData.redirectPath);
+                    if(response.status == messageMap.facetRelatedErrorStatus.invalidFilter){
+                        response.errorData.redirectUrl = redirectLink.replace('recordedit', 'recordset');
+                    }else{
+                        response.errorData.redirectUrl = redirectLink;
+                    }
+                }
                 throw response;
             });
         });
