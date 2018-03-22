@@ -63,6 +63,7 @@
                 vm.clickActionMessage = messageMap.facetRelatedErrorStatus.clickActionMessage.replace('@errorStatus', vm.params.errorCode);
             }
         } else {
+            // TODO: if schema/table not found (may be hiden to user), add `'<br>' + messageMap.maybeUnauthorizedMessage` to the `message`
             vm.clickActionMessage = messageMap.recordAvailabilityError.pageRedirect + vm.params.pageName + '. ';
             if (vm.params.appName == 'recordedit'){
                 vm.showReloadBtn = true;
