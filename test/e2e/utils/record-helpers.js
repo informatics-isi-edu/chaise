@@ -376,3 +376,463 @@ exports.testPresentation = function (tableParams) {
         });
     });
 };
+
+/**
+ * required attributes:
+ * name
+ * schemaName
+ * displayname
+ * count
+ * canEdit
+ * canCreate
+ * canDelete
+ * optional attributes:
+ * isAssociation
+ * isMarkdown
+ * isInline
+ * viewMore:
+ *  - name
+ *  - displayname
+ *  - filter
+ * add:
+ *  - ?????????????????????
+ * rowValues
+ * rowViewPaths
+ * markdownValue
+ * page_size (default 25)
+ *
+ *
+ * testAdd
+ * testEdit
+ * testDelete
+ */
+exports.testRelatedTable = function (params, pageReadyCondition) {
+	//TODO add supprt for inline!!!!!!!!!!
+	var currentEl, markdownToggleLink, toggled = false;
+	beforeAll(function() {
+		if (params.isInline) {
+			currentEl = chaisePage.recordPage.getEntityRelatedTable(params.displayname);
+		} else {
+			currentEl = chaisePage.recordPage.getRelatedTableHeading(params.displayname);
+		}
+
+		markdownToggleLink = chaisePage.recordPage.getToggleDisplayLink(params.displayname);
+	});
+
+	var testHeading = function (count, page_size) {
+		page_size = page_size || 25;
+
+		var heading = chaisePage.recordPage.getRelatedTableHeadingTitle(params.displayname);
+		var title = params.displayname;
+		if (count === 0) {
+			title += " (no results found)";
+	    } else if (count < page_size) {
+			title += " (showing all " + count + " results)";
+		} else {
+			title += " (showing first " + page_size + " results)"
+		}
+		expect(heading.getText()).toBe(title, "heading missmatch.");
+	};
+
+	it ("title should be correct.", function () {
+		testHeading(params.count, params.page_size);
+	});
+
+	describe("regarding table level actions, ", function () {
+
+		// View More
+		describe("`View More` button, ", function () {
+			var viewMoreBtn;
+			beforeAll(function () {
+				viewMoreBtn = chaisePage.recordPage.getMoreResultsLink(params.displayname);
+			});
+
+			it ('should be displayed.', function () {
+				expect(viewMoreBtn.isDisplayed()).toBeTruthy("view more is not visible.");
+			});
+
+			if (params.viewMore){
+				it ("should always go to recordset app with correct set of filters.", function (done) {
+					browser.wait(EC.elementToBeClickable(viewMoreBtn), browser.params.defaultTimeout);
+					chaisePage.clickButton(viewMoreBtn).then(function () {
+						return browser.driver.getCurrentUrl();
+					}).then(function(url) {
+                        expect(url.indexOf('recordset')).toBeGreaterThan(-1, "didn't go to recordset app");
+                        return chaisePage.waitForElement(element(by.id("divRecordSet")));
+                    }).then(function() {
+                        expect(chaisePage.recordsetPage.getPageTitleElement().getText()).toBe(params.viewMore.displayname, "title missmatch.");
+                        expect(chaisePage.recordsetPage.getFilterString().getText()).toBe(params.viewMore.filter, "filter missmatch.");
+						browser.navigate().back();
+						pageReadyCondition();
+						done();
+
+					}).catch(function (err) {
+						console.log(err);
+						done.fail();
+					})
+				});
+			}
+		});
+
+		// Display Mode
+		describe("view mode and rows, ", function () {
+
+			if (params.isMarkdown || params.isInline) {
+				it ("markdown container must be visible.", function () {
+					expect(currentEl.element(by.css('.markdown-container')).isDisplayed()).toBeTruthy("didn't have markdown");
+				});
+
+				if (params.markdownValue) {
+					it ("correct markdown values should be visible.", function () {
+						expect(currentEl.element(by.css('.markdown-container')).getAttribute('innerHTML')).toEqual(params.markdownValue)
+					});
+				}
+
+				if (params.canEdit) {
+					it ("`Edit` button should be visible to switch to tabular mode.", function () {
+						// revert is `Display`
+						expect(markdownToggleLink.isDisplayed()).toBeTruthy();
+						expect(markdownToggleLink.getText()).toBe("Edit");
+					});
+				} else {
+					it ("`Table Display` button should be visible to switch to tabular mode.", function () {
+						// revert is `Revert Display`
+						expect(markdownToggleLink.isDisplayed()).toBeTruthy();
+						expect(markdownToggleLink.getText()).toBe("Table Display");
+					});
+				}
+
+				it ("clicking on the toggle should change the view to tabular.", function (done) {
+					chaisePage.clickButton(markdownToggleLink).then(function() {
+						if (params.canEdit) {
+							expect(markdownToggleLink.getText()).toBe("Display", "after toggle button missmatch.");
+						} else {
+							expect(markdownToggleLink.getText()).toBe("Revert Display", "after toggle button missmatch.");
+						}
+
+						//TODO make sure table is visible
+						toggled = true;
+						done();
+					}).catch(function(error) {
+						console.log(error);
+						done.fail();
+					});
+				});
+
+			} else {
+				it ("option for different display modes should not be presented to user.", function () {
+					expect(markdownToggleLink.isPresent()).toBe(false);
+				});
+			}
+
+			if (params.rowValues) {
+				// since we toggled to row, the data should be available.
+				it ("rows of data should be correct and respect the given page_size.", function (done) {
+					chaisePage.recordPage.getRelatedTableRows(params.displayname).then(function (rows) {
+						expect(params.rowValues.length).toBe(params.rowValues.length, "rows length missmatch.");
+						if (rows.length === 0) {
+							done();
+						}
+						rows.forEach(function (row, index) {
+							row.all(by.tagName("td")).then(function (cells) {
+								expect(cells.length).toBe(params.rowValues[index].length + 1, "number of column are not as expected.");
+								params.rowValues[index].forEach(function (expectedRow, columnIndex) {
+									if (typeof expectedRow === "object" && expectedRow.url) {
+										expect(cells[columnIndex+1].element(by.tagName("a")).getAttribute("href")).toContain(expectedRow.url, "link missmatch for row=" + index + ", columnIndex=" + columnIndex);
+										expect(cells[columnIndex+1].element(by.tagName("a")).getText()).toBe(expectedRow.caption, "caption missmatch for row=" + index  + ", columnIndex=" + columnIndex);
+									} else {
+										expect(cells[columnIndex+1].getText()).toBe(expectedRow, "missmatch for row=" + index  + ", columnIndex=" + columnIndex);
+									}
+								});
+								done();
+							}).catch(function (err) {
+								throw err;
+							});
+						});
+					}).catch(function(error) {
+						console.log(error);
+						done.fail();
+					});
+				});
+			}
+		});
+
+		if (typeof params.canCreate === "boolean") {
+			it ("`Add` button should be " + (params.canCreate ? "visible." : "invisible."), function () {
+				var addBtn = chaisePage.recordPage.getAddRecordLink(params.displayname);
+				expect(addBtn.isPresent()).toBe(params.canCreate);
+			});
+		 }
+	});
+
+	// in our test cases we are changing the view to tabular
+	describe("regarding row level actions, ", function () {
+
+		if (params.rowViewPaths) {
+			it ("'View Details' button should have the correct link.", function () {
+				var expected = '/record/#' + browser.params.catalogId + "/" + params.schemaName + ":" + (params.isAssociation ? params.relatedName : params.name) + "/";
+				params.rowViewPaths.forEach(function (row, index) {
+					var btn = chaisePage.recordPage.getRelatedTableRowLink(params.displayname, index);
+					expect(btn.getAttribute('href')).toContain(expected + params.rowViewPaths[index], "link missmatch for index=" + index);
+				});
+			});
+		}
+
+		if (typeof params.canEdit === "boolean") {
+			if (!params.canEdit) {
+				it ("edit button should not be visible.", function () {
+					expect(currentEl.all(by.css(".edit-action-button")).isPresent()).not.toBeTruthy();
+				});
+			} else if (params.rowViewPaths || params.rowEditPaths) {
+				it ("clicking on 'edit` button should open a tab to recordedit page.", function (done) {
+					var btn = chaisePage.recordPage.getRelatedTableRowEdit(params.displayname, 0);
+
+					expect(btn.isDisplayed()).toBeTruthy("edit button is missing.");
+					chaisePage.clickButton(btn).then(function () {
+						return browser.getAllWindowHandles();
+					}).then(function(handles) {
+						allWindows = handles;
+						return browser.switchTo().window(allWindows[1]);
+					}).then(function() {
+						var result = '/recordedit/#' + browser.params.catalogId + "/" + params.schemaName + ":" + params.name;
+
+						// in case of association edit and view are different
+						result += "/" + (params.rowEditPaths ? params.rowEditPaths[0] : params.rowViewPaths[0]);
+
+						expect(browser.driver.getCurrentUrl()).toContain(result, "expected link missmatch.");
+						browser.close();
+						return browser.switchTo().window(allWindows[0]);
+					}).then(function (){
+						done();
+					}).catch(function (err) {
+						console.log(err);
+						done.fail();
+					});
+				});
+			}
+		}
+
+		if (typeof params.canDelete === "boolean") {
+			describe("`Delete` or `Unlink` button, ", function () {
+				var deleteBtn;
+				beforeAll(function () {
+					deleteBtn = chaisePage.recordPage.getRelatedTableRowDelete(params.displayname, 0);
+				})
+				if (params.canDelete) {
+					it ('should be visible.', function () {
+						expect(deleteBtn.isDisplayed()).toBeTruthy("delete button is missing.");
+					});
+
+					if (params.isAssociation) {
+						it ("button tooltip should be `Unlink`.", function () {
+							expect(deleteBtn.getAttribute("uib-tooltip")).toBe("Unlink");
+						});
+					} else {
+						it ("button tooltip be `Delete`.", function () {
+							expect(deleteBtn.getAttribute("uib-tooltip")).toBe("Delete");
+						});
+					}
+
+					it ("it should update the table and title after confirmation.", function (done) {
+						var currentCount;
+						chaisePage.recordPage.getRelatedTableRows(params.displayname).count().then(function (count) {
+							currentCount = count;
+							return chaisePage.clickButton(deleteBtn);
+						}).then(function () {
+							var confirmButton = chaisePage.recordPage.getConfirmDeleteButton();
+		                    browser.wait(EC.visibilityOf(confirmButton), browser.params.defaultTimeout);
+
+							return confirmButton.click();
+						}).then(function () {
+							chaisePage.waitForElementInverse(element(by.id("spinner")));
+							return chaisePage.recordPage.getRelatedTableRows(params.displayname).count();
+						}).then(function (count) {
+							expect(count).toBe(currentCount-1, "count didn't change.");
+							testHeading(count, params.page_size);
+							done();
+						}).catch(function (err) {
+							console.log(err);
+							done.fail();
+						})
+					});
+
+				} else {
+					it ("should not be visible.", function () {
+						expect(deleteBtn.isDisplayed()).toBe(false, "delete button was visible.");
+					});
+				}
+			});
+		}
+	});
+
+	// if it was markdown, we are changing the view, change it back.
+	afterAll(function (done) {
+		if (toggled) {
+			chaisePage.clickButton(markdownToggleLink).then(function() {
+				done();
+			}).catch(function(error) {
+				console.log(error);
+				done.fail();
+			});
+		} else {
+			done();
+		}
+	});
+};
+
+/**
+ * required attributes:
+ *  - tableName
+ *  - schemaName
+ *  - relatedDisplayname
+ *  - tableDisplayname
+ *  - columnDisplayname
+ *  - columnValue
+ */
+exports.testAddRelatedTable = function (params, inputCallback) {
+	describe("Add feature, ", function () {
+		it ("clicking on `Add` button should open recordedit.", function (done) {
+			var addBtn = chaisePage.recordPage.getAddRecordLink(params.relatedDisplayname);
+			var recordeditUrl = browser.params.url + '/recordedit/#' + browser.params.catalogId + "/" +
+								params.schemaName + ":" + params.tableName;
+
+			expect(addBtn.isDisplayed()).toBeTruthy("add button is not displayed");
+			chaisePage.clickButton(addBtn).then(function () {
+				// This Add link opens in a new tab so we have to track the windows in the browser...
+				return browser.getAllWindowHandles();
+			}).then(function(handles) {
+				allWindows = handles;
+				// ... and switch to the new tab here...
+				return browser.switchTo().window(allWindows[1]);
+			}).then(function() {
+				return chaisePage.waitForElement(element(by.id('submit-record-button')));
+			}).then(function() {
+
+				browser.wait(function () {
+					return browser.driver.getCurrentUrl().then(function(url) {
+						return url.startsWith(recordeditUrl);
+					});
+				}, browser.params.defaultTimeout);
+
+				// ... and then get the url from this new tab...
+				return browser.driver.getCurrentUrl();
+			}).then(function(url) {
+				expect(url.indexOf('?prefill=')).toBeGreaterThan(-1, "didn't have prefill");
+
+				var title = chaisePage.recordEditPage.getFormTitle().getText();
+				expect(title).toBe("Create " + params.tableDisplayname + " Record", "recordedit title missmatch.")
+
+				done();
+			}).catch(function (err) {
+				console.log(err);
+				done.fail();
+			});
+		});
+
+		it ("the opened form should have the prefill value for foreignkey.", function () {
+			var fkInput = chaisePage.recordEditPage.getForeignKeyInputDisplay(params.columnDisplayname, 0);
+			expect(fkInput.getText()).toBe(params.columnValue, "value missmatch");
+			expect(fkInput.getAttribute('disabled')).toBe('true', "column was enabled.");
+		});
+
+		it ("submitting the form and coming back to recordset page should update the related table.", function (done) {
+			inputCallback().then(function () {
+				return chaisePage.recordEditPage.submitForm();
+			}).then(function() {
+				// wait until redirected to record page
+				browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
+				browser.close();
+				browser.switchTo().window(allWindows[0]);
+
+				//TODO should check for the updated value.
+				done();
+			}).catch(function(error) {
+				console.log(error);
+				done.fail();
+			});
+		});
+	});
+};
+
+/**
+ * - relatedDisplayname
+ * - tableDisplayname
+ * - totalCount
+ * - existingCount
+ * - disabledRows
+ * - selectIndex
+ */
+exports.testAddAssociationTable = function (params, pageReadyCondition) {
+	describe("Add feature, ", function () {
+		it ("clicking on `Add` button should open up a modal.", function (done) {
+			var addBtn = chaisePage.recordPage.getAddRecordLink(params.relatedDisplayname);
+			chaisePage.clickButton(addBtn).then(function () {
+				chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
+				return chaisePage.recordEditPage.getModalTitle().getText();
+			}).then(function (title) {
+				expect(title).toBe("Choose " + params.tableDisplayname, "title missmatch.");
+
+				browser.wait(function () {
+					return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
+						return (ct == params.totalCount);
+					});
+				});
+
+				return chaisePage.recordsetPage.getModalRows().count();
+			}).then(function(ct){
+				expect(ct).toBe(params.totalCount, "association count missmatch.");
+				done();
+			}).catch(function(error) {
+				console.log(error);
+				done.fail();
+			});
+		});
+
+		it ("current values must be disabled.", function (done) {
+			chaisePage.recordPage.getModalDisabledRows().then(function (disabledRows) {
+				expect(disabledRows.length).toBe(params.disabledRows.length, "disabled length missmatch.");
+
+
+				// go through the list and check their first column (which is the id)
+				disabledRows.forEach(function (r, index) {
+					r.findElement(by.css("td:not(.actions-layout)")).then(function (el) {
+						expect(el.getText()).toMatch(params.disabledRows[index], "missmatch disabled row index=" + index);
+					});
+				});
+
+				done();
+			}).catch(function(error) {
+				console.log(error);
+				done.fail();
+			});
+		});
+
+		it ("user should be able to select new values and submit.", function (done) {
+			var inp = chaisePage.recordsetPage.getModalOptionByIndex(params.selectIndex);
+			chaisePage.clickButton(inp).then(function (selectButtons){
+				return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
+			}).then(function () {
+				browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
+				//TODO this is refreshing the page which it shouldn't
+				//TODO we should check the value and not just count
+				browser.driver.navigate().refresh();
+				pageReadyCondition();
+
+				browser.wait(function() {
+					return chaisePage.recordPage.getRelatedTableRows(params.relatedDisplayname).count().then(function(ct) {
+						return ct == params.existingCount + 1;
+					});
+				}, browser.params.defaultTimeout);
+
+				return chaisePage.recordPage.getRelatedTableRows(params.relatedDisplayname).count();
+			}).then(function (count){
+				expect(count).toBe(params.existingCount + 1);
+				done();
+			}).catch(function(error) {
+				console.log(error);
+				done.fail();
+			});
+		});
+
+	});
+};

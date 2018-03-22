@@ -658,7 +658,6 @@ var recordPage = function() {
         return element(by.id("entity-" + displayName)).element(by.css(".ng-scope")).element(by.css(".ng-scope"));
     };
 
-
     this.getRelatedTableHeadings = function() {
         return element.all(by.css(".related-table-heading"));
     };
@@ -685,6 +684,21 @@ var recordPage = function() {
     this.getRelatedTableRows = function(displayName) {
         displayName = makeSafeIdAttr(displayName);
         return element(by.id("rt-" + displayName)).all(by.css(".table-row"));
+    };
+
+    this.getRelatedTableRowLink = function (displayName, rowIndex) {
+        var rows = this.getRelatedTableRows(displayName);
+        return rows.get(rowIndex).all(by.tagName("td")).first().all(by.css(".view-action-button")).first();
+    };
+
+    this.getRelatedTableRowEdit = function (displayName, rowIndex) {
+        var rows = this.getRelatedTableRows(displayName);
+        return rows.get(rowIndex).all(by.tagName("td")).first().all(by.css(".edit-action-button")).first();
+    };
+
+    this.getRelatedTableRowDelete = function (displayName, rowIndex) {
+        var rows = this.getRelatedTableRows(displayName);
+        return rows.get(rowIndex).all(by.tagName("td")).first().all(by.css(".delete-action-button")).first();
     };
 
     this.getMoreResultsLink = function(displayName) {
@@ -962,6 +976,10 @@ var recordsetPage = function() {
         return browser.executeScript("return $('.panel-open h3 a').map(function(i, a) { return a.textContent.trim(); });");
     }
 
+    this.getFilterString = function () {
+        return element(by.id("recordset-filter-str"));
+    };
+
     this.getFilters = function () {
         return element.all(by.css(".filter-label.label-default"));
     }
@@ -1022,7 +1040,11 @@ var recordsetPage = function() {
 
     this.getModalOptions = function () {
         return element(by.css(".modal-body")).all(by.css(".chaise-checkbox input"));
-    }
+    };
+
+    this.getModalOptionByIndex = function (index) {
+        return element(by.css(".modal-body")).all(by.css(".chaise-checkbox input")).get(index);
+    };
 
     this.getModalSubmit = function () {
         return element(by.css(".modal-body")).element(by.id("multi-select-submit-btn"));

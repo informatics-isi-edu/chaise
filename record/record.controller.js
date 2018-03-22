@@ -159,10 +159,13 @@
         };
 
         vm.canCreateRelated = function(relatedRef) {
-            if(angular.isUndefined(relatedRef))
-            return false;
-           var ref = (relatedRef.derivedAssociationReference ? relatedRef.derivedAssociationReference : relatedRef);
-           return (ref.canCreate && $rootScope.modifyRecord);
+            if(angular.isUndefined(relatedRef) || !$rootScope.modifyRecord) return false;
+
+            // we are not supporting add in this case
+            if (relatedRef.pseudoColumn && !relatedRef.pseudoColumn.isInboundForeignKey) return false;
+
+            var ref = (relatedRef.derivedAssociationReference ? relatedRef.derivedAssociationReference : relatedRef);
+            return ref.canCreate;
         };
 
         // Send user to RecordEdit to create a new row in this related table
