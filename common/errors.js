@@ -233,7 +233,8 @@
             var reloadLink,
                 redirectLink = $window.location.origin,
                 gotoLocation = "Home Page",
-                appName = UriUtils.appNamefromUrlPathname($window.location.pathname);
+                appName = UriUtils.appNamefromUrlPathname($window.location.pathname),
+                errorCode = exception.code;
 
             var stackTrace =  (exception.errorData && exception.errorData.stack)? exception.errorData.stack: undefined;
 
@@ -259,7 +260,7 @@
                 } else {
                     redirectLink = $window.location.origin;
                 }
-                errorPopup( exception.message, exception.status, gotoLocation, redirectLink, exception.subMessage, '', exception.code);
+                errorPopup( exception.message, exception.status, gotoLocation, redirectLink, exception.subMessage, '', errorCode);
             } else {
                 logError(exception);
 
@@ -268,7 +269,6 @@
                     systemAdminMessage = errorMessages.systemAdminMessage,
                     redirectLink = $window.location.origin,
                     pageName = "Home Page";
-
 
                 errName = (errName.toLowerCase() !== 'error') ? errName : "Terminal Error";
 
@@ -279,7 +279,7 @@
                     redirectLink,
                     errorText,
                     stackTrace,
-                    exception.code
+                    errorCode
                 );
             }
 
