@@ -44,7 +44,7 @@ var testParams = {
         { title: "Thumbnail", value: null, type: "int4"},
         { title: "Operational Since", value: "2008-12-09 00:00:00", type: "timestamptz" },
         { title: "Is Luxurious", value: "true", type: "boolean" },
-        { title: "accommodation_collections", value: '<ul>\n<li><a href="https://dev.isrd.isi.edu/~ashafaei/chaise/record/#'+browser.params.catalogId+'/product-record:accommodation_collection/id=2000">Sherathon Hotel</a></li>\n</ul>\n', type: "inline"},
+        { title: "accommodation_collections", value: '<ul>\n<li><a href="' + browser.params.url + '/record/#'+browser.params.catalogId+'/product-record:accommodation_collection/id=2000">Sherathon Hotel</a></li>\n</ul>\n', type: "inline"},
         { title: "json_col", value:'<pre>'+JSON.stringify(null,undefined,2)+'</pre>', match:"html"},
         { title: "json_col_with_markdown", value: "<p>Status is: “delivered”</p>\n", match:"html"},
     ],
