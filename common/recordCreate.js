@@ -1,7 +1,9 @@
 (function() {
     'use strict';
-    angular.module('chaise.recordcreate', ['chaise.errors','chaise.utils']).factory("recordCreate", ['$cookies', '$log', '$window', 'modalUtils', 'AlertsService', 'DataUtils', 'UriUtils', 'modalBox', '$q', 'logActions',
-     function($cookies, $log, $window, modalUtils, AlertsService, DataUtils, UriUtils, modalBox, $q, logActions) {
+    angular.module('chaise.recordcreate', ['chaise.errors','chaise.utils'])
+
+    .factory("recordCreate", ['$cookies', '$log', '$rootScope', '$window', 'modalUtils', 'AlertsService', 'DataUtils', 'UriUtils', 'modalBox', '$q', 'logActions',
+        function($cookies, $log, $rootScope, $window, modalUtils, AlertsService, DataUtils, UriUtils, modalBox, $q, logActions) {
 
         var viewModel = {};
         var GV_recordEditModel = {},
@@ -370,6 +372,8 @@
                     addRecords(viewModel.editMode, derivedref, nullArr, isModalUpdate, rsReference, rsTuples, rsQueryParams, viewModel, viewModel.onSuccess, logObject);
                 }
 
+            }, function modalClosed() {
+                $rootScope.pageLoaded = false;
             });
         }
 

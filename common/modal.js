@@ -163,30 +163,35 @@
             // TODO this should not be a hardcoded value, either need a pageInfo object across apps or part of user settings
             // The new recordset (recordsetWithFaceting) doesn't require read first. It will take care of this.
             var logObject = params.logObject ? params.logObject : {action: logActions.recordsetLoad};
-            reference.read(limit, logObject).then(function getPseudoData(page) {
-                var afterRead = function () {
-                    vm.tableModel.hasLoaded = true;
-                    vm.tableModel.initialized = true;
-                    vm.tableModel.page = page;
-                    vm.tableModel.rowValues = DataUtils.getRowValuesFromPage(page);
-                    $scope.$broadcast('data-modified');
-                };
+            if (params.faceting) {
+                $scope.$broadcast('page-loaded');
+            } else {
+                reference.read(limit, logObject).then(function getPseudoData(page) {
+                    var afterRead = function () {
+                        vm.tableModel.hasLoaded = true;
+                        vm.tableModel.initialized = true;
+                        vm.tableModel.page = page;
+                        vm.tableModel.rowValues = DataUtils.getRowValuesFromPage(page);
+                        console.log("BEFORE BROADCAST");
+                        $scope.$broadcast('data-modified');
+                    };
 
-                // get disabled tuple.
-                if (vm.getDisabledTuples) {
-                    vm.getDisabledTuples(page, vm.tableModel.pageLimit).then(function (rows) {
-                        vm.tableModel.disabledRows = rows;
+                    // get disabled tuple.
+                    if (vm.getDisabledTuples) {
+                        vm.getDisabledTuples(page, vm.tableModel.pageLimit).then(function (rows) {
+                            vm.tableModel.disabledRows = rows;
+                            afterRead();
+                        }).catch(function (err) {
+                            throw err;
+                        });
+                    } else {
                         afterRead();
-                    }).catch(function (err) {
-                        throw err;
-                    });
-                } else {
-                    afterRead();
-                }
+                    }
 
-            }).catch(function(exception) {
-                throw exception;
-            });
+                }).catch(function(exception) {
+                    throw exception;
+                });
+            }
         };
 
         // make sure to fetch the records after having the recordset directive
