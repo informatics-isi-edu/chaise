@@ -201,7 +201,7 @@
             };
 
 
-            if (subMessage == 403 || (chaiseConfig && chaiseConfig.allowErrorDismissal)) {  //If Forbidden error then allow modal to be dismissed
+            if ((errorCode == 403 || errorCode == 409) || (chaiseConfig && chaiseConfig.allowErrorDismissal)) {  //If Forbidden error then allow modal to be dismissed
                 delete modalProperties.keyboard;
                 delete modalProperties.backdrop;
                 params.canClose = true;
@@ -259,7 +259,7 @@
                 } else {
                     redirectLink = $window.location.origin;
                 }
-                errorPopup( exception.message, exception.status, gotoLocation, redirectLink, exception.subMessage);
+                errorPopup( exception.message, exception.status, gotoLocation, redirectLink, exception.subMessage, '', exception.code);
             } else {
                 logError(exception);
 
@@ -278,7 +278,8 @@
                     pageName,
                     redirectLink,
                     errorText,
-                    stackTrace
+                    stackTrace,
+                    exception.code
                 );
             }
 
