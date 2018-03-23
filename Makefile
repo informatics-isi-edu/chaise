@@ -331,6 +331,7 @@ DETAILED_CSS_SOURCE=$(COMMON)/styles/app.css
 RECORD_ASSETS=record
 
 RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
+	$(JS)/vendor/plotly-latest.min.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-plotly.js \
 	$(JS)/vendor/angular-messages.min.js \
@@ -423,6 +424,7 @@ VIEWER_CSS_SOURCE=$(VIEWER_ASSETS)/viewer.css
 RE_ASSETS=recordedit
 
 RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
+	$(JS)/vendor/plotly-latest.min.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-plotly.js \
 	$(JS)/vendor/angular-sanitize.js \
