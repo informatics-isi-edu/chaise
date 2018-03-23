@@ -1140,6 +1140,7 @@ footer .container1 {
     display: none;
  }
 
+/* side panel buttons */
  .sidePanFiddler, #back-to-top {
      cursor: pointer;
      overflow: hidden;
@@ -1155,8 +1156,23 @@ footer .container1 {
      top: 5px;
  }
 
+/* record side panel collapse button */
+ .record-container .sidePanFiddler {
+     position: absolute;
+     right: 10px;
+ }
+
+ .record-container .sidePanFiddler.close-panel {
+     padding: 1px 4px 0 0px;
+ }
+
+/* recordset side panel collapse button */
  .recordset-container .sidePanFiddler {
      margin-bottom: 10px;
+ }
+
+ .recordset-container .sidePanFiddler.open-panel {
+     padding: 1px 4px 0 0px;
  }
 
  /****** RSwF main container *******/
