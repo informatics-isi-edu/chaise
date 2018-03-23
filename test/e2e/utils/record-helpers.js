@@ -106,34 +106,35 @@ exports.testPresentation = function (tableParams) {
 
     it("should validate the values of each column", function () {
         var columns = tableParams.columns.filter(function (c) { return c.value != null; });
-        expect(element.all(by.className('entity-value')).count()).toEqual(columns.length);
+        expect(element.all(by.className('entity-value')).count()).toEqual(columns.length, "length missmatch.");
+        var index = -1, columnUrl, aTag;
+        columns.forEach(function (column) {
+			var errMessage = "value missmatch for column " + column.title;
 
-            var index = -1, columnUrl, aTag;
-            columns.forEach(function (column) {
-                var columnEls;
-                if (column.title=='booking') {
-                    expect(element(by.id('entity-4-markdown')).element(by.tagName('span')).getAttribute('innerHTML')).toContain(column.value);
-                } else if (column.match=='html') {
-                    expect(chaisePage.recordPage.getEntityRelatedTableScope(column.title).getAttribute('innerHTML')).toBe(column.value);
-                } else if (column.title == 'User Rating'){
-                    expect(chaisePage.recordPage.getEntityRelatedTableScope('&lt;strong&gt;User&nbsp;Rating&lt;/strong&gt;',true).getAttribute('innerHTML')).toBe(column.value);
-                } else {
-                    columnEls = chaisePage.recordPage.getEntityRelatedTable(column.title);
+            var columnEls;
+            if (column.match=='html') {
+                expect(chaisePage.recordPage.getEntityRelatedTableScope(column.title).getAttribute('innerHTML')).toBe(column.value, errMessage);
+            } else if (column.title == 'User Rating'){
+                expect(chaisePage.recordPage.getEntityRelatedTableScope('&lt;strong&gt;User&nbsp;Rating&lt;/strong&gt;',true).getAttribute('innerHTML')).toBe(column.value, errMessage);
+            } else {
+                columnEls = chaisePage.recordPage.getEntityRelatedTable(column.title);
 
-                    if (column.presentation && column.presentation.type == "url") {
-                        chaisePage.recordPage.getLinkChild(columnEls).then(function (aTag) {
-                            columnUrl = mustache.render(column.presentation.template, {
-                                "catalog_id": process.env.catalogId,
-                                "chaise_url": process.env.CHAISE_BASE_URL,
-                            });
-
-                            expect(aTag.getAttribute('href')).toEqual(columnUrl);
-                            expect(aTag.getText()).toEqual(column.value);
+                if (column.presentation && column.presentation.type == "url") {
+                    chaisePage.recordPage.getLinkChild(columnEls).then(function (aTag) {
+                        columnUrl = mustache.render(column.presentation.template, {
+                            "catalog_id": process.env.catalogId,
+                            "chaise_url": process.env.CHAISE_BASE_URL,
                         });
-                    } else {
-                        expect(columnEls.getAttribute('innerText')).toBe(column.value);
-                    }
-            }
+
+                        expect(aTag.getAttribute('href')).toEqual(columnUrl, errMessage + " for url");
+                        expect(aTag.getText()).toEqual(column.value, errMessage + " for caption");
+                    });
+                } else if (column.type === "inline"){
+                    expect(chaisePage.recordPage.getMarkdownContainer(columnEls).getAttribute('innerHTML')).toBe(column.value, errMessage);
+                } else {
+					expect(columnEls.getAttribute('innerText')).toBe(column.value, errMessage);
+				}
+        	}
         });
     });
 
@@ -262,61 +263,65 @@ exports.testPresentation = function (tableParams) {
         })
     });
 
-    it("visible column related table with inline inbound fk should display 'None' in markdown display mode if no data was found.",function(){
+    it("visible column related table with inline inbound fk should display 'None' in markdown display mode if no data was found.",function(done){
         var EC = protractor.ExpectedConditions,
-            markdownEntity = element(by.id('entity-4-markdown')),
+            markdownEntity = element(by.id('entity-4-markdown')), //TODO this should be a function, it's also is assuming the order
             bookingName = "booking";
 
+		var confirmButton = chaisePage.recordPage.getConfirmDeleteButton();
+		var getRowDeleteBtn = function (index) {
+			return chaisePage.recordPage.getRelatedTableRowDelete(bookingName, index, true);
+		}
 
-        chaisePage.waitForElement(element(by.id("rt-" + bookingName))).then(function(){
-            return chaisePage.recordPage.getDeleteActionButtons(bookingName);
-        }).then(function(deleteButtons) {
-            return deleteButtons[0].click();
-        }).then(function () {
-            chaisePage.waitForElement(element(by.id("delete-confirmation")));
-            return chaisePage.recordPage.getConfirmDeleteButton().click();
-        }).then(function () {
-            browser.wait(function () {
-                return chaisePage.recordPage.getDeleteActionButtons(bookingName).count().then(function (ct) {
-                    return (ct==1);
-                });
-            });
+		chaisePage.waitForElement(element(by.id("rt-" + bookingName)));
 
-            return chaisePage.recordPage.getDeleteActionButtons(bookingName);
-        }).then(function (deleteButtons) {
-            return deleteButtons[0].click();
+		// delete the first row
+        chaisePage.clickButton(getRowDeleteBtn(0)).then(function(){
+			browser.wait(EC.visibilityOf(confirmButton), browser.params.defaultTimeout);
+			return confirmButton.click();
         }).then(function () {
-            return chaisePage.recordPage.getConfirmDeleteButton();//.click();
-        }).then(function(confirmationBtn){
-           return confirmationBtn.click();
+			chaisePage.waitForElementInverse(element(by.id("spinner")));
+
+			// delete the other row
+            return chaisePage.clickButton(getRowDeleteBtn(0));
         }).then(function () {
+			browser.wait(EC.visibilityOf(confirmButton), browser.params.defaultTimeout);
+			return chaisePage.clickButton(confirmButton);
+		}).then(function () {
+			chaisePage.waitForElementInverse(element(by.id("spinner")));
+
+			// make sure there are zero rows
             browser.wait(function() {
                 return chaisePage.recordPage.getRelatedTableRows(bookingName).count().then(function(ct) {
                     return (ct==0);
                 });
             }, browser.params.defaultTimeout);
 
-            return browser.executeScript("return $('a.toggle-display-link').click()");
+			// switch the display mode
+			return chaisePage.clickButton(chaisePage.recordPage.getToggleDisplayLink(bookingName, true));
         }).then(function(){
             browser.wait(EC.visibilityOf(markdownEntity), browser.params.defaultTimeout);
             expect(markdownEntity.getText()).toBe('None',"Incorrect text for empty markdown!");
+			done();
         }).catch(function(err){
             console.log(err);
-            expect('Encountered an error').toBe('Please check the log', 'Inside catch block');
-        })
+            done.fail();
+        });
     });
 
-    it("visible column related table with inline inbound fk should disappear when 'Hide All Related Records' was clicked.",function(){
-         var markdownEntityRow = element(by.id('row-product-record_fk_booking_accommodation')).all(by.tagName('td')),
-            showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton();
-         showAllRTButton.click();
-         // multiple td returns [] when isDisplayed() is resolved; therefore length is being used to check if it is displayed.
-         markdownEntityRow.isDisplayed().then(function(err){
-            expect(err.length).toBe(0);
-         })
-         showAllRTButton.click();     // reverse the status of the page
-    });
+    it("empty inline inbound fks should disappear when 'Hide All Related Records' was clicked.",function(done){
+        var showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton();
 
+		chaisePage.clickButton(showAllRTButton).then(function () {
+			expect(chaisePage.recordPage.getEntityRelatedTable("booking").isPresent()).toBeFalsy();
+			return chaisePage.clickButton(showAllRTButton);
+		}).then(function () {
+			done();
+		}).catch(function(err){
+            console.log(err);
+            done.fail();
+        });
+    });
 
     // Related tables are contextualized with `compact/brief`, but if that is not specified it will inherit from `compact`
     it("should honor the page_size annotation for the table, file, in the compact context based on inheritance.", function() {
@@ -327,12 +332,13 @@ exports.testPresentation = function (tableParams) {
         });
     });
 
-    it("clicking the related table heading should change the heading and hide the table.", function() {
+    it("clicking the related table heading should change the heading and hide the table.", function(done) {
         var relatedTable = tableParams.related_tables[0];
         var displayName = relatedTable.title;
         var tableHeading = chaisePage.recordPage.getRelatedTableHeading(displayName),
             tableElement = chaisePage.recordPage.getRelatedTable(displayName);
 
+		// TODO this test is using too many css classes which should be functions in chaise.page.js
         tableHeading.element(by.css('.glyphicon')).getAttribute('class').then(function(cssClass) {
             // related table should be open by default
             expect(cssClass).toContain('glyphicon-chevron-down');
@@ -341,7 +347,7 @@ exports.testPresentation = function (tableParams) {
         }).then(function(attribute) {
             expect(attribute).toMatch("panel-open");
             chaisePage.waitForElement(element(by.css(".accordion-toggle")));
-            return tableHeading.element(by.css(".accordion-toggle")).click();
+            return chaisePage.clickButton(tableHeading.element(by.css(".accordion-toggle")));
         }).then(function() {
             return tableHeading.getAttribute("heading");
         }).then(function(heading) {
@@ -350,7 +356,11 @@ exports.testPresentation = function (tableParams) {
             return tableHeading.getAttribute("class");
         }).then(function(attribute) {
             expect(attribute).not.toMatch("panel-open");
-        });
+			done();
+        }).catch(function (err) {
+			console.log(err);
+			done.fail();
+		})
     });
 
     // There is a media table linked to accommodations but this accommodation (Sheraton Hotel) doesn't have any media
@@ -375,6 +385,29 @@ exports.testPresentation = function (tableParams) {
             console.log(error);
         });
     });
+
+	describe("regarding inline related entities, ", function () {
+		beforeAll(function () {
+			// make sure page is in its initial state
+			browser.driver.navigate().refresh();
+		});
+
+		var pageReadyCondition = function () {
+		    chaisePage.waitForElementInverse(element(by.id("spinner")));
+
+		    // make sure the last related entity is visible
+		    chaisePage.waitForElement(element(by.id('rt-accommodation_image')));
+		};
+
+		for (var i = 0; i < tableParams.inline_columns.length; i++) {
+			var p = tableParams.inline_columns[i];
+			describe ("for " + p.title + ", ", function (){
+				exports.testRelatedTable(p, pageReadyCondition);
+			});
+
+		}
+	});
+
 };
 
 /**
@@ -390,12 +423,11 @@ exports.testPresentation = function (tableParams) {
  * isAssociation
  * isMarkdown
  * isInline
+ * isTableMode
  * viewMore:
  *  - name
  *  - displayname
  *  - filter
- * add:
- *  - ?????????????????????
  * rowValues
  * rowViewPaths
  * markdownValue
@@ -407,16 +439,17 @@ exports.testPresentation = function (tableParams) {
  * testDelete
  */
 exports.testRelatedTable = function (params, pageReadyCondition) {
-	//TODO add supprt for inline!!!!!!!!!!
 	var currentEl, markdownToggleLink, toggled = false;
 	beforeAll(function() {
+		pageReadyCondition();
+
 		if (params.isInline) {
 			currentEl = chaisePage.recordPage.getEntityRelatedTable(params.displayname);
 		} else {
 			currentEl = chaisePage.recordPage.getRelatedTableHeading(params.displayname);
 		}
 
-		markdownToggleLink = chaisePage.recordPage.getToggleDisplayLink(params.displayname);
+		markdownToggleLink = chaisePage.recordPage.getToggleDisplayLink(params.displayname, params.isInline);
 	});
 
 	var testHeading = function (count, page_size) {
@@ -434,9 +467,11 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 		expect(heading.getText()).toBe(title, "heading missmatch.");
 	};
 
-	it ("title should be correct.", function () {
-		testHeading(params.count, params.page_size);
-	});
+	if (!params.isInline) {
+		it ("title should be correct.", function () {
+			testHeading(params.count, params.page_size);
+		});
+	}
 
 	describe("regarding table level actions, ", function () {
 
@@ -444,7 +479,8 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 		describe("`View More` button, ", function () {
 			var viewMoreBtn;
 			beforeAll(function () {
-				viewMoreBtn = chaisePage.recordPage.getMoreResultsLink(params.displayname);
+				viewMoreBtn = chaisePage.recordPage.getMoreResultsLink(params.displayname, params.isInline);
+				browser.wait(EC.elementToBeClickable(viewMoreBtn), browser.params.defaultTimeout);
 			});
 
 			it ('should be displayed.', function () {
@@ -453,7 +489,6 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 
 			if (params.viewMore){
 				it ("should always go to recordset app with correct set of filters.", function (done) {
-					browser.wait(EC.elementToBeClickable(viewMoreBtn), browser.params.defaultTimeout);
 					chaisePage.clickButton(viewMoreBtn).then(function () {
 						return browser.driver.getCurrentUrl();
 					}).then(function(url) {
@@ -528,7 +563,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 			if (params.rowValues) {
 				// since we toggled to row, the data should be available.
 				it ("rows of data should be correct and respect the given page_size.", function (done) {
-					chaisePage.recordPage.getRelatedTableRows(params.displayname).then(function (rows) {
+					chaisePage.recordPage.getRelatedTableRows(params.displayname, params.isInline).then(function (rows) {
 						expect(params.rowValues.length).toBe(params.rowValues.length, "rows length missmatch.");
 						if (rows.length === 0) {
 							done();
@@ -559,7 +594,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 
 		if (typeof params.canCreate === "boolean") {
 			it ("`Add` button should be " + (params.canCreate ? "visible." : "invisible."), function () {
-				var addBtn = chaisePage.recordPage.getAddRecordLink(params.displayname);
+				var addBtn = chaisePage.recordPage.getAddRecordLink(params.displayname, params.isInline);
 				expect(addBtn.isPresent()).toBe(params.canCreate);
 			});
 		 }
@@ -572,7 +607,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 			it ("'View Details' button should have the correct link.", function () {
 				var expected = '/record/#' + browser.params.catalogId + "/" + params.schemaName + ":" + (params.isAssociation ? params.relatedName : params.name) + "/";
 				params.rowViewPaths.forEach(function (row, index) {
-					var btn = chaisePage.recordPage.getRelatedTableRowLink(params.displayname, index);
+					var btn = chaisePage.recordPage.getRelatedTableRowLink(params.displayname, index, params.isInline);
 					expect(btn.getAttribute('href')).toContain(expected + params.rowViewPaths[index], "link missmatch for index=" + index);
 				});
 			});
@@ -585,7 +620,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 				});
 			} else if (params.rowViewPaths || params.rowEditPaths) {
 				it ("clicking on 'edit` button should open a tab to recordedit page.", function (done) {
-					var btn = chaisePage.recordPage.getRelatedTableRowEdit(params.displayname, 0);
+					var btn = chaisePage.recordPage.getRelatedTableRowEdit(params.displayname, 0, params.isInline);
 
 					expect(btn.isDisplayed()).toBeTruthy("edit button is missing.");
 					chaisePage.clickButton(btn).then(function () {
@@ -616,7 +651,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 			describe("`Delete` or `Unlink` button, ", function () {
 				var deleteBtn;
 				beforeAll(function () {
-					deleteBtn = chaisePage.recordPage.getRelatedTableRowDelete(params.displayname, 0);
+					deleteBtn = chaisePage.recordPage.getRelatedTableRowDelete(params.displayname, 0, params.isInline);
 				})
 				if (params.canDelete) {
 					it ('should be visible.', function () {
@@ -635,7 +670,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 
 					it ("it should update the table and title after confirmation.", function (done) {
 						var currentCount;
-						chaisePage.recordPage.getRelatedTableRows(params.displayname).count().then(function (count) {
+						chaisePage.recordPage.getRelatedTableRows(params.displayname, params.isInline).count().then(function (count) {
 							currentCount = count;
 							return chaisePage.clickButton(deleteBtn);
 						}).then(function () {
@@ -645,7 +680,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 							return confirmButton.click();
 						}).then(function () {
 							chaisePage.waitForElementInverse(element(by.id("spinner")));
-							return chaisePage.recordPage.getRelatedTableRows(params.displayname).count();
+							return chaisePage.recordPage.getRelatedTableRows(params.displayname, params.isInline).count();
 						}).then(function (count) {
 							expect(count).toBe(currentCount-1, "count didn't change.");
 							testHeading(count, params.page_size);

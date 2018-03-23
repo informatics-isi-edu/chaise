@@ -685,57 +685,51 @@ var recordPage = function() {
         return element(by.id("rt-" + displayName)).all(by.css(".table-column-displayname > span"));
     };
 
-    this.getRelatedTableRows = function(displayName) {
-        displayName = makeSafeIdAttr(displayName);
-        return element(by.id("rt-" + displayName)).all(by.css(".table-row"));
+    this.getRelatedTableRows = function(displayName, isInline) {
+        var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTable(displayName);
+        return el.all(by.css(".table-row"));
     };
 
-    this.getRelatedTableRowLink = function (displayName, rowIndex) {
-        var rows = this.getRelatedTableRows(displayName);
+    this.getRelatedTableRowLink = function (displayName, rowIndex, isInline) {
+        var rows = this.getRelatedTableRows(displayName, isInline);
         return rows.get(rowIndex).all(by.tagName("td")).first().all(by.css(".view-action-button")).first();
     };
 
-    this.getRelatedTableRowEdit = function (displayName, rowIndex) {
-        var rows = this.getRelatedTableRows(displayName);
+    this.getRelatedTableRowEdit = function (displayName, rowIndex, isInline) {
+        var rows = this.getRelatedTableRows(displayName, isInline);
         return rows.get(rowIndex).all(by.tagName("td")).first().all(by.css(".edit-action-button")).first();
     };
 
-    this.getRelatedTableRowDelete = function (displayName, rowIndex) {
+    this.getRelatedTableRowDelete = function (displayName, rowIndex, isInline) {
         var rows = this.getRelatedTableRows(displayName);
         return rows.get(rowIndex).all(by.tagName("td")).first().all(by.css(".delete-action-button")).first();
     };
 
-    this.getMoreResultsLink = function(displayName) {
-        displayName = makeSafeIdAttr(displayName);
+    this.getMoreResultsLink = function(displayName, isInline) {
+        var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTableHeading(displayName);
         // the link is not a child of the table, rather one of the accordion group
-        return element(by.id("rt-heading-" + displayName)).element(by.css(".more-results-link"));
+        return el.element(by.css(".more-results-link"));
     };
 
-    this.getAddRecordLink = function(displayName) {
-        displayName = makeSafeIdAttr(displayName);
+    this.getAddRecordLink = function(displayName, isInline) {
+        var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTableHeading(displayName);
         // the link is not a child of the table, rather one of the accordion group
-        return element(by.id("rt-heading-" + displayName)).element(by.css(".add-records-link"));
+        return el.element(by.css(".add-records-link"));
     };
 
-    this.getToggleDisplayLink = function(displayName) {
-        displayName = makeSafeIdAttr(displayName);
+    this.getToggleDisplayLink = function(displayName, isInline) {
+        var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTableHeading(displayName);
         // the link is not a child of the table, rather one of the accordion group
-        return element(by.id("rt-heading-" + displayName)).element(by.css(".toggle-display-link"));
+        return el.element(by.css(".toggle-display-link"));
     };
 
-    this.getEntityToggleDisplayLink = function(displayName) {
-        displayName = makeSafeIdAttr(displayName);
-        return element(by.id("entity-" + displayName)).element(by.css(".toggle-display-link"));
+    this.getRelatedTableRowValues = function(displayName, isInline) {
+        return this.getRelatedTableRows(displayName, isInline).all(by.tagName("td"));
     };
 
-    this.getRelatedTableRowValues = function(displayName) {
-        displayName = makeSafeIdAttr(displayName);
-        return that.getRelatedTableRows(displayName).all(by.tagName("td"));
-    };
-
-    this.getNoResultsRow = function(displayName) {
-        displayName = makeSafeIdAttr(displayName);
-        return element(by.id("rt-" + displayName)).element(by.id("no-results-row"));
+    this.getNoResultsRow = function(displayName, isInline) {
+        var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTable(displayName);
+        return el.element(by.id("no-results-row"));
     };
 
     this.getCreateRecordButton = function() {
@@ -821,6 +815,10 @@ var recordPage = function() {
     this.getSidePanelFiddler = function() {
         return element(by.className('sidePanFiddler')).element(by.tagName('i'));
     }
+
+    this.getMarkdownContainer = function (el) {
+        return el.all(by.css(".markdown-container")).first();
+    };
 };
 
 var recordsetPage = function() {
