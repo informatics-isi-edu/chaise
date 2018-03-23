@@ -551,6 +551,30 @@ describe('Error related test cases,', function() {
 
     });
 
+    describe("Dismissible Error Modal ", function(){
+
+      beforeAll(function() {
+          var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name +  "/id=2002";
+          browser.get(url);
+          deleteBtn  = chaisePage.recordPage.getDeleteRecordButton();
+      });
+        it('After clicking back button initial page should appear', function(done){
+          chaisePage.waitForElement(deleteBtn).then(function(){
+              deleteBtn.click();
+              return chaisePage.recordPage.getConfirmDeleteButton().click();
+            }).then (function() {
+              closeModal = chaisePage.recordEditPage.getModalCloseBtn();
+              chaisePage.waitForElement(closeModal);
+              expect(closeModal.isDisplayed()).toBeTruthy('Close modal option is not available for conflict/forbiddden errors');
+              done();
+          }).catch(function(error) {
+              console.log(error);
+              done.fail();
+          });
+      });
+
+    });
+
 
 
 });
