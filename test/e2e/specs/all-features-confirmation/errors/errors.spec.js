@@ -558,7 +558,7 @@ describe('Error related test cases,', function() {
           browser.get(url);
           deleteBtn  = chaisePage.recordPage.getDeleteRecordButton();
       });
-        it('After clicking back button initial page should appear', function(done){
+        it('Error modal is dismissible in case of conflict/forbidden error', function(done){
           chaisePage.waitForElement(deleteBtn).then(function(){
               deleteBtn.click();
               return chaisePage.recordPage.getConfirmDeleteButton().click();
