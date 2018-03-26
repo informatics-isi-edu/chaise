@@ -53,8 +53,9 @@ describe('Navbar ', function() {
 
     it('should open the profile card on click of My Profile link', function(done) {
         var link = element(by.css('.dropdown-toggle'));
-        browser.wait(EC.elementToBeClickable(link), browser.params.defaultTimeout).then(function() {
-            link.click();
+
+        browser.wait(EC.elementToBeClickable(link), browser.params.defaultTimeout);
+        chaisePage.clickButton(link).then(function() {
             var profileLink = element(by.id('profile-link'));
             browser.wait(EC.elementToBeClickable(profileLink), browser.params.defaultTimeout);
             chaisePage.clickButton(profileLink).then(function() {
