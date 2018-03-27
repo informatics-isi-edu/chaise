@@ -83,7 +83,7 @@
                 errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
                 errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
                 error.errorData = errorData;
-                throw error;
+                ErrorService.handleException(error, true); // call error module with isDismissible = True
             });
         };
 

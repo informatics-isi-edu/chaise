@@ -282,7 +282,7 @@
                           errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
                           errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
                           response.errorData = errorData;
-                          throw response;
+                          ErrorService.handleException(response, true); // call error module with isDismissible = True
                         }
                     });
                 }, function onError (exception) {
@@ -296,7 +296,7 @@
                     errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
                     errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
                     response.errorData = errorData;
-                    throw response;
+                    ErrorService.handleException(response, true); // call error module with isDismissible = True
                 }).catch(function (exception) {
                     $rootScope.showSpinner = false;
                     AlertsService.addAlert(exception.message, 'error');

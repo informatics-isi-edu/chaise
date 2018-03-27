@@ -150,7 +150,7 @@
             window.location.reload();
         };
 
-        function errorPopup(message, errorStatus, pageName, redirectLink, subMessage, stackTrace, errorCode) {
+        function errorPopup(message, errorStatus, pageName, redirectLink, subMessage, stackTrace, errorCode, isDismissible) {
             var providedLink = true,
                 isLoggedIn = false;
             var appName = UriUtils.appNamefromUrlPathname($window.location.pathname),
@@ -201,7 +201,7 @@
             };
 
 
-            if ((errorCode == 403 || errorCode == 409) || (chaiseConfig && chaiseConfig.allowErrorDismissal)) {  //If Forbidden error then allow modal to be dismissed
+            if (isDismissible || (chaiseConfig && chaiseConfig.allowErrorDismissal)) {  //If Forbidden error then allow modal to be dismissed
                 delete modalProperties.keyboard;
                 delete modalProperties.backdrop;
                 params.canClose = true;
@@ -228,7 +228,7 @@
         var exceptionFlag = false;
 
         // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
-        function handleException(exception) {
+        function handleException(exception, isDismissible) {
             $log.info(exception);
             var reloadLink,
                 redirectLink = $window.location.origin,
@@ -260,7 +260,7 @@
                 } else {
                     redirectLink = $window.location.origin;
                 }
-                errorPopup( exception.message, exception.status, gotoLocation, redirectLink, exception.subMessage, '', errorCode);
+                errorPopup( exception.message, exception.status, gotoLocation, redirectLink, exception.subMessage, '', errorCode, isDismissible);
             } else {
                 logError(exception);
 
@@ -279,7 +279,8 @@
                     redirectLink,
                     errorText,
                     stackTrace,
-                    errorCode
+                    errorCode,
+                    isDismissible
                 );
             }
 
