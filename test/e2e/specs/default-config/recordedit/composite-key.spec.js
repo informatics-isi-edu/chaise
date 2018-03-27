@@ -2,11 +2,11 @@ var chaisePage = require('../../../utils/chaise.page.js');
 var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
 var testParams = {
     table_name: "accommodation",
-    column_names: ["first_name", "last_name", "product-person_product-person-fk"],
+    column_names: ["first_name", "last_name", "sIfIZTdKhErJ9HC3xhuSbA"],
     column_values: {
         first_name: "John",
         last_name: "Doe",
-        "product-person_product-person-fk": "John Doe"
+        "sIfIZTdKhErJ9HC3xhuSbA": "John Doe" // person foreignkey column
     }
 };
 
@@ -25,7 +25,7 @@ describe('Add a record,', function() {
 
             var rows;
 
-            it("the composite key should be filled in.", function() {
+            it("the composite key should be filled in.", function(done) {
                 var EC = protractor.ExpectedConditions;
                 var modalTitle = chaisePage.recordEditPage.getModalTitle();
 
@@ -58,7 +58,11 @@ describe('Add a record,', function() {
                     browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), browser.params.defaultTimeout);
 
                     var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputDisplay("Person", 0);
-                    expect(foreignKeyInput.getText()).toBe(testParams.column_values["product-person_product-person-fk"], "Foreign Key input display value is incorrect");
+                    expect(foreignKeyInput.getText()).toBe(testParams.column_values["sIfIZTdKhErJ9HC3xhuSbA"], "Foreign Key input display value is incorrect");
+                    done();
+                }).catch(function (err) {
+                    console.log(err);
+                    done.fail();
                 });
             });
         });
@@ -92,7 +96,6 @@ describe('Add a record,', function() {
 
                     chaisePage.waitForUrl(redirectUrl, browser.params.defaultTimeout).then(function() {
                         expect(browser.driver.getCurrentUrl()).toBe(redirectUrl);
-
                         recordEditHelpers.testRecordAppValuesAfterSubmission(testParams.column_names, testParams.column_values);
                     }, function() {
                         console.log("          Timed out while waiting for the url to be the new one");

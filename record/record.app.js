@@ -205,7 +205,7 @@
                 $rootScope.columns = $rootScope.reference.generateColumnsList(tuple);
                 var allInbFKColsIdx = [];
                 var allInbFKCols = $rootScope.columns.filter(function (o, i) {
-                    if(o.isInboundForeignKey){
+                    if(o.isInboundForeignKey || (o.isPathColumn && o.hasPath && !o.isUnique)){
                         allInbFKColsIdx.push(i);
                         return o;
                     }
@@ -219,6 +219,7 @@
                     $rootScope.colTableModels = [];
 
                     for(var i =0;i<allInbFKCols.length;i++){
+                        // TODO this is mutating the reference
                         allInbFKCols[i].reference = allInbFKCols[i].reference.contextualize.compactBriefInline;
                         var ifkPageSize = getPageSize(allInbFKCols[i].reference);
                         (function(i) {

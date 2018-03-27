@@ -662,7 +662,6 @@ var recordPage = function() {
         return element(by.id("entity-" + displayName)).element(by.css(".ng-scope")).element(by.css(".ng-scope"));
     };
 
-
     this.getRelatedTableHeadings = function() {
         return element.all(by.css(".related-table-heading"));
     };
@@ -686,42 +685,51 @@ var recordPage = function() {
         return element(by.id("rt-" + displayName)).all(by.css(".table-column-displayname > span"));
     };
 
-    this.getRelatedTableRows = function(displayName) {
-        displayName = makeSafeIdAttr(displayName);
-        return element(by.id("rt-" + displayName)).all(by.css(".table-row"));
+    this.getRelatedTableRows = function(displayName, isInline) {
+        var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTable(displayName);
+        return el.all(by.css(".table-row"));
     };
 
-    this.getMoreResultsLink = function(displayName) {
-        displayName = makeSafeIdAttr(displayName);
+    this.getRelatedTableRowLink = function (displayName, rowIndex, isInline) {
+        var rows = this.getRelatedTableRows(displayName, isInline);
+        return rows.get(rowIndex).all(by.tagName("td")).first().all(by.css(".view-action-button")).first();
+    };
+
+    this.getRelatedTableRowEdit = function (displayName, rowIndex, isInline) {
+        var rows = this.getRelatedTableRows(displayName, isInline);
+        return rows.get(rowIndex).all(by.tagName("td")).first().all(by.css(".edit-action-button")).first();
+    };
+
+    this.getRelatedTableRowDelete = function (displayName, rowIndex, isInline) {
+        var rows = this.getRelatedTableRows(displayName);
+        return rows.get(rowIndex).all(by.tagName("td")).first().all(by.css(".delete-action-button")).first();
+    };
+
+    this.getMoreResultsLink = function(displayName, isInline) {
+        var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTableHeading(displayName);
         // the link is not a child of the table, rather one of the accordion group
-        return element(by.id("rt-heading-" + displayName)).element(by.css(".more-results-link"));
+        return el.element(by.css(".more-results-link"));
     };
 
-    this.getAddRecordLink = function(displayName) {
-        displayName = makeSafeIdAttr(displayName);
+    this.getAddRecordLink = function(displayName, isInline) {
+        var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTableHeading(displayName);
         // the link is not a child of the table, rather one of the accordion group
-        return element(by.id("rt-heading-" + displayName)).element(by.css(".add-records-link"));
+        return el.element(by.css(".add-records-link"));
     };
 
-    this.getToggleDisplayLink = function(displayName) {
-        displayName = makeSafeIdAttr(displayName);
+    this.getToggleDisplayLink = function(displayName, isInline) {
+        var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTableHeading(displayName);
         // the link is not a child of the table, rather one of the accordion group
-        return element(by.id("rt-heading-" + displayName)).element(by.css(".toggle-display-link"));
+        return el.element(by.css(".toggle-display-link"));
     };
 
-    this.getEntityToggleDisplayLink = function(displayName) {
-        displayName = makeSafeIdAttr(displayName);
-        return element(by.id("entity-" + displayName)).element(by.css(".toggle-display-link"));
+    this.getRelatedTableRowValues = function(displayName, isInline) {
+        return this.getRelatedTableRows(displayName, isInline).all(by.tagName("td"));
     };
 
-    this.getRelatedTableRowValues = function(displayName) {
-        displayName = makeSafeIdAttr(displayName);
-        return that.getRelatedTableRows(displayName).all(by.tagName("td"));
-    };
-
-    this.getNoResultsRow = function(displayName) {
-        displayName = makeSafeIdAttr(displayName);
-        return element(by.id("rt-" + displayName)).element(by.id("no-results-row"));
+    this.getNoResultsRow = function(displayName, isInline) {
+        var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTable(displayName);
+        return el.element(by.id("no-results-row"));
     };
 
     this.getCreateRecordButton = function() {
@@ -807,6 +815,10 @@ var recordPage = function() {
     this.getSidePanelFiddler = function() {
         return element(by.className('sidePanFiddler')).element(by.tagName('i'));
     }
+
+    this.getMarkdownContainer = function (el) {
+        return el.all(by.css(".markdown-container")).first();
+    };
 };
 
 var recordsetPage = function() {
@@ -966,6 +978,10 @@ var recordsetPage = function() {
         return browser.executeScript("return $('.panel-open h3 a').map(function(i, a) { return a.textContent.trim(); });");
     }
 
+    this.getFilterString = function () {
+        return element(by.id("recordset-filter-str"));
+    };
+
     this.getFilters = function () {
         return element.all(by.css(".filter-label.label-default"));
     }
@@ -1026,7 +1042,11 @@ var recordsetPage = function() {
 
     this.getModalOptions = function () {
         return element(by.css(".modal-body")).all(by.css(".chaise-checkbox input"));
-    }
+    };
+
+    this.getModalOptionByIndex = function (index) {
+        return element(by.css(".modal-body")).all(by.css(".chaise-checkbox input")).get(index);
+    };
 
     this.getModalSubmit = function () {
         return element(by.css(".modal-body")).element(by.id("multi-select-submit-btn"));

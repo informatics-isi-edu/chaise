@@ -1,0 +1,4 @@
+[{"id": 1, "col": "one", "fk_to_rel": 1},
+ {"id": 2, "col": "two", "fk_to_rel": 2},
+ {"id": 3, "col": "three", "fk_to_rel": 3},
+ {"id": 4, "col": "four", "fk_to_rel": 4}]

@@ -43,19 +43,20 @@
                 },
                 link: function(scope){
 
-                    scope.showRelatedTables = function(i){
-                        //show/hide empty Related Tables
-                        if (scope.recordTableModel && scope.recordTableModel[i]) {
-                            if(scope.recordTableModel[i].rowValues.length > 0 || scope.showEmptyRelatedTables){
-                                return true;
-                            }
-                            else{
-                                return false;
-                            }
-                        }else {
-                            return true;
-                        }
-                    }
+                    scope.isInline = function (i) {
+                        var column = scope.columns[i];
+                        return (column.isInboundForeignKey || (column.isPathColumn && column.hasPath && !column.isUnique));
+                    };
+
+                    // returns true if we should show the column
+                    scope.showColumn = function (i) {
+                        return (typeof scope.values[i].value === "string" && scope.values[i].value !== '') && !scope.isInline(i);
+                    };
+
+                    // returns true if we should show a table
+                    scope.showInlineTable = function (i) {
+                        return scope.isInline(i) && (scope.showEmptyRelatedTables || (scope.recordTableModel[i] && scope.recordTableModel[i].rowValues.length > 0));
+                    };
                 }
             };
         }])
