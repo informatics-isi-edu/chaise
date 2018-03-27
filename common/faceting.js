@@ -1140,7 +1140,7 @@
                     };
 
                     scope.$watch(function () {
-                        return scope.facetModel.isOpen && scope.facetModel.initialized;
+                        return scope.facetModel.isOpen && scope.facetModel.initialized && scope.$root.facetPanelOpen;
                     }, function (newVal, oldVal) {
                         var findMoreHeight = 25;
                         if (newVal) {

@@ -363,6 +363,8 @@
                 }
 
                 vm.recordEditModel.rows[rowIndex][column.name] = tuple.displayname.value;
+            }, function modalClosed() {
+                $rootScope.pageLoaded = false;
             });
         }
 

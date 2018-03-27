@@ -3,6 +3,7 @@
 
     angular.module('chaise.recordEdit', [
         '720kb.datepicker',
+        'duScroll',
         'chaise.alerts',
         'chaise.authen',
         'chaise.delete',

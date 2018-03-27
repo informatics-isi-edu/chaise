@@ -1011,6 +1011,7 @@
                 scope.vm.dirtyResult = false;
                 scope.vm.occupiedSlots = 0;
                 scope.vm.facetsToInitialize = [];
+                scope.$root.facetPanelOpen = scope.vm.config.facetPanelOpen;
 
                 scope.setPageLimit = function(limit) {
                     scope.vm.pageLimit = limit;
@@ -1140,7 +1141,7 @@
                 };
 
                 scope.togglePanel = function () {
-                    scope.vm.config.facetPanelOpen = !scope.vm.config.facetPanelOpen;
+                    scope.$root.facetPanelOpen = !scope.$root.facetPanelOpen;
                 };
 
                 // on window focus, if has pending add record requests
