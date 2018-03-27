@@ -81,7 +81,7 @@
                 </a>
                 <div class="filter-label label label-default" tooltip-enable="tooltipEnabled" uib-tooltip="{{vm.filterString}}" tooltip-placement="bottom" chaise-enable-tooltip-width>
                     <a class="remove-link" ng-click="unfiltered()"><i class="glyphicon glyphicon-remove"></i></a>
-                    <span ng-bind="vm.filterString"></span>
+                    <span ng-bind="vm.filterString" id="recordset-filter-str"></span>
                 </div>
             </div>
         </div>

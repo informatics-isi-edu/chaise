@@ -37,7 +37,7 @@ var testParams = {
         optionsWOFilter: ["2", "1", "3", "4", "5", "6", "7", "8", "9", "10"],
         option: 1
     },
-    recordColumns: [ "text_col", "longtext_col", "markdown_col", "int_col", "float_col", "date_col", "timestamp_col", "boolean_col", "jsonb_col", "faceting_main_fk1", "faceting_main_fk2" ],
+    recordColumns: [ "text_col", "longtext_col", "markdown_col", "int_col", "float_col", "date_col", "timestamp_col", "boolean_col", "jsonb_col", "eqK7CNP-yhTDab74BW-7lQ", "cD8qWek-pEc_of8BUq0kAw" ],
     recordValues: {
         text_col: "one",
         longtext_col: "one",
@@ -48,8 +48,8 @@ var testParams = {
         timestamp_col: "2001-01-01 00:01:01",
         boolean_col: "true",
         jsonb_col: JSON.stringify({"key":"one"},undefined,2),
-        faceting_main_fk1: "one",
-        faceting_main_fk2: "one"
+        "eqK7CNP-yhTDab74BW-7lQ": "one", // faceting_main_fk1
+        "cD8qWek-pEc_of8BUq0kAw": "one" // faceting_main_fk2
     }
 };
 
@@ -74,10 +74,10 @@ describe("Other facet features, ", function() {
         });
 
         it ("should open the facet, select a value to filter on.", function (done) {
-            clearAll.click().then(function () {
+            chaisePage.clickButton(clearAll).then(function () {
                 return chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
             }).then(function () {
-              return facet.click();
+              return chaisePage.clickButton(facet);
             }).then(function () {
                 // wait for facet to open
                 browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
@@ -113,7 +113,7 @@ describe("Other facet features, ", function() {
         it ("the selected value should be selected on the modal.", function (done) {
             var showMore = chaisePage.recordsetPage.getShowMore(idx);
             browser.wait(EC.elementToBeClickable(showMore));
-            showMore.click().then(function () {
+            chaisePage.clickButton(showMore).then(function () {
                 chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
 
                 expect(chaisePage.recordsetPage.getCheckedModalOptions().count()).toBe(1, "number of checked rows missmatch.");
@@ -131,7 +131,7 @@ describe("Other facet features, ", function() {
             chaisePage.recordsetPage.getModalOptions().then(function (options) {
                 return chaisePage.clickButton(options[testParams.filter_secondary_key.modalOption+1]);
             }).then(function () {
-                return chaisePage.recordsetPage.getModalSubmit().click();
+                return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
             }).then(function () {
                 chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
 
@@ -142,7 +142,7 @@ describe("Other facet features, ", function() {
                 return chaisePage.recordsetPage.getRows().count();
             }).then(function (ct) {
                 expect(ct).toBe(testParams.filter_secondary_key.numRowsAfterModal, "Number of visible rows after selecting a second option from the modal is incorrect");
-                return chaisePage.recordsetPage.getClearAllFilters().click();
+                return chaisePage.clickButton(chaisePage.recordsetPage.getClearAllFilters());
             }).then(function () {
                 done();
             }).catch(function (err) {
@@ -169,7 +169,7 @@ describe("Other facet features, ", function() {
 
         it ("`All Records With Value` option must be available in modal picker.", function (done) {
             browser.wait(EC.elementToBeClickable(showMore));
-            showMore.click().then(function () {
+            chaisePage.clickButton(showMore).then(function () {
                 chaisePage.waitForElementInverse(element(by.id("spinner")));
                 notNullBtn = chaisePage.recordsetPage.getModalMatchNotNullInput();
                 expect(notNullBtn.isPresent()).toEqual(true);
@@ -182,7 +182,7 @@ describe("Other facet features, ", function() {
         });
 
         it ("Selecting `All Records With Value` should disable all the rows.", function (done) {
-            notNullBtn.click().then(function () {
+            chaisePage.clickButton(notNullBtn).then(function () {
                 browser.wait(function () {
                     return chaisePage.recordsetPage.getModalDisabledRows().count().then(function (ct) {
                         return (ct > 0);
@@ -190,7 +190,7 @@ describe("Other facet features, ", function() {
                 });
                 expect(chaisePage.recordsetPage.getModalDisabledRows().count()).toBe(testParams.not_null.modal_available_options, "number of disabled rows missmatch.");
                 expect(chaisePage.recordsetPage.getCheckedModalOptions().count()).toBe(0, "number of checked rows missmatch.");
-                return chaisePage.recordsetPage.getModalSubmit().click();
+                return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
             }).then(function () {
                 done();
             }).catch(function (err) {

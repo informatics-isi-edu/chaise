@@ -34,9 +34,9 @@ describe('View existing record,', function() {
             chaisePage.waitForElement(chaisePage.recordPage.getEntityTitleElement(), browser.params.defaultTimeout);
         });
 
-        it("should load chaise-config.js and have maxRelatedTablesOpen=6", function() {
+        it("should load chaise-config.js and have maxRelatedTablesOpen=7", function() {
             browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
-                expect(chaiseConfig.maxRelatedTablesOpen).toBe(6);
+                expect(chaiseConfig.maxRelatedTablesOpen).toBe(7);
             });
         });
 
