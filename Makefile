@@ -440,6 +440,7 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/faceting.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/ellipses.js \
+	$(COMMON)/resizable.js \
 	$(COMMON)/storage.js \
 	$(COMMON)/table.js \
 	$(COMMON)/utils.js \
