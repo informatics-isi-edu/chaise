@@ -713,7 +713,8 @@
 
                     scope.rangeOptions = {
                         type: scope.facetColumn.column.type,
-                        callback: scope.addFilter
+                        callback: scope.addFilter,
+                        model: {}
                     }
                 }
             };

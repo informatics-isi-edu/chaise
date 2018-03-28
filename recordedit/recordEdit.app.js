@@ -15,6 +15,7 @@
         'chaise.upload',
         'chaise.record.table',
         'chaise.markdown',
+        'chaise.resizable',
         'chaise.utils',
         'chaise.validators',
         'chaise.html',
