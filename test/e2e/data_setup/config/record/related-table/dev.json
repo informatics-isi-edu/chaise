@@ -1,7 +1,6 @@
 {
     "setup": {
         "schemaConfigurations": [
-            "record/related-table/actions.config.json",
             "record/related-table/links.config.json"
         ]
     },

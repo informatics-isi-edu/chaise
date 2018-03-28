@@ -1,18 +1,18 @@
 <table class="table" id="tblRecord">
-    <tr ng-repeat="column in columns" ng-if="::values[$index].value != null" id="{{'row-' + column.name}}">
-        <td class="entity-key col-xs-2" ng-if="showRelatedTables($index)">
+    <tr ng-repeat="column in columns" ng-if="showColumn($index) || showInlineTable($index)" id="{{'row-' + column.name}}">
+        <td class="entity-key col-xs-2">
             <span class="column-displayname" ng-attr-uib-tooltip="{{::(column.comment) ? column.comment : undefined}}" ng-attr-tooltip-placement="{{::(column.comment) ? 'right' : undefined}}">
                 <span ng-if="::column.displayname.isHTML" ng-bind-html="::column.displayname.value"></span>
                 <span ng-if="::!column.displayname.isHTML" ng-bind="::column.displayname.value"></span>
             </span>
         </td>
-        <td class="entity-value col-xs-10" ng-switch="::values[$index].isHTML" id="entity-{{makeSafeIdAttr(column.displayname.value)}}" ng-if="showRelatedTables($index)">
+        <td class="entity-value col-xs-10" ng-switch="::values[$index].isHTML" id="entity-{{makeSafeIdAttr(column.displayname.value)}}">
 
-            <span ng-if="::values[$index].value != ''">
+            <span ng-if="showColumn($index)">
                 <span ng-switch-when="true" class="markdown-container" ng-bind-html="::values[$index].value | trustedHTML"></span>
                 <span ng-switch-default>{{::values[$index].value}}</span>
             </span>
-            <span ng-if="::values[$index].value == '' && recordTableModel" id="entity-{{$index}}-table">
+            <span ng-if="showInlineTable($index)" id="entity-{{$index}}-table">
                   <record-action-bar id="actionbar-{{$index}}" tabtype="entity" related-table-ref-display="relatedReferenceDisplayTable[$index].display.type" tab-model-display="recordTableModel[$index].displayType"
                   toggle-related-table-display-type='toggleRelatedTableDisplayType({dataModel:recordTableModel[$index]})' can-edit-related="canEditRelated({ref:relatedReferenceDisplayTable[$index]})"
                   can-create-related="canCreateRelated({ref:relatedReferenceDisplayTable[$index]})"

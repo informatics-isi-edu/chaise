@@ -282,7 +282,7 @@
                     var location = reference.location;
 
                     // only allowing single column sort here
-                    if (reference.sortObject) {
+                    if (location.sortObject) {
                         recordsetModel.sortby = location.sortObject[0].column;
                         recordsetModel.sortOrder = (location.sortObject[0].descending ? "desc" : "asc");
                     }
