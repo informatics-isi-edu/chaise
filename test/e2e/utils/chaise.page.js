@@ -1044,8 +1044,8 @@ var recordsetPage = function() {
         return element(by.css(".modal-body")).all(by.css(".chaise-checkbox input"));
     };
 
-    this.getModalOptionByIndex = function (index) {
-        return element(by.css(".modal-body")).all(by.css(".chaise-checkbox input")).get(index);
+    this.getModalRecordsetTableOptionByIndex = function (index) {
+        return element(by.css(".modal-body")).element(by.css(".main-container")).all(by.css(".chaise-checkbox input")).get(index);
     };
 
     this.getModalSubmit = function () {

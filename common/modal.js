@@ -134,7 +134,6 @@
         vm.ok = ok;
         vm.cancel = cancel;
         vm.submit = submitMultiSelection;
-        vm.getDisabledTuples = params.getDisabledTuples ? params.getDisabledTuples : undefined;
         vm.mode = params.mode;
 
         vm.hasLoaded = false;
@@ -158,6 +157,12 @@
             config:             {viewable: false, editable: false, deletable: false, selectMode: params.selectMode, showFaceting: params.faceting, facetPanelOpen: params.facetPanelOpen, showNull: params.showNull === true},
             context:            params.context
         };
+
+        if (params.getDisabledTuples) {
+            vm.getDisabledTuples = vm.tableModel.getDisabledTuples = params.getDisabledTuples;
+        } else {
+            vm.getDisabledTuples = undefined;
+        }
 
         var fetchRecords = function() {
             // TODO this should not be a hardcoded value, either need a pageInfo object across apps or part of user settings

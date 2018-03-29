@@ -843,8 +843,8 @@ exports.testAddAssociationTable = function (params, pageReadyCondition) {
 		});
 
 		it ("user should be able to select new values and submit.", function (done) {
-			var inp = chaisePage.recordsetPage.getModalOptionByIndex(params.selectIndex);
-			chaisePage.clickButton(inp).then(function (selectButtons){
+			var inp = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(params.selectIndex);
+			chaisePage.clickButton(inp).then(function (){
 				return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
 			}).then(function () {
 				browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);

@@ -211,14 +211,18 @@
             var defer = $q.defer();
             (function (uri) {
                 vm.reference.read(vm.pageLimit, vm.logObject).then(function (page) {
-                    if (vm.reference.uri !== uri) {
-                        return defer.resolve(false);
-                    }
+                    if (vm.reference.uri !== uri) return defer.resolve(false);
 
                     vm.page = page;
-                    vm.rowValues = DataUtils.getRowValuesFromPage(page);
+
+                    return vm.getDisabledTuples ? vm.getDisabledTuples(page, vm.pageLimit) : '';
+                }).then(function (rows) {
+                    vm.disabledRows = rows;
                     vm.hasLoaded = true;
                     vm.initialized = true;
+                    vm.rowValues = DataUtils.getRowValuesFromPage(vm.page);
+                    console.log("should be initialized");
+
                     return defer.resolve(true);
                 }).catch(function(err) {
                     if (vm.reference.uri !== uri) {
@@ -227,6 +231,7 @@
 
                     vm.hasLoaded = true;
                     vm.initialized = true;
+                    coonsole.log("should be initialized");
                     if (DataUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
                       err.errorData.redirectUrl = UriUtils.createRedirectLinkFromPath(err.errorData.redirectPath);
                     }
