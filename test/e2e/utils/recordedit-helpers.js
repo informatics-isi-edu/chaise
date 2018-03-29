@@ -597,7 +597,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                                     return activeId == searchBoxId;
                                                 });
                                             });
-                                        }, browser.params.defaultTimeout)
+                                        }, browser.params.defaultTimeout);
                                     }).then(function() {
                                         expect(searchBox.getAttribute('id')).toEqual(browser.driver.switchTo().activeElement().getAttribute('id'), colError(foreignKeyCols[i].name, "when opened the modal selector, focus was not on search input."));
 
