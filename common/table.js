@@ -217,11 +217,10 @@
 
                     return vm.getDisabledTuples ? vm.getDisabledTuples(page, vm.pageLimit) : '';
                 }).then(function (rows) {
-                    vm.disabledRows = rows;
+                    if (rows) vm.disabledRows = rows;
                     vm.hasLoaded = true;
                     vm.initialized = true;
                     vm.rowValues = DataUtils.getRowValuesFromPage(vm.page);
-                    console.log("should be initialized");
 
                     return defer.resolve(true);
                 }).catch(function(err) {
@@ -231,7 +230,6 @@
 
                     vm.hasLoaded = true;
                     vm.initialized = true;
-                    coonsole.log("should be initialized");
                     if (DataUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
                       err.errorData.redirectUrl = UriUtils.createRedirectLinkFromPath(err.errorData.redirectPath);
                     }
