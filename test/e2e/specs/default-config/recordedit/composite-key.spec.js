@@ -50,7 +50,6 @@ describe('Add a record,', function() {
                     return rows.count();
                 }).then(function(ct) {
                     expect(ct).toBe(3);
-                    browser.pause();
 
                     return rows.get(0).all(by.css(".select-action-button"));
                 }).then(function(selectButtons) {
