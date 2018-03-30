@@ -941,6 +941,8 @@
                         params.displayname = scope.facetColumn.displayname;
                         params.context = "compact/select";
                         params.selectMode = "multi-select";
+                        params.faceting = false;
+                        params.facetPanelOpen = false;
 
                         // to choose the correct directive
                         params.mode = "selectFaceting";
