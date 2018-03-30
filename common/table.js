@@ -1207,15 +1207,8 @@
                     recordTableUtils.update(scope.vm, true, true, true);
                 });
 
-                scope.$on('page-loaded', function ($event) {
-                    scope.$root.pageLoaded = true;
-                    if (scope.vm.reference.facetColumns.length == 0) {
-                        scope.$root.facetsLoaded = true;
-                    }
-                });
-
                 scope.$watch(function () {
-                    return scope.$root.pageLoaded && scope.$root.facetsLoaded;
+                    return scope.$root.pageLoaded && (scope.$root.facetsLoaded || scope.vm.reference.facetColumns.length == 0);
                 }, function (newValue, oldValue) {
                     if(angular.equals(newValue, oldValue) || !newValue){
                         return;

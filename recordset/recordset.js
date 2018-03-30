@@ -315,8 +315,7 @@
                      recordsetModel.logObject = {action: logActions.recordsetLoad};
 
                      if (showFaceting) {
-                         $log.debug("sending page-loaded message");
-                         $rootScope.$broadcast('page-loaded');
+                         $rootScope.pageLoaded = true;
                      } else {
                          recordsetModel.reference.read(recordsetModel.pageLimit, recordsetModel.logObject).then(function (page) {
                              recordsetModel.page = page;

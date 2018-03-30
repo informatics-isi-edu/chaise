@@ -580,12 +580,12 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                     // this will have the index and the presentational value
                                     var fkSelectedValue = getRecordInput(col.name);
 
-                                    var rows;
+                                    var rows, searchBox;
                                     chaisePage.clickButton(popupBtns[(foreignKeyCols.length * recordIndex) + i ]).then(function() {
                                         // wait for the modal to open
                                         browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
                                         // Expect search box to have focus
-                                        var searchBox = chaisePage.recordsetPage.getSearchBox();
+                                        searchBox = chaisePage.recordsetPage.getSearchBox();
                                         browser.wait(EC.visibilityOf(searchBox), browser.params.defaultTimeout);
 
                                         return browser.wait(function() {

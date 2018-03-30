@@ -127,7 +127,7 @@
      *  - context {String} - the current context that the directive fetches data for
      *  - selectMode {String} - the select mode the modal uses
      */
-    .controller('SearchPopupController', ['$scope', '$uibModalInstance', 'DataUtils', 'params', 'Session', 'modalBox', 'logActions', '$timeout', function SearchPopupController($scope, $uibModalInstance, DataUtils, params, Session, modalBox, logActions, $timeout) {
+    .controller('SearchPopupController', ['$scope', '$rootScope', '$uibModalInstance', 'DataUtils', 'params', 'Session', 'modalBox', 'logActions', '$timeout', function SearchPopupController($scope, $rootScope, $uibModalInstance, DataUtils, params, Session, modalBox, logActions, $timeout) {
         var vm = this;
 
         vm.params = params;
@@ -169,7 +169,7 @@
             // The new recordset (recordsetWithFaceting) doesn't require read first. It will take care of this.
             var logObject = params.logObject ? params.logObject : {action: logActions.recordsetLoad};
             if (params.faceting) {
-                $scope.$broadcast('page-loaded');
+                $rootScope.pageLoaded = true;
             } else {
                 reference.read(limit, logObject).then(function getPseudoData(page) {
                     var afterRead = function () {

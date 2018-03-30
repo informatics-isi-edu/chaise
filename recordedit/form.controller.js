@@ -326,6 +326,7 @@
             var submissionRow = populateSubmissionRow(vm.recordEditModel.rows[rowIndex], vm.recordEditModel.submissionRows[rowIndex], originalTuple, $rootScope.reference.columns, editOrCopy);
 
             params.reference = column.filteredRef(submissionRow, vm.recordEditModel.foreignKeyData[rowIndex]).contextualize.compactSelect;
+            console.log(params);
             params.reference.session = $rootScope.session;
             params.context = "compact/select";
             params.selectedRows = [];
@@ -363,6 +364,7 @@
                 }
 
                 vm.recordEditModel.rows[rowIndex][column.name] = tuple.displayname.value;
+                $rootScope.pageLoaded = false;
             }, function modalClosed() {
                 $rootScope.pageLoaded = false;
             });
