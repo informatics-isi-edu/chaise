@@ -240,6 +240,9 @@
 
             $rootScope.error = true;    // used to hide spinner in conjunction with a css property
 
+            if(isDismissible !== undefined  && isDismissible !== null && isDismissible){
+              exceptionFlag = false;
+            }
             if (exceptionFlag || window.location.pathname.indexOf('/search/') != -1 || window.location.pathname.indexOf('/viewer/') != -1){
                 return;
             }

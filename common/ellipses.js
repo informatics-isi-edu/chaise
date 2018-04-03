@@ -27,7 +27,7 @@
                     scope.$root.showSpinner = false;
                     // if response is string, the modal has been dismissed
                     if (typeof response !== "string") {
-                        ErrorService.handleException(response, true);
+                        ErrorService.handleException(response, true);  // throw exception for dismissible pop- up (error, isDismissible = true)
                     }
                 }
                 modalUtils.showModal({
@@ -53,7 +53,7 @@
 
                 }).catch(function (error) {
                     scope.$root.showSpinner = false;
-                    ErrorService.handleException(error, true);
+                    ErrorService.handleException(error, true); // throw exception for dismissible pop- up (error, isDismissible = true)
                 });
             }
         }
