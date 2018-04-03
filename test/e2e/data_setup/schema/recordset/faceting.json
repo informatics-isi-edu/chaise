@@ -118,7 +118,7 @@
                 {
                     "name": "fk_to_f1",
                     "type": {
-                        "typename": "serial4"
+                        "typename": "int4"
                     }
                 },
                 {
@@ -263,14 +263,14 @@
                     "name": "id_main",
                     "nullok": false,
                     "type": {
-                        "typename": "serial4"
+                        "typename": "int4"
                     }
                 },
                 {
                     "name": "id_f3",
                     "nullok": false,
                     "type": {
-                        "typename": "serial4"
+                        "typename": "int4"
                     }
                 }
             ]
