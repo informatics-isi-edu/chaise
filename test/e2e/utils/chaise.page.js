@@ -817,11 +817,11 @@ var recordPage = function() {
     }
 
     this.getModalSidePanelFiddler = function() {
-        return element(by.css(".modal-body").element(by.className('sidePanFiddler')).element(by.tagName('i'));
+        return element(by.css(".modal-body")).element(by.className('sidePanFiddler')).element(by.tagName('i'));
     }
 
     this.getModalSidePanel = function() {
-      return element(by.css(".modal-body").element(by.css('.faceting-resizable'));
+        return element(by.css(".modal-body")).element(by.css('.faceting-resizable'));
     }
 
     this.getMarkdownContainer = function (el) {
@@ -1255,7 +1255,6 @@ function chaisePage() {
     };
 
     this.performLogin = function(cookie, defer) {
-
         defer = defer || require('q').defer();
 
         browser.get(process.env.CHAISE_BASE_URL + "/login/");
