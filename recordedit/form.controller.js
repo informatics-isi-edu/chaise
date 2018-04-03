@@ -469,6 +469,7 @@
             vm.recordEditModel.submissionRows.splice(index, 1);
             $timeout(function() {
                 onResize();
+                $rootScope.showSpinner = false;
             }, 10);
         }
 
