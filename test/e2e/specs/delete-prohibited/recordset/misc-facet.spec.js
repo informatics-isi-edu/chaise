@@ -50,7 +50,13 @@ var testParams = {
         jsonb_col: JSON.stringify({"key":"one"},undefined,2),
         "eqK7CNP-yhTDab74BW-7lQ": "one", // faceting_main_fk1
         "cD8qWek-pEc_of8BUq0kAw": "one" // faceting_main_fk2
-    }
+    },
+    glyphLeftClass: "glyphicon-triangle-left",
+    glyphRightClass: "glyphicon-triangle-right",
+    foreignKeyPopupFacetFilter: "term: eight",
+    associationRTName: "main_f3_assoc",
+    associationPopupFacetFilter: "term: five",
+    associationPopupSelectedRowsFilter: "five"
 };
 
 
@@ -77,11 +83,11 @@ describe("Other facet features, ", function() {
             var recPan =  chaisePage.recordPage.getSidePanel(),
                 fiddlerBtn = chaisePage.recordPage.getSidePanelFiddler();
 
-            expect(fiddlerBtn.getAttribute("class")).toContain('glyphicon glyphicon-triangle-left', 'Side Pan Pull button is not pointing in the left direction');
+            expect(fiddlerBtn.getAttribute("class")).toContain(testParams.glyphLeftClass, 'Side Pan Pull button is not pointing in the left direction');
             expect(recPan.getAttribute("class")).toContain('open-panel', 'Side Panel is not visible when fiddler is poining in left direction');
 
             fiddlerBtn.click().then(function(){
-                expect(fiddlerBtn.getAttribute("class")).toContain("glyphicon glyphicon-triangle-right", "Side Pan Pull button is not pointing in the right direction.");
+                expect(fiddlerBtn.getAttribute("class")).toContain(testParams.glyphRightClass, "Side Pan Pull button is not pointing in the right direction.");
                 expect(recPan.getAttribute("class")).toContain('close-panel', 'Side Panel is not hidden when fiddler is poining in right direction');
 
                 return fiddlerBtn.click();
@@ -295,7 +301,7 @@ describe("Other facet features, ", function() {
         });
 
         it ("should show the applied filter and clear all button.", function (done) {
-            chaisePage.recordsetPage.getFilters().then(function (filters) {
+            chaisePage.recordsetPage.getFacetFilters().then(function (filters) {
                 expect(filters.length).toEqual(1, "filter is missing");
 
                 expect(filters[0].getText()).toEqual("Custom Filter: " + customFilterParams.ermrestFilter, "filter text missmatch.");
@@ -333,7 +339,7 @@ describe("Other facet features, ", function() {
                 chaisePage.waitForElementInverse(element(by.id("spinner")));
 
                 // make sure filter is there
-                expect(chaisePage.recordsetPage.getFilters().count()).toBe(2, "facet filter missing.");
+                expect(chaisePage.recordsetPage.getFacetFilters().count()).toBe(2, "facet filter missing.");
 
                 // make sure data has been updated
                 expect(chaisePage.recordsetPage.getRows().count()).toBe(customFilterParams.numRowsWFacet, "");
@@ -435,7 +441,7 @@ describe("Other facet features, ", function() {
                     sidePanelBtn = chaisePage.recordPage.getSidePanelFiddler();
                     chaisePage.waitForElement(sidePanelBtn);
 
-                    expect(sidePanelBtn.getAttribute("class")).toContain("glyphicon-triangle-right", "side panel should be closed, button is displayed wrong");
+                    expect(sidePanelBtn.getAttribute("class")).toContain(testParams.glyphRightClass, "side panel should be closed, button is displayed wrong");
                     done();
                 }).catch(chaisePage.catchTestError(done));
             });
@@ -445,7 +451,7 @@ describe("Other facet features, ", function() {
                     var sidePanel = chaisePage.recordPage.getSidePanel();
                     browser.wait(EC.visibilityOf(sidePanel), browser.params.defaultTimeout);
 
-                    expect(sidePanelBtn.getAttribute("class")).toContain("glyphicon-triangle-left", "side panel should be open, button is displayed wrong");
+                    expect(sidePanelBtn.getAttribute("class")).toContain(testParams.glyphLeftClass, "side panel should be open, button is displayed wrong");
                     expect(sidePanel.isDisplayed()).toBeTruthy("Side panel is not visible after opening it");
                     done();
                 }).catch(chaisePage.catchTestError(done));
@@ -458,6 +464,10 @@ describe("Other facet features, ", function() {
                             return (ct == 1);
                         });
                     });
+
+                    return chaisePage.recordsetPage.getFacetFilters();
+                }).then(function (filters) {
+                    expect(filters[0].getText()).toBe(testParams.foreignKeyPopupFacetFilter, "Filter for facet is incorrect");
 
                     return chaisePage.recordsetPage.getModalRows().get(0).all(by.css(".select-action-button"));
                 }).then(function (selectButtons) {
@@ -476,10 +486,9 @@ describe("Other facet features, ", function() {
 
         describe("in record app, association add popup should have facets available,", function() {
 
-            var sidePanelBtn, rtName;
+            var sidePanelBtn;
 
             beforeAll(function (done) {
-                rtName = "main_f3_assoc";
                 browser.ignoreSynchronization=true;
                 browser.get(uri);
                 chaisePage.waitForElementInverse(element(by.id("spinner")));
@@ -498,7 +507,7 @@ describe("Other facet features, ", function() {
             });
 
             it("should click the add button for an association table and have the facet collapse button visible", function (done) {
-                chaisePage.clickButton(chaisePage.recordPage.getAddRecordLink(rtName)).then(function () {
+                chaisePage.clickButton(chaisePage.recordPage.getAddRecordLink(testParams.associationRTName)).then(function () {
                     browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getModalTitle()), browser.params.defaultTimeout);
 
                     browser.wait(function () {
@@ -511,7 +520,7 @@ describe("Other facet features, ", function() {
                     sidePanelBtn = chaisePage.recordPage.getModalSidePanelFiddler();
                     chaisePage.waitForElement(sidePanelBtn);
 
-                    expect(sidePanelBtn.getAttribute("class")).toContain("glyphicon-triangle-right", "side panel should be closed, button is displayed wrong");
+                    expect(sidePanelBtn.getAttribute("class")).toContain(testParams.glyphRightClass, "side panel should be closed, button is displayed wrong");
                     done();
                 }).catch(chaisePage.catchTestError(done));
             });
@@ -521,7 +530,7 @@ describe("Other facet features, ", function() {
                     var sidePanel = chaisePage.recordPage.getModalSidePanel();
                     browser.wait(EC.visibilityOf(sidePanel), browser.params.defaultTimeout);
 
-                    expect(sidePanelBtn.getAttribute("class")).toContain("glyphicon-triangle-left", "side panel should be open, button is displayed wrong");
+                    expect(sidePanelBtn.getAttribute("class")).toContain(testParams.glyphLeftClass, "side panel should be open, button is displayed wrong");
                     expect(sidePanel.isDisplayed()).toBeTruthy("Side panel is not visible after opening it");
                     done();
                 }).catch(chaisePage.catchTestError(done));
@@ -535,21 +544,19 @@ describe("Other facet features, ", function() {
                         });
                     });
 
+                    return chaisePage.recordsetPage.getFacetFilters();
+                }).then(function (filters) {
+                    expect(filters[0].getText()).toBe(testParams.associationPopupFacetFilter, "Filter for selected rows is incorrect");
+
                     var rowCheckbox = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(0);
 
                     return chaisePage.clickButton(rowCheckbox);
                 }).then(function () {
-                    return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
-                }).then(function () {
-                    browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
-
-                    browser.wait(function() {
-                        return chaisePage.recordPage.getRelatedTableRows(rtName).count().then(function(ct) {
-                            return ct == 1;
-                        });
-                    }, browser.params.defaultTimeout);
-
-                    expect(chaisePage.recordPage.getRelatedTableRows(rtName).count()).toBe(1, "related table didn't load the new row");
+                    //verify selected row filter
+                    return chaisePage.recordsetPage.getSelectedRowsFilters();
+                }).then(function (filters) {
+                    expect(filters[0].getText()).toBe(testParams.associationPopupSelectedRowsFilter, "Filter for facet is incorrect");
+                    // NOTE: we don't test add here because we aren't trying to test mutating data, but whether the popup behaves appropriately with faceting
 
                     done();
                 }).catch(chaisePage.catchTestError(done));

@@ -13,7 +13,7 @@
 
             <faceting-collapse-btn panel-open="$root.facetPanelOpen" toggle-panel="togglePanel" position="left" tooltip-message="{{'Click to ' + (($root.facetPanelOpen) ? 'hide' : 'show') + ' list of available facets.'}}" ng-hide="!$root.showFaceting || !vm.showFaceting"></faceting-collapse-btn>
 
-            <div ng-if="vm.selectedRows.length > 0 && vm.config.selectMode == 'multi-select' && !vm.config.hideSelectedRows" class="row total-filters">
+            <div ng-if="vm.selectedRows.length > 0 && vm.config.selectMode == 'multi-select' && !vm.config.hideSelectedRows" class="row total-filters selected-rows-filters">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                     <a class="remove-link" ng-click="removeAllPills()">
                         <span class="filter-label label label-primary">
@@ -82,7 +82,7 @@
         </div>
 
         <div ng-if="vm.initialized">
-            <div class="total-filters" ng-if="($root.showFaceting && vm.showFaceting) && (vm.reference.location.facets || vm.reference.location.searchTerm || vm.reference.location.filter)">
+            <div class="total-filters facet-filters" ng-if="($root.showFaceting && vm.showFaceting) && (vm.reference.location.facets || vm.reference.location.searchTerm || vm.reference.location.filter)">
                 <a id="clear-all-filters" class="remove-link" ng-click="vm.removeFilter()" ng-if="vm.hasFilter() || vm.reference.location.searchTerm || vm.reference.location.filter">
                     <span class="filter-label label label-primary label-inverted" uib-tooltip="Clear all Facets" tooltip-placement="bottom">
                         Clear All

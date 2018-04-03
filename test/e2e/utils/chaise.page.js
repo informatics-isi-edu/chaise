@@ -990,8 +990,12 @@ var recordsetPage = function() {
         return element(by.id("recordset-filter-str"));
     };
 
-    this.getFilters = function () {
-        return element.all(by.css(".filter-label.label-default"));
+    this.getSelectedRowsFilters = function () {
+        return element(by.css(".selected-rows-filters")).all(by.css(".filter-label.label-default"));
+    }
+
+    this.getFacetFilters = function () {
+        return element(by.css(".facet-filters")).all(by.css(".filter-label.label-default"));
     }
 
     this.getClearAllFilters = function () {
