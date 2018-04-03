@@ -281,7 +281,7 @@ describe('Error related test cases,', function() {
                 expect('Something went wrong with this promise chain.').toBe('Please see error message.');
             });
         });
-    });
+    }).pend("no button on Recordedit for delete");
 
     describe("For no record found in RecordEdit app", function() {
 
