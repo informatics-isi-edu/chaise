@@ -150,7 +150,7 @@
             window.location.reload();
         };
 
-        function errorPopup(message, errorCode, pageName, redirectLink, subMessage, stackTrace) {
+        function errorPopup(message, errorStatus, pageName, redirectLink, subMessage, stackTrace, errorCode, isDismissible) {
             var providedLink = true,
                 isLoggedIn = false;
             var appName = UriUtils.appNamefromUrlPathname($window.location.pathname),
@@ -180,7 +180,7 @@
 
             var params = {
                 message: message,
-                errorCode: errorCode,
+                errorStatus: errorStatus,
                 pageName: pageName,
                 subMessage: subMessage,
                 appName: appName,
@@ -201,14 +201,14 @@
             };
 
 
-            if (chaiseConfig && chaiseConfig.allowErrorDismissal) {
+            if (isDismissible || (chaiseConfig && chaiseConfig.allowErrorDismissal)) {  //If Forbidden error then allow modal to be dismissed
                 delete modalProperties.keyboard;
                 delete modalProperties.backdrop;
                 params.canClose = true;
             }
 
             modalUtils.showModal(modalProperties, function (actionBtnIdentifier) {
-                if ((errorCode == errorNames.unauthorized && !providedLink) || (actionBtnIdentifier === "login")) {
+                if ((errorStatus == errorNames.unauthorized && !providedLink) || (actionBtnIdentifier === "login")) {
                     Session.loginInAPopUp();
                 } else {
                     if(actionBtnIdentifier == "reload"){
@@ -228,12 +228,13 @@
         var exceptionFlag = false;
 
         // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
-        function handleException(exception) {
+        function handleException(exception, isDismissible) {
             $log.info(exception);
             var reloadLink,
                 redirectLink = $window.location.origin,
                 gotoLocation = "Home Page",
-                appName = UriUtils.appNamefromUrlPathname($window.location.pathname);
+                appName = UriUtils.appNamefromUrlPathname($window.location.pathname),
+                errorCode = exception.code;
 
             var stackTrace =  (exception.errorData && exception.errorData.stack)? exception.errorData.stack: undefined;
 
@@ -259,7 +260,7 @@
                 } else {
                     redirectLink = $window.location.origin;
                 }
-                errorPopup( exception.message, exception.status, gotoLocation, redirectLink, exception.subMessage);
+                errorPopup( exception.message, exception.status, gotoLocation, redirectLink, exception.subMessage, '', errorCode, isDismissible);
             } else {
                 logError(exception);
 
@@ -269,7 +270,6 @@
                     redirectLink = $window.location.origin,
                     pageName = "Home Page";
 
-
                 errName = (errName.toLowerCase() !== 'error') ? errName : "Terminal Error";
 
                 errorPopup(
@@ -278,11 +278,14 @@
                     pageName,
                     redirectLink,
                     errorText,
-                    stackTrace
+                    stackTrace,
+                    errorCode,
+                    isDismissible
                 );
             }
-
+            if(!isDismissible) {  // if not a dismissible errror then exception should be suppressed 
             exceptionFlag = true;
+          }
         }
 
         return {
