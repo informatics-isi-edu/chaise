@@ -45,25 +45,24 @@
         vm.showReloadBtn = false;
         var reloadMessage = ' <p>  </p>';
 
-        if (vm.params.errorCode == 'Multiple Records Found') {
+        if(vm.params.errorStatus == 'Multiple Records Found'){
             vm.clickActionMessage =  messageMap.recordAvailabilityError.multipleRecords;
-        } else if (vm.params.errorCode == 'Record Not Found') {
+        } else if(vm.params.errorStatus == 'Record Not Found'){
             vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
 
             // if no user logged in, change message
             if (params && !params.isLoggedIn) {
                 params.message = messageMap.noRecordForFilter + '<br>' + messageMap.maybeUnauthorizedMessage;
             }
-        } else if (Object.values(messageMap.facetRelatedErrorStatus).indexOf(vm.params.errorCode) > -1) {
-            // Check if error prompted was found in the facetRelatedErrorStatus object and use it to
-            // generate error phrase for action message
-            if (vm.params.errorCode == messageMap.facetRelatedErrorStatus.invalidFilter) {
+        } else if (Object.values(messageMap.facetRelatedErrorStatus).indexOf(vm.params.errorStatus) > -1) {
+           // Check if error prompted was found in the facetRelatedErrorStatus object and use it to
+           // generate error phrase for action message
+            if(vm.params.errorStatus == messageMap.facetRelatedErrorStatus.invalidFilter){
                 vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
-            } else {
-                vm.clickActionMessage = messageMap.facetRelatedErrorStatus.clickActionMessage.replace('@errorStatus', vm.params.errorCode);
-            }
-        } else {
-            // TODO: if schema/table not found (may be hiden to user), add `'<br>' + messageMap.maybeUnauthorizedMessage` to the `message`
+            } else{
+            vm.clickActionMessage = messageMap.facetRelatedErrorStatus.clickActionMessage.replace('@errorStatus', vm.params.errorStatus);
+          }
+        }else {
             vm.clickActionMessage = messageMap.recordAvailabilityError.pageRedirect + vm.params.pageName + '. ';
             if (vm.params.appName == 'recordedit'){
                 vm.showReloadBtn = true;

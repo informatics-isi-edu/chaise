@@ -3,6 +3,7 @@ var recordHelpers = require('../../../utils/record-helpers.js');
 var testParams = {
     table_name: "accommodation",
     schemaName:  "product-record",
+    fileTable:  "file",
     multipleRecordsTable : "multiple_records",
     tableNotFound : "accommodation_not_found",
     conflict : "Conflict",
@@ -542,6 +543,54 @@ describe('Error related test cases,', function() {
               return browser.driver.getCurrentUrl();
             }).then (function(currentUrl) {
               expect(currentUrl).toContain('id=269111', "The back button failed to go back to previous page.");
+              done();
+          }).catch(function(error) {
+              console.log(error);
+              done.fail();
+          });
+      });
+
+    });
+
+    describe("Dismissible Error Modal when using Navbar Delete button", function(){
+
+      beforeAll(function() {
+          var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name +  "/id=2002";
+          browser.get(url);
+          deleteBtn  = chaisePage.recordPage.getDeleteRecordButton();
+      });
+        it('Error modal is dismissible in case of conflict/forbidden error', function(done){
+          chaisePage.waitForElement(deleteBtn).then(function(){
+              deleteBtn.click();
+              return chaisePage.recordPage.getConfirmDeleteButton().click();
+            }).then (function() {
+              closeModal = chaisePage.recordEditPage.getModalCloseBtn();
+              chaisePage.waitForElement(closeModal);
+              expect(closeModal.isDisplayed()).toBeTruthy('Close modal option is not available for conflict/forbiddden errors');
+              done();
+          }).catch(function(error) {
+              console.log(error);
+              done.fail();
+          });
+      });
+    });
+
+    // delete from ellipses
+    describe("Dismissible Error Modal when using Ellipses delete button", function(){
+
+      beforeAll(function() {
+          var url = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.fileTable;
+          browser.get(url);
+          deleteBtnEllipses  = chaisePage.recordsetPage.getDeleteActionButtons().first();
+          chaisePage.waitForElement(deleteBtnEllipses);
+      });
+        it('Error modal is dismissible in case of conflict/forbidden error while deleting from ellipses', function(done){
+            deleteBtnEllipses.click().then(function(){;
+              return chaisePage.recordsetPage.getConfirmDeleteButton().click();
+            }).then (function() {
+              closeModal = chaisePage.recordEditPage.getModalCloseBtn();
+              chaisePage.waitForElement(closeModal);
+              expect(closeModal.isDisplayed()).toBeTruthy('Close modal option is not available for conflict/forbiddden errors');
               done();
           }).catch(function(error) {
               console.log(error);
