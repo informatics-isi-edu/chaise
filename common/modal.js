@@ -176,7 +176,6 @@
                         vm.tableModel.initialized = true;
                         vm.tableModel.page = page;
                         vm.tableModel.rowValues = DataUtils.getRowValuesFromPage(page);
-                        console.log("BEFORE BROADCAST");
                         $scope.$broadcast('data-modified');
                     };
 
