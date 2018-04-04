@@ -120,76 +120,37 @@
     margin: 5px 0 0 -5px;
 }
 
-.record-container > #record-side-pan {
-    flex: 0;
+.record-toc .columns-container ul {
+    padding-left: 10px;
+}
+
+#record-side-pan {
     position: relative;
     z-index: 2;
-    /* padding-left: 5px; */
-    /*overflow-y: auto;*/
-    /* margin-left: 5px; */
     font-weight: bold;
+    margin-left: 15px;
+    min-width: 170px;
+    max-width: 50vw;
+    flex:0 0 15vw;
 }
-.record-container > #record-side-pan  .panel {
+
+#record-side-pan .panel {
     margin-bottom: 5px !important;
     padding: 8px !important;
 }
 
-.record-toc .columns-container ul {
-  padding-left: 10px;
-}
-
-.sidePanFiddler, #back-to-top {
-    cursor: pointer;
-    overflow: hidden;
-    z-index: 50;
-    font-size: 25px;
-    padding: 1px 0 1px 5px;
-    border-radius: 2px 0 0px 2px;
-    height: 35px;
-    width: 35px;
-}
-
-.sidePanFiddler{
-    position: absolute;
-    left: -51px;
-    top: 5px;
-}
-
-#record-side-pan {
-  width: 0;
-  max-width: 0;
-}
-
-#record-side-pan.close-panel .rg-left, #record-side-pan.close-panel .rg-right {
-  display: none;
-}
-
-#record-side-pan.open-panel {
-  margin-left: 15px;
-  min-width: 170px;
-  max-width: 50vw;
-  flex:0 0 15vw;
-}
-
-
-#record-side-pan.close-panel .sidePanFiddler {
-    padding: 1px 4px 0 0px;
-}
-
-#record-side-pan.open-panel .sidePanFiddler {
-  left: -66px;
+#record-side-pan.open-panel #back-to-top {
+    left: -66px;
 }
 
 #back-to-top {
-  position: absolute;
-  left: -51px;
-  bottom: 2em;
-  padding: 1px 4px;
+    position: absolute;
+    left: -51px;
+    bottom: 2em;
+    padding: 1px 4px;
 }
 
-#record-side-pan.open-panel #back-to-top {
-  left: -66px;
-}
+/********* print ********/
 
 @media print {
     #main-content {

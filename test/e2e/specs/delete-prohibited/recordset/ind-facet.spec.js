@@ -293,7 +293,7 @@ describe("Viewing Recordset with Faceting,", function() {
             });
 
             it("should have 2 filters selected", function () {
-                chaisePage.recordsetPage.getFilters().count().then(function (ct) {
+                chaisePage.recordsetPage.getFacetFilters().count().then(function (ct) {
                     expect(ct).toBe(testParams.defaults.numFilters, "Number of visible filters is incorrect");
                 });
             });
@@ -380,7 +380,7 @@ describe("Viewing Recordset with Faceting,", function() {
                         });
                     }, browser.params.defaultTimeout);
 
-                    return chaisePage.recordsetPage.getFilters();
+                    return chaisePage.recordsetPage.getFacetFilters();
                 }).then(function (filters) {
                     return filters[0].getText();
                 }).then(function (text) {
@@ -414,7 +414,7 @@ describe("Viewing Recordset with Faceting,", function() {
                         });
                     }, browser.params.defaultTimeout);
 
-                    return chaisePage.recordsetPage.getFilters();
+                    return chaisePage.recordsetPage.getFacetFilters();
                 }).then(function (filters) {
                     return filters[0].element(by.css(".remove-link")).click();
                 }).then(function () {
@@ -446,7 +446,7 @@ describe("Viewing Recordset with Faceting,", function() {
                         });
                     }, browser.params.defaultTimeout);
 
-                    return chaisePage.recordsetPage.getFilters();
+                    return chaisePage.recordsetPage.getFacetFilters();
                 }).then(function (filters) {
                     return filters[0].getText();
                 }).then(function (text) {
@@ -468,7 +468,7 @@ describe("Viewing Recordset with Faceting,", function() {
                 }).then(function (ct) {
                     expect(ct).toBe(testParams.defaults.pageSize, "Number of visible rows is incorrect");
 
-                    return chaisePage.recordsetPage.getFilters().count();
+                    return chaisePage.recordsetPage.getFacetFilters().count();
                 }).then(function (ct) {
                     expect(ct).toBe(0, "Number of visible filters is incorrect");
                 });
@@ -581,12 +581,12 @@ describe("Viewing Recordset with Faceting,", function() {
                                     // wait for request to return
                                     browser.wait(EC.visibilityOf(clearAll), browser.params.defaultTimeout);
 
-                                    return chaisePage.recordsetPage.getFilters().count();
+                                    return chaisePage.recordsetPage.getFacetFilters().count();
                                 }).then(function (ct) {
                                     expect(ct).toBe(1, "number of filters is incorrect for '" + facetParams.name + "' facet");
 
                                     //should only be one
-                                    return chaisePage.recordsetPage.getFilters();
+                                    return chaisePage.recordsetPage.getFacetFilters();
                                 }).then(function (filters) {
                                     return filters[0].getText();
                                 }).then(function(text) {
@@ -669,12 +669,12 @@ describe("Viewing Recordset with Faceting,", function() {
                                     // wait for request to return
                                     browser.wait(EC.visibilityOf(clearAll), browser.params.defaultTimeout);
 
-                                    return chaisePage.recordsetPage.getFilters().count();
+                                    return chaisePage.recordsetPage.getFacetFilters().count();
                                 }).then(function (ct) {
                                     expect(ct).toBe(1, "number of filters is incorrect for '" + facetParams.name + "' facet");
 
                                     //should only be one
-                                    return chaisePage.recordsetPage.getFilters();
+                                    return chaisePage.recordsetPage.getFacetFilters();
                                 }).then(function (filters) {
                                     return filters[0].getText();
                                 }).then(function(text) {
@@ -716,7 +716,7 @@ describe("Viewing Recordset with Faceting,", function() {
                                     browser.wait(EC.visibilityOf(clearAll), browser.params.defaultTimeout);
 
                                     //should only be one
-                                    return chaisePage.recordsetPage.getFilters();
+                                    return chaisePage.recordsetPage.getFacetFilters();
                                 }).then(function (filters) {
                                     return filters[0].getText();
                                 }).then(function(text) {
@@ -756,7 +756,7 @@ describe("Viewing Recordset with Faceting,", function() {
                                     browser.wait(EC.visibilityOf(clearAll), browser.params.defaultTimeout);
 
                                     //should only be one
-                                    return chaisePage.recordsetPage.getFilters();
+                                    return chaisePage.recordsetPage.getFacetFilters();
                                 }).then(function (filters) {
                                     return filters[0].getText();
                                 }).then(function(text) {
@@ -867,12 +867,12 @@ describe("Viewing Recordset with Faceting,", function() {
                                     // wait for request to return
                                     browser.wait(EC.visibilityOf(clearAll), browser.params.defaultTimeout);
 
-                                    return chaisePage.recordsetPage.getFilters().count();
+                                    return chaisePage.recordsetPage.getFacetFilters().count();
                                 }).then(function (ct) {
                                     expect(ct).toBe(1, "number of filters is incorrect for '" + facetParams.name + "' facet");
 
                                     //should only be one
-                                    return chaisePage.recordsetPage.getFilters();
+                                    return chaisePage.recordsetPage.getFacetFilters();
                                 }).then(function (filters) {
                                     return filters[0].getText();
                                 }).then(function(text) {
@@ -918,7 +918,7 @@ describe("Viewing Recordset with Faceting,", function() {
                                     browser.wait(EC.visibilityOf(clearAll), browser.params.defaultTimeout);
 
                                     //should only be one
-                                    return chaisePage.recordsetPage.getFilters();
+                                    return chaisePage.recordsetPage.getFacetFilters();
                                 }).then(function (filters) {
                                     return filters[0].getText();
                                 }).then(function(text) {
@@ -960,7 +960,7 @@ describe("Viewing Recordset with Faceting,", function() {
                                     browser.wait(EC.visibilityOf(clearAll), browser.params.defaultTimeout);
 
                                     //should only be one
-                                    return chaisePage.recordsetPage.getFilters();
+                                    return chaisePage.recordsetPage.getFacetFilters();
                                 }).then(function (filters) {
                                     return filters[0].getText();
                                 }).then(function(text) {
@@ -1029,7 +1029,7 @@ describe("Viewing Recordset with Faceting,", function() {
                             // wait for request to return
                             browser.wait(EC.visibilityOf(clearAll), browser.params.defaultTimeout);
 
-                            return chaisePage.recordsetPage.getFilters().count();
+                            return chaisePage.recordsetPage.getFacetFilters().count();
                         }).then(function (ct) {
                             expect(ct).toBe(idx+1, "number of filters is incorrect for facet at index: " + facetParams.facetIdx + " facet");
 
@@ -1094,7 +1094,7 @@ describe("Viewing Recordset with Faceting,", function() {
                     // wait for request to return
                     browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getClearAllFilters()), browser.params.defaultTimeout);
 
-                    return chaisePage.recordsetPage.getFilters().count();
+                    return chaisePage.recordsetPage.getFacetFilters().count();
                 }).then(function (ct) {
                     expect(ct).toBe(4, "Number of filters is incorrect after making 4 selections");
 

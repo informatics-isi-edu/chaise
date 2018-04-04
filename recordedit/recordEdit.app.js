@@ -3,16 +3,19 @@
 
     angular.module('chaise.recordEdit', [
         '720kb.datepicker',
+        'duScroll',
         'chaise.alerts',
         'chaise.authen',
         'chaise.delete',
         'chaise.errors',
+        'chaise.faceting',
         'chaise.filters',
         'chaise.modal',
         'chaise.navbar',
         'chaise.upload',
         'chaise.record.table',
         'chaise.markdown',
+        'chaise.resizable',
         'chaise.utils',
         'chaise.validators',
         'chaise.html',
@@ -73,6 +76,7 @@
 
         var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
 
+        $rootScope.showFaceting = chaiseConfig.showFaceting === true ? true : false; // for faceting in popups
         $rootScope.context = context;
 
         // will be used to determine the app mode (edit, create, or copy)

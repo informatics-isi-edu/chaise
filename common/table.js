@@ -63,7 +63,8 @@
      *          - hideSelectedRows
      *          - hideTotalCount
      *          - hidePageSettings
-     *          - showFaceting
+     *          - showFaceting: defines if the facet panel should be available
+     *          - openFacetPanel: defines if the facet panel is open by default
      *          - showNull: if this is available and equal to `true`, we will differentiate between `null` and empty string.
      *
      * The events that are being used by directives in this file and their children:
@@ -210,14 +211,17 @@
             var defer = $q.defer();
             (function (uri) {
                 vm.reference.read(vm.pageLimit, vm.logObject).then(function (page) {
-                    if (vm.reference.uri !== uri) {
-                        return defer.resolve(false);
-                    }
+                    if (vm.reference.uri !== uri) return defer.resolve(false);
 
                     vm.page = page;
-                    vm.rowValues = DataUtils.getRowValuesFromPage(page);
+
+                    return vm.getDisabledTuples ? vm.getDisabledTuples(page, vm.pageLimit) : '';
+                }).then(function (rows) {
+                    if (rows) vm.disabledRows = rows;
                     vm.hasLoaded = true;
                     vm.initialized = true;
+                    vm.rowValues = DataUtils.getRowValuesFromPage(vm.page);
+
                     return defer.resolve(true);
                 }).catch(function(err) {
                     if (vm.reference.uri !== uri) {
@@ -479,13 +483,15 @@
             };
 
             scope.isDisabled = function (tuple) {
-                if (!scope.vm.disabledRows || scope.vm.disabledRows.length == 0) {
-                    return false;
-                }
+                if (tuple) {
+                    if (!scope.vm.disabledRows || scope.vm.disabledRows.length == 0) {
+                        return false;
+                    }
 
-                return scope.vm.disabledRows.findIndex(function (obj) {
-                    return obj.uniqueId == tuple.uniqueId;
-                }) > -1;
+                    return scope.vm.disabledRows.findIndex(function (obj) {
+                        return obj.uniqueId == tuple.uniqueId;
+                    }) > -1;
+                }
             };
 
             // verifies whether or not the current key value is in the set of selected rows or not
@@ -1010,6 +1016,8 @@
                 scope.vm.dirtyResult = false;
                 scope.vm.occupiedSlots = 0;
                 scope.vm.facetsToInitialize = [];
+                scope.vm.showFaceting = scope.vm.config.showFaceting;
+                scope.$root.facetPanelOpen = scope.vm.config.facetPanelOpen;
 
                 scope.setPageLimit = function(limit) {
                     scope.vm.pageLimit = limit;
@@ -1138,6 +1146,10 @@
                     scope.vm.currentPageSelected = false;
                 };
 
+                scope.togglePanel = function () {
+                    scope.$root.facetPanelOpen = !scope.$root.facetPanelOpen;
+                };
+
                 // on window focus, if has pending add record requests
                 // check if any are complete 1) delete requests, 2) delete cookies, 3) do a read
                 $window.onfocus = function() {
@@ -1198,46 +1210,54 @@
                     recordTableUtils.update(scope.vm, true, true, true);
                 });
 
-                scope.$on('page-loaded', function ($event) {
-                    scope.$root.pageLoaded = true;
-                    if (scope.vm.reference.facetColumns.length == 0) {
-                        scope.$root.facetsLoaded = true;
-                    }
-                });
-
-                scope.$watch(function () {
-                    return scope.$root.pageLoaded && scope.$root.facetsLoaded;
-                }, function (newValue, oldValue) {
-                    if(angular.equals(newValue, oldValue) || !newValue){
-                        return;
-                    }
-
-                    $timeout(function() {
-                        // NOTE
-                        // This order is very important, the ref.facetColumns is going to change the
-                        // location, so we should call read after that.
-                        // TODO BUT WE SHOULD DO SOMETHING ABOUT IT IN ERMRESTJS
-                        if (scope.vm.reference.facetColumns.length > 0) {
-                            var firstOpen = -1;
-                            // create the facetsToInitialize and also open facets
-                            scope.vm.reference.facetColumns.forEach(function (fc, index) {
-                                if (fc.isOpen) {
-                                    firstOpen = (firstOpen == -1 || firstOpen > index) ? index : firstOpen;
-                                    scope.vm.facetsToInitialize.push(index);
-                                    scope.vm.facetModels[index].processed = false;
-                                    scope.vm.facetModels[index].isOpen = true;
-                                    scope.vm.facetModels[index].isLoading = true;
-                                }
-                            });
-
-                            firstOpen = (firstOpen !== -1) ? firstOpen : 0;
-                            scope.vm.focusOnFacet(firstOpen);
+                // if faceting is visible, register a watch that relies on facets loading
+                if (chaiseConfig.showFaceting) {
+                    scope.$watch(function () {
+                        return scope.$root.pageLoaded && (scope.$root.facetsLoaded || scope.vm.reference.facetColumns.length == 0);
+                    }, function (newValue, oldValue) {
+                        if(angular.equals(newValue, oldValue) || !newValue){
+                            return;
                         }
 
-                        scope.vm.logObject = {action: logActions.recordsetLoad};
-                        recordTableUtils.initialize(scope.vm);
+                        $timeout(function() {
+                            // NOTE
+                            // This order is very important, the ref.facetColumns is going to change the
+                            // location, so we should call read after that.
+                            // TODO BUT WE SHOULD DO SOMETHING ABOUT IT IN ERMRESTJS
+                            if (scope.vm.reference.facetColumns.length > 0) {
+                                var firstOpen = -1;
+                                // create the facetsToInitialize and also open facets
+                                scope.vm.reference.facetColumns.forEach(function (fc, index) {
+                                    if (fc.isOpen) {
+                                        firstOpen = (firstOpen == -1 || firstOpen > index) ? index : firstOpen;
+                                        scope.vm.facetsToInitialize.push(index);
+                                        scope.vm.facetModels[index].processed = false;
+                                        scope.vm.facetModels[index].isOpen = true;
+                                        scope.vm.facetModels[index].isLoading = true;
+                                    }
+                                });
+
+                                firstOpen = (firstOpen !== -1) ? firstOpen : 0;
+                                scope.vm.focusOnFacet(firstOpen);
+                            }
+
+                            scope.vm.logObject = {action: logActions.recordsetLoad};
+                            recordTableUtils.initialize(scope.vm);
+                        });
                     });
-                });
+                // for deployments that won't use faceting
+                } else {
+                    scope.$watch(function () {
+                        return scope.$root.pageLoaded
+                    }, function (newValue, oldValue) {
+                        if (newValue) {
+                            $timeout(function () {
+                                scope.vm.logObject = {action: logActions.recordsetLoad};
+                                recordTableUtils.initialize(scope.vm);
+                            });
+                        }
+                    });
+                }
             }
         };
     }]);

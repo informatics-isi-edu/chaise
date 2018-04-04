@@ -713,7 +713,8 @@
 
                     scope.rangeOptions = {
                         type: scope.facetColumn.column.type,
-                        callback: scope.addFilter
+                        callback: scope.addFilter,
+                        model: {}
                     }
                 }
             };
@@ -940,6 +941,8 @@
                         params.displayname = scope.facetColumn.displayname;
                         params.context = "compact/select";
                         params.selectMode = "multi-select";
+                        params.faceting = false;
+                        params.facetPanelOpen = false;
 
                         // to choose the correct directive
                         params.mode = "selectFaceting";
@@ -1140,7 +1143,7 @@
                     };
 
                     scope.$watch(function () {
-                        return scope.facetModel.isOpen && scope.facetModel.initialized;
+                        return scope.facetModel.isOpen && scope.facetModel.initialized && scope.$root.facetPanelOpen;
                     }, function (newVal, oldVal) {
                         var findMoreHeight = 25;
                         if (newVal) {
@@ -1174,5 +1177,38 @@
                     });
                 }
             };
-        }]);
+        }])
+
+        .directive('facetingCollapseBtn', function () {
+            return {
+                restrict: 'E',
+                templateUrl: '../common/templates/faceting/collapse-btn.html',
+                scope: {
+                    togglePanel: "=",       // function for toggling the panel open/closed
+                    tooltipMessage: "@",    // tooltip message
+                    panelOpen: "=",         // boolean value to control the panel being open/closed
+                    position: "@"           // can be 'left' or 'right'
+                },
+                link: function (scope, element, attr, ctrls) {
+                    var LEFT = "left",
+                        RIGHT = "right";
+
+                    if (scope.position == LEFT) {
+                        scope.tooltipPosition = RIGHT;
+                    }
+
+                    if (scope.position == RIGHT) {
+                        scope.tooltipPosition = LEFT;
+                    }
+
+                    scope.setClass = function () {
+                        if (scope.position == LEFT) {
+                            return {'glyphicon glyphicon-triangle-left': scope.panelOpen, 'glyphicon glyphicon-triangle-right': !scope.panelOpen}
+                        } else if (scope.position == RIGHT) {
+                            return {'glyphicon glyphicon-triangle-right': scope.panelOpen, 'glyphicon glyphicon-triangle-left': !scope.panelOpen}
+                        }
+                    }
+                }
+            }
+        });
 })();

@@ -797,7 +797,7 @@ var recordPage = function() {
     }
 
     this.getSidePanel = function() {
-      return element(by.id('record-side-pan'));
+      return element(by.css('.faceting-resizable'));
     }
 
     this.getSidePanelItemById = function (idx) {
@@ -814,6 +814,14 @@ var recordPage = function() {
 
     this.getSidePanelFiddler = function() {
         return element(by.className('sidePanFiddler')).element(by.tagName('i'));
+    }
+
+    this.getModalSidePanelFiddler = function() {
+        return element(by.css(".modal-body")).element(by.className('sidePanFiddler')).element(by.tagName('i'));
+    }
+
+    this.getModalSidePanel = function() {
+        return element(by.css(".modal-body")).element(by.css('.faceting-resizable'));
     }
 
     this.getMarkdownContainer = function (el) {
@@ -982,8 +990,12 @@ var recordsetPage = function() {
         return element(by.id("recordset-filter-str"));
     };
 
-    this.getFilters = function () {
-        return element.all(by.css(".filter-label.label-default"));
+    this.getSelectedRowsFilters = function () {
+        return element(by.css(".selected-rows-filters")).all(by.css(".filter-label.label-default"));
+    }
+
+    this.getFacetFilters = function () {
+        return element(by.css(".facet-filters")).all(by.css(".filter-label.label-default"));
     }
 
     this.getClearAllFilters = function () {
@@ -1044,8 +1056,12 @@ var recordsetPage = function() {
         return element(by.css(".modal-body")).all(by.css(".chaise-checkbox input"));
     };
 
-    this.getModalOptionByIndex = function (index) {
-        return element(by.css(".modal-body")).all(by.css(".chaise-checkbox input")).get(index);
+    this.getRecordsetTableModalOptions = function () {
+        return element(by.css(".modal-body .recordset-table")).all(by.css(".chaise-checkbox input"));
+    };
+
+    this.getModalRecordsetTableOptionByIndex = function (index) {
+        return element(by.css(".modal-body")).element(by.css(".main-container")).all(by.css(".chaise-checkbox input")).get(index);
     };
 
     this.getModalSubmit = function () {
@@ -1235,8 +1251,14 @@ function chaisePage() {
         return browser.wait(condition, timeout || browser.params.defaultTimeout);
     };
 
-    this.performLogin = function(cookie, defer) {
+    this.catchTestError = function (done) {
+        return function (err) {
+            console.log(err);
+            done.fail();
+        }
+    };
 
+    this.performLogin = function(cookie, defer) {
         defer = defer || require('q').defer();
 
         browser.get(process.env.CHAISE_BASE_URL + "/login/");

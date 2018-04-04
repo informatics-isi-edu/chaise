@@ -106,7 +106,7 @@ exports.parameterize = function(config, configParams) {
         browser.params.defaultSchema = data.defaultSchema;
         browser.params.defaultTable = data.defaultTable;
         browser.params.catalogId = data.catalogId;
-        
+
         // Set hatrac namespaces that should be deleted (test cases will add to this)
         testConfiguration.hatracNamespaces = [];
 
@@ -126,6 +126,9 @@ exports.parameterize = function(config, configParams) {
         }
     }, function(err) {
         defer.reject({ catalogId: catalogId });
+    }).catch(function (err) {
+        console.log(err);
+        defer.reject({ catalogId: catalogId });
     });
 
 
@@ -135,7 +138,7 @@ exports.parameterize = function(config, configParams) {
   // This method will be called after executing the test suite
   config.afterLaunch = function(exitCode) {
     var promises = [];
-    
+
     if (testConfiguration.hatracNamespaces && testConfiguration.hatracNamespaces.length > 0) {
         // cleanup the hatrac namespaces
         promises.push(pImport.deleteHatracNamespaces(testConfiguration.authCookie, testConfiguration.hatracNamespaces));
@@ -148,7 +151,7 @@ exports.parameterize = function(config, configParams) {
     if (testConfiguration.cleanup && testConfiguration.setup && catalogId != null) {
         promises.push(pImport.tear(testConfiguration, catalogId));
     }
-    
+
     return Q.all(promises);
   };
 

@@ -150,7 +150,7 @@ describe("Viewing Recordset with Faceting,", function() {
 
                                     return chaisePage.recordsetPage.getRangeSubmit(idx).click();
                                 }).then(function () {
-                                    return chaisePage.recordsetPage.getFilters().count();
+                                    return chaisePage.recordsetPage.getFacetFilters().count();
                                 }).then(function (ct) {
                                     expect(ct).toBe(1, "Number of visible filters is incorrect");
 
@@ -246,7 +246,7 @@ describe("Viewing Recordset with Faceting,", function() {
 
                                     return chaisePage.recordsetPage.getRangeSubmit(idx).click();
                                 }).then(function () {
-                                    return chaisePage.recordsetPage.getFilters().count();
+                                    return chaisePage.recordsetPage.getFacetFilters().count();
                                 }).then(function (ct) {
                                     expect(ct).toBe(1, "Number of visible filters is incorrect");
 

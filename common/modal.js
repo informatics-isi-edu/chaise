@@ -126,14 +126,13 @@
      *  - context {String} - the current context that the directive fetches data for
      *  - selectMode {String} - the select mode the modal uses
      */
-    .controller('SearchPopupController', ['$scope', '$uibModalInstance', 'DataUtils', 'params', 'Session', 'modalBox', 'logActions', '$timeout', function SearchPopupController($scope, $uibModalInstance, DataUtils, params, Session, modalBox, logActions, $timeout) {
+    .controller('SearchPopupController', ['$scope', '$rootScope', '$uibModalInstance', 'DataUtils', 'params', 'Session', 'modalBox', 'logActions', '$timeout', function SearchPopupController($scope, $rootScope, $uibModalInstance, DataUtils, params, Session, modalBox, logActions, $timeout) {
         var vm = this;
 
         vm.params = params;
         vm.ok = ok;
         vm.cancel = cancel;
         vm.submit = submitMultiSelection;
-        vm.getDisabledTuples = params.getDisabledTuples ? params.getDisabledTuples : undefined;
         vm.mode = params.mode;
 
         vm.hasLoaded = false;
@@ -154,38 +153,48 @@
             selectedRows:       params.selectedRows,
             matchNotNull:       params.matchNotNull,
             search:             reference.location.searchTerm,
-            config:             {viewable: false, editable: false, deletable: false, selectMode: params.selectMode, showNull: params.showNull === true},
+            config:             {viewable: false, editable: false, deletable: false, selectMode: params.selectMode, showFaceting: params.faceting, facetPanelOpen: params.facetPanelOpen, showNull: params.showNull === true},
             context:            params.context
         };
+
+        if (params.getDisabledTuples) {
+            vm.getDisabledTuples = vm.tableModel.getDisabledTuples = params.getDisabledTuples;
+        } else {
+            vm.getDisabledTuples = undefined;
+        }
 
         var fetchRecords = function() {
             // TODO this should not be a hardcoded value, either need a pageInfo object across apps or part of user settings
             // The new recordset (recordsetWithFaceting) doesn't require read first. It will take care of this.
             var logObject = params.logObject ? params.logObject : {action: logActions.recordsetLoad};
-            reference.read(limit, logObject).then(function getPseudoData(page) {
-                var afterRead = function () {
-                    vm.tableModel.hasLoaded = true;
-                    vm.tableModel.initialized = true;
-                    vm.tableModel.page = page;
-                    vm.tableModel.rowValues = DataUtils.getRowValuesFromPage(page);
-                    $scope.$broadcast('data-modified');
-                };
+            if (params.faceting) {
+                $rootScope.pageLoaded = true;
+            } else {
+                reference.read(limit, logObject).then(function getPseudoData(page) {
+                    var afterRead = function () {
+                        vm.tableModel.hasLoaded = true;
+                        vm.tableModel.initialized = true;
+                        vm.tableModel.page = page;
+                        vm.tableModel.rowValues = DataUtils.getRowValuesFromPage(page);
+                        $scope.$broadcast('data-modified');
+                    };
 
-                // get disabled tuple.
-                if (vm.getDisabledTuples) {
-                    vm.getDisabledTuples(page, vm.tableModel.pageLimit).then(function (rows) {
-                        vm.tableModel.disabledRows = rows;
+                    // get disabled tuple.
+                    if (vm.getDisabledTuples) {
+                        vm.getDisabledTuples(page, vm.tableModel.pageLimit).then(function (rows) {
+                            vm.tableModel.disabledRows = rows;
+                            afterRead();
+                        }).catch(function (err) {
+                            throw err;
+                        });
+                    } else {
                         afterRead();
-                    }).catch(function (err) {
-                        throw err;
-                    });
-                } else {
-                    afterRead();
-                }
+                    }
 
-            }).catch(function(exception) {
-                throw exception;
-            });
+                }).catch(function(exception) {
+                    throw exception;
+                });
+            }
         };
 
         // make sure to fetch the records after having the recordset directive

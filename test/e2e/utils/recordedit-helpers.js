@@ -580,24 +580,27 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                     // this will have the index and the presentational value
                                     var fkSelectedValue = getRecordInput(col.name);
 
-                                    var rows;
+                                    var rows, searchBox;
                                     chaisePage.clickButton(popupBtns[(foreignKeyCols.length * recordIndex) + i ]).then(function() {
                                         // wait for the modal to open
                                         browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
                                         // Expect search box to have focus
-                                        var searchBox = chaisePage.recordsetPage.getSearchBox();
-                                        browser.wait(function() {
+                                        searchBox = chaisePage.recordsetPage.getSearchBox();
+                                        browser.wait(EC.visibilityOf(searchBox), browser.params.defaultTimeout);
+
+                                        return browser.wait(function() {
                                             var searchBoxId, activeElement;
                                             return searchBox.getAttribute('id').then(function(id) {
                                                 searchBoxId = id;
-                                                return browser.driver.switchTo().activeElement().getAttribute('id');
-                                            }).then(function(activeId) {
-                                                activeElement = activeId;
-                                                return activeId == searchBoxId;
+                                                return browser.driver.switchTo().activeElement().getAttribute('id').then(function(activeId) {
+                                                    activeElement = activeId;
+                                                    return activeId == searchBoxId;
+                                                });
                                             });
-                                        }, browser.params.defaultTimeout).then(function() {
-                                            expect(searchBox.getAttribute('id')).toEqual(browser.driver.switchTo().activeElement().getAttribute('id'), colError(foreignKeyCols[i].name, "when opened the modal selector, focus was not on search input."));
-                                        });
+                                        }, browser.params.defaultTimeout);
+                                    }).then(function() {
+                                        expect(searchBox.getAttribute('id')).toEqual(browser.driver.switchTo().activeElement().getAttribute('id'), colError(foreignKeyCols[i].name, "when opened the modal selector, focus was not on search input."));
+
                                         return modalTitle.getText();
                                     }).then(function(text) {
                                         // make sure modal opened
