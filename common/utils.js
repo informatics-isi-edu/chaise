@@ -48,7 +48,7 @@
             message: "To open the login window press"
         },
         "previousSession": {
-            message: "To access the site anonymously with limited access, click"
+            message: "A previous session was detected, you may want to <a ng-click='login'>Login</a>."
         },
         "noSession": {
             title: "You need to be logged in to continue.",

@@ -83,7 +83,7 @@
     })
 
     // Register the recordset controller
-    .controller('recordsetController', ['context', 'DataUtils', 'ErrorService', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$document', '$log', '$rootScope', '$scope', '$window', function(context, DataUtils, ErrorService, recordsetModel, Session, UiUtils, UriUtils, $document, $log, $rootScope, $scope, $window) {
+    .controller('recordsetController', ['context', 'DataUtils', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$document', '$log', '$rootScope', '$scope', '$window', function(context, DataUtils, recordsetModel, Session, UiUtils, UriUtils, $document, $log, $rootScope, $scope, $window) {
 
         $scope.vm = recordsetModel;
         recordsetModel.RECORDEDIT_MAX_ROWS = 200;
@@ -231,8 +231,8 @@
     }])
 
     // Register work to be performed after loading all modules
-    .run(['AlertsService', 'context', 'DataUtils', 'ERMrest', 'ErrorService', 'FunctionUtils', 'headInjector', 'MathUtils', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', 'modalBox', 'logActions',
-        function(AlertsService, context, DataUtils, ERMrest, ErrorService, FunctionUtils, headInjector, MathUtils, recordsetModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, modalBox, logActions) {
+    .run(['AlertsService', 'context', 'DataUtils', 'ERMrest', 'FunctionUtils', 'headInjector', 'MathUtils', 'messageMap', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', 'modalBox', 'logActions',
+        function(AlertsService, context, DataUtils, ERMrest, FunctionUtils, headInjector, MathUtils, messageMap, recordsetModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, modalBox, logActions) {
         try {
             var session;
 
@@ -274,10 +274,9 @@
                 // Unsubscribe onchange event to avoid this function getting called again
                 Session.unsubscribeOnChange(subId);
 
-                Session.promptUserPreviousSession().then(function () {
-                    return ERMrest.resolve(ermrestUri, { cid: context.appName, pid: context.pageId, wid: $window.name });
-                }).then(function getReference(reference) {
+                ERMrest.resolve(ermrestUri, { cid: context.appName, pid: context.pageId, wid: $window.name }).then(function getReference(reference) {
                     session = Session.getSessionValue();
+                    if (!session && Session.showPreviousSessionAlert()) AlertsService.addAlert(messageMap.previousSession.message, 'warning', Session.createPromptExpirationToken);
 
                     var location = reference.location;
 
