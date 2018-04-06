@@ -43,6 +43,7 @@
         vm.displayDetails = false;
         vm.linkText = messageMap.showErrDetails;
         vm.showReloadBtn = false;
+        vm.showLoginLink = false;
         var reloadMessage = ' <p>  </p>';
 
         if(vm.params.errorStatus == 'Multiple Records Found'){
@@ -53,6 +54,7 @@
             // if no user logged in, change message
             if (params && !params.isLoggedIn) {
                 params.message = messageMap.noRecordForFilter + '<br>' + messageMap.maybeUnauthorizedMessage;
+                vm.showLoginLink = true;
             }
         } else if (Object.values(messageMap.facetRelatedErrorStatus).indexOf(vm.params.errorStatus) > -1) {
            // Check if error prompted was found in the facetRelatedErrorStatus object and use it to
