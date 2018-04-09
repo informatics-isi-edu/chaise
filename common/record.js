@@ -45,7 +45,7 @@
 
                     scope.isInline = function (i) {
                         var column = scope.columns[i];
-                        return (column.isInboundForeignKey || (column.isPathColumn && column.hasPath && !column.isUnique));
+                        return (column.isInboundForeignKey || (column.isPathColumn && column.hasPath && !column.isUnique && !column.hasAggregate));
                     };
 
                     // returns true if we should show the column

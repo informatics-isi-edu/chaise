@@ -370,6 +370,26 @@
                     {"inbound": ["product-record", "fk_thumbnail_collection"]},
                     "id"
                 ]},
+                {"source": [
+                    {"outbound": ["product-record", "fk_cover"]},
+                    {"inbound": ["product-record", "fk_thumbnail_collection"]},
+                    "id"
+                ], "aggregate": "cnt"},
+                {"source": [
+                    {"outbound": ["product-record", "fk_cover"]},
+                    {"inbound": ["product-record", "fk_thumbnail_collection"]},
+                    "id"
+                ], "aggregate": "cnt_d"},
+                {"source": [
+                    {"outbound": ["product-record", "fk_cover"]},
+                    {"inbound": ["product-record", "fk_thumbnail_collection"]},
+                    "title"
+                ], "aggregate": "min"},
+                {"source": [
+                    {"outbound": ["product-record", "fk_cover"]},
+                    {"inbound": ["product-record", "fk_thumbnail_collection"]},
+                    "title"
+                ], "aggregate": "max"},
                 "json_col","json_col_with_markdown"
             ]
         },
