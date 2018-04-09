@@ -205,9 +205,21 @@
                 });
 
                 $rootScope.columns = $rootScope.reference.generateColumnsList(tuple);
+
+                // get data for aggregated related entities
+                $rootScope.columns.filter(function (c, i) {
+                    if (c.isPathColumn && c.hasAggregate) {
+                        c.getAggregatedValue(page, {action: logActions.recordAggregate}).then(function (values) {
+                            $rootScope.recordValues[i] = values[0];
+                        }).catch(function (err) {
+                            throw err;
+                        });
+                    }
+                });
+
                 var allInbFKColsIdx = [];
                 var allInbFKCols = $rootScope.columns.filter(function (o, i) {
-                    if(o.isInboundForeignKey || (o.isPathColumn && o.hasPath && !o.isUnique)){
+                    if(o.isInboundForeignKey || (o.isPathColumn && o.hasPath && !o.isUnique && !o.hasAggregate)){
                         allInbFKColsIdx.push(i);
                         return o;
                     }

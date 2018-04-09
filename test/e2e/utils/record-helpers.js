@@ -3,6 +3,17 @@ var mustache = require('../../../../ermrestjs/vendor/mustache.min.js');
 var EC = protractor.ExpectedConditions;
 
 exports.testPresentation = function (tableParams) {
+    var pageReadyCondition = function () {
+	    chaisePage.waitForElementInverse(element(by.id("spinner")));
+
+	    // make sure the last related entity is visible
+	    chaisePage.waitForElement(element(by.id('rt-accommodation_image')));
+	};
+
+    beforeAll(function () {
+        pageReadyCondition();
+    });
+
 	it("should have '" + tableParams.title +  "' as title", function() {
         var title = chaisePage.recordPage.getEntityTitleElement();
 		chaisePage.waitForElement(title);
@@ -391,13 +402,6 @@ exports.testPresentation = function (tableParams) {
 			// make sure page is in its initial state
 			browser.driver.navigate().refresh();
 		});
-
-		var pageReadyCondition = function () {
-		    chaisePage.waitForElementInverse(element(by.id("spinner")));
-
-		    // make sure the last related entity is visible
-		    chaisePage.waitForElement(element(by.id('rt-accommodation_image')));
-		};
 
 		for (var i = 0; i < tableParams.inline_columns.length; i++) {
 			var p = tableParams.inline_columns[i];
