@@ -7,9 +7,7 @@
         <loading-spinner id="main-spinner" ng-show="!vm.hasLoaded && vm.initialized"></loading-spinner>
         <div style="margin-bottom: 10px;" ng-show="vm.initialized">
 
-            <div style="margin-left: 15px;margin-right: 20px;">
-                <alerts alerts="$root.alerts"></alerts>
-            </div>
+            <alerts alerts="$root.alerts"></alerts>
 
             <faceting-collapse-btn panel-open="$root.facetPanelOpen" toggle-panel="togglePanel" position="left" tooltip-message="{{'Click to ' + (($root.facetPanelOpen) ? 'hide' : 'show') + ' list of available facets.'}}" ng-hide="!$root.showFaceting || !vm.showFaceting"></faceting-collapse-btn>
 

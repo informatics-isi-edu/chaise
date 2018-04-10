@@ -51,6 +51,9 @@
                     AlertsService.deleteAlert(alert);
                 };
 
+                /****** Functions used within alert messages *******/
+                // defined here to allow for any callback to be used with the alert messages
+                // passing along the named functions and attaching them to the alert scope may be over-engineering, so this will suffice for now
                 scope.login = function() {
                     Session.loginInAPopUp();
                 };
