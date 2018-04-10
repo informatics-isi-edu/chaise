@@ -46,8 +46,8 @@
         $logProvider.debugEnabled(chaiseConfig.debug === true);
     }])
 
-    .run(['constants', 'DataUtils', 'ERMrest', 'ErrorService', 'FunctionUtils', 'headInjector', 'logActions', 'MathUtils', 'modalBox', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', 'Errors',
-        function runApp(constants, DataUtils, ERMrest, ErrorService, FunctionUtils, headInjector, logActions, MathUtils, modalBox, Session, UiUtils, UriUtils, $log, $rootScope, $window, Errors) {
+    .run(['AlertsService', 'constants', 'DataUtils', 'ERMrest', 'ErrorService', 'FunctionUtils', 'headInjector', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', 'Errors',
+        function runApp(AlertsService, constants, DataUtils, ERMrest, ErrorService, FunctionUtils, headInjector, logActions, MathUtils, messageMap, modalBox, Session, UiUtils, UriUtils, $log, $rootScope, $window, Errors) {
 
         var session,
             context = {},
@@ -144,15 +144,14 @@
             // Unsubscribe onchange event to avoid this function getting called again
             Session.unsubscribeOnChange(subId);
 
-            Session.promptUserPreviousSession().then(function () {
-                return ERMrest.resolve(ermrestUri, { cid: context.appName, pid: context.pageId, wid: $window.name });
-            }).then(function getReference(reference) {
+            ERMrest.resolve(ermrestUri, { cid: context.appName, pid: context.pageId, wid: $window.name }).then(function getReference(reference) {
                 context.filter = reference.location.filter;
                 context.facets = reference.location.facets;
 
                 DataUtils.verify((context.filter || context.facets), 'No filter or facet was defined. Cannot find a record without a filter or facet.');
 
                 session = Session.getSessionValue();
+                if (!session && Session.showPreviousSessionAlert()) AlertsService.addAlert(messageMap.previousSession.message, 'warning', Session.createPromptExpirationToken);
 
                 // $rootScope.reference != reference after contextualization
                 $rootScope.reference = reference.contextualize.detailed;

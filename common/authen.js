@@ -9,8 +9,8 @@
         var serviceURL = $window.location.origin;
 
         var LOCAL_STORAGE_KEY = 'session';              // name of object session information is stored under
-        var PROMPT_EXPIRATION_KEY = 'promptExpiration'  // name of key for prompt expiration value
-        var PREVIOUS_SESSION_KEY = 'previousSession'    // name of key for previous session boolean
+        var PROMPT_EXPIRATION_KEY = 'promptExpiration'; // name of key for prompt expiration value
+        var PREVIOUS_SESSION_KEY = 'previousSession';   // name of key for previous session boolean
 
         // Private variable to store current session object
         var _session = null;
@@ -277,45 +277,10 @@
                 return _session;
             },
 
-            promptUserPreviousSession: function() {
-                var defer = $q.defer();
-                // if there's a previous login token AND
-                // the prompt expiration token does not exist OR it has expired
-                if(!_session) {
-                    if (_tokenExists(PREVIOUS_SESSION_KEY) && (!_tokenExists(PROMPT_EXPIRATION_KEY) || _expiredToken(PROMPT_EXPIRATION_KEY))) {
-                        var params = {
-                            title: messageMap.sessionExpired.title,
-                            message: messageMap.sessionExpired.message,
-                            subMessage: messageMap.previousSession.message
-                        }
-
-                        var modalProperties = {
-                            windowClass: "modal-login-instruction",
-                            templateUrl: "../common/templates/loginDialog.modal.html",
-                            controller: 'LoginDialogController',
-                            controllerAs: 'ctrl',
-                            resolve: {
-                                params: params
-                            },
-                            openedClass: 'previous-login'
-                        }
-
-                        modalUtils.showModal(modalProperties, function () {
-                            // success callback
-                        }, function () {
-                            // error callback
-                            // set prompt expiration
-                            _createToken(PROMPT_EXPIRATION_KEY);
-                            defer.resolve();
-                        });
-                    } else {
-                        defer.resolve();
-                    }
-                } else {
-                    defer.resolve();
-                }
-
-                return defer.promise;
+            // if there's a previous login token AND
+            // the prompt expiration token does not exist OR it has expired
+            showPreviousSessionAlert: function() {
+                return (_tokenExists(PREVIOUS_SESSION_KEY) && (!_tokenExists(PROMPT_EXPIRATION_KEY) || _expiredToken(PROMPT_EXPIRATION_KEY)));
             },
 
             subscribeOnChange: function(fn) {
@@ -330,6 +295,10 @@
 
             unsubscribeOnChange: function(id) {
                 delete _changeCbs[id];
+            },
+
+            createPromptExpirationToken: function() {
+                _createToken(PROMPT_EXPIRATION_KEY);
             },
 
             extendPromptExpirationToken: function() {
