@@ -1116,16 +1116,22 @@ footer .container1 {
  }
 
 /******* faceting resizeable *******/
+ .recordset-container.with-faceting > .faceting-resizable.open-panel {
+     flex:0 0 20vw;
+     min-width: 170px;
+ }
+
+ .recordset-container.with-faceting > .faceting-resizable.close-panel {
+     width: 0px;
+ }
 
  .faceting-resizable.close-panel .rg-left, .faceting-resizable.close-panel .rg-right {
    display: none;
  }
 
  .recordset-container.with-faceting > .faceting-resizable {
-     flex:0 0 20vw;
      position: relative;
      /*border-right: 15px solid white;*/
-     min-width: 170px;
      max-width: 50vw;
      z-index: 2;
      padding-left: 5px;
@@ -1140,20 +1146,32 @@ footer .container1 {
     display: none;
  }
 
-/* side panel buttons */
+ .facet-btn {
+     right: -20px;
+     top: 15px;
+     position: absolute;
+ }
+
+ /* side panel buttons */
  .sidePanFiddler, #back-to-top {
      cursor: pointer;
      overflow: hidden;
      z-index: 50;
      font-size: 25px;
      padding: 1px 0 1px 5px;
-     border-radius: 2px 0 0px 2px;
-     height: 35px;
-     width: 35px;
  }
 
  .sidePanFiddler {
-     top: 5px;
+     border-left: none;
+     border-radius: 0px 15px 15px 0px;
+     height: 40px;
+     width: 20px;
+ }
+
+ #back-to-top {
+     border-radius: 2px 0 0px 2px;
+     height: 35px;
+     width: 35px;
  }
 
 /* record side panel collapse button */
