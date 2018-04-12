@@ -813,11 +813,11 @@ var recordPage = function() {
     }
 
     this.getSidePanelFiddler = function() {
-        return element(by.className('sidePanFiddler')).element(by.tagName('i'));
+        return element(by.className('sidePanFiddler')).element(by.className('facet-glyph-icon'));
     }
 
     this.getModalSidePanelFiddler = function() {
-        return element(by.css(".modal-body")).element(by.className('sidePanFiddler')).element(by.tagName('i'));
+        return element(by.css(".modal-body")).element(by.className('sidePanFiddler')).element(by.className('facet-glyph-icon'));
     }
 
     this.getModalSidePanel = function() {
