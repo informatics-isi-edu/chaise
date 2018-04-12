@@ -959,6 +959,7 @@ footer .container1 {
   background: #fff;
   border: solid 1px;
   border-top: none;
+  border-bottom: none;
 }
 .rg-right span, .rg-left span, .rg-top span, .rg-bottom span {
   position: absolute;
