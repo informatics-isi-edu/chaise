@@ -52,8 +52,6 @@
         <div class="main-container" ng-class="{'initializing': !displayReady}">
             <alerts alerts="ctrl.alerts"></alerts>
 
-            <faceting-collapse-btn panel-open="recordSidePanOpen" toggle-panel="ctrl.togglePan" position="right" tooltip-message="{{'Click to ' + ((recordSidePanOpen) ? 'hide' : 'show') + ' list of related records.'}}" ng-hide="ctrl.noVisibleRelatedTables()"></faceting-collapse-btn>
-
             <!-- defined on $rootScope in run function -->
             <record-display columns="::columns" values="::recordValues"  record-table-model="::colTableModels" related-reference-display-table="::rtrefDisTypetable"
             toggle-related-table-display-type='ctrl.toggleRelatedTableDisplayType(dataModel)' can-edit-related="::ctrl.canEditRelated(ref)" can-create-related="::ctrl.canCreateRelated(ref)"
@@ -90,7 +88,7 @@
             <span id="rt-loading" ng-show="loading">Loading...</span>
         </div>
 
-        <div class="faceting-resizable record-toc" resizable r-directions=["left"] r-flex="true" id="record-side-pan" ng-hide="ctrl.hidePanel()" ng-class="{'open-panel': recordSidePanOpen, 'close-panel': !recordSidePanOpen}">
+        <div class="faceting-resizable record-toc" resizable r-directions=["left"] r-flex="true" id="record-side-pan" ng-hide="ctrl.noVisibleRelatedTables()" ng-class="{'open-panel': recordSidePanOpen, 'close-panel': !recordSidePanOpen}">
             <div class="btn btn-primary btn-inverted" id="back-to-top" ng-click="scrollToTop()" ng-show="showTopBtn">
                 <i uib-tooltip="Scroll To Top" tooltip-placement="left" class="glyphicon glyphicon-triangle-top"></i>
             </div>
@@ -101,7 +99,7 @@
                     <ul>
                       <li id="main-to-top" style="padding:5px" ng-click="scrollToTop()">
                         <a uib-tooltip="Main" tooltip-placement="bottom" chaise-enable-tooltip-width>Main</a> </li>
-                        <div ng-repeat="relatedRef in relatedReferences track by $index"  id="recordSidePan-{{$index}}" ng-if="ctrl.showRelatedTable($index)" class="{{lastActiveFacet == $index ? 'focused': ''}}" ng-click="ctrl.gotoRelatedTable(relatedRef.displayname.value, $index)">
+                        <div ng-repeat="relatedRef in relatedReferences track by $index" id="recordSidePan-{{$index}}" ng-if="ctrl.showRelatedTable($index)" class="{{lastActiveFacet == $index ? 'focused': ''}}" ng-click="ctrl.gotoRelatedTable(relatedRef.displayname.value, $index)">
 
                             <li  id="recordSidePan-heading-{{$index}}" style="padding:5px">
                                 <a uib-tooltip="{{relatedRef.displayname.value}}" tooltip-placement="bottom" chaise-enable-tooltip-width>
@@ -115,6 +113,7 @@
                     </ul>
                 </div>
             </div>
+            <faceting-collapse-btn class="facet-btn" panel-open="recordSidePanOpen" toggle-panel="ctrl.togglePan" position="right" tooltip-message="{{'Click to ' + ((recordSidePanOpen) ? 'hide' : 'show') + ' list of related records.'}}" ng-hide="ctrl.noVisibleRelatedTables()" ng-class="{'open-panel': recordSidePanOpen, 'close-panel': !recordSidePanOpen}"></faceting-collapse-btn>
         </div>
 
     </div>
