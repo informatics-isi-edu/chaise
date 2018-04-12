@@ -40,8 +40,8 @@
                                     <div ng-if="displayname" class="col-xs-7">
                                         <div id="entity-title">
                                             <span>{{ form.editMode ? "Edit " : "Create " }}</span>
-                                            <span ng-if="displayname.isHTML" ng-bind-html="displayname.value" ng-attr-tooltip-placement="bottom" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}"></span>
-                                            <span ng-if="!displayname.isHTML" ng-bind="displayname.value" ng-attr-tooltip-placement="bottom" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}"></span>
+                                            <span class="re-displayname" ng-if="displayname.isHTML" ng-bind-html="displayname.value" ng-attr-tooltip-placement="bottom" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}"></span>
+                                            <span class="re-displayname" ng-if="!displayname.isHTML" ng-bind="displayname.value" ng-attr-tooltip-placement="bottom" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}"></span>
                                             <span>{{ (form.recordEditModel.rows.length > 1) ? " Records" : " Record" }}</span>
                                         </div>
                                         <span class="text-danger">*</span> indicates required field

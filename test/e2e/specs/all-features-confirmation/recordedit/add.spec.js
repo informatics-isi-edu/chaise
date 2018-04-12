@@ -11,6 +11,7 @@ var testParams = {
         schema_name: "product-add",
         table_name: "accommodation",
         table_displayname: "Accommodations",
+        table_comment: "List of different types of accommodations",
         primary_keys: ["id"],
         columns: [
             { name: "id", generated: true, immutable: true, title: "Id", type: "serial4", nullok: false},
@@ -46,6 +47,7 @@ var testParams = {
        schema_name: "product-add",
        table_name: "file",
        table_displayname: "file",
+       table_comment: "asset/object",
        primary_keys: ["id"],
        columns: [
            { name: "fileid", title: "fileid", type: "int4" },

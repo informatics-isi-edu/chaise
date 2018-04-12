@@ -9,6 +9,7 @@ var testParams = {
     schema_name: "multi-edit",
     tables: [{
             table_name: "multi-edit-table",
+            tableComment: "Table to represent adding multiple entities",
             sortColumns: "id",
             keys: [
                 {name: "id", value: "1000", operator: "="},
@@ -32,6 +33,7 @@ var testParams = {
             ]
         }, {
             table_name: "multi-edit-table",
+            tableComment: "Table to represent adding multiple entities",
             sortColumns: "id",
             keys: [
                 {name: "id", value: "1000", operator: "="},
@@ -57,6 +59,7 @@ var testParams = {
             ]
         }, {
             table_name: 'table_w_multiple_assets',
+            tableComment: "table that has three file assets",
             sortColumns: "id",
             keys: [
                 {name: "id",value: "1", operator: "="},
@@ -153,6 +156,10 @@ describe('Edit multiple existing record,', function() {
                     chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
                         expect(chaisePage.recordEditPage.getEntityTitleElement().getText()).toBe("Edit " + tableParams.table_name + " Records");
                     });
+                });
+
+                it("table tooltip must be correct.", function () {
+                    expect(chaisePage.recordEditPage.getEntityTitleTooltip()).toBe(tableParams.tableComment);
                 });
 
                 it("columns should have correct value, and selectable.", function() {
