@@ -1208,18 +1208,14 @@ footer .container1 {
 
  .sidePanFiddler {
      height: 40px;
-     width: 20px;
+     width: 21px;
      font-size: 20px;
-     padding: 0px 4px 0px 0px;
- }
-
- .facet-glyph-icon {
-     top: 22%;
+     padding: 4px 4px 0px 0px;
  }
 
  /** record side panel collapse button **/
  .record-container .facet-btn {
-     left: -19px;
+     left: -20px;
  }
 
  .record-container .facet-btn.close-panel {
@@ -1233,7 +1229,7 @@ footer .container1 {
 
  /** recordset side panel collapse button **/
  .recordset-container .facet-btn {
-     right: -19px;
+     right: -20px;
  }
 
  .recordset-container .sidePanFiddler {
