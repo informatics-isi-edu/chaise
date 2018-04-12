@@ -4,8 +4,8 @@
         <div id="bookmark-container" class="col-xs-12 meta-icons">
             <div class="pull-left">
                 <h1 id="page-title">
-                    <span ng-if="::vm.tableDisplayname.isHTML" ng-bind-html="vm.tableDisplayName.value"></span>
-                    <span ng-if="::!vm.tableDisplayname.isHTML" ng-bind="vm.tableDisplayName.value"></span>
+                    <span ng-if="::vm.tableDisplayname.isHTML" ng-bind-html="vm.tableDisplayName.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::vm.tableComment ? vm.tableComment : undefined}}"></span>
+                    <span ng-if="::!vm.tableDisplayname.isHTML" ng-bind="vm.tableDisplayName.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::vm.tableComment ? vm.tableComment : undefined}}"></span>
                 </h1>
                 <h3 ng-if="::vm.subTitle" class="page-filters">
                     <span id="page-subtitle" class="sub-title" ng-bind="vm.subTitle"></span>

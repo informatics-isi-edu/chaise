@@ -939,6 +939,8 @@
                         params.reference = scope.reference;
                         params.reference.session = scope.$root.session;
                         params.displayname = scope.facetColumn.displayname;
+                        // disable comment for facet, since it might be confusing
+                        params.comment = "";
                         params.context = "compact/select";
                         params.selectMode = "multi-select";
                         params.faceting = false;

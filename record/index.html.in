@@ -16,8 +16,8 @@
                     <span ng-if="::!recordDisplayname.isHTML" ng-bind="::recordDisplayname.value"></span>
                 </h1>
                 <h3 id="page-subtitle" class="pull-left">
-                    <span ng-if="::reference.displayname.isHTML" ng-bind-html="::reference.displayname.value"></span>
-                    <span ng-if="::!reference.displayname.isHTML" ng-bind="::reference.displayname.value"></span>
+                    <span ng-if="::reference.displayname.isHTML" ng-bind-html="::reference.displayname.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::reference.table.comment ? reference.table.comment : undefined}}"></span>
+                    <span ng-if="::!reference.displayname.isHTML" ng-bind="::reference.displayname.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::reference.table.comment ? reference.table.comment : undefined}}"></span>
                 </h3>
             </div>
             <div class="pull-right">

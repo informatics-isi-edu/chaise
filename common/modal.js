@@ -138,11 +138,13 @@
         vm.hasLoaded = false;
         var reference = vm.reference = params.reference;
         var limit = (!angular.isUndefined(reference) && !angular.isUndefined(reference.display) && reference.display.defaultPageSize) ? reference.display.defaultPageSize : 25;
+        var comment = (typeof params.comment === "string") ? params.comment: reference.table.comment;
 
         vm.tableModel = {
             hasLoaded:          false,
             reference:          reference,
             tableDisplayName:   params.displayname ? params.displayname : reference.displayname,
+            tableComment:            comment,
             columns:            reference.columns,
             sortby:             reference.location.sortObject ? reference.location.sortObject[0].column: null,
             sortOrder:          reference.location.sortObject ? (reference.location.sortObject[0].descending ? "desc" : "asc") : null,

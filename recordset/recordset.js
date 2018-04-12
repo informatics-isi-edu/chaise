@@ -291,6 +291,7 @@
                     recordsetModel.reference = reference.contextualize.compact;
                     recordsetModel.context = "compact";
                     recordsetModel.reference.session = session;
+                    recordsetModel.tableComment = recordsetModel.reference.table.comment;
 
                     $log.info("Reference:", recordsetModel.reference);
 
