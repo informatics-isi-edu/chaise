@@ -111,6 +111,10 @@
                         scope.updateReference(newRef, -1);
                     };
 
+                    scope.togglePanel = function () {
+                        scope.$root.facetPanelOpen = !scope.$root.facetPanelOpen;
+                    };
+
                     /**
                      * open or close the facet given its index
                      * @param  {int} index index of facet

@@ -40,7 +40,7 @@
                         dir = scope.rDirections || ['right'],
                         vx = scope.rCenteredX ? 2 : 1, // if centered double velocity
                         vy = scope.rCenteredY ? 2 : 1, // if centered double velocity
-                        inner = scope.rGrabber ? scope.rGrabber : '<span>||</span>',
+                        inner = scope.rGrabber ? scope.rGrabber : '<span class="glyphicon glyphicon-resize-horizontal"></span>',
                         start,
                         dragDir,
                         axis,

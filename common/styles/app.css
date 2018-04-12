@@ -947,7 +947,7 @@ footer .container1 {
 
 .rg-right, .rg-left, .rg-top, .rg-bottom {
   display: block;
-  width: 30px;
+  width: 15px;
   height: 14px;
   line-height: 14px;
   position: absolute;
@@ -956,31 +956,27 @@ footer .container1 {
   -ms-user-select: none;
   -webkit-user-select: none;
   user-select: none;
-  background: transparent;
+  background: #fff;
+  border: solid 1px;
+  border-top: none;
+  border-bottom: none;
 }
 .rg-right span, .rg-left span, .rg-top span, .rg-bottom span {
   position: absolute;
   box-sizing: border-box;
   display: block;
-  /*border: 1px solid #ccc;*/
 }
 
 .rg-right span, .rg-left span {
-  /*border-width: 0 1px;*/
   font-family: 'Glyphicons Halflings';
-  font-size: 1.9em;
   top: 50vh;
   margin-top: -10px;
   margin: -10px 0 0 0.8px;
   height: 20px;
   width: 30px;
   top: 50%;
-  color: #a5a5a5;
+  color: #337ab7;
   font-weight: 400;
-}
-
-.rg-right span:before, .rg-left span:before {
-    /*content: "\e120";*/
 }
 
 .rg-top span, .rg-bottom span {
@@ -1002,10 +998,10 @@ footer .container1 {
 .rg-right {
   cursor: col-resize;
   height: 100%;
-  right: -20px;
+  right: 0;
   top: 0;
   margin-right: -14px;
-  /*border: 1px solid #ccc;*/
+  border-right: none;
 }
 
 .rg-bottom {
@@ -1022,6 +1018,7 @@ footer .container1 {
   left: 0;
   top: 0;
   margin-left: -14px;
+  border-left: none;
 }
 
 
@@ -1115,64 +1112,130 @@ footer .container1 {
      margin-top: 5px;
  }
 
-/******* faceting resizeable *******/
-
+ /****** faceting resizeable ******/
  .faceting-resizable.close-panel .rg-left, .faceting-resizable.close-panel .rg-right {
-   display: none;
+     display: none;
  }
 
- .recordset-container.with-faceting > .faceting-resizable {
-     flex:0 0 20vw;
+ /** record side panel **/
+ .record-container > .faceting-resizable {
      position: relative;
-     /*border-right: 15px solid white;*/
+     z-index: 2;
+     font-weight: bold;
+     max-width: 50vw;
+ }
+
+ .record-container > .faceting-resizable.open-panel {
+     flex:0 0 15vw;
+     margin-left: 15px;
      min-width: 170px;
+ }
+
+ .record-container > .faceting-resizable.close-panel {
+     width: 0px;
+     flex-basis: 0px !important;
+ }
+
+ .record-container > .faceting-resizable.close-panel .faceting-container{
+     width: 0px;
+ }
+
+ .record-container > .faceting-resizable .sidePanelHeading{
+     font-weight: bold;
+     padding: 9px 10px 10px !important;
+     margin: 5px 0 0 -5px;
+ }
+
+ .record-toc .columns-container ul {
+     padding-left: 10px;
+ }
+
+ .record-container .rowFocus{
+     border-color: rgb(51, 122, 183) !important;
+ }
+
+ .record-container .panel-group .panel.rowFocus + .panel {
+     border-top: 2px solid #ddd;
+ }
+
+ /** recordset with faceting side panel **/
+ .recordset-container.with-faceting > .faceting-resizable {
+     position: relative;
      max-width: 50vw;
      z-index: 2;
-     padding-left: 5px;
- }
- .recordset-container.with-faceting > .faceting-resizable:not(.initializing) {
-    -webkit-box-shadow: 11px 0px 16px -2px rgba(204,204,204,1);
-    -moz-box-shadow: 11px 0px 16px -2px rgba(204,204,204,1);
-    box-shadow: 11px 0px 16px -2px rgba(204,204,204,1);
  }
 
  .recordset-container.with-faceting > .faceting-resizable.initializing > .rg-right > span{
     display: none;
  }
 
-/* side panel buttons */
+ .recordset-container.with-faceting > .faceting-resizable.open-panel {
+     flex:0 0 20vw;
+     min-width: 170px;
+     padding-left: 5px;
+ }
+
+ .recordset-container.with-faceting > .faceting-resizable.close-panel {
+     width: 0px;
+     flex-basis: 0px !important;
+ }
+
+ .recordset-container.with-faceting > .faceting-resizable.close-panel .faceting-container{
+     width: 0px;
+ }
+
+ /**** side panel buttons ****/
+ .facet-btn {
+     position: absolute;
+     top: 8px;
+     z-index: 2;
+ }
+
  .sidePanFiddler, #back-to-top {
      cursor: pointer;
      overflow: hidden;
-     z-index: 50;
+ }
+
+ #back-to-top {
+     position: absolute;
+     left: -66px;
+     bottom: 2em;
+     padding: 1px 4px;
      font-size: 25px;
-     padding: 1px 0 1px 5px;
      border-radius: 2px 0 0px 2px;
      height: 35px;
      width: 35px;
  }
 
  .sidePanFiddler {
-     top: 5px;
+     height: 40px;
+     width: 21px;
+     font-size: 20px;
+     padding: 4px 4px 0px 0px;
  }
 
-/* record side panel collapse button */
+ /** record side panel collapse button **/
+ .record-container .facet-btn {
+     left: -20px;
+ }
+
+ .record-container .facet-btn.close-panel {
+     left: -20px;
+ }
+
  .record-container .sidePanFiddler {
-     position: absolute;
-     right: 10px;
+     border-right: none;
+     border-radius: 15px 0px 0px 15px;
  }
 
- .record-container .sidePanFiddler.close-panel {
-     padding: 1px 4px 0 0px;
+ /** recordset side panel collapse button **/
+ .recordset-container .facet-btn {
+     right: -20px;
  }
 
-/* recordset side panel collapse button */
  .recordset-container .sidePanFiddler {
-     margin-bottom: 10px;
- }
-
- .recordset-container .sidePanFiddler.open-panel {
-     padding: 1px 4px 0 0px;
+     border-left: none;
+     border-radius: 0px 15px 15px 0px;
  }
 
  /****** RSwF main container *******/

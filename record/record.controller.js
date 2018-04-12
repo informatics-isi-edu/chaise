@@ -140,10 +140,6 @@
             return true;
         };
 
-        vm.hidePanel = function () {
-            return vm.noVisibleRelatedTables() || !$scope.recordSidePanOpen;
-        }
-
         vm.toggleRelatedTableDisplayType = function(dataModel) {
             if (dataModel.displayType == 'markdown') {
                 dataModel.displayType = 'table';

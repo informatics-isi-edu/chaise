@@ -1,3 +1,3 @@
-<div class="sidePanFiddler btn btn-primary btn-inverted" ng-class="{'open-panel': panelOpen, 'close-panel': !panelOpen}" ng-click="togglePanel()" uib-tooltip="{{tooltipMessage}}" tooltip-placement="{{tooltipPosition}}">
-    <i ng-class="setClass()"></i>
-</div>
+<button class="sidePanFiddler btn btn-primary btn-inverted" type="button" ng-class="{'open-panel': panelOpen, 'close-panel': !panelOpen}" ng-click="togglePanel()" uib-tooltip="{{tooltipMessage}}" tooltip-placement="{{tooltipPosition}}">
+    <span class="facet-glyph-icon" ng-class="setClass()"></span>
+</button>

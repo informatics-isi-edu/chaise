@@ -48,7 +48,7 @@
             message: "To open the login window press"
         },
         "previousSession": {
-            message: "A previous session was detected, you may want to <a ng-click='login'>Login</a>."
+            message: "Your login session has expired. You are now accessing data anonymously. Log in to continue your privileged access."
         },
         "noSession": {
             title: "You need to be logged in to continue.",

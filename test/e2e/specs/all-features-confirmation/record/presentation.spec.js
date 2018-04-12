@@ -205,6 +205,7 @@ describe('View existing record,', function() {
             fiddlerBtn = chaisePage.recordPage.getSidePanelFiddler();
             chaisePage.waitForElement(fiddlerBtn);
         });
+
         it('Table of contents should be displayed by default', function(){
             var recordSidePan = chaisePage.recordPage.getSidePanel();
             expect(recordSidePan.isDisplayed()).toBeTruthy("Side Panel is not visible when page loads initially.");
