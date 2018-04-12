@@ -1135,6 +1135,10 @@ footer .container1 {
      flex-basis: 0px !important;
  }
 
+ .record-container > .faceting-resizable.close-panel .faceting-container{
+     width: 0px;
+ }
+
  .record-container > .faceting-resizable .sidePanelHeading{
      font-weight: bold;
      padding: 9px 10px 10px !important;
@@ -1175,6 +1179,10 @@ footer .container1 {
      flex-basis: 0px !important;
  }
 
+ .recordset-container.with-faceting > .faceting-resizable.close-panel .faceting-container{
+     width: 0px;
+ }
+
  /**** side panel buttons ****/
  .facet-btn {
      position: absolute;
@@ -1185,8 +1193,6 @@ footer .container1 {
  .sidePanFiddler, #back-to-top {
      cursor: pointer;
      overflow: hidden;
-     font-size: 20px;
-     padding: 1px 0 1px 5px;
  }
 
  #back-to-top {
@@ -1194,6 +1200,7 @@ footer .container1 {
      left: -66px;
      bottom: 2em;
      padding: 1px 4px;
+     font-size: 25px;
      border-radius: 2px 0 0px 2px;
      height: 35px;
      width: 35px;
@@ -1202,10 +1209,12 @@ footer .container1 {
  .sidePanFiddler {
      height: 40px;
      width: 20px;
+     font-size: 20px;
+     padding: 0px 4px 0px 0px;
  }
 
  .facet-glyph-icon {
-     top: 6px;
+     top: 22%;
  }
 
  /** record side panel collapse button **/
@@ -1222,14 +1231,6 @@ footer .container1 {
      border-radius: 15px 0px 0px 15px;
  }
 
- .record-container .sidePanFiddler.close-panel {
-     padding: 1px 4px 0px 0px;
- }
-
- .record-container .facet-glyph-icon {
-     /* right: 6px; */
- }
-
  /** recordset side panel collapse button **/
  .recordset-container .facet-btn {
      right: -19px;
@@ -1238,10 +1239,6 @@ footer .container1 {
  .recordset-container .sidePanFiddler {
      border-left: none;
      border-radius: 0px 15px 15px 0px;
- }
-
- .recordset-container .facet-glyph-icon {
-     right: 8px;
  }
 
  /****** RSwF main container *******/
