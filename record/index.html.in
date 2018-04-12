@@ -113,7 +113,7 @@
                     </ul>
                 </div>
             </div>
-            <faceting-collapse-btn class="facet-btn" panel-open="recordSidePanOpen" toggle-panel="ctrl.togglePan" position="right" tooltip-message="{{'Click to ' + ((recordSidePanOpen) ? 'hide' : 'show') + ' list of related records.'}}" ng-hide="ctrl.noVisibleRelatedTables()" ng-class="{'open-panel': recordSidePanOpen, 'close-panel': !recordSidePanOpen}"></faceting-collapse-btn>
+            <faceting-collapse-btn class="facet-btn" panel-open="recordSidePanOpen" toggle-panel="ctrl.togglePan" position="right" tooltip-message="{{'Click to ' + ((recordSidePanOpen) ? 'hide' : 'show') + ' list of related records.'}}" ng-class="{'open-panel': recordSidePanOpen, 'close-panel': !recordSidePanOpen}"></faceting-collapse-btn>
         </div>
 
     </div>
