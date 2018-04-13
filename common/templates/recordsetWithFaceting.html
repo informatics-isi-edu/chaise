@@ -1,6 +1,6 @@
 <div class="recordset-container" ng-class="($root.showFaceting && vm.showFaceting) ? 'row with-faceting':'without-faceting'" >
     <loading-spinner ng-show="(!vm.initialized || $root.showSpinner) && !$root.error"></loading-spinner>
-    <div class="faceting-resizable" resizable r-directions=["right"] r-flex="true" ng-show="$root.showFaceting && vm.showFaceting" ng-class="{'open-panel': $root.facetPanelOpen, 'close-panel': !$root.facetPanelOpen, 'initializing': !vm.initialized}">
+    <div class="faceting-resizable" resizable r-directions=["right"] r-flex="true" ng-show="$root.showFaceting && vm.showFaceting && vm.reference" ng-class="{'open-panel': $root.facetPanelOpen, 'close-panel': !$root.facetPanelOpen, 'initializing': !vm.initialized}">
         <faceting vm="vm"></faceting>
     </div>
     <div class="main-container">
