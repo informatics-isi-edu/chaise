@@ -3,6 +3,7 @@ var testParams = {
     accommodation_tuple: {
         schemaName: "product-recordset",
         table_name: "accommodation",
+        comment: "List of different types of accommodations",
         displayName: "Accommodations",
         title: "Accommodations",
         key: { name: "id", value: "2001", operator: "::gt::"},
@@ -92,6 +93,10 @@ describe('View recordset,', function() {
             it("should have '" + accommodationParams.title +  "' as title", function() {
                 var title = chaisePage.recordsetPage.getPageTitleElement();
                 expect(title.getText()).toEqual(accommodationParams.title);
+            });
+
+            it ('should have the correct tooltip.', function () {
+                expect(chaisePage.recordsetPage.getPageTitleTooltip()).toBe(accommodationParams.comment);
             });
 
             it("should autofocus on search box", function() {

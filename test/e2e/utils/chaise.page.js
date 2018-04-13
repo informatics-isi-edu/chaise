@@ -271,6 +271,11 @@ var recordEditPage = function() {
         return element(by.id('entity-title'));
     };
 
+    this.getEntityTitleTooltip = function () {
+        // the .re-displayname element might not exist, that's why it's different from other tooltips
+        return element.all(by.css("#entity-title .re-displayname")).first().getAttribute('uib-tooltip');
+    };
+
     this.getResultTitle = function () {
         return element(by.id('result-title'));
     };
@@ -603,6 +608,10 @@ var recordPage = function() {
         return element(by.id("page-subtitle"));
     };
 
+    this.getEntitySubTitleTooltip = function () {
+        return this.getEntitySubTitleElement().all(by.css("span")).first().getAttribute('uib-tooltip');
+    };
+
     this.getColumns = function() {
         return browser.executeScript("return $('tr[ng-repeat=\"column in columns\"]')");
     };
@@ -837,6 +846,10 @@ var recordsetPage = function() {
 
     this.getPageTitleElement = function() {
         return element(by.id('page-title'));
+    };
+
+    this.getPageTitleTooltip = function () {
+        return this.getPageTitleElement().all(by.css("span")).first().getAttribute('uib-tooltip');
     };
 
     this.getPageSubtitle = function() {

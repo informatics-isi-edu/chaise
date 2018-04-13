@@ -115,8 +115,8 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
         it("should have edit record title", function() {
             var EC = protractor.ExpectedConditions;
 
-            browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), browser.params.defaultTimeout);
-            var title = chaisePage.recordEditPage.getFormTitle();
+            browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getEntityTitleElement()), browser.params.defaultTimeout);
+            var title = chaisePage.recordEditPage.getEntityTitleElement();
             expect(title.getText()).toEqual("Edit " + tableParams.table_displayname + " Record");
         });
 
@@ -131,11 +131,8 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
         it("should have create record title", function() {
             var EC = protractor.ExpectedConditions;
 
-            browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), browser.params.defaultTimeout);
-
-            chaisePage.recordEditPage.getEntityTitle().then(function(txt) {
-                expect(txt).toBe("Create " + tableParams.table_displayname + " Records");
-            });
+            browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getEntityTitleElement()), browser.params.defaultTimeout);
+            expect(chaisePage.recordEditPage.getEntityTitleElement().getText()).toBe("Create " + tableParams.table_displayname + " Record");
         });
 
         it("should allow to add new rows/columns", function() {
@@ -145,6 +142,10 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
             });
         });
     }
+
+    it ("should have the table subtitle.", function () {
+        expect(chaisePage.recordEditPage.getEntityTitleTooltip()).toBe(tableParams.table_comment);
+    });
 
     it("should render columns which are inside the visible columns annotation if defined; Default all are visible", function() {
         var columns = tableParams.columns;

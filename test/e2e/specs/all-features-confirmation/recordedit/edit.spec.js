@@ -13,7 +13,8 @@ var testParams = {
     tables: [{
         schema_name: "product-edit",
         table_name: "accommodation",
-        table_displayname: "Sherathon Hotel",
+        table_displayname: "Sherathon Hotel", //since this is in single-edit, displayname is rowname.
+        table_comment: null, //since this is in single-edit, tooltip is missing.
         key: { name: "id", value: "2000", operator: "="},
         primary_keys: ["id"],
         columns: [
@@ -54,7 +55,8 @@ var testParams = {
     }, {
        schema_name: "product-edit",
        table_name: "file",
-       table_displayname: "90008",
+       table_displayname: "90008", //since this is in single-edit, displayname is rowname.
+       table_comment: null, //since this is in single-edit, tooltip is missing.
        primary_keys: ["id"],
        key: { name: "id", value: "90008", operator: "="},
        columns: [

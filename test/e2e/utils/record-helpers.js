@@ -26,6 +26,10 @@ exports.testPresentation = function (tableParams) {
         expect(subtitle.getText()).toEqual(tableParams.subTitle.toUpperCase());
 	});
 
+    it ("should have the correct table tooltip.", function () {
+        expect(chaisePage.recordPage.getEntitySubTitleTooltip()).toBe(tableParams.tableComment);
+    });
+
 	it("should show " + tableParams.columns.filter(function(c) {return c.value != null;}).length + " columns only", function() {
         var columns = tableParams.columns.filter(function(c) {return c.value != null;});
 		chaisePage.recordPage.getColumns().then(function(els) {

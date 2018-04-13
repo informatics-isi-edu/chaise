@@ -9,6 +9,7 @@ var testParams = {
     },
     title: "Sherathon Hotel",
     subTitle: "Accommodations",
+    tableComment: "List of different types of accommodations",
     tables_order: ["accommodation_image (showing first 2 results)", "media (no results found)"],
     related_table_name_with_page_size_annotation: "accommodation_image",
     page_size: 2,
