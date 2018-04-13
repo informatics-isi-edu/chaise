@@ -956,7 +956,7 @@ footer .container1 {
   -ms-user-select: none;
   -webkit-user-select: none;
   user-select: none;
-  background: #fff;
+  background: transparent;
   border: solid 1px;
   border-top: none;
   border-bottom: none;
@@ -972,8 +972,6 @@ footer .container1 {
   top: 50vh;
   margin-top: -10px;
   margin: -10px 0 0 0.8px;
-  height: 20px;
-  width: 30px;
   top: 50%;
   color: #337ab7;
   font-weight: 400;
@@ -1015,10 +1013,10 @@ footer .container1 {
 .rg-left {
   cursor: col-resize;
   height: 100%;
-  left: 0;
+  left: 14px;
   top: 0;
   margin-left: -14px;
-  border-left: none;
+  border-right: none;
 }
 
 
@@ -1127,7 +1125,6 @@ footer .container1 {
 
  .record-container > .faceting-resizable.open-panel {
      flex:0 0 15vw;
-     margin-left: 15px;
      min-width: 170px;
  }
 
@@ -1148,6 +1145,15 @@ footer .container1 {
 
  .record-toc .columns-container ul {
      padding-left: 10px;
+ }
+
+ .record-toc .toc-heading {
+     padding: 5px;
+     cursor: pointer;
+ }
+
+ .record-toc .toc-heading:hover {
+     background-color: rgb(241, 241, 241);
  }
 
  .record-container .rowFocus{
@@ -1187,7 +1193,7 @@ footer .container1 {
  /**** side panel buttons ****/
  .facet-btn {
      position: absolute;
-     top: 8px;
+     top: 40px;
      z-index: 2;
  }
 
@@ -1442,6 +1448,7 @@ footer .container1 {
  .faceting-container .string-picker .tab-content{
      margin-top: 10px;
  }
+
 .faceting-container .string-picker .pager {
     margin: 0px;
 }
@@ -1465,13 +1472,16 @@ footer .container1 {
     margin-top: 10px;
     margin-bottom: 0px;
 }
+
 .chaise-checkbox {
     position: relative;
     /*margin: 10px 0;*/
 }
+
 li.chaise-checkbox:hover {
     background-color: rgb(241, 241, 241);
 }
+
 .ellipsis-text label{
     text-overflow: ellipsis;
     white-space: nowrap;
