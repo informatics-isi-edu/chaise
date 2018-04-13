@@ -957,7 +957,7 @@ footer .container1 {
   -webkit-user-select: none;
   user-select: none;
   background: transparent;
-  border: solid 1px;
+  border: solid 1px #2e6da4;;
   border-top: none;
   border-bottom: none;
 }
@@ -1126,6 +1126,7 @@ footer .container1 {
  .record-container > .faceting-resizable.open-panel {
      flex:0 0 15vw;
      min-width: 170px;
+     padding-left: 5px;
  }
 
  .record-container > .faceting-resizable.close-panel {
