@@ -97,11 +97,12 @@
                 <h2 class="sidePanelHeading">Contents</h2>
                 <div class="columns-container">
                     <ul>
-                      <li id="main-to-top" style="padding:5px" ng-click="scrollToTop()">
-                        <a uib-tooltip="Main" tooltip-placement="bottom" chaise-enable-tooltip-width>Main</a> </li>
+                        <li id="main-to-top" class="toc-heading" ng-click="scrollToTop()">
+                            <a uib-tooltip="Main" tooltip-placement="bottom" chaise-enable-tooltip-width>Main</a>
+                        </li>
                         <div ng-repeat="relatedRef in relatedReferences track by $index" id="recordSidePan-{{$index}}" ng-if="ctrl.showRelatedTable($index)" class="{{lastActiveFacet == $index ? 'focused': ''}}" ng-click="ctrl.gotoRelatedTable(relatedRef.displayname.value, $index)">
 
-                            <li  id="recordSidePan-heading-{{$index}}" style="padding:5px">
+                            <li id="recordSidePan-heading-{{$index}}" class="toc-heading">
                                 <a uib-tooltip="{{relatedRef.displayname.value}}" tooltip-placement="bottom" chaise-enable-tooltip-width>
                                     <span ng-if="::relatedRef.displayname.isHTML" ng-bind-html="::relatedRef.displayname.value"></span>
                                     <span ng-if="::!relatedRef.displayname.isHTML" ng-bind="::relatedRef.displayname.value"></span>
@@ -113,7 +114,7 @@
                     </ul>
                 </div>
             </div>
-            <faceting-collapse-btn class="facet-btn" panel-open="recordSidePanOpen" toggle-panel="ctrl.togglePan" position="right" tooltip-message="{{'Click to ' + ((recordSidePanOpen) ? 'hide' : 'show') + ' list of related records.'}}" ng-class="{'open-panel': recordSidePanOpen, 'close-panel': !recordSidePanOpen}"></faceting-collapse-btn>
+            <faceting-collapse-btn class="facet-btn" panel-open="recordSidePanOpen" toggle-panel="ctrl.togglePan" position="right" tooltip-message="{{'Click to ' + ((recordSidePanOpen) ? 'hide' : 'show') + ' table of contents.'}}" ng-class="{'open-panel': recordSidePanOpen, 'close-panel': !recordSidePanOpen}"></faceting-collapse-btn>
         </div>
 
     </div>
