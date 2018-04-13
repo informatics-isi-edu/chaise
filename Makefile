@@ -260,6 +260,7 @@ JS_SOURCE=$(JS)/respond.js \
 	$(JS)/controller/ermrestTourController.js \
 	$(JS)/tour.js \
 	$(COMMON)/alerts.js \
+	$(COMMON)/storage.js \
 	$(COMMON)/authen.js \
 	$(COMMON)/delete-link.js \
 	$(COMMON)/errors.js \
@@ -380,6 +381,7 @@ VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/alerts.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/utils.js \
+	$(COMMON)/storage.js \
 	$(COMMON)/authen.js \
 	$(COMMON)/errors.js \
 	$(COMMON)/modal.js \
