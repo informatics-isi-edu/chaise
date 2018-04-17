@@ -512,11 +512,12 @@
             // This function is called as a success promise callback by completeUpload function above for each file
             // Once upload jobs are marked as completed it sets the url in the columns for rows
             // And closes the modal
-            uploadFile.prototype.onCompleteUploadJob = function() {
+            uploadFile.prototype.onCompleteUploadJob = function(url) {
 
                 if (vm.erred || vm.aborted) return;
 
                 this.completeUploadJob = true;
+                this.versionedUrl = url;
 
 
                 // This code updates the main progress bar for job completion progress for all files
@@ -554,7 +555,7 @@
                             // then set the url in the corresonding column for the row as its value
                             var column = reference.columns.find(function(c) { return c.name == k;  });
                             if (column && row[k] != null && (column.isAsset) && typeof row[k] == 'object' && row[k].file) {
-                                row[k] = vm.rows[index][rowIndex++].url;
+                                row[k] = vm.rows[index][rowIndex++].versionedUrl;
                             }
                         }
 

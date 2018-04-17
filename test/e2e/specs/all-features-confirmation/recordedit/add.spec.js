@@ -62,8 +62,8 @@ var testParams = {
            "fileid", "uri", "filename", "bytes"
        ],
        results: [
-           ["1", {"link": "/hatrac/js/chaise/" + currentTimestampTime + "/1", "value": "testfile1MB.txt"}, "testfile1MB.txt", "1,024,000"],
-           ["2", {"link": "/hatrac/js/chaise/" + currentTimestampTime + "/2", "value": "testfile500kb.png"}, "testfile500kb.png", "512,000"]
+           ["1", {"link": "/hatrac/js/chaise/" + currentTimestampTime + "/1/3a8c740953a168d9761d0ba2c9800475:", "value": "testfile1MB.txt"}, "testfile1MB.txt", "1,024,000"],
+           ["2", {"link": "/hatrac/js/chaise/" + currentTimestampTime + "/2/2ada69fe3cdadcefddc5a83144bddbb4:", "value": "testfile500kb.png"}, "testfile500kb.png", "512,000"]
        ],
        files : [{
            name: "testfile1MB.txt",
