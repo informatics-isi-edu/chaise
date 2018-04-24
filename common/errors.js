@@ -245,13 +245,6 @@
                 return;
             }
 
-            // No point having this case separate from below ermrestJS error check case
-            // if ( (ERMrest && exception instanceof ERMrest.ForbiddenError)) {
-            //     // Forbidden (give terminal error)
-            //     // change default properties
-            //     // errorPopup(exception.message, exception.status, "Home Page", $window.location.origin); ---> all defaults
-            // }
-
             if (exception instanceof Errors.multipleRecordError || exception instanceof Errors.noRecordError){
                 // change defaults
                 pageName = "Recordset";
