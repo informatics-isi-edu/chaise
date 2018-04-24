@@ -146,45 +146,41 @@
     .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$window', 'errorMessages', 'Errors', 'DataUtils', 'UriUtils', 'modalUtils',
           function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $window, errorMessages, Errors, DataUtils, UriUtils, modalUtils) {
 
-        var reloadCb = function(){
+        var reloadCb = function() {
             window.location.reload();
         };
 
-        function errorPopup(message, errorStatus, pageName, redirectLink, subMessage, stackTrace, errorCode, isDismissible) {
-            var providedLink = true,
-                isLoggedIn = false;
+        function errorPopup(message, errorStatus, pageName, redirectLink, subMessage, stackTrace, errorCode, isDismissible, showLogin) {
             var appName = UriUtils.appNamefromUrlPathname($window.location.pathname),
-                session = Session.getSessionValue();
-            // if it's not defined, redirect to the dataBrowser config setting (if set) or the landing page
+                session = Session.getSessionValue(),
+                providedLink = true;
+
+            var reloadCb = function(){
+                window.location.reload();
+            };
+
             if (!redirectLink) {
                 providedLink = false;
-                var redirectLink = (chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : $window.location.origin);
+                redirectLink = $window.location.origin;
             }
 
 
             var isFirefox = typeof InstallTrigger !== 'undefined';
             var isChrome = !!window.chrome && !!window.chrome.webstore;
             // If browser is chrome then use stack trace which has "Error"  appended before the trace
-            // Else append subMessage before the tarce to complete the message as FF does not generate sufficient error text
-            if (subMessage && stackTrace) {
-                if (isChrome) {
-                    subMessage = stackTrace;
-                } else {
-                    subMessage = subMessage + "\n   " + stackTrace.split("\n").join("\n   ");
-                }
-            }
-            //check if user is logged in
-            if(session && session.client !== null){
-              isLoggedIn = true;
+            // Else append subMessage before the trace to complete the message as FF does not generate sufficient error text
+            if (stackTrace) {
+                subMessage = (subMessage && !isChrome) ? (subMessage + "\n   " + stackTrace.split("\n").join("\n   ")) : stackTrace;
             }
 
             var params = {
-                message: message,
-                errorStatus: errorStatus,
-                pageName: pageName,
-                subMessage: subMessage,
                 appName: appName,
-                isLoggedIn: isLoggedIn
+                canClose: false,
+                errorStatus: errorStatus,
+                message: message,
+                pageName: pageName,
+                showLogin: showLogin,
+                subMessage: subMessage
             };
 
             var modalProperties = {
@@ -216,13 +212,8 @@
                     } else{             //default action i.e. redirect link for OK button
                         $window.location = redirectLink;
                     }
-
                 }
             });
-
-            var reloadCb = function(){
-                window.location.reload();
-            };
         }
 
         var exceptionFlag = false;
@@ -230,62 +221,57 @@
         // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
         function handleException(exception, isDismissible) {
             $log.info(exception);
-            var reloadLink,
-                redirectLink = $window.location.origin,
-                gotoLocation = "Home Page",
-                appName = UriUtils.appNamefromUrlPathname($window.location.pathname),
-                errorCode = exception.code;
 
-            var stackTrace =  (exception.errorData && exception.errorData.stack)? exception.errorData.stack: undefined;
+            // arguments for `errorPopup()` in order for method declaration
+            var message = exception.message,
+                errorStatus = exception.status,
+                pageName = "Home Page",
+                redirectLink = chaiseConfig.dataBrowser,
+                subMessage = (exception.subMessage ? exception.subMessage : undefined),
+                stackTrace = ( (exception.errorData && exception.errorData.stack) ? exception.errorData.stack : undefined),
+                errorCode = exception.code,
+                isDismissible = isDismissible,
+                showLogin = false;
 
             $rootScope.error = true;    // used to hide spinner in conjunction with a css property
 
-            if (exceptionFlag || window.location.pathname.indexOf('/search/') != -1 || window.location.pathname.indexOf('/viewer/') != -1){
+            // don't throw an angular error if in search/viewer or one has already been thrown
+            if (exceptionFlag || window.location.pathname.indexOf('/search/') != -1 || window.location.pathname.indexOf('/viewer/') != -1) return;
+
+            // If not authorized, ask user to sign in first
+            if ( (ERMrest && exception instanceof ERMrest.UnauthorizedError)) {
+                // Unauthorized (needs to login)
+                Session.loginInAModal(reloadCb);
                 return;
             }
-            // we decided to deal with the OR condition later
-            if ( (ERMrest && exception instanceof ERMrest.UnauthorizedError) || exception.code == errorNames.unauthorized) {
-                Session.loginInAModal(reloadCb);
-            } else if ((exception.status && exception.status == errorNames.multipleRecords) || exception.constructor.name === "noRecordError"){
-                errorPopup(exception.message, exception.status, "Recordset ", exception.errorData.redirectUrl, stackTrace);
-            } else if ( (ERMrest && exception instanceof ERMrest.ForbiddenError) || exception.code == errorNames.forbidden) {
-                // we decided to deal with the OR condition later
-                errorPopup( exception.message, exception.status ,"Home Page", $window.location.origin);
+
+            // No point having this case separate from below ermrestJS error check case
+            // if ( (ERMrest && exception instanceof ERMrest.ForbiddenError)) {
+            //     // Forbidden (give terminal error)
+            //     // change default properties
+            //     // errorPopup(exception.message, exception.status, "Home Page", $window.location.origin); ---> all defaults
+            // }
+
+            if (exception instanceof Errors.multipleRecordError || exception instanceof Errors.noRecordError){
+                // change defaults
+                pageName = "Recordset";
+                redirectLink = exception.errorData.redirectUrl;
+                if (exception instanceof Errors.noRecordError && !Session.getSessionValue()) showLogin = true;
             } else if (ERMrest && exception instanceof ERMrest.ERMrestError ) {
-                if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'gotoTableDisplayname')){
-                    gotoLocation = exception.errorData.gotoTableDisplayname;
-                }
-                if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'redirectUrl')) {
-                    redirectLink = exception.errorData.redirectUrl;
-                } else {
-                    redirectLink = $window.location.origin;
-                }
-                errorPopup( exception.message, exception.status, gotoLocation, redirectLink, exception.subMessage, '', errorCode, isDismissible);
+                if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'gotoTableDisplayname')) pageName = exception.errorData.gotoTableDisplayname;
+                if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'redirectUrl')) redirectLink = exception.errorData.redirectUrl;
+                if (exception instanceof ERMrest.NotFoundError && !Session.getSessionValue()) showLogin = true;
             } else {
                 logError(exception);
-
-                var errName = exception.status? exception.status:"Terminal Error",
-                    errorText = exception.message,
-                    systemAdminMessage = errorMessages.systemAdminMessage,
-                    redirectLink = $window.location.origin,
-                    pageName = "Home Page";
-
-                errName = (errName.toLowerCase() !== 'error') ? errName : "Terminal Error";
-
-                errorPopup(
-                    systemAdminMessage,
-                    errName,
-                    pageName,
-                    redirectLink,
-                    errorText,
-                    stackTrace,
-                    errorCode,
-                    isDismissible
-                );
+                message = errorMessages.systemAdminMessage;
+                if (!errorStatus) errorStatus = "Terminal Error";
+                subMessage = exception.message;
             }
-            if(!isDismissible) {  // if not a dismissible errror then exception should be suppressed 
-            exceptionFlag = true;
-          }
+
+            errorPopup(message, errorStatus, pageName, redirectLink, subMessage, stackTrace, errorCode, isDismissible, showLogin);
+
+            // if not a dismissible errror then exception should be suppressed
+            if (!isDismissible) exceptionFlag = true;
         }
 
         return {
