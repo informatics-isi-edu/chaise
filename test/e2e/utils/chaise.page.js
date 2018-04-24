@@ -840,6 +840,12 @@ var recordPage = function() {
 
 var recordsetPage = function() {
     var that = this;
+
+    this.waitForInverseMainSpinner = function () {
+        var locator = element(by.id("main-spinner"));
+        return browser.wait(protractor.ExpectedConditions.invisibilityOf(locator), browser.params.defaultTimeout);
+    };
+
     this.getPageTitle = function() {
         return browser.executeScript("return $('#page-title').text();");
     };
@@ -900,12 +906,16 @@ var recordsetPage = function() {
         return element(by.id("search-input"));
     };
 
+    this.getMainSearchBox = function() {
+        return element(by.css(".main-container")).element(by.id("search-input"));
+    };
+
     this.getSearchSubmitButton = function() {
-        return element(by.id("search-submit"));
+        return element(by.css(".main-container")).element(by.id("search-submit"));
     };
 
     this.getSearchClearButton = function() {
-        return element(by.id("search-clear"));
+        return element(by.css(".main-container")).element(by.id("search-clear"));
     };
 
     this.getAddRecordLink = function() {

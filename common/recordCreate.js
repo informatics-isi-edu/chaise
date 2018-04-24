@@ -328,7 +328,7 @@
             params.context = "compact/select";
             params.selectMode = isModalUpdate ? modalBox.multiSelectMode : modalBox.singleSelectMode;
             params.selectedRows = [];
-            params.faceting = true;
+            params.showFaceting = true;
             params.facetPanelOpen = false;
             //NOTE assumption is that this function is only is called for adding pure and binary association
             params.logObject = {
@@ -346,8 +346,6 @@
                 size: "xl",
                 templateUrl: "../common/templates/searchPopup.modal.html"
             }, function dataSelected(tuples) {
-                // to notify the modal popup has been closed so when it opens again it can "load" again
-                $rootScope.pageLoaded = false;
                 // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
                 // set data in view model (model.rows) and submission model (model.submissionRows)
                 // we assume that the data for the main table has been populated before
@@ -373,8 +371,6 @@
                     };
                     addRecords(viewModel.editMode, derivedref, nullArr, isModalUpdate, rsReference, rsTuples, rsQueryParams, viewModel, viewModel.onSuccess, logObject);
                 }
-            }, function modalClosed() {
-                $rootScope.pageLoaded = false;
             });
         }
 

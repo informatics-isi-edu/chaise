@@ -194,7 +194,7 @@
         }
 
         $scope.$watch(function() {
-            return ($rootScope.pageLoaded || recordsetModel.hasLoaded) && recordsetModel.initialized;
+            return recordsetModel.hasLoaded && recordsetModel.initialized;
         }, function (newValue, oldValue) {
             if (newValue) {
                 try {
@@ -213,7 +213,7 @@
 
         angular.element($window).bind('resize', function(){
             try {
-                if ( ($rootScope.pageLoaded || recordsetModel.hasLoaded) && recordsetModel.initialized ) {
+                if (recordsetModel.hasLoaded && recordsetModel.initialized ) {
                     var elements = fetchMainElements();
                     // if these 2 values are not set yet, don't set the height
                     if(elements.navbarHeight && elements.bookmarkHeight) {
@@ -256,7 +256,6 @@
 
             $rootScope.alerts = AlertsService.alerts;
 
-            $rootScope.showFaceting = showFaceting;
             $rootScope.location = $window.location.href;
             recordsetModel.hasLoaded = false;
             $rootScope.context = context;
@@ -314,23 +313,7 @@
 
                      recordsetModel.logObject = {action: logActions.recordsetLoad};
 
-                     if (showFaceting) {
-                         $rootScope.pageLoaded = true;
-                     } else {
-                         recordsetModel.reference.read(recordsetModel.pageLimit, recordsetModel.logObject).then(function (page) {
-                             recordsetModel.page = page;
-                             recordsetModel.rowValues = DataUtils.getRowValuesFromPage(page);
-                             recordsetModel.initialized = true;
-                             recordsetModel.hasLoaded = true;
-
-                             $rootScope.$broadcast('data-modified');
-                         }).catch(function (err) {
-                             if (DataUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
-                                 err.errorData.redirectUrl = UriUtils.createRedirectLinkFromPath(err.errorData.redirectPath);
-                             }
-                             throw err;
-                         });
-                     }
+                     recordsetModel.readyToInitialize = true;
                  }).catch(function genericCatch(exception) {
                      $log.warn(exception);
                      recordsetModel.hasLoaded = true;

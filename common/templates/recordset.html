@@ -1,106 +1,135 @@
-<div class="recordset-container without-faceting">
-    <loading-spinner ng-show="((!vm.hasLoaded && !vm.backgroundSearch) || showSpinner) && !error"></loading-spinner>
+<div class="recordset-container" ng-class="vm.config.showFaceting ? 'row with-faceting':'without-faceting'" >
+    <loading-spinner ng-show="(!vm.initialized || $root.showSpinner) && !$root.error"></loading-spinner>
+    <div class="faceting-resizable" resizable r-directions=["right"] r-flex="true" ng-show="vm.config.showFaceting && vm.reference" ng-class="{'open-panel': vm.config.facetPanelOpen, 'close-panel': !vm.config.facetPanelOpen, 'initializing': !vm.initialized}">
+        <faceting vm="vm"></faceting>
+    </div>
     <div class="main-container">
-        <div ng-show="vm.initialized" class="row" style="margin-bottom: 10px;">
+        <loading-spinner id="main-spinner" ng-show="!vm.hasLoaded && vm.initialized"></loading-spinner>
+        <div style="margin-bottom: 10px;" ng-show="vm.initialized">
 
-            <div style="margin-left:15px; margin-right:20px;">
-                <alerts alerts="$root.alerts"></alerts>
-            </div>
+            <alerts alerts="$root.alerts"></alerts>
 
-            <div ng-if="vm.config.selectMode == 'multi-select' && !vm.config.hideSelectedRows" class="row total-filters selected-rows">
+            <div ng-if="vm.selectedRows.length > 0 && vm.config.selectMode == 'multi-select' && !vm.config.hideSelectedRows" class="row total-filters selected-rows-filters">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                    <a class="remove-link" ng-click="removeAllPills()" ng-disabled="vm.selectedRows.length < 1">
-                        <span class="filter-label label label-primary label-inverted" ng-if="vm.selectedRows.length < 1">
-                            No Item Selected
-                        </span>
-                        <span class="filter-label label label-primary label-inverted" ng-if="vm.selectedRows.length > 0">
-                            Clear All
+                    <a class="remove-link" ng-click="removeAllPills()">
+                        <span class="filter-label label label-primary">
+                            clear all
                         </span>
                     </a>
-                    <div ng-if="vm.selectedRows.length > 0" class="filter-label label label-default" ng-repeat="row in vm.selectedRows track by $index" tooltip-enable="tooltipEnabled" uib-tooltip="{{row.displayname.value}}" tooltip-placement="bottom" chaise-enable-tooltip-width>
+                    <div class="filter-label label label-default" ng-repeat="row in vm.selectedRows track by $index">
                         <a class="remove-link" ng-click="removePill(row.uniqueId)"><i class="glyphicon glyphicon-remove"></i></a>
-                        <span ng-if="row.displayname.value && row.displayname.isHTML" ng-bind-html="row.displayname.value"></span>
-                        <span ng-if="row.displayname.value && !row.displayname.isHTML" ng-bind="row.displayname.value"></span>
-                        <span ng-if="row.displayname.value == '' && row.uniqueId != null" ng-bind-html="defaultDisplayname.empty"></span>
-                        <span ng-if="row.displayname.value == null || row.uniqueId === null" ng-bind-html="defaultDisplayname.null"></span>
+                        <span ng-if="row.displayname.isHTML" ng-bind-html="row.displayname.value"></span>
+                        <span ng-if="!row.displayname.isHTML" ng-bind="row.displayname.value"></span>
                     </div>
                 </div>
             </div>
 
-            <div ng-class="vm.config.hidePageSettings ? 'col-lg-8 col-md-8 col-sm-8 col-xs-8': 'col-lg-4 col-md-5 col-sm-6 col-xs-6'">
-                <!-- search box -->
-                <div class="input-group has-feedback">
-                    <input type="text"
-                           id="search-input"
-                           ng-model="vm.search"
-                           class="form-control"
-                           ng-class="{'search-progress': vm.backgroundSearch }"
-                           on-enter="enterPressed()"
-                           ng-change="inputChanged()"
-                           placeholder="Search"
-                           autofocus
-                           ng-disabled="!vm.hasLoaded && !vm.backgroundSearch">
-                    <div class="form-control-feedback coltooltip" ng-hide="!vm.reference.location.searchTerm || !vm.hasLoaded || vm.backgroundSearch" ng-style="{'cursor': 'pointer', 'right': (onPlusButtonClick ? '85px': '50px'), 'pointer-events': 'all', 'z-index': '5'}"><!-- form-control:focus changes the z-index of the form control from 2 to 3. form-control-feedback has z-index of 2. Overriding that z index to 5 so it isn't hidden when focused-->
-                        <span id="search-clear" class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="::clearSearch()" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
+            <div class="row">
+                <div ng-class="vm.config.hidePageSettings ? 'col-lg-8 col-md-8 col-sm-8 col-xs-8': 'col-lg-4 col-md-5 col-sm-6 col-xs-6'">
+                    <!-- search box -->
+                    <div class="input-group has-feedback">
+                        <input type="text"
+                               id="search-input"
+                               ng-model="vm.search"
+                               class="form-control main-search-input"
+                               ng-class="{'search-progress': inputChangedPromise }"
+                               on-enter="enterPressed()"
+                               ng-change="inputChanged()"
+                               placeholder="Search"
+                               autofocus>
+                        <div class="form-control-feedback coltooltip" ng-show="vm.search && !inputChangedPromise" ng-style="{'cursor': 'pointer', 'right': (onPlusButtonClick ? '85px': '50px'), 'pointer-events': 'all', 'z-index': '5'}"><!-- form-control:focus changes the z-index of the form control from 2 to 3. form-control-feedback has z-index of 2. Overriding that z index to 5 so it isn't hidden when focused-->
+                            <span id="search-clear" class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="::clearSearch()" tooltip-placement="bottom" uib-tooltip="Clear Search"></span>
+                        </div>
+                        <span class="input-group-btn">
+                            <button id="search-submit" class="btn btn-primary btn-inverted" ng-click="enterPressed(vm.search)" role="button" tooltip-placement="bottom"
+                                uib-tooltip-html="'<p>Use space to separate between conjunctive terms, | (no spaces) to separate disjunctive terms and quotations for exact phrases.</p><p>For example, <i><b>usc 1234</b></i> returns all records containing &ldquo;usc&rdquo; and &ldquo;1234&rdquo;.</p><p><i><b>usc|1234</b></i> returns all records containing &ldquo;usc&rdquo; or &ldquo;1234&rdquo;.</b></i></p><p><i><b>&ldquo;usc 1234&rdquo;</b></i> returns all records containing &ldquo;usc 1234&rdquo;.</p>'">
+                                &nbsp;<span class="glyphicon glyphicon-search"></span>&nbsp;<!-- Added 2 non-breaking spaces to prevent btn's margins from collapsing and to center the icon-->
+                            </button>
+                        </span>
                     </div>
-                    <span class="input-group-btn">
-                        <button id="search-submit" class="btn btn-primary btn-inverted" ng-click="enterPressed(vm.search)" role="button" ng-disabled="!vm.hasLoaded && !vm.backgroundSearch" tooltip-placement="bottom"
-                            uib-tooltip-html="'<p>Use space to separate between conjunctive terms, | (no spaces) to separate disjunctive terms and quotations for exact phrases.</p><p>For example, <i><b>usc 1234</b></i> returns all records containing &ldquo;usc&rdquo; and &ldquo;1234&rdquo;.</p><p><i><b>usc|1234</b></i> returns all records containing &ldquo;usc&rdquo; or &ldquo;1234&rdquo;.</b></i></p><p><i><b>&ldquo;usc 1234&rdquo;</b></i> returns all records containing &ldquo;usc 1234&rdquo;.</p>'">
-                            &nbsp;<span class="glyphicon glyphicon-search"></span>&nbsp;<!-- Added 2 non-breaking spaces to prevent btn's margins from collapsing and to center the icon-->
+                </div>
+
+                <div style="height: 34px;" class="col-lg-4 col-md-4 col-sm-4 col-xs-4" ng-if="!vm.config.hidePageSettings">
+                    <!-- pagination -->
+                    <span class="dropdown" style="margin-left: 5px">
+                        <button id="page-size-dropdown" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">{{vm.pageLimit}} Items per page
+                            <span class="caret"></span>
                         </button>
+                        <ul class="dropdown-menu dropdown-menu-right">
+                            <li ng-if="pageLimits.indexOf(vm.pageLimit) === -1"><a id="custom-page-size" href ng-click="setPageLimit(vm.pageLimit)">
+                                <span class="glyphicon glyphicon-ok"></span>
+                                {{ vm.pageLimit }} (Custom)</a>
+                            </li>
+                            <li ng-repeat="limit in pageLimits"><a id="page-size-{{limit}}" href ng-click="setPageLimit(limit)">
+                                <span class="glyphicon" ng-class="vm.pageLimit === limit ? 'glyphicon-ok' : 'glyphicon-invisible'"></span>
+                                {{ limit }}</a>
+                            </li>
+                        </ul>
                     </span>
                 </div>
-            </div>
 
-            <div style="height: 34px;" class="col-lg-4 col-md-4 col-sm-4 col-xs-4" ng-if="!vm.config.hidePageSettings">
-                <!-- pagination -->
-                <span class="dropdown" style="margin-left: 5px">
-                    <button id="page-size-dropdown" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">{{vm.pageLimit}} Items per page
-                        <span class="caret"></span></button>
-                    <ul class="dropdown-menu dropdown-menu-right">
-                        <li ng-if="pageLimits.indexOf(vm.pageLimit) === -1"><a id="custom-page-size" href ng-click="setPageLimit(vm.pageLimit)">
-                            <span class="glyphicon glyphicon-ok"></span>
-                            {{ vm.pageLimit }} (Custom)</a>
-                        </li>
-                        <li ng-repeat="limit in pageLimits"><a id="page-size-{{limit}}" href ng-click="setPageLimit(limit)">
-                            <span class="glyphicon" ng-class="vm.pageLimit === limit ? 'glyphicon-ok' : 'glyphicon-invisible'"></span>
-                            {{ limit }}</a>
-                        </li>
-                    </ul>
-                </span>
-            </div>
-
-            <div class="col-lg-4 col-md-3 col-sm-2 col-xs-2">
-                <!-- add record -->
-                <button id="add-record-btn" type="button" class="btn btn-primary btn-inverted pull-right" ng-if="vm.reference.canCreate && allowCreate" ng-click="addRecord()"  tooltip-placement="bottom" uib-tooltip="Create new record">
-                    <span class="glyphicon glyphicon-plus"></span>
-                </button>
+                <div class="col-lg-4 col-md-3 col-sm-2 col-xs-2">
+                    <!-- add record -->
+                    <button id="add-record-btn" type="button" class="btn btn-primary btn-inverted pull-right" ng-if="vm.reference.canCreate && allowCreate" ng-click="addRecord()"  tooltip-placement="bottom" uib-tooltip="Create new record">
+                        <span class="glyphicon glyphicon-plus"></span>
+                    </button>
+                </div>
             </div>
         </div>
-        <div ng-if="vm.initialized && vm.filterString" class="row total-filters selected-rows">
-            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding-left: 0;">
-                <a class="remove-link" ng-click="unfiltered()" tooltip-placement="bottom" uib-tooltip="Show unfiltered list">
-                    <span class="filter-label label label-primary label-inverted">
+
+        <div ng-if="vm.initialized">
+            <div class="total-filters facet-filters" ng-if="vm.reference.location.facets || vm.reference.location.searchTerm || vm.reference.location.filter">
+                <a id="clear-all-filters" class="remove-link" ng-click="vm.removeFilter()" ng-if="vm.hasFilter() || vm.reference.location.searchTerm || vm.reference.location.filter">
+                    <span class="filter-label label label-primary label-inverted" uib-tooltip="Clear all Facets" tooltip-placement="bottom">
                         Clear All
                     </span>
                 </a>
-                <div class="filter-label label label-default" tooltip-enable="tooltipEnabled" uib-tooltip="{{vm.filterString}}" tooltip-placement="bottom" chaise-enable-tooltip-width>
-                    <a class="remove-link" ng-click="unfiltered()"><i class="glyphicon glyphicon-remove"></i></a>
-                    <span ng-bind="vm.filterString" id="recordset-filter-str"></span>
+                <div class="filter-label label label-default" ng-if="vm.reference.location.searchTerm">
+                    <a class="remove-link" ng-click="::clearSearch()" tooltip-placement="bottom" uib-tooltip="Clear Search"><i class="glyphicon glyphicon-remove"></i></a>
+                    <a ng-click="focusOnSearchInput()">Search</a>:
+                    <span ng-bind="vm.reference.location.searchTerm"></span>
+                </div>
+                <div class="filter-label label label-default" ng-if="vm.reference.location.filter">
+                  <a id="clear-custom-filters" class="remove-link" ng-click="vm.removeFilter(-1)" tooltip-placement="bottom" uib-tooltip="Clear Filters"><i class="glyphicon glyphicon-remove"></i></a>
+                  <i>Custom Filter</i>:
+                  <span ng-bind="vm.reference.location.filtersString"></span>
+                </div>
+                <div class="filter-label label label-default" ng-repeat="fc in vm.reference.facetColumns track by $index" ng-if="vm.hasFilter($index)">
+                    <a class="remove-link" ng-click="vm.removeFilter($index)" tooltip-placement="bottom" uib-tooltip="Clear Facet"><i class="glyphicon glyphicon-remove"></i></a>
+                    <a tooltip-placement="bottom" ng-click="vm.focusOnFacet($index)" ng-if="::fc.displayname.isHTML"  uib-tooltip="Go to the Facet" ng-bind-html="::fc.displayname.value"></a>
+                    <a tooltip-placement="bottom" ng-click="vm.focusOnFacet($index)" ng-if="::!fc.displayname.isHTML" uib-tooltip="Go to the Facet" ng-bind="::fc.displayname.value"></a>:
+                    <span uib-tooltip-template="'filtersTooltipTemplate.html'" tooltip-placement="bottom-left">
+                        <span ng-repeat="filter in vm.facetModels[$index].appliedFilters">
+                            <span ng-if="::filter.displayname.value && filter.displayname.isHTML" ng-bind-html="::filter.displayname.value"></span>
+                            <span ng-if="::filter.displayname.value && !filter.displayname.isHTML" ng-bind="::filter.displayname.value"></span>
+                            <span ng-if="::filter.displayname.value == ''" ng-bind-html="defaultDisplayname.empty"></span>
+                            <span ng-if="::filter.displayname.value == null" ng-bind-html="defaultDisplayname.null"></span>
+                            <span>{{$last ? '': ','}}</span>
+                        </span>
+                    </span>
+                    <script type="text/ng-template" id="filtersTooltipTemplate.html">
+                        <span ng-repeat="filter in vm.facetModels[$index].appliedFilters">
+                            <span>&bull;</span>
+                            <span ng-if="::filter.displayname.value && filter.displayname.isHTML" ng-bind-html="::filter.displayname.value"></span>
+                            <span ng-if="::filter.displayname.value && !filter.displayname.isHTML" ng-bind="::filter.displayname.value"></span>
+                            <span ng-if="::filter.displayname.value == ''" ng-bind-html="defaultDisplayname.empty"></span>
+                            <span ng-if="::filter.displayname.value == null" ng-bind-html="defaultDisplayname.null"></span>
+                        </span>
+                    </script>
                 </div>
             </div>
         </div>
 
         <!-- record table -->
-        <div ng-if="vm.hasLoaded">
+        <div  ng-if="vm.initialized">
             <h3 ng-if="!vm.config.hideTotalCount" id="rs-total-count">Displaying {{vm.rowValues.length}}{{vm.totalRowsCnt ? " of " + (vm.totalRowsCnt > vm.rowValues.length ? vm.totalRowsCnt : vm.rowValues.length) : ''}} Records</h3>
         </div>
-        <div ng-if="vm.hasLoaded">
+        <div  ng-if="vm.initialized">
             <record-table id="rs-{{vm.makeSafeIdAttr(vm.tableDisplayName.value)}}" vm="vm" on-row-click-bind="onRowClick"></record-table>
         </div>
 
         <!-- bottom pagination -->
-        <div class="pager" ng-show="vm.initialized && vm.hasLoaded">
+        <div class="pager"  ng-if="vm.initialized">
             <button id="rs-previous-btn" type="button" class="btn btn-primary btn-xs btn-inverted" ng-click="before()" ng-disabled="!vm.hasLoaded || !vm.page.hasPrevious">
                 <span class="glyphicon glyphicon-chevron-left"></span>
             </button>

@@ -35,11 +35,6 @@
         </div>
     </div>
     <div id="main-content" class="container-fluid" style="padding-bottom: 20px;" ng-style="{ 'overflow-y': !showFaceting ? 'auto' : ''}">
-        <div ng-if="!showFaceting">
-            <recordset vm="vm" allow-create="false"></recordset>
-        </div>
-        <div ng-if="showFaceting">
-            <recordset-with-faceting vm="vm" allow-create="false"></recordset-with-faceting>
-        </div>
+        <recordset vm="vm" allow-create="false"></recordset>
     </div>
 </div>

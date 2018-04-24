@@ -76,7 +76,6 @@
 
         var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
 
-        $rootScope.showFaceting = chaiseConfig.showFaceting === true ? true : false; // for faceting in popups
         $rootScope.context = context;
 
         // will be used to determine the app mode (edit, create, or copy)
