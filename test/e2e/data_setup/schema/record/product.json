@@ -369,27 +369,27 @@
                     {"outbound": ["product-record", "fk_cover"]},
                     {"inbound": ["product-record", "fk_thumbnail_collection"]},
                     "id"
-                ]},
+                ], "comment": "collections"},
                 {"source": [
                     {"outbound": ["product-record", "fk_cover"]},
                     {"inbound": ["product-record", "fk_thumbnail_collection"]},
                     "id"
-                ], "aggregate": "cnt"},
+                ], "aggregate": "cnt", "comment": "Count of Id"},
                 {"source": [
                     {"outbound": ["product-record", "fk_cover"]},
                     {"inbound": ["product-record", "fk_thumbnail_collection"]},
                     "id"
-                ], "aggregate": "cnt_d"},
+                ], "aggregate": "cnt_d", "comment": "Count Distinct of Id"},
                 {"source": [
                     {"outbound": ["product-record", "fk_cover"]},
                     {"inbound": ["product-record", "fk_thumbnail_collection"]},
                     "title"
-                ], "aggregate": "min"},
+                ], "aggregate": "min", "comment": "Minimum of title"},
                 {"source": [
                     {"outbound": ["product-record", "fk_cover"]},
                     {"inbound": ["product-record", "fk_thumbnail_collection"]},
                     "title"
-                ], "aggregate": "max"},
+                ], "aggregate": "max", "comment": "maximum of title"},
                 "json_col","json_col_with_markdown"
             ]
         },
