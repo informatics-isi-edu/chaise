@@ -169,7 +169,7 @@ describe('Record Add', function() {
 
             beforeAll(function () {
                 browser.ignoreSynchronization=true;
-                browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/multi-add:" + testParams.table_name);
+                browser.refresh();
             });
 
             it("should show a resultset table with " + (testParams.max_input_rows+1) + " entities.", function() {
