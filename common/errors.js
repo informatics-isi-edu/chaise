@@ -150,7 +150,18 @@
             window.location.reload();
         };
 
-        function errorPopup(message, errorStatus, pageName, redirectLink, subMessage, stackTrace, errorCode, isDismissible, showLogin) {
+        /**
+         * exception    - the error that was thrown
+         * pageName     - the name of the page we will redirect to
+         * redirectLink - link that is used for redirect
+         * subMessage   - message displayed after the exception message
+         * stackTrace   - stack trace provided with error output
+         * isDismissible- if the error modal can be close
+         * showLogin    - if the login link should be shown
+         * message      - (optional) primary message displayed in modal (if defined, overwrites exception.message)
+         * errorStatus  - (optional) error "name" (if defined, overwrites exception.status)
+         */
+        function errorPopup(exception, pageName, redirectLink, subMessage, stackTrace, isDismissible, showLogin, message, errorStatus) {
             var appName = UriUtils.appNamefromUrlPathname($window.location.pathname),
                 session = Session.getSessionValue(),
                 providedLink = true;
@@ -175,12 +186,13 @@
 
             var params = {
                 appName: appName,
-                canClose: false,
-                errorStatus: errorStatus,
-                message: message,
                 pageName: pageName,
-                showLogin: showLogin,
-                subMessage: subMessage
+                exception: exception,
+                errorStatus: errorStatus ? errorStatus : exception.status,
+                message: message ? message : exception.message,
+                subMessage: subMessage,
+                canClose: false,
+                showLogin: showLogin
             };
 
             var modalProperties = {
@@ -223,15 +235,12 @@
             $log.info(exception);
 
             // arguments for `errorPopup()` in order for method declaration
-            var message = exception.message,
-                errorStatus = exception.status,
-                pageName = "Home Page",
+            var pageName = "Home Page",
                 redirectLink = chaiseConfig.dataBrowser,
                 subMessage = (exception.subMessage ? exception.subMessage : undefined),
                 stackTrace = ( (exception.errorData && exception.errorData.stack) ? exception.errorData.stack : undefined),
-                errorCode = exception.code,
-                isDismissible = isDismissible,
-                showLogin = false;
+                showLogin = false,
+                message, errorStatus;
 
             $rootScope.error = true;    // used to hide spinner in conjunction with a css property
 
@@ -261,7 +270,7 @@
                 subMessage = exception.message;
             }
 
-            errorPopup(message, errorStatus, pageName, redirectLink, subMessage, stackTrace, errorCode, isDismissible, showLogin);
+            errorPopup(exception, pageName, redirectLink, subMessage, stackTrace, isDismissible, showLogin, message, errorStatus);
 
             // if not a dismissible errror then exception should be suppressed
             if (!isDismissible) exceptionFlag = true;

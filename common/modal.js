@@ -37,31 +37,38 @@
             $uibModalInstance.dismiss('cancel');
         }
     }])
-    .controller('ErrorModalController', ['$uibModalInstance', 'params', 'messageMap', '$window', 'Session', function ErrorModalController($uibModalInstance, params, messageMap, $window, Session) {
+    .controller('ErrorModalController', ['Errors', 'messageMap', 'params', 'Session', '$uibModalInstance', '$window', function ErrorModalController(Errors, messageMap, params, Session, $uibModalInstance, $window) {
         var vm = this;
         vm.params = params;
         vm.displayDetails = false;
-        vm.linkText = messageMap.showErrDetails;
         vm.showReloadBtn = false;
-        var reloadMessage = ' <p>  </p>';
+        vm.linkText = messageMap.showErrDetails;
 
-        if (vm.params.errorStatus == 'Multiple Records Found') {
+        function isErmrestErrorNeedReplace (error) {
+            switch (error.constructor) {
+                case ERMrest.InvalidFacetOperatorError:
+                case ERMrest.InvalidPageCriteria:
+                case ERMrest.InvalidSortCriteria:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        var exception = params.exception,
+            reloadMessage = ' <p>  </p>';
+
+        if (exception instanceof Errors.multipleRecordError) {
             vm.clickActionMessage =  messageMap.recordAvailabilityError.multipleRecords;
-        } else if (vm.params.errorStatus == 'Record Not Found') {
+        } else if (exception instanceof Errors.noRecordError) {
             vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
 
             // if no user logged in, change message
-            if (params && params.showLogin) {
-                params.message = messageMap.noRecordForFilter + '<br>' + messageMap.maybeUnauthorizedMessage;
-            }
-        } else if (Object.values(messageMap.facetRelatedErrorStatus).indexOf(vm.params.errorStatus) > -1) {
-            // Check if error prompted was found in the facetRelatedErrorStatus object and use it to
-            // generate error phrase for action message
-            if (vm.params.errorStatus == messageMap.facetRelatedErrorStatus.invalidFilter) {
-                vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
-            } else {
-                vm.clickActionMessage = messageMap.facetRelatedErrorStatus.clickActionMessage.replace('@errorStatus', vm.params.errorStatus);
-            }
+            if (vm.params.showLogin) vm.params.message = messageMap.noRecordForFilter + '<br>' + messageMap.maybeUnauthorizedMessage;
+        } else if (ERMrest && exception instanceof ERMrest.InvalidFilterOperatorError) {
+            vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
+        } else if (ERMrest && isErmrestErrorNeedReplace(exception)) {
+            vm.clickActionMessage = messageMap.actionMessageWReplace.clickActionMessage.replace('@errorStatus', vm.params.errorStatus);
         } else {
             vm.clickActionMessage = messageMap.recordAvailabilityError.pageRedirect + vm.params.pageName + '. ';
             if (vm.params.appName == 'recordedit'){
