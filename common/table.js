@@ -704,7 +704,6 @@
         return {
             initialize: initialize,
             update: update,
-            updatePage: updatePage,
             registerTableCallbacks: registerTableCallbacks,
             registerRecordsetCallbacks: registerRecordsetCallbacks
         };

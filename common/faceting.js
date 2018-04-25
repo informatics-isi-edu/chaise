@@ -52,12 +52,12 @@
                         var fm = $scope.vm.facetModels[index];
                         fm.processed = false;
                         fm.isLoading = true;
-                        recordTableUtils.updatePage($scope.vm);
+                        recordTableUtils.update($scope.vm);
                     };
 
                     ctrl.focusOnFacet = function (index) {
                         $scope.focusOnFacet(index);
-                    }
+                    };
                 }],
                 require: 'faceting',
                 link: function (scope, element, attr, currentCtrl) {

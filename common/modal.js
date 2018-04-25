@@ -127,8 +127,8 @@
      *  - selectMode {String} - the select mode the modal uses
      */
     .controller('SearchPopupController',
-                ['$scope', '$rootScope', '$uibModalInstance', 'DataUtils', 'params', 'Session', 'modalBox', 'logActions', '$timeout', 'recordTableUtils',
-                function SearchPopupController($scope, $rootScope, $uibModalInstance, DataUtils, params, Session, modalBox, logActions, $timeout, recordTableUtils) {
+                ['$scope', '$rootScope', '$uibModalInstance', 'DataUtils', 'params', 'Session', 'modalBox', 'logActions', '$timeout',
+                function SearchPopupController($scope, $rootScope, $uibModalInstance, DataUtils, params, Session, modalBox, logActions, $timeout) {
         var vm = this;
 
         vm.params = params;
@@ -162,19 +162,12 @@
             context:            params.context
         };
 
-        if (params.getDisabledTuples) {
-            vm.getDisabledTuples = vm.tableModel.getDisabledTuples = params.getDisabledTuples;
-        } else {
-            vm.getDisabledTuples = undefined;
-        }
-
         $timeout(function() {
             vm.tableModel.readyToInitialize = true;
         });
 
         // since this is currently used for single select mode, the isSelected will always be true
         function ok(tuples, isSelected) {
-            vm.tableModel.readyToInitialize = false;
             if (params.selectMode != modalBox.multiSelectMode) $uibModalInstance.close(tuples[0]);
         }
 
@@ -183,7 +176,6 @@
          * If we had the matchNotNull, then we just need to pass that attribute.
          */
         function submitMultiSelection() {
-            vm.tableModel.readyToInitialize = false;
             var res = vm.tableModel.selectedRows;
             if (!Array.isArray(res)) res = [];
             if (vm.tableModel.matchNotNull) {
@@ -193,7 +185,6 @@
         }
 
         function cancel() {
-            vm.tableModel.readyToInitialize = false;
             $uibModalInstance.dismiss("cancel");
         }
     }])
