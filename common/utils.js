@@ -63,12 +63,7 @@
           "okBtnMessage": "Click <b>OK</b> to go to the Recordset.",
           "reloadMessage": "Click <b>Reload</b> to start over."
         },
-        "facetRelatedErrorStatus" : {
-          invalidFilter : "Invalid Filter",
-          facetingError: "Invalid Facet Filters",
-          invalidFacetSorting : "Invalid Facet Sorting",
-          invalidPageCriteria : "Invalid Page Criteria",
-          InvalidSortCriteria : "Invalid Sort Criteria",
+        "actionMessageWReplace" : {
           clickActionMessage: "Click <b>OK</b> to reload this page without @errorStatus."
         },
         "tableMissing": "No table specified in the form of 'schema-name:table-name' and no Default is set.",

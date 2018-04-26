@@ -349,11 +349,7 @@
 
                             if (DataUtils.isObjectAndKeyDefined(response.errorData, 'redirectPath')) {
                                 var redirectLink = UriUtils.createRedirectLinkFromPath(response.errorData.redirectPath);
-                                if(response.status == messageMap.facetRelatedErrorStatus.invalidFilter){
-                                    response.errorData.redirectUrl = redirectLink.replace('recordedit', 'recordset');
-                                } else{
-                                    response.errorData.redirectUrl = redirectLink;
-                                }
+                                response.errorData.redirectUrl = response instanceof ERMrest.InvalidFilterOperatorError ? redirectLink.replace('recordedit', 'recordset') : redirectLink;
                             }
                             throw response;
                         });
@@ -440,11 +436,7 @@
             }, function error(response) {
                 if (DataUtils.isObjectAndKeyDefined(response.errorData, 'redirectPath')) {
                     var redirectLink = UriUtils.createRedirectLinkFromPath(response.errorData.redirectPath);
-                    if(response.status == messageMap.facetRelatedErrorStatus.invalidFilter){
-                        response.errorData.redirectUrl = redirectLink.replace('recordedit', 'recordset');
-                    }else{
-                        response.errorData.redirectUrl = redirectLink;
-                    }
+                    response.errorData.redirectUrl = response instanceof ERMrest.InvalidFilterOperatorError ? redirectLink.replace('recordedit', 'recordset') : redirectLink;
                 }
                 throw response;
             });
