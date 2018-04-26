@@ -124,8 +124,21 @@
         function updateCount (vm) {
             var  defer = $q.defer();
             (function (uri) {
+                var aggList, hasError;
+                try {
+                    // if the table doesn't have any simple key, this might throw error
+                    aggList = [vm.reference.aggregate.countAgg];
+                } catch (exp) {
+                    hasError = true;
+                }
+                if (hasError) {
+                    vm.totalRowsCnt = null;
+                    defer.resolve(true);
+                    return defer.promise;
+                }
+
                 vm.reference.getAggregates(
-                    [vm.reference.aggregate.countAgg],
+                    aggList,
                     {action: logActions.recordsetCount}
                 ).then(function getAggregateCount(response) {
                     if (vm.reference.uri !== uri) {
@@ -310,6 +323,8 @@
         }
 
         function registerTableCallbacks(scope) {
+            if (!scope.vm) scope.vm = {};
+
             scope.vm.dirtyResult = false;
             scope.vm.occupiedSlots = 0;
 

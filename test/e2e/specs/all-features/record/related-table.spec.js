@@ -133,7 +133,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         isAssociation: true,
         viewMore: {
             displayname: "related_table",
-            filter: "base table association related: Super 8 North Hollywood Motel"
+            filter: "base table association related : Super 8 North Hollywood Motel"
         },
         rowValues: [
             [{url: "product-unordered-related-tables-links:related_table/id=1", caption: "1"}, "Television"]
