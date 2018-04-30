@@ -133,7 +133,9 @@
      *  - context {String} - the current context that the directive fetches data for
      *  - selectMode {String} - the select mode the modal uses
      */
-    .controller('SearchPopupController', ['$scope', '$rootScope', '$uibModalInstance', 'DataUtils', 'params', 'Session', 'modalBox', 'logActions', '$timeout', function SearchPopupController($scope, $rootScope, $uibModalInstance, DataUtils, params, Session, modalBox, logActions, $timeout) {
+    .controller('SearchPopupController',
+                ['$scope', '$rootScope', '$uibModalInstance', 'DataUtils', 'params', 'Session', 'modalBox', 'logActions', '$timeout',
+                function SearchPopupController($scope, $rootScope, $uibModalInstance, DataUtils, params, Session, modalBox, logActions, $timeout) {
         var vm = this;
 
         vm.params = params;
@@ -146,8 +148,10 @@
         var reference = vm.reference = params.reference;
         var limit = (!angular.isUndefined(reference) && !angular.isUndefined(reference.display) && reference.display.defaultPageSize) ? reference.display.defaultPageSize : 25;
         var comment = (typeof params.comment === "string") ? params.comment: reference.table.comment;
+        var showFaceting = chaiseConfig.showFaceting ? params.showFaceting : false;
 
         vm.tableModel = {
+            readyToInitialize:  true,
             hasLoaded:          false,
             reference:          reference,
             tableDisplayName:   params.displayname ? params.displayname : reference.displayname,
@@ -162,54 +166,10 @@
             selectedRows:       params.selectedRows,
             matchNotNull:       params.matchNotNull,
             search:             reference.location.searchTerm,
-            config:             {viewable: false, editable: false, deletable: false, selectMode: params.selectMode, showFaceting: params.faceting, facetPanelOpen: params.facetPanelOpen, showNull: params.showNull === true},
-            context:            params.context
+            config:             {viewable: false, editable: false, deletable: false, selectMode: params.selectMode, showFaceting: showFaceting, facetPanelOpen: params.facetPanelOpen, showNull: params.showNull === true},
+            context:            params.context,
+            getDisabledTuples:  params.getDisabledTuples
         };
-
-        if (params.getDisabledTuples) {
-            vm.getDisabledTuples = vm.tableModel.getDisabledTuples = params.getDisabledTuples;
-        } else {
-            vm.getDisabledTuples = undefined;
-        }
-
-        var fetchRecords = function() {
-            // TODO this should not be a hardcoded value, either need a pageInfo object across apps or part of user settings
-            // The new recordset (recordsetWithFaceting) doesn't require read first. It will take care of this.
-            var logObject = params.logObject ? params.logObject : {action: logActions.recordsetLoad};
-            if (params.faceting) {
-                $rootScope.pageLoaded = true;
-            } else {
-                reference.read(limit, logObject).then(function getPseudoData(page) {
-                    var afterRead = function () {
-                        vm.tableModel.hasLoaded = true;
-                        vm.tableModel.initialized = true;
-                        vm.tableModel.page = page;
-                        vm.tableModel.rowValues = DataUtils.getRowValuesFromPage(page);
-                        $scope.$broadcast('data-modified');
-                    };
-
-                    // get disabled tuple.
-                    if (vm.getDisabledTuples) {
-                        vm.getDisabledTuples(page, vm.tableModel.pageLimit).then(function (rows) {
-                            vm.tableModel.disabledRows = rows;
-                            afterRead();
-                        }).catch(function (err) {
-                            throw err;
-                        });
-                    } else {
-                        afterRead();
-                    }
-
-                }).catch(function(exception) {
-                    throw exception;
-                });
-            }
-        };
-
-        // make sure to fetch the records after having the recordset directive
-        $timeout(function() {
-            fetchRecords();
-        });
 
         // since this is currently used for single select mode, the isSelected will always be true
         function ok(tuples, isSelected) {

@@ -34,7 +34,7 @@
                         };
 
                         if (ctrl.facetingCount === $scope.vm.reference.facetColumns.length) {
-                            $rootScope.facetsLoaded = true;
+                            $scope.$emit("facetsLoaded");
                         }
                     };
 
@@ -52,12 +52,12 @@
                         var fm = $scope.vm.facetModels[index];
                         fm.processed = false;
                         fm.isLoading = true;
-                        recordTableUtils.updatePage($scope.vm);
+                        recordTableUtils.update($scope.vm);
                     };
 
                     ctrl.focusOnFacet = function (index) {
                         $scope.focusOnFacet(index);
-                    }
+                    };
                 }],
                 require: 'faceting',
                 link: function (scope, element, attr, currentCtrl) {
@@ -112,7 +112,7 @@
                     };
 
                     scope.togglePanel = function () {
-                        scope.$root.facetPanelOpen = !scope.$root.facetPanelOpen;
+                        scope.vm.config.facetPanelOpen = !scope.vm.config.facetPanelOpen;
                     };
 
                     /**
@@ -187,7 +187,8 @@
                 scope: {
                     facetColumn: "=",
                     facetModel: "=",
-                    index: "="
+                    index: "=",
+                    facetPanelOpen: "="
                 },
                 controller: ['$scope', function ($scope) {
                     var ctrl = this;
@@ -902,7 +903,8 @@
                 scope: {
                     facetColumn: "=",
                     facetModel: "=",
-                    index: "="
+                    index: "=",
+                    facetPanelOpen: "="
                 },
                 controller: ['$scope', function ($scope) {
                     var ctrl = this;
@@ -1149,7 +1151,7 @@
                     };
 
                     scope.$watch(function () {
-                        return scope.facetModel.isOpen && scope.facetModel.initialized && scope.$root.facetPanelOpen;
+                        return scope.facetModel.isOpen && scope.facetModel.initialized && scope.facetPanelOpen;
                     }, function (newVal, oldVal) {
                         var findMoreHeight = 25;
                         if (newVal) {

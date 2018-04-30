@@ -504,14 +504,16 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
                         return chaisePage.waitForElement(element(by.id("divRecordSet")));
                     }).then(function() {
                         expect(chaisePage.recordsetPage.getPageTitleElement().getText()).toBe(params.viewMore.displayname, "title missmatch.");
-                        expect(chaisePage.recordsetPage.getFilterString().getText()).toBe(params.viewMore.filter, "filter missmatch.");
+                        expect(chaisePage.recordsetPage.getFacetFilters().isPresent()).toBe(true, "filter was not present");
+                        expect(chaisePage.recordsetPage.getFacetFilters().first().getText()).toEqual(params.viewMore.filter, "filter missmatch.");
 						browser.navigate().back();
 						pageReadyCondition();
 						done();
 
 					}).catch(function (err) {
-						console.log(err);
-						done.fail();
+                        browser.navigate().back();
+						pageReadyCondition();
+						done.fail(err);
 					})
 				});
 			}

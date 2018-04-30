@@ -88,124 +88,6 @@
             ['AlertsService', 'modalBox', 'DataUtils', '$timeout','Session', '$q', 'tableConstants', '$rootScope', '$log', '$window', '$cookies', 'defaultDisplayname', 'MathUtils', 'UriUtils', 'logActions',
             function(AlertsService, modalBox, DataUtils, $timeout, Session, $q, tableConstants, $rootScope, $log, $window, $cookies, defaultDisplayname, MathUtils, UriUtils, logActions) {
 
-        // This method sets backgroundSearch states depending upon various parameters
-        // If it returns true then we should render the data
-        // else we should reject the data
-        function setSearchStates(scope, isBackground, searchTerm) {
-            // If request is background
-            if (isBackground) {
-                // If there is a term in backgroundSearchPendingTerm for background and there is no foreground search going on then
-                // Fire the request for the term in the backgroundSearchPendingTerm and return false
-                // Else empty the backgroundSearchPendingTerm and set backgroundSearch false
-                if (scope.vm.backgroundSearchPendingTerm && !scope.vm.foregroundSearch) {
-                    scope.vm.search = scope.vm.backgroundSearchPendingTerm
-                    scope.vm.backgroundSearchPendingTerm = null;
-                    scope.vm.logObject = {action: logActions.recordsetFacet};
-                    read(scope, true);
-                    return false;
-                } else {
-                    scope.vm.backgroundSearch = false;
-                    scope.vm.backgroundSearchPendingTerm = null;
-
-                    // If forground search is going on or the searchterm differs from the current searchterm
-                    // then return false
-                    if (scope.vm.foregroundSearch || (searchTerm != scope.vm.search)) return false;
-                }
-            }
-
-            return true;
-        }
-
-        /*
-            This function performs a reference.read operation on search and pagination
-            It accepts 2 parameters: viz: scope and isBackground
-            The isbackground is true if the search was triggered because of a delayed search called backgroundSearch
-            It is false for other scenarios.
-
-            It uses 3 variables to determine the flow of search and perform operations
-
-            - If this is a foreground search, it is fired instantly depending on the variable vm.foregroundSearch and results are rendered once returned.
-              It also sets vm.backgroundSearch to false and empties backgroundSearchPendingTerm, to cancel any backgroundSearch.
-            - If this is a background search and there is already a foreground search in progress which can be determined from vm.foregroundSearch,
-              we cancel this search and empty the backgroundSearchPendingTerm.
-            - If this is a background search, and there is already a background search in progress, this method will never be called,
-              as we have the restriction of having only one background search running at a time
-            - If the background search is completed successfully, and if the vm.foregroundSearch flag is true, then we reject background search results
-              and empty the backgroundSearchPendingTerm
-            - If the background search is completed successfully, and if the vm.foregroundSearch flag is false, and the backgroundSearchpendingTerm is
-              not empty then we reject these results and fire a search for that term
-            - If the background search is completed successfully, and if the vm.foregroundSearch flag is false, and the backgroundSearchpendingTerm is
-              not empty then we render the background search results and empty the backgroundSearchPendingTerm
-        */
-        function read(scope, isBackground, broadcast) {
-
-            if (scope.vm.search == '') scope.vm.search = null;
-            var searchTerm = scope.vm.search;
-
-            scope.vm.hasLoaded = false;
-
-            // If isbackground and no foregroundsearch going on then only fire the search request
-            // Else empty the backgroundSearchPendingTerm
-            if (isBackground) {
-                if (!scope.vm.foregroundSearch) {
-                    scope.vm.backgroundSearch = true;
-                    scope.vm.totalRowsCnt = null;
-                } else {
-                    scope.vm.backgroundSearchPendingTerm = null;
-                    scope.vm.backgroundSearch = false;
-                    return;
-                }
-            } else {
-                scope.vm.backgroundSearchPendingTerm = null;
-            }
-
-            scope.vm.reference.read(scope.vm.pageLimit, scope.vm.logObject).then(function (page) {
-                if (!setSearchStates(scope, isBackground, searchTerm)) return;
-
-                var afterRead = function () {
-                    scope.vm.page = page;
-
-                    scope.vm.rowValues = DataUtils.getRowValuesFromPage(page);
-                    scope.vm.hasLoaded = true;
-
-                    $timeout(function() {
-                        if (scope.vm.foregroundSearch) scope.vm.foregroundSearch = false;
-                    }, 200);
-
-                    if (!isBackground) {
-                        // tell parent controller data modified
-                        scope.$emit('reference-modified');
-                    }
-
-                    // tell children that data modified
-                    if (broadcast) {
-                        scope.$broadcast('data-modified');
-                    }
-                };
-
-                if (scope.getDisabledTuples) {
-                    scope.getDisabledTuples(page, scope.vm.pageLimit).then(function (rows) {
-                        if (!setSearchStates(scope, isBackground, searchTerm)) return;
-                        scope.vm.disabledRows = rows;
-                        afterRead();
-                    }).catch(function (err) {
-                        throw err;
-                    });
-                } else {
-                    afterRead();
-                }
-
-            }).catch(function error(exception) {
-                scope.vm.hasLoaded = true;
-                setSearchStates(scope, isBackground);
-                if (!isBackground && scope.vm.foregroundSearch) scope.vm.foregroundSearch = false;
-                if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'redirectPath')) {
-                  exception.errorData.redirectUrl = UriUtils.createRedirectLinkFromPath(exception.errorData.redirectPath);
-                }
-                throw exception;
-            });
-        }
-
         function updateResult (vm) {
             vm.hasLoaded = false;
             var defer = $q.defer();
@@ -242,8 +124,21 @@
         function updateCount (vm) {
             var  defer = $q.defer();
             (function (uri) {
+                var aggList, hasError;
+                try {
+                    // if the table doesn't have any simple key, this might throw error
+                    aggList = [vm.reference.aggregate.countAgg];
+                } catch (exp) {
+                    hasError = true;
+                }
+                if (hasError) {
+                    vm.totalRowsCnt = null;
+                    defer.resolve(true);
+                    return defer.promise;
+                }
+
                 vm.reference.getAggregates(
-                    [vm.reference.aggregate.countAgg],
+                    aggList,
                     {action: logActions.recordsetCount}
                 ).then(function getAggregateCount(response) {
                     if (vm.reference.uri !== uri) {
@@ -354,51 +249,53 @@
             }
 
             // update the facets
-            if (vm.facetsToInitialize.length === 0) {
-                vm.facetModels.forEach(function (fm, index) {
-                    if (fm.processed || !haveFreeSlot()) {
-                        return;
-                    }
+            if (vm.facetModels) {
+                if (vm.facetsToInitialize.length === 0) {
+                    vm.facetModels.forEach(function (fm, index) {
+                        if (fm.processed || !haveFreeSlot()) {
+                            return;
+                        }
 
+                        vm.occupiedSlots++;
+                        fm.processed = true;
+
+                        var afterFacetUpdate = function (i, res, hasError) {
+                            vm.occupiedSlots--;
+                            var currFm = vm.facetModels[i];
+                            currFm.initialized = res || currFm.initialized;
+                            currFm.isLoading = !res;
+                            currFm.processed = res || currFm.processed;
+
+                            $log.debug("after facet (index="+i+") update: " + (res ? "successful." : "unsuccessful."));
+                        };
+
+                        (function (i) {
+                            $log.debug("updating facet (index="+i+")");
+                            vm.facetModels[i].updateFacet().then(function (res) {
+                                afterFacetUpdate(i, res);
+                                updatePage(vm);
+                            }).catch(function (err) {
+                                afterFacetUpdate(i, false);
+                                throw err;
+                            });
+                        })(index);
+                    });
+                }
+                // initialize facets
+                else if (haveFreeSlot()){
                     vm.occupiedSlots++;
-                    fm.processed = true;
-
-                    var afterFacetUpdate = function (i, res, hasError) {
-                        vm.occupiedSlots--;
-                        var currFm = vm.facetModels[i];
-                        currFm.initialized = res || currFm.initialized;
-                        currFm.isLoading = !res;
-                        currFm.processed = res || currFm.processed;
-
-                        $log.debug("after facet (index="+i+") update: " + (res ? "successful." : "unsuccessful."));
-                    };
-
+                    var index = vm.facetsToInitialize.shift();
                     (function (i) {
-                        $log.debug("updating facet (index="+i+")");
-                        vm.facetModels[i].updateFacet().then(function (res) {
-                            afterFacetUpdate(i, res);
+                        $log.debug("initializing facet (index="+index+")");
+                        vm.facetModels[i].initializeFacet().then(function (res) {
+                            $log.debug("after facet (index="+ i +") initialize: " + (res ? "successful." : "unsuccessful."));
+                            vm.occupiedSlots--;
                             updatePage(vm);
                         }).catch(function (err) {
-                            afterFacetUpdate(i, false);
                             throw err;
                         });
                     })(index);
-                });
-            }
-            // initialize facets
-            else if (haveFreeSlot()){
-                vm.occupiedSlots++;
-                var index = vm.facetsToInitialize.shift();
-                (function (i) {
-                    $log.debug("initializing facet (index="+index+")");
-                    vm.facetModels[i].initializeFacet().then(function (res) {
-                        $log.debug("after facet (index="+ i +") initialize: " + (res ? "successful." : "unsuccessful."));
-                        vm.occupiedSlots--;
-                        updatePage(vm);
-                    }).catch(function (err) {
-                        throw err;
-                    });
-                })(index);
+                }
             }
 
             // update the count
@@ -426,13 +323,18 @@
         }
 
         function registerTableCallbacks(scope) {
+            if (!scope.vm) scope.vm = {};
+
+            scope.vm.dirtyResult = false;
+            scope.vm.occupiedSlots = 0;
+
             var callOnRowClick = function (scope, tuples, isSelected) {
                 if (scope.onRowClickBind) {
                     scope.onRowClickBind()(tuples, isSelected);
                 } else if (scope.onRowClick) {
                     scope.onRowClick()(tuples, isSelected);
                 }
-            }
+            };
 
             scope.noSelect = modalBox.noSelect;
             scope.singleSelect = modalBox.singleSelectMode;
@@ -464,11 +366,7 @@
                         sort: ref.location.sortObject
                     };
 
-                    if (scope.vm.showFaceting === true) {
-                        update(scope.vm, true, false, false);
-                    } else {
-                        read(scope);
-                    }
+                    update(scope.vm, true, false, false);
                 }
             };
 
@@ -483,19 +381,19 @@
             };
 
             scope.isDisabled = function (tuple) {
-                if (tuple) {
-                    if (!scope.vm.disabledRows || scope.vm.disabledRows.length == 0) {
-                        return false;
-                    }
-
-                    return scope.vm.disabledRows.findIndex(function (obj) {
-                        return obj.uniqueId == tuple.uniqueId;
-                    }) > -1;
+                if (!tuple) return false;
+                if (!scope.vm.disabledRows || scope.vm.disabledRows.length == 0) {
+                    return false;
                 }
+
+                return scope.vm.disabledRows.findIndex(function (obj) {
+                    return obj.uniqueId == tuple.uniqueId;
+                }) > -1;
             };
 
             // verifies whether or not the current key value is in the set of selected rows or not
             scope.isSelected = function (tuple) {
+                if (!tuple) return false;
                 var index = scope.vm.selectedRows.findIndex(function (obj) {
                     return obj.uniqueId == tuple.uniqueId;
                 });
@@ -570,69 +468,74 @@
                 } else {
                     scope.vm.logObject = {action: logActions.recordsetUpdate};
                 }
-                read(scope);
+                update(scope.vm, true, false, false);
             });
         }
 
         function registerRecordsetCallbacks(scope) {
-            scope.defaultDisplayname = defaultDisplayname;
+            if (!scope.vm) scope.vm = {};
 
             var addRecordRequests = {}; // table refresh used by add record implementation with cookie (old method)
             var updated = false; // table refresh used by ellipses' edit action (new method)
 
             scope.pageLimits = [10, 25, 50, 75, 100, 200];
+            scope.$root.alerts = AlertsService.alerts;
+            scope.$root.showSpinner = false; // this property is set from common modules for controlling the spinner at a global level that is out of the scope of the app
             scope.vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
-            scope.vm.backgroundSearchPendingTerm = null;
-            scope.vm.currentPageSelected = false;
-            scope.$root.showSpinner = false; // this property is set from common modules for controlling the spinner at a global level that is out of the scope of the app
-            //TODO this is forced here
-            scope.vm.showFaceting = false;
+            scope.defaultDisplayname = defaultDisplayname;
 
-            scope.unfiltered = function () {
-                scope.vm.reference = scope.vm.reference.unfilteredReference.contextualize.compact;
-                scope.vm.filterString = null;
-                scope.vm.logObject = {action: logActions.recordsetFacet};
-                read(scope, false, true);
-            };
+            scope.vm.isIdle = true;
+            scope.vm.facetModels = [];
+            scope.vm.dirtyResult = false;
+            scope.vm.occupiedSlots = 0;
+            scope.vm.facetsToInitialize = [];
 
             scope.setPageLimit = function(limit) {
                 scope.vm.pageLimit = limit;
+
                 scope.vm.logObject = {action: logActions.recordsetLimit};
-                read(scope);
+                update(scope.vm, true, false, false);
             };
 
             scope.before = function() {
                 var previous = scope.vm.page.previous;
-                if (previous) {
+                if (previous && scope.$root.checkReferenceURL(previous)) {
                     scope.vm.reference = previous;
+                    $log.debug('going to previous page. updating..');
+
                     scope.vm.logObject = {
                         action: logActions.recordsetPage,
                         sort: previous.location.sortObject,
                         page: previous.location.beforeObject,
                         type: "before"
                     };
-                    read(scope);
-
+                    update(scope.vm, true, false, false);
                 }
             };
 
             scope.after = function() {
                 var next = scope.vm.page.next;
-                if (next) {
+                if (next && scope.$root.checkReferenceURL(next)) {
                     scope.vm.reference = next;
+                    $log.debug('going to next page. updating..');
+
                     scope.vm.logObject = {
                         action: logActions.recordsetPage,
                         sort: next.location.sortObject,
                         page: next.location.afterObject,
                         type: "after"
                     };
-                    read(scope);
+                    update(scope.vm, true, false, false);
                 }
 
             };
 
-            var inputChangedPromise;
+            scope.focusOnSearchInput = function () {
+                angular.element("#search-input.main-search-input").focus();
+            };
+
+            scope.inputChangedPromise = undefined;
 
             /*
                 The search fires at most one active "background"
@@ -645,55 +548,37 @@
                 if (scope.vm.enableAutoSearch) {
 
                     // Cancel previous promise for background search that was queued to be called
-
-                    if (inputChangedPromise) {
-                        $timeout.cancel(inputChangedPromise);
+                    if (scope.inputChangedPromise) {
+                        $timeout.cancel(scope.inputChangedPromise);
                     }
 
                     // Wait for the user to stop typing for a second and then fire the search
-                    inputChangedPromise = $timeout(function() {
-                        inputChangedPromise = null;
-
-                        // If there is no foregound search going currently
-                        if (!scope.vm.foregroundSearch) {
-                            // If there is a background search going on currently then
-                            // set the search term in the backgroundSearchPendingTerm
-                            // else fire the search and empty the backgroundSearchPendingTerm
-                            if (scope.vm.backgroundSearch) {
-                                scope.vm.backgroundSearchPendingTerm = scope.vm.search
-                            } else {
-                                scope.search(scope.vm.search, true);
-                                scope.vm.backgroundSearchPendingTerm = null;
-                            }
-                        }
+                    scope.inputChangedPromise = $timeout(function() {
+                        scope.inputChangedPromise = null;
+                        scope.search(scope.vm.search);
                     }, tableConstants.AUTO_SEARCH_TIMEOUT);
                 }
             };
 
             scope.enterPressed = function() {
-                /* If user has pressed enter then foreground search starts,
-                the input is supposed to be frozen w/ a spinner to show that it is busy doing what the user
-                asked for. Any existing background search result completing during that time is to be discarded
-                to avoid confusing the UX.
-                */
-                $timeout.cancel(inputChangedPromise);
-
-                // Set the foregroundSearch to true and empty the backgroundSearchPendingTerm
-                scope.vm.foregroundSearch = true;
-                scope.vm.backgroundSearchPendingTerm = null;
-
+                scope.inputChangedPromise = null;
                 // Trigger search
                 scope.search(scope.vm.search);
             };
 
-            scope.search = function(term, isBackground) {
+            scope.search = function(term) {
 
                 if (term) term = term.trim();
 
-                scope.vm.search = term;
-                scope.vm.reference = scope.vm.reference.search(term); // this will clear previous search first
-                scope.vm.logObject = {action: logActions.recordsetFacet};
-                read(scope, isBackground, true);
+                var ref = scope.vm.reference.search(term); // this will clear previous search first
+                 if (scope.$root.checkReferenceURL(ref)) {
+                     scope.vm.search = term;
+                     scope.vm.reference = ref;
+                     scope.vm.lastActiveFacet = -1;
+                     scope.vm.logObject = {action: logActions.recordsetFacet};
+                     $log.debug("search changed to `" + term + "`. updating..");
+                     update(scope.vm, true, true, true);
+                 }
             };
 
             scope.clearSearch = function() {
@@ -750,13 +635,15 @@
 
                 // read
                 if (completed > 0 || updated) {
+                    $log.debug("fouced on page after change, updating...");
                     updated = false;
+                    scope.vm.lastActiveFacet = -1;
                     if (scope.parentReference) {
                         scope.vm.logObject = {action: logActions.recordRelatedUpdate};
                     } else {
                         scope.vm.logObject = {action: logActions.recordsetUpdate};
                     }
-                    read(scope);
+                    update(scope.vm, true, true, true);
                 }
 
             };
@@ -767,49 +654,86 @@
                 updated = true;
             };
 
-            scope.$on('data-modified', function($event) {
-                console.log('data-modified in recordset directive, getting count');
-                if (!scope.vm.config.hideTotalCount && scope.vm.search == scope.vm.reference.location.searchTerm) {
-                    // get the total row count to display above the table
-                    console.log("Data-updated: ", scope.vm);
-                    scope.vm.reference.getAggregates(
-                        [scope.vm.reference.aggregate.countAgg],
-                        {action: logActions.recordsetCount}
-                    ).then(function (response) {
-                        // NOTE: scenario: A user triggered a foreground search. Once it returns the aggregate count request is queued.
-                        // While that request is running, the user triggers another foreground search.
-                        // How do we avoid one aggregate count query to not show when it isn't relevant to the displayed data?
-                        // Maybe comparing reference.location.searchTerm and vm.search here instead and if they don't match,
-                        // set the value to null so the count displayed is just the count of the shown rows until the latter
-                        // aggregate count request returns. If the latter one never returns (because of a server error or something),
-                        // at least the UI doesn't show any misleading information.
-                        scope.vm.totalRowsCnt = response[0];
-                    }, function error(response) {
-                        //fail silently
-                        scope.vm.totalRowsCn = null;
-                    });
-                }
+            scope.$on('facet-modified', function ($event) {
+                $log.debug("-----------------------------");
+                $log.debug('facet-modified in recordset directive');
+                scope.vm.logObject = {action: logActions.recordsetFacet};
+                update(scope.vm, true, true, true);
             });
 
-            // row data has been modified (from ellipses)
-            // do a read
-            scope.$on('record-modified', function($event) {
-                console.log('record-modified in recordset directive');
-                if (scope.parentReference) {
-                    scope.vm.logObject = {action: logActions.recordRelatedUpdate};
-                } else {
-                    scope.vm.logObject = {action: logActions.recordsetUpdate};
-                }
-                read(scope, false, true);
-                // $event.stopPropagation();
+            scope.$on('record-deleted', function ($event) {
+                $log.debug("-----------------------------");
+                $log.debug('record-deleted in recordset directive');
+                scope.vm.lastActiveFacet = -1;
+                scope.vm.logObject = {action: logActions.recordsetUpdate};
+                update(scope.vm, true, true, true);
             });
+
+            // This is not used now, but we should change the record-deleted to this.
+            // row data has been modified (from ellipses) do read
+            scope.$on('record-modified', function($event) {
+                $log.debug("-----------------------------");
+                $log.debug('record-modified in recordset directive');
+                scope.vm.lastActiveFacet = -1;
+                scope.vm.logObject = {action: logActions.recordsetUpdate};
+                update(scope.vm, true, true, true);
+            });
+
+            scope.$on('facetsLoaded', function () {
+                scope.facetsLoaded = true;
+            });
+
+            var recordsetReadyToInitialize = function (scope) {
+                return scope.vm.readyToInitialize && (scope.facetsLoaded || (scope.vm.reference && scope.vm.reference.facetColumns && scope.vm.reference.facetColumns.length === 0));
+            };
+
+            // initialize the recordset
+            var initializeRecordset = function (scope) {
+                $timeout(function() {
+                    // NOTE
+                    // This order is very important, the ref.facetColumns is going to change the
+                    // location, so we should call read after that.
+                    if (!scope.ignoreFaceting && scope.vm.reference.facetColumns.length > 0) {
+                        var firstOpen = -1;
+                        // create the facetsToInitialize and also open facets
+                        scope.vm.reference.facetColumns.forEach(function (fc, index) {
+                            if (fc.isOpen) {
+                                firstOpen = (firstOpen == -1 || firstOpen > index) ? index : firstOpen;
+                                scope.vm.facetsToInitialize.push(index);
+                                scope.vm.facetModels[index].processed = false;
+                                scope.vm.facetModels[index].isOpen = true;
+                                scope.vm.facetModels[index].isLoading = true;
+                            }
+                        });
+
+                        firstOpen = (firstOpen !== -1) ? firstOpen : 0;
+                        scope.vm.focusOnFacet(firstOpen);
+                    }
+
+                    scope.vm.logObject = {action: logActions.recordsetLoad};
+                    initialize(scope.vm);
+                });
+            };
+
+            // initialize the recordset when it's ready to be initialized
+            scope.$watch(function () {
+                return recordsetReadyToInitialize(scope);
+            }, function (newValue, oldValue) {
+                if(angular.equals(newValue, oldValue) || !newValue){
+                    return;
+                }
+                initializeRecordset(scope);
+            });
+
+            // we might be able to initialize the recordset when it's loading
+            if (recordsetReadyToInitialize(scope)) {
+                initializeRecordset(scope);
+            }
         }
 
         return {
-            read: read,
             initialize: initialize,
             update: update,
-            updatePage: updatePage,
             registerTableCallbacks: registerTableCallbacks,
             registerRecordsetCallbacks: registerRecordsetCallbacks
         };
@@ -856,6 +780,7 @@
                     if (scope.vm.matchNotNull) {
                         return false;
                     }
+                    if (!tuple) return false;
                     var index = scope.vm.selectedRows.findIndex(function (obj) {
                         return obj.uniqueId == tuple.uniqueId;
                     });
@@ -869,7 +794,7 @@
                     if (!scope.vm.disabledRows || scope.vm.disabledRows.length == 0) {
                         return false;
                     }
-
+                    if (!tuple) return false;
                     return scope.vm.disabledRows.findIndex(function (obj) {
                         return obj.uniqueId == tuple.uniqueId;
                     }) > -1;
@@ -916,24 +841,6 @@
         }
     }])
 
-    .directive('recordset', ['recordTableUtils', function(recordTableUtils) {
-
-        return {
-            restrict: 'E',
-            templateUrl: "../common/templates/recordset.html",
-            scope: {
-                mode: "=?",
-                vm: '=',
-                onRowClick: '&?',       // set row click function
-                allowCreate: '=?',      // if undefined, assume false
-                getDisabledTuples: "=?" // callback to get the disabled tuples
-            },
-            link: function (scope, elem, attr) {
-                recordTableUtils.registerRecordsetCallbacks(scope);
-            }
-        };
-    }])
-
     .directive('recordsetSelectFaceting', ['recordTableUtils', function(recordTableUtils) {
 
         return {
@@ -944,9 +851,15 @@
                 vm: '=',
                 onRowClick: '&?',       // set row click function
                 allowCreate: '=?',      // if undefined, assume false
-                getDisabledTuples: "=?" // callback to get the disabled tuples
+                getDisabledTuples: "=?", // callback to get the disabled tuples
+                registerSetPageState: "&?"
             },
             link: function (scope, elem, attr) {
+                // currently faceting is not defined in this mode.
+                // TODO We should eventually add faceting here, and remove these initializations
+                scope.facetsLoaded = true;
+                scope.ignoreFaceting = true; // this is a temporary flag to avoid any faceting logic
+
                 recordTableUtils.registerRecordsetCallbacks(scope);
 
                 // function for removing a single pill and it's corresponding selected row
@@ -988,272 +901,19 @@
         };
     }])
 
-    //TODO This is used in recrodset app, eventually it should be used everywhere
-    .directive('recordsetWithFaceting', ['recordTableUtils', '$window', '$cookies', 'DataUtils', 'MathUtils', 'UriUtils', '$timeout', 'AlertsService', '$log', 'tableConstants', 'defaultDisplayname', 'logActions',
-        function(recordTableUtils, $window, $cookies, DataUtils, MathUtils, UriUtils, $timeout, AlertsService, $log, tableConstants, defaultDisplayname, logActions) {
+    .directive('recordset', ['recordTableUtils', function(recordTableUtils) {
 
         return {
             restrict: 'E',
-            templateUrl: '../common/templates/recordsetWithFaceting.html',
+            templateUrl: '../common/templates/recordset.html',
             scope: {
                 vm: '=',
                 onRowClick: '&?',       // set row click function
-                allowCreate: '=?'       // if undefined, assume false
+                allowCreate: '=?',       // if undefined, assume false
+                registerSetPageState: "&?"
             },
             link: function (scope, elem, attr) {
-                var addRecordRequests = {}; // table refresh used by add record implementation with cookie (old method)
-                var updated = false; // table refresh used by ellipses' edit action (new method)
-
-                scope.pageLimits = [10, 25, 50, 75, 100, 200];
-                scope.$root.alerts = AlertsService.alerts;
-                scope.$root.showSpinner = false; // this property is set from common modules for controlling the spinner at a global level that is out of the scope of the app
-                scope.vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
-
-                scope.defaultDisplayname = defaultDisplayname;
-
-                scope.vm.isIdle = true;
-                scope.vm.facetModels = [];
-                scope.vm.dirtyResult = false;
-                scope.vm.occupiedSlots = 0;
-                scope.vm.facetsToInitialize = [];
-                scope.vm.showFaceting = scope.vm.config.showFaceting;
-                scope.$root.facetPanelOpen = scope.vm.config.facetPanelOpen;
-
-                scope.setPageLimit = function(limit) {
-                    scope.vm.pageLimit = limit;
-
-                    scope.vm.logObject = {action: logActions.recordsetLimit};
-                    recordTableUtils.update(scope.vm, true, false, false);
-                };
-
-                scope.before = function() {
-                    var previous = scope.vm.page.previous;
-                    if (previous && scope.$root.checkReferenceURL(previous)) {
-                        scope.vm.reference = previous;
-                        $log.debug('going to previous page. updating..');
-
-                        scope.vm.logObject = {
-                            action: logActions.recordsetPage,
-                            sort: previous.location.sortObject,
-                            page: previous.location.beforeObject,
-                            type: "before"
-                        };
-                        recordTableUtils.update(scope.vm, true, false, false);
-                    }
-                };
-
-                scope.after = function() {
-                    var next = scope.vm.page.next;
-                    if (next && scope.$root.checkReferenceURL(next)) {
-                        scope.vm.reference = next;
-                        $log.debug('going to next page. updating..');
-
-                        scope.vm.logObject = {
-                            action: logActions.recordsetPage,
-                            sort: next.location.sortObject,
-                            page: next.location.afterObject,
-                            type: "after"
-                        };
-                        recordTableUtils.update(scope.vm, true, false, false);
-                    }
-
-                };
-
-                scope.focusOnSearchInput = function () {
-                    angular.element("#search-input.main-search-input").focus();
-                };
-
-                scope.inputChangedPromise = undefined;
-
-                /*
-                    The search fires at most one active "background"
-                    search at a time and, i.e. for opportunistic type-ahead search. It should never send
-                    another before the previous terminates. The delay for firing the search is
-                    1 second, when the user has stopeed typing.
-                */
-                // On change in user input
-                scope.inputChanged = function() {
-                    if (scope.vm.enableAutoSearch) {
-
-                        // Cancel previous promise for background search that was queued to be called
-                        if (scope.inputChangedPromise) {
-                            $timeout.cancel(scope.inputChangedPromise);
-                        }
-
-                        // Wait for the user to stop typing for a second and then fire the search
-                        scope.inputChangedPromise = $timeout(function() {
-                            scope.inputChangedPromise = null;
-                            scope.search(scope.vm.search);
-                        }, tableConstants.AUTO_SEARCH_TIMEOUT);
-                    }
-                };
-
-                scope.enterPressed = function() {
-                    // Trigger search
-                    scope.search(scope.vm.search);
-                };
-
-                scope.search = function(term) {
-
-                    if (term) term = term.trim();
-
-                    var ref = scope.vm.reference.search(term); // this will clear previous search first
-                     if (scope.$root.checkReferenceURL(ref)) {
-                         scope.vm.search = term;
-                         scope.vm.reference = ref;
-                         scope.vm.lastActiveFacet = -1;
-                         scope.vm.logObject = {action: logActions.recordsetFacet};
-                         $log.debug("search changed to `" + term + "`. updating..");
-                         recordTableUtils.update(scope.vm, true, true, true);
-                     }
-                };
-
-                scope.clearSearch = function() {
-                    if (scope.vm.reference.location.searchTerm)
-                        scope.search();
-
-                    scope.vm.search = null;
-                };
-
-                scope.addRecord = function() {
-
-                    // Generate a unique id for this request
-                    // append it to the URL
-                    var referrer_id = 'recordset-' + MathUtils.getRandomInt(0, Number.MAX_SAFE_INTEGER);
-                    addRecordRequests[referrer_id] = 0;
-
-                    // open a new tab
-                    var newRef = scope.vm.reference.table.reference.contextualize.entryCreate;
-                    var appLink = newRef.appLink;
-                    appLink = appLink + (appLink.indexOf("?") === -1 ? "?" : "&") +
-                        'invalidate=' + UriUtils.fixedEncodeURIComponent(referrer_id);
-
-                    // open url in a new tab
-                    $window.open(appLink, '_blank');
-                };
-
-                // function for removing a single pill and it's corresponding selected row
-                scope.removePill = function(key) {
-                    var index = scope.vm.selectedRows.findIndex(function (obj) {
-                        return obj.uniqueId == key;
-                    });
-                    scope.vm.selectedRows.splice(index, 1);
-                };
-
-                // function for removing all pills regardless of what page they are on, clears the whole selectedRows array
-                scope.removeAllPills = function() {
-                    scope.vm.selectedRows.clear();
-                    scope.vm.currentPageSelected = false;
-                };
-
-                // on window focus, if has pending add record requests
-                // check if any are complete 1) delete requests, 2) delete cookies, 3) do a read
-                $window.onfocus = function() {
-
-                    var completed = 0; // completed add record requests
-                    for (var id in addRecordRequests) {
-                        var cookie = $cookies.getObject(id);
-                        if (cookie) {
-                            delete addRecordRequests[id];
-                            $cookies.remove(id);
-                            completed += 1;
-                        }
-                    }
-
-                    // read
-                    if (completed > 0 || updated) {
-                        $log.debug("fouced on page after change, updating...");
-                        updated = false;
-                        scope.vm.lastActiveFacet = -1;
-                        if (scope.parentReference) {
-                            scope.vm.logObject = {action: logActions.recordRelatedUpdate};
-                        } else {
-                            scope.vm.logObject = {action: logActions.recordsetUpdate};
-                        }
-                        recordTableUtils.update(scope.vm, true, true, true);
-                    }
-
-                };
-
-                // allow child window to call to indicate table has been updated
-                // called from form.controller.js to communicate that an entity was just updated
-                window.updated = function() {
-                    updated = true;
-                };
-
-                scope.$on('facet-modified', function ($event) {
-                    $log.debug("-----------------------------");
-                    $log.debug('facet-modified in recordset directive');
-                    scope.vm.logObject = {action: logActions.recordsetFacet};
-                    recordTableUtils.update(scope.vm, true, true, true);
-                });
-
-                scope.$on('record-deleted', function ($event) {
-                    $log.debug("-----------------------------");
-                    $log.debug('record-deleted in recordset directive');
-                    scope.vm.lastActiveFacet = -1;
-                    scope.vm.logObject = {action: logActions.recordsetUpdate};
-                    recordTableUtils.update(scope.vm, true, true, true);
-                });
-
-                // This is not used now, but we should change the record-deleted to this.
-                // row data has been modified (from ellipses) do read
-                scope.$on('record-modified', function($event) {
-                    $log.debug("-----------------------------");
-                    $log.debug('record-modified in recordset directive');
-                    scope.vm.lastActiveFacet = -1;
-                    scope.vm.logObject = {action: logActions.recordsetUpdate};
-                    recordTableUtils.update(scope.vm, true, true, true);
-                });
-
-                // if faceting is visible, register a watch that relies on facets loading
-                if (chaiseConfig.showFaceting) {
-                    scope.$watch(function () {
-                        return scope.$root.pageLoaded && (scope.$root.facetsLoaded || scope.vm.reference.facetColumns.length == 0);
-                    }, function (newValue, oldValue) {
-                        if(angular.equals(newValue, oldValue) || !newValue){
-                            return;
-                        }
-
-                        $timeout(function() {
-                            // NOTE
-                            // This order is very important, the ref.facetColumns is going to change the
-                            // location, so we should call read after that.
-                            // TODO BUT WE SHOULD DO SOMETHING ABOUT IT IN ERMRESTJS
-                            if (scope.vm.reference.facetColumns.length > 0) {
-                                var firstOpen = -1;
-                                // create the facetsToInitialize and also open facets
-                                scope.vm.reference.facetColumns.forEach(function (fc, index) {
-                                    if (fc.isOpen) {
-                                        firstOpen = (firstOpen == -1 || firstOpen > index) ? index : firstOpen;
-                                        scope.vm.facetsToInitialize.push(index);
-                                        scope.vm.facetModels[index].processed = false;
-                                        scope.vm.facetModels[index].isOpen = true;
-                                        scope.vm.facetModels[index].isLoading = true;
-                                    }
-                                });
-
-                                firstOpen = (firstOpen !== -1) ? firstOpen : 0;
-                                scope.vm.focusOnFacet(firstOpen);
-                            }
-
-                            scope.vm.logObject = {action: logActions.recordsetLoad};
-                            recordTableUtils.initialize(scope.vm);
-                        });
-                    });
-                // for deployments that won't use faceting
-                } else {
-                    scope.$watch(function () {
-                        return scope.$root.pageLoaded
-                    }, function (newValue, oldValue) {
-                        if (newValue) {
-                            $timeout(function () {
-                                scope.vm.logObject = {action: logActions.recordsetLoad};
-                                recordTableUtils.initialize(scope.vm);
-                            });
-                        }
-                    });
-                }
+                recordTableUtils.registerRecordsetCallbacks(scope);
             }
         };
     }]);

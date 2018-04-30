@@ -283,7 +283,6 @@ TEMPLATES_DEPS=$(TEMPLATES)/erminit.html \
 	$(TEMPLATES)/ermretrieveresults.html
 
 DETAILED_TEMPLATES=detailed/assets/views/detailed.html
-RECSET_TEMPLATES_DEPS=recordset/recordset.html
 
 # JavaScript and CSS source for Record app
 DETAILED_ASSETS=detailed/assets
@@ -495,6 +494,7 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/vendor/angular-animate.min.js \
 	$(COMMON)/vendor/angular-scroll.min.js \
 	$(COMMON)/alerts.js \
+	$(COMMON)/authen.js \
 	$(COMMON)/bindHtmlUnsafe.js \
 	$(COMMON)/ellipses.js \
 	$(COMMON)/errors.js \
@@ -507,12 +507,12 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/resizable.js \
 	$(COMMON)/storage.js \
 	$(COMMON)/table.js \
+	$(COMMON)/utils.js \
 	$(COMMON)/validators.js \
 	$(COMMON)/vendor/angular-cookies.min.js
 
-RECSET_JS_SOURCE=$(COMMON)/authen.js \
-    $(COMMON)/utils.js \
-    $(RECSET_ASSETS)/recordset.js
+RECSET_JS_SOURCE=$(RECSET_ASSETS)/recordset.app.js \
+    $(RECSET_ASSETS)/recordset.controller.js
 
 RECSET_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css
@@ -630,9 +630,8 @@ record/index.html: record/index.html.in .make-record-asset-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-record-asset-block' -e 'd' -e '}' \
 		record/index.html.in > record/index.html
 
-recordset/index.html: recordset/index.html.in .make-rs-asset-block .make-rs-template-block
+recordset/index.html: recordset/index.html.in .make-rs-asset-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-rs-asset-block' -e 'd' -e '}' \
-		-e '/%TEMPLATES%/ {' -e 'r .make-rs-template-block' -e 'd' -e '}' \
 		recordset/index.html.in > recordset/index.html
 
 viewer/index.html: viewer/index.html.in .make-viewer-asset-block
@@ -693,12 +692,6 @@ $(JS_CONFIG): chaise-config-sample.js
 	> .make-template-block
 	for file in $(TEMPLATES_DEPS); do \
 		$(CAT) $$file >> .make-template-block ; \
-	done
-
-.make-rs-template-block: $(RECSET_TEMPLATES_DEPS)
-	> .make-rs-template-block
-	for file in $(RECSET_TEMPLATES_DEPS); do \
-		$(CAT) $$file >> .make-rs-template-block ; \
 	done
 
 .make-detailed-template-block: $(DETAILED_TEMPLATES)

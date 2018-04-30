@@ -245,7 +245,7 @@
                         <footer></footer>
                     </div>
                 </div>
-                <div ng-show="form.resultset" class="container-fluid">
+                <div ng-if="form.resultset" class="container-fluid">
                     <div class="main-container">
                         <h2 id="result-title">
                             <span>{{ form.resultsetModel.rowValues.length }}/{{ form.resultsetModel.pageLimit }}</span>

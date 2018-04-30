@@ -14,7 +14,7 @@
         <!-- switch when 'selectFaceting' -->
         <recordset-select-faceting ng-switch-when="selectFaceting" vm="ctrl.tableModel" on-row-click="ctrl.ok" allow-create="false"></recordset-select-faceting>
         <!-- swtich default -->
-        <recordset-with-faceting ng-switch-default vm="ctrl.tableModel" on-row-click="ctrl.ok" allow-create="true" get-disabled-tuples="getDisabledTuples"></recordset-with-faceting>
+        <recordset ng-switch-default vm="ctrl.tableModel" on-row-click="ctrl.ok" allow-create="true" get-disabled-tuples="getDisabledTuples"></recordset>
     </div>
 
 </div>

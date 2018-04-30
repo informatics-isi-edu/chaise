@@ -330,7 +330,7 @@
             params.context = "compact/select";
             params.selectedRows = [];
             params.selectMode = modalBox.singleSelectMode;
-            params.faceting = true;
+            params.showFaceting = true;
             params.facetPanelOpen = false;
 
             modalUtils.showModal({
@@ -363,9 +363,6 @@
                 }
 
                 vm.recordEditModel.rows[rowIndex][column.name] = tuple.displayname.value;
-                $rootScope.pageLoaded = false;
-            }, function modalClosed() {
-                $rootScope.pageLoaded = false;
             });
         }
 
