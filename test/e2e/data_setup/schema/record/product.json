@@ -1308,7 +1308,12 @@
             ],
             "compact": [
                 "id", "title"
-            ]
+            ],
+            "filter": {
+                "and": [
+                    {"source": [{"outbound":["product-record","fk_thumbnail_collection"]},{"inbound":["product-record","fk_cover"]},"cover"], "ux_mode": "choices"}
+                ]
+            }
         },
 
         "tag:isrd.isi.edu,2016:visible-foreign-keys" : {

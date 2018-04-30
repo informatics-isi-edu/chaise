@@ -15,12 +15,12 @@
                         </h3>
                     </uib-accordion-heading>
                 <div ng-switch="fc.preferredMode">
-                    <range-picker ng-switch-when="ranges" vm="vm" facet-column="fc" facet-model="vm.facetModels[$index]" index="$index"></range-picker>
-                    <choice-picker ng-switch-default facet-column="fc" facet-model="vm.facetModels[$index]" index="$index"></string-picker>
+                    <range-picker ng-switch-when="ranges" facet-panel-open="vm.config.facetPanelOpen" facet-column="fc" facet-model="vm.facetModels[$index]" index="$index"></range-picker>
+                    <choice-picker ng-switch-default facet-panel-open="vm.config.facetPanelOpen" facet-column="fc" facet-model="vm.facetModels[$index]" index="$index"></string-picker>
                 </div>
             </div>
         </uib-accordion>
         <h3 ng-if="vm.reference.facetColumns.length == 0">No Filter Options</h3>
     </div>
 </div>
-<faceting-collapse-btn class="facet-btn" panel-open="$root.facetPanelOpen" toggle-panel="togglePanel" position="left" tooltip-message="{{'Click to ' + (($root.facetPanelOpen) ? 'hide' : 'show') + ' facet search panel.'}}"></faceting-collapse-btn>
+<faceting-collapse-btn class="facet-btn" panel-open="vm.config.facetPanelOpen" toggle-panel="togglePanel" position="left" tooltip-message="{{'Click to ' + ((vm.config.facetPanelOpen) ? 'hide' : 'show') + ' facet search panel.'}}"></faceting-collapse-btn>

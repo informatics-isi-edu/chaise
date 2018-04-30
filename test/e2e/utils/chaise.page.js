@@ -840,6 +840,12 @@ var recordPage = function() {
 
 var recordsetPage = function() {
     var that = this;
+
+    this.waitForInverseMainSpinner = function () {
+        var locator = element(by.id("main-spinner"));
+        return browser.wait(protractor.ExpectedConditions.invisibilityOf(locator), browser.params.defaultTimeout);
+    };
+
     this.getPageTitle = function() {
         return browser.executeScript("return $('#page-title').text();");
     };
@@ -900,12 +906,16 @@ var recordsetPage = function() {
         return element(by.id("search-input"));
     };
 
+    this.getMainSearchBox = function() {
+        return element(by.css(".main-container")).element(by.id("search-input"));
+    };
+
     this.getSearchSubmitButton = function() {
-        return element(by.id("search-submit"));
+        return element(by.css(".main-container")).element(by.id("search-submit"));
     };
 
     this.getSearchClearButton = function() {
-        return element(by.id("search-clear"));
+        return element(by.css(".main-container")).element(by.id("search-clear"));
     };
 
     this.getAddRecordLink = function() {
@@ -1143,6 +1153,18 @@ var recordsetPage = function() {
     };
 };
 
+var errorModal = function () {
+    var self = this;
+
+    this.getToggleDetailsLink = function () {
+        return element(by.id('toggle-error-details'));
+    };
+
+    this.getErrorDetails = function () {
+        return element(by.id('error-details'));
+    }
+};
+
 // Makes a string safe and valid for use in an HTML element's id attribute.
 // Commonly used for column displaynames.
 function makeSafeIdAttr(string) {
@@ -1164,6 +1186,7 @@ function chaisePage() {
     this.recordEditPage = new recordEditPage();
     this.recordPage = new recordPage();
     this.recordsetPage = new recordsetPage();
+    this.errorModal = new errorModal();
     this.tools = new tools();
     this.tourButton = element(by.css('.tour-start-btn'));
     this.tourBox = element(by.css('.tour-DataBrowserTour'));

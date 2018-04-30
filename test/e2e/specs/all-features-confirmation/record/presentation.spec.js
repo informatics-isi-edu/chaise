@@ -87,7 +87,7 @@ var testParams = {
           viewMore: {
               name: "accommodation_collection",
               displayname: "accommodation_collections",
-              filter: "Accommodations: Sherathon Hotel"
+              filter: "Accommodations (Cover Image): 3,005"
           },
           rowValues: [
               ["2000", "Sherathon Hotel"]

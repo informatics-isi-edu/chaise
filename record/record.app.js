@@ -62,7 +62,6 @@
         $rootScope.showEmptyRelatedTables = false;
         $rootScope.modifyRecord = chaiseConfig.editRecord === false ? false : true;
         $rootScope.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
-        $rootScope.showFaceting = chaiseConfig.showFaceting === true ? true : false; // for faceting in popups
 
         var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
 

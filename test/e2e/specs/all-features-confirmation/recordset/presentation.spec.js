@@ -100,7 +100,7 @@ describe('View recordset,', function() {
             });
 
             it("should autofocus on search box", function() {
-                var searchBox = chaisePage.recordsetPage.getSearchBox();
+                var searchBox = chaisePage.recordsetPage.getMainSearchBox();
                 expect(searchBox.getAttribute('id')).toEqual(browser.driver.switchTo().activeElement().getAttribute('id'));
             });
 
@@ -164,74 +164,63 @@ describe('View recordset,', function() {
                 });
             });
 
-            it("apply different searches, ", function() {
+            it("apply different searches, ", function(done) {
                 var EC = protractor.ExpectedConditions;
                 var e = element(by.id('custom-page-size'));
                 browser.wait(EC.presenceOf(e), browser.params.defaultTimeout);
 
-                var searchBox = chaisePage.recordsetPage.getSearchBox(),
+                var searchBox = chaisePage.recordsetPage.getMainSearchBox(),
                 searchSubmitButton = chaisePage.recordsetPage.getSearchSubmitButton(),
                 clearSearchButton = chaisePage.recordsetPage.getSearchClearButton(),
                 noResultsMessage = "No Results Found";
 
                 searchBox.sendKeys('Super 8 North Hollywood Motel');
                 searchSubmitButton.click().then(function() {
-                    return chaisePage.waitForElementInverse(element(by.id("spinner")));
-                }).then(function() {
-                    return chaisePage.recordsetPage.getRows()
-                }).then(function(rows) {
-                    expect(rows.length).toBe(1);
-                    expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying 1 of 1 Records", "Display total count for 'Super 8 North Hollywood Motel' search is incorrect");
+                    chaisePage.recordsetPage.waitForInverseMainSpinner();
+                    expect(chaisePage.recordsetPage.getRows().count()).toBe(1, "search 01: row count missmatch");
+                    expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying 1 of 1 Records", "search 01: total count missmatch.");
                     // clear search
                     return clearSearchButton.click();
                 }).then(function() {
-                    return chaisePage.waitForElementInverse(element(by.id("spinner")));
-                }).then(function() {
-                    return chaisePage.recordsetPage.getRows();
-                }).then(function(rows) {
-                    expect(rows.length).toBe(4);
-                    expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying 4 of 4 Records", "Display total count for no search term is incorrect");
+                    chaisePage.recordsetPage.waitForInverseMainSpinner();
+                    expect(chaisePage.recordsetPage.getRows().count()).toBe(4, "search 02: row count missmatch");
+                    expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying 4 of 4 Records", "search 02: total count missmatch.");
 
                     // apply conjunctive search words
                     searchBox.sendKeys('"Super 8" motel "North Hollywood"');
-
                     return searchSubmitButton.click();
                 }).then(function() {
-                    return chaisePage.waitForElementInverse(element(by.id("spinner")));
-                }).then(function() {
-                    return chaisePage.recordsetPage.getRows();
-                }).then(function(rows) {
-                    expect(rows.length).toBe(1);
-                    expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying 1 of 1 Records", "Display total count for '\"Super 8\" motel \"North Hollywood\"' search is incorrect");
+                    chaisePage.recordsetPage.waitForInverseMainSpinner();
+                    expect(chaisePage.recordsetPage.getRows().count()).toBe(1, "search 03: row count missmatch");
+                    expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying 1 of 1 Records", "search 03: total count missmatch.");
                     // clear search
                     return clearSearchButton.click();
                 }).then(function() {
-                    return chaisePage.waitForElementInverse(element(by.id("spinner")));
-                }).then(function() {
+                    chaisePage.recordsetPage.waitForInverseMainSpinner();
+
                     // search has been reset
                     searchBox.sendKeys("asdfghjkl");
-
                     return searchSubmitButton.click();
                 }).then(function() {
-                    return chaisePage.waitForElementInverse(element(by.id("spinner")));
-                }).then(function() {
-                    return chaisePage.recordsetPage.getRows();
-                }).then(function(rows) {
-                    expect(rows.length).toBe(0);
-                    expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying 0 Records", "Display total count for 'asdfghjkl' search is incorrect");
 
-                    return chaisePage.recordsetPage.getNoResultsRow().getText();
-                }).then(function(text) {
-                    expect(text).toBe(noResultsMessage);
+                    chaisePage.recordsetPage.waitForInverseMainSpinner();
+                    expect(chaisePage.recordsetPage.getRows().count()).toBe(0, "search 04: row count missmatch");
+                    expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying 0 Records", "search 04: total count missmatch.");
+                    expect(chaisePage.recordsetPage.getNoResultsRow().getText()).toBe(noResultsMessage, "search 04: no result message missmatch.");
 
                     // clearing the search here resets the page for the next test case
                     clearSearchButton.click();
+                }).then(function () {
+                    chaisePage.recordsetPage.waitForInverseMainSpinner();
+                    done();
+                }).catch(function(err) {
+                    done.fail(err);
                 });
 
             });
 
             it("JSON Column value should be searchable", function(){
-                var searchBox = chaisePage.recordsetPage.getSearchBox(),
+                var searchBox = chaisePage.recordsetPage.getMainSearchBox(),
                 searchSubmitButton = chaisePage.recordsetPage.getSearchSubmitButton(),
                 clearSearchButton = chaisePage.recordsetPage.getSearchClearButton(),
                 noResultsMessage = "No Results Found";
@@ -249,7 +238,7 @@ describe('View recordset,', function() {
 
             it("action columns should show Download CSV button if records present else should not show download button", function() {
                 var downloadButton;
-                var searchBox = chaisePage.recordsetPage.getSearchBox(),
+                var searchBox = chaisePage.recordsetPage.getMainSearchBox(),
                 searchSubmitButton = chaisePage.recordsetPage.getSearchSubmitButton(),
                 clearSearchButton = chaisePage.recordsetPage.getSearchClearButton();
 
