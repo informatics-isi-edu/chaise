@@ -591,7 +591,7 @@
                 // there is no bookmark bar
                 // TODO: if bookmark bar added
                 elements.bookmarkHeight = 0;
-                // get recordset main container
+                // get recordedit main container
                 elements.container = $document[0].getElementsByClassName('main-container')[mainContainerIndex];
             } catch(error) {
                 $log.warn(error);

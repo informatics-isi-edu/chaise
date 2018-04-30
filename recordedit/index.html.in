@@ -27,8 +27,8 @@
             <div ng-controller="FormController as form" class="row">
                 <div ng-show="!form.resultset">
                     <loading-spinner ng-show="form.submissionButtonDisabled || showSpinner"></loading-spinner>
-                    <div class="col-xs-12">
-                        <div class="row main-container">
+                    <div class="main-container col-xs-12">
+                        <div class="row">
                             <!-- Alerts section -->
                             <div style="margin-left:15px; margin-right:20px;">
                                 <alerts alerts="form.alerts"></alerts>
@@ -242,6 +242,7 @@
                                 </div>
                             </div>
                         </div>
+                        <footer></footer>
                     </div>
                 </div>
                 <div ng-show="form.resultset" class="container-fluid">
@@ -271,6 +272,5 @@
         </div>
 
     </div>
-    <footer></footer>
 </body>
 </html>

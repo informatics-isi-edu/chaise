@@ -257,12 +257,12 @@ img.spinner-sm {
     top: 20px;
 }
 
-.main-container:after {
+/* .main-container:after {
     content: "";
     height: 40px;
     display: block;
     opacity: 0;
-}
+} */
 
 
 /*** NESTED TABLES ***/
@@ -903,9 +903,6 @@ body.error-open loading-spinner {
     width: 100%;
     height: 30px;
     background-color: #ededed;
-    bottom: 0px;
-    position: fixed;
-    z-index: 1000;
 }
 
 footer .container1 {
