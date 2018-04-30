@@ -473,6 +473,8 @@
         }
 
         function registerRecordsetCallbacks(scope) {
+            if (!scope.vm) scope.vm = {};
+
             var addRecordRequests = {}; // table refresh used by add record implementation with cookie (old method)
             var updated = false; // table refresh used by ellipses' edit action (new method)
 
@@ -681,14 +683,12 @@
                 scope.facetsLoaded = true;
             });
 
-            // register a watch that relies on facets loading
-            scope.$watch(function () {
-                return scope.vm.readyToInitialize && (scope.facetsLoaded || (scope.vm.reference && scope.vm.reference.facetColumns.length === 0));
-            }, function (newValue, oldValue) {
-                if(angular.equals(newValue, oldValue) || !newValue){
-                    return;
-                }
+            var recordsetReadyToInitialize = function (scope) {
+                return scope.vm.readyToInitialize && (scope.facetsLoaded || (scope.vm.reference && scope.vm.reference.facetColumns && scope.vm.reference.facetColumns.length === 0));
+            };
 
+            // initialize the recordset
+            var initializeRecordset = function (scope) {
                 $timeout(function() {
                     // NOTE
                     // This order is very important, the ref.facetColumns is going to change the
@@ -713,7 +713,22 @@
                     scope.vm.logObject = {action: logActions.recordsetLoad};
                     initialize(scope.vm);
                 });
+            };
+
+            // initialize the recordset when it's ready to be initialized
+            scope.$watch(function () {
+                return recordsetReadyToInitialize(scope);
+            }, function (newValue, oldValue) {
+                if(angular.equals(newValue, oldValue) || !newValue){
+                    return;
+                }
+                initializeRecordset(scope);
             });
+
+            // we might be able to initialize the recordset when it's loading
+            if (recordsetReadyToInitialize(scope)) {
+                initializeRecordset(scope);
+            }
         }
 
         return {
@@ -840,12 +855,12 @@
                 registerSetPageState: "&?"
             },
             link: function (scope, elem, attr) {
-                recordTableUtils.registerRecordsetCallbacks(scope);
-
                 // currently faceting is not defined in this mode.
                 // TODO We should eventually add faceting here, and remove these initializations
                 scope.facetsLoaded = true;
                 scope.ignoreFaceting = true; // this is a temporary flag to avoid any faceting logic
+
+                recordTableUtils.registerRecordsetCallbacks(scope);
 
                 // function for removing a single pill and it's corresponding selected row
                 scope.removePill = function(key) {

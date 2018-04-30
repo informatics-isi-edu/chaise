@@ -151,6 +151,7 @@
         var showFaceting = chaiseConfig.showFaceting ? params.showFaceting : false;
 
         vm.tableModel = {
+            readyToInitialize:  true,
             hasLoaded:          false,
             reference:          reference,
             tableDisplayName:   params.displayname ? params.displayname : reference.displayname,
@@ -169,10 +170,6 @@
             context:            params.context,
             getDisabledTuples:  params.getDisabledTuples
         };
-
-        $timeout(function() {
-            vm.tableModel.readyToInitialize = true;
-        });
 
         // since this is currently used for single select mode, the isSelected will always be true
         function ok(tuples, isSelected) {
