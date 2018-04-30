@@ -54,14 +54,15 @@ describe('Error related test cases,', function() {
             expect(modalText.getText()).toBe(testParams.recordNotFoundModalText, "The message in modal pop is not correct");
         });
 
-        it('Error modal should Show Error Details', function(){
-            var showErrorLinkIcon =  element.all(by.xpath("//div/a")).get(0);
-            var errorSpan = element(by.xpath("//div/span/pre"));
-            showErrorLinkIcon.click().then(function(){
-              expect(showErrorLinkIcon.getText()).toBe(testParams.hideErrors, "The Show/Hide message in modal pop is not correct");
-              expect(errorSpan.getText()).toContain("Error");
-            })
-
+        it('Error modal should Show Error Details', function(done){
+            var showDetails = chaisePage.errorModal.getToggleDetailsLink();
+            showDetails.click().then(function(){
+                expect(showDetails.getText()).toBe(testParams.hideErrors, "The Show/Hide message in modal pop is not correct");
+                expect(chaisePage.errorModal.getErrorDetails().getText()).toContain("Error", "error missmatch.");
+                done();
+            }).catch(function (err) {
+                done.fail(err);
+            });
         });
 
         it('On click of OK button the page should redirect to recordset/search page', function(){
@@ -100,28 +101,30 @@ describe('Error related test cases,', function() {
             expect(modalText.getText()).toBe(testParams.multipleRecordFoundModalText, "The message in modal pop is not correct");
         });
 
-        it('Error modal should Show Error Details', function(){
-            var showErrorLinkIcon =  element.all(by.xpath("//div/a")).get(0);
-            var errorSpan = element(by.xpath("//div/span/pre"));
-            showErrorLinkIcon.click().then(function(){
-              expect(showErrorLinkIcon.getText()).toBe(testParams.hideErrors, "The Show/Hide message in modal pop is not correct");
-              expect(errorSpan.getText()).toContain("Error");
-            })
+        it('Error modal should Show Error Details', function(done){
+            var showDetails = chaisePage.errorModal.getToggleDetailsLink();
+            showDetails.click().then(function(){
+                expect(showDetails.getText()).toBe(testParams.hideErrors, "The Show/Hide message in modal pop is not correct");
+                expect(chaisePage.errorModal.getErrorDetails().getText()).toContain("Error", "error missmatch.");
+                done();
+            }).catch(function (err) {
+                done.fail(err);
+            });
         });
 
-        it('On click of OK button the page should redirect to recordset/search page', function(){
+        it('On click of OK button the page should redirect to recordset/search page', function(done){
             chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
                 return btn.click();
             }).then (function (){
                 return browser.driver.getCurrentUrl();
             }).then (function(currentUrl) {
-              var newapplink = url.replace("record", "recordset"),
-                  lastSlash = newapplink.lastIndexOf("/"),
-                  recordsetUrl = newapplink.slice(0, lastSlash);
+                var newapplink = url.replace("record", "recordset"),
+                    lastSlash = newapplink.lastIndexOf("/"),
+                    recordsetUrl = newapplink.slice(0, lastSlash);
                 expect(currentUrl).toBe(recordsetUrl, "The redirection from record page to recordset/search in case of multiple records failed");
+                done();
             }).catch( function(err) {
-                console.log(err);
-                expect('Something went wrong with this promise chain.').toBe('Please see error message.');
+                done.fail(err);
             });
         });
     });
@@ -417,7 +420,8 @@ describe('Error related test cases,', function() {
 
       it('On click of OK button the page should reload the page without paging conditions', function(done){
           chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
-              btn.click();
+              return btn.click();
+          }).then(function () {
               return browser.driver.getCurrentUrl();
           }).then (function(currentUrl) {
              recordsetPage = pageTestUrl.slice(0, pageTestUrl.search('@'));
@@ -530,49 +534,51 @@ describe('Error related test cases,', function() {
 
     describe("History for errorneous Url", function(){
 
-      beforeAll(function() {
-          var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name +  "/id=269111";
-          browser.get(url);
-          chaisePage.waitForElement(element(by.css('.modal-dialog ')));
-      });
+        beforeAll(function() {
+            var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name +  "/id=269111";
+            browser.get(url);
+            chaisePage.waitForElement(element(by.css('.modal-dialog ')));
+        });
+
         it('After clicking back button initial page should appear', function(done){
             chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
-              return btn.click();
+                return btn.click();
             }).then (function (){
-              browser.navigate().back();
-              return browser.driver.getCurrentUrl();
+                return browser.navigate().back();
+            }).then(function (){
+                return browser.driver.getCurrentUrl();
             }).then (function(currentUrl) {
-              expect(currentUrl).toContain('id=269111', "The back button failed to go back to previous page.");
-              done();
-          }).catch(function(error) {
-              console.log(error);
-              done.fail();
-          });
-      });
+                expect(currentUrl).toContain('id=269111', "The back button failed to go back to previous page.");
+                done();
+            }).catch(function(error) {
+                done.fail(error);
+            });
+        });
 
     });
 
     describe("Dismissible Error Modal when using Navbar Delete button", function(){
 
-      beforeAll(function() {
-          var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name +  "/id=2002";
-          browser.get(url);
-          deleteBtn  = chaisePage.recordPage.getDeleteRecordButton();
-      });
+        beforeAll(function() {
+            var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name +  "/id=2002";
+            browser.get(url);
+            deleteBtn  = chaisePage.recordPage.getDeleteRecordButton();
+        });
+
         it('Error modal is dismissible in case of conflict/forbidden error', function(done){
-          chaisePage.waitForElement(deleteBtn).then(function(){
-              deleteBtn.click();
-              return chaisePage.recordPage.getConfirmDeleteButton().click();
+            chaisePage.waitForElement(deleteBtn).then(function(){
+                return deleteBtn.click();
+            }).then(function () {
+                return chaisePage.recordPage.getConfirmDeleteButton().click();
             }).then (function() {
-              closeModal = chaisePage.recordEditPage.getModalCloseBtn();
-              chaisePage.waitForElement(closeModal);
-              expect(closeModal.isDisplayed()).toBeTruthy('Close modal option is not available for conflict/forbiddden errors');
-              done();
-          }).catch(function(error) {
-              console.log(error);
-              done.fail();
-          });
-      });
+                closeModal = chaisePage.recordEditPage.getModalCloseBtn();
+                chaisePage.waitForElement(closeModal);
+                expect(closeModal.isDisplayed()).toBeTruthy('Close modal option is not available for conflict/forbiddden errors');
+                done();
+            }).catch(function(error) {
+                done.fail(error);
+            });
+        });
     });
 
     // delete from ellipses
