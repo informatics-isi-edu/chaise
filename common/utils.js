@@ -920,7 +920,7 @@
         };
     }])
 
-    .factory("UiUtils", [function() {
+    .factory("UiUtils", ['$log', '$timeout', function($log, $timeout) {
         /**
          *
          * To allow the dropdown button to open at the top/bottom depending on the space available
@@ -1037,11 +1037,15 @@
          *      - {DOMElement} container - the main container to fix the height of
          **/
         function setDisplayContainerHeight(domElements) {
-            // calculate remaining dom height (navbar + bookmark)/viewheight
-            // This will be a percentage out of 100
-            var fixedHeightUsed = Math.ceil( ((domElements.navbarHeight + domElements.bookmarkHeight)/domElements.docHeight) * 100);
-            // set height to remaining
-            domElements.container.style.height = (100 - fixedHeightUsed) + 'vh';
+            try {
+                // calculate remaining dom height (navbar + bookmark)/viewheight
+                // This will be a percentage out of 100
+                var fixedHeightUsed = Math.ceil( ((domElements.navbarHeight + domElements.bookmarkHeight)/domElements.docHeight) * 100);
+                // set height to remaining
+                domElements.container.style.height = (100 - fixedHeightUsed) + 'vh';
+            } catch(err) {
+                $log.warn(err);
+            }
         }
 
         /**
@@ -1053,11 +1057,23 @@
          *      - {DOMElement} body - the main body to fix the height of
          **/
         function setDisplayBodyHeight(domElements) {
-            if ( (domElements.initialInnerHeight + domElements.footerHeight) < domElements.mainContainerHeight) {
-                var percentage = Math.ceil( ((domElements.mainContainerHeight - domElements.footerHeight)/domElements.mainContainerHeight) * 100);
-                domElements.body.style.height = percentage + '%';
-            } else {
-                domElements.body.style.height = domElements.initialInnerHeight + 'px';
+            try {
+                console.log(domElements);
+                console.log(domElements.body.offsetHeight);
+                domElements.footerHeight = domElements.footerHeight + 10;
+                // calculate the inner height of the app content (height of children in main-body + footer)
+                if ( (domElements.initialInnerHeight + domElements.footerHeight) < domElements.mainContainerHeight) {
+                    // if the inner height is less than the vh (viewport height also main-container height):
+                    //      change the height of main-body to be a percentage of it's parent's height
+                    var percentage = Math.ceil( ((domElements.mainContainerHeight - domElements.footerHeight)/domElements.mainContainerHeight) * 100);
+                    domElements.body.style.height = percentage + '%';
+                } else {
+                    // set the body height to what it's inner elements say it's height should be
+                    // for putting the footer at the bottom of the page (most likely the inner height doesn't fit in the viewport)
+                    domElements.body.style.height = domElements.initialInnerHeight + 'px';
+                }
+            } catch(err) {
+                $log.warn(err);
             }
         }
 

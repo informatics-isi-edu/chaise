@@ -4,7 +4,7 @@
     angular.module('chaise.recordset')
 
     // Register the recordset controller
-    .controller('recordsetController', ['context', 'DataUtils', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$document', '$log', '$rootScope', '$scope', '$window', function(context, DataUtils, recordsetModel, Session, UiUtils, UriUtils, $document, $log, $rootScope, $scope, $window) {
+    .controller('recordsetController', ['context', 'DataUtils', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window', function(context, DataUtils, recordsetModel, Session, UiUtils, UriUtils, $document, $log, $rootScope, $scope, $timeout, $window) {
 
         $scope.vm = recordsetModel;
         recordsetModel.RECORDEDIT_MAX_ROWS = 200;
@@ -114,38 +114,70 @@
             return elements;
         }
 
+        function setRecordsetHeight() {
+            var elements = fetchMainElements();
+            // if these 2 values are not set yet, don't set the height
+            if (elements.navbarHeight && elements.bookmarkHeight) {
+                UiUtils.setDisplayContainerHeight(elements);
+                // no need to fetch and verify the faceting elements (navbar and bookmark are the same container as the ones used in main elements function)
+                if (chaiseConfig.showFaceting) UiUtils.setDisplayContainerHeight(fetchFacetingElements());
+            }
+        }
+
+        function fetchBodyElements() {
+            var elements = {};
+            try {
+                /**** used for main-body height calculation ****/
+                // get footer height
+                elements.footerHeight = $document[0].getElementById('footer').offsetHeight;
+                // get main container height
+                elements.mainContainerHeight = $document[0].getElementsByClassName('main-container')[0].offsetHeight;
+                // get recordedit main body
+                elements.body = $document[0].getElementsByClassName('main-body')[0];
+
+                // get recordset controls height
+                var controlsHeight = $document[0].getElementById('recordset-controls-container').offsetHeight;
+                // get facet filters container height
+                var filtersHeight = $document[0].getElementById('facet-filters-container').offsetHeight;
+                // get table height
+                var tableHeight = $document[0].getElementById('recordset-table-container').offsetHeight;
+                // get paging height
+                // account for margins applied
+                var pagerHeight = $document[0].getElementById('pager-container').offsetHeight + 70;
+                console.log("controls height: ", controlsHeight);
+                console.log("filters height: ", filtersHeight);
+                console.log("table height: ", tableHeight);
+                console.log("pager height: ", pagerHeight);
+                elements.initialInnerHeight = controlsHeight + filtersHeight + tableHeight + pagerHeight;
+            } catch(error) {
+                $log.warn(error)
+            }
+            return elements;
+        }
+
+        function setMainBodyHeight() {
+            var elements = fetchBodyElements();
+
+            UiUtils.setDisplayBodyHeight(elements);
+        }
+
+        function setMainHeights() {
+            setRecordsetHeight();
+            $timeout(setMainBodyHeight, 0);
+        }
+
         $scope.$watch(function() {
             return recordsetModel.hasLoaded && recordsetModel.initialized;
         }, function (newValue, oldValue) {
             if (newValue) {
-                try {
-                    var elements = fetchMainElements();
-                    // if these 2 values are not set yet, don't set the height
-                    if(elements.navbarHeight && elements.bookmarkHeight) {
-                        UiUtils.setDisplayContainerHeight(elements);
-                        // no need to fetch and verify the faceting elements (navbar and bookmark are the same container as the ones used in main elements function)
-                        if (chaiseConfig.showFaceting) UiUtils.setDisplayContainerHeight(fetchFacetingElements());
-                    }
-                } catch(exp) {
-                    // fail silently
-                }
+                setMainHeights();
             }
         });
 
         angular.element($window).bind('resize', function(){
-            try {
-                if (recordsetModel.hasLoaded && recordsetModel.initialized ) {
-                    var elements = fetchMainElements();
-                    // if these 2 values are not set yet, don't set the height
-                    if(elements.navbarHeight && elements.bookmarkHeight) {
-                        UiUtils.setDisplayContainerHeight(elements);
-                        // no need to fetch and verify the faceting elements (navbar and bookmark are the same container as the ones used in main elements function)
-                        if (chaiseConfig.showFaceting) UiUtils.setDisplayContainerHeight(fetchFacetingElements());
-                    }
-                    $scope.$digest();
-                }
-            } catch(exp) {
-                // fail silently
+            if (recordsetModel.hasLoaded && recordsetModel.initialized ) {
+                setMainHeights();
+                $scope.$digest();
             }
         });
 

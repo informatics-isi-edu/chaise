@@ -51,7 +51,7 @@
 
         <div class="main-container" ng-class="{'initializing': !displayReady}">
             <div class="main-body" style="padding-right:10px; padding-left:15px;">
-                <alerts class="alerts-container" alerts="ctrl.alerts"></alerts>
+                <alerts id="alerts-container" alerts="ctrl.alerts"></alerts>
 
                 <!-- defined on $rootScope in run function -->
                 <record-display class="entity-container" columns="::columns" values="::recordValues"  record-table-model="colTableModels" related-reference-display-table="::rtrefDisTypetable"
@@ -60,7 +60,7 @@
                 </record-display>
 
                 <!-- used to delay empty accordions from displaying before simple record display -->
-                <div ng-if="displayReady" class="rt-container">
+                <div ng-if="displayReady" id="rt-container">
                     <uib-accordion close-others="false">
                         <div uib-accordion-group class="related-table-heading" id="rt-heading-{{::ctrl.makeSafeIdAttr(relatedRef.displayname.value)}}"  ng-repeat="relatedRef in relatedReferences track by $index"  ng-if="ctrl.showRelatedTable($index)" is-open="tableModels[$index].open">
                             <uib-accordion-heading>

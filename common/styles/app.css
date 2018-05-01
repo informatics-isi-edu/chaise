@@ -180,6 +180,13 @@ img.spinner-sm {
     text-align: right;
 }
 
+/* used to replace the margin with padding on h1-4 elements */
+.replace-margin {
+    margin: 0;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
 /****************** ACCORDION ******************/
 
 .panel{
@@ -1250,12 +1257,15 @@ footer .container1 {
 
  .recordset-container.with-faceting > .main-container {
      flex:1;
-     border-left: 25px solid white;
-     padding-right: 10px;
      position: relative;
      z-index: 1;
      overflow-y: auto;
      margin-top: 10px;
+ }
+
+ .recordset-container.with-faceting .main-body {
+     border-left: 25px solid white;
+     padding-right: 10px;
  }
 
  .recordset-container.with-faceting .pager {

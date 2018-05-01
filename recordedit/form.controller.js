@@ -163,7 +163,7 @@
                 vm.redirectAfterSubmission(page);
             }
             else {
-                AlertsService.addAlert("Your data has been submitted. Showing you the result set...","success");
+                AlertsService.addAlert("Your data has been submitted. Showing you the result set...", "success");
 
                 // can't use page.reference because it reflects the specific values that were inserted
                 vm.recordsetLink = $rootScope.reference.contextualize.compact.appLink;
@@ -214,7 +214,8 @@
                     };
                 }
                 vm.resultset = true;
-                UiUtils.setDisplayContainerHeight(fetchContainerElements(1));
+                // delay updating the height of DOM elements so the current digest cycle can complete and "show" the resultset view
+                $timeout(setMainHeights, 0);
         }
     }
 
@@ -612,18 +613,30 @@
             var elements = {};
             try {
                 /**** used for main-body height calculation ****/
-                // get footer height
-                elements.footerHeight = $document[0].getElementById('footer').offsetHeight;
                 // get main container height
                 elements.mainContainerHeight = $document[0].getElementsByClassName('main-container')[containerIndex].offsetHeight;
                 // get recordedit main body
                 elements.body = $document[0].getElementsByClassName('main-body')[containerIndex];
 
-                // get alerts height
-                var alertsHeight = $document[0].getElementsByClassName('alerts-container')[containerIndex].offsetHeight;
-                // get form height
-                var formHeight = $document[0].getElementsByClassName('form-section')[containerIndex].offsetHeight;
-                elements.initialInnerHeight = alertsHeight + formHeight;
+                if (containerIndex == 0) {
+                    // get footer height
+                    // we use ng-if to hide the resultset veiw, so only 1 footer is present to start
+                    elements.footerHeight = $document[0].getElementsByTagName('footer')[containerIndex].offsetHeight;
+                    // get alerts height
+                    var alertsHeight = $document[0].getElementsByClassName('alerts-container')[containerIndex].offsetHeight;
+                    // get form height
+                    var formHeight = $document[0].getElementById('form-section').offsetHeight;
+                    elements.initialInnerHeight = alertsHeight + formHeight;
+                } else if (containerIndex == 1) {
+                    // get footer height
+                    // at this point, 2 footers are drawn in the DOM
+                    elements.footerHeight = $document[0].getElementsByTagName('footer')[containerIndex].offsetHeight;
+                    // get resultset title height
+                    var titleHeight = $document[0].getElementById('result-title').offsetHeight;
+                    // get resultset height
+                    var resultsetHeight = $document[0].getElementById('resultset-tables').offsetHeight;
+                    elements.initialInnerHeight = titleHeight + resultsetHeight;
+                }
             } catch(error) {
                 $log.warn(error);
             }
@@ -637,12 +650,16 @@
             UiUtils.setDisplayBodyHeight(elements);
         }
 
+        function setMainHeights() {
+            setMainContainerHeight();
+            $timeout(setMainBodyHeight, 0);
+        };
+
         $scope.$watch(function() {
             return $rootScope.displayReady;
         }, function (newValue, oldValue) {
             if (newValue) {
-                setMainContainerHeight();
-                $timeout(setMainBodyHeight, 10);
+                setMainHeights();
             }
         });
 
@@ -660,8 +677,7 @@
 
         angular.element($window).bind('resize', function(){
             if ($rootScope.displayReady) {
-                setMainContainerHeight();
-                setMainBodyHeight();
+                setMainHeights();
                 $scope.$digest();
             }
         });

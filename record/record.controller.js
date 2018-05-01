@@ -41,6 +41,7 @@
 
         vm.togglePan = function() {
             $scope.recordSidePanOpen = !$scope.recordSidePanOpen;
+            $timeout(setMainBodyHeight, 0);
         };
 
         vm.canCreate = function() {
@@ -150,9 +151,11 @@
 
         vm.toggleRelatedTables = function() {
             $rootScope.showEmptyRelatedTables = !$rootScope.showEmptyRelatedTables;
+            $timeout(setMainBodyHeight, 0);
         };
 
         vm.onAccordionClick = function () {
+            // delay for animation
             $timeout(setMainBodyHeight, 500);
         };
 
@@ -341,11 +344,11 @@
                 elements.body = $document[0].getElementsByClassName('main-body')[0];
 
                 // get alerts height
-                var alertsHeight = $document[0].getElementsByClassName('alerts-container')[0].offsetHeight;
+                var alertsHeight = $document[0].getElementById('alerts-container').offsetHeight;
                 // get entity container height
                 var recordHeight = $document[0].getElementById('tblRecord').offsetHeight;
                 // get related tables section height
-                var rtHeight = $document[0].getElementsByClassName('rt-container')[0].offsetHeight;
+                var rtHeight = $document[0].getElementById('rt-container').offsetHeight;
                 // get loading... height
                 var loadingHeight = $document[0].getElementById('rt-loading').offsetHeight;
                 elements.initialInnerHeight = alertsHeight + recordHeight + rtHeight + loadingHeight;
@@ -370,21 +373,13 @@
             }
         });
 
+        // watch for the related tables to finish loading
         $scope.$watch(function() {
             return $rootScope.loading;
         }, function (newValue, oldValue) {
             // done loading
             if (newValue == false && $rootScope.displayReady) {
                 setMainBodyHeight();
-            }
-        });
-
-        $scope.$watch(function() {
-            return $rootScope.showEmptyRelatedTables;
-        }, function (newValue, oldValue) {
-            // done loading
-            if ($rootScope.displayReady) {
-                $timeout(setMainBodyHeight, 10);
             }
         });
 

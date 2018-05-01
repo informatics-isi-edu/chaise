@@ -35,7 +35,7 @@
                             </div>
 
                             <!-- Form section -->
-                            <div class="form-section col-xs-12">
+                            <div id="form-section" class="col-xs-12">
                                 <div class="row">
                                     <div ng-if="displayname" class="col-xs-7">
                                         <div id="entity-title">
@@ -245,27 +245,30 @@
                         <footer></footer>
                     </div>
                 </div>
-                <div ng-if="form.resultset" class="container-fluid">
+                <div ng-if="form.resultset">
                     <div class="main-container">
-                        <h2 id="result-title">
-                            <span>{{ form.resultsetModel.rowValues.length }}/{{ form.resultsetModel.pageLimit }}</span>
-                            <a ng-href="{{::form.recordsetLink}}">
-                                <span ng-if="::form.resultsetModel.tableDisplayname.isHTML" ng-bind-html="::form.resultsetModel.tableDisplayName.value"></span>
-                                <span ng-if="::!form.resultsetModel.tableDisplayname.isHTML" ng-bind="::form.resultsetModel.tableDisplayName.value"></span>
-                            </a>
-                            <span>Records <span ng-if="::!form.editMode">Created</span><span ng-if="::form.editMode">Updated</span> Successfully</span>
-                        </h2>
-                        <div class="side-padding-15">
-                            <h3>{{ form.resultsetModel.rowValues.length }} Successful <span ng-if="::!form.editMode">Creations</span><span ng-if="::form.editMode">Updates</span></h3>
+                        <div class="main-body container-fluid">
+                            <h2 id="result-title" class="replace-margin">
+                                <span>{{ form.resultsetModel.rowValues.length }}/{{ form.resultsetModel.pageLimit }}</span>
+                                <a ng-href="{{::form.recordsetLink}}">
+                                    <span ng-if="::form.resultsetModel.tableDisplayname.isHTML" ng-bind-html="::form.resultsetModel.tableDisplayName.value"></span>
+                                    <span ng-if="::!form.resultsetModel.tableDisplayname.isHTML" ng-bind="::form.resultsetModel.tableDisplayName.value"></span>
+                                </a>
+                                <span>Records <span ng-if="::!form.editMode">Created</span><span ng-if="::form.editMode">Updated</span> Successfully</span>
+                            </h2>
+                            <div id="resultset-tables" class="side-padding-15">
+                                <h3 class="replace-margin">{{ form.resultsetModel.rowValues.length }} Successful <span ng-if="::!form.editMode">Creations</span><span ng-if="::form.editMode">Updates</span></h3>
 
-                            <record-table vm="form.resultsetModel"></record-table>
+                                <record-table vm="form.resultsetModel"></record-table>
 
-                            <div ng-if="form.omittedResultsetModel">
-                                <h3>{{ form.omittedResultsetModel.rowValues.length }} Failed <span ng-if="::!form.editMode">Creations</span><span ng-if="::form.editMode">Updates</span></h3>
+                                <div ng-if="form.omittedResultsetModel">
+                                    <h3 class="replace-margin">{{ form.omittedResultsetModel.rowValues.length }} Failed <span ng-if="::!form.editMode">Creations</span><span ng-if="::form.editMode">Updates</span></h3>
 
-                                <record-table vm="form.omittedResultsetModel" default-row-linking="true"></record-table>
+                                    <record-table vm="form.omittedResultsetModel" default-row-linking="true"></record-table>
+                                </div>
                             </div>
                         </div>
+                        <footer></footer>
                     </div>
                 </div>
             </div>

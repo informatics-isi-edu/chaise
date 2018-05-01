@@ -47,6 +47,5 @@
                 <recordset vm="vm" allow-create="false"></recordset>
             </div>
         </div>
-        <footer></footer>
     </body>
 </html>
