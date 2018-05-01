@@ -1036,7 +1036,7 @@
          *      - {integer} docHeight - the height of the viewport
          *      - {DOMElement} container - the main container to fix the height of
          **/
-        function setDisplayHeight(domElements) {
+        function setDisplayContainerHeight(domElements) {
             // calculate remaining dom height (navbar + bookmark)/viewheight
             // This will be a percentage out of 100
             var fixedHeightUsed = Math.ceil( ((domElements.navbarHeight + domElements.bookmarkHeight)/domElements.docHeight) * 100);
@@ -1044,12 +1044,30 @@
             domElements.container.style.height = (100 - fixedHeightUsed) + 'vh';
         }
 
+        /**
+         * sets the height of domElements.body
+         * @param {Object} domElements - an object with the following properties:
+         *      - {integer} footerHeight - the height of the footer element
+         *      - {integer} mainContainerHeight - the height of the main container (container containing main-body)
+         *      - {integer} initialInnerHeight - the height of the alerts container and form section
+         *      - {DOMElement} body - the main body to fix the height of
+         **/
+        function setDisplayBodyHeight(domElements) {
+            if ( (domElements.initialInnerHeight + domElements.footerHeight) < domElements.mainContainerHeight) {
+                var percentage = Math.ceil( ((domElements.mainContainerHeight - domElements.footerHeight)/domElements.mainContainerHeight) * 100);
+                domElements.body.style.height = percentage + '%';
+            } else {
+                domElements.body.style.height = domElements.initialInnerHeight + 'px';
+            }
+        }
+
         return {
             setBootstrapDropdownButtonBehavior: setBootstrapDropdownButtonBehavior,
             getImageAndIframes: getImageAndIframes,
             humanFileSize: humanFileSize,
             getDisplayType: getDisplayType,
-            setDisplayHeight: setDisplayHeight
+            setDisplayBodyHeight: setDisplayBodyHeight,
+            setDisplayContainerHeight: setDisplayContainerHeight
         }
     }])
 

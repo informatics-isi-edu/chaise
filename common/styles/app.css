@@ -899,9 +899,13 @@ body.error-open loading-spinner {
 .mbl { margin-bottom: 20px; }
 .marl { margin: 20px;  }
 
+footer {
+    height: 30px;
+}
+
 #footer {
     width: 100%;
-    height: 30px;
+    height: inherit;
     background-color: #ededed;
 }
 

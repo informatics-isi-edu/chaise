@@ -27,15 +27,15 @@
             <div ng-controller="FormController as form" class="row">
                 <div ng-show="!form.resultset">
                     <loading-spinner ng-show="form.submissionButtonDisabled || showSpinner"></loading-spinner>
-                    <div class="main-container col-xs-12">
-                        <div class="row">
+                    <div class="main-container">
+                        <div class="main-body" style="padding-right:15px; padding-left:15px;">
                             <!-- Alerts section -->
-                            <div style="margin-left:15px; margin-right:20px;">
+                            <div class="alerts-container" style="margin-left:15px; margin-right:20px;">
                                 <alerts alerts="form.alerts"></alerts>
                             </div>
 
                             <!-- Form section -->
-                            <div class="col-xs-12">
+                            <div class="form-section col-xs-12">
                                 <div class="row">
                                     <div ng-if="displayname" class="col-xs-7">
                                         <div id="entity-title">

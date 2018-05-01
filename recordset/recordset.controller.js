@@ -122,9 +122,9 @@
                     var elements = fetchMainElements();
                     // if these 2 values are not set yet, don't set the height
                     if(elements.navbarHeight && elements.bookmarkHeight) {
-                        UiUtils.setDisplayHeight(elements);
+                        UiUtils.setDisplayContainerHeight(elements);
                         // no need to fetch and verify the faceting elements (navbar and bookmark are the same container as the ones used in main elements function)
-                        if (chaiseConfig.showFaceting) UiUtils.setDisplayHeight(fetchFacetingElements());
+                        if (chaiseConfig.showFaceting) UiUtils.setDisplayContainerHeight(fetchFacetingElements());
                     }
                 } catch(exp) {
                     // fail silently
@@ -138,9 +138,9 @@
                     var elements = fetchMainElements();
                     // if these 2 values are not set yet, don't set the height
                     if(elements.navbarHeight && elements.bookmarkHeight) {
-                        UiUtils.setDisplayHeight(elements);
+                        UiUtils.setDisplayContainerHeight(elements);
                         // no need to fetch and verify the faceting elements (navbar and bookmark are the same container as the ones used in main elements function)
-                        if (chaiseConfig.showFaceting) UiUtils.setDisplayHeight(fetchFacetingElements());
+                        if (chaiseConfig.showFaceting) UiUtils.setDisplayContainerHeight(fetchFacetingElements());
                     }
                     $scope.$digest();
                 }

@@ -8,7 +8,6 @@
         var vm = this;
         var context = $rootScope.context;
 
-
         vm.recordEditModel = recordEditModel;
         vm.dataFormats = dataFormats;
         vm.resultset = false;
@@ -215,7 +214,7 @@
                     };
                 }
                 vm.resultset = true;
-                UiUtils.setDisplayHeight(fetchElements(1));
+                UiUtils.setDisplayContainerHeight(fetchContainerElements(1));
         }
     }
 
@@ -575,12 +574,13 @@
             e.currentTarget.blur();
         }
 
-        // fetches the height of navbar, bookmark container, and view
-        // also fetches the faceting container for defining the dynamic height
+        // fetches the height of navbar, bookmark container, and viewport
+        // also fetches the main container for defining the dynamic height
         // There are 2 main containers on `recordedit` app
-        function fetchElements(mainContainerIndex) {
+        function fetchContainerElements(containerIndex) {
             var elements = {};
             try {
+                /**** used for main-container height calculation ****/
                 // get document height
                 elements.docHeight = $document[0].documentElement.offsetHeight
                 // get navbar height
@@ -589,27 +589,60 @@
                 // TODO: if bookmark bar added
                 elements.bookmarkHeight = 0;
                 // get recordedit main container
-                elements.container = $document[0].getElementsByClassName('main-container')[mainContainerIndex];
+                elements.container = $document[0].getElementsByClassName('main-container')[containerIndex];
             } catch(error) {
                 $log.warn(error);
             }
             return elements;
         }
 
+        function setMainContainerHeight() {
+            var idx = vm.resultset ? 1 : 0;
+            var elements = fetchContainerElements(idx);
+            // if the navbarHeight is not set yet, don't set the height
+            // no bookmark container here
+            if(elements.navbarHeight) {
+                UiUtils.setDisplayContainerHeight(elements);
+            }
+        }
+
+        // fetches the height of the footer and main container (container containing main-body)
+        // also fetches the main body for defining the dynamic height
+        function fetchBodyElements(containerIndex) {
+            var elements = {};
+            try {
+                /**** used for main-body height calculation ****/
+                // get footer height
+                elements.footerHeight = $document[0].getElementById('footer').offsetHeight;
+                // get main container height
+                elements.mainContainerHeight = $document[0].getElementsByClassName('main-container')[containerIndex].offsetHeight;
+                // get recordedit main body
+                elements.body = $document[0].getElementsByClassName('main-body')[containerIndex];
+
+                // get alerts height
+                var alertsHeight = $document[0].getElementsByClassName('alerts-container')[containerIndex].offsetHeight;
+                // get form height
+                var formHeight = $document[0].getElementsByClassName('form-section')[containerIndex].offsetHeight;
+                elements.initialInnerHeight = alertsHeight + formHeight;
+            } catch(error) {
+                $log.warn(error);
+            }
+            return elements;
+        }
+
+        function setMainBodyHeight() {
+            var idx = vm.resultset ? 1 : 0;
+            var elements = fetchBodyElements(idx);
+
+            UiUtils.setDisplayBodyHeight(elements);
+        }
+
         $scope.$watch(function() {
             return $rootScope.displayReady;
         }, function (newValue, oldValue) {
             if (newValue) {
-                var idx = 0;
-                if (vm.resultset) {
-                    idx = 1;
-                }
-                var elements = fetchElements(idx);
-                // if the navbarHeight is not set yet, don't set the height
-                // no bookmark container here
-                if(elements.navbarHeight) {
-                    UiUtils.setDisplayHeight(elements);
-                }
+                setMainContainerHeight();
+                $timeout(setMainBodyHeight, 10);
             }
         });
 
@@ -627,16 +660,8 @@
 
         angular.element($window).bind('resize', function(){
             if ($rootScope.displayReady) {
-                var idx = 0;
-                if (vm.resultset) {
-                    idx = 1;
-                }
-                var elements = fetchElements(idx);
-                // if the navbarHeight is not set yet, don't set the height
-                // no bookmark container here
-                if(elements.navbarHeight) {
-                    UiUtils.setDisplayHeight(elements);
-                }
+                setMainContainerHeight();
+                setMainBodyHeight();
                 $scope.$digest();
             }
         });
