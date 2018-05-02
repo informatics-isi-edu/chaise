@@ -920,7 +920,7 @@
         };
     }])
 
-    .factory("UiUtils", ['$log', '$timeout', function($log, $timeout) {
+    .factory("UiUtils", ['$log', function($log) {
         /**
          *
          * To allow the dropdown button to open at the top/bottom depending on the space available
@@ -1049,15 +1049,13 @@
         }
 
         /**
-         * sets the height of domElements.body
+         * sets the style of domElements.footer
          * @param {Object} domElements - an object with the following properties:
-         *      - {integer} footerHeight - the height of the footer element
+         *      - {integer} footer - the footer element
          *      - {integer} mainContainerHeight - the height of the main container (container containing main-body)
-         *      - {integer} initialInnerHeight - the height of the alerts container and form section
-         *      - {DOMElement} body - the main body to fix the height of
+         *      - {integer} initialInnerHeight - the height of the main body
          **/
         function setFooterStyle(domElements) {
-            console.log(domElements.initialInnerHeight);
             try {
                 var footerHeight = domElements.footer.offsetHeight + 10;
                 // calculate the inner height of the app content (height of children in main-body + footer)

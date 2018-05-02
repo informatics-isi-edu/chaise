@@ -358,7 +358,7 @@
 
         // watch for the main body size to change
         $scope.$watch(function() {
-            return mainBodyEl[0].offsetHeight;
+            return mainBodyEl && mainBodyEl[0].offsetHeight;
         }, function (newValue, oldValue) {
             if (newValue, oldValue) {
                 setFooterStyle();

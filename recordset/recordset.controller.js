@@ -12,7 +12,6 @@
         $scope.navbarBrandImage = (chaiseConfig['navbarBrandImage'] !== undefined? chaiseConfig.navbarBrandImage : "");
         $scope.navbarBrandText = (chaiseConfig['navbarBrandText'] !== undefined? chaiseConfig.navbarBrandText : "Chaise");
         var mainBodyEl;
-         // = angular.element(document.getElementsByClassName('main-body')[0]);
 
         function updateLocation() {
             $window.scrollTo(0, 0);
