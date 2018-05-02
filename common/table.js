@@ -66,7 +66,6 @@
      *          - showFaceting: defines if the facet panel should be available
      *          - openFacetPanel: defines if the facet panel is open by default
      *          - showNull: if this is available and equal to `true`, we will differentiate between `null` and empty string.
-     *          - searchpopup: denotes if the recordset is inside of a modal popup
      *
      * The events that are being used by directives in this file and their children:
      * 1. `reference-modified`: data model has been updated.

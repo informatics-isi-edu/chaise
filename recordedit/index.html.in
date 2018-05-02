@@ -25,7 +25,7 @@
         <loading-spinner ng-show="!displayReady && !error"></loading-spinner>
         <div ng-if="reference && (reference.canCreate || reference.canUpdate)">
             <div ng-controller="FormController as form" class="row">
-                <div ng-show="!form.resultset">
+                <!-- <div ng-show="!form.resultset"> -->
                     <loading-spinner ng-show="form.submissionButtonDisabled || showSpinner"></loading-spinner>
                     <div class="main-container">
                         <div class="main-body" style="padding-right:15px; padding-left:15px;">
@@ -35,7 +35,7 @@
                             </div>
 
                             <!-- Form section -->
-                            <div id="form-section" class="col-xs-12">
+                            <div id="form-section">
                                 <div class="row">
                                     <div ng-if="displayname" class="col-xs-7">
                                         <div id="entity-title">
@@ -244,7 +244,7 @@
                         </div>
                         <footer></footer>
                     </div>
-                </div>
+                <!-- </div> -->
                 <div ng-if="form.resultset">
                     <div class="main-container">
                         <div class="main-body container-fluid">

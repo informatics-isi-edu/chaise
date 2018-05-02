@@ -899,6 +899,7 @@ body.error-open loading-spinner {
 .mbl { margin-bottom: 20px; }
 .marl { margin: 20px;  }
 
+/******** footer **********/
 footer {
     height: 30px;
 }
@@ -917,7 +918,7 @@ footer .container1 {
     font-size: 11px;
     line-height: 0;
 }
-.container1 > p{
+ .container1 > p{
 	margin: 8px 0 5px !important;
 }
 .container1 li {
@@ -1247,6 +1248,14 @@ footer .container1 {
  }
 
  /****** RSwF main container *******/
+
+ .modal-body .recordset-container footer {
+     display: none !important;
+ }
+
+ .modal-body .recordset-container alerts {
+     display: none !important;
+ }
 
  .recordset-container.with-faceting > .main-container {
      flex:1;

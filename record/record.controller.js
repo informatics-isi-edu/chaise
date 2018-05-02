@@ -8,6 +8,7 @@
         var vm = this;
 
         var mainContainerEl = angular.element(document.getElementsByClassName('main-container')[0]);
+        var mainBodyEl = angular.element(document.getElementsByClassName('main-body')[0]);
         var addRecordRequests = {}; // <generated unique id : reference of related table>
         var editRecordRequests = {}; // generated id: {schemaName, tableName}
         var updated = {};
@@ -41,7 +42,6 @@
 
         vm.togglePan = function() {
             $scope.recordSidePanOpen = !$scope.recordSidePanOpen;
-            $timeout(setMainBodyHeight, 0);
         };
 
         vm.canCreate = function() {
@@ -151,14 +151,7 @@
 
         vm.toggleRelatedTables = function() {
             $rootScope.showEmptyRelatedTables = !$rootScope.showEmptyRelatedTables;
-            $timeout(setMainBodyHeight, 0);
         };
-
-        vm.onAccordionClick = function () {
-            // delay for animation
-            $timeout(setMainBodyHeight, 500);
-        };
-
 
         vm.canEditRelated = function(ref) {
             if(angular.isUndefined(ref))
@@ -336,32 +329,22 @@
             var elements = {};
             try {
                 /**** used for main-body height calculation ****/
-                // get footer height
-                elements.footerHeight = $document[0].getElementById('footer').offsetHeight;
                 // get main container height
                 elements.mainContainerHeight = $document[0].getElementsByClassName('main-container')[0].offsetHeight;
-                // get recordedit main body
-                elements.body = $document[0].getElementsByClassName('main-body')[0];
-
-                // get alerts height
-                var alertsHeight = $document[0].getElementById('alerts-container').offsetHeight;
-                // get entity container height
-                var recordHeight = $document[0].getElementById('tblRecord').offsetHeight;
-                // get related tables section height
-                var rtHeight = $document[0].getElementById('rt-container').offsetHeight;
-                // get loading... height
-                var loadingHeight = $document[0].getElementById('rt-loading').offsetHeight;
-                elements.initialInnerHeight = alertsHeight + recordHeight + rtHeight + loadingHeight;
+                // get the main body height
+                elements.initialInnerHeight = $document[0].getElementsByClassName('main-body')[0].offsetHeight;
+                // get footer
+                elements.footer = $document[0].getElementsByTagName('footer')[0];
             } catch(error) {
                 $log.warn(error);
             }
             return elements;
         };
 
-        function setMainBodyHeight() {
+        function setFooterStyle() {
             var elements = fetchBodyElements();
 
-            UiUtils.setDisplayBodyHeight(elements);
+            UiUtils.setFooterStyle(elements);
         };
 
         // watch for the display to be ready before setting the main container height
@@ -373,13 +356,12 @@
             }
         });
 
-        // watch for the related tables to finish loading
+        // watch for the main body size to change
         $scope.$watch(function() {
-            return $rootScope.loading;
+            return mainBodyEl[0].offsetHeight;
         }, function (newValue, oldValue) {
-            // done loading
-            if (newValue == false && $rootScope.displayReady) {
-                setMainBodyHeight();
+            if (newValue, oldValue) {
+                setFooterStyle();
             }
         });
 
@@ -387,7 +369,7 @@
         angular.element($window).bind('resize', function(){
             if ($rootScope.displayReady) {
                 setMainContainerHeight();
-                setMainBodyHeight();
+                setFooterStyle();
                 $scope.$digest();
             }
         });

@@ -7,6 +7,7 @@
         function FormController(AlertsService, dataFormats, DataUtils, ErrorService, logActions, messageMap, modalBox, modalUtils, recordCreate, recordEditModel, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
         var context = $rootScope.context;
+        var mainBodyEl = angular.element(document.getElementsByClassName('main-body')[0]);
 
         vm.recordEditModel = recordEditModel;
         vm.dataFormats = dataFormats;
@@ -615,51 +616,37 @@
                 /**** used for main-body height calculation ****/
                 // get main container height
                 elements.mainContainerHeight = $document[0].getElementsByClassName('main-container')[containerIndex].offsetHeight;
-                // get recordedit main body
-                elements.body = $document[0].getElementsByClassName('main-body')[containerIndex];
-
-                if (containerIndex == 0) {
-                    // get footer height
-                    // we use ng-if to hide the resultset veiw, so only 1 footer is present to start
-                    elements.footerHeight = $document[0].getElementsByTagName('footer')[containerIndex].offsetHeight;
-                    // get alerts height
-                    var alertsHeight = $document[0].getElementsByClassName('alerts-container')[containerIndex].offsetHeight;
-                    // get form height
-                    var formHeight = $document[0].getElementById('form-section').offsetHeight;
-                    elements.initialInnerHeight = alertsHeight + formHeight;
-                } else if (containerIndex == 1) {
-                    // get footer height
-                    // at this point, 2 footers are drawn in the DOM
-                    elements.footerHeight = $document[0].getElementsByTagName('footer')[containerIndex].offsetHeight;
-                    // get resultset title height
-                    var titleHeight = $document[0].getElementById('result-title').offsetHeight;
-                    // get resultset height
-                    var resultsetHeight = $document[0].getElementById('resultset-tables').offsetHeight;
-                    elements.initialInnerHeight = titleHeight + resultsetHeight;
-                }
+                // get the main body height
+                elements.initialInnerHeight = $document[0].getElementsByClassName('main-body')[containerIndex].offsetHeight;
+                // get the footer
+                elements.footer = $document[0].getElementsByTagName('footer')[containerIndex];
             } catch(error) {
                 $log.warn(error);
             }
             return elements;
         }
 
-        function setMainBodyHeight() {
+        function setFooterStyle() {
             var idx = vm.resultset ? 1 : 0;
             var elements = fetchBodyElements(idx);
 
-            UiUtils.setDisplayBodyHeight(elements);
+            UiUtils.setFooterStyle(elements);
         }
-
-        function setMainHeights() {
-            setMainContainerHeight();
-            $timeout(setMainBodyHeight, 0);
-        };
 
         $scope.$watch(function() {
             return $rootScope.displayReady;
         }, function (newValue, oldValue) {
             if (newValue) {
-                setMainHeights();
+                setMainContainerHeight();
+            }
+        });
+
+        // watch for the main body size to change
+        $scope.$watch(function() {
+            return mainBodyEl[0].offsetHeight;
+        }, function (newValue, oldValue) {
+            if (newValue, oldValue) {
+                setFooterStyle();
             }
         });
 
@@ -677,7 +664,8 @@
 
         angular.element($window).bind('resize', function(){
             if ($rootScope.displayReady) {
-                setMainHeights();
+                setMainContainerHeight();
+                setFooterStyle();
                 $scope.$digest();
             }
         });

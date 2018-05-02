@@ -1056,21 +1056,21 @@
          *      - {integer} initialInnerHeight - the height of the alerts container and form section
          *      - {DOMElement} body - the main body to fix the height of
          **/
-        function setDisplayBodyHeight(domElements) {
+        function setFooterStyle(domElements) {
+            console.log(domElements.initialInnerHeight);
             try {
-                console.log(domElements);
-                console.log(domElements.body.offsetHeight);
-                domElements.footerHeight = domElements.footerHeight + 10;
+                var footerHeight = domElements.footer.offsetHeight + 10;
                 // calculate the inner height of the app content (height of children in main-body + footer)
-                if ( (domElements.initialInnerHeight + domElements.footerHeight) < domElements.mainContainerHeight) {
-                    // if the inner height is less than the vh (viewport height also main-container height):
-                    //      change the height of main-body to be a percentage of it's parent's height
-                    var percentage = Math.ceil( ((domElements.mainContainerHeight - domElements.footerHeight)/domElements.mainContainerHeight) * 100);
-                    domElements.body.style.height = percentage + '%';
+                if ( (domElements.initialInnerHeight + footerHeight) < domElements.mainContainerHeight) {
+                    domElements.footer.style.position = "absolute";
+                    domElements.footer.style.bottom = 0;
+                    domElements.footer.style.left = 0;
+                    domElements.footer.style.right = 0;
                 } else {
-                    // set the body height to what it's inner elements say it's height should be
-                    // for putting the footer at the bottom of the page (most likely the inner height doesn't fit in the viewport)
-                    domElements.body.style.height = domElements.initialInnerHeight + 'px';
+                    domElements.footer.style.position = "relative";
+                    domElements.footer.style.bottom = "unset";
+                    domElements.footer.style.left = "unset";
+                    domElements.footer.style.right = "unset";
                 }
             } catch(err) {
                 $log.warn(err);
@@ -1082,7 +1082,7 @@
             getImageAndIframes: getImageAndIframes,
             humanFileSize: humanFileSize,
             getDisplayType: getDisplayType,
-            setDisplayBodyHeight: setDisplayBodyHeight,
+            setFooterStyle: setFooterStyle,
             setDisplayContainerHeight: setDisplayContainerHeight
         }
     }])
