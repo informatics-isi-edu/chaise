@@ -25,7 +25,7 @@
         <loading-spinner ng-show="!displayReady && !error"></loading-spinner>
         <div ng-if="reference && (reference.canCreate || reference.canUpdate)">
             <div ng-controller="FormController as form" class="row">
-                <div ng-show="!form.resultset">
+                <div ng-hide="form.resultset">
                     <loading-spinner ng-show="form.submissionButtonDisabled || showSpinner"></loading-spinner>
                     <div class="main-container">
                         <div class="main-body" style="padding-right:15px; padding-left:15px;">

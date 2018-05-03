@@ -43,7 +43,7 @@
                     </div>
                 </div>
             </div>
-            <div id="main-content" class="container-fluid" style="padding-bottom: 20px;" ng-style="{ 'overflow-y': !showFaceting ? 'auto' : ''}">
+            <div id="main-content" ng-style="{ 'overflow-y': !showFaceting ? 'auto' : ''}">
                 <recordset vm="vm" allow-create="false"></recordset>
             </div>
         </div>

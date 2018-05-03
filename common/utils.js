@@ -1040,7 +1040,7 @@
             try {
                 // calculate remaining dom height (navbar + bookmark)/viewheight
                 // This will be a percentage out of 100
-                var fixedHeightUsed = Math.ceil( ((domElements.navbarHeight + domElements.bookmarkHeight)/domElements.docHeight) * 100);
+                var fixedHeightUsed = ((domElements.navbarHeight + domElements.bookmarkHeight)/domElements.docHeight) * 100;
                 // set height to remaining
                 domElements.container.style.height = (100 - fixedHeightUsed) + 'vh';
             } catch(err) {

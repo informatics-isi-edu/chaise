@@ -8,7 +8,7 @@
         var vm = this;
 
         var mainContainerEl = angular.element(document.getElementsByClassName('main-container')[0]);
-        var mainBodyEl = angular.element(document.getElementsByClassName('main-body')[0]);
+        var mainBodyEl = $document[0].getElementsByClassName('main-body');
         var addRecordRequests = {}; // <generated unique id : reference of related table>
         var editRecordRequests = {}; // generated id: {schemaName, tableName}
         var updated = {};
@@ -151,6 +151,9 @@
 
         vm.toggleRelatedTables = function() {
             $rootScope.showEmptyRelatedTables = !$rootScope.showEmptyRelatedTables;
+            // NOTE: there's a case where clicking the button to toggle this doesn't re-paint the footer until the mouse "moves"
+            // having this $timeout triggers the function after the digest cycle which is after the elements have finished showing/hidingbased on the above flag
+            $timeout(setFooterStyle, 0);
         };
 
         vm.canEditRelated = function(ref) {
@@ -360,7 +363,7 @@
         $scope.$watch(function() {
             return mainBodyEl && mainBodyEl[0].offsetHeight;
         }, function (newValue, oldValue) {
-            if (newValue, oldValue) {
+            if (newValue) {
                 setFooterStyle();
             }
         });

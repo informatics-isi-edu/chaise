@@ -902,11 +902,10 @@ body.error-open loading-spinner {
 /******** footer **********/
 footer {
     height: 30px;
-}
-
-#footer {
-    width: 100%;
-    height: inherit;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    left: 0;
     background-color: #ededed;
 }
 
@@ -916,22 +915,20 @@ footer .container1 {
     padding-top: 5px;
     color: #595757;
     font-size: 11px;
-    line-height: 0;
 }
- .container1 > p{
-	margin: 8px 0 5px !important;
-}
+
 .container1 li {
      list-style-type: inherit;
  }
+
  .container1 ul {
      list-style-type: disc;
-     margin: 8px 0 5px !important;
  }
+
  .container1 ol {
      list-style-type: decimal;
-     margin: 8px 0 5px !important;
  }
+
  .container1 code {
      padding-left: 0;
      padding-right: 0;
@@ -1101,8 +1098,13 @@ footer .container1 {
      display:inline-block;
  }
 
- .recordset-container.without-faceting {
-    margin-top: 20px;
+ .recordset-container.without-faceting .main-container{
+    padding-top: 20px;
+ }
+
+ .recordset-container.without-faceting .main-body{
+    padding-left: 15px;
+    padding-right: 15px;
  }
 
  .recordset-container.with-faceting {
@@ -1169,6 +1171,7 @@ footer .container1 {
 
  /** recordset with faceting side panel **/
  .recordset-container.with-faceting > .faceting-resizable {
+     padding-top: 5px;
      position: relative;
      max-width: 50vw;
      z-index: 2;
@@ -1257,12 +1260,17 @@ footer .container1 {
      display: none !important;
  }
 
+ .recordset-container.with-faceting {
+     padding-left: 15px;
+     padding-right: 15px;
+ }
+
  .recordset-container.with-faceting > .main-container {
      flex:1;
      position: relative;
      z-index: 1;
      overflow-y: auto;
-     margin-top: 10px;
+     padding-top: 15px;
  }
 
  .recordset-container.with-faceting .main-body {

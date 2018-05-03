@@ -85,11 +85,7 @@
                 // get bookmark container height
                 elements.bookmarkHeight = $document[0].getElementById('bookmark-container').offsetHeight;
                 // get recordset main container
-                if (chaiseConfig.showFaceting) {
-                    elements.container = $document[0].getElementsByClassName("recordset-container with-faceting")[0].getElementsByClassName('main-container')[0];
-                } else {
-                    elements.container = $document[0].getElementById('main-content');
-                }
+                elements.container = $document[0].getElementsByClassName("recordset-container")[0].getElementsByClassName('main-container')[0];
             } catch (error) {
                 $log.warn(error);
             }
@@ -157,7 +153,9 @@
 
         // watch for the main body size to change
         $scope.$watch(function() {
-            return mainBodyEl && mainBodyEl[0].offsetHeight;
+            if (mainBodyEl && mainBodyEl[0]) {
+                return mainBodyEl && mainBodyEl[0].offsetHeight;
+            }
         }, function (newValue, oldValue) {
             if (newValue) {
                 setFooterStyle();
@@ -174,7 +172,7 @@
         });
 
         $timeout(function () {
-            mainBodyEl = angular.element(document.getElementsByClassName('main-body')[0]);
+            mainBodyEl = $document[0].getElementsByClassName('main-body');
         }, 0);
     }]);
 })();

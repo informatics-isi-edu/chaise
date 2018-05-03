@@ -7,7 +7,7 @@
         function FormController(AlertsService, dataFormats, DataUtils, ErrorService, logActions, messageMap, modalBox, modalUtils, recordCreate, recordEditModel, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
         var context = $rootScope.context;
-        var mainBodyEl = angular.element(document.getElementsByClassName('main-body')[0]);
+        var mainBodyEl = $document[0].getElementsByClassName('main-body')[0];
 
         vm.recordEditModel = recordEditModel;
         vm.dataFormats = dataFormats;
@@ -215,6 +215,7 @@
                     };
                 }
                 vm.resultset = true;
+                mainBodyEl = $document[0].getElementsByClassName('main-body')[1];
                 // delay updating the height of DOM elements so the current digest cycle can complete and "show" the resultset view
                 $timeout(setMainHeights, 0);
         }
@@ -643,7 +644,7 @@
 
         // watch for the main body size to change
         $scope.$watch(function() {
-            return mainBodyEl && mainBodyEl[0].offsetHeight;
+            return mainBodyEl && mainBodyEl.offsetHeight;
         }, function (newValue, oldValue) {
             if (newValue, oldValue) {
                 setFooterStyle();
