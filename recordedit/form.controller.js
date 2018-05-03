@@ -7,7 +7,7 @@
         function FormController(AlertsService, dataFormats, DataUtils, ErrorService, logActions, messageMap, modalBox, modalUtils, recordCreate, recordEditModel, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
         var context = $rootScope.context;
-        var mainBodyEl = $document[0].getElementsByClassName('main-body')[0];
+        var mainBodyEl;
 
         vm.recordEditModel = recordEditModel;
         vm.dataFormats = dataFormats;
@@ -577,6 +577,19 @@
             e.currentTarget.blur();
         }
 
+        // if any of the columns is showing spinner, that means it's waiting for some
+        // data and therefore we should just disable the addMore button.
+        $rootScope.$watchCollection(function () {
+            return $rootScope.showColumnSpinner[$rootScope.showColumnSpinner.length-1];
+        }, function (newValue, oldValue) {
+            if (newValue && Object.values(newValue).some(function (v) {return v;})) {
+                vm.canAddMore = false;
+            } else {
+                vm.canAddMore = true;
+            }
+        });
+
+        /*** Container Heights and other styling ***/
         // fetches the height of navbar, bookmark container, and viewport
         // also fetches the main container for defining the dynamic height
         // There are 2 main containers on `recordedit` app
@@ -609,31 +622,6 @@
             }
         }
 
-        // fetches the height of the footer and main container (container containing main-body)
-        // also fetches the main body for defining the dynamic height
-        function fetchBodyElements(containerIndex) {
-            var elements = {};
-            try {
-                /**** used for main-body height calculation ****/
-                // get main container height
-                elements.mainContainerHeight = $document[0].getElementsByClassName('main-container')[containerIndex].offsetHeight;
-                // get the main body height
-                elements.initialInnerHeight = $document[0].getElementsByClassName('main-body')[containerIndex].offsetHeight;
-                // get the footer
-                elements.footer = $document[0].getElementsByTagName('footer')[containerIndex];
-            } catch(error) {
-                $log.warn(error);
-            }
-            return elements;
-        }
-
-        function setFooterStyle() {
-            var idx = vm.resultset ? 1 : 0;
-            var elements = fetchBodyElements(idx);
-
-            UiUtils.setFooterStyle(elements);
-        }
-
         $scope.$watch(function() {
             return $rootScope.displayReady;
         }, function (newValue, oldValue) {
@@ -644,32 +632,24 @@
 
         // watch for the main body size to change
         $scope.$watch(function() {
-            return mainBodyEl && mainBodyEl.offsetHeight;
+            return mainBodyEl && mainBodyEl[0].offsetHeight;
         }, function (newValue, oldValue) {
-            if (newValue, oldValue) {
-                setFooterStyle();
-            }
-        });
-
-        // if any of the columns is showing spinner, that means it's waiting for some
-        // data and therefore we should just disable the addMore button.
-        $rootScope.$watchCollection(function () {
-            return $rootScope.showColumnSpinner[$rootScope.showColumnSpinner.length-1];
-        }, function (newValue, oldValue) {
-            if (newValue && Object.values(newValue).some(function (v) {return v;})) {
-                vm.canAddMore = false;
-            } else {
-                vm.canAddMore = true;
+            if (newValue) {
+                UiUtils.setFooterStyle(vm.resultset ? 1 : 0);
             }
         });
 
         angular.element($window).bind('resize', function(){
             if ($rootScope.displayReady) {
                 setMainContainerHeight();
-                setFooterStyle();
+                UiUtils.setFooterStyle(vm.resultset ? 1 : 0);
                 $scope.$digest();
             }
         });
+
+        $timeout(function () {
+            mainBodyEl = $document[0].getElementsByClassName('main-body');
+        }, 0);
 
         /*------------------------code below is for fixing the column names when scrolling -----------*/
 

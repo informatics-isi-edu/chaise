@@ -73,6 +73,8 @@
             return appLink;
         };
 
+
+        /*** Container Heights and other styling ***/
         // fetches the height of navbar, bookmark container, and view
         // also fetches the main container for defining the dynamic height
         function fetchMainElements() {
@@ -121,28 +123,6 @@
             }
         }
 
-        function fetchBodyElements() {
-            var elements = {};
-            try {
-                /**** used for main-body height calculation ****/
-                // get main container height
-                elements.mainContainerHeight = $document[0].getElementsByClassName('main-container')[0].offsetHeight;
-                // get the main body height
-                elements.initialInnerHeight = $document[0].getElementsByClassName('main-body')[0].offsetHeight;
-                // get the footer
-                elements.footer = $document[0].getElementsByTagName('footer')[0];
-            } catch(error) {
-                $log.warn(error)
-            }
-            return elements;
-        }
-
-        function setFooterStyle() {
-            var elements = fetchBodyElements();
-
-            UiUtils.setFooterStyle(elements);
-        }
-
         $scope.$watch(function() {
             return recordsetModel.hasLoaded && recordsetModel.initialized;
         }, function (newValue, oldValue) {
@@ -158,7 +138,7 @@
             }
         }, function (newValue, oldValue) {
             if (newValue) {
-                setFooterStyle();
+                UiUtils.setFooterStyle(0);
             }
         });
 
@@ -166,7 +146,7 @@
         angular.element($window).bind('resize', function(){
             if (recordsetModel.hasLoaded && recordsetModel.initialized ) {
                 setRecordsetHeight();
-                setFooterStyle();
+                UiUtils.setFooterStyle(0);
                 $scope.$digest();
             }
         });

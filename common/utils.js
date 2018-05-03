@@ -920,7 +920,7 @@
         };
     }])
 
-    .factory("UiUtils", ['$log', function($log) {
+    .factory("UiUtils", ['$document', '$log', function($document, $log) {
         /**
          *
          * To allow the dropdown button to open at the top/bottom depending on the space available
@@ -1050,25 +1050,32 @@
 
         /**
          * sets the style of domElements.footer
-         * @param {Object} domElements - an object with the following properties:
-         *      - {integer} footer - the footer element
-         *      - {integer} mainContainerHeight - the height of the main container (container containing main-body)
-         *      - {integer} initialInnerHeight - the height of the main body
+         * @param {Integer} index - index pertaining to which dom element to select
          **/
-        function setFooterStyle(domElements) {
+        function setFooterStyle(index) {
             try {
-                var footerHeight = domElements.footer.offsetHeight + 10;
+                var elements = {};
+                /**** used for main-body height calculation ****/
+                // get main container height
+                elements.mainContainerHeight = $document[0].getElementsByClassName('main-container')[index].offsetHeight;
+                // get the main body height
+                elements.initialInnerHeight = $document[0].getElementsByClassName('main-body')[index].offsetHeight;
+                // get the footer
+                elements.footer = $document[0].getElementsByTagName('footer')[index];
+
+
+                var footerHeight = elements.footer.offsetHeight + 10;
                 // calculate the inner height of the app content (height of children in main-body + footer)
-                if ( (domElements.initialInnerHeight + footerHeight) < domElements.mainContainerHeight) {
-                    domElements.footer.style.position = "absolute";
-                    domElements.footer.style.bottom = 0;
-                    domElements.footer.style.left = 0;
-                    domElements.footer.style.right = 0;
+                if ( (elements.initialInnerHeight + footerHeight) < elements.mainContainerHeight) {
+                    elements.footer.style.position = "absolute";
+                    elements.footer.style.bottom = 0;
+                    elements.footer.style.left = 0;
+                    elements.footer.style.right = 0;
                 } else {
-                    domElements.footer.style.position = "relative";
-                    domElements.footer.style.bottom = "unset";
-                    domElements.footer.style.left = "unset";
-                    domElements.footer.style.right = "unset";
+                    elements.footer.style.position = "relative";
+                    elements.footer.style.bottom = "unset";
+                    elements.footer.style.left = "unset";
+                    elements.footer.style.right = "unset";
                 }
             } catch(err) {
                 $log.warn(err);

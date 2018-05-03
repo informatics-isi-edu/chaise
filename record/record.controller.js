@@ -8,7 +8,7 @@
         var vm = this;
 
         var mainContainerEl = angular.element(document.getElementsByClassName('main-container')[0]);
-        var mainBodyEl = $document[0].getElementsByClassName('main-body');
+        var mainBodyEl;
         var addRecordRequests = {}; // <generated unique id : reference of related table>
         var editRecordRequests = {}; // generated id: {schemaName, tableName}
         var updated = {};
@@ -153,7 +153,9 @@
             $rootScope.showEmptyRelatedTables = !$rootScope.showEmptyRelatedTables;
             // NOTE: there's a case where clicking the button to toggle this doesn't re-paint the footer until the mouse "moves"
             // having this $timeout triggers the function after the digest cycle which is after the elements have finished showing/hidingbased on the above flag
-            $timeout(setFooterStyle, 0);
+            $timeout(function () {
+                UiUtils.setFooterStyle(0);
+            }, 0);
         };
 
         vm.canEditRelated = function(ref) {
@@ -299,6 +301,7 @@
             delete editRecordRequests[id];
         }
 
+        /*** Container Heights and other styling ***/
         // fetches the height of navbar, bookmark container, and view
         // also fetches the main container for defining the dynamic height
         function fetchContainerElements() {
@@ -326,30 +329,6 @@
             }
         };
 
-        // fetches the height of the footer and main container (container containing main-body)
-        // also fetches the main body for defining the dynamic height
-        function fetchBodyElements() {
-            var elements = {};
-            try {
-                /**** used for main-body height calculation ****/
-                // get main container height
-                elements.mainContainerHeight = $document[0].getElementsByClassName('main-container')[0].offsetHeight;
-                // get the main body height
-                elements.initialInnerHeight = $document[0].getElementsByClassName('main-body')[0].offsetHeight;
-                // get footer
-                elements.footer = $document[0].getElementsByTagName('footer')[0];
-            } catch(error) {
-                $log.warn(error);
-            }
-            return elements;
-        };
-
-        function setFooterStyle() {
-            var elements = fetchBodyElements();
-
-            UiUtils.setFooterStyle(elements);
-        };
-
         // watch for the display to be ready before setting the main container height
         $scope.$watch(function() {
             return $rootScope.displayReady;
@@ -364,7 +343,7 @@
             return mainBodyEl && mainBodyEl[0].offsetHeight;
         }, function (newValue, oldValue) {
             if (newValue) {
-                setFooterStyle();
+                UiUtils.setFooterStyle(0);
             }
         });
 
@@ -372,11 +351,16 @@
         angular.element($window).bind('resize', function(){
             if ($rootScope.displayReady) {
                 setMainContainerHeight();
-                setFooterStyle();
+                UiUtils.setFooterStyle(0);
                 $scope.$digest();
             }
         });
 
+        $timeout(function () {
+            mainBodyEl = $document[0].getElementsByClassName('main-body');
+        }, 0);
+
+        /*** scroll to events ***/
         // scroll to top button
         $scope.scrollToTop = function () {
             mainContainerEl.scrollTo(0,0, 500);
