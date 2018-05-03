@@ -64,6 +64,13 @@ td.entity-value {
   min-width: 250px;
 }
 
+#form-section {
+    width: 100%;
+    position: relative;
+    padding-right: 15px;
+    padding-left: 15px;
+}
+
 #formEdit {
   position: static;
   overflow-x: auto;

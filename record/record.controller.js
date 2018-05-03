@@ -8,6 +8,7 @@
         var vm = this;
 
         var mainContainerEl = angular.element(document.getElementsByClassName('main-container')[0]);
+        var mainBodyEl;
         var addRecordRequests = {}; // <generated unique id : reference of related table>
         var editRecordRequests = {}; // generated id: {schemaName, tableName}
         var updated = {};
@@ -150,6 +151,11 @@
 
         vm.toggleRelatedTables = function() {
             $rootScope.showEmptyRelatedTables = !$rootScope.showEmptyRelatedTables;
+            // NOTE: there's a case where clicking the button to toggle this doesn't re-paint the footer until the mouse "moves"
+            // having this $timeout triggers the function after the digest cycle which is after the elements have finished showing/hidingbased on the above flag
+            $timeout(function () {
+                UiUtils.setFooterStyle(0);
+            }, 0);
         };
 
         vm.canEditRelated = function(ref) {
@@ -295,53 +301,66 @@
             delete editRecordRequests[id];
         }
 
+        /*** Container Heights and other styling ***/
         // fetches the height of navbar, bookmark container, and view
         // also fetches the main container for defining the dynamic height
-        function fetchElements() {
+        function fetchContainerElements() {
             var elements = {};
             try {
                 // get document height
                 elements.docHeight = $document[0].documentElement.offsetHeight
                 // get navbar height
-                var mainNav = $document[0].getElementById('mainnav');
-                elements.navbarHeight = mainNav.offsetHeight;
+                elements.navbarHeight = $document[0].getElementById('mainnav').offsetHeight;
                 // get bookmark container height
-                var bookmark = $document[0].getElementById('bookmark-container');
-                elements.bookmarkHeight = bookmark.offsetHeight;
+                elements.bookmarkHeight = $document[0].getElementById('bookmark-container').offsetHeight;
                 // get record main container
                 elements.container = $document[0].getElementById('main-content');
             } catch (error) {
                 $log.warn(error);
             }
             return elements;
-        }
+        };
+
+        function setMainContainerHeight() {
+            var elements = fetchContainerElements();
+            // if these values are not set yet, don't set the height
+            if(elements.navbarHeight && elements.bookmarkHeight) {
+                UiUtils.setDisplayContainerHeight(elements);
+            }
+        };
 
         // watch for the display to be ready before setting the main container height
         $scope.$watch(function() {
             return $rootScope.displayReady;
         }, function (newValue, oldValue) {
             if (newValue) {
+                setMainContainerHeight();
+            }
+        });
 
-                var elements = fetchElements();
-                // if these values are not set yet, don't set the height
-                if(elements.navbarHeight && elements.bookmarkHeight) {
-                    UiUtils.setDisplayHeight(elements);
-                }
+        // watch for the main body size to change
+        $scope.$watch(function() {
+            return mainBodyEl && mainBodyEl[0].offsetHeight;
+        }, function (newValue, oldValue) {
+            if (newValue) {
+                UiUtils.setFooterStyle(0);
             }
         });
 
         // change the main container height whenever the DOM resizes
         angular.element($window).bind('resize', function(){
             if ($rootScope.displayReady) {
-                var elements = fetchElements();
-                // if these values are not set yet, don't set the height
-                if(elements.navbarHeight && elements.bookmarkHeight) {
-                    UiUtils.setDisplayHeight(elements);
-                }
+                setMainContainerHeight();
+                UiUtils.setFooterStyle(0);
                 $scope.$digest();
             }
         });
 
+        $timeout(function () {
+            mainBodyEl = $document[0].getElementsByClassName('main-body');
+        }, 0);
+
+        /*** scroll to events ***/
         // scroll to top button
         $scope.scrollToTop = function () {
             mainContainerEl.scrollTo(0,0, 500);

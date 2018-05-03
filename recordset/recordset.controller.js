@@ -4,13 +4,14 @@
     angular.module('chaise.recordset')
 
     // Register the recordset controller
-    .controller('recordsetController', ['context', 'DataUtils', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$document', '$log', '$rootScope', '$scope', '$window', function(context, DataUtils, recordsetModel, Session, UiUtils, UriUtils, $document, $log, $rootScope, $scope, $window) {
+    .controller('recordsetController', ['context', 'DataUtils', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window', function(context, DataUtils, recordsetModel, Session, UiUtils, UriUtils, $document, $log, $rootScope, $scope, $timeout, $window) {
 
         $scope.vm = recordsetModel;
         recordsetModel.RECORDEDIT_MAX_ROWS = 200;
         $scope.navbarBrand = (chaiseConfig['navbarBrand'] !== undefined? chaiseConfig.navbarBrand : "");
         $scope.navbarBrandImage = (chaiseConfig['navbarBrandImage'] !== undefined? chaiseConfig.navbarBrandImage : "");
         $scope.navbarBrandText = (chaiseConfig['navbarBrandText'] !== undefined? chaiseConfig.navbarBrandText : "Chaise");
+        var mainBodyEl;
 
         function updateLocation() {
             $window.scrollTo(0, 0);
@@ -72,6 +73,8 @@
             return appLink;
         };
 
+
+        /*** Container Heights and other styling ***/
         // fetches the height of navbar, bookmark container, and view
         // also fetches the main container for defining the dynamic height
         function fetchMainElements() {
@@ -84,11 +87,7 @@
                 // get bookmark container height
                 elements.bookmarkHeight = $document[0].getElementById('bookmark-container').offsetHeight;
                 // get recordset main container
-                if (chaiseConfig.showFaceting) {
-                    elements.container = $document[0].getElementsByClassName("recordset-container with-faceting")[0].getElementsByClassName('main-container')[0];
-                } else {
-                    elements.container = $document[0].getElementById('main-content');
-                }
+                elements.container = $document[0].getElementsByClassName("recordset-container")[0].getElementsByClassName('main-container')[0];
             } catch (error) {
                 $log.warn(error);
             }
@@ -114,40 +113,46 @@
             return elements;
         }
 
+        function setRecordsetHeight() {
+            var elements = fetchMainElements();
+            // if these 2 values are not set yet, don't set the height
+            if (elements.navbarHeight && elements.bookmarkHeight) {
+                UiUtils.setDisplayContainerHeight(elements);
+                // no need to fetch and verify the faceting elements (navbar and bookmark are the same container as the ones used in main elements function)
+                if (chaiseConfig.showFaceting) UiUtils.setDisplayContainerHeight(fetchFacetingElements());
+            }
+        }
+
         $scope.$watch(function() {
             return recordsetModel.hasLoaded && recordsetModel.initialized;
         }, function (newValue, oldValue) {
             if (newValue) {
-                try {
-                    var elements = fetchMainElements();
-                    // if these 2 values are not set yet, don't set the height
-                    if(elements.navbarHeight && elements.bookmarkHeight) {
-                        UiUtils.setDisplayHeight(elements);
-                        // no need to fetch and verify the faceting elements (navbar and bookmark are the same container as the ones used in main elements function)
-                        if (chaiseConfig.showFaceting) UiUtils.setDisplayHeight(fetchFacetingElements());
-                    }
-                } catch(exp) {
-                    // fail silently
-                }
+                setRecordsetHeight();
             }
         });
+
+        // watch for the main body size to change
+        $scope.$watch(function() {
+            if (mainBodyEl && mainBodyEl[0]) {
+                return mainBodyEl && mainBodyEl[0].offsetHeight;
+            }
+        }, function (newValue, oldValue) {
+            if (newValue) {
+                UiUtils.setFooterStyle(0);
+            }
+        });
+
 
         angular.element($window).bind('resize', function(){
-            try {
-                if (recordsetModel.hasLoaded && recordsetModel.initialized ) {
-                    var elements = fetchMainElements();
-                    // if these 2 values are not set yet, don't set the height
-                    if(elements.navbarHeight && elements.bookmarkHeight) {
-                        UiUtils.setDisplayHeight(elements);
-                        // no need to fetch and verify the faceting elements (navbar and bookmark are the same container as the ones used in main elements function)
-                        if (chaiseConfig.showFaceting) UiUtils.setDisplayHeight(fetchFacetingElements());
-                    }
-                    $scope.$digest();
-                }
-            } catch(exp) {
-                // fail silently
+            if (recordsetModel.hasLoaded && recordsetModel.initialized ) {
+                setRecordsetHeight();
+                UiUtils.setFooterStyle(0);
+                $scope.$digest();
             }
         });
 
+        $timeout(function () {
+            mainBodyEl = $document[0].getElementsByClassName('main-body');
+        }, 0);
     }]);
 })();

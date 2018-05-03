@@ -920,7 +920,7 @@
         };
     }])
 
-    .factory("UiUtils", [function() {
+    .factory("UiUtils", ['$document', '$log', function($document, $log) {
         /**
          *
          * To allow the dropdown button to open at the top/bottom depending on the space available
@@ -1036,12 +1036,50 @@
          *      - {integer} docHeight - the height of the viewport
          *      - {DOMElement} container - the main container to fix the height of
          **/
-        function setDisplayHeight(domElements) {
-            // calculate remaining dom height (navbar + bookmark)/viewheight
-            // This will be a percentage out of 100
-            var fixedHeightUsed = Math.ceil( ((domElements.navbarHeight + domElements.bookmarkHeight)/domElements.docHeight) * 100);
-            // set height to remaining
-            domElements.container.style.height = (100 - fixedHeightUsed) + 'vh';
+        function setDisplayContainerHeight(domElements) {
+            try {
+                // calculate remaining dom height (navbar + bookmark)/viewheight
+                // This will be a percentage out of 100
+                var fixedHeightUsed = ((domElements.navbarHeight + domElements.bookmarkHeight)/domElements.docHeight) * 100;
+                // set height to remaining
+                domElements.container.style.height = (100 - fixedHeightUsed) + 'vh';
+            } catch(err) {
+                $log.warn(err);
+            }
+        }
+
+        /**
+         * sets the style of domElements.footer
+         * @param {Integer} index - index pertaining to which dom element to select
+         **/
+        function setFooterStyle(index) {
+            try {
+                var elements = {};
+                /**** used for main-body height calculation ****/
+                // get main container height
+                elements.mainContainerHeight = $document[0].getElementsByClassName('main-container')[index].offsetHeight;
+                // get the main body height
+                elements.initialInnerHeight = $document[0].getElementsByClassName('main-body')[index].offsetHeight;
+                // get the footer
+                elements.footer = $document[0].getElementsByTagName('footer')[index];
+
+
+                var footerHeight = elements.footer.offsetHeight + 10;
+                // calculate the inner height of the app content (height of children in main-body + footer)
+                if ( (elements.initialInnerHeight + footerHeight) < elements.mainContainerHeight) {
+                    elements.footer.style.position = "absolute";
+                    elements.footer.style.bottom = 0;
+                    elements.footer.style.left = 0;
+                    elements.footer.style.right = 0;
+                } else {
+                    elements.footer.style.position = "relative";
+                    elements.footer.style.bottom = "unset";
+                    elements.footer.style.left = "unset";
+                    elements.footer.style.right = "unset";
+                }
+            } catch(err) {
+                $log.warn(err);
+            }
         }
 
         return {
@@ -1049,7 +1087,8 @@
             getImageAndIframes: getImageAndIframes,
             humanFileSize: humanFileSize,
             getDisplayType: getDisplayType,
-            setDisplayHeight: setDisplayHeight
+            setFooterStyle: setFooterStyle,
+            setDisplayContainerHeight: setDisplayContainerHeight
         }
     }])
 
