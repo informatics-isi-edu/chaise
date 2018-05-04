@@ -31,7 +31,7 @@
             }
 
             //var url = context.mainURI;
-            var url = context.chaiseBaseURL + "#" + UriUtils.fixedEncodeURIComponent(recordsetModel.reference.location.catalog) + "/" +
+            var url = context.chaiseBaseURL + "#" + recordsetModel.reference.location.catalog + "/" +
                 recordsetModel.reference.location.compactPath;
 
             // add sort modifier
