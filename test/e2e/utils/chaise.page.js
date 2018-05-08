@@ -1151,6 +1151,18 @@ var recordsetPage = function() {
     this.getPlotlyReset = function (idx) {
         return element(by.id("fc-" + idx)).element(by.css(".reset-plotly-button"));
     };
+
+    this.getWarningAlert = function () {
+        return element(by.css(".alert-warning"));
+    };
+
+    this.getWarningAlertDissmBtn = function () {
+        return element(by.css(".alert-warning")).element(by.css("button"));
+    }
+
+    this.getSelectAllBtn = function () {
+        return element(by.id("table-select-all-rows"));
+    }
 };
 
 var errorModal = function () {

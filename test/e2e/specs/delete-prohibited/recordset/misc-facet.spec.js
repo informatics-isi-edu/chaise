@@ -1,5 +1,6 @@
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
+var chance = require('chance').Chance();
 var EC = protractor.ExpectedConditions;
 
 var testParams = {
@@ -36,6 +37,12 @@ var testParams = {
         options: ["1", "2", "6", "7", "8", "9", "10"],
         optionsWOFilter: ["2", "1", "3", "4", "5", "6", "7", "8", "9", "10"],
         option: 1
+    },
+    maximumLength: {
+        facetIdx: 15,
+        numRows: 25,
+        modalOption: 10,
+        totalNumOptions: 25
     },
     recordColumns: [ "text_col", "longtext_col", "markdown_col", "int_col", "float_col", "date_col", "timestamp_col", "boolean_col", "jsonb_col", "eqK7CNP-yhTDab74BW-7lQ", "cD8qWek-pEc_of8BUq0kAw" ],
     recordValues: {
@@ -336,13 +343,19 @@ describe("Other facet features, ", function() {
                 // select a new facet
                 return chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(idx, customFilterParams.option));
             }).then(function () {
-                chaisePage.waitForElementInverse(element(by.id("spinner")));
+                // wait for table rows to load
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                        return ct == customFilterParams.numRowsWFacet;
+                    });
+                }, browser.params.defaultTimeout);
+
+                // make sure data has been updated
+                expect(chaisePage.recordsetPage.getRows().count()).toBe(customFilterParams.numRowsWFacet, "");
 
                 // make sure filter is there
                 expect(chaisePage.recordsetPage.getFacetFilters().count()).toBe(2, "facet filter missing.");
 
-                // make sure data has been updated
-                expect(chaisePage.recordsetPage.getRows().count()).toBe(customFilterParams.numRowsWFacet, "");
 
                 done();
             }).catch(chaisePage.catchTestError(done));
@@ -358,6 +371,73 @@ describe("Other facet features, ", function() {
 
                 expect(chaisePage.recordsetPage.getFacetOptionsText(idx)).toEqual(customFilterParams.optionsWOFilter, "options missmatch.");
 
+                done();
+            }).catch(chaisePage.catchTestError(done));
+        });
+    });
+
+    describe("regarding URL limitation check, ", function () {
+        var uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
+        var clearAll;
+
+        var checkAlertAndClose = function (done) {
+            var alert = chaisePage.recordsetPage.getWarningAlert();
+
+            browser.wait(EC.visibilityOf(alert, browser.params.defaultTimeout));
+
+            expect(alert.getText()).toContain("Warning Maximum URL length reached. Cannot perform the requested action.", "alert message missmatch.");
+
+            expect(chaisePage.recordsetPage.getRows().count()).toBe(testParams.maximumLength.numRows, "row count missmatch.");
+
+            return chaisePage.clickButton(chaisePage.recordsetPage.getWarningAlertDissmBtn());
+        };
+
+        beforeAll(function (done) {
+            browser.ignoreSynchronization=true;
+            browser.get(uri);
+            chaisePage.waitForElementInverse(element(by.id("spinner")));
+
+            clearAll = chaisePage.recordsetPage.getClearAllFilters();
+            browser.wait(EC.elementToBeClickable(clearAll));
+
+            clearAll.click().then(function () {
+                chaisePage.waitForElementInverse(element(by.id("spinner")));
+
+                done();
+            }).catch(chaisePage.catchTestError(done));
+        });
+
+        it ("searching a lenghty string should show the `Maximum URL length reached` warning.", function (done) {
+            var mainSearch = chaisePage.recordsetPage.getSearchBox();
+            mainSearch.sendKeys(chance.string({length: 2000}));
+            chaisePage.recordsetPage.waitForInverseMainSpinner();
+            checkAlertAndClose().then(function () {
+                done();
+            }).catch(chaisePage.catchTestError(done));
+        });
+
+        it ("after selecting the facets we should check for URL limit and show warning if needed.", function (done) {
+            var idx = testParams.maximumLength.facetIdx;
+            var facet = chaisePage.recordsetPage.getFacetById(idx);
+            chaisePage.clickButton(facet).then(function () {
+                // wait for facet to open
+                browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
+
+                // click on show more
+                var showMore = chaisePage.recordsetPage.getShowMore(idx);
+                browser.wait(EC.elementToBeClickable(showMore));
+                return chaisePage.clickButton(showMore);
+            }).then(function () {
+                //select all
+                chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
+                return chaisePage.clickButton(chaisePage.recordsetPage.getSelectAllBtn());
+            }).then(function () {
+                // submit modal
+                return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
+            }).then(function () {
+                //check the warning
+                return checkAlertAndClose(done);
+            }).then(function () {
                 done();
             }).catch(chaisePage.catchTestError(done));
         });
@@ -563,4 +643,5 @@ describe("Other facet features, ", function() {
             });
         });
     });
+
 });
