@@ -27,25 +27,32 @@
             <div ng-controller="FormController as form" class="row">
                 <div class="row">
                     <div id="bookmark-container" class="col-xs-12 meta-icons">
-                        <div ng-if="displayname" id="title" class="pull-left">
+                        <div id="title" class="pull-left">
                             <h1 id="page-title">
-                                <span>{{ form.editMode ? "Edit " : "Create " }}</span>
-                                <span class="re-displayname" ng-if="displayname.isHTML" ng-bind-html="displayname.value"></span>
-                                <span class="re-displayname" ng-if="!displayname.isHTML" ng-bind="displayname.value"></span>
-                                <span>{{ (form.recordEditModel.rows.length > 1) ? " Records" : " Record" }}</span>
+                                <div ng-if="!form.resultset">
+                                    <span>{{ form.editMode ? "Edit " : "Create " }}</span>
+                                    <span class="re-displayname" ng-if="displayname.isHTML" ng-bind-html="displayname.value"></span>
+                                    <span class="re-displayname" ng-if="!displayname.isHTML" ng-bind="displayname.value"></span>
+                                    <span>{{ (form.recordEditModel.rows.length > 1) ? " Records" : " Record" }}</span>
+                                </div>
+                                <div ng-if="form.resultset">
+                                    <span>{{ form.resultsetModel.rowValues.length }}/{{ form.resultsetModel.pageLimit }}</span>
+                                    <a ng-href="{{::form.recordsetLink}}">
+                                        <span ng-if="::form.resultsetModel.tableDisplayname.isHTML" ng-bind-html="::form.resultsetModel.tableDisplayName.value"></span>
+                                        <span ng-if="::!form.resultsetModel.tableDisplayname.isHTML" ng-bind="::form.resultsetModel.tableDisplayName.value"></span>
+                                    </a>
+                                    <span>Records <span ng-if="::!form.editMode">Created</span><span ng-if="::form.editMode">Updated</span> Successfully</span>
+                                </div>
                             </h1>
                             <div>
-                                <h3 id="page-subtitle" style="display:inline;">
+                                <h3 id="page-subtitle">
                                     <span ng-if="tableDisplayName.isHTML" ng-bind-html="tableDisplayName.value" ng-attr-tooltip-placement="bottom" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}"></span>
                                     <span ng-if="!tableDisplayName.isHTML" ng-bind="tableDisplayName.value" ng-attr-tooltip-placement="bottom" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}"></span>
-                                </h3>&nbsp;&nbsp;
-                                <span style="font-size:10px; display:inline;"><span class="text-danger">*</span> indicates required field</span>
+                                </h3>
                             </div>
                         </div>
                         <div class="pull-right">
-                            <a id="submit-record-button" ng-click="::form.submit();" ng-disabled="form.submissionButtonDisabled" uib-tooltip="Click here to submit data." tooltip-placement="bottom">
-                                <span class="glyphicon glyphicon-saved"></span> <strong>Submit</strong>
-                            </a>
+                            <button ng-if="!form.resultset" id="submit-record-button" class="btn btn-primary btn-inverted" type="submit" ng-disabled="form.submissionButtonDisabled" ng-click="::form.submit()">Submit</button>
                         </div>
                     </div>
                 </div>
@@ -60,6 +67,7 @@
 
                             <!-- Form section -->
                             <div id="form-section">
+                                <span class="pull-left"><span class="text-danger">*</span> indicates required field</span>
                                 <div class="row padding-right-15" ng-show="::!form.editMode">
                                     <div class="btn-group pull-right">
                                         <button id="copy-record-btn" class="btn btn-primary btn-inverted center-block" ng-click="::form.copyFormRow();" ng-if="::!form.editMode" type="button" ng-disabled="!form.canAddMore" tooltip-placement="bottom" uib-tooltip="Click to add 1 record.">
@@ -82,7 +90,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row form-container" style="margin-top: 25px;">
+                                <div class="row form-container">
                                     <div ng-show="displayReady" class="col-xs-12" id="formEditScroll" ng-class="{'editMode': form.editMode, 'createMode': !form.editMode}" ng-style="form.formEditDivMarginLeft">
                                         <div ng-style="form.tableWidth"></div>
                                     </div>
@@ -256,22 +264,12 @@
                 <div ng-if="form.resultset">
                     <div class="main-container">
                         <div class="main-body container-fluid">
-                            <h2 id="result-title" class="replace-margin">
-                                <span>{{ form.resultsetModel.rowValues.length }}/{{ form.resultsetModel.pageLimit }}</span>
-                                <a ng-href="{{::form.recordsetLink}}">
-                                    <span ng-if="::form.resultsetModel.tableDisplayname.isHTML" ng-bind-html="::form.resultsetModel.tableDisplayName.value"></span>
-                                    <span ng-if="::!form.resultsetModel.tableDisplayname.isHTML" ng-bind="::form.resultsetModel.tableDisplayName.value"></span>
-                                </a>
-                                <span>Records <span ng-if="::!form.editMode">Created</span><span ng-if="::form.editMode">Updated</span> Successfully</span>
-                            </h2>
                             <div id="resultset-tables" class="side-padding-15">
                                 <h3 class="replace-margin">{{ form.resultsetModel.rowValues.length }} Successful <span ng-if="::!form.editMode">Creations</span><span ng-if="::form.editMode">Updates</span></h3>
-
                                 <record-table vm="form.resultsetModel"></record-table>
 
                                 <div ng-if="form.omittedResultsetModel">
                                     <h3 class="replace-margin">{{ form.omittedResultsetModel.rowValues.length }} Failed <span ng-if="::!form.editMode">Creations</span><span ng-if="::form.editMode">Updates</span></h3>
-
                                     <record-table vm="form.omittedResultsetModel" default-row-linking="true"></record-table>
                                 </div>
                             </div>
