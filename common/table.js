@@ -93,7 +93,10 @@
             var defer = $q.defer();
             (function (uri) {
                 vm.reference.read(vm.pageLimit, vm.logObject).then(function (page) {
-                    if (vm.reference.uri !== uri) return defer.resolve(false);
+                    if (vm.reference.uri !== uri) {
+                        defer.resolve(false);
+                        return defer.promise;
+                    }
 
                     vm.page = page;
 
@@ -104,7 +107,7 @@
                     vm.initialized = true;
                     vm.rowValues = DataUtils.getRowValuesFromPage(vm.page);
 
-                    return defer.resolve(true);
+                    defer.resolve(true);
                 }).catch(function(err) {
                     if (vm.reference.uri !== uri) {
                         defer.resolve(false);
@@ -115,7 +118,7 @@
                     if (DataUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
                       err.errorData.redirectUrl = UriUtils.createRedirectLinkFromPath(err.errorData.redirectPath);
                     }
-                    return defer.reject(err);
+                    defer.reject(err);
                 });
             }) (vm.reference.uri);
             return defer.promise;
@@ -142,14 +145,16 @@
                     {action: logActions.recordsetCount}
                 ).then(function getAggregateCount(response) {
                     if (vm.reference.uri !== uri) {
-                        return defer.resolve(false);
+                        defer.resolve(false);
+                        return defer.promise;
                     }
 
                     vm.totalRowsCnt = response[0];
-                    return defer.resolve(true);
+                    defer.resolve(true);
                 }).catch(function (err) {
                     if (vm.reference.uri !== uri) {
-                        return defer.resolve(false);
+                        defer.resolve(false);
+                        return defer.promise;
                     }
 
                     // fail silently
