@@ -254,6 +254,7 @@
                                 $rootScope.displayname = page.tuples[0].displayname;
                                 $rootScope.tableComment = "";
                             }
+                            $rootScope.tableDisplayName = $rootScope.reference.displayname;
 
                             for (var j = 0; j < page.tuples.length; j++) {
                                 // initialize row objects {column-name: value,...}
@@ -363,7 +364,7 @@
                     }
                 } else if (context.mode == context.modes.CREATE) {
                     if ($rootScope.reference.canCreate) {
-                        $rootScope.displayname = $rootScope.reference.displayname;
+                        $rootScope.displayname = $rootScope.tableDisplayName = $rootScope.reference.displayname;
                         $rootScope.tableComment = $rootScope.reference.table.comment;
 
                         // populate defaults

@@ -217,7 +217,10 @@
                 vm.resultset = true;
                 mainBodyEl = $document[0].getElementsByClassName('main-body')[1];
                 // delay updating the height of DOM elements so the current digest cycle can complete and "show" the resultset view
-                $timeout(setMainHeights, 0);
+                $timeout(function() {
+                    setMainContainerHeight();
+                    UiUtils.setFooterStyle(1);
+                }, 0);
         }
     }
 
@@ -601,9 +604,8 @@
                 elements.docHeight = $document[0].documentElement.offsetHeight
                 // get navbar height
                 elements.navbarHeight = $document[0].getElementById('mainnav').offsetHeight;
-                // there is no bookmark bar
-                // TODO: if bookmark bar added
-                elements.bookmarkHeight = 0;
+                // get bookmark height
+                elements.bookmarkHeight = $document[0].getElementById('bookmark-container').offsetHeight;
                 // get recordedit main container
                 elements.container = $document[0].getElementsByClassName('main-container')[containerIndex];
             } catch(error) {
@@ -626,7 +628,7 @@
             return $rootScope.displayReady;
         }, function (newValue, oldValue) {
             if (newValue) {
-                setMainContainerHeight();
+                $timeout(setMainContainerHeight, 0);
             }
         });
 
@@ -635,7 +637,9 @@
             return mainBodyEl && mainBodyEl[0].offsetHeight;
         }, function (newValue, oldValue) {
             if (newValue) {
-                UiUtils.setFooterStyle(vm.resultset ? 1 : 0);
+                $timeout(function () {
+                    UiUtils.setFooterStyle(vm.resultset ? 1 : 0);
+                }, 0);
             }
         });
 

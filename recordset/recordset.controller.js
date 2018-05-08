@@ -127,7 +127,7 @@
             return recordsetModel.hasLoaded && recordsetModel.initialized;
         }, function (newValue, oldValue) {
             if (newValue) {
-                setRecordsetHeight();
+                $timeout(setRecordsetHeight, 0);
             }
         });
 
@@ -138,7 +138,9 @@
             }
         }, function (newValue, oldValue) {
             if (newValue) {
-                UiUtils.setFooterStyle(0);
+                $timeout(function () {
+                    UiUtils.setFooterStyle(0);
+                }, 0);
             }
         });
 

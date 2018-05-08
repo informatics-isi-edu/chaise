@@ -334,7 +334,7 @@
             return $rootScope.displayReady;
         }, function (newValue, oldValue) {
             if (newValue) {
-                setMainContainerHeight();
+                $timeout(setMainContainerHeight, 0);
             }
         });
 
@@ -343,7 +343,9 @@
             return mainBodyEl && mainBodyEl[0].offsetHeight;
         }, function (newValue, oldValue) {
             if (newValue) {
-                UiUtils.setFooterStyle(0);
+                $timeout(function () {
+                    UiUtils.setFooterStyle(0);
+                }, 0);
             }
         });
 
