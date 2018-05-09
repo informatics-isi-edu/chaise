@@ -408,8 +408,8 @@ describe("Other facet features, ", function() {
         });
 
         it ("searching a lenghty string should show the `Maximum URL length reached` warning.", function (done) {
-            var mainSearch = chaisePage.recordsetPage.getSearchBox();
-            mainSearch.sendKeys(chance.string({length: 2000}));
+            var mainSearch = chaisePage.recordsetPage.getMainSearchBox();
+            chaisePage.setInputValue(mainSearch, chance.string({length: 2000}));
             chaisePage.recordsetPage.waitForInverseMainSpinner();
             checkAlertAndClose().then(function () {
                 done();
