@@ -42,7 +42,7 @@
                                 </h3>
                             </div>
                             <div class="pull-right">
-                                <button id="submit-record-button" class="btn btn-primary btn-inverted" type="submit" ng-disabled="form.submissionButtonDisabled" ng-click="::form.submit()">Submit</button>
+                                <button id="submit-record-button" class="btn btn-primary btn-inverted" type="submit" ng-disabled="form.submissionButtonDisabled" ng-click="::form.submit()" ng-attr-tooltip-placement="bottom-right" ng-attr-uib-tooltip="Submit data">Submit</button>
                             </div>
                         </div>
                     </div>
@@ -55,13 +55,13 @@
 
                             <!-- Form section -->
                             <div id="form-section">
-                                <span class="pull-left"><span class="text-danger">*</span> indicates required field</span>
+                                <span class="pull-left"><span class="text-danger"><b>*</b></span> indicates required field</span>
                                 <div class="row padding-right-15" ng-show="::!form.editMode">
                                     <div class="btn-group pull-right">
-                                        <button id="copy-record-btn" class="btn btn-primary btn-inverted center-block" ng-click="::form.copyFormRow();" ng-if="::!form.editMode" type="button" ng-disabled="!form.canAddMore" tooltip-placement="bottom" uib-tooltip="Click to add 1 record.">
+                                        <button id="copy-record-btn" class="btn btn-primary btn-inverted center-block" ng-click="::form.copyFormRow();" ng-if="::!form.editMode" type="button" ng-disabled="!form.canAddMore" tooltip-placement="top" uib-tooltip="Add 1 record.">
                                             <span class="glyphicon glyphicon-plus"></span>
                                         </button>
-                                        <button id="copy-x-rows-btn" class="btn btn-primary btn-inverted center-block" ng-click="::(form.showMultiInsert = !form.showMultiInsert)" type="button" ng-disabled="!form.canAddMore" tooltip-placement="bottom-right" uib-tooltip="Click to add a maximum of {{::form.MAX_ROWS_TO_ADD-1}} records.">
+                                        <button id="copy-x-rows-btn" class="btn btn-primary btn-inverted center-block" ng-click="::(form.showMultiInsert = !form.showMultiInsert)" type="button" ng-disabled="!form.canAddMore" tooltip-placement="top-right" uib-tooltip="Add a maximum of {{::form.MAX_ROWS_TO_ADD-1}} records.">
                                             <span class="glyphicon glyphicon-chevron-down"></span>
                                         </button>
                                     </div>
@@ -71,7 +71,7 @@
                                         <div class="input-group">
                                             <input id="copy-rows-input" type="number" class="form-control " ng-model="form.numberRowsToAdd">
                                             <span class="input-group-btn">
-                                                <button id="copy-rows-submit" class="btn btn-sm btn-primary btn-inverted center-block" ng-click="::form.copyFormRow()" type="button" tooltip-placement="bottom" uib-tooltip="Submit">
+                                                <button id="copy-rows-submit" class="btn btn-sm btn-primary btn-inverted center-block" ng-click="::form.copyFormRow()" type="button" tooltip-placement="bottom" uib-tooltip="Apply">
                                                     <span class="glyphicon glyphicon-ok"></span>
                                                 </button>
                                             </span>
@@ -97,7 +97,7 @@
                                             </tr>
                                             <tr class="entity" ng-form="form.formContainer.row[rowIndex]" ng-repeat="column in reference.columns">
                                                 <td ng-style="form.captionColumnWidth" class="entity-key col-xs-1">
-                                                    <span ng-if="::form.isRequired(column);" class="text-danger">*</span>
+                                                    <span ng-if="::form.isRequired(column);" class="text-danger"><b>*</b></span>
                                                     <span class="column-displayname" ng-attr-tooltip-placement="{{::(column.comment) ? 'right' : undefined}}" ng-attr-uib-tooltip="{{::(column.comment) ? column.comment : undefined}}">
                                                         <span ng-if="::column.displayname.isHTML" ng-bind-html="::column.displayname.value"></span>
                                                         <span ng-if="::!column.displayname.isHTML" ng-bind="::column.displayname.value"></span>
