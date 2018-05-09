@@ -11,7 +11,6 @@
 
         vm.recordEditModel = recordEditModel;
         vm.dataFormats = dataFormats;
-        vm.resultset = false;
         vm.editMode = (context.mode == context.modes.EDIT ? true : false);
         vm.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
         vm.booleanValues = context.booleanValues;
@@ -605,7 +604,7 @@
                 // get navbar height
                 elements.navbarHeight = $document[0].getElementById('mainnav').offsetHeight;
                 // get bookmark height
-                elements.bookmarkHeight = $document[0].getElementById('bookmark-container').offsetHeight;
+                elements.bookmarkHeight = $document[0].getElementsByClassName('meta-icons')[containerIndex].offsetHeight;
                 // get recordedit main container
                 elements.container = $document[0].getElementsByClassName('main-container')[containerIndex];
             } catch(error) {

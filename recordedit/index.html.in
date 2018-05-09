@@ -25,39 +25,27 @@
         <loading-spinner ng-show="!displayReady && !error"></loading-spinner>
         <div ng-if="reference && (reference.canCreate || reference.canUpdate)">
             <div ng-controller="FormController as form" class="row">
-                <div class="row">
-                    <div id="bookmark-container" class="col-xs-12 meta-icons">
-                        <div id="title" class="pull-left">
-                            <h1 id="page-title">
-                                <div ng-if="!form.resultset">
-                                    <span>{{ form.editMode ? "Edit " : "Create " }}</span>
-                                    <span class="re-displayname" ng-if="displayname.isHTML" ng-bind-html="displayname.value"></span>
-                                    <span class="re-displayname" ng-if="!displayname.isHTML" ng-bind="displayname.value"></span>
-                                    <span>{{ (form.recordEditModel.rows.length > 1) ? " Records" : " Record" }}</span>
-                                </div>
-                                <div ng-if="form.resultset">
-                                    <span>{{ form.resultsetModel.rowValues.length }}/{{ form.resultsetModel.pageLimit }}</span>
-                                    <a ng-href="{{::form.recordsetLink}}">
-                                        <span ng-if="::form.resultsetModel.tableDisplayname.isHTML" ng-bind-html="::form.resultsetModel.tableDisplayName.value"></span>
-                                        <span ng-if="::!form.resultsetModel.tableDisplayname.isHTML" ng-bind="::form.resultsetModel.tableDisplayName.value"></span>
-                                    </a>
-                                    <span>Records <span ng-if="::!form.editMode">Created</span><span ng-if="::form.editMode">Updated</span> Successfully</span>
-                                </div>
-                            </h1>
-                            <div>
-                                <h3 id="page-subtitle">
-                                    <span ng-if="tableDisplayName.isHTML" ng-bind-html="tableDisplayName.value" ng-attr-tooltip-placement="bottom" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}"></span>
-                                    <span ng-if="!tableDisplayName.isHTML" ng-bind="tableDisplayName.value" ng-attr-tooltip-placement="bottom" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}"></span>
-                                </h3>
-                            </div>
-                        </div>
-                        <div class="pull-right">
-                            <button ng-if="!form.resultset" id="submit-record-button" class="btn btn-primary btn-inverted" type="submit" ng-disabled="form.submissionButtonDisabled" ng-click="::form.submit()">Submit</button>
-                        </div>
-                    </div>
-                </div>
                 <div ng-hide="form.resultset">
                     <loading-spinner ng-show="form.submissionButtonDisabled || showSpinner"></loading-spinner>
+                    <div class="row">
+                        <div id="bookmark-container" class="col-xs-12 meta-icons">
+                            <div id="title" class="pull-left">
+                                <h1 id="page-title">
+                                        <span>{{ form.editMode ? "Edit " : "Create " }}</span>
+                                        <span class="re-displayname" ng-if="displayname.isHTML" ng-bind-html="displayname.value"></span>
+                                        <span class="re-displayname" ng-if="!displayname.isHTML" ng-bind="displayname.value"></span>
+                                        <span>{{ (form.recordEditModel.rows.length > 1) ? " Records" : " Record" }}</span>
+                                </h1>
+                                <h3 id="page-subtitle">
+                                    <span class="re-subtitle" ng-if="tableDisplayName.isHTML" ng-bind-html="tableDisplayName.value" ng-attr-tooltip-placement="bottom" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}"></span>
+                                    <span class="re-subtitle" ng-if="!tableDisplayName.isHTML" ng-bind="tableDisplayName.value" ng-attr-tooltip-placement="bottom" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}"></span>
+                                </h3>
+                            </div>
+                            <div class="pull-right">
+                                <button id="submit-record-button" class="btn btn-primary btn-inverted" type="submit" ng-disabled="form.submissionButtonDisabled" ng-click="::form.submit()">Submit</button>
+                            </div>
+                        </div>
+                    </div>
                     <div class="main-container">
                         <div class="main-body" style="padding-right:15px; padding-left:15px;">
                             <!-- Alerts section -->
@@ -261,7 +249,22 @@
                         <footer></footer>
                     </div>
                 </div>
-                <div ng-if="form.resultset">
+                <div class="resultset-container" ng-if="form.resultset">
+                    <div class="row">
+                        <div id="bookmark-container" class="col-xs-12 meta-icons">
+                            <div id="title" class="pull-left">
+                                <h1 id="page-title">
+                                    <span>{{ form.resultsetModel.rowValues.length }}/{{ form.resultsetModel.pageLimit }} Records <span ng-if="::!form.editMode">Created</span><span ng-if="::form.editMode">Updated</span> Successfully</span>
+                                </h1>
+                                <h3 id="page-subtitle">
+                                    <a ng-href="{{::form.recordsetLink}}">
+                                        <span class="re-subtitle" ng-if="tableDisplayName.isHTML" ng-bind-html="tableDisplayName.value" ng-attr-tooltip-placement="bottom" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}"></span>
+                                        <span class="re-subtitle" ng-if="!tableDisplayName.isHTML" ng-bind="tableDisplayName.value" ng-attr-tooltip-placement="bottom" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}"></span>
+                                    </a>
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
                     <div class="main-container">
                         <div class="main-body container-fluid">
                             <div id="resultset-tables" class="side-padding-15">

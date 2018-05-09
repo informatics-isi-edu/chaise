@@ -129,7 +129,7 @@ describe('View existing record,', function() {
 
                     return titleElement.getText();
                 }).then(function(txt) {
-                    expect(txt).toBe("Create " + testParams.table_displayname +" Record");
+                    expect(txt).toBe("Create Record", "Recordedit title is incorrect.");
 
                     return titleElement.element(by.css('span[ng-bind-html]')).getAttribute("innerHTML");
                 }).then(function(html) {

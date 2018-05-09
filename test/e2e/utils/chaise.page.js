@@ -268,20 +268,24 @@ var recordEditPage = function() {
     };
 
     this.getEntityTitleElement = function() {
-        return element(by.id('entity-title'));
+        return element(by.id('page-title'));
     };
 
-    this.getEntityTitleTooltip = function () {
-        // the .re-displayname element might not exist, that's why it's different from other tooltips
-        return element.all(by.css("#entity-title .re-displayname")).first().getAttribute('uib-tooltip');
+    this.getResultsetTitleElement = function() {
+        return element(by.css('.resultset-container #page-title'));
     };
 
-    this.getResultTitle = function () {
-        return element(by.id('result-title'));
+    this.getEntitySubtitleElement = function() {
+        return element(by.id('page-subtitle'));
     };
 
-    this.getResultTitleLink = function () {
-        return element.all(by.css('#result-title > a'));
+    this.getEntitySubtitleTooltip = function () {
+        // the .re-subtitle element might not exist, that's why it's different from other tooltips
+        return element.all(by.css("#page-subtitle .re-subtitle")).first().getAttribute('uib-tooltip');
+    };
+
+    this.getResultsetSubtitleLink = function () {
+        return element.all(by.css('#page-subtitle > a'));
     };
 
     this.getAllColumnCaptions = function() {
@@ -395,7 +399,7 @@ var recordEditPage = function() {
     };
 
     this.getFormTitle = function() {
-        return element(by.id("entity-title"));
+        return element(by.id("page-title"));
     };
 
     this.getForeignKeyInputDisplay = function(columnDisplayName, index) {
