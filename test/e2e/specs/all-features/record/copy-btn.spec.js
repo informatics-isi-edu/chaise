@@ -131,7 +131,7 @@ describe('View existing record,', function() {
                 }).then(function(txt) {
                     expect(txt).toBe("Create Record", "Recordedit title is incorrect.");
 
-                    return titleElement.element(by.css('span[ng-bind-html]')).getAttribute("innerHTML");
+                    return chaisePage.recordEditPage.getEntitySubtitleElement().element(by.css('span[ng-bind-html]')).getAttribute("innerHTML");
                 }).then(function(html) {
                     expect(html).toBe(testParams.table_inner_html_display);
 
