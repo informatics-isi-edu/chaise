@@ -87,10 +87,10 @@
             // Created a single entity or Updated one
             if (rowset.length == 1) {
                 AlertsService.addAlert('Your data has been submitted. Redirecting you now to the record...', 'success');
-                redirectUrl += "record/#" + UriUtils.fixedEncodeURIComponent(page.reference.location.catalog) + '/' + page.reference.location.compactPath;
+                redirectUrl += "record/#" + page.reference.location.catalog + '/' + page.reference.location.compactPath;
             } else {
                 AlertsService.addAlert('Your data has been submitted. Redirecting you now to the recordset...', 'success');
-                redirectUrl += "recordset/#" + UriUtils.fixedEncodeURIComponent(page.reference.location.catalog) + '/' + page.reference.location.compactPath;
+                redirectUrl += "recordset/#" + page.reference.location.catalog + '/' + page.reference.location.compactPath;
             }
 
             // Redirect to record or recordset app..
