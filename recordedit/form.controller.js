@@ -214,9 +214,9 @@
                     };
                 }
                 vm.resultset = true;
-                mainBodyEl = $document[0].getElementsByClassName('main-body')[1];
                 // delay updating the height of DOM elements so the current digest cycle can complete and "show" the resultset view
                 $timeout(function() {
+                    mainBodyEl = $document[0].getElementsByClassName('main-body')[1];
                     setMainContainerHeight();
                     UiUtils.setFooterStyle(1);
                 }, 0);
@@ -633,7 +633,7 @@
 
         // watch for the main body size to change
         $scope.$watch(function() {
-            return mainBodyEl && mainBodyEl[0].offsetHeight;
+            return mainBodyEl && mainBodyEl.offsetHeight;
         }, function (newValue, oldValue) {
             if (newValue) {
                 $timeout(function () {
@@ -651,7 +651,7 @@
         });
 
         $timeout(function () {
-            mainBodyEl = $document[0].getElementsByClassName('main-body');
+            mainBodyEl = $document[0].getElementsByClassName('main-body')[0];
         }, 0);
 
         /*------------------------code below is for fixing the column names when scrolling -----------*/
