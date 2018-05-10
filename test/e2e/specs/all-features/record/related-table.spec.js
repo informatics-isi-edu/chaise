@@ -256,8 +256,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         rowViewPaths: [
             "id=1", "id=2"
         ],
-        count: 3,
-        page_size: 2,
+        count: 2,
         canEdit: true,
         canCreate: true,
         canDelete: true

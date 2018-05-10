@@ -1156,6 +1156,19 @@ var recordsetPage = function() {
         var locator = element.all(by.css('aggregate-col-loader'));
         return browser.wait(protractor.ExpectedConditions.invisibilityOf(locator), timeout || browser.params.defaultTimeout);
     };
+
+    this.getWarningAlert = function () {
+        return element(by.css(".alert-warning"));
+    };
+
+    this.getWarningAlertDissmBtn = function () {
+        return element(by.css(".alert-warning")).element(by.css("button"));
+    };
+
+    this.getSelectAllBtn = function () {
+        return element(by.id("table-select-all-rows"));
+    };
+
 };
 
 var errorModal = function () {
@@ -1198,6 +1211,21 @@ function chaisePage() {
     this.clickButton = function(button) {
         return browser.executeScript("$(arguments[0]).click();", button);
     };
+
+    /**
+     * For longer strings, the sendKeys can be very slow.
+     * If the string length is more than 10, it will change the value of input directly
+     * and then does the sendKeys for the last character, just to make sure it's
+     * triggering angularjs digest cycle.
+     */
+    this.setInputValue = function (el, value) {
+        var sendKeysVal = value;
+        if (value.length > 10) {
+            browser.executeScript("arguments[0].value='" + value.substring(0, value.length-1) + "';", el);
+            sendKeysVal = value[value.length-1];
+        }
+        el.sendKeys(sendKeysVal);
+    }
     this.customExpect = {
         elementContainClass: function (ele, className) {
             expect(ele.getAttribute('class')).toContain(className);

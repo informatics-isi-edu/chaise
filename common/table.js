@@ -179,7 +179,10 @@
             var defer = $q.defer();
             (function (current) {
                 vm.reference.read(vm.pageLimit, vm.logObject).then(function (page) {
-                    if (current !== $rootScope.counter) return defer.resolve(false);
+                    if (current !== $rootScope.counter) {
+                        defer.resolve(false);
+                        return defer.promise;
+                    }
 
                     vm.page = page;
 
@@ -196,7 +199,7 @@
                         }
                     });
 
-                    return defer.resolve(true);
+                    defer.resolve(true);
                 }).catch(function(err) {
                     if (current !== $rootScope.counter) {
                         return defer.resolve(false);
@@ -207,7 +210,7 @@
                     if (DataUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
                       err.errorData.redirectUrl = UriUtils.createRedirectLinkFromPath(err.errorData.redirectPath);
                     }
-                    return defer.reject(err);
+                    defer.reject(err);
                 });
             }) ($rootScope.counter);
             return defer.promise;
@@ -233,15 +236,17 @@
                     aggList,
                     {action: logActions.recordsetCount}
                 ).then(function getAggregateCount(response) {
-                    if ($rootScope.counter !== current) {
-                        return defer.resolve(false);
+                    if (current !== $rootScope.counter) {
+                        defer.resolve(false);
+                        return defer.promise;
                     }
 
                     vm.totalRowsCnt = response[0];
-                    return defer.resolve(true);
+                    defer.resolve(true);
                 }).catch(function (err) {
-                    if ($rootScope.counter !== current) {
-                        return defer.resolve(false);
+                    if (current !== $rootScope.counter) {
+                        defer.resolve(false);
+                        return defer.promise;
                     }
 
                     // fail silently
