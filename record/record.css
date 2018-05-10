@@ -1,6 +1,4 @@
 .record-container {
-    /* If changing paddings here, change the padding in #bookmark-container */
-    padding-left: 20px;
     padding-right: 0;
     -webkit-box-flex: 1;
     display: flex;
@@ -10,9 +8,6 @@
 
 .record-container > .main-container {
     flex:1;
-    border-left: 10px solid white;
-    border-right: 2px solid white;
-    padding-right: 10px;
     position: relative;
     z-index: 1;
     overflow-x: hidden;

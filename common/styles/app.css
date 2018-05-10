@@ -180,6 +180,13 @@ img.spinner-sm {
     text-align: right;
 }
 
+/* used to replace the margin with padding on h1-4 elements */
+.replace-margin {
+    margin: 0;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
 /****************** ACCORDION ******************/
 
 .panel{
@@ -255,13 +262,6 @@ img.spinner-sm {
     text-align: right;
     position: absolute;
     top: 20px;
-}
-
-.main-container:after {
-    content: "";
-    height: 40px;
-    display: block;
-    opacity: 0;
 }
 
 
@@ -899,13 +899,14 @@ body.error-open loading-spinner {
 .mbl { margin-bottom: 20px; }
 .marl { margin: 20px;  }
 
-#footer {
-    width: 100%;
+/******** footer **********/
+footer {
     height: 30px;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    left: 0;
     background-color: #ededed;
-    bottom: 0px;
-    position: fixed;
-    z-index: 1000;
 }
 
 footer .container1 {
@@ -914,22 +915,20 @@ footer .container1 {
     padding-top: 5px;
     color: #595757;
     font-size: 11px;
-    line-height: 0;
 }
-.container1 > p{
-	margin: 8px 0 5px !important;
-}
+
 .container1 li {
      list-style-type: inherit;
  }
+
  .container1 ul {
      list-style-type: disc;
-     margin: 8px 0 5px !important;
  }
+
  .container1 ol {
      list-style-type: decimal;
-     margin: 8px 0 5px !important;
  }
+
  .container1 code {
      padding-left: 0;
      padding-right: 0;
@@ -1099,8 +1098,13 @@ footer .container1 {
      display:inline-block;
  }
 
- .recordset-container.without-faceting {
-    margin-top: 20px;
+ .recordset-container.without-faceting .main-container{
+    padding-top: 20px;
+ }
+
+ .recordset-container.without-faceting .main-body{
+    padding-left: 15px;
+    padding-right: 15px;
  }
 
  .recordset-container.with-faceting {
@@ -1167,6 +1171,7 @@ footer .container1 {
 
  /** recordset with faceting side panel **/
  .recordset-container.with-faceting > .faceting-resizable {
+     padding-top: 5px;
      position: relative;
      max-width: 50vw;
      z-index: 2;
@@ -1247,14 +1252,30 @@ footer .container1 {
 
  /****** RSwF main container *******/
 
+ .modal-body .recordset-container footer {
+     display: none !important;
+ }
+
+ .modal-body .recordset-container alerts {
+     display: none !important;
+ }
+
+ .recordset-container.with-faceting {
+     padding-left: 15px;
+     padding-right: 15px;
+ }
+
  .recordset-container.with-faceting > .main-container {
      flex:1;
-     border-left: 25px solid white;
-     padding-right: 10px;
      position: relative;
      z-index: 1;
      overflow-y: auto;
-     margin-top: 10px;
+     padding-top: 15px;
+ }
+
+ .recordset-container.with-faceting .main-body {
+     border-left: 25px solid white;
+     padding-right: 10px;
  }
 
  .recordset-container.with-faceting .pager {
