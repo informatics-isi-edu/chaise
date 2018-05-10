@@ -460,7 +460,8 @@
                             scope.facetColumn.column.groupAggregate.histogram(numBuckets, requestMin, requestMax).read().then(function (response) {
                                 if (scope.facetColumn.sourceReference.uri !== uri) {
                                     // return breaks out of the current callback function
-                                    return defer.resolve(false);
+                                    defer.resolve(false);
+                                    return defer.promise;
                                 }
 
                                 // after zooming in, we don't care about displaying values beyond the set the user sees
@@ -496,7 +497,7 @@
                                     Plotly.relayout(plotEl, {'xaxis.fixedrange': scope.disableZoomIn()});
                                 }
 
-                                return defer.resolve(true);
+                                defer.resolve(true);
                             }).catch(function (err) {
                                 defer.reject(err);
                             });
@@ -764,24 +765,24 @@
                     scope.facetModel.appliedFilters.push(notNullFilter);
                     defer.resolve();
                 }
-
-                if (scope.facetColumn.choiceFilters.length === 0) {
+                else if (scope.facetColumn.choiceFilters.length === 0) {
                     defer.resolve();
                 }
-
-                scope.facetColumn.getChoiceDisplaynames().then(function (filters) {
-                    filters.forEach(function (f) {
-                        scope.facetModel.appliedFilters.push({
-                            uniqueId: f.uniqueId,
-                            displayname: f.displayname,
-                            tuple: f.tuple // this might be null
+                else {
+                    scope.facetColumn.getChoiceDisplaynames().then(function (filters) {
+                        filters.forEach(function (f) {
+                            scope.facetModel.appliedFilters.push({
+                                uniqueId: f.uniqueId,
+                                displayname: f.displayname,
+                                tuple: f.tuple // this might be null
+                            });
                         });
-                    });
 
-                    defer.resolve();
-                }).catch(function (error) {
-                    defer.reject(error);
-                });
+                        defer.resolve();
+                    }).catch(function (error) {
+                        defer.reject(error);
+                    });
+                }
                 return defer.promise;
             }
 
@@ -828,7 +829,8 @@
                 var appliedLen = scope.facetModel.appliedFilters.length;
                 if (appliedLen >= tableConstants.PAGE_SIZE) {
                     scope.checkboxRows = scope.facetModel.appliedFilters.map(appliedFilterToRow);
-                    return defer.resolve(true);
+                    defer.resolve(true);
+                    return defer.promise;
                 }
 
                 // read new data if needed
@@ -838,7 +840,8 @@
                     scope.reference.read(appliedLen + tableConstants.PAGE_SIZE, facetLog).then(function (page) {
                         // if this is not the result of latest facet change
                         if (scope.reference.uri !== uri) {
-                            return defer.resolve(false);
+                            defer.resolve(false);
+                            return defer.promise;
                         }
 
                         scope.checkboxRows = scope.facetModel.appliedFilters.map(appliedFilterToRow);
@@ -1005,6 +1008,12 @@
                             // if the value returned is an object with matchNotNull
                             if (res.matchNotNull) {
                                 ref = scope.facetColumn.addNotNullFilter();
+
+                                // update the reference
+                                if (!scope.parentCtrl.updateVMReference(ref, -1)) {
+                                    return;
+                                }
+
                                 scope.facetModel.appliedFilters = [notNullFilter];
                             } else if (Array.isArray(res)){
                                 var tuples = res;
@@ -1013,6 +1022,11 @@
                                 ref = scope.facetColumn.replaceAllChoiceFilters(tuples.map(function (t) {
                                     return getFilterUniqueId(t, scope.columnName);
                                 }));
+
+                                // update the reference
+                                if (!scope.parentCtrl.updateVMReference(ref, -1)) {
+                                    return;
+                                }
 
                                 // create the list of applied filters, this Will
                                 // be used for genreating the checkboxRows of current facet
@@ -1034,9 +1048,6 @@
 
                             // make sure to update all the opened facets
                             scope.parentCtrl.setInitialized();
-
-                            // update the reference
-                            scope.parentCtrl.updateVMReference(ref, -1);
 
                             // focus on the current facet
                             scope.parentCtrl.focusOnFacet(scope.index);

@@ -126,6 +126,12 @@
                     "type": {
                         "typename": "serial4"
                     }
+                },
+                {
+                    "name": "col_w_long_values",
+                    "type": {
+                        "typename": "text"
+                    }
                 }
             ],
             "annotations": {
@@ -148,7 +154,8 @@
                             {"source": [{"outbound": ["faceting", "main_fk2"]}, "id"], "open": true},
                             {"source": [{"inbound": ["faceting", "main_f3_assoc_fk1"]}, {"outbound": ["faceting", "main_f3_assoc_fk2"]}, "term"]},
                             {"source": [{"inbound": ["faceting", "f4_fk1"]}, "id"], "entity": false, "ux_mode": "choices"},
-                            {"source": [{"outbound": ["faceting", "main_fk1"]}, "term"], "markdown_name": "F1 with Term"}
+                            {"source": [{"outbound": ["faceting", "main_fk1"]}, "term"], "markdown_name": "F1 with Term"},
+                            {"source": "col_w_long_values"}
                         ]
                     }
                 }

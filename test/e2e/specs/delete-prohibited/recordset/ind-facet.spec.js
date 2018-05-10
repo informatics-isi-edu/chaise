@@ -4,8 +4,8 @@ var EC = protractor.ExpectedConditions;
 var testParams = {
     schema_name: "faceting",
     table_name: "main",
-    totalNumFacets: 15,
-    facetNames: [ "id", "int_col", "float_col", "date_col", "timestamp_col", "text_col", "longtext_col", "markdown_col", "boolean_col", "jsonb_col", "F1", "to_name", "f3 (term)", "from_name", "F1 with Term" ],
+    totalNumFacets: 16,
+    facetNames: [ "id", "int_col", "float_col", "date_col", "timestamp_col", "text_col", "longtext_col", "markdown_col", "boolean_col", "jsonb_col", "F1", "to_name", "f3 (term)", "from_name", "F1 with Term", "col_w_long_values" ],
     defaults: {
         openFacetNames: [ "id", "int_col", "to_name" ],
         numFilters: 2,
@@ -257,7 +257,7 @@ describe("Viewing Recordset with Faceting,", function() {
         });
 
         describe("default presentation based on facets annotation ", function () {
-            it("should have 14 facets", function () {
+            it("should have " + testParams.totalNumFacets + " facets", function () {
                 chaisePage.recordsetPage.getAllFacets().count().then(function (ct) {
                     expect(ct).toBe(testParams.totalNumFacets, "Number of all facets is incorrect");
 
@@ -543,7 +543,7 @@ describe("Viewing Recordset with Faceting,", function() {
                 clearAll = chaisePage.recordsetPage.getClearAllFilters();
             });
 
-            for (var j=0; j<testParams.totalNumFacets; j++) {
+            for (var j=0; j<testParams.facets.length; j++) {
                 // anon function to capture looping variable
                 (function(facetParams, idx) {
                     if (facetParams.type == "choice") {
