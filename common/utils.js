@@ -258,7 +258,7 @@
             }
 
             var baseUri = chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : location.origin + '/ermrest';
-            var path = '/catalog/' + fixedEncodeURIComponent(catalogId) + '/entity' + hash;
+            var path = '/catalog/' + catalogId + '/entity' + hash;
             return baseUri + path;
         }
 
@@ -292,7 +292,7 @@
                 appPath = ContextUtils.getValueFromContext(appContextMapping, context);
             }
 
-            var url = chaiseBaseURL + appPath + "/#" + fixedEncodeURIComponent(location.catalog) + "/" + location.path;
+            var url = chaiseBaseURL + appPath + "/#" + location.catalog + "/" + location.path;
             if (location.queryParamsString && (context.indexOf("compact") === 0)) {
                 url = url + "?" + location.queryParamsString;
             }
