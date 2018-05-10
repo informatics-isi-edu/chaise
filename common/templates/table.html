@@ -15,14 +15,15 @@
                         </button>
                     </div>
                 </th>
-                <th nowrap ng-repeat="col in vm.columns track by $index">
-                    <span class="table-column-displayname" ng-attr-uib-tooltip="{{::(col.comment) ? col.comment : undefined}}" ng-attr-tooltip-placement="{{::(col.comment) ? 'top' : undefined}}" title="{{col.comment}}" ng-click="col.sortable && vm.enableSort && sortby(col.name)">
-                        <span ng-if="::col.displayname.isHTML" ng-bind-html="::col.displayname.value"></span>
-                        <span ng-if="::!col.displayname.isHTML" ng-bind="::col.displayname.value"></span>
+                <th nowrap ng-repeat="col in vm.columnModels track by $index">
+                    <span class="table-column-displayname" ng-attr-uib-tooltip="{{::(col.column.comment) ? col.column.comment : undefined}}" ng-attr-tooltip-placement="{{::(col.column.comment) ? 'top' : undefined}}" title="{{col.column.comment}}" ng-click="col.column.sortable && vm.enableSort && sortby(col.column.name)">
+                        <span ng-if="::col.column.displayname.isHTML" ng-bind-html="::col.column.displayname.value"></span>
+                        <span ng-if="::!col.column.displayname.isHTML" ng-bind="::col.column.displayname.value"></span>
                     </span>
-                    <span ng-show="col.sortable && vm.enableSort && vm.sortby==col.name && vm.sortOrder=='asc'" ng-click="::toggleSortOrder()" class="glyphicon glyphicon-sort-by-attributes" ng-style="{'cursor': 'pointer'}"></span>
-                    <span ng-show="col.sortable && vm.enableSort && vm.sortby==col.name && vm.sortOrder=='desc'" ng-click="::toggleSortOrder()" class="glyphicon glyphicon-sort-by-attributes-alt" ng-style="{'cursor': 'pointer'}"></span>
-                    <span ng-show="col.sortable && vm.enableSort && vm.sortby!==col.name" class="glyphicon glyphicon-sort" ng-click="::sortby(col.name)" ng-style="{'cursor': 'pointer'}"></span>
+                    <span ng-show="col.column.sortable && vm.enableSort && vm.sortby==col.column.name && vm.sortOrder=='asc'" ng-click="::toggleSortOrder()" class="glyphicon glyphicon-sort-by-attributes" ng-style="{'cursor': 'pointer'}"></span>
+                    <span ng-show="col.column.sortable && vm.enableSort && vm.sortby==col.column.name && vm.sortOrder=='desc'" ng-click="::toggleSortOrder()" class="glyphicon glyphicon-sort-by-attributes-alt" ng-style="{'cursor': 'pointer'}"></span>
+                    <span ng-show="col.column.sortable && vm.enableSort && vm.sortby!==col.column.name" class="glyphicon glyphicon-sort" ng-click="::sortby(col.column.name)" ng-style="{'cursor': 'pointer'}"></span>
+                    <span ng-show="col.isLoading" class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
                 </th>
             </tr>
         </thead>
@@ -34,7 +35,7 @@
                 config="vm.config" context="vm.context" on-row-click-bind="onSelect" selected="isSelected(vm.page.tuples[$index])" select-disabled="isDisabled(vm.page.tuples[$index])">
             </tr>
             <tr ng-if="vm.rowValues.length < 1">
-                <td id="no-results-row" colspan="{{vm.columns.length + 1}}" style="text-align: center;">No Results Found</td>
+                <td id="no-results-row" colspan="{{vm.columnModels.length + 1}}" style="text-align: center;">No Results Found</td>
             </tr>
         </tbody>
     </table>

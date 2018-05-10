@@ -1330,7 +1330,6 @@
         }
       }
     },
-
     "media_collection": {
       "comment": null,
       "kind": "table",
@@ -1409,7 +1408,6 @@
         }
       }
     },
-
     "category_collection": {
       "comment": "domain",
       "kind": "table",
@@ -1495,7 +1493,6 @@
         }
       }
     },
-
     "category_collection_2": {
       "comment": "domain",
       "kind": "table",
@@ -1569,7 +1566,6 @@
         }
       }
     },
-
     "category_collection_3": {
       "comment": "domain",
       "kind": "table",
@@ -1643,7 +1639,6 @@
         }
       }
     },
-
     "category_collection_4": {
       "comment": "domain",
       "kind": "table",
@@ -1717,7 +1712,6 @@
         }
       }
     },
-
     "category_collection_5": {
       "comment": "domain",
       "kind": "table",
@@ -1791,7 +1785,6 @@
         }
       }
     },
-
     "category_collection_6": {
       "comment": "domain",
       "kind": "table",
@@ -1865,7 +1858,6 @@
         }
       }
     },
-
     "multiple_records": {
    "comment": "domain",
    "kind": "table",
@@ -1944,24 +1936,6 @@
      }
    }
   },
-
-  "table_names": [
-    "category",
-    "file",
-    "accommodation",
-    "accommodation_image",
-    "booking",
-    "media",
-    "multiple_records",
-    "accommodation_collection",
-    "category_collection",
-    "category_collection_2",
-    "category_collection_3",
-    "category_collection_4",
-    "category_collection_5",
-    "category_collection_6",
-    "media_collection"
-  ],
   "comment": null,
   "annotations": {
     "tag:misd.isi.edu,2015:display": {

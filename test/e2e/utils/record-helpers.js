@@ -7,7 +7,7 @@ exports.testPresentation = function (tableParams) {
 	    chaisePage.waitForElementInverse(element(by.id("spinner")));
 
 	    // make sure the last related entity is visible
-	    chaisePage.waitForElement(element(by.id('rt-accommodation_image')));
+	    chaisePage.waitForElementInverse(element(by.id('rt-loading')));
 	};
 
     beforeAll(function () {

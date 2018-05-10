@@ -27,6 +27,7 @@
     .factory('constants', [function(){
         return {
             defaultPageSize: 25,
+            MAX_CONCURENT_REQUEST: 4
         };
     }])
 
@@ -46,14 +47,235 @@
         $logProvider.debugEnabled(chaiseConfig.debug === true);
     }])
 
-    .run(['AlertsService', 'constants', 'DataUtils', 'ERMrest', 'ErrorService', 'FunctionUtils', 'headInjector', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', 'Errors',
-        function runApp(AlertsService, constants, DataUtils, ERMrest, ErrorService, FunctionUtils, headInjector, logActions, MathUtils, messageMap, modalBox, Session, UiUtils, UriUtils, $log, $rootScope, $window, Errors) {
+    .factory('recordAppUtils',
+             ['constants', 'DataUtils', 'Errors', '$log', 'logActions', 'modalBox', '$q', 'recordTableUtils', '$rootScope',
+             function (constants, DataUtils, Errors, $log, logActions, modalBox, $q, recordTableUtils, $rootScope) {
+
+        function haveFreeSlot() {
+            var res = $rootScope.occupiedSlots < constants.MAX_CONCURENT_REQUEST;
+            if (!res) {
+                $log.debug("No free slot available.");
+            }
+            return res;
+        }
+
+        function processRequests(isUpdate) {
+            if (!haveFreeSlot()) return;
+
+            if ($rootScope.isMainDirty) {
+                readMainEntity().then(function (tuple) {
+                    $rootScope.isMainDirty = false;
+                    processRequests(isUpdate);
+                }).catch(genericErrorCatch);
+                return;
+            }
+
+            var i = 0, model, logObject;
+
+            // inline entities
+            for (i = 0; i < $rootScope.columnModels.length && $rootScope.hasInline; i++) {
+                model = $rootScope.columnModels[i];
+                if (!model.isInline || !model.tableModel.dirtyResult) continue;
+                if (!haveFreeSlot()) return;
+                model.tableModel.logObject = getTableModelLogObject(model.tableModel, isUpdate ? logActions.recordInlineUpdate : logActions.recordInlineRead);
+                recordTableUtils.updateMainEntity(model.tableModel, processRequests, !isUpdate);
+            }
+
+            // main aggregates
+            if ($rootScope.hasAggregate) {
+                readMainAggregates(isUpdate);
+            }
+
+            // related entites
+            for (i = 0; i < $rootScope.relatedTableModels.length; i++) {
+                model = $rootScope.relatedTableModels[i];
+                if (!model.tableModel.dirtyResult) continue;
+                if (!haveFreeSlot()) return;
+                model.tableModel.logObject = getTableModelLogObject(model.tableModel, isUpdate ? logActions.recordRelatedUpdate : logActions.recordRelatedRead);
+                recordTableUtils.updateMainEntity(model.tableModel, processRequests, !isUpdate);
+            }
+
+            // aggregates in inline
+            for (i = 0; i < $rootScope.columnModels.length && $rootScope.hasInline; i++) {
+                model = $rootScope.columnModels[i];
+                if (!model.isInline || model.tableModel.dirtyResult) continue;
+                if (!haveFreeSlot()) return;
+                console.log("getting aggregates in inline");
+                logObject = getTableModelLogObject(model.tableModel, isUpdate ? logActions.recordInlineAggregateUpdate : logActions.recordInlineAggregate);
+                recordTableUtils.updateColumnAggregates(model.tableModel, processRequests, logObject, !isUpdate);
+            }
+
+            // aggregates in related
+            for (i = 0; i < $rootScope.relatedTableModels.length; i++) {
+                model = $rootScope.relatedTableModels[i];
+                if (model.tableModel.dirtyResult) continue;
+                if (!haveFreeSlot()) return;
+                console.log("getting aggregates in related");
+                logObject = getTableModelLogObject(model.tableModel, isUpdate ? logActions.recordRelatedAggregateUpdate : logActions.recordRelatedAggregate);
+                recordTableUtils.updateColumnAggregates(model.tableModel, processRequests, logObject, !isUpdate);
+            }
+        }
+
+        function readMainEntity() {
+            var defer = $q.defer();
+
+            $rootScope.reference.read(1, {action: logActions.recordRead}).then(function (page) {
+                $log.info("Page: ", page);
+
+                /*
+                *  recordSetLink should be used to present user with  an option in case of no data found/more data found(>1)
+                *  This could be link to RECORDSET or SEARCH.
+                */
+                var recordSetLink = page.reference.unfilteredReference.contextualize.compact.appLink;
+                var tableDisplayName = page.reference.displayname.value;
+                if (page.tuples.length < 1) {
+                    throw new Errors.noRecordError({}, tableDisplayName, recordSetLink);
+                }
+                else if(page.hasNext || page.hasPrevious){
+                    throw new Errors.multipleRecordError(tableDisplayName, recordSetLink);
+                }
+
+                $rootScope.page = page;
+                var tuple = $rootScope.tuple = page.tuples[0];
+
+                // Used directly in the record-display directive
+                $rootScope.recordDisplayname = tuple.displayname;
+
+                // Collate tuple.isHTML and tuple.values into an array of objects
+                // i.e. {isHTML: false, value: 'sample'}
+                $rootScope.recordValues = [];
+                tuple.values.forEach(function(value, index) {
+                    $rootScope.recordValues.push({
+                        isHTML: tuple.isHTML[index],
+                        value: value
+                    });
+                });
+
+                $rootScope.displayReady = true;
+                defer.resolve(page);
+            }).catch(function (err) {
+                defer.reject(err);
+            });
+
+            return defer.promise;
+        }
+
+        function readMainAggregates(isUpdate) {
+            $rootScope.columnModels.forEach(function (model, index) {
+                if (!model.isAggregate || !haveFreeSlot() || !model.dirtyResult) return;
+                $rootScope.occupiedSlots++;
+                model.dirtyResult = false;
+                readMainColumnAggregate(model.column, index, $rootScope.counter).then(function (res) {
+                    $rootScope.occupiedSlots--;
+                    model.dirtyResult = !res;
+                    processRequests(isUpdate);
+                }).catch(genericErrorCatch);
+            });
+        }
+
+        function readMainColumnAggregate(column, index, current) {
+            var defer = $q.defer();
+            var logObject = column.reference.defaultLogInfo;
+            logObject.action = logActions.recordAggregate;
+            logObject.referrer = $rootScope.reference.defaultLogInfo;
+
+            column.getAggregatedValue($rootScope.page, logObject).then(function (values) {
+                if ($rootScope.counter !== current) {
+                    return defer.resolve(false);
+                }
+                $rootScope.recordValues[index] = values[0];
+                return defer.resolve(true);
+            }).catch(function (err) {
+                if ($rootScope.counter !== current) {
+                    return defer.resolve(false);
+                }
+                return defer.reject(err);
+            });
+            return defer.promise;
+        }
+
+        function updateRecordPage(isUpdate) {
+            if (!DataUtils.isInteger($rootScope.occupiedSlots)) {
+                $rootScope.occupiedSlots = 0;
+            }
+            if (!DataUtils.isInteger($rootScope.counter)) {
+                $rootScope.counter = 0;
+            }
+            $rootScope.counter++;
+
+            $rootScope.columnModels.forEach(function (m) {
+                if (m.isAggregate) {
+                    m.dirtyResult = true;
+                } else if (m.isInline) {
+                    m.tableModel.dirtyResult = true;
+                }
+            });
+            $rootScope.relatedTableModels.forEach(function (m) {
+                m.tableModel.dirtyResult = true;
+            });
+
+            processRequests(isUpdate);
+        }
+
+        function genericErrorCatch(exception) {
+            if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'redirectPath')) {
+                var redirectLink = UriUtils.createRedirectLinkFromPath(exception.errorData.redirectPath);
+                exception.errorData.redirectUrl = redirectLink.replace('record', 'recordset');
+            }
+            throw exception;
+        }
+
+        function getTableModel (reference, context, fromTuple) {
+            return {
+                reference: reference,
+                pageLimit: getPageSize(reference),
+                displayType: reference.display.type,
+                fromTuple: fromTuple,
+                context: context,
+                enableSort: true,
+                rowValues: [],
+                selectedRows: [],//TODO migth not be needed
+                dirtyResult: true,
+                config: {
+                    viewable: true,
+                    editable: $rootScope.modifyRecord,
+                    deletable: $rootScope.modifyRecord && $rootScope.showDeleteButton,
+                    selectMode: modalBox.noSelect
+                }
+            };
+        }
+
+        function getTableModelLogObject(tableModel, action) {
+            var logObject = tableModel.reference.defaultLogInfo;
+            logObject.referrer = $rootScope.reference.defaultLogInfo;
+            logObject.action = action;
+            return logObject;
+        }
+
+        /**
+         * @private
+         * returns page size of the display attribute in the object.
+         * @param {ERMrest.Reference} reference Object reference that has the display attribute
+         */
+        function getPageSize(reference){
+            return ((!angular.isUndefined(reference) && reference.display.defaultPageSize) ? reference.display.defaultPageSize:constants.defaultPageSize);
+        }
+
+        return {
+            updateRecordPage: updateRecordPage,
+            genericErrorCatch: genericErrorCatch,
+            readMainEntity: readMainEntity,
+            getTableModel: getTableModel
+        };
+    }])
+
+    .run(['AlertsService', 'DataUtils', 'ERMrest', 'FunctionUtils', 'headInjector', '$log', 'MathUtils', 'messageMap', 'recordAppUtils',  '$rootScope', 'Session', '$timeout', 'UiUtils', 'UriUtils', '$window',
+        function runApp(AlertsService, DataUtils, ERMrest, FunctionUtils, headInjector, $log, MathUtils, messageMap, recordAppUtils, $rootScope, Session, $timeout, UiUtils, UriUtils , $window) {
 
         var session,
             context = {},
             errorData = {};
         $rootScope.displayReady = false;
-        $rootScope.recDisplayReady = false;
         $rootScope.showSpinner = false; // this property is set from common modules for controlling the spinner at a global level that is out of the scope of the app
 
         UriUtils.setOrigin();
@@ -73,70 +295,6 @@
 
         FunctionUtils.registerErmrestCallbacks();
 
-        /**
-        * getPageSize(obj) returms page size of the display attribute in the object.
-        * @param {object} obj Object reference that has the display attribute
-        */
-        function getPageSize(obj){
-            return ((!angular.isUndefined(obj) && obj.display.defaultPageSize)?obj.display.defaultPageSize:constants.defaultPageSize);
-        }
-
-        /**
-        * getRelatedTableData(refObj, accordionOpen, callback) returns model object with all required component values
-        * that is needed by <record-table>, <record-action-bar> and <record-display> diretives.
-        * @param {object} refObj Reference object with component details
-        * @param {bool} accordionOpen if paased as TRUE accordion should be expanded
-        * @param {string} context  context for reading page reference
-        * @param {callback} callback to be called after function processing
-        */
-        function getRelatedTableData(refObj, accordionOpen, context, callback){
-
-            // TODO: function should be re-written using defer
-            var pageSize = getPageSize(refObj);
-            refObj.read(pageSize, {action: logActions.recordRelatedRead}).then(function (page) {
-                var model = {
-                    reference: refObj,
-                    columns: refObj.columns,
-                    page: page,
-                    pageLimit: pageSize,
-                    hasNext: page.hasNext,      // used to determine if a link should be shown
-                    hasLoaded: true,            // used to determine if the current table and next table should be rendered
-                    open: accordionOpen,        // to define if the accordion is open or closed
-                    enableSort: true,           // allow sorting on table
-                    sortby: null,               // column name, user selected or null
-                    sortOrder: null,            // asc (default) or desc
-                    rowValues: [],              // array of rows values
-                    selectedRows: [],           // array of selected rows, needs to be defined even if not used
-                    search: null,                // search term
-                    displayType: refObj.display.type,
-                    context: context,
-                    fromTuple: $rootScope.tuple
-                };
-                model.rowValues = DataUtils.getRowValuesFromPage(page);
-                model.config = {
-                    viewable: true,
-                    editable: $rootScope.modifyRecord,
-                    deletable: $rootScope.modifyRecord && $rootScope.showDeleteButton,
-                    selectMode: modalBox.noSelect
-                };
-                // return model;
-                callback(model);
-            }, function readFail(error) {
-                var model = {
-                    hasLoaded: true
-                };
-                // return model;
-                callback(model);
-                throw error;
-            }).catch(function(e) {
-                // The .catch from the outer promise won't catch errors from this closure
-                // so a .catch needs to be appended here.
-                errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
-                errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
-                e.errorData = errorData;
-                throw e;
-            });
-        }
         // Subscribe to on change event for session
         var subId = Session.subscribeOnChange(function() {
 
@@ -157,133 +315,72 @@
                 $rootScope.reference.session = session;
                 $log.info("Reference: ", $rootScope.reference);
 
-                return $rootScope.reference.read(1, {action: logActions.recordRead});
-            }, function error(exception) {
-                if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'redirectPath')) {
-                    var redirectLink = UriUtils.createRedirectLinkFromPath(exception.errorData.redirectPath);
-                    exception.errorData.redirectUrl = redirectLink.replace('record', 'recordset');
-                }
-                throw exception;
-            }).then(function getPage(page) {
-                $log.info("Page: ", page);
-                /*
-                *  recordSetLink should be used to present user with  an option in case of no data found/more data found(>1)
-                *  This could be link to RECORDSET or SEARCH.
-                */
-                var recordSetLink = page.reference.unfilteredReference.contextualize.compact.appLink;
-                var tableDisplayName = page.reference.displayname.value;
-                if (page.tuples.length < 1) {
-                    throw new Errors.noRecordError({}, tableDisplayName, recordSetLink);
-                }
-                else if(page.hasNext || page.hasPrevious){
-                    $rootScope.displayReady = true;
-                    // TODO this will break going to recordset with filters/facets, make sure RS has proper data visible
-                    // the problem is that if there's a filter in the URL, the app will redirect to recordset and understand the filter, but the app won't show anything
-                    // selected inside the facet. So we will have a recordset page that is filtered by a filter you cant remove unless the URL is changed
-                    throw new Errors.multipleRecordError(tableDisplayName, recordSetLink);
-                }
-
-                var tuple = $rootScope.tuple = page.tuples[0];
-                // Used directly in the record-display directive
-                $rootScope.recordDisplayname = tuple.displayname;
+                return recordAppUtils.readMainEntity();
+            }).then(function (page) {
+                var tuple = page.tuples[0];
 
                 // related references
-                $rootScope.relatedReferences = $rootScope.reference.related(tuple);
+                var related = $rootScope.reference.related(tuple);
 
-                $rootScope.loading = $rootScope.relatedReferences.length > 0;
+                var columns = $rootScope.reference.generateColumnsList(tuple), model;
 
-                // Collate tuple.isHTML and tuple.values into an array of objects
-                // i.e. {isHTML: false, value: 'sample'}
-                $rootScope.recordValues = [];
-                tuple.values.forEach(function(value, index) {
-                    $rootScope.recordValues.push({
-                        isHTML: tuple.isHTML[index],
-                        value: value
+                $rootScope.hasAggregate = false;
+                $rootScope.hasInline = false;
+                $rootScope.columnModels = [];
+                columns.forEach(function (col, index) {
+                    model = {};
+
+                    // aggregate
+                    if (col.isPathColumn && col.hasAggregate) {
+                        model = {
+                            isAggregate: true,
+                            dirtyResult: true
+                        };
+                        $rootScope.hasAggregate = true;
+                    }
+
+                    // inline
+                    else if (col.isInboundForeignKey || (col.isPathColumn && col.hasPath && !col.isUnique && !col.hasAggregate)) {
+                        var reference = col.reference.contextualize.compactBriefInline;
+                        model = {
+                            isInline: true,
+                            displayType: reference.display.type,
+                            displayname: reference.displayname,
+                            tableModel: recordAppUtils.getTableModel(reference, "compact/brief/inline")
+                        };
+                        $rootScope.hasInline = true;
+                    }
+
+                    model.column = col;
+                    $rootScope.columnModels.push(model);
+                });
+
+                var cutOff = chaiseConfig.maxRelatedTablesOpen > 0? chaiseConfig.maxRelatedTablesOpen : Infinity;
+                var openByDefault = related.length > cutOff ? false:true;
+                $rootScope.relatedTableModels = [];
+                $rootScope.lastRendered = null;
+                related.forEach(function (ref, index) {
+                    ref = ref.contextualize.compactBrief;
+                    if (!$rootScope.showEmptyRelatedTables && $rootScope.modifyRecord && ref.canCreate) {
+                        $rootScope.showEmptyRelatedTables = true;
+                    }
+
+                    $rootScope.relatedTableModels.push({
+                        open: openByDefault,
+                        displayType: ref.display.type,
+                        displayname: ref.displayname,
+                        tableModel: recordAppUtils.getTableModel(ref, "compact/brief", $rootScope.tuple)
                     });
                 });
 
-                $rootScope.columns = $rootScope.reference.generateColumnsList(tuple);
-
-                // get data for aggregated related entities
-                $rootScope.columns.filter(function (c, i) {
-                    if (c.isPathColumn && c.hasAggregate) {
-                        c.getAggregatedValue(page, {action: logActions.recordAggregate}).then(function (values) {
-                            $rootScope.recordValues[i] = values[0];
-                        }).catch(function (err) {
-                            throw err;
-                        });
-                    }
+                $rootScope.loading = related.length > 0;
+                $timeout(function () {
+                    recordAppUtils.updateRecordPage();
                 });
 
-                var allInbFKColsIdx = [];
-                var allInbFKCols = $rootScope.columns.filter(function (o, i) {
-                    if(o.isInboundForeignKey || (o.isPathColumn && o.hasPath && !o.isUnique && !o.hasAggregate)){
-                        allInbFKColsIdx.push(i);
-                        return o;
-                    }
-                });
-                $rootScope.inboundFKCols = allInbFKCols;
-                $rootScope.inboundFKColsIdx = allInbFKColsIdx;
-                $rootScope.inbFKRef = allInbFKCols;
-                if(allInbFKCols.length>0){
+            }).catch(recordAppUtils.genericErrorCatch);
 
-                    $rootScope.rtrefDisTypetable = [];
-                    $rootScope.colTableModels = [];
-
-                    for(var i =0;i<allInbFKCols.length;i++){
-                        // TODO this is mutating the reference
-                        allInbFKCols[i].reference = allInbFKCols[i].reference.contextualize.compactBriefInline;
-                        var ifkPageSize = getPageSize(allInbFKCols[i].reference);
-                        (function(i) {
-                            if (allInbFKCols[i].reference.canCreate && $rootScope.modifyRecord && !$rootScope.showEmptyRelatedTables) {
-                                $rootScope.showEmptyRelatedTables = true;
-                            }
-                            getRelatedTableData(allInbFKCols[i].reference, true, "compact/brief/inline", function(model){
-
-                                $rootScope.colTableModels[allInbFKColsIdx[i]] = model;
-                                $rootScope.rtrefDisTypetable[allInbFKColsIdx[i]] = allInbFKCols[i].reference;
-                                $rootScope.recDisplayReady =  (i==allInbFKCols.length-1)?true:false;
-
-                            });
-                        })(i);
-                    }
-                }else{
-                    $rootScope.recDisplayReady =  true;
-                }
-
-                $rootScope.tableModels = [];
-                $rootScope.lastRendered = null;
-                var cutOff = chaiseConfig.maxRelatedTablesOpen > 0? chaiseConfig.maxRelatedTablesOpen : Infinity;
-                var boolIsOpen = $rootScope.relatedReferences.length > cutOff ? false:true;
-
-                for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
-
-                    $rootScope.relatedReferences[i] = $rootScope.relatedReferences[i].contextualize.compactBrief;
-                    var pageSize = getPageSize($rootScope.relatedReferences[i]);
-                    (function(i) {
-                        if ($rootScope.relatedReferences[i].canCreate && $rootScope.modifyRecord && !$rootScope.showEmptyRelatedTables) {
-                            $rootScope.showEmptyRelatedTables = true;
-                        }
-                        getRelatedTableData($rootScope.relatedReferences[i], boolIsOpen, "compact/brief", function(model){
-                            $rootScope.tableModels[i] = model;
-                            $rootScope.displayReady = true;
-                        });
-                    })(i);
-                }
-                if ($rootScope.relatedReferences.length == 0) {
-                    $rootScope.displayReady = true;
-                }
-
-            }).catch(function genericCatch(exception) {
-                if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'redirectPath')) {
-                    var redirectLink = UriUtils.createRedirectLinkFromPath(exception.errorData.redirectPath);
-                    exception.errorData.redirectUrl = redirectLink.replace('record', 'recordset');
-                }
-                throw exception;
-            });
-
-        })
-
+        });
 
         /**
          * it saves the location in $rootScope.location.

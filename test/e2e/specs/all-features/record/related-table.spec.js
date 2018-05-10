@@ -18,7 +18,8 @@ var testParams = {
         "association_table (showing all 1 results)", // association
         "accommodation_image (showing first 2 results)", // association with page_size
         "association_table_markdown (showing all 1 results)", // association with markdown
-        "related_table_2 (showing all 1 results)" // related entity with path length 3
+        "related_table_2 (showing all 1 results)", // related entity with path length 3
+        "table_w_aggregates (showing all 2 results)" // related entity with aggregate columns
     ],
     related_table_name_with_page_size_annotation: "accommodation_image",
     related_table_name_with_link_in_table: "accommodation_image"
@@ -27,8 +28,8 @@ var testParams = {
 var pageReadyCondition = function () {
     chaisePage.waitForElementInverse(element(by.id("spinner")));
 
-    // make sure the last related entity is visible
-    chaisePage.waitForElement(element(by.id('rt-schedule')));
+    // make sure the loader is hidden
+    chaisePage.waitForElementInverse(element(by.id('rt-loading')));
 };
 
 
@@ -41,7 +42,6 @@ describe ("Viewing exisiting record with related entities, ", function () {
         browser.get(url);
 
         pageReadyCondition();
-
     });
 
     it ("should show the related entities in the expected order.", function () {
@@ -238,5 +238,30 @@ describe ("Viewing exisiting record with related entities, ", function () {
     };
     describe("for a related entity with a path of length 3, ", function () {
         recordHelpers.testRelatedTable(path_related, pageReadyCondition);
+    });
+
+    var related_w_agg = {
+        comment: "related with aggregate columns",
+        schemaName: "product-unordered-related-tables-links",
+        displayname: "table_w_aggregates",
+        name: "table_w_aggregates",
+        viewMore: {
+            displayname: "table_w_aggregates",
+            filter: "fk_to_accommodation : Super 8 North Hollywood Motel"
+        },
+        rowValues: [
+            ["1", "100", "100", "1", "1"],
+            ["2", "101", "101", "1", "1"],
+        ],
+        rowViewPaths: [
+            "id=1", "id=2"
+        ],
+        count: 2,
+        canEdit: true,
+        canCreate: true,
+        canDelete: true
+    };
+    describe("for a related entity with aggregate columns.", function () {
+        recordHelpers.testRelatedTable(related_w_agg, pageReadyCondition);
     });
 });

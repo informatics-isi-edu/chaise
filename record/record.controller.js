@@ -3,8 +3,8 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
-        function RecordController(AlertsService, DataUtils, ErrorService, logActions, MathUtils, messageMap, modalBox, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
+    .controller('RecordController', ['AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'recordAppUtils', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
+        function RecordController(AlertsService, DataUtils, ErrorService, logActions, MathUtils, messageMap, modalBox, recordAppUtils, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
 
         var mainContainerEl = angular.element(document.getElementsByClassName('main-container')[0]);
@@ -26,7 +26,7 @@
             var safeSectionId = vm.makeSafeIdAttr(sectionId);
             var pageSection = "rt-heading-" + safeSectionId;
 
-            $rootScope.tableModels[index].open = true;
+            $rootScope.relatedTableModels[index].open = true;
             vm.rowFocus[index] = false;
             var el = angular.element(document.getElementById(pageSection));
             mainContainerEl.scrollToElementAnimated(el, 40).then(function () {
@@ -103,37 +103,55 @@
             return $window.location.href = recordSetUrl;
         };
 
+        /**
+         * Make sure we're showing related tables from top to bottom.
+         * If the previous one has not been loaded yet, it should return false.
+         * @param  {integer} i related table index
+         * @return {boolean}   whether to show related table or not
+         */
         vm.showRelatedTable = function(i) {
-            var isFirst = false, prevTableHasLoaded = false;
-            if ($rootScope.tableModels && $rootScope.tableModels[i]) {
+            if (!$rootScope.relatedTableModels) return false;
+
+            var tableModel = $rootScope.relatedTableModels[i].tableModel;
+            var canShow = function () {
+                if (!tableModel.initialized) {
+                  return false;
+                }
+
                 if (i === 0) {
                     $rootScope.lastRendered = 0;
-                    isFirst = true;
-                } else if ($rootScope.tableModels[i-1]) {
-                    prevTableHasLoaded = $rootScope.tableModels[i-1].hasLoaded;
-                    if ($rootScope.lastRendered == (i-1)) {
-                        $rootScope.lastRendered = i;
+
+                    // don't show the loading if it's done
+                    if ($rootScope.lastRendered === $rootScope.relatedTableModels.length-1) {
+                        $rootScope.loading = false;
                     }
+
+                    return true;
                 }
 
-                if ($rootScope.lastRendered == $rootScope.relatedReferences.length-1) {
-                    $rootScope.loading = false;
+                if ($rootScope.lastRendered === i-1)  {
+                    $rootScope.lastRendered = i;
+
+                    // don't show the loading if it's done
+                    if ($rootScope.lastRendered === $rootScope.relatedTableModels.length-1) {
+                        $rootScope.loading = false;
+                    }
+
+                    return true;
                 }
 
-                if ($rootScope.showEmptyRelatedTables) {
-                    return isFirst || prevTableHasLoaded;
-                }
-
-                if ((isFirst || prevTableHasLoaded) && $rootScope.tableModels[i].rowValues && $rootScope.tableModels[i].rowValues.length > 0) {
-                    return (i == $rootScope.lastRendered);
-                }
                 return false;
+            };
+
+            if (canShow()) {
+                return $rootScope.showEmptyRelatedTables || tableModel.rowValues.length > 0;
             }
+            return false;
         };
 
         vm.noVisibleRelatedTables = function () {
-            if ($rootScope.tableModels) {
-                return !$rootScope.tableModels.some(function (tm, index) {
+            if ($rootScope.relatedTableModels) {
+                return !$rootScope.relatedTableModels.some(function (tm, index) {
                     return vm.showRelatedTable(index);
                 });
             }
@@ -153,16 +171,19 @@
         };
 
         vm.canEditRelated = function(ref) {
-            if(angular.isUndefined(ref))
-            return false;
+           if(angular.isUndefined(ref)) return false;
            return (ref.canUpdate && $rootScope.modifyRecord);
         };
 
         vm.canCreateRelated = function(relatedRef) {
-            if(angular.isUndefined(relatedRef) || !$rootScope.modifyRecord) return false;
+            if(angular.isUndefined(relatedRef) || !$rootScope.modifyRecord) {
+                return false;
+            }
 
             // we are not supporting add in this case
-            if (relatedRef.pseudoColumn && !relatedRef.pseudoColumn.isInboundForeignKey) return false;
+            if (relatedRef.pseudoColumn && !relatedRef.pseudoColumn.isInboundForeignKey) {
+                return false;
+            }
 
             var ref = (relatedRef.derivedAssociationReference ? relatedRef.derivedAssociationReference : relatedRef);
             return ref.canCreate;
@@ -227,32 +248,6 @@
             editRecordRequests[args.id] = {"schema": args.schema, "table": args.table};
         });
 
-        /**
-        * readUpdatedTable(refObj, dataModel, idx, isModalUpdate) returns model object with all updated component values
-        * @param {object} refObj Reference object with component details
-        * @param {object} dataModel Contains value that is bind to the table columns
-        * @param {int} idx Index of each reference
-        * @param {bool} isModalUpdate if update happens through modal pop up
-        */
-        function readUpdatedTable(refObj, dataModel, idx, isModalUpdate){
-            var errorData = {};
-            if (isModalUpdate || completed[refObj.uri] || updated[refObj.location.schemaName + ":" + refObj.location.tableName]) {
-                delete updated[refObj.location.schemaName + ":" + refObj.location.tableName];
-
-                (function (i) {
-                    refObj.read(dataModel.pageLimit, {action: logActions.recordRelatedUpdate}).then(function (page) {
-                        dataModel.page = page;
-                        dataModel.rowValues = DataUtils.getRowValuesFromPage(page);
-                    }).catch(function (error) {
-                        errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
-                        errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
-                        error.errorData = errorData;
-                        throw error;
-                    });
-                })(i);
-            }
-        }
-
         // When page gets focus, check cookie for completed requests
         // re-read the records for that table
         $window.onfocus = function() {
@@ -262,7 +257,7 @@
         var onfocusEventCall = function(isModalUpdate) {
             if ($rootScope.loading === false) {
                 var idxInbFk;
-                completed = { };
+                completed = {};
                 for (var id in addRecordRequests) {
                     var cookie = $cookies.getObject(id);
                     if (cookie) { // add request has been completed
@@ -277,14 +272,10 @@
                     }
                 }
                 // read updated tables
-                if (isModalUpdate || Object.keys(completed).length > 0 || updated !== {}) {
-                    for (var i = 0; i < $rootScope.inboundFKCols.length; i++) {
-                        idxInbFk = $rootScope.inboundFKColsIdx[i];
-                        readUpdatedTable($rootScope.inboundFKCols[i].reference, $rootScope.colTableModels[idxInbFk], idxInbFk, isModalUpdate);
-                    }
-                    for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
-                        readUpdatedTable($rootScope.relatedReferences[i], $rootScope.tableModels[i], i, isModalUpdate);
-                    }
+                if (isModalUpdate || Object.keys(completed).length > 0 || Object.keys(updated).length > 0) {
+                    updated = {};
+                    //NOTE we're updating the whole page
+                    recordAppUtils.updateRecordPage(true);
                 }
             }
 

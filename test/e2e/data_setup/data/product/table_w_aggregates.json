@@ -1,0 +1,4 @@
+[
+    {"id": "1", "fk_to_accommodation": "2004", "value": "100"},
+    {"id": "2", "fk_to_accommodation": "2004", "value": "101"}
+]

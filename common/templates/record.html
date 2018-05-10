@@ -1,33 +1,33 @@
 <table class="table" id="tblRecord">
-    <tr ng-repeat="column in columns" ng-if="showColumn($index) || showInlineTable($index)" id="{{'row-' + column.name}}">
+    <tr ng-repeat="col in columnModels" ng-if="showColumn($index) || showInlineTable($index)" id="{{'row-' + col.column.name}}">
         <td class="entity-key col-xs-2">
-            <span class="column-displayname" ng-attr-uib-tooltip="{{::(column.comment) ? column.comment : undefined}}" ng-attr-tooltip-placement="{{::(column.comment) ? 'right' : undefined}}">
-                <span ng-if="::column.displayname.isHTML" ng-bind-html="::column.displayname.value"></span>
-                <span ng-if="::!column.displayname.isHTML" ng-bind="::column.displayname.value"></span>
+            <span class="column-displayname" ng-attr-uib-tooltip="{{::(col.column.comment) ? col.column.comment : undefined}}" ng-attr-tooltip-placement="{{::(col.column.comment) ? 'right' : undefined}}">
+                <span ng-if="::col.column.displayname.isHTML" ng-bind-html="::col.column.displayname.value"></span>
+                <span ng-if="::!col.column.displayname.isHTML" ng-bind="::col.column.displayname.value"></span>
             </span>
         </td>
-        <td class="entity-value col-xs-10" ng-switch="::values[$index].isHTML" id="entity-{{makeSafeIdAttr(column.displayname.value)}}">
+        <td class="entity-value col-xs-10" ng-switch="values[$index].isHTML" id="entity-{{makeSafeIdAttr(col.column.displayname.value)}}">
 
             <span ng-if="showColumn($index)">
-                <span ng-switch-when="true" class="markdown-container" ng-bind-html="::values[$index].value | trustedHTML"></span>
-                <span ng-switch-default>{{::values[$index].value}}</span>
+                <span ng-switch-when="true" class="markdown-container" ng-bind-html="values[$index].value | trustedHTML"></span>
+                <span ng-switch-default>{{values[$index].value}}</span>
             </span>
             <span ng-if="showInlineTable($index)" id="entity-{{$index}}-table">
-                  <record-action-bar id="actionbar-{{$index}}" tabtype="entity" related-table-ref-display="relatedReferenceDisplayTable[$index].display.type" tab-model-display="recordTableModel[$index].displayType"
-                  toggle-related-table-display-type='toggleRelatedTableDisplayType({dataModel:recordTableModel[$index]})' can-edit-related="canEditRelated({ref:relatedReferenceDisplayTable[$index]})"
-                  can-create-related="canCreateRelated({ref:relatedReferenceDisplayTable[$index]})"
-                  add-related-record="addRelatedRecord({ref:relatedReferenceDisplayTable[$index]})" to-record-set="toRecordSet({ref:relatedReferenceDisplayTable[$index]})">
+                  <record-action-bar id="actionbar-{{$index}}" tabtype="entity" related-table-ref-display="col.tableModel.reference.display.type" tab-model-display="col.tableModel.displayType"
+                  toggle-related-table-display-type='toggleRelatedTableDisplayType({dataModel:col.tableModel})' can-edit-related="canEditRelated({ref:col.tableModel.reference})"
+                  can-create-related="canCreateRelated({ref:col.tableModel.reference})"
+                  add-related-record="addRelatedRecord({ref:col.tableModel.reference})" to-record-set="toRecordSet({ref:col.tableModel.reference})">
                   </record-action-bar>
-                    <span ng-show="recordTableModel[$index].displayType == 'markdown'" id="entity-{{$index}}-markdown">
-                        <span ng-if="recordTableModel[$index].page.content == '' || recordTableModel[$index].page.content == null">
+                    <span ng-show="col.tableModel.displayType == 'markdown'" id="entity-{{$index}}-markdown">
+                        <span ng-if="col.tableModel.page.content == '' || col.tableModel.page.content == null">
                             <span class="markdown-container"><em><strong>None</strong></em></span>
                         </span>
-                        <span ng-if="recordTableModel[$index].page.content != '' ">
-                            <span class="markdown-container" ng-bind-html="recordTableModel[$index].page.content | trustedHTML"></span>
+                        <span ng-if="col.tableModel.page.content != '' ">
+                            <span class="markdown-container" ng-bind-html="col.tableModel.page.content | trustedHTML"></span>
                         </span>
                     </span>
-                    <span ng-show="recordTableModel[$index].displayType == 'table'" id="entity-{{$index}}-recTab">
-                            <record-table class="related-table" id="rt-{{::makeSafeIdAttr(column.displayname.value)}}" vm="recordTableModel[$index]"></record-table>
+                    <span ng-show="col.tableModel.displayType == 'table'" id="entity-{{$index}}-recTab">
+                            <record-table class="related-table" id="rt-{{::makeSafeIdAttr(col.column.displayname.value)}}" vm="col.tableModel"></record-table>
                     </span>
          </span>
         </td>

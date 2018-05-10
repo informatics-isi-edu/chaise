@@ -88,26 +88,118 @@
             ['AlertsService', 'modalBox', 'DataUtils', '$timeout','Session', '$q', 'tableConstants', '$rootScope', '$log', '$window', '$cookies', 'defaultDisplayname', 'MathUtils', 'UriUtils', 'logActions',
             function(AlertsService, modalBox, DataUtils, $timeout, Session, $q, tableConstants, $rootScope, $log, $window, $cookies, defaultDisplayname, MathUtils, UriUtils, logActions) {
 
-        function updateResult (vm) {
+        function haveFreeSlot() {
+            var res = $rootScope.occupiedSlots < tableConstants.MAX_CONCURENT_REQUEST;
+            if (!res) {
+                $log.debug("No free slot available.");
+            }
+            return res;
+        }
+
+        function updateColumnAggregates(vm, updatePageCB, logObject, hideSpinner) {
+            if (!vm.hasLoaded || !Array.isArray(vm.aggregatesToInitialize)) return;
+            while (vm.aggregatesToInitialize.length > 0) {
+                if (!haveFreeSlot()) {
+                    return;
+                }
+
+                $rootScope.occupiedSlots++;
+                (function (i, current) {
+                    $log.debug("getting aggregated values for column (index=" + i + ")");
+                    updateColumnAggregate(vm, i, current, logObject, hideSpinner).then(function (res) {
+                        afterUpdateColumnAggregate(res, i, vm);
+                        updatePageCB(vm);
+                    }).catch(function (err) {
+                        afterUpdateColumnAggregate(false, i, vm);
+                        throw err;
+                    });
+                })(vm.aggregatesToInitialize.shift(), $rootScope.counter);
+            }
+        }
+
+        function updateColumnAggregate(vm, colIndex, current, logObject, hideSpinner) {
+            var defer = $q.defer();
+            vm.columnModels[colIndex].isLoading = !hideSpinner;
+            logObject = logObject || {action: logActions.recordsetAggregate};
+            logObject.colIndex = colIndex;
+
+            vm.columnModels[colIndex].column.getAggregatedValue(vm.page, logObject).then(function (values) {
+                if ($rootScope.counter !== current) {
+                    return defer.resolve(false);
+                }
+                vm.columnModels[colIndex].isLoading = false;
+                vm.rowValues.forEach(function (val, index) {
+                    vm.rowValues[index][colIndex] = values[index];
+                });
+                return defer.resolve(true);
+            }).catch(function (err) {
+                if ($rootScope.counter !== current) {
+                    return defer.resolve(false);
+                }
+                return defer.reject(err);
+            });
+
+            return defer.promise;
+        }
+
+        function afterUpdateColumnAggregate(res, colIndex, vm) {
+            $rootScope.occupiedSlots--;
+            $log.debug("after aggregated value for column (index=" + colIndex + ") update: " + (res? "successful." : "unsuccessful."));
+        }
+
+        function updateMainEntity(vm, updatePageCB, hideSpinner) {
+            if (!vm.dirtyResult || !haveFreeSlot()) return;
+
+            $rootScope.occupiedSlots++;
+            vm.dirtyResult = false;
+
+            var afterUpdateResult = function (res) {
+                if (res) {
+                    // we got the results, let's just update the url
+                    $rootScope.$emit('reference-modified');
+                }
+                $rootScope.occupiedSlots--;
+                vm.dirtyResult = !res;
+                $log.debug("after result update: " + (res ? "successful." : "unsuccessful."));
+            };
+
+            $log.debug("updating result");
+            readMainEntity(vm, hideSpinner).then(function (res) {
+                afterUpdateResult(res);
+                updatePageCB(vm);
+            }).catch(function (err) {
+                afterUpdateResult(true);
+                throw err;
+            });
+        }
+
+        function readMainEntity (vm, hideSpinner) {
+            vm.dirtyResult = false;
             vm.hasLoaded = false;
             var defer = $q.defer();
-            (function (uri) {
+            (function (current) {
                 vm.reference.read(vm.pageLimit, vm.logObject).then(function (page) {
-                    if (vm.reference.uri !== uri) return defer.resolve(false);
+                    if (current !== $rootScope.counter) return defer.resolve(false);
 
                     vm.page = page;
 
                     return vm.getDisabledTuples ? vm.getDisabledTuples(page, vm.pageLimit) : '';
                 }).then(function (rows) {
                     if (rows) vm.disabledRows = rows;
+                    vm.rowValues = DataUtils.getRowValuesFromPage(vm.page);
                     vm.hasLoaded = true;
                     vm.initialized = true;
-                    vm.rowValues = DataUtils.getRowValuesFromPage(vm.page);
+                    vm.aggregatesToInitialize = [];
+                    vm.reference.columns.forEach(function (c, i) {
+                        if(c.isPathColumn && c.hasAggregate) {
+                            vm.aggregatesToInitialize.push(i);
+                        }
+                    });
 
                     return defer.resolve(true);
                 }).catch(function(err) {
-                    if (vm.reference.uri !== uri) {
-                        defer.resolve(false);
+                    if (current !== $rootScope.counter) {
+                        return defer.resolve(false);
                     }
 
                     vm.hasLoaded = true;
@@ -117,13 +209,13 @@
                     }
                     return defer.reject(err);
                 });
-            }) (vm.reference.uri);
+            }) ($rootScope.counter);
             return defer.promise;
         }
 
         function updateCount (vm) {
             var  defer = $q.defer();
-            (function (uri) {
+            (function (current) {
                 var aggList, hasError;
                 try {
                     // if the table doesn't have any simple key, this might throw error
@@ -141,21 +233,21 @@
                     aggList,
                     {action: logActions.recordsetCount}
                 ).then(function getAggregateCount(response) {
-                    if (vm.reference.uri !== uri) {
+                    if ($rootScope.counter !== current) {
                         return defer.resolve(false);
                     }
 
                     vm.totalRowsCnt = response[0];
                     return defer.resolve(true);
                 }).catch(function (err) {
-                    if (vm.reference.uri !== uri) {
+                    if ($rootScope.counter !== current) {
                         return defer.resolve(false);
                     }
 
                     // fail silently
                     vm.totalRowsCnt = null;
                 });
-            })(vm.reference.uri);
+            })($rootScope.counter);
             return defer.promise;
         }
 
@@ -164,6 +256,7 @@
             vm.initialized = false;
             vm.dirtyResult = true;
             vm.dirtyCount = true;
+            $rootScope.counter = 0;
 
             update(vm);
         }
@@ -199,6 +292,8 @@
             vm.dirtyCount = updateCount || vm.dirtyCount;
 
             $timeout(function () {
+                $rootScope.counter++;
+                $log.debug("adding one to counter: " + $rootScope.counter);
                 updatePage(vm);
             }, 0);
         }
@@ -211,42 +306,15 @@
          * @param  {Object} vm The table view model
          */
         function updatePage(vm) {
-            var haveFreeSlot = function () {
-                var res = vm.occupiedSlots < tableConstants.MAX_CONCURENT_REQUEST;
-                if (!res) {
-                    $log.debug("No free slot available.");
-                }
-                return res;
-            };
-
             if (!haveFreeSlot()) {
                 return;
             }
 
             // update the resultset
-            if (vm.dirtyResult) {
-                vm.occupiedSlots++;
-                vm.dirtyResult = false;
+            updateMainEntity(vm, updatePage);
 
-                var afterUpdateResult = function (res) {
-                    if (res) {
-                        // we got the results, let's just update the url
-                        $rootScope.$emit('reference-modified');
-                    }
-                    vm.occupiedSlots--;
-                    vm.dirtyResult = !res;
-                    $log.debug("after result update: " + (res ? "successful." : "unsuccessful."));
-                };
-
-                $log.debug("updating result");
-                updateResult(vm).then(function (res) {
-                    afterUpdateResult(res);
-                    updatePage(vm);
-                }).catch(function (err) {
-                    afterUpdateResult(true);
-                    throw err;
-                });
-            }
+            // get the aggregate values only if main page is loaded
+            updateColumnAggregates(vm, updatePage);
 
             // update the facets
             if (vm.facetModels) {
@@ -256,11 +324,11 @@
                             return;
                         }
 
-                        vm.occupiedSlots++;
+                        $rootScope.occupiedSlots++;
                         fm.processed = true;
 
                         var afterFacetUpdate = function (i, res, hasError) {
-                            vm.occupiedSlots--;
+                            $rootScope.occupiedSlots--;
                             var currFm = vm.facetModels[i];
                             currFm.initialized = res || currFm.initialized;
                             currFm.isLoading = !res;
@@ -283,13 +351,13 @@
                 }
                 // initialize facets
                 else if (haveFreeSlot()){
-                    vm.occupiedSlots++;
+                    $rootScope.occupiedSlots++;
                     var index = vm.facetsToInitialize.shift();
                     (function (i) {
                         $log.debug("initializing facet (index="+index+")");
                         vm.facetModels[i].initializeFacet().then(function (res) {
                             $log.debug("after facet (index="+ i +") initialize: " + (res ? "successful." : "unsuccessful."));
-                            vm.occupiedSlots--;
+                            $rootScope.occupiedSlots--;
                             updatePage(vm);
                         }).catch(function (err) {
                             throw err;
@@ -302,11 +370,11 @@
             if (vm.config.hideTotalCount) {
                 vm.totalRowsCnt = null;
             } else if (vm.dirtyCount && haveFreeSlot()) {
-                vm.occupiedSlots++;
+                $rootScope.occupiedSlots++;
                 vm.dirtyCount = false;
 
                 var afterUpdateCount = function (res, hasError) {
-                    vm.occupiedSlots--;
+                    $rootScope.occupiedSlots--;
                     vm.dirtyCount = !res;
                     $log.debug("after count update: " + (res ? "successful." : "unsuccessful."));
                 };
@@ -322,11 +390,31 @@
             }
         }
 
+        function attachExtraAttributes(vm) {
+            vm.columnModels = [];
+            vm.reference.columns.forEach(function (col) {
+                vm.columnModels.push({
+                    column: col
+                });
+            });
+
+            // only allowing single column sort here
+            var location = vm.reference.location;
+            if (location.sortObject) {
+                vm.sortby = location.sortObject[0].column;
+                vm.sortOrder = (location.sortObject[0].descending ? "desc" : "asc");
+            }
+        }
+
         function registerTableCallbacks(scope) {
             if (!scope.vm) scope.vm = {};
 
-            scope.vm.dirtyResult = false;
-            scope.vm.occupiedSlots = 0;
+            if (!DataUtils.isInteger($rootScope.occupiedSlots)) {
+                $rootScope.occupiedSlots = 0;
+            }
+            if (!DataUtils.isInteger($rootScope.counter)) {
+                $rootScope.counter = 0;
+            }
 
             var callOnRowClick = function (scope, tuples, isSelected) {
                 if (scope.onRowClickBind) {
@@ -439,7 +527,6 @@
                 }
             };
 
-
             // Facilitates the multi select functionality for multi edit by storing the tuple in the selectedRows array
             scope.onSelect = function(args) {
                 var tuple = args.tuple;
@@ -470,10 +557,28 @@
                 }
                 update(scope.vm, true, false, false);
             });
+
+            scope.$watch(function () {
+                return (scope.vm && scope.vm.reference) ? scope.vm.reference.columns : null;
+            }, function (newValue, oldValue) {
+                if(angular.equals(newValue, oldValue) || !newValue){
+                    return;
+                }
+                attachExtraAttributes(scope.vm);
+            });
+
+            if (scope.vm && scope.vm.reference) {
+                attachExtraAttributes(scope.vm);
+            }
         }
 
         function registerRecordsetCallbacks(scope) {
-            if (!scope.vm) scope.vm = {};
+            if (!DataUtils.isInteger($rootScope.occupiedSlots)) {
+                $rootScope.occupiedSlots = 0;
+            }
+            if (!DataUtils.isInteger($rootScope.counter)) {
+                $rootScope.counter = 0;
+            }
 
             var addRecordRequests = {}; // table refresh used by add record implementation with cookie (old method)
             var updated = false; // table refresh used by ellipses' edit action (new method)
@@ -487,8 +592,6 @@
 
             scope.vm.isIdle = true;
             scope.vm.facetModels = [];
-            scope.vm.dirtyResult = false;
-            scope.vm.occupiedSlots = 0;
             scope.vm.facetsToInitialize = [];
 
             scope.setPageLimit = function(limit) {
@@ -679,6 +782,15 @@
                 update(scope.vm, true, true, true);
             });
 
+            scope.$watch(function () {
+                return (scope.vm && scope.vm.reference) ? scope.vm.reference.columns : null;
+            }, function (newValue, oldValue) {
+                if(angular.equals(newValue, oldValue) || !newValue){
+                    return;
+                }
+                attachExtraAttributes(scope.vm);
+            });
+
             scope.$on('facetsLoaded', function () {
                 scope.facetsLoaded = true;
             });
@@ -734,6 +846,8 @@
         return {
             initialize: initialize,
             update: update,
+            updateColumnAggregates: updateColumnAggregates,
+            updateMainEntity: updateMainEntity,
             registerTableCallbacks: registerTableCallbacks,
             registerRecordsetCallbacks: registerRecordsetCallbacks
         };
