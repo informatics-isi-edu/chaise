@@ -1209,6 +1209,7 @@
       "column_definitions": [
         {
           "name": "id",
+          "nullok": false,
           "type": {
             "typename": "int4"
           }
