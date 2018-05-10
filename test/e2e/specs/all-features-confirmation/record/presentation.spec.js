@@ -143,6 +143,7 @@ describe('View existing record,', function() {
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + testParams.table_name + "/" + keys.join("&");
             browser.get(url);
             chaisePage.waitForElement(element(by.id('tblRecord')));
+            chaisePage.waitForElementInverse(element(by.id('rt-loading')));
         });
 
         it("should show all of the related tables in the correct order.", function() {

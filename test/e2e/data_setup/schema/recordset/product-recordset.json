@@ -365,7 +365,29 @@
           "detailed" : ["id", ["product-recordset", "fk_category"], "website", "rating", "summary", "description","json_col", "json_col_with_markdown", ["product-recordset", "fk_thumbnail"],"terms", "opened_on", "luxurious"],
           "entry/create": ["id", "title", "website", ["product-recordset", "fk_category"], "rating", "summary", "description","json_col", "json_col_with_markdown","no_of_rooms", ["product-recordset", "fk_thumbnail"], ["product-recordset", "fk_cover"],"terms", "opened_on","luxurious"],
           "entry/edit": ["id", "title", "website", ["product-recordset", "fk_category"], "rating", "summary", "description","json_col", "json_col_with_markdown","no_of_rooms", ["product-recordset", "fk_thumbnail"], ["product-recordset", "fk_cover"],"terms", "opened_on","luxurious"],
-          "compact" : ["title", "website", "rating", "summary","terms", "opened_on", "luxurious","json_col", "json_col_with_markdown"]
+          "compact" : [
+              "title", "website", "rating", "summary","terms", "opened_on", "luxurious","json_col", "json_col_with_markdown",
+              {"source": [
+                  {"inbound": ["product-recordset", "fk_accommodation_image"]},
+                  {"outbound": ["product-recordset", "fk_accommodation_image_2"]},
+                  "id"
+              ], "aggregate": "cnt", "markdown_name": "Image Count", "comment": "Image Count"},
+              {"source": [
+                  {"inbound": ["product-recordset", "fk_accommodation_image"]},
+                  {"outbound": ["product-recordset", "fk_accommodation_image_2"]},
+                  "id"
+              ], "aggregate": "cnt_d", "markdown_name": "Image Distinct Count", "comment": "Image Distinct Count"},
+              {"source": [
+                  {"inbound": ["product-recordset", "fk_accommodation_image"]},
+                  {"outbound": ["product-recordset", "fk_accommodation_image_2"]},
+                  "id"
+              ], "aggregate": "min", "entity": false, "markdown_name": "Min Image ID", "comment": "Min Image ID"},
+              {"source": [
+                  {"inbound": ["product-recordset", "fk_accommodation_image"]},
+                  {"outbound": ["product-recordset", "fk_accommodation_image_2"]},
+                  "id"
+              ], "aggregate": "max",  "entity": false, "markdown_name": "Max Image ID", "comment": "Max Image ID"}
+          ]
         },
 
         "tag:isrd.isi.edu,2016:visible-foreign-keys" : {

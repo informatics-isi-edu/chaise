@@ -32,10 +32,7 @@ exports.testPresentation = function (tableParams) {
 
 	it("should show " + tableParams.columns.filter(function(c) {return c.value != null;}).length + " columns only", function() {
         var columns = tableParams.columns.filter(function(c) {return c.value != null;});
-		chaisePage.recordPage.getColumns().then(function(els) {
-			// Check no of columns are same as needed
-			expect(els.length).toBe(columns.length);
-		});
+		expect(chaisePage.recordPage.getColumns().count()).toBe(columns.length);
 	});
 
     it("should show the action buttons properly", function() {
@@ -384,18 +381,18 @@ exports.testPresentation = function (tableParams) {
             tableDisplayname = "<strong>media</strong>",
             noResultsMessage = "No Results Found";
         showAllRTButton.click().then(function() {
-            expect(chaisePage.recordPage.getRelatedTable(tableDisplayname).isPresent()).toBeFalsy();
+            expect(chaisePage.recordPage.getRelatedTable(tableDisplayname).isDisplayed()).toBeFalsy();
             return showAllRTButton.click();
         }).then(function() {
             // empty related table should show
-            expect(chaisePage.recordPage.getRelatedTable(tableDisplayname).isPresent()).toBeTruthy();
+            expect(chaisePage.recordPage.getRelatedTable(tableDisplayname).isDisplayed()).toBeTruthy();
             //check the no results text appears properly
             return chaisePage.recordPage.getNoResultsRow(tableDisplayname);
         }).then(function(emptyTab) {
             expect(emptyTab.getText()).toBe(noResultsMessage);
             return showAllRTButton.click();
         }).then(function() {
-            expect(chaisePage.recordPage.getRelatedTable(tableDisplayname).isPresent()).toBeFalsy();
+            expect(chaisePage.recordPage.getRelatedTable(tableDisplayname).isDisplayed()).toBeFalsy();
         }).catch(function(error) {
             console.log(error);
         });

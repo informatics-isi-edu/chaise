@@ -16,7 +16,11 @@ var testParams = {
             { title: "Operational Since", value: "2008-12-09 00:00:00", type: "timestamptz" },
             { title: "Is Luxurious", value: "true", type: "boolean" },
             { title: "json_col", value:JSON.stringify({"name":"testing JSON"},undefined,2), type: "json" },
-            { title: "json_col_with_markdown", value: "Status is: delivered"}
+            { title: "json_col_with_markdown", value: "Status is: delivered"},
+            { title: "Image Count", value: "1", comment: "Image Count"},
+            { title: "Image Distinct Count", value: "1", comment: "Image Distinct Count"},
+            { title: "Min Image ID", value: "1", comment: "Min Image ID"},
+            { title: "Max Image ID", value: "1", comment: "Max Image ID"}
         ],
         data: [
             {
@@ -28,7 +32,11 @@ var testParams = {
                 opened_on: "1976-06-15 00:00:00",
                 luxurious: "true",
                 json_col: JSON.stringify({"name":"testing_json"},undefined,2),
-                json_col_with_markdown: "Status is: “delivered”"
+                json_col_with_markdown: "Status is: “delivered”",
+                count_image_id: "1",
+                count_distinct_image_id: "1",
+                min_image_id: "3001",
+                max_image_id: "3001"
             },
             {
                 id: 2002,
@@ -39,7 +47,11 @@ var testParams = {
                 opened_on: "2008-12-09 00:00:00",
                 luxurious: "true",
                 json_col: JSON.stringify(null,undefined,2),
-                json_col_with_markdown: "Status is: “delivered”"
+                json_col_with_markdown: "Status is: “delivered”",
+                count_image_id: "4",
+                count_distinct_image_id: "4",
+                min_image_id: "3005",
+                max_image_id: "30007"
             },
             {
                 id: 2004,
@@ -50,7 +62,11 @@ var testParams = {
                 opened_on: "2013-06-11 00:00:00",
                 luxurious: "false",
                 json_col: JSON.stringify({"age": 25,"name": "Testing"},undefined,2),
-                json_col_with_markdown: "Status is: “Processing”"
+                json_col_with_markdown: "Status is: “Processing”",
+                count_image_id: "3",
+                count_distinct_image_id: "3",
+                min_image_id: "3009",
+                max_image_id: "3011"
             },
             {
                 id: 4004,
@@ -61,7 +77,11 @@ var testParams = {
                 opened_on: "2013-06-11 00:00:00",
                 luxurious: "true",
                 json_col: "9876.3543",
-                json_col_with_markdown: "Status is: “Processing”"
+                json_col_with_markdown: "Status is: “Processing”",
+                count_image_id: "",
+                count_distinct_image_id: "",
+                min_image_id: "",
+                max_image_id: ""
             }
         ]
     },
@@ -86,6 +106,7 @@ describe('View recordset,', function() {
             browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:" + accommodationParams.table_name + "/" + keys.join("&") + "@sort(" + accommodationParams.sortby + ")");
 
             chaisePage.waitForElement(element(by.id("divRecordSet")));
+            chaisePage.recordsetPage.waitForAggregates();
         });
 
         describe("Presentation ,", function() {
@@ -129,6 +150,10 @@ describe('View recordset,', function() {
                                 expect(cells[6].getText()).toBe(accommodationParams.data[index].luxurious, "luxurious column missmatch for row=" + index);
                                 expect(cells[7].getText()).toBe(accommodationParams.data[index].json_col, "json_col column missmatch for row=" + index);
                                 expect(cells[8].getText()).toBe(accommodationParams.data[index].json_col_with_markdown, "json_col_with_markdown column missmatch for row=" + index);
+                                expect(cells[9].getText()).toBe(accommodationParams.data[index].count_image_id, "count_image_id column missmatch for row=" + index);
+                                expect(cells[10].getText()).toBe(accommodationParams.data[index].count_distinct_image_id, "count_distinct_image_id column missmatch for row=" + index);
+                                expect(cells[11].getText()).toBe(accommodationParams.data[index].min_image_id, "min_image_id column missmatch for row=" + index);
+                                expect(cells[12].getText()).toBe(accommodationParams.data[index].max_image_id, "max_image_id column missmatch for row=" + index);
                             });
                         }(i))
                     }
