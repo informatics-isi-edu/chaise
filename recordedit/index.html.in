@@ -27,6 +27,25 @@
             <div ng-controller="FormController as form" class="row">
                 <div ng-hide="form.resultset">
                     <loading-spinner ng-show="form.submissionButtonDisabled || showSpinner"></loading-spinner>
+                    <div class="row">
+                        <div id="bookmark-container" class="col-xs-12 meta-icons">
+                            <div id="title" class="pull-left">
+                                <h1 id="page-title">
+                                        <span>{{ form.editMode ? "Edit " : "Create " }}</span>
+                                        <span class="re-displayname" ng-if="displayname.isHTML" ng-bind-html="displayname.value"></span>
+                                        <span class="re-displayname" ng-if="!displayname.isHTML" ng-bind="displayname.value"></span>
+                                        <span>{{ (form.recordEditModel.rows.length > 1) ? " Records" : " Record" }}</span>
+                                </h1>
+                                <h3 id="page-subtitle">
+                                    <span class="re-subtitle" ng-if="tableDisplayName.isHTML" ng-bind-html="tableDisplayName.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}"></span>
+                                    <span class="re-subtitle" ng-if="!tableDisplayName.isHTML" ng-bind="tableDisplayName.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}"></span>
+                                </h3>
+                            </div>
+                            <div class="pull-right">
+                                <button id="submit-record-button" class="btn btn-primary btn-inverted" type="submit" ng-disabled="form.submissionButtonDisabled" ng-click="::form.submit()" ng-attr-tooltip-placement="bottom-right" ng-attr-uib-tooltip="Submit data">Submit</button>
+                            </div>
+                        </div>
+                    </div>
                     <div class="main-container">
                         <div class="main-body" style="padding-right:15px; padding-left:15px;">
                             <!-- Alerts section -->
@@ -36,28 +55,13 @@
 
                             <!-- Form section -->
                             <div id="form-section">
-                                <div class="row">
-                                    <div ng-if="displayname" class="col-xs-7">
-                                        <div id="entity-title">
-                                            <span>{{ form.editMode ? "Edit " : "Create " }}</span>
-                                            <span class="re-displayname" ng-if="displayname.isHTML" ng-bind-html="displayname.value" ng-attr-tooltip-placement="bottom" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}"></span>
-                                            <span class="re-displayname" ng-if="!displayname.isHTML" ng-bind="displayname.value" ng-attr-tooltip-placement="bottom" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}"></span>
-                                            <span>{{ (form.recordEditModel.rows.length > 1) ? " Records" : " Record" }}</span>
-                                        </div>
-                                        <span class="text-danger">*</span> indicates required field
-                                    </div>
-                                    <div class="col-xs-5 padding-top-10">
-                                        <div class="pull-right">
-                                            <button id="submit-record-button" class="btn btn-primary btn-inverted" type="submit" ng-disabled="form.submissionButtonDisabled" ng-click="::form.submit();">Submit Data</button>
-                                        </div>
-                                    </div>
-                                </div>
+                                <span class="pull-left"><span class="text-danger"><b>*</b></span> indicates required field</span>
                                 <div class="row padding-right-15" ng-show="::!form.editMode">
                                     <div class="btn-group pull-right">
-                                        <button id="copy-record-btn" class="btn btn-primary btn-inverted center-block" ng-click="::form.copyFormRow();" ng-if="::!form.editMode" type="button" ng-disabled="!form.canAddMore" tooltip-placement="bottom" uib-tooltip="Click to add 1 record.">
+                                        <button id="copy-record-btn" class="btn btn-primary btn-inverted center-block" ng-click="::form.copyFormRow();" ng-if="::!form.editMode" type="button" ng-disabled="!form.canAddMore" tooltip-placement="top" uib-tooltip="Add 1 record.">
                                             <span class="glyphicon glyphicon-plus"></span>
                                         </button>
-                                        <button id="copy-x-rows-btn" class="btn btn-primary btn-inverted center-block" ng-click="::(form.showMultiInsert = !form.showMultiInsert)" type="button" ng-disabled="!form.canAddMore" tooltip-placement="bottom-right" uib-tooltip="Click to add a maximum of {{::form.MAX_ROWS_TO_ADD-1}} records.">
+                                        <button id="copy-x-rows-btn" class="btn btn-primary btn-inverted center-block" ng-click="::(form.showMultiInsert = !form.showMultiInsert)" type="button" ng-disabled="!form.canAddMore" tooltip-placement="top-right" uib-tooltip="Add a maximum of {{::form.MAX_ROWS_TO_ADD-1}} records.">
                                             <span class="glyphicon glyphicon-chevron-down"></span>
                                         </button>
                                     </div>
@@ -67,14 +71,14 @@
                                         <div class="input-group">
                                             <input id="copy-rows-input" type="number" class="form-control " ng-model="form.numberRowsToAdd">
                                             <span class="input-group-btn">
-                                                <button id="copy-rows-submit" class="btn btn-sm btn-primary btn-inverted center-block" ng-click="::form.copyFormRow()" type="button" tooltip-placement="bottom" uib-tooltip="Submit">
+                                                <button id="copy-rows-submit" class="btn btn-sm btn-primary btn-inverted center-block" ng-click="::form.copyFormRow()" type="button" tooltip-placement="bottom" uib-tooltip="Apply">
                                                     <span class="glyphicon glyphicon-ok"></span>
                                                 </button>
                                             </span>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row form-container" style="margin-top: 25px;">
+                                <div class="row form-container">
                                     <div ng-show="displayReady" class="col-xs-12" id="formEditScroll" ng-class="{'editMode': form.editMode, 'createMode': !form.editMode}" ng-style="form.formEditDivMarginLeft">
                                         <div ng-style="form.tableWidth"></div>
                                     </div>
@@ -93,7 +97,7 @@
                                             </tr>
                                             <tr class="entity" ng-form="form.formContainer.row[rowIndex]" ng-repeat="column in reference.columns">
                                                 <td ng-style="form.captionColumnWidth" class="entity-key col-xs-1">
-                                                    <span ng-if="::form.isRequired(column);" class="text-danger">*</span>
+                                                    <span ng-if="::form.isRequired(column);" class="text-danger"><b>*</b></span>
                                                     <span class="column-displayname" ng-attr-tooltip-placement="{{::(column.comment) ? 'right' : undefined}}" ng-attr-uib-tooltip="{{::(column.comment) ? column.comment : undefined}}">
                                                         <span ng-if="::column.displayname.isHTML" ng-bind-html="::column.displayname.value"></span>
                                                         <span ng-if="::!column.displayname.isHTML" ng-bind="::column.displayname.value"></span>
@@ -245,25 +249,30 @@
                         <footer></footer>
                     </div>
                 </div>
-                <div ng-if="form.resultset">
+                <div class="resultset-container" ng-if="form.resultset">
+                    <div class="row">
+                        <div id="bookmark-container" class="col-xs-12 meta-icons">
+                            <div id="title" class="pull-left">
+                                <h1 id="page-title">
+                                    <span>{{ form.resultsetModel.rowValues.length }}/{{ form.resultsetModel.pageLimit }} Records <span ng-if="::!form.editMode">Created</span><span ng-if="::form.editMode">Updated</span> Successfully</span>
+                                </h1>
+                                <h3 id="page-subtitle">
+                                    <a ng-href="{{::form.recordsetLink}}">
+                                        <span class="re-subtitle" ng-if="tableDisplayName.isHTML" ng-bind-html="tableDisplayName.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}"></span>
+                                        <span class="re-subtitle" ng-if="!tableDisplayName.isHTML" ng-bind="tableDisplayName.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}"></span>
+                                    </a>
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
                     <div class="main-container">
                         <div class="main-body container-fluid">
-                            <h2 id="result-title" class="replace-margin">
-                                <span>{{ form.resultsetModel.rowValues.length }}/{{ form.resultsetModel.pageLimit }}</span>
-                                <a ng-href="{{::form.recordsetLink}}">
-                                    <span ng-if="::form.resultsetModel.tableDisplayname.isHTML" ng-bind-html="::form.resultsetModel.tableDisplayName.value"></span>
-                                    <span ng-if="::!form.resultsetModel.tableDisplayname.isHTML" ng-bind="::form.resultsetModel.tableDisplayName.value"></span>
-                                </a>
-                                <span>Records <span ng-if="::!form.editMode">Created</span><span ng-if="::form.editMode">Updated</span> Successfully</span>
-                            </h2>
                             <div id="resultset-tables" class="side-padding-15">
                                 <h3 class="replace-margin">{{ form.resultsetModel.rowValues.length }} Successful <span ng-if="::!form.editMode">Creations</span><span ng-if="::form.editMode">Updates</span></h3>
-
                                 <record-table vm="form.resultsetModel"></record-table>
 
                                 <div ng-if="form.omittedResultsetModel">
                                     <h3 class="replace-margin">{{ form.omittedResultsetModel.rowValues.length }} Failed <span ng-if="::!form.editMode">Creations</span><span ng-if="::form.editMode">Updates</span></h3>
-
                                     <record-table vm="form.omittedResultsetModel" default-row-linking="true"></record-table>
                                 </div>
                             </div>

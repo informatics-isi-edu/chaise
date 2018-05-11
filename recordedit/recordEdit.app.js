@@ -248,12 +248,12 @@
                             // $rootScope.tuples is used for keeping track of changes in the tuple data before it is submitted for update
                             $rootScope.tuples = [];
                             if ((context.mode != context.modes.EDIT || page.tuples.length > 1)) {
-                                $rootScope.displayname = $rootScope.reference.displayname;
                                 $rootScope.tableComment = $rootScope.reference.table.comment;
                             } else {
                                 $rootScope.displayname = page.tuples[0].displayname;
-                                $rootScope.tableComment = "";
+                                $rootScope.tableComment = $rootScope.reference.table.comment;
                             }
+                            $rootScope.tableDisplayName = $rootScope.reference.displayname;
 
                             for (var j = 0; j < page.tuples.length; j++) {
                                 // initialize row objects {column-name: value,...}
@@ -363,7 +363,7 @@
                     }
                 } else if (context.mode == context.modes.CREATE) {
                     if ($rootScope.reference.canCreate) {
-                        $rootScope.displayname = $rootScope.reference.displayname;
+                        $rootScope.tableDisplayName = $rootScope.reference.displayname;
                         $rootScope.tableComment = $rootScope.reference.table.comment;
 
                         // populate defaults

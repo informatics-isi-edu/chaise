@@ -117,7 +117,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
             browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getEntityTitleElement()), browser.params.defaultTimeout);
             var title = chaisePage.recordEditPage.getEntityTitleElement();
-            expect(title.getText()).toEqual("Edit " + tableParams.table_displayname + " Record");
+            expect(title.getText()).toEqual("Edit " + tableParams.record_displayname + " Record", "Edit mode title is incorrect.");
         });
 
         it("should not allow to add new rows/columns", function() {
@@ -132,7 +132,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
             var EC = protractor.ExpectedConditions;
 
             browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getEntityTitleElement()), browser.params.defaultTimeout);
-            expect(chaisePage.recordEditPage.getEntityTitleElement().getText()).toBe("Create " + tableParams.table_displayname + " Record");
+            expect(chaisePage.recordEditPage.getEntityTitleElement().getText()).toBe("Create Record", "Create mode title is incorrect.");
         });
 
         it("should allow to add new rows/columns", function() {
@@ -144,7 +144,8 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
     }
 
     it ("should have the table subtitle.", function () {
-        expect(chaisePage.recordEditPage.getEntityTitleTooltip()).toBe(tableParams.table_comment);
+        expect(chaisePage.recordEditPage.getEntitySubtitleElement().getText()).toBe(tableParams.table_displayname.toUpperCase(), "Entity subtitle is incorrect.");
+        expect(chaisePage.recordEditPage.getEntitySubtitleTooltip()).toBe(tableParams.table_comment, "Entity subtitle tooltip is incorrect.");
     });
 
     it("should render columns which are inside the visible columns annotation if defined; Default all are visible", function() {
@@ -1345,8 +1346,8 @@ exports.testSubmission = function (tableParams, isEditMode) {
 
         describe('result page, ', function () {
             it("should have the correct title.", function() {
-                var title = tableParams.results.length + "/" + tableParams.results.length + " "+ tableParams.table_displayname +" Records "+(isEditMode? "Updated": "Created")+" Successfully";
-                expect(chaisePage.recordEditPage.getResultTitle().getText()).toBe(title);
+                var title = tableParams.results.length + "/" + tableParams.results.length + " Records " + (isEditMode ? "Updated" : "Created") + " Successfully";
+                expect(chaisePage.recordEditPage.getResultsetTitleElement().getText()).toBe(title, "Resultset page title is incorrect.");
             });
 
             it('should point to the correct link with caption.', function () {
@@ -1361,8 +1362,8 @@ exports.testSubmission = function (tableParams, isEditMode) {
 
                 var expectedLink = process.env.CHAISE_BASE_URL + "/recordset/#" +  browser.params.catalogId + "/" + tableParams.schema_name + ":" + tableParams.table_name + linkModifier;
 
-                chaisePage.recordEditPage.getResultTitleLink().then(function (titleLink) {
-                    expect(titleLink[0].getText()).toBe(tableParams.table_displayname, "Title of result page doesn't have the expected caption.");
+                chaisePage.recordEditPage.getResultsetSubtitleLink().then(function (titleLink) {
+                    expect(titleLink[0].getText()).toBe(tableParams.table_displayname.toUpperCase(), "Title of result page doesn't have the expected caption.");
                     expect(titleLink[0].getAttribute("href")).toBe(expectedLink , "Title of result page doesn't have the expected link.");
                 });
             });

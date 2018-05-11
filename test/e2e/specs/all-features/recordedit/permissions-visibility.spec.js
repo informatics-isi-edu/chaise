@@ -52,8 +52,8 @@ describe('When viewing RecordEdit app', function() {
     describe('as a user who can update (and create)', function() {
         beforeAll(function() {
             browser.get(baseUrl + ':main_update_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value);
-            chaisePage.waitForElement(element(by.id('entity-title'))).then(function() {
-                expect(element(by.id('entity-title')).isDisplayed()).toBe(true);
+            chaisePage.waitForElement(element(by.id('page-title'))).then(function() {
+                expect(element(by.id('page-title')).isDisplayed()).toBe(true);
             });
         });
 
@@ -134,7 +134,7 @@ describe('When viewing RecordEdit app', function() {
 
             browser.get(url);
             chaisePage.waitForElement(modalBody).then(function() {
-                expect(element(by.id('entity-title')).isPresent()).toBe(false);
+                expect(element(by.id('page-title')).isPresent()).toBe(false);
                 expect(modalBody.isDisplayed()).toBe(true);
                 expect(element(by.css('.modal-title')).isPresent()).toBe(true);
                 expect(element(by.css('.modal-title')).getText()).toBe('You need to be logged in to continue.');
