@@ -763,7 +763,7 @@ exports.testAddRelatedTable = function (params, inputCallback) {
 				expect(url.indexOf('?prefill=')).toBeGreaterThan(-1, "didn't have prefill");
 
 				var title = chaisePage.recordEditPage.getFormTitle().getText();
-				expect(title).toBe("Create " + params.tableDisplayname + " Record", "recordedit title missmatch.")
+				expect(title).toBe("Create Record", "recordedit title missmatch.")
 
 				done();
 			}).catch(function (err) {

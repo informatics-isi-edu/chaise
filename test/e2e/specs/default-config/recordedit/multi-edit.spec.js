@@ -151,15 +151,19 @@ describe('Edit multiple existing record,', function() {
                     browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/" + schemaName + ":" + tableParams.table_name + "/" + keyPairs.join(";"));
                 });
 
-                it("should have the table displayname as part of the entity title.", function() {
+                it("should have the title displayed properly.", function() {
                     // if submit button is visible, this means the recordedit page has loaded
                     chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
-                        expect(chaisePage.recordEditPage.getEntityTitleElement().getText()).toBe("Edit " + tableParams.table_name + " Records");
+                        expect(chaisePage.recordEditPage.getEntityTitleElement().getText()).toBe("Edit Records", "Multi-edit title is incorrect.");
                     });
                 });
 
-                it("table tooltip must be correct.", function () {
-                    expect(chaisePage.recordEditPage.getEntityTitleTooltip()).toBe(tableParams.tableComment);
+                it("should have the table displayname as part of the entity subtitle witht eh proper tooltip.", function() {
+                    // if submit button is visible, this means the recordedit page has loaded
+                    chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
+                        expect(chaisePage.recordEditPage.getEntitySubtitleElement().getText()).toBe(tableParams.table_name.toUpperCase(), "Entity subtitle is incorrect.");
+                        expect(chaisePage.recordEditPage.getEntitySubtitleTooltip()).toBe(tableParams.tableComment, "Subtitle comment is incorrect.");
+                    });
                 });
 
                 it("columns should have correct value, and selectable.", function() {
@@ -217,14 +221,14 @@ describe('Edit multiple existing record,', function() {
 
                     describe("result page", function () {
                         it("should have the correct title.", function() {
-                            expect(chaisePage.recordEditPage.getResultTitle().getText()).toBe(tableParams.results.length + "/" + tableParams.results.length + " "+ tableParams.table_name +" Records Updated Successfully");
+                            expect(chaisePage.recordEditPage.getResultsetTitleElement().getText()).toBe(tableParams.results.length + "/" + tableParams.results.length + " Records Updated Successfully", "Resultset title is incorrect.");
                         });
 
                         it('should point to the correct link with caption.', function () {
                             var expectedLink = process.env.CHAISE_BASE_URL + "/recordset/#" +  browser.params.catalogId + "/" + schemaName + ":" + tableParams.table_name + "/" + keyPairs.join(";") + "@sort(" + tableParams.sortColumns + ")";
 
-                            chaisePage.recordEditPage.getResultTitleLink().then(function (titleLink) {
-                                expect(titleLink[0].getText()).toBe(tableParams.table_name, "Title of result page doesn't have the expected caption.");
+                            chaisePage.recordEditPage.getResultsetSubtitleLink().then(function (titleLink) {
+                                expect(titleLink[0].getText()).toBe(tableParams.table_name.toUpperCase(), "Title of result page doesn't have the expected caption.");
                                 expect(titleLink[0].getAttribute("href")).toBe(expectedLink , "Title of result page doesn't have the expected link.");
                             });
                         });
