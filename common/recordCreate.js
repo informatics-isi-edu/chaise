@@ -371,7 +371,7 @@
                     };
                     addRecords(viewModel.editMode, derivedref, nullArr, isModalUpdate, rsReference, rsTuples, rsQueryParams, viewModel, viewModel.onSuccess, logObject);
                 }
-            });
+            }, viewModel.onModalClose);
         }
 
         /**
@@ -411,7 +411,8 @@
          * @param  {object} rsQueryParams           object contains queryparams of context from calling function
          * @param  {callback} onSuccess             callback
          */
-        function addRelatedRecordFact(isModalUpdate, ref, rowIdx, modelObject, editMode, formContainer, readyToSubmit, recordsetLink, submissionButtonDisabled, rsReference, rsTuples, rsSession, rsQueryParams, onSuccess) {
+        function addRelatedRecordFact(isModalUpdate, ref, rowIdx, modelObject, editMode, formContainer, readyToSubmit, recordsetLink, submissionButtonDisabled, rsReference, rsTuples, rsSession, rsQueryParams, onSuccess, onModalClose) {
+            viewModel.onModalClose = onModalClose;
             viewModel.onSuccess = onSuccess;
             viewModel.editMode = editMode;
             viewModel.formContainer = formContainer;

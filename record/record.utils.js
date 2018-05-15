@@ -6,7 +6,7 @@
     .factory('constants', [function(){
         return {
             defaultPageSize: 25,
-            MAX_CONCURENT_REQUEST: 4
+            MAX_CONCURENT_REQUEST: 6
         };
     }])
 
@@ -19,7 +19,7 @@
          * @private
          */
         function _haveFreeSlot() {
-            var res = $rootScope.occupiedSlots < constants.MAX_CONCURENT_REQUEST;
+            var res = $rootScope.recordFlowControl.occupiedSlots < $rootScope.recordFlowControl.maxRequests;
             if (!res) {
                 $log.debug("No free slot available.");
             }
@@ -33,7 +33,7 @@
          * if it's needed to.
          */
         function _processRequests(isUpdate) {
-            if (!_haveFreeSlot()) return;
+            if (!_haveFreeSlot() || $rootScope.pauseRequests) return;
 
             if ($rootScope.isMainDirty) {
                 readMainEntity().then(function (tuple) {
@@ -142,10 +142,10 @@
         function readMainAggregates(isUpdate) {
             $rootScope.columnModels.forEach(function (model, index) {
                 if (!model.isAggregate || !_haveFreeSlot() || !model.dirtyResult) return;
-                $rootScope.occupiedSlots++;
+                $rootScope.recordFlowControl.occupiedSlots++;
                 model.dirtyResult = false;
-                _readMainColumnAggregate(model.column, index, $rootScope.counter).then(function (res) {
-                    $rootScope.occupiedSlots--;
+                _readMainColumnAggregate(model.column, index, $rootScope.recordFlowControl.counter).then(function (res) {
+                    $rootScope.recordFlowControl.occupiedSlots--;
                     model.dirtyResult = !res;
                     _processRequests(isUpdate);
                 }).catch(genericErrorCatch);
@@ -164,13 +164,13 @@
             logObject.referrer = $rootScope.reference.defaultLogInfo;
 
             column.getAggregatedValue($rootScope.page, logObject).then(function (values) {
-                if ($rootScope.counter !== current) {
+                if ($rootScope.recordFlowControl.counter !== current) {
                     return defer.resolve(false);
                 }
                 $rootScope.recordValues[index] = values[0];
                 return defer.resolve(true);
             }).catch(function (err) {
-                if ($rootScope.counter !== current) {
+                if ($rootScope.recordFlowControl.counter !== current) {
                     return defer.resolve(false);
                 }
                 return defer.reject(err);
@@ -183,13 +183,11 @@
          * @param  {Boolean} isUpdate indicates that the function has been triggered for update and not load.
          */
         function updateRecordPage(isUpdate) {
-            if (!DataUtils.isInteger($rootScope.occupiedSlots)) {
-                $rootScope.occupiedSlots = 0;
+            if (!isUpdate) {
+                $rootScope.recordFlowControl.occupiedSlots = 0;
+                $rootScope.recordFlowControl.counter = 0;
             }
-            if (!DataUtils.isInteger($rootScope.counter)) {
-                $rootScope.counter = 0;
-            }
-            $rootScope.counter++;
+            $rootScope.recordFlowControl.counter++;
 
             $rootScope.columnModels.forEach(function (m) {
                 if (m.isAggregate) {
@@ -203,6 +201,25 @@
             });
 
             _processRequests(isUpdate);
+        }
+
+
+        /**
+         * will pause the requests that are pending for updating the page.
+         * Currently it's only setting a variable, but we might want to add
+         * more logic later.
+         */
+        function pauseUpdateRecordPage() {
+            $rootScope.pauseRequests = true;
+        }
+
+        /**
+         * Resume the requests after pausing
+         */
+        function resumeUpdateRecordPage() {
+            if (!$rootScope.pauseRequests) return;
+            $rootScope.pauseRequests = false;
+            _processRequests(true);
         }
 
         /**
@@ -239,7 +256,8 @@
                     editable: $rootScope.modifyRecord,
                     deletable: $rootScope.modifyRecord && $rootScope.showDeleteButton,
                     selectMode: modalBox.noSelect
-                }
+                },
+                flowControlObject: $rootScope.recordFlowControl
             };
         }
 
@@ -263,11 +281,19 @@
             return ((!angular.isUndefined(reference) && reference.display.defaultPageSize) ? reference.display.defaultPageSize:constants.defaultPageSize);
         }
 
+        function FlowControlObject (maxRequests) {
+            maxRequests = maxRequests || constants.MAX_CONCURENT_REQUEST;
+            recordTableUtils.FlowControlObject.call(this, maxRequests);
+        }
+
         return {
             updateRecordPage: updateRecordPage,
             genericErrorCatch: genericErrorCatch,
             readMainEntity: readMainEntity,
-            getTableModel: getTableModel
+            getTableModel: getTableModel,
+            FlowControlObject: FlowControlObject,
+            pauseUpdateRecordPage: pauseUpdateRecordPage,
+            resumeUpdateRecordPage: resumeUpdateRecordPage
         };
     }]);
 

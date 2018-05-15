@@ -95,6 +95,8 @@
 
                 var columns = $rootScope.reference.generateColumnsList(tuple), model;
 
+                $rootScope.recordFlowControl = new recordAppUtils.FlowControlObject();
+
                 $rootScope.hasAggregate = false;
                 $rootScope.hasInline = false;
                 $rootScope.columnModels = [];

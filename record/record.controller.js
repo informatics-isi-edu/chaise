@@ -202,6 +202,10 @@
             onfocusEventCall(true);
         }
 
+        function onModalClose () {
+            recordAppUtils.resumeUpdateRecordPage();
+        }
+
         vm.addRelatedRecord = function(ref) {
             // 1. Pluck required values from the ref into cookie obj by getting the values of the keys that form this FK relationship
             // Another option is just passing the column name,
@@ -224,7 +228,8 @@
             });
 
             if(ref.derivedAssociationReference){
-                recordCreate.addRelatedRecordFact(true, ref, 0, cookie, vm.editMode, vm.formContainer, vm.readyToSubmit, vm.recordsetLink, vm.submissionButtonDisabled, $rootScope.reference, $rootScope.tuples, $rootScope.session, $rootScope.context.queryParams, onSuccess);
+                recordAppUtils.pauseUpdateRecordPage();
+                recordCreate.addRelatedRecordFact(true, ref, 0, cookie, vm.editMode, vm.formContainer, vm.readyToSubmit, vm.recordsetLink, vm.submissionButtonDisabled, $rootScope.reference, $rootScope.tuples, $rootScope.session, $rootScope.context.queryParams, onSuccess, onModalClose);
                 return;
             }
 

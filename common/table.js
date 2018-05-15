@@ -88,13 +88,18 @@
             ['AlertsService', 'modalBox', 'DataUtils', '$timeout','Session', '$q', 'tableConstants', '$rootScope', '$log', '$window', '$cookies', 'defaultDisplayname', 'MathUtils', 'UriUtils', 'logActions',
             function(AlertsService, modalBox, DataUtils, $timeout, Session, $q, tableConstants, $rootScope, $log, $window, $cookies, defaultDisplayname, MathUtils, UriUtils, logActions) {
 
+        function FlowControlObject(maxRequests) {
+            this.maxRequests = maxRequests || tableConstants.MAX_CONCURENT_REQUEST;
+            this.occupiedSlots = 0;
+            this.counter = 0;
+        }
+
         /**
          * returns true if we have free slots for requests.
-         * @private
          * @return {boolean}
          */
-        function _haveFreeSlot() {
-            var res = $rootScope.occupiedSlots < tableConstants.MAX_CONCURENT_REQUEST;
+        function _haveFreeSlot(vm) {
+            var res = vm.flowControlObject.occupiedSlots < vm.flowControlObject.maxRequests;
             if (!res) {
                 $log.debug("No free slot available.");
             }
@@ -114,21 +119,21 @@
         function updateColumnAggregates(vm, updatePageCB, logObject, hideSpinner) {
             if (!vm.hasLoaded || !Array.isArray(vm.aggregatesToInitialize)) return;
             while (vm.aggregatesToInitialize.length > 0) {
-                if (!_haveFreeSlot()) {
+                if (!_haveFreeSlot(vm)) {
                     return;
                 }
 
-                $rootScope.occupiedSlots++;
+                vm.flowControlObject.occupiedSlots++;
                 (function (i, current) {
                     $log.debug("getting aggregated values for column (index=" + i + ")");
                     _updateColumnAggregate(vm, i, current, logObject, hideSpinner).then(function (res) {
-                        _afterUpdateColumnAggregate(res, i, vm);
+                        _afterUpdateColumnAggregate(vm, res, i);
                         updatePageCB(vm);
                     }).catch(function (err) {
-                        _afterUpdateColumnAggregate(false, i, vm);
+                        _afterUpdateColumnAggregate(vm, false, i);
                         throw err;
                     });
-                })(vm.aggregatesToInitialize.shift(), $rootScope.counter);
+                })(vm.aggregatesToInitialize.shift(), vm.flowControlObject.counter);
             }
         }
 
@@ -144,7 +149,7 @@
             logObject.colIndex = colIndex;
 
             vm.columnModels[colIndex].column.getAggregatedValue(vm.page, logObject).then(function (values) {
-                if ($rootScope.counter !== current) {
+                if (vm.flowControlObject.counter !== current) {
                     return defer.resolve(false);
                 }
                 vm.columnModels[colIndex].isLoading = false;
@@ -153,7 +158,7 @@
                 });
                 return defer.resolve(true);
             }).catch(function (err) {
-                if ($rootScope.counter !== current) {
+                if (vm.flowControlObject.counter !== current) {
                     return defer.resolve(false);
                 }
                 return defer.reject(err);
@@ -166,8 +171,8 @@
          * @private
          * This will be called after getting data for each of the aggregate columns
          */
-        function _afterUpdateColumnAggregate(res, colIndex, vm) {
-            $rootScope.occupiedSlots--;
+        function _afterUpdateColumnAggregate(vm, res, colIndex) {
+            vm.flowControlObject.occupiedSlots--;
             $log.debug("after aggregated value for column (index=" + colIndex + ") update: " + (res? "successful." : "unsuccessful."));
         }
 
@@ -179,9 +184,9 @@
          * @param  {boolean} hideSpinner  Indicates whether we should show spinner for columns or not
          */
         function updateMainEntity(vm, updatePageCB, hideSpinner) {
-            if (!vm.dirtyResult || !_haveFreeSlot()) return;
+            if (!vm.dirtyResult || !_haveFreeSlot(vm)) return;
 
-            $rootScope.occupiedSlots++;
+            vm.flowControlObject.occupiedSlots++;
             vm.dirtyResult = false;
 
             $log.debug("updating result");
@@ -204,7 +209,7 @@
                 // we got the results, let's just update the url
                 $rootScope.$emit('reference-modified');
             }
-            $rootScope.occupiedSlots--;
+            vm.flowControlObject.occupiedSlots--;
             vm.dirtyResult = !res;
             $log.debug("after result update: " + (res ? "successful." : "unsuccessful."));
         }
@@ -220,7 +225,7 @@
             var defer = $q.defer();
             (function (current) {
                 vm.reference.read(vm.pageLimit, vm.logObject).then(function (page) {
-                    if (current !== $rootScope.counter) {
+                    if (current !== vm.flowControlObject.counter) {
                         defer.resolve(false);
                         return defer.promise;
                     }
@@ -242,7 +247,7 @@
 
                     defer.resolve(true);
                 }).catch(function(err) {
-                    if (current !== $rootScope.counter) {
+                    if (current !== vm.flowControlObject.counter) {
                         return defer.resolve(false);
                     }
 
@@ -253,7 +258,7 @@
                     }
                     defer.reject(err);
                 });
-            }) ($rootScope.counter);
+            }) (vm.flowControlObject.counter);
             return defer.promise;
         }
 
@@ -262,7 +267,7 @@
          * will be called after getting data for each facet to set the flags.
          */
         function _afterFacetUpdate (vm, i, res) {
-            $rootScope.occupiedSlots--;
+            vm.flowControlObject.occupiedSlots--;
             var currFm = vm.facetModels[i];
             currFm.initialized = res || currFm.initialized;
             currFm.isLoading = !res;
@@ -296,7 +301,7 @@
                     aggList,
                     {action: logActions.recordsetCount}
                 ).then(function getAggregateCount(response) {
-                    if (current !== $rootScope.counter) {
+                    if (current !== vm.flowControlObject.counter) {
                         defer.resolve(false);
                         return defer.promise;
                     }
@@ -304,7 +309,7 @@
                     vm.totalRowsCnt = response[0];
                     defer.resolve(true);
                 }).catch(function (err) {
-                    if (current !== $rootScope.counter) {
+                    if (current !== vm.flowControlObject.counter) {
                         defer.resolve(false);
                         return defer.promise;
                     }
@@ -312,7 +317,7 @@
                     // fail silently
                     vm.totalRowsCnt = null;
                 });
-            })($rootScope.counter);
+            })(vm.flowControlObject.counter);
             return defer.promise;
         }
 
@@ -321,7 +326,7 @@
          * will be called after getting data for count to set the flags.
          */
         function _afterUpdateCount (vm, res) {
-            $rootScope.occupiedSlots--;
+            vm.flowControlObject.occupiedSlots--;
             vm.dirtyCount = !res;
             $log.debug("after count update: " + (res ? "successful." : "unsuccessful."));
         }
@@ -336,7 +341,7 @@
             vm.initialized = false;
             vm.dirtyResult = true;
             vm.dirtyCount = true;
-            $rootScope.counter = 0;
+            vm.flowControlObject.counter = 0;
 
             update(vm);
         }
@@ -372,8 +377,8 @@
             vm.dirtyCount = updateCount || vm.dirtyCount;
 
             $timeout(function () {
-                $rootScope.counter++;
-                $log.debug("adding one to counter: " + $rootScope.counter);
+                vm.flowControlObject.counter++;
+                $log.debug("adding one to counter: " + vm.flowControlObject.counter);
                 _updatePage(vm);
             }, 0);
         }
@@ -392,7 +397,7 @@
          * @param  {Object} vm The table view model
          */
         function _updatePage(vm) {
-            if (!_haveFreeSlot()) {
+            if (!_haveFreeSlot(vm)) {
                 return;
             }
 
@@ -406,11 +411,11 @@
             if (vm.facetModels) {
                 if (vm.facetsToInitialize.length === 0) {
                     vm.facetModels.forEach(function (fm, index) {
-                        if (fm.processed || !_haveFreeSlot()) {
+                        if (fm.processed || !_haveFreeSlot(vm)) {
                             return;
                         }
 
-                        $rootScope.occupiedSlots++;
+                        vm.flowControlObject.occupiedSlots++;
                         fm.processed = true;
 
                         (function (i) {
@@ -426,14 +431,14 @@
                     });
                 }
                 // initialize facets
-                else if (_haveFreeSlot()){
-                    $rootScope.occupiedSlots++;
+                else if (_haveFreeSlot(vm)){
+                    vm.flowControlObject.occupiedSlots++;
                     var index = vm.facetsToInitialize.shift();
                     (function (i) {
                         $log.debug("initializing facet (index="+index+")");
                         vm.facetModels[i].initializeFacet().then(function (res) {
                             $log.debug("after facet (index="+ i +") initialize: " + (res ? "successful." : "unsuccessful."));
-                            $rootScope.occupiedSlots--;
+                            vm.flowControlObject.occupiedSlots--;
                             _updatePage(vm);
                         }).catch(function (err) {
                             throw err;
@@ -445,8 +450,8 @@
             // update the count
             if (vm.config.hideTotalCount) {
                 vm.totalRowsCnt = null;
-            } else if (vm.dirtyCount && _haveFreeSlot()) {
-                $rootScope.occupiedSlots++;
+            } else if (vm.dirtyCount && _haveFreeSlot(vm)) {
+                vm.flowControlObject.occupiedSlots++;
                 vm.dirtyCount = false;
 
                 $log.debug("updating count");
@@ -491,13 +496,6 @@
          */
         function registerTableCallbacks(scope) {
             if (!scope.vm) scope.vm = {};
-
-            if (!DataUtils.isInteger($rootScope.occupiedSlots)) {
-                $rootScope.occupiedSlots = 0;
-            }
-            if (!DataUtils.isInteger($rootScope.counter)) {
-                $rootScope.counter = 0;
-            }
 
             var callOnRowClick = function (scope, tuples, isSelected) {
                 if (scope.onRowClickBind) {
@@ -660,13 +658,6 @@
          * @param  {object} scope the scope object
          */
         function registerRecordsetCallbacks(scope) {
-            if (!DataUtils.isInteger($rootScope.occupiedSlots)) {
-                $rootScope.occupiedSlots = 0;
-            }
-            if (!DataUtils.isInteger($rootScope.counter)) {
-                $rootScope.counter = 0;
-            }
-
             var addRecordRequests = {}; // table refresh used by add record implementation with cookie (old method)
             var updated = false; // table refresh used by ellipses' edit action (new method)
 
@@ -680,6 +671,7 @@
             scope.vm.isIdle = true;
             scope.vm.facetModels = [];
             scope.vm.facetsToInitialize = [];
+            scope.vm.flowControlObject = new FlowControlObject();
 
             scope.setPageLimit = function(limit) {
                 scope.vm.pageLimit = limit;
@@ -936,7 +928,8 @@
             updateColumnAggregates: updateColumnAggregates,
             updateMainEntity: updateMainEntity,
             registerTableCallbacks: registerTableCallbacks,
-            registerRecordsetCallbacks: registerRecordsetCallbacks
+            registerRecordsetCallbacks: registerRecordsetCallbacks,
+            FlowControlObject: FlowControlObject
         };
     }])
 
