@@ -1,3 +1,35 @@
+@font-face {
+    font-family: 'chaise-icons';
+
+    src: url('fonts/chaise-icons.eot');
+    src: url('fonts/chaise-icons.eot?#iefix') format('embedded-opentype'),
+         url('fonts/chaise-icons.woff2') format('woff2'),
+         url('fonts/chaise-icons.woff') format('woff'),
+         url('fonts/chaise-icons.ttf') format('truetype'),
+         url('fonts/chaise-icons.svg#chaise-icons') format('svg');
+}
+
+.chaise-icon {
+    position: relative;
+    top: 1px;
+    display: inline-block;
+    font-family: 'chaise-icons';
+    font-style: normal;
+    font-weight: normal;
+    line-height: 1;
+
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.chaise-icon.chaise-zoom-in::before {
+    content: '\00A3';
+}
+
+.chaise-icon.chaise-zoom-out::before {
+    content: '\00A2';
+}
+
 /****************** GLOBAL ******************/
 html, body {
     height: 100%;
@@ -256,6 +288,10 @@ img.spinner-sm {
     border-top: none;
     border-bottom: 1px solid #ddd;
     word-wrap: break-word;
+}
+
+.table>tbody>tr>td {
+    padding: 5px;
 }
 
 #detailed-bookmark-container{
@@ -1182,7 +1218,7 @@ footer .container1 {
  }
 
  .recordset-container.with-faceting > .faceting-resizable.open-panel {
-     flex:0 0 20vw;
+     flex:0 0 21vw;
      min-width: 170px;
      padding-left: 5px;
  }
@@ -1457,13 +1493,16 @@ footer .container1 {
  /* INTEGER SEARCH */
 
  .faceting-container .range-picker hr {
-  color: #f5f5f5;
-  width: 1px;
+     color: #f5f5f5;
+     width: 1px;
  }
+
  .faceting-container .range-picker .form-inline input {
      width: 100%;
-     margin-right: 10px;
-     padding: 6px;
+     padding: 6px 20px 6px 6px;
+     height: 100%;
+     border: none;
+     border-radius: 4px;
  }
 
  /* STRING SEARCH */
@@ -1566,11 +1605,16 @@ li.chaise-checkbox:hover {
 }
 
 /******* range inputs ***********/
-range-inputs .input-clearbtn{
+range-inputs .input-clearbtn {
     cursor: pointer;
-    right: -4px;
+    right: 0px;
     pointer-events: all;
     z-index: 5;
+    width: 22px
+}
+
+range-inputs .form-control {
+    padding: 0px;
 }
 
 range-inputs .input-container {
@@ -1579,8 +1623,14 @@ range-inputs .input-container {
 
 range-inputs .range-inputs-width {
     min-width: 100px;
-    max-width: 300px;
-    width: 100%;
+}
+
+range-inputs .numeric-date-width {
+    max-width: 110px
+}
+
+range-inputs .datetime-width {
+    max-width: 150px
 }
 
 range-inputs .input-group {

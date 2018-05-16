@@ -1,0 +1,28 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" >
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">
+<metadata></metadata>
+<defs>
+<font id="untitled1regular" horiz-adv-x="2096" >
+<font-face units-per-em="2048" ascent="1638" descent="-410" />
+<missing-glyph horiz-adv-x="500" />
+<glyph horiz-adv-x="0" />
+<glyph unicode="&#xd;" />
+<glyph unicode="&#xa2;" d="M66 858q0 316 142 590t380 428q242 156 526 156t526 -156q244 -160 382 -428t140 -590q2 -390 -206 -704l566 -560l-80 -112l-568 562q-146 -174 -342 -268q-198 -96 -418 -96q-208 0 -406 94q-194 92 -334 250t-224 376t-84 458zM234 858q0 -408 258 -700t622 -292 q240 0 442 134q198 132 320 362q122 232 120 496q-2 206 -70 382q-72 186 -188 316q-114 128 -282 210q-164 80 -342 80q-176 0 -342 -80q-162 -78 -280 -210q-120 -134 -189 -316t-69 -382zM378 722l4 252h1474l-4 -252h-1474z" />
+<glyph unicode="&#xa3;" d="M66 858q0 316 142 590t380 428q242 156 526 156t526 -156q244 -160 382 -428t140 -590q2 -390 -206 -704l570 -564l-80 -112l-572 566q-146 -174 -342 -268q-198 -96 -418 -96q-208 0 -406 94q-194 92 -334 250t-224 376t-84 458zM234 858q0 -408 258 -700t622 -292 q240 0 442 134q198 132 320 362q122 232 120 496q-2 206 -70 382q-72 186 -188 316q-114 128 -282 210q-164 80 -342 80q-176 0 -342 -80q-162 -78 -280 -210q-120 -134 -189 -316t-69 -382zM378 722l4 252h598v660l252 -4v-656h624l-4 -252h-620v-706l-252 4v702h-602z" />
+<glyph unicode="&#x2000;" horiz-adv-x="1016" />
+<glyph unicode="&#x2001;" horiz-adv-x="2032" />
+<glyph unicode="&#x2002;" horiz-adv-x="1016" />
+<glyph unicode="&#x2003;" horiz-adv-x="2032" />
+<glyph unicode="&#x2004;" horiz-adv-x="677" />
+<glyph unicode="&#x2005;" horiz-adv-x="508" />
+<glyph unicode="&#x2006;" horiz-adv-x="338" />
+<glyph unicode="&#x2007;" horiz-adv-x="338" />
+<glyph unicode="&#x2008;" horiz-adv-x="254" />
+<glyph unicode="&#x2009;" horiz-adv-x="406" />
+<glyph unicode="&#x200a;" horiz-adv-x="112" />
+<glyph unicode="&#x202f;" horiz-adv-x="406" />
+<glyph unicode="&#x205f;" horiz-adv-x="508" />
+<glyph unicode="&#x25fc;" horiz-adv-x="1000" d="M0 0z" />
+</font>
+</defs></svg> 

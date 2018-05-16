@@ -3,7 +3,7 @@
 
     angular.module('chaise.inputs', ['chaise.validators'])
 
-    .directive('rangeInputs', ['dataFormats', function(dataFormats) {
+    .directive('rangeInputs', ['dataFormats', 'integerLimits', function(dataFormats, integerLimits) {
         return {
             restrict: 'E',
             templateUrl: '../common/templates/inputs/rangeInputs.html',
@@ -16,20 +16,8 @@
             },
             link: function(scope, elem, attr) {
                 function emptyOrNull(val) {
-
                     return (val === '' || val == null || val == undefined);
                 }
-
-                scope.dataFormats = dataFormats;
-
-                scope.int2min = -32768;
-                scope.int2max = 32767;
-                scope.int4min = -2147483648;
-                scope.int4max = 2147483647;
-                scope.int8min = -9223372036854775808
-                scope.int8max = 9223372036854775807;
-
-                scope.model = {};
 
                 /**
                  * Returns a relative type after checkins if the column has a domain type.
@@ -63,18 +51,34 @@
                 }
 
                 // initialize properties
-                if (scope.displayType(scope.type) == "datetime") {
-                    scope.model.min = {
-                        date: null,
-                        time: null
-                    };
-                    scope.model.max = {
-                        date: null,
-                        time: null
-                    };
-                } else {
-                    scope.model.min = scope.modelMin;
-                    scope.model.max = scope.modelMax;
+                scope.dataFormats = dataFormats;
+                scope.model = {};
+                scope.model.min = scope.modelMin;
+                scope.model.max = scope.modelMax;
+                switch (scope.type.rootName) {
+                    case 'int2':
+                        scope.intMin = integerLimits.INT_2_MIN;
+                        scope.intMax = integerLimits.INT_2_MAX;
+                        break;
+                    case 'int4':
+                        scope.intMin = integerLimits.INT_4_MIN;
+                        scope.intMax = integerLimits.INT_4_MAX;
+                        break;
+                    case 'int8':
+                        scope.intMin = integerLimits.INT_8_MIN;
+                        scope.intMax = integerLimits.INT_8_MAX;
+                        break;
+                    case 'timestamp':
+                    case 'timestamptz':
+                        scope.model.min = {
+                            date: null,
+                            time: null
+                        };
+                        scope.model.max = {
+                            date: null,
+                            time: null
+                        };
+                        break;
                 }
 
                 // returns a boolean to disable the add button if both min and max are not set

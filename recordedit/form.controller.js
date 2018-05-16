@@ -3,8 +3,8 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'dataFormats', 'DataUtils', 'ErrorService', 'logActions', 'messageMap', 'modalBox', 'modalUtils', 'recordCreate', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
-        function FormController(AlertsService, dataFormats, DataUtils, ErrorService, logActions, messageMap, modalBox, modalUtils, recordCreate, recordEditModel, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
+    .controller('FormController', ['AlertsService', 'dataFormats', 'DataUtils', 'ErrorService', 'integerLimits', 'logActions', 'messageMap', 'modalBox', 'modalUtils', 'recordCreate', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
+        function FormController(AlertsService, dataFormats, DataUtils, ErrorService, integerLimits, logActions, messageMap, modalBox, modalUtils, recordCreate, recordEditModel, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
         var context = $rootScope.context;
         var mainBodyEl;
@@ -41,12 +41,12 @@
         vm.deleteRecord = deleteRecord;
 
         vm.inputType = null;
-        vm.int2min = -32768;
-        vm.int2max = 32767;
-        vm.int4min = -2147483648;
-        vm.int4max = 2147483647;
-        vm.int8min = -9223372036854775808
-        vm.int8max = 9223372036854775807;
+        vm.int2min = integerLimits.INT_2_MIN;
+        vm.int2max = integerLimits.INT_2_MAX;
+        vm.int4min = integerLimits.INT_4_MIN;
+        vm.int4max = integerLimits.INT_4_MAX;
+        vm.int8min = integerLimits.INT_8_MIN;
+        vm.int8max = integerLimits.INT_8_MAX;
 
         vm.columnToDisplayType = columnToDisplayType;
         vm.matchType = matchType;

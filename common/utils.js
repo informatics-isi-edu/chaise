@@ -147,6 +147,15 @@
         }
     })
 
+    .constant("integerLimits", {
+        INT_2_MIN: -32768,
+        INT_2_MAX: 32767,
+        INT_4_MIN: -2147483648,
+        INT_4_MAX: 2147483647,
+        INT_8_MIN: -9223372036854775808,
+        INT_8_MAX: 9223372036854775807
+    })
+
     .factory('UriUtils', ['$injector', '$rootScope', '$window', 'appContextMapping', 'appTagMapping', 'ContextUtils', 'Errors', 'messageMap', 'parsedFilter',
         function($injector, $rootScope, $window, appContextMapping, appTagMapping, ContextUtils, Errors, messageMap, ParsedFilter) {
 
