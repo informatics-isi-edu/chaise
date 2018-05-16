@@ -371,6 +371,10 @@
                     "id"
                 ], "comment": "collections"},
                 {"source": [
+                    {"inbound": ["product-record", "fk_table_w_agg_accommodation"]},
+                    "id"
+                ], "comment": "has aggregates"},
+                {"source": [
                     {"outbound": ["product-record", "fk_cover"]},
                     {"inbound": ["product-record", "fk_thumbnail_collection"]},
                     "id"
@@ -1330,7 +1334,6 @@
         }
       }
     },
-
     "media_collection": {
       "comment": null,
       "kind": "table",
@@ -1409,7 +1412,6 @@
         }
       }
     },
-
     "category_collection": {
       "comment": "domain",
       "kind": "table",
@@ -1495,7 +1497,6 @@
         }
       }
     },
-
     "category_collection_2": {
       "comment": "domain",
       "kind": "table",
@@ -1569,7 +1570,6 @@
         }
       }
     },
-
     "category_collection_3": {
       "comment": "domain",
       "kind": "table",
@@ -1643,7 +1643,6 @@
         }
       }
     },
-
     "category_collection_4": {
       "comment": "domain",
       "kind": "table",
@@ -1717,7 +1716,6 @@
         }
       }
     },
-
     "category_collection_5": {
       "comment": "domain",
       "kind": "table",
@@ -1791,7 +1789,6 @@
         }
       }
     },
-
     "category_collection_6": {
       "comment": "domain",
       "kind": "table",
@@ -1865,7 +1862,6 @@
         }
       }
     },
-
     "multiple_records": {
    "comment": "domain",
    "kind": "table",
@@ -1942,26 +1938,70 @@
        "*": ["id", "telno", "term"]
       }
      }
+   },
+   "table_w_aggregates": {
+     "comment": "table with aggregate column that has fk to accomodation",
+     "kind": "table",
+     "table_name": "table_w_aggregates",
+     "schema_name": "product-record",
+     "keys": [{
+       "unique_columns": ["id"]
+     }],
+     "column_definitions": [
+       {
+         "name": "id",
+         "nullok": false,
+         "type": {
+           "typename": "int4"
+         }
+       },
+       {
+         "name": "value",
+         "type": {
+           "typename": "text"
+         }
+       },
+       {
+         "name": "fk_to_accommodation",
+         "type": {
+           "typename": "int4"
+         }
+       }
+     ],
+     "foreign_keys": [
+       {
+         "names" : [["product-record", "fk_table_w_agg_accommodation"]],
+         "comment": null,
+         "foreign_key_columns": [
+           {
+             "table_name": "table_w_aggregates",
+             "schema_name": "product-record",
+             "column_name": "fk_to_accommodation"
+           }
+         ],
+         "annotations": {},
+         "referenced_columns": [
+           {
+             "table_name": "accommodation",
+             "schema_name": "product-record",
+             "column_name": "id"
+           }
+         ]
+       }
+     ],
+     "annotations": {
+       "tag:isrd.isi.edu,2016:visible-columns": {
+         "*": [
+           "id",
+           {"source": "value", "aggregate": "max"},
+           {"source": "value", "aggregate": "min"},
+           {"source": "value", "aggregate": "cnt"},
+           {"source": "value", "aggregate": "cnt_d"}
+         ]
+       }
+     }
    }
   },
-
-  "table_names": [
-    "category",
-    "file",
-    "accommodation",
-    "accommodation_image",
-    "booking",
-    "media",
-    "multiple_records",
-    "accommodation_collection",
-    "category_collection",
-    "category_collection_2",
-    "category_collection_3",
-    "category_collection_4",
-    "category_collection_5",
-    "category_collection_6",
-    "media_collection"
-  ],
   "comment": null,
   "annotations": {
     "tag:misd.isi.edu,2015:display": {

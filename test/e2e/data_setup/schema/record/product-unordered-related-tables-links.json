@@ -350,7 +350,8 @@
                   {"outbound": ["product-unordered-related-tables-links", "fk_assoc_related_table"]},
                   {"inbound": ["product-unordered-related-tables-links", "fk_related_table_2_to_related"]},
                   "id"
-              ]}
+              ]},
+              ["product-unordered-related-tables-links", "fk_table_w_agg_accommodation"]
           ]
         }
       }
@@ -1144,7 +1145,7 @@
           "compact": "tag:isrd.isi.edu,2016:chaise:search"
         }
       }
-  },
+    },
     "related_table_2": {
       "comment":"has a foreignkey to related_table",
       "kind": "table",
@@ -1196,21 +1197,71 @@
           "*": ["id", "col"]
         }
       }
+  },
+    "table_w_aggregates": {
+      "comment": "table with aggregate column that has fk to accomodation",
+      "kind": "table",
+      "table_name": "table_w_aggregates",
+      "schema_name": "product-unordered-related-tables-links",
+      "keys": [{
+        "unique_columns": ["id"]
+      }],
+      "column_definitions": [
+        {
+          "name": "id",
+          "nullok": false,
+          "type": {
+            "typename": "int4"
+          }
+        },
+        {
+          "name": "value",
+          "type": {
+            "typename": "text"
+          }
+        },
+        {
+          "name": "fk_to_accommodation",
+          "type": {
+            "typename": "int4"
+          }
+        }
+      ],
+      "foreign_keys": [
+        {
+          "names" : [["product-unordered-related-tables-links", "fk_table_w_agg_accommodation"]],
+          "comment": null,
+          "foreign_key_columns": [
+            {
+              "table_name": "table_w_aggregates",
+              "schema_name": "product-unordered-related-tables-links",
+              "column_name": "fk_to_accommodation"
+            }
+          ],
+          "annotations": {},
+          "referenced_columns": [
+            {
+              "table_name": "accommodation",
+              "schema_name": "product-unordered-related-tables-links",
+              "column_name": "id"
+            }
+          ]
+        }
+      ],
+      "annotations": {
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "*": [
+            "id",
+            ["product-unordered-related-tables-links", "fk_table_w_agg_accommodation"],
+            {"source": "value", "aggregate": "max"},
+            {"source": "value", "aggregate": "min"},
+            {"source": "value", "aggregate": "cnt"},
+            {"source": "value", "aggregate": "cnt_d"}
+          ]
+        }
+      }
     }
   },
-  "table_names": [
-    "category",
-    "file",
-    "accommodation",
-    "accommodation_image",
-    "booking",
-    "media",
-    "related_table",
-    "association_table",
-    "association_table_markdown",
-    "related_table_markdown",
-    "schedule"
-  ],
   "comment": null,
   "annotations": {
     "tag:misd.isi.edu,2015:display": {

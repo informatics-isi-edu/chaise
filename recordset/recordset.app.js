@@ -139,17 +139,11 @@
                     }
                     recordsetModel.tableDisplayName = recordsetModel.reference.displayname;
 
-                     // the additional provided name
-                     if (location.queryParams && location.queryParams.subset) {
-                         recordsetModel.filterString = location.queryParams.subset;
-                     }
+                    recordsetModel.search = recordsetModel.reference.location.searchTerm;
 
-                     recordsetModel.columns = recordsetModel.reference.columns;
-                     recordsetModel.search = recordsetModel.reference.location.searchTerm;
+                    recordsetModel.logObject = {action: logActions.recordsetLoad};
 
-                     recordsetModel.logObject = {action: logActions.recordsetLoad};
-
-                     recordsetModel.readyToInitialize = true;
+                    recordsetModel.readyToInitialize = true;
                  }).catch(function genericCatch(exception) {
                      $log.warn(exception);
                      recordsetModel.hasLoaded = true;

@@ -361,6 +361,7 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/ui-bootstrap-tpls.js
 
 RECORD_JS_SOURCE=$(RECORD_ASSETS)/record.app.js \
+	$(RECORD_ASSETS)/record.utils.js \
 	$(RECORD_ASSETS)/record.controller.js
 
 RECORD_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
