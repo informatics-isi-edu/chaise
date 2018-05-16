@@ -1,3 +1,35 @@
+@font-face {
+    font-family: 'chaise-icons';
+
+    src: url('fonts/chaise-icons.eot');
+    src: url('fonts/chaise-icons.eot?#iefix') format('embedded-opentype'),
+         url('fonts/chaise-icons.woff2') format('woff2'),
+         url('fonts/chaise-icons.woff') format('woff'),
+         url('fonts/chaise-icons.ttf') format('truetype'),
+         url('fonts/chaise-icons.svg#chaise-icons') format('svg');
+}
+
+.chaise-icon {
+    position: relative;
+    top: 1px;
+    display: inline-block;
+    font-family: 'chaise-icons';
+    font-style: normal;
+    font-weight: normal;
+    line-height: 1;
+
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.chaise-icon.chaise-zoom-in::before {
+    content: '\00A3';
+}
+
+.chaise-icon.chaise-zoom-out::before {
+    content: '\00A2';
+}
+
 /****************** GLOBAL ******************/
 html, body {
     height: 100%;
