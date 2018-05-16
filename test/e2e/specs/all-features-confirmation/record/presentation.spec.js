@@ -46,6 +46,7 @@ var testParams = {
         { title: "Operational Since", value: "2008-12-09 00:00:00", type: "timestamptz" },
         { title: "Is Luxurious", value: "true", type: "boolean" },
         { title: "accommodation_collections", comment: "collections", value: '<ul>\n<li><a href="' + browser.params.url + '/record/#'+browser.params.catalogId+'/product-record:accommodation_collection/id=2000">Sherathon Hotel</a></li>\n</ul>\n', type: "inline"},
+        { title: "table_w_aggregates", comment: "has aggregates", value: '<ul>\n<li><a href="' + browser.params.url + '/record/#'+browser.params.catalogId+'/product-record:table_w_aggregates/id=3">3</a></li>\n</ul>\n', type: "inline"},
         { title: "# Id", comment: "Count of Id", value: "1"},
         { title: "# Id", comment: "Count Distinct of Id", value: "1"},
         { title: "Min Name of accommodation_collection", comment: "Minimum of title", value: "Sherathon Hotel"},
@@ -93,6 +94,26 @@ var testParams = {
               ["2000", "Sherathon Hotel"]
           ],
           rowViewPaths: ["id=2000"]
+      },
+      {
+          title: "a related entity with aggregate columns",
+          name: "table_w_aggregates",
+          schemaName: "product-record",
+          displayname: "table_w_aggregates",
+          count: 1,
+          canEdit: true,
+          canCreate: true,
+          isInline: true,
+          isTableMode: true,
+          viewMore: {
+              name: "table_w_aggregates",
+              displayname: "table_w_aggregates",
+              filter: "Accommodations: Sherathon Hotel"
+          },
+          rowValues: [
+              ["3", "102", "102", "1", "1"]
+          ],
+          rowViewPaths: ["id=3"]
       }
   ]
 };
@@ -143,6 +164,7 @@ describe('View existing record,', function() {
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + testParams.table_name + "/" + keys.join("&");
             browser.get(url);
             chaisePage.waitForElement(element(by.id('tblRecord')));
+            chaisePage.waitForElementInverse(element(by.id('rt-loading')));
         });
 
         it("should show all of the related tables in the correct order.", function() {

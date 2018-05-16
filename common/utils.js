@@ -80,6 +80,14 @@
         "recordRead": "record/main", // read the main entity (record)
         "recordRelatedRead": "record/related", // secondary
         "recordRelatedUpdate": "record/related/update", // secondary
+        "recordRelatedAggregate": "record/related/aggregate", // secondary
+        "recordRelatedAggregateUpdate": "record/related/aggregate/update", // secondary
+        "recordInlineRead": "record/inline", // secondary
+        "recordInlineUpdate": "record/inline/update", // secondary
+        "recordInlineAggregate": "record/inline/aggregate",
+        "recordInlineAggregateUpdate": "record/inline/aggregate/update",
+        "recordAggregate": "record/aggregate", // secondary
+        "recordAggregateUpdate": "record/aggregate/update", // secondary
 
 
         "createPrefill": "create/prefill", // create with inbound related prefilled (recordedit) -> does it need referrer? (the pre should have it)
@@ -103,6 +111,7 @@
         "recordsetSort": "recordset/main/sort", // recordset main data read on changing sort (recordset) has sort
         "recordsetPage": "recordset/main/page", // recordset main data read on changing page (recordset) has page
         "recordsetLimit": "recordset/main/limit", // recordset main data read on changing page limit (recordset)
+        "recordsetAggregate": "recordset/main/aggregate", //secondary (recordset get data for pseudo-columns)
         "recordsetFacet": "recordset/main/facet", // recordset main data read on changing facet (recordset)
         "recordsetFacetDetails": "recordset/viewmore", // getting facet details in modal (recordset)
         "recordsetFacetRead": "recordset/facet", // secondary
@@ -165,7 +174,7 @@
 
                 hash = hash.slice(0, hash.indexOf('?')); // remove queries
                 for (i = 0; i < queries.length; i++) { // add back only the valid queries
-                    if (queries[i].indexOf("limit=") === 0 || queries[i].indexOf("subset=") === 0) {
+                    if (queries[i].indexOf("limit=") === 0) {
                         acceptedQueries.push(queries[i]);
                     }
                 }
@@ -872,6 +881,15 @@
         }
 
         /**
+         * Verifies that the given data is integer
+         * @param  {Object}  data
+         * @return {Boolean} whether it is integer or not
+         */
+        function isInteger(data) {
+            return (typeof data === 'number') && (data % 1 === 0);
+        }
+
+        /**
         *
         * @desc Converts the following characters to HTML entities for safe and
         * HTML5-valid usage in the `id` attributes of HTML elements: spaces, ampersands,
@@ -915,6 +933,7 @@
             getRowValuesFromTupleData: getRowValuesFromTupleData,
             getRowValuesFromTuples: getRowValuesFromTuples,
             isObjectAndKeyDefined: isObjectAndKeyDefined,
+            isInteger: isInteger,
             makeSafeIdAttr: makeSafeIdAttr,
             verify: verify
         };

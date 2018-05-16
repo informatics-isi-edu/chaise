@@ -88,12 +88,144 @@
             ['AlertsService', 'modalBox', 'DataUtils', '$timeout','Session', '$q', 'tableConstants', '$rootScope', '$log', '$window', '$cookies', 'defaultDisplayname', 'MathUtils', 'UriUtils', 'logActions',
             function(AlertsService, modalBox, DataUtils, $timeout, Session, $q, tableConstants, $rootScope, $log, $window, $cookies, defaultDisplayname, MathUtils, UriUtils, logActions) {
 
-        function updateResult (vm) {
+        function FlowControlObject(maxRequests) {
+            this.maxRequests = maxRequests || tableConstants.MAX_CONCURENT_REQUEST;
+            this.occupiedSlots = 0;
+            this.counter = 0;
+        }
+
+        /**
+         * returns true if we have free slots for requests.
+         * @return {boolean}
+         */
+        function _haveFreeSlot(vm) {
+            var res = vm.flowControlObject.occupiedSlots < vm.flowControlObject.maxRequests;
+            if (!res) {
+                $log.debug("No free slot available.");
+            }
+            return res;
+        }
+
+        /**
+         * Given the tableModel object, will get value for the aggregate columns.
+         * The updateMainEntity should be called on the tableModel before this function.
+         * That function will generate `vm.page` and `vm.aggregatesToInitialize` which
+         * are needed for this function.
+         * @param  {object} vm           table model
+         * @param  {function} updatePageCB The update page callback which we will call after getting each result.
+         * @param  {object} logObject    The object that should be logged with the read request.
+         * @param  {boolean} hideSpinner  Indicates whether we should show spinner for columns or not
+         */
+        function updateColumnAggregates(vm, updatePageCB, logObject, hideSpinner) {
+            if (!vm.hasLoaded || !Array.isArray(vm.aggregatesToInitialize)) return;
+            while (vm.aggregatesToInitialize.length > 0) {
+                if (!_haveFreeSlot(vm)) {
+                    return;
+                }
+
+                vm.flowControlObject.occupiedSlots++;
+                (function (i, current) {
+                    $log.debug("getting aggregated values for column (index=" + i + ")");
+                    _updateColumnAggregate(vm, i, current, logObject, hideSpinner).then(function (res) {
+                        _afterUpdateColumnAggregate(vm, res, i);
+                        updatePageCB(vm);
+                    }).catch(function (err) {
+                        _afterUpdateColumnAggregate(vm, false, i);
+                        throw err;
+                    });
+                })(vm.aggregatesToInitialize.shift(), vm.flowControlObject.counter);
+            }
+        }
+
+        /**
+         * @private
+         * Generate request for each individual aggregate columns. Will return
+         * a promise that is resolved with a boolean value denoting the success or failure.
+         */
+        function _updateColumnAggregate(vm, colIndex, current, logObject, hideSpinner) {
+            var defer = $q.defer();
+            vm.columnModels[colIndex].isLoading = !hideSpinner;
+            logObject = logObject || {action: logActions.recordsetAggregate};
+            logObject.colIndex = colIndex;
+
+            vm.columnModels[colIndex].column.getAggregatedValue(vm.page, logObject).then(function (values) {
+                if (vm.flowControlObject.counter !== current) {
+                    return defer.resolve(false);
+                }
+                vm.columnModels[colIndex].isLoading = false;
+                vm.rowValues.forEach(function (val, index) {
+                    vm.rowValues[index][colIndex] = values[index];
+                });
+                return defer.resolve(true);
+            }).catch(function (err) {
+                if (vm.flowControlObject.counter !== current) {
+                    return defer.resolve(false);
+                }
+                return defer.reject(err);
+            });
+
+            return defer.promise;
+        }
+
+        /**
+         * @private
+         * This will be called after getting data for each of the aggregate columns
+         */
+        function _afterUpdateColumnAggregate(vm, res, colIndex) {
+            vm.flowControlObject.occupiedSlots--;
+            $log.debug("after aggregated value for column (index=" + colIndex + ") update: " + (res? "successful." : "unsuccessful."));
+        }
+
+        /**
+         * Given the tableModel object, will get the values for main entity and
+         * attach them to the model.
+         * @param  {object} vm           table model
+         * @param  {function} updatePageCB The update page callback which we will call after getting the result.
+         * @param  {boolean} hideSpinner  Indicates whether we should show spinner for columns or not
+         */
+        function updateMainEntity(vm, updatePageCB, hideSpinner) {
+            if (!vm.dirtyResult || !_haveFreeSlot(vm)) return;
+
+            vm.flowControlObject.occupiedSlots++;
+            vm.dirtyResult = false;
+
+            $log.debug("updating result");
+            _readMainEntity(vm, hideSpinner).then(function (res) {
+                _afterUpdateMainEntity(vm, res);
+                updatePageCB(vm);
+            }).catch(function (err) {
+                _afterUpdateMainEntity(vm, true);
+                throw err;
+            });
+        }
+
+        /**
+         * @private
+         * This will be called after updateMainEntity. which will set the flags
+         * based on success or failure of request.
+         */
+        function _afterUpdateMainEntity(vm, res) {
+            if (res) {
+                // we got the results, let's just update the url
+                $rootScope.$emit('reference-modified');
+            }
+            vm.flowControlObject.occupiedSlots--;
+            vm.dirtyResult = !res;
+            $log.debug("after result update: " + (res ? "successful." : "unsuccessful."));
+        }
+
+        /**
+         * @private
+         * Does the actual read for the main entity. Returns a promise that will
+         * be resolved with `true` if the request was successful.
+         */
+        function _readMainEntity (vm, hideSpinner) {
+            vm.dirtyResult = false;
             vm.hasLoaded = false;
             var defer = $q.defer();
-            (function (uri) {
+            (function (current) {
                 vm.reference.read(vm.pageLimit, vm.logObject).then(function (page) {
-                    if (vm.reference.uri !== uri) {
+                    if (current !== vm.flowControlObject.counter) {
                         defer.resolve(false);
                         return defer.promise;
                     }
@@ -103,14 +235,20 @@
                     return vm.getDisabledTuples ? vm.getDisabledTuples(page, vm.pageLimit) : '';
                 }).then(function (rows) {
                     if (rows) vm.disabledRows = rows;
+                    vm.rowValues = DataUtils.getRowValuesFromPage(vm.page);
                     vm.hasLoaded = true;
                     vm.initialized = true;
-                    vm.rowValues = DataUtils.getRowValuesFromPage(vm.page);
+                    vm.aggregatesToInitialize = [];
+                    vm.reference.columns.forEach(function (c, i) {
+                        if(c.isPathColumn && c.hasAggregate) {
+                            vm.aggregatesToInitialize.push(i);
+                        }
+                    });
 
                     defer.resolve(true);
                 }).catch(function(err) {
-                    if (vm.reference.uri !== uri) {
-                        defer.resolve(false);
+                    if (current !== vm.flowControlObject.counter) {
+                        return defer.resolve(false);
                     }
 
                     vm.hasLoaded = true;
@@ -120,13 +258,32 @@
                     }
                     defer.reject(err);
                 });
-            }) (vm.reference.uri);
+            }) (vm.flowControlObject.counter);
             return defer.promise;
         }
 
-        function updateCount (vm) {
+        /**
+         * @private
+         * will be called after getting data for each facet to set the flags.
+         */
+        function _afterFacetUpdate (vm, i, res) {
+            vm.flowControlObject.occupiedSlots--;
+            var currFm = vm.facetModels[i];
+            currFm.initialized = res || currFm.initialized;
+            currFm.isLoading = !res;
+            currFm.processed = res || currFm.processed;
+
+            $log.debug("after facet (index="+i+") update: " + (res ? "successful." : "unsuccessful."));
+        }
+
+        /**
+         * @private
+         * This will generate the request for getting the count.
+         * Returns a promise. If it's resolved with `true` then it has been successful.
+         */
+        function _updateCount (vm) {
             var  defer = $q.defer();
-            (function (uri) {
+            (function (current) {
                 var aggList, hasError;
                 try {
                     // if the table doesn't have any simple key, this might throw error
@@ -144,7 +301,7 @@
                     aggList,
                     {action: logActions.recordsetCount}
                 ).then(function getAggregateCount(response) {
-                    if (vm.reference.uri !== uri) {
+                    if (current !== vm.flowControlObject.counter) {
                         defer.resolve(false);
                         return defer.promise;
                     }
@@ -152,7 +309,7 @@
                     vm.totalRowsCnt = response[0];
                     defer.resolve(true);
                 }).catch(function (err) {
-                    if (vm.reference.uri !== uri) {
+                    if (current !== vm.flowControlObject.counter) {
                         defer.resolve(false);
                         return defer.promise;
                     }
@@ -160,15 +317,31 @@
                     // fail silently
                     vm.totalRowsCnt = null;
                 });
-            })(vm.reference.uri);
+            })(vm.flowControlObject.counter);
             return defer.promise;
         }
 
+        /**
+         * @private
+         * will be called after getting data for count to set the flags.
+         */
+        function _afterUpdateCount (vm, res) {
+            vm.flowControlObject.occupiedSlots--;
+            vm.dirtyCount = !res;
+            $log.debug("after count update: " + (res ? "successful." : "unsuccessful."));
+        }
+
+        /**
+         * This should be called to start the initialization of recordset page.
+         * It will set the flags, and then call the actual update function.
+         * @param  {object} vm the table model object
+         */
         function initialize (vm) {
             vm.search = vm.reference.location.searchTerm;
             vm.initialized = false;
             vm.dirtyResult = true;
             vm.dirtyCount = true;
+            vm.flowControlObject.counter = 0;
 
             update(vm);
         }
@@ -204,98 +377,69 @@
             vm.dirtyCount = updateCount || vm.dirtyCount;
 
             $timeout(function () {
-                updatePage(vm);
+                vm.flowControlObject.counter++;
+                $log.debug("adding one to counter: " + vm.flowControlObject.counter);
+                _updatePage(vm);
             }, 0);
         }
 
         /**
-         * Given the viewmodel, it will update the page.
+         * Given the table model, it will update the page.
          * This is behaving as a flow-control system, that allows only a Maximum
-         * number of requests defined.
+         * number of requests defined. Requests are generated in this order:
          *
+         * 1. main entity
+         * 2. aggregate columns
+         * 3. facets
+         * 4. total count
+         *
+         * @private
          * @param  {Object} vm The table view model
          */
-        function updatePage(vm) {
-            var haveFreeSlot = function () {
-                var res = vm.occupiedSlots < tableConstants.MAX_CONCURENT_REQUEST;
-                if (!res) {
-                    $log.debug("No free slot available.");
-                }
-                return res;
-            };
-
-            if (!haveFreeSlot()) {
+        function _updatePage(vm) {
+            if (!_haveFreeSlot(vm)) {
                 return;
             }
 
             // update the resultset
-            if (vm.dirtyResult) {
-                vm.occupiedSlots++;
-                vm.dirtyResult = false;
+            updateMainEntity(vm, _updatePage);
 
-                var afterUpdateResult = function (res) {
-                    if (res) {
-                        // we got the results, let's just update the url
-                        $rootScope.$emit('reference-modified');
-                    }
-                    vm.occupiedSlots--;
-                    vm.dirtyResult = !res;
-                    $log.debug("after result update: " + (res ? "successful." : "unsuccessful."));
-                };
-
-                $log.debug("updating result");
-                updateResult(vm).then(function (res) {
-                    afterUpdateResult(res);
-                    updatePage(vm);
-                }).catch(function (err) {
-                    afterUpdateResult(true);
-                    throw err;
-                });
-            }
+            // get the aggregate values only if main page is loaded
+            updateColumnAggregates(vm, _updatePage);
 
             // update the facets
             if (vm.facetModels) {
                 if (vm.facetsToInitialize.length === 0) {
                     vm.facetModels.forEach(function (fm, index) {
-                        if (fm.processed || !haveFreeSlot()) {
+                        if (fm.processed || !_haveFreeSlot(vm)) {
                             return;
                         }
 
-                        vm.occupiedSlots++;
+                        vm.flowControlObject.occupiedSlots++;
                         fm.processed = true;
-
-                        var afterFacetUpdate = function (i, res, hasError) {
-                            vm.occupiedSlots--;
-                            var currFm = vm.facetModels[i];
-                            currFm.initialized = res || currFm.initialized;
-                            currFm.isLoading = !res;
-                            currFm.processed = res || currFm.processed;
-
-                            $log.debug("after facet (index="+i+") update: " + (res ? "successful." : "unsuccessful."));
-                        };
 
                         (function (i) {
                             $log.debug("updating facet (index="+i+")");
                             vm.facetModels[i].updateFacet().then(function (res) {
-                                afterFacetUpdate(i, res);
-                                updatePage(vm);
+                                _afterFacetUpdate(vm, i, res);
+                                _updatePage(vm);
                             }).catch(function (err) {
-                                afterFacetUpdate(i, false);
+                                _afterFacetUpdate(vm, i, false);
                                 throw err;
                             });
                         })(index);
                     });
                 }
                 // initialize facets
-                else if (haveFreeSlot()){
-                    vm.occupiedSlots++;
+                else if (_haveFreeSlot(vm)){
+                    vm.flowControlObject.occupiedSlots++;
                     var index = vm.facetsToInitialize.shift();
                     (function (i) {
                         $log.debug("initializing facet (index="+index+")");
                         vm.facetModels[i].initializeFacet().then(function (res) {
                             $log.debug("after facet (index="+ i +") initialize: " + (res ? "successful." : "unsuccessful."));
-                            vm.occupiedSlots--;
-                            updatePage(vm);
+                            vm.flowControlObject.occupiedSlots--;
+                            _updatePage(vm);
                         }).catch(function (err) {
                             throw err;
                         });
@@ -306,32 +450,52 @@
             // update the count
             if (vm.config.hideTotalCount) {
                 vm.totalRowsCnt = null;
-            } else if (vm.dirtyCount && haveFreeSlot()) {
-                vm.occupiedSlots++;
+            } else if (vm.dirtyCount && _haveFreeSlot(vm)) {
+                vm.flowControlObject.occupiedSlots++;
                 vm.dirtyCount = false;
 
-                var afterUpdateCount = function (res, hasError) {
-                    vm.occupiedSlots--;
-                    vm.dirtyCount = !res;
-                    $log.debug("after count update: " + (res ? "successful." : "unsuccessful."));
-                };
-
                 $log.debug("updating count");
-                updateCount(vm).then(function (res) {
-                    afterUpdateCount(res);
-                    updatePage(vm);
+                _updateCount(vm).then(function (res) {
+                    _afterUpdateCount(vm, res);
+                    _updatePage(vm);
                 }).catch(function (err) {
-                    afterUpdateCount(true);
+                    _afterUpdateCount(vm, true);
                     throw err;
                 });
             }
         }
 
+        /**
+         * @private
+         * attaches the extra attributes to the vm object.
+         * The issue is that when we're calling the directive, the tableModel.reference
+         * might not be defined. Therefore the directive should work without those attributes.
+         * But as soon as we attach those variables, we should update other attributes that are
+         * relying on reference.
+         * In this case, columnModels is the attribute that need to be updated.
+         */
+        function _attachExtraAttributes(vm) {
+            vm.columnModels = [];
+            vm.reference.columns.forEach(function (col) {
+                vm.columnModels.push({
+                    column: col
+                });
+            });
+
+            // only allowing single column sort here
+            var location = vm.reference.location;
+            if (location.sortObject) {
+                vm.sortby = location.sortObject[0].column;
+                vm.sortOrder = (location.sortObject[0].descending ? "desc" : "asc");
+            }
+        }
+
+        /**
+         * Registers the callbacks for recordTable directive and it's children.
+         * @param  {object} scope the scope object
+         */
         function registerTableCallbacks(scope) {
             if (!scope.vm) scope.vm = {};
-
-            scope.vm.dirtyResult = false;
-            scope.vm.occupiedSlots = 0;
 
             var callOnRowClick = function (scope, tuples, isSelected) {
                 if (scope.onRowClickBind) {
@@ -444,7 +608,6 @@
                 }
             };
 
-
             // Facilitates the multi select functionality for multi edit by storing the tuple in the selectedRows array
             scope.onSelect = function(args) {
                 var tuple = args.tuple;
@@ -475,11 +638,26 @@
                 }
                 update(scope.vm, true, false, false);
             });
+
+            scope.$watch(function () {
+                return (scope.vm && scope.vm.reference) ? scope.vm.reference.columns : null;
+            }, function (newValue, oldValue) {
+                if(angular.equals(newValue, oldValue) || !newValue){
+                    return;
+                }
+                _attachExtraAttributes(scope.vm);
+            });
+
+            if (scope.vm && scope.vm.reference) {
+                _attachExtraAttributes(scope.vm);
+            }
         }
 
+        /**
+         * Registers the callbacks for recordset directive and it's children.
+         * @param  {object} scope the scope object
+         */
         function registerRecordsetCallbacks(scope) {
-            if (!scope.vm) scope.vm = {};
-
             var addRecordRequests = {}; // table refresh used by add record implementation with cookie (old method)
             var updated = false; // table refresh used by ellipses' edit action (new method)
 
@@ -492,9 +670,8 @@
 
             scope.vm.isIdle = true;
             scope.vm.facetModels = [];
-            scope.vm.dirtyResult = false;
-            scope.vm.occupiedSlots = 0;
             scope.vm.facetsToInitialize = [];
+            scope.vm.flowControlObject = new FlowControlObject();
 
             scope.setPageLimit = function(limit) {
                 scope.vm.pageLimit = limit;
@@ -684,6 +861,15 @@
                 update(scope.vm, true, true, true);
             });
 
+            scope.$watch(function () {
+                return (scope.vm && scope.vm.reference) ? scope.vm.reference.columns : null;
+            }, function (newValue, oldValue) {
+                if(angular.equals(newValue, oldValue) || !newValue){
+                    return;
+                }
+                _attachExtraAttributes(scope.vm);
+            });
+
             scope.$on('facetsLoaded', function () {
                 scope.facetsLoaded = true;
             });
@@ -739,8 +925,11 @@
         return {
             initialize: initialize,
             update: update,
+            updateColumnAggregates: updateColumnAggregates,
+            updateMainEntity: updateMainEntity,
             registerTableCallbacks: registerTableCallbacks,
-            registerRecordsetCallbacks: registerRecordsetCallbacks
+            registerRecordsetCallbacks: registerRecordsetCallbacks,
+            FlowControlObject: FlowControlObject
         };
     }])
 

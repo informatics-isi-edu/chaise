@@ -617,7 +617,7 @@ var recordPage = function() {
     };
 
     this.getColumns = function() {
-        return browser.executeScript("return $('tr[ng-repeat=\"column in columns\"]')");
+        return element.all(by.css("td.entity-key"));
     };
 
     this.getAllColumnCaptions = function() {
@@ -659,7 +659,7 @@ var recordPage = function() {
         return element.all(by.css(".panel"));
     };
     this.getRelatedTablesWithPanelandHeading = function () {
-        return element.all(by.css(".related-table-heading.panel"));
+        return element.all(by.css(".related-table-heading.panel:not(.ng-hide)"));
     };
 
     this.getRelatedTable = function(displayName) {
@@ -1156,17 +1156,23 @@ var recordsetPage = function() {
         return element(by.id("fc-" + idx)).element(by.css(".reset-plotly-button"));
     };
 
+    this.waitForAggregates = function (timeout) {
+        var locator = element.all(by.css('aggregate-col-loader'));
+        return browser.wait(protractor.ExpectedConditions.invisibilityOf(locator), timeout || browser.params.defaultTimeout);
+    };
+
     this.getWarningAlert = function () {
         return element(by.css(".alert-warning"));
     };
 
     this.getWarningAlertDissmBtn = function () {
         return element(by.css(".alert-warning")).element(by.css("button"));
-    }
+    };
 
     this.getSelectAllBtn = function () {
         return element(by.id("table-select-all-rows"));
-    }
+    };
+
 };
 
 var errorModal = function () {

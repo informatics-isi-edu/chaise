@@ -7,7 +7,7 @@ exports.testPresentation = function (tableParams) {
 	    chaisePage.waitForElementInverse(element(by.id("spinner")));
 
 	    // make sure the last related entity is visible
-	    chaisePage.waitForElement(element(by.id('rt-accommodation_image')));
+	    chaisePage.waitForElementInverse(element(by.id('rt-loading')));
 	};
 
     beforeAll(function () {
@@ -32,10 +32,7 @@ exports.testPresentation = function (tableParams) {
 
 	it("should show " + tableParams.columns.filter(function(c) {return c.value != null;}).length + " columns only", function() {
         var columns = tableParams.columns.filter(function(c) {return c.value != null;});
-		chaisePage.recordPage.getColumns().then(function(els) {
-			// Check no of columns are same as needed
-			expect(els.length).toBe(columns.length);
-		});
+		expect(chaisePage.recordPage.getColumns().count()).toBe(columns.length);
 	});
 
     it("should show the action buttons properly", function() {
@@ -379,25 +376,26 @@ exports.testPresentation = function (tableParams) {
     });
 
     // There is a media table linked to accommodations but this accommodation (Sheraton Hotel) doesn't have any media
-    it("should show and hide a related table with zero values upon clicking a link to toggle visibility of related entities", function() {
+    it("should show and hide a related table with zero values upon clicking a link to toggle visibility of related entities", function(done) {
         var showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton(),
             tableDisplayname = "<strong>media</strong>",
             noResultsMessage = "No Results Found";
-        showAllRTButton.click().then(function() {
-            expect(chaisePage.recordPage.getRelatedTable(tableDisplayname).isPresent()).toBeFalsy();
-            return showAllRTButton.click();
+         chaisePage.clickButton(showAllRTButton).then(function() {
+            expect(chaisePage.recordPage.getRelatedTable(tableDisplayname).isDisplayed()).toBeFalsy("first click: didn't hide.");
+            return  chaisePage.clickButton(showAllRTButton);
         }).then(function() {
             // empty related table should show
-            expect(chaisePage.recordPage.getRelatedTable(tableDisplayname).isPresent()).toBeTruthy();
+            expect(chaisePage.recordPage.getRelatedTable(tableDisplayname).isDisplayed()).toBeTruthy("second click: didn't show.");
             //check the no results text appears properly
             return chaisePage.recordPage.getNoResultsRow(tableDisplayname);
         }).then(function(emptyTab) {
-            expect(emptyTab.getText()).toBe(noResultsMessage);
-            return showAllRTButton.click();
+            expect(emptyTab.getText()).toBe(noResultsMessage, "message missmatch.");
+            return  chaisePage.clickButton(showAllRTButton);
         }).then(function() {
-            expect(chaisePage.recordPage.getRelatedTable(tableDisplayname).isPresent()).toBeFalsy();
+            expect(chaisePage.recordPage.getRelatedTable(tableDisplayname).isDisplayed()).toBeFalsy("third click: didn't hide.");
+            done();
         }).catch(function(error) {
-            console.log(error);
+            done.fail(error);
         });
     });
 
