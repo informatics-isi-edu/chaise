@@ -1162,7 +1162,7 @@
                     };
 
                     scope.$watch(function () {
-                        return scope.facetModel.isOpen && scope.facetModel.initialized && scope.facetPanelOpen;
+                        return scope.facetModel.isOpen && !scope.facetModel.isLoading && scope.facetPanelOpen;
                     }, function (newVal, oldVal) {
                         var findMoreHeight = 25;
                         if (newVal) {
