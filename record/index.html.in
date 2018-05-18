@@ -88,7 +88,7 @@
                 </div>
                 <span id="rt-loading" ng-show="loading">Loading...</span>
             </div>
-            <footer></footer>
+            <footer ng-show="!loading && displayReady"></footer>
         </div>
 
         <div class="faceting-resizable record-toc" resizable r-directions=["left"] r-flex="true" id="record-side-pan" ng-hide="ctrl.noVisibleRelatedTables()" ng-class="{'open-panel': recordSidePanOpen, 'close-panel': !recordSidePanOpen}">
