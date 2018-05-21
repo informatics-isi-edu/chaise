@@ -183,6 +183,7 @@
          * @param  {Boolean} isUpdate indicates that the function has been triggered for update and not load.
          */
         function updateRecordPage(isUpdate) {
+
             if (!isUpdate) {
                 $rootScope.recordFlowControl.occupiedSlots = 0;
                 $rootScope.recordFlowControl.counter = 0;
@@ -200,6 +201,7 @@
                 m.tableModel.dirtyResult = true;
             });
 
+            $rootScope.pauseRequests = false;
             _processRequests(isUpdate);
         }
 
