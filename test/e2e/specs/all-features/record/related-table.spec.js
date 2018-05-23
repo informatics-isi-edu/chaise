@@ -80,17 +80,22 @@ describe ("Viewing exisiting record with related entities, ", function () {
             relatedDisplayname: "booking",
             tableDisplayname: "booking",
             columnDisplayname: "accommodation_id",
-            columnValue: "Super 8 North Hollywood Motel"
+            columnValue: "Super 8 North Hollywood Motel",
+            rowValuesAfter: [
+                [{url: "product-unordered-related-tables-links:booking/accommodation_id=2004&id=1", caption: "2,004:1"},"247.0000",""],
+                [{url: "product-unordered-related-tables-links:booking/accommodation_id=2004&id=9", caption: "2,004:9"},"100.0000","2016-06-01 00:00:00"],
+                [{url: "product-unordered-related-tables-links:booking/accommodation_id=2004&id=10", caption: "2,004:10"},"110.0000","2016-05-19 01:00:00"],
+                [{url: "product-unordered-related-tables-links:booking/accommodation_id=2004&id=11", caption: "2,004:11"},"120.0000","2015-11-10 00:00:00"],
+                [{url: "product-unordered-related-tables-links:booking/accommodation_id=2004&id=12", caption: "2,004:12"},"180.0000","2016-09-04 01:00:00"],
+                [{url: "product-unordered-related-tables-links:booking/accommodation_id=2004&id=13", caption: "2,004:13"},"80.0000","2016-01-01 00:00:00"],
+            ]
         }
     };
     describe("for a related entity, ", function () {
         recordHelpers.testRelatedTable(related_table, pageReadyCondition);
-
-        recordHelpers.testAddRelatedTable(related_table.add, function () {
+        recordHelpers.testAddRelatedTable(related_table.add, false, function () {
             var input = chaisePage.recordEditPage.getInputById(0, "price");
-            input.sendKeys("247.00");
-            var nowBtn = element.all(by.css('button[name="booking_date-now"]')).get(0);
-            return nowBtn.click();
+            return input.sendKeys("247.00");
         });
     });
 
@@ -152,13 +157,17 @@ describe ("Viewing exisiting record with related entities, ", function () {
             totalCount: 4,
             existingCount: 1,
             disabledRows: ["1"],
-            selectIndex: 2
+            selectIndex: 2,
+            rowValuesAfter: [
+                [{url: "product-unordered-related-tables-links:related_table/id=1", caption: "1"}, "Television"],
+                [{url: "product-unordered-related-tables-links:related_table/id=3", caption: "3"}, "Coffee Maker"]
+            ]
         }
     };
     describe("for a pure and binary association,", function () {
         recordHelpers.testRelatedTable(association_table, pageReadyCondition);
 
-        recordHelpers.testAddAssociationTable(association_table.add, pageReadyCondition);
+        recordHelpers.testAddAssociationTable(association_table.add, false, pageReadyCondition);
     });
 
     var association_with_page_size = {
