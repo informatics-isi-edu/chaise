@@ -3,9 +3,9 @@
         <tr>
             <td style="padding: 0px; border-bottom:none;">
                 <div class="form-group" style="margin-bottom: 0px;">
-                    <input name="{{::column.name}}" type="file" tabindex="-1" id="{{fileElId}}" style="position: absolute; clip: rect(0px 0px 0px 0px);" ng-disabled="isDisabled">
+                    <input name="{{::column.name}}" type="file" accept="{{fileExtensions}}" tabindex="-1" id="{{fileElId}}" style="position: absolute; clip: rect(0px 0px 0px 0px);" ng-disabled="isDisabled">
                     <div class="input-group input-group-sm" style="width: 100%;">
-                        <input name="txt{{::column.name}}" type="text" class="form-control" ng-required="!column.nullok" ng-disabled="isDisabled" placeholder="{{placeholder}}" readonly="" ng-model="value.url" ng-click="select()" ng-style="column.getInputDisabled($root.context.appContext) ? {'cursor': 'default'} : {'cursor': 'pointer'}" style="padding-right: 25px;font-size: 14px; height: 34px; pointer-events: all;"/>
+                        <input name="txt{{::column.name}}" type="text" class="form-control" ng-required="!column.nullok" ng-disabled="isDisabled" placeholder="{{placeholder}}" file-extension readonly="" ng-model="value.url" ng-click="select()" ng-style="column.getInputDisabled($root.context.appContext) ? {'cursor': 'default'} : {'cursor': 'pointer'}" style="padding-right: 25px;font-size: 14px; height: 34px; pointer-events: all;"/>
                         <div class="form-control-feedback coltooltip" ng-click="clear()" ng-hide="!value.url || value.url == '' || isDisabled" style="cursor: pointer;right: 105px;top: 2px;pointer-events: all; height: 34px;">
                             <span class="glyphicon glyphicon-remove coltooltiptext foreignkey-remove" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
                         </div>

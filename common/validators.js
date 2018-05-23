@@ -169,5 +169,34 @@
                 }, true);
             }
         };
+    })
+
+    .directive('fileExtension', function() {
+        return {
+            restrict: 'A',
+            require: 'ngModel',
+            link: function(scope, elm, attrs, ctrl) {
+                ctrl.$validators.fileExtension = function(modelValue, viewValue) {
+                    if (ctrl.$isEmpty(modelValue)) {
+                        // consider empty models to be valid
+                        // use the `required` attribute in the HTML
+                        return true;
+                    }
+                    var fileExtensionFilter = scope.column.filenameExtFilter;
+                    if (fileExtensionFilter) {
+                        var isMatch = false;
+                        for (var j=0; j<fileExtensionFilter.length; j++) {
+                            if (modelValue.slice(modelValue.length - fileExtensionFilter[j].length, modelValue.length) == fileExtensionFilter[j]) {
+                                isMatch = true
+                            }
+                        }
+                        return isMatch;
+                    }
+
+                    // no filenameExtFilter, validates as true
+                    return true;
+                };
+            }
+        };
     });
 })();
