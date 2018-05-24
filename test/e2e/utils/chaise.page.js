@@ -489,6 +489,10 @@ var recordEditPage = function() {
         return browser.executeScript("return $(arguments[0]).parents('div[ng-switch-when=\"date\"]').siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
     };
 
+    this.getFileInputErrorMessage = function(el, type) {
+        return browser.executeScript("return $(arguments[0]).parents('div[ng-switch-when=\"file\"]').siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
+    };
+
     this.clearInput = function(el) {
         return el.getAttribute('value').then(function(value) {
             el.sendKeys(Array(value.length + 1).join(protractor.Key.BACK_SPACE));
