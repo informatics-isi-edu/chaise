@@ -211,19 +211,19 @@ var testParams = {
             name: "f3 (term)",
             type: "choice",
             totalNumOptions: 3,
-            option: 0,
+            option: 1,
             filter: "f3 (term): one",
             numRows: 6,
-            options: [ 'one', 'two', "No Value" ]
+            options: [ "No Value", 'one', 'two' ]
         },
         {
             name: "from_name",
             type: "choice",
             totalNumOptions: 10,
-            option: 4,
+            option: 5,
             filter: "from_name: 5",
             numRows: 1,
-            options: [ '1', '2', '3', '4', '5', '6', '7', '8', '9', '10' ]
+            options: [ 'No Value', '1', '2', '3', '4', '5', '6', '7', '8', '9' ]
         },
         {
             name: "F1 with Term",

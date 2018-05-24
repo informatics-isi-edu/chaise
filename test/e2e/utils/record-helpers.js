@@ -571,31 +571,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 			if (params.rowValues) {
 				// since we toggled to row, the data should be available.
 				it ("rows of data should be correct and respect the given page_size.", function (done) {
-					chaisePage.recordPage.getRelatedTableRows(params.displayname, params.isInline).then(function (rows) {
-						expect(params.rowValues.length).toBe(params.rowValues.length, "rows length missmatch.");
-						if (rows.length === 0) {
-							done();
-						}
-						rows.forEach(function (row, index) {
-							row.all(by.tagName("td")).then(function (cells) {
-								expect(cells.length).toBe(params.rowValues[index].length + 1, "number of column are not as expected.");
-								params.rowValues[index].forEach(function (expectedRow, columnIndex) {
-									if (typeof expectedRow === "object" && expectedRow.url) {
-										expect(cells[columnIndex+1].element(by.tagName("a")).getAttribute("href")).toContain(expectedRow.url, "link missmatch for row=" + index + ", columnIndex=" + columnIndex);
-										expect(cells[columnIndex+1].element(by.tagName("a")).getText()).toBe(expectedRow.caption, "caption missmatch for row=" + index  + ", columnIndex=" + columnIndex);
-									} else {
-										expect(cells[columnIndex+1].getText()).toBe(expectedRow, "missmatch for row=" + index  + ", columnIndex=" + columnIndex);
-									}
-								});
-								done();
-							}).catch(function (err) {
-								throw err;
-							});
-						});
-					}).catch(function(error) {
-						console.log(error);
-						done.fail();
-					});
+					checkRelatedRowValues(params.displayname, params.isInline, params.rowValues, done);
 				});
 			}
 		});
@@ -732,7 +708,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
  *  - columnDisplayname
  *  - columnValue
  */
-exports.testAddRelatedTable = function (params, inputCallback) {
+exports.testAddRelatedTable = function (params, isInline, inputCallback) {
 	describe("Add feature, ", function () {
 		it ("clicking on `Add` button should open recordedit.", function (done) {
 			var addBtn = chaisePage.recordPage.getAddRecordLink(params.relatedDisplayname);
@@ -784,11 +760,20 @@ exports.testAddRelatedTable = function (params, inputCallback) {
 			}).then(function() {
 				// wait until redirected to record page
 				browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
-				browser.close();
-				browser.switchTo().window(allWindows[0]);
+                browser.close();
+				return browser.switchTo().window(allWindows[0]);
+            }).then(function () {
+                //TODO should remove this, but sometimes it's not working in test cases
+                browser.driver.navigate().refresh();
 
-				//TODO should check for the updated value.
-				done();
+                // check for the updated value.
+				//there's no loading indocator, so we have to wait for count
+                browser.wait(function () {
+                    return chaisePage.recordPage.getRelatedTableRows(params.relatedDisplayname, isInline).count().then(function (cnt) {
+                        return cnt === params.rowValuesAfter.length;
+                    }, function (err) {throw err;});
+                });
+                checkRelatedRowValues(params.relatedDisplayname, isInline, params.rowValuesAfter, done);
 			}).catch(function(error) {
 				console.log(error);
 				done.fail();
@@ -805,7 +790,7 @@ exports.testAddRelatedTable = function (params, inputCallback) {
  * - disabledRows
  * - selectIndex
  */
-exports.testAddAssociationTable = function (params, pageReadyCondition) {
+exports.testAddAssociationTable = function (params, isInline, pageReadyCondition) {
 	describe("Add feature, ", function () {
 		it ("clicking on `Add` button should open up a modal.", function (done) {
 			var addBtn = chaisePage.recordPage.getAddRecordLink(params.relatedDisplayname);
@@ -856,16 +841,7 @@ exports.testAddAssociationTable = function (params, pageReadyCondition) {
 				return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
 			}).then(function () {
 				browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
-				//TODO this is refreshing the page which it shouldn't
-				//TODO we should check the value and not just count
-				browser.driver.navigate().refresh();
-				pageReadyCondition();
-
-				browser.wait(function() {
-					return chaisePage.recordPage.getRelatedTableRows(params.relatedDisplayname).count().then(function(ct) {
-						return ct == params.existingCount + 1;
-					});
-				}, browser.params.defaultTimeout);
+                checkRelatedRowValues(params.relatedDisplayname, isInline, params.rowValuesAfter, done);
 
 				return chaisePage.recordPage.getRelatedTableRows(params.relatedDisplayname).count();
 			}).then(function (count){
@@ -879,3 +855,32 @@ exports.testAddAssociationTable = function (params, pageReadyCondition) {
 
 	});
 };
+
+
+function checkRelatedRowValues(displayname, isInline, rowValues, done) {
+    chaisePage.recordPage.getRelatedTableRows(displayname, isInline).then(function (rows) {
+        expect(rowValues.length).toBe(rowValues.length, "rows length missmatch.");
+        if (rows.length === 0) {
+            done();
+        }
+        rows.forEach(function (row, index) {
+            row.all(by.tagName("td")).then(function (cells) {
+                expect(cells.length).toBe(rowValues[index].length + 1, "number of column are not as expected.");
+                rowValues[index].forEach(function (expectedRow, columnIndex) {
+                    if (typeof expectedRow === "object" && expectedRow.url) {
+                        expect(cells[columnIndex+1].element(by.tagName("a")).getAttribute("href")).toContain(expectedRow.url, "link missmatch for row=" + index + ", columnIndex=" + columnIndex);
+                        expect(cells[columnIndex+1].element(by.tagName("a")).getText()).toBe(expectedRow.caption, "caption missmatch for row=" + index  + ", columnIndex=" + columnIndex);
+                    } else {
+                        expect(cells[columnIndex+1].getText()).toBe(expectedRow, "missmatch for row=" + index  + ", columnIndex=" + columnIndex);
+                    }
+                });
+                done();
+            }).catch(function (err) {
+                throw err;
+            });
+        });
+    }).catch(function(error) {
+        console.log(error);
+        done.fail();
+    });
+}
