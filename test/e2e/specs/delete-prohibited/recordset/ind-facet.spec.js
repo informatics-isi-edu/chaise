@@ -58,12 +58,12 @@ var testParams = {
             },
             justMin: {
                 min: 6,
-                filter: "int_col: > 6",
+                filter: "int_col: ≥ 6",
                 numRows: 17
             },
             justMax: {
                 max: 12,
-                filter: "int_col: < 12",
+                filter: "int_col: ≤ 12",
                 numRows: 15
             }
         },
@@ -81,12 +81,12 @@ var testParams = {
             },
             justMin: {
                 min: 8.9,
-                filter: "float_col: > 8.9000",
+                filter: "float_col: ≥ 8.9000",
                 numRows: 14
             },
             justMax: {
                 max: 7.45,
-                filter: "float_col: < 7.4500",
+                filter: "float_col: ≤ 7.4500",
                 numRows: 4
             }
         },
@@ -104,12 +104,12 @@ var testParams = {
             },
             justMin: {
                 min: "2009-12-14",
-                filter: "date_col: > 2009-12-14",
+                filter: "date_col: ≥ 2009-12-14",
                 numRows: 3
             },
             justMax: {
                 max: "2007-04-18",
-                filter: "date_col: < 2007-04-18",
+                filter: "date_col: ≤ 2007-04-18",
                 numRows: 14
             }
         },
@@ -134,13 +134,13 @@ var testParams = {
             justMin: {
                 date: "2004-05-20",
                 time: "10:08:00",
-                filter: "timestamp_col: > 2004-05-20 10:08:00",
+                filter: "timestamp_col: ≥ 2004-05-20 10:08:00",
                 numRows: 8
             },
             justMax: {
                 date: "2007-12-06",
                 time: "17:26:12",
-                filter: "timestamp_col: < 2007-12-06 17:26:12",
+                filter: "timestamp_col: ≤ 2007-12-06 17:26:12",
                 numRows: 15
             }
         },
