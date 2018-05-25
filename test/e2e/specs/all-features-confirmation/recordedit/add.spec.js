@@ -58,7 +58,7 @@ var testParams = {
        inputs: [
            {"fileid": "1", "uri": 0, "timestamp_txt": currentTimestampTime},
            {"fileid": "2", "uri": 1, "timestamp_txt": currentTimestampTime},
-           {"fileid": "3", "uri": 2, "timestamp_txt": currentTimestampTime}
+           {"fileid": "3", "uri": 2, "timestamp_txt": currentTimestampTime, validate: true}
        ],
        formsAfterInput: 3,
        result_columns: [
@@ -133,14 +133,7 @@ describe('Record Add', function() {
 
                     if (tableParams.inputs.length > 1) {
 
-                        if (!process.env.TRAVIS && tableParams.files.length > 0) {
-                            it("should show a validation error for the last file input.", function () {
-                                var extraFileInput = chaisePage.recordEditPage.getUploadInput("uri", 2);
-                                chaisePage.recordEditPage.getFileInputErrorMessage(extraFileInput, 'fileExtension').then(function(err) {
-                                    expect(err.isDisplayed()).toBeTruthy("validation message is not displayed for file input");
-                                });
-                            });
-                        } else {
+                        if (tableParams.files.length == 0) {
                             it("should click and add an extra record.", function() {
                                 chaisePage.recordEditPage.getAddRowButton().then(function(button) {
                                     chaisePage.clickButton(button);
