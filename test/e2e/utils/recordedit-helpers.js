@@ -1552,7 +1552,6 @@ exports.testFileInput = function (colName, recordIndex, file, currentValue, prin
                 }
 
                 if (testValidation) {
-                    // var extraFileInput = chaisePage.recordEditPage.getUploadInput("uri", 2);
                     chaisePage.recordEditPage.getFileInputErrorMessage(fileInput, 'fileExtension').then(function(err) {
                         expect(err.isDisplayed()).toBeTruthy("validation message is not displayed for file input");
                     });
