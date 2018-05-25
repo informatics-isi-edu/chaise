@@ -233,7 +233,7 @@
                                                         <div ng-message="integer">Please enter an integer value.</div>
                                                         <div ng-message="float">Please enter a decimal value.</div>
                                                         <div ng-message="json">Please enter a valid JSON value.</div>
-                                                        <div ng-message="fileExtension">Please select a file with the following type: {{form.fileExtensionTypes(column)}}.</div>
+                                                        <div ng-message="fileExtension">Please select a file with the following type: {{form.fileExtensionTypes(column)}}</div>
                                                     </div>
 
                                                     <!-- Validation error messages to show when the form is submitted -->

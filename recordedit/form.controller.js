@@ -576,12 +576,8 @@
         }
 
         function fileExtensionTypes(column) {
-            var fileExtensions = "";
             var fileExtensionFilter = column.filenameExtFilter;
-            for (var j=0; j<fileExtensionFilter.length; j++) {
-                fileExtensions += (j !== 0 ? ", " : "" ) + "'" + fileExtensionFilter[j] + "'";
-            }
-            return fileExtensions;
+            return fileExtensionFilter.join(", ");
         }
 
         // Given an $event, this will blur or removes the focus from the element that triggerd the event

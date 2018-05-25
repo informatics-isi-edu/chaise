@@ -46,12 +46,7 @@
 
                     var fileExtensionFilter = scope.column.filenameExtFilter;
                     // needs to be a comma separated list, i.e. ".jpg", ".png", ...
-                    scope.fileExtensions = "";
-                    if (fileExtensionFilter) {
-                        for (var j=0; j<fileExtensionFilter.length; j++) {
-                            scope.fileExtensions += (j !== 0 ? "," : "" ) + fileExtensionFilter[j];
-                        }
-                    }
+                    scope.fileExtensions = fileExtensionFilter.join(",");
 
                     scope.select = function() {
                         scope.fileEl.click();

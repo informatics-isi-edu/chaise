@@ -177,24 +177,18 @@
             require: 'ngModel',
             link: function(scope, elm, attrs, ctrl) {
                 ctrl.$validators.fileExtension = function(modelValue, viewValue) {
-                    if (ctrl.$isEmpty(modelValue)) {
-                        // consider empty models to be valid
-                        // use the `required` attribute in the HTML
-                        return true;
-                    }
-                    var fileExtensionFilter = scope.column.filenameExtFilter;
-                    if (fileExtensionFilter) {
-                        var isMatch = false;
-                        for (var j=0; j<fileExtensionFilter.length; j++) {
-                            if (modelValue.slice(modelValue.length - fileExtensionFilter[j].length, modelValue.length) == fileExtensionFilter[j]) {
-                                isMatch = true
-                            }
-                        }
-                        return isMatch;
-                    }
+                    // consider empty models to be valid
+                    if (ctrl.$isEmpty(modelValue)) return true;
 
-                    // no filenameExtFilter, validates as true
-                    return true;
+                    var fileExtensionFilter = scope.column.filenameExtFilter;
+                    // no filenameExtFilter (empty array), validates as true
+                    if (fileExtensionFilter.length == 0) return true;
+                    // loop through the array, if any of the extensions in the array match the extension in the current filename, validates as true
+                    for (var j=0; j<fileExtensionFilter.length; j++) {
+                        if (modelValue.slice(modelValue.length - fileExtensionFilter[j].length, modelValue.length) == fileExtensionFilter[j]) return true;
+                    }
+                    // there were somearray values, but none of them matched
+                    return false;
                 };
             }
         };
