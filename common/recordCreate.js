@@ -2,8 +2,8 @@
     'use strict';
     angular.module('chaise.recordcreate', ['chaise.errors','chaise.utils'])
 
-    .factory("recordCreate", ['$cookies', '$log', '$q', '$rootScope', '$window', 'AlertsService', 'DataUtils', 'logActions', 'messageMap', 'modalBox', 'modalUtils', 'Session', 'UriUtils',
-        function($cookies, $log, $q, $rootScope, $window, AlertsService, DataUtils, logActions, messageMap, modalBox, modalUtils, Session, UriUtils) {
+    .factory("recordCreate", ['$cookies', '$log', '$rootScope', '$window', 'modalUtils', 'AlertsService', 'DataUtils', 'UriUtils', 'modalBox', '$q', 'logActions',
+        function($cookies, $log, $rootScope, $window, modalUtils, AlertsService, DataUtils, UriUtils, modalBox, $q, logActions) {
 
         var viewModel = {};
         var GV_recordEditModel = {},
@@ -230,17 +230,11 @@
                     }
                 }).catch(function(exception) {
                     viewModel.submissionButtonDisabled = false;
-                    // non-expensive query, no need to check for exception type before checking for session expired
-                    // this is for creating/update callback, so a session should exist
-                    Session.getSession().then(function (session) {
-                        if (exception instanceof ERMrest.ConflictError && !session) {
-                            Session.loginInAModal();
-                        } else if (exception instanceof ERMrest.NoDataChangedError) {
-                            AlertsService.addAlert(exception.message, 'warning');
-                        } else {
-                            AlertsService.addAlert(exception.message, 'error');
-                        }
-                    });
+                    if (exception instanceof ERMrest.NoDataChangedError) {
+                        AlertsService.addAlert(exception.message, 'warning');
+                    } else {
+                        AlertsService.addAlert(exception.message, 'error');
+                    }
                 });
 
             });

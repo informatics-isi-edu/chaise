@@ -248,9 +248,18 @@
             if (exceptionFlag || window.location.pathname.indexOf('/search/') != -1 || window.location.pathname.indexOf('/viewer/') != -1) return;
 
             // If not authorized, ask user to sign in first
-            if ( (ERMrest && exception instanceof ERMrest.UnauthorizedError)) {
+            if (ERMrest && exception instanceof ERMrest.UnauthorizedError) {
                 // Unauthorized (needs to login)
                 Session.loginInAModal(reloadCb);
+                return;
+            }
+
+            // If conflict Error and user was previously logged in
+            // if session is invalid, ask user to login rather than throw an error
+            if (ERMrest && exception instanceof ERMrest.ConflictError && Session.getSessionValue()) {
+                Session.getSession().then(function (session) {
+                    if (!session) Session.loginInAModal();
+                });
                 return;
             }
 
