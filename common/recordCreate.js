@@ -2,8 +2,8 @@
     'use strict';
     angular.module('chaise.recordcreate', ['chaise.errors','chaise.utils'])
 
-    .factory("recordCreate", ['$cookies', '$log', '$rootScope', '$window', 'modalUtils', 'AlertsService', 'DataUtils', 'UriUtils', 'modalBox', '$q', 'logActions',
-        function($cookies, $log, $rootScope, $window, modalUtils, AlertsService, DataUtils, UriUtils, modalBox, $q, logActions) {
+    .factory("recordCreate", ['$cookies', '$log', '$q', '$rootScope', '$window', 'AlertsService', 'DataUtils', 'logActions', 'messageMap', 'modalBox', 'modalUtils', 'Session', 'UriUtils',
+        function($cookies, $log, $q, $rootScope, $window, AlertsService, DataUtils, logActions, messageMap, modalBox, modalUtils, Session, UriUtils) {
 
         var viewModel = {};
         var GV_recordEditModel = {},
@@ -229,6 +229,12 @@
 
                     }
                 }).catch(function(exception) {
+                    if (exception instanceof ERMrest.ConflictError) {
+                        Session.getSession().then(function (session) {
+                            if (!session) throw new ERMrest.UnauthorizedError(messageMap.unauthorizedErrorCode, (messageMap.unauthorizedMessage + messageMap.reportErrorToAdmin));
+                        });
+                    }
+
                     viewModel.submissionButtonDisabled = false;
                     if (exception instanceof ERMrest.NoDataChangedError) {
                         AlertsService.addAlert(exception.message, 'warning');
