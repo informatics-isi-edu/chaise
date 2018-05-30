@@ -229,18 +229,18 @@
 
                     }
                 }).catch(function(exception) {
-                    if (exception instanceof ERMrest.ConflictError) {
-                        Session.getSession().then(function (session) {
-                            if (!session) throw new ERMrest.UnauthorizedError(messageMap.unauthorizedErrorCode, (messageMap.unauthorizedMessage + messageMap.reportErrorToAdmin));
-                        });
-                    }
-
                     viewModel.submissionButtonDisabled = false;
-                    if (exception instanceof ERMrest.NoDataChangedError) {
-                        AlertsService.addAlert(exception.message, 'warning');
-                    } else {
-                        AlertsService.addAlert(exception.message, 'error');
-                    }
+                    // non-expensive query, no need to check for exception type before checking for session expired
+                    // this is for creating/update callback, so a session should exist
+                    Session.getSession().then(function (session) {
+                        if (exception instanceof ERMrest.ConflictError && !session) {
+                            Session.loginInAModal();
+                        } else if (exception instanceof ERMrest.NoDataChangedError) {
+                            AlertsService.addAlert(exception.message, 'warning');
+                        } else {
+                            AlertsService.addAlert(exception.message, 'error');
+                        }
+                    });
                 });
 
             });
