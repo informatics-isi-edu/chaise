@@ -58,6 +58,10 @@
         var exception = params.exception,
             reloadMessage = ' <p>  </p>';
 
+        if (ERMrest && exception instanceof ERMrest.NotFoundError && vm.params.showLogin) {
+           vm.params.message = vm.params.message + messageMap.maybeNeedLogin;
+        }
+
         if (exception instanceof Errors.multipleRecordError) {
             vm.clickActionMessage =  messageMap.recordAvailabilityError.multipleRecords;
         } else if (exception instanceof Errors.noRecordError) {
