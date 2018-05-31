@@ -280,7 +280,9 @@
                             selected: selected,
                             metaData: {
                                 min: filter.min,
-                                max: filter.max
+                                minExclusive: filter.minExclusive,
+                                max: filter.max,
+                                maxExclusive: filter.maxExclusive
                             }
                         };
                     };
@@ -302,9 +304,9 @@
                     scope.onSelect = function (row, $event) {
                         var res;
                         if (row.selected) {
-                            res = scope.facetColumn.addRangeFilter(row.metaData.min, row.metaData.max);
+                            res = scope.facetColumn.addRangeFilter(row.metaData.min, row.metaData.minExclusive, row.metaData.max, row.metaData.maxExclusive);
                         } else {
-                            res = scope.facetColumn.removeRangeFilter(row.metaData.min, row.metaData.max);
+                            res = scope.facetColumn.removeRangeFilter(row.metaData.min, row.metaData.minExclusive, row.metaData.max, row.metaData.maxExclusive);
                         }
 
                         $log.debug("request for facet (index="+scope.facetColumn.index+") range " + (row.selected ? "add" : "remove") + '. min=' + row.metaData.min + ", max=" + row.metaData.max);
@@ -329,7 +331,7 @@
 
                     // Add new integer filter, used as the callback function to range-inputs
                     scope.addFilter = function (min, max) {
-                        var res = scope.facetColumn.addRangeFilter(min, max);
+                        var res = scope.facetColumn.addRangeFilter(min, false, max, false);
                         if (!res) {
                             return; // duplicate filter
                         }
