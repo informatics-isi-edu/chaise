@@ -225,7 +225,7 @@
                                                     <input ng-switch-default id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="text" class="form-control" ng-required="::form.isRequired(column);" ng-disabled="::form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" empty-to-null></input>
 
                                                     <!-- Validation error messages to show when the form field is touched -->
-                                                    <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty || form.formContainer.$submitted" class="text-danger" role="alert">
+                                                    <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.$error || form.formContainer.$submitted" class="text-danger" role="alert">
                                                         <div ng-message="date">Please enter a date value in {{form.dataFormats.date}} format.</div>
                                                         <div ng-message="time">Please enter a time value in 12-hr {{form.dataFormats.time24}} format.</div>
                                                         <div ng-message="timestampDate">Please enter a date value in {{form.dataFormats.date}} format.</div>
@@ -233,6 +233,7 @@
                                                         <div ng-message="integer">Please enter an integer value.</div>
                                                         <div ng-message="float">Please enter a decimal value.</div>
                                                         <div ng-message="json">Please enter a valid JSON value.</div>
+                                                        <div ng-message="fileExtension">Please select a file with the following type: {{form.fileExtensionTypes(column)}}</div>
                                                     </div>
 
                                                     <!-- Validation error messages to show when the form is submitted -->

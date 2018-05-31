@@ -44,6 +44,9 @@
 
                     }, 10);
 
+                    var fileExtensionFilter = scope.column.filenameExtFilter;
+                    // needs to be a comma separated list, i.e. ".jpg", ".png", ...
+                    scope.fileExtensions = fileExtensionFilter.join(",");
 
                     scope.select = function() {
                         scope.fileEl.click();

@@ -55,6 +55,7 @@
         vm.datepickerOpened = {}; // Tracks which datepickers on the form are open
         vm.toggleMeridiem = toggleMeridiem;
         vm.clearModel = clearModel;
+        vm.fileExtensionTypes = fileExtensionTypes;
         vm.blurElement = blurElement;
         // Specifies the regexes to be used for a token in a ui-mask input. For example, the '1' key in
         // in vm.maskOptions.date means that only 0 or 1 is allowed wherever the '1' key is used in a ui-mask template.
@@ -572,6 +573,11 @@
                 return true;
             }
             return false;
+        }
+
+        function fileExtensionTypes(column) {
+            var fileExtensionFilter = column.filenameExtFilter;
+            return fileExtensionFilter.join(", ");
         }
 
         // Given an $event, this will blur or removes the focus from the element that triggerd the event
