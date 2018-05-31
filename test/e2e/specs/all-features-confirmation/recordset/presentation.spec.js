@@ -416,12 +416,16 @@ describe('View recordset,', function() {
                 });
             });
 
+            it("apply sorting on different columns.", function() {
+                browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:" + accommodationParams.table_name + "/" + keys.join("&") + "@sort(" + accommodationParams.sortby + ")?limit=5");
+                browser.sleep(20000);
+            });
 
         });
 
     });
 
-    describe("For table " + fileParams.table_name + ',', function() {
+    /*describe("For table " + fileParams.table_name + ',', function() {
         var EC = protractor.ExpectedConditions;
 
         beforeAll(function () {
@@ -631,5 +635,5 @@ describe('View recordset,', function() {
                 });
             });
         }
-    });
+    });*/
 });
