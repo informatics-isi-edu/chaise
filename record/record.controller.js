@@ -272,7 +272,7 @@
                 for (var id in addRecordRequests) {
                     var cookie = $cookies.getObject(id);
                     if (cookie) { // add request has been completed
-                        console.log('Cookie found', cookie);
+                        console.log('Cookie found for the id=' + id);
                         completed[addRecordRequests[id]] = true;
 
                         // remove cookie and request

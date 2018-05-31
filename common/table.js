@@ -220,6 +220,10 @@
          * be resolved with `true` if the request was successful.
          */
         function _readMainEntity (vm, hideSpinner) {
+            if (!vm.columnModels) {
+                _attachExtraAttributes(vm);
+            }
+
             vm.dirtyResult = false;
             vm.hasLoaded = false;
             var defer = $q.defer();
