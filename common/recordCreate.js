@@ -2,8 +2,8 @@
     'use strict';
     angular.module('chaise.recordcreate', ['chaise.errors','chaise.utils'])
 
-    .factory("recordCreate", ['$cookies', '$log', '$rootScope', '$window', 'modalUtils', 'AlertsService', 'DataUtils', 'UriUtils', 'modalBox', '$q', 'logActions',
-        function($cookies, $log, $rootScope, $window, modalUtils, AlertsService, DataUtils, UriUtils, modalBox, $q, logActions) {
+    .factory("recordCreate", ['$cookies', '$log', '$q', '$rootScope', '$window', 'AlertsService', 'DataUtils', 'logActions', 'modalBox', 'modalUtils', 'Session', 'UriUtils',
+        function($cookies, $log, $q, $rootScope, $window, AlertsService, DataUtils, logActions, modalBox, modalUtils, Session, UriUtils) {
 
         var viewModel = {};
         var GV_recordEditModel = {},
@@ -230,11 +230,12 @@
                     }
                 }).catch(function(exception) {
                     viewModel.submissionButtonDisabled = false;
-                    if (exception instanceof ERMrest.NoDataChangedError) {
-                        AlertsService.addAlert(exception.message, 'warning');
-                    } else {
-                        AlertsService.addAlert(exception.message, 'error');
-                    }
+                    // assume user had been previously logged in (can't create/update without it)
+                    // if no valid current session, user should re-login
+                    Session.getSession().then(function (session) {
+                        if (!session && exception instanceof ERMrest.ConflictError) throw new ERMrest.UnauthorizedError();
+                        AlertsService.addAlert(exception.message, (exception instanceof ERMrest.NoDataChangedError ? 'warning' : 'error') );
+                    });
                 });
 
             });

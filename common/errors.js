@@ -254,8 +254,8 @@
                 return;
             }
 
-            // If conflict Error and user was previously logged in
-            // if session is invalid, ask user to login rather than throw an error
+            // If Conflict Error and user was previously logged in
+            // AND if session is invalid, ask user to login rather than throw an error
             if (ERMrest && exception instanceof ERMrest.ConflictError && Session.getSessionValue()) {
                 Session.getSession().then(function (session) {
                     if (!session) Session.loginInAModal();
