@@ -58,24 +58,34 @@
         var exception = params.exception,
             reloadMessage = ' <p>  </p>';
 
+        // in case of adding login button, we should add extra message
+        if (vm.params.showLogin) {
+            if (ERMrest && exception instanceof ERMrest.NotFoundError) {
+                vm.params.message = vm.params.message + messageMap.maybeNeedLogin;
+            } else if (exception instanceof Errors.noRecordError) {
+                vm.params.message = messageMap.noRecordForFilter + '<br>' + messageMap.maybeUnauthorizedMessage;
+            }
+        }
+
+        // set the click action message
         if (exception instanceof Errors.multipleRecordError) {
             vm.clickActionMessage =  messageMap.recordAvailabilityError.multipleRecords;
         } else if (exception instanceof Errors.noRecordError) {
             vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
-
-            // if no user logged in, change message
-            if (vm.params.showLogin) vm.params.message = messageMap.noRecordForFilter + '<br>' + messageMap.maybeUnauthorizedMessage;
         } else if (ERMrest && exception instanceof ERMrest.InvalidFilterOperatorError) {
             vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
         } else if (ERMrest && isErmrestErrorNeedReplace(exception)) {
             vm.clickActionMessage = messageMap.actionMessageWReplace.clickActionMessage.replace('@errorStatus', vm.params.errorStatus);
         } else {
             vm.clickActionMessage = messageMap.recordAvailabilityError.pageRedirect + vm.params.pageName + '. ';
+
+            // TODO it might be more appropriate to move the following outside the if-else
             if (vm.params.appName == 'recordedit'){
                 vm.showReloadBtn = true;
                 reloadMessage = ' <p>' + messageMap.terminalError.reloadMessage +' </p>';
             }
         }
+
         // <p> tag is added to maintain the space between click action message and buttons
         // Also maintains consistency  in their placement irrespective of reload message
         vm.clickActionMessage += reloadMessage;
