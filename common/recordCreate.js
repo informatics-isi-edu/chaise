@@ -232,7 +232,8 @@
                     viewModel.submissionButtonDisabled = false;
                     // assume user had been previously logged in (can't create/update without it)
                     // if no valid current session, user should re-login
-                    Session.getSession().then(function (session) {
+                    // validate session will never throw an error, so it's safe to not write a reject callback or catch clause
+                    Session.validateSession().then(function (session) {
                         if (!session && exception instanceof ERMrest.ConflictError) throw new ERMrest.UnauthorizedError();
                         AlertsService.addAlert(exception.message, (exception instanceof ERMrest.NoDataChangedError ? 'warning' : 'error') );
                     });
