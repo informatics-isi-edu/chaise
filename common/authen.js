@@ -223,6 +223,10 @@
             });
         };
 
+        /**
+         * uses the reloadCb function to reload the page no matter what after a user logs in
+         * creates a race condition with the calback registered for the LoginInAModal function
+         */
         var popupLogin = function () {
             var reloadCb = function(){
                 window.location.reload();
@@ -273,6 +277,22 @@
                 });
             },
 
+            /**
+             * Will return a promise that is resolved with the session.
+             * Meant for validating the server session and verify if it's still active or not
+             */
+            validateSession: function () {
+                return $http.get(serviceURL + "/authn/session").then(function(response) {
+                    _session = response.data;
+                    return _session;
+                }).catch(function(err) {
+                    $log.warn(err);
+
+                    _session = null;
+                    return _session;
+                });
+            },
+
             getSessionValue: function() {
                 return _session;
             },
@@ -307,6 +327,13 @@
 
             loginInAPopUp: popupLogin,
 
+            /**
+             * This function opens a modal dialog which has a link for login
+             * the callback for this function has a race condition because the login link in the modal uses `loginInAPopUp`
+             * that function uses the embedded `reloadCb` as the callback for the actual login window closing.
+             * these 2 callbacks trigger in the order of `popupCb` first then `modalCb` where modalCb is ignored more often than not
+             * @param {Function} notifyErmrestCB - runs after the login process has been complete
+             */
             loginInAModal: function(notifyErmrestCB) {
                 logInHelper(loginWindowCb, "", notifyErmrestCB, 'modal');
             },
