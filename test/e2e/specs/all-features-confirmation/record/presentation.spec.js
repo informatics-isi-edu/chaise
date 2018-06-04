@@ -137,7 +137,10 @@ var testParams = {
           rowValues: [
               ["3,005","Four Points Sherathon 1","http://images.trvl-media.com/hotels/1000000/30000/28200/28110/28110_190_z.jpg","image/jpeg","0","2016-01-18 00:00:00","","",""]
           ],
-          rowViewPaths: ["id=3005"]
+          rowViewPaths: ["id=3005"],
+          rowEditPaths: [ // in case of association, edit should naviagte to the association table
+              "accommodation_id=2002&image_id=3005"
+          ],
       }
   ]
 };
