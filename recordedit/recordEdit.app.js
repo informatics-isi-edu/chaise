@@ -47,6 +47,30 @@
         $logProvider.debugEnabled(chaiseConfig.debug === true);
     }])
 
+    .config(function($provide) {
+        $provide.decorator("$exceptionHandler", ['$log', '$injector', function($log, $injector) {
+            return function(exception, cause) {
+                var ErrorService = $injector.get("ErrorService");
+                var Session = $injector.get("Session");
+                // If Conflict Error and user was previously logged in
+                // AND if session is invalid, ask user to login rather than throw an error
+                if (ERMrest && exception instanceof ERMrest.ConflictError && Session.getSessionValue()) {
+                    // validate session will never throw an error, so it's safe to not write a reject callback or catch clause
+                    Session.validateSession().then(function (session) {
+                        if (!session) {
+                            Session.loginInAModal();
+                        } else {
+                            ErrorService.handleException(exception);
+                        }
+                    });
+                    // so the function will stop executing
+                    return;
+                }
+                ErrorService.handleException(exception);
+            };
+        }]);
+    })
+
     .run(['AlertsService', 'dataFormats', 'DataUtils', 'ERMrest', 'ErrorService', 'FunctionUtils', 'headInjector', 'logActions', 'MathUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', 'messageMap', 'Errors',
         function runRecordEditApp(AlertsService, dataFormats, DataUtils, ERMrest, ErrorService, FunctionUtils, headInjector, logActions, MathUtils, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies, messageMap, Errors) {
 

@@ -254,16 +254,6 @@
                 return;
             }
 
-            // If Conflict Error and user was previously logged in
-            // AND if session is invalid, ask user to login rather than throw an error
-            if (ERMrest && exception instanceof ERMrest.ConflictError && Session.getSessionValue()) {
-                // validate session will never throw an error, so it's safe to not write a reject callback or catch clause
-                Session.validateSession().then(function (session) {
-                    if (!session) Session.loginInAModal();
-                });
-                return;
-            }
-
             if (exception instanceof Errors.multipleRecordError || exception instanceof Errors.noRecordError){
                 // change defaults
                 pageName = "Recordset";
