@@ -545,8 +545,8 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 					});
 				}
 
-        it ("clicking on the toggle should change the view to tabular.", function (done) {
-          chaisePage.clickButton(markdownToggleLink).then(function() {
+				it ("clicking on the toggle should change the view to tabular.", function (done) {
+					chaisePage.clickButton(markdownToggleLink).then(function() {
 						if (params.canEdit) {
 							expect(markdownToggleLink.getText()).toBe("Display", "after toggle button missmatch.");
 						} else {
@@ -613,7 +613,8 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 						allWindows = handles;
 						return browser.switchTo().window(allWindows[1]);
 					}).then(function() {
-            var result = '/recordedit/#' + browser.params.catalogId + "/" + params.schemaName + ":" + params.name;
+						var result = '/recordedit/#' + browser.params.catalogId + "/" + params.schemaName + ":" + params.name;
+
 						// in case of association edit and view are different
 						result += "/" + (params.rowEditPaths ? params.rowEditPaths[0] : params.rowViewPaths[0]);
 
