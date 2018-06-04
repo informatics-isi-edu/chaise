@@ -613,8 +613,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 						allWindows = handles;
 						return browser.switchTo().window(allWindows[1]);
 					}).then(function() {
-            // In case of Association, edit record for the leaf level table is displayed.
-            var result = '/recordedit/#' + browser.params.catalogId + "/" + params.schemaName + ":" + (params.isAssociation ? params.relatedName : params.name);
+            var result = '/recordedit/#' + browser.params.catalogId + "/" + params.schemaName + ":" + params.name;
 						// in case of association edit and view are different
 						result += "/" + (params.rowEditPaths ? params.rowEditPaths[0] : params.rowViewPaths[0]);
 
