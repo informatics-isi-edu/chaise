@@ -937,7 +937,7 @@
         };
     }])
 
-    .directive('recordTable', ['recordTableUtils', function(recordTableUtils) {
+    .directive('recordTable', ['DataUtils', 'recordTableUtils', function(DataUtils, recordTableUtils) {
 
         return {
             restrict: 'E',
@@ -954,6 +954,8 @@
             },
             link: function (scope, elem, attr) {
                 recordTableUtils.registerTableCallbacks(scope);
+
+                scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
             }
         };
     }])
