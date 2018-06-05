@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html ng-app="chaise.recordEdit">
+<html lang="en" id="recordedit" ng-app="chaise.recordEdit">
 <head>
     <title>RecordEdit App</title>
     <meta charset="utf-8" http-equiv="X-UA-Compatible" content="IE=10; IE=9; IE=8; IE=7; IE=EDGE" />
