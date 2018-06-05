@@ -48,7 +48,7 @@ var testParams = {
                 id: 2002,
                 no_of_rooms: '23',
                 title: "Sherathon Hotel",
-                website: "http://www.starwoodhotels.com/sheraton/index.html",  
+                website: "http://www.starwoodhotels.com/sheraton/index.html", 
                 rating: "4.3000",
                 summary: "Sherathon Hotels is an international hotel company with more than 990 locations in 73 countries. The first Radisson Hotel was built in 1909 in Minneapolis, Minnesota, US. It is named after the 17th-century French explorer Pierre-Esprit Radisson.",
                 opened_on: "2008-12-09 00:00:00",
@@ -273,7 +273,7 @@ describe('View recordset,', function() {
                         });
                     });
                 });
-            });            
+            });
 
             it("apply different searches, ", function(done) {
                 var EC = protractor.ExpectedConditions;
@@ -345,7 +345,7 @@ describe('View recordset,', function() {
                     // clear search
                     return clearSearchButton.click();
                 })
-            });            
+            });
 
             it("action columns should show Download CSV button if records present else should not show download button", function() {
                 var downloadButton;
@@ -472,8 +472,8 @@ describe('View recordset,', function() {
                     console.dir(error);
                     expect(error).not.toBeDefined();
                 });
-            }).pend("412 support has been dropped from ermestjs.");            
-
+            }).pend("412 support has been dropped from ermestjs.");
+            
             it("action columns should show delete button that deletes record", function() {
                 var deleteButton;
                 var EC = protractor.ExpectedConditions;
@@ -507,9 +507,9 @@ describe('View recordset,', function() {
                 var EC = protractor.ExpectedConditions;
                 chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
                 browser.wait(EC.presenceOf(chaisePage.recordsetPage.getRows().get(2)), browser.params.defaultTimeout);
-                //Click on sort button
                 for (var j = 0; j < accommodationParams.sortedData.length; j++) {
                     (function (k) {
+                        //Click on sort button
                         chaisePage.recordsetPage.getColumnSortButton(accommodationParams.sortedData[k].columnPosition).click().then(function () {
                             browser.wait(EC.textToBePresentInElement(element(by.id('rs-total-count')),"Displaying 3 of 5 Records"), browser.params.defaultTimeout);
                             return chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
