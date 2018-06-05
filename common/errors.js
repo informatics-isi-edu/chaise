@@ -248,7 +248,7 @@
             if (exceptionFlag || window.location.pathname.indexOf('/search/') != -1 || window.location.pathname.indexOf('/viewer/') != -1) return;
 
             // If not authorized, ask user to sign in first
-            if ( (ERMrest && exception instanceof ERMrest.UnauthorizedError)) {
+            if (ERMrest && exception instanceof ERMrest.UnauthorizedError) {
                 // Unauthorized (needs to login)
                 Session.loginInAModal(reloadCb);
                 return;

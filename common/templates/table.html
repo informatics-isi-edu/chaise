@@ -1,4 +1,4 @@
-<div class="outer-table recordset-table" id="divRecordSet">
+<div class="outer-table recordset-table s_{{::makeSafeIdAttr(vm.reference.table.schema.name)}} t_{{::makeSafeIdAttr(vm.reference.table.name)}}" id="divRecordSet">
     <table class="table table-striped table-bordered table-hover">
         <!-- sortable column header -->
         <thead class="table-heading">
@@ -15,7 +15,7 @@
                         </button>
                     </div>
                 </th>
-                <th nowrap ng-repeat="col in vm.columnModels track by $index">
+                <th nowrap ng-repeat="col in vm.columnModels track by $index" class="c_{{makeSafeIdAttr(col.column.name)}}">
                     <span class="table-column-displayname" ng-attr-uib-tooltip="{{::(col.column.comment) ? col.column.comment : undefined}}" ng-attr-tooltip-placement="{{::(col.column.comment) ? 'top' : undefined}}" ng-click="col.column.sortable && vm.enableSort && sortby(col.column.name)">
                         <span ng-if="::col.column.displayname.isHTML" ng-bind-html="::col.column.displayname.value"></span>
                         <span ng-if="::!col.column.displayname.isHTML" ng-bind="::col.column.displayname.value"></span>
