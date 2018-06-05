@@ -23,7 +23,7 @@
         multipleDataErrorCode : "Multiple Records Found",
         multipleDataMessage : "There are more than 1 record found for the filters provided.",
         facetFilterMissing : "No filtering criteria was specified to identify a specific record.",
-        systemAdminMessage : "An unexpected error has occurred. Please report this problem to your system administrators."
+        systemAdminMessage : "An unexpected error has occurred. Try clearing your cache. If you continue to face this issue, please contact the system administrator."
     })
 
     .factory('Errors', ['errorNames', 'errorMessages', function(errorNames, errorMessages) {
@@ -344,7 +344,7 @@ window.onerror = function() {
                     + '<h2 class="modal-title ">Error: ' + errName + '</h2>'
                 + '</div>'
                 + '<div class="modal-body ">'
-                    + 'An unexpected error has occurred. Please report this problem to your system administrators.'
+                    + 'An unexpected error has occurred. Try clearing your cache. If you continue to face this issue, please contact the system administrator.'
                     + '<br><br>'
                     + 'Click OK to return to the Home Page.'
                     + '<br>'
