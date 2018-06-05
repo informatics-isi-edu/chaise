@@ -48,6 +48,12 @@ a{
     cursor: pointer;
 }
 
+/* if you want the table to have a fixed layout */
+table.table-fixed-layout {
+    table-layout: fixed;
+    width: 100%;
+}
+
 .chaise-body {
     overflow: hidden;
 }
