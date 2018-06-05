@@ -204,6 +204,7 @@ describe('View recordset,', function() {
 
             it("should autofocus on search box", function() {
                 var searchBox = chaisePage.recordsetPage.getMainSearchBox();
+                chaisePage.waitForElement(searchBox);
                 expect(searchBox.getAttribute('id')).toEqual(browser.driver.switchTo().activeElement().getAttribute('id'));
             });
 
@@ -338,7 +339,7 @@ describe('View recordset,', function() {
                 searchSubmitButton.click().then(function() {
                     return chaisePage.waitForElementInverse(element(by.id("spinner")));
                 }).then(function() {
-                    return chaisePage.recordsetPage.getRows()
+                    return chaisePage.recordsetPage.getRows();
                 }).then(function(rows) {
                     expect(rows.length).toBe(1);
                     // clear search
