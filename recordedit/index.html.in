@@ -46,7 +46,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="main-container">
+                    <div class="main-container" class="recordedit-container">
                         <div class="main-body" style="padding-right:15px; padding-left:15px;">
                             <!-- Alerts section -->
                             <div class="alerts-container" style="margin-left:15px; margin-right:20px;">
