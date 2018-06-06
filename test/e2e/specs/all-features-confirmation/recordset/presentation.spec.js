@@ -515,20 +515,21 @@ describe('View recordset,', function() {
             for (var j = 0; j < accommodationParams.sortedData.length; j++) {
                 (function (k) {
                     it("should sort " + accommodationParams.sortedData[k].columnName + " column in ascending order.", function (done) {
-                        var EC = protractor.ExpectedConditions;
+                        var rowCount = chaisePage.recordsetPage.getTotalCount();
+
                         // Check the presence of initial sort button
                         expect(chaisePage.recordsetPage.getColumnSortButton(accommodationParams.sortedData[k].rawColumnName).isDisplayed()).toBe(true);
 
                         // Click on sort button
                         chaisePage.recordsetPage.getColumnSortButton(accommodationParams.sortedData[k].rawColumnName).click().then(function () {
-                            browser.wait(EC.textToBePresentInElement(element(by.id('rs-total-count')), "Displaying 3 of 5 Records"), browser.params.defaultTimeout);
+                            chaisePage.waitForTextInElement(rowCount, "Displaying 3 of 5 Records");
                             chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
 
                             //Check the presence of descending sort button
                             expect(chaisePage.recordsetPage.getColumnSortDescButton(accommodationParams.sortedData[k].rawColumnName).isDisplayed()).toBe(true);
 
                             // Check if the url has @sort by column name
-                            browser.wait(EC.urlContains('@sort(' + accommodationParams.sortedData[k].rawColumnName + ',id)'), browser.params.defaultTimeout, "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 1 for ascending order.");
+                            chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + ',id)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 1 for ascending order.");
 
                             return chaisePage.recordsetPage.getRows();
 
@@ -546,11 +547,11 @@ describe('View recordset,', function() {
                             return chaisePage.recordsetPage.getNextButton().click();
 
                         }).then(function () {
-                            browser.wait(EC.textToBePresentInElement(element(by.id('rs-total-count')), "Displaying 2 of 5 Records"), browser.params.defaultTimeout);
+                            chaisePage.waitForTextInElement(rowCount, "Displaying 2 of 5 Records");
                             chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
 
                             // Check if the url has @sort by column name
-                            browser.wait(EC.urlContains('@sort(' + accommodationParams.sortedData[k].rawColumnName + ',id)'), browser.params.defaultTimeout, "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 2 for ascending order.");
+                            chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + ',id)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 2 for ascending order.");
 
                             return chaisePage.recordsetPage.getRows();
 
@@ -568,11 +569,11 @@ describe('View recordset,', function() {
                             return chaisePage.recordsetPage.getPreviousButton().click();
 
                         }).then(function () {
-                            browser.wait(EC.textToBePresentInElement(element(by.id('rs-total-count')), "Displaying 3 of 5 Records"), browser.params.defaultTimeout);
+                            chaisePage.waitForTextInElement(rowCount, "Displaying 3 of 5 Records");
                             chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
 
                             // Sanity check on the previous page
-                            browser.wait(EC.urlContains('@sort(' + accommodationParams.sortedData[k].rawColumnName + ',id)'), browser.params.defaultTimeout, "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 1 for ascending order.");
+                            chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + ',id)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 1 for ascending order.");
                             done();
 
                         }).catch(function (err) {
@@ -582,20 +583,20 @@ describe('View recordset,', function() {
                     });
 
                     it("should sort " + accommodationParams.sortedData[k].columnName + " column in descending order.", function (done) {
-                        var EC = protractor.ExpectedConditions;
+                        var rowCount = chaisePage.recordsetPage.getTotalCount();
                         // Check the presence of descending sort button
                         expect(chaisePage.recordsetPage.getColumnSortDescButton(accommodationParams.sortedData[k].rawColumnName).isDisplayed()).toBe(true);
 
                         // Click on sort button to sort in descending order
                         chaisePage.recordsetPage.getColumnSortDescButton(accommodationParams.sortedData[k].rawColumnName).click().then(function () {
-                            browser.wait(EC.textToBePresentInElement(element(by.id('rs-total-count')), "Displaying 3 of 5 Records"), browser.params.defaultTimeout);
+                            chaisePage.waitForTextInElement(rowCount, "Displaying 3 of 5 Records");
                             chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
 
                             // Check the presence of ascending sort button
                             expect(chaisePage.recordsetPage.getColumnSortAscButton(accommodationParams.sortedData[k].rawColumnName).isDisplayed()).toBe(true);
 
                             // Check if the url has @sort by column name
-                            browser.wait(EC.urlContains('@sort(' + accommodationParams.sortedData[k].rawColumnName + '::desc::,id)'), browser.params.defaultTimeout, "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 1 for descending order.");
+                            chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + '::desc::,id)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 1 for descending order.");
 
                             return chaisePage.recordsetPage.getRows();
 
@@ -613,11 +614,11 @@ describe('View recordset,', function() {
                             return chaisePage.recordsetPage.getNextButton().click();
 
                         }).then(function () {
-                            browser.wait(EC.textToBePresentInElement(element(by.id('rs-total-count')), "Displaying 2 of 5 Records"), browser.params.defaultTimeout);
+                            chaisePage.waitForTextInElement(rowCount, "Displaying 2 of 5 Records");
                             chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
 
                             // Check if the url has @sort by column name
-                            browser.wait(EC.urlContains('@sort(' + accommodationParams.sortedData[k].rawColumnName + '::desc::,id)'), browser.params.defaultTimeout, "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 2 for descending order.");
+                            chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + '::desc::,id)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 2 for descending order.");
 
                             return chaisePage.recordsetPage.getRows();
 
@@ -635,11 +636,11 @@ describe('View recordset,', function() {
                             return chaisePage.recordsetPage.getPreviousButton().click();
 
                         }).then(function () {
-                            browser.wait(EC.textToBePresentInElement(element(by.id('rs-total-count')), "Displaying 3 of 5 Records"), browser.params.defaultTimeout);
+                            chaisePage.waitForTextInElement(rowCount, "Displaying 3 of 5 Records");
                             chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
 
                             // Sanity check on the previous page
-                            browser.wait(EC.urlContains('@sort(' + accommodationParams.sortedData[k].rawColumnName + '::desc::,id)'), browser.params.defaultTimeout, "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 1 for descending order.");
+                            chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + '::desc::,id)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 1 for descending order.");
                             done();
 
                         }).catch(function (err) {

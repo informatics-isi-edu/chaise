@@ -1340,6 +1340,14 @@ function chaisePage() {
         return browser.wait(condition, timeout || browser.params.defaultTimeout);
     };
 
+    this.waitForTextInElement = function(locator, text, timeout) {
+        return browser.wait(protractor.ExpectedConditions.textToBePresentInElement(locator, text), timeout || browser.params.defaultTimeout);
+    }
+
+    this.waitForTextInUrl = function(text, errMsg, timeout){
+        return browser.wait(protractor.ExpectedConditions.urlContains(text), timeout || browser.params.defaultTimeout, errMsg);
+    }
+
     this.catchTestError = function (done) {
         return function (err) {
             console.log(err);
