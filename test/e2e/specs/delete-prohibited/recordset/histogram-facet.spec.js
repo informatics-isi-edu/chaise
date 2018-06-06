@@ -63,6 +63,7 @@ describe("Viewing Recordset with Faceting,", function() {
             browser.ignoreSynchronization=true;
             browser.get(uri);
             chaisePage.waitForElementInverse(element(by.id("spinner")));
+
             // close the first facet
             chaisePage.recordsetPage.getFacetById(0).click();
         });
@@ -299,6 +300,24 @@ describe("Viewing Recordset with Faceting,", function() {
                     });
                 })(testParams.facets[j], j);
             }
+        });
+
+        describe ("going to a page with filters that return no data.", function () {
+            beforeAll(function () {
+                var noDataUri = uri + "/int_col::leq::0&float_col::leq::0&date_col::leq::2000-01-01&timestamp_col::leq::2000-01-01";
+                browser.get(noDataUri);
+                chaisePage.waitForElementInverse(element(by.id("spinner")));
+            });
+
+            it ("no data should be represented to the user.", function () {
+                expect(chaisePage.recordsetPage.getRows().count()).toBe(0);
+            });
+
+            it ("no histogram should be displayed.", function () {
+                for(var i = 0; i < testParams.totalNumFacets; i++) {
+                    expect(chaisePage.recordsetPage.getHistogram(i).isPresent()).not.toBeTruthy("histogram is available for facet index=" + i);
+                }
+            });
         });
     });
 });
