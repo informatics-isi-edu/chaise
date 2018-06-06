@@ -473,7 +473,7 @@ describe('View recordset,', function() {
                     expect(error).not.toBeDefined();
                 });
             }).pend("412 support has been dropped from ermestjs.");
- 
+
             it("action columns should show delete button that deletes record", function() {
                 var deleteButton;
                 var EC = protractor.ExpectedConditions;
