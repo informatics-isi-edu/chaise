@@ -890,16 +890,16 @@ var recordsetPage = function() {
         return element.all(by.css(".table-column-displayname > span"));
     };
 
-    this.getColumnSortButton = function(index){
-        return element(by.id("divRecordSet")).all(by.css('table > thead > tr > th')).get(index).element(by.css('.glyphicon-sort'));
+    this.getColumnSortButton = function(rawColumnName){
+        return element(by.css('.c_' + rawColumnName)).element(by.css('.glyphicon-sort'));
     };
 
-    this.getColumnSortAscButton = function(index){
-        return element(by.id("divRecordSet")).all(by.css('table > thead > tr > th')).get(index).element(by.css('.glyphicon-sort-by-attributes-alt'));
+    this.getColumnSortAscButton = function(rawColumnName){
+        return element(by.css('.c_' + rawColumnName)).element(by.css('.glyphicon-sort-by-attributes-alt'));
     };
 
-    this.getColumnSortDescButton = function(index){
-        return element(by.id("divRecordSet")).all(by.css('table > thead > tr > th')).get(index).element(by.css('.glyphicon-sort-by-attributes'));
+    this.getColumnSortDescButton = function(rawColumnName){
+        return element(by.css('.c_' + rawColumnName)).element(by.css('.glyphicon-sort-by-attributes'));
     };
 
     this.getRows = function() {

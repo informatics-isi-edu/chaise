@@ -869,7 +869,7 @@
           "display": "Categories"
         },
         "tag:isrd.isi.edu,2016:visible-columns": {
-          "*": ["id", "term", "type"]
+          "*": ["id", "term"]
         },
         "tag:isrd.isi.edu,2016:visible-foreign-keys" : {
           "*" : [
@@ -897,15 +897,12 @@
           ]
         }
       ],
-      "entityCount": 0,
       "foreign_keys": [],
       "table_name": "facilities",
       "schema_name": "product-recordset",
       "column_definitions": [
         {
-          "comment": null,
           "name": "id",
-          "default": null,
           "nullok": false,
           "type": {
             "typename": "int4"
@@ -917,9 +914,7 @@
           }
         },
         {
-          "comment": null,
           "name": "type",
-          "default": null,
           "nullok": false,
           "type": {
             "typename": "text"
@@ -929,9 +924,8 @@
           }
         },
         {
-          "comment": null,
           "name": "conference_room",
-          "default": null,
+          "default": false,
           "nullok": true,
           "type": {
             "typename": "boolean"
@@ -947,9 +941,8 @@
           }
         },
         {
-          "comment": null,
           "name": "golf_course",
-          "default": null,
+          "default": false,
           "nullok": true,
           "type": {
             "typename": "boolean"
@@ -965,9 +958,8 @@
           }
         },
         {
-          "comment": null,
           "name": "fine_dining",
-          "default": null,
+          "default": false,
           "nullok": true,
           "type": {
             "typename": "boolean"
@@ -983,9 +975,8 @@
           }
         },
         {
-          "comment": null,
           "name": "gym",
-          "default": null,
+          "default": false,
           "nullok": true,
           "type": {
             "typename": "boolean"
@@ -1001,9 +992,8 @@
           }
         },
         {
-          "comment": null,
           "name": "wifi",
-          "default": null,
+          "default": true,
           "nullok": true,
           "type": {
             "typename": "boolean"

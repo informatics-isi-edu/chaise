@@ -48,13 +48,13 @@ var testParams = {
                 id: 2002,
                 no_of_rooms: '23',
                 title: "Sherathon Hotel",
-                website: "http://www.starwoodhotels.com/sheraton/index.html", 
+                website: "http://www.starwoodhotels.com/sheraton/index.html",
                 rating: "4.3000",
                 summary: "Sherathon Hotels is an international hotel company with more than 990 locations in 73 countries. The first Radisson Hotel was built in 1909 in Minneapolis, Minnesota, US. It is named after the 17th-century French explorer Pierre-Esprit Radisson.",
                 opened_on: "2008-12-09 00:00:00",
                 luxurious: "true",
                 json_col: JSON.stringify(null,undefined,2),
-                json_col_with_markdown: "Status is: “delivered”",              
+                json_col_with_markdown: "Status is: “delivered”",
                 category: "Hotel",
                 type_of_facilities: "Upscale",
                 count_image_id: "4",
@@ -72,7 +72,7 @@ var testParams = {
                 opened_on: "2013-06-11 00:00:00",
                 luxurious: "false",
                 json_col: JSON.stringify({"age": 25,"name": "Testing"},undefined,2),
-                json_col_with_markdown: "Status is: “Processing”",              
+                json_col_with_markdown: "Status is: “Processing”",
                 category: "Motel",
                 type_of_facilities: "Basic",
                 count_image_id: "3",
@@ -90,7 +90,7 @@ var testParams = {
                 opened_on: "2013-06-11 00:00:00",
                 luxurious: "true",
                 json_col: "9876.3543",
-                json_col_with_markdown: "Status is: “Processing”",              
+                json_col_with_markdown: "Status is: “Processing”",
                 category: "Hotel",
                 type_of_facilities: "Upscale",
                 count_image_id: "",
@@ -102,7 +102,7 @@ var testParams = {
         sortedData:[
             { 
                 columnName: "Name of Accommodation",
-                nameInUrl: "title",
+                rawColumnName: "title",
                 columnPosition: 1,
                 page1:{
                     asc: ["NH Munich Resort", "Radisson Hotel", "Sherathon Hotel"],
@@ -115,7 +115,7 @@ var testParams = {
             },
             { 
                 columnName: "Number of Rooms",
-                nameInUrl: "no_of_rooms",
+                rawColumnName: "no_of_rooms",
                 columnPosition: 4,
                 page1:{
                     asc: ["15", "23", "23", ],
@@ -128,7 +128,7 @@ var testParams = {
             },
             { 
                 columnName: "Operational Since",
-                nameInUrl: "opened_on",
+                rawColumnName: "opened_on",
                 columnPosition: 6,
                 page1:{
                     asc: ["1976-06-15 00:00:00", "2002-01-22 00:00:00", "2008-12-09 00:00:00"],
@@ -141,7 +141,7 @@ var testParams = {
             },
             { 
                 columnName:"Category",
-                nameInUrl: "Y09mXK6LidrvCvNoXbesgg",
+                rawColumnName: "Y09mXK6LidrvCvNoXbesgg",
                 columnPosition: 10,
                 page1:{
                     asc: ["Hotel", "Hotel", "Hotel"],
@@ -154,7 +154,7 @@ var testParams = {
             },
             { 
                 columnName:"Type of Facilities",
-                nameInUrl: "hZ7Jzy0aC3Q3KQqz4DIXTw",
+                rawColumnName: "hZ7Jzy0aC3Q3KQqz4DIXTw",
                 columnPosition: 11,
                 page1:{
                     asc: ["Basic", "Luxury", "Upscale"],
@@ -473,7 +473,7 @@ describe('View recordset,', function() {
                     expect(error).not.toBeDefined();
                 });
             }).pend("412 support has been dropped from ermestjs.");
-            
+ 
             it("action columns should show delete button that deletes record", function() {
                 var deleteButton;
                 var EC = protractor.ExpectedConditions;
@@ -502,100 +502,152 @@ describe('View recordset,', function() {
                 });
             });
 
-            it("apply sorting on different columns.", function () {
+        });
+
+        describe("testing sorting and paging features, ", function () {
+            beforeAll(function () {
                 browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:" + accommodationParams.table_name + "?limit=3");
                 var EC = protractor.ExpectedConditions;
                 chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
                 browser.wait(EC.presenceOf(chaisePage.recordsetPage.getRows().get(2)), browser.params.defaultTimeout);
-                for (var j = 0; j < accommodationParams.sortedData.length; j++) {
-                    (function (k) {
-                        //Click on sort button
-                        chaisePage.recordsetPage.getColumnSortButton(accommodationParams.sortedData[k].columnPosition).click().then(function () {
-                            browser.wait(EC.textToBePresentInElement(element(by.id('rs-total-count')),"Displaying 3 of 5 Records"), browser.params.defaultTimeout);
-                            return chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
-                        }).then(function () {
+            });
+
+            for (var j = 0; j < accommodationParams.sortedData.length; j++) {
+                (function (k) {
+                    it("should sort " + accommodationParams.sortedData[k].columnName + " column in ascending order.", function (done) {
+                        var EC = protractor.ExpectedConditions;
+                        // Check the presence of initial sort button
+                        expect(chaisePage.recordsetPage.getColumnSortButton(accommodationParams.sortedData[k].rawColumnName).isDisplayed()).toBe(true);
+
+                        // Click on sort button
+                        chaisePage.recordsetPage.getColumnSortButton(accommodationParams.sortedData[k].rawColumnName).click().then(function () {
+                            browser.wait(EC.textToBePresentInElement(element(by.id('rs-total-count')), "Displaying 3 of 5 Records"), browser.params.defaultTimeout);
+                            chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
+
+                            //Check the presence of descending sort button
+                            expect(chaisePage.recordsetPage.getColumnSortDescButton(accommodationParams.sortedData[k].rawColumnName).isDisplayed()).toBe(true);
+
                             // Check if the url has @sort by column name
-                            expect(browser.getCurrentUrl()).toContain('@sort(' + accommodationParams.sortedData[k].nameInUrl + ',id)');
+                            browser.wait(EC.urlContains('@sort(' + accommodationParams.sortedData[k].rawColumnName + ',id)'), browser.params.defaultTimeout, "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 1 for ascending order.");
+
+                            return chaisePage.recordsetPage.getRows();
+
+                        }).then(function (rows) {
                             // Check if values of the sorted column on this page(first page) are in ascending order.
-                            chaisePage.recordsetPage.getRows().then(function (rows) {
-                                for (var i = 0; i < 3; i++) {
-                                    (function (index1) {
-                                        rows[index1].all(by.tagName("td")).then(function (cells) {
-                                            expect(cells[accommodationParams.sortedData[k].columnPosition].getText()).toBe(accommodationParams.sortedData[k].page1.asc[index1], accommodationParams.sortedData[k].nameInUrl + " column value missmatch for row = " + index1 + " in ascending order on Page 1. k=" + k);
-                                        });
-                                    }(i))
-                                }
-                            });
-                        }).then(function () {
+                            for (var i = 0; i < 3; i++) {
+                                (function (index1) {
+                                    rows[index1].all(by.tagName("td")).then(function (cells) {
+                                        expect(cells[accommodationParams.sortedData[k].columnPosition].getText()).toBe(accommodationParams.sortedData[k].page1.asc[index1], accommodationParams.sortedData[k].rawColumnName + " column value missmatch for row = " + index1 + " in ascending order on Page 1.");
+                                    });
+                                }(i))
+                            }
+
                             // Go to the next page
                             return chaisePage.recordsetPage.getNextButton().click();
+
                         }).then(function () {
-                            browser.wait(EC.textToBePresentInElement(element(by.id('rs-total-count')),"Displaying 2 of 5 Records"), browser.params.defaultTimeout);
-                            return chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
-                        }).then(function () {
+                            browser.wait(EC.textToBePresentInElement(element(by.id('rs-total-count')), "Displaying 2 of 5 Records"), browser.params.defaultTimeout);
+                            chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
+
                             // Check if the url has @sort by column name
-                            expect(browser.getCurrentUrl()).toContain('@sort(' + accommodationParams.sortedData[k].nameInUrl + ',id)');
+                            browser.wait(EC.urlContains('@sort(' + accommodationParams.sortedData[k].rawColumnName + ',id)'), browser.params.defaultTimeout, "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 2 for ascending order.");
+
+                            return chaisePage.recordsetPage.getRows();
+
+                        }).then(function (rows) {
                             // Check if values of the sorted column on second page are in ascending order
-                            chaisePage.recordsetPage.getRows().then(function (rows) {
-                                for (var i = 0; i < 2; i++) {
-                                    (function (index2) {
-                                        rows[index2].all(by.tagName("td")).then(function (cells) {
-                                            expect(cells[accommodationParams.sortedData[k].columnPosition].getText()).toBe(accommodationParams.sortedData[k].page2.asc[index2], accommodationParams.sortedData[k].nameInUrl + " column value missmatch for row = " + index2 + " in ascending order on Page 2.k=" + k);
-                                        });
-                                    }(i))
-                                }
-                            });
-                        }).then(function () {
-                            // Click on sort button to sort in descending order. This redirects to the first page.
-                            return chaisePage.recordsetPage.getColumnSortDescButton(accommodationParams.sortedData[k].columnPosition).click();
-                        }).then(function () {
-                            browser.wait(EC.textToBePresentInElement(element(by.id('rs-total-count')),"Displaying 3 of 5 Records"), browser.params.defaultTimeout);
-                            return chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
-                        }).then(function () {
-                            // Check if the url has @sort by column name
-                            expect(browser.getCurrentUrl()).toContain('@sort(' + accommodationParams.sortedData[k].nameInUrl + '::desc::,id)');
-                            // Check if values of the sorted column on first page are in descending order
-                            chaisePage.recordsetPage.getRows().then(function (rows) {
-                                for (var i = 0; i < 3; i++) {
-                                    (function (index3) {
-                                        rows[index3].all(by.tagName("td")).then(function (cells) {
-                                            expect(cells[accommodationParams.sortedData[k].columnPosition].getText()).toBe(accommodationParams.sortedData[k].page1.desc[index3], accommodationParams.sortedData[k].nameInUrl + " column value missmatch for row = " + index3 + " in descending order on Page 1.k=" + k);
-                                        });
-                                    }(i))
-                                }
-                            });
-                        }).then(function () {
-                            // Go to the next page
-                            return chaisePage.recordsetPage.getNextButton().click();
-                        }).then(function () {
-                            browser.wait(EC.textToBePresentInElement(element(by.id('rs-total-count')),"Displaying 2 of 5 Records"), browser.params.defaultTimeout);
-                            return chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
-                        }).then(function () {
-                            // Check if the url has @sort by column name
-                            expect(browser.getCurrentUrl()).toContain('@sort(' + accommodationParams.sortedData[k].nameInUrl + '::desc::,id)');
-                            // Check if values of the sorted column on second page are in descending order
-                            chaisePage.recordsetPage.getRows().then(function (rows) {
-                                for (var i = 0; i < 2; i++) {
-                                    (function (index4) {
-                                        rows[index4].all(by.tagName("td")).then(function (cells) {
-                                            expect(cells[accommodationParams.sortedData[k].columnPosition].getText()).toBe(accommodationParams.sortedData[k].page2.desc[index4], accommodationParams.sortedData[k].nameInUrl + " column value missmatch for row = " + index4 + " in descending order on Page 2.k=" + k);
-                                        });
-                                    }(i))
-                                }
-                            });
-                        }).then(function(){
+                            for (var i = 0; i < 2; i++) {
+                                (function (index2) {
+                                    rows[index2].all(by.tagName("td")).then(function (cells) {
+                                        expect(cells[accommodationParams.sortedData[k].columnPosition].getText()).toBe(accommodationParams.sortedData[k].page2.asc[index2], accommodationParams.sortedData[k].rawColumnName + " column value missmatch for row = " + index2 + " in ascending order on Page 2.");
+                                    });
+                                }(i))
+                            }
+
                             // Go to the previous page
                             return chaisePage.recordsetPage.getPreviousButton().click();
+
                         }).then(function () {
-                            browser.wait(EC.textToBePresentInElement(element(by.id('rs-total-count')),"Displaying 3 of 5 Records"), browser.params.defaultTimeout);
-                            return chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
-                        }).then(function () {
+                            browser.wait(EC.textToBePresentInElement(element(by.id('rs-total-count')), "Displaying 3 of 5 Records"), browser.params.defaultTimeout);
+                            chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
+
                             // Sanity check on the previous page
-                            expect(browser.getCurrentUrl()).toContain('@sort(' + accommodationParams.sortedData[k].nameInUrl + '::desc::,id)');
+                            browser.wait(EC.urlContains('@sort(' + accommodationParams.sortedData[k].rawColumnName + ',id)'), browser.params.defaultTimeout, "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 1 for ascending order.");
+                            done();
+
+                        }).catch(function (err) {
+                            done.fail(err);
                         });
-                    }(j))
-                }
-            });
+
+                    });
+
+                    it("should sort " + accommodationParams.sortedData[k].columnName + " column in descending order.", function (done) {
+                        var EC = protractor.ExpectedConditions;
+                        // Check the presence of descending sort button
+                        expect(chaisePage.recordsetPage.getColumnSortDescButton(accommodationParams.sortedData[k].rawColumnName).isDisplayed()).toBe(true);
+
+                        // Click on sort button to sort in descending order
+                        chaisePage.recordsetPage.getColumnSortDescButton(accommodationParams.sortedData[k].rawColumnName).click().then(function () {
+                            browser.wait(EC.textToBePresentInElement(element(by.id('rs-total-count')), "Displaying 3 of 5 Records"), browser.params.defaultTimeout);
+                            chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
+
+                            // Check the presence of ascending sort button
+                            expect(chaisePage.recordsetPage.getColumnSortAscButton(accommodationParams.sortedData[k].rawColumnName).isDisplayed()).toBe(true);
+
+                            // Check if the url has @sort by column name
+                            browser.wait(EC.urlContains('@sort(' + accommodationParams.sortedData[k].rawColumnName + '::desc::,id)'), browser.params.defaultTimeout, "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 1 for descending order.");
+
+                            return chaisePage.recordsetPage.getRows();
+
+                        }).then(function (rows) {
+                            // Check if values of the sorted column on first page are in descending order
+                            for (var i = 0; i < 3; i++) {
+                                (function (index3) {
+                                    rows[index3].all(by.tagName("td")).then(function (cells) {
+                                        expect(cells[accommodationParams.sortedData[k].columnPosition].getText()).toBe(accommodationParams.sortedData[k].page1.desc[index3], accommodationParams.sortedData[k].rawColumnName + " column value missmatch for row = " + index3 + " in descending order on Page 1");
+                                    });
+                                }(i))
+                            }
+
+                            // Go to the next page
+                            return chaisePage.recordsetPage.getNextButton().click();
+
+                        }).then(function () {
+                            browser.wait(EC.textToBePresentInElement(element(by.id('rs-total-count')), "Displaying 2 of 5 Records"), browser.params.defaultTimeout);
+                            chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
+
+                            // Check if the url has @sort by column name
+                            browser.wait(EC.urlContains('@sort(' + accommodationParams.sortedData[k].rawColumnName + '::desc::,id)'), browser.params.defaultTimeout, "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 2 for descending order.");
+
+                            return chaisePage.recordsetPage.getRows();
+
+                        }).then(function (rows) {
+                            // Check if values of the sorted column on second page are in descending order
+                            for (var i = 0; i < 2; i++) {
+                                (function (index4) {
+                                    rows[index4].all(by.tagName("td")).then(function (cells) {
+                                        expect(cells[accommodationParams.sortedData[k].columnPosition].getText()).toBe(accommodationParams.sortedData[k].page2.desc[index4], accommodationParams.sortedData[k].rawColumnName + " column value missmatch for row = " + index4 + " in descending order on Page 2.");
+                                    });
+                                }(i))
+                            }
+
+                            // Go to the previous page
+                            return chaisePage.recordsetPage.getPreviousButton().click();
+
+                        }).then(function () {
+                            browser.wait(EC.textToBePresentInElement(element(by.id('rs-total-count')), "Displaying 3 of 5 Records"), browser.params.defaultTimeout);
+                            chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
+
+                            // Sanity check on the previous page
+                            browser.wait(EC.urlContains('@sort(' + accommodationParams.sortedData[k].rawColumnName + '::desc::,id)'), browser.params.defaultTimeout, "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 1 for descending order.");
+                            done();
+
+                        }).catch(function (err) {
+                            done.fail(err);
+                        });
+                    });
+                }(j))
+            }
 
         });
 
