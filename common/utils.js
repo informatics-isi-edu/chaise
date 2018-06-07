@@ -1319,6 +1319,27 @@
         };
     }])
 
+    /**
+    *  The compile directive is used to compile the html/content
+    *  for angularjs to resolve functions like "ng-click" within
+    *  the alert messages e.g. previousSession.message.
+    */
+    .directive('compile', ['$compile', function ($compile) {
+      return {
+        restrict: 'A',
+        link: function(scope, element, attrs) {
+          scope.$watch(
+            function(scope) {
+              return scope.$eval(attrs.compile);
+            },
+            function(value) {
+              element.html(value);
+              $compile(element.contents())(scope);
+            }
+          )}
+        }
+     }])
+
     .service('headInjector', ['$window', 'MathUtils', function($window, MathUtils) {
         function addCustomCSS() {
             if (chaiseConfig['customCSS'] !== undefined) {
