@@ -315,7 +315,7 @@ describe("Viewing Recordset with Faceting,", function() {
 
             it ("no histogram should be displayed.", function () {
                 for(var i = 0; i < testParams.totalNumFacets; i++) {
-                    expect(chaisePage.recordsetPage.getHistogram(i).isPresent()).not.toBeTruthy("histogram is available for facet index=" + i);
+                    expect(chaisePage.recordsetPage.getHistogram(i).isPresent()).toBeFalsy("histogram is available for facet index=" + i);
                 }
             });
         });
