@@ -794,7 +794,6 @@
       "entityCount": 0,
       "foreign_keys": [
         {
-          "comment": null,
           "names": [["product-recordset", "fk_facilities"]],
           "foreign_key_columns": [
             {
@@ -845,7 +844,6 @@
         {
           "comment": "amenities",
           "name": "type_of_facilities",
-          "default": null,
           "nullok": false,
           "type": {
             "typename": "text"

@@ -505,6 +505,11 @@ describe('View recordset,', function() {
         });
 
         describe("testing sorting and paging features, ", function () {
+            var rowCount = chaisePage.recordsetPage.getTotalCount();
+            var recordsOnPage1 = accommodationParams.sortedData[0].page1.asc.length;
+            var recordsOnPage2 = accommodationParams.sortedData[0].page2.asc.length;
+            var totalRecords = recordsOnPage1 + recordsOnPage2;
+
             beforeAll(function () {
                 browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:" + accommodationParams.table_name + "?limit=3");
                 var EC = protractor.ExpectedConditions;
@@ -515,18 +520,17 @@ describe('View recordset,', function() {
             for (var j = 0; j < accommodationParams.sortedData.length; j++) {
                 (function (k) {
                     it("should sort " + accommodationParams.sortedData[k].columnName + " column in ascending order.", function (done) {
-                        var rowCount = chaisePage.recordsetPage.getTotalCount();
 
                         // Check the presence of initial sort button
-                        expect(chaisePage.recordsetPage.getColumnSortButton(accommodationParams.sortedData[k].rawColumnName).isDisplayed()).toBe(true);
+                        expect(chaisePage.recordsetPage.getColumnSortButton(accommodationParams.sortedData[k].rawColumnName).isDisplayed()).toBe(true, accommodationParams.sortedData[k].columnName + " column doesn't contain the initial sort button.");
 
                         // Click on sort button
                         chaisePage.recordsetPage.getColumnSortButton(accommodationParams.sortedData[k].rawColumnName).click().then(function () {
-                            chaisePage.waitForTextInElement(rowCount, "Displaying 3 of 5 Records");
+                            chaisePage.waitForTextInElement(rowCount, "Displaying " + recordsOnPage1 + " of " + totalRecords + " Records");
                             chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
 
                             //Check the presence of descending sort button
-                            expect(chaisePage.recordsetPage.getColumnSortDescButton(accommodationParams.sortedData[k].rawColumnName).isDisplayed()).toBe(true);
+                            expect(chaisePage.recordsetPage.getColumnSortDescButton(accommodationParams.sortedData[k].rawColumnName).isDisplayed()).toBe(true,  accommodationParams.sortedData[k].columnName + " column doesn't contain the descending sort button.");
 
                             // Check if the url has @sort by column name
                             chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + ',id)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 1 for ascending order.");
@@ -535,7 +539,7 @@ describe('View recordset,', function() {
 
                         }).then(function (rows) {
                             // Check if values of the sorted column on this page(first page) are in ascending order.
-                            for (var i = 0; i < 3; i++) {
+                            for (var i = 0; i < recordsOnPage1; i++) {
                                 (function (index1) {
                                     rows[index1].all(by.tagName("td")).then(function (cells) {
                                         expect(cells[accommodationParams.sortedData[k].columnPosition].getText()).toBe(accommodationParams.sortedData[k].page1.asc[index1], accommodationParams.sortedData[k].rawColumnName + " column value missmatch for row = " + index1 + " in ascending order on Page 1.");
@@ -547,7 +551,7 @@ describe('View recordset,', function() {
                             return chaisePage.recordsetPage.getNextButton().click();
 
                         }).then(function () {
-                            chaisePage.waitForTextInElement(rowCount, "Displaying 2 of 5 Records");
+                            chaisePage.waitForTextInElement(rowCount, "Displaying " + recordsOnPage2 + " of " + totalRecords + " Records");
                             chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
 
                             // Check if the url has @sort by column name
@@ -557,7 +561,7 @@ describe('View recordset,', function() {
 
                         }).then(function (rows) {
                             // Check if values of the sorted column on second page are in ascending order
-                            for (var i = 0; i < 2; i++) {
+                            for (var i = 0; i < recordsOnPage2; i++) {
                                 (function (index2) {
                                     rows[index2].all(by.tagName("td")).then(function (cells) {
                                         expect(cells[accommodationParams.sortedData[k].columnPosition].getText()).toBe(accommodationParams.sortedData[k].page2.asc[index2], accommodationParams.sortedData[k].rawColumnName + " column value missmatch for row = " + index2 + " in ascending order on Page 2.");
@@ -569,7 +573,7 @@ describe('View recordset,', function() {
                             return chaisePage.recordsetPage.getPreviousButton().click();
 
                         }).then(function () {
-                            chaisePage.waitForTextInElement(rowCount, "Displaying 3 of 5 Records");
+                            chaisePage.waitForTextInElement(rowCount, "Displaying " + recordsOnPage1 + " of " + totalRecords + " Records");
                             chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
 
                             // Sanity check on the previous page
@@ -577,23 +581,23 @@ describe('View recordset,', function() {
                             done();
 
                         }).catch(function (err) {
+                            console.log("Error in the promise chain: ", err);
                             done.fail(err);
                         });
 
                     });
 
                     it("should sort " + accommodationParams.sortedData[k].columnName + " column in descending order.", function (done) {
-                        var rowCount = chaisePage.recordsetPage.getTotalCount();
                         // Check the presence of descending sort button
-                        expect(chaisePage.recordsetPage.getColumnSortDescButton(accommodationParams.sortedData[k].rawColumnName).isDisplayed()).toBe(true);
+                        expect(chaisePage.recordsetPage.getColumnSortDescButton(accommodationParams.sortedData[k].rawColumnName).isDisplayed()).toBe(true, accommodationParams.sortedData[k].columnName + " column doesn't contain the descending sort button.");
 
                         // Click on sort button to sort in descending order
                         chaisePage.recordsetPage.getColumnSortDescButton(accommodationParams.sortedData[k].rawColumnName).click().then(function () {
-                            chaisePage.waitForTextInElement(rowCount, "Displaying 3 of 5 Records");
+                            chaisePage.waitForTextInElement(rowCount, "Displaying " + recordsOnPage1 + " of " + totalRecords + " Records");
                             chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
 
                             // Check the presence of ascending sort button
-                            expect(chaisePage.recordsetPage.getColumnSortAscButton(accommodationParams.sortedData[k].rawColumnName).isDisplayed()).toBe(true);
+                            expect(chaisePage.recordsetPage.getColumnSortAscButton(accommodationParams.sortedData[k].rawColumnName).isDisplayed()).toBe(true, accommodationParams.sortedData[k].columnName + " column doesn't contain the ascending sort button.");
 
                             // Check if the url has @sort by column name
                             chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + '::desc::,id)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 1 for descending order.");
@@ -602,7 +606,7 @@ describe('View recordset,', function() {
 
                         }).then(function (rows) {
                             // Check if values of the sorted column on first page are in descending order
-                            for (var i = 0; i < 3; i++) {
+                            for (var i = 0; i < recordsOnPage1; i++) {
                                 (function (index3) {
                                     rows[index3].all(by.tagName("td")).then(function (cells) {
                                         expect(cells[accommodationParams.sortedData[k].columnPosition].getText()).toBe(accommodationParams.sortedData[k].page1.desc[index3], accommodationParams.sortedData[k].rawColumnName + " column value missmatch for row = " + index3 + " in descending order on Page 1");
@@ -614,7 +618,7 @@ describe('View recordset,', function() {
                             return chaisePage.recordsetPage.getNextButton().click();
 
                         }).then(function () {
-                            chaisePage.waitForTextInElement(rowCount, "Displaying 2 of 5 Records");
+                            chaisePage.waitForTextInElement(rowCount, "Displaying " + recordsOnPage2 + " of " + totalRecords + " Records");
                             chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
 
                             // Check if the url has @sort by column name
@@ -624,7 +628,7 @@ describe('View recordset,', function() {
 
                         }).then(function (rows) {
                             // Check if values of the sorted column on second page are in descending order
-                            for (var i = 0; i < 2; i++) {
+                            for (var i = 0; i < recordsOnPage2; i++) {
                                 (function (index4) {
                                     rows[index4].all(by.tagName("td")).then(function (cells) {
                                         expect(cells[accommodationParams.sortedData[k].columnPosition].getText()).toBe(accommodationParams.sortedData[k].page2.desc[index4], accommodationParams.sortedData[k].rawColumnName + " column value missmatch for row = " + index4 + " in descending order on Page 2.");
@@ -636,7 +640,7 @@ describe('View recordset,', function() {
                             return chaisePage.recordsetPage.getPreviousButton().click();
 
                         }).then(function () {
-                            chaisePage.waitForTextInElement(rowCount, "Displaying 3 of 5 Records");
+                            chaisePage.waitForTextInElement(rowCount, "Displaying " + recordsOnPage1 + " of " + totalRecords + " Records");
                             chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
 
                             // Sanity check on the previous page
@@ -644,6 +648,7 @@ describe('View recordset,', function() {
                             done();
 
                         }).catch(function (err) {
+                            console.log("Error in the promise chain: ", err);
                             done.fail(err);
                         });
                     });
