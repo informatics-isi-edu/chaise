@@ -144,6 +144,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
     }
 
     it ("should have the table subtitle.", function () {
+        browser.pause();
         expect(chaisePage.recordEditPage.getEntitySubtitleElement().getText()).toBe(tableParams.table_displayname.toUpperCase(), "Entity subtitle is incorrect.");
         expect(chaisePage.recordEditPage.getEntitySubtitleTooltip()).toBe(tableParams.table_comment, "Entity subtitle tooltip is incorrect.");
     });

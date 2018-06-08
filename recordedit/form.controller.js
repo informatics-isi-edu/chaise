@@ -161,7 +161,7 @@
             var failedPage = result.failed;
             var resultsReference = page.reference;
             if (model.rows.length == 1) {
-                vm.redirectAfterSubmission(page);
+                // vm.redirectAfterSubmission(page);
             }
             else {
                 AlertsService.addAlert("Your data has been submitted. Showing you the result set...", "success");

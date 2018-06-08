@@ -106,13 +106,16 @@
             vm.erred = false;
 
             vm.totalSize = 0;
-            vm.humanTotalSize = 0
-            vm.noOfFiles = 0;
+            vm.humanTotalSize = 0;
+            vm.filesCt = 0;
+            vm.filesToUploadCt = 0;
             vm.sizeTransferred = 0;
             vm.humanSizeTransferred = 0;
 
             vm.checksumProgress = 0;
             vm.checksumCompleted = 0;
+
+            vm.preFileExistsCount = 0;
 
             vm.createUploadJobProgress = 0;
             vm.createUploadJobCompleted = 0;
@@ -163,6 +166,24 @@
                 });
             };
 
+            // This function checks for files existing before upload job is created
+            // verifies if the same file exists in the namespace with the same size/length
+            var preCheckFileExists = function() {
+
+                if (vm.erred || vm.aborted) return;
+
+                vm.title = "Checking for existing files";
+                vm.isFileExists = true;
+                vm.isUpload = false;
+                vm.rows.forEach(function(row) {
+                    row.forEach(function(item) {
+                        item.hatracObj.fileExists().then(
+                            item.onPreFileExistSuccess.bind(item),
+                            onError);
+                    });
+                });
+            }
+
             // This function creates upload jobs in hatrac.js for all files
             var createUploadJobs = function() {
 
@@ -174,9 +195,15 @@
                 vm.isUpload = false;
                 vm.rows.forEach(function(row) {
                     row.forEach(function(item) {
-                        item.hatracObj.createUploadJob().then(
-                            item.onJobCreated.bind(item),
-                            onError);
+                        if (item.skipUploadJob) {
+                            item.hatracObj.completeUpload().then(
+                                item.onCompleteUploadJob.bind(item),
+                                onError);
+                        } else {
+                            item.hatracObj.createUploadJob().then(
+                                item.onJobCreated.bind(item),
+                                onError);
+                        }
                     });
                 });
             };
@@ -212,10 +239,12 @@
                 vm.rows.forEach(function(row) {
                     row.forEach(function(item) {
                         item.onProgressChanged(0);
+                        console.log("add to queue");
                         vm.queue.push(item);
                     });
                 });
 
+                console.log(vm.queue.length);
                 startQueuedUpload();
 
                 vm.speed = "Calculating Speed";
@@ -237,6 +266,7 @@
                 var item = vm.queue.shift();
                 if(!item) return;
 
+                console.log("before start");
                 item.hatracObj.start().then(
                             item.onUploadCompleted.bind(item),
                             onError,
@@ -376,11 +406,43 @@
 
                     // Once all checksums have been calculated call createUploadJobs
                     // To create a job for each file
-                    if (vm.checksumCompleted == vm.noOfFiles) {
-                        createUploadJobs();
+                    if (vm.checksumCompleted == vm.filesCt) {
+                        console.log("number of files: ", vm.filesCt);
+                        console.log("pre check file exists");
+                        preCheckFileExists();
                     }
                 }
             };
+
+            uploadFile.prototype.onPreFileExistSuccess = function() {
+
+                if (vm.erred || vm.aborted) return;
+
+                this.skipUploadJob = this.hatracObj.jobDone;
+
+                // if the job is already done, that means the file has an idntical file already in the server
+                // md5, filename, and size all match
+                // we don't want to even create a job for that file because it shouldn't be uploaded
+                if (this.hatracObj.jobDone) {
+                    vm.filesToUploadCt -= 1;
+                } else {
+                    vm.preFileExistsCount++
+                }
+
+                $timeout(function() {
+                    try {
+                        $scope.$apply();
+                    } catch (e) {
+                        $log.warn("$scope.$apply() error. $apply was called while a digest cycle was running.");
+                    }
+                });
+
+                if (vm.preFileExistsCount == vm.filesToUploadCt) {
+                    console.log("number of files: ", vm.filesCt);
+                    console.log("number of files to upload: ", vm.filesToUploadCt);
+                    createUploadJobs();
+                }
+            }
 
             // This function is called as a success promise callback by createUpload function above for each file
             // Once upload jobs for all files are done it calls checkFileExists
@@ -402,7 +464,7 @@
                     });
                 });
 
-                vm.createUploadJobProgress = (progress/vm.noOfFiles)*100;
+                vm.createUploadJobProgress = (progress/vm.filesToUploadCt)*100;
                 vm.createUploadJobCompleted = progress;
 
                 $timeout(function() {
@@ -413,7 +475,11 @@
                     }
                 });
 
-                if (progress == vm.noOfFiles) {
+                console.log("files count: ", vm.filesCt);
+                console.log("files to upload count: ", vm.filesToUploadCt);
+                console.log("progress: ", progress);
+                console.log("=========");
+                if (progress == vm.filesToUploadCt) {
                     checkFileExists();
                 }
             };
@@ -439,7 +505,7 @@
                     });
                 });
 
-                vm.fileExistsProgress = (progress/vm.noOfFiles)*100;
+                vm.fileExistsProgress = (progress/vm.filesToUploadCt)*100;
                 vm.fileExistsCompleted = progress;
 
                 $timeout(function() {
@@ -450,7 +516,10 @@
                     }
                 });
 
-                if (progress == vm.noOfFiles) {
+                if (progress == vm.filesToUploadCt) {
+                    console.log("number of files: ", vm.filesCt);
+                    console.log("number of files to upload: ", vm.filesToUploadCt);
+                    console.log("start upload");
                     startUpload();
                 }
             };
@@ -504,11 +573,13 @@
 
                     // If all files have been uploaded then call completeUpload
                     // to sent requests to mark the job as done
-                    if (vm.uploadCompleted == vm.noOfFiles) {
+                    if (vm.uploadCompleted == vm.filesToUploadCt) {
+                        console.log("complete upload");
                         clearInterval(speedIntervalTimer);
                         completeUpload();
                     }
                 }
+                console.log("next queue");
                 startQueuedUpload();
             };
 
@@ -523,6 +594,7 @@
                 this.versionedUrl = url;
 
 
+                console.log("in complete upload job");
                 // This code updates the main progress bar for job completion progress for all files
                 var progress  = 0;
                 vm.rows.forEach(function(row) {
@@ -531,7 +603,8 @@
                     });
                 });
 
-                vm.uploadJobCompleteProgress = (progress/vm.noOfFiles)*100;
+                console.log("progress: ", progress)
+                vm.uploadJobCompleteProgress = (progress/vm.filesCt)*100;
                 vm.uploadJobCompletedCount = progress;
 
                 $timeout(function() {
@@ -542,8 +615,11 @@
                     }
                 });
 
+                console.log("number of files: ", vm.filesCt);
+                console.log("number of files uploaded: ", vm.filesToUploadCt);
+                console.log("number of completed uploads: ", vm.uploadCompleted);
                 // If all files have been uploaded and their completed upload job calls are done
-                if (progress == vm.noOfFiles) {
+                if (progress == vm.filesCt) {
                     var index = 0;
 
                      // Iterate over all rows that are passed as parameters to the modal controller
@@ -564,6 +640,7 @@
 
                         index++;
                     });
+                    console.log("before modal close");
                     $uibModalInstance.close();
                 }
             };
@@ -588,7 +665,7 @@
                         // else if column contains url then set it in the column directly
                         // if the url is empty then set the column values as null
                         if (row[k] != null && typeof row[k] == 'object' && row[k].file) {
-                            vm.noOfFiles++;
+                            vm.filesCt++;
                             vm.totalSize += row[k].file.size;
                             tuple.push(new uploadFile(row[k], column, row));
                         } else {
@@ -603,11 +680,12 @@
 
             // If there are no files to be uploaded then simply close the modal
             // Else start with calling calculateChecksum
-            if (!vm.noOfFiles) {
+            if (!vm.filesCt) {
                 $timeout(function() {
                    $uibModalInstance.close();
                 });
             } else {
+                vm.filesToUploadCt = vm.filesCt;
                 calculateChecksum();
             }
 
