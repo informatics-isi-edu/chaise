@@ -103,7 +103,7 @@ if (!process.env.TRAVIS) {
 
 describe('Record Add', function() {
 
-    for (var i=1; i< testParams.tables.length; i++) {
+    for (var i=0; i< testParams.tables.length; i++) {
 
         (function(tableParams, index) {
 

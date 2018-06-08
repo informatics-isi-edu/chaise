@@ -124,7 +124,7 @@
             vm.fileExistsCompleted = 0;
 
             vm.uploadProgress = 0;
-            vm.uploadCompleted = 0;
+            vm.numUploadsCompleted = 0;
 
             vm.uploadJobCompleteProgress = 0;
             vm.uploadJobCompletedCount = 0;
@@ -239,12 +239,10 @@
                 vm.rows.forEach(function(row) {
                     row.forEach(function(item) {
                         item.onProgressChanged(0);
-                        console.log("add to queue");
                         vm.queue.push(item);
                     });
                 });
 
-                console.log(vm.queue.length);
                 startQueuedUpload();
 
                 vm.speed = "Calculating Speed";
@@ -266,7 +264,6 @@
                 var item = vm.queue.shift();
                 if(!item) return;
 
-                console.log("before start");
                 item.hatracObj.start().then(
                             item.onUploadCompleted.bind(item),
                             onError,
@@ -407,8 +404,6 @@
                     // Once all checksums have been calculated call createUploadJobs
                     // To create a job for each file
                     if (vm.checksumCompleted == vm.filesCt) {
-                        console.log("number of files: ", vm.filesCt);
-                        console.log("pre check file exists");
                         preCheckFileExists();
                     }
                 }
@@ -438,8 +433,6 @@
                 });
 
                 if (vm.preFileExistsCount == vm.filesToUploadCt) {
-                    console.log("number of files: ", vm.filesCt);
-                    console.log("number of files to upload: ", vm.filesToUploadCt);
                     createUploadJobs();
                 }
             }
@@ -475,10 +468,6 @@
                     }
                 });
 
-                console.log("files count: ", vm.filesCt);
-                console.log("files to upload count: ", vm.filesToUploadCt);
-                console.log("progress: ", progress);
-                console.log("=========");
                 if (progress == vm.filesToUploadCt) {
                     checkFileExists();
                 }
@@ -517,9 +506,6 @@
                 });
 
                 if (progress == vm.filesToUploadCt) {
-                    console.log("number of files: ", vm.filesCt);
-                    console.log("number of files to upload: ", vm.filesToUploadCt);
-                    console.log("start upload");
                     startUpload();
                 }
             };
@@ -569,17 +555,15 @@
                 this.progressPercent = 100;
                 if (!this.uploadCompleted) {
                     this.uploadCompleted = true;
-                    vm.uploadCompleted++;
+                    vm.numUploadsCompleted++;
 
                     // If all files have been uploaded then call completeUpload
                     // to sent requests to mark the job as done
-                    if (vm.uploadCompleted == vm.filesToUploadCt) {
-                        console.log("complete upload");
+                    if (vm.numUploadsCompleted == vm.filesToUploadCt) {
                         clearInterval(speedIntervalTimer);
                         completeUpload();
                     }
                 }
-                console.log("next queue");
                 startQueuedUpload();
             };
 
@@ -594,7 +578,6 @@
                 this.versionedUrl = url;
 
 
-                console.log("in complete upload job");
                 // This code updates the main progress bar for job completion progress for all files
                 var progress  = 0;
                 vm.rows.forEach(function(row) {
@@ -603,7 +586,6 @@
                     });
                 });
 
-                console.log("progress: ", progress)
                 vm.uploadJobCompleteProgress = (progress/vm.filesCt)*100;
                 vm.uploadJobCompletedCount = progress;
 
@@ -615,9 +597,6 @@
                     }
                 });
 
-                console.log("number of files: ", vm.filesCt);
-                console.log("number of files uploaded: ", vm.filesToUploadCt);
-                console.log("number of completed uploads: ", vm.uploadCompleted);
                 // If all files have been uploaded and their completed upload job calls are done
                 if (progress == vm.filesCt) {
                     var index = 0;
@@ -640,7 +619,6 @@
 
                         index++;
                     });
-                    console.log("before modal close");
                     $uibModalInstance.close();
                 }
             };
