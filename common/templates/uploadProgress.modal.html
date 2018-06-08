@@ -14,7 +14,7 @@
     </div>
     <div class="row no-row-margin" ng-show="ctrl.isCreateUploadJob && !ctrl.isFileExists && !ctrl.isUpload ">
     	<div class="col-md-12 pad0-left pad0-right text-right">
-	    	<strong>Completed: {{ctrl.createUploadJobCompleted}}/{{ctrl.filesCt}}</strong>
+	    	<strong>Completed: {{ctrl.createUploadJobCompleted}}/{{ctrl.filesToUploadCt}}</strong>
     	</div>
 	    <div class="progress">
 	        <div class="progress-bar upload-progress-bar" role="progressbar" ng-style="{ 'width': ctrl.createUploadJobProgress + '%' }"></div>
@@ -23,7 +23,7 @@
     </div>
     <div class="row no-row-margin" ng-show="ctrl.isFileExists && !ctrl.isUpload">
     	<div class="col-md-12 pad0-left pad0-right text-right">
-	    	<strong>Completed: {{ctrl.fileExistsCompleted}}/{{ctrl.filesCt}}</strong>
+	    	<strong>Completed: {{ctrl.fileExistsCompleted}}/{{ctrl.filesToUploadCt}}</strong>
     	</div>
 	    <div class="progress">
 	        <div class="progress-bar upload-progress-bar" role="progressbar" ng-style="{ 'width': ctrl.fileExistsProgress + '%' }"></div>
@@ -32,7 +32,7 @@
     </div>
     <div class="row no-row-margin" ng-show="ctrl.isUpload && (ctrl.uploadCompleted != ctrl.filesCt)">
     	<div class="col-md-6  pad0-left pad0-right">
-	    	<strong>Completed: {{ctrl.uploadCompleted}}/{{ctrl.filesCt}} Files ({{ctrl.humanSizeTransferred}}/ {{ctrl.humanTotalSize}}) </strong>
+	    	<strong>Completed: {{ctrl.uploadCompleted}}/{{ctrl.filesToUploadCt}} Files ({{ctrl.humanSizeTransferred}}/ {{ctrl.humanTotalSize}}) </strong>
     	</div>
     	<div class="col-md-6 pad0-left pad0-right text-right">
 	    	<strong>Speed: {{ctrl.speed}}</strong>
@@ -52,11 +52,11 @@
 	    <div class="progress-percent">{{ctrl.uploadJobCompleteProgress | number:0}}%</div>
     </div>
 	<table class="table upload-table" ng-show="(!ctrl.isCreateUploadJob && !ctrl.isFileExists && !ctrl.isUpload) || (ctrl.isUpload && ctrl.uploadCompleted != ctrl.filesCt)">
-	    <tbody ng-repeat="(rowIndex, row) in ctrl.rows track by $index" ng-show="row.length">    
+	    <tbody ng-repeat="(rowIndex, row) in ctrl.rows track by $index" ng-show="row.length">
 	    	<tr>
 	    		<td colspan="3">Record <span ng-bind="rowIndex+1"></span></td>
 			</tr>
-			<tr ng-repeat="item in row"> 
+			<tr ng-repeat="item in row">
 	            <td>
 	    			<div class="ellipsis">
 	    				{{item.name}} ( {{item.humanFileSize}} )
@@ -65,7 +65,7 @@
 				<td>
 	                <div class="progress">
 	                	<div ng-show="!item.uploadStarted" class="progress-bar" role="progressbar" ng-style="{ 'width': item.checksumPercent + '%' }" style="background-color: #8cacc7 !important;"></div>
-	                	
+
 	                	<div ng-show="item.uploadStarted" class="progress-bar" role="progressbar" ng-style="{ 'width': item.progressPercent + '%' }"></div>
 	                </div>
 	                <div ng-show="!item.uploadStarted" class="progress-percent inner-progress-percent">{{item.checksumPercent | number:0}}%</div>
