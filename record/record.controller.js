@@ -3,8 +3,8 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'recordAppUtils', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
-        function RecordController(AlertsService, DataUtils, ErrorService, logActions, MathUtils, messageMap, modalBox, recordAppUtils, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
+    .controller('RecordController', ['AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordAppUtils', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
+        function RecordController(AlertsService, DataUtils, ErrorService, logActions, MathUtils, messageMap, modalBox, modalUtils, recordAppUtils, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
 
         var mainContainerEl = angular.element(document.getElementsByClassName('main-container')[0]);
@@ -195,6 +195,16 @@
             return ref.canCreate;
         };
 
+        vm.canDeleteRelated = function(relatedRef) {
+            if (angular.isUndefined(relatedRef)) return false;
+
+            if ( (relatedRef.pseudoColumn && !relatedRef.pseudoColumn.isInboundForeignKey) || !relatedRef.derivedAssociationReference) {
+                return false;
+            }
+
+            return (relatedRef.derivedAssociationReference.canDelete && $rootScope.showDeleteButton && $rootScope.modifyRecord);
+        }
+
         // Send user to RecordEdit to create a new row in this related table
         function onSuccess (){
             AlertsService.addAlert("Your data has been submitted. Showing you the result set...","success");
@@ -254,6 +264,40 @@
             // 4. Redirect to the url in a new tab
             $window.open(appLink, '_blank');
         };
+
+        vm.removeRelatedRecord = function(ref) {
+            recordAppUtils.pauseUpdateRecordPage();
+
+            var params = {};
+            params.reference = ref.contextualize.compactSelect;
+            params.reference.session = $rootScope.session;
+            params.context = "compact/select";
+            params.selectMode = modalBox.multiSelectMode;
+            params.selectedRows = [];
+            params.showFaceting = true;
+            params.facetPanelOpen = false;
+            //NOTE assumption is that this function is only is called for adding pure and binary association
+            params.logObject = {
+                action: logActions.preUnlinkAssociation,
+                referrer: ref.defaultLogInfo
+            };
+
+            modalUtils.showModal({
+                animation: false,
+                controller: "SearchPopupController",
+                controllerAs: "ctrl",
+                resolve: {
+                    params: params
+                },
+                size: "xl",
+                templateUrl: "../common/templates/searchPopup.modal.html"
+            }, function dataSelected(tuples) {
+                // take set of tuples and delete
+                // ref.delete(tuples).then()
+                //    onSuccessFunction
+            }, onModalClose);
+            return;
+        }
 
         $scope.$on("edit-request", function(event, args) {
             editRecordRequests[args.id] = {"schema": args.schema, "table": args.table};

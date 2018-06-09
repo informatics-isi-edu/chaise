@@ -70,8 +70,8 @@
 
                             <!-- for different elements inside the accordion -->
                             <record-action-bar tabtype="related" related-table-ref-display="rtm.tableModel.reference.display.type" tab-model-display="rtm.displayType"
-                                toggle-related-table-display-type='ctrl.toggleRelatedTableDisplayType(rtm)' can-edit-related="::ctrl.canEditRelated(rtm.tableModel.reference)" can-create-related="ctrl.canCreateRelated(rtm.tableModel.reference)"
-                                add-related-record="::ctrl.addRelatedRecord(rtm.tableModel.reference)" to-record-set="::ctrl.toRecordSet(rtm.tableModel.reference)">
+                                toggle-related-table-display-type='ctrl.toggleRelatedTableDisplayType(rtm)' can-edit-related="::ctrl.canEditRelated(rtm.tableModel.reference)" can-create-related="::ctrl.canCreateRelated(rtm.tableModel.reference)" can-delete-related="ctrl.canDeleteRelated(rtm.tableModel.reference)"
+                                add-related-record="::ctrl.addRelatedRecord(rtm.tableModel.reference)" remove-related-record="::ctrl.removeRelatedRecord(rtm.tableModel.reference)" to-record-set="::ctrl.toRecordSet(rtm.tableModel.reference)">
                             </record-action-bar>
                             <div class="row">
                                 <div class="col-xs-12">

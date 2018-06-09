@@ -60,7 +60,7 @@
         * While for the table display it appears on the top right corner.
         * @example: <record-action-bar related-table-ref-display="tableModel.reference.display.type" tab-model-display="tableModel.displayType"
         *        toggle-related-table-display-type='toggleRelatedTableDisplayType({dataModel:tableModel})' can-edit-related="canEditRelated({ref:relatedReferenceDisplayTable[$index]})"
-        *        can-create-related="canCreateRelated0({ref:tableModel.reference})"
+        *        can-create-related="canCreateRelated({ref:tableModel.reference})"
         *        add-related-record="addRelatedRecord({ref:tableModel.reference})" to-record-set="toRecordSet({ref:tableModel.reference})">
         *        </record-action-bar>
         * @param {string} relatedTableRefDisplay: Related table ref. display type
@@ -80,7 +80,9 @@
                     toggleRelatedTableDisplayType: '&',
                     canEditRelated: '&',
                     canCreateRelated: '&',
+                    canDeleteRelated: '&',
                     addRelatedRecord: '&',
+                    removeRelatedRecord: '&',
                     toRecordSet: '&'
                 },
                 templateUrl: '../common/templates/recordAction.html',

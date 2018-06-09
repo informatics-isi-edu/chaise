@@ -101,6 +101,7 @@
         "preCreateAssociation": "pre-create/prefill/association", // read the association values to add new ones (record) has referrer
         "preCreateAssociationSelected": "pre-create/prefill/association/disabled", // secondary
         "preCopy": "pre-create/copy", // read the current data before copy (recordedit)
+        "preUnlinkAssociation": "pre-unlink/association",
         "recordeditDefault": "recordedit/default",
 
         "update": "update", // update entity (recordedit)
