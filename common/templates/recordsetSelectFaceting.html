@@ -1,6 +1,7 @@
 <div class="recordset-container without-faceting">
     <loading-spinner ng-show="(!vm.hasLoaded && !vm.backgroundSearch) || showSpinner"></loading-spinner>
     <div class="main-container">
+        <alerts alerts="$root.alerts"></alerts>
         <div ng-show="vm.initialized" class="row" style="margin-bottom: 10px;">
             <div ng-if="vm.config.selectMode == 'multi-select' && !vm.config.hideSelectedRows" class="row total-filters selected-rows">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">

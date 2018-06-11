@@ -181,9 +181,26 @@
             getDisabledTuples:  params.getDisabledTuples
         };
 
-        // since this is currently used for single select mode, the isSelected will always be true
-        function ok(tuples, isSelected) {
-            if (params.selectMode != modalBox.multiSelectMode) $uibModalInstance.close(tuples[0]);
+        function ok(tuples, isSelected, $event) {
+            switch (params.selectMode) {
+                case modalBox.multiSelectMode:
+                    if (params.onRowClick) {
+                        return params.onRowClick(getMultiSelectionResult());
+                    }
+                    break;
+                default:
+                    // for single select isSelected is always true
+                    $uibModalInstance.close(tuples[0]);
+            }
+        }
+
+        function getMultiSelectionResult() {
+            var res = vm.tableModel.selectedRows;
+            if (!Array.isArray(res)) res = [];
+            if (vm.tableModel.matchNotNull) {
+                res = {matchNotNull: true};
+            }
+            return res;
         }
 
         /**
@@ -191,12 +208,7 @@
          * If we had the matchNotNull, then we just need to pass that attribute.
          */
         function submitMultiSelection() {
-            var res = vm.tableModel.selectedRows;
-            if (!Array.isArray(res)) res = [];
-            if (vm.tableModel.matchNotNull) {
-                res = {matchNotNull: true};
-            }
-            $uibModalInstance.close(res);
+            $uibModalInstance.close(getMultiSelectionResult());
         }
 
         function cancel() {

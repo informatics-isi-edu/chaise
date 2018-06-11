@@ -5,7 +5,7 @@
 
     .constant('tableConstants', {
         MAX_CONCURENT_REQUEST: 4,
-        MAX_URL_LENGTH: 2000,
+        MAX_URL_LENGTH: 400, //TODO for test, should change back to 2048
         PAGE_SIZE: 10,
         AUTO_SEARCH_TIMEOUT: 2000
     })
@@ -501,11 +501,11 @@
         function registerTableCallbacks(scope) {
             if (!scope.vm) scope.vm = {};
 
-            var callOnRowClick = function (scope, tuples, isSelected) {
+            var callOnRowClick = function (scope, tuples, isSelected, $event) {
                 if (scope.onRowClickBind) {
-                    scope.onRowClickBind()(tuples, isSelected);
+                    return scope.onRowClickBind()(tuples, isSelected, $event);
                 } else if (scope.onRowClick) {
-                    scope.onRowClick()(tuples, isSelected);
+                    return scope.onRowClick()(tuples, isSelected, $event);
                 }
             };
 
@@ -513,14 +513,21 @@
             scope.singleSelect = modalBox.singleSelectMode;
             scope.multiSelect = modalBox.multiSelectMode;
 
+            var maxLenAlert = null;
             scope.$root.checkReferenceURL = function (ref) {
                 var refUri = ref.isAttributeGroup ? ref.uri : ref.location.ermrestUri;
                 if (refUri.length > tableConstants.MAX_URL_LENGTH) {
-                    $timeout(function () {
-                        $window.scrollTo(0, 0);
-                    }, 0);
-                    AlertsService.addAlert('Maximum URL length reached. Cannot perform the requested action.', 'warning');
+                    if (!maxLenAlert) {
+                        $timeout(function () {
+                            $window.scrollTo(0, 0);
+                        }, 0);
+                        maxLenAlert = AlertsService.addAlert('Maximum URL length reached. Cannot perform the requested action.', 'warning');
+                    }
                     return false;
+                }
+                if (maxLenAlert) {
+                    AlertsService.deleteAlert(maxLenAlert);
+                    maxLenAlert = null;
                 }
                 return true;
             };
@@ -613,7 +620,7 @@
             };
 
             // Facilitates the multi select functionality for multi edit by storing the tuple in the selectedRows array
-            scope.onSelect = function(args) {
+            scope.onSelect = function(args, $event) {
                 var tuple = args.tuple;
 
                 var rowIndex = scope.vm.selectedRows.findIndex(function (obj) {
@@ -629,7 +636,15 @@
                     scope.vm.selectedRows.splice(rowIndex, 1);
                 }
 
-                callOnRowClick(scope, [tuple], isSelected);
+                // if returns false, then we should deselect
+                if (callOnRowClick(scope, [tuple], isSelected, $event) === false) {
+                    $event.preventDefault();
+                    if (isSelected) {
+                        scope.vm.selectedRows.splice(scope.vm.selectedRows.length-1, 1);
+                    } else {
+                        scope.vm.selectedRows.push(tuple);
+                    }
+                }
             };
 
             scope.$on('record-deleted', function() {
@@ -949,7 +964,7 @@
                  * The recordset has a onRowClick which will be passed to this onRowClickBind.
                  */
                 onRowClickBind: '=?',
-                onRowClick: '&?',      // set row click function
+                onRowClick: '&?',      // set row click function TODO not used anywhere
                 parentReference: "=?" // if this is used for related references, this will be the main reference
             },
             link: function (scope, elem, attr) {

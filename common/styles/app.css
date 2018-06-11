@@ -1298,7 +1298,7 @@ footer .container1 {
      display: none !important;
  }
 
- .modal-body .recordset-container alerts {
+ #record .modal-body .recordset-container alerts {
      display: none !important;
  }
 

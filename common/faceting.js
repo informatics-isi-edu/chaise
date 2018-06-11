@@ -38,8 +38,8 @@
                         }
                     };
 
-                    ctrl.updateVMReference = function (reference, index) {
-                        return $scope.updateReference(reference, index);
+                    ctrl.updateVMReference = function (reference, index, keepRef) {
+                        return $scope.updateReference(reference, index, keepRef);
                     };
 
                     ctrl.setInitialized = function () {
@@ -61,13 +61,16 @@
                 }],
                 require: 'faceting',
                 link: function (scope, element, attr, currentCtrl) {
-                    scope.updateReference = function (reference, index) {
+                    scope.updateReference = function (reference, index, keepRef) {
                         if (!scope.$root.checkReferenceURL(reference)) {
                             return false;
                         }
-                        scope.vm.lastActiveFacet = index;
-                        scope.vm.reference = reference;
-                        scope.$emit('facet-modified');
+
+                        if (!keepRef) {
+                            scope.vm.lastActiveFacet = index;
+                            scope.vm.reference = reference;
+                            scope.$emit('facet-modified');
+                        }
                         return true;
                     };
 
@@ -902,6 +905,68 @@
                 return res;
             }
 
+            function modalDataChanged(scope, changeRef) {
+                return function (res) {
+                    // TODO needs refactoring.
+                    var ref;
+
+                    if (!res) return false;
+
+                    // if the value returned is an object with matchNotNull
+                    if (res.matchNotNull) {
+                        ref = scope.facetColumn.addNotNullFilter();
+
+                        // update the reference
+                        if (!scope.parentCtrl.updateVMReference(ref, -1, !changeRef)) {
+                            return false;
+                        }
+
+                        if (changeRef) {
+                            scope.facetModel.appliedFilters = [notNullFilter];
+                        }
+                    } else if (Array.isArray(res)){
+                        var tuples = res;
+
+                        // create the reference using filters
+                        ref = scope.facetColumn.replaceAllChoiceFilters(tuples.map(function (t) {
+                            return getFilterUniqueId(t, scope.columnName);
+                        }));
+
+                        // update the reference
+                        if (!scope.parentCtrl.updateVMReference(ref, -1, !changeRef)) {
+                            return false;
+                        }
+
+                        if (changeRef) {
+                            // create the list of applied filters, this Will
+                            // be used for genreating the checkboxRows of current facet
+                            scope.facetModel.appliedFilters = tuples.map(function (t) {
+                                var val = getFilterUniqueId(t, scope.columnName);
+
+                                // NOTE displayname will always be string, but we want to treat null and empty string differently,
+                                // therefore we have a extra case for null, to just return null.
+                                return {
+                                    uniqueId: val,
+                                    displayname: (val == null) ? {value: null, isHTML: false} : t.displayname,
+                                    tuple: t,
+                                };
+                            });
+                        }
+                    } else {
+                        // invalid result from the callback.
+                        return false;
+                    }
+
+                    if (changeRef) {
+                        // make sure to update all the opened facets
+                        scope.parentCtrl.setInitialized();
+
+                        // focus on the current facet
+                        scope.parentCtrl.focusOnFacet(scope.index);
+                    }
+                };
+            }
+
             return {
                 restrict: 'AE',
                 templateUrl: '../common/templates/faceting/choice-picker.html',
@@ -957,6 +1022,8 @@
                         params.faceting = false;
                         params.facetPanelOpen = false;
 
+                        params.onRowClick = modalDataChanged(scope, false);
+
                         // to choose the correct directive
                         params.mode = "selectFaceting";
 
@@ -1001,59 +1068,7 @@
                             },
                             size: "xl",
                             templateUrl: "../common/templates/searchPopup.modal.html"
-                        }, function dataSelected(res) {
-                            // TODO needs refactoring.
-                            var ref;
-
-                            if (!res) return;
-
-                            // if the value returned is an object with matchNotNull
-                            if (res.matchNotNull) {
-                                ref = scope.facetColumn.addNotNullFilter();
-
-                                // update the reference
-                                if (!scope.parentCtrl.updateVMReference(ref, -1)) {
-                                    return;
-                                }
-
-                                scope.facetModel.appliedFilters = [notNullFilter];
-                            } else if (Array.isArray(res)){
-                                var tuples = res;
-
-                                // create the reference using filters
-                                ref = scope.facetColumn.replaceAllChoiceFilters(tuples.map(function (t) {
-                                    return getFilterUniqueId(t, scope.columnName);
-                                }));
-
-                                // update the reference
-                                if (!scope.parentCtrl.updateVMReference(ref, -1)) {
-                                    return;
-                                }
-
-                                // create the list of applied filters, this Will
-                                // be used for genreating the checkboxRows of current facet
-                                scope.facetModel.appliedFilters = tuples.map(function (t) {
-                                    var val = getFilterUniqueId(t, scope.columnName);
-
-                                    // NOTE displayname will always be string, but we want to treat null and empty string differently,
-                                    // therefore we have a extra case for null, to just return null.
-                                    return {
-                                        uniqueId: val,
-                                        displayname: (val == null) ? {value: null, isHTML: false} : t.displayname,
-                                        tuple: t,
-                                    };
-                                });
-                            } else {
-                                // invalid result from the callback.
-                                return;
-                            }
-
-                            // make sure to update all the opened facets
-                            scope.parentCtrl.setInitialized();
-
-                            // focus on the current facet
-                            scope.parentCtrl.focusOnFacet(scope.index);
-                        });
+                        }, modalDataChanged(scope, true));
                     };
 
                     // for clicking on each row (will be registerd as a callback for list directive)
@@ -1191,7 +1206,7 @@
                             $timeout(function () {
                                 var listElem = element[0].getElementsByClassName("chaise-list-container")[0];
                                 if (listElem) {
-                                    scope.showFindMore = listElem.scrollHeight > listElem.offsetHeight
+                                    scope.showFindMore = listElem.scrollHeight > listElem.offsetHeight;
                                 }
                             });
                         }

@@ -130,12 +130,12 @@
                 // Initialize the action column btn links
                 init();
 
-                scope.onSelect = function() {
+                scope.onSelect = function($event) {
                     var args = {"tuple": scope.tuple};
                     if (scope.onRowClickBind) {
-                        scope.onRowClickBind(args);
+                        scope.onRowClickBind(args, $event);
                     } else if (scope.onRowClick) {
-                        scope.onRowClick(args);
+                        scope.onRowClick(args, $event);
                     }
                 };
 

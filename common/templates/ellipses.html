@@ -12,12 +12,12 @@
         <button ng-if="config.deletable && delete && tuple.reference.canDelete" type="button" class="delete-action-button btn btn-xs btn-primary btn-inverted btn-no-focus" ng-click="delete()" tooltip-placement="bottom" uib-tooltip="Delete">
             <span class="glyphicon glyphicon-trash"></span>
         </button>
-        <button ng-if="config.selectMode == singleSelect" type="button" class="select-action-button btn btn-xs btn-primary btn-inverted btn-no-focus" ng-click="onSelect()" tooltip-placement="bottom" uib-tooltip="Select" >
+        <button ng-if="config.selectMode == singleSelect" type="button" class="select-action-button btn btn-xs btn-primary btn-inverted btn-no-focus" ng-click="onSelect($event)" tooltip-placement="bottom" uib-tooltip="Select" >
             <span class="glyphicon glyphicon-check"></span>
         </button>
     </div>
     <div ng-if="config.selectMode == multiSelect" class="chaise-checkbox">
-        <input type="checkbox" ng-checked="selected" ng-click="onSelect()" ng-disabled="selectDisabled">
+        <input type="checkbox" ng-checked="selected" ng-click="onSelect($event)" ng-disabled="selectDisabled">
         <label />
     </div>
 </td>
