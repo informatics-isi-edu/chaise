@@ -943,6 +943,7 @@ body.error-open loading-spinner {
 
 /******** footer **********/
 footer {
+    height: 30px;
     position: absolute;
     bottom: 0;
     right: 0;
@@ -950,7 +951,7 @@ footer {
 }
 
 footer .container1 {
-    height: 30px;
+    height: inherit;
     background-color: #ededed;
     padding-right: 5px;
     padding-left: 5px;
