@@ -194,14 +194,14 @@
                 canClose: false,
                 showLogin: showLogin
             };
-            var errorModalClass = repositionErrorModal();
+            var errorModalStyle = repositionErrorModal();
             var modalProperties = {
                 windowClass: "modal-error",
                 templateUrl: '../common/templates/errorDialog.modal.html',
                 controller: 'ErrorModalController',
                 controllerAs: 'ctrl',
                 backdrop: 'static',
-                windowClass: errorModalClass,
+                windowClass: errorModalStyle.className,
                 keyboard: false,
                 resolve: {
                     params: params
@@ -217,6 +217,9 @@
             }
 
             modalUtils.showModal(modalProperties, function (actionBtnIdentifier) {
+                if(errorModalStyle.element !== null){
+                    document.getElementsByTagName('head')[0].removeChild(errorModalStyle.element);
+                }
                 if ((errorStatus == errorNames.unauthorized && !providedLink) || (actionBtnIdentifier === "login")) {
                     Session.loginInAPopUp();
                 } else {
@@ -286,9 +289,15 @@
                 style.type = 'text/css';
                 style.innerHTML = '.' + className + '{ top:' + navbarHeight + ' }';
                 document.getElementsByTagName('head')[0].appendChild(style);
-                return className;
+                return {
+                    className: className,
+                    element: style
+                };
             }
-            return "";
+            return {
+                className: "",
+                element: null
+            };
         }
 
         return {
