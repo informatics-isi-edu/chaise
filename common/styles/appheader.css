@@ -9,8 +9,12 @@ body > .container {
 	padding-top: 70px;
 }
 
-#mainnav {
+.blur-mainnav {
     z-index: 1037;
+}
+
+.show-mainnav {
+    z-index: 1051;
 }
 
 .navbar-inverse {

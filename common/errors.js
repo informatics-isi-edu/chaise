@@ -194,13 +194,14 @@
                 canClose: false,
                 showLogin: showLogin
             };
-
+            var errorModalClass = repositionErrorModal();
             var modalProperties = {
                 windowClass: "modal-error",
                 templateUrl: '../common/templates/errorDialog.modal.html',
                 controller: 'ErrorModalController',
                 controllerAs: 'ctrl',
                 backdrop: 'static',
+                windowClass: errorModalClass,
                 keyboard: false,
                 resolve: {
                     params: params
@@ -274,6 +275,20 @@
 
             // if not a dismissible errror then exception should be suppressed
             if (!isDismissible) exceptionFlag = true;
+        }
+
+        function repositionErrorModal() {
+            var mainnav = document.getElementById('mainnav');
+            if (mainnav !== null && mainnav !== undefined) {
+                var navbarHeight = mainnav.offsetHeight + "px";
+                var className = 'error-modal-top';
+                var style = document.createElement('style');
+                style.type = 'text/css';
+                style.innerHTML = '.' + className + '{ top:' + navbarHeight + ' }';
+                document.getElementsByTagName('head')[0].appendChild(style);
+                return className;
+            }
+            return "";
         }
 
         return {
