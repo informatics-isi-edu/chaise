@@ -20,26 +20,11 @@
                         return val == '' || angular.isUndefined(val) || val === null
                     }
 
-                    function setClass() {
-                         $timeout(function() {
-                            if (angular.isUndefinedOrNull(footerText)) {
-                                ele.hide();
-                            } else {
-                                ele.show();
-                                ERMrest._onload().then(function() {
-                                    scope.privacyResult = ERMrest.renderMarkdown(footerText);
-                                })
-                            }
-                        }, 500);
+                    if (!angular.isUndefinedOrNull(footerText)) {
+                        ERMrest._onload().then(function() {
+                            scope.privacyResult = ERMrest.renderMarkdown(footerText);
+                        });
                     }
-                    setClass();
-                    scope.$watch(function() {
-                        return $(document).height();
-                    }, function(o, n) {
-                        if(Math.abs(o-n)>1){
-                        setClass();
-                    }
-                    });
                 }
             };
         }])

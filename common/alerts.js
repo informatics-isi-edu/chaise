@@ -75,6 +75,9 @@
                 scope.closeAlert = function(alert) {
                     AlertsService.deleteAlert(alert);
                 };
+                scope.login = function() {
+                  Session.loginInAPopUp();
+                }
             }
         };
     }]);

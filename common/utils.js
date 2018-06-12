@@ -48,7 +48,7 @@
             message: "To open the login window press"
         },
         "previousSession": {
-            message: "Your login session has expired. You are now accessing data anonymously. Log in to continue your privileged access."
+            message: "Your login session has expired. You are now accessing data anonymously. <a ng-click='login()'>Log in</a> to continue your privileged access."
         },
         "noSession": {
             title: "You need to be logged in to continue.",
@@ -1319,6 +1319,39 @@
             }
         };
     }])
+
+    /**
+    *  The compile directive is used to compile the html/content
+    *  for angularjs to resolve functions like "ng-click" within
+    *  the alert messages e.g. previousSession.message.
+    */
+    .directive('compile', ['$compile', function ($compile) {
+      return {
+        restrict: 'A',
+        link: function(scope, element, attrs) {
+          var ensureCompileRunsOnce = scope.$watch(
+            function(scope) {
+               // watch the 'compile' expression for changes
+              return scope.$eval(attrs.compile);
+            },
+            function(value) {
+              // when the 'compile' expression changes
+              // assign it into the current DOM
+              element.html(value);
+
+              // compile the new DOM and link it to the current
+              // scope.
+              // NOTE: we only compile .childNodes so that
+              // we don't get into infinite loop compiling ourselves
+              $compile(element.contents())(scope);
+
+              // Use un-watch feature to ensure compilation happens only once.
+              ensureCompileRunsOnce();
+            }
+          );
+        }
+      }
+     }])
 
     .service('headInjector', ['$window', 'MathUtils', function($window, MathUtils) {
         function addCustomCSS() {
