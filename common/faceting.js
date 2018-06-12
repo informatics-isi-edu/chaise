@@ -731,7 +731,9 @@
             };
         }])
 
-        .directive('choicePicker', ["defaultDisplayname", 'logActions', "$log", 'modalUtils', '$q', 'tableConstants', '$timeout', function (defaultDisplayname, logActions, $log, modalUtils, $q, tableConstants, $timeout) {
+        .directive('choicePicker',
+            ["AlertsService", "defaultDisplayname", 'logActions', "$log", 'modalUtils', '$q', 'tableConstants', '$timeout',
+            function (AlertsService, defaultDisplayname, logActions, $log, modalUtils, $q, tableConstants, $timeout) {
 
             // the not_null filter with appropriate attributes
             var notNullFilter = {
@@ -905,6 +907,12 @@
                 return res;
             }
 
+            /**
+             * Post process after selectedRows is defined coming from the modal.
+             * If changeRef is false, then we only want to apply the URL limitation logic.
+             * @param  {object} scope
+             * @param  {boolean} changeRef whether we should change the reference or not
+             */
             function modalDataChanged(scope, changeRef) {
                 return function (res) {
                     // TODO needs refactoring.
@@ -1022,7 +1030,11 @@
                         params.faceting = false;
                         params.facetPanelOpen = false;
 
+                        // callback on each selected change (incldues the url limitation logic)
                         params.onRowClick = modalDataChanged(scope, false);
+
+                        // if url limitation alert exists, remove it.
+                        AlertsService.deleteURLLimitAlert();
 
                         // to choose the correct directive
                         params.mode = "selectFaceting";

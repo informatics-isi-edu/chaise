@@ -5,7 +5,7 @@
 
     .constant('tableConstants', {
         MAX_CONCURENT_REQUEST: 4,
-        MAX_URL_LENGTH: 400, //TODO for test, should change back to 2048
+        MAX_URL_LENGTH: 2000,
         PAGE_SIZE: 10,
         AUTO_SEARCH_TIMEOUT: 2000
     })
@@ -85,8 +85,8 @@
      * modified. ellipses will fire this event and recordset directive will use it.
      */
     .factory('recordTableUtils',
-            ['AlertsService', 'modalBox', 'DataUtils', '$timeout','Session', '$q', 'tableConstants', '$rootScope', '$log', '$window', '$cookies', 'defaultDisplayname', 'MathUtils', 'UriUtils', 'logActions',
-            function(AlertsService, modalBox, DataUtils, $timeout, Session, $q, tableConstants, $rootScope, $log, $window, $cookies, defaultDisplayname, MathUtils, UriUtils, logActions) {
+            ['AlertsService', '$document', 'modalBox', 'DataUtils', '$timeout','Session', '$q', 'tableConstants', '$rootScope', '$log', '$window', '$cookies', 'defaultDisplayname', 'MathUtils', 'UriUtils', 'logActions',
+            function(AlertsService, $document, modalBox, DataUtils, $timeout, Session, $q, tableConstants, $rootScope, $log, $window, $cookies, defaultDisplayname, MathUtils, UriUtils, logActions) {
 
         function FlowControlObject(maxRequests) {
             this.maxRequests = maxRequests || tableConstants.MAX_CONCURENT_REQUEST;
@@ -494,41 +494,53 @@
             }
         }
 
+        function _callOnRowClick (scope, tuples, isSelected) {
+            if (scope.onRowClickBind) {
+                return scope.onRowClickBind()(tuples, isSelected);
+            } else if (scope.onRowClick) {
+                return scope.onRowClick()(tuples, isSelected);
+            }
+        }
+
+        /**
+         * Scrolls the current container to top. The container
+         * can be the modal-body or the main-container
+         */
+        function scrollToTop() {
+            $timeout(function () {
+                // if modal is open, scroll the modal to top
+                var container = angular.element(".modal-body");
+                if (container.length) {
+                    container.scrollTo(0, 0, 100);
+                }
+
+                // otherwise scroll the main-container
+                container = angular.element(".main-container");
+                if (container.length) {
+                    container.scrollTo(0, 0, 100);
+                }
+            }, 0);
+        }
+
         /**
          * Registers the callbacks for recordTable directive and it's children.
          * @param  {object} scope the scope object
          */
-        function registerTableCallbacks(scope) {
+        function registerTableCallbacks(scope, elem, attr) {
             if (!scope.vm) scope.vm = {};
-
-            var callOnRowClick = function (scope, tuples, isSelected, $event) {
-                if (scope.onRowClickBind) {
-                    return scope.onRowClickBind()(tuples, isSelected, $event);
-                } else if (scope.onRowClick) {
-                    return scope.onRowClick()(tuples, isSelected, $event);
-                }
-            };
 
             scope.noSelect = modalBox.noSelect;
             scope.singleSelect = modalBox.singleSelectMode;
             scope.multiSelect = modalBox.multiSelectMode;
 
-            var maxLenAlert = null;
             scope.$root.checkReferenceURL = function (ref) {
                 var refUri = ref.isAttributeGroup ? ref.uri : ref.location.ermrestUri;
                 if (refUri.length > tableConstants.MAX_URL_LENGTH) {
-                    if (!maxLenAlert) {
-                        $timeout(function () {
-                            $window.scrollTo(0, 0);
-                        }, 0);
-                        maxLenAlert = AlertsService.addAlert('Maximum URL length reached. Cannot perform the requested action.', 'warning');
-                    }
+                    AlertsService.addURLLimitAlert();
+                    scrollToTop();
                     return false;
                 }
-                if (maxLenAlert) {
-                    AlertsService.deleteAlert(maxLenAlert);
-                    maxLenAlert = null;
-                }
+                AlertsService.deleteURLLimitAlert();
                 return true;
             };
 
@@ -581,7 +593,7 @@
             };
 
             // this is for the button on the table heading that deselects all currently visible rows
-            scope.selectNone = function() {
+            scope.selectNone = function($event) {
                 var tuples = [], tuple;
                 for (var i = 0; i < scope.vm.page.tuples.length; i++) {
                     tuple = scope.vm.page.tuples[i];
@@ -596,16 +608,17 @@
                         scope.vm.selectedRows.splice(index, 1);
                     }
                 }
+
                 if (tuples.length > 0) {
-                    callOnRowClick(scope, tuples, false);
+                    _callOnRowClick(scope, tuples, false);
                 }
             };
 
             // this is for the button on the table heading that selects all currently visible rows
-            scope.selectAll = function() {
+            scope.selectAll = function($event) {
                 var tuples = [], tuple;
                 for (var i = 0; i < scope.vm.page.tuples.length; i++) {
-                    var tuple = scope.vm.page.tuples[i];
+                    tuple = scope.vm.page.tuples[i];
 
                     if (scope.isDisabled(tuple)) continue;
 
@@ -615,7 +628,7 @@
                     }
                 }
                 if (tuples.length > 0) {
-                    callOnRowClick(scope, tuples, true);
+                    _callOnRowClick(scope, tuples, true);
                 }
             };
 
@@ -636,15 +649,7 @@
                     scope.vm.selectedRows.splice(rowIndex, 1);
                 }
 
-                // if returns false, then we should deselect
-                if (callOnRowClick(scope, [tuple], isSelected, $event) === false) {
-                    $event.preventDefault();
-                    if (isSelected) {
-                        scope.vm.selectedRows.splice(scope.vm.selectedRows.length-1, 1);
-                    } else {
-                        scope.vm.selectedRows.push(tuple);
-                    }
-                }
+                _callOnRowClick(scope, [tuple], isSelected);
             };
 
             scope.$on('record-deleted', function() {
@@ -807,17 +812,28 @@
             };
 
             // function for removing a single pill and it's corresponding selected row
-            scope.removePill = function(key) {
+            scope.removePill = function(key, $event) {
                 var index = scope.vm.selectedRows.findIndex(function (obj) {
                     return obj.uniqueId == key;
                 });
-                scope.vm.selectedRows.splice(index, 1);
+
+                // this sanity check is not necessary since we're always calling
+                // this function with a valid key. but it doesn't harm to check
+                if (index === -1) {
+                    $event.preventDefault();
+                    return;
+                }
+
+                var tuple = scope.vm.selectedRows.splice(index, 1)[0];
+                _callOnRowClick(scope, tuple, false);
             };
 
             // function for removing all pills regardless of what page they are on, clears the whole selectedRows array
-            scope.removeAllPills = function() {
+            scope.removeAllPills = function($event) {
+                var pre = scope.vm.selectedRows.slice();
                 scope.vm.selectedRows.clear();
                 scope.vm.currentPageSelected = false;
+                _callOnRowClick(scope, pre, false);
             };
 
             // on window focus, if has pending add record requests
@@ -968,7 +984,7 @@
                 parentReference: "=?" // if this is used for related references, this will be the main reference
             },
             link: function (scope, elem, attr) {
-                recordTableUtils.registerTableCallbacks(scope);
+                recordTableUtils.registerTableCallbacks(scope, elem, attr);
 
                 scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
             }
@@ -989,7 +1005,7 @@
                 onRowClick: '&?'      // set row click function
             },
             link: function (scope, elem, attr) {
-                recordTableUtils.registerTableCallbacks(scope);
+                recordTableUtils.registerTableCallbacks(scope, elem, attr);
 
                 scope.isSelected = function (tuple) {
                     if (scope.vm.matchNotNull) {
@@ -1078,7 +1094,7 @@
                 recordTableUtils.registerRecordsetCallbacks(scope);
 
                 // function for removing a single pill and it's corresponding selected row
-                scope.removePill = function(key) {
+                scope.removePill = function(key, $event) {
                     if (scope.vm.matchNotNull) {
                         scope.vm.matchNotNull = false;
                         scope.vm.selectedRows.clear();
@@ -1087,29 +1103,48 @@
                     var index = scope.vm.selectedRows.findIndex(function (obj) {
                         return obj.uniqueId == key;
                     });
-                    scope.vm.selectedRows.splice(index, 1);
+
+                    if (index === -1) {
+                        $event.preventDefault();
+                        return;
+                    }
+
+                    var tuple = scope.vm.selectedRows.splice(index, 1)[0];
+
+                    if (scope.onRowClick) {
+                        scope.onRowClick()(tuple, false);
+                    }
                 };
 
                 // function for removing all pills regardless of what page they are on, clears the whole selectedRows array
-                scope.removeAllPills = function() {
+                scope.removeAllPills = function($event) {
+                    var pre = scope.vm.selectedRows.slice();
+                    scope.vm.selectedRows.clear();
                     if (scope.vm.matchNotNull) {
                         scope.vm.matchNotNull = false;
-                        scope.vm.selectedRows.clear();
-                        return;
+                    } else {
+                        scope.vm.currentPageSelected = false;
                     }
-                    scope.vm.selectedRows.clear();
-                    scope.vm.currentPageSelected = false;
+                    if (scope.onRowClick) {
+                        scope.onRowClick()(pre, false);
+                    }
                 };
 
                 scope.toggleMatchNotNull = function () {
                     scope.vm.matchNotNull = !scope.vm.matchNotNull;
+                    var tuples = [];
                     if (scope.vm.matchNotNull) {
-                        scope.vm.selectedRows = [{
+                        scope.vm.selectedRows = tuples = [{
                             isNotNull: true,
                             displayname: {"value": scope.defaultDisplayname.notNull, "isHTML": true}
                         }];
                     } else {
+                        tuples = scope.vm.selectedRows.slice();
                         scope.vm.selectedRows.clear();
+                    }
+
+                    if (scope.onRowClick) {
+                        scope.onRowClick()(tuples, scope.vm.matchNotNull);
                     }
                 };
             }

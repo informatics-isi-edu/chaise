@@ -149,7 +149,7 @@
         var vm = this;
 
         vm.params = params;
-        vm.ok = ok;
+        vm.onRowClick = onRowClick;
         vm.cancel = cancel;
         vm.submit = submitMultiSelection;
         vm.mode = params.mode;
@@ -181,11 +181,12 @@
             getDisabledTuples:  params.getDisabledTuples
         };
 
-        function ok(tuples, isSelected, $event) {
+        function onRowClick(tuples, isSelected) {
             switch (params.selectMode) {
                 case modalBox.multiSelectMode:
                     if (params.onRowClick) {
-                        return params.onRowClick(getMultiSelectionResult());
+                        // if it returns false, then we should disable submit button
+                        vm.disableSubmit = (params.onRowClick(getMultiSelectionResult()) === false);
                     }
                     break;
                 default:
