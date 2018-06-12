@@ -12,15 +12,6 @@
 	    </div>
 	    <div class="progress-percent">{{ctrl.checksumProgress | number:0}}%</div>
     </div>
-    <div class="row no-row-margin" ng-show="ctrl.isCreateUploadJob && !ctrl.isFileExists && !ctrl.isUpload ">
-    	<div class="col-md-12 pad0-left pad0-right text-right">
-	    	<strong>Completed: {{ctrl.createUploadJobCompleted}}/{{ctrl.filesToUploadCt}}</strong>
-    	</div>
-	    <div class="progress">
-	        <div class="progress-bar upload-progress-bar" role="progressbar" ng-style="{ 'width': ctrl.createUploadJobProgress + '%' }"></div>
-	    </div>
-	    <div class="progress-percent">{{ctrl.createUploadJobProgress | number:0}}%</div>
-    </div>
     <div class="row no-row-margin" ng-show="ctrl.isFileExists && !ctrl.isUpload">
     	<div class="col-md-12 pad0-left pad0-right text-right">
 	    	<strong>Completed: {{ctrl.fileExistsCompleted}}/{{ctrl.filesToUploadCt}}</strong>
@@ -30,9 +21,18 @@
 	    </div>
 	    <div class="progress-percent">{{ctrl.fileExistsProgress | number:0}}%</div>
     </div>
+    <div class="row no-row-margin" ng-show="ctrl.isCreateUploadJob && ctrl.isFileExists && !ctrl.isUpload ">
+    	<div class="col-md-12 pad0-left pad0-right text-right">
+	    	<strong>Completed: {{ctrl.createUploadJobCompleted}}/{{ctrl.filesToUploadCt}}</strong>
+    	</div>
+	    <div class="progress">
+	        <div class="progress-bar upload-progress-bar" role="progressbar" ng-style="{ 'width': ctrl.createUploadJobProgress + '%' }"></div>
+	    </div>
+	    <div class="progress-percent">{{ctrl.createUploadJobProgress | number:0}}%</div>
+    </div>
     <div class="row no-row-margin" ng-show="ctrl.isUpload && (ctrl.uploadCompleted != ctrl.filesCt)">
     	<div class="col-md-6  pad0-left pad0-right">
-	    	<strong>Completed: {{ctrl.uploadCompleted}}/{{ctrl.filesToUploadCt}} Files ({{ctrl.humanSizeTransferred}}/ {{ctrl.humanTotalSize}}) </strong>
+	    	<strong>Completed: {{ctrl.numUploadsCompleted}}/{{ctrl.filesToUploadCt}} Files ({{ctrl.humanSizeTransferred}}/ {{ctrl.humanTotalSize}}) </strong>
     	</div>
     	<div class="col-md-6 pad0-left pad0-right text-right">
 	    	<strong>Speed: {{ctrl.speed}}</strong>
