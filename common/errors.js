@@ -292,7 +292,6 @@
         };
     }])
 
-
     .config(function($provide) {
         $provide.decorator("$exceptionHandler", ['$log', '$injector' , function($log, $injector) {
             return function(exception, cause) {
