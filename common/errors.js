@@ -194,6 +194,7 @@
                 canClose: false,
                 showLogin: showLogin
             };
+
             var modalProperties = {
                 windowClass: "modal-error",
                 templateUrl: '../common/templates/errorDialog.modal.html',
@@ -290,7 +291,8 @@
             handleException: handleException
         };
     }])
- 
+
+
     .config(function($provide) {
         $provide.decorator("$exceptionHandler", ['$log', '$injector' , function($log, $injector) {
             return function(exception, cause) {
