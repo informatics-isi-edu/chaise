@@ -143,8 +143,8 @@
     }])
 
     // Factory for each error type
-    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$window', 'errorMessages', 'Errors', 'DataUtils', 'UriUtils', 'modalUtils',
-          function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $window, errorMessages, Errors, DataUtils, UriUtils, modalUtils) {
+    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$window', 'errorMessages', 'Errors', 'DataUtils', 'UriUtils', 'modalUtils', '$document',
+          function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $window, errorMessages, Errors, DataUtils, UriUtils, modalUtils, $document) {
 
         var reloadCb = function() {
             window.location.reload();
@@ -194,14 +194,12 @@
                 canClose: false,
                 showLogin: showLogin
             };
-            var errorModalStyle = repositionErrorModal();
             var modalProperties = {
                 windowClass: "modal-error",
                 templateUrl: '../common/templates/errorDialog.modal.html',
                 controller: 'ErrorModalController',
                 controllerAs: 'ctrl',
                 backdrop: 'static',
-                windowClass: errorModalStyle.className,
                 keyboard: false,
                 resolve: {
                     params: params
@@ -216,10 +214,7 @@
                 params.canClose = true;
             }
 
-            modalUtils.showModal(modalProperties, function (actionBtnIdentifier) {
-                if(errorModalStyle.element !== null){
-                    document.getElementsByTagName('head')[0].removeChild(errorModalStyle.element);
-                }
+            modalUtils.showModal(modalProperties, moveErrorModal, function (actionBtnIdentifier) {
                 if ((errorStatus == errorNames.unauthorized && !providedLink) || (actionBtnIdentifier === "login")) {
                     Session.loginInAPopUp();
                 } else {
@@ -230,6 +225,16 @@
                     }
                 }
             });
+
+            function moveErrorModal() {
+                var mainnav = $document[0].getElementById('mainnav');
+                if (mainnav !== null) {
+                    var errorModal = $document[0].getElementsByClassName('modal-error')[0];
+                    if (errorModal !== null && errorModal !== undefined) {
+                            errorModal.style.top = mainnav.offsetHeight + "px";
+                    }
+                }
+            }
         }
 
         var exceptionFlag = false;
@@ -280,32 +285,12 @@
             if (!isDismissible) exceptionFlag = true;
         }
 
-        function repositionErrorModal() {
-            var mainnav = document.getElementById('mainnav');
-            if (mainnav !== null && mainnav !== undefined) {
-                var navbarHeight = mainnav.offsetHeight + "px";
-                var className = 'error-modal-top';
-                var style = document.createElement('style');
-                style.type = 'text/css';
-                style.innerHTML = '.' + className + '{ top:' + navbarHeight + ' }';
-                document.getElementsByTagName('head')[0].appendChild(style);
-                return {
-                    className: className,
-                    element: style
-                };
-            }
-            return {
-                className: "",
-                element: null
-            };
-        }
-
         return {
             errorPopup: errorPopup,
             handleException: handleException
         };
     }])
-
+ 
     .config(function($provide) {
         $provide.decorator("$exceptionHandler", ['$log', '$injector' , function($log, $injector) {
             return function(exception, cause) {
