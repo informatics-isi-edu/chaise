@@ -17,16 +17,16 @@
      *    <record-table vm="vm"></record-table>
      *
      * 2. Selectable table only with select function
-     *    <record-table vm="vm" on-row-click="gotoRowLink(tuple)"></record-table>
+     *    <record-table vm="vm" on-selected-rows-changed="gotoRowLink(tuple)"></record-table>
      *
      * 3. Table with search, page size, previous/next
      *    <recordset vm="vm"></recordset>
      *
      * 4. Selectable table with search, page size, previous/next
-     *    <recordset vm="vm" on-row-click="gotoRowLink(tuple)"></recordset>
+     *    <recordset vm="vm" on-selected-rows-changed="gotoRowLink(tuple)"></recordset>
      *
      * These are recordset and record-table directive parameters:
-     * - onRowClick(tuple, isSelected):
+     * - onSelectedRowsChanged(tuple, isSelected):
      *   - A callback for when in select mode a row is selected.
      *   - If isSelected is false, that means the row has been deselected.
      *
@@ -494,11 +494,11 @@
             }
         }
 
-        function _callOnRowClick (scope, tuples, isSelected) {
-            if (scope.onRowClickBind) {
-                return scope.onRowClickBind()(tuples, isSelected);
-            } else if (scope.onRowClick) {
-                return scope.onRowClick()(tuples, isSelected);
+        function _callonSelectedRowsChanged (scope, tuples, isSelected) {
+            if (scope.onSelectedRowsChangedBind) {
+                return scope.onSelectedRowsChangedBind()(tuples, isSelected);
+            } else if (scope.onSelectedRowsChanged) {
+                return scope.onSelectedRowsChanged()(tuples, isSelected);
             }
         }
 
@@ -536,10 +536,18 @@
             scope.$root.checkReferenceURL = function (ref) {
                 var refUri = ref.isAttributeGroup ? ref.uri : ref.location.ermrestUri;
                 if (refUri.length > tableConstants.MAX_URL_LENGTH) {
+
+                    // show the alert (the function will handle just showing one alert)
                     AlertsService.addURLLimitAlert();
+
+                    // scroll to top of the container so users can see the alert
                     scrollToTop();
+
+                    // signal the caller that we reached the URL limit.
                     return false;
                 }
+
+                // remove the alert if it's present since we don't need it anymore
                 AlertsService.deleteURLLimitAlert();
                 return true;
             };
@@ -610,7 +618,7 @@
                 }
 
                 if (tuples.length > 0) {
-                    _callOnRowClick(scope, tuples, false);
+                    _callonSelectedRowsChanged(scope, tuples, false);
                 }
             };
 
@@ -628,7 +636,7 @@
                     }
                 }
                 if (tuples.length > 0) {
-                    _callOnRowClick(scope, tuples, true);
+                    _callonSelectedRowsChanged(scope, tuples, true);
                 }
             };
 
@@ -649,7 +657,7 @@
                     scope.vm.selectedRows.splice(rowIndex, 1);
                 }
 
-                _callOnRowClick(scope, [tuple], isSelected);
+                _callonSelectedRowsChanged(scope, [tuple], isSelected);
             };
 
             scope.$on('record-deleted', function() {
@@ -825,7 +833,7 @@
                 }
 
                 var tuple = scope.vm.selectedRows.splice(index, 1)[0];
-                _callOnRowClick(scope, tuple, false);
+                _callonSelectedRowsChanged(scope, tuple, false);
             };
 
             // function for removing all pills regardless of what page they are on, clears the whole selectedRows array
@@ -833,7 +841,7 @@
                 var pre = scope.vm.selectedRows.slice();
                 scope.vm.selectedRows.clear();
                 scope.vm.currentPageSelected = false;
-                _callOnRowClick(scope, pre, false);
+                _callonSelectedRowsChanged(scope, pre, false);
             };
 
             // on window focus, if has pending add record requests
@@ -977,10 +985,10 @@
                 vm: '=',
                 /*
                  * used by the recordset template to pass down on click function
-                 * The recordset has a onRowClick which will be passed to this onRowClickBind.
+                 * The recordset has a onSelectedRowsChanged which will be passed to this onSelectedRowsChangedBind.
                  */
-                onRowClickBind: '=?',
-                onRowClick: '&?',      // set row click function TODO not used anywhere
+                onSelectedRowsChangedBind: '=?',
+                onSelectedRowsChanged: '&?',      // set row click function TODO not used anywhere
                 parentReference: "=?" // if this is used for related references, this will be the main reference
             },
             link: function (scope, elem, attr) {
@@ -999,10 +1007,10 @@
                 vm: '=',
                 /*
                  * used by the recordset template to pass down on click function
-                 * The recordset has a onRowClick which will be passed to this onRowClickBind.
+                 * The recordset has a onSelectedRowsChanged which will be passed to this onSelectedRowsChangedBind.
                  */
-                onRowClickBind: '=?',
-                onRowClick: '&?'      // set row click function
+                onSelectedRowsChangedBind: '=?',
+                onSelectedRowsChanged: '&?'      // set row click function
             },
             link: function (scope, elem, attr) {
                 recordTableUtils.registerTableCallbacks(scope, elem, attr);
@@ -1080,7 +1088,7 @@
             scope: {
                 mode: "=?",
                 vm: '=',
-                onRowClick: '&?',       // set row click function
+                onSelectedRowsChanged: '&?',       // set row click function
                 allowCreate: '=?',      // if undefined, assume false
                 getDisabledTuples: "=?", // callback to get the disabled tuples
                 registerSetPageState: "&?"
@@ -1111,8 +1119,8 @@
 
                     var tuple = scope.vm.selectedRows.splice(index, 1)[0];
 
-                    if (scope.onRowClick) {
-                        scope.onRowClick()(tuple, false);
+                    if (scope.onSelectedRowsChanged) {
+                        scope.onSelectedRowsChanged()(tuple, false);
                     }
                 };
 
@@ -1125,8 +1133,8 @@
                     } else {
                         scope.vm.currentPageSelected = false;
                     }
-                    if (scope.onRowClick) {
-                        scope.onRowClick()(pre, false);
+                    if (scope.onSelectedRowsChanged) {
+                        scope.onSelectedRowsChanged()(pre, false);
                     }
                 };
 
@@ -1143,8 +1151,8 @@
                         scope.vm.selectedRows.clear();
                     }
 
-                    if (scope.onRowClick) {
-                        scope.onRowClick()(tuples, scope.vm.matchNotNull);
+                    if (scope.onSelectedRowsChanged) {
+                        scope.onSelectedRowsChanged()(tuples, scope.vm.matchNotNull);
                     }
                 };
             }
@@ -1158,7 +1166,7 @@
             templateUrl: '../common/templates/recordset.html',
             scope: {
                 vm: '=',
-                onRowClick: '&?',       // set row click function
+                onSelectedRowsChanged: '&?',       // set row click function
                 allowCreate: '=?',       // if undefined, assume false
                 registerSetPageState: "&?"
             },

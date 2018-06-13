@@ -149,7 +149,7 @@
         var vm = this;
 
         vm.params = params;
-        vm.onRowClick = onRowClick;
+        vm.onSelectedRowsChanged = onSelectedRowsChanged;
         vm.cancel = cancel;
         vm.submit = submitMultiSelection;
         vm.mode = params.mode;
@@ -181,12 +181,20 @@
             getDisabledTuples:  params.getDisabledTuples
         };
 
-        function onRowClick(tuples, isSelected) {
+        /**
+         * In case of single-select, this will be called just once.
+         * In case of multi-select, this will be called anytime the list has changed
+         */
+        function onSelectedRowsChanged(tuples, isSelected) {
             switch (params.selectMode) {
                 case modalBox.multiSelectMode:
-                    if (params.onRowClick) {
+                    if (params.onSelectedRowsChanged) {
+                        var res = params.onSelectedRowsChanged(getMultiSelectionResult());
+
                         // if it returns false, then we should disable submit button
-                        vm.disableSubmit = (params.onRowClick(getMultiSelectionResult()) === false);
+                        // since we cannot apply the change (url limit issue)
+                        vm.disableSubmit = (res === false);
+                        return res;
                     }
                     break;
                 default:
@@ -195,6 +203,10 @@
             }
         }
 
+        /**
+         * This will generate the correct object that we need to pass in case of multi-select.
+         * In that case, we might have the `matchNotNull` variable. If we do, we just need to pass that.
+         */
         function getMultiSelectionResult() {
             var res = vm.tableModel.selectedRows;
             if (!Array.isArray(res)) res = [];

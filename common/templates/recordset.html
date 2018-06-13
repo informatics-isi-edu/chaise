@@ -125,7 +125,7 @@
             <!-- record table -->
             <div id="recordset-table-container" ng-if="vm.initialized">
                 <h3 ng-if="!vm.config.hideTotalCount" id="rs-total-count" class="replace-margin">Displaying {{vm.rowValues.length}}{{vm.totalRowsCnt ? " of " + (vm.totalRowsCnt > vm.rowValues.length ? vm.totalRowsCnt : vm.rowValues.length) : ''}} Records</h3>
-                <record-table id="rs-{{vm.makeSafeIdAttr(vm.tableDisplayName.value)}}" vm="vm" on-row-click-bind="onRowClick"></record-table>
+                <record-table id="rs-{{vm.makeSafeIdAttr(vm.tableDisplayName.value)}}" vm="vm" on-selected-rows-changed-bind="onSelectedRowsChanged"></record-table>
             </div>
 
             <!-- bottom pagination -->

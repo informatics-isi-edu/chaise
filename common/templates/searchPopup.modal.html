@@ -12,9 +12,9 @@
     </span>
     <div ng-switch="ctrl.mode">
         <!-- switch when 'selectFaceting' -->
-        <recordset-select-faceting ng-switch-when="selectFaceting" vm="ctrl.tableModel" on-row-click="ctrl.onRowClick" allow-create="false"></recordset-select-faceting>
+        <recordset-select-faceting ng-switch-when="selectFaceting" vm="ctrl.tableModel" on-selected-rows-changed="ctrl.onSelectedRowsChanged" allow-create="false"></recordset-select-faceting>
         <!-- swtich default -->
-        <recordset ng-switch-default vm="ctrl.tableModel" on-row-click="ctrl.onRowClick" allow-create="true" get-disabled-tuples="getDisabledTuples"></recordset>
+        <recordset ng-switch-default vm="ctrl.tableModel" on-selected-rows-changed="ctrl.onSelectedRowsChanged" allow-create="true" get-disabled-tuples="getDisabledTuples"></recordset>
     </div>
 
 </div>

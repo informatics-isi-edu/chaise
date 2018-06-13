@@ -1299,7 +1299,7 @@ footer .container1 {
      display: none !important;
  }
 
- #record .modal-body .recordset-container alerts {
+ .modal-body .recordset-container alerts:not(.enforce-alert) {
      display: none !important;
  }
 

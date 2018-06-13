@@ -919,6 +919,9 @@
             /**
              * Post process after selectedRows is defined coming from the modal.
              * If changeRef is false, then we only want to apply the URL limitation logic.
+             * the callback that is returning is accepting an array or an object with `matchNotNull` attribute.
+             * If the attribute exists, then we want to match any values apart from null. otherwise the
+             * parameter will be an array of tuples.
              * @param  {object} scope
              * @param  {boolean} changeRef whether we should change the reference or not
              */
@@ -1040,9 +1043,18 @@
                         params.facetPanelOpen = false;
 
                         // callback on each selected change (incldues the url limitation logic)
-                        params.onRowClick = modalDataChanged(scope, false);
+                        params.onSelectedRowsChanged = modalDataChanged(scope, false);
 
                         // if url limitation alert exists, remove it.
+                        // The alert on the main recordset page is behaving differently
+                        // from the alert that we are going to show on modal.
+                        // We're showing alert as a preventing measure in recordset.
+                        // if users are about to reach the limit, upon making the request
+                        // we're showing the modal and ignoring the request. So the alert
+                        // is just to tell users why they couldn't do the action and it
+                        // doesn't have to remain on the page.
+                        // While the alert on modal must stay untill they actually remove
+                        // some selections and url becomes shorter than the limit.
                         AlertsService.deleteURLLimitAlert();
 
                         // to choose the correct directive
