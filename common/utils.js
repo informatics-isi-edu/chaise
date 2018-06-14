@@ -74,7 +74,10 @@
         "noRecordForFilter" : "No matching record found for the given filter or facet.",
         "unauthorizedErrorCode" : "Unauthorized Access",
         "showErrDetails" : "Show Error Details",
-        "hideErrDetails" : "Hide Error Details"
+        "hideErrDetails" : "Hide Error Details",
+        "toolTips": {
+            "permaLink":"This link stores your search criteria as a URL. Right click and save."
+        }
     })
 
     .constant("logActions", {
