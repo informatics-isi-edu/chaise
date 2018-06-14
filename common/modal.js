@@ -4,11 +4,13 @@
     angular.module('chaise.modal', ['chaise.utils'])
 
     //TODO
-    .factory('modalUtils', ["$uibModal", function ($uibModal) {
+    .factory('modalUtils', ["$uibModal", "$log", function ($uibModal, $log) {
         function showModal(params, successCB, rejectCB, postRenderCB) {
             var modalInstance = $uibModal.open(params);
             if (postRenderCB) {
-                modalInstance.rendered.then(postRenderCB);    
+                modalInstance.rendered.then(postRenderCB).catch(function (error) {
+                    $log.warn(error);
+                });    
             }            
             modalInstance.result.then(successCB).catch(function (response) {
                 if (rejectCB) {
