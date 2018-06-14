@@ -366,7 +366,13 @@
           "entry/create": ["id", "title", "website", ["product-recordset", "fk_category"], "rating", "summary", "description","json_col", "json_col_with_markdown","no_of_rooms", ["product-recordset", "fk_thumbnail"], ["product-recordset", "fk_cover"],"terms", "opened_on","luxurious"],
           "entry/edit": ["id", "title", "website", ["product-recordset", "fk_category"], "rating", "summary", "description","json_col", "json_col_with_markdown","no_of_rooms", ["product-recordset", "fk_thumbnail"], ["product-recordset", "fk_cover"],"terms", "opened_on","luxurious"],
           "compact" : [
-              "title", "website", "rating", "summary","terms", "opened_on", "luxurious","json_col", "json_col_with_markdown",
+              "title", "website", "rating", "no_of_rooms", "summary","terms", "opened_on", "luxurious","json_col", "json_col_with_markdown",
+              ["product-recordset", "fk_category"],
+              {"source": [
+                {"outbound": ["product-recordset", "fk_category"]},
+                {"outbound": ["product-recordset", "fk_facilities"]},
+                "type"
+              ], "markdown_name": "Type of Facilities"},
               {"source": [
                   {"inbound": ["product-recordset", "fk_accommodation_image"]},
                   {"outbound": ["product-recordset", "fk_accommodation_image_2"]},
@@ -786,7 +792,26 @@
         }
       ],
       "entityCount": 0,
-      "foreign_keys": [],
+      "foreign_keys": [
+        {
+          "names": [["product-recordset", "fk_facilities"]],
+          "foreign_key_columns": [
+            {
+              "table_name": "category",
+              "schema_name": "product-recordset",
+              "column_name": "type_of_facilities"
+            }
+          ],
+          "annotations": {},
+          "referenced_columns": [
+            {
+              "table_name": "facilities",
+              "schema_name": "product-recordset",
+              "column_name": "type"
+            }
+          ]
+        }
+      ],
       "table_name": "category",
       "schema_name": "product-recordset",
       "column_definitions": [
@@ -815,6 +840,23 @@
           "annotations": {
             "comment": ["top"]
           }
+        },
+        {
+          "comment": "amenities",
+          "name": "type_of_facilities",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          },
+          "annotations": {
+            "comment": ["top"],
+            "description": {
+              "display": "Type of facilities"
+            },
+            "tag:misd.isi.edu,2015:display": {
+              "name": "Type of facilities"
+            }
+          }
         }
       ],
       "annotations": {
@@ -826,6 +868,154 @@
         },
         "tag:isrd.isi.edu,2016:visible-columns": {
           "*": ["id", "term"]
+        },
+        "tag:isrd.isi.edu,2016:visible-foreign-keys" : {
+          "*" : [
+              ["product-recordset", "fk_facilities"]
+          ]
+        }
+      }
+    },
+    "facilities": {
+      "comment": "Type of facilities ('Luxury/Upscale/Basic')",
+      "kind": "table",
+      "keys": [
+        {
+          "comment": "vocabulary",
+          "annotations": {},
+          "unique_columns": [
+            "id"
+          ]
+        },
+        {
+          "comment": "vocabulary",
+          "annotations": {},
+          "unique_columns": [
+            "type"
+          ]
+        }
+      ],
+      "foreign_keys": [],
+      "table_name": "facilities",
+      "schema_name": "product-recordset",
+      "column_definitions": [
+        {
+          "name": "id",
+          "nullok": false,
+          "type": {
+            "typename": "int4"
+          },
+          "annotations": {
+            "comment": [
+              "hidden"
+            ]
+          }
+        },
+        {
+          "name": "type",
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          },
+          "annotations": {
+            "comment": ["top"]
+          }
+        },
+        {
+          "name": "conference_room",
+          "default": false,
+          "nullok": true,
+          "type": {
+            "typename": "boolean"
+          },
+          "annotations": {
+            "comment": ["top"],
+            "description": {
+              "display": "Conference Room"
+            },
+            "tag:misd.isi.edu,2015:display": {
+              "name": "Conference Room"
+            }
+          }
+        },
+        {
+          "name": "golf_course",
+          "default": false,
+          "nullok": true,
+          "type": {
+            "typename": "boolean"
+          },
+          "annotations": {
+            "comment": ["top"],
+            "description": {
+              "display": "Golf Course"
+            },
+            "tag:misd.isi.edu,2015:display": {
+              "name": "Golf Course"
+            }
+          }
+        },
+        {
+          "name": "fine_dining",
+          "default": false,
+          "nullok": true,
+          "type": {
+            "typename": "boolean"
+          },
+          "annotations": {
+            "comment": ["top"],
+            "description": {
+              "display": "Fine Dining Restaurant"
+            },
+            "tag:misd.isi.edu,2015:display": {
+              "name": "Fine Dining Restaurant"
+            }
+          }
+        },
+        {
+          "name": "gym",
+          "default": false,
+          "nullok": true,
+          "type": {
+            "typename": "boolean"
+          },
+          "annotations": {
+            "comment": ["top"],
+            "description": {
+              "display": "Gymnasium"
+            },
+            "tag:misd.isi.edu,2015:display": {
+              "name": "Gymnasium"
+            }
+          }
+        },
+        {
+          "name": "wifi",
+          "default": true,
+          "nullok": true,
+          "type": {
+            "typename": "boolean"
+          },
+          "annotations": {
+            "comment": ["top"],
+            "description": {
+              "display": "WiFi"
+            },
+            "tag:misd.isi.edu,2015:display": {
+              "name": "WiFi"
+            }
+          }
+        }
+      ],
+      "annotations": {
+        "tag:misd.isi.edu,2015:display": {
+          "name": "Facilities"
+        },
+        "description": {
+          "display": "Facilities"
+        },
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "*": ["id", "type", "conference_room", "golf_course", "fine_dining", "gym", "wifi"]
         }
       }
     }
@@ -835,7 +1025,8 @@
     "file",
     "accommodation",
     "accommodation_image",
-    "booking"
+    "booking",
+    "facilities"
   ],
   "comment": null,
   "annotations": {

@@ -890,6 +890,18 @@ var recordsetPage = function() {
         return element.all(by.css(".table-column-displayname > span"));
     };
 
+    this.getColumnSortButton = function(rawColumnName){
+        return element(by.css('.c_' + rawColumnName)).element(by.css('.glyphicon-sort'));
+    };
+
+    this.getColumnSortAscButton = function(rawColumnName){
+        return element(by.css('.c_' + rawColumnName)).element(by.css('.glyphicon-sort-by-attributes-alt'));
+    };
+
+    this.getColumnSortDescButton = function(rawColumnName){
+        return element(by.css('.c_' + rawColumnName)).element(by.css('.glyphicon-sort-by-attributes'));
+    };
+
     this.getRows = function() {
         return element.all(by.css('.table-row'));
     };
@@ -1327,6 +1339,14 @@ function chaisePage() {
     this.waitForElementCondition = function(condition, timeout) {
         return browser.wait(condition, timeout || browser.params.defaultTimeout);
     };
+
+    this.waitForTextInElement = function(locator, text, timeout) {
+        return browser.wait(protractor.ExpectedConditions.textToBePresentInElement(locator, text), timeout || browser.params.defaultTimeout);
+    }
+
+    this.waitForTextInUrl = function(text, errMsg, timeout){
+        return browser.wait(protractor.ExpectedConditions.urlContains(text), timeout || browser.params.defaultTimeout, errMsg);
+    }
 
     this.catchTestError = function (done) {
         return function (err) {
