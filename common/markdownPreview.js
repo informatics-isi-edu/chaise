@@ -54,7 +54,7 @@
                                       <div style="padding:10px" ng-bind-html="ctrl.params.markdownOut" class="markdown-container"></div> \
                                     </div> \
                                 </div> '
-                  });
+                  }, false, false, false);
                 }
 
                 if (angular.isUndefinedOrNull(textInput))
