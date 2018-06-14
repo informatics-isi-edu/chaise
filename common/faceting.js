@@ -1062,7 +1062,7 @@
 
                             // focus on the current facet
                             scope.parentCtrl.focusOnFacet(scope.index);
-                        });
+                        }, false, false);
                     };
 
                     // for clicking on each row (will be registerd as a callback for list directive)
