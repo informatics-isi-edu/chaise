@@ -43,7 +43,7 @@
                     </div>
                 </div>
             </div>
-            <div id="main-content" ng-style="{ 'overflow-y': !showFaceting ? 'auto' : ''}">
+            <div id="main-content">
                 <recordset vm="vm" allow-create="false"></recordset>
             </div>
         </div>
