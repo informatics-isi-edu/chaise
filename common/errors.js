@@ -215,7 +215,7 @@
                 params.canClose = true;
             }
 
-            modalUtils.showModal(modalProperties, moveErrorModal, function (actionBtnIdentifier) {
+            modalUtils.showModal(modalProperties, function (actionBtnIdentifier) {
                 if ((errorStatus == errorNames.unauthorized && !providedLink) || (actionBtnIdentifier === "login")) {
                     Session.loginInAPopUp();
                 } else {
@@ -225,7 +225,7 @@
                         $window.location = redirectLink;
                     }
                 }
-            });
+            }, false, moveErrorModal);
 
             function moveErrorModal() {
                 var mainnav = $document[0].getElementById('mainnav');

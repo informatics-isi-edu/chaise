@@ -5,9 +5,11 @@
 
     //TODO
     .factory('modalUtils', ["$uibModal", function ($uibModal) {
-        function showModal(params, postRenderCB, successCB, rejectCB) {
+        function showModal(params, successCB, rejectCB, postRenderCB) {
             var modalInstance = $uibModal.open(params);
-            modalInstance.rendered.then(postRenderCB);                
+            if (postRenderCB) {
+                modalInstance.rendered.then(postRenderCB);    
+            }            
             modalInstance.result.then(successCB).catch(function (response) {
                 if (rejectCB) {
                     rejectCB(response);

@@ -126,7 +126,7 @@
                     openedClass: 'modal-login',
                     backdrop: 'static',
                     keyboard: false
-                }, onModalCloseSuccess, onModalClose);
+                }, onModalCloseSuccess, onModalClose, false);
             }
 
 
