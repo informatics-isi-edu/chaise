@@ -75,8 +75,9 @@
         "unauthorizedErrorCode" : "Unauthorized Access",
         "showErrDetails" : "Show Error Details",
         "hideErrDetails" : "Hide Error Details",
-        "toolTips": {
-            "permaLink":"This link stores your search criteria as a URL. Right click and save."
+        "tooltip": {
+            downloadCSV: "Click to download all matched results",
+            permalink: "This link stores your search criteria as a URL. Right click and save."
         }
     })
 

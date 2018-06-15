@@ -996,8 +996,12 @@ var recordsetPage = function() {
         return element(by.id("page-size-" + limit));
     };
 
-    this.getDownloadButton = function (limit) {
-        return element(by.css("downloadCSV-link"));
+    this.getDownloadButton = function () {
+        return element(by.id("downloadCSV-link"));
+    };
+
+    this.getPermalinkButton = function() {
+        return element(by.id('permalink'));
     };
 
     /******* Facet selectors for recordset with faceting ********/
@@ -1347,6 +1351,10 @@ function chaisePage() {
     this.waitForTextInUrl = function(text, errMsg, timeout){
         return browser.wait(protractor.ExpectedConditions.urlContains(text), timeout || browser.params.defaultTimeout, errMsg);
     }
+
+    this.getTooltipDiv = function() {
+        return element(by.css('.tooltip'));
+    };
 
     this.catchTestError = function (done) {
         return function (err) {

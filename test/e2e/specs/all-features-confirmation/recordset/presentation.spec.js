@@ -171,6 +171,10 @@ var testParams = {
         table_name: "file",
         custom_page_size: 5,
         page_size: 10
+    },
+    tooltip: {
+        downloadCSV: "Click to download all matched results",
+        permalink: "This link stores your search criteria as a URL. Right click and save."
     }
 };
 
@@ -200,6 +204,28 @@ describe('View recordset,', function() {
 
             it ('should have the correct tooltip.', function () {
                 expect(chaisePage.recordsetPage.getPageTitleTooltip()).toBe(accommodationParams.comment);
+            });
+
+            it('should display the permalink button & a tooltip on hovering on it', function () {
+                var permalink = chaisePage.recordsetPage.getPermalinkButton();
+                expect(permalink.isDisplayed()).toBe(true);
+                browser.actions().mouseMove(permalink).perform();
+                var tooltip = chaisePage.getTooltipDiv();
+                chaisePage.waitForElement(tooltip).then(function () {
+                    expect(tooltip.getText()).toBe(testParams.tooltip.permalink);
+                    browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
+                });
+            });
+
+            it('should display the downloadCSV button & a tooltip on hovering on it', function () {
+                var downloadCSV = chaisePage.recordsetPage.getDownloadButton();
+                expect(downloadCSV.isDisplayed()).toBe(true);
+                browser.actions().mouseMove(downloadCSV).perform();
+                var tooltip = chaisePage.getTooltipDiv();
+                chaisePage.waitForElement(tooltip).then(function () {
+                    expect(tooltip.getText()).toBe(testParams.tooltip.downloadCSV);
+                    browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
+                });
             });
 
             it("should autofocus on search box", function() {

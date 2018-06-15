@@ -22,7 +22,7 @@
         vm.sidePanToggleBtnIndicator = "Show";
 
         $scope.recordSidePanOpen = chaiseConfig.hideTableOfContents === true ? false : true;
-
+        $scope.tooltip = messageMap.tooltip;
         vm.gotoRelatedTable = function(sectionId, index) {
             var safeSectionId = vm.makeSafeIdAttr(sectionId);
             var pageSection = "rt-heading-" + safeSectionId;

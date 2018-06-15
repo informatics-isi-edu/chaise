@@ -39,7 +39,7 @@
                         Related Records
                     </strong>
                 </a>&nbsp;&nbsp;
-                <a id="permalink" ng-href="{{::ctrl.permalink()}}" uib-tooltip="This link stores your search criteria as a URL. Right click and save." tooltip-placement="bottom">
+                <a id="permalink" ng-href="{{::ctrl.permalink()}}" uib-tooltip={{::tooltip.permalink}} tooltip-placement="bottom">
                     <span class="glyphicon glyphicon-bookmark"></span><strong> Permalink</strong>
                 </a>
             </div>
