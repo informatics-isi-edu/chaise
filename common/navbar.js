@@ -85,7 +85,7 @@
                         templateUrl: "../common/templates/profile.modal.html",
                         controller: "profileModalDialogController",
                         controllerAs: "ctrl"
-                    });
+                    }, false, false, false);
                 };
 
             }

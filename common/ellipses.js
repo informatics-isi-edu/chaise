@@ -43,7 +43,7 @@
                         // tell parent controller data updated
                         scope.$emit('record-deleted');
                     }).catch(onError);
-                }, onError);
+                }, onError, false);
             } else {
                 scope.$root.showSpinner = true;
                 reference.delete(logObject).then(function deleteSuccess() {

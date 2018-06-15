@@ -1101,7 +1101,7 @@
                             },
                             size: "xl",
                             templateUrl: "../common/templates/searchPopup.modal.html"
-                        }, modalDataChanged(scope, true));
+                        }, modalDataChanged(scope, true), false, false);
                     };
 
                     // for clicking on each row (will be registerd as a callback for list directive)

@@ -50,7 +50,7 @@
                     }, function onSuccess() {
                         scope.$root.showSpinner = true;
                         return scope.callback();
-                    });
+                    }, false, false);
                 }
             },
             templateUrl: function(elem, attrs) {
