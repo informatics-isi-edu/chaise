@@ -293,7 +293,7 @@
 
                 vm.erred = true;
 
-                abortUploads();
+                abortUploads(err);
 
                 $uibModalInstance.dismiss(err);
             };
