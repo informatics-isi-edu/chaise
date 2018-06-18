@@ -206,24 +206,24 @@ describe('View recordset,', function() {
                 expect(chaisePage.recordsetPage.getPageTitleTooltip()).toBe(accommodationParams.comment);
             });
 
-            it('should display the permalink button & a tooltip on hovering on it', function () {
+            it('should display the permalink button & a tooltip on hovering over it', function () {
                 var permalink = chaisePage.recordsetPage.getPermalinkButton();
-                expect(permalink.isDisplayed()).toBe(true);
+                expect(permalink.isDisplayed()).toBe(true, "The permalink button is not visible on the recordset app");
                 browser.actions().mouseMove(permalink).perform();
                 var tooltip = chaisePage.getTooltipDiv();
                 chaisePage.waitForElement(tooltip).then(function () {
-                    expect(tooltip.getText()).toBe(testParams.tooltip.permalink);
+                    expect(tooltip.getText()).toBe(testParams.tooltip.permalink, "Incorrect tooltip on the Permalink button");
                     browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
                 });
             });
 
-            it('should display the downloadCSV button & a tooltip on hovering on it', function () {
+            it('should display the Download CSV button & a tooltip on hovering over it', function () {
                 var downloadCSV = chaisePage.recordsetPage.getDownloadButton();
-                expect(downloadCSV.isDisplayed()).toBe(true);
+                expect(downloadCSV.isDisplayed()).toBe(true, "The Download CSV button is not visible on the recordset app");
                 browser.actions().mouseMove(downloadCSV).perform();
                 var tooltip = chaisePage.getTooltipDiv();
                 chaisePage.waitForElement(tooltip).then(function () {
-                    expect(tooltip.getText()).toBe(testParams.tooltip.downloadCSV);
+                    expect(tooltip.getText()).toBe(testParams.tooltip.downloadCSV, "Incorrect tooltip on the Download CSV button");
                     browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
                 });
             });
