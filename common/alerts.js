@@ -3,9 +3,10 @@
 
     angular.module('chaise.alerts', ['chaise.filters', 'chaise.utils'])
 
-    .factory('AlertsService', ['DataUtils', function AlertsService(DataUtils) {
+    .factory('AlertsService', ['DataUtils', 'messageMap', function AlertsService(DataUtils, messageMap) {
         var alerts = [];
         var ALERT_TYPES = ['success', 'error', 'warning'];
+        var urlLimitAlert;
 
         function Alert(message, type, cb) {
             DataUtils.verify(message, 'Message required to create an alert.');
@@ -31,10 +32,34 @@
             return alerts.splice(index, 1);
         }
 
+        /**
+         * Will create a specific type of alert for url limitation
+         * @param {string} message
+         */
+        function addURLLimitAlert(message) {
+            message = message || messageMap.URLLimitMessage;
+            if (urlLimitAlert) return;
+            urlLimitAlert = addAlert(message, ALERT_TYPES[2]);
+            return urlLimitAlert;
+        }
+
+        /**
+         * Delete the specific alert
+         * @return {Alert}
+         */
+        function deleteURLLimitAlert() {
+            if (!urlLimitAlert) return;
+            var alert = deleteAlert(urlLimitAlert);
+            urlLimitAlert = null;
+            return alert;
+        }
+
         return {
             alerts: alerts,
             addAlert: addAlert,
-            deleteAlert: deleteAlert
+            deleteAlert: deleteAlert,
+            addURLLimitAlert: addURLLimitAlert,
+            deleteURLLimitAlert: deleteURLLimitAlert
         };
     }])
 

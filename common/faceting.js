@@ -38,8 +38,8 @@
                         }
                     };
 
-                    ctrl.updateVMReference = function (reference, index) {
-                        return $scope.updateReference(reference, index);
+                    ctrl.updateVMReference = function (reference, index, keepRef) {
+                        return $scope.updateReference(reference, index, keepRef);
                     };
 
                     ctrl.setInitialized = function () {
@@ -61,13 +61,16 @@
                 }],
                 require: 'faceting',
                 link: function (scope, element, attr, currentCtrl) {
-                    scope.updateReference = function (reference, index) {
+                    scope.updateReference = function (reference, index, keepRef) {
                         if (!scope.$root.checkReferenceURL(reference)) {
                             return false;
                         }
-                        scope.vm.lastActiveFacet = index;
-                        scope.vm.reference = reference;
-                        scope.$emit('facet-modified');
+
+                        if (!keepRef) {
+                            scope.vm.lastActiveFacet = index;
+                            scope.vm.reference = reference;
+                            scope.$emit('facet-modified');
+                        }
                         return true;
                     };
 
@@ -737,7 +740,9 @@
             };
         }])
 
-        .directive('choicePicker', ["defaultDisplayname", 'logActions', "$log", 'modalUtils', '$q', 'tableConstants', '$timeout', function (defaultDisplayname, logActions, $log, modalUtils, $q, tableConstants, $timeout) {
+        .directive('choicePicker',
+            ["AlertsService", "defaultDisplayname", 'logActions', "$log", 'modalUtils', '$q', 'tableConstants', '$timeout',
+            function (AlertsService, defaultDisplayname, logActions, $log, modalUtils, $q, tableConstants, $timeout) {
 
             // the not_null filter with appropriate attributes
             var notNullFilter = {
@@ -911,6 +916,77 @@
                 return res;
             }
 
+            /**
+             * Post process after selectedRows is defined coming from the modal.
+             * If changeRef is false, then we only want to apply the URL limitation logic.
+             * the callback that is returning is accepting an array or an object with `matchNotNull` attribute.
+             * If the attribute exists, then we want to match any values apart from null. otherwise the
+             * parameter will be an array of tuples.
+             * @param  {object} scope
+             * @param  {boolean} changeRef whether we should change the reference or not
+             */
+            function modalDataChanged(scope, changeRef) {
+                return function (res) {
+                    // TODO needs refactoring.
+                    var ref;
+
+                    if (!res) return false;
+
+                    // if the value returned is an object with matchNotNull
+                    if (res.matchNotNull) {
+                        ref = scope.facetColumn.addNotNullFilter();
+
+                        // update the reference
+                        if (!scope.parentCtrl.updateVMReference(ref, -1, !changeRef)) {
+                            return false;
+                        }
+
+                        if (changeRef) {
+                            scope.facetModel.appliedFilters = [notNullFilter];
+                        }
+                    } else if (Array.isArray(res)){
+                        var tuples = res;
+
+                        // create the reference using filters
+                        ref = scope.facetColumn.replaceAllChoiceFilters(tuples.map(function (t) {
+                            return getFilterUniqueId(t, scope.columnName);
+                        }));
+
+                        // update the reference
+                        if (!scope.parentCtrl.updateVMReference(ref, -1, !changeRef)) {
+                            return false;
+                        }
+
+                        if (changeRef) {
+                            // create the list of applied filters, this Will
+                            // be used for genreating the checkboxRows of current facet
+                            scope.facetModel.appliedFilters = tuples.map(function (t) {
+                                var val = getFilterUniqueId(t, scope.columnName);
+
+                                // NOTE displayname will always be string, but we want to treat null and empty string differently,
+                                // therefore we have a extra case for null, to just return null.
+                                return {
+                                    uniqueId: val,
+                                    displayname: (val == null) ? {value: null, isHTML: false} : t.displayname,
+                                    tuple: t,
+                                };
+                            });
+                        }
+                    } else {
+                        // invalid result from the callback.
+                        return false;
+                    }
+
+                    if (changeRef) {
+                        // make sure to update all the opened facets
+                        scope.parentCtrl.setInitialized();
+
+                        // focus on the current facet
+                        scope.parentCtrl.focusOnFacet(scope.index);
+                    }
+                };
+            }
+
             return {
                 restrict: 'AE',
                 templateUrl: '../common/templates/faceting/choice-picker.html',
@@ -966,6 +1042,21 @@
                         params.faceting = false;
                         params.facetPanelOpen = false;
 
+                        // callback on each selected change (incldues the url limitation logic)
+                        params.onSelectedRowsChanged = modalDataChanged(scope, false);
+
+                        // if url limitation alert exists, remove it.
+                        // The alert on the main recordset page is behaving differently
+                        // from the alert that we are going to show on modal.
+                        // We're showing alert as a preventing measure in recordset.
+                        // if users are about to reach the limit, upon making the request
+                        // we're showing the modal and ignoring the request. So the alert
+                        // is just to tell users why they couldn't do the action and it
+                        // doesn't have to remain on the page.
+                        // While the alert on modal must stay untill they actually remove
+                        // some selections and url becomes shorter than the limit.
+                        AlertsService.deleteURLLimitAlert();
+
                         // to choose the correct directive
                         params.mode = "selectFaceting";
 
@@ -1010,59 +1101,7 @@
                             },
                             size: "xl",
                             templateUrl: "../common/templates/searchPopup.modal.html"
-                        }, function dataSelected(res) {
-                            // TODO needs refactoring.
-                            var ref;
-
-                            if (!res) return;
-
-                            // if the value returned is an object with matchNotNull
-                            if (res.matchNotNull) {
-                                ref = scope.facetColumn.addNotNullFilter();
-
-                                // update the reference
-                                if (!scope.parentCtrl.updateVMReference(ref, -1)) {
-                                    return;
-                                }
-
-                                scope.facetModel.appliedFilters = [notNullFilter];
-                            } else if (Array.isArray(res)){
-                                var tuples = res;
-
-                                // create the reference using filters
-                                ref = scope.facetColumn.replaceAllChoiceFilters(tuples.map(function (t) {
-                                    return getFilterUniqueId(t, scope.columnName);
-                                }));
-
-                                // update the reference
-                                if (!scope.parentCtrl.updateVMReference(ref, -1)) {
-                                    return;
-                                }
-
-                                // create the list of applied filters, this Will
-                                // be used for genreating the checkboxRows of current facet
-                                scope.facetModel.appliedFilters = tuples.map(function (t) {
-                                    var val = getFilterUniqueId(t, scope.columnName);
-
-                                    // NOTE displayname will always be string, but we want to treat null and empty string differently,
-                                    // therefore we have a extra case for null, to just return null.
-                                    return {
-                                        uniqueId: val,
-                                        displayname: (val == null) ? {value: null, isHTML: false} : t.displayname,
-                                        tuple: t,
-                                    };
-                                });
-                            } else {
-                                // invalid result from the callback.
-                                return;
-                            }
-
-                            // make sure to update all the opened facets
-                            scope.parentCtrl.setInitialized();
-
-                            // focus on the current facet
-                            scope.parentCtrl.focusOnFacet(scope.index);
-                        }, false, false);
+                        }, modalDataChanged(scope, true), false, false);
                     };
 
                     // for clicking on each row (will be registerd as a callback for list directive)
@@ -1200,7 +1239,7 @@
                             $timeout(function () {
                                 var listElem = element[0].getElementsByClassName("chaise-list-container")[0];
                                 if (listElem) {
-                                    scope.showFindMore = listElem.scrollHeight > listElem.offsetHeight
+                                    scope.showFindMore = listElem.scrollHeight > listElem.offsetHeight;
                                 }
                             });
                         }
