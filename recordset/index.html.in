@@ -33,11 +33,11 @@
                             <span class="glyphicon glyphicon-pencil"></span> <strong>Edit</strong>
                         </a>&nbsp;&nbsp;
                         <!-- Download Link -->
-                        <a id="downloadCSV-link" ng-if="vm.rowValues.length>0" ng-href={{vm.reference.csvDownloadLink}} tooltip-placement="bottom" uib-tooltip="Click to download all matched results">
+                        <a id="downloadCSV-link" ng-if="vm.rowValues.length>0" ng-href={{vm.reference.csvDownloadLink}} tooltip-placement="bottom" uib-tooltip={{::tooltip.downloadCSV}}>
                             <span class="glyphicon glyphicon-download-alt"></span> <strong>Download CSV</strong>
                         </a>&nbsp;&nbsp;
                         <!-- permalink -->
-                        <a id="permalink" ng-href="{{ permalink() }}">
+                        <a id="permalink" ng-href="{{ permalink() }}" tooltip-placement="bottom" uib-tooltip={{::tooltip.permalink}}>
                             <span class="glyphicon glyphicon-bookmark"></span> <strong>Permalink</strong>
                         </a>
                     </div>

@@ -75,6 +75,10 @@
         "unauthorizedErrorCode" : "Unauthorized Access",
         "showErrDetails" : "Show Error Details",
         "hideErrDetails" : "Hide Error Details",
+        "tooltip": {
+            downloadCSV: "Click to download all matched results",
+            permalink: "This link stores your search criteria as a URL. Right click and save."
+        },
         "URLLimitMessage": "Maximum URL length reached. Cannot perform the requested action."
     })
 
