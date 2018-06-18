@@ -394,7 +394,11 @@
                     {"inbound": ["product-record", "fk_thumbnail_collection"]},
                     "title"
                 ], "aggregate": "max", "comment": "maximum of title"},
-                "json_col","json_col_with_markdown"
+                "json_col","json_col_with_markdown",
+                {"source": [
+                 {"inbound": ["product-record", "fk_accom_image_assoc_1"]},
+                 {"outbound": ["product-record", "fk_accom_image_assoc_2"]},
+                 "id"], "comment": "Accommodation Image"}
             ]
         },
 
@@ -1999,6 +2003,82 @@
            {"source": "value", "aggregate": "cnt_d"}
          ]
        }
+     }
+   },
+   "accommodation_image_assoc": {
+     "comment": "Association Table between accomodation and image",
+     "kind": "table",
+     "table_name": "accommodation_image_assoc",
+     "schema_name": "product-record",
+     "keys": [{
+      "unique_columns": [
+      "image_id",
+      "accommodation_id"
+      ]
+     }],
+     "entityCount": 0,
+     "foreign_keys": [
+      {
+        "names" : [["product-record", "fk_accom_image_assoc_1"]],
+        "foreign_key_columns": [
+          {
+            "table_name": "accommodation_image_assoc",
+            "schema_name": "product-record",
+            "column_name": "accommodation_id"
+          }
+        ],
+        "referenced_columns": [
+          {
+            "table_name": "accommodation",
+            "schema_name": "product-record",
+            "column_name": "id"
+          }
+        ]
+      },
+      {
+        "names" : [["product-record", "fk_accom_image_assoc_2"]],
+        "foreign_key_columns": [
+          {
+            "table_name": "accommodation_image_assoc",
+            "schema_name": "product-record",
+            "column_name": "image_id"
+          }
+        ],
+         "referenced_columns": [
+          {
+            "table_name": "file",
+            "schema_name": "product-record",
+            "column_name": "id"
+          }
+        ]
+      }
+     ],
+     "column_definitions": [
+      {
+        "name": "accommodation_id",
+        "nullok": false,
+        "type": {
+        "typename": "int4"
+        }
+      },
+      {
+        "name": "image_id",
+        "nullok": false,
+        "type": {
+        "typename": "int4"
+        }
+      }
+     ],
+     "annotations": {
+      "comment": [
+        "image"
+      ],
+      "description": {
+        "display": "Accommodation Images"
+      },
+      "tag:isrd.isi.edu,2016:visible-columns": {
+        "*": [["product-record", "fk_accom_image_assoc_1"], ["product-record", "fk_accom_image_assoc_2"]]
+      }
      }
    }
   },

@@ -119,7 +119,7 @@
                             isInline: true,
                             displayType: reference.display.type,
                             displayname: reference.displayname,
-                            tableModel: recordAppUtils.getTableModel(reference, "compact/brief/inline")
+                            tableModel: recordAppUtils.getTableModel(reference, "compact/brief/inline", $rootScope.tuple)
                         };
                         $rootScope.hasInline = true;
                     }

@@ -17,16 +17,16 @@
      *    <record-table vm="vm"></record-table>
      *
      * 2. Selectable table only with select function
-     *    <record-table vm="vm" on-row-click="gotoRowLink(tuple)"></record-table>
+     *    <record-table vm="vm" on-selected-rows-changed="gotoRowLink(tuple)"></record-table>
      *
      * 3. Table with search, page size, previous/next
      *    <recordset vm="vm"></recordset>
      *
      * 4. Selectable table with search, page size, previous/next
-     *    <recordset vm="vm" on-row-click="gotoRowLink(tuple)"></recordset>
+     *    <recordset vm="vm" on-selected-rows-changed="gotoRowLink(tuple)"></recordset>
      *
      * These are recordset and record-table directive parameters:
-     * - onRowClick(tuple, isSelected):
+     * - onSelectedRowsChanged(tuple, isSelected):
      *   - A callback for when in select mode a row is selected.
      *   - If isSelected is false, that means the row has been deselected.
      *
@@ -85,8 +85,8 @@
      * modified. ellipses will fire this event and recordset directive will use it.
      */
     .factory('recordTableUtils',
-            ['AlertsService', 'modalBox', 'DataUtils', '$timeout','Session', '$q', 'tableConstants', '$rootScope', '$log', '$window', '$cookies', 'defaultDisplayname', 'MathUtils', 'UriUtils', 'logActions',
-            function(AlertsService, modalBox, DataUtils, $timeout, Session, $q, tableConstants, $rootScope, $log, $window, $cookies, defaultDisplayname, MathUtils, UriUtils, logActions) {
+            ['AlertsService', '$document', 'modalBox', 'DataUtils', '$timeout','Session', '$q', 'tableConstants', '$rootScope', '$log', '$window', '$cookies', 'defaultDisplayname', 'MathUtils', 'UriUtils', 'logActions',
+            function(AlertsService, $document, modalBox, DataUtils, $timeout, Session, $q, tableConstants, $rootScope, $log, $window, $cookies, defaultDisplayname, MathUtils, UriUtils, logActions) {
 
         function FlowControlObject(maxRequests) {
             this.maxRequests = maxRequests || tableConstants.MAX_CONCURENT_REQUEST;
@@ -494,20 +494,40 @@
             }
         }
 
+        function _callonSelectedRowsChanged (scope, tuples, isSelected) {
+            if (scope.onSelectedRowsChangedBind) {
+                return scope.onSelectedRowsChangedBind()(tuples, isSelected);
+            } else if (scope.onSelectedRowsChanged) {
+                return scope.onSelectedRowsChanged()(tuples, isSelected);
+            }
+        }
+
+        /**
+         * Scrolls the current container to top. The container
+         * can be the modal-body or the main-container
+         */
+        function scrollToTop() {
+            $timeout(function () {
+                // if modal is open, scroll the modal to top
+                var container = angular.element(".modal-body");
+                if (container.length) {
+                    container.scrollTo(0, 0, 100);
+                }
+
+                // otherwise scroll the main-container
+                container = angular.element(".main-container");
+                if (container.length) {
+                    container.scrollTo(0, 0, 100);
+                }
+            }, 0);
+        }
+
         /**
          * Registers the callbacks for recordTable directive and it's children.
          * @param  {object} scope the scope object
          */
-        function registerTableCallbacks(scope) {
+        function registerTableCallbacks(scope, elem, attr) {
             if (!scope.vm) scope.vm = {};
-
-            var callOnRowClick = function (scope, tuples, isSelected) {
-                if (scope.onRowClickBind) {
-                    scope.onRowClickBind()(tuples, isSelected);
-                } else if (scope.onRowClick) {
-                    scope.onRowClick()(tuples, isSelected);
-                }
-            };
 
             scope.noSelect = modalBox.noSelect;
             scope.singleSelect = modalBox.singleSelectMode;
@@ -516,12 +536,19 @@
             scope.$root.checkReferenceURL = function (ref) {
                 var refUri = ref.isAttributeGroup ? ref.uri : ref.location.ermrestUri;
                 if (refUri.length > tableConstants.MAX_URL_LENGTH) {
-                    $timeout(function () {
-                        $window.scrollTo(0, 0);
-                    }, 0);
-                    AlertsService.addAlert('Maximum URL length reached. Cannot perform the requested action.', 'warning');
+
+                    // show the alert (the function will handle just showing one alert)
+                    AlertsService.addURLLimitAlert();
+
+                    // scroll to top of the container so users can see the alert
+                    scrollToTop();
+
+                    // signal the caller that we reached the URL limit.
                     return false;
                 }
+
+                // remove the alert if it's present since we don't need it anymore
+                AlertsService.deleteURLLimitAlert();
                 return true;
             };
 
@@ -574,7 +601,7 @@
             };
 
             // this is for the button on the table heading that deselects all currently visible rows
-            scope.selectNone = function() {
+            scope.selectNone = function($event) {
                 var tuples = [], tuple;
                 for (var i = 0; i < scope.vm.page.tuples.length; i++) {
                     tuple = scope.vm.page.tuples[i];
@@ -589,16 +616,17 @@
                         scope.vm.selectedRows.splice(index, 1);
                     }
                 }
+
                 if (tuples.length > 0) {
-                    callOnRowClick(scope, tuples, false);
+                    _callonSelectedRowsChanged(scope, tuples, false);
                 }
             };
 
             // this is for the button on the table heading that selects all currently visible rows
-            scope.selectAll = function() {
+            scope.selectAll = function($event) {
                 var tuples = [], tuple;
                 for (var i = 0; i < scope.vm.page.tuples.length; i++) {
-                    var tuple = scope.vm.page.tuples[i];
+                    tuple = scope.vm.page.tuples[i];
 
                     if (scope.isDisabled(tuple)) continue;
 
@@ -608,12 +636,12 @@
                     }
                 }
                 if (tuples.length > 0) {
-                    callOnRowClick(scope, tuples, true);
+                    _callonSelectedRowsChanged(scope, tuples, true);
                 }
             };
 
             // Facilitates the multi select functionality for multi edit by storing the tuple in the selectedRows array
-            scope.onSelect = function(args) {
+            scope.onSelect = function(args, $event) {
                 var tuple = args.tuple;
 
                 var rowIndex = scope.vm.selectedRows.findIndex(function (obj) {
@@ -629,7 +657,7 @@
                     scope.vm.selectedRows.splice(rowIndex, 1);
                 }
 
-                callOnRowClick(scope, [tuple], isSelected);
+                _callonSelectedRowsChanged(scope, [tuple], isSelected);
             };
 
             scope.$on('record-deleted', function() {
@@ -792,17 +820,28 @@
             };
 
             // function for removing a single pill and it's corresponding selected row
-            scope.removePill = function(key) {
+            scope.removePill = function(key, $event) {
                 var index = scope.vm.selectedRows.findIndex(function (obj) {
                     return obj.uniqueId == key;
                 });
-                scope.vm.selectedRows.splice(index, 1);
+
+                // this sanity check is not necessary since we're always calling
+                // this function with a valid key. but it doesn't harm to check
+                if (index === -1) {
+                    $event.preventDefault();
+                    return;
+                }
+
+                var tuple = scope.vm.selectedRows.splice(index, 1)[0];
+                _callonSelectedRowsChanged(scope, tuple, false);
             };
 
             // function for removing all pills regardless of what page they are on, clears the whole selectedRows array
-            scope.removeAllPills = function() {
+            scope.removeAllPills = function($event) {
+                var pre = scope.vm.selectedRows.slice();
                 scope.vm.selectedRows.clear();
                 scope.vm.currentPageSelected = false;
+                _callonSelectedRowsChanged(scope, pre, false);
             };
 
             // on window focus, if has pending add record requests
@@ -946,14 +985,14 @@
                 vm: '=',
                 /*
                  * used by the recordset template to pass down on click function
-                 * The recordset has a onRowClick which will be passed to this onRowClickBind.
+                 * The recordset has a onSelectedRowsChanged which will be passed to this onSelectedRowsChangedBind.
                  */
-                onRowClickBind: '=?',
-                onRowClick: '&?',      // set row click function
+                onSelectedRowsChangedBind: '=?',
+                onSelectedRowsChanged: '&?',      // set row click function TODO not used anywhere
                 parentReference: "=?" // if this is used for related references, this will be the main reference
             },
             link: function (scope, elem, attr) {
-                recordTableUtils.registerTableCallbacks(scope);
+                recordTableUtils.registerTableCallbacks(scope, elem, attr);
 
                 scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
             }
@@ -968,13 +1007,13 @@
                 vm: '=',
                 /*
                  * used by the recordset template to pass down on click function
-                 * The recordset has a onRowClick which will be passed to this onRowClickBind.
+                 * The recordset has a onSelectedRowsChanged which will be passed to this onSelectedRowsChangedBind.
                  */
-                onRowClickBind: '=?',
-                onRowClick: '&?'      // set row click function
+                onSelectedRowsChangedBind: '=?',
+                onSelectedRowsChanged: '&?'      // set row click function
             },
             link: function (scope, elem, attr) {
-                recordTableUtils.registerTableCallbacks(scope);
+                recordTableUtils.registerTableCallbacks(scope, elem, attr);
 
                 scope.isSelected = function (tuple) {
                     if (scope.vm.matchNotNull) {
@@ -1049,7 +1088,7 @@
             scope: {
                 mode: "=?",
                 vm: '=',
-                onRowClick: '&?',       // set row click function
+                onSelectedRowsChanged: '&?',       // set row click function
                 allowCreate: '=?',      // if undefined, assume false
                 getDisabledTuples: "=?", // callback to get the disabled tuples
                 registerSetPageState: "&?"
@@ -1063,7 +1102,7 @@
                 recordTableUtils.registerRecordsetCallbacks(scope);
 
                 // function for removing a single pill and it's corresponding selected row
-                scope.removePill = function(key) {
+                scope.removePill = function(key, $event) {
                     if (scope.vm.matchNotNull) {
                         scope.vm.matchNotNull = false;
                         scope.vm.selectedRows.clear();
@@ -1072,29 +1111,48 @@
                     var index = scope.vm.selectedRows.findIndex(function (obj) {
                         return obj.uniqueId == key;
                     });
-                    scope.vm.selectedRows.splice(index, 1);
+
+                    if (index === -1) {
+                        $event.preventDefault();
+                        return;
+                    }
+
+                    var tuple = scope.vm.selectedRows.splice(index, 1)[0];
+
+                    if (scope.onSelectedRowsChanged) {
+                        scope.onSelectedRowsChanged()(tuple, false);
+                    }
                 };
 
                 // function for removing all pills regardless of what page they are on, clears the whole selectedRows array
-                scope.removeAllPills = function() {
+                scope.removeAllPills = function($event) {
+                    var pre = scope.vm.selectedRows.slice();
+                    scope.vm.selectedRows.clear();
                     if (scope.vm.matchNotNull) {
                         scope.vm.matchNotNull = false;
-                        scope.vm.selectedRows.clear();
-                        return;
+                    } else {
+                        scope.vm.currentPageSelected = false;
                     }
-                    scope.vm.selectedRows.clear();
-                    scope.vm.currentPageSelected = false;
+                    if (scope.onSelectedRowsChanged) {
+                        scope.onSelectedRowsChanged()(pre, false);
+                    }
                 };
 
                 scope.toggleMatchNotNull = function () {
                     scope.vm.matchNotNull = !scope.vm.matchNotNull;
+                    var tuples = [];
                     if (scope.vm.matchNotNull) {
-                        scope.vm.selectedRows = [{
+                        scope.vm.selectedRows = tuples = [{
                             isNotNull: true,
                             displayname: {"value": scope.defaultDisplayname.notNull, "isHTML": true}
                         }];
                     } else {
+                        tuples = scope.vm.selectedRows.slice();
                         scope.vm.selectedRows.clear();
+                    }
+
+                    if (scope.onSelectedRowsChanged) {
+                        scope.onSelectedRowsChanged()(tuples, scope.vm.matchNotNull);
                     }
                 };
             }
@@ -1108,7 +1166,7 @@
             templateUrl: '../common/templates/recordset.html',
             scope: {
                 vm: '=',
-                onRowClick: '&?',       // set row click function
+                onSelectedRowsChanged: '&?',       // set row click function
                 allowCreate: '=?',       // if undefined, assume false
                 registerSetPageState: "&?"
             },

@@ -154,7 +154,14 @@
                 var imageFilter = new ERMrest.BinaryPredicate(imagePathColumn, ERMrest.OPERATOR.EQUAL, context.imageID);
                 imagePath.filter(imageFilter).entity.get().then(function success(entity) {
                     image.entity = entity[0];
-                    iframe.location.replace(image.entity.uri);
+                    var waterMark = context.queryParams.waterMark;
+                    if (waterMark === undefined) {
+                    	waterMark = '';
+                    } else {
+                    	waterMark = '&waterMark=' + waterMark;
+                    }
+                    console.log('uri='+image.entity.uri + waterMark);
+                    iframe.location.replace(image.entity.uri + waterMark);
                     console.log('Image: ', image);
 
                     var annotationTable = schema.tables.get('annotation');

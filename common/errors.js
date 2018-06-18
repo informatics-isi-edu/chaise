@@ -23,7 +23,7 @@
         multipleDataErrorCode : "Multiple Records Found",
         multipleDataMessage : "There are more than 1 record found for the filters provided.",
         facetFilterMissing : "No filtering criteria was specified to identify a specific record.",
-        systemAdminMessage : "An unexpected error has occurred. Please report this problem to your system administrators."
+        systemAdminMessage : "An unexpected error has occurred. Try clearing your cache. If you continue to face this issue, please contact the system administrator."
     })
 
     .factory('Errors', ['errorNames', 'errorMessages', function(errorNames, errorMessages) {
@@ -143,8 +143,8 @@
     }])
 
     // Factory for each error type
-    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$window', 'errorMessages', 'Errors', 'DataUtils', 'UriUtils', 'modalUtils',
-          function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $window, errorMessages, Errors, DataUtils, UriUtils, modalUtils) {
+    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$window', 'errorMessages', 'Errors', 'DataUtils', 'UriUtils', 'modalUtils', '$document',
+          function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $window, errorMessages, Errors, DataUtils, UriUtils, modalUtils, $document) {
 
         var reloadCb = function() {
             window.location.reload();
@@ -194,14 +194,13 @@
                 canClose: false,
                 showLogin: showLogin
             };
-            var errorModalStyle = repositionErrorModal();
+
             var modalProperties = {
                 windowClass: "modal-error",
                 templateUrl: '../common/templates/errorDialog.modal.html',
                 controller: 'ErrorModalController',
                 controllerAs: 'ctrl',
                 backdrop: 'static',
-                windowClass: errorModalStyle.className,
                 keyboard: false,
                 resolve: {
                     params: params
@@ -217,9 +216,6 @@
             }
 
             modalUtils.showModal(modalProperties, function (actionBtnIdentifier) {
-                if(errorModalStyle.element !== null){
-                    document.getElementsByTagName('head')[0].removeChild(errorModalStyle.element);
-                }
                 if ((errorStatus == errorNames.unauthorized && !providedLink) || (actionBtnIdentifier === "login")) {
                     Session.loginInAPopUp();
                 } else {
@@ -229,7 +225,17 @@
                         $window.location = redirectLink;
                     }
                 }
-            });
+            }, false, moveErrorModal);
+
+            function moveErrorModal() {
+                var mainnav = $document[0].getElementById('mainnav');
+                if (mainnav !== null) {
+                    var errorModal = $document[0].getElementsByClassName('modal-error')[0];
+                    if (errorModal !== null && errorModal !== undefined) {
+                            errorModal.style.top = mainnav.offsetHeight + "px";
+                    }
+                }
+            }
         }
 
         var exceptionFlag = false;
@@ -278,26 +284,6 @@
 
             // if not a dismissible errror then exception should be suppressed
             if (!isDismissible) exceptionFlag = true;
-        }
-
-        function repositionErrorModal() {
-            var mainnav = document.getElementById('mainnav');
-            if (mainnav !== null && mainnav !== undefined) {
-                var navbarHeight = mainnav.offsetHeight + "px";
-                var className = 'error-modal-top';
-                var style = document.createElement('style');
-                style.type = 'text/css';
-                style.innerHTML = '.' + className + '{ top:' + navbarHeight + ' }';
-                document.getElementsByTagName('head')[0].appendChild(style);
-                return {
-                    className: className,
-                    element: style
-                };
-            }
-            return {
-                className: "",
-                element: null
-            };
         }
 
         return {
@@ -368,7 +354,7 @@ window.onerror = function() {
                     + '<h2 class="modal-title ">Error: ' + errName + '</h2>'
                 + '</div>'
                 + '<div class="modal-body ">'
-                    + 'An unexpected error has occurred. Please report this problem to your system administrators.'
+                    + 'An unexpected error has occurred. Try clearing your cache. If you continue to face this issue, please contact the system administrator.'
                     + '<br><br>'
                     + 'Click OK to return to the Home Page.'
                     + '<br>'

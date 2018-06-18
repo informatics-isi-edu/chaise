@@ -310,7 +310,7 @@ describe('Error related test cases,', function() {
                 var newapplink = url.replace("recordedit", "recordset"),
                     lastSlash = newapplink.lastIndexOf("/"),
                     recordsetUrl = newapplink.slice(0, lastSlash);
-                expect(currentUrl).toBe(recordsetUrl, "The redirection from record page to recordset/search in case of multiple records failed");
+                expect(currentUrl).toContain(recordsetUrl, "The redirection from record page to recordset/search in case of multiple records failed");
             }).catch( function(err) {
                 console.log(err);
                 expect('Something went wrong with this promise chain.').toBe('Please see error message.');

@@ -53,7 +53,8 @@ var testParams = {
         { title: "Max Name of accommodation_collection", comment: "maximum of title", value: "Sherathon Hotel"},
         { title: "json_col", value:'<pre>'+JSON.stringify(null,undefined,2)+'</pre>', match:"html"},
         { title: "json_col_with_markdown", value: "<p>Status is: “delivered”</p>\n", match:"html"},
-    ],
+        { title: "accommodation_image_assoc", comment: "Accommodation Image", value: '<ul>\n<li><a href="' + browser.params.url + '/record/#'+browser.params.catalogId+'/product-record:file/id=3005">3,005</a></li>\n</ul>\n', type: "inline"}
+      ],
     no_related_data: {
         key: {
             name: "id",
@@ -114,6 +115,32 @@ var testParams = {
               ["3", "102", "102", "1", "1"]
           ],
           rowViewPaths: ["id=3"]
+      },
+      {
+          title: "a related entity with association between accomodation and image",
+          name: "accommodation_image_assoc",
+          schemaName: "product-record",
+          displayname: "accommodation_image_assoc",
+          isAssociation: true,
+          relatedName: "file",
+          relatedDisplayname: "file",
+          count: 1,
+          canEdit: true,
+          canCreate: true,
+          canUnlink: true,
+          isInline: true,
+          viewMore: {
+              name: "file",
+              displayname: "file",
+              filter: "accommodation_image_assoc : Sherathon Hotel"
+          },
+          rowValues: [
+              ["3,005","Four Points Sherathon 1","http://images.trvl-media.com/hotels/1000000/30000/28200/28110/28110_190_z.jpg","image/jpeg","0","2016-01-18 00:00:00","","",""]
+          ],
+          rowViewPaths: ["id=3005"],
+          rowEditPaths: [ // in case of association, edit should naviagte to the association table
+              "accommodation_id=2002&image_id=3005"
+          ],
       }
   ]
 };

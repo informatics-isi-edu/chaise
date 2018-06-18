@@ -9,11 +9,11 @@ body > .container {
 	padding-top: 70px;
 }
 
-.blur-mainnav {
+#mainnav {
     z-index: 1037;
 }
 
-.show-mainnav {
+.error-open #mainnav {
     z-index: 1051;
 }
 
