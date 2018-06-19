@@ -77,9 +77,12 @@
 
             3.  CheckFileExists function checks whether a file already exists using hatrac.js.
                 It keeps track of the checkfile calls progress for each file and once all are done it calls createUploadJob
+                If the file already exists, creating the upload job is skipped and marked as complete. filesToUploadCt is reduced by 1
+                If there is a 403 returned (job/file exists but the current user can't read it), use the same job with a new version
 
             4.  CreateUploadJob creates an upload job for each file calling the relevant function in hatrac.js using the hatracObj
                 It keeps track of the upload job progress for each file and once all are done it calls startUpload
+                If the file was marked to be skipped, the upload job is marked as complete (and never created)
 
             5.  StartUpload functions calls the start function in hatrac.js for the hatrac hatracObj for all files.
                 It keeps track of the upload progress for each file and once all are done it calls completeUpload
@@ -115,7 +118,7 @@
             vm.checksumProgress = 0;
             vm.checksumCompleted = 0;
 
-            vm.preFileExistsCount = 0;
+            vm.fileExistsCount = 0;
 
             vm.createUploadJobProgress = 0;
             vm.createUploadJobCompleted = 0;
@@ -184,6 +187,7 @@
             }
 
             // This function creates upload jobs in hatrac.js for all files
+            // if the job was marked to be skipped in the fileExists check, skip creating the job and mark it as complete
             var createUploadJobs = function() {
 
                 if (vm.erred || vm.aborted) return;
@@ -404,7 +408,7 @@
                 if (this.hatracObj.jobDone) {
                     vm.filesToUploadCt -= 1;
                 } else {
-                    vm.preFileExistsCount++
+                    vm.fileExistsCount++
                 }
 
                 // This code updates the main progress bar for file exist progress for all files
@@ -428,7 +432,7 @@
                     }
                 });
 
-                if (vm.preFileExistsCount == vm.filesToUploadCt) {
+                if (vm.fileExistsCount == vm.filesToUploadCt) {
                     createUploadJobs();
                 }
             }
