@@ -4,9 +4,14 @@
     angular.module('chaise.modal', ['chaise.utils'])
 
     //TODO
-    .factory('modalUtils', ["$uibModal", function ($uibModal) {
-        function showModal(params, successCB, rejectCB) {
+    .factory('modalUtils', ["$uibModal", "$log", function ($uibModal, $log) {
+        function showModal(params, successCB, rejectCB, postRenderCB) {
             var modalInstance = $uibModal.open(params);
+            if (postRenderCB) {
+                modalInstance.rendered.then(postRenderCB).catch(function (error) {
+                    $log.warn(error);
+                });    
+            }            
             modalInstance.result.then(successCB).catch(function (response) {
                 if (rejectCB) {
                     rejectCB(response);
@@ -149,7 +154,7 @@
         var vm = this;
 
         vm.params = params;
-        vm.ok = ok;
+        vm.onSelectedRowsChanged = onSelectedRowsChanged;
         vm.cancel = cancel;
         vm.submit = submitMultiSelection;
         vm.mode = params.mode;
@@ -181,9 +186,39 @@
             getDisabledTuples:  params.getDisabledTuples
         };
 
-        // since this is currently used for single select mode, the isSelected will always be true
-        function ok(tuples, isSelected) {
-            if (params.selectMode != modalBox.multiSelectMode) $uibModalInstance.close(tuples[0]);
+        /**
+         * In case of single-select, this will be called just once.
+         * In case of multi-select, this will be called anytime the list has changed
+         */
+        function onSelectedRowsChanged(tuples, isSelected) {
+            switch (params.selectMode) {
+                case modalBox.multiSelectMode:
+                    if (params.onSelectedRowsChanged) {
+                        var res = params.onSelectedRowsChanged(getMultiSelectionResult());
+
+                        // if it returns false, then we should disable submit button
+                        // since we cannot apply the change (url limit issue)
+                        vm.disableSubmit = (res === false);
+                        return res;
+                    }
+                    break;
+                default:
+                    // for single select isSelected is always true
+                    $uibModalInstance.close(tuples[0]);
+            }
+        }
+
+        /**
+         * This will generate the correct object that we need to pass in case of multi-select.
+         * In that case, we might have the `matchNotNull` variable. If we do, we just need to pass that.
+         */
+        function getMultiSelectionResult() {
+            var res = vm.tableModel.selectedRows;
+            if (!Array.isArray(res)) res = [];
+            if (vm.tableModel.matchNotNull) {
+                res = {matchNotNull: true};
+            }
+            return res;
         }
 
         /**
@@ -191,12 +226,7 @@
          * If we had the matchNotNull, then we just need to pass that attribute.
          */
         function submitMultiSelection() {
-            var res = vm.tableModel.selectedRows;
-            if (!Array.isArray(res)) res = [];
-            if (vm.tableModel.matchNotNull) {
-                res = {matchNotNull: true};
-            }
-            $uibModalInstance.close(res);
+            $uibModalInstance.close(getMultiSelectionResult());
         }
 
         function cancel() {

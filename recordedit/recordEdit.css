@@ -82,6 +82,7 @@ td.entity-value {
 #formEdit > table {
   overflow: hidden;
   margin-bottom: 0px;
+  max-width: none;
 }
 
 #formEdit > table > tbody > tr >  td:first-child {

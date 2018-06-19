@@ -292,7 +292,7 @@
                 }, function onError (exception) {
                     $rootScope.showSpinner = false;
                     AlertsService.addAlert(exception.message, 'error');
-                });
+                }, false);
             } else {
                 $rootScope.showSpinner = true;
                 $rootScope.reference.delete().then(onDelete, function deleteFailure(response) {
@@ -367,7 +367,7 @@
                 }
 
                 vm.recordEditModel.rows[rowIndex][column.name] = tuple.displayname.value;
-            });
+            }, false, false);
         }
 
         function clearForeignKey(rowIndex, column) {

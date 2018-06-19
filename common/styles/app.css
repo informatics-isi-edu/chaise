@@ -948,10 +948,11 @@ footer {
     bottom: 0;
     right: 0;
     left: 0;
-    background-color: #ededed;
 }
 
 footer .container1 {
+    height: inherit;
+    background-color: #ededed;
     padding-right: 5px;
     padding-left: 5px;
     padding-top: 5px;
@@ -1298,7 +1299,7 @@ footer .container1 {
      display: none !important;
  }
 
- .modal-body .recordset-container alerts {
+ .modal-body .recordset-container alerts:not(.enforce-alert) {
      display: none !important;
  }
 

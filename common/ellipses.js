@@ -43,7 +43,7 @@
                         // tell parent controller data updated
                         scope.$emit('record-deleted');
                     }).catch(onError);
-                }, onError);
+                }, onError, false);
             } else {
                 scope.$root.showSpinner = true;
                 reference.delete(logObject).then(function deleteSuccess() {
@@ -130,12 +130,12 @@
                 // Initialize the action column btn links
                 init();
 
-                scope.onSelect = function() {
+                scope.onSelect = function($event) {
                     var args = {"tuple": scope.tuple};
                     if (scope.onRowClickBind) {
-                        scope.onRowClickBind(args);
+                        scope.onRowClickBind(args, $event);
                     } else if (scope.onRowClick) {
-                        scope.onRowClick(args);
+                        scope.onRowClick(args, $event);
                     }
                 };
 

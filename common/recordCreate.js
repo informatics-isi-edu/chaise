@@ -119,7 +119,7 @@
                     viewModel.submissionButtonDisabled = false;
 
                     if (exception) AlertsService.addAlert(exception.message, 'error');
-                });
+                }, false, false);
             } else {
                 viewModel.readyToSubmit = false;
                 viewModel.submissionButtonDisabled = false;
@@ -373,7 +373,7 @@
                     };
                     addRecords(viewModel.editMode, derivedref, nullArr, isModalUpdate, rsReference, rsTuples, rsQueryParams, viewModel, viewModel.onSuccess, logObject);
                 }
-            }, viewModel.onModalClose);
+            }, viewModel.onModalClose, false);
         }
 
         /**

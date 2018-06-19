@@ -143,8 +143,8 @@
     }])
 
     // Factory for each error type
-    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$window', 'errorMessages', 'Errors', 'DataUtils', 'UriUtils', 'modalUtils',
-          function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $window, errorMessages, Errors, DataUtils, UriUtils, modalUtils) {
+    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$window', 'errorMessages', 'Errors', 'DataUtils', 'UriUtils', 'modalUtils', '$document',
+          function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $window, errorMessages, Errors, DataUtils, UriUtils, modalUtils, $document) {
 
         var reloadCb = function() {
             window.location.reload();
@@ -225,7 +225,17 @@
                         $window.location = redirectLink;
                     }
                 }
-            });
+            }, false, moveErrorModal);
+
+            function moveErrorModal() {
+                var mainnav = $document[0].getElementById('mainnav');
+                if (mainnav !== null) {
+                    var errorModal = $document[0].getElementsByClassName('modal-error')[0];
+                    if (errorModal !== null && errorModal !== undefined) {
+                            errorModal.style.top = mainnav.offsetHeight + "px";
+                    }
+                }
+            }
         }
 
         var exceptionFlag = false;

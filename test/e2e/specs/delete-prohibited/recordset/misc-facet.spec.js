@@ -40,9 +40,14 @@ var testParams = {
     },
     maximumLength: {
         facetIdx: 15,
+        option: 0,
         numRows: 25,
         modalOption: 10,
-        totalNumOptions: 25
+        totalNumOptions: 25,
+        filteredNumRows: 14,
+        secondFacetIdx: 11,
+        secondFacetOption: 0,
+        secondFacetNumOptions: 2
     },
     recordColumns: [ "text_col", "longtext_col", "markdown_col", "int_col", "float_col", "date_col", "timestamp_col", "boolean_col", "jsonb_col", "eqK7CNP-yhTDab74BW-7lQ", "cD8qWek-pEc_of8BUq0kAw" ],
     recordValues: {
@@ -82,7 +87,6 @@ describe("Other facet features, ", function() {
 
             idx = testParams.filter_secondary_key.facetIdx;
             facet = chaisePage.recordsetPage.getFacetById(idx);
-
             done();
         });
 
@@ -379,17 +383,14 @@ describe("Other facet features, ", function() {
     describe("regarding URL limitation check, ", function () {
         var uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
         var clearAll;
+        var alert = chaisePage.recordsetPage.getWarningAlert();
+        var submitBtn = chaisePage.recordsetPage.getModalSubmit();
+        var idx = testParams.maximumLength.facetIdx;
+        var facet = chaisePage.recordsetPage.getFacetById(idx);
 
-        var checkAlertAndClose = function (done) {
-            var alert = chaisePage.recordsetPage.getWarningAlert();
-
+        var checkAlert = function () {
             browser.wait(EC.visibilityOf(alert, browser.params.defaultTimeout));
-
             expect(alert.getText()).toContain("Warning Maximum URL length reached. Cannot perform the requested action.", "alert message missmatch.");
-
-            expect(chaisePage.recordsetPage.getRows().count()).toBe(testParams.maximumLength.numRows, "row count missmatch.");
-
-            return chaisePage.clickButton(chaisePage.recordsetPage.getWarningAlertDissmBtn());
         };
 
         beforeAll(function (done) {
@@ -407,40 +408,100 @@ describe("Other facet features, ", function() {
             }).catch(chaisePage.catchTestError(done));
         });
 
-        it ("searching a lenghty string should show the `Maximum URL length reached` warning.", function (done) {
+        it ("searching a lenghty string should show the `Maximum URL length reached` warning.", function () {
             var mainSearch = chaisePage.recordsetPage.getMainSearchBox();
             chaisePage.setInputValue(mainSearch, chance.string({length: 2000}));
             chaisePage.recordsetPage.waitForInverseMainSpinner();
-            checkAlertAndClose().then(function () {
-                done();
-            }).catch(chaisePage.catchTestError(done));
+            expect(chaisePage.recordsetPage.getRows().count()).toBe(testParams.maximumLength.numRows, "row count missmatch.");
+            checkAlert();
         });
 
-        it ("after selecting the facets we should check for URL limit and show warning if needed.", function (done) {
-            var idx = testParams.maximumLength.facetIdx;
-            var facet = chaisePage.recordsetPage.getFacetById(idx);
-            chaisePage.clickButton(facet).then(function () {
-                // wait for facet to open
-                browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
+        describe("in facet modal, ", function () {
+            beforeAll(function (done) {
+                chaisePage.clickButton(facet).then(function () {
+                    // wait for facet to open
+                    browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
 
-                // click on show more
-                var showMore = chaisePage.recordsetPage.getShowMore(idx);
-                browser.wait(EC.elementToBeClickable(showMore));
-                return chaisePage.clickButton(showMore);
-            }).then(function () {
-                //select all
-                chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
-                return chaisePage.clickButton(chaisePage.recordsetPage.getSelectAllBtn());
-            }).then(function () {
-                // submit modal
-                return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
-            }).then(function () {
-                //check the warning
-                return checkAlertAndClose(done);
-            }).then(function () {
-                done();
-            }).catch(chaisePage.catchTestError(done));
+                    // click on show more
+                    var showMore = chaisePage.recordsetPage.getShowMore(idx);
+                    browser.wait(EC.elementToBeClickable(showMore));
+                    return chaisePage.clickButton(showMore);
+                }).then(function () {
+                    chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
+                    done();
+                }).catch(chaisePage.catchTestError(done));
+            });
+
+            it ('after opening the modal, the existing url limit alert should be removed.', function () {
+                expect(alert.isPresent()).toBeFalsy();
+            });
+
+            it ("alert should be displayed upon reaching the URL limit and submit button should be disabled.", function (done) {
+                chaisePage.clickButton(chaisePage.recordsetPage.getSelectAllBtn()).then(function () {
+                    checkAlert();
+                    expect(submitBtn.getAttribute('disabled')).toBe('true', "submit is not disabled.");
+                    done();
+                }).catch(chaisePage.catchTestError(done));
+            });
+
+            it ("changing filters and going below the URL limit should hide the alert and enable the submit button.", function (done) {
+                chaisePage.clickButton(chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(1)).then(function () {
+                    chaisePage.waitForElementInverse(alert);
+                    expect(submitBtn.getAttribute('disabled')).not.toBe('true', "submit is disabled.");
+                    return chaisePage.clickButton(submitBtn);
+                }).then(function () {
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                            return ct == testParams.maximumLength.filteredNumRows;
+                        });
+                    }, browser.params.defaultTimeout);
+                    done();
+                }).catch(chaisePage.catchTestError(done));
+            });
         });
+
+        describe("in main container, ", function () {
+            var secondFacetIdx = testParams.maximumLength.secondFacetIdx;
+
+            it ("alert should be displayed upon reaching the URL limit and the request should not be completed.", function (done) {
+                var secondFacetOption = chaisePage.recordsetPage.getFacetOption(
+                    secondFacetIdx,
+                    testParams.maximumLength.secondFacetOption
+                );
+
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getFacetOptions(secondFacetIdx).count().then(function(ct) {
+                        return ct == testParams.maximumLength.secondFacetNumOptions;
+                    });
+                }, browser.params.defaultTimeout);
+
+                browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(secondFacetIdx)), browser.params.defaultTimeout);
+
+                chaisePage.clickButton(secondFacetOption).then(function () {
+                    checkAlert();
+                    expect(secondFacetOption.isSelected()).toBeFalsy("the option is checked.");
+                    done();
+                }).catch(chaisePage.catchTestError(done));
+            });
+
+            it ("changing filters and going below the URL limit should hide the alert.", function (done) {
+                var facetOption = chaisePage.recordsetPage.getFacetOption(
+                    idx,
+                    testParams.maximumLength.option
+                );
+
+                chaisePage.clickButton(facetOption).then(function () {
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                            return ct == testParams.maximumLength.filteredNumRows - 1;
+                        });
+                    }, browser.params.defaultTimeout);
+                    expect(alert.isPresent()).toBeFalsy("alert is visible");
+                    done();
+                }).catch(chaisePage.catchTestError(done));
+            });
+        });
+
     });
 
     describe("navigating to record and recordedit app with facets.", function () {

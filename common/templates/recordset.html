@@ -12,13 +12,13 @@
 
                 <div ng-if="vm.selectedRows.length > 0 && vm.config.selectMode == 'multi-select' && !vm.config.hideSelectedRows" class="row total-filters selected-rows-filters">
                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <a class="remove-link" ng-click="removeAllPills()">
+                        <a class="remove-link" ng-click="removeAllPills($event)">
                             <span class="filter-label label label-primary">
                                 clear all
                             </span>
                         </a>
                         <div class="filter-label label label-default" ng-repeat="row in vm.selectedRows track by $index">
-                            <a class="remove-link" ng-click="removePill(row.uniqueId)"><i class="glyphicon glyphicon-remove"></i></a>
+                            <a class="remove-link" ng-click="removePill(row.uniqueId, $event)"><i class="glyphicon glyphicon-remove"></i></a>
                             <span ng-if="row.displayname.isHTML" ng-bind-html="row.displayname.value"></span>
                             <span ng-if="!row.displayname.isHTML" ng-bind="row.displayname.value"></span>
                         </div>
@@ -125,7 +125,7 @@
             <!-- record table -->
             <div id="recordset-table-container" ng-if="vm.initialized">
                 <h3 ng-if="!vm.config.hideTotalCount" id="rs-total-count" class="replace-margin">Displaying {{vm.rowValues.length}}{{vm.totalRowsCnt ? " of " + (vm.totalRowsCnt > vm.rowValues.length ? vm.totalRowsCnt : vm.rowValues.length) : ''}} Records</h3>
-                <record-table id="rs-{{vm.makeSafeIdAttr(vm.tableDisplayName.value)}}" vm="vm" on-row-click-bind="onRowClick"></record-table>
+                <record-table id="rs-{{vm.makeSafeIdAttr(vm.tableDisplayName.value)}}" vm="vm" on-selected-rows-changed-bind="onSelectedRowsChanged"></record-table>
             </div>
 
             <!-- bottom pagination -->
