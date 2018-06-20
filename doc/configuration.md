@@ -46,3 +46,4 @@ The below table explains the usage of the default parameters:
 | maxRelatedTablesOpen | An integer | N/A | "maxRelatedTablesOpen" : \<value\> | N/A | It defines maximum number of expanded related table on a page during initial loading. If related tables exceed this value then all of them shall be collapsed.
 | showFaceting | Boolean | false | "showFaceting" : \<value\> | N/A | If true, shows the faceting panel on the recordset app.
 | hideTableOfContents | Boolean | false | "hideTableOfContents" : \<value\> | N/A | If true, hides the table of contents panel on the record app. By default table of contents will be visible.
+| showExportButton | Boolean | false | "showExportButton" : \<value\> | N/A | If true, shows the experimental export button.
