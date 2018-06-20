@@ -498,6 +498,7 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/authen.js \
 	$(COMMON)/bindHtmlUnsafe.js \
 	$(COMMON)/ellipses.js \
+	$(COMMON)/export.js \
 	$(COMMON)/errors.js \
 	$(COMMON)/faceting.js \
 	$(COMMON)/filters.js \
