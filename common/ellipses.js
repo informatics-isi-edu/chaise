@@ -22,6 +22,9 @@
                 };
             }
 
+            var tuples = []
+            tuples.push(scope.tuple);
+
             if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
                 var onError = function (response) {
                     scope.$root.showSpinner = false;
@@ -38,7 +41,7 @@
                 }, function onSuccess(res) {
                     scope.$root.showSpinner = true;
                     // user accepted prompt to delete
-                    reference.delete(logObject).then(function deleteSuccess() {
+                    reference.delete(tuples, logObject).then(function deleteSuccess() {
                         scope.$root.showSpinner = false;
                         // tell parent controller data updated
                         scope.$emit('record-deleted');
@@ -46,7 +49,7 @@
                 }, onError, false);
             } else {
                 scope.$root.showSpinner = true;
-                reference.delete(logObject).then(function deleteSuccess() {
+                reference.delete(tuples, logObject).then(function deleteSuccess() {
                     scope.$root.showSpinner = false;
                     // tell parent controller data updated
                     scope.$emit('record-deleted');
