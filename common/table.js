@@ -534,7 +534,7 @@
             scope.multiSelect = modalBox.multiSelectMode;
 
             scope.$root.checkReferenceURL = function (ref) {
-                var refUri = ref.isAttributeGroup ? ref.uri : ref.location.ermrestUri;
+                var refUri = ref.isAttributeGroup ? ref.ermrestPath : ref.location.ermrestPath;
                 if (refUri.length > tableConstants.MAX_URL_LENGTH) {
 
                     // show the alert (the function will handle just showing one alert)
