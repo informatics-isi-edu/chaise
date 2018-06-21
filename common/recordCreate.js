@@ -118,7 +118,9 @@
                     viewModel.readyToSubmit = false;
                     viewModel.submissionButtonDisabled = false;
 
-                    if (exception) AlertsService.addAlert(exception.message, 'error');
+                    if (exception) {
+                        AlertsService.addAlert(exception.message || "", 'error');
+                    }
                 }, false, false);
             } else {
                 viewModel.readyToSubmit = false;
