@@ -73,7 +73,7 @@ var testParams = {
 
 
 describe("Other facet features, ", function() {
-/*
+
     describe("selecting entity facet that is not on the shortest key.", function () {
         var facet, idx, clearAll;
         beforeAll(function (done) {
@@ -379,7 +379,7 @@ describe("Other facet features, ", function() {
             }).catch(chaisePage.catchTestError(done));
         });
     });
-*/
+
     describe("regarding URL limitation check, ", function () {
         var uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
         var clearAll;
@@ -465,24 +465,24 @@ describe("Other facet features, ", function() {
 
             it ("alert should be displayed upon reaching the URL limit and the request should not be completed.", function (done) {
                 var secondFacet = chaisePage.recordsetPage.getFacetById(secondFacetIdx);
-                
+
                 var secondFacetOption = chaisePage.recordsetPage.getFacetOption(
                     secondFacetIdx,
                     testParams.maximumLength.secondFacetOption
                 );
-                
+
                 chaisePage.clickButton(secondFacet).then(function () {
                     // wait for facet to open
                     browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(secondFacetIdx)), browser.params.defaultTimeout);
-                    
+
                     browser.wait(function () {
                         return chaisePage.recordsetPage.getFacetOptions(secondFacetIdx).count().then(function(ct) {
                             return ct == testParams.maximumLength.secondFacetNumOptions;
                         });
                     }, browser.params.defaultTimeout);
-                    
+
                     browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(secondFacetIdx)), browser.params.defaultTimeout);
-                    
+
                     return chaisePage.clickButton(secondFacetOption);
                 }).then(function () {
                         checkAlert();
@@ -511,7 +511,7 @@ describe("Other facet features, ", function() {
         });
 
     });
-/*
+
     describe("navigating to record and recordedit app with facets.", function () {
 
         var uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
@@ -712,5 +712,4 @@ describe("Other facet features, ", function() {
             });
         });
     });
-*/
 });
