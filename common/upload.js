@@ -73,13 +73,16 @@
                 It calls calculateChecksum if there are any file objects
 
             2.  CalculateChecksum calls the relevant function in hatrac.js using the hatracObj to calculate the checksum
-                It keeps track of checksum calculationprogress for each file and once all are done it calls createUploadJob
+                It keeps track of checksum calculationprogress for each file and once all are done it calls checkFileExists
 
-            3.  CreateUploadJob creates an upload job for each file calling the relevant function in hatrac.js using the hatracObj
-                It keeps track of the upload job progress for each file and once all are done it calls checkFileExists
+            3.  CheckFileExists function checks whether a file already exists using hatrac.js.
+                It keeps track of the checkfile calls progress for each file and once all are done it calls createUploadJob
+                If the file already exists, creating the upload job is skipped and marked as complete. filesToUploadCt is reduced by 1
+                If there is a 403 returned (job/file exists but the current user can't read it), use the same job with a new version
 
-            4.  CheckFileExists function checks whether a file already exists using hatrac.js.
-                It keeps track of the checkfile calls progress for each file and once all are done it calls startUpload
+            4.  CreateUploadJob creates an upload job for each file calling the relevant function in hatrac.js using the hatracObj
+                It keeps track of the upload job progress for each file and once all are done it calls startUpload
+                If the file was marked to be skipped, the upload job is marked as complete (and never created)
 
             5.  StartUpload functions calls the start function in hatrac.js for the hatrac hatracObj for all files.
                 It keeps track of the upload progress for each file and once all are done it calls completeUpload
@@ -106,13 +109,16 @@
             vm.erred = false;
 
             vm.totalSize = 0;
-            vm.humanTotalSize = 0
-            vm.noOfFiles = 0;
+            vm.humanTotalSize = 0;
+            vm.filesCt = 0;
+            vm.filesToUploadCt = 0;
             vm.sizeTransferred = 0;
             vm.humanSizeTransferred = 0;
 
             vm.checksumProgress = 0;
             vm.checksumCompleted = 0;
+
+            vm.fileExistsCount = 0;
 
             vm.createUploadJobProgress = 0;
             vm.createUploadJobCompleted = 0;
@@ -121,7 +127,7 @@
             vm.fileExistsCompleted = 0;
 
             vm.uploadProgress = 0;
-            vm.uploadCompleted = 0;
+            vm.numUploadsCompleted = 0;
 
             vm.uploadJobCompleteProgress = 0;
             vm.uploadJobCompletedCount = 0;
@@ -163,37 +169,43 @@
                 });
             };
 
-            // This function creates upload jobs in hatrac.js for all files
-            var createUploadJobs = function() {
-
-                if (vm.erred || vm.aborted) return;
-
-                vm.title = "Creating Upload Jobs for the files";
-                vm.isCreateUploadJob = true;
-                vm.isFileExists = false;
-                vm.isUpload = false;
-                vm.rows.forEach(function(row) {
-                    row.forEach(function(item) {
-                        item.hatracObj.createUploadJob().then(
-                            item.onJobCreated.bind(item),
-                            onError);
-                    });
-                });
-            };
-
-            // This function calls for checkFileExists in hatrac.js for all files to determine their existence
+            // This function checks for files existing before upload job is created
+            // verifies if the same file exists in the namespace with the same size/length
             var checkFileExists = function() {
 
                 if (vm.erred || vm.aborted) return;
 
                 vm.title = "Checking for existing files";
                 vm.isFileExists = true;
-                vm.isUpload = false;
                 vm.rows.forEach(function(row) {
                     row.forEach(function(item) {
                         item.hatracObj.fileExists().then(
                             item.onFileExistSuccess.bind(item),
                             onError);
+                    });
+                });
+            }
+
+            // This function creates upload jobs in hatrac.js for all files
+            // if the job was marked to be skipped in the fileExists check, skip creating the job and mark it as complete
+            var createUploadJobs = function() {
+
+                if (vm.erred || vm.aborted) return;
+
+                vm.title = "Creating Upload Jobs for the files";
+                vm.isCreateUploadJob = true;
+                vm.isUpload = false;
+                vm.rows.forEach(function(row) {
+                    row.forEach(function(item) {
+                        if (item.skipUploadJob) {
+                            item.hatracObj.completeUpload().then(
+                                item.onCompleteUploadJob.bind(item),
+                                onError);
+                        } else {
+                            item.hatracObj.createUploadJob().then(
+                                item.onJobCreated.bind(item),
+                                onError);
+                        }
                     });
                 });
             };
@@ -285,7 +297,7 @@
 
                 vm.erred = true;
 
-                abortUploads();
+                abortUploads(err);
 
                 $uibModalInstance.dismiss(err);
             };
@@ -367,6 +379,7 @@
 
                 if (vm.erred || vm.aborted) return;
 
+                this.fileExistsDone = false;
                 this.checksumPercent = 100;
                 this.checksumProgress = this.size;
                 if (!this.checksumCompleted) {
@@ -376,58 +389,27 @@
 
                     // Once all checksums have been calculated call createUploadJobs
                     // To create a job for each file
-                    if (vm.checksumCompleted == vm.noOfFiles) {
-                        createUploadJobs();
+                    if (vm.checksumCompleted == vm.filesCt) {
+                        checkFileExists();
                     }
                 }
             };
 
-            // This function is called as a success promise callback by createUpload function above for each file
-            // Once upload jobs for all files are done it calls checkFileExists
-            uploadFile.prototype.onJobCreated = function() {
-
-                if (vm.erred || vm.aborted) return;
-
-                // This code updates the individual progress bar for job creation progress for this file
-                this.jobCreateDone = true;
-                this.fileExistsDone = false;
-                this.uploadStarted = false;
-                this.completeUploadJob = false;
-
-                // This code updates the main progress bar for job creation progress for all files
-                var progress  = 0;
-                vm.rows.forEach(function(row) {
-                    row.forEach(function(item) {
-                        progress += item.jobCreateDone ? 1 : 0;
-                    });
-                });
-
-                vm.createUploadJobProgress = (progress/vm.noOfFiles)*100;
-                vm.createUploadJobCompleted = progress;
-
-                $timeout(function() {
-                    try {
-                        $scope.$apply();
-                    } catch (e) {
-                        $log.warn("$scope.$apply() error. $apply was called while a digest cycle was running.");
-                    }
-                });
-
-                if (progress == vm.noOfFiles) {
-                    checkFileExists();
-                }
-            };
-
-            // This function is called as a success promise callback by checkFileExists function above for each file
-            // Once all files have been checked for their existence it calls startUpload
             uploadFile.prototype.onFileExistSuccess = function() {
 
                 if (vm.erred || vm.aborted) return;
 
-                 // This code updates the individual progress bar for file exist progress for current file
+                this.skipUploadJob = this.hatracObj.jobDone;
                 this.fileExistsDone = true;
-                this.uploadStarted = false;
-                this.completeUploadJob = false;
+                this.jobCreateDone = false;
+
+                // if the job is already done, that means the file has an idntical file already in the server (md5 and size match)
+                // we don't want to even create a job for that file because it shouldn't be uploaded
+                if (this.hatracObj.jobDone) {
+                    vm.filesToUploadCt -= 1;
+                } else {
+                    vm.fileExistsCount++
+                }
 
                 // This code updates the main progress bar for file exist progress for all files
                 var progress  = 0;
@@ -439,7 +421,7 @@
                     });
                 });
 
-                vm.fileExistsProgress = (progress/vm.noOfFiles)*100;
+                vm.fileExistsProgress = (progress/vm.filesToUploadCt)*100;
                 vm.fileExistsCompleted = progress;
 
                 $timeout(function() {
@@ -450,10 +432,48 @@
                     }
                 });
 
-                if (progress == vm.noOfFiles) {
+                if (vm.fileExistsCount == vm.filesToUploadCt) {
+                    createUploadJobs();
+                }
+            }
+
+            // This function is called as a success promise callback by createUpload function above for each file
+            // Once upload jobs for all files are done it calls checkFileExists
+            uploadFile.prototype.onJobCreated = function() {
+
+                if (vm.erred || vm.aborted) return;
+
+                // This code updates the individual progress bar for job creation progress for this file
+                this.jobCreateDone = true;
+                this.uploadStarted = false;
+                this.completeUploadJob = false;
+
+                // This code updates the main progress bar for job creation progress for all files
+                var progress  = 0;
+                vm.rows.forEach(function(row) {
+                    row.forEach(function(item) {
+                        progress += item.jobCreateDone ? 1 : 0;
+                    });
+                });
+
+                vm.createUploadJobProgress = (progress/vm.filesToUploadCt)*100;
+                vm.createUploadJobCompleted = progress;
+
+                $timeout(function() {
+                    try {
+                        $scope.$apply();
+                    } catch (e) {
+                        $log.warn("$scope.$apply() error. $apply was called while a digest cycle was running.");
+                    }
+                });
+
+                if (progress == vm.filesToUploadCt) {
                     startUpload();
                 }
             };
+
+            // This function is called as a success promise callback by checkFileExists function above for each file
+            // Once all files have been checked for their existence it calls startUpload
 
             // This function is called as a notify promise callback by startUpload function above for each file
             // It updates the progress for upload on the UI
@@ -500,11 +520,11 @@
                 this.progressPercent = 100;
                 if (!this.uploadCompleted) {
                     this.uploadCompleted = true;
-                    vm.uploadCompleted++;
+                    vm.numUploadsCompleted++;
 
                     // If all files have been uploaded then call completeUpload
                     // to sent requests to mark the job as done
-                    if (vm.uploadCompleted == vm.noOfFiles) {
+                    if (vm.numUploadsCompleted == vm.filesToUploadCt) {
                         clearInterval(speedIntervalTimer);
                         completeUpload();
                     }
@@ -531,7 +551,7 @@
                     });
                 });
 
-                vm.uploadJobCompleteProgress = (progress/vm.noOfFiles)*100;
+                vm.uploadJobCompleteProgress = (progress/vm.filesCt)*100;
                 vm.uploadJobCompletedCount = progress;
 
                 $timeout(function() {
@@ -543,7 +563,7 @@
                 });
 
                 // If all files have been uploaded and their completed upload job calls are done
-                if (progress == vm.noOfFiles) {
+                if (progress == vm.filesCt) {
                     var index = 0;
 
                      // Iterate over all rows that are passed as parameters to the modal controller
@@ -588,7 +608,7 @@
                         // else if column contains url then set it in the column directly
                         // if the url is empty then set the column values as null
                         if (row[k] != null && typeof row[k] == 'object' && row[k].file) {
-                            vm.noOfFiles++;
+                            vm.filesCt++;
                             vm.totalSize += row[k].file.size;
                             tuple.push(new uploadFile(row[k], column, row));
                         } else {
@@ -603,11 +623,12 @@
 
             // If there are no files to be uploaded then simply close the modal
             // Else start with calling calculateChecksum
-            if (!vm.noOfFiles) {
+            if (!vm.filesCt) {
                 $timeout(function() {
                    $uibModalInstance.close();
                 });
             } else {
+                vm.filesToUploadCt = vm.filesCt;
                 calculateChecksum();
             }
 
