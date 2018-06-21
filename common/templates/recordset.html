@@ -100,7 +100,7 @@
                         <a class="remove-link" ng-click="vm.removeFilter($index)" tooltip-placement="bottom" uib-tooltip="Clear Facet"><i class="glyphicon glyphicon-remove"></i></a>
                         <a tooltip-placement="bottom" ng-click="vm.focusOnFacet($index)" ng-if="::fc.displayname.isHTML"  uib-tooltip="Go to the Facet" ng-bind-html="::fc.displayname.value"></a>
                         <a tooltip-placement="bottom" ng-click="vm.focusOnFacet($index)" ng-if="::!fc.displayname.isHTML" uib-tooltip="Go to the Facet" ng-bind="::fc.displayname.value"></a>:
-                        <span uib-tooltip-template="'filtersTooltipTemplate.html'" tooltip-placement="bottom-left">
+                        <span uib-tooltip-template="'filtersTooltipTemplate.html'" tooltip-placement="bottom-left" tooltip-class="filters-tooltip">
                             <span ng-repeat="filter in vm.facetModels[$index].appliedFilters">
                                 <span ng-if="::filter.displayname.value && filter.displayname.isHTML" ng-bind-html="::filter.displayname.value"></span>
                                 <span ng-if="::filter.displayname.value && !filter.displayname.isHTML" ng-bind="::filter.displayname.value"></span>

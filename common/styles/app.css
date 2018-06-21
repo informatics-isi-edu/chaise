@@ -87,6 +87,14 @@ span[uib-tooltip] {
     text-align: left;
 }
 
+.filters-tooltip {
+    margin-right: 2%;
+}
+
+.filters-tooltip .tooltip-inner {
+    max-width: inherit;
+}
+
 .btn.btn-primary.btn-inverted {
     color: #337ab7;
     background-color: white;
