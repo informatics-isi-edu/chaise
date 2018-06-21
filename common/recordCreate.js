@@ -119,7 +119,9 @@
                     viewModel.submissionButtonDisabled = false;
 
                     if (exception) {
-                        AlertsService.addAlert(exception.message || "", 'error');
+                        // happens with an error with code 0
+                        var message = exception.message || "Please try again";
+                        AlertsService.addAlert(message, 'error');
                     }
                 }, false, false);
             } else {
