@@ -12,7 +12,7 @@
     .directive('ellipses', ['AlertsService', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$window', 'defaultDisplayname',
         function(AlertsService, ErrorService, logActions, MathUtils, messageMap, modalBox, modalUtils, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $window, defaultDisplayname) {
 
-        function deleteReference(scope, reference) {
+        function deleteReference(scope, reference, tuple) {
             var logObject = {action: logActions.recordsetDelete};
             // if parentReference exists then it's in the related entities section
             if (scope.parentReference) {
@@ -22,42 +22,39 @@
                 };
             }
 
-            var tuples = []
-            tuples.push(scope.tuple);
-
-            if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
-                var onError = function (response) {
+            var onError = function (hasConfirm) {
+                return function (response) {
                     scope.$root.showSpinner = false;
                     // if response is string, the modal has been dismissed
-                    if (typeof response !== "string") {
+                    if (!hasConfirm || typeof response !== "string") {
                         ErrorService.handleException(response, true);  // throw exception for dismissible pop- up (error, isDismissible = true)
                     }
                 }
+            }
+
+            var deleteTuple = function (hasConfirmation) {
+                scope.$root.showSpinner = true;
+                // user accepted prompt to delete
+                reference.delete(tuples, logObject).then(function deleteSuccess() {
+                    scope.$root.showSpinner = false;
+                    // tell parent controller data updated
+                    scope.$emit('record-deleted');
+                }).catch(onError());
+            }
+
+            var tuples = tuple ? [tuple] : null;
+
+            if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
                 modalUtils.showModal({
                     templateUrl: "../common/templates/delete-link/confirm_delete.modal.html",
                     controller: "ConfirmDeleteController",
                     controllerAs: "ctrl",
                     size: "sm"
                 }, function onSuccess(res) {
-                    scope.$root.showSpinner = true;
-                    // user accepted prompt to delete
-                    reference.delete(tuples, logObject).then(function deleteSuccess() {
-                        scope.$root.showSpinner = false;
-                        // tell parent controller data updated
-                        scope.$emit('record-deleted');
-                    }).catch(onError);
-                }, onError, false);
+                    deleteTuple(true)
+                }, onError(true), false);
             } else {
-                scope.$root.showSpinner = true;
-                reference.delete(tuples, logObject).then(function deleteSuccess() {
-                    scope.$root.showSpinner = false;
-                    // tell parent controller data updated
-                    scope.$emit('record-deleted');
-
-                }).catch(function (error) {
-                    scope.$root.showSpinner = false;
-                    ErrorService.handleException(error, true); // throw exception for dismissible pop- up (error, isDismissible = true)
-                });
+                deleteTuple(false);
             }
         }
 
@@ -118,14 +115,17 @@
                     if (scope.config.deletable && scope.context.indexOf("compact/brief") === 0 && scope.associationRef) {
                         var associatedRefTuples = [];
                         scope.unlink = function() {
-                            deleteReference(scope, scope.associationRef);
+                            // NOTE: For deleting association rows (M <= A => FK where A is the association table),
+                            // we don't have the tuple with relelvant data for the row in A. So delete based on the reference uri
+                            deleteReference(scope, scope.associationRef, null);
                         };
                     }
 
                     // define delete function
                     else if (scope.config.deletable) {
                         scope.delete = function() {
-                            deleteReference(scope, scope.tuple.reference);
+                            // For deleting a row, pass the tuple with it's appropriate key information
+                            deleteReference(scope, scope.tuple.reference, scope.tuple);
                         };
                     }
                 };
