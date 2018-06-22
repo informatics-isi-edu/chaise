@@ -269,6 +269,8 @@
             $window.location.href = uri;
         }
 
+        // TODO: If we re-enable this feature for recordedit, this function needs to be refactored to include tuples in the delete request
+        // i.e. reference.delete([Tuple, Tuple, ...])
         function deleteRecord() {
             var errorData = {};
             if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
