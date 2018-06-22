@@ -4,7 +4,7 @@
     angular.module('chaise.upload', ['ermrestjs'])
 
 
-        .directive('upload', [ '$timeout', 'ERMrest', function($timeout, ERMrest) {
+        .directive('upload', [ '$timeout', 'AlertsService', 'ERMrest', function($timeout, AlertsService, ERMrest) {
 
             return {
                 restrict: 'AE',
@@ -30,6 +30,25 @@
                             .bind('change', function (event) {
 
                                 if (event.target.files.length) {
+                                    var fileExtensionFilter = scope.column.filenameExtFilter;
+
+                                    if (fileExtensionFilter.length > 0) {
+                                        var validFileExtension = false;
+                                        // loop through the array, if any of the extensions in the array match the extension in the current filename, validates as true
+                                        for (var j=0; j<fileExtensionFilter.length; j++) {
+                                            var filename = event.target.files[0].name;
+                                            if (filename.slice(filename.length - fileExtensionFilter[j].length, filename.length) == fileExtensionFilter[j]) {
+                                                validFileExtension = true;
+                                            }
+                                        }
+
+                                        if (!validFileExtension) {
+                                            AlertsService.addAlert("Invalid file extension for '" + filename + "'. Valid file extensions are " + scope.fileExtensions, 'error');
+                                            scope.$apply();
+                                            return;
+                                        }
+                                    }
+
                                     // set the reference value object with selected file, url/filename
                                     // and also create an Upload object and save it as hatracObj in the value object
                                     scope.value.file = event.target.files[0];
@@ -144,7 +163,7 @@
             vm.cancel = function() {
                 vm.aborted = true;
                 abortUploads();
-                $uibModalInstance.dismiss();
+                $uibModalInstance.dismiss('cancel');
             };
 
             var lastByteTransferred = 0;

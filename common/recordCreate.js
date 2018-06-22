@@ -2,8 +2,8 @@
     'use strict';
     angular.module('chaise.recordcreate', ['chaise.errors','chaise.utils'])
 
-    .factory("recordCreate", ['$cookies', '$log', '$q', '$rootScope', '$window', 'AlertsService', 'DataUtils', 'logActions', 'modalBox', 'modalUtils', 'Session', 'UriUtils',
-        function($cookies, $log, $q, $rootScope, $window, AlertsService, DataUtils, logActions, modalBox, modalUtils, Session, UriUtils) {
+    .factory("recordCreate", ['$cookies', '$log', '$q', '$rootScope', '$window', 'AlertsService', 'DataUtils', 'logActions', 'messageMap', 'modalBox', 'modalUtils', 'Session', 'UriUtils',
+        function($cookies, $log, $q, $rootScope, $window, AlertsService, DataUtils, logActions, messageMap, modalBox, modalUtils, Session, UriUtils) {
 
         var viewModel = {};
         var GV_recordEditModel = {},
@@ -118,7 +118,12 @@
                     viewModel.readyToSubmit = false;
                     viewModel.submissionButtonDisabled = false;
 
-                    if (exception) AlertsService.addAlert(exception.message, 'error');
+                    if (typeof exception !== "string") {
+                        // happens with an error with code 0 (Timeout Error)
+                        $log.warn(exception);
+                        var message = exception.message || messageMap.errorMessageMissing;
+                        AlertsService.addAlert(message, 'error');
+                    }
                 }, false, false);
             } else {
                 viewModel.readyToSubmit = false;
