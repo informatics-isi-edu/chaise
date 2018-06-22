@@ -66,6 +66,7 @@
         "actionMessageWReplace" : {
           clickActionMessage: "Click <b>OK</b> to reload this page without @errorStatus."
         },
+        "errorMessageMissing": "An unexpected error has occurred. Please try again",
         "tableMissing": "No table specified in the form of 'schema-name:table-name' and no Default is set.",
         "maybeNeedLogin": "You may need to login to see the model or data.",
         "maybeUnauthorizedMessage" : "You may not be authorized to view this record (or records).",

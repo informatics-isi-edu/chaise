@@ -163,7 +163,7 @@
             vm.cancel = function() {
                 vm.aborted = true;
                 abortUploads();
-                $uibModalInstance.dismiss();
+                $uibModalInstance.dismiss('cancel');
             };
 
             var lastByteTransferred = 0;
