@@ -74,7 +74,12 @@
 
         vm.deleteRecord = function() {
             var errorData = {};
-            $rootScope.reference.delete([$rootScope.tuple], {action: logActions.recordDelete}).then(function deleteSuccess() {
+            var dataForDelete = {};
+            for (var i=0; i<$rootScope.reference.table.shortestKey.length; i++) {
+                var keyname = $rootScope.reference.table.shortestKey[i].name;
+                dataForDelete[keyname] = $rootScope.tuple.data[keyname];
+            }
+            $rootScope.reference.delete([dataForDelete], {action: logActions.recordDelete}).then(function deleteSuccess() {
                 // Get an appLink from a reference to the table that the existing reference came from
                 var unfilteredRefAppLink = $rootScope.reference.table.reference.contextualize.compact.appLink;
                 $rootScope.showSpinner = false;
