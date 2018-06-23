@@ -12,7 +12,7 @@
     .directive('ellipses', ['AlertsService', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$window', 'defaultDisplayname',
         function(AlertsService, ErrorService, logActions, MathUtils, messageMap, modalBox, modalUtils, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $window, defaultDisplayname) {
 
-        function deleteReference(scope, reference, tuple) {
+        function deleteReference(scope, reference, tuple, isAssociation) {
             var logObject = {action: logActions.recordsetDelete};
             // if parentReference exists then it's in the related entities section
             if (scope.parentReference) {
@@ -42,7 +42,38 @@
                 }).catch(onError());
             }
 
-            var tuples = tuple ? [tuple] : null;
+            var dataForDelete = {};
+            for (var i=0; i<reference.table.shortestKey.length; i++) {
+                var keyname = reference.table.shortestKey[i].name;
+                // NOTE: This is ugly.
+                // if assocation, we have to grab the key information for the association table from
+                //   - the tuple.data (leaf table) and
+                //   - $rootScope.tuple.data (main table)
+                if (isAssociation) {
+                    for (var j=0; j<reference.table.foreignKeys._mappings.length; j++) {
+                        var mapping = reference.table.foreignKeys._mappings[j];
+                        var value;
+                        // Could be 20 mappings but we only want the ones that match the shortest key infor for the association table
+                        // If the the current mapping column name is the same as a keyname, we need the data for that keyname
+                        // NOTE: this doesn't loop through the column set in the mapping
+                        if (mapping._from[0].name == keyname) {
+                            // if the mapping points to the leaf table, use the data from tuple
+                            if (mapping._to[0].table.name == tuple.reference.table.name) {
+                                value = tuple.data[mapping._to[0].name];
+                            // if the mapping points to the main table, use the data from $rootScope.tuple
+                            } else if (mapping._to[0].table.name == $rootScope.reference.table.name) {
+                                value = $rootScope.tuple.data[mapping._to[0].name];
+                            }
+
+                            dataForDelete[reference.table.shortestKey[i].name] = value;
+                        }
+                    }
+                } else {
+                    dataForDelete[keyname] = tuple.data[keyname];
+                }
+            }
+
+            var tuples = [dataForDelete];
 
             if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
                 modalUtils.showModal({
@@ -115,9 +146,8 @@
                     if (scope.config.deletable && scope.context.indexOf("compact/brief") === 0 && scope.associationRef) {
                         var associatedRefTuples = [];
                         scope.unlink = function() {
-                            // NOTE: For deleting association rows (M <= A => FK where A is the association table),
-                            // we don't have the tuple with relelvant data for the row in A. So delete based on the reference uri
-                            deleteReference(scope, scope.associationRef, null);
+                            // For deleting association rows (M <= A => FK where A is the association table), set flag to true
+                            deleteReference(scope, scope.associationRef, scope.tuple, true);
                         };
                     }
 
@@ -125,7 +155,7 @@
                     else if (scope.config.deletable) {
                         scope.delete = function() {
                             // For deleting a row, pass the tuple with it's appropriate key information
-                            deleteReference(scope, scope.tuple.reference, scope.tuple);
+                            deleteReference(scope, scope.tuple.reference, scope.tuple, false);
                         };
                     }
                 };
