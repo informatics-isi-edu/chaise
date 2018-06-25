@@ -46,8 +46,6 @@
                     // ermrest (for single table CSV or JSON export) or ioboxd (if bag or multi-file export)
                     doExport(scope);
 
-                    scope.isLoading = false;
-
                 };
 
                 function updateExportFormats(scope) {
@@ -196,11 +194,15 @@
                                 location.href = uriList[0];
                             }
                             console.timeEnd('External export duration');
+                            scope.isLoading = false;
+                            scope.$apply()
                         },
                         error: function (jqXHR, textStatus, errorThrown) {
+                            console.timeEnd('External export duration');
                             AlertsService.addAlert("Export failed for " + serviceUrl + " with " +
                                 textStatus + ": " + errorThrown + ": " + jqXHR.responseText, "error");
-                            console.timeEnd('External export duration');
+                            scope.isLoading = false;
+                            scope.$apply()
                         }
                     });
                 }
