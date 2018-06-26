@@ -208,16 +208,14 @@
                 }
 
                 function doExport(scope) {
-                    var baseName = scope.reference.location.tableName;
-                    var baseOpts = "?limit=none&download=" + UriUtils.fixedEncodeURIComponent(baseName);
                     var exportFormatName = scope.exportOptions.format["name"];
                     var exportFormatType = scope.exportOptions.format["type"];
                     switch (exportFormatType) {
                         case "DIRECT":
                             if (exportFormatName === "CSV") {
-                                location.href = scope.reference.location.ermrestUri + baseOpts + "&accept=csv";
+                                location.href = scope.reference.csvDownloadLink;
                             } else if (exportFormatName === "JSON") {
-                                location.href = scope.reference.location.ermrestUri + baseOpts + "&accept=json";
+                                location.href = scope.reference.jsonDownloadLink;
                             }
                             break;
                         case "BAG":
