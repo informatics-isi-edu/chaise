@@ -145,6 +145,8 @@
                     scope.scrollToFacet = function (index) {
                         var container = angular.element(document.getElementsByClassName('faceting-container')[0]);
                         var el = angular.element(document.getElementById('fc-'+index));
+                        // the elements might not be available
+                        if (el.length === 0 || container.length === 0) return;
                         container.scrollToElementAnimated(el, 5).then(function () {
                             $timeout(function () {
                                 el.addClass("active");
@@ -152,8 +154,11 @@
                             $timeout(function () {
                                 el.removeClass('active');
                             }, 1600);
+                        }).catch(function(err) {
+                            //it will be rejected only if scroll is cancelled
+                            //we don't need to handle the rejection, so we can fail silently.
                         });
-                    }
+                    };
 
                     scope.focusOnFacet = function (index) {
                         var fm = scope.vm.facetModels[index];
