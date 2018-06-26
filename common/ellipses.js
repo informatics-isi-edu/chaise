@@ -12,7 +12,7 @@
     .directive('ellipses', ['AlertsService', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$window', 'defaultDisplayname',
         function(AlertsService, ErrorService, logActions, MathUtils, messageMap, modalBox, modalUtils, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $window, defaultDisplayname) {
 
-        function deleteReference(scope, reference, tuple, isAssociation) {
+        function deleteReference(scope, reference, tuple, isUnlink) {
             var logObject = {action: logActions.recordsetDelete};
             // if parentReference exists then it's in the related entities section
             if (scope.parentReference) {
@@ -43,35 +43,30 @@
             }
 
             var dataForDelete = {};
-            for (var i=0; i<reference.table.shortestKey.length; i++) {
-                var keyname = reference.table.shortestKey[i].name;
-                // NOTE: This is ugly.
-                // if assocation, we have to grab the key information for the association table from
-                //   - the tuple.data (leaf table) and
-                //   - $rootScope.tuple.data (main table)
-                if (isAssociation) {
-                    for (var j=0; j<reference.table.foreignKeys._mappings.length; j++) {
-                        var mapping = reference.table.foreignKeys._mappings[j];
-                        var value;
-                        // Could be 20 mappings but we only want the ones that match the shortest key infor for the association table
-                        // If the the current mapping column name is the same as a keyname, we need the data for that keyname
-                        // NOTE: this doesn't loop through the column set in the mapping
-                        if (mapping._from[0].name == keyname) {
-                            // if the mapping points to the leaf table, use the data from tuple
-                            if (mapping._to[0].table.name == tuple.reference.table.name) {
-                                value = tuple.data[mapping._to[0].name];
-                            // if the mapping points to the main table, use the data from $rootScope.tuple
-                            } else if (mapping._to[0].table.name == $rootScope.reference.table.name) {
-                                value = $rootScope.tuple.data[mapping._to[0].name];
-                            }
+            // if assocation, we have to grab the key information for the association table from
+            //   - the tuple.data (leaf table) and
+            //   - $rootScope.tuple.data (main table)
+            if (isUnlink) {
+                var fks = reference.table.foreignKeys.all();
+                for (var j=0; j<fks.length; j++) {
+                    var fk = fks[j];
+                    // loop through set of fk columns, each column in FK is identifying information that should be used as part of the uri for delete
+                    for (var k=0; k<fk.colset.columns.length; k++) {
+                        var col = fk.colset.columns[k];
+                        var mappedCol = fk.mapping.get(col);
 
-                            dataForDelete[reference.table.shortestKey[i].name] = value;
-                        }
+                        // if the mapping points to the leaf table, use the data from tuple
+                        // else the mapping points to the main table, use the data from $rootScope.tuple
+                        dataForDelete[col.name] = (mappedCol.table.name == tuple.reference.table.name) ? tuple.data[mappedCol.name] : $rootScope.tuple.data[mappedCol.name];
                     }
-                } else {
+                }
+            } else {
+                for (var i=0; i<reference.table.shortestKey.length; i++) {
+                    var keyname = reference.table.shortestKey[i].name;
                     dataForDelete[keyname] = tuple.data[keyname];
                 }
             }
+
 
             var tuples = [dataForDelete];
 

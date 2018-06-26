@@ -281,6 +281,7 @@
             params.selectedRows = [];
             params.showFaceting = true;
             params.facetPanelOpen = false;
+            params.isRemove = true;
             //NOTE assumption is that this function is only is called for adding pure and binary association
             params.logObject = {
                 action: logActions.preUnlinkAssociation,
@@ -297,9 +298,36 @@
                 size: "xl",
                 templateUrl: "../common/templates/searchPopup.modal.html"
             }, function dataSelected(tuples) {
-                // take set of tuples and delete
-                // ref.delete(tuples).then()
-                //    onSuccessFunction
+                var rowsToDelete = [],
+                    tupleData;
+
+                var associationRef = ref.derivedAssociationReference;
+                for (var i=0; i<tuples.length; i++) {
+                    var tuple = tuples[i];
+                    tupleData = {};
+                    var fks = associationRef.table.foreignKeys.all();
+                    for (var j=0; j<fks.length; j++) {
+                        var fk = fks[j];
+                        // loop through set of fk columns, each column in FK is identifying information that should be used as part of the uri for delete
+                        for (var k=0; k<fk.colset.columns.length; k++) {
+                            var col = fk.colset.columns[k];
+                            var mappedCol = fk.mapping.get(col);
+
+                            // if the mapping points to the leaf table, use the data from tuple
+                            // else the mapping points to the main table, use the data from $rootScope.tuple
+                            tupleData[col.name] = (mappedCol.table.name == tuple.reference.table.name) ? tuple.data[mappedCol.name] : $rootScope.tuple.data[mappedCol.name];
+                        }
+                    }
+                    rowsToDelete.push(tupleData);
+                }
+
+                associationRef.delete(rowsToDelete).then(function () {
+                    AlertsService.addAlert("Your data has been submitted. Showing you the result set...","success");
+                    onfocusEventCall(true);
+                    onModalClose();
+                }).catch(function () {
+                    // handle exception for delete
+                });
             }, onModalClose);
             return;
         }
