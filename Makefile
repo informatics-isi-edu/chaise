@@ -873,3 +873,4 @@ usage:
 	@echo "    testviewer   	- runs viewer app e2e tests"
 	@echo "    testnavbar   	- runs navbar e2e tests"
 	@echo "    testlogin    	- runs login app e2e tests"
+	
