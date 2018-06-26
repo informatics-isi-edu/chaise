@@ -57,8 +57,6 @@ FullFeaturesParallel=test/e2e/specs/all-features/protractor.conf.js
 FullFeaturesConfirmationParallel=test/e2e/specs/all-features-confirmation/protractor.conf.js
 DeleteProhibitedParallel=test/e2e/specs/delete-prohibited/protractor.conf.js
 DefaultConfigParallel=test/e2e/specs/default-config/protractor.conf.js
-# Setup for manual tests
-E2ErecordsetManual=test/e2e/specs/all-features-confirmation/manual/recordset-manual.conf.js
 
 
 NAVBAR_TESTS=$(E2Enavbar) $(E2EnavbarHeadTitle)
@@ -77,7 +75,6 @@ FULL_FEATURES_CONFIRMATION_PARALLEL_TESTS=$(FullFeaturesConfirmationParallel)
 FULL_FEATURES_PARALLEL_TESTS=$(FullFeaturesParallel)
 PARALLEL_TESTS=$(FullFeaturesParallel) $(FullFeaturesConfirmationParallel) $(DeleteProhibitedParallel) $(DefaultConfigParallel)
 VIEWER_TESTS=$(E2EDviewer)
-MANUAL_RECORDSET_TESTS=$(E2ErecordsetManual)
 
 ALL_TESTS=$(NAVBAR_TESTS) $(RECORD_TESTS) $(RECORDSET_TESTS) $(RECORDADD_TESTS) $(RECORDEDIT_TESTS) $(PERMISSIONS_TESTS) $(FOOTER_TESTS) $(ERRORS_TESTS)
 
@@ -156,10 +153,6 @@ testfooter: test-FOOTER_TESTS
 #Rule to run the default chaise configuration tests in parallel
 .PHONY: testerrors
 testerrors: test-ERRORS_TESTS
-
-# Rule to setup schema and data for testing recordset manually
-.PHONY: testrecordsetmanually
-testrecordsetmanually: test-MANUAL_RECORDSET_TESTS
 
 # Rule to run tests
 .PHONY: test
