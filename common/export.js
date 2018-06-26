@@ -100,11 +100,9 @@
                         query["output_path"] = bagFormatOpts["name"];
                         query["output_format"] = bagFormatOpts["table_format"];
                         query["query_path"] = "/" + scope.reference.location.api + "/" +
-                            decodeURI(scope.reference.location.ermrestCompactPath + "?limit=none");
+                            scope.reference.location.ermrestCompactPath + "?limit=none";
                         queries.push(query);
                     } else {
-                        // TODO: The "template" mechanism needs refactoring to allow for full query paths in the
-                        // template config, and not just "meta" query fragments.
                         var outputs = template["outputs"];
                         if ((outputs === undefined) || (outputs && outputs.length === 0)) {
                             var error = "No outputs configured in template: " + template["name"];
@@ -112,48 +110,32 @@
                             throw new Error(error);
                         }
 
-                        var depth = 1;
-                        var baseTableAlias = "X";
-                        var tableAliasToken = baseTableAlias + depth;
+                        var tableAliasToken = "X";
                         $.each(outputs, function (i, output) {
                             var query = {};
                             var queryFrags = [];
                             var source = output["source"];
-                            var sourceName = source["name"];
-                            var sourceType = source["type"];
+                            var table = encodeURI(decodeURI(source["table"]));
+                            var api = source["api"];
                             var dest = output["destination"];
                             var destName = dest["name"];
                             var destType = dest["type"];
                             var destParams = dest["params"];
-                            var predicate = decodeURI(scope.reference.location.ermrestCompactPath);
+                            var predicate = scope.reference.location.ermrestCompactPath;
 
-                            queryFrags.push(sourceType);
-                            var predicateContainsTargetEntity = predicate.indexOf(sourceName) !== -1;
+                            queryFrags.push(api);
+                            var predicateContainsTargetEntity = predicate.indexOf(table) !== -1;
                             if (predicateContainsTargetEntity) {
                                 queryFrags.push(predicate);
                             } else {
                                 queryFrags.push(predicate);
-                                queryFrags.push(tableAliasToken + ":=" + sourceName);
+                                queryFrags.push(tableAliasToken + ":=" + table);
                             }
-                            if (source["filter"] !== undefined) {
-                                queryFrags.push(source["filter"]);
+                            if (source["path"] !== undefined) {
+                                queryFrags.push(source["path"]);
                             }
-                            if ((sourceType === "attribute") || (sourceType === "attributegroup")) {
-                                var columnRefs = [];
-                                var columnMap = source["column_map"];
-                                if (columnMap !== undefined) {
-                                    for (var col in columnMap) {
-                                        if (columnMap.hasOwnProperty(col)) {
-                                            columnRefs.push(col + ":=" +
-                                                columnMap[col]);
-                                        }
-                                    }
-                                }
-                                queryFrags.push(columnRefs.join(","))
-                            }
-                            var query_path = encodeURI("/" + queryFrags.join("/") + "?limit=none");
-                            query["query_path"] = query_path.replace(/\(/g, '%28').replace(/\)/g, '%29');
-                            query["output_path"] = destName || sourceName;
+                            query["query_path"] = "/" + queryFrags.join("/") + "?limit=none";
+                            query["output_path"] = destName || table;
                             query["output_format"] = destType || bagFormatOpts["table_format"];
                             if (destParams != null) {
                                 query["output_format_params"] = destParams;
