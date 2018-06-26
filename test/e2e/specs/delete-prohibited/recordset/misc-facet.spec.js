@@ -45,9 +45,9 @@ var testParams = {
         modalOption: 10,
         totalNumOptions: 25,
         filteredNumRows: 14,
-        secondFacetIdx: 11,
+        secondFacetIdx: 6,
         secondFacetOption: 0,
-        secondFacetNumOptions: 2
+        secondFacetNumOptions: 6
     },
     recordColumns: [ "text_col", "longtext_col", "markdown_col", "int_col", "float_col", "date_col", "timestamp_col", "boolean_col", "jsonb_col", "eqK7CNP-yhTDab74BW-7lQ", "cD8qWek-pEc_of8BUq0kAw" ],
     recordValues: {
@@ -464,24 +464,32 @@ describe("Other facet features, ", function() {
             var secondFacetIdx = testParams.maximumLength.secondFacetIdx;
 
             it ("alert should be displayed upon reaching the URL limit and the request should not be completed.", function (done) {
+                var secondFacet = chaisePage.recordsetPage.getFacetById(secondFacetIdx);
+
                 var secondFacetOption = chaisePage.recordsetPage.getFacetOption(
                     secondFacetIdx,
                     testParams.maximumLength.secondFacetOption
                 );
 
-                browser.wait(function () {
-                    return chaisePage.recordsetPage.getFacetOptions(secondFacetIdx).count().then(function(ct) {
-                        return ct == testParams.maximumLength.secondFacetNumOptions;
-                    });
-                }, browser.params.defaultTimeout);
+                chaisePage.clickButton(secondFacet).then(function () {
+                    // wait for facet to open
+                    browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(secondFacetIdx)), browser.params.defaultTimeout);
 
-                browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(secondFacetIdx)), browser.params.defaultTimeout);
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getFacetOptions(secondFacetIdx).count().then(function(ct) {
+                            return ct == testParams.maximumLength.secondFacetNumOptions;
+                        });
+                    }, browser.params.defaultTimeout);
 
-                chaisePage.clickButton(secondFacetOption).then(function () {
-                    checkAlert();
-                    expect(secondFacetOption.isSelected()).toBeFalsy("the option is checked.");
-                    done();
+                    browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(secondFacetIdx)), browser.params.defaultTimeout);
+
+                    return chaisePage.clickButton(secondFacetOption);
+                }).then(function () {
+                        checkAlert();
+                        expect(secondFacetOption.isSelected()).toBeFalsy("the option is checked.");
+                        done();
                 }).catch(chaisePage.catchTestError(done));
+
             });
 
             it ("changing filters and going below the URL limit should hide the alert.", function (done) {
@@ -704,5 +712,4 @@ describe("Other facet features, ", function() {
             });
         });
     });
-
 });

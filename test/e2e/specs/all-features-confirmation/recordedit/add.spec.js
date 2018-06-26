@@ -79,10 +79,10 @@ var testParams = {
            displaySize: "500KB",
            path: "testfile500kb.png"
        }, {
-           name: "testfile5MB.pdf",
+           name: "testfile5MB.txt",
            size: "5242880",
            displaySize: "5MB",
-           path: "testfile5MB.pdf"
+           path: "testfile5MB.txt"
        }]
     }]
 };
