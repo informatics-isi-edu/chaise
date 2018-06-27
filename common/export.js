@@ -30,7 +30,7 @@
                             }
                         },
                         defaultFormat: {
-                            name: "CSV", type: "DIRECT", template: null
+                            name: "BDBag", type: "BAG", template: null
                         },
                         defaultFormats: [
                             {name: "CSV", type: "DIRECT", template: null},
@@ -52,8 +52,11 @@
                     scope.exportOptions.format = JSON.parse(JSON.stringify(scope.exportOptions.defaultFormat));
                     scope.exportOptions.supportedFormats =
                         JSON.parse(JSON.stringify(scope.exportOptions.defaultFormats));
-                    var exportAnnotations = scope.reference.table.annotations.get("tag:isrd.isi.edu,2016:export");
-                    var templates = (exportAnnotations !== undefined) ?
+                    var exportAnnotations = null;
+                    if (scope.reference.table.annotations.contains("tag:isrd.isi.edu,2016:export")) {
+                        exportAnnotations = scope.reference.table.annotations.get("tag:isrd.isi.edu,2016:export");
+                    }
+                    var templates = (exportAnnotations != null) ?
                         exportAnnotations.content["templates"] : null;
                     if (templates == null) {
                         return;
@@ -199,6 +202,8 @@
                             } else if (exportFormatName === "JSON") {
                                 location.href = scope.reference.jsonDownloadLink;
                             }
+                            scope.isLoading = false;
+                            scope.$apply();
                             break;
                         case "BAG":
                         case "FILE":
