@@ -274,7 +274,8 @@
             recordAppUtils.pauseUpdateRecordPage();
 
             var params = {};
-            params.reference = ref.contextualize.compactSelect;
+            params.reference = ref.contextualize.compactSelect; // don't unfilter reference because we want ONLY the set already associated with the main entity reference
+            params.displayname = ref.table.displayname; // because we don't unfilter the reference, the displayname is still based on the filtered reference displayname heuristics
             params.reference.session = $rootScope.session;
             params.context = "compact/select";
             params.selectMode = modalBox.multiSelectMode;

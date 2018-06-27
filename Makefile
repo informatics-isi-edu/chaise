@@ -64,6 +64,7 @@ SEARCH_TESTS=$(E2Esearch)
 DETAILED_TESTS=$(E2EDdetailed)
 RECORDSET_TESTS=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit) $(E2EDrecordsetIndFacet) $(E2EDrecordsetHistFacet)
 RECORD_TESTS=$(E2EDrecord) $(E2ErecordNoDeleteBtn) $(E2EDrecordRelatedTable) $(E2EDrecordCopy)
+RECORD_RELATED_TESTS=$(E2EDrecordRelatedTable)
 RECORDADD_TESTS=$(E2EDIrecordAdd) $(E2EDIrecordMultiAdd) $(E2EDIrecordImmutable)
 RECORDEDIT_TESTS=$(E2EDIrecordEdit) $(E2EDIrecordMultiEdit) $(E2EDrecordEditCompositeKey) $(E2ErecordEditNoDeleteBtn) $(E2EDrecordEditSubmissionDisabled) $(E2EDIrecordEditMultiColTypes) $(E2EDrecordEditDomainFilter)
 PERMISSIONS_TESTS=$(E2EmultiPermissionsVisibility)
@@ -101,6 +102,10 @@ testsearch: test-SEARCH_TESTS
 #Rule to run record app tests
 .PHONY: testrecord
 testrecord: test-RECORD_TESTS
+
+#Rule to run record app related table tests
+.PHONY: testrelated
+testrelated: test-RECORD_RELATED_TESTS
 
 #Rule to run record add app tests
 .PHONY: testrecordadd
@@ -862,6 +867,7 @@ usage:
 	@echo "    testrecordadd 	- runs data entry app add e2e tests"
 	@echo "    testrecordedit 	- runs data entry app edit e2e tests"
 	@echo "    testrecord 		- runs record app e2e tests"
+	@echo "    testrelated 		- runs record app related tables e2e tests"
 	@echo "    testrecordset 	- runs recordset app e2e tests"
 	@echo "    testviewer   	- runs viewer app e2e tests"
 	@echo "    testnavbar   	- runs navbar e2e tests"
