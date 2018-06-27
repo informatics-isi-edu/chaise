@@ -42,7 +42,8 @@ var testParams = {
             option: 2,
             filter: "id: 3",
             numRows: 1,
-            options: [ '1', '2', '3', '4', '5', '6', '7', '8', '9', '10' ]
+            options: [ '1', '2', '3', '4', '5', '6', '7', '8', '9', '10' ],
+            comment: "ID comment"
         },
         {
             name: "int_col",
@@ -65,7 +66,8 @@ var testParams = {
                 max: 12,
                 filter: "int_col: ≤ 12",
                 numRows: 15
-            }
+            },
+            comment: "int comment"
         },
         {
             name: "float_col",
@@ -142,7 +144,8 @@ var testParams = {
                 time: "17:26:12",
                 filter: "timestamp_col: ≤ 2007-12-06 17:26:12",
                 numRows: 15
-            }
+            },
+            comment: "timestamp column"
         },
         {
             name: "text_col",
@@ -160,7 +163,8 @@ var testParams = {
             option: 2,
             filter: "longtext_col: two",
             numRows: 5,
-            options: [ 'Empty', 'one', 'two', 'No Value', 'eight', 'eleven', 'five', 'four', 'nine', 'seven' ]
+            options: [ 'Empty', 'one', 'two', 'No Value', 'eight', 'eleven', 'five', 'four', 'nine', 'seven' ],
+            comment: "A lengthy comment for the facet of the longtext_col. This should be displyed properly in the facet."
         },
         {
             name: "markdown_col",
@@ -205,7 +209,8 @@ var testParams = {
             option: 0,
             filter: "to_name: one",
             numRows: 10,
-            options: [ 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten' ]
+            options: [ 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten' ],
+            comment: "open facet"
         },
         {
             name: "f3 (term)",
@@ -232,7 +237,8 @@ var testParams = {
             option: 1,
             filter: "F1 with Term : two",
             numRows: 10,
-            options: [ 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten' ]
+            options: [ 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten' ],
+            comment: "F1 with Term comment"
         }
     ],
     multipleFacets: [
@@ -474,7 +480,7 @@ describe("Viewing Recordset with Faceting,", function() {
                 });
             });
 
-            it("should have 1 row selected in show more popup for entity.", function () {
+            it("should have 1 row selected in show more popup for entity.", function (done) {
                 var showMore = chaisePage.recordsetPage.getShowMore(11);
 
                 chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(11, 0)).then(function () {
@@ -508,7 +514,33 @@ describe("Viewing Recordset with Faceting,", function() {
                 }).then(function (ct) {
                     expect(ct).toBe(15, "Number of visible rows after selecting a second option from the modal is incorrect");
 
-                    return chaisePage.recordsetPage.getClearAllFilters().click();
+                    return chaisePage.clickButton(chaisePage.recordsetPage.getClearAllFilters());
+                }).then(function () {
+                    done();
+                }).catch(function (err) {
+                    done.fail(err);
+                });
+            });
+
+            it("should show correct tooltip for the facets.", function () {
+                testParams.facets.forEach(function (facetParams, idx) {
+                    var facetHeader = chaisePage.recordsetPage.getFacetHeaderById(idx);
+                    var tooltip = chaisePage.getTooltipDiv();
+
+                    // move mouse over the facet header to show the tooltip
+                    browser.actions().mouseMove(facetHeader).perform();
+                    if (facetParams.comment) {
+                        chaisePage.waitForElement(tooltip).then(function () {
+                            expect(tooltip.getText()).toBe(facetParams.comment, "comment missmatch for facet index=" + idx);
+                        }).catch(function (err) {
+                            console.log("error while waiting for tooltip")
+                            console.log(err);
+                        });
+                    }
+
+                    // move mouse to somewhere that doesn't have tooltip just to clear the tooltip from page
+                    browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
+                    chaisePage.waitForElementInverse(tooltip);
                 });
             });
 

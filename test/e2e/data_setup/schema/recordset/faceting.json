@@ -139,22 +139,22 @@
                     "compact": ["id"],
                     "filter": {
                         "and": [
-                            {"source": "id", "ux_mode": "choices", "choices": ["1"]},
-                            {"source": "int_col", "ranges": [{"min": "-2"}], "bar_plot": false},
+                            {"source": "id", "ux_mode": "choices", "choices": ["1"], "comment": "ID comment"},
+                            {"source": "int_col", "ranges": [{"min": "-2"}], "bar_plot": false, "comment": "int comment"},
                             {"source": "float_col", "bar_plot": false},
                             {"source": "date_col", "bar_plot": false},
-                            {"source": "timestamp_col", "bar_plot": false},
+                            {"source": "timestamp_col", "bar_plot": false, "comment": "timestamp column"},
                             {"source": "shorttext_col"},
                             {"source": "text_col"},
-                            {"source": "longtext_col"},
+                            {"source": "longtext_col", "comment": "A lengthy comment for the facet of the longtext_col. This should be displyed properly in the facet."},
                             {"source": "markdown_col"},
                             {"source": "boolean_col"},
                             {"source": "jsonb_col"},
                             {"source": [{"outbound": ["faceting", "main_fk1"]}, "id"], "markdown_name": "**F1**"},
-                            {"source": [{"outbound": ["faceting", "main_fk2"]}, "id"], "open": true},
+                            {"source": [{"outbound": ["faceting", "main_fk2"]}, "id"], "open": true, "comment": "open facet"},
                             {"source": [{"inbound": ["faceting", "main_f3_assoc_fk1"]}, {"outbound": ["faceting", "main_f3_assoc_fk2"]}, "term"]},
                             {"source": [{"inbound": ["faceting", "f4_fk1"]}, "id"], "entity": false, "ux_mode": "choices"},
-                            {"source": [{"outbound": ["faceting", "main_fk1"]}, "term"], "markdown_name": "F1 with Term"},
+                            {"source": [{"outbound": ["faceting", "main_fk1"]}, "term"], "markdown_name": "F1 with Term", "comment": "F1 with Term comment"},
                             {"source": "col_w_long_values"}
                         ]
                     }

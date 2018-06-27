@@ -1021,6 +1021,10 @@ var recordsetPage = function() {
         return element(by.id("fc-heading-" + idx));
     }
 
+    this.getFacetHeaderById = function (idx) {
+        return element(by.id("fc-heading-" + idx)).element(by.css('a'));
+    };
+
     this.getFacetCollapse = function (idx) {
         return element(by.id("fc-" + idx)).element(by.css("div[aria-expanded=true]"));
     }
