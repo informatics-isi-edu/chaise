@@ -44,7 +44,7 @@
 
             var dataForDelete = {};
             // if assocation, we have to grab the key information for the association table from
-            //   - the tuple.data (leaf table) and
+            //   - tuple.data (leaf table) and
             //   - $rootScope.tuple.data (main table)
             if (isUnlink) {
                 var fks = reference.table.foreignKeys.all();
@@ -141,7 +141,7 @@
                     if (scope.config.deletable && scope.context.indexOf("compact/brief") === 0 && scope.associationRef) {
                         var associatedRefTuples = [];
                         scope.unlink = function() {
-                            // For deleting association rows (M <= A => FK where A is the association table), set flag to true
+                            // For deleting association rows ('M <= A => L' where A is the association table), set flag to true
                             deleteReference(scope, scope.associationRef, scope.tuple, true);
                         };
                     }

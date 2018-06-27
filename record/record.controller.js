@@ -283,7 +283,7 @@
             params.showFaceting = true;
             params.facetPanelOpen = false;
             params.isRemove = true;
-            //NOTE assumption is that this function is only is called for adding pure and binary association
+
             params.logObject = {
                 action: logActions.preUnlinkAssociation,
                 referrer: ref.defaultLogInfo
@@ -324,6 +324,7 @@
 
                 associationRef.delete(rowsToDelete).then(function () {
                     AlertsService.addAlert("Your data has been submitted. Showing you the result set...","success");
+                    // trigger the reread of the data (NOTE: does it for whole page)
                     onfocusEventCall(true);
                     onModalClose();
                 }).catch(function () {
