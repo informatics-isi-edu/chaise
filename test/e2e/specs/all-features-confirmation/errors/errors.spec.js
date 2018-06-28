@@ -38,7 +38,7 @@ describe('Error related test cases,', function() {
     describe("For no record found in Record app", function() {
 
         beforeAll(function() {
-          browser.ignoreSynchronization=true;
+          browser.ignoreSynchronization = true;
             url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name +  "/id=11223312121";
             browser.get(url);
             chaisePage.waitForElement(element(by.css('.modal-dialog ')));
@@ -297,9 +297,6 @@ describe('Error related test cases,', function() {
               });
           }).then(function (errorText) {
               // Added OR case to avoid discrepancy in error message when table is deleted
-              console.log(errorText);
-              console.log(testParams.deletionErrTextBooking);
-              console.log(testParams.deletionErrTextAccommodationImg);
               expect(errorText == testParams.deletionErrTextBooking || errorText == testParams.deletionErrTextAccommodationImg).toBe(true, "409 Conflict could not be matched! Check conflict during deletion.");
               done();
           }).catch(function(error) {
