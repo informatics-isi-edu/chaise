@@ -13,7 +13,8 @@
         function(AlertsService, ErrorService, logActions, MathUtils, messageMap, modalBox, modalUtils, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $window, defaultDisplayname) {
 
         function deleteReference(scope, reference, tuple, isUnlink) {
-            var logObject = {action: logActions.recordsetDelete};
+            var logObject = {action: logActions.recordsetDelete},
+                dataForDelete = {};
             // if parentReference exists then it's in the related entities section
             if (scope.parentReference) {
                 logObject = {
@@ -35,40 +36,33 @@
             var deleteTuple = function (hasConfirmation) {
                 scope.$root.showSpinner = true;
                 // user accepted prompt to delete
-                reference.delete(tuples, logObject).then(function deleteSuccess() {
+                reference.delete([dataForDelete], logObject).then(function deleteSuccess() {
                     scope.$root.showSpinner = false;
                     // tell parent controller data updated
                     scope.$emit('record-deleted');
                 }).catch(onError());
             }
 
-            var dataForDelete = {};
             // if assocation, we have to grab the key information for the association table from
             //   - tuple.data (leaf table) and
             //   - $rootScope.tuple.data (main table)
+            // NOTE: it's assumed this will be used only for pure and binary association and it will only work for that case (having two foreignkeys)
             if (isUnlink) {
-                var fks = reference.table.foreignKeys.all();
-                for (var j=0; j<fks.length; j++) {
-                    var fk = fks[j];
+                reference.table.foreignKeys.all().forEach(function (fk) {
                     // loop through set of fk columns, each column in FK is identifying information that should be used as part of the uri for delete
-                    for (var k=0; k<fk.colset.columns.length; k++) {
-                        var col = fk.colset.columns[k];
+                    fk.colset.columns.forEach(function (col) {
                         var mappedCol = fk.mapping.get(col);
 
                         // if the mapping points to the leaf table, use the data from tuple
                         // else the mapping points to the main table, use the data from $rootScope.tuple
                         dataForDelete[col.name] = (mappedCol.table.name == tuple.reference.table.name) ? tuple.data[mappedCol.name] : $rootScope.tuple.data[mappedCol.name];
-                    }
-                }
+                    });
+                });
             } else {
-                for (var i=0; i<reference.table.shortestKey.length; i++) {
-                    var keyname = reference.table.shortestKey[i].name;
-                    dataForDelete[keyname] = tuple.data[keyname];
+                reference.table.shortestKey.forEach(function (key) {
+                    dataForDelete[key.name] = tuple.data[key.name];
                 }
             }
-
-
-            var tuples = [dataForDelete];
 
             if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
                 modalUtils.showModal({

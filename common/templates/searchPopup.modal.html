@@ -1,6 +1,6 @@
 <div class="modal-header">
     <button class="btn btn-default pull-right modal-close" type="button" ng-click="ctrl.cancel()">X</button>
-    <h2 class="modal-title">{{ctrl.params.isRemove ? "Remove" : "Choose"}}
+    <h2 class="modal-title">{{ctrl.params.isUnlink ? "Remove" : "Choose"}}
         <span ng-if="::ctrl.tableModel.tableDisplayName.isHTML" ng-bind-html="::ctrl.tableModel.tableDisplayName.value" ng-attr-tooltip-placement="bottom" ng-attr-uib-tooltip="{{::ctrl.tableModel.tableComment ? ctrl.tableModel.tableComment : undefined}}"></span>
         <span ng-if="::!ctrl.tableModel.tableDisplayName.isHTML" ng-bind="::ctrl.tableModel.tableDisplayName.value" ng-attr-tooltip-placement="bottom" ng-attr-uib-tooltip="{{::ctrl.tableModel.tableComment ? ctrl.tableModel.tableComment : undefined}}"></span>
     </h2>
@@ -8,7 +8,7 @@
 <div class="modal-body" style="overflow: auto;">
     <loading-spinner ng-show="!ctrl.tableModel.hasLoaded && !ctrl.tableModel.backgroundSearch"></loading-spinner>
     <span ng-if="ctrl.tableModel.config.selectMode=='multi-select'" ng-hide="ctrl.tableModel.selectedRows.length < 1">
-        <button id="multi-select-submit-btn" class="btn btn-primary btn-inverted pull-right" type="button" ng-click="ctrl.submit()" ng-disabled="ctrl.disableSubmit">{{ctrl.params.isRemove ? "Remove" : "Submit"}}</button>
+        <button id="multi-select-submit-btn" class="btn btn-primary btn-inverted pull-right" type="button" ng-click="ctrl.submit()" ng-disabled="ctrl.disableSubmit">{{ctrl.params.isUnlink ? "Remove" : "Submit"}}</button>
     </span>
     <div ng-switch="ctrl.mode">
         <!-- switch when 'selectFaceting' -->

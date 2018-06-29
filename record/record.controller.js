@@ -75,9 +75,8 @@
         vm.deleteRecord = function() {
             var errorData = {};
             var dataForDelete = {};
-            for (var i=0; i<$rootScope.reference.table.shortestKey.length; i++) {
-                var keyname = $rootScope.reference.table.shortestKey[i].name;
-                dataForDelete[keyname] = $rootScope.tuple.data[keyname];
+            $rootScope.reference.table.shortestKey.forEach(function (key) {
+                dataForDelete[key.name] = $rootScope.tuple.data[key.name];
             }
             $rootScope.reference.delete([dataForDelete], {action: logActions.recordDelete}).then(function deleteSuccess() {
                 // Get an appLink from a reference to the table that the existing reference came from
@@ -200,7 +199,7 @@
             return ref.canCreate;
         };
 
-        vm.canDeleteRelated = function(relatedRef) {
+        vm.canUnlinkRelated = function(relatedRef) {
             if (angular.isUndefined(relatedRef)) return false;
 
             if ( (relatedRef.pseudoColumn && !relatedRef.pseudoColumn.isInboundForeignKey) || !relatedRef.derivedAssociationReference) {
@@ -270,7 +269,7 @@
             $window.open(appLink, '_blank');
         };
 
-        vm.removeRelatedRecord = function(ref) {
+        vm.unlinkRelatedRecord = function(ref) {
             recordAppUtils.pauseUpdateRecordPage();
 
             var params = {};
@@ -303,24 +302,20 @@
                     tupleData;
 
                 var associationRef = ref.derivedAssociationReference;
-                for (var i=0; i<tuples.length; i++) {
-                    var tuple = tuples[i];
+                tuples.forEach(function (tuple) {
                     tupleData = {};
-                    var fks = associationRef.table.foreignKeys.all();
-                    for (var j=0; j<fks.length; j++) {
-                        var fk = fks[j];
+                    associationRef.table.foreignKeys.all().forEach(function (fk) {
                         // loop through set of fk columns, each column in FK is identifying information that should be used as part of the uri for delete
-                        for (var k=0; k<fk.colset.columns.length; k++) {
-                            var col = fk.colset.columns[k];
+                        fk.colset.columns.forEach(function (col) {
                             var mappedCol = fk.mapping.get(col);
 
                             // if the mapping points to the leaf table, use the data from tuple
                             // else the mapping points to the main table, use the data from $rootScope.tuple
                             tupleData[col.name] = (mappedCol.table.name == tuple.reference.table.name) ? tuple.data[mappedCol.name] : $rootScope.tuple.data[mappedCol.name];
-                        }
-                    }
+                        });
+                    });
                     rowsToDelete.push(tupleData);
-                }
+                });
 
                 associationRef.delete(rowsToDelete).then(function () {
                     AlertsService.addAlert("Your data has been submitted. Showing you the result set...","success");

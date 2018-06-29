@@ -80,9 +80,9 @@
                     toggleRelatedTableDisplayType: '&',
                     canEditRelated: '&',
                     canCreateRelated: '&',
-                    canDeleteRelated: '&',
+                    canUnlinkRelated: '&',
                     addRelatedRecord: '&',
-                    removeRelatedRecord: '&',
+                    unlinkRelatedRecord: '&',
                     toRecordSet: '&'
                 },
                 templateUrl: '../common/templates/recordAction.html',

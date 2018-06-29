@@ -14,8 +14,8 @@
     <span ng-if="canCreateRelated({ref:ref})">
         <a class="add-records-link" ng-click="addRelatedRecord({ref:ref})">Add</a>
         &nbsp;|</span>
-    <span ng-if="canDeleteRelated({ref:ref})">
-        <a class="remove-records-link" ng-click="removeRelatedRecord({ref:ref})">Remove</a>
+    <span ng-if="canUnlinkRelated({ref:ref})">
+        <a class="remove-records-link" ng-click="unlinkRelatedRecord({ref:ref})">Remove</a>
         &nbsp;|</span>
     <span><a class="more-results-link" ng-click="toRecordSet({ref:ref})">View More</a></span>
     <div ng-transclude></div>
