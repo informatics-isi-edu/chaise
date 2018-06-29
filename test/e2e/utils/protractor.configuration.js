@@ -43,7 +43,11 @@ exports.getConfig = function(options) {
   var testConfiguration = options.testConfiguration;
   if (options.configFileName) {
     var configFileName = options.configFileName;
-    testConfiguration =  require('../data_setup/config/' + configFileName);
+    if(options.manualTestConfig) {
+      testConfiguration =  require('../../manual/data_setup/config/' + configFileName);
+    } else {
+      testConfiguration =  require('../data_setup/config/' + configFileName);
+    }
   }
 
   var dataSetup = require('./protractor.parameterize.js');
@@ -53,7 +57,11 @@ exports.getConfig = function(options) {
   for (var i = 0; i < schemaConfigs.length; i++) {
       var schemaConfig = schemaConfigs[i];
       if (typeof schemaConfig === 'string') {
+        if(options.manualTestConfig) {
+          schemaConfigs[i] = require(process.env.PWD + "/test/manual/data_setup/config/" + schemaConfig);
+        } else {
           schemaConfigs[i] = require(process.env.PWD + "/test/e2e/data_setup/config/" + schemaConfig);
+        }
       }
   }
 
