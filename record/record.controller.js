@@ -77,7 +77,8 @@
             var dataForDelete = {};
             $rootScope.reference.table.shortestKey.forEach(function (key) {
                 dataForDelete[key.name] = $rootScope.tuple.data[key.name];
-            }
+            });
+
             $rootScope.reference.delete([dataForDelete], {action: logActions.recordDelete}).then(function deleteSuccess() {
                 // Get an appLink from a reference to the table that the existing reference came from
                 var unfilteredRefAppLink = $rootScope.reference.table.reference.contextualize.compact.appLink;

@@ -61,7 +61,7 @@
             } else {
                 reference.table.shortestKey.forEach(function (key) {
                     dataForDelete[key.name] = tuple.data[key.name];
-                }
+                });
             }
 
             if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
