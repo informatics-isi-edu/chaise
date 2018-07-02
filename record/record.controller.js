@@ -282,7 +282,7 @@
             params.selectedRows = [];
             params.showFaceting = true;
             params.facetPanelOpen = false;
-            params.isRemove = true;
+            params.isUnlink = true;
 
             params.logObject = {
                 action: logActions.preUnlinkAssociation,
