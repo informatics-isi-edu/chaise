@@ -737,7 +737,7 @@ var recordPage = function() {
     this.getRemoveRecordLink = function(displayName, isInline) {
         var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTableHeading(displayName);
         // the link is not a child of the table, rather one of the accordion group
-        return el.element(by.css(".remove-records-link"));
+        return el.element(by.css(".unlink-records-link"));
     };
 
     this.getToggleDisplayLink = function(displayName, isInline) {
