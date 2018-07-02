@@ -1012,7 +1012,7 @@ var recordsetPage = function() {
 
     /******* Facet selectors for recordset with faceting ********/
     this.getAllFacets = function (){
-        return element.all(by.css(".panel-default"));
+        return element(by.css(".panel-group")).all(by.repeater("fc in vm.reference.facetColumns"));
     }
 
     this.getOpenFacets = function () {
@@ -1027,12 +1027,16 @@ var recordsetPage = function() {
         return element(by.id("fc-heading-" + idx));
     }
 
+    this.getFacetHeaderById = function (idx) {
+        return element(by.id("fc-heading-" + idx)).element(by.css('a'));
+    };
+
     this.getFacetCollapse = function (idx) {
         return element(by.id("fc-" + idx)).element(by.css("div[aria-expanded=true]"));
     }
 
     this.getFacetTitles = function () {
-        return browser.executeScript("return $('.panel h3 a').map(function(i, a) { return a.textContent.trim(); });");
+        return browser.executeScript("return $('.panel-title h3 a').map(function(i, a) { return a.textContent.trim(); });");
     }
 
     this.getOpenFacetTitles = function () {
