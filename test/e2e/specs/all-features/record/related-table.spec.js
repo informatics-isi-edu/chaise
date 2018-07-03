@@ -157,7 +157,22 @@ describe ("Viewing exisiting record with related entities, ", function () {
             totalCount: 4,
             existingCount: 1,
             disabledRows: ["1"],
-            selectIndex: 2,
+            selectIndex1: 1,
+            selectIndex2: 2,
+            selectIndex3: 3,
+            rowValuesAfter: [
+                [{url: "product-unordered-related-tables-links:related_table/id=1", caption: "1"}, "Television"],
+                [{url: "product-unordered-related-tables-links:related_table/id=2", caption: "2"}, "Air Conditioning"],
+                [{url: "product-unordered-related-tables-links:related_table/id=3", caption: "3"}, "Coffee Maker"],
+                [{url: "product-unordered-related-tables-links:related_table/id=4", caption: "4"}, "UHD TV"]
+            ]
+        },
+        unlink: {
+            relatedDisplayname: "association_table",
+            tableDisplayname: "related_table",
+            totalCount: 4,
+            selectIndex1: 1,
+            selectIndex2: 3,
             rowValuesAfter: [
                 [{url: "product-unordered-related-tables-links:related_table/id=1", caption: "1"}, "Television"],
                 [{url: "product-unordered-related-tables-links:related_table/id=3", caption: "3"}, "Coffee Maker"]
@@ -168,6 +183,8 @@ describe ("Viewing exisiting record with related entities, ", function () {
         recordHelpers.testRelatedTable(association_table, pageReadyCondition);
 
         recordHelpers.testAddAssociationTable(association_table.add, false, pageReadyCondition);
+
+        recordHelpers.testRemoveAssociationTable(association_table.unlink, false, pageReadyCondition);
     });
 
     var association_with_page_size = {
@@ -190,7 +207,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
                 chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
                 return chaisePage.recordEditPage.getModalTitle().getText();
             }).then(function (title) {
-                expect(title).toBe("Choose file", "titlte missmatch.");
+                expect(title).toBe("Choose file", "title missmatch.");
 
                 browser.wait(function () {
                        return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {

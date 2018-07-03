@@ -12,8 +12,9 @@
     .directive('ellipses', ['AlertsService', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$window', 'defaultDisplayname',
         function(AlertsService, ErrorService, logActions, MathUtils, messageMap, modalBox, modalUtils, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $window, defaultDisplayname) {
 
-        function deleteReference(scope, reference) {
-            var logObject = {action: logActions.recordsetDelete};
+        function deleteReference(scope, reference, tuple, isUnlink) {
+            var logObject = {action: logActions.recordsetDelete},
+                dataForDelete = {};
             // if parentReference exists then it's in the related entities section
             if (scope.parentReference) {
                 logObject = {
@@ -22,39 +23,58 @@
                 };
             }
 
-            if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
-                var onError = function (response) {
+            var onError = function (hasConfirm) {
+                return function (response) {
                     scope.$root.showSpinner = false;
                     // if response is string, the modal has been dismissed
-                    if (typeof response !== "string") {
+                    if (!hasConfirm || typeof response !== "string") {
                         ErrorService.handleException(response, true);  // throw exception for dismissible pop- up (error, isDismissible = true)
                     }
                 }
+            }
+
+            var deleteTuple = function (hasConfirmation) {
+                scope.$root.showSpinner = true;
+                // user accepted prompt to delete
+                reference.delete([dataForDelete], logObject).then(function deleteSuccess() {
+                    scope.$root.showSpinner = false;
+                    // tell parent controller data updated
+                    scope.$emit('record-deleted');
+                }).catch(onError());
+            }
+
+            // if assocation, we have to grab the key information for the association table from
+            //   - tuple.data (leaf table) and
+            //   - $rootScope.tuple.data (main table)
+            // NOTE: it's assumed this will be used only for pure and binary association and it will only work for that case (having two foreignkeys)
+            if (isUnlink) {
+                reference.table.foreignKeys.all().forEach(function (fk) {
+                    // loop through set of fk columns, each column in FK is identifying information that should be used as part of the uri for delete
+                    fk.colset.columns.forEach(function (col) {
+                        var mappedCol = fk.mapping.get(col);
+
+                        // if the mapping points to the leaf table, use the data from tuple
+                        // else the mapping points to the main table, use the data from $rootScope.tuple
+                        dataForDelete[col.name] = (mappedCol.table.name == tuple.reference.table.name) ? tuple.data[mappedCol.name] : $rootScope.tuple.data[mappedCol.name];
+                    });
+                });
+            } else {
+                reference.table.shortestKey.forEach(function (key) {
+                    dataForDelete[key.name] = tuple.data[key.name];
+                });
+            }
+
+            if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
                 modalUtils.showModal({
                     templateUrl: "../common/templates/delete-link/confirm_delete.modal.html",
                     controller: "ConfirmDeleteController",
                     controllerAs: "ctrl",
                     size: "sm"
                 }, function onSuccess(res) {
-                    scope.$root.showSpinner = true;
-                    // user accepted prompt to delete
-                    reference.delete(logObject).then(function deleteSuccess() {
-                        scope.$root.showSpinner = false;
-                        // tell parent controller data updated
-                        scope.$emit('record-deleted');
-                    }).catch(onError);
-                }, onError, false);
+                    deleteTuple(true)
+                }, onError(true), false);
             } else {
-                scope.$root.showSpinner = true;
-                reference.delete(logObject).then(function deleteSuccess() {
-                    scope.$root.showSpinner = false;
-                    // tell parent controller data updated
-                    scope.$emit('record-deleted');
-
-                }).catch(function (error) {
-                    scope.$root.showSpinner = false;
-                    ErrorService.handleException(error, true); // throw exception for dismissible pop- up (error, isDismissible = true)
-                });
+                deleteTuple(false);
             }
         }
 
@@ -115,14 +135,16 @@
                     if (scope.config.deletable && scope.context.indexOf("compact/brief") === 0 && scope.associationRef) {
                         var associatedRefTuples = [];
                         scope.unlink = function() {
-                            deleteReference(scope, scope.associationRef);
+                            // For deleting association rows ('M <= A => L' where A is the association table), set flag to true
+                            deleteReference(scope, scope.associationRef, scope.tuple, true);
                         };
                     }
 
                     // define delete function
                     else if (scope.config.deletable) {
                         scope.delete = function() {
-                            deleteReference(scope, scope.tuple.reference);
+                            // For deleting a row, pass the tuple with it's appropriate key information
+                            deleteReference(scope, scope.tuple.reference, scope.tuple, false);
                         };
                     }
                 };
