@@ -3,8 +3,8 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'recordAppUtils', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
-        function RecordController(AlertsService, DataUtils, ErrorService, logActions, MathUtils, messageMap, modalBox, recordAppUtils, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
+    .controller('RecordController', ['AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordAppUtils', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
+        function RecordController(AlertsService, DataUtils, ErrorService, logActions, MathUtils, messageMap, modalBox, modalUtils, recordAppUtils, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
 
         var mainContainerEl = angular.element(document.getElementsByClassName('main-container')[0]);
@@ -74,7 +74,12 @@
 
         vm.deleteRecord = function() {
             var errorData = {};
-            $rootScope.reference.delete({action: logActions.recordDelete}).then(function deleteSuccess() {
+            var dataForDelete = {};
+            $rootScope.reference.table.shortestKey.forEach(function (key) {
+                dataForDelete[key.name] = $rootScope.tuple.data[key.name];
+            });
+
+            $rootScope.reference.delete([dataForDelete], {action: logActions.recordDelete}).then(function deleteSuccess() {
                 // Get an appLink from a reference to the table that the existing reference came from
                 var unfilteredRefAppLink = $rootScope.reference.table.reference.contextualize.compact.appLink;
                 $rootScope.showSpinner = false;
@@ -195,6 +200,16 @@
             return ref.canCreate;
         };
 
+        vm.canUnlinkRelated = function(relatedRef) {
+            if (angular.isUndefined(relatedRef)) return false;
+
+            if ( (relatedRef.pseudoColumn && !relatedRef.pseudoColumn.isInboundForeignKey) || !relatedRef.derivedAssociationReference) {
+                return false;
+            }
+
+            return (relatedRef.derivedAssociationReference.canDelete && $rootScope.showDeleteButton && $rootScope.modifyRecord);
+        }
+
         // Send user to RecordEdit to create a new row in this related table
         function onSuccess (){
             AlertsService.addAlert("Your data has been submitted. Showing you the result set...","success");
@@ -254,6 +269,66 @@
             // 4. Redirect to the url in a new tab
             $window.open(appLink, '_blank');
         };
+
+        vm.unlinkRelatedRecord = function(ref) {
+            recordAppUtils.pauseUpdateRecordPage();
+
+            var params = {};
+            params.reference = ref.contextualize.compactSelect; // don't unfilter reference because we want ONLY the set already associated with the main entity reference
+            params.displayname = ref.table.displayname; // because we don't unfilter the reference, the displayname is still based on the filtered reference displayname heuristics
+            params.reference.session = $rootScope.session;
+            params.context = "compact/select";
+            params.selectMode = modalBox.multiSelectMode;
+            params.selectedRows = [];
+            params.showFaceting = true;
+            params.facetPanelOpen = false;
+            params.isUnlink = true;
+
+            params.logObject = {
+                action: logActions.preUnlinkAssociation,
+                referrer: ref.defaultLogInfo
+            };
+
+            modalUtils.showModal({
+                animation: false,
+                controller: "SearchPopupController",
+                controllerAs: "ctrl",
+                resolve: {
+                    params: params
+                },
+                size: "xl",
+                templateUrl: "../common/templates/searchPopup.modal.html"
+            }, function dataSelected(tuples) {
+                var rowsToDelete = [],
+                    tupleData;
+
+                var associationRef = ref.derivedAssociationReference;
+                tuples.forEach(function (tuple) {
+                    tupleData = {};
+                    associationRef.table.foreignKeys.all().forEach(function (fk) {
+                        // loop through set of fk columns, each column in FK is identifying information that should be used as part of the uri for delete
+                        fk.colset.columns.forEach(function (col) {
+                            var mappedCol = fk.mapping.get(col);
+
+                            // if the mapping points to the leaf table, use the data from tuple
+                            // else the mapping points to the main table, use the data from $rootScope.tuple
+                            tupleData[col.name] = (mappedCol.table.name == tuple.reference.table.name) ? tuple.data[mappedCol.name] : $rootScope.tuple.data[mappedCol.name];
+                        });
+                    });
+                    rowsToDelete.push(tupleData);
+                });
+
+                associationRef.delete(rowsToDelete).then(function () {
+                    AlertsService.addAlert("Your data has been submitted. Showing you the result set...","success");
+                    // trigger the reread of the data (NOTE: does it for whole page)
+                    onfocusEventCall(true);
+                    onModalClose();
+                }).catch(function () {
+                    // handle exception for delete
+                });
+            }, onModalClose);
+            return;
+        }
 
         $scope.$on("edit-request", function(event, args) {
             editRecordRequests[args.id] = {"schema": args.schema, "table": args.table};
