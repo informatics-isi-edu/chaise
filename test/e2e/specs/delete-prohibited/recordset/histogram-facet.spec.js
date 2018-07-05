@@ -104,20 +104,19 @@ describe("Viewing Recordset with Faceting,", function() {
                                 // wait for facet to open
                                 browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
                                 browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getRangeSubmit(idx)), browser.params.defaultTimeout);
-                                // browser.pause();
-                                chaisePage.recordsetPage.getHistogram(idx).isDisplayed().then(function (bool) {
-                                    expect(bool).toBeTruthy();
 
-                                    minDateInput = chaisePage.recordsetPage.getRangeMinInput(idx, "ts-date-range-min");
-                                    minTimeInput = chaisePage.recordsetPage.getRangeMinInput(idx, "ts-time-range-min");
-                                    maxDateInput = chaisePage.recordsetPage.getRangeMaxInput(idx, "ts-date-range-max");
-                                    maxTimeInput = chaisePage.recordsetPage.getRangeMaxInput(idx, "ts-time-range-max");
+                                // wait for histogram
+                                browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getHistogram(idx)), browser.params.defaultTimeout);
 
-                                    expect(minDateInput.getAttribute("value")).toBe(facetParams.absMin.date, "initial min date value is incorrect");
-                                    expect(minTimeInput.getAttribute("value")).toBe(facetParams.absMin.time, "initial min time value is incorrect");
-                                    expect(maxDateInput.getAttribute("value")).toBe(facetParams.absMax.date, "initial max date value is incorrect");
-                                    expect(maxTimeInput.getAttribute("value")).toBe(facetParams.absMax.time, "initial max time value is incorrect");
-                                });
+                                minDateInput = chaisePage.recordsetPage.getRangeMinInput(idx, "ts-date-range-min");
+                                minTimeInput = chaisePage.recordsetPage.getRangeMinInput(idx, "ts-time-range-min");
+                                maxDateInput = chaisePage.recordsetPage.getRangeMaxInput(idx, "ts-date-range-max");
+                                maxTimeInput = chaisePage.recordsetPage.getRangeMaxInput(idx, "ts-time-range-max");
+
+                                expect(minDateInput.getAttribute("value")).toBe(facetParams.absMin.date, "initial min date value is incorrect");
+                                expect(minTimeInput.getAttribute("value")).toBe(facetParams.absMin.time, "initial min time value is incorrect");
+                                expect(maxDateInput.getAttribute("value")).toBe(facetParams.absMax.date, "initial max date value is incorrect");
+                                expect(maxTimeInput.getAttribute("value")).toBe(facetParams.absMax.time, "initial max time value is incorrect");
                             });
 
                             it("unzoom should be disabled, clicking zoom should zoom in and enable the unzoom button.", function () {
@@ -208,16 +207,15 @@ describe("Viewing Recordset with Faceting,", function() {
                                 // wait for facet to open
                                 browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
                                 browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getRangeSubmit(idx)), browser.params.defaultTimeout);
-                                // browser.pause();
-                                chaisePage.recordsetPage.getHistogram(idx).isDisplayed().then(function (bool) {
-                                    expect(bool).toBeTruthy();
 
-                                    minInput = chaisePage.recordsetPage.getRangeMinInput(idx, "range-min");
-                                    maxInput = chaisePage.recordsetPage.getRangeMaxInput(idx, "range-max");
+                                // wait for histogram
+                                browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getHistogram(idx)), browser.params.defaultTimeout);
 
-                                    expect(minInput.getAttribute("value")).toBe(facetParams.absMin, "initial min value is incorrect");
-                                    expect(maxInput.getAttribute("value")).toBe(facetParams.absMax, "initial max value is incorrect");
-                                });
+                                minInput = chaisePage.recordsetPage.getRangeMinInput(idx, "range-min");
+                                maxInput = chaisePage.recordsetPage.getRangeMaxInput(idx, "range-max");
+
+                                expect(minInput.getAttribute("value")).toBe(facetParams.absMin, "initial min value is incorrect");
+                                expect(maxInput.getAttribute("value")).toBe(facetParams.absMax, "initial max value is incorrect");
                             });
 
                             it("unzoom should be disabled, clicking zoom should zoom in and enable the unzoom button.", function () {
