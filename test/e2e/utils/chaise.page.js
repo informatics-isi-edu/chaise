@@ -734,12 +734,6 @@ var recordPage = function() {
         return el.element(by.css(".add-records-link"));
     };
 
-    this.getRemoveRecordLink = function(displayName, isInline) {
-        var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTableHeading(displayName);
-        // the link is not a child of the table, rather one of the accordion group
-        return el.element(by.css(".unlink-records-link"));
-    };
-
     this.getToggleDisplayLink = function(displayName, isInline) {
         var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTableHeading(displayName);
         // the link is not a child of the table, rather one of the accordion group
