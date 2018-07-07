@@ -791,134 +791,69 @@ exports.testAddRelatedTable = function (params, isInline, inputCallback) {
  * - selectIndex
  */
 exports.testAddAssociationTable = function (params, isInline, pageReadyCondition) {
-    describe("Add feature, ", function () {
-        it ("clicking on `Add` button should open up a modal.", function (done) {
-            var addBtn = chaisePage.recordPage.getAddRecordLink(params.relatedDisplayname);
-            chaisePage.clickButton(addBtn).then(function () {
-                chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
-                return chaisePage.recordEditPage.getModalTitle().getText();
-            }).then(function (title) {
-                expect(title).toBe("Choose " + params.tableDisplayname, "title missmatch.");
+	describe("Add feature, ", function () {
+		it ("clicking on `Add` button should open up a modal.", function (done) {
+			var addBtn = chaisePage.recordPage.getAddRecordLink(params.relatedDisplayname);
+			chaisePage.clickButton(addBtn).then(function () {
+				chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
+				return chaisePage.recordEditPage.getModalTitle().getText();
+			}).then(function (title) {
+				expect(title).toBe("Choose " + params.tableDisplayname, "title missmatch.");
 
-                browser.wait(function () {
-                    return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
-                        return (ct == params.totalCount);
-                    });
-                });
+				browser.wait(function () {
+					return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
+						return (ct == params.totalCount);
+					});
+				});
 
-                return chaisePage.recordsetPage.getModalRows().count();
-            }).then(function(ct){
-                expect(ct).toBe(params.totalCount, "association count missmatch.");
-                done();
-            }).catch(function(error) {
-                console.log(error);
-                done.fail();
-            });
-        });
+				return chaisePage.recordsetPage.getModalRows().count();
+			}).then(function(ct){
+				expect(ct).toBe(params.totalCount, "association count missmatch.");
+				done();
+			}).catch(function(error) {
+				console.log(error);
+				done.fail();
+			});
+		});
 
-        it ("current values must be disabled.", function (done) {
-            chaisePage.recordPage.getModalDisabledRows().then(function (disabledRows) {
-                expect(disabledRows.length).toBe(params.disabledRows.length, "disabled length missmatch.");
+		it ("current values must be disabled.", function (done) {
+			chaisePage.recordPage.getModalDisabledRows().then(function (disabledRows) {
+				expect(disabledRows.length).toBe(params.disabledRows.length, "disabled length missmatch.");
 
 
-                // go through the list and check their first column (which is the id)
-                disabledRows.forEach(function (r, index) {
-                    r.findElement(by.css("td:not(.actions-layout)")).then(function (el) {
-                        expect(el.getText()).toMatch(params.disabledRows[index], "missmatch disabled row index=" + index);
-                    });
-                });
+				// go through the list and check their first column (which is the id)
+				disabledRows.forEach(function (r, index) {
+					r.findElement(by.css("td:not(.actions-layout)")).then(function (el) {
+						expect(el.getText()).toMatch(params.disabledRows[index], "missmatch disabled row index=" + index);
+					});
+				});
 
-                done();
-            }).catch(function(error) {
-                console.log(error);
-                done.fail();
-            });
-        });
+				done();
+			}).catch(function(error) {
+				console.log(error);
+				done.fail();
+			});
+		});
 
-        it ("user should be able to select new values and submit.", function (done) {
-            var row2Select = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(params.selectIndex1);
-            var row3Select = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(params.selectIndex2);
-            var row4Select = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(params.selectIndex3);
-            // select 2nd row
-            chaisePage.clickButton(row2Select).then(function (){
-                // select 3rd row
-                return chaisePage.clickButton(row3Select);
-            }).then(function () {
-                // select 4th row
-                return chaisePage.clickButton(row4Select);
-            }).then(function () {
-                return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
-            }).then(function () {
-                browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
+		it ("user should be able to select new values and submit.", function (done) {
+			var inp = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(params.selectIndex);
+			chaisePage.clickButton(inp).then(function (){
+				return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
+			}).then(function () {
+				browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
                 checkRelatedRowValues(params.relatedDisplayname, isInline, params.rowValuesAfter, done);
 
-                return chaisePage.recordPage.getRelatedTableRows(params.relatedDisplayname).count();
-            }).then(function (count){
-                expect(count).toBe(params.existingCount + 3);
-                done();
-            }).catch(function(error) {
-                console.log(error);
-                done.fail();
-            });
-        });
-    });
-};
+				return chaisePage.recordPage.getRelatedTableRows(params.relatedDisplayname).count();
+			}).then(function (count){
+				expect(count).toBe(params.existingCount + 1);
+				done();
+			}).catch(function(error) {
+				console.log(error);
+				done.fail();
+			});
+		});
 
-exports.testRemoveAssociationTable = function (params, isInline, pageReadyCondition) {
-    describe("Unlink feature, ", function () {
-        it ("clicking on `Remove` button should open up a modal.", function (done) {
-            var removeBtn = chaisePage.recordPage.getRemoveRecordLink(params.relatedDisplayname);
-            chaisePage.clickButton(removeBtn).then(function () {
-                chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
-                return chaisePage.recordEditPage.getModalTitle().getText();
-            }).then(function (title) {
-                expect(title).toBe("Remove " + params.tableDisplayname, "title missmatch.");
-
-                browser.wait(function () {
-                    return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
-                        return (ct == params.totalCount);
-                    });
-                });
-
-                return chaisePage.recordsetPage.getModalRows().count();
-            }).then(function(ct){
-                expect(ct).toBe(params.totalCount, "association count missmatch.");
-                done();
-            }).catch(function(error) {
-                console.log(error);
-                done.fail();
-            });
-        });
-
-        it ("user should select existing values and submit (click remove).", function (done) {
-            var row1Select = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(params.selectIndex1);
-            var row3Select = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(params.selectIndex2);
-            // browser.pause();
-            chaisePage.clickButton(row1Select).then(function (){
-                return chaisePage.clickButton(row3Select);
-            }).then(function () {
-                return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
-            }).then(function () {
-                browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
-                browser.wait(function () {
-                    return chaisePage.recordPage.getRelatedTableRows(params.relatedDisplayname).count().then(function (ct) {
-                        return (ct == params.totalCount - 2);
-                    });
-                });
-
-                checkRelatedRowValues(params.relatedDisplayname, isInline, params.rowValuesAfter, done);
-
-                return chaisePage.recordPage.getRelatedTableRows(params.relatedDisplayname).count();
-            }).then(function (count){
-                expect(count).toBe(params.totalCount - 2);
-                done();
-            }).catch(function(error) {
-                console.log(error);
-                done.fail();
-            });
-        });
-
-    });
+	});
 };
 
 

@@ -100,7 +100,7 @@ var testParams = {
             }
         ],
         sortedData:[
-            {
+            { 
                 columnName: "Name of Accommodation",
                 rawColumnName: "title",
                 columnPosition: 1,
@@ -113,7 +113,7 @@ var testParams = {
                     desc: ["Radisson Hotel", "NH Munich Resort"]
                 }
             },
-            {
+            { 
                 columnName: "Number of Rooms",
                 rawColumnName: "no_of_rooms",
                 columnPosition: 4,
@@ -126,7 +126,7 @@ var testParams = {
                     desc: ["23", "15"]
                 }
             },
-            {
+            { 
                 columnName: "Operational Since",
                 rawColumnName: "opened_on",
                 columnPosition: 6,
@@ -139,7 +139,7 @@ var testParams = {
                     desc: ["2002-01-22 00:00:00", "1976-06-15 00:00:00"]
                 }
             },
-            {
+            { 
                 columnName:"Category",
                 rawColumnName: "Y09mXK6LidrvCvNoXbesgg",
                 columnPosition: 10,
@@ -152,7 +152,7 @@ var testParams = {
                     desc: ["Hotel", "Hotel"]
                 }
             },
-            {
+            { 
                 columnName:"Type of Facilities",
                 rawColumnName: "hZ7Jzy0aC3Q3KQqz4DIXTw",
                 columnPosition: 11,
@@ -206,7 +206,7 @@ describe('View recordset,', function() {
                 expect(chaisePage.recordsetPage.getPageTitleTooltip()).toBe(accommodationParams.comment);
             });
 
-            it('should display the permalink button & a tooltip on hovering over it', function (done) {
+            it('should display the permalink button & a tooltip on hovering over it', function () {
                 var permalink = chaisePage.recordsetPage.getPermalinkButton();
                 expect(permalink.isDisplayed()).toBe(true, "The permalink button is not visible on the recordset app");
                 browser.actions().mouseMove(permalink).perform();
@@ -214,13 +214,10 @@ describe('View recordset,', function() {
                 chaisePage.waitForElement(tooltip).then(function () {
                     expect(tooltip.getText()).toBe(testParams.tooltip.permalink, "Incorrect tooltip on the Permalink button");
                     browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
-                    done();
-                }).catch(function(err) {
-                    done.fail(err);
                 });
             });
 
-            it('should display the Download CSV button & a tooltip on hovering over it', function (done) {
+            it('should display the Download CSV button & a tooltip on hovering over it', function () {
                 var downloadCSV = chaisePage.recordsetPage.getDownloadButton();
                 expect(downloadCSV.isDisplayed()).toBe(true, "The Download CSV button is not visible on the recordset app");
                 browser.actions().mouseMove(downloadCSV).perform();
@@ -228,9 +225,6 @@ describe('View recordset,', function() {
                 chaisePage.waitForElement(tooltip).then(function () {
                     expect(tooltip.getText()).toBe(testParams.tooltip.downloadCSV, "Incorrect tooltip on the Download CSV button");
                     browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
-                    done();
-                }).catch(function(err) {
-                    done.fail(err);
                 });
             });
 
