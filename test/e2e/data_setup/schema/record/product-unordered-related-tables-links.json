@@ -336,6 +336,22 @@
                 },
                 "tag:isrd.isi.edu,2016:visible-columns" : {
                     "detailed" : ["id", "title", "website", ["product-unordered-related-tables-links", "fk_category"], "rating", "summary", "description", "no_of_rooms", ["product-unordered-related-tables-links", "fk_cover"], ["product-unordered-related-tables-links", "fk_thumbnail"], "opened_on", "luxurious"]
+                },
+                "tag:isrd.isi.edu,2016:visible-foreign-keys": {
+                    "detailed": [
+                        ["product-unordered-related-tables-links", "fk_booking_accommodation"],
+                        ["product-unordered-related-tables-links", "fk_schedule_accommodation"],
+                        ["product-unordered-related-tables-links", "fk_media_accommodation"],
+                        ["product-unordered-related-tables-links", "fk_assoc_accommodation"],
+                        ["product-unordered-related-tables-links", "fk_accommodation_image"],
+                        ["product-unordered-related-tables-links", "fk_assoc_mdn_accommodation"],
+                        {"source": [
+                            {"inbound": ["product-unordered-related-tables-links", "fk_assoc_accommodation"]},
+                            {"outbound": ["product-unordered-related-tables-links", "fk_assoc_related_table"]},
+                            {"inbound": ["product-unordered-related-tables-links", "fk_related_table_2_to_related"]},
+                            "id"
+                        ]}
+                    ]
                 }
             }
         },
@@ -923,38 +939,32 @@
             "foreign_keys": [
                 {
                     "comment": "",
-                    "foreign_key_columns": [
-                        {
+                    "names": [["product-unordered-related-tables-links", "fk_assoc_mdn_related_table"]],
+                    "foreign_key_columns": [{
                             "table_name": "association_table_markdown",
                             "schema_name": "product-unordered-related-tables-links",
                             "column_name": "id_related"
-                        }
-                    ],
-                    "referenced_columns": [
-                        {
+                    }],
+                    "referenced_columns": [{
                             "table_name": "related_table_markdown",
                             "schema_name": "product-unordered-related-tables-links",
                             "column_name": "id"
-                        }
-                    ],
+                    }],
                     "annotations": {}
                 },
                 {
                     "comment": "",
-                    "foreign_key_columns": [
-                        {
+                    "names": [["product-unordered-related-tables-links", "fk_assoc_mdn_accommodation"]],
+                    "foreign_key_columns": [{
                             "table_name": "association_table_markdown",
                             "schema_name": "product-unordered-related-tables-links",
                             "column_name": "id_base"
-                        }
-                    ],
-                    "referenced_columns": [
-                        {
+                    }],
+                    "referenced_columns": [{
                             "table_name": "accommodation",
                             "schema_name": "product-unordered-related-tables-links",
                             "column_name": "id"
-                        }
-                    ],
+                    }],
                     "annotations": {
                         "tag:isrd.isi.edu,2016:foreign-key": {
                             "to_name": "base table association related"
@@ -997,38 +1007,32 @@
             "foreign_keys": [
                 {
                     "comment": "",
-                    "foreign_key_columns": [
-                        {
+                    "names": [["product-unordered-related-tables-links", "fk_assoc_related_table"]],
+                    "foreign_key_columns": [{
                             "table_name": "association_table",
                             "schema_name": "product-unordered-related-tables-links",
                             "column_name": "id_related"
-                        }
-                    ],
-                    "referenced_columns": [
-                        {
+                    }],
+                    "referenced_columns": [{
                             "table_name": "related_table",
                             "schema_name": "product-unordered-related-tables-links",
                             "column_name": "id"
-                        }
-                    ],
+                    }],
                     "annotations": {}
                 },
                 {
                     "comment": "",
-                    "foreign_key_columns": [
-                        {
+                    "names": [["product-unordered-related-tables-links", "fk_assoc_accommodation"]],
+                    "foreign_key_columns": [{
                             "table_name": "association_table",
                             "schema_name": "product-unordered-related-tables-links",
                             "column_name": "id_base"
-                        }
-                    ],
-                    "referenced_columns": [
-                        {
+                    }],
+                    "referenced_columns": [{
                             "table_name": "accommodation",
                             "schema_name": "product-unordered-related-tables-links",
                             "column_name": "id"
-                        }
-                    ],
+                    }],
                     "annotations": {
                         "tag:isrd.isi.edu,2016:foreign-key": {
                             "to_name": "base table association related"
@@ -1153,9 +1157,60 @@
                 }
 
             }
+        },
+        "related_table_2": {
+            "comment":"has a foreignkey to related_table",
+            "kind": "table",
+            "table_name": "related_table_2",
+            "schema_name": "product-unordered-related-tables-links",
+            "keys": [{
+                "comment": null,
+                "annotations": {},
+                "unique_columns": ["id"]
+            }],
+            "foreign_keys": [{
+                "names" : [["product-unordered-related-tables-links", "fk_related_table_2_to_related"]],
+                "comment": null,
+                "foreign_key_columns": [{
+                    "table_name": "related_table_2",
+                    "schema_name": "product-unordered-related-tables-links",
+                    "column_name": "fk_to_rel"
+                }],
+                "annotations": {},
+                "referenced_columns": [{
+                    "table_name": "related_table",
+                    "schema_name": "product-unordered-related-tables-links",
+                    "column_name": "id"
+                }]
+            }],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "col",
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "fk_to_rel",
+                    "type": {
+                        "typename": "text"
+                    }
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:visible-columns": {
+                    "*": ["id", "col"]
+                }
+            }
         }
     },
-
     "table_names": [
         "category",
         "file",
@@ -1167,7 +1222,8 @@
         "association_table",
         "association_table_markdown",
         "related_table_markdown",
-        "schedule"
+        "schedule",
+        "realted_table_2"
     ],
     "comment": null,
     "annotations": {

@@ -468,7 +468,8 @@
               "url_pattern":"/hatrac/js/chaise/{{{_timestamp_txt}}}/{{{_fileid}}}/{{{_uri.md5_hex}}}",
               "filename_column" : "filename",
               "byte_count_column": "bytes",
-              "md5": "md5"
+              "md5": "md5",
+              "filename_ext_filter": [".txt", ".png"]
             }
           }
         },

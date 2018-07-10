@@ -3,9 +3,12 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$uibModal', '$window',
-        function RecordController(AlertsService, DataUtils, ErrorService, logActions, MathUtils, messageMap, modalBox, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $uibModal, $window) {
+    .controller('RecordController', ['AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'recordAppUtils', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
+        function RecordController(AlertsService, DataUtils, ErrorService, logActions, MathUtils, messageMap, modalBox, recordAppUtils, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
+
+        var mainContainerEl = angular.element(document.getElementsByClassName('main-container')[0]);
+        var mainBodyEl;
         var addRecordRequests = {}; // <generated unique id : reference of related table>
         var editRecordRequests = {}; // generated id: {schemaName, tableName}
         var updated = {};
@@ -14,6 +17,32 @@
         var modalUpdate = false;
         vm.alerts = AlertsService.alerts;
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
+
+        vm.rowFocus = {};
+        vm.sidePanToggleBtnIndicator = "Show";
+
+        $scope.recordSidePanOpen = chaiseConfig.hideTableOfContents === true ? false : true;
+        vm.tooltip = messageMap.tooltip;
+        vm.gotoRelatedTable = function(sectionId, index) {
+            var safeSectionId = vm.makeSafeIdAttr(sectionId);
+            var pageSection = "rt-heading-" + safeSectionId;
+
+            $rootScope.relatedTableModels[index].open = true;
+            vm.rowFocus[index] = false;
+            var el = angular.element(document.getElementById(pageSection));
+            mainContainerEl.scrollToElementAnimated(el, 40).then(function () {
+                $timeout(function () {
+                    el.addClass("rowFocus");
+                }, 100);
+                $timeout(function () {
+                    el.removeClass('rowFocus');
+                }, 1600);
+            });
+        };
+
+        vm.togglePan = function() {
+            $scope.recordSidePanOpen = !$scope.recordSidePanOpen;
+        };
 
         vm.canCreate = function() {
             return ($rootScope.reference && $rootScope.reference.canCreate && $rootScope.modifyRecord);
@@ -55,7 +84,7 @@
                 errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
                 errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
                 error.errorData = errorData;
-                throw error;
+                ErrorService.handleException(error, true); // call error module with isDismissible = True
             });
         };
 
@@ -75,32 +104,59 @@
             return $window.location.href = recordSetUrl;
         };
 
+        /**
+         * Make sure we're showing related tables from top to bottom.
+         * If the previous one has not been loaded yet, it should return false.
+         * @param  {integer} i related table index
+         * @return {boolean}   whether to show related table or not
+         */
         vm.showRelatedTable = function(i) {
-            var isFirst = false, prevTableHasLoaded = false;
-            if ($rootScope.tableModels && $rootScope.tableModels[i]) {
+            if (!$rootScope.relatedTableModels) return false;
+
+            var tableModel = $rootScope.relatedTableModels[i].tableModel;
+            var canShow = function () {
+                if (!tableModel.initialized) {
+                  return false;
+                }
+
                 if (i === 0) {
                     $rootScope.lastRendered = 0;
-                    isFirst = true;
-                } else if ($rootScope.tableModels[i-1]) {
-                    prevTableHasLoaded = $rootScope.tableModels[i-1].hasLoaded;
-                    if ($rootScope.lastRendered == (i-1)) {
-                        $rootScope.lastRendered = i;
+
+                    // don't show the loading if it's done
+                    if ($rootScope.lastRendered === $rootScope.relatedTableModels.length-1) {
+                        $rootScope.loading = false;
                     }
+
+                    return true;
                 }
 
-                if ($rootScope.lastRendered == $rootScope.relatedReferences.length-1) {
-                    $rootScope.loading = false;
+                if ($rootScope.lastRendered === i-1)  {
+                    $rootScope.lastRendered = i;
+
+                    // don't show the loading if it's done
+                    if ($rootScope.lastRendered === $rootScope.relatedTableModels.length-1) {
+                        $rootScope.loading = false;
+                    }
+
+                    return true;
                 }
 
-                if ($rootScope.showEmptyRelatedTables) {
-                    return isFirst || prevTableHasLoaded;
-                }
-
-                if ((isFirst || prevTableHasLoaded) && $rootScope.tableModels[i].rowValues && $rootScope.tableModels[i].rowValues.length > 0) {
-                    return (i == $rootScope.lastRendered);
-                }
                 return false;
+            };
+
+            if (canShow()) {
+                return $rootScope.showEmptyRelatedTables || tableModel.rowValues.length > 0;
             }
+            return false;
+        };
+
+        vm.noVisibleRelatedTables = function () {
+            if ($rootScope.relatedTableModels) {
+                return !$rootScope.relatedTableModels.some(function (tm, index) {
+                    return vm.showRelatedTable(index);
+                });
+            }
+            return true;
         };
 
         vm.toggleRelatedTableDisplayType = function(dataModel) {
@@ -113,19 +169,30 @@
 
         vm.toggleRelatedTables = function() {
             $rootScope.showEmptyRelatedTables = !$rootScope.showEmptyRelatedTables;
+            // NOTE: there's a case where clicking the button to toggle this doesn't re-paint the footer until the mouse "moves"
+            // having this $timeout triggers the function after the digest cycle which is after the elements have finished showing/hidingbased on the above flag
+            $timeout(function () {
+                UiUtils.setFooterStyle(0);
+            }, 0);
         };
 
         vm.canEditRelated = function(ref) {
-            if(angular.isUndefined(ref))
-            return false;
+           if(angular.isUndefined(ref)) return false;
            return (ref.canUpdate && $rootScope.modifyRecord);
         };
 
         vm.canCreateRelated = function(relatedRef) {
-            if(angular.isUndefined(relatedRef))
-            return false;
-           var ref = (relatedRef.derivedAssociationReference ? relatedRef.derivedAssociationReference : relatedRef);
-           return (ref.canCreate && $rootScope.modifyRecord);
+            if(angular.isUndefined(relatedRef) || !$rootScope.modifyRecord) {
+                return false;
+            }
+
+            // we are not supporting add in this case
+            if (relatedRef.pseudoColumn && !relatedRef.pseudoColumn.isInboundForeignKey) {
+                return false;
+            }
+
+            var ref = (relatedRef.derivedAssociationReference ? relatedRef.derivedAssociationReference : relatedRef);
+            return ref.canCreate;
         };
 
         // Send user to RecordEdit to create a new row in this related table
@@ -133,6 +200,10 @@
             AlertsService.addAlert("Your data has been submitted. Showing you the result set...","success");
             vm.resultset = true;
             onfocusEventCall(true);
+        }
+
+        function onModalClose () {
+            recordAppUtils.resumeUpdateRecordPage();
         }
 
         vm.addRelatedRecord = function(ref) {
@@ -157,7 +228,8 @@
             });
 
             if(ref.derivedAssociationReference){
-                recordCreate.addRelatedRecordFact(true, ref, 0, cookie, vm.editMode, vm.formContainer, vm.readyToSubmit, vm.recordsetLink, vm.submissionButtonDisabled, $rootScope.reference, $rootScope.tuples, $rootScope.session, $rootScope.context.queryParams, onSuccess);
+                recordAppUtils.pauseUpdateRecordPage();
+                recordCreate.addRelatedRecordFact(true, ref, 0, cookie, vm.editMode, vm.formContainer, vm.readyToSubmit, vm.recordsetLink, vm.submissionButtonDisabled, $rootScope.reference, $rootScope.tuples, $rootScope.session, $rootScope.context.queryParams, onSuccess, onModalClose);
                 return;
             }
 
@@ -187,36 +259,6 @@
             editRecordRequests[args.id] = {"schema": args.schema, "table": args.table};
         });
 
-        /**
-        * readUpdatedTable(refObj, dataModel, idx, isModalUpdate) returns model object with all updated component values
-        * @param {object} refObj Reference object with component details
-        * @param {object} dataModel Contains value that is bind to the table columns
-        * @param {int} idx Index of each reference
-        * @param {bool} isModalUpdate if update happens through modal pop up
-        */
-        function readUpdatedTable(refObj, dataModel, idx, isModalUpdate){
-            var errorData = {};
-            if (isModalUpdate || completed[refObj.uri] || updated[refObj.location.schemaName + ":" + refObj.location.tableName]) {
-                delete updated[refObj.location.schemaName + ":" + refObj.location.tableName];
-
-                (function (i) {
-                    refObj.read(dataModel.pageLimit, {action: logActions.recordRelatedUpdate}).then(function (page) {
-                        dataModel.page = page;
-                        dataModel.rowValues = DataUtils.getRowValuesFromPage(page);
-                    }, function (error) {
-                        console.log(error);
-                        throw error;
-                    }).catch(function (error) {
-                        console.log(error);
-                        errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
-                        errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
-                        error.errorData = errorData;
-                        throw error;
-                    });
-                })(i);
-            }
-        }
-
         // When page gets focus, check cookie for completed requests
         // re-read the records for that table
         $window.onfocus = function() {
@@ -226,11 +268,11 @@
         var onfocusEventCall = function(isModalUpdate) {
             if ($rootScope.loading === false) {
                 var idxInbFk;
-                completed = { };
+                completed = {};
                 for (var id in addRecordRequests) {
                     var cookie = $cookies.getObject(id);
                     if (cookie) { // add request has been completed
-                        console.log('Cookie found', cookie);
+                        console.log('Cookie found for the id=' + id);
                         completed[addRecordRequests[id]] = true;
 
                         // remove cookie and request
@@ -241,14 +283,10 @@
                     }
                 }
                 // read updated tables
-                if (isModalUpdate || Object.keys(completed).length > 0 || updated !== {}) {
-                    for (var i = 0; i < $rootScope.inboundFKCols.length; i++) {
-                        idxInbFk = $rootScope.inboundFKColsIdx[i];
-                        readUpdatedTable($rootScope.inboundFKCols[i].reference, $rootScope.colTableModels[idxInbFk], idxInbFk, isModalUpdate);
-                    }
-                    for (var i = 0; i < $rootScope.relatedReferences.length; i++) {
-                        readUpdatedTable($rootScope.relatedReferences[i], $rootScope.tableModels[i], i, isModalUpdate);
-                    }
+                if (isModalUpdate || Object.keys(completed).length > 0 || Object.keys(updated).length > 0) {
+                    updated = {};
+                    //NOTE we're updating the whole page
+                    recordAppUtils.updateRecordPage(true);
                 }
             }
 
@@ -259,50 +297,79 @@
             delete editRecordRequests[id];
         }
 
+        /*** Container Heights and other styling ***/
         // fetches the height of navbar, bookmark container, and view
         // also fetches the main container for defining the dynamic height
-        function fetchElements() {
+        function fetchContainerElements() {
             var elements = {};
             try {
                 // get document height
                 elements.docHeight = $document[0].documentElement.offsetHeight
                 // get navbar height
-                var mainNav = $document[0].getElementById('mainnav');
-                elements.navbarHeight = mainNav.offsetHeight;
+                elements.navbarHeight = $document[0].getElementById('mainnav').offsetHeight;
                 // get bookmark container height
-                var bookmark = $document[0].getElementById('bookmark-container');
-                elements.bookmarkHeight = bookmark.offsetHeight;
+                elements.bookmarkHeight = $document[0].getElementById('bookmark-container').offsetHeight;
                 // get record main container
                 elements.container = $document[0].getElementById('main-content');
             } catch (error) {
                 $log.warn(error);
             }
             return elements;
-        }
+        };
+
+        function setMainContainerHeight() {
+            var elements = fetchContainerElements();
+            // if these values are not set yet, don't set the height
+            if(elements.navbarHeight && elements.bookmarkHeight) {
+                UiUtils.setDisplayContainerHeight(elements);
+            }
+        };
 
         // watch for the display to be ready before setting the main container height
         $scope.$watch(function() {
             return $rootScope.displayReady;
         }, function (newValue, oldValue) {
             if (newValue) {
-                var elements = fetchElements();
-                // if these values are not set yet, don't set the height
-                if(elements.navbarHeight && elements.bookmarkHeight) {
-                    UiUtils.setDisplayHeight(elements);
-                }
+                $timeout(setMainContainerHeight, 0);
+            }
+        });
+
+        // watch for the main body size to change
+        $scope.$watch(function() {
+            return mainBodyEl && mainBodyEl[0].offsetHeight;
+        }, function (newValue, oldValue) {
+            if (newValue) {
+                $timeout(function () {
+                    UiUtils.setFooterStyle(0);
+                }, 0);
             }
         });
 
         // change the main container height whenever the DOM resizes
         angular.element($window).bind('resize', function(){
             if ($rootScope.displayReady) {
-                var elements = fetchElements();
-                // if these values are not set yet, don't set the height
-                if(elements.navbarHeight && elements.bookmarkHeight) {
-                    UiUtils.setDisplayHeight(elements);
-                }
+                setMainContainerHeight();
+                UiUtils.setFooterStyle(0);
                 $scope.$digest();
             }
         });
+
+        $timeout(function () {
+            mainBodyEl = $document[0].getElementsByClassName('main-body');
+        }, 0);
+
+        /*** scroll to events ***/
+        // scroll to top button
+        $scope.scrollToTop = function () {
+            mainContainerEl.scrollTo(0,0, 500);
+        };
+
+        mainContainerEl.on('scroll', $scope.$apply.bind($scope, function () {
+            if (mainContainerEl.scrollTop() > 300) {
+              $scope.showTopBtn = true;
+            } else {
+              $scope.showTopBtn = false;
+            }
+        }));
     }]);
 })();

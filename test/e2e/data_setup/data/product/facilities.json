@@ -1,0 +1,29 @@
+[
+    {
+        "id": 1111,
+        "type": "Luxury",
+        "conference_room": true,
+        "golf_course": true,
+        "fine_dining": true,
+        "gym": true,
+        "wifi": true
+    },
+    {
+        "id": 1112,
+        "type": "Upscale",
+        "conference_room": false,
+        "golf_course": false,
+        "fine_dining": true,
+        "gym": true,
+        "wifi": true
+    },
+    {
+        "id": 1113,
+        "type": "Basic",
+        "conference_room": false,
+        "golf_course": false,
+        "fine_dining": false,
+        "gym": false,
+        "wifi": true
+    }
+]

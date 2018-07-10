@@ -18,7 +18,7 @@ The below table explains the usage of the default parameters:
 | tableThreshold | Number of rows. | 0 | "tableThreshold":\<value\> | N/A | Max number of rows default to transpose view. |
 | showAllAttributes | A boolean | False | "showAllAttributes":\<value\> | N/A | If present and True, select all the attributes in the search page. |
 | headTitle | An application name | Chaise | "headTitle":\<value\> | N/A | The application name. |
-| customCSS | A URL | N/A | "customCSS":\<value\> | N/A | The URL for a style sheet file to be applied for the application header. This is typically a relative URL to a dedicated stylesheet in the CSS folder of the related static site repo (For example, in RBK, it's /assets/css/chaise.css in the rbk-www repo.) |
+| customCSS | A URL | N/A | "customCSS":\<value\> | N/A | The URL for a style sheet file to be applied for the application header. This is typically a relative URL to a dedicated stylesheet in the CSS folder of the related static site repo (For example, in RBK, it's /assets/css/chaise.css in the rbk-www repo). More information can be found [here](https://github.com/informatics-isi-edu/chaise/wiki/Custom-CSS-Styling-tips) |
 | navbarBrand | A URL | N/A | "navbarBrand":\<value\> | N/A | The URL for the branding logo in the top navigation bar. |
 | navbarBrandText | A string | Chaise | "navbarBrandText":\<value\> | N/A | The value to be displayed in the navigation bar. |
 | navbarBrandImage | A URL | N/A | "navbarBrandImage":\<value\> | N/A | The URL for an image to be displayed in the navigation bar. |
@@ -45,3 +45,5 @@ The below table explains the usage of the default parameters:
 | footerMarkdown | A footer markdown string | N/A | "footerMarkdown" : \<value\> | N/A | If present, it creates a footer at the bottom of the app with the markdown text.
 | maxRelatedTablesOpen | An integer | N/A | "maxRelatedTablesOpen" : \<value\> | N/A | It defines maximum number of expanded related table on a page during initial loading. If related tables exceed this value then all of them shall be collapsed.
 | showFaceting | Boolean | false | "showFaceting" : \<value\> | N/A | If true, shows the faceting panel on the recordset app.
+| hideTableOfContents | Boolean | false | "hideTableOfContents" : \<value\> | N/A | If true, hides the table of contents panel on the record app. By default table of contents will be visible.
+| showExportButton | Boolean | false | "showExportButton" : \<value\> | N/A | If true, shows the experimental export button.

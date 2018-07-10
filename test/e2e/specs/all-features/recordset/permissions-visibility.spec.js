@@ -35,8 +35,11 @@ describe('When viewing Recordset app', function() {
         });
 
         describe('the action column', function() {
-            it('should display the view button', function() {
+            it("should display 'View' as the column header", function() {
+                expect(element.all(by.tagName('th')).get(0).getText()).toBe("View");
+            });
 
+            it('should display the view button', function() {
                 var button = recordsetPage.getViewActionButtons().first();
                 // There's only 1 button because the table only has 1 row
                 chaisePage.waitForElement(button).then(function(){
@@ -78,10 +81,14 @@ describe('When viewing Recordset app', function() {
 
         it('should not display the Edit link', function() {
             var link = recordsetPage.getEditRecordLink();
-            expect(link.isPresent()).toBe(false);          
+            expect(link.isPresent()).toBe(false);
         });
 
         describe('the action column', function() {
+            it("should display 'View' as the column header", function() {
+                expect(element.all(by.tagName('th')).get(0).getText()).toBe("View");
+            });
+
             it('should display the view button', function() {
                 var button = recordsetPage.getViewActionButtons().first();
                 // There's only 1 button because the table only has 1 row
@@ -125,6 +132,10 @@ describe('When viewing Recordset app', function() {
         });
 
         describe('the action column', function() {
+            it("should display 'Actions' as the column header", function() {
+                expect(element.all(by.tagName('th')).get(0).getText()).toBe("Actions");
+            });
+
             it('should display the view button', function() {
                 var button = recordsetPage.getViewActionButtons().first();
                 // There's only 1 button because the table only has 1 row
@@ -167,6 +178,10 @@ describe('When viewing Recordset app', function() {
         });
 
         describe('the action column', function() {
+            it("should display 'Actions' as the column header", function() {
+                expect(element.all(by.tagName('th')).get(0).getText()).toBe("Actions");
+            });
+
             it('should display the view button', function() {
                 chaisePage.waitForElementInverse(element(by.id("spinner")));
                 var button = recordsetPage.getViewActionButtons().first();

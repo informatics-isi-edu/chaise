@@ -49,36 +49,41 @@ describe('Navbar ', function() {
             expect(count).toEqual(counter);
         });
     });
-    
-    
-    it('should open the profile card on click of My Profile link', function() {
-        var link = element(by.css('.dropdown-toggle'));    
-        browser.wait(EC.elementToBeClickable(link), browser.params.defaultTimeout).then(function() {
-            link.click();
+
+
+    it('should open the profile card on click of My Profile link', function(done) {
+        var link = element(by.css('.dropdown-toggle'));
+
+        browser.wait(EC.elementToBeClickable(link), browser.params.defaultTimeout);
+        chaisePage.clickButton(link).then(function() {
             var profileLink = element(by.id('profile-link'));
-            browser.wait(EC.elementToBeClickable(profileLink), browser.params.defaultTimeout).then(function() {
-                return profileLink.click();
-            }).then(function () {
+            browser.wait(EC.elementToBeClickable(profileLink), browser.params.defaultTimeout);
+            chaisePage.clickButton(profileLink).then(function() {
                 var modalContent = element(by.css('.modal-content'));
+
+                chaisePage.waitForElement(modalContent);
                 expect(modalContent.isDisplayed()).toBeTruthy();
+                done();
+            }).catch(function (err) {
+                done.fail();
+                console.log(err);
             });
         });
     });
-    
-    it('should close the profile card on click of X on the modal window', function() {
+
+    it('should close the profile card on click of X on the modal window', function(done) {
          var closeLink = element(by.css('.modal-close'));
-         browser.wait(EC.elementToBeClickable(closeLink), browser.params.defaultTimeout).then (function(){
-            return closeLink.click();
-        }).then(function () {
-            //Adding extra wait for condition as the modal close triggers an animation while closing
-            chaisePage.waitForElementInverse(element(by.css('.modal-content'))).then(function (){
-                chaisePage.waitForElement(element(by.id("divRecordSet"))).then(function(){
-                    var modalContent = element(by.css('.modal-content'));
-                    expect(modalContent.isPresent()).toEqual(false);
-                });
-            });
-            
-         });
+         var modalContent = element(by.css('.modal-content'));
+         browser.wait(EC.elementToBeClickable(closeLink), browser.params.defaultTimeout);
+         chaisePage.clickButton(closeLink).then(function(){
+
+            browser.wait(EC.not(EC.presenceOf(modalContent)), browser.params.defaultTimeout);
+            expect(modalContent.isPresent()).toEqual(false);
+            done();
+        }).catch(function (err) {
+            console.log(err);
+            done.fail();
+        });
     });
 
     // TODO: These tests are xit'd because we don't handle tests logging in via Globus/other services just yet

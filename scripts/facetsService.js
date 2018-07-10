@@ -853,15 +853,21 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 		if (coordinates.z.column) {
 			plotUrl += ',z:=A:' + fixedEncodeURIComponent(coordinates.z.column);
 		}
-		plotUrl += '?limit=none';
+		plotUrl += '@sort(x)?limit=none';
 		ERMREST.GET(plotUrl,
 					'application/x-www-form-urlencoded; charset=UTF-8',
 				    this.successGetPlotData,
 			 		this.errorGetPlotData,
 					this);
-
+		//setTimeout(this.refreshPlot, 60000, window.location.href, this);
 	};
-
+	
+	this.refreshPlot = function refreshPlot(url, that) {
+		if (url == window.location.href) {
+			that.renderPlot();
+		}
+	};
+	
 	this.errorGetPlotData = function (jqXHR, textStatus, errorThrown, url, param)
 	{
 		handleError(jqXHR, textStatus, errorThrown, url);

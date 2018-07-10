@@ -25,7 +25,7 @@ E2EDIrecordAdd=test/e2e/specs/all-features-confirmation/recordedit/add.conf.js
 E2EDIrecordEditMultiColTypes=test/e2e/specs/default-config/recordedit/multi-col-types.conf.js
 E2EDIrecordImmutable=test/e2e/specs/default-config/recordedit/immutable-inputs.conf.js
 E2EDIrecordEdit=test/e2e/specs/all-features-confirmation/recordedit/edit-delete.conf.js
-E2ErecordEditNoDeleteBtn=test/e2e/specs/delete-prohibited/recordedit/no-delete-btn.conf.js
+# E2ErecordEditNoDeleteBtn=test/e2e/specs/delete-prohibited/recordedit/no-delete-btn.conf.js
 E2EDIrecordMultiAdd=test/e2e/specs/default-config/recordedit/add-x-forms.conf.js
 E2EDIrecordMultiEdit=test/e2e/specs/default-config/recordedit/multi-edit.conf.js
 E2EDrecordEditCompositeKey=test/e2e/specs/default-config/recordedit/composite-key.conf.js
@@ -41,6 +41,7 @@ E2EDrecordset=test/e2e/specs/all-features-confirmation/recordset/presentation.co
 E2EDrecordsetEdit=test/e2e/specs/default-config/recordset/edit.conf.js
 E2ErecordsetAdd=test/e2e/specs/default-config/recordset/add.conf.js
 E2EDrecordsetIndFacet=test/e2e/specs/delete-prohibited/recordset/ind-facet.conf.js
+E2EDrecordsetHistFacet=test/e2e/specs/delete-prohibited/recordset/histogram-facet.conf.js
 # Viewer tests
 E2EDviewer=test/e2e/specs/all-features/viewer/presentation.conf.js
 # misc tests
@@ -56,12 +57,14 @@ FullFeaturesParallel=test/e2e/specs/all-features/protractor.conf.js
 FullFeaturesConfirmationParallel=test/e2e/specs/all-features-confirmation/protractor.conf.js
 DeleteProhibitedParallel=test/e2e/specs/delete-prohibited/protractor.conf.js
 DefaultConfigParallel=test/e2e/specs/default-config/protractor.conf.js
+# Setup for manual tests
+Manualrecordset=test/manual/specs/recordset.conf.js
 
 
 NAVBAR_TESTS=$(E2Enavbar) $(E2EnavbarHeadTitle)
 SEARCH_TESTS=$(E2Esearch)
 DETAILED_TESTS=$(E2EDdetailed)
-RECORDSET_TESTS=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit) $(E2EDrecordsetIndFacet)
+RECORDSET_TESTS=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit) $(E2EDrecordsetIndFacet) $(E2EDrecordsetHistFacet)
 RECORD_TESTS=$(E2EDrecord) $(E2ErecordNoDeleteBtn) $(E2EDrecordRelatedTable) $(E2EDrecordCopy)
 RECORDADD_TESTS=$(E2EDIrecordAdd) $(E2EDIrecordMultiAdd) $(E2EDIrecordImmutable)
 RECORDEDIT_TESTS=$(E2EDIrecordEdit) $(E2EDIrecordMultiEdit) $(E2EDrecordEditCompositeKey) $(E2ErecordEditNoDeleteBtn) $(E2EDrecordEditSubmissionDisabled) $(E2EDIrecordEditMultiColTypes) $(E2EDrecordEditDomainFilter)
@@ -76,6 +79,8 @@ PARALLEL_TESTS=$(FullFeaturesParallel) $(FullFeaturesConfirmationParallel) $(Del
 VIEWER_TESTS=$(E2EDviewer)
 
 ALL_TESTS=$(NAVBAR_TESTS) $(RECORD_TESTS) $(RECORDSET_TESTS) $(RECORDADD_TESTS) $(RECORDEDIT_TESTS) $(PERMISSIONS_TESTS) $(FOOTER_TESTS) $(ERRORS_TESTS)
+
+ALL_MANUAL_TESTS=$(Manualrecordset)
 
 define make_test
 	rc=0; \
@@ -152,6 +157,10 @@ testfooter: test-FOOTER_TESTS
 #Rule to run the default chaise configuration tests in parallel
 .PHONY: testerrors
 testerrors: test-ERRORS_TESTS
+
+# Rule to setup schema and data for manual tests
+.PHONY: testmanually
+testmanually: test-ALL_MANUAL_TESTS
 
 # Rule to run tests
 .PHONY: test
@@ -259,15 +268,16 @@ JS_SOURCE=$(JS)/respond.js \
 	$(JS)/controller/ermrestTourController.js \
 	$(JS)/tour.js \
 	$(COMMON)/alerts.js \
+	$(COMMON)/storage.js \
 	$(COMMON)/authen.js \
 	$(COMMON)/delete-link.js \
 	$(COMMON)/errors.js \
-	$(COMMON)/errorDialog.controller.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/navbar.js \
 	$(COMMON)/record.js \
 	$(COMMON)/ellipses.js \
+	$(COMMON)/storage.js \
 	$(COMMON)/table.js \
 	$(COMMON)/utils.js \
 	$(COMMON)/bindHtmlUnsafe.js
@@ -281,7 +291,6 @@ TEMPLATES_DEPS=$(TEMPLATES)/erminit.html \
 	$(TEMPLATES)/ermretrieveresults.html
 
 DETAILED_TEMPLATES=detailed/assets/views/detailed.html
-RECSET_TEMPLATES_DEPS=recordset/recordset.html
 
 # JavaScript and CSS source for Record app
 DETAILED_ASSETS=detailed/assets
@@ -330,31 +339,37 @@ DETAILED_CSS_SOURCE=$(COMMON)/styles/app.css
 RECORD_ASSETS=record
 
 RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
+	$(JS)/vendor/plotly-latest.min.js \
 	$(JS)/vendor/angular.js \
+	$(JS)/vendor/angular-plotly.js \
 	$(JS)/vendor/angular-messages.min.js \
 	$(JS)/vendor/angular-sanitize.js \
 	$(COMMON)/vendor/angular-cookies.min.js \
 	$(COMMON)/vendor/angular-animate.min.js \
+	$(COMMON)/vendor/angular-scroll.min.js \
 	$(COMMON)/alerts.js \
 	$(COMMON)/authen.js \
 	$(COMMON)/delete-link.js \
 	$(COMMON)/errors.js \
-	$(COMMON)/errorDialog.controller.js \
+	$(COMMON)/faceting.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/navbar.js \
 	$(COMMON)/record.js \
 	$(COMMON)/ellipses.js \
+	$(COMMON)/storage.js \
 	$(COMMON)/table.js \
 	$(COMMON)/utils.js \
 	$(COMMON)/bindHtmlUnsafe.js \
 	$(COMMON)/footer.js \
 	$(COMMON)/upload.js \
 	$(COMMON)/recordCreate.js \
+	$(COMMON)/resizable.js \
 	$(JS)/vendor/bootstrap.js \
 	$(JS)/vendor/ui-bootstrap-tpls.js
 
 RECORD_JS_SOURCE=$(RECORD_ASSETS)/record.app.js \
+	$(RECORD_ASSETS)/record.utils.js \
 	$(RECORD_ASSETS)/record.controller.js
 
 RECORD_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
@@ -374,6 +389,7 @@ VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/alerts.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/utils.js \
+	$(COMMON)/storage.js \
 	$(COMMON)/authen.js \
 	$(COMMON)/errors.js \
 	$(COMMON)/modal.js \
@@ -418,24 +434,29 @@ VIEWER_CSS_SOURCE=$(VIEWER_ASSETS)/viewer.css
 RE_ASSETS=recordedit
 
 RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
+	$(JS)/vendor/plotly-latest.min.js \
 	$(JS)/vendor/angular.js \
+	$(JS)/vendor/angular-plotly.js \
 	$(JS)/vendor/angular-sanitize.js \
 	$(JS)/vendor/angular-messages.min.js \
 	$(COMMON)/vendor/angular-cookies.min.js \
+	$(COMMON)/vendor/angular-scroll.min.js \
 	$(COMMON)/vendor/mask.min.js \
 	$(COMMON)/vendor/moment.min.js \
 	$(COMMON)/vendor/sparkMD5.min.js \
 	$(COMMON)/alerts.js \
 	$(COMMON)/authen.js \
 	$(COMMON)/errors.js \
+	$(COMMON)/faceting.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/ellipses.js \
+	$(COMMON)/resizable.js \
+	$(COMMON)/storage.js \
 	$(COMMON)/table.js \
 	$(COMMON)/utils.js \
 	$(COMMON)/upload.js \
 	$(COMMON)/validators.js \
 	$(COMMON)/navbar.js \
-	$(COMMON)/errorDialog.controller.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/delete-link.js \
 	$(COMMON)/bindHtmlUnsafe.js \
@@ -482,10 +503,11 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/vendor/angular-animate.min.js \
 	$(COMMON)/vendor/angular-scroll.min.js \
 	$(COMMON)/alerts.js \
+	$(COMMON)/authen.js \
 	$(COMMON)/bindHtmlUnsafe.js \
 	$(COMMON)/ellipses.js \
+	$(COMMON)/export.js \
 	$(COMMON)/errors.js \
-	$(COMMON)/errorDialog.controller.js \
 	$(COMMON)/faceting.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/footer.js \
@@ -493,20 +515,21 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/navbar.js \
 	$(COMMON)/resizable.js \
+	$(COMMON)/storage.js \
 	$(COMMON)/table.js \
+	$(COMMON)/utils.js \
 	$(COMMON)/validators.js \
 	$(COMMON)/vendor/angular-cookies.min.js
 
-RECSET_JS_SOURCE=$(COMMON)/authen.js \
-    $(COMMON)/utils.js \
-    $(RECSET_ASSETS)/recordset.js
+RECSET_JS_SOURCE=$(RECSET_ASSETS)/recordset.app.js \
+    $(RECSET_ASSETS)/recordset.controller.js
 
 RECSET_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css
 
 RECSET_CSS_SOURCE=$(COMMON)/styles/app.css \
-    $(COMMON)/styles/appheader.css \
-		$(COMMON)/vendor/MarkdownEditor/styles/github-markdown.css
+	$(COMMON)/styles/appheader.css \
+	$(COMMON)/vendor/MarkdownEditor/styles/github-markdown.css
 
 # Config file
 JS_CONFIG=chaise-config.js
@@ -617,9 +640,8 @@ record/index.html: record/index.html.in .make-record-asset-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-record-asset-block' -e 'd' -e '}' \
 		record/index.html.in > record/index.html
 
-recordset/index.html: recordset/index.html.in .make-rs-asset-block .make-rs-template-block
+recordset/index.html: recordset/index.html.in .make-rs-asset-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-rs-asset-block' -e 'd' -e '}' \
-		-e '/%TEMPLATES%/ {' -e 'r .make-rs-template-block' -e 'd' -e '}' \
 		recordset/index.html.in > recordset/index.html
 
 viewer/index.html: viewer/index.html.in .make-viewer-asset-block
@@ -680,12 +702,6 @@ $(JS_CONFIG): chaise-config-sample.js
 	> .make-template-block
 	for file in $(TEMPLATES_DEPS); do \
 		$(CAT) $$file >> .make-template-block ; \
-	done
-
-.make-rs-template-block: $(RECSET_TEMPLATES_DEPS)
-	> .make-rs-template-block
-	for file in $(RECSET_TEMPLATES_DEPS); do \
-		$(CAT) $$file >> .make-rs-template-block ; \
 	done
 
 .make-detailed-template-block: $(DETAILED_TEMPLATES)

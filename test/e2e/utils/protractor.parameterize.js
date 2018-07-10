@@ -156,6 +156,9 @@ exports.parameterize = function(config, configParams) {
         }
     }, function(err) {
         defer.reject({ catalogId: catalogId });
+    }).catch(function (err) {
+        console.log(err);
+        defer.reject({ catalogId: catalogId });
     });
 
 

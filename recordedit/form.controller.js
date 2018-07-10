@@ -3,14 +3,14 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'messageMap', 'modalBox', 'recordCreate', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$uibModal', '$window',
-        function FormController(AlertsService, DataUtils, ErrorService, logActions, messageMap, modalBox, recordCreate, recordEditModel, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $uibModal, $window) {
+    .controller('FormController', ['AlertsService', 'dataFormats', 'DataUtils', 'ErrorService', 'integerLimits', 'logActions', 'messageMap', 'modalBox', 'modalUtils', 'recordCreate', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
+        function FormController(AlertsService, dataFormats, DataUtils, ErrorService, integerLimits, logActions, messageMap, modalBox, modalUtils, recordCreate, recordEditModel, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
         var context = $rootScope.context;
-
+        var mainBodyEl;
 
         vm.recordEditModel = recordEditModel;
-        vm.resultset = false;
+        vm.dataFormats = dataFormats;
         vm.editMode = (context.mode == context.modes.EDIT ? true : false);
         vm.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
         vm.booleanValues = context.booleanValues;
@@ -41,12 +41,12 @@
         vm.deleteRecord = deleteRecord;
 
         vm.inputType = null;
-        vm.int2min = -32768;
-        vm.int2max = 32767;
-        vm.int4min = -2147483648;
-        vm.int4max = 2147483647;
-        vm.int8min = -9223372036854775808
-        vm.int8max = 9223372036854775807;
+        vm.int2min = integerLimits.INT_2_MIN;
+        vm.int2max = integerLimits.INT_2_MAX;
+        vm.int4min = integerLimits.INT_4_MIN;
+        vm.int4max = integerLimits.INT_4_MAX;
+        vm.int8min = integerLimits.INT_8_MIN;
+        vm.int8max = integerLimits.INT_8_MAX;
 
         vm.columnToDisplayType = columnToDisplayType;
         vm.matchType = matchType;
@@ -55,6 +55,7 @@
         vm.datepickerOpened = {}; // Tracks which datepickers on the form are open
         vm.toggleMeridiem = toggleMeridiem;
         vm.clearModel = clearModel;
+        vm.fileExtensionTypes = fileExtensionTypes;
         vm.blurElement = blurElement;
         // Specifies the regexes to be used for a token in a ui-mask input. For example, the '1' key in
         // in vm.maskOptions.date means that only 0 or 1 is allowed wherever the '1' key is used in a ui-mask template.
@@ -86,10 +87,10 @@
             // Created a single entity or Updated one
             if (rowset.length == 1) {
                 AlertsService.addAlert('Your data has been submitted. Redirecting you now to the record...', 'success');
-                redirectUrl += "record/#" + UriUtils.fixedEncodeURIComponent(page.reference.location.catalog) + '/' + page.reference.location.compactPath;
+                redirectUrl += "record/#" + page.reference.location.catalog + '/' + page.reference.location.compactPath;
             } else {
                 AlertsService.addAlert('Your data has been submitted. Redirecting you now to the recordset...', 'success');
-                redirectUrl += "recordset/#" + UriUtils.fixedEncodeURIComponent(page.reference.location.catalog) + '/' + page.reference.location.compactPath;
+                redirectUrl += "recordset/#" + page.reference.location.catalog + '/' + page.reference.location.compactPath;
             }
 
             // Redirect to record or recordset app..
@@ -120,10 +121,10 @@
                         case "timestamptz":
                             if (vm.readyToSubmit) {
                                 if (rowVal.date && rowVal.time && rowVal.meridiem) {
-                                    rowVal = moment(rowVal.date + rowVal.time + rowVal.meridiem, 'YYYY-MM-DDhh:mm:ssA').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+                                    rowVal = moment(rowVal.date + rowVal.time + rowVal.meridiem, dataFormats.date + dataFormats.time12 + 'A').format(dataFormats.datetime.submission);
                                 } else if (rowVal.date && rowVal.time === null) {
                                     rowVal.time = '00:00:00';
-                                    rowVal = moment(rowVal.date + rowVal.time + rowVal.meridiem, 'YYYY-MM-DDhh:mm:ssA').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+                                    rowVal = moment(rowVal.date + rowVal.time + rowVal.meridiem, dataFormats.date + dataFormats.time12 + 'A').format(dataFormats.datetime.submission);
                                 // in create if the user doesn't change the timestamp field, it will be an object in form {time: null, date: null, meridiem: AM}
                                 // meridiem should never be null,time can be left empty (null) but the case above would catch that.
                                 } else if (!rowVal.date) {
@@ -163,7 +164,7 @@
                 vm.redirectAfterSubmission(page);
             }
             else {
-                AlertsService.addAlert("Your data has been submitted. Showing you the result set...","success");
+                AlertsService.addAlert("Your data has been submitted. Showing you the result set...", "success");
 
                 // can't use page.reference because it reflects the specific values that were inserted
                 vm.recordsetLink = $rootScope.reference.contextualize.compact.appLink;
@@ -214,6 +215,12 @@
                     };
                 }
                 vm.resultset = true;
+                // delay updating the height of DOM elements so the current digest cycle can complete and "show" the resultset view
+                $timeout(function() {
+                    mainBodyEl = $document[0].getElementsByClassName('main-body')[1];
+                    setMainContainerHeight();
+                    UiUtils.setFooterStyle(1);
+                }, 0);
         }
     }
 
@@ -266,26 +273,27 @@
         function deleteRecord() {
             var errorData = {};
             if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
-                $uibModal.open({
+                modalUtils.showModal({
                     templateUrl: "../common/templates/delete-link/confirm_delete.modal.html",
                     controller: "ConfirmDeleteController",
                     controllerAs: "ctrl",
                     size: "sm"
-                }).result.then(function success() {
+                }, function success() {
                     $rootScope.showSpinner = true;
                     // user accepted prompt to delete
-                    return $rootScope.reference.delete({action: logActions.recordEditDelete});
-                }).then(onDelete, function deleteFailure(response) {
+                    $rootScope.reference.delete({action: logActions.recordEditDelete}).then(onDelete, function deleteFailure(response) {
+                        $rootScope.showSpinner = false;
+                        if (typeof response !== "string") {
+                          errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
+                          errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
+                          response.errorData = errorData;
+                          ErrorService.handleException(response, true); // call error module with isDismissible = True
+                        }
+                    });
+                }, function onError (exception) {
                     $rootScope.showSpinner = false;
-                    if (typeof response !== "string") {
-                      errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
-                      errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
-                      response.errorData = errorData;
-                      throw response;
-                    }
-                }).catch(function (exception) {
                     AlertsService.addAlert(exception.message, 'error');
-                });
+                }, false);
             } else {
                 $rootScope.showSpinner = true;
                 $rootScope.reference.delete().then(onDelete, function deleteFailure(response) {
@@ -293,8 +301,9 @@
                     errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
                     errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
                     response.errorData = errorData;
-                    throw response;
+                    ErrorService.handleException(response, true); // call error module with isDismissible = True
                 }).catch(function (exception) {
+                    $rootScope.showSpinner = false;
                     AlertsService.addAlert(exception.message, 'error');
                 });
             }
@@ -326,19 +335,19 @@
             params.context = "compact/select";
             params.selectedRows = [];
             params.selectMode = modalBox.singleSelectMode;
+            params.showFaceting = true;
+            params.facetPanelOpen = false;
 
-            var modalInstance = $uibModal.open({
+            modalUtils.showModal({
                 animation: false,
                 controller: "SearchPopupController",
                 controllerAs: "ctrl",
                 resolve: {
                     params: params
                 },
-                size: "lg",
+                size: "xl",
                 templateUrl: "../common/templates/searchPopup.modal.html"
-            });
-
-            modalInstance.result.then(function dataSelected(tuple) {
+            }, function dataSelected(tuple) {
                 // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
                 // set data in view model (model.rows) and submission model (model.submissionRows)
 
@@ -359,7 +368,7 @@
                 }
 
                 vm.recordEditModel.rows[rowIndex][column.name] = tuple.displayname.value;
-            });
+            }, false, false);
         }
 
         function clearForeignKey(rowIndex, column) {
@@ -467,6 +476,7 @@
             vm.recordEditModel.submissionRows.splice(index, 1);
             $timeout(function() {
                 onResize();
+                $rootScope.showSpinner = false;
             }, 10);
         }
 
@@ -529,12 +539,12 @@
         function applyCurrentDatetime(modelIndex, columnName, columnType) {
             if (columnType === 'timestamp' || columnType === 'timestamptz') {
                 return vm.recordEditModel.rows[modelIndex][columnName] = {
-                    date: moment().format('YYYY-MM-DD'),
-                    time: moment().format('hh:mm:ss'),
+                    date: moment().format(dataFormats.date),
+                    time: moment().format(dataFormats.time24),
                     meridiem: moment().format('A')
                 }
             }
-            return vm.recordEditModel.rows[modelIndex][columnName] = moment().format('YYYY-MM-DD');
+            return vm.recordEditModel.rows[modelIndex][columnName] = moment().format(dataFormats.date);
         }
 
         // Toggle between AM/PM for a time input's model
@@ -565,43 +575,15 @@
             return false;
         }
 
+        function fileExtensionTypes(column) {
+            var fileExtensionFilter = column.filenameExtFilter;
+            return fileExtensionFilter.join(", ");
+        }
+
         // Given an $event, this will blur or removes the focus from the element that triggerd the event
         function blurElement(e) {
             e.currentTarget.blur();
         }
-
-        // fetches the height of navbar, bookmark container, and view
-        // also fetches the faceting container for defining the dynamic height
-        function fetchElements() {
-            var elements = {};
-            try {
-                // get document height
-                elements.docHeight = $document[0].documentElement.offsetHeight
-                // get navbar height
-                elements.navbarHeight = $document[0].getElementById('mainnav').offsetHeight;
-                // there is no bookmark bar
-                // TODO: if bookmark bar added
-                elements.bookmarkHeight = 0;
-                // get recordset main container
-                elements.container = $document[0].getElementsByClassName('main-container')[0];
-            } catch(error) {
-                $log.warn(error);
-            }
-            return elements;
-        }
-
-        $scope.$watch(function() {
-            return $rootScope.displayReady;
-        }, function (newValue, oldValue) {
-            if (newValue) {
-                var elements = fetchElements();
-                // if the navbarHeight is not set yet, don't set the height
-                // no bookmark container here
-                if(elements.navbarHeight) {
-                    UiUtils.setDisplayHeight(elements);
-                }
-            }
-        });
 
         // if any of the columns is showing spinner, that means it's waiting for some
         // data and therefore we should just disable the addMore button.
@@ -615,17 +597,68 @@
             }
         });
 
+        /*** Container Heights and other styling ***/
+        // fetches the height of navbar, bookmark container, and viewport
+        // also fetches the main container for defining the dynamic height
+        // There are 2 main containers on `recordedit` app
+        function fetchContainerElements(containerIndex) {
+            var elements = {};
+            try {
+                /**** used for main-container height calculation ****/
+                // get document height
+                elements.docHeight = $document[0].documentElement.offsetHeight
+                // get navbar height
+                elements.navbarHeight = $document[0].getElementById('mainnav').offsetHeight;
+                // get bookmark height
+                elements.bookmarkHeight = $document[0].getElementsByClassName('meta-icons')[containerIndex].offsetHeight;
+                // get recordedit main container
+                elements.container = $document[0].getElementsByClassName('main-container')[containerIndex];
+            } catch(error) {
+                $log.warn(error);
+            }
+            return elements;
+        }
+
+        function setMainContainerHeight() {
+            var idx = vm.resultset ? 1 : 0;
+            var elements = fetchContainerElements(idx);
+            // if the navbarHeight is not set yet, don't set the height
+            // no bookmark container here
+            if(elements.navbarHeight) {
+                UiUtils.setDisplayContainerHeight(elements);
+            }
+        }
+
+        $scope.$watch(function() {
+            return $rootScope.displayReady;
+        }, function (newValue, oldValue) {
+            if (newValue) {
+                $timeout(setMainContainerHeight, 0);
+            }
+        });
+
+        // watch for the main body size to change
+        $scope.$watch(function() {
+            return mainBodyEl && mainBodyEl.offsetHeight;
+        }, function (newValue, oldValue) {
+            if (newValue) {
+                $timeout(function () {
+                    UiUtils.setFooterStyle(vm.resultset ? 1 : 0);
+                }, 0);
+            }
+        });
+
         angular.element($window).bind('resize', function(){
             if ($rootScope.displayReady) {
-                var elements = fetchElements();
-                // if the navbarHeight is not set yet, don't set the height
-                // no bookmark container here
-                if(elements.navbarHeight) {
-                    UiUtils.setDisplayHeight(elements);
-                }
+                setMainContainerHeight();
+                UiUtils.setFooterStyle(vm.resultset ? 1 : 0);
                 $scope.$digest();
             }
         });
+
+        $timeout(function () {
+            mainBodyEl = $document[0].getElementsByClassName('main-body')[0];
+        }, 0);
 
         /*------------------------code below is for fixing the column names when scrolling -----------*/
 

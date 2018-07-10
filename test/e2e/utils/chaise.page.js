@@ -268,15 +268,24 @@ var recordEditPage = function() {
     };
 
     this.getEntityTitleElement = function() {
-        return element(by.id('entity-title'));
+        return element(by.id('page-title'));
     };
 
-    this.getResultTitle = function () {
-        return element(by.id('result-title'));
+    this.getResultsetTitleElement = function() {
+        return element(by.css('.resultset-container #page-title'));
     };
 
-    this.getResultTitleLink = function () {
-        return element.all(by.css('#result-title > a'));
+    this.getEntitySubtitleElement = function() {
+        return element(by.id('page-subtitle'));
+    };
+
+    this.getEntitySubtitleTooltip = function () {
+        // the .re-subtitle element might not exist, that's why it's different from other tooltips
+        return element.all(by.css("#page-subtitle .re-subtitle")).first().getAttribute('uib-tooltip');
+    };
+
+    this.getResultsetSubtitleLink = function () {
+        return element.all(by.css('#page-subtitle > a'));
     };
 
     this.getAllColumnCaptions = function() {
@@ -377,6 +386,10 @@ var recordEditPage = function() {
         return element(by.css(".modal-title"));
     };
 
+    this.getModalActionBody = function() {
+        return element(by.css('.modal-body')).all(by.tagName('span')).get(1);
+    };
+
     this.getModalCloseBtn = function() {
             return element(by.css(".modal-close"));
     };
@@ -386,7 +399,7 @@ var recordEditPage = function() {
     };
 
     this.getFormTitle = function() {
-        return element(by.id("entity-title"));
+        return element(by.id("page-title"));
     };
 
     this.getForeignKeyInputDisplay = function(columnDisplayName, index) {
@@ -474,6 +487,10 @@ var recordEditPage = function() {
 
     this.getDateInputErrorMessage = function(el, type) {
         return browser.executeScript("return $(arguments[0]).parents('div[ng-switch-when=\"date\"]').siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
+    };
+
+    this.getFileInputErrorMessage = function(el, type) {
+        return browser.executeScript("return $(arguments[0]).parents('div[ng-switch-when=\"file\"]').siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
     };
 
     this.clearInput = function(el) {
@@ -599,8 +616,12 @@ var recordPage = function() {
         return element(by.id("page-subtitle"));
     };
 
+    this.getEntitySubTitleTooltip = function () {
+        return this.getEntitySubTitleElement().all(by.css("span")).first().getAttribute('uib-tooltip');
+    };
+
     this.getColumns = function() {
-        return browser.executeScript("return $('tr[ng-repeat=\"column in columns\"]')");
+        return element.all(by.css("td.entity-key"));
     };
 
     this.getAllColumnCaptions = function() {
@@ -641,6 +662,9 @@ var recordPage = function() {
     this.getRelatedTablesWithPanel = function () {
         return element.all(by.css(".panel"));
     };
+    this.getRelatedTablesWithPanelandHeading = function () {
+        return element.all(by.css(".related-table-heading.panel:not(.ng-hide)"));
+    };
 
     this.getRelatedTable = function(displayName) {
         displayName = makeSafeIdAttr(displayName);
@@ -654,7 +678,6 @@ var recordPage = function() {
         displayName = safeId?displayName:makeSafeIdAttr(displayName);
         return element(by.id("entity-" + displayName)).element(by.css(".ng-scope")).element(by.css(".ng-scope"));
     };
-
 
     this.getRelatedTableHeadings = function() {
         return element.all(by.css(".related-table-heading"));
@@ -679,37 +702,51 @@ var recordPage = function() {
         return element(by.id("rt-" + displayName)).all(by.css(".table-column-displayname > span"));
     };
 
-    this.getRelatedTableRows = function(displayName) {
-        displayName = makeSafeIdAttr(displayName);
-        return element(by.id("rt-" + displayName)).all(by.css(".table-row"));
+    this.getRelatedTableRows = function(displayName, isInline) {
+        var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTable(displayName);
+        return el.all(by.css(".table-row"));
     };
 
-    this.getMoreResultsLink = function(displayName) {
-        displayName = makeSafeIdAttr(displayName);
+    this.getRelatedTableRowLink = function (displayName, rowIndex, isInline) {
+        var rows = this.getRelatedTableRows(displayName, isInline);
+        return rows.get(rowIndex).all(by.tagName("td")).first().all(by.css(".view-action-button")).first();
+    };
+
+    this.getRelatedTableRowEdit = function (displayName, rowIndex, isInline) {
+        var rows = this.getRelatedTableRows(displayName, isInline);
+        return rows.get(rowIndex).all(by.tagName("td")).first().all(by.css(".edit-action-button")).first();
+    };
+
+    this.getRelatedTableRowDelete = function (displayName, rowIndex, isInline) {
+        var rows = this.getRelatedTableRows(displayName);
+        return rows.get(rowIndex).all(by.tagName("td")).first().all(by.css(".delete-action-button")).first();
+    };
+
+    this.getMoreResultsLink = function(displayName, isInline) {
+        var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTableHeading(displayName);
         // the link is not a child of the table, rather one of the accordion group
-        return element(by.id("rt-heading-" + displayName)).element(by.css(".more-results-link"));
+        return el.element(by.css(".more-results-link"));
     };
 
-    this.getAddRecordLink = function(displayName) {
-        displayName = makeSafeIdAttr(displayName);
+    this.getAddRecordLink = function(displayName, isInline) {
+        var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTableHeading(displayName);
         // the link is not a child of the table, rather one of the accordion group
-        return element(by.id("rt-heading-" + displayName)).element(by.css(".add-records-link"));
+        return el.element(by.css(".add-records-link"));
     };
 
-    this.getToggleDisplayLink = function(displayName) {
-        displayName = makeSafeIdAttr(displayName);
+    this.getToggleDisplayLink = function(displayName, isInline) {
+        var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTableHeading(displayName);
         // the link is not a child of the table, rather one of the accordion group
-        return element(by.id("rt-heading-" + displayName)).element(by.css(".toggle-display-link"));
+        return el.element(by.css(".toggle-display-link"));
     };
 
-    this.getRelatedTableRowValues = function(displayName) {
-        displayName = makeSafeIdAttr(displayName);
-        return that.getRelatedTableRows(displayName).all(by.tagName("td"));
+    this.getRelatedTableRowValues = function(displayName, isInline) {
+        return this.getRelatedTableRows(displayName, isInline).all(by.tagName("td"));
     };
 
-    this.getNoResultsRow = function(displayName) {
-        displayName = makeSafeIdAttr(displayName);
-        return element(by.id("rt-" + displayName)).element(by.id("no-results-row"));
+    this.getNoResultsRow = function(displayName, isInline) {
+        var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTable(displayName);
+        return el.element(by.id("no-results-row"));
     };
 
     this.getCreateRecordButton = function() {
@@ -775,16 +812,58 @@ var recordPage = function() {
     this.getLoadingElement = function () {
         return element(by.id("rt-loading"));
     }
+
+    this.getSidePanel = function() {
+      return element(by.css('.faceting-resizable'));
+    }
+
+    this.getSidePanelItemById = function (idx) {
+        return element(by.id("recordSidePan-" + idx));
+    }
+
+    this.getSidePanelHeading = function () {
+        return browser.executeScript('return $(".sidePanelHeading").text()');
+    }
+
+    this.getSidePanelTableTitles = function() {
+        return browser.executeScript("return $('.columns-container li').map(function(i, a) { return a.textContent.trim(); });");
+    }
+
+    this.getSidePanelFiddler = function() {
+        return element(by.className('sidePanFiddler')).element(by.className('facet-glyph-icon'));
+    }
+
+    this.getModalSidePanelFiddler = function() {
+        return element(by.css(".modal-body")).element(by.className('sidePanFiddler')).element(by.className('facet-glyph-icon'));
+    }
+
+    this.getModalSidePanel = function() {
+        return element(by.css(".modal-body")).element(by.css('.faceting-resizable'));
+    }
+
+    this.getMarkdownContainer = function (el) {
+        return el.all(by.css(".markdown-container")).first();
+    };
 };
 
 var recordsetPage = function() {
     var that = this;
+
+    this.waitForInverseMainSpinner = function () {
+        var locator = element(by.id("main-spinner"));
+        return browser.wait(protractor.ExpectedConditions.invisibilityOf(locator), browser.params.defaultTimeout);
+    };
+
     this.getPageTitle = function() {
         return browser.executeScript("return $('#page-title').text();");
     };
 
     this.getPageTitleElement = function() {
         return element(by.id('page-title'));
+    };
+
+    this.getPageTitleTooltip = function () {
+        return this.getPageTitleElement().all(by.css("span")).first().getAttribute('uib-tooltip');
     };
 
     this.getPageSubtitle = function() {
@@ -811,6 +890,18 @@ var recordsetPage = function() {
         return element.all(by.css(".table-column-displayname > span"));
     };
 
+    this.getColumnSortButton = function(rawColumnName){
+        return element(by.css('.c_' + rawColumnName)).element(by.css('.glyphicon-sort'));
+    };
+
+    this.getColumnSortAscButton = function(rawColumnName){
+        return element(by.css('.c_' + rawColumnName)).element(by.css('.glyphicon-sort-by-attributes-alt'));
+    };
+
+    this.getColumnSortDescButton = function(rawColumnName){
+        return element(by.css('.c_' + rawColumnName)).element(by.css('.glyphicon-sort-by-attributes'));
+    };
+
     this.getRows = function() {
         return element.all(by.css('.table-row'));
     };
@@ -835,12 +926,16 @@ var recordsetPage = function() {
         return element(by.id("search-input"));
     };
 
+    this.getMainSearchBox = function() {
+        return element(by.css(".main-container")).element(by.id("search-input"));
+    };
+
     this.getSearchSubmitButton = function() {
-        return element(by.id("search-submit"));
+        return element(by.css(".main-container")).element(by.id("search-submit"));
     };
 
     this.getSearchClearButton = function() {
-        return element(by.id("search-clear"));
+        return element(by.css(".main-container")).element(by.id("search-clear"));
     };
 
     this.getAddRecordLink = function() {
@@ -901,8 +996,12 @@ var recordsetPage = function() {
         return element(by.id("page-size-" + limit));
     };
 
-    this.getDownloadButton = function (limit) {
-        return element(by.css("downloadCSV-link"));
+    this.getDownloadButton = function () {
+        return element(by.id("downloadCSV-link"));
+    };
+
+    this.getPermalinkButton = function() {
+        return element(by.id('permalink'));
     };
 
     this.getRecordsetColumnHeader = function (name) {
@@ -926,6 +1025,10 @@ var recordsetPage = function() {
         return element(by.id("fc-heading-" + idx));
     }
 
+    this.getFacetHeaderById = function (idx) {
+        return element(by.id("fc-heading-" + idx)).element(by.css('a'));
+    };
+
     this.getFacetCollapse = function (idx) {
         return element(by.id("fc-" + idx)).element(by.css("div[aria-expanded=true]"));
     }
@@ -938,12 +1041,24 @@ var recordsetPage = function() {
         return browser.executeScript("return $('.panel-open h3 a').map(function(i, a) { return a.textContent.trim(); });");
     }
 
-    this.getFilters = function () {
-        return element.all(by.css(".filter-label.label-default"));
+    this.getFilterString = function () {
+        return element(by.id("recordset-filter-str"));
+    };
+
+    this.getSelectedRowsFilters = function () {
+        return element(by.css(".selected-rows-filters")).all(by.css(".filter-label.label-default"));
+    }
+
+    this.getFacetFilters = function () {
+        return element(by.css(".facet-filters")).all(by.css(".filter-label.label-default"));
     }
 
     this.getClearAllFilters = function () {
         return element(by.id("clear-all-filters"));
+    }
+
+    this.getClearCustomFilters = function () {
+        return element(by.id("clear-custom-filters"));
     }
 
     this.getFacetOptions = function (idx) {
@@ -976,6 +1091,10 @@ var recordsetPage = function() {
         return element(by.id("fc-" + idx)).element(by.css(".facet-search-clear"));
     }
 
+    this.getHistogram = function (idx) {
+        return element(by.id("fc-" + idx)).element(by.tagName("plotly"));
+    }
+
     this.getList = function (idx) {
         return element(by.id("fc-" + idx)).element(by.css(".chaise-list-container"));
     }
@@ -990,7 +1109,15 @@ var recordsetPage = function() {
 
     this.getModalOptions = function () {
         return element(by.css(".modal-body")).all(by.css(".chaise-checkbox input"));
-    }
+    };
+
+    this.getRecordsetTableModalOptions = function () {
+        return element(by.css(".modal-body .recordset-table")).all(by.css(".chaise-checkbox input"));
+    };
+
+    this.getModalRecordsetTableOptionByIndex = function (index) {
+        return element(by.css(".modal-body")).element(by.css(".main-container")).all(by.css(".chaise-checkbox input")).get(index);
+    };
 
     this.getModalSubmit = function () {
         return element(by.css(".modal-body")).element(by.id("multi-select-submit-btn"));
@@ -1025,13 +1152,67 @@ var recordsetPage = function() {
         return element.all(by.css('.modal-body tr.disabled-row'));
     };
 
-    this.getFacetSpinner= function (idx) {
+    this.getFacetSpinner = function (idx) {
         return element(by.id("fc-" + idx)).element(by.css(".spinner"));
     };
 
     this.getDisabledFacetOptions = function (idx) {
         return element(by.id("fc-" + idx)).all(by.css(".chaise-checkbox input[disabled=disabled]"));
     };
+
+    this.getHistogram = function (idx) {
+        return element(by.id("fc-" + idx)).element(by.css(".js-plotly-plot"));
+    };
+
+    this.getPlotlyZoom = function (idx) {
+        return element(by.id("fc-" + idx)).element(by.css(".zoom-plotly-button"));
+    };
+
+    this.getPlotlyZoomDisabled = function (idx) {
+        return element(by.id("fc-" + idx)).all(by.css(".zoom-plotly-button[disabled=disabled]"));
+    };
+
+    this.getPlotlyUnzoom = function (idx) {
+        return element(by.id("fc-" + idx)).element(by.css(".unzoom-plotly-button"));
+    };
+
+    this.getPlotlyUnzoomDisabled = function (idx) {
+        return element(by.id("fc-" + idx)).all(by.css(".unzoom-plotly-button[disabled=disabled]"));
+    };
+
+    this.getPlotlyReset = function (idx) {
+        return element(by.id("fc-" + idx)).element(by.css(".reset-plotly-button"));
+    };
+
+    this.waitForAggregates = function (timeout) {
+        var locator = element.all(by.css('aggregate-col-loader'));
+        return browser.wait(protractor.ExpectedConditions.invisibilityOf(locator), timeout || browser.params.defaultTimeout);
+    };
+
+    this.getWarningAlert = function () {
+        return element(by.css(".alert-warning"));
+    };
+
+    this.getWarningAlertDissmBtn = function () {
+        return element(by.css(".alert-warning")).element(by.css("button"));
+    };
+
+    this.getSelectAllBtn = function () {
+        return element(by.id("table-select-all-rows"));
+    };
+
+};
+
+var errorModal = function () {
+    var self = this;
+
+    this.getToggleDetailsLink = function () {
+        return element(by.id('toggle-error-details'));
+    };
+
+    this.getErrorDetails = function () {
+        return element(by.id('error-details'));
+    }
 };
 
 // Makes a string safe and valid for use in an HTML element's id attribute.
@@ -1055,12 +1236,28 @@ function chaisePage() {
     this.recordEditPage = new recordEditPage();
     this.recordPage = new recordPage();
     this.recordsetPage = new recordsetPage();
+    this.errorModal = new errorModal();
     this.tools = new tools();
     this.tourButton = element(by.css('.tour-start-btn'));
     this.tourBox = element(by.css('.tour-DataBrowserTour'));
     this.clickButton = function(button) {
         return browser.executeScript("$(arguments[0]).click();", button);
     };
+
+    /**
+     * For longer strings, the sendKeys can be very slow.
+     * If the string length is more than 10, it will change the value of input directly
+     * and then does the sendKeys for the last character, just to make sure it's
+     * triggering angularjs digest cycle.
+     */
+    this.setInputValue = function (el, value) {
+        var sendKeysVal = value;
+        if (value.length > 10) {
+            browser.executeScript("arguments[0].value='" + value.substring(0, value.length-1) + "';", el);
+            sendKeysVal = value[value.length-1];
+        }
+        el.sendKeys(sendKeysVal);
+    }
     this.customExpect = {
         elementContainClass: function (ele, className) {
             expect(ele.getAttribute('class')).toContain(className);
@@ -1155,8 +1352,26 @@ function chaisePage() {
         return browser.wait(condition, timeout || browser.params.defaultTimeout);
     };
 
-    this.performLogin = function(cookie, defer) {
+    this.waitForTextInElement = function(locator, text, timeout) {
+        return browser.wait(protractor.ExpectedConditions.textToBePresentInElement(locator, text), timeout || browser.params.defaultTimeout);
+    }
 
+    this.waitForTextInUrl = function(text, errMsg, timeout){
+        return browser.wait(protractor.ExpectedConditions.urlContains(text), timeout || browser.params.defaultTimeout, errMsg);
+    }
+
+    this.getTooltipDiv = function() {
+        return element(by.css('.tooltip'));
+    };
+
+    this.catchTestError = function (done) {
+        return function (err) {
+            console.log(err);
+            done.fail();
+        }
+    };
+
+    this.performLogin = function(cookie, defer) {
         defer = defer || require('q').defer();
 
         browser.get(process.env.CHAISE_BASE_URL + "/login/");

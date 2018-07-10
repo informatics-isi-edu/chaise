@@ -1,3 +1,35 @@
+@font-face {
+    font-family: 'chaise-icons';
+
+    src: url('fonts/chaise-icons.eot');
+    src: url('fonts/chaise-icons.eot?#iefix') format('embedded-opentype'),
+         url('fonts/chaise-icons.woff2') format('woff2'),
+         url('fonts/chaise-icons.woff') format('woff'),
+         url('fonts/chaise-icons.ttf') format('truetype'),
+         url('fonts/chaise-icons.svg#chaise-icons') format('svg');
+}
+
+.chaise-icon {
+    position: relative;
+    top: 1px;
+    display: inline-block;
+    font-family: 'chaise-icons';
+    font-style: normal;
+    font-weight: normal;
+    line-height: 1;
+
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.chaise-icon.chaise-zoom-in::before {
+    content: '\00A3';
+}
+
+.chaise-icon.chaise-zoom-out::before {
+    content: '\00A2';
+}
+
 /****************** GLOBAL ******************/
 html, body {
     height: 100%;
@@ -14,6 +46,12 @@ li{
 
 a{
     cursor: pointer;
+}
+
+/* if you want the table to have a fixed layout */
+table.table-fixed-layout {
+    table-layout: fixed;
+    width: 100%;
 }
 
 .chaise-body {
@@ -41,12 +79,20 @@ a .glyphicon-trash {
     color: #428bca;
 }
 
-span[uib-tooltip] {
+span[uib-tooltip], .show-tooltip-border[uib-tooltip] {
     border-bottom: 1px dotted black;
 }
 
 .tooltip-inner {
     text-align: left;
+}
+
+.filters-tooltip {
+    margin-right: 2%;
+}
+
+.filters-tooltip .tooltip-inner {
+    max-width: inherit;
 }
 
 .btn.btn-primary.btn-inverted {
@@ -61,8 +107,8 @@ span[uib-tooltip] {
 
 .btn.btn-primary.btn-inverted[disabled],
 .chaise-checkbox input[disabled][type="checkbox"] + label:before {
-    color: #f1f1f1 !important;
-    border-color: #f1f1f1 !important;
+    color: #ccc !important;
+    border-color: #ccc !important;
 }
 
 .chaise-checkbox input[disabled][type="checkbox"]:checked + label:after {
@@ -162,7 +208,7 @@ img.spinner-sm {
 }
 
 #bookmark-container {
-    padding: 15px 40px 15px 40px; /* padding-left and padding-right sides are to equal the left and right paddings of .container-fluid */
+    padding: 15px 40px 10px 40px; /* padding-left and padding-right sides are to equal the left and right paddings of .container-fluid */
     background-color: #f1f1f1;
     box-shadow: 0 4px 2px -2px rgba(0,0,0,0.4);
     z-index: 100;
@@ -180,14 +226,17 @@ img.spinner-sm {
     text-align: right;
 }
 
+/* used to replace the margin with padding on h1-4 elements */
+.replace-margin {
+    margin: 0;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
 /****************** ACCORDION ******************/
 
 .panel{
     box-shadow: none;
-}
-
-.panel-group .panel{
-    border: none;
 }
 
 .panel-title>a:hover, .panel-title>a:focus{
@@ -211,10 +260,6 @@ img.spinner-sm {
     float: left;
     line-height: 12px;
     margin-right: 10px;
-}
-
-.panel-group .panel+.panel{
-    border: none;
 }
 
 .panel-default>.panel-heading+.panel-collapse>.panel-body{
@@ -259,17 +304,14 @@ img.spinner-sm {
     word-wrap: break-word;
 }
 
+.table>tbody>tr>td {
+    padding: 5px;
+}
+
 #detailed-bookmark-container{
     text-align: right;
     position: absolute;
     top: 20px;
-}
-
-.main-container:after {
-    content: "";
-    height: 40px;
-    display: block;
-    opacity: 0;
 }
 
 
@@ -710,7 +752,7 @@ input.search-progress {
     border-bottom: none;
 }
 
-/*=============Popup modal for login instructions********/
+/******** Popup modal for login instructions ********/
 
 .modal-login .modal-backdrop {
     opacity: 0.7 !important;
@@ -726,7 +768,7 @@ input.search-progress {
 
 .modal-login-instruction .modal-dialog .modal-content {
     width: 600px;
-    height: 200px;
+
 }
 
 .modal-login-instruction .modal-dialog ol li {
@@ -741,6 +783,23 @@ input.search-progress {
 
 .modal-login .modal-title {
     font-size: 22px !important;
+}
+
+/******* Popup modal for previous login ********/
+
+body.previous-login > .modal-login-instruction {
+    z-index: 99999 !important;
+}
+
+body.previous-login > *:not(.modal-login-instruction):not(navbar):not(.modal-backdrop) {
+    display: none !important;
+}
+
+/******* Popup modal for error ********/
+
+/* hide the loading spinner if we have the error dialog open */
+body.error-open loading-spinner {
+    display: none !important;
 }
 
 /*******Bootstrap  Modal styling *********/
@@ -890,37 +949,37 @@ input.search-progress {
 .mbl { margin-bottom: 20px; }
 .marl { margin: 20px;  }
 
-#footer {
-    width: 100%;
+/******** footer **********/
+footer {
     height: 30px;
-    background-color: #ededed;
-    bottom: 0px;
-    position: fixed;
-    z-index: 1000;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    left: 0;
 }
 
 footer .container1 {
+    height: inherit;
+    background-color: #ededed;
     padding-right: 5px;
     padding-left: 5px;
     padding-top: 5px;
     color: #595757;
     font-size: 11px;
-    line-height: 0;
 }
-.container1 > p{
-	margin: 8px 0 5px !important;
-}
+
 .container1 li {
      list-style-type: inherit;
  }
+
  .container1 ul {
      list-style-type: disc;
-     margin: 8px 0 5px !important;
  }
+
  .container1 ol {
      list-style-type: decimal;
-     margin: 8px 0 5px !important;
  }
+
  .container1 code {
      padding-left: 0;
      padding-right: 0;
@@ -938,7 +997,7 @@ footer .container1 {
 
 .rg-right, .rg-left, .rg-top, .rg-bottom {
   display: block;
-  width: 30px;
+  width: 15px;
   height: 14px;
   line-height: 14px;
   position: absolute;
@@ -948,27 +1007,24 @@ footer .container1 {
   -webkit-user-select: none;
   user-select: none;
   background: transparent;
+  border: solid 1px #2e6da4;;
+  border-top: none;
+  border-bottom: none;
 }
 .rg-right span, .rg-left span, .rg-top span, .rg-bottom span {
   position: absolute;
   box-sizing: border-box;
   display: block;
-  /*border: 1px solid #ccc;*/
 }
 
 .rg-right span, .rg-left span {
-  /*border-width: 0 1px;*/
   font-family: 'Glyphicons Halflings';
-  font-size: 1.9em;
   top: 50vh;
   margin-top: -10px;
   margin: -10px 0 0 0.8px;
-  height: 20px;
-  width: 30px;
-}
-
-.rg-right span:before, .rg-left span:before {
-    /*content: "\e120";*/
+  top: 50%;
+  color: #337ab7;
+  font-weight: 400;
 }
 
 .rg-top span, .rg-bottom span {
@@ -990,10 +1046,10 @@ footer .container1 {
 .rg-right {
   cursor: col-resize;
   height: 100%;
-  right: -20px;
+  right: 0;
   top: 0;
   margin-right: -14px;
-  /*border: 1px solid #ccc;*/
+  border-right: none;
 }
 
 .rg-bottom {
@@ -1007,9 +1063,10 @@ footer .container1 {
 .rg-left {
   cursor: col-resize;
   height: 100%;
-  left: 0;
+  left: 14px;
   top: 0;
   margin-left: -14px;
+  border-right: none;
 }
 
 
@@ -1092,8 +1149,13 @@ footer .container1 {
      display:inline-block;
  }
 
- .recordset-container.without-faceting {
-    margin-top: 20px;
+ .recordset-container.without-faceting .main-container{
+    padding-top: 20px;
+ }
+
+ .recordset-container.without-faceting .main-body{
+    padding-left: 15px;
+    padding-right: 15px;
  }
 
  .recordset-container.with-faceting {
@@ -1103,29 +1165,168 @@ footer .container1 {
      margin-top: 5px;
  }
 
- .recordset-container.with-faceting > .faceting-resizable {
-     flex:0 0 20vw;
+ /****** faceting resizeable ******/
+ .faceting-resizable.close-panel .rg-left, .faceting-resizable.close-panel .rg-right {
+     display: none;
+ }
+
+ /** record side panel **/
+ .record-container > .faceting-resizable {
      position: relative;
-     /*border-right: 15px solid white;*/
-     min-width: 170px;
-     max-width: 50vw;
      z-index: 2;
+     font-weight: bold;
+     max-width: 50vw;
+ }
+
+ .record-container > .faceting-resizable.open-panel {
+     flex:0 0 15vw;
+     min-width: 170px;
      padding-left: 5px;
  }
- .recordset-container.with-faceting > .faceting-resizable:not(.initializing) {
-     -webkit-box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
-    -moz-box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
-    box-shadow: 11px 3px 16px -2px rgba(204,204,204,1);
+
+ .record-container > .faceting-resizable.close-panel {
+     width: 0px;
+     flex-basis: 0px !important;
+ }
+
+ .record-container > .faceting-resizable.close-panel .faceting-container{
+     width: 0px;
+ }
+
+ .record-container > .faceting-resizable .sidePanelHeading{
+     font-weight: bold;
+     padding: 9px 10px 10px !important;
+     margin: 5px 0 0 -5px;
+ }
+
+ .record-toc .columns-container ul {
+     padding-left: 10px;
+ }
+
+ .record-toc .toc-heading {
+     padding: 5px;
+     cursor: pointer;
+ }
+
+ .record-toc .toc-heading:hover {
+     background-color: rgb(241, 241, 241);
+ }
+
+ .record-container .rowFocus{
+     border-color: rgb(51, 122, 183) !important;
+ }
+
+ .record-container .panel-group .panel.rowFocus + .panel {
+     border-top: 2px solid #ddd;
+ }
+
+ /** recordset with faceting side panel **/
+ .recordset-container.with-faceting > .faceting-resizable {
+     padding-top: 5px;
+     position: relative;
+     max-width: 50vw;
+     z-index: 2;
+ }
+
+ .recordset-container.with-faceting > .faceting-resizable.initializing > .rg-right > span{
+    display: none;
+ }
+
+ .recordset-container.with-faceting > .faceting-resizable.open-panel {
+     flex:0 0 21vw;
+     min-width: 170px;
+     padding-left: 5px;
+ }
+
+ .recordset-container.with-faceting > .faceting-resizable.close-panel {
+     width: 0px;
+     flex-basis: 0px !important;
+ }
+
+ .recordset-container.with-faceting > .faceting-resizable.close-panel .faceting-container{
+     width: 0px;
+ }
+
+ /**** side panel buttons ****/
+ .facet-btn {
+     position: absolute;
+     top: 40px;
+     z-index: 2;
+ }
+
+ .sidePanFiddler, #back-to-top {
+     cursor: pointer;
+     overflow: hidden;
+ }
+
+ #back-to-top {
+     position: absolute;
+     left: -66px;
+     bottom: 2em;
+     padding: 1px 4px;
+     font-size: 25px;
+     border-radius: 2px 0 0px 2px;
+     height: 35px;
+     width: 35px;
+ }
+
+ .sidePanFiddler {
+     height: 40px;
+     width: 21px;
+     font-size: 20px;
+     padding: 4px 4px 0px 0px;
+ }
+
+ /** record side panel collapse button **/
+ .record-container .facet-btn {
+     left: -20px;
+ }
+
+ .record-container .facet-btn.close-panel {
+     left: -20px;
+ }
+
+ .record-container .sidePanFiddler {
+     border-right: none;
+     border-radius: 15px 0px 0px 15px;
+ }
+
+ /** recordset side panel collapse button **/
+ .recordset-container .facet-btn {
+     right: -20px;
+ }
+
+ .recordset-container .sidePanFiddler {
+     border-left: none;
+     border-radius: 0px 15px 15px 0px;
+ }
+
+ /****** RSwF main container *******/
+
+ .modal-body .recordset-container footer {
+     display: none !important;
+ }
+
+ .modal-body .recordset-container alerts:not(.enforce-alert) {
+     display: none !important;
+ }
+
+ .recordset-container.with-faceting {
+     padding-left: 15px;
+     padding-right: 15px;
  }
 
  .recordset-container.with-faceting > .main-container {
      flex:1;
-     border-left: 25px solid white;
-     padding-right: 10px;
      position: relative;
      z-index: 1;
      overflow-y: auto;
-     margin-top: 10px;
+     padding-top: 15px;
+ }
+
+ .recordset-container.with-faceting .main-body {
+     border-left: 25px solid white;
+     padding-right: 10px;
  }
 
  .recordset-container.with-faceting .pager {
@@ -1173,6 +1374,7 @@ footer .container1 {
 
  .faceting-container .panel:hover, .faceting-container .panel-default.active {
      border-color: rgb(51, 122, 183) !important;
+     animation-duration: 4s;
  }
 
  .faceting-container .update-btn {
@@ -1306,19 +1508,23 @@ footer .container1 {
  /* INTEGER SEARCH */
 
  .faceting-container .range-picker hr {
-  color: #f5f5f5;
-  width: 1px;
+     color: #f5f5f5;
+     width: 1px;
  }
+
  .faceting-container .range-picker .form-inline input {
      width: 100%;
-     margin-right: 10px;
-     padding: 6px;
+     padding: 6px 20px 6px 6px;
+     height: 100%;
+     border: none;
+     border-radius: 4px;
  }
 
  /* STRING SEARCH */
  .faceting-container .string-picker .tab-content{
      margin-top: 10px;
  }
+
 .faceting-container .string-picker .pager {
     margin: 0px;
 }
@@ -1327,6 +1533,14 @@ footer .container1 {
     padding: 5px 15px;
 }
 
+.plotly-how-to {
+    border-color: white !important;
+    cursor: default;
+}
+
+.plotly-how-to:hover {
+    z-index: auto !important;
+}
 
 /*************** LIST ***************************/
 .chaise-list-container {
@@ -1334,13 +1548,16 @@ footer .container1 {
     margin-top: 10px;
     margin-bottom: 0px;
 }
+
 .chaise-checkbox {
     position: relative;
     /*margin: 10px 0;*/
 }
+
 li.chaise-checkbox:hover {
     background-color: rgb(241, 241, 241);
 }
+
 .ellipsis-text label{
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -1403,11 +1620,16 @@ li.chaise-checkbox:hover {
 }
 
 /******* range inputs ***********/
-range-inputs .input-clearbtn{
+range-inputs .input-clearbtn {
     cursor: pointer;
-    right: -4px;
+    right: 0px;
     pointer-events: all;
     z-index: 5;
+    width: 22px
+}
+
+range-inputs .form-control {
+    padding: 0px;
 }
 
 range-inputs .input-container {
@@ -1416,8 +1638,14 @@ range-inputs .input-container {
 
 range-inputs .range-inputs-width {
     min-width: 100px;
-    max-width: 300px;
-    width: 100%;
+}
+
+range-inputs .numeric-date-width {
+    max-width: 110px
+}
+
+range-inputs .datetime-width {
+    max-width: 150px
 }
 
 range-inputs .input-group {
@@ -1456,3 +1684,21 @@ input[type=number]::-moz-placeholder {
 .selected-rows {
     min-height: 45px;
 }
+
+record-display .markdown-container ul > li:only-child,
+record-display .markdown-container ol > li:only-child {
+    list-style: none;
+    padding: 0;
+    margin-left: 0;
+}
+
+record-display .markdown-container ol,
+record-display .markdown-container ul {
+    padding: 0 !important; /*existing rule is padding=2, which should be changed for the other changes*/
+}
+
+record-display .markdown-container ol > li,
+record-display .markdown-container ul > li {
+    margin-left: 1em;
+    padding-left: 0;
+ }

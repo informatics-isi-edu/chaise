@@ -11,6 +11,7 @@ var testParams = {
         schema_name: "product-add",
         table_name: "accommodation",
         table_displayname: "Accommodations",
+        table_comment: "List of different types of accommodations",
         primary_keys: ["id"],
         columns: [
             { name: "id", generated: true, immutable: true, title: "Id", type: "serial4", nullok: false},
@@ -34,6 +35,7 @@ var testParams = {
              "rating": "2",  "summary": "This is the summary of this column 2.", "description": "## Description 2",
              "no_of_rooms": "2", "opened_on": moment("2017-02-02 02:02:02", "YYYY-MM-DD hh:mm:ss"), "date_col": "2017-02-02", "luxurious":  true}
         ],
+        formsAfterInput: 3,
         result_columns: [
             "title", "website", "product-add_fk_category", "rating", "summary", "description", "no_of_rooms", "opened_on", "date_col", "luxurious"
         ],
@@ -46,6 +48,7 @@ var testParams = {
        schema_name: "product-add",
        table_name: "file",
        table_displayname: "file",
+       table_comment: "asset/object",
        primary_keys: ["id"],
        columns: [
            { name: "fileid", title: "fileid", type: "int4" },
@@ -54,14 +57,16 @@ var testParams = {
        ],
        inputs: [
            {"fileid": "1", "uri": 0, "timestamp_txt": currentTimestampTime},
-           {"fileid": "2", "uri": 1, "timestamp_txt": currentTimestampTime}
+           {"fileid": "2", "uri": 1, "timestamp_txt": currentTimestampTime},
+           {"fileid": "3", "uri": 2, "timestamp_txt": currentTimestampTime, validate: true}
        ],
+       formsAfterInput: 3,
        result_columns: [
            "fileid", "uri", "filename", "bytes"
        ],
        results: [
-           ["1", {"link": "/hatrac/js/chaise/" + currentTimestampTime + "/1", "value": "testfile1MB.txt"}, "testfile1MB.txt", "1,024,000"],
-           ["2", {"link": "/hatrac/js/chaise/" + currentTimestampTime + "/2", "value": "testfile500kb.png"}, "testfile500kb.png", "512,000"]
+           ["1", {"link": "/hatrac/js/chaise/" + currentTimestampTime + "/1/3a8c740953a168d9761d0ba2c9800475:", "value": "testfile1MB.txt"}, "testfile1MB.txt", "1,024,000"],
+           ["2", {"link": "/hatrac/js/chaise/" + currentTimestampTime + "/2/2ada69fe3cdadcefddc5a83144bddbb4:", "value": "testfile500kb.png"}, "testfile500kb.png", "512,000"]
        ],
        files : [{
            name: "testfile1MB.txt",
@@ -74,10 +79,10 @@ var testParams = {
            displaySize: "500KB",
            path: "testfile500kb.png"
        }, {
-           name: "testfile5MB.pdf",
+           name: "testfile5MB.txt",
            size: "5242880",
            displaySize: "5MB",
-           path: "testfile5MB.pdf"
+           path: "testfile5MB.txt"
        }]
     }]
 };
@@ -128,15 +133,17 @@ describe('Record Add', function() {
 
                     if (tableParams.inputs.length > 1) {
 
-                        it("should click and add an extra record.", function() {
-                            chaisePage.recordEditPage.getAddRowButton().then(function(button) {
-                                chaisePage.clickButton(button);
+                        if (tableParams.files.length == 0) {
+                            it("should click and add an extra record.", function() {
+                                chaisePage.recordEditPage.getAddRowButton().then(function(button) {
+                                    chaisePage.clickButton(button);
+                                });
                             });
-                        });
+                        }
 
-                        it((tableParams.inputs.length+1) + " buttons should be visible and enabled", function() {
+                        it((tableParams.formsAfterInput) + " buttons should be visible and enabled", function() {
                             chaisePage.recordEditPage.getAllDeleteRowButtons().then(function(buttons) {
-                                expect(buttons.length).toBe(tableParams.inputs.length + 1);
+                                expect(buttons.length).toBe(tableParams.formsAfterInput);
                                 buttons.forEach(function(btn) {
                                     expect(btn.isDisplayed()).toBe(true);
                                     expect(btn.isEnabled()).toBe(true);
@@ -145,7 +152,7 @@ describe('Record Add', function() {
                         });
 
                         it("should click and remove the last record", function() {
-                            chaisePage.recordEditPage.getDeleteRowButton(tableParams.inputs.length).then(function(button)	 {
+                            chaisePage.recordEditPage.getDeleteRowButton(tableParams.formsAfterInput - 1).then(function(button) {
                                 chaisePage.clickButton(button);
 
                                 browser.wait(protractor.ExpectedConditions.visibilityOf(element(by.id('delete-confirmation'))), browser.params.defaultTimeout);
@@ -154,7 +161,7 @@ describe('Record Add', function() {
                                     chaisePage.clickButton(modalBtn);
                                     browser.sleep(50);
                                     chaisePage.recordEditPage.getAllDeleteRowButtons().then(function(buttons) {
-                                        expect(buttons.length).toBe(tableParams.inputs.length);
+                                        expect(buttons.length).toBe(tableParams.formsAfterInput - 1);
                                     });
                                 });
                             });
@@ -194,8 +201,8 @@ describe('Record Add', function() {
             chaisePage.waitForElement(element(by.id("submit-record-button"))).then (function () {
                 // Write a dummy cookie for creating a record in Accommodation table
                 testCookie = {
-                    constraintName: 'product-add_fk_category', // A FK that Accommodation table has with Category table
-                    columnName: 'product-add_fk_category',
+                    constraintName: 't3DKiki_LeUaqmVDZmuG_w', // A FK that Accommodation table has with Category table
+                    columnName: 't3DKiki_LeUaqmVDZmuG_w',
                     rowname: {
                         value: chance.sentence()
                     },

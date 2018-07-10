@@ -34,5 +34,19 @@ describe('View existing record,', function() {
             var deleteBtn = chaisePage.recordPage.getDeleteRecordButton();
             expect(deleteBtn.isPresent()).toBeFalsy();
         });
+
+        it('Record Table of Contents panel should be hidden by default as chaiseConfig entry hideTableOfContents is true.', function(done){
+            var recPan =  chaisePage.recordPage.getSidePanel(),
+            fiddlerBtn = chaisePage.recordPage.getSidePanelFiddler();
+
+            fiddlerBtn.getAttribute("class").then(function(classNameLeft) {
+                expect(classNameLeft).toContain("glyphicon glyphicon-triangle-left", "Side Pan Pull button is not pointing in the left direction.");
+                expect(recPan.getAttribute("class")).toContain('close-panel', 'Side Panel is not hidden when fiddler is poining in left direction');
+                done();
+            }).catch( function(err) {
+                console.log(err);
+                done.fail();
+            });
+        });
     });
 });

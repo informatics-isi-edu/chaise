@@ -1,7 +1,9 @@
 (function() {
     'use strict';
-    angular.module('chaise.recordcreate', ['chaise.errors','chaise.utils']).factory("recordCreate", ['$cookies', '$log', '$window', '$uibModal', 'AlertsService', 'DataUtils', 'UriUtils', 'modalBox', '$q', 'logActions',
-     function($cookies, $log, $window, $uibModal, AlertsService, DataUtils, UriUtils, modalBox, $q, logActions) {
+    angular.module('chaise.recordcreate', ['chaise.errors','chaise.utils'])
+
+    .factory("recordCreate", ['$cookies', '$log', '$q', '$rootScope', '$window', 'AlertsService', 'DataUtils', 'logActions', 'messageMap', 'modalBox', 'modalUtils', 'Session', 'UriUtils',
+        function($cookies, $log, $q, $rootScope, $window, AlertsService, DataUtils, logActions, messageMap, modalBox, modalUtils, Session, UriUtils) {
 
         var viewModel = {};
         var GV_recordEditModel = {},
@@ -99,7 +101,7 @@
 
             // If url is valid
             if (areFilesValid(submissionRowsCopy, rsReference)) {
-                $uibModal.open({
+                modalUtils.showModal({
                     templateUrl: "../common/templates/uploadProgress.modal.html",
                     controller: "UploadModalDialogController",
                     controllerAs: "ctrl",
@@ -112,12 +114,17 @@
                             rows: submissionRowsCopy
                         }
                     }
-                }).result.then(onSuccess, function(exception) {
+                }, onSuccess, function(exception) {
                     viewModel.readyToSubmit = false;
                     viewModel.submissionButtonDisabled = false;
 
-                    if (exception) AlertsService.addAlert(exception.message, 'error');
-                });
+                    if (typeof exception !== "string") {
+                        // happens with an error with code 0 (Timeout Error)
+                        $log.warn(exception);
+                        var message = exception.message || messageMap.errorMessageMissing;
+                        AlertsService.addAlert(message, 'error');
+                    }
+                }, false, false);
             } else {
                 viewModel.readyToSubmit = false;
                 viewModel.submissionButtonDisabled = false;
@@ -228,11 +235,13 @@
                     }
                 }).catch(function(exception) {
                     viewModel.submissionButtonDisabled = false;
-                    if (exception instanceof ERMrest.NoDataChangedError) {
-                        AlertsService.addAlert(exception.message, 'warning');
-                    } else {
-                        AlertsService.addAlert(exception.message, 'error');
-                    }
+                    // assume user had been previously logged in (can't create/update without it)
+                    // if no valid current session, user should re-login
+                    // validate session will never throw an error, so it's safe to not write a reject callback or catch clause
+                    Session.validateSession().then(function (session) {
+                        if (!session && exception instanceof ERMrest.ConflictError) throw new ERMrest.UnauthorizedError();
+                        AlertsService.addAlert(exception.message, (exception instanceof ERMrest.NoDataChangedError ? 'warning' : 'error') );
+                    });
                 });
 
             });
@@ -315,7 +324,7 @@
 
                     defer.resolve(disabledRows);
                 }).catch(function (err) {
-                    throw err;
+                    defer.reject(err);
                 });
 
                 return defer.promise;
@@ -326,24 +335,24 @@
             params.context = "compact/select";
             params.selectMode = isModalUpdate ? modalBox.multiSelectMode : modalBox.singleSelectMode;
             params.selectedRows = [];
+            params.showFaceting = true;
+            params.facetPanelOpen = false;
             //NOTE assumption is that this function is only is called for adding pure and binary association
             params.logObject = {
                 action: logActions.preCreateAssociation,
                 referrer: rsReference.defaultLogInfo
             };
 
-            var modalInstance = $uibModal.open({
+            modalUtils.showModal({
                 animation: false,
                 controller: "SearchPopupController",
                 controllerAs: "ctrl",
                 resolve: {
                     params: params
                 },
-                size: "lg",
+                size: "xl",
                 templateUrl: "../common/templates/searchPopup.modal.html"
-            });
-
-            modalInstance.result.then(function dataSelected(tuples) {
+            }, function dataSelected(tuples) {
                 // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
                 // set data in view model (model.rows) and submission model (model.submissionRows)
                 // we assume that the data for the main table has been populated before
@@ -369,8 +378,7 @@
                     };
                     addRecords(viewModel.editMode, derivedref, nullArr, isModalUpdate, rsReference, rsTuples, rsQueryParams, viewModel, viewModel.onSuccess, logObject);
                 }
-
-            });
+            }, viewModel.onModalClose, false);
         }
 
         /**
@@ -410,7 +418,8 @@
          * @param  {object} rsQueryParams           object contains queryparams of context from calling function
          * @param  {callback} onSuccess             callback
          */
-        function addRelatedRecordFact(isModalUpdate, ref, rowIdx, modelObject, editMode, formContainer, readyToSubmit, recordsetLink, submissionButtonDisabled, rsReference, rsTuples, rsSession, rsQueryParams, onSuccess) {
+        function addRelatedRecordFact(isModalUpdate, ref, rowIdx, modelObject, editMode, formContainer, readyToSubmit, recordsetLink, submissionButtonDisabled, rsReference, rsTuples, rsSession, rsQueryParams, onSuccess, onModalClose) {
+            viewModel.onModalClose = onModalClose;
             viewModel.onSuccess = onSuccess;
             viewModel.editMode = editMode;
             viewModel.formContainer = formContainer;

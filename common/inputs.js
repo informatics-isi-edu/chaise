@@ -1,9 +1,9 @@
 (function() {
     'use strict';
-    
+
     angular.module('chaise.inputs', ['chaise.validators'])
 
-    .directive('rangeInputs', function() {
+    .directive('rangeInputs', ['dataFormats', 'integerLimits', function(dataFormats, integerLimits) {
         return {
             restrict: 'E',
             templateUrl: '../common/templates/inputs/rangeInputs.html',
@@ -11,22 +11,13 @@
                 type: '=',
                 addRangeCb: '=',
                 absMin: '=?',
-                absMax: '=?'
+                absMax: '=?',
+                model: '=?'
             },
             link: function(scope, elem, attr) {
                 function emptyOrNull(val) {
-                    
                     return (val === '' || val == null || val == undefined);
                 }
-                
-                scope.int2min = -32768;
-                scope.int2max = 32767;
-                scope.int4min = -2147483648;
-                scope.int4max = 2147483647;
-                scope.int8min = -9223372036854775808
-                scope.int8max = 9223372036854775807;
-                
-                scope.model = {};
 
                 /**
                  * Returns a relative type after checkins if the column has a domain type.
@@ -60,18 +51,34 @@
                 }
 
                 // initialize properties
-                if (scope.displayType(scope.type) == "datetime") {
-                    scope.model.min = {
-                        date: null,
-                        time: null
-                    };
-                    scope.model.max = {
-                        date: null,
-                        time: null
-                    };
-                } else {
-                    scope.model.min = null;
-                    scope.model.max = null;
+                scope.dataFormats = dataFormats;
+                scope.model = {};
+                scope.model.min = scope.modelMin;
+                scope.model.max = scope.modelMax;
+                switch (scope.type.rootName) {
+                    case 'int2':
+                        scope.intMin = integerLimits.INT_2_MIN;
+                        scope.intMax = integerLimits.INT_2_MAX;
+                        break;
+                    case 'int4':
+                        scope.intMin = integerLimits.INT_4_MIN;
+                        scope.intMax = integerLimits.INT_4_MAX;
+                        break;
+                    case 'int8':
+                        scope.intMin = integerLimits.INT_8_MIN;
+                        scope.intMax = integerLimits.INT_8_MAX;
+                        break;
+                    case 'timestamp':
+                    case 'timestamptz':
+                        scope.model.min = {
+                            date: null,
+                            time: null
+                        };
+                        scope.model.max = {
+                            date: null,
+                            time: null
+                        };
+                        break;
                 }
 
                 // returns a boolean to disable the add button if both min and max are not set
@@ -85,28 +92,28 @@
                     scope.isDirty = true;
                     // data for timestamp[tz] needs to be formatted properly
                     if (scope.displayType(scope.type) == "datetime") {
-                        min = (scope.model.min.date) ? moment(scope.model.min.date + scope.model.min.time, 'YYYY-MM-DDHH:mm:ss') : '';
-                        max = (scope.model.max.date) ? moment(scope.model.max.date + scope.model.max.time, 'YYYY-MM-DDHH:mm:ss') : '';
+                        min = (scope.model.min.date) ? moment(scope.model.min.date + scope.model.min.time, dataFormats.date + dataFormats.time24) : '';
+                        max = (scope.model.max.date) ? moment(scope.model.max.date + scope.model.max.time, dataFormats.date + dataFormats.time24) : '';
                         if ((min && max) && max.isBefore(min)) {
                             scope.minMaxForm.$error.improperRange = true;
                             return;
                         } else {
                             scope.minMaxForm.$error.improperRange = false;
                         }
-                        if (min) min = min.format('YYYY-MM-DDTHH:mm:ss.SSSZ');
-                        if (max) max = max.format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+                        if (min) min = min.format(dataFormats.datetime.submission);
+                        if (max) max = max.format(dataFormats.datetime.submission);
                         // data for date needs to be formatted properly for a proper comparison
                     } else if (scope.displayType(scope.type) == "date") {
-                        min = (scope.model.min) ? moment(scope.model.min, 'YYYY-MM-DD') : '';
-                        max = (scope.model.max) ? moment(scope.model.max, 'YYYY-MM-DD') : '';
+                        min = (scope.model.min) ? moment(scope.model.min, dataFormats.date) : '';
+                        max = (scope.model.max) ? moment(scope.model.max, dataFormats.date) : '';
                         if ((min && max) && max.isBefore(min)) {
                             scope.minMaxForm.$error.improperRange = true;
                             return;
                         } else {
                             scope.minMaxForm.$error.improperRange = false;
                         }
-                        if (min) min = min.format('YYYY-MM-DD');
-                        if (max) max = max.format('YYYY-MM-DD');
+                        if (min) min = min.format(dataFormats.date);
+                        if (max) max = max.format(dataFormats.date);
                         // date for numeric should be formatted as Number() for a proper comparison
                     } else if (scope.displayType(scope.type) == "number") {
                         min = !emptyOrNull(scope.model.min) ? Number(scope.model.min) : '';
@@ -164,5 +171,5 @@
                 }
             }
         }
-    });
+    }]);
 })();

@@ -3,16 +3,19 @@
 
     angular.module('chaise.recordEdit', [
         '720kb.datepicker',
+        'duScroll',
         'chaise.alerts',
         'chaise.authen',
         'chaise.delete',
         'chaise.errors',
+        'chaise.faceting',
         'chaise.filters',
         'chaise.modal',
         'chaise.navbar',
         'chaise.upload',
         'chaise.record.table',
         'chaise.markdown',
+        'chaise.resizable',
         'chaise.utils',
         'chaise.validators',
         'chaise.html',
@@ -44,8 +47,32 @@
         $logProvider.debugEnabled(chaiseConfig.debug === true);
     }])
 
-    .run(['AlertsService', 'ERMrest', 'ErrorService', 'headInjector', 'logActions', 'MathUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', 'messageMap', 'Errors',
-        function runRecordEditApp(AlertsService, ERMrest, ErrorService, headInjector, logActions, MathUtils, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies, messageMap, Errors) {
+    .config(function($provide) {
+        $provide.decorator("$exceptionHandler", ['$log', '$injector', function($log, $injector) {
+            return function(exception, cause) {
+                var ErrorService = $injector.get("ErrorService");
+                var Session = $injector.get("Session");
+                // If Conflict Error and user was previously logged in
+                // AND if session is invalid, ask user to login rather than throw an error
+                if (ERMrest && exception instanceof ERMrest.ConflictError && Session.getSessionValue()) {
+                    // validate session will never throw an error, so it's safe to not write a reject callback or catch clause
+                    Session.validateSession().then(function (session) {
+                        if (!session) {
+                            Session.loginInAModal();
+                        } else {
+                            ErrorService.handleException(exception);
+                        }
+                    });
+                    // so the function will stop executing
+                    return;
+                }
+                ErrorService.handleException(exception);
+            };
+        }]);
+    })
+
+    .run(['AlertsService', 'dataFormats', 'DataUtils', 'ERMrest', 'ErrorService', 'FunctionUtils', 'headInjector', 'logActions', 'MathUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', 'messageMap', 'Errors',
+        function runRecordEditApp(AlertsService, dataFormats, DataUtils, ERMrest, ErrorService, FunctionUtils, headInjector, logActions, MathUtils, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies, messageMap, Errors) {
 
         var session,
             context = { booleanValues: ['', true, false] };
@@ -98,22 +125,21 @@
         // mode defaults to create
         context.mode = context.modes.CREATE;
 
-        ERMrest.appLinkFn(UriUtils.appTagToURL);
+        FunctionUtils.registerErmrestCallbacks();
 
         // Subscribe to on change event for session
         var subId = Session.subscribeOnChange(function() {
+            // Unsubscribe onchange event to avoid this function getting called again
+            Session.unsubscribeOnChange(subId);
 
             // Get existing session value
             session = Session.getSessionValue();
 
             // If session is not defined or null (Anonymous user) prompt the user to login
             if (!session) {
-                var notAuthorizedError = new ERMrest.UnauthorizedError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
+                var notAuthorizedError = new ERMrest.UnauthorizedError(messageMap.unauthorizedErrorCode, (messageMap.unauthorizedMessage + messageMap.reportErrorToAdmin));
                 throw notAuthorizedError;
             }
-
-            // Unsubscribe onchange event to avoid this function getting called again
-            Session.unsubscribeOnChange(subId);
 
             // On resolution
             ERMrest.resolve(ermrestUri, { cid: context.appName, pid: context.pageId, wid: $window.name }).then(function getReference(reference) {
@@ -197,7 +223,7 @@
                             getForeignKeyData(newRow, cookie.columnName, cookie.constraintName, ref, logObject);
                         }).catch(function (err) {
                             $rootScope.showColumnSpinner[newRow][cookie.columnName] = false;
-                            console.log(err);
+                            $log.warn(err);
                         });
 
                         // Update submission model
@@ -245,7 +271,13 @@
 
                             // $rootScope.tuples is used for keeping track of changes in the tuple data before it is submitted for update
                             $rootScope.tuples = [];
-                            $rootScope.displayname = ((context.queryParams.copy || page.tuples.length > 1) ? $rootScope.reference.displayname : page.tuples[0].displayname);
+                            if ((context.mode != context.modes.EDIT || page.tuples.length > 1)) {
+                                $rootScope.tableComment = $rootScope.reference.table.comment;
+                            } else {
+                                $rootScope.displayname = page.tuples[0].displayname;
+                                $rootScope.tableComment = $rootScope.reference.table.comment;
+                            }
+                            $rootScope.tableDisplayName = $rootScope.reference.displayname;
 
                             for (var j = 0; j < page.tuples.length; j++) {
                                 // initialize row objects {column-name: value,...}
@@ -275,7 +307,7 @@
                                             if (column.isAsset) {
                                                 recordEditModel.rows[j][column.name] = { url: values[i] || "" };
                                             } else if (column.type.name == "timestamptz") {
-                                                recordEditModel.rows[j][column.name] = moment(values[i]).format('YYYY-MM-DDTHH:mm:ssZ');
+                                                recordEditModel.rows[j][column.name] = moment(values[i]).format(dataFormats.datetime.return);
                                             } else {
                                                 recordEditModel.rows[j][column.name] = values[i];
                                             }
@@ -290,8 +322,8 @@
                                             if (values[i]) {
                                                 var ts = moment(values[i]);
                                                 value = {
-                                                    date: ts.format('YYYY-MM-DD'),
-                                                    time: ts.format('hh:mm:ss'),
+                                                    date: ts.format(dataFormats.date),
+                                                    time: ts.format(dataFormats.time12),
                                                     meridiem: ts.format('A')
                                                 };
                                             } else {
@@ -333,24 +365,30 @@
                             // Keep a copy of the initial rows data so that we can see if user has made any changes later
                             recordEditModel.oldRows = angular.copy(recordEditModel.rows);
                         }, function error(response) {
-                          var errorData = {};
+                            var errorData = {};
                             errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
                             errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
                             response.errorData = errorData;
+
+                            if (DataUtils.isObjectAndKeyDefined(response.errorData, 'redirectPath')) {
+                                var redirectLink = UriUtils.createRedirectLinkFromPath(response.errorData.redirectPath);
+                                response.errorData.redirectUrl = response instanceof ERMrest.InvalidFilterOperatorError ? redirectLink.replace('recordedit', 'recordset') : redirectLink;
+                            }
                             throw response;
                         });
                     } else if (session) {
-                        var forbiddenError = new ERMrest.ForbiddenError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
+                        var forbiddenError = new ERMrest.ForbiddenError(messageMap.unauthorizedErrorCode, (messageMap.unauthorizedMessage + messageMap.reportErrorToAdmin));
                         // user logged in but not allowed (forbidden)
                         throw forbiddenError;
                     } else {
-                        var notAuthorizedError = new ERMrest.UnauthorizedError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage)
+                        var notAuthorizedError = new ERMrest.UnauthorizedError(messageMap.unauthorizedErrorCode, (messageMap.unauthorizedMessage + messageMap.reportErrorToAdmin));
                         // user not logged in (unauthorized)
                         throw notAuthorizedError;
                     }
                 } else if (context.mode == context.modes.CREATE) {
                     if ($rootScope.reference.canCreate) {
-                        $rootScope.displayname = $rootScope.reference.displayname;
+                        $rootScope.tableDisplayName = $rootScope.reference.displayname;
+                        $rootScope.tableComment = $rootScope.reference.table.comment;
 
                         // populate defaults
                         for (var i = 0; i < $rootScope.reference.columns.length; i++) {
@@ -374,9 +412,9 @@
                                 if (defaultSet) {
                                     var ts = moment(column.default);
                                     if (inputDisabled) {
-                                        initialModelValue = ( column.type.name === 'timestamp' ? ts.format("YYYY-MM-DD HH:mm:ss") : ts.format("YYYY-MM-DD HH:mm:ssZ") );
+                                        initialModelValue = ( column.type.name === 'timestamp' ? ts.format(dataFormats.datetime.display) : ts.format(dataFormats.datetime.displayZ) );
                                     } else {
-                                        initialModelValue = { date: ts.format('YYYY-MM-DD'), time: ts.format('hh:mm:ss'), meridiem: ts.format('A') };
+                                        initialModelValue = { date: ts.format(dataFormats.date), time: ts.format(dataFormats.time12), meridiem: ts.format('A') };
                                     }
                                 } else if (!inputDisabled) {
                                     // If there are no defaults, then just initialize timestamp[tz] columns with the app's default obj
@@ -412,13 +450,17 @@
                         $rootScope.displayReady = true;
                         // if there is a session, user isn't allowed to create
                     } else if (session) {
-                        throw new ERMrest.ForbiddenError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
+                        throw new ERMrest.ForbiddenError(messageMap.unauthorizedErrorCode, (messageMap.unauthorizedMessage + messageMap.reportErrorToAdmin));
                         // user isn't logged in and needs permissions to create
                     } else {
-                        throw new ERMrest.UnauthorizedError(messageMap.unauthorizedErrorCode, messageMap.unauthorizedMessage);
+                        throw new ERMrest.UnauthorizedError(messageMap.unauthorizedErrorCode, (messageMap.unauthorizedMessage + messageMap.reportErrorToAdmin));
                     }
                 }
             }, function error(response) {
+                if (DataUtils.isObjectAndKeyDefined(response.errorData, 'redirectPath')) {
+                    var redirectLink = UriUtils.createRedirectLinkFromPath(response.errorData.redirectPath);
+                    response.errorData.redirectUrl = response instanceof ERMrest.InvalidFilterOperatorError ? redirectLink.replace('recordedit', 'recordset') : redirectLink;
+                }
                 throw response;
             });
         });
@@ -450,7 +492,7 @@
                 $rootScope.showColumnSpinner[rowIndex][colName] = false;
             }).catch(function (err) {
                 $rootScope.showColumnSpinner[rowIndex][colName] = false;
-                console.log(err);
+                $log.warn(err);
             });
         }
 

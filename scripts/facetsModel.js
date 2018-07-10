@@ -161,6 +161,19 @@ var defaultPlotFormats =
 			showlegend: true,
 			autosize: true
 		}
+	},
+	{
+		name:"Line",
+		type:"scatter",
+		marker: {
+			opacity: 0.75
+		},
+		coordinates:['x', 'y'],
+		layout:{
+			hovermode: 'closest',
+			showlegend: true,
+			autosize: true
+		}
 	}
 /*
 	,

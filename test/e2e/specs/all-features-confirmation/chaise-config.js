@@ -6,6 +6,7 @@ var chaiseConfig = {
     deleteRecord: true,
     confirmDelete: true,
     defaultCatalog: 1,
+    maxRelatedTablesOpen: 6,
     footerMarkdown:"**Please check** [Privacy Policy](/privacy-policy/){target='_blank'}",
     defaultTables: {
         "1": {

@@ -1,12 +1,16 @@
 (function() {
     'use strict';
 
-    angular.module('chaise.authen', ['chaise.utils'])
+    angular.module('chaise.authen', ['chaise.utils', 'chaise.storage'])
 
-    .factory('Session', ['$http', '$q', '$window', 'UriUtils', '$uibModal', '$interval', '$cookies','messageMap', function ($http, $q, $window, UriUtils, $uibModal, $interval, $cookies, messageMap) {
+    .factory('Session', ['messageMap', 'modalUtils', 'StorageService', '$cookies', '$http', '$interval', '$log', '$q', 'UriUtils', '$window', function (messageMap, modalUtils, StorageService, $cookies, $http, $interval, $log, $q, UriUtils, $window) {
 
         // authn API no longer communicates through ermrest, removing the need to check for ermrest location
         var serviceURL = $window.location.origin;
+
+        var LOCAL_STORAGE_KEY = 'session';              // name of object session information is stored under
+        var PROMPT_EXPIRATION_KEY = 'promptExpiration'; // name of key for prompt expiration value
+        var PREVIOUS_SESSION_KEY = 'previousSession';   // name of key for previous session boolean
 
         // Private variable to store current session object
         var _session = null;
@@ -20,7 +24,7 @@
                 _changeCbs[k]();
             }
         };
-        
+
         /**
          * Return deployment specific path name
          * @return {String} string representation of the path name "~username/chaise", "chaise", "path/to/deployment/data"
@@ -37,7 +41,60 @@
             splits.splice(splits.length-1, 1);
             return splits.join('/');
         };
-        
+
+        /**
+         * Functions that interact with the StorageService tokens
+         * There are 2 keys stored under the LOCAL_STORAGE_KEY object, PROMPT_EXPIRATION_KEY and PREVIOUS_SESSION_KEY
+         */
+
+        // verifies value exists for `keyName`
+        var _tokenExists = function(keyName) {
+            var sessionStorage = StorageService.getStorage(LOCAL_STORAGE_KEY);
+
+            return (sessionStorage && sessionStorage[keyName]);
+        };
+
+        // creates an expiration token with `keyName`
+        var _createToken = function (keyName) {
+            var data = {};
+            var hourFromNow = new Date();
+            hourFromNow.setHours(hourFromNow.getHours() + 1);
+
+            data[keyName] = hourFromNow.getTime();
+
+            StorageService.updateStorage(LOCAL_STORAGE_KEY, data);
+        };
+
+        // removes the key/value pair at `keyName`
+        var _removeToken = function (keyName) {
+            if (_tokenExists(keyName)) {
+                StorageService.deleteStorageValue(LOCAL_STORAGE_KEY, keyName);
+            }
+        };
+
+        // checks if the expiration token with `keyName` has expired
+        var _expiredToken = function (keyName) {
+            var sessionStorage = StorageService.getStorage(LOCAL_STORAGE_KEY);
+
+            return (sessionStorage && new Date().getTime() > sessionStorage[keyName]);
+        };
+
+        // extends the expiration token with `keyName` if it hasn't expired
+        var _extendToken = function (keyName) {
+            if (_tokenExists(keyName) && !_expiredToken(keyName)) {
+                _createToken(keyName);
+            }
+        };
+
+        // creates a boolean token with `keyName`
+        var _createBool = function (keyName) {
+            var data = {};
+
+            data[keyName] = true;
+
+            StorageService.updateStorage(LOCAL_STORAGE_KEY, data);
+        };
+
         var loginWindowCb = function (params, referrerId, cb, type){
             if(type.indexOf('modal')!== -1){
                 if (_session) {
@@ -47,8 +104,18 @@
                     params.title = messageMap.noSession.title;
                     params.message = messageMap.noSession.message;
                 }
-                var modalInstance, closed = false;
-                modalInstance = $uibModal.open({
+                var closed = false;
+                var onModalCloseSuccess = function () {
+                    onModalClose();
+                }
+
+                var onModalClose = function() {
+                    $interval.cancel(intervalId);
+                    $cookies.remove("chaise-" + referrerId, { path: "/" });
+                    closed = true;
+                };
+
+                var modalInstance = modalUtils.showModal({
                     windowClass: "modal-login-instruction",
                     templateUrl: "../common/templates/loginDialog.modal.html",
                     controller: 'LoginDialogController',
@@ -59,19 +126,10 @@
                     openedClass: 'modal-login',
                     backdrop: 'static',
                     keyboard: false
-                });
-                
-                var onModalClose = function() {
-                    $interval.cancel(intervalId);
-                    $cookies.remove("chaise-" + referrerId, { path: "/" });
-                    closed = true;
-                };
-                
-                // To avoid problems when user explicitly close the modal
-                modalInstance.result.then(onModalClose, onModalClose);
+                }, onModalCloseSuccess, onModalClose, false);
             }
-            
-            
+
+
             /* if browser is IE then add explicit handler to watch for changes in localstorage for a particular
              * variable
              */
@@ -95,10 +153,12 @@
                         return;
                     }
                 }
-            } 
+            }
             else {
                 window.addEventListener('message', function(args) {
                     if (args && args.data && (typeof args.data == 'string')) {
+                        _createBool(PREVIOUS_SESSION_KEY);
+                        _removeToken(PROMPT_EXPIRATION_KEY);
                         var obj = UriUtils.queryStringToJSON(args.data);
                         if (obj.referrerid == referrerId && (typeof cb== 'function')) {
                             if(type.indexOf('modal')!== -1){
@@ -114,11 +174,11 @@
                 });
             }
         };
-        
-        
+
+
         var logInHelper = function(logInTypeCb, win, cb, type){
-            var referrerId = (new Date().getTime());    
-            
+            var referrerId = (new Date().getTime());
+
             var url = serviceURL + '/authn/preauth?referrer='+UriUtils.fixedEncodeURIComponent($window.location.origin+"/"+getDeploymentPathName() + "/login?referrerid=" + referrerId);
             var config = {
                 headers: {
@@ -163,6 +223,23 @@
             });
         };
 
+        /**
+         * uses the reloadCb function to reload the page no matter what after a user logs in
+         * creates a race condition with the calback registered for the LoginInAModal function
+         */
+        var popupLogin = function () {
+            var reloadCb = function(){
+                window.location.reload();
+            };
+
+            var x = window.innerWidth/2 - 800/2;
+            var y = window.innerHeight/2 - 600/2;
+
+            var win = window.open("", '_blank','width=800,height=600,left=' + x + ',top=' + y);
+
+            logInHelper(loginWindowCb, win, reloadCb, 'popUp');
+        };
+
         var shouldReloadPageAfterLogin = function(newSession) {
             if (_session === null) return true;
             return false;
@@ -170,24 +247,60 @@
 
         return {
 
+            /**
+             * Will return a promise that is resolved with the session.
+             * It will also call the _executeListeners() functions and sets the _session.
+             * If we couldn't fetch the session, it will resolve with `null`.
+             *
+             * TODO needs to be revisited for 401.
+             * We want to reload the page and stop the code execution for 401,
+             *  but currently the code will continue executing and then reloads.
+             *
+             * @param  {string=} context undefined or "401"
+             */
             getSession: function(context) {
                 return $http.get(serviceURL + "/authn/session").then(function(response) {
                     if (context === "401" && shouldReloadPageAfterLogin(response.data)) {
                         window.location.reload();
-                        return;
+                        return response.data;
                     }
+
                     _session = response.data;
                     _executeListeners();
-                    return response.data;
-                }, function(response) {
+                    return _session;
+                }).catch(function(err) {
+                    $log.warn(err);
+
                     _session = null;
                     _executeListeners();
-                    return $q.reject(response);
+                    return _session;
+                });
+            },
+
+            /**
+             * Will return a promise that is resolved with the session.
+             * Meant for validating the server session and verify if it's still active or not
+             */
+            validateSession: function () {
+                return $http.get(serviceURL + "/authn/session").then(function(response) {
+                    _session = response.data;
+                    return _session;
+                }).catch(function(err) {
+                    $log.warn(err);
+
+                    _session = null;
+                    return _session;
                 });
             },
 
             getSessionValue: function() {
                 return _session;
+            },
+
+            // if there's a previous login token AND
+            // the prompt expiration token does not exist OR it has expired
+            showPreviousSessionAlert: function() {
+                return (_tokenExists(PREVIOUS_SESSION_KEY) && (!_tokenExists(PROMPT_EXPIRATION_KEY) || _expiredToken(PROMPT_EXPIRATION_KEY)));
             },
 
             subscribeOnChange: function(fn) {
@@ -203,13 +316,26 @@
             unsubscribeOnChange: function(id) {
                 delete _changeCbs[id];
             },
-            
-            loginInAPopUp: function(win,reloadCb) {
-                logInHelper(loginWindowCb,win,reloadCb,'popUp');
+
+            createPromptExpirationToken: function() {
+                _createToken(PROMPT_EXPIRATION_KEY);
             },
 
+            extendPromptExpirationToken: function() {
+                _extendToken(PROMPT_EXPIRATION_KEY);
+            },
+
+            loginInAPopUp: popupLogin,
+
+            /**
+             * This function opens a modal dialog which has a link for login
+             * the callback for this function has a race condition because the login link in the modal uses `loginInAPopUp`
+             * that function uses the embedded `reloadCb` as the callback for the actual login window closing.
+             * these 2 callbacks trigger in the order of `popupCb` first then `modalCb` where modalCb is ignored more often than not
+             * @param {Function} notifyErmrestCB - runs after the login process has been complete
+             */
             loginInAModal: function(notifyErmrestCB) {
-                logInHelper(loginWindowCb,"",notifyErmrestCB,'modal');
+                logInHelper(loginWindowCb, "", notifyErmrestCB, 'modal');
             },
 
             logout: function() {
@@ -219,6 +345,7 @@
                 url += '?logout_url=' + UriUtils.fixedEncodeURIComponent(logoutURL);
 
                 $http.delete(url).then(function(response) {
+                    StorageService.deleteStorageNamespace(LOCAL_STORAGE_KEY);
                     $window.location = response.data.logout_url;
                 }, function(error) {
                     // if the logout fails for some reason, send the user to the logout url as defined above
@@ -255,7 +382,7 @@
                     Session.getSession("401").then(function(_session) {
                         defer.resolve();
                     }, function(exception) {
-                        throw exception;
+                        defer.reject(exception);
                     });
 
                 });

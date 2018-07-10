@@ -1,0 +1,15 @@
+{
+    "catalog": {},
+    "schema": {
+        "name": "product-recordset",
+        "createNew": true,
+        "path": "test/manual/data_setup/schema/product-recordset.json"
+    },
+    "tables": {
+        "createNew": true
+    },
+    "entities": {
+        "createNew": true,
+        "path": "test/manual/data_setup/data/recordset"
+    }
+}

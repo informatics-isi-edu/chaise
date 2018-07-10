@@ -1,13 +1,13 @@
-<div class="faceting-container" du-scroll-container>
+<div class="faceting-container">
     <div class="columns-container">
         <uib-accordion close-others="false">
             <!-- TODO test this last active  -->
             <div uib-accordion-group ng-repeat="fc in vm.reference.facetColumns track by $index" is-open="vm.facetModels[$index].isOpen" id="fc-{{$index}}" class="{{lastActiveFacet == $index ? 'focused': ''}}">
                     <uib-accordion-heading>
-                        <h3 class="panel-title accordion-toggle ellipsis" id="fc-heading-{{$index}}" ng-click="toggleFacet($index)" tooltip-enable="tooltipEnabled" uib-tooltip-html="fc.displayname.value" tooltip-placement="bottom" chaise-enable-tooltip-width>
+                        <h3 class="panel-title accordion-toggle ellipsis" id="fc-heading-{{$index}}" ng-click="toggleFacet($index)">
                             <i class="pull-left glyphicon toggle-icon" ng-class="{'glyphicon-chevron-down': vm.facetModels[$index].isOpen, 'glyphicon-chevron-right': !vm.facetModels[$index].isOpen}"></i>
 
-                            <a>
+                            <a class="show-tooltip-border" tooltip-class="facet-header-tooltip" ng-attr-uib-tooltip="{{::(fc.comment) ? fc.comment : undefined}}" ng-attr-tooltip-placement="{{::(fc.comment) ? 'right' : undefined}}">
                                 <span ng-if="::fc.displayname.isHTML" ng-bind-html="::fc.displayname.value"></span>
                                 <span ng-if="::!fc.displayname.isHTML" ng-bind="::fc.displayname.value"></span>
                             </a>
@@ -15,11 +15,12 @@
                         </h3>
                     </uib-accordion-heading>
                 <div ng-switch="fc.preferredMode">
-                    <range-picker ng-switch-when="ranges" vm="vm" facet-column="fc" facet-model="vm.facetModels[$index]" index="$index"></range-picker>
-                    <choice-picker ng-switch-default facet-column="fc" facet-model="vm.facetModels[$index]" index="$index"></string-picker>
+                    <range-picker ng-switch-when="ranges" facet-panel-open="vm.config.facetPanelOpen" facet-column="fc" facet-model="vm.facetModels[$index]" index="$index"></range-picker>
+                    <choice-picker ng-switch-default facet-panel-open="vm.config.facetPanelOpen" facet-column="fc" facet-model="vm.facetModels[$index]" index="$index"></string-picker>
                 </div>
             </div>
         </uib-accordion>
         <h3 ng-if="vm.reference.facetColumns.length == 0">No Filter Options</h3>
     </div>
 </div>
+<faceting-collapse-btn class="facet-btn" panel-open="vm.config.facetPanelOpen" toggle-panel="togglePanel" position="left" tooltip-message="{{'Click to ' + ((vm.config.facetPanelOpen) ? 'hide' : 'show') + ' facet search panel.'}}"></faceting-collapse-btn>

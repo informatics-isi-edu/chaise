@@ -19,11 +19,11 @@
         forbidden: "Forbidden",
         notFound: "No data",
         multipleRecords: "Multiple Records Found",
-        noDataMessage: "No matching record found for the given filter or facet.",
+        noDataMessage: 'The record does not exist or may be hidden. If you continue to face this issue, please contact the system administrator.',
         multipleDataErrorCode : "Multiple Records Found",
         multipleDataMessage : "There are more than 1 record found for the filters provided.",
         facetFilterMissing : "No filtering criteria was specified to identify a specific record.",
-        systemAdminMessage : "An unexpected error has occurred. Please report this problem to your system administrators."
+        systemAdminMessage : "An unexpected error has occurred. Try clearing your cache. If you continue to face this issue, please contact the system administrator."
     })
 
     .factory('Errors', ['errorNames', 'errorMessages', function(errorNames, errorMessages) {
@@ -143,39 +143,60 @@
     }])
 
     // Factory for each error type
-    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$uibModal', '$window', 'errorMessages', 'Errors', 'UriUtils',
-          function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $uibModal, $window, errorMessages, Errors, UriUtils) {
+    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$window', 'errorMessages', 'Errors', 'DataUtils', 'UriUtils', 'modalUtils', '$document',
+          function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $window, errorMessages, Errors, DataUtils, UriUtils, modalUtils, $document) {
 
-        function errorPopup(message, errorCode, pageName, redirectLink, subMessage, stackTrace) {
-            var providedLink = true;
-            var appName = UriUtils.appNamefromUrlPathname($window.location.pathname);
-            // if it's not defined, redirect to the dataBrowser config setting (if set) or the landing page
+        var reloadCb = function() {
+            window.location.reload();
+        };
+
+        /**
+         * exception    - the error that was thrown
+         * pageName     - the name of the page we will redirect to
+         * redirectLink - link that is used for redirect
+         * subMessage   - message displayed after the exception message
+         * stackTrace   - stack trace provided with error output
+         * isDismissible- if the error modal can be close
+         * showLogin    - if the login link should be shown
+         * message      - (optional) primary message displayed in modal (if defined, overwrites exception.message)
+         * errorStatus  - (optional) error "name" (if defined, overwrites exception.status)
+         */
+        function errorPopup(exception, pageName, redirectLink, subMessage, stackTrace, isDismissible, showLogin, message, errorStatus) {
+            var appName = UriUtils.appNamefromUrlPathname($window.location.pathname),
+                session = Session.getSessionValue(),
+                providedLink = true;
+
+            var reloadCb = function(){
+                window.location.reload();
+            };
+
             if (!redirectLink) {
                 providedLink = false;
-                var redirectLink = (chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : $window.location.origin);
+                redirectLink = $window.location.origin;
             }
 
 
             var isFirefox = typeof InstallTrigger !== 'undefined';
             var isChrome = !!window.chrome && !!window.chrome.webstore;
             // If browser is chrome then use stack trace which has "Error"  appended before the trace
-            // Else append subMessage before the tarce to complete the message as FF does not generate sufficient error text
-            if (subMessage && stackTrace) {
-                if (isChrome) {
-                    subMessage = stackTrace;
-                } else {
-                    subMessage = subMessage + "\n   " + stackTrace.split("\n").join("\n   ");
-                }
+            // Else append subMessage before the trace to complete the message as FF does not generate sufficient error text
+            if (stackTrace) {
+                subMessage = (subMessage && !isChrome) ? (subMessage + "\n   " + stackTrace.split("\n").join("\n   ")) : stackTrace;
             }
+
             var params = {
-                message: message,
-                errorCode: errorCode,
+                appName: appName,
                 pageName: pageName,
+                exception: exception,
+                errorStatus: errorStatus ? errorStatus : exception.status,
+                message: message ? message : exception.message,
                 subMessage: subMessage,
-                appName: appName
+                canClose: false,
+                showLogin: showLogin
             };
 
             var modalProperties = {
+                windowClass: "modal-error",
                 templateUrl: '../common/templates/errorDialog.modal.html',
                 controller: 'ErrorModalController',
                 controllerAs: 'ctrl',
@@ -183,101 +204,86 @@
                 keyboard: false,
                 resolve: {
                     params: params
-                }
+                },
+                openedClass: 'error-open'
             };
 
 
-            if (chaiseConfig && chaiseConfig.allowErrorDismissal) {
+            if (isDismissible || (chaiseConfig && chaiseConfig.allowErrorDismissal)) {  //If Forbidden error then allow modal to be dismissed
                 delete modalProperties.keyboard;
                 delete modalProperties.backdrop;
                 params.canClose = true;
             }
 
-            var modalInstance = $uibModal.open(modalProperties);
-
-            var reloadCb = function(){
-                window.location.reload();
-            };
-
-            modalInstance.result.then(function (actionBtnIdentifier) {
-
-                if (errorCode == errorNames.unauthorized && !providedLink) {
-                    var x = window.innerWidth/2 - 800/2;
-                    var y = window.innerHeight/2 - 600/2;
-
-                    var win = window.open("", '_blank','width=800,height=600,left=' + x + ',top=' + y);
-                    Session.loginInAPopUp(win, reloadCb);
+            modalUtils.showModal(modalProperties, function (actionBtnIdentifier) {
+                if ((errorStatus == errorNames.unauthorized && !providedLink) || (actionBtnIdentifier === "login")) {
+                    Session.loginInAPopUp();
                 } else {
                     if(actionBtnIdentifier == "reload"){
                         reloadCb();
                     } else{             //default action i.e. redirect link for OK button
-                        $window.location.replace(redirectLink);
+                        $window.location = redirectLink;
                     }
-
                 }
-            });
+            }, false, moveErrorModal);
+
+            function moveErrorModal() {
+                var mainnav = $document[0].getElementById('mainnav');
+                if (mainnav !== null) {
+                    var errorModal = $document[0].getElementsByClassName('modal-error')[0];
+                    if (errorModal !== null && errorModal !== undefined) {
+                            errorModal.style.top = mainnav.offsetHeight + "px";
+                    }
+                }
+            }
         }
 
         var exceptionFlag = false;
 
         // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
-        function handleException(exception) {
+        function handleException(exception, isDismissible) {
             $log.info(exception);
-            var reloadLink,
-                redirectLink = $window.location.origin,
-                gotoLocation = "Home Page";
 
-            var stackTrace =  (exception.errorData && exception.errorData.stack)? exception.errorData.stack: undefined;
+            // arguments for `errorPopup()` in order for method declaration
+            var pageName = "Home Page",
+                redirectLink = chaiseConfig.dataBrowser,
+                subMessage = (exception.subMessage ? exception.subMessage : undefined),
+                stackTrace = ( (exception.errorData && exception.errorData.stack) ? exception.errorData.stack : undefined),
+                showLogin = false,
+                message, errorStatus;
 
-            var reloadCb = function() {
-                window.location.reload();
-            };
-            if (exceptionFlag || window.location.pathname.indexOf('/search/') != -1 || window.location.pathname.indexOf('/viewer/') != -1){
-              return;
-            }
-            // we decided to deal with the OR condition later
-            if ( (ERMrest && exception instanceof ERMrest.UnauthorizedError) || exception.code == errorNames.unauthorized) {
+            $rootScope.error = true;    // used to hide spinner in conjunction with a css property
+
+            // don't throw an angular error if in search/viewer or one has already been thrown
+            if (exceptionFlag || window.location.pathname.indexOf('/search/') != -1 || window.location.pathname.indexOf('/viewer/') != -1) return;
+
+            // If not authorized, ask user to sign in first
+            if (ERMrest && exception instanceof ERMrest.UnauthorizedError) {
+                // Unauthorized (needs to login)
                 Session.loginInAModal(reloadCb);
+                return;
             }
-            else if ((exception.status && exception.status == errorNames.multipleRecords) || exception.constructor.name === "noRecordError"){
-               errorPopup(exception.message, exception.status, "Recordset ", exception.errorData.redirectUrl, stackTrace);
-           }
-            // we decided to deal with the OR condition later
-            else if ( (ERMrest && exception instanceof ERMrest.ForbiddenError) || exception.code == errorNames.forbidden) {
-                errorPopup( exception.message, exception.status ,"Home Page", $window.location.origin);
-            }
-            else if (ERMrest && exception instanceof ERMrest.ERMrestError ) {
-              if(exception.errorData && exception.errorData.gotoTableDisplayname != 'undefined' && exception.errorData.gotoTableDisplayname != ''){
-                gotoLocation = exception.errorData.gotoTableDisplayname;
-              }
-              if(exception.errorData && exception.errorData.redirectUrl != 'undefined' && exception.errorData.redirectUrl != ''){
+
+            if (exception instanceof Errors.multipleRecordError || exception instanceof Errors.noRecordError){
+                // change defaults
+                pageName = "Recordset";
                 redirectLink = exception.errorData.redirectUrl;
-              }
-                errorPopup( exception.message, exception.status, gotoLocation, redirectLink, exception.subMessage);
-            }
-            else {
+                if (exception instanceof Errors.noRecordError && !Session.getSessionValue()) showLogin = true;
+            } else if (ERMrest && exception instanceof ERMrest.ERMrestError ) {
+                if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'gotoTableDisplayname')) pageName = exception.errorData.gotoTableDisplayname;
+                if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'redirectUrl')) redirectLink = exception.errorData.redirectUrl;
+                if (exception instanceof ERMrest.NotFoundError && !Session.getSessionValue()) showLogin = true;
+            } else {
                 logError(exception);
-
-                var errName = exception.status? exception.status:"Terminal Error",
-                    errorText = exception.message,
-                    systemAdminMessage = errorMessages.systemAdminMessage,
-                    redirectLink = $window.location.origin,
-                    pageName = "Home Page";
-
-
-                errName = (errName.toLowerCase() !== 'error') ? errName : "Terminal Error";
-
-                errorPopup(
-                    systemAdminMessage,
-                    errName,
-                    pageName,
-                    redirectLink,
-                    errorText,
-                    stackTrace
-                );
+                message = errorMessages.systemAdminMessage;
+                if (!errorStatus) errorStatus = "Terminal Error";
+                subMessage = exception.message;
             }
 
-            exceptionFlag = true;
+            errorPopup(exception, pageName, redirectLink, subMessage, stackTrace, isDismissible, showLogin, message, errorStatus);
+
+            // if not a dismissible errror then exception should be suppressed
+            if (!isDismissible) exceptionFlag = true;
         }
 
         return {
@@ -304,14 +310,13 @@
  */
 var logError = function (error) {
     if (!ERMrest) return;
-    try {
-        var ermrestUri = chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : window.location.origin + '/ermrest';
-        ERMrest.logError(error, ermrestUri).then(function () {
-            console.log("logged the error");
-        }).catch(function (err) {});
-    } catch (exp) {
+
+    var ermrestUri = chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : window.location.origin + '/ermrest';
+    ERMrest.logError(error, ermrestUri).then(function () {
+        console.log("logged the error");
+    }).catch(function (err) {
         console.log("couldn't log the error.");
-    }
+    });
 };
 
 window.onerror = function() {
@@ -349,7 +354,7 @@ window.onerror = function() {
                     + '<h2 class="modal-title ">Error: ' + errName + '</h2>'
                 + '</div>'
                 + '<div class="modal-body ">'
-                    + 'An unexpected error has occurred. Please report this problem to your system administrators.'
+                    + 'An unexpected error has occurred. Try clearing your cache. If you continue to face this issue, please contact the system administrator.'
                     + '<br><br>'
                     + 'Click OK to return to the Home Page.'
                     + '<br>'

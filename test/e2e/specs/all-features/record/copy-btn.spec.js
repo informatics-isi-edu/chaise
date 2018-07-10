@@ -34,9 +34,9 @@ describe('View existing record,', function() {
             chaisePage.waitForElement(chaisePage.recordPage.getEntityTitleElement(), browser.params.defaultTimeout);
         });
 
-        it("should load chaise-config.js and have maxRelatedTablesOpen=6", function() {
+        it("should load chaise-config.js and have maxRelatedTablesOpen=8", function() {
             browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
-                expect(chaiseConfig.maxRelatedTablesOpen).toBe(6);
+                expect(chaiseConfig.maxRelatedTablesOpen).toBe(8);
             });
         });
 
@@ -129,9 +129,9 @@ describe('View existing record,', function() {
 
                     return titleElement.getText();
                 }).then(function(txt) {
-                    expect(txt).toBe("Create " + testParams.table_displayname +" Record");
+                    expect(txt).toBe("Create Record", "Recordedit title is incorrect.");
 
-                    return titleElement.element(by.css('span[ng-bind-html]')).getAttribute("innerHTML");
+                    return chaisePage.recordEditPage.getEntitySubtitleElement().element(by.css('span[ng-bind-html]')).getAttribute("innerHTML");
                 }).then(function(html) {
                     expect(html).toBe(testParams.table_inner_html_display);
 

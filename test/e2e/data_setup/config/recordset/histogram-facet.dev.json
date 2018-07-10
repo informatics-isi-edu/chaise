@@ -1,0 +1,9 @@
+{
+    "setup": {
+        "schemaConfigurations": [
+            "recordset/histogram-facet.config.json"
+        ],
+        "schema": "histogram-faceting"
+    },
+    "cleanup" : true
+}

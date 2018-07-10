@@ -115,9 +115,9 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
         it("should have edit record title", function() {
             var EC = protractor.ExpectedConditions;
 
-            browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), browser.params.defaultTimeout);
-            var title = chaisePage.recordEditPage.getFormTitle();
-            expect(title.getText()).toEqual("Edit " + tableParams.table_displayname + " Record");
+            browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getEntityTitleElement()), browser.params.defaultTimeout);
+            var title = chaisePage.recordEditPage.getEntityTitleElement();
+            expect(title.getText()).toEqual("Edit " + tableParams.record_displayname + " Record", "Edit mode title is incorrect.");
         });
 
         it("should not allow to add new rows/columns", function() {
@@ -131,11 +131,8 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
         it("should have create record title", function() {
             var EC = protractor.ExpectedConditions;
 
-            browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), browser.params.defaultTimeout);
-
-            chaisePage.recordEditPage.getEntityTitle().then(function(txt) {
-                expect(txt).toBe("Create " + tableParams.table_displayname + " Records");
-            });
+            browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getEntityTitleElement()), browser.params.defaultTimeout);
+            expect(chaisePage.recordEditPage.getEntityTitleElement().getText()).toBe("Create Record", "Create mode title is incorrect.");
         });
 
         it("should allow to add new rows/columns", function() {
@@ -145,6 +142,11 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
             });
         });
     }
+
+    it ("should have the table subtitle.", function () {
+        expect(chaisePage.recordEditPage.getEntitySubtitleElement().getText()).toBe(tableParams.table_displayname.toUpperCase(), "Entity subtitle is incorrect.");
+        expect(chaisePage.recordEditPage.getEntitySubtitleTooltip()).toBe(tableParams.table_comment, "Entity subtitle tooltip is incorrect.");
+    });
 
     it("should render columns which are inside the visible columns annotation if defined; Default all are visible", function() {
         var columns = tableParams.columns;
@@ -579,24 +581,27 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                     // this will have the index and the presentational value
                                     var fkSelectedValue = getRecordInput(col.name);
 
-                                    var rows;
+                                    var rows, searchBox;
                                     chaisePage.clickButton(popupBtns[(foreignKeyCols.length * recordIndex) + i ]).then(function() {
                                         // wait for the modal to open
                                         browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
                                         // Expect search box to have focus
-                                        var searchBox = chaisePage.recordsetPage.getSearchBox();
-                                        browser.wait(function() {
+                                        searchBox = chaisePage.recordsetPage.getSearchBox();
+                                        browser.wait(EC.visibilityOf(searchBox), browser.params.defaultTimeout);
+
+                                        return browser.wait(function() {
                                             var searchBoxId, activeElement;
                                             return searchBox.getAttribute('id').then(function(id) {
                                                 searchBoxId = id;
-                                                return browser.driver.switchTo().activeElement().getAttribute('id');
-                                            }).then(function(activeId) {
-                                                activeElement = activeId;
-                                                return activeId == searchBoxId;
+                                                return browser.driver.switchTo().activeElement().getAttribute('id').then(function(activeId) {
+                                                    activeElement = activeId;
+                                                    return activeId == searchBoxId;
+                                                });
                                             });
-                                        }, browser.params.defaultTimeout).then(function() {
-                                            expect(searchBox.getAttribute('id')).toEqual(browser.driver.switchTo().activeElement().getAttribute('id'), colError(foreignKeyCols[i].name, "when opened the modal selector, focus was not on search input."));
-                                        });
+                                        }, browser.params.defaultTimeout);
+                                    }).then(function() {
+                                        expect(searchBox.getAttribute('id')).toEqual(browser.driver.switchTo().activeElement().getAttribute('id'), colError(foreignKeyCols[i].name, "when opened the modal selector, focus was not on search input."));
+
                                         return modalTitle.getText();
                                     }).then(function(text) {
                                         // make sure modal opened
@@ -1261,7 +1266,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                 describe("File fields,", function() {
                     it("should render input type as file input ", function() {
                         fileCols.forEach(function(column) {
-                            exports.testFileInput(column.name, recordIndex, tableParams.files[getRecordInput(column.name, 0)], true);
+                            exports.testFileInput(column.name, recordIndex, tableParams.files[getRecordInput(column.name, 0)], true, tableParams.inputs[getRecordInput(column.name, 0)].validate);
                         });
                     });
 
@@ -1340,8 +1345,8 @@ exports.testSubmission = function (tableParams, isEditMode) {
 
         describe('result page, ', function () {
             it("should have the correct title.", function() {
-                var title = tableParams.results.length + "/" + tableParams.results.length + " "+ tableParams.table_displayname +" Records "+(isEditMode? "Updated": "Created")+" Successfully";
-                expect(chaisePage.recordEditPage.getResultTitle().getText()).toBe(title);
+                var title = tableParams.results.length + "/" + tableParams.results.length + " Records " + (isEditMode ? "Updated" : "Created") + " Successfully";
+                expect(chaisePage.recordEditPage.getResultsetTitleElement().getText()).toBe(title, "Resultset page title is incorrect.");
             });
 
             it('should point to the correct link with caption.', function () {
@@ -1356,8 +1361,8 @@ exports.testSubmission = function (tableParams, isEditMode) {
 
                 var expectedLink = process.env.CHAISE_BASE_URL + "/recordset/#" +  browser.params.catalogId + "/" + tableParams.schema_name + ":" + tableParams.table_name + linkModifier;
 
-                chaisePage.recordEditPage.getResultTitleLink().then(function (titleLink) {
-                    expect(titleLink[0].getText()).toBe(tableParams.table_displayname, "Title of result page doesn't have the expected caption.");
+                chaisePage.recordEditPage.getResultsetSubtitleLink().then(function (titleLink) {
+                    expect(titleLink[0].getText()).toBe(tableParams.table_displayname.toUpperCase(), "Title of result page doesn't have the expected caption.");
                     expect(titleLink[0].getAttribute("href")).toBe(expectedLink , "Title of result page doesn't have the expected link.");
                 });
             });
@@ -1499,6 +1504,17 @@ exports.deleteFiles = function(files) {
     });
 };
 
+var selectFile = function(file, fileInput, txtInput) {
+    var filePath = require('path').join(__dirname , "/../data_setup/uploaded_files/" + file.path);
+
+    fileInput.sendKeys(filePath);
+
+    browser.sleep(100);
+
+    expect(fileInput.getAttribute('value')).toContain(file.name, "didn't select the correct file.");
+    expect(txtInput.getAttribute('value')).toBe(file.name, "didn't show the correct file name after selection.");
+};
+
 /**
  * test a file input with the given column name, and file that we want to test
  * the file input against it.
@@ -1508,46 +1524,38 @@ exports.deleteFiles = function(files) {
  * @param  {string=}        currentValue    if you want to test the current value.
  * @param  {boolean=false}  print           should it print the file names or not.
  */
-exports.testFileInput = function (colName, recordIndex, file, currentValue, print) {
+exports.testFileInput = function (colName, recordIndex, file, currentValue, print, testValidation) {
     chaisePage.recordEditPage.getInputForAColumn(colName, recordIndex).then(function(fileInput) {
         print = typeof print !== "boolean" ? false : print;
 
-
         if (fileInput) {
-            chaisePage.recordEditPage.getInputForAColumn("txt" + colName, recordIndex).then(function(txtInput) {
+            var txtInput;
+            chaisePage.recordEditPage.getInputForAColumn("txt" + colName, recordIndex).then(function(input) {
+                txtInput = input;
+                return txtInput.getAttribute('value');
+            }).then(function(value) {
+                // Incase of edit first clear the fileinput field by pressing the dismiss button
+                // and then set new file
+                if (value.trim().length > 0) {
+                    chaisePage.recordEditPage.getClearButton(txtInput).then(function(clearButton) {
+                        return clearButton.click();
+                    }).then(function () {
 
-                var selectFile = function() {
-                    var filePath = require('path').join(__dirname , "/../data_setup/uploaded_files/" + file.path);
+                        browser.sleep(50);
 
-                    fileInput.sendKeys(filePath);
+                        expect(txtInput.getAttribute('value')).toBe("", "couldn't clear the button.");
+                        selectFile(file, fileInput, txtInput);
+                    });
+                } else {
+                    selectFile(file, fileInput, txtInput);
+                }
 
-                    browser.sleep(100);
-
-                    expect(fileInput.getAttribute('value')).toContain(file.name, "didn't select the correct file.");
-                    expect(txtInput.getAttribute('value')).toBe(file.name, "didn't show the correct file name after selection.");
-                };
-
-                txtInput.getAttribute('value').then(function(value) {
-                    // Incase of edit first clear the fileinput field by pressing the dismiss button
-                    // and then set new file
-                    if (value.trim().length > 0) {
-
-                        chaisePage.recordEditPage.getClearButton(txtInput).then(function(clearButton) {
-                            clearButton.click();
-
-                            browser.sleep(50);
-
-                            expect(txtInput.getAttribute('value')).toBe("", "couldn't clear the button.");
-
-                            selectFile();
-                        });
-                    } else {
-                        selectFile();
-                    }
-                });
-
+                if (testValidation) {
+                    chaisePage.recordEditPage.getFileInputErrorMessage(fileInput, 'fileExtension').then(function(err) {
+                        expect(err.isDisplayed()).toBeTruthy("validation message is not displayed for file input");
+                    });
+                }
             });
-
         } else {
             expect(undefined).toBeDefined("Unable to find file input field for column " + colName);
         }

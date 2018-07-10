@@ -3,7 +3,7 @@ var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
 var momentTz = require('moment-timezone');
 var testParams = {
     // for verifying data is present
-    column_names: ["text", "text_disabled", "markdown", "markdown_disabled", "defaults_fk_text", "defaults_fk_text_disabled", "int", "int_disabled", "float", "float_disabled", "boolean_true", "boolean_false", "boolean_disabled", "date", "date_disabled", "timestamptz", "timestamptz_disabled", "json", "json_disabled", "json_disabled_no_default"],
+    column_names: ["text", "text_disabled", "markdown", "markdown_disabled", "gh_eEgUfJKBOcck-JHw4wg", "Bp0pr6Z_oHIvREd4ORPGOA", "int", "int_disabled", "float", "float_disabled", "boolean_true", "boolean_false", "boolean_disabled", "date", "date_disabled", "timestamptz", "timestamptz_disabled", "json", "json_disabled", "json_disabled_no_default"],
     table_name: "defaults-table",
     default_column_values: {
     // data values
@@ -12,7 +12,7 @@ var testParams = {
         markdown_value: "**bold**",
         markdown_disabled_value: "*italics*",
         foreign_key_value: "Default for foreign_key column", // rowname of the fk
-        foreign_key_disabled_value: "Default for foreign_key_disabled column", // rowname of the fk
+        foreign_key_disabled_value: "Default for foreign_key_disabled column", // rowname of the disabled fk
         int_value: "25",
         int_disabled_value: "20",
         float_value: "1.6478",
@@ -47,10 +47,10 @@ var testParams = {
         text_disabled: "Disabled input",
         markdown: "bold",
         markdown_disabled: "italics",
-        // Value of "name" column on foreign related entity
-        defaults_fk_text: "Default for foreign_key column",
-        // Value of "name" column on foreign related entity
-        defaults_fk_text_disabled: "Default for foreign_key_disabled column",
+        // Value of "name" column on foreign (defaults_fk_text) related entity
+        "gh_eEgUfJKBOcck-JHw4wg": "Default for foreign_key column",
+        // Value of "name" column on foreign (defaults_fk_text_disabled) related entity
+        "Bp0pr6Z_oHIvREd4ORPGOA": "Default for foreign_key_disabled column",
         int: "25",
         int_disabled: "20",
         float: "1.6478",

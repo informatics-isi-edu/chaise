@@ -3,6 +3,7 @@ var testParams = {
     accommodation_tuple: {
         schemaName: "product-recordset",
         table_name: "accommodation",
+        comment: "List of different types of accommodations",
         displayName: "Accommodations",
         title: "Accommodations",
         key: { name: "id", value: "2001", operator: "::gt::"},
@@ -12,15 +13,23 @@ var testParams = {
             { title: "Name of Accommodation", value: "Sherathon Hotel", type: "text"},
             { title: "Website", value: "<p class=\"ng-scope\"><a href=\"http://www.starwoodhotels.com/sheraton/index.html\">Link to Website</a></p>", type: "text", comment: "A valid url of the accommodation"},
             { title: "User Rating", value: "4.3000", type: "float4"},
+            { title: "Number of Rooms", value: "23", type: "int4"},
             { title: "Summary", value: "Sherathon Hotels is an international hotel company with more than 990 locations in 73 countries. The first Radisson Hotel was built in 1909 in Minneapolis, Minnesota, US. It is named after the 17th-century French explorer Pierre-Esprit Radisson.", type: "longtext"},
             { title: "Operational Since", value: "2008-12-09 00:00:00", type: "timestamptz" },
             { title: "Is Luxurious", value: "true", type: "boolean" },
             { title: "json_col", value:JSON.stringify({"name":"testing JSON"},undefined,2), type: "json" },
-            { title: "json_col_with_markdown", value: "Status is: delivered"}
+            { title: "json_col_with_markdown", value: "Status is: delivered"},
+            { title: "Category", value: "Hotel", comment: "Type of accommodation ('Resort/Hotel/Motel')"},
+            { title: "Type of Facilities", value: "Upscale", comment: "Type of facilities ('Luxury/Upscale/Basic')"},
+            { title: "Image Count", value: "1", comment: "Image Count"},
+            { title: "Image Distinct Count", value: "1", comment: "Image Distinct Count"},
+            { title: "Min Image ID", value: "1", comment: "Min Image ID"},
+            { title: "Max Image ID", value: "1", comment: "Max Image ID"}
         ],
         data: [
             {
                 id: 2003,
+                no_of_rooms: '15',
                 title: "NH Munich Resort",
                 website: "http://www.nh-hotels.com/hotels/munich",
                 rating: "3.2000",
@@ -28,10 +37,17 @@ var testParams = {
                 opened_on: "1976-06-15 00:00:00",
                 luxurious: "true",
                 json_col: JSON.stringify({"name":"testing_json"},undefined,2),
-                json_col_with_markdown: "Status is: “delivered”"
+                json_col_with_markdown: "Status is: “delivered”",
+                category: "Resort",
+                type_of_facilities: "Luxury",
+                count_image_id: "1",
+                count_distinct_image_id: "1",
+                min_image_id: "3001",
+                max_image_id: "3001"
             },
             {
                 id: 2002,
+                no_of_rooms: '23',
                 title: "Sherathon Hotel",
                 website: "http://www.starwoodhotels.com/sheraton/index.html",
                 rating: "4.3000",
@@ -39,10 +55,17 @@ var testParams = {
                 opened_on: "2008-12-09 00:00:00",
                 luxurious: "true",
                 json_col: JSON.stringify(null,undefined,2),
-                json_col_with_markdown: "Status is: “delivered”"
+                json_col_with_markdown: "Status is: “delivered”",
+                category: "Hotel",
+                type_of_facilities: "Upscale",
+                count_image_id: "4",
+                count_distinct_image_id: "4",
+                min_image_id: "3005",
+                max_image_id: "30007"
             },
             {
                 id: 2004,
+                no_of_rooms: '35',
                 title: "Super 8 North Hollywood Motel",
                 website: "https://www.kayak.com/hotels/Super-8-North-Hollywood-c31809-h40498/2016-06-09/2016-06-10/2guests",
                 summary: "Fair Hotel. Close to Universal Studios. Located near shopping areas with easy access to parking. Professional staff and clean rooms. Poorly-maintained rooms.",
@@ -50,10 +73,17 @@ var testParams = {
                 opened_on: "2013-06-11 00:00:00",
                 luxurious: "false",
                 json_col: JSON.stringify({"age": 25,"name": "Testing"},undefined,2),
-                json_col_with_markdown: "Status is: “Processing”"
+                json_col_with_markdown: "Status is: “Processing”",
+                category: "Motel",
+                type_of_facilities: "Basic",
+                count_image_id: "3",
+                count_distinct_image_id: "3",
+                min_image_id: "3009",
+                max_image_id: "3011"
             },
             {
                 id: 4004,
+                no_of_rooms: '96',
                 title: "Hilton Hotel",
                 website: "",
                 summary: "Great Hotel. We've got the best prices out of anyone. Stay here to make America great again. Located near shopping areas with easy access to parking. Professional staff and clean rooms. Poorly-maintained rooms.",
@@ -61,7 +91,80 @@ var testParams = {
                 opened_on: "2013-06-11 00:00:00",
                 luxurious: "true",
                 json_col: "9876.3543",
-                json_col_with_markdown: "Status is: “Processing”"
+                json_col_with_markdown: "Status is: “Processing”",
+                category: "Hotel",
+                type_of_facilities: "Upscale",
+                count_image_id: "",
+                count_distinct_image_id: "",
+                min_image_id: "",
+                max_image_id: ""
+            }
+        ],
+        sortedData:[
+            { 
+                columnName: "Name of Accommodation",
+                rawColumnName: "title",
+                columnPosition: 1,
+                page1:{
+                    asc: ["NH Munich Resort", "Radisson Hotel", "Sherathon Hotel"],
+                    desc: ["Super 8 North Hollywood Motel", "Sherathon Hotel", "Sherathon Hotel"]
+                },
+                page2:{
+                    asc: ["Sherathon Hotel", "Super 8 North Hollywood Motel"],
+                    desc: ["Radisson Hotel", "NH Munich Resort"]
+                }
+            },
+            { 
+                columnName: "Number of Rooms",
+                rawColumnName: "no_of_rooms",
+                columnPosition: 4,
+                page1:{
+                    asc: ["15", "23", "23", ],
+                    desc: ["46", "35", "23"]
+                },
+                page2:{
+                    asc: ["35", "46"],
+                    desc: ["23", "15"]
+                }
+            },
+            { 
+                columnName: "Operational Since",
+                rawColumnName: "opened_on",
+                columnPosition: 6,
+                page1:{
+                    asc: ["1976-06-15 00:00:00", "2002-01-22 00:00:00", "2008-12-09 00:00:00"],
+                    desc: ["2013-06-11 00:00:00", "2008-12-09 00:00:00", "2008-12-09 00:00:00"]
+                },
+                page2:{
+                    asc: ["2008-12-09 00:00:00", "2013-06-11 00:00:00"],
+                    desc: ["2002-01-22 00:00:00", "1976-06-15 00:00:00"]
+                }
+            },
+            { 
+                columnName:"Category",
+                rawColumnName: "Y09mXK6LidrvCvNoXbesgg",
+                columnPosition: 10,
+                page1:{
+                    asc: ["Hotel", "Hotel", "Hotel"],
+                    desc: ["Resort", "Motel", "Hotel"]
+                },
+                page2:{
+                    asc: ["Motel", "Resort"],
+                    desc: ["Hotel", "Hotel"]
+                }
+            },
+            { 
+                columnName:"Type of Facilities",
+                rawColumnName: "hZ7Jzy0aC3Q3KQqz4DIXTw",
+                columnPosition: 11,
+                page1:{
+                    asc: ["Basic", "Luxury", "Upscale"],
+                    desc: ["Upscale", "Upscale", "Upscale"]
+                },
+                page2:{
+                    asc: ["Upscale", "Upscale"],
+                    desc: ["Luxury", "Basic"]
+                }
             }
         ]
     },
@@ -69,6 +172,10 @@ var testParams = {
         table_name: "file",
         custom_page_size: 5,
         page_size: 10
+    },
+    tooltip: {
+        downloadCSV: "Click to download all matched results",
+        permalink: "This link stores your search criteria as a URL. Right click and save."
     }
 };
 
@@ -86,6 +193,7 @@ describe('View recordset,', function() {
             browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:" + accommodationParams.table_name + "/" + keys.join("&") + "@sort(" + accommodationParams.sortby + ")");
 
             chaisePage.waitForElement(element(by.id("divRecordSet")));
+            chaisePage.recordsetPage.waitForAggregates();
         });
 
         describe("Presentation ,", function() {
@@ -95,8 +203,35 @@ describe('View recordset,', function() {
                 expect(title.getText()).toEqual(accommodationParams.title);
             });
 
+            it ('should have the correct tooltip.', function () {
+                expect(chaisePage.recordsetPage.getPageTitleTooltip()).toBe(accommodationParams.comment);
+            });
+
+            it('should display the permalink button & a tooltip on hovering over it', function () {
+                var permalink = chaisePage.recordsetPage.getPermalinkButton();
+                expect(permalink.isDisplayed()).toBe(true, "The permalink button is not visible on the recordset app");
+                browser.actions().mouseMove(permalink).perform();
+                var tooltip = chaisePage.getTooltipDiv();
+                chaisePage.waitForElement(tooltip).then(function () {
+                    expect(tooltip.getText()).toBe(testParams.tooltip.permalink, "Incorrect tooltip on the Permalink button");
+                    browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
+                });
+            });
+
+            it('should display the Download CSV button & a tooltip on hovering over it', function () {
+                var downloadCSV = chaisePage.recordsetPage.getDownloadButton();
+                expect(downloadCSV.isDisplayed()).toBe(true, "The Download CSV button is not visible on the recordset app");
+                browser.actions().mouseMove(downloadCSV).perform();
+                var tooltip = chaisePage.getTooltipDiv();
+                chaisePage.waitForElement(tooltip).then(function () {
+                    expect(tooltip.getText()).toBe(testParams.tooltip.downloadCSV, "Incorrect tooltip on the Download CSV button");
+                    browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
+                });
+            });
+
             it("should autofocus on search box", function() {
-                var searchBox = chaisePage.recordsetPage.getSearchBox();
+                var searchBox = chaisePage.recordsetPage.getMainSearchBox();
+                chaisePage.waitForElement(searchBox);
                 expect(searchBox.getAttribute('id')).toEqual(browser.driver.switchTo().activeElement().getAttribute('id'));
             });
 
@@ -120,11 +255,18 @@ describe('View recordset,', function() {
                                 expect(cells[2].element(by.tagName("a")).getAttribute("href")).toBe(accommodationParams.data[index].website, "website column link missmatch for row=" + index);
                                 expect(cells[2].element(by.tagName("a")).getText()).toBe("Link to Website", "website column caption missmatch for row=" + index);
                                 expect(cells[3].getText()).toBe(accommodationParams.data[index].rating, "rating column missmatch for row=" + index);
-                                expect(cells[4].getText()).toBe(accommodationParams.data[index].summary, "summary column missmatch for row=" + index);
-                                expect(cells[5].getText()).toBe(accommodationParams.data[index].opened_on, "opened_on column missmatch for row=" + index);
-                                expect(cells[6].getText()).toBe(accommodationParams.data[index].luxurious, "luxurious column missmatch for row=" + index);
-                                expect(cells[7].getText()).toBe(accommodationParams.data[index].json_col, "json_col column missmatch for row=" + index);
-                                expect(cells[8].getText()).toBe(accommodationParams.data[index].json_col_with_markdown, "json_col_with_markdown column missmatch for row=" + index);
+                                expect(cells[4].getText()).toBe(accommodationParams.data[index].no_of_rooms, "no_of_rooms column missmatch for row=" + index);
+                                expect(cells[5].getText()).toContain(accommodationParams.data[index].summary, "summary column missmatch for row=" + index);
+                                expect(cells[6].getText()).toBe(accommodationParams.data[index].opened_on, "opened_on column missmatch for row=" + index);
+                                expect(cells[7].getText()).toBe(accommodationParams.data[index].luxurious, "luxurious column missmatch for row=" + index);
+                                expect(cells[8].getText()).toBe(accommodationParams.data[index].json_col, "json_col column missmatch for row=" + index);
+                                expect(cells[9].getText()).toBe(accommodationParams.data[index].json_col_with_markdown, "json_col_with_markdown column missmatch for row=" + index);
+                                expect(cells[10].getText()).toBe(accommodationParams.data[index].category, "category column missmatch for row=" + index);
+                                expect(cells[11].getText()).toBe(accommodationParams.data[index].type_of_facilities, "type of facilities column missmatch for row=" + index);
+                                expect(cells[12].getText()).toBe(accommodationParams.data[index].count_image_id, "count_image_id column missmatch for row=" + index);
+                                expect(cells[13].getText()).toBe(accommodationParams.data[index].count_distinct_image_id, "count_distinct_image_id column missmatch for row=" + index);
+                                expect(cells[14].getText()).toBe(accommodationParams.data[index].min_image_id, "min_image_id column missmatch for row=" + index);
+                                expect(cells[15].getText()).toBe(accommodationParams.data[index].max_image_id, "max_image_id column missmatch for row=" + index);
                             });
                         }(i))
                     }
@@ -160,74 +302,63 @@ describe('View recordset,', function() {
                 });
             });
 
-            it("apply different searches, ", function() {
+            it("apply different searches, ", function(done) {
                 var EC = protractor.ExpectedConditions;
                 var e = element(by.id('custom-page-size'));
                 browser.wait(EC.presenceOf(e), browser.params.defaultTimeout);
 
-                var searchBox = chaisePage.recordsetPage.getSearchBox(),
+                var searchBox = chaisePage.recordsetPage.getMainSearchBox(),
                 searchSubmitButton = chaisePage.recordsetPage.getSearchSubmitButton(),
                 clearSearchButton = chaisePage.recordsetPage.getSearchClearButton(),
                 noResultsMessage = "No Results Found";
 
                 searchBox.sendKeys('Super 8 North Hollywood Motel');
                 searchSubmitButton.click().then(function() {
-                    return chaisePage.waitForElementInverse(element(by.id("spinner")));
-                }).then(function() {
-                    return chaisePage.recordsetPage.getRows()
-                }).then(function(rows) {
-                    expect(rows.length).toBe(1);
-                    expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying 1 of 1 Records", "Display total count for 'Super 8 North Hollywood Motel' search is incorrect");
+                    chaisePage.recordsetPage.waitForInverseMainSpinner();
+                    expect(chaisePage.recordsetPage.getRows().count()).toBe(1, "search 01: row count missmatch");
+                    expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying 1 of 1 Records", "search 01: total count missmatch.");
                     // clear search
                     return clearSearchButton.click();
                 }).then(function() {
-                    return chaisePage.waitForElementInverse(element(by.id("spinner")));
-                }).then(function() {
-                    return chaisePage.recordsetPage.getRows();
-                }).then(function(rows) {
-                    expect(rows.length).toBe(4);
-                    expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying 4 of 4 Records", "Display total count for no search term is incorrect");
+                    chaisePage.recordsetPage.waitForInverseMainSpinner();
+                    expect(chaisePage.recordsetPage.getRows().count()).toBe(4, "search 02: row count missmatch");
+                    expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying 4 of 4 Records", "search 02: total count missmatch.");
 
                     // apply conjunctive search words
                     searchBox.sendKeys('"Super 8" motel "North Hollywood"');
-
                     return searchSubmitButton.click();
                 }).then(function() {
-                    return chaisePage.waitForElementInverse(element(by.id("spinner")));
-                }).then(function() {
-                    return chaisePage.recordsetPage.getRows();
-                }).then(function(rows) {
-                    expect(rows.length).toBe(1);
-                    expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying 1 of 1 Records", "Display total count for '\"Super 8\" motel \"North Hollywood\"' search is incorrect");
+                    chaisePage.recordsetPage.waitForInverseMainSpinner();
+                    expect(chaisePage.recordsetPage.getRows().count()).toBe(1, "search 03: row count missmatch");
+                    expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying 1 of 1 Records", "search 03: total count missmatch.");
                     // clear search
                     return clearSearchButton.click();
                 }).then(function() {
-                    return chaisePage.waitForElementInverse(element(by.id("spinner")));
-                }).then(function() {
+                    chaisePage.recordsetPage.waitForInverseMainSpinner();
+
                     // search has been reset
                     searchBox.sendKeys("asdfghjkl");
-
                     return searchSubmitButton.click();
                 }).then(function() {
-                    return chaisePage.waitForElementInverse(element(by.id("spinner")));
-                }).then(function() {
-                    return chaisePage.recordsetPage.getRows();
-                }).then(function(rows) {
-                    expect(rows.length).toBe(0);
-                    expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying 0 Records", "Display total count for 'asdfghjkl' search is incorrect");
 
-                    return chaisePage.recordsetPage.getNoResultsRow().getText();
-                }).then(function(text) {
-                    expect(text).toBe(noResultsMessage);
+                    chaisePage.recordsetPage.waitForInverseMainSpinner();
+                    expect(chaisePage.recordsetPage.getRows().count()).toBe(0, "search 04: row count missmatch");
+                    expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying 0 Records", "search 04: total count missmatch.");
+                    expect(chaisePage.recordsetPage.getNoResultsRow().getText()).toBe(noResultsMessage, "search 04: no result message missmatch.");
 
                     // clearing the search here resets the page for the next test case
                     clearSearchButton.click();
+                }).then(function () {
+                    chaisePage.recordsetPage.waitForInverseMainSpinner();
+                    done();
+                }).catch(function(err) {
+                    done.fail(err);
                 });
 
             });
 
             it("JSON Column value should be searchable", function(){
-                var searchBox = chaisePage.recordsetPage.getSearchBox(),
+                var searchBox = chaisePage.recordsetPage.getMainSearchBox(),
                 searchSubmitButton = chaisePage.recordsetPage.getSearchSubmitButton(),
                 clearSearchButton = chaisePage.recordsetPage.getSearchClearButton(),
                 noResultsMessage = "No Results Found";
@@ -235,7 +366,7 @@ describe('View recordset,', function() {
                 searchSubmitButton.click().then(function() {
                     return chaisePage.waitForElementInverse(element(by.id("spinner")));
                 }).then(function() {
-                    return chaisePage.recordsetPage.getRows()
+                    return chaisePage.recordsetPage.getRows();
                 }).then(function(rows) {
                     expect(rows.length).toBe(1);
                     // clear search
@@ -245,7 +376,7 @@ describe('View recordset,', function() {
 
             it("action columns should show Download CSV button if records present else should not show download button", function() {
                 var downloadButton;
-                var searchBox = chaisePage.recordsetPage.getSearchBox(),
+                var searchBox = chaisePage.recordsetPage.getMainSearchBox(),
                 searchSubmitButton = chaisePage.recordsetPage.getSearchSubmitButton(),
                 clearSearchButton = chaisePage.recordsetPage.getSearchClearButton();
 
@@ -408,6 +539,158 @@ describe('View recordset,', function() {
                 });
             });
 
+        });
+
+        describe("testing sorting and paging features, ", function () {
+            var rowCount = chaisePage.recordsetPage.getTotalCount();
+            var recordsOnPage1 = accommodationParams.sortedData[0].page1.asc.length;
+            var recordsOnPage2 = accommodationParams.sortedData[0].page2.asc.length;
+            var totalRecords = recordsOnPage1 + recordsOnPage2;
+
+            beforeAll(function () {
+                browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:" + accommodationParams.table_name + "?limit=3");
+                var EC = protractor.ExpectedConditions;
+                chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
+                browser.wait(EC.presenceOf(chaisePage.recordsetPage.getRows().get(2)), browser.params.defaultTimeout);
+            });
+
+            for (var j = 0; j < accommodationParams.sortedData.length; j++) {
+                (function (k) {
+                    it("should sort " + accommodationParams.sortedData[k].columnName + " column in ascending order.", function (done) {
+
+                        // Check the presence of initial sort button
+                        expect(chaisePage.recordsetPage.getColumnSortButton(accommodationParams.sortedData[k].rawColumnName).isDisplayed()).toBe(true, accommodationParams.sortedData[k].columnName + " column doesn't contain the initial sort button.");
+
+                        // Click on sort button
+                        chaisePage.recordsetPage.getColumnSortButton(accommodationParams.sortedData[k].rawColumnName).click().then(function () {
+                            chaisePage.waitForTextInElement(rowCount, "Displaying " + recordsOnPage1 + " of " + totalRecords + " Records");
+                            chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
+
+                            //Check the presence of descending sort button
+                            expect(chaisePage.recordsetPage.getColumnSortDescButton(accommodationParams.sortedData[k].rawColumnName).isDisplayed()).toBe(true,  accommodationParams.sortedData[k].columnName + " column doesn't contain the descending sort button.");
+
+                            // Check if the url has @sort by column name
+                            chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + ',id)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 1 for ascending order.");
+
+                            return chaisePage.recordsetPage.getRows();
+
+                        }).then(function (rows) {
+                            // Check if values of the sorted column on this page(first page) are in ascending order.
+                            for (var i = 0; i < recordsOnPage1; i++) {
+                                (function (index1) {
+                                    rows[index1].all(by.tagName("td")).then(function (cells) {
+                                        expect(cells[accommodationParams.sortedData[k].columnPosition].getText()).toBe(accommodationParams.sortedData[k].page1.asc[index1], accommodationParams.sortedData[k].rawColumnName + " column value missmatch for row = " + index1 + " in ascending order on Page 1.");
+                                    });
+                                }(i))
+                            }
+
+                            // Go to the next page
+                            return chaisePage.recordsetPage.getNextButton().click();
+
+                        }).then(function () {
+                            chaisePage.waitForTextInElement(rowCount, "Displaying " + recordsOnPage2 + " of " + totalRecords + " Records");
+                            chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
+
+                            // Check if the url has @sort by column name
+                            chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + ',id)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 2 for ascending order.");
+
+                            return chaisePage.recordsetPage.getRows();
+
+                        }).then(function (rows) {
+                            // Check if values of the sorted column on second page are in ascending order
+                            for (var i = 0; i < recordsOnPage2; i++) {
+                                (function (index2) {
+                                    rows[index2].all(by.tagName("td")).then(function (cells) {
+                                        expect(cells[accommodationParams.sortedData[k].columnPosition].getText()).toBe(accommodationParams.sortedData[k].page2.asc[index2], accommodationParams.sortedData[k].rawColumnName + " column value missmatch for row = " + index2 + " in ascending order on Page 2.");
+                                    });
+                                }(i))
+                            }
+
+                            // Go to the previous page
+                            return chaisePage.recordsetPage.getPreviousButton().click();
+
+                        }).then(function () {
+                            chaisePage.waitForTextInElement(rowCount, "Displaying " + recordsOnPage1 + " of " + totalRecords + " Records");
+                            chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
+
+                            // Sanity check on the previous page
+                            chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + ',id)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 1 for ascending order.");
+                            done();
+
+                        }).catch(function (err) {
+                            console.log("Error in the promise chain: ", err);
+                            done.fail(err);
+                        });
+
+                    });
+
+                    it("should sort " + accommodationParams.sortedData[k].columnName + " column in descending order.", function (done) {
+                        // Check the presence of descending sort button
+                        expect(chaisePage.recordsetPage.getColumnSortDescButton(accommodationParams.sortedData[k].rawColumnName).isDisplayed()).toBe(true, accommodationParams.sortedData[k].columnName + " column doesn't contain the descending sort button.");
+
+                        // Click on sort button to sort in descending order
+                        chaisePage.recordsetPage.getColumnSortDescButton(accommodationParams.sortedData[k].rawColumnName).click().then(function () {
+                            chaisePage.waitForTextInElement(rowCount, "Displaying " + recordsOnPage1 + " of " + totalRecords + " Records");
+                            chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
+
+                            // Check the presence of ascending sort button
+                            expect(chaisePage.recordsetPage.getColumnSortAscButton(accommodationParams.sortedData[k].rawColumnName).isDisplayed()).toBe(true, accommodationParams.sortedData[k].columnName + " column doesn't contain the ascending sort button.");
+
+                            // Check if the url has @sort by column name
+                            chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + '::desc::,id)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 1 for descending order.");
+
+                            return chaisePage.recordsetPage.getRows();
+
+                        }).then(function (rows) {
+                            // Check if values of the sorted column on first page are in descending order
+                            for (var i = 0; i < recordsOnPage1; i++) {
+                                (function (index3) {
+                                    rows[index3].all(by.tagName("td")).then(function (cells) {
+                                        expect(cells[accommodationParams.sortedData[k].columnPosition].getText()).toBe(accommodationParams.sortedData[k].page1.desc[index3], accommodationParams.sortedData[k].rawColumnName + " column value missmatch for row = " + index3 + " in descending order on Page 1");
+                                    });
+                                }(i))
+                            }
+
+                            // Go to the next page
+                            return chaisePage.recordsetPage.getNextButton().click();
+
+                        }).then(function () {
+                            chaisePage.waitForTextInElement(rowCount, "Displaying " + recordsOnPage2 + " of " + totalRecords + " Records");
+                            chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
+
+                            // Check if the url has @sort by column name
+                            chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + '::desc::,id)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 2 for descending order.");
+
+                            return chaisePage.recordsetPage.getRows();
+
+                        }).then(function (rows) {
+                            // Check if values of the sorted column on second page are in descending order
+                            for (var i = 0; i < recordsOnPage2; i++) {
+                                (function (index4) {
+                                    rows[index4].all(by.tagName("td")).then(function (cells) {
+                                        expect(cells[accommodationParams.sortedData[k].columnPosition].getText()).toBe(accommodationParams.sortedData[k].page2.desc[index4], accommodationParams.sortedData[k].rawColumnName + " column value missmatch for row = " + index4 + " in descending order on Page 2.");
+                                    });
+                                }(i))
+                            }
+
+                            // Go to the previous page
+                            return chaisePage.recordsetPage.getPreviousButton().click();
+
+                        }).then(function () {
+                            chaisePage.waitForTextInElement(rowCount, "Displaying " + recordsOnPage1 + " of " + totalRecords + " Records");
+                            chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
+
+                            // Sanity check on the previous page
+                            chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + '::desc::,id)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 1 for descending order.");
+                            done();
+
+                        }).catch(function (err) {
+                            console.log("Error in the promise chain: ", err);
+                            done.fail(err);
+                        });
+                    });
+                }(j))
+            }
 
         });
 

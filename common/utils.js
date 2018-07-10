@@ -20,6 +20,13 @@
         "*": "/record"
     })
 
+    .constant("appNames", {
+        "RECORD": "record",
+        "RECORDSET": "recordset",
+        "RECORDEDIT": "recordedit",
+        "SEARCH": "search"
+    })
+
     // this constant is used to keep track of our strings that the user is shown
     // so that when one is changed, it is changed in all places.
     // this will make localization easier if we go that route
@@ -40,6 +47,9 @@
             title: "Your session has expired. Please login to continue.",
             message: "To open the login window press"
         },
+        "previousSession": {
+            message: "Your login session has expired. You are now accessing data anonymously. <a ng-click='login()'>Log in</a> to continue your privileged access."
+        },
         "noSession": {
             title: "You need to be logged in to continue.",
             message: "To open the login window press"
@@ -53,17 +63,38 @@
           "okBtnMessage": "Click <b>OK</b> to go to the Recordset.",
           "reloadMessage": "Click <b>Reload</b> to start over."
         },
+        "actionMessageWReplace" : {
+          clickActionMessage: "Click <b>OK</b> to reload this page without @errorStatus."
+        },
+        "errorMessageMissing": "An unexpected error has occurred. Please try again",
         "tableMissing": "No table specified in the form of 'schema-name:table-name' and no Default is set.",
-        "unauthorizedMessage" : "You are not authorized to perform this action. Please report this problem to your system administrators.",
+        "maybeNeedLogin": "You may need to login to see the model or data.",
+        "maybeUnauthorizedMessage" : "You may not be authorized to view this record (or records).",
+        "unauthorizedMessage" : "You are not authorized to perform this action.",
+        "reportErrorToAdmin" : " Please report this problem to your system administrators.",
+        "noRecordForFilter" : "No matching record found for the given filter or facet.",
         "unauthorizedErrorCode" : "Unauthorized Access",
         "showErrDetails" : "Show Error Details",
-        "hideErrDetails" : "Hide Error Details"
+        "hideErrDetails" : "Hide Error Details",
+        "tooltip": {
+            downloadCSV: "Click to download all matched results",
+            permalink: "This link stores your search criteria as a URL. Right click and save."
+        },
+        "URLLimitMessage": "Maximum URL length reached. Cannot perform the requested action."
     })
 
     .constant("logActions", {
         "recordRead": "record/main", // read the main entity (record)
         "recordRelatedRead": "record/related", // secondary
         "recordRelatedUpdate": "record/related/update", // secondary
+        "recordRelatedAggregate": "record/related/aggregate", // secondary
+        "recordRelatedAggregateUpdate": "record/related/aggregate/update", // secondary
+        "recordInlineRead": "record/inline", // secondary
+        "recordInlineUpdate": "record/inline/update", // secondary
+        "recordInlineAggregate": "record/inline/aggregate",
+        "recordInlineAggregateUpdate": "record/inline/aggregate/update",
+        "recordAggregate": "record/aggregate", // secondary
+        "recordAggregateUpdate": "record/aggregate/update", // secondary
 
 
         "createPrefill": "create/prefill", // create with inbound related prefilled (recordedit) -> does it need referrer? (the pre should have it)
@@ -87,6 +118,7 @@
         "recordsetSort": "recordset/main/sort", // recordset main data read on changing sort (recordset) has sort
         "recordsetPage": "recordset/main/page", // recordset main data read on changing page (recordset) has page
         "recordsetLimit": "recordset/main/limit", // recordset main data read on changing page limit (recordset)
+        "recordsetAggregate": "recordset/main/aggregate", //secondary (recordset get data for pseudo-columns)
         "recordsetFacet": "recordset/main/facet", // recordset main data read on changing facet (recordset)
         "recordsetFacetDetails": "recordset/viewmore", // getting facet details in modal (recordset)
         "recordsetFacetRead": "recordset/facet", // secondary
@@ -108,6 +140,27 @@
         null: "<i>No Value</i>",
         empty: "<i>Empty</i>",
         notNull: "<i>All Records With Value</i>"
+    })
+
+    .constant("dataFormats", {
+        date: "YYYY-MM-DD",
+        time12: "hh:mm:ss", // used for displaying values in recordedit properly
+        time24: "HH:mm:ss",
+        datetime:  {
+            display: "YYYY-MM-DD HH:mm:ss",
+            displayZ: "YYYY-MM-DD HH:mm:ssZ",
+            return: "YYYY-MM-DDTHH:mm:ssZ", // the format that the database returns when there are no fractional seconds to show
+            submission: "YYYY-MM-DDTHH:mm:ss.SSSZ"
+        }
+    })
+
+    .constant("integerLimits", {
+        INT_2_MIN: -32768,
+        INT_2_MAX: 32767,
+        INT_4_MIN: -2147483648,
+        INT_4_MAX: 2147483647,
+        INT_8_MIN: -9223372036854775808,
+        INT_8_MAX: 9223372036854775807
     })
 
     .factory('UriUtils', ['$injector', '$rootScope', '$window', 'appContextMapping', 'appTagMapping', 'ContextUtils', 'Errors', 'messageMap', 'parsedFilter',
@@ -137,7 +190,7 @@
 
                 hash = hash.slice(0, hash.indexOf('?')); // remove queries
                 for (i = 0; i < queries.length; i++) { // add back only the valid queries
-                    if (queries[i].indexOf("limit=") === 0 || queries[i].indexOf("subset=") === 0) {
+                    if (queries[i].indexOf("limit=") === 0) {
                         acceptedQueries.push(queries[i]);
                     }
                 }
@@ -230,7 +283,7 @@
             }
 
             var baseUri = chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : location.origin + '/ermrest';
-            var path = '/catalog/' + fixedEncodeURIComponent(catalogId) + '/entity' + hash;
+            var path = '/catalog/' + catalogId + '/entity' + hash;
             return baseUri + path;
         }
 
@@ -264,8 +317,8 @@
                 appPath = ContextUtils.getValueFromContext(appContextMapping, context);
             }
 
-            var url = chaiseBaseURL + appPath + "/#" + fixedEncodeURIComponent(location.catalog) + "/" + location.path;
-            if (location.queryParamsString && (context === "compact" || context === "compact/brief")) {
+            var url = chaiseBaseURL + appPath + "/#" + location.catalog + "/" + location.path;
+            if (location.queryParamsString && (context.indexOf("compact") === 0)) {
                 url = url + "?" + location.queryParamsString;
             }
             return url;
@@ -676,6 +729,12 @@
           return newPath.substring(lastSlash + 1, newPath.length);
         }
 
+        // Takes path and creates full redirect links with catalogId
+        function createRedirectLinkFromPath(path){
+          var catalogString = $window.location.hash.slice(0, $window.location.hash.search("/"));
+          return $window.location.origin + $window.location.pathname + catalogString + "/" + path;
+        }
+
         return {
             queryStringToJSON: queryStringToJSON,
             appTagToURL: appTagToURL,
@@ -687,7 +746,19 @@
             setLocationChangeHandling: setLocationChangeHandling,
             isBrowserIE: isBrowserIE,
             getQueryParams: getQueryParams,
-            appNamefromUrlPathname: appNamefromUrlPathname
+            appNamefromUrlPathname: appNamefromUrlPathname,
+            createRedirectLinkFromPath: createRedirectLinkFromPath
+        }
+    }])
+
+    .factory('FunctionUtils', ['Session', 'UriUtils', function(Session, UriUtils) {
+        function registerErmrestCallbacks() {
+            ERMrest.appLinkFn(UriUtils.appTagToURL);
+            ERMrest.onHTTPSuccess(Session.extendPromptExpirationToken);
+        }
+
+        return {
+            registerErmrestCallbacks: registerErmrestCallbacks
         }
     }])
 
@@ -819,6 +890,22 @@
         }
 
         /**
+         * Verifies that the object is defined and the containing key/value pair is a non-empty string
+         */
+        function isObjectAndKeyDefined(obj, keyName) {
+            return (obj && typeof obj[keyName] == 'string' && obj[keyName] != '')
+        }
+
+        /**
+         * Verifies that the given data is integer
+         * @param  {Object}  data
+         * @return {Boolean} whether it is integer or not
+         */
+        function isInteger(data) {
+            return (typeof data === 'number') && (data % 1 === 0);
+        }
+
+        /**
         *
         * @desc Converts the following characters to HTML entities for safe and
         * HTML5-valid usage in the `id` attributes of HTML elements: spaces, ampersands,
@@ -861,12 +948,14 @@
             getRowValuesFromPage: getRowValuesFromPage,
             getRowValuesFromTupleData: getRowValuesFromTupleData,
             getRowValuesFromTuples: getRowValuesFromTuples,
+            isObjectAndKeyDefined: isObjectAndKeyDefined,
+            isInteger: isInteger,
             makeSafeIdAttr: makeSafeIdAttr,
             verify: verify
         };
     }])
 
-    .factory("UiUtils", [function() {
+    .factory("UiUtils", ['$document', '$log', function($document, $log) {
         /**
          *
          * To allow the dropdown button to open at the top/bottom depending on the space available
@@ -982,12 +1071,50 @@
          *      - {integer} docHeight - the height of the viewport
          *      - {DOMElement} container - the main container to fix the height of
          **/
-        function setDisplayHeight(domElements) {
-            // calculate remaining dom height (navbar + bookmark)/viewheight
-            // This will be a percentage out of 100
-            var fixedHeightUsed = Math.ceil( ((domElements.navbarHeight + domElements.bookmarkHeight)/domElements.docHeight) * 100);
-            // set height to remaining
-            domElements.container.style.height = (100 - fixedHeightUsed) + 'vh';
+        function setDisplayContainerHeight(domElements) {
+            try {
+                // calculate remaining dom height (navbar + bookmark)/viewheight
+                // This will be a percentage out of 100
+                var fixedHeightUsed = ((domElements.navbarHeight + domElements.bookmarkHeight)/domElements.docHeight) * 100;
+                // set height to remaining
+                domElements.container.style.height = (100 - fixedHeightUsed) + 'vh';
+            } catch(err) {
+                $log.warn(err);
+            }
+        }
+
+        /**
+         * sets the style of domElements.footer
+         * @param {Integer} index - index pertaining to which dom element to select
+         **/
+        function setFooterStyle(index) {
+            try {
+                var elements = {};
+                /**** used for main-body height calculation ****/
+                // get main container height
+                elements.mainContainerHeight = $document[0].getElementsByClassName('main-container')[index].offsetHeight;
+                // get the main body height
+                elements.initialInnerHeight = $document[0].getElementsByClassName('main-body')[index].offsetHeight;
+                // get the footer
+                elements.footer = $document[0].getElementsByTagName('footer')[index];
+
+
+                var footerHeight = elements.footer.offsetHeight + 10;
+                // calculate the inner height of the app content (height of children in main-body + footer)
+                if ( (elements.initialInnerHeight + footerHeight) < elements.mainContainerHeight) {
+                    elements.footer.style.position = "absolute";
+                    elements.footer.style.bottom = 0;
+                    elements.footer.style.left = 0;
+                    elements.footer.style.right = 0;
+                } else {
+                    elements.footer.style.position = "relative";
+                    elements.footer.style.bottom = "unset";
+                    elements.footer.style.left = "unset";
+                    elements.footer.style.right = "unset";
+                }
+            } catch(err) {
+                $log.warn(err);
+            }
         }
 
         return {
@@ -995,7 +1122,8 @@
             getImageAndIframes: getImageAndIframes,
             humanFileSize: humanFileSize,
             getDisplayType: getDisplayType,
-            setDisplayHeight: setDisplayHeight
+            setFooterStyle: setFooterStyle,
+            setDisplayContainerHeight: setDisplayContainerHeight
         }
     }])
 
@@ -1196,6 +1324,39 @@
             }
         };
     }])
+
+    /**
+    *  The compile directive is used to compile the html/content
+    *  for angularjs to resolve functions like "ng-click" within
+    *  the alert messages e.g. previousSession.message.
+    */
+    .directive('compile', ['$compile', function ($compile) {
+      return {
+        restrict: 'A',
+        link: function(scope, element, attrs) {
+          var ensureCompileRunsOnce = scope.$watch(
+            function(scope) {
+               // watch the 'compile' expression for changes
+              return scope.$eval(attrs.compile);
+            },
+            function(value) {
+              // when the 'compile' expression changes
+              // assign it into the current DOM
+              element.html(value);
+
+              // compile the new DOM and link it to the current
+              // scope.
+              // NOTE: we only compile .childNodes so that
+              // we don't get into infinite loop compiling ourselves
+              $compile(element.contents())(scope);
+
+              // Use un-watch feature to ensure compilation happens only once.
+              ensureCompileRunsOnce();
+            }
+          );
+        }
+      }
+     }])
 
     .service('headInjector', ['$window', 'MathUtils', function($window, MathUtils) {
         function addCustomCSS() {
