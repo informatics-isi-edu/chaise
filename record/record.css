@@ -133,3 +133,8 @@
         width: 85%;
     }
 }
+
+@page {
+    size: auto;
+    margin: 0mm;
+}
