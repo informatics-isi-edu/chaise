@@ -37,15 +37,20 @@
 
     //  Enable log system, if in debug mode
     .config(['$logProvider', function($logProvider) {
+      if(typeof chaiseConfig != 'undefined' && chaiseConfig.debug)
         $logProvider.debugEnabled(chaiseConfig.debug === true);
     }])
 
-    .run(['AlertsService', 'DataUtils', 'ERMrest', 'FunctionUtils', 'headInjector', '$log', 'MathUtils', 'messageMap', 'recordAppUtils',  '$rootScope', 'Session', '$timeout', 'UiUtils', 'UriUtils', '$window',
-        function runApp(AlertsService, DataUtils, ERMrest, FunctionUtils, headInjector, $log, MathUtils, messageMap, recordAppUtils, $rootScope, Session, $timeout, UiUtils, UriUtils , $window) {
+    .run(['AlertsService', 'DataUtils', 'ERMrest', 'FunctionUtils', 'headInjector', '$log', 'MathUtils', 'messageMap', 'recordAppUtils',  '$rootScope', 'Session', '$timeout', 'UiUtils', 'UriUtils', 'ConfigUtils', '$window',
+        function runApp(AlertsService, DataUtils, ERMrest, FunctionUtils, headInjector, $log, MathUtils, messageMap, recordAppUtils, $rootScope, Session, $timeout, UiUtils, UriUtils , ConfigUtils, $window) {
 
-        var session,
+        var session,chaiseConfig,
             context = {},
             errorData = {};
+
+        if(typeof chaiseConfig == 'undefined')
+          chaiseConfig = ConfigUtils.getConfigJSON();
+
         $rootScope.displayReady = false;
         $rootScope.showSpinner = false; // this property is set from common modules for controlling the spinner at a global level that is out of the scope of the app
 
@@ -53,8 +58,8 @@
         headInjector.setupHead();
 
         $rootScope.showEmptyRelatedTables = false;
-        $rootScope.modifyRecord = chaiseConfig.editRecord === false ? false : true;
-        $rootScope.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
+        $rootScope.modifyRecord = typeof chaiseConfig != 'undefined' && chaiseConfig.editRecord === false ? false : true;
+        $rootScope.showDeleteButton = typeof chaiseConfig != 'undefined' && chaiseConfig.deleteRecord === true ? true : false;
 
         var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
 
@@ -128,7 +133,7 @@
                     $rootScope.columnModels.push(model);
                 });
 
-                var cutOff = chaiseConfig.maxRelatedTablesOpen > 0? chaiseConfig.maxRelatedTablesOpen : Infinity;
+                var cutOff = typeof chaiseConfig != 'undefined' && chaiseConfig.maxRelatedTablesOpen > 0? chaiseConfig.maxRelatedTablesOpen : Infinity;
                 var openByDefault = related.length > cutOff ? false:true;
                 $rootScope.relatedTableModels = [];
                 $rootScope.lastRendered = null;

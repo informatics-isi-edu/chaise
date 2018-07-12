@@ -1,6 +1,62 @@
 (function() {
     'use strict';
 
+    var defaultChaiseConfig = {
+        "catalog": 1,
+        "layout": "list",
+        "feedbackURL": "",
+        "helpURL": "",
+        "ermrestLocation": (window.location.protocol) + "//" + (window.location.host),
+        "recordResource": "/record",
+        "showBadgeCounts": false,
+        "tableThreshold": 0,
+        "showAllAttributes": false,
+        "headTitle": "Chaise",
+        "navbarBrandText": "Chaise",
+        "logoutURL": "/",
+        "maxRecordsetRowHeight": 160,
+        "dataBrowser": "/chaise/search",
+        "defaultAnnotationColor": "red",
+        "confirmDelete": true,
+        "hideSearchTextFacet": false,
+        "maxColumns": 6,
+        "showUnfilteredResults": false,
+        "editRecord": true,
+        "deleteRecord": true,
+        "signUpURL": "",
+        "profileURL": "",
+        "navbarMenu": {
+            "newTab": true,
+            "children": []
+        },
+        "sidebarPosition": "right",
+        "attributesSidebarHeading": "Choose Attributes",
+        "allowErrorDismissal": true,
+        "searchPageSize": 25,
+        "showFaceting": true,
+        "hideTableOfContents": false,
+        "showExportButton": false,
+        "navbarBrand": "/",
+        "navbarBrandImage": null,
+        "customCSS": "/assets/css/chaise.css",
+        "footerMarkdown": "**Please check** [Privacy Policy](/privacy-policy/){target='_blank'}",
+        "maxRelatedTablesOpen":15,
+        "plotViewEnabled": false,
+        "recordUiGridEnabled": false,
+        "recordUiGridExportCSVEnabled": true,
+        "recordUiGridExportPDFEnabled": true,
+        "tour": {
+          "pickRandom": false,
+          "searchInputAttribute": "Data",
+          "searchChosenAttribute": "Data Type",
+          "searchInputValue": "micro",
+          "extraAttribute": "Mouse Anatomic Source",
+          "chosenAttribute": "Data Type",
+          "chosenValue": "Expression microarray - gene"
+        }
+    }
+
+
     angular.module('chaise.utils', ['chaise.errors'])
 
     .constant("appTagMapping", {
@@ -160,7 +216,6 @@
 
     .factory('UriUtils', ['$injector', '$rootScope', '$window', 'appContextMapping', 'appTagMapping', 'ContextUtils', 'Errors', 'messageMap', 'parsedFilter',
         function($injector, $rootScope, $window, appContextMapping, appTagMapping, ContextUtils, Errors, messageMap, ParsedFilter) {
-
         var chaiseBaseURL;
         /**
          * @function
@@ -196,8 +251,8 @@
 
             // If the hash is empty, check for defaults
             if (hash == '' || hash === undefined || hash.length == 1) {
-                if (chaiseConfig.defaultCatalog) {
-                    if (chaiseConfig.defaultTables) {
+                if (typeof chaiseConfig != 'undefined' && chaiseConfig.defaultCatalog) {
+                    if (typeof chaiseConfig != 'undefined' && chaiseConfig.defaultTables) {
                         catalogId = chaiseConfig.defaultCatalog;
 
                         var tableConfig = chaiseConfig.defaultTables[catalogId];
@@ -235,7 +290,7 @@
 
                 // if no catalog id for some reason
                 if (catalogId === '' || catalogId === undefined || catalogId === null) {
-                    if (chaiseConfig.defaultCatalog) {
+                    if (typeof chaiseConfig != 'undefined' && chaiseConfig.defaultCatalog) {
                         catalogId = chaiseConfig.defaultCatalog;
                     } else {
                         // no defined or default catalog
@@ -250,7 +305,7 @@
                 // there is no '/' character (only a catalog id) or a trailing '/' after the id
                 if (hash.indexOf('/') === -1 || hash.substring(hash.indexOf('/')).length === 1) {
                     // check for default Table
-                    if (chaiseConfig.defaultTables) {
+                    if (typeof chaiseConfig != 'undefined' && chaiseConfig.defaultTables) {
                         var tableConfig = chaiseConfig.defaultTables[catalogId];
                         if (tableConfig) {
                             hash = '/' + fixedEncodeURIComponent(tableConfig.schema) + ':' + fixedEncodeURIComponent(tableConfig.table);
@@ -277,7 +332,7 @@
                 }
             }
 
-            var baseUri = chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : location.origin + '/ermrest';
+            var baseUri = typeof chaiseConfig != 'undefined' && chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : location.origin + '/ermrest';
             var path = '/catalog/' + catalogId + '/entity' + hash;
             return baseUri + path;
         }
@@ -359,7 +414,7 @@
             // typical deployment location for ermrest.
             context.serviceURL = location.origin + '/ermrest';
 
-            if (chaiseConfig.ermrestLocation) {
+            if (typeof chaiseConfig != 'undefined' && chaiseConfig.ermrestLocation) {
                 context.serviceURL = chaiseConfig.ermrestLocation;
             }
 
@@ -1168,6 +1223,15 @@
         }
     }])
 
+    .factory("ConfigUtils", [function() {
+        function getConfigJSON() {
+          return defaultChaiseConfig;
+        }
+        return {
+            getConfigJSON: getConfigJSON
+        }
+    }])
+
     // directive for including the loading spinner
     .directive('loadingSpinner', function () {
         return {
@@ -1354,8 +1418,12 @@
      }])
 
     .service('headInjector', ['$window', 'MathUtils', function($window, MathUtils) {
+
+        // var chaiseConfig;
+        // if(typeof chaiseConfig == 'undefined')
+        //   chaiseConfig = defaultChaiseConfig;
         function addCustomCSS() {
-            if (chaiseConfig['customCSS'] !== undefined) {
+            if (typeof chaiseConfig != 'undefined' && chaiseConfig['customCSS'] !== undefined) {
                 var fileref = document.createElement("link");
                 fileref.setAttribute("rel", "stylesheet");
                 fileref.setAttribute("type", "text/css");
@@ -1365,7 +1433,7 @@
         }
 
         function addTitle() {
-            if (chaiseConfig.headTitle !== undefined) {
+            if (typeof chaiseConfig != 'undefined' && chaiseConfig.headTitle !== undefined) {
                 document.getElementsByTagName('head')[0].getElementsByTagName('title')[0].innerHTML = chaiseConfig.headTitle;
             }
         }

@@ -143,8 +143,12 @@
     }])
 
     // Factory for each error type
-    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$window', 'errorMessages', 'Errors', 'DataUtils', 'UriUtils', 'modalUtils', '$document',
-          function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $window, errorMessages, Errors, DataUtils, UriUtils, modalUtils, $document) {
+    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$window', 'errorMessages', 'Errors', 'DataUtils', 'UriUtils', 'ConfigUtils', 'modalUtils', '$document',
+          function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $window, errorMessages, Errors, DataUtils, UriUtils, ConfigUtils, modalUtils, $document) {
+
+            var chaiseConfig;
+            if(typeof chaiseConfig == 'undefined')
+              chaiseConfig = ConfigUtils.getConfigJSON();
 
         var reloadCb = function() {
             window.location.reload();
@@ -209,7 +213,7 @@
             };
 
 
-            if (isDismissible || (chaiseConfig && chaiseConfig.allowErrorDismissal)) {  //If Forbidden error then allow modal to be dismissed
+            if (isDismissible || (typeof chaiseConfig != 'undefined' && chaiseConfig.allowErrorDismissal)) {  //If Forbidden error then allow modal to be dismissed
                 delete modalProperties.keyboard;
                 delete modalProperties.backdrop;
                 params.canClose = true;
@@ -246,11 +250,15 @@
 
             // arguments for `errorPopup()` in order for method declaration
             var pageName = "Home Page",
-                redirectLink = chaiseConfig.dataBrowser,
                 subMessage = (exception.subMessage ? exception.subMessage : undefined),
                 stackTrace = ( (exception.errorData && exception.errorData.stack) ? exception.errorData.stack : undefined),
                 showLogin = false,
-                message, errorStatus;
+                message, errorStatus,redirectLink;
+                if(typeof chaiseConfig != 'undefined' && chaiseConfig.dataBrowser)
+                    redirectLink = chaiseConfig.dataBrowser;
+                else {
+                  redirectLink = window.location.origin;
+                }
 
             $rootScope.error = true;    // used to hide spinner in conjunction with a css property
 
@@ -310,8 +318,12 @@
  */
 var logError = function (error) {
     if (!ERMrest) return;
-
-    var ermrestUri = chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : window.location.origin + '/ermrest';
+    var ermrestUri;
+    if(typeof chaiseConfig != 'undefined' && chaiseConfig.ermrestLocation)
+      ermrestUri =  chaiseConfig.ermrestLocation;
+    else {
+      ermrestUri = window.location.origin + '/ermrest';
+    }
     ERMrest.logError(error, ermrestUri).then(function () {
         console.log("logged the error");
     }).catch(function (err) {
@@ -328,7 +340,7 @@ window.onerror = function() {
 
     var canClose = false;
 
-    if (chaiseConfig && chaiseConfig.allowErrorDismissal) {
+    if (typeof chaiseConfig != 'undefined' && chaiseConfig.allowErrorDismissal) {
         canClose = true;
     }
 
@@ -339,7 +351,7 @@ window.onerror = function() {
         arguments[3]
     ].join(':');
 
-    var redirectLink = (chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : window.location.origin);
+    var redirectLink = (typeof chaiseConfig != 'undefined' && chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : window.location.origin);
 
     if (!document || !document.body) return;
 

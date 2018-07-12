@@ -3,16 +3,20 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'dataFormats', 'DataUtils', 'ErrorService', 'integerLimits', 'logActions', 'messageMap', 'modalBox', 'modalUtils', 'recordCreate', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
-        function FormController(AlertsService, dataFormats, DataUtils, ErrorService, integerLimits, logActions, messageMap, modalBox, modalUtils, recordCreate, recordEditModel, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
+    .controller('FormController', ['AlertsService', 'dataFormats', 'DataUtils', 'ErrorService', 'integerLimits', 'logActions', 'messageMap', 'modalBox', 'modalUtils', 'recordCreate', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', 'ConfigUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
+        function FormController(AlertsService, dataFormats, DataUtils, ErrorService, integerLimits, logActions, messageMap, modalBox, modalUtils, recordCreate, recordEditModel, Session, UiUtils, UriUtils, ConfigUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
         var context = $rootScope.context;
         var mainBodyEl;
+        var chaiseConfig;
+
+        if(typeof chaiseConfig == 'undefined')
+          chaiseConfig = ConfigUtils.getConfigJSON();
 
         vm.recordEditModel = recordEditModel;
         vm.dataFormats = dataFormats;
         vm.editMode = (context.mode == context.modes.EDIT ? true : false);
-        vm.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
+        vm.showDeleteButton = typeof chaiseConfig != 'undefined' && chaiseConfig.deleteRecord === true ? true : false;
         vm.booleanValues = context.booleanValues;
         vm.mdHelpLinks = { // Links to Markdown references to be used in help text
             editor: "https://jbt.github.io/markdown-editor/#RZDLTsMwEEX3/opBXQCRmqjlsYBVi5CKxGOBWFWocuOpM6pjR54Jbfl6nKY08mbO1dwj2yN4pR+ENx23Juw8PBuSEJU6B3zwovdgAzIED1IhONwINNqjezxyRG6dkLcQWmlaAWIwxI3TBzT/pUi2klypLJsHZ0BwL1kGSq1eRDsq6Rf7cKXUCBaoTeebJBho2tGAN0cc+LbnIbg7BUNyr9SnrhuH6dUsCjKYNYm4m+bap3McP6L2NqX/y+9tvcaYLti3Jvm5Ns2H3k0+FBdpvfsGDUvuHY789vuqEmn4oShsCNZhXob6Ou+3LxmqsAMJQL50rUHQHqjWFpW6WM7gpPn6fAIXbBhUUe9yS1K1605XkN+EWGuhksfENEbTFmWlibGoNQvG4ijlouVy3MQE8cAVoTO7EE2ibd54e/0H",
@@ -259,7 +263,7 @@
             var uri;
             var ref = $rootScope.reference.unfilteredReference.contextualize.compact;
 
-            if (chaiseConfig.showFaceting) {
+            if (typeof chaiseConfig != 'undefined' && chaiseConfig.showFaceting) {
                 uri = ref.appLink;
             } else {
                 var location = ref.location;
@@ -272,7 +276,7 @@
 
         function deleteRecord() {
             var errorData = {};
-            if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
+            if (typeof chaiseConfig != 'undefined' && (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete)) {
                 modalUtils.showModal({
                     templateUrl: "../common/templates/delete-link/confirm_delete.modal.html",
                     controller: "ConfirmDeleteController",

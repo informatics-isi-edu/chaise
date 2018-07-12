@@ -44,6 +44,7 @@
 
     //  Enable log system, if in debug mode
     .config(['$logProvider', function($logProvider) {
+      if(typeof chaiseConfig != 'undefined' && typeof chaiseConfig.debug != 'undefined')
         $logProvider.debugEnabled(chaiseConfig.debug === true);
     }])
 
@@ -67,19 +68,22 @@
     })
 
     // Register work to be performed after loading all modules
-    .run(['AlertsService', 'context', 'DataUtils', 'ERMrest', 'FunctionUtils', 'headInjector', 'MathUtils', 'messageMap', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', 'modalBox', 'logActions',
-        function(AlertsService, context, DataUtils, ERMrest, FunctionUtils, headInjector, MathUtils, messageMap, recordsetModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, modalBox, logActions) {
+    .run(['AlertsService', 'context', 'DataUtils', 'ERMrest', 'FunctionUtils', 'headInjector', 'MathUtils', 'messageMap', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', 'ConfigUtils', '$log', '$rootScope', '$window', 'modalBox', 'logActions',
+        function(AlertsService, context, DataUtils, ERMrest, FunctionUtils, headInjector, MathUtils, messageMap, recordsetModel, Session, UiUtils, UriUtils, ConfigUtils, $log, $rootScope, $window, modalBox, logActions) {
         try {
-            var session;
+            var session, chaiseConfig;
 
             headInjector.setupHead();
 
             UriUtils.setOrigin();
 
+            if(typeof chaiseConfig == 'undefined')
+              chaiseConfig = ConfigUtils.getConfigJSON();
+
             context.chaiseBaseURL = $window.location.href.replace($window.location.hash, '');
-            var modifyEnabled = chaiseConfig.editRecord === false ? false : true;
-            var deleteEnabled = chaiseConfig.deleteRecord === true ? true : false;
-            var showFaceting = chaiseConfig.showFaceting === true ? true : false;
+            var modifyEnabled = (typeof chaiseConfig != 'undefined' && chaiseConfig.editRecord === false ? false : true);
+            var deleteEnabled = (typeof chaiseConfig != 'undefined' && chaiseConfig.deleteRecord === true ? true : false);
+            var showFaceting = (typeof chaiseConfig != 'undefined' && chaiseConfig.showFaceting === true ? true : false);
 
             recordsetModel.config = {
                 viewable: true,

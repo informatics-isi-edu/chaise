@@ -4,13 +4,16 @@
     angular.module('chaise.recordset')
 
     // Register the recordset controller
-    .controller('recordsetController', ['context', 'DataUtils', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window', function(context, DataUtils, recordsetModel, Session, UiUtils, UriUtils, $document, $log, $rootScope, $scope, $timeout, $window) {
+    .controller('recordsetController', ['context', 'DataUtils', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', 'ConfigUtils', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window', function(context, DataUtils, recordsetModel, Session, UiUtils, UriUtils, ConfigUtils, $document, $log, $rootScope, $scope, $timeout, $window) {
 
+        var chaiseConfig;
         $scope.vm = recordsetModel;
         recordsetModel.RECORDEDIT_MAX_ROWS = 200;
-        $scope.navbarBrand = (chaiseConfig['navbarBrand'] !== undefined? chaiseConfig.navbarBrand : "");
-        $scope.navbarBrandImage = (chaiseConfig['navbarBrandImage'] !== undefined? chaiseConfig.navbarBrandImage : "");
-        $scope.navbarBrandText = (chaiseConfig['navbarBrandText'] !== undefined? chaiseConfig.navbarBrandText : "Chaise");
+        if(typeof chaiseConfig == 'undefined')
+          chaiseConfig = ConfigUtils.getConfigJSON();
+        $scope.navbarBrand = (typeof chaiseConfig != 'undefined' && chaiseConfig['navbarBrand'] !== undefined? chaiseConfig.navbarBrand : "");
+        $scope.navbarBrandImage = (typeof chaiseConfig != 'undefined' && chaiseConfig['navbarBrandImage'] !== undefined? chaiseConfig.navbarBrandImage : "");
+        $scope.navbarBrandText = (typeof chaiseConfig != 'undefined' && chaiseConfig['navbarBrandText'] !== undefined? chaiseConfig.navbarBrandText : "Chaise");
         var mainBodyEl;
 
         function updateLocation() {
@@ -119,7 +122,7 @@
             if (elements.navbarHeight && elements.bookmarkHeight) {
                 UiUtils.setDisplayContainerHeight(elements);
                 // no need to fetch and verify the faceting elements (navbar and bookmark are the same container as the ones used in main elements function)
-                if (chaiseConfig.showFaceting) UiUtils.setDisplayContainerHeight(fetchFacetingElements());
+                if (typeof chaiseConfig != 'undefined' && chaiseConfig.showFaceting) UiUtils.setDisplayContainerHeight(fetchFacetingElements());
             }
         }
 

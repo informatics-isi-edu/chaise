@@ -8,14 +8,18 @@
     'use strict';
 
     angular.module('chaise.footer', [])
-        .directive('footer', ['ERMrest', '$timeout', function(ERMrest, $timeout) {
+        .directive('footer', ['ERMrest', '$timeout', 'ConfigUtils', function(ERMrest, $timeout, ConfigUtils) {
 
+          var chaiseConfig;
+          if(typeof chaiseConfig == 'undefined')
+            chaiseConfig = ConfigUtils.getConfigJSON();
+            
             return {
                 restrict: 'E',
                 scope: {},
                 templateUrl: '../common/templates/footer.html',
                 link: function(scope, ele) {
-                    var footerText = chaiseConfig.footerMarkdown;
+                    var footerText = typeof chaiseConfig != 'undefined' && chaiseConfig.footerMarkdown ? chaiseConfig.footerMarkdown : "**Please check** [Privacy Policy](/privacy-policy/){target='_blank'}";
                     angular.isUndefinedOrNull = function(val) {
                         return val == '' || angular.isUndefined(val) || val === null
                     }

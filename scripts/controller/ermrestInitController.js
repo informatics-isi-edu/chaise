@@ -11,14 +11,14 @@ ermInitController.controller('InitListCtrl', ['$sce', '$rootScope', '$scope', '$
 	$scope.status = 0;
 	$scope.errorMessage = null;
 
-	if (chaiseConfig['customCSS'] !== undefined) {
+	if (typeof chaiseConfig != 'undefined' && chaiseConfig['customCSS'] !== undefined) {
 		var fileref = document.createElement("link");
 		fileref.setAttribute("rel", "stylesheet");
 		fileref.setAttribute("type", "text/css");
 		fileref.setAttribute("href", chaiseConfig['customCSS']);
 		document.getElementsByTagName("head")[0].appendChild(fileref);
 	}
-	if (chaiseConfig['headTitle'] !== undefined) {
+	if (typeof chaiseConfig != 'undefined' && chaiseConfig['headTitle'] !== undefined) {
 		document.getElementsByTagName("head")[0].getElementsByTagName("title")[0].innerHTML = chaiseConfig['headTitle'];
 	}
 
@@ -49,7 +49,7 @@ ermInitController.controller('InitListCtrl', ['$sce', '$rootScope', '$scope', '$
 
 	$scope.FacetsData = FacetsData;
 
-	if (chaiseConfig['searchPageSize'] !== undefined) {
+	if (typeof chaiseConfig != 'undefined' && chaiseConfig['searchPageSize'] !== undefined) {
 		$scope.FacetsData.pagingOptions.pageSizes.empty();
 		$scope.FacetsData.pagingOptions.pageSize = chaiseConfig['searchPageSize'];
 		$scope.FacetsData.pagingOptions.pageSizes.push($scope.FacetsData.pagingOptions.pageSize);
@@ -98,14 +98,14 @@ ermInitController.controller('InitListCtrl', ['$sce', '$rootScope', '$scope', '$
 	if (searchQuery['catalog'] != null) {
 		CATALOG = searchQuery['catalog'];
 	} else if (CATALOG == null) {
-		if (chaiseConfig['catalog'] != null) {
+		if (typeof chaiseConfig != 'undefined' && chaiseConfig['catalog'] != null) {
 			CATALOG = chaiseConfig['catalog'];
 		} else {
 			CATALOG = ermrest.catalog;
 		}
 	}
 
-	if (chaiseConfig['facetPolicy'] != null) {
+	if (typeof chaiseConfig != 'undefined' && chaiseConfig['facetPolicy'] != null) {
 		facetPolicy = chaiseConfig['facetPolicy'];
 	}
 
@@ -150,7 +150,7 @@ ermInitController.controller('InitListCtrl', ['$sce', '$rootScope', '$scope', '$
 	$scope.FacetsData.view = ermrest.layout;
 	if (searchQuery['layout'] != null) {
 		$scope.FacetsData.view = searchQuery['layout'];
-	} else if (chaiseConfig['layout'] != null) {
+	} else if (typeof chaiseConfig != 'undefined' && chaiseConfig['layout'] != null) {
 		$scope.FacetsData.view = chaiseConfig['layout'];
 	}
 

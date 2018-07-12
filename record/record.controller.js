@@ -3,8 +3,8 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'recordAppUtils', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
-        function RecordController(AlertsService, DataUtils, ErrorService, logActions, MathUtils, messageMap, modalBox, recordAppUtils, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
+    .controller('RecordController', ['AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'recordAppUtils', 'recordCreate', 'UiUtils', 'UriUtils', 'ConfigUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
+        function RecordController(AlertsService, DataUtils, ErrorService, logActions, MathUtils, messageMap, modalBox, recordAppUtils, recordCreate, UiUtils, UriUtils, ConfigUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
 
         var mainContainerEl = angular.element(document.getElementsByClassName('main-container')[0]);
@@ -15,13 +15,16 @@
         var context = $rootScope.context;
         var completed = {};
         var modalUpdate = false;
+        var chaiseConfig;
         vm.alerts = AlertsService.alerts;
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
         vm.rowFocus = {};
         vm.sidePanToggleBtnIndicator = "Show";
 
-        $scope.recordSidePanOpen = chaiseConfig.hideTableOfContents === true ? false : true;
+        if(typeof chaiseConfig == 'undefined')
+          chaiseConfig = ConfigUtils.getConfigJSON();
+        $scope.recordSidePanOpen = typeof chaiseConfig != 'undefined' && chaiseConfig.hideTableOfContents === true ? false : true;
 
         vm.gotoRelatedTable = function(sectionId, index) {
             var safeSectionId = vm.makeSafeIdAttr(sectionId);

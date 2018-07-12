@@ -44,7 +44,7 @@
 
     //  Enable log system, if in debug mode
     .config(['$logProvider', function($logProvider) {
-        $logProvider.debugEnabled(chaiseConfig.debug === true);
+      $logProvider.debugEnabled(typeof chaiseConfig != 'undefined' && chaiseConfig.debug === true);
     }])
 
     .config(function($provide) {
@@ -71,11 +71,14 @@
         }]);
     })
 
-    .run(['AlertsService', 'dataFormats', 'DataUtils', 'ERMrest', 'ErrorService', 'FunctionUtils', 'headInjector', 'logActions', 'MathUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', 'messageMap', 'Errors',
-        function runRecordEditApp(AlertsService, dataFormats, DataUtils, ERMrest, ErrorService, FunctionUtils, headInjector, logActions, MathUtils, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies, messageMap, Errors) {
+    .run(['AlertsService', 'dataFormats', 'DataUtils', 'ERMrest', 'ErrorService', 'FunctionUtils', 'headInjector', 'logActions', 'MathUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', 'ConfigUtils', '$log', '$rootScope', '$window', '$cookies', 'messageMap', 'Errors',
+        function runRecordEditApp(AlertsService, dataFormats, DataUtils, ERMrest, ErrorService, FunctionUtils, headInjector, logActions, MathUtils, recordEditModel, Session, UiUtils, UriUtils, ConfigUtils, $log, $rootScope, $window, $cookies, messageMap, Errors) {
 
-        var session,
+        var session,chaiseConfig,
             context = { booleanValues: ['', true, false] };
+
+        if(typeof chaiseConfig == 'undefined')
+          chaiseConfig = ConfigUtils.getConfigJSON();
 
         $rootScope.showColumnSpinner = [{}];
 
@@ -90,7 +93,7 @@
         UriUtils.setLocationChangeHandling();
 
         // If defined but false, throw an error
-        if (!chaiseConfig.editRecord && chaiseConfig.editRecord !== undefined) {
+        if (typeof chaiseConfig != 'undefined' && !chaiseConfig.editRecord && chaiseConfig.editRecord !== undefined) {
             var message = 'Chaise is currently configured to disallow editing records. Check the editRecord setting in chaise-config.js.';
             var error = new Error(message);
             error.code = "Record Editing Disabled";

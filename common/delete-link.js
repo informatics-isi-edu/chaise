@@ -22,9 +22,12 @@
 (function() {
     'use strict';
     angular.module('chaise.delete', [])
-    .directive('deleteLink', ['modalUtils', function(modalUtils) {
+    .directive('deleteLink', ['modalUtils', 'ConfigUtils', function(modalUtils, ConfigUtils) {
+        var chaiseConfig;
+        if(typeof chaiseConfig == 'undefined')
+          chaiseConfig = ConfigUtils.getConfigJSON();
         var TEMPLATES_PATH = '../common/templates/delete-link/';
-        var CONFIRM_DELETE =  (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) ? true : false;
+        var CONFIRM_DELETE =  (typeof chaiseConfig != 'undefined' && (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete)) ? true : false;
 
         return {
             restrict: 'EA',

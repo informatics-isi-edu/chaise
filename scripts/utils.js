@@ -42,7 +42,7 @@ if (!String.prototype.startsWith) {
 
 
 function initLocation() {
-	if (chaiseConfig['ermrestLocation'] != null) {
+	if (typeof chaiseConfig != 'undefined' && chaiseConfig['ermrestLocation'] != null) {
 		HOME = chaiseConfig['ermrestLocation'];
 	} else {
 		HOME = window.location.protocol + '//' + window.location.host;
@@ -61,12 +61,12 @@ function clearFacets(options) {
 	emptyJSON(options['searchFilterValue']);
 	emptyJSON(options['facetClass']);
 	emptyJSON(options['enabledFilters']);
-	
+
 	options['facets'].empty();
 	options['ermrestData'].empty();
 	options['colsDefs'].empty();
 	options['score'].empty();
-	
+
 	var filterOptions = options['filterOptions'];
 	$.each(filterOptions, function(key, value) {
 		if (key == 'filterText') {
@@ -77,7 +77,7 @@ function clearFacets(options) {
 			delete filterOptions[key];
 		}
 	});
-	
+
 	var pagingOptions = options['pagingOptions'];
 	$.each(pagingOptions, function(key, value) {
 		if (key == 'pageSizes') {
@@ -93,7 +93,7 @@ function clearFacets(options) {
 			delete pagingOptions[key];
 		}
 	});
-	
+
 	var sortInfo = options['sortInfo'];
 	$.each(sortInfo, function(key, value) {
 		if (key == 'fields') {
@@ -118,7 +118,7 @@ function getDisplayColumns(row, m, maxRows, table_name) {
          var rowCount = 0;
          $.each(display_columns['top_columns'], function(i, col) {
                  if (row[col] == null || row[col] === '' || display_columns['title'] == col ||
-                                 display_columns['thumbnail'].contains(col) || display_columns['hidden'].contains(col) || 
+                                 display_columns['thumbnail'].contains(col) || display_columns['hidden'].contains(col) ||
                                  hasAnnotation(table_name, col, 'bottom')) {
                          return true;
                  }
@@ -155,7 +155,7 @@ function getViewColumns(row, m, maxRows, table_name) {
     var rowCount = 0;
     $.each(display_columns['top_columns'], function(i, col) {
             if (row[col] == null || row[col] === '' || display_columns['title'] == col || display_columns['summary'] == col ||
-                            display_columns['thumbnail'].contains(col) || display_columns['hidden'].contains(col) || 
+                            display_columns['thumbnail'].contains(col) || display_columns['hidden'].contains(col) ||
                             hasAnnotation(table_name, col, 'bottom')) {
                     return true;
             }
@@ -191,10 +191,10 @@ function getViewColumns(row, m, maxRows, table_name) {
 }
 
 function isLongText(col, value) {
-	return (col != '$$hashKey' && 
+	return (col != '$$hashKey' &&
 			value != null &&
 			value !== '' &&
-			col != display_columns['title'] && 
+			col != display_columns['title'] &&
 			col != display_columns['subtitle'] &&
 			!display_columns['thumbnail'].contains(col) &&
                         !display_columns['hidden'].contains(col) &&
@@ -212,9 +212,9 @@ function getDetailRows(row, m) {
 		if (key == '$$hashKey' || value == null || value === '') {
 			return true;
 		}
-		if (!display_columns['thumbnail'].contains(key) || !display_columns['3dview'].contains(key)  || 
+		if (!display_columns['thumbnail'].contains(key) || !display_columns['3dview'].contains(key)  ||
                         !display_columns['zoomify'].contains(key) || display_columns['hidden'].contains(key) ||
-				key == display_columns['title'] || key == display_columns['subtitle'] || 
+				key == display_columns['title'] || key == display_columns['subtitle'] ||
 				/*display_columns['text_columns'].contains(key) ||*/ value.length > 20) {
 			return true;
 		}
@@ -242,13 +242,13 @@ function getDetailColumns(row) {
 }
 
 function getTableColumnsNames(table_name, maxCols) {
-	if (chaiseConfig['maxColumns'] != null) {
+	if (typeof chaiseConfig != 'undefined' && chaiseConfig['maxColumns'] != null) {
 		maxCols = chaiseConfig['maxColumns'];
 	}
 	var ret = [];
     $.each(display_columns['top_columns'], function(i, col) {
         if (display_columns['title'] == col || display_columns['summary'] == col ||
-                        display_columns['thumbnail'].contains(col) || display_columns['hidden'].contains(col) && !display_columns['top_columns_annotation'].contains(col) || 
+                        display_columns['thumbnail'].contains(col) || display_columns['hidden'].contains(col) && !display_columns['top_columns_annotation'].contains(col) ||
                         hasAnnotation(table_name, col, 'bottom')) {
                 return true;
         }
@@ -347,7 +347,7 @@ function setActivePage(currentPage, pageMap) {
 			}
 		}
 	});
-	
+
 }
 
 // "m" is the number of tiles per row
@@ -466,4 +466,3 @@ function getReferenceRows(linearizeView) {
 	});
 	return ret;
 }
-

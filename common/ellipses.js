@@ -9,8 +9,12 @@
         };
     }])
 
-    .directive('ellipses', ['AlertsService', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$window', 'defaultDisplayname',
-        function(AlertsService, ErrorService, logActions, MathUtils, messageMap, modalBox, modalUtils, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $window, defaultDisplayname) {
+    .directive('ellipses', ['AlertsService', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'UiUtils', 'UriUtils', 'ConfigUtils', '$log', '$rootScope', '$sce', '$timeout', '$window', 'defaultDisplayname',
+        function(AlertsService, ErrorService, logActions, MathUtils, messageMap, modalBox, modalUtils, UiUtils, UriUtils, ConfigUtils, $log, $rootScope, $sce, $timeout, $window, defaultDisplayname) {
+
+          var chaiseConfig;
+          if(typeof chaiseConfig == 'undefined')
+            chaiseConfig = ConfigUtils.getConfigJSON();
 
         function deleteReference(scope, reference) {
             var logObject = {action: logActions.recordsetDelete};
@@ -144,7 +148,7 @@
                 }
 
                 // If chaiseconfig contains maxRecordSetHeight then only apply more-less styling
-                if (chaiseConfig.maxRecordsetRowHeight != false ) {
+                if (typeof chaiseConfig != 'undefined' && chaiseConfig.maxRecordsetRowHeight != false ) {
 
                     // 1em = 14px
                     // 7.25em = 101.5px
@@ -215,7 +219,7 @@
                     init();
 
                     // add timeout only if maxRecordsetRowHeight is not false in chaiseConfig
-                    if (chaiseConfig.maxRecordsetRowHeight != false ) {
+                    if (typeof chaiseConfig != 'undefined' && chaiseConfig.maxRecordsetRowHeight != false ) {
                         $timeout(function() {
                             containsOverflow = false;
                             resizeRow();

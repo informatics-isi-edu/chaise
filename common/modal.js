@@ -10,8 +10,8 @@
             if (postRenderCB) {
                 modalInstance.rendered.then(postRenderCB).catch(function (error) {
                     $log.warn(error);
-                });    
-            }            
+                });
+            }
             modalInstance.result.then(successCB).catch(function (response) {
                 if (rejectCB) {
                     rejectCB(response);
@@ -149,8 +149,8 @@
      *  - selectMode {String} - the select mode the modal uses
      */
     .controller('SearchPopupController',
-                ['$scope', '$rootScope', '$uibModalInstance', 'DataUtils', 'params', 'Session', 'modalBox', 'logActions', '$timeout',
-                function SearchPopupController($scope, $rootScope, $uibModalInstance, DataUtils, params, Session, modalBox, logActions, $timeout) {
+                ['$scope', '$rootScope', '$uibModalInstance', 'DataUtils', 'ConfigUtils', 'params', 'Session', 'modalBox', 'logActions', '$timeout',
+                function SearchPopupController($scope, $rootScope, $uibModalInstance, DataUtils, ConfigUtils, params, Session, modalBox, logActions, $timeout) {
         var vm = this;
 
         vm.params = params;
@@ -160,6 +160,10 @@
         vm.mode = params.mode;
 
         vm.hasLoaded = false;
+
+        var chaiseConfig;
+        if(typeof chaiseConfig == 'undefined')
+          chaiseConfig = ConfigUtils.getConfigJSON();
         var reference = vm.reference = params.reference;
         var limit = (!angular.isUndefined(reference) && !angular.isUndefined(reference.display) && reference.display.defaultPageSize) ? reference.display.defaultPageSize : 25;
         var comment = (typeof params.comment === "string") ? params.comment: reference.table.comment;
