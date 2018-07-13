@@ -4,7 +4,11 @@
     angular.module('chaise.recordset')
 
     // Register the recordset controller
-    .controller('recordsetController', ['context', 'DataUtils', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', 'ConfigUtils', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window', function(context, DataUtils, recordsetModel, Session, UiUtils, UriUtils, ConfigUtils, $document, $log, $rootScope, $scope, $timeout, $window) {
+    .controller('recordsetController', ['context', 'DataUtils', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', 'ConfigUtils', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window', 'messageMap', function(context, DataUtils, recordsetModel, Session, UiUtils, UriUtils, ConfigUtils, $document, $log, $rootScope, $scope, $timeout, $window, messageMap) {
+
+        var ctrl = this;
+
+        ctrl.showExportButton = (chaiseConfig && chaiseConfig.showExportButton === true);
 
         var chaiseConfig;
         $scope.vm = recordsetModel;
@@ -15,6 +19,7 @@
         $scope.navbarBrandImage = (typeof chaiseConfig != 'undefined' && chaiseConfig['navbarBrandImage'] !== undefined? chaiseConfig.navbarBrandImage : "");
         $scope.navbarBrandText = (typeof chaiseConfig != 'undefined' && chaiseConfig['navbarBrandText'] !== undefined? chaiseConfig.navbarBrandText : "Chaise");
         var mainBodyEl;
+        $scope.tooltip = messageMap.tooltip;
 
         function updateLocation() {
             $window.scrollTo(0, 0);
