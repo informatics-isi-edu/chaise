@@ -79,12 +79,20 @@ a .glyphicon-trash {
     color: #428bca;
 }
 
-span[uib-tooltip] {
+span[uib-tooltip], .show-tooltip-border[uib-tooltip] {
     border-bottom: 1px dotted black;
 }
 
 .tooltip-inner {
     text-align: left;
+}
+
+.filters-tooltip {
+    margin-right: 2%;
+}
+
+.filters-tooltip .tooltip-inner {
+    max-width: inherit;
 }
 
 .btn.btn-primary.btn-inverted {

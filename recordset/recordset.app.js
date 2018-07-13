@@ -5,6 +5,7 @@
     angular.module('chaise.recordset', [
         'chaise.authen',
         'chaise.errors',
+        'chaise.export',
         'chaise.faceting',
         'chaise.footer',
         'chaise.html',

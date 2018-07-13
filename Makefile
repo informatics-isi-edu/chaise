@@ -57,6 +57,8 @@ FullFeaturesParallel=test/e2e/specs/all-features/protractor.conf.js
 FullFeaturesConfirmationParallel=test/e2e/specs/all-features-confirmation/protractor.conf.js
 DeleteProhibitedParallel=test/e2e/specs/delete-prohibited/protractor.conf.js
 DefaultConfigParallel=test/e2e/specs/default-config/protractor.conf.js
+# Setup for manual tests
+Manualrecordset=test/manual/specs/recordset.conf.js
 
 
 NAVBAR_TESTS=$(E2Enavbar) $(E2EnavbarHeadTitle)
@@ -77,6 +79,8 @@ PARALLEL_TESTS=$(FullFeaturesParallel) $(FullFeaturesConfirmationParallel) $(Del
 VIEWER_TESTS=$(E2EDviewer)
 
 ALL_TESTS=$(NAVBAR_TESTS) $(RECORD_TESTS) $(RECORDSET_TESTS) $(RECORDADD_TESTS) $(RECORDEDIT_TESTS) $(PERMISSIONS_TESTS) $(FOOTER_TESTS) $(ERRORS_TESTS)
+
+ALL_MANUAL_TESTS=$(Manualrecordset)
 
 define make_test
 	rc=0; \
@@ -153,6 +157,10 @@ testfooter: test-FOOTER_TESTS
 #Rule to run the default chaise configuration tests in parallel
 .PHONY: testerrors
 testerrors: test-ERRORS_TESTS
+
+# Rule to setup schema and data for manual tests
+.PHONY: testmanually
+testmanually: test-ALL_MANUAL_TESTS
 
 # Rule to run tests
 .PHONY: test
@@ -498,6 +506,7 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/authen.js \
 	$(COMMON)/bindHtmlUnsafe.js \
 	$(COMMON)/ellipses.js \
+	$(COMMON)/export.js \
 	$(COMMON)/errors.js \
 	$(COMMON)/faceting.js \
 	$(COMMON)/filters.js \

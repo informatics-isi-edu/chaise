@@ -122,6 +122,7 @@
         "actionMessageWReplace" : {
           clickActionMessage: "Click <b>OK</b> to reload this page without @errorStatus."
         },
+        "errorMessageMissing": "An unexpected error has occurred. Please try again",
         "tableMissing": "No table specified in the form of 'schema-name:table-name' and no Default is set.",
         "maybeNeedLogin": "You may need to login to see the model or data.",
         "maybeUnauthorizedMessage" : "You may not be authorized to view this record (or records).",
@@ -131,6 +132,10 @@
         "unauthorizedErrorCode" : "Unauthorized Access",
         "showErrDetails" : "Show Error Details",
         "hideErrDetails" : "Hide Error Details",
+        "tooltip": {
+            downloadCSV: "Click to download all matched results",
+            permalink: "This link stores your search criteria as a URL. Right click and save."
+        },
         "URLLimitMessage": "Maximum URL length reached. Cannot perform the requested action."
     })
 
