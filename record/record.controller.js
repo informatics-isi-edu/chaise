@@ -25,7 +25,7 @@
         if(typeof chaiseConfig == 'undefined')
           chaiseConfig = ConfigUtils.getConfigJSON();
         $scope.recordSidePanOpen = typeof chaiseConfig != 'undefined' && chaiseConfig.hideTableOfContents === true ? false : true;
-
+        vm.tooltip = messageMap.tooltip;
         vm.gotoRelatedTable = function(sectionId, index) {
             var safeSectionId = vm.makeSafeIdAttr(sectionId);
             var pageSection = "rt-heading-" + safeSectionId;
