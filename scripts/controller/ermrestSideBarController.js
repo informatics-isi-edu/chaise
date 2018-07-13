@@ -13,18 +13,9 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
     $scope.filtersMatch = {};
     $scope.selectedCollection = '';
     $scope.requestCounter = 0;
-    if(typeof chaiseConfig != 'undefined')
-      $scope.chaiseConfig = chaiseConfig;
-    if(typeof chaiseConfig != 'undefined' && chaiseConfig.sidebarPosition)
-      $scope.position = chaiseConfig.sidebarPosition;
-    else {
-      $scope.position = 'right';
-    }
-    if(typeof chaiseConfig != 'undefined' && chaiseConfig.attributesSidebarHeading)
-      $scope.defaultHeading = chaiseConfig.attributesSidebarHeading;
-    else {
-      $scope.defaultHeading = 'CHOOSE ATTRIBUTES';
-    }
+    $scope.chaiseConfig = chaiseConfig;
+    $scope.position = chaiseConfig.sidebarPosition || 'right';
+    $scope.defaultHeading = chaiseConfig.attributesSidebarHeading || 'CHOOSE ATTRIBUTES';
     $('[data-toggle="tooltip"]').tooltip();
 
   	$scope.translate = function(value) {
@@ -712,11 +703,7 @@ ermSideBarController.controller('SideBarCtrl', ['$scope', '$filter', '$timeout',
 	};
 
 	this.hideSearchTextFacet = function hideSearchTextFacet() {
-    if(typeof chaiseConfig != 'undefined' && chaiseConfig['hideSearchTextFacet'] != 'undefined')
-      return chaiseConfig['hideSearchTextFacet'];
-    else {
-      return false;
-    }
+    return chaiseConfig['hideSearchTextFacet'];
 	};
 
 }]);

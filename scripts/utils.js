@@ -42,7 +42,7 @@ if (!String.prototype.startsWith) {
 
 
 function initLocation() {
-	if (typeof chaiseConfig != 'undefined' && chaiseConfig['ermrestLocation'] != null) {
+	if (chaiseConfig['ermrestLocation'] != null) {
 		HOME = chaiseConfig['ermrestLocation'];
 	} else {
 		HOME = window.location.protocol + '//' + window.location.host;
@@ -242,7 +242,7 @@ function getDetailColumns(row) {
 }
 
 function getTableColumnsNames(table_name, maxCols) {
-	if (typeof chaiseConfig != 'undefined' && chaiseConfig['maxColumns'] != null) {
+	if (chaiseConfig['maxColumns'] != null) {
 		maxCols = chaiseConfig['maxColumns'];
 	}
 	var ret = [];
