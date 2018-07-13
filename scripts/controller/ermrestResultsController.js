@@ -10,7 +10,7 @@ ermResultsController.controller('ResultsListCtrl', ['$rootScope', '$scope', '$wi
                                                       function($rootScope, $scope, $window, $timeout, $sce, FacetsData, FacetsService) {
 
 	$scope.FacetsData = FacetsData;
-  $scope.chaiseConfig = chaiseConfig;
+  	$scope.chaiseConfig = chaiseConfig;
 
 	$scope.predicate_search_all = function predicate_search_all() {
 		FacetsService.setSortOption();
@@ -426,6 +426,7 @@ ermResultsController.controller('ResultsListCtrl', ['$rootScope', '$scope', '$wi
 			try {
 				values = value.split(',');
 			} catch (e) {
+				
 			}
 			$.each(values, function(i, val) {
 				var vals = [];
@@ -447,9 +448,10 @@ ermResultsController.controller('ResultsListCtrl', ['$rootScope', '$scope', '$wi
 	this.displayRange = function displayRange() {
 		return (FacetsData.ermrestData.length == 0) ? '0-0' : '1-'+$scope.FacetsData.ermrestData.length;
 	};
-
+	
   this.showupResults = function showupResults() {
-	  return (chaiseConfig['showUnfilteredResults'] === true) || $scope.hasSelectedFacets();
+	  return chaiseConfig['showUnfilteredResults'] === true || $scope.hasSelectedFacets();
+		  
   };
 
   this.hasSelectedFacets = $scope.hasSelectedFacets = function hasSelectedFacets() {
@@ -591,7 +593,7 @@ ermResultsController.controller('ResultsListCtrl', ['$rootScope', '$scope', '$wi
 	};
 
 	this.plotViewEnabled = function plotViewEnabled() {
-    return (chaiseConfig['plotViewEnabled']);
+		return (chaiseConfig['plotViewEnabled']);
 	};
 
 	this.onPlotTraceMode = function onPlotTraceMode() {

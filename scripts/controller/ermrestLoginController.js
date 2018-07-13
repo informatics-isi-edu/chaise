@@ -10,7 +10,7 @@ ermLoginController.controller('LoginCtrl', ['$sce', '$scope', 'ermrest', 'UriUti
 
    	var queryString = uriUtils.queryStringToJSON(window.location.search);
    	if (queryString.referrerid && (typeof queryString.action == 'undefined') && window.opener) {
-
+			
 		// if browser is IE then clear the referrerId from cookiestore
 		// else postmessage to parent window and close itslef
    		if (uriUtils.isBrowserIE()) {
