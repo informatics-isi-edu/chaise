@@ -35,26 +35,25 @@ var testParams = {
         { title: "Id", value: "2002", type: "serial4"},
         { title: "Name of Accommodation", value: "Sherathon Hotel", type: "text"},
         { title: "Website", value: "<p><a href=\"http://www.starwoodhotels.com/sheraton/index.html\">Link to Website</a></p>\n", type: "text", comment: "A valid url of the accommodation", match:"html" },
-        // { title: "Category", value: "Hotel", type: "text", comment: "Type of accommodation ('Resort/Hotel/Motel')", presentation: { type:"url", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-record:category/", table_name: "category", key_value: "10003"} },
-        { title: "Category", value: "Hotel", type: "text", comment: "Type of accommodation ('Resort/Hotel/Motel')", presentation: { type:"url", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-record:category/id=10003"} },
+        { title: "Category", value: "Hotel", type: "text", comment: "Type of accommodation ('Resort/Hotel/Motel')", presentation: { type:"url", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-record:category/", table_name: "category", key_value: [{column: "id", value: "10003"}]} },
         { title: "booking", value:'<p><strong class="vocab">2</strong> <strong class="vocab">350.0000</strong> <strong class="vocab">2016-04-18 00:00:00</strong> <strong class="vocab">4</strong> <strong class="vocab">200.0000</strong> <strong class="vocab">2016-05-31 00:00:00</strong></p>\n', type: "inline" },
         { title: "User Rating", value: "4.3000", type: "float4", annotations: { "tag:misd.isi.edu,2015:display": { markdown_name: "<strong>User Rating</strong>"}} },
         { title: "Summary", value: "Sherathon Hotels is an international hotel company with more than 990 locations in 73 countries. The first Radisson Hotel was built in 1909 in Minneapolis, Minnesota, US. It is named after the 17th-century French explorer Pierre-Esprit Radisson.", type: "longtext"},
-        { title: "Description", type: "markdown",match:"html", value: "<p><strong>CARING. SHARING. DARING.</strong><br>\nRadisson<sup>®</sup> is synonymous with outstanding levels of service and comfort delivered with utmost style. And today, we deliver even more to make sure we maintain our position at the forefront of the hospitality industry now and in the future.<br>\nOur hotels are service driven, responsible, socially and locally connected and demonstrate a modern friendly attitude in everything we do. Our aim is to deliver our outstanding <code>Yes I Can!</code> <sup>SM</sup> service, comfort and style where you need us.</p>\n<p><strong>THE RADISSON<sup>®</sup> WAY</strong> Always positive, always smiling and always professional, Radisson people set Radisson apart. Every member of the team has a dedication to <code>Yes I Can!</code> <sup>SM</sup> hospitality – a passion for ensuring the total wellbeing and satisfaction of each individual guest. Imaginative, understanding and truly empathetic to the needs of the modern traveler, they are people on a special mission to deliver exceptional Extra Thoughtful Care.</p>\n"},
+        { title: "Description", type: "markdown", match: "html", value: "<p><strong>CARING. SHARING. DARING.</strong><br>\nRadisson<sup>®</sup> is synonymous with outstanding levels of service and comfort delivered with utmost style. And today, we deliver even more to make sure we maintain our position at the forefront of the hospitality industry now and in the future.<br>\nOur hotels are service driven, responsible, socially and locally connected and demonstrate a modern friendly attitude in everything we do. Our aim is to deliver our outstanding <code>Yes I Can!</code> <sup>SM</sup> service, comfort and style where you need us.</p>\n<p><strong>THE RADISSON<sup>®</sup> WAY</strong> Always positive, always smiling and always professional, Radisson people set Radisson apart. Every member of the team has a dedication to <code>Yes I Can!</code> <sup>SM</sup> hospitality – a passion for ensuring the total wellbeing and satisfaction of each individual guest. Imaginative, understanding and truly empathetic to the needs of the modern traveler, they are people on a special mission to deliver exceptional Extra Thoughtful Care.</p>\n"},
         { title: "Number of Rooms", value: "23", type: "int2"},
-        { title: "Cover Image", value: "3,005", type: "int2", presentation: { type: "url", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-record:file/", table_name: "file", key_value: "3005"} },
+        { title: "Cover Image", value: "3,005", type: "int2", presentation: { type: "url", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-record:file/", table_name: "file", key_value: [{column: "id", value: "3005"}]} },
         { title: "Thumbnail", value: null, type: "int4"},
         { title: "Operational Since", value: "2008-12-09 00:00:00", type: "timestamptz" },
         { title: "Is Luxurious", value: "true", type: "boolean" },
-        { title: "accommodation_collections", comment: "collections", value: '<ul>\n<li><a href="' + browser.params.url + '/record/#'+browser.params.catalogId+'/product-record:accommodation_collection/id=2000">Sherathon Hotel</a></li>\n</ul>\n', type: "inline"},
-        { title: "table_w_aggregates", comment: "has aggregates", value: '<ul>\n<li><a href="' + browser.params.url + '/record/#'+browser.params.catalogId+'/product-record:table_w_aggregates/id=3">3</a></li>\n</ul>\n', type: "inline"},
+        { title: "accommodation_collections", value: "Sherathon Hotel", comment: "collections", presentation: { type: "inline", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-record:accommodation_collection/", table_name: "accommodation_collection", key_value: [{column: "id", value: "2000"}]} },
+        { title: "table_w_aggregates", value: "3", comment: "has aggregates", presentation: { type: "inline", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-record:table_w_aggregates/", table_name: "table_w_aggregates", key_value: [{column: "id", value: "3"}]} },
         { title: "# Id", comment: "Count of Id", value: "1"},
         { title: "# Id", comment: "Count Distinct of Id", value: "1"},
         { title: "Min Name of accommodation_collection", comment: "Minimum of title", value: "Sherathon Hotel"},
         { title: "Max Name of accommodation_collection", comment: "maximum of title", value: "Sherathon Hotel"},
         { title: "json_col", value:'<pre>'+JSON.stringify(null,undefined,2)+'</pre>', match:"html"},
         { title: "json_col_with_markdown", value: "<p>Status is: “delivered”</p>\n", match:"html"},
-        { title: "accommodation_image_assoc", comment: "Accommodation Image", value: '<ul>\n<li><a href="' + browser.params.url + '/record/#'+browser.params.catalogId+'/product-record:file/id=3005">3,005</a></li>\n</ul>\n', type: "inline"}
+        { title: "accommodation_image_assoc", comment: "Accommodation Image", value: "3,005", presentation: { type: "inline", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-record:file/", table_name: "file", key_value: [{column: "id", value: "3005"}]} }
       ],
     no_related_data: {
         key: {
@@ -95,7 +94,10 @@ var testParams = {
           rowValues: [
               ["2000", "Sherathon Hotel"]
           ],
-          rowViewPaths: ["id=2000"]
+          rowViewPaths: [[{
+              column: "id",
+              value: "2000"
+          }]]
       },
       {
           title: "a related entity with aggregate columns",
@@ -115,7 +117,10 @@ var testParams = {
           rowValues: [
               ["3", "102", "102", "1", "1"]
           ],
-          rowViewPaths: ["id=3"]
+          rowViewPaths: [[{
+              column: "id",
+              value: "3"
+          }]]
       },
       {
           title: "a related entity with association between accomodation and image",
@@ -128,7 +133,7 @@ var testParams = {
           count: 1,
           canEdit: true,
           canCreate: true,
-          canUnlink: true,
+          // canDelete: true, NOTE: was canUnlink
           isInline: true,
           viewMore: {
               name: "file",
@@ -138,7 +143,10 @@ var testParams = {
           rowValues: [
               ["3,005","Four Points Sherathon 1","http://images.trvl-media.com/hotels/1000000/30000/28200/28110/28110_190_z.jpg","image/jpeg","0","2016-01-18 00:00:00","","",""]
           ],
-          rowViewPaths: ["id=3005"],
+          rowViewPaths: [[{
+              column: "id",
+              value: "3005"
+          }]],
           rowEditPaths: [ // in case of association, edit should naviagte to the association table
               "accommodation_id=2002&image_id=3005"
           ],

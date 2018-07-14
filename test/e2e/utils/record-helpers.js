@@ -121,10 +121,11 @@ exports.testPresentation = function (tableParams) {
         expect(element.all(by.className('entity-value')).count()).toEqual(columns.length, "length missmatch.");
         var index = -1, columnUrl, aTag;
         columns.forEach(function (column) {
-			var errMessage = "value missmatch for column " + column.title;
+            var errMessage = "value mismatch for column " + column.title;
 
             var columnEls;
             if (column.title=='booking') {
+                // get the value at row 5 of the table list of values
                 expect(element(by.id('entity-4-markdown')).element(by.css('.markdown-container')).getAttribute('innerHTML')).toContain(column.value, errMessage);
             } else if (column.match=='html') {
                 expect(chaisePage.recordPage.getEntityRelatedTableScope(column.title).getAttribute('innerHTML')).toBe(column.value, errMessage);
@@ -133,11 +134,11 @@ exports.testPresentation = function (tableParams) {
             } else {
                 columnEls = chaisePage.recordPage.getEntityRelatedTable(column.title);
 
-                if (column.presentation && column.presentation.type == "url") {
-                    var dataRow = browser.params.entities["product-record"][column.presentation.table_name].find(function (entity) {
-                        return entity.id == column.presentation.key_value;
-                    });
+                if (column.presentation) {
+                    if (column.presentation.type === "inline") columnEls = chaisePage.recordPage.getMarkdownContainer(columnEls);
+
                     chaisePage.recordPage.getLinkChild(columnEls).then(function (aTag) {
+                        var dataRow = chaisePage.getEntityRow("product-record", column.presentation.table_name, column.presentation.key_value);
                         columnUrl = mustache.render(column.presentation.template, {
                             "catalog_id": process.env.catalogId,
                             "chaise_url": process.env.CHAISE_BASE_URL,
@@ -147,11 +148,9 @@ exports.testPresentation = function (tableParams) {
                         expect(aTag.getAttribute('href')).toEqual(columnUrl, errMessage + " for url");
                         expect(aTag.getText()).toEqual(column.value, errMessage + " for caption");
                     });
-                } else if (column.type === "inline"){
-                    expect(chaisePage.recordPage.getMarkdownContainer(columnEls).getAttribute('innerHTML')).toBe(column.value, errMessage);
                 } else {
-					expect(columnEls.getAttribute('innerText')).toBe(column.value, errMessage);
-				}
+                    expect(columnEls.getAttribute('innerText')).toBe(column.value, errMessage);
+                }
         	}
         });
     });
@@ -599,14 +598,13 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 
 		if (params.rowViewPaths) {
 			it ("'View Details' button should have the correct link.", function () {
-				var expected = '/record/#' + browser.params.catalogId + "/" + params.schemaName + ":" + (params.isAssociation ? params.relatedName : params.name) + "/";
-                // var dataRow = browser.params.entities[testParams.schemaName][linkedToTableName].find(function (entity) {
-                //     return entity.id == testParams.related_linked_table_key_value;
-                // });
-                // var linkedToTableFilter = testParams.shortest_key_filter + dataRow.RID;
+                var tableName = (params.isAssociation ? params.relatedName : params.name);
 				params.rowViewPaths.forEach(function (row, index) {
+                    var expected = '/record/#' + browser.params.catalogId + "/" + params.schemaName + ":" + tableName + "/";
+                    var dataRow = chaisePage.getEntityRow(params.schemaName, tableName, row);
+                    expected += "RID=" + dataRow.RID;
 					var btn = chaisePage.recordPage.getRelatedTableRowLink(params.displayname, index, params.isInline);
-					expect(btn.getAttribute('href')).toContain(expected + params.rowViewPaths[index], "link missmatch for index=" + index);
+					expect(btn.getAttribute('href')).toContain(expected, "link missmatch for index=" + index);
 				});
 			});
 		}
@@ -620,12 +618,6 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 				it ("clicking on 'edit` button should open a tab to recordedit page.", function (done) {
 					var btn = chaisePage.recordPage.getRelatedTableRowEdit(params.displayname, 0, params.isInline);
 
-                    // var relatedTableKey = testParams.related_regular_table_key_value;
-                    // var dataRow = browser.params.entities[testParams.schemaName][relatedTableName].find(function (entity) {
-                    //     return entity.accommodation_id == relatedTableKey;
-                    // });
-                    // var relatedTableFilter = testParams.shortest_key_filter + dataRow.RID;
-
 					expect(btn.isDisplayed()).toBeTruthy("edit button is missing.");
 					chaisePage.clickButton(btn).then(function () {
 						return browser.getAllWindowHandles();
@@ -636,7 +628,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 						var result = '/recordedit/#' + browser.params.catalogId + "/" + params.schemaName + ":" + params.name;
 
 						// in case of association edit and view are different
-						result += "/" + (params.rowEditPaths ? params.rowEditPaths[0] : params.rowViewPaths[0]);
+						result += "/" + (params.rowEditPaths ? params.rowEditPaths[0] : "RID=" + chaisePage.getEntityRow(params.schemaName, params.name, params.rowViewPaths[0]).RID);
 
 						expect(browser.driver.getCurrentUrl()).toContain(result, "expected link missmatch.");
 						browser.close();
@@ -861,6 +853,11 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
 				return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
 			}).then(function () {
 				browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
+                browser.wait(function () {
+					return chaisePage.recordPage.getRelatedTableRows(params.relatedDisplayname, isInline).then(function (rows) {
+						return (rows.length == params.existingCount+1);
+					});
+				});
                 checkRelatedRowValues(params.relatedDisplayname, isInline, params.rowValuesAfter, done);
 
 				return chaisePage.recordPage.getRelatedTableRows(params.relatedDisplayname).count();
@@ -879,19 +876,19 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
 
 function checkRelatedRowValues(displayname, isInline, rowValues, done) {
     chaisePage.recordPage.getRelatedTableRows(displayname, isInline).then(function (rows) {
-        expect(rowValues.length).toBe(rowValues.length, "rows length missmatch.");
+        expect(rows.length).toBe(rowValues.length, "rows length mismatch.");
         if (rows.length === 0) {
             done();
         }
         rows.forEach(function (row, index) {
             row.all(by.tagName("td")).then(function (cells) {
-                expect(cells.length).toBe(rowValues[index].length + 1, "number of column are not as expected.");
+                expect(cells.length).toBe(rowValues[index].length + 1, "number of columns are not as expected.");
                 rowValues[index].forEach(function (expectedRow, columnIndex) {
                     if (typeof expectedRow === "object" && expectedRow.url) {
                         expect(cells[columnIndex+1].element(by.tagName("a")).getAttribute("href")).toContain(expectedRow.url, "link missmatch for row=" + index + ", columnIndex=" + columnIndex);
                         expect(cells[columnIndex+1].element(by.tagName("a")).getText()).toBe(expectedRow.caption, "caption missmatch for row=" + index  + ", columnIndex=" + columnIndex);
                     } else {
-                        expect(cells[columnIndex+1].getText()).toBe(expectedRow, "missmatch for row=" + index  + ", columnIndex=" + columnIndex);
+                        expect(cells[columnIndex+1].getText()).toBe(expectedRow, "mismatch for row=" + index  + ", columnIndex=" + columnIndex);
                     }
                 });
                 done();

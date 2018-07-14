@@ -350,7 +350,8 @@
                             {"outbound": ["product-unordered-related-tables-links", "fk_assoc_related_table"]},
                             {"inbound": ["product-unordered-related-tables-links", "fk_related_table_2_to_related"]},
                             "id"
-                        ]}
+                        ]},
+                        ["product-unordered-related-tables-links", "fk_table_w_agg_accommodation"]
                     ]
                 }
             }
@@ -454,6 +455,17 @@
                 ],
                 "description": {
                     "display": "Bookings"
+                },
+                "tag:isrd.isi.edu,2016:visible-columns": {
+                    "compact/brief": ["price", "booking_date"],
+                    "filter": {
+                        "and": [
+                            {"source": [{"outbound": ["product-unordered-related-tables-links", "fk_booking_accommodation"]}], "markdown_name": "Accommodations"}
+                        ]
+                    }
+                },
+                "tag:isrd.isi.edu,2016:table-display": {
+                    "*": {"row_order": [{"column": "id"}]}
                 }
             }
         },
@@ -704,6 +716,9 @@
                 ],
                 "description": {
                     "display": "Accommodation Images"
+                },
+                "tag:isrd.isi.edu,2016:visible-columns": {
+                    "compact/brief": ["filename", "uri", "content_type", "bytes", "timestamp"]
                 }
             }
         },
@@ -882,6 +897,9 @@
                     "compact": {
                         "row_order": [{"column": "id"}]
                     }
+                },
+                "tag:isrd.isi.edu,2016:visible-columns": {
+                    "compact/brief": ["facility"]
                 }
             }
         },
@@ -921,6 +939,9 @@
                         "separator_markdown": " ",
                         "row_markdown_pattern": " **{{id}}:{{facility}}**{.vocab} "
                     }
+                },
+                "tag:isrd.isi.edu,2016:visible-columns": {
+                    "compact/brief": ["facility"]
                 }
             }
         },
@@ -1061,7 +1082,7 @@
             "annotations": {
                 "tag:isrd.isi.edu,2016:table-display": {
                     "compact": {
-                        "row_order": [{"column": "id"}]
+                        "row_order": [{"column": "id_base"}]
                     }
                 }
             }
@@ -1154,8 +1175,15 @@
                 },
                 "tag:isrd.isi.edu,2016:app-links": {
                     "compact": "tag:isrd.isi.edu,2016:chaise:search"
+                },
+                "tag:isrd.isi.edu,2016:visible-columns": {
+                    "compact/brief": ["summary"],
+                    "filter": {
+                        "and": [
+                            {"source": [{"outbound": ["product-unordered-related-tables-links", "fk_schedule_accommodation"]}], "markdown_name": "Accommodations"}
+                        ]
+                    }
                 }
-
             }
         },
         "related_table_2": {
@@ -1205,8 +1233,77 @@
                 }
             ],
             "annotations": {
+                "tag:isrd.isi.edu,2016:table-display": {
+                    "*": {"row_order": [{"column": "id"}]}
+                },
                 "tag:isrd.isi.edu,2016:visible-columns": {
-                    "*": ["id", "col"]
+                    "compact/brief": ["col"]
+                }
+            }
+        },
+        "table_w_aggregates": {
+            "comment": "table with aggregate column that has fk to accomodation",
+            "kind": "table",
+            "table_name": "table_w_aggregates",
+            "schema_name": "product-unordered-related-tables-links",
+            "keys": [{
+                "unique_columns": ["id"]
+            }],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": {
+                        "typename": "int4"
+                    }
+                },
+                {
+                    "name": "value",
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "fk_to_accommodation",
+                    "type": {
+                        "typename": "int4"
+                    }
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "names" : [["product-unordered-related-tables-links", "fk_table_w_agg_accommodation"]],
+                    "comment": null,
+                    "foreign_key_columns": [
+                        {
+                            "table_name": "table_w_aggregates",
+                            "schema_name": "product-unordered-related-tables-links",
+                            "column_name": "fk_to_accommodation"
+                        }
+                    ],
+                    "annotations": {},
+                    "referenced_columns": [
+                        {
+                            "table_name": "accommodation",
+                            "schema_name": "product-unordered-related-tables-links",
+                            "column_name": "id"
+                        }
+                    ]
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:visible-columns": {
+                    "*": [
+                        "id",
+                        ["product-unordered-related-tables-links", "fk_table_w_agg_accommodation"],
+                        {"source": "value", "aggregate": "max"},
+                        {"source": "value", "aggregate": "min"},
+                        {"source": "value", "aggregate": "cnt"},
+                        {"source": "value", "aggregate": "cnt_d"}
+                    ]
+                },
+                "tag:isrd.isi.edu,2016:table-display": {
+                    "*": {"row_order": [{"column": "id"}]}
                 }
             }
         }
@@ -1223,7 +1320,8 @@
         "association_table_markdown",
         "related_table_markdown",
         "schedule",
-        "realted_table_2"
+        "related_table_2",
+        "table_w_aggregates"
     ],
     "comment": null,
     "annotations": {

@@ -702,6 +702,9 @@
         "comment": [
           "exclude"
         ],
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "*": ["id", "filename", "uri", "content_type", "bytes", "timestamp", "image_width", "image_height", "preview"]
+        },
         "tag:isrd.isi.edu,2016:table-display": {
           "compact": {
             "page_size": 2
@@ -1870,82 +1873,82 @@
       }
     },
     "multiple_records": {
-   "comment": "domain",
-   "kind": "table",
-   "keys": [
-     {
-       "comment": "vocabulary",
-       "annotations": {},
-       "unique_columns": [
-         "id",
-         "telno"
-       ]
-     },
-     {
-       "comment": "vocabulary",
-       "annotations": {},
-       "unique_columns": [
-         "term"
-       ]
-     }
-   ],
-   "entityCount": 0,
-   "foreign_keys": [],
-   "table_name": "multiple_records",
-   "schema_name": "product-record",
-   "column_definitions": [
-     {
-       "comment": null,
-       "name": "id",
-       "default": null,
-       "nullok": false,
-       "type": {
-         "typename": "int4"
-       },
-       "annotations": {
-         "comment": [
-           "hidden"
-         ]
-       }
-     },
-     {
-       "comment": null,
-       "name": "telno",
-       "default": null,
-       "nullok": false,
-       "type": {
-         "typename": "int8"
-       },
-       "annotations": {
-         "comment": [
-           "hidden"
-         ]
-       }
-     },
-     {
-       "comment": null,
-       "name": "term",
-       "default": null,
-       "nullok": false,
-       "type": {
-         "typename": "text"
-       },
-       "annotations": {
-         "comment": ["top"]
-       }
-     }
-   ],
-   "annotations": {
-     "tag:isrd.isi.edu,2016:table-display": {
-       "*": {
-         "page_size": -2
-       }
-     },
-     "tag:isrd.isi.edu,2016:visible-columns": {
-       "*": ["id", "telno", "term"]
+      "comment": "domain",
+      "kind": "table",
+      "keys": [
+        {
+          "comment": "vocabulary",
+          "annotations": {},
+          "unique_columns": [
+            "id",
+            "telno"
+          ]
+        },
+        {
+          "comment": "vocabulary",
+          "annotations": {},
+          "unique_columns": [
+            "term"
+          ]
+        }
+      ],
+      "entityCount": 0,
+      "foreign_keys": [],
+      "table_name": "multiple_records",
+      "schema_name": "product-record",
+      "column_definitions": [
+        {
+          "comment": null,
+          "name": "id",
+          "default": null,
+          "nullok": false,
+          "type": {
+            "typename": "int4"
+          },
+          "annotations": {
+            "comment": [
+              "hidden"
+            ]
+          }
+        },
+        {
+          "comment": null,
+          "name": "telno",
+          "default": null,
+          "nullok": false,
+          "type": {
+            "typename": "int8"
+          },
+          "annotations": {
+            "comment": [
+              "hidden"
+            ]
+          }
+        },
+        {
+          "comment": null,
+          "name": "term",
+          "default": null,
+          "nullok": false,
+          "type": {
+            "typename": "text"
+          },
+          "annotations": {
+            "comment": ["top"]
+          }
+        }
+      ],
+      "annotations": {
+        "tag:isrd.isi.edu,2016:table-display": {
+          "*": {
+            "page_size": -2
+          }
+        },
+        "tag:isrd.isi.edu,2016:visible-columns": {
+          "*": ["id", "telno", "term"]
+        }
       }
-     }
-   },
+    },
    "table_w_aggregates": {
      "comment": "table with aggregate column that has fk to accomodation",
      "kind": "table",

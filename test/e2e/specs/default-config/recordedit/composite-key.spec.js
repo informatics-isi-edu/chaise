@@ -10,7 +10,7 @@ var testParams = {
     }
 };
 
-describe('Add a record,', function() {
+describe('Edit a record,', function() {
 
     describe("For table " + testParams.table_name + ",", function() {
 
@@ -96,13 +96,8 @@ describe('Add a record,', function() {
                         });
                     });
 
-                    chaisePage.waitForUrl(redirectUrl, browser.params.defaultTimeout).then(function() {
-                        expect(browser.driver.getCurrentUrl()).toBe(redirectUrl);
-                        recordEditHelpers.testRecordAppValuesAfterSubmission(testParams.column_names, testParams.column_values);
-                    }, function() {
-                        console.log("          Timed out while waiting for the url to be the new one");
-                        expect(browser.driver.getCurrentUrl()).toBe(redirectUrl);
-                    });
+                    expect(browser.driver.getCurrentUrl()).toContain(redirectUrl);
+                    recordEditHelpers.testRecordAppValuesAfterSubmission(testParams.column_names, testParams.column_values);
                 }
             });
         });

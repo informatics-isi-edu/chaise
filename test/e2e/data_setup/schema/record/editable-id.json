@@ -57,7 +57,7 @@
             ],
             "annotations": {
                 "tag:isrd.isi.edu,2016:visible-columns" : {
-                    "*": ["id", "text", "int", "generated"]
+                    "*": ["RID", "id", "text", "int", "generated"]
                 },
                 "tag:misd.isi.edu,2015:display" : {
                     "markdown_name": "**Editable Id Table**"
