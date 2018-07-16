@@ -4,9 +4,7 @@
     angular.module('chaise.viewer')
 
     .controller('AnnotationsController', ['AuthService', 'annotations', 'comments', 'anatomies', 'AnnotationsService', 'CommentsService', 'ConfigUtils', '$window', '$rootScope','$scope', '$timeout', '$uibModal', 'AlertsService', function AnnotationsController(AuthService, annotations, comments, anatomies, AnnotationsService, CommentsService, ConfigUtils, $window, $rootScope, $scope, $timeout, $uibModal, AlertsService) {
-        var chaiseConfig;
-        if(typeof chaiseConfig == 'undefined')
-          chaiseConfig = ConfigUtils.getConfigJSON();
+        var chaiseConfig = ConfigUtils.getConfigJSON();
         var vm = this;
         vm.annotations = annotations;
         vm.anatomies = anatomies;

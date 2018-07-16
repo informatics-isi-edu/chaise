@@ -1230,7 +1230,10 @@
 
     .factory("ConfigUtils", [function() {
         function getConfigJSON() {
-          return defaultChaiseConfig;
+          if(typeof chaiseConfig != 'undefined')
+            return chaiseConfig;
+          else
+            return defaultChaiseConfig;
         }
         return {
             getConfigJSON: getConfigJSON

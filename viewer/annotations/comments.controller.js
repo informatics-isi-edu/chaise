@@ -4,9 +4,7 @@
     angular.module('chaise.viewer')
 
     .controller('CommentsController', ['AuthService', 'CommentsService', 'ConfigUtils', '$scope', '$uibModal', 'comments', function AnnotationsController(AuthService, CommentsService, ConfigUtils, $scope, $uibModal, comments) {
-        var chaiseConfig;
-        if(typeof chaiseConfig == 'undefined')
-          chaiseConfig = ConfigUtils.getConfigJSON();
+        var chaiseConfig = ConfigUtils.getConfigJSON();
         var vm = this;
         vm.comments = comments;
         vm.newComment = {

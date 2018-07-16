@@ -10,16 +10,14 @@
     angular.module('chaise.footer', [])
         .directive('footer', ['ERMrest', '$timeout', 'ConfigUtils', function(ERMrest, $timeout, ConfigUtils) {
 
-          var chaiseConfig;
-          if(typeof chaiseConfig == 'undefined')
-            chaiseConfig = ConfigUtils.getConfigJSON();
-            
+          var chaiseConfig = ConfigUtils.getConfigJSON();
+
             return {
                 restrict: 'E',
                 scope: {},
                 templateUrl: '../common/templates/footer.html',
                 link: function(scope, ele) {
-                    var footerText = typeof chaiseConfig != 'undefined' && chaiseConfig.footerMarkdown ? chaiseConfig.footerMarkdown : "**Please check** [Privacy Policy](/privacy-policy/){target='_blank'}";
+                    var footerText = chaiseConfig.footerMarkdown ? chaiseConfig.footerMarkdown : "**Please check** [Privacy Policy](/privacy-policy/){target='_blank'}";
                     angular.isUndefinedOrNull = function(val) {
                         return val == '' || angular.isUndefined(val) || val === null
                     }

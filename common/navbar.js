@@ -8,13 +8,11 @@
     ])
     .directive('navbar', ['$window', '$rootScope', 'Session', 'modalUtils', 'ConfigUtils', function($window, $rootScope, Session, modalUtils, ConfigUtils) {
 
-        var chaiseConfig;
-        if(typeof chaiseConfig == 'undefined')
-          chaiseConfig = ConfigUtils.getConfigJSON();
+        var chaiseConfig = ConfigUtils.getConfigJSON();
 
     // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
         var root;
-        if(typeof chaiseConfig != 'undefined' && chaiseConfig.navbarMenu)
+        if(chaiseConfig.navbarMenu)
           root = chaiseConfig.navbarMenu;
         else {
           root={};
@@ -53,32 +51,32 @@
             scope: {},
             templateUrl: '../common/templates/navbar.html',
             link: function(scope) {
-              if(typeof chaiseConfig != 'undefined' && chaiseConfig.navbarBrand)
+              if(chaiseConfig.navbarBrand)
                 scope.brandURL = chaiseConfig.navbarBrand;
               else {
                 scope.brandURL = '/'
               }
-              if(typeof chaiseConfig != 'undefined' && chaiseConfig.navbarBrandText)
+              if(chaiseConfig.navbarBrandText)
                 scope.brandText = chaiseConfig.navbarBrandText || chaiseConfig.headTitle;
               else {
                 scope.brandText = 'Chaise';
               }
-              if(typeof chaiseConfig != 'undefined' && chaiseConfig.navbarBrandImage)
+              if(chaiseConfig.navbarBrandImage)
                 scope.brandImage = chaiseConfig.navbarBrandImage;
               else {
                 scope.brandImage = null
               }
-              if(typeof chaiseConfig != 'undefined' && chaiseConfig.navbarMenu && chaiseConfig.navbarMenu.children)
+              if(chaiseConfig.navbarMenu && chaiseConfig.navbarMenu.children)
                 scope.menu = chaiseConfig.navbarMenu.children;
               else {
                 scope.menu = [];
               }
-              if(typeof chaiseConfig != 'undefined' && chaiseConfig.signUpURL)
+              if(chaiseConfig.signUpURL)
                 scope.signUpURL = chaiseConfig.signUpURL;
               else {
                 scope.signUpURL = ''
               }
-              if(typeof chaiseConfig != 'undefined' && chaiseConfig.profileURL)
+              if(chaiseConfig.profileURL)
                 scope.profileURL = chaiseConfig.profileURL;
               else {
                 scope.profileURL = ''

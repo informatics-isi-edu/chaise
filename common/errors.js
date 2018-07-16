@@ -146,9 +146,7 @@
     .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$window', 'errorMessages', 'Errors', 'DataUtils', 'UriUtils', 'ConfigUtils', 'modalUtils', '$document',
           function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $window, errorMessages, Errors, DataUtils, UriUtils, ConfigUtils, modalUtils, $document) {
 
-            var chaiseConfig;
-            if(typeof chaiseConfig == 'undefined')
-              chaiseConfig = ConfigUtils.getConfigJSON();
+            var chaiseConfig = ConfigUtils.getConfigJSON();
 
         var reloadCb = function() {
             window.location.reload();
@@ -213,7 +211,7 @@
             };
 
 
-            if (isDismissible || (typeof chaiseConfig != 'undefined' && chaiseConfig.allowErrorDismissal)) {  //If Forbidden error then allow modal to be dismissed
+            if (isDismissible || chaiseConfig.allowErrorDismissal) {  //If Forbidden error then allow modal to be dismissed
                 delete modalProperties.keyboard;
                 delete modalProperties.backdrop;
                 params.canClose = true;
@@ -254,7 +252,7 @@
                 stackTrace = ( (exception.errorData && exception.errorData.stack) ? exception.errorData.stack : undefined),
                 showLogin = false,
                 message, errorStatus,redirectLink;
-                if(typeof chaiseConfig != 'undefined' && chaiseConfig.dataBrowser)
+                if(chaiseConfig.dataBrowser)
                     redirectLink = chaiseConfig.dataBrowser;
                 else {
                   redirectLink = window.location.origin;
@@ -319,7 +317,7 @@
 var logError = function (error) {
     if (!ERMrest) return;
     var ermrestUri;
-    if(typeof chaiseConfig != 'undefined' && chaiseConfig.ermrestLocation)
+    if(chaiseConfig.ermrestLocation)
       ermrestUri =  chaiseConfig.ermrestLocation;
     else {
       ermrestUri = window.location.origin + '/ermrest';
@@ -340,7 +338,7 @@ window.onerror = function() {
 
     var canClose = false;
 
-    if (typeof chaiseConfig != 'undefined' && chaiseConfig.allowErrorDismissal) {
+    if (chaiseConfig.allowErrorDismissal) {
         canClose = true;
     }
 
@@ -351,7 +349,7 @@ window.onerror = function() {
         arguments[3]
     ].join(':');
 
-    var redirectLink = (typeof chaiseConfig != 'undefined' && chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : window.location.origin);
+    var redirectLink = (chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : window.location.origin);
 
     if (!document || !document.body) return;
 

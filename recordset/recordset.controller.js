@@ -10,14 +10,12 @@
 
         ctrl.showExportButton = (chaiseConfig && chaiseConfig.showExportButton === true);
 
-        var chaiseConfig;
         $scope.vm = recordsetModel;
         recordsetModel.RECORDEDIT_MAX_ROWS = 200;
-        if(typeof chaiseConfig == 'undefined')
-          chaiseConfig = ConfigUtils.getConfigJSON();
-        $scope.navbarBrand = (typeof chaiseConfig != 'undefined' && chaiseConfig['navbarBrand'] !== undefined? chaiseConfig.navbarBrand : "");
-        $scope.navbarBrandImage = (typeof chaiseConfig != 'undefined' && chaiseConfig['navbarBrandImage'] !== undefined? chaiseConfig.navbarBrandImage : "");
-        $scope.navbarBrandText = (typeof chaiseConfig != 'undefined' && chaiseConfig['navbarBrandText'] !== undefined? chaiseConfig.navbarBrandText : "Chaise");
+        var chaiseConfig = ConfigUtils.getConfigJSON();
+        $scope.navbarBrand = (chaiseConfig['navbarBrand'] !== undefined? chaiseConfig.navbarBrand : "");
+        $scope.navbarBrandImage = (chaiseConfig['navbarBrandImage'] !== undefined? chaiseConfig.navbarBrandImage : "");
+        $scope.navbarBrandText = (chaiseConfig['navbarBrandText'] !== undefined? chaiseConfig.navbarBrandText : "Chaise");
         var mainBodyEl;
         $scope.tooltip = messageMap.tooltip;
 
@@ -127,7 +125,7 @@
             if (elements.navbarHeight && elements.bookmarkHeight) {
                 UiUtils.setDisplayContainerHeight(elements);
                 // no need to fetch and verify the faceting elements (navbar and bookmark are the same container as the ones used in main elements function)
-                if (typeof chaiseConfig != 'undefined' && chaiseConfig.showFaceting) UiUtils.setDisplayContainerHeight(fetchFacetingElements());
+                if (chaiseConfig.showFaceting) UiUtils.setDisplayContainerHeight(fetchFacetingElements());
             }
         }
 

@@ -15,16 +15,14 @@
         var context = $rootScope.context;
         var completed = {};
         var modalUpdate = false;
-        var chaiseConfig;
         vm.alerts = AlertsService.alerts;
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
         vm.rowFocus = {};
         vm.sidePanToggleBtnIndicator = "Show";
 
-        if(typeof chaiseConfig == 'undefined')
-          chaiseConfig = ConfigUtils.getConfigJSON();
-        $scope.recordSidePanOpen = typeof chaiseConfig != 'undefined' && chaiseConfig.hideTableOfContents === true ? false : true;
+        var chaiseConfig = ConfigUtils.getConfigJSON();
+        $scope.recordSidePanOpen = chaiseConfig.hideTableOfContents === true ? false : true;
         vm.tooltip = messageMap.tooltip;
         vm.gotoRelatedTable = function(sectionId, index) {
             var safeSectionId = vm.makeSafeIdAttr(sectionId);
