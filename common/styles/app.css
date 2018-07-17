@@ -1361,7 +1361,7 @@ footer .container1 {
      border-top: 1px solid rgba(34,36,38,.15);
      border-bottom: 1px solid rgba(255,255,255,.1);
  }
-/* make it as panel*/
+ 
  .faceting-container .facet-panel>.panel-heading {
      text-transform: none;
      border: 0;
