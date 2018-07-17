@@ -256,7 +256,7 @@
 
             // If the hash is empty, check for defaults
             if (hash == '' || hash === undefined || hash.length == 1) {
-                if (chaiseConfig.defaultCatalog) {
+                if (typeof chaiseConfig != 'undefined' && chaiseConfig.defaultCatalog) {
                     if (chaiseConfig.defaultTables) {
                         catalogId = chaiseConfig.defaultCatalog;
 
@@ -295,7 +295,7 @@
 
                 // if no catalog id for some reason
                 if (catalogId === '' || catalogId === undefined || catalogId === null) {
-                    if (chaiseConfig.defaultCatalog) {
+                    if (typeof chaiseConfig != 'undefined' &&  chaiseConfig.defaultCatalog) {
                         catalogId = chaiseConfig.defaultCatalog;
                     } else {
                         // no defined or default catalog
@@ -310,7 +310,7 @@
                 // there is no '/' character (only a catalog id) or a trailing '/' after the id
                 if (hash.indexOf('/') === -1 || hash.substring(hash.indexOf('/')).length === 1) {
                     // check for default Table
-                    if (chaiseConfig.defaultTables) {
+                    if (typeof chaiseConfig != 'undefined' &&  chaiseConfig.defaultTables) {
                         var tableConfig = chaiseConfig.defaultTables[catalogId];
                         if (tableConfig) {
                             hash = '/' + fixedEncodeURIComponent(tableConfig.schema) + ':' + fixedEncodeURIComponent(tableConfig.table);
@@ -337,7 +337,7 @@
                 }
             }
 
-            var baseUri = chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : location.origin + '/ermrest';
+            var baseUri = typeof chaiseConfig != 'undefined' && chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : location.origin + '/ermrest';
             var path = '/catalog/' + catalogId + '/entity' + hash;
             return baseUri + path;
         }
@@ -419,7 +419,7 @@
             // typical deployment location for ermrest.
             context.serviceURL = location.origin + '/ermrest';
 
-            if (chaiseConfig.ermrestLocation) {
+            if (typeof chaiseConfig != 'undefined' && chaiseConfig.ermrestLocation) {
                 context.serviceURL = chaiseConfig.ermrestLocation;
             }
 
@@ -1425,10 +1425,9 @@
       }
      }])
 
-    .service('headInjector', ['$window', 'MathUtils', function($window, MathUtils) {
-
+    .service('headInjector', ['$window', 'MathUtils',  function($window, MathUtils) {
         function addCustomCSS() {
-            if (chaiseConfig['customCSS'] !== undefined) {
+            if (typeof chaiseConfig != 'undefined' && chaiseConfig['customCSS'] !== undefined) {
                 var fileref = document.createElement("link");
                 fileref.setAttribute("rel", "stylesheet");
                 fileref.setAttribute("type", "text/css");
@@ -1438,7 +1437,7 @@
         }
 
         function addTitle() {
-            if (chaiseConfig.headTitle !== undefined) {
+            if (typeof chaiseConfig != 'undefined' && chaiseConfig.headTitle !== undefined) {
                 document.getElementsByTagName('head')[0].getElementsByTagName('title')[0].innerHTML = chaiseConfig.headTitle;
             }
         }

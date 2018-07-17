@@ -37,7 +37,7 @@
 
     //  Enable log system, if in debug mode
     .config(['$logProvider', function($logProvider) {
-      if(chaiseConfig.debug)
+      if(typeof chaiseConfig != 'undefined' && chaiseConfig.debug)
         $logProvider.debugEnabled(chaiseConfig.debug === true);
     }])
 

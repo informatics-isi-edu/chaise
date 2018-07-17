@@ -313,7 +313,7 @@
  */
 var logError = function (error) {
     if (!ERMrest) return;
-    var ermrestUri = chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : window.location.origin + '/ermrest';
+    var ermrestUri = (typeof chaiseConfig != 'undefined' && chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : window.location.origin + '/ermrest');
     ERMrest.logError(error, ermrestUri).then(function () {
         console.log("logged the error");
     }).catch(function (err) {
@@ -330,7 +330,7 @@ window.onerror = function() {
 
     var canClose = false;
 
-    if (chaiseConfig && chaiseConfig.allowErrorDismissal) {
+    if (typeof chaiseConfig != 'undefined' && chaiseConfig.allowErrorDismissal) {
         canClose = true;
     }
 
@@ -341,7 +341,7 @@ window.onerror = function() {
         arguments[3]
     ].join(':');
 
-    var redirectLink = (chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : window.location.origin);
+    var redirectLink = (typeof chaiseConfig != 'undefined' && chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : window.location.origin);
 
     if (!document || !document.body) return;
 
