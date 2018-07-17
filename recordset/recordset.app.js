@@ -80,9 +80,9 @@
 
             var chaiseConfig = ConfigUtils.getConfigJSON();
             context.chaiseBaseURL = $window.location.href.replace($window.location.hash, '');
-            var modifyEnabled = (chaiseConfig.editRecord === false ? false : true);
-            var deleteEnabled = (chaiseConfig.deleteRecord === true ? true : false);
-            var showFaceting = (chaiseConfig.showFaceting === true ? true : false);
+            var modifyEnabled = chaiseConfig.editRecord === false ? false : true;
+            var deleteEnabled = chaiseConfig.deleteRecord === true ? true : false;
+            var showFaceting = chaiseConfig.showFaceting === true ? true : false;
 
             recordsetModel.config = {
                 viewable: true,

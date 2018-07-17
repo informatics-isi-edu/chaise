@@ -211,7 +211,7 @@
             };
 
 
-            if (isDismissible || chaiseConfig.allowErrorDismissal) {  //If Forbidden error then allow modal to be dismissed
+            if (isDismissible || (chaiseConfig && chaiseConfig.allowErrorDismissal)) {  //If Forbidden error then allow modal to be dismissed
                 delete modalProperties.keyboard;
                 delete modalProperties.backdrop;
                 params.canClose = true;
@@ -248,15 +248,12 @@
 
             // arguments for `errorPopup()` in order for method declaration
             var pageName = "Home Page",
+                redirectLink = chaiseConfig.dataBrowser,
                 subMessage = (exception.subMessage ? exception.subMessage : undefined),
                 stackTrace = ( (exception.errorData && exception.errorData.stack) ? exception.errorData.stack : undefined),
                 showLogin = false,
-                message, errorStatus,redirectLink;
-                if(chaiseConfig.dataBrowser)
-                    redirectLink = chaiseConfig.dataBrowser;
-                else {
-                  redirectLink = window.location.origin;
-                }
+                message, errorStatus;
+
 
             $rootScope.error = true;    // used to hide spinner in conjunction with a css property
 
@@ -316,12 +313,7 @@
  */
 var logError = function (error) {
     if (!ERMrest) return;
-    var ermrestUri;
-    if(chaiseConfig.ermrestLocation)
-      ermrestUri =  chaiseConfig.ermrestLocation;
-    else {
-      ermrestUri = window.location.origin + '/ermrest';
-    }
+    var ermrestUri = chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : window.location.origin + '/ermrest';
     ERMrest.logError(error, ermrestUri).then(function () {
         console.log("logged the error");
     }).catch(function (err) {
@@ -338,7 +330,7 @@ window.onerror = function() {
 
     var canClose = false;
 
-    if (chaiseConfig.allowErrorDismissal) {
+    if (chaiseConfig && chaiseConfig.allowErrorDismissal) {
         canClose = true;
     }
 

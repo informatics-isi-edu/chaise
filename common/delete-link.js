@@ -25,7 +25,7 @@
     .directive('deleteLink', ['modalUtils', 'ConfigUtils', function(modalUtils, ConfigUtils) {
         var chaiseConfig = ConfigUtils.getConfigJSON();
         var TEMPLATES_PATH = '../common/templates/delete-link/';
-        var CONFIRM_DELETE = (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) ? true : false;
+        var CONFIRM_DELETE =  (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) ? true : false;
 
         return {
             restrict: 'EA',
