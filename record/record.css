@@ -97,6 +97,11 @@
 @media print {
     #main-content {
         height: auto !important;
+        display: block;
+    }
+
+    #record-side-pan {
+        display: none;
     }
 
     .container-fluid {
@@ -120,11 +125,16 @@
     }
 
     .record-container .entity-key {
-        width: auto;
+        width: 15%;
         max-width: 120px;
     }
 
     .record-container .entity-value {
-        width: auto;
+        width: 85%;
     }
+}
+
+@page {
+    size: auto;
+    margin: 5% 4% 5% 3%;
 }
