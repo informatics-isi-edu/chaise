@@ -39,14 +39,14 @@
     color: rgb(63, 124, 184);
 }
 
-.record-container .panel-default>.panel-heading{
+.record-container .related-table-heading>.panel-heading{
     text-transform: inherit;
     padding: 8px 8px 8px 0px;
     color: inherit;
     border: none;
 }
 
-.record-container .panel-default>.panel-heading+.panel-collapse>.panel-body{
+.record-container .related-table-heading>.panel-heading+.panel-collapse>.panel-body{
     padding-left: 0px;
 }
 

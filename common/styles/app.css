@@ -244,25 +244,25 @@ img.spinner-sm {
     color: rgb(63, 124, 184);
 }
 
-.panel-default>.panel-heading{
+.related-table-heading>.panel-heading{
     background: #fff;
     text-transform: uppercase;
     border-bottom: 1px solid #ddd;
 }
-.panel-default>.panel-heading div:before{
+.related-table-heading>.panel-heading div:before{
     content: "+";
     float: left;
     line-height: 12px;
     margin-right: 10px;
 }
-.panel-default>.panel-heading div.active:before{
+.related-table-heading>.panel-heading div.active:before{
     content: "-";
     float: left;
     line-height: 12px;
     margin-right: 10px;
 }
 
-.panel-default>.panel-heading+.panel-collapse>.panel-body{
+.related-table-heading>.panel-heading+.panel-collapse>.panel-body{
     border-top: none;
     padding-left: 25px;
     padding-bottom: 10px;
@@ -1361,8 +1361,8 @@ footer .container1 {
      border-top: 1px solid rgba(34,36,38,.15);
      border-bottom: 1px solid rgba(255,255,255,.1);
  }
-
- .faceting-container .panel-default>.panel-heading {
+/* make it as panel*/
+ .faceting-container .facet-panel>.panel-heading {
      text-transform: none;
      border: 0;
      margin: 1px 0;
@@ -1372,7 +1372,7 @@ footer .container1 {
      border: 1px solid #ddd !important;
  }
 
- .faceting-container .panel:hover, .faceting-container .panel-default.active {
+ .faceting-container .panel:hover, .faceting-container .facet-panel.active {
      border-color: rgb(51, 122, 183) !important;
      animation-duration: 4s;
  }
@@ -1470,8 +1470,8 @@ footer .container1 {
      margin-right: 0;
  }
 
- .faceting-container .panel-default>.panel-heading div:before,
- .faceting-container .panel-default>.panel-heading div.active:before {
+ .faceting-container .facet-panel>.panel-heading div:before,
+ .faceting-container .facet-panel>.panel-heading div.active:before {
      content: "";
  }
 
