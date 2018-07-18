@@ -326,30 +326,6 @@
                     "type": {
                         "typename": "text"
                     }
-                }, {
-                    "name": "RID",
-                    "default": "someFunc()",
-                    "type": { "typename": "text" }
-                },
-                {
-                    "name": "RCB",
-                    "default": "someFunc()",
-                    "type": { "typename": "text" }
-                },
-                {
-                    "name": "RMB",
-                    "default": "someFunc()",
-                    "type": { "typename": "text" }
-                },
-                {
-                    "name": "RCT",
-                    "default": "",
-                    "type": { "typename": "timestamptz" }
-                },
-                {
-                    "name": "RMT",
-                    "default": "",
-                    "type": { "typename": "timestamptz" }
                 }
             ],
             "annotations": {

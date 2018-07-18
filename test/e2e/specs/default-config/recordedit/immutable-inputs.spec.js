@@ -3,7 +3,7 @@ var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
 var momentTz = require('moment-timezone');
 var testParams = {
     // for verifying data is present
-    column_names: ["text", "text_disabled", "markdown", "markdown_disabled", "gh_eEgUfJKBOcck-JHw4wg", "Bp0pr6Z_oHIvREd4ORPGOA", "int", "int_disabled", "float", "float_disabled", "boolean_true", "boolean_false", "boolean_disabled", "date", "date_disabled", "timestamptz", "timestamptz_disabled", "json", "json_disabled", "json_disabled_no_default"],
+    column_names: ["text", "text_disabled", "markdown", "markdown_disabled", "iKS50idGfVCGnnS6lUoZ8Q", "WnsyE4pJ1O0IW8zsj6MDHg", "int", "int_disabled", "float", "float_disabled", "boolean_true", "boolean_false", "boolean_disabled", "date", "date_disabled", "timestamptz", "timestamptz_disabled", "json", "json_disabled", "json_disabled_no_default"],
     table_name: "defaults-table",
     default_column_values: {
     // data values
@@ -48,9 +48,9 @@ var testParams = {
         markdown: "bold",
         markdown_disabled: "italics",
         // Value of "name" column on foreign (defaults_fk_text) related entity
-        "gh_eEgUfJKBOcck-JHw4wg": "Default for foreign_key column",
+        "iKS50idGfVCGnnS6lUoZ8Q": "Default for foreign_key column",
         // Value of "name" column on foreign (defaults_fk_text_disabled) related entity
-        "Bp0pr6Z_oHIvREd4ORPGOA": "Default for foreign_key_disabled column",
+        "WnsyE4pJ1O0IW8zsj6MDHg": "Default for foreign_key_disabled column",
         int: "25",
         int_disabled: "20",
         float: "1.6478",
@@ -226,16 +226,17 @@ describe('Record Add with defaults', function() {
             });
 
             it("and redirect to a record page with the default values.", function() {
-                // After submitting 1 record in RecordEdit, the expected record
-                // page url will have a id of 1 because it'll always be the first
-                // row of this table in the new catalog created by the defaults tests.
-                var redirectUrl = browser.params.url + "/record/#" + browser.params.catalogId + "/defaults:" + testParams.table_name + '/id=1';
+                var redirectUrl = browser.params.url + "/record/#" + browser.params.catalogId + "/defaults:" + testParams.table_name + "/RID=";
 
-                chaisePage.waitForUrl(redirectUrl).then(function() {
-                    expect(browser.driver.getCurrentUrl()).toBe(redirectUrl);
-
-                    recordEditHelpers.testRecordAppValuesAfterSubmission(testParams.column_names, testParams.record_column_values);
+                browser.wait(function () {
+                    return browser.driver.getCurrentUrl().then(function(url) {
+                        return url.startsWith(redirectUrl);
+                    });
                 });
+
+                expect(browser.driver.getCurrentUrl()).toContain(redirectUrl);
+
+                recordEditHelpers.testRecordAppValuesAfterSubmission(testParams.column_names, testParams.record_column_values);
             });
         });
     });

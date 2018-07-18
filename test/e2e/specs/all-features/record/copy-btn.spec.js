@@ -158,7 +158,10 @@ describe('View existing record,', function() {
                 }, browser.params.defaultTimeout).then(function(error) {
                     return error.getText();
                 }).then(function(text) {
-                    expect(text.indexOf("collides with existing entity")).toBeGreaterThan(-1, "Text for conflict error is not correct");
+                    expect(text.indexOf("The entry cannot be created/updated. Please use a different id for this record.")).toBeGreaterThan(-1, "Text for conflict error is not correct");
+                }).catch(function(error) {
+                    console.log(error);
+                    expect('There was an error.').toBe('Please check the error message.');
                 });
             });
 

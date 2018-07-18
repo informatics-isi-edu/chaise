@@ -329,7 +329,7 @@ var recordEditPage = function() {
 
     this.getDropdown = function(el, index) {
         index = index || 0;
-        return browser.executeScript("return $(arguments[0]).parents('tr').find('.select2-container')[" + index + "];", el);
+        return browser.executeScript("return $(arguments[0]).parents('tr').find('.select2-container:visible')[" + index + "];", el);
     };
 
     this.selectDropdownValue = function(el, value) {
@@ -670,10 +670,12 @@ var recordPage = function() {
         displayName = makeSafeIdAttr(displayName);
         return element(by.id("rt-" + displayName));
     };
+
     this.getEntityRelatedTable = function (displayName) {
         displayName = makeSafeIdAttr(displayName);
         return element(by.id("entity-" + displayName));
     };
+
     this.getEntityRelatedTableScope = function (displayName,safeId=false) { //if safeId==true then no need to call the function
         displayName = safeId?displayName:makeSafeIdAttr(displayName);
         return element(by.id("entity-" + displayName)).element(by.css(".ng-scope")).element(by.css(".ng-scope"));
@@ -1002,6 +1004,10 @@ var recordsetPage = function() {
 
     this.getPermalinkButton = function() {
         return element(by.id('permalink'));
+    };
+
+    this.getRecordsetColumnHeader = function (name) {
+        return element(by.id(name + "-header"));
     };
 
     /******* Facet selectors for recordset with faceting ********/
@@ -1355,6 +1361,34 @@ function chaisePage() {
     this.waitForTextInUrl = function(text, errMsg, timeout){
         return browser.wait(protractor.ExpectedConditions.urlContains(text), timeout || browser.params.defaultTimeout, errMsg);
     }
+
+    // schema - schema name
+    // table - table name
+    // row - array of objects in form of [{column: "column-name", value: "value"}, ...]
+    this.getEntityRow = function (schema, table, row) {
+        var match;
+        var entities = browser.params.entities[schema][table];
+        for (var i=0; i<entities.length; i++) {
+            var entity = entities[i];
+            // identifying information for entity could be multiple columns of data
+            // which is the case for assocation tables
+            for (var j=0; j<row.length; j++) {
+                if (entity[row[j].column] == row[j].value) {
+                    match = entity;
+                } else {
+                    match = null;
+                    // move on to next entity
+                    break;
+                }
+            }
+            if (match) break;
+        }
+        return match;
+    }
+
+    this.getErmrest = function () {
+        return browser.executeScript("return window");
+    };
 
     this.getTooltipDiv = function() {
         return element(by.css('.tooltip'));
