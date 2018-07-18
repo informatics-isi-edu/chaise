@@ -3,11 +3,8 @@ var pConfig = require('./../../utils/protractor.configuration.js');
 var config = pConfig.getConfig({
     // This config is meant to be run as part of the parallel tests configuration
     configFileName: 'parallel-configs/all-features-confirmation.dev.json',
-    specsO: [
-        "*/*.spec.js"
-    ],
     specs: [
-        "dummy.spec.js"
+        "*/*.spec.js"
     ],
     setBaseUrl: function(browser, data) {
         browser.params.url = process.env.CHAISE_BASE_URL;
