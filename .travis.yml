@@ -66,6 +66,7 @@ before_install:
   - cd ..
   - git clone https://github.com/informatics-isi-edu/ermrest.git
   - cd ermrest
+  - git checkout latest-stateless-model
   - sudo make install PLATFORM=ubuntu1204
   - sudo make deploy PLATFORM=ubuntu1204
   - cd ..
