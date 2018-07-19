@@ -14,14 +14,14 @@ var testParams = {
         pageSize: 25
     },
     searchBox: {
-        term: "ne",
-        filter: "Search: ne",
+        term: "one",
+        filter: "Search: one",
         numRows: 6,
-        term2: "ve",
+        term2: "eve",
         term2Rows: 4,
-        term3: "n",
-        term3Filter: "Search: ven",
-        term3Rows: 2
+        term3: "ns",
+        term3Filter: "Search: evens",
+        term3Rows: 1
     },
     minInputClass: "range-min",
     minInputClearClass: "min-clear",
@@ -152,10 +152,10 @@ var testParams = {
             name: "text_col",
             type: "choice",
             totalNumOptions: 10,
-            option: 1,
+            option: 0,
             filter: "text_col: one",
-            numRows: 5,
-            options: [ 'Empty', 'one', 'two', 'No Value', 'eight', 'eleven', 'five', 'four', 'nine', 'seven' ]
+            numRows: 6,
+            options: [ 'one', 'Empty', 'two', 'No Value', 'seven', 'eight', 'elevens', 'four', 'six', 'ten' ]
         },
         {
             name: "longtext_col",
