@@ -8,6 +8,7 @@ dist: trusty
 branches:
   only:
     - master
+    - system-columns
 
 addons:
   sauce_connect: true
@@ -39,7 +40,9 @@ before_install:
   - sudo apt-get -y purge python-psycopg2
   - sudo pip install web.py
   - sudo pip install psycopg2
+  - pip install requests
   - sudo ln -s /etc/apache2/conf-enabled /etc/apache2/conf.d
+  - sudo ln -s /var/run/apache2 /var/run/httpd
   - sudo a2enmod ssl
   - sudo a2ensite default-ssl
   - cd ..

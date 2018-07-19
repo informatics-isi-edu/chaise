@@ -4,6 +4,7 @@ var EC = protractor.ExpectedConditions;
 var testParams = {
     schema_name: "faceting",
     table_name: "main",
+    sort: "@sort(id)",
     totalNumFacets: 16,
     facetNames: [ "id", "int_col", "float_col", "date_col", "timestamp_col", "text_col", "longtext_col", "markdown_col", "boolean_col", "jsonb_col", "F1", "to_name", "f3 (term)", "from_name", "F1 with Term", "col_w_long_values" ],
     defaults: {
@@ -254,7 +255,7 @@ describe("Viewing Recordset with Faceting,", function() {
     describe("For table " + testParams.table_name + ",", function() {
 
         var table, record,
-        uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
+        uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name + testParams.sort;
 
         beforeAll(function () {
             browser.ignoreSynchronization=true;
@@ -461,14 +462,13 @@ describe("Viewing Recordset with Faceting,", function() {
             });
 
             it("should show 25 rows and 0 filters after clicking 'clear all'", function () {
-                var sortString = "@sort(id)";
                 chaisePage.recordsetPage.getClearAllFilters().click().then(function () {
                     return chaisePage.waitForElementInverse(element(by.id("spinner")));
                 }).then(function () {
                     //verify there's no facet string in url
                     return browser.getCurrentUrl();
                 }).then(function (url) {
-                    expect(url).toBe(uri + sortString);
+                    expect(url).toBe(uri, "uri after clear all is incorrect");
 
                     return chaisePage.recordsetPage.getRows().count();
                 }).then(function (ct) {
