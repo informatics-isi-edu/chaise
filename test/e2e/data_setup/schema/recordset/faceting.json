@@ -186,7 +186,14 @@
                         "typename": "text"
                     }
                 }
-            ]
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:table-display": {
+                    "compact": {
+                        "row_order": [{"column": "id"}]
+                    }
+                }
+            }
         },
         "f2": {
             "kind": "table",
@@ -215,6 +222,9 @@
             ],
             "annotations": {
                 "tag:isrd.isi.edu,2016:table-display": {
+                    "compact": {
+                        "row_order": [{"column": "id"}]
+                    },
                     "row_name": {
                         "row_markdown_pattern": "{{term}}"
                     }

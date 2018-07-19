@@ -196,19 +196,24 @@ describe('Record Add', function() {
     describe('When url has a prefill query string param set, ', function() {
         var testCookie = {};
         beforeAll(function() {
+            browser.ignoreSynchronization=true;
             // Refresh the page
             browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-add:accommodation");
             chaisePage.waitForElement(element(by.id("submit-record-button"))).then (function () {
                 // Write a dummy cookie for creating a record in Accommodation table
                 testCookie = {
-                    constraintName: 't3DKiki_LeUaqmVDZmuG_w', // A FK that Accommodation table has with Category table
-                    columnName: 't3DKiki_LeUaqmVDZmuG_w',
+                    constraintName: 'npH9l-Il-ZAadyQ8VTPStA', // A FK that Accommodation table has with Category table, column._name
+                    columnName: 'npH9l-Il-ZAadyQ8VTPStA',
                     rowname: {
-                        value: chance.sentence()
+                        value: "Castle"
                     },
-                    keys: {id: 1},
-                    origUrl: browser.params.url + "/record/#" + browser.params.catalogId + "/product-add:category/id=1"
+                    keys: {id: 10007},
+                    origUrl: process.env.ERMREST_URL + "/catalog/" + browser.params.catalogId + "/entity/product-add:category/id=10007"
                 };
+                // NOTE: if origUrl is improper, the rowname value above is set in the input field
+                // origUrl is used to fetch the entity after the fact to get other data that may be used by domain-filter-pattern
+                // the input field value is updated when this entity returns
+                // NOTE: this test was updated to fix the constraint name, and include a proper url, key, and rowname
                 browser.manage().addCookie({name: 'test', value: JSON.stringify(testCookie)});
             });
 
