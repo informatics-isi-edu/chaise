@@ -63,16 +63,20 @@ describe ("Viewing exisiting record with related entities, ", function () {
             filter: "Accommodations: Super 8 North Hollywood Motel"
         },
         rowValues: [
-            [{url: "product-unordered-related-tables-links:booking/accommodation_id=2004&id=8", caption: "2,004:8"},"125.0000","2016-03-12 00:00:00"],
-            [{url: "product-unordered-related-tables-links:booking/accommodation_id=2004&id=9", caption: "2,004:9"},"100.0000","2016-06-01 00:00:00"],
-            [{url: "product-unordered-related-tables-links:booking/accommodation_id=2004&id=10", caption: "2,004:10"},"110.0000","2016-05-19 01:00:00"],
-            [{url: "product-unordered-related-tables-links:booking/accommodation_id=2004&id=11", caption: "2,004:11"},"120.0000","2015-11-10 00:00:00"],
-            [{url: "product-unordered-related-tables-links:booking/accommodation_id=2004&id=12", caption: "2,004:12"},"180.0000","2016-09-04 01:00:00"],
-            [{url: "product-unordered-related-tables-links:booking/accommodation_id=2004&id=13", caption: "2,004:13"},"80.0000","2016-01-01 00:00:00"],
+            ["125.0000","2016-03-12 00:00:00"],
+            ["100.0000","2016-06-01 00:00:00"],
+            ["110.0000","2016-05-19 01:00:00"],
+            ["120.0000","2015-11-10 00:00:00"],
+            ["180.0000","2016-09-04 01:00:00"],
+            ["80.0000","2016-01-01 00:00:00"],
         ],
         rowViewPaths: [
-            "accommodation_id=2004&id=8", "accommodation_id=2004&id=9", "accommodation_id=2004&id=10",
-            "accommodation_id=2004&id=11", "accommodation_id=2004&id=12", "accommodation_id=2004&id=13"
+            [{column: "accommodation_id", value: "2004"}, {column: "id", value: "8"}],
+            [{column: "accommodation_id", value: "2004"}, {column: "id", value: "9"}],
+            [{column: "accommodation_id", value: "2004"}, {column: "id", value: "10"}],
+            [{column: "accommodation_id", value: "2004"}, {column: "id", value: "11"}],
+            [{column: "accommodation_id", value: "2004"}, {column: "id", value: "12"}],
+            [{column: "accommodation_id", value: "2004"}, {column: "id", value: "13"}]
         ],
         add: {
             tableName: "booking",
@@ -82,12 +86,12 @@ describe ("Viewing exisiting record with related entities, ", function () {
             columnDisplayname: "accommodation_id",
             columnValue: "Super 8 North Hollywood Motel",
             rowValuesAfter: [
-                [{url: "product-unordered-related-tables-links:booking/accommodation_id=2004&id=1", caption: "2,004:1"},"247.0000",""],
-                [{url: "product-unordered-related-tables-links:booking/accommodation_id=2004&id=9", caption: "2,004:9"},"100.0000","2016-06-01 00:00:00"],
-                [{url: "product-unordered-related-tables-links:booking/accommodation_id=2004&id=10", caption: "2,004:10"},"110.0000","2016-05-19 01:00:00"],
-                [{url: "product-unordered-related-tables-links:booking/accommodation_id=2004&id=11", caption: "2,004:11"},"120.0000","2015-11-10 00:00:00"],
-                [{url: "product-unordered-related-tables-links:booking/accommodation_id=2004&id=12", caption: "2,004:12"},"180.0000","2016-09-04 01:00:00"],
-                [{url: "product-unordered-related-tables-links:booking/accommodation_id=2004&id=13", caption: "2,004:13"},"80.0000","2016-01-01 00:00:00"],
+                ["247.0000",""],
+                ["100.0000","2016-06-01 00:00:00"],
+                ["110.0000","2016-05-19 01:00:00"],
+                ["120.0000","2015-11-10 00:00:00"],
+                ["180.0000","2016-09-04 01:00:00"],
+                ["80.0000","2016-01-01 00:00:00"],
             ]
         }
     };
@@ -141,10 +145,10 @@ describe ("Viewing exisiting record with related entities, ", function () {
             filter: "base table association related : Super 8 North Hollywood Motel"
         },
         rowValues: [
-            [{url: "product-unordered-related-tables-links:related_table/id=1", caption: "1"}, "Television"]
+            ["Television"]
         ],
         rowViewPaths: [
-            "id=1"
+            [{column: "id", value: "1"}]
         ],
         rowEditPaths: [ // in case of association, edit should naviagte to the association table
             "id_base=2004&id_related=1"
@@ -159,8 +163,8 @@ describe ("Viewing exisiting record with related entities, ", function () {
             disabledRows: ["1"],
             selectIndex: 2,
             rowValuesAfter: [
-                [{url: "product-unordered-related-tables-links:related_table/id=1", caption: "1"}, "Television"],
-                [{url: "product-unordered-related-tables-links:related_table/id=3", caption: "3"}, "Coffee Maker"]
+                ["Television"],
+                ["Coffee Maker"]
             ]
         }
     };
@@ -193,10 +197,10 @@ describe ("Viewing exisiting record with related entities, ", function () {
                 expect(title).toBe("Choose file", "titlte missmatch.");
 
                 browser.wait(function () {
-                       return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
-                           return (ct == 2);
-                       });
-                   });
+                    return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
+                        return (ct == 2);
+                    });
+                });
                 return chaisePage.recordsetPage.getModalRows().count();
             }).then(function(ct){
                 expect(ct).toBe(2, "association count missmatch for file domain table.");
@@ -234,11 +238,11 @@ describe ("Viewing exisiting record with related entities, ", function () {
             filter: "base table association related: Super 8 North Hollywood Motel"
         },
         rowValues: [
-            ["1", "one"],
-            ["3", "three"],
+            ["one"],
+            ["three"],
         ],
         rowViewPaths: [
-            "id=1", "id=3"
+            [{column: "id", value: "1"}], [{column: "id", value: "3"}]
         ],
         count: 2, // by load time it's one but when we add another related for the other table this should be updated too.
         canEdit: true,
@@ -263,7 +267,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
             ["2", "101", "101", "1", "1"],
         ],
         rowViewPaths: [
-            "id=1", "id=2"
+            [{column: "id", value: "1"}], [{column: "id", value: "2"}]
         ],
         count: 2,
         canEdit: true,

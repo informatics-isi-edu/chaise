@@ -7,6 +7,7 @@ var testParams = {
         displayName: "Accommodations",
         title: "Accommodations",
         key: { name: "id", value: "2001", operator: "::gt::"},
+        shortest_key_filter: "RID=",
         sortby: "no_of_rooms",
         columns: [
             { title: "Name of Accommodation", value: "Sherathon Hotel", type: "text"},
@@ -100,7 +101,7 @@ var testParams = {
             }
         ],
         sortedData:[
-            { 
+            {
                 columnName: "Name of Accommodation",
                 rawColumnName: "title",
                 columnPosition: 1,
@@ -113,7 +114,7 @@ var testParams = {
                     desc: ["Radisson Hotel", "NH Munich Resort"]
                 }
             },
-            { 
+            {
                 columnName: "Number of Rooms",
                 rawColumnName: "no_of_rooms",
                 columnPosition: 4,
@@ -126,7 +127,7 @@ var testParams = {
                     desc: ["23", "15"]
                 }
             },
-            { 
+            {
                 columnName: "Operational Since",
                 rawColumnName: "opened_on",
                 columnPosition: 6,
@@ -139,9 +140,9 @@ var testParams = {
                     desc: ["2002-01-22 00:00:00", "1976-06-15 00:00:00"]
                 }
             },
-            { 
+            {
                 columnName:"Category",
-                rawColumnName: "Y09mXK6LidrvCvNoXbesgg",
+                rawColumnName: "F8V7Ebs7zt7towDneZvefw",
                 columnPosition: 10,
                 page1:{
                     asc: ["Hotel", "Hotel", "Hotel"],
@@ -152,7 +153,7 @@ var testParams = {
                     desc: ["Hotel", "Hotel"]
                 }
             },
-            { 
+            {
                 columnName:"Type of Facilities",
                 rawColumnName: "hZ7Jzy0aC3Q3KQqz4DIXTw",
                 columnPosition: 11,
@@ -402,13 +403,18 @@ describe('View recordset,', function() {
             });
 
             it("action columns should show view button that redirects to the record page", function() {
+                var dataRow = browser.params.entities[accommodationParams.schemaName][accommodationParams.table_name].find(function (entity) {
+                    return entity.id == accommodationParams.data[0].id;
+                });
+                var filter = accommodationParams.shortest_key_filter + dataRow.RID;
+
                 chaisePage.waitForElementInverse(element(by.id("spinner"))).then(function() {
                     return chaisePage.recordsetPage.getViewActionButtons();
                 }).then(function(viewButtons) {
                     expect(viewButtons.length).toBe(4);
                     return viewButtons[0].click();
                 }).then(function() {
-                    var result = '/record/#' + browser.params.catalogId + "/" + accommodationParams.schemaName + ":" + accommodationParams.table_name + "/id=" + accommodationParams.data[0].id;
+                    var result = '/record/#' + browser.params.catalogId + "/" + accommodationParams.schemaName + ":" + accommodationParams.table_name + "/" + filter;
                     chaisePage.waitForUrl(result, browser.params.defaultTimeout).finally(function() {
                         expect(browser.driver.getCurrentUrl()).toContain(result);
                         browser.navigate().back();
@@ -417,7 +423,12 @@ describe('View recordset,', function() {
             });
 
             it("action columns should show edit button that redirects to the recordedit page", function() {
+                var dataRow = browser.params.entities[accommodationParams.schemaName][accommodationParams.table_name].find(function (entity) {
+                    return entity.id == accommodationParams.data[0].id;
+                });
+                var filter = accommodationParams.shortest_key_filter + dataRow.RID;
                 var allWindows;
+
                 chaisePage.waitForElementInverse(element(by.id("spinner"))).then(function() {
                     return chaisePage.recordsetPage.getEditActionButtons();
                 }).then(function(editButtons) {
@@ -429,7 +440,7 @@ describe('View recordset,', function() {
                     allWindows = handles;
                     return browser.switchTo().window(allWindows[1]);
                 }).then(function() {
-                    var result = '/recordedit/#' + browser.params.catalogId + "/" + accommodationParams.schemaName + ":" + accommodationParams.table_name + "/id=" + accommodationParams.data[0].id;
+                    var result = '/recordedit/#' + browser.params.catalogId + "/" + accommodationParams.schemaName + ":" + accommodationParams.table_name + "/" + filter;
                     browser.driver.getCurrentUrl().then(function(url) {
                         // Store this for use in later spec.
                         recEditUrl = url;
@@ -546,7 +557,6 @@ describe('View recordset,', function() {
             for (var j = 0; j < accommodationParams.sortedData.length; j++) {
                 (function (k) {
                     it("should sort " + accommodationParams.sortedData[k].columnName + " column in ascending order.", function (done) {
-
                         // Check the presence of initial sort button
                         expect(chaisePage.recordsetPage.getColumnSortButton(accommodationParams.sortedData[k].rawColumnName).isDisplayed()).toBe(true, accommodationParams.sortedData[k].columnName + " column doesn't contain the initial sort button.");
 
@@ -559,7 +569,7 @@ describe('View recordset,', function() {
                             expect(chaisePage.recordsetPage.getColumnSortDescButton(accommodationParams.sortedData[k].rawColumnName).isDisplayed()).toBe(true,  accommodationParams.sortedData[k].columnName + " column doesn't contain the descending sort button.");
 
                             // Check if the url has @sort by column name
-                            chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + ',id)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 1 for ascending order.");
+                            chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + ',RID)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 1 for ascending order.");
 
                             return chaisePage.recordsetPage.getRows();
 
@@ -581,7 +591,7 @@ describe('View recordset,', function() {
                             chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
 
                             // Check if the url has @sort by column name
-                            chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + ',id)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 2 for ascending order.");
+                            chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + ',RID)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 2 for ascending order.");
 
                             return chaisePage.recordsetPage.getRows();
 
@@ -603,7 +613,7 @@ describe('View recordset,', function() {
                             chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
 
                             // Sanity check on the previous page
-                            chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + ',id)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 1 for ascending order.");
+                            chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + ',RID)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 1 for ascending order.");
                             done();
 
                         }).catch(function (err) {
@@ -626,7 +636,7 @@ describe('View recordset,', function() {
                             expect(chaisePage.recordsetPage.getColumnSortAscButton(accommodationParams.sortedData[k].rawColumnName).isDisplayed()).toBe(true, accommodationParams.sortedData[k].columnName + " column doesn't contain the ascending sort button.");
 
                             // Check if the url has @sort by column name
-                            chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + '::desc::,id)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 1 for descending order.");
+                            chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + '::desc::,RID)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 1 for descending order.");
 
                             return chaisePage.recordsetPage.getRows();
 
@@ -648,7 +658,7 @@ describe('View recordset,', function() {
                             chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
 
                             // Check if the url has @sort by column name
-                            chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + '::desc::,id)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 2 for descending order.");
+                            chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + '::desc::,RID)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 2 for descending order.");
 
                             return chaisePage.recordsetPage.getRows();
 
@@ -670,7 +680,7 @@ describe('View recordset,', function() {
                             chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
 
                             // Sanity check on the previous page
-                            chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + '::desc::,id)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 1 for descending order.");
+                            chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + '::desc::,RID)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 1 for descending order.");
                             done();
 
                         }).catch(function (err) {
@@ -785,10 +795,15 @@ describe('View recordset,', function() {
         });
 
         it("clicking view action should change current window with the same window ID and a new page ID.", function () {
+            var dataRow = browser.params.entities[accommodationParams.schemaName][accommodationParams.table_name].find(function (entity) {
+                return entity.id == accommodationParams.data[0].id;
+            });
+            var filter = accommodationParams.shortest_key_filter + dataRow.RID;
+
             chaisePage.recordsetPage.getViewActionButtons().then(function(viewButtons) {
                 return viewButtons[0].click();
             }).then(function() {
-                var result = '/record/#' + browser.params.catalogId + "/" + accommodationParams.schemaName + ":" + accommodationParams.table_name + "/id=" + accommodationParams.data[0].id;
+                var result = '/record/#' + browser.params.catalogId + "/" + accommodationParams.schemaName + ":" + accommodationParams.table_name + "/" + filter;
                 return chaisePage.waitForUrl(result, browser.params.defaultTimeout);
             }).finally(function() {
                 expect(chaisePage.getWindowName()).toBe(windowId);
@@ -804,6 +819,10 @@ describe('View recordset,', function() {
         });
 
         it("clicking edit action should open a new window with a new window ID and a new page ID.", function () {
+            var dataRow = browser.params.entities[accommodationParams.schemaName][accommodationParams.table_name].find(function (entity) {
+                return entity.id == accommodationParams.data[0].id;
+            });
+            var filter = accommodationParams.shortest_key_filter + dataRow.RID;
             var allWindows;
 
             chaisePage.recordsetPage.getEditActionButtons().then(function(editButtons) {
@@ -814,7 +833,7 @@ describe('View recordset,', function() {
                 allWindows = handles;
                 return browser.switchTo().window(allWindows[1]);
             }).then(function() {
-                var result = '/recordedit/#' + browser.params.catalogId + "/" + accommodationParams.schemaName + ":" + accommodationParams.table_name + "/id=" + accommodationParams.data[0].id;
+                var result = '/recordedit/#' + browser.params.catalogId + "/" + accommodationParams.schemaName + ":" + accommodationParams.table_name + "/" + filter;
                 return chaisePage.waitForUrl(result, browser.params.defaultTimeout);
             }).finally(function() {
                 expect(chaisePage.getWindowName()).not.toBe(windowId);
