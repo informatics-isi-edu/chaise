@@ -13,6 +13,10 @@ var Sidebar = function() {
 				columns.push(c);
 			}
 		});
+
+		columns = columns.filter(function(c) {
+			return ["RID","RCT","RMT","RCB","RMB"].indexOf(c.name) === -1;
+		});
 		return columns.slice(0);
 	};
 
