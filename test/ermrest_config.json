@@ -1,4 +1,5 @@
 {
+  "require_primary_keys": false,
   "registry": {
     "type": "postgres",
     "dsn": "dbname=ermrest",
