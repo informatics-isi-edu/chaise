@@ -229,11 +229,10 @@
                 editOrCopy = true,
                 form = vm.formContainer,
                 model = vm.recordEditModel;
-
+            form.$setSubmitted()
             if (form.$invalid) {
                 vm.readyToSubmit = false;
                 AlertsService.addAlert('Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.', 'error');
-                form.$setSubmitted();
                 return;
             }
 
@@ -800,6 +799,13 @@
             $timeout(function() {
                   resizeColumns();
             }, TIMER_INTERVAL, false);
+        });
+
+        $window.addEventListener("beforeunload", function(e) {
+            if(vm.formContainer.$submitted){
+                return undefined;
+            }
+            e.returnValue = "Do you want to leave this page? Changes you have made will not be saved.";
         });
     }]);
 })();
