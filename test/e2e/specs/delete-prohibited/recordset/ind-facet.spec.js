@@ -4,6 +4,7 @@ var EC = protractor.ExpectedConditions;
 var testParams = {
     schema_name: "faceting",
     table_name: "main",
+    sort: "@sort(id)",
     totalNumFacets: 16,
     facetNames: [ "id", "int_col", "float_col", "date_col", "timestamp_col", "text_col", "longtext_col", "markdown_col", "boolean_col", "jsonb_col", "F1", "to_name", "f3 (term)", "from_name", "F1 with Term", "col_w_long_values" ],
     defaults: {
@@ -13,14 +14,14 @@ var testParams = {
         pageSize: 25
     },
     searchBox: {
-        term: "ne",
-        filter: "Search: ne",
+        term: "one",
+        filter: "Search: one",
         numRows: 6,
-        term2: "ve",
+        term2: "eve",
         term2Rows: 4,
-        term3: "n",
-        term3Filter: "Search: ven",
-        term3Rows: 2
+        term3: "ns",
+        term3Filter: "Search: evens",
+        term3Rows: 1
     },
     minInputClass: "range-min",
     minInputClearClass: "min-clear",
@@ -151,10 +152,10 @@ var testParams = {
             name: "text_col",
             type: "choice",
             totalNumOptions: 10,
-            option: 1,
+            option: 0,
             filter: "text_col: one",
-            numRows: 5,
-            options: [ 'Empty', 'one', 'two', 'No Value', 'eight', 'eleven', 'five', 'four', 'nine', 'seven' ]
+            numRows: 6,
+            options: [ 'one', 'Empty', 'two', 'No Value', 'seven', 'eight', 'elevens', 'four', 'six', 'ten' ]
         },
         {
             name: "longtext_col",
@@ -254,7 +255,7 @@ describe("Viewing Recordset with Faceting,", function() {
     describe("For table " + testParams.table_name + ",", function() {
 
         var table, record,
-        uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
+        uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name + testParams.sort;
 
         beforeAll(function () {
             browser.ignoreSynchronization=true;
@@ -461,14 +462,13 @@ describe("Viewing Recordset with Faceting,", function() {
             });
 
             it("should show 25 rows and 0 filters after clicking 'clear all'", function () {
-                var sortString = "@sort(id)";
                 chaisePage.recordsetPage.getClearAllFilters().click().then(function () {
                     return chaisePage.waitForElementInverse(element(by.id("spinner")));
                 }).then(function () {
                     //verify there's no facet string in url
                     return browser.getCurrentUrl();
                 }).then(function (url) {
-                    expect(url).toBe(uri + sortString);
+                    expect(url).toBe(uri, "uri after clear all is incorrect");
 
                     return chaisePage.recordsetPage.getRows().count();
                 }).then(function (ct) {

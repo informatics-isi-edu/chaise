@@ -73,7 +73,7 @@
     },
     {
         "id": "13", "fk_to_f1": "2", "fk_to_f2": "2",
-        "int_col": 5, "float_col": 5.5, "date_col": "2005-05-05", "timestamp_col": "2005-05-05T05:05:05-07:00", "text_col": "five", "shorttext_col": "five", "longtext_col": "five", "markdown_col": "**five**",
+        "int_col": 5, "float_col": 5.5, "date_col": "2005-05-05", "timestamp_col": "2005-05-05T05:05:05-07:00", "text_col": "seven", "shorttext_col": "seven", "longtext_col": "five", "markdown_col": "**five**",
         "boolean_col": false, "jsonb_col": {"key": "five"},
         "col_w_long_values": "1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000013"
     },
@@ -97,7 +97,7 @@
     },
     {
         "id": "17", "fk_to_f1": "2", "fk_to_f2": "3",
-        "int_col": 9, "float_col": 9.9, "date_col": "2009-09-09", "timestamp_col": "2009-09-09T09:09:09-07:00", "text_col": "nine", "shorttext_col": "nine", "longtext_col": "nine", "markdown_col": "**nine**",
+        "int_col": 9, "float_col": 9.9, "date_col": "2009-09-09", "timestamp_col": "2009-09-09T09:09:09-07:00", "text_col": "one", "shorttext_col": "one", "longtext_col": "nine", "markdown_col": "**nine**",
         "boolean_col": false, "jsonb_col": {"key": "nine"},
         "col_w_long_values": "1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000015"
     },
@@ -109,13 +109,13 @@
     },
     {
         "id": "19", "fk_to_f1": "2", "fk_to_f2": "3",
-        "int_col": 11, "float_col": 11.11, "date_col": "2011-11-11", "timestamp_col": "2011-11-11T11:11:11-07:00", "text_col": "eleven", "shorttext_col": "eleven", "longtext_col": "eleven", "markdown_col": "**eleven**",
+        "int_col": 11, "float_col": 11.11, "date_col": "2011-11-11", "timestamp_col": "2011-11-11T11:11:11-07:00", "text_col": "elevens", "shorttext_col": "elevens", "longtext_col": "eleven", "markdown_col": "**eleven**",
         "boolean_col": false, "jsonb_col": {"key": "eleven"},
         "col_w_long_values": "1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000015"
     },
     {
         "id": "20", "fk_to_f1": "2", "fk_to_f2": "3",
-        "int_col": 12, "float_col": 12.12, "date_col": "2012-12-12", "timestamp_col": "2012-12-12T12:12:12-07:00", "text_col": "twelve", "shorttext_col": "twelve", "longtext_col": "twelve", "markdown_col": "**twelve**",
+        "int_col": 12, "float_col": 12.12, "date_col": "2012-12-12", "timestamp_col": "2012-12-12T12:12:12-07:00", "text_col": "seven", "shorttext_col": "seven", "longtext_col": "twelve", "markdown_col": "**twelve**",
         "boolean_col": false, "jsonb_col": {"key": "twelve"},
         "col_w_long_values": "1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000015"
     },
