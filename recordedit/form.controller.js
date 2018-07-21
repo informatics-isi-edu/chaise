@@ -231,7 +231,7 @@
                 editOrCopy = true,
                 form = vm.formContainer,
                 model = vm.recordEditModel;
-            
+
             if (form.$invalid) {
                 vm.readyToSubmit = false;
                 AlertsService.addAlert('Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.', 'error');
