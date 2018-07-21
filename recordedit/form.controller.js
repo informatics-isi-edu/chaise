@@ -28,6 +28,7 @@
         vm.submit = submit;
         vm.readyToSubmit = false;
         vm.submissionButtonDisabled = false;
+        vm.successfulSubmission = false;
         vm.redirectAfterSubmission = redirectAfterSubmission;
         vm.searchPopup = searchPopup;
         vm.createRecord = createRecord;
@@ -160,6 +161,7 @@
             var page = result.successful;
             var failedPage = result.failed;
             var resultsReference = page.reference;
+            vm.successfulSubmission = true;
             if (model.rows.length == 1) {
                 vm.redirectAfterSubmission(page);
             }
@@ -229,10 +231,11 @@
                 editOrCopy = true,
                 form = vm.formContainer,
                 model = vm.recordEditModel;
-            form.$setSubmitted()
+            
             if (form.$invalid) {
                 vm.readyToSubmit = false;
                 AlertsService.addAlert('Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.', 'error');
+                form.$setSubmitted();
                 return;
             }
 
@@ -802,7 +805,7 @@
         });
 
         $window.addEventListener("beforeunload", function(e) {
-            if(vm.formContainer.$submitted){
+            if(vm.successfulSubmission){
                 return undefined;
             }
             e.returnValue = "Do you want to leave this page? Changes you have made will not be saved.";
