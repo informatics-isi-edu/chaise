@@ -235,7 +235,7 @@ JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/jquery.cookie.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-sanitize.js \
-	$(JS)/vendor/ui-bootstrap-tpls.js \
+	$(JS)/vendor/ui-bootstrap-tpls-2.5.0.min.js \
 	$(COMMON)/vendor/angular-cookies.min.js \
 	$(JS)/vendor/rzslider.js \
 	$(JS)/vendor/angular-datepicker.js \
@@ -268,6 +268,7 @@ JS_SOURCE=$(JS)/respond.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/navbar.js \
+	$(COMMON)/login.js \
 	$(COMMON)/record.js \
 	$(COMMON)/ellipses.js \
 	$(COMMON)/storage.js \
@@ -303,6 +304,7 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/navbar.js \
+	$(COMMON)/login.js \
 	$(COMMON)/record.js \
 	$(COMMON)/ellipses.js \
 	$(COMMON)/storage.js \
@@ -314,7 +316,7 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/recordCreate.js \
 	$(COMMON)/resizable.js \
 	$(JS)/vendor/bootstrap.js \
-	$(JS)/vendor/ui-bootstrap-tpls.js
+	$(JS)/vendor/ui-bootstrap-tpls-2.5.0.min.js
 
 RECORD_JS_SOURCE=$(RECORD_ASSETS)/record.app.js \
 	$(RECORD_ASSETS)/record.utils.js \
@@ -346,7 +348,7 @@ VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/vendor/ng-device-detector.js \
 	$(COMMON)/vendor/angular-cookies.min.js \
 	$(JS)/vendor/bootstrap.js \
-	$(JS)/vendor/ui-bootstrap-tpls.js \
+	$(JS)/vendor/ui-bootstrap-tpls-2.5.0.min.js \
 	$(JS)/vendor/select.js
 
 VIEWER_JS_SOURCE=$(VIEWER_ASSETS)/viewer.app.js \
@@ -405,6 +407,7 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/upload.js \
 	$(COMMON)/validators.js \
 	$(COMMON)/navbar.js \
+	$(COMMON)/login.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/delete-link.js \
 	$(COMMON)/bindHtmlUnsafe.js \
@@ -412,7 +415,7 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/footer.js \
 	$(COMMON)/recordCreate.js \
 	$(JS)/vendor/bootstrap.js \
-	$(JS)/vendor/ui-bootstrap-tpls.js \
+	$(JS)/vendor/ui-bootstrap-tpls-2.5.0.min.js \
 	$(JS)/vendor/select.js \
 	$(JS)/vendor/angular-datepicker.js \
 	$(JS)/vendor/rzslider.js
@@ -447,7 +450,7 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular-plotly.js \
 	$(JS)/vendor/angular-sanitize.js \
 	$(JS)/vendor/bootstrap.js \
-	$(JS)/vendor/ui-bootstrap-tpls.js \
+	$(JS)/vendor/ui-bootstrap-tpls-2.5.0.min.js \
 	$(COMMON)/vendor/angular-animate.min.js \
 	$(COMMON)/vendor/angular-scroll.min.js \
 	$(COMMON)/alerts.js \
@@ -462,6 +465,7 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/inputs.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/navbar.js \
+	$(COMMON)/login.js \
 	$(COMMON)/resizable.js \
 	$(COMMON)/storage.js \
 	$(COMMON)/table.js \
