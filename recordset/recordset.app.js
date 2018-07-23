@@ -64,11 +64,7 @@
         selectedRows: [],   // array of selected rows
         search: null,       // search term
         pageLimit: 25,      // number of rows per page
-        config: {},
-        tooltip: {
-            actionCol: "Click on the action buttons to view, edit, or delete each record",
-            viewCol: "Click on the eye button to view the detailed page associated with each record"
-        }
+        config: {}
     })
 
     // Register work to be performed after loading all modules
