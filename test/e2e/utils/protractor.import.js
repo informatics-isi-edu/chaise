@@ -87,44 +87,58 @@ var fetchSchemas = function(testConfiguration, catalogId) {
 };
 exports.fetchSchemas = fetchSchemas;
 
-var importSchemas = function(configs, defer, authCookie, catalogId, entities) {
+var importSchemas = function(configs, defer, authCookie, entities) {
+    var schemas = {};
 
-    if (configs.length == 0) {
-        defer.resolve({catalogId: catalogId, entities: entities});
-        return;
+    var config, schema, schemaName;
+
+    if (!configs || configs.length === 0) {
+        return defer.resolve({catalogId: catalogId, entities: {}}), defer.promise;
     }
 
-    var config = configs.shift();
-
-    if (catalogId) config.catalog.id = catalogId;
-    else delete config.catalog.id;
-
-    ermrestUtils.importData({
-        setup: config,
-        url: process.env.ERMREST_URL,
+    var settings = {
+        url: process.env.ERMREST_UR,
         authCookie: authCookie
-    }).then(function (data) {
-        process.env.catalogId = data.catalogId;
-        if (data.schema) {
-            entities[data.schema.name] = {};
-            for (var t in data.schema.tables) {
-                if (!data.schema.tables.hasOwnProperty(t)) continue;
-                entities[data.schema.name][t] = data.schema.tables[t].entities;
-            }
-            console.log("Attached entities of " + data.schema.name + " schema");
+    };
+
+    configs.forEach(function (config) {
+        schemas[config.schema.name] = {
+            path: config.schema.path
+        };
+
+        if (config.entities) {
+            schemas[config.schema.name].entities = config.entities.path;
         }
-        importSchemas(configs, defer, authCookie, data.catalogId, entities);
-    }, function (err) {
-        defer.reject(err);
-    }).catch(function(err) {
-        console.log(err);
+    });
+
+    settings.setup = {catalog: {}, schemas: schemas};
+
+    ermrestUtils.createSchemasAndEntities(settings).then(function (data) {
+        process.env.catalogId = data.catalogId;
+        if (data.schemas) {
+            for(schemaName in data.schemas) {
+                if (!data.schemas.hasOwnProperty(schemaName)) continue;
+
+                schema = data.schemas[schemaName];
+                entities[schema.name] = {};
+
+                for (var t in schema.tables) {
+                    if (!schema.tables.hasOwnProperty(t)) continue;
+
+                    entities[schema.name][t] = schema.tables[t].entities;
+                }
+            }
+            console.log("Attached entities for the schemas");
+        }
+        defer.resolve({entities: entities, catalogId: data.catalogId});
+    }).catch(function (err) {
         defer.reject(err);
     });
 };
 
-exports.importSchemas = function(schemaConfigurations, catalogId) {
+exports.importSchemas = function(schemaConfigurations) {
     var defer = q.defer();
-    importSchemas(schemaConfigurations.slice(0), defer, catalogId, {});
+    importSchemas(schemaConfigurations, defer, {});
     return defer.promise;
 };
 
@@ -140,7 +154,7 @@ exports.setup = function(testConfiguration) {
 
     var defer1 = Q.defer();
     // Call setup to import data for tests as specified in the configuration
-    importSchemas(schemaConfigurations.slice(0), defer1, testConfiguration.authCookie, undefined, entities);
+    importSchemas(schemaConfigurations, defer1, testConfiguration.authCookie, entities);
 
     defer1.promise.then(function(res) {
 
@@ -198,7 +212,8 @@ exports.tear = function(testConfiguration, catalogId, defer) {
     ermrestUtils.tear({
       url: process.env.ERMREST_URL,
       catalogId: catalogId,
-      setup: testConfiguration.setup.schemaConfigurations[0]
+      setup: testConfiguration.setup.schemaConfigurations[0],
+      authCookie: process.env.AUTH_COOKIE
     }).done(function() {
       cleanupDone = true;
     });
