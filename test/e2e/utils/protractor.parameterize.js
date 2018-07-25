@@ -88,6 +88,7 @@ exports.parameterize = function(config, configParams) {
                   onErmrestLogin(defer);
                 } else defer.reject(error);
               } else {
+                console.log("error occured while trying to get authCookie of dummy user.");
                 console.dir(error);
                 defer.reject(error);
               }
