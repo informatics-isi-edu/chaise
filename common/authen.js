@@ -3,9 +3,9 @@
 
     angular.module('chaise.authen', ['chaise.utils', 'chaise.storage'])
 
-    .factory('Session', ['messageMap', 'modalUtils', 'StorageService', '$cookies', '$http', '$interval', '$log', '$q', 'UriUtils', 'ConfigUtils', '$window', function (messageMap, modalUtils, StorageService, $cookies, $http, $interval, $log, $q, UriUtils, ConfigUtils, $window) {
+    .factory('Session', ['messageMap', 'modalUtils', 'StorageService', '$cookies', '$http', '$interval', '$log', '$q', 'UriUtils', '$window', '$rootScope', function (messageMap, modalUtils, StorageService, $cookies, $http, $interval, $log, $q, UriUtils, $window, $rootScope) {
 
-        var chaiseConfig = ConfigUtils.getConfigJSON();
+        var chaiseConfig = $rootScope.chaiseConfig;
 
         // authn API no longer communicates through ermrest, removing the need to check for ermrest location
         var serviceURL = $window.location.origin;

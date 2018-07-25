@@ -26,6 +26,10 @@
         $cookiesProvider.defaults.path = '/';
     }])
 
+    .config(['ConfigUtilsProvider', function(ConfigUtilsProvider) {
+      ConfigUtilsProvider.$get().setConfigJSON();
+    }])
+
     // Register the 'context' object which can be accessed by config and other
     // services.
     .constant('context', {
@@ -69,8 +73,8 @@
     })
 
     // Register work to be performed after loading all modules
-    .run(['AlertsService', 'context', 'DataUtils', 'ERMrest', 'FunctionUtils', 'headInjector', 'MathUtils', 'messageMap', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', 'ConfigUtils', '$log', '$rootScope', '$window', 'modalBox', 'logActions',
-        function(AlertsService, context, DataUtils, ERMrest, FunctionUtils, headInjector, MathUtils, messageMap, recordsetModel, Session, UiUtils, UriUtils, ConfigUtils, $log, $rootScope, $window, modalBox, logActions) {
+    .run(['AlertsService', 'context', 'DataUtils', 'ERMrest', 'FunctionUtils', 'headInjector', 'MathUtils', 'messageMap', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', 'modalBox', 'logActions',
+        function(AlertsService, context, DataUtils, ERMrest, FunctionUtils, headInjector, MathUtils, messageMap, recordsetModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, modalBox, logActions) {
         try {
             var session;
 
@@ -78,7 +82,7 @@
 
             UriUtils.setOrigin();
 
-            var chaiseConfig = ConfigUtils.getConfigJSON();
+            var chaiseConfig = $rootScope.chaiseConfig;
             context.chaiseBaseURL = $window.location.href.replace($window.location.hash, '');
             var modifyEnabled = chaiseConfig.editRecord === false ? false : true;
             var deleteEnabled = chaiseConfig.deleteRecord === true ? true : false;

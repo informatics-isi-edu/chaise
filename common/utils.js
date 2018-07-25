@@ -1,63 +1,62 @@
 (function() {
     'use strict';
 
-    var defaultChaiseConfig = {
-        "catalog": 1,
-        "layout": "list",
-        "feedbackURL": "",
-        "helpURL": "",
-        "ermrestLocation": (window.location.protocol) + "//" + (window.location.host),
-        "recordResource": "/record",
-        "showBadgeCounts": false,
-        "tableThreshold": 0,
-        "showAllAttributes": false,
-        "headTitle": "Chaise",
-        "navbarBrandText": "Chaise",
-        "logoutURL": "/",
-        "maxRecordsetRowHeight": 160,
-        "dataBrowser": "/chaise/search",
-        "defaultAnnotationColor": "red",
-        "confirmDelete": true,
-        "hideSearchTextFacet": false,
-        "maxColumns": 6,
-        "showUnfilteredResults": false,
-        "editRecord": true,
-        "deleteRecord": true,
-        "signUpURL": "",
-        "profileURL": "",
-        "navbarMenu": {
-            "newTab": true,
-            "children": []
-        },
-        "sidebarPosition": "right",
-        "attributesSidebarHeading": "Choose Attributes",
-        "allowErrorDismissal": true,
-        "searchPageSize": 25,
-        "showFaceting": true,
-        "hideTableOfContents": false,
-        "showExportButton": false,
-        "navbarBrand": "/",
-        "navbarBrandImage": null,
-        "customCSS": "/assets/css/chaise.css",
-        "footerMarkdown": "**Please check** [Privacy Policy](/privacy-policy/){target='_blank'}",
-        "maxRelatedTablesOpen":15,
-        "plotViewEnabled": false,
-        "recordUiGridEnabled": false,
-        "recordUiGridExportCSVEnabled": true,
-        "recordUiGridExportPDFEnabled": true,
-        "tour": {
-          "pickRandom": false,
-          "searchInputAttribute": "Data",
-          "searchChosenAttribute": "Data Type",
-          "searchInputValue": "micro",
-          "extraAttribute": "Mouse Anatomic Source",
-          "chosenAttribute": "Data Type",
-          "chosenValue": "Expression microarray - gene"
-        }
-    }
-
-
     angular.module('chaise.utils', ['chaise.errors'])
+
+    .constant("defaultChaiseConfig", {
+          "catalog": 1,
+          "layout": "list",
+          "feedbackURL": "",
+          "helpURL": "",
+          "ermrestLocation": (window.location.protocol) + "//" + (window.location.host),
+          "recordResource": "/record",
+          "showBadgeCounts": false,
+          "tableThreshold": 0,
+          "showAllAttributes": false,
+          "headTitle": "Chaise",
+          "navbarBrandText": "Chaise",
+          "logoutURL": "/",
+          "maxRecordsetRowHeight": 160,
+          "dataBrowser": "/chaise/search",
+          "defaultAnnotationColor": "red",
+          "confirmDelete": true,
+          "hideSearchTextFacet": false,
+          "maxColumns": 6,
+          "showUnfilteredResults": false,
+          "editRecord": true,
+          "deleteRecord": true,
+          "signUpURL": "",
+          "profileURL": "",
+          "navbarMenu": {
+              "newTab": true,
+              "children": []
+          },
+          "sidebarPosition": "right",
+          "attributesSidebarHeading": "Choose Attributes",
+          "allowErrorDismissal": true,
+          "searchPageSize": 25,
+          "showFaceting": true,
+          "hideTableOfContents": false,
+          "showExportButton": false,
+          "navbarBrand": "/",
+          "navbarBrandImage": null,
+          "customCSS": "/assets/css/chaise.css",
+          "footerMarkdown": "**Please check** [Privacy Policy](/privacy-policy/){target='_blank'}",
+          "maxRelatedTablesOpen":15,
+          "plotViewEnabled": false,
+          "recordUiGridEnabled": false,
+          "recordUiGridExportCSVEnabled": true,
+          "recordUiGridExportPDFEnabled": true,
+          "tour": {
+            "pickRandom": false,
+            "searchInputAttribute": "Data",
+            "searchChosenAttribute": "Data Type",
+            "searchInputValue": "micro",
+            "extraAttribute": "Mouse Anatomic Source",
+            "chosenAttribute": "Data Type",
+            "chosenValue": "Expression microarray - gene"
+          }
+    })
 
     .constant("appTagMapping", {
         "tag:isrd.isi.edu,2016:chaise:record": "/record",
@@ -222,6 +221,7 @@
     .factory('UriUtils', ['$injector', '$rootScope', '$window', 'appContextMapping', 'appTagMapping', 'ContextUtils', 'Errors', 'messageMap', 'parsedFilter',
         function($injector, $rootScope, $window, appContextMapping, appTagMapping, ContextUtils, Errors, messageMap, ParsedFilter) {
         var chaiseBaseURL;
+        //var chaiseConfig = $rootScope.chaiseConfig;
         /**
          * @function
          * @param {Object} location - location Object from the $window resource
@@ -1228,16 +1228,24 @@
         }
     }])
 
-    .factory("ConfigUtils", [function() {
-        function getConfigJSON() {
-          if(typeof chaiseConfig != 'undefined')
-            return chaiseConfig;
-          else
-            return defaultChaiseConfig;
-        }
-        return {
-            getConfigJSON: getConfigJSON
-        }
+    .factory("ConfigUtils", ['$rootScope', 'defaultChaiseConfig', function($rootScope, defaultConfig) {
+      function setConfigJSON() {
+        $rootScope.chaiseConfig = {};
+        if(typeof chaiseConfig != 'undefined')
+          $rootScope.chaiseConfig = chaiseConfig;
+
+        Object.keys(defaultConfig).forEach(function (key) {
+          if (typeof chaiseConfig != 'undefined' && typeof chaiseConfig[key] != 'undefined') {
+            $rootScope.chaiseConfig[key] = chaiseConfig[key];
+          } else { // property doesn't exist
+            $rootScope.chaiseConfig[key] = defaultConfig[key];
+          }
+        })
+      }
+
+      return {
+        setConfigJSON: setConfigJSON
+      }
     }])
 
     // directive for including the loading spinner
@@ -1425,7 +1433,8 @@
       }
      }])
 
-    .service('headInjector', ['$window', 'MathUtils',  function($window, MathUtils) {
+    .service('headInjector', ['$window', '$rootScope', 'MathUtils',  function($window, $rootScope, MathUtils) {
+        //var chaiseConfig = $rootScope.chaiseConfig;
         function addCustomCSS() {
             if (typeof chaiseConfig != 'undefined' && chaiseConfig['customCSS'] !== undefined) {
                 var fileref = document.createElement("link");

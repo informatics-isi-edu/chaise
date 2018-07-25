@@ -8,11 +8,10 @@
     'use strict';
 
     angular.module('chaise.footer', [])
-        .directive('footer', ['ERMrest', '$timeout', 'ConfigUtils', function(ERMrest, $timeout, ConfigUtils) {
-
-          var chaiseConfig = ConfigUtils.getConfigJSON();
-
-            return {
+        .directive('footer', ['ERMrest', '$timeout', '$rootScope', function(ERMrest, $timeout, $rootScope) {
+          var chaiseConfig = $rootScope.chaiseConfig;
+          var footerText = $rootScope.chaiseConfig.footerMarkdown;
+          return {
                 restrict: 'E',
                 scope: {},
                 templateUrl: '../common/templates/footer.html',

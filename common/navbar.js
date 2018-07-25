@@ -6,25 +6,16 @@
         'chaise.authen',
         'ui.bootstrap'
     ])
-    .directive('navbar', ['$window', '$rootScope', 'Session', 'modalUtils', 'ConfigUtils', function($window, $rootScope, Session, modalUtils, ConfigUtils) {
+    .directive('navbar', ['$window', '$rootScope', 'Session', 'modalUtils', function($window, $rootScope, Session, modalUtils) {
 
-        var chaiseConfig = ConfigUtils.getConfigJSON();
+        var chaiseConfig = $rootScope.chaiseConfig;
 
     // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
-        var root;
-        if(chaiseConfig.navbarMenu)
-          root = chaiseConfig.navbarMenu;
-        else {
-          root={};
-        }
+        var root = $rootScope.navbarMenu;
         if (root) {
             // Set default newTab property at root node
-            if (!root.hasOwnProperty('newTab')) {
-                root.newTab = true;
-            }
-
+            root.newTab = true;
             var q = [root];
-
             while (q.length > 0) {
                 var obj = q.shift();
                 var parentNewTab = obj.newTab;
@@ -51,36 +42,13 @@
             scope: {},
             templateUrl: '../common/templates/navbar.html',
             link: function(scope) {
-              if(chaiseConfig.navbarBrand)
-                scope.brandURL = chaiseConfig.navbarBrand;
-              else {
-                scope.brandURL = '/'
-              }
-              if(chaiseConfig.navbarBrandText)
-                scope.brandText = chaiseConfig.navbarBrandText || chaiseConfig.headTitle;
-              else {
-                scope.brandText = 'Chaise';
-              }
-              if(chaiseConfig.navbarBrandImage)
-                scope.brandImage = chaiseConfig.navbarBrandImage;
-              else {
-                scope.brandImage = null
-              }
-              if(chaiseConfig.navbarMenu && chaiseConfig.navbarMenu.children)
-                scope.menu = chaiseConfig.navbarMenu.children;
-              else {
-                scope.menu = [];
-              }
-              if(chaiseConfig.signUpURL)
-                scope.signUpURL = chaiseConfig.signUpURL;
-              else {
-                scope.signUpURL = ''
-              }
-              if(chaiseConfig.profileURL)
-                scope.profileURL = chaiseConfig.profileURL;
-              else {
-                scope.profileURL = ''
-              }
+                scope.brandURL = $rootScope.navbarBrand;
+                scope.brandText = $rootScope.navbarBrandText || $rootScope.headTitle;
+                scope.brandImage = $rootScope.navbarBrandImage;
+                scope.menu = $rootScope.navbarMenu.children;
+                scope.signUpURL = $rootScope.signUpURL;
+                scope.profileURL = $rootScope.profileURL;
+
                 Session.subscribeOnChange(function() {
                     $rootScope.session = Session.getSessionValue();
 

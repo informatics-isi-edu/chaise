@@ -48,6 +48,10 @@
         $logProvider.debugEnabled(chaiseConfig.debug === true);
     }])
 
+    .config(['ConfigUtilsProvider', function(ConfigUtilsProvider) {
+      ConfigUtilsProvider.$get().setConfigJSON();
+    }])
+
     .config(function($provide) {
         $provide.decorator("$exceptionHandler", ['$log', '$injector', function($log, $injector) {
             return function(exception, cause) {
@@ -72,13 +76,13 @@
         }]);
     })
 
-    .run(['AlertsService', 'dataFormats', 'DataUtils', 'ERMrest', 'ErrorService', 'FunctionUtils', 'headInjector', 'logActions', 'MathUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', 'ConfigUtils', '$log', '$rootScope', '$window', '$cookies', 'messageMap', 'Errors',
-        function runRecordEditApp(AlertsService, dataFormats, DataUtils, ERMrest, ErrorService, FunctionUtils, headInjector, logActions, MathUtils, recordEditModel, Session, UiUtils, UriUtils, ConfigUtils, $log, $rootScope, $window, $cookies, messageMap, Errors) {
+    .run(['AlertsService', 'dataFormats', 'DataUtils', 'ERMrest', 'ErrorService', 'FunctionUtils', 'headInjector', 'logActions', 'MathUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', 'messageMap', 'Errors',
+        function runRecordEditApp(AlertsService, dataFormats, DataUtils, ERMrest, ErrorService, FunctionUtils, headInjector, logActions, MathUtils, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies, messageMap, Errors) {
 
         var session,
             context = { booleanValues: ['', true, false] };
 
-        var chaiseConfig = ConfigUtils.getConfigJSON();
+        var chaiseConfig = $rootScope.chaiseConfig;
         $rootScope.showColumnSpinner = [{}];
 
         $rootScope.displayReady = false;
