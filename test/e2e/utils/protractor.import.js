@@ -136,12 +136,6 @@ var importSchemas = function(configs, defer, authCookie, entities) {
     });
 };
 
-exports.importSchemas = function(schemaConfigurations) {
-    var defer = q.defer();
-    importSchemas(schemaConfigurations, defer, {});
-    return defer.promise;
-};
-
 exports.setup = function(testConfiguration) {
 
     var defer = Q.defer();
