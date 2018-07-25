@@ -36,7 +36,6 @@ exports.parameterize = function(config, configParams) {
     testConfiguration.setup.url = process.env.ERMREST_URL;
     testConfiguration.setup.authCookie = testConfiguration.authCookie;
 
-    console.log("cookie while calling setup: ", testConfiguration.authCookie);
     pImport.setup(testConfiguration).then(function(data) {
       process.env.CATALOGID = data.catalogId;
       if (data.entities) {
@@ -86,7 +85,6 @@ exports.parameterize = function(config, configParams) {
                 });
                 if (testConfiguration.authCookie) {
                   process.env.AUTH_COOKIE = testConfiguration.authCookie;
-                  console.log("cookie in beforeLaunch:", testConfiguration.authCookie);
                   onErmrestLogin(defer);
                 } else defer.reject(error);
               } else {

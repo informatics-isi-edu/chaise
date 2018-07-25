@@ -97,7 +97,7 @@ var importSchemas = function(configs, defer, authCookie, entities) {
     }
 
     var settings = {
-        url: process.env.ERMREST_UR,
+        url: process.env.ERMREST_URL,
         authCookie: authCookie
     };
 
