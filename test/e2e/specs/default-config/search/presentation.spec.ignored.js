@@ -492,7 +492,7 @@ describe('The initial sidebar,', function () {
 
         it('the number in the () should be consistent with the number of items displayed in the list under "View all attributes"', function () {
             var columns = chaisePage.dataUtils.sidebar.getAllSidebarColumns(browser.params.defaultSchema, browser.params.defaultTable);
-            expect(viewAll.getText()).toBe("View all attributes (" + columns.length + ")");
+            expect(viewAll.getText()).toBe("View all attributes (" + (columns.length + 10) + ")");
         });
 
         var sidebarHeader = chaisePage.sidebar.sidebarHeader;

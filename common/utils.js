@@ -1232,15 +1232,17 @@
       function setConfigJSON() {
         $rootScope.chaiseConfig = {};
         if(typeof chaiseConfig != 'undefined')
-          $rootScope.chaiseConfig = chaiseConfig;
+          $rootScope.chaiseConfig = Object.assign({}, chaiseConfig);
 
-        Object.keys(defaultConfig).forEach(function (key) {
-          if (typeof chaiseConfig != 'undefined' && typeof chaiseConfig[key] != 'undefined') {
-            $rootScope.chaiseConfig[key] = chaiseConfig[key];
-          } else { // property doesn't exist
-            $rootScope.chaiseConfig[key] = defaultConfig[key];
+        for (var property in defaultConfig) {
+          if (defaultConfig.hasOwnProperty(property)) {
+            if (typeof chaiseConfig != 'undefined' && typeof chaiseConfig[property] != 'undefined') {
+              $rootScope.chaiseConfig[property] = chaiseConfig[property];
+            } else { // property doesn't exist
+              $rootScope.chaiseConfig[property] = defaultConfig[property];
+            }
           }
-        })
+        }
       }
 
       return {

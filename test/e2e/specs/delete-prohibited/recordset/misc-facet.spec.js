@@ -49,7 +49,7 @@ var testParams = {
         secondFacetOption: 0,
         secondFacetNumOptions: 6
     },
-    recordColumns: [ "text_col", "longtext_col", "markdown_col", "int_col", "float_col", "date_col", "timestamp_col", "boolean_col", "jsonb_col", "eqK7CNP-yhTDab74BW-7lQ", "cD8qWek-pEc_of8BUq0kAw" ],
+    recordColumns: [ "text_col", "longtext_col", "markdown_col", "int_col", "float_col", "date_col", "timestamp_col", "boolean_col", "jsonb_col", "1-o7Ye2EkulrWcCVFNHi3A", "hmZyP_Ufo3E5v_nmdTXyyA" ],
     recordValues: {
         text_col: "one",
         longtext_col: "one",
@@ -60,8 +60,8 @@ var testParams = {
         timestamp_col: "2001-01-01 00:01:01",
         boolean_col: "true",
         jsonb_col: JSON.stringify({"key":"one"},undefined,2),
-        "eqK7CNP-yhTDab74BW-7lQ": "one", // faceting_main_fk1
-        "cD8qWek-pEc_of8BUq0kAw": "one" // faceting_main_fk2
+        "1-o7Ye2EkulrWcCVFNHi3A": "one", // faceting_main_fk1
+        "hmZyP_Ufo3E5v_nmdTXyyA": "one" // faceting_main_fk2
     },
     glyphLeftClass: "glyphicon-triangle-left",
     glyphRightClass: "glyphicon-triangle-right",

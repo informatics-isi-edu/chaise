@@ -148,7 +148,7 @@ describe('Edit multiple existing record,', function() {
 
                 beforeAll(function() {
                     browser.ignoreSynchronization = true;
-                    browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/" + schemaName + ":" + tableParams.table_name + "/" + keyPairs.join(";"));
+                    browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/" + schemaName + ":" + tableParams.table_name + "/" + keyPairs.join(";") + "@sort(" + tableParams.sortColumns + ")");
                 });
 
                 it("should have the title displayed properly.", function() {

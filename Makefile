@@ -19,7 +19,6 @@ BIN=$(MODULES)/.bin
 ## Sequential protractor scripts
 # Legacy apps tests
 E2Esearch=test/e2e/specs/default-config/search/presentation.conf.js
-E2EDdetailed=test/e2e/specs/detailed/data-dependent/protractor.conf.js
 # Recordedit tests
 E2EDIrecordAdd=test/e2e/specs/all-features-confirmation/recordedit/add.conf.js
 E2EDIrecordEditMultiColTypes=test/e2e/specs/default-config/recordedit/multi-col-types.conf.js
@@ -63,7 +62,6 @@ Manualrecordset=test/manual/specs/recordset.conf.js
 
 NAVBAR_TESTS=$(E2Enavbar) $(E2EnavbarHeadTitle)
 SEARCH_TESTS=$(E2Esearch)
-DETAILED_TESTS=$(E2EDdetailed)
 RECORDSET_TESTS=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit) $(E2EDrecordsetIndFacet) $(E2EDrecordsetHistFacet)
 RECORD_TESTS=$(E2EDrecord) $(E2ErecordNoDeleteBtn) $(E2EDrecordRelatedTable) $(E2EDrecordCopy)
 RECORDADD_TESTS=$(E2EDIrecordAdd) $(E2EDIrecordMultiAdd) $(E2EDIrecordImmutable)
@@ -120,10 +118,6 @@ testpermissions:test-PERMISSIONS_TESTS
 #Rule to run viewer app tests
 .PHONY: testviewer
 testviewer: test-VIEWER_TESTS
-
-#Rule to run detailed app tests
-.PHONY: testdetailed
-testdetailed: test-DETAILED_TESTS
 
 #Rule to run recordset app tests
 .PHONY: testrecordset
@@ -187,7 +181,6 @@ CAT=cat
 # HTML
 HTML=search/index.html \
 	 login/index.html \
-	 detailed/index.html \
 	 recordset/index.html \
 	 viewer/index.html \
 	 recordedit/index.html \
@@ -242,7 +235,7 @@ JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/jquery.cookie.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-sanitize.js \
-	$(JS)/vendor/ui-bootstrap-tpls.js \
+	$(JS)/vendor/ui-bootstrap-tpls-2.5.0.min.js \
 	$(COMMON)/vendor/angular-cookies.min.js \
 	$(JS)/vendor/rzslider.js \
 	$(JS)/vendor/angular-datepicker.js \
@@ -275,6 +268,7 @@ JS_SOURCE=$(JS)/respond.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/navbar.js \
+	$(COMMON)/login.js \
 	$(COMMON)/record.js \
 	$(COMMON)/ellipses.js \
 	$(COMMON)/storage.js \
@@ -289,51 +283,6 @@ TEMPLATES_DEPS=$(TEMPLATES)/erminit.html \
 	$(TEMPLATES)/ermsidebar.html \
 	$(TEMPLATES)/ermretrievefilters.html \
 	$(TEMPLATES)/ermretrieveresults.html
-
-DETAILED_TEMPLATES=detailed/assets/views/detailed.html
-
-# JavaScript and CSS source for Record app
-DETAILED_ASSETS=detailed/assets
-
-DETAILED_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
-	$(JS)/vendor/jquery.cookie.js \
-	$(JS)/vendor/angular.js \
-	$(JS)/vendor/angular-sanitize.js \
-	$(JS)/vendor/bootstrap.js \
-	$(COMMON)/authen.js \
-	$(COMMON)/navbar.js
-
-DETAILED_JS_DEPS=$(DETAILED_ASSETS)/lib/angular-route.min.js \
-	$(DETAILED_ASSETS)/lib/angular-resource.min.js \
-	$(DETAILED_ASSETS)/lib/angular-animate.min.js \
-	$(DETAILED_ASSETS)/lib/angular-cookies.min.js \
-	$(DETAILED_ASSETS)/lib/ui-bootstrap-tpls-0.12.1.min.js \
-	$(DETAILED_ASSETS)/lib/filesize.min.js \
-	$(DETAILED_ASSETS)/lib/slippry/slippry.min.js \
-	$(DETAILED_ASSETS)/lib/fancybox/jquery.fancybox.pack.js \
-	$(DETAILED_ASSETS)/lib/jquery.floatThead.min.js \
-    $(DETAILED_ASSETS)/lib/ui-grid.js \
-    $(DETAILED_ASSETS)/lib/csv.js \
-    $(DETAILED_ASSETS)/lib/pdfmake.min.js \
-    $(DETAILED_ASSETS)/lib/vfs_fonts.js \
-    $(DETAILED_ASSETS)/lib/marked.min.js
-
-DETAILED_JS_SOURCE= $(JS)/respond.js \
-	$(JS)/variables.js \
-	$(JS)/utils.js \
-	$(JS)/ermrest.js \
-	$(COMMON)/utils.js \
-	$(DETAILED_ASSETS)/javascripts/app.js
-
-DETAILED_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
-	$(CSS)/material-design/css/material-design-iconic-font.min.css \
-	$(COMMON)/styles/appheader.css
-
-DETAILED_CSS_DEPS=$(DETAILED_ASSETS)/lib/slippry/slippry.css \
-	$(DETAILED_ASSETS)/lib/fancybox/jquery.fancybox.css \
-	$(DETAILED_ASSETS)/stylesheets/ui-grid.css
-
-DETAILED_CSS_SOURCE=$(COMMON)/styles/app.css
 
 # JavaScript and CSS source for Record(2) app
 RECORD_ASSETS=record
@@ -355,6 +304,7 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/navbar.js \
+	$(COMMON)/login.js \
 	$(COMMON)/record.js \
 	$(COMMON)/ellipses.js \
 	$(COMMON)/storage.js \
@@ -366,7 +316,7 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/recordCreate.js \
 	$(COMMON)/resizable.js \
 	$(JS)/vendor/bootstrap.js \
-	$(JS)/vendor/ui-bootstrap-tpls.js
+	$(JS)/vendor/ui-bootstrap-tpls-2.5.0.min.js
 
 RECORD_JS_SOURCE=$(RECORD_ASSETS)/record.app.js \
 	$(RECORD_ASSETS)/record.utils.js \
@@ -398,7 +348,7 @@ VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/vendor/ng-device-detector.js \
 	$(COMMON)/vendor/angular-cookies.min.js \
 	$(JS)/vendor/bootstrap.js \
-	$(JS)/vendor/ui-bootstrap-tpls.js \
+	$(JS)/vendor/ui-bootstrap-tpls-2.5.0.min.js \
 	$(JS)/vendor/select.js
 
 VIEWER_JS_SOURCE=$(VIEWER_ASSETS)/viewer.app.js \
@@ -457,6 +407,7 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/upload.js \
 	$(COMMON)/validators.js \
 	$(COMMON)/navbar.js \
+	$(COMMON)/login.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/delete-link.js \
 	$(COMMON)/bindHtmlUnsafe.js \
@@ -464,7 +415,7 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/footer.js \
 	$(COMMON)/recordCreate.js \
 	$(JS)/vendor/bootstrap.js \
-	$(JS)/vendor/ui-bootstrap-tpls.js \
+	$(JS)/vendor/ui-bootstrap-tpls-2.5.0.min.js \
 	$(JS)/vendor/select.js \
 	$(JS)/vendor/angular-datepicker.js \
 	$(JS)/vendor/rzslider.js
@@ -499,7 +450,7 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(JS)/vendor/angular-plotly.js \
 	$(JS)/vendor/angular-sanitize.js \
 	$(JS)/vendor/bootstrap.js \
-	$(JS)/vendor/ui-bootstrap-tpls.js \
+	$(JS)/vendor/ui-bootstrap-tpls-2.5.0.min.js \
 	$(COMMON)/vendor/angular-animate.min.js \
 	$(COMMON)/vendor/angular-scroll.min.js \
 	$(COMMON)/alerts.js \
@@ -514,6 +465,7 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/inputs.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/navbar.js \
+	$(COMMON)/login.js \
 	$(COMMON)/resizable.js \
 	$(COMMON)/storage.js \
 	$(COMMON)/table.js \
@@ -631,11 +583,6 @@ login/index.html: login/index.html.in .make-asset-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
 		login/index.html.in > login/index.html
 
-detailed/index.html: detailed/index.html.in .make-detailed-asset-block .make-detailed-template-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-detailed-asset-block' -e 'd' -e '}' \
-		-e '/%TEMPLATES%/ {' -e 'r .make-detailed-template-block' -e 'd' -e '}' \
-		detailed/index.html.in > detailed/index.html
-
 record/index.html: record/index.html.in .make-record-asset-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-record-asset-block' -e 'd' -e '}' \
 		record/index.html.in > record/index.html
@@ -679,35 +626,10 @@ $(JS_CONFIG): chaise-config-sample.js
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-asset-block ; \
 	done
 
-.make-detailed-asset-block: $(DETAILED_SHARED_CSS_DEPS) $(DETAILED_CSS_DEPS) $(DETAILED_CSS_SOURCE) $(DETAILED_SHARED_JS_DEPS) $(DETAILED_JS_DEPS) $(DETAILED_JS_SOURCE) $(JS_CONFIG)
-	> .make-detailed-asset-block
-	for file in $(DETAILED_SHARED_CSS_DEPS) $(DETAILED_CSS_DEPS); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-detailed-asset-block ; \
-	done
-	for file in $(DETAILED_CSS_SOURCE); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-detailed-asset-block ; \
-	done
-	for file in $(JS_CONFIG) $(DETAILED_SHARED_JS_DEPS) $(DETAILED_JS_DEPS); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-detailed-asset-block ; \
-	done
-	for file in $(DETAILED_JS_SOURCE); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-detailed-asset-block ; \
-	done
-
 .make-template-block: $(TEMPLATES_DEPS)
 	> .make-template-block
 	for file in $(TEMPLATES_DEPS); do \
 		$(CAT) $$file >> .make-template-block ; \
-	done
-
-.make-detailed-template-block: $(DETAILED_TEMPLATES)
-	> .make-detailed-template-block
-	for file in $(DETAILED_TEMPLATES); do \
-		$(CAT) $$file >> .make-detailed-template-block; \
 	done
 
 .make-viewer-asset-block: $(VIEWER_SHARED_CSS_DEPS) $(VIEWER_CSS_SOURCE) $(VIEWER_SHARED_JS_DEPS) $(VIEWER_JS_SOURCE) $(JS_CONFIG)
@@ -866,7 +788,6 @@ usage:
 	@echo "    clean     		- cleans the dist dir"
 	@echo "    distclean 		- cleans the dist dir and the dependencies"
 	@echo "    testsearch 		- runs search app e2e tests"
-	@echo "    testdetailed 	- runs detailed app e2e tests"
 	@echo "    testrecordadd 	- runs data entry app add e2e tests"
 	@echo "    testrecordedit 	- runs data entry app edit e2e tests"
 	@echo "    testrecord 		- runs record app e2e tests"
