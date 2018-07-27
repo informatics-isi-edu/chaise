@@ -14,41 +14,7 @@
             link: function (scope, element, attributes) {
                 scope.isLoading = false;
 
-                scope.submit = function () {
-                    scope.isLoading = true;
-                    var base_url = scope.reference.location.service;
-                    scope.exportOptions = {
-                        host: base_url.substring(0, base_url.lastIndexOf("/")),
-                        format: {},
-                        formatOptions: {
-                            "bag": {
-                                name: scope.reference.location.tableName,
-                                algs: ["md5"],
-                                archiver: "zip",
-                                metadata: {},
-                                table_format: "csv"
-                            }
-                        },
-                        defaultFormat: {
-                            name: "BDBag", type: "BAG", template: null
-                        },
-                        defaultFormats: [
-                            {name: "CSV", type: "DIRECT", template: null},
-                            {name: "JSON", type: "DIRECT", template: null}
-                        ],
-                        supportedFormats: []
-                    };
-
-                    // TODO: this function is meant to be triggered by a change of the current table context
-                    updateExportFormats(scope);
-
-                    // The actual export code - it invokes a (synchronous) web service call to either
-                    // ermrest (for single table CSV or JSON export) or ioboxd (if bag or multi-file export)
-                    doExport(scope);
-
-                };
-
-                function updateExportFormats(scope) {
+                scope.updateExportFormats = function () {
                     scope.exportOptions.format = JSON.parse(JSON.stringify(scope.exportOptions.defaultFormat));
                     scope.exportOptions.supportedFormats =
                         JSON.parse(JSON.stringify(scope.exportOptions.defaultFormats));
@@ -74,12 +40,50 @@
                             }
                         }
                     });
-                }
+                };
+
+                scope.submit = function () {
+                    scope.isLoading = true;
+
+                    // TODO: The object below "scope.exportOptions" needs to be initialized before "updateExportFormats"
+                    // or "submit" is called.
+                    var base_url = scope.reference.location.service;
+                    scope.exportOptions = {
+                        host: base_url.substring(0, base_url.lastIndexOf("/")),
+                        format: {},
+                        formatOptions: {
+                            "BAG": {
+                                name: scope.reference.location.tableName,
+                                algs: ["md5"],
+                                archiver: "zip",
+                                metadata: {},
+                                table_format: "csv"
+                            }
+                        },
+                        defaultFormat: {
+                            name: "CSV", type: "DIRECT", template: null
+                        },
+                        defaultFormats: [
+                            {name: "CSV", type: "DIRECT", template: null},
+                            {name: "JSON", type: "DIRECT", template: null},
+                            {name: "BDBag", type: "BAG", template: null}
+                        ],
+                        supportedFormats: []
+                    };
+
+                    // TODO: this function is meant to be triggered by a change of the current table context
+                    scope.updateExportFormats();
+
+                    // The actual export code - it invokes a (synchronous) web service call to either
+                    // ermrest (for single table CSV or JSON export) or ioboxd (if bag or multi-file export)
+                    doExport(scope);
+
+                };
 
                 function createExportParameters(scope) {
                     var exportParameters = {};
 
-                    var bagFormatOpts = scope.exportOptions.formatOptions["bag"];
+                    var bagFormatOpts = scope.exportOptions.formatOptions["BAG"];
                     if (bagFormatOpts !== undefined) {
                         var bagParameters = {};
                         exportParameters["bag"] = bagParameters;
