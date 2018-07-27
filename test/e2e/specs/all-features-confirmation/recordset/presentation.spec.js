@@ -303,7 +303,7 @@ describe('View recordset,', function() {
                 });
 
                 //Check tooltip of Action column
-                var actionCol = element(by.cssContainingText('table > thead > tr > th > span', 'Actions'));
+                var actionCol = element(by.css('.actions-header'));
                 chaisePage.recordsetPage.getColumnComment(actionCol).then(function(comment){
                     expect(comment).toBe(testParams.tooltip.actionCol);
                 });
