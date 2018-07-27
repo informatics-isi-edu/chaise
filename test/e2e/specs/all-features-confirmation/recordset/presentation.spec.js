@@ -175,7 +175,8 @@ var testParams = {
     },
     tooltip: {
         downloadCSV: "Click to download all matched results",
-        permalink: "This link stores your search criteria as a URL. Right click and save."
+        permalink: "This link stores your search criteria as a URL. Right click and save.",
+        actionCol: "Click on the action buttons to view, edit, or delete each record"
     }
 };
 
@@ -300,6 +301,13 @@ describe('View recordset,', function() {
                         });
                     });
                 });
+
+                //Check tooltip of Action column
+                var actionCol = element(by.cssContainingText('table > thead > tr > th > span', 'Actions'));
+                chaisePage.recordsetPage.getColumnComment(actionCol).then(function(comment){
+                    expect(comment).toBe(testParams.tooltip.actionCol);
+                });
+
             });
 
             it("apply different searches, ", function(done) {
