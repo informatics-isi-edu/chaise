@@ -239,7 +239,31 @@
                     return vm.getDisabledTuples ? vm.getDisabledTuples(page, vm.pageLimit) : '';
                 }).then(function (rows) {
                     if (rows) vm.disabledRows = rows;
-                    vm.rowValues = DataUtils.getRowValuesFromPage(vm.page);
+                    var rowValues = DataUtils.getRowValuesFromPage(vm.page);
+                    var cellLimit = 300;
+                    // calculate how many rows can be shown based on # of columns
+                    // var rowLimit = Math.ceil(cellLimit/vm.page.reference.columns.length);
+                    var rowLimit = 2;
+
+                    var pushMoreRows = function(prevInd) {
+                        if (rowValues[prevInd]) {
+                            var nextLimit = prevInd + rowLimit;
+                            Array.prototype.push.apply(vm.rowValues, rowValues.slice(prevInd, nextLimit));
+                            if (rowValues[nextLimit]) {
+                                $timeout(function () {
+                                    pushMoreRows(nextLimit);
+                                });
+                            }
+                        }
+                    }
+
+                    console.log("# of rows before visual paging: ", rowLimit);
+                    if (rowValues.length > rowLimit) {
+                        pushMoreRows(0);
+                    } else {
+                        vm.rowValues = rowValues;
+                    }
+
                     vm.hasLoaded = true;
                     vm.initialized = true;
                     vm.aggregatesToInitialize = [];
