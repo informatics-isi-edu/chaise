@@ -78,6 +78,7 @@ describe('When viewing RecordEdit app', function() {
                 var modalTitle = recordEditPage.getModalTitle();
                 input.click();
                 chaisePage.waitForElement(modalTitle).then(function() {
+                    chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
                     var addBtn = chaisePage.recordsetPage.getAddRecordButton();
                     expect(addBtn.isDisplayed()).toBe(true);
                 });
@@ -88,6 +89,7 @@ describe('When viewing RecordEdit app', function() {
                 var modalTitle = recordEditPage.getModalTitle();
                 input.click();
                 chaisePage.waitForElement(modalTitle).then(function() {
+                    chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
                     var addBtn = chaisePage.recordsetPage.getAddRecordButton();
                     expect(addBtn.isPresent()).toBe(false);
                 });
@@ -98,6 +100,7 @@ describe('When viewing RecordEdit app', function() {
                 var modalTitle = recordEditPage.getModalTitle();
                 input.click();
                 chaisePage.waitForElement(modalTitle).then(function() {
+                    chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
                     var addBtn = chaisePage.recordsetPage.getAddRecordButton();
                     expect(addBtn.isDisplayed()).toBe(true);
                 });
@@ -108,6 +111,7 @@ describe('When viewing RecordEdit app', function() {
                 var modalTitle = recordEditPage.getModalTitle();
                 input.click();
                 chaisePage.waitForElement(modalTitle).then(function() {
+                    chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
                     var addBtn = chaisePage.recordsetPage.getAddRecordButton();
                     expect(addBtn.isPresent()).toBe(false);
                 });
@@ -118,7 +122,7 @@ describe('When viewing RecordEdit app', function() {
 
     describe('user should be shown login modal', function() {
         beforeAll(function(done) {
-            chaisePage.performLogin(process.env.AUTH_COOKIE + "expires=Thu, 01 Jan 1970 00:00:01 GMT;").then(function() {
+            chaisePage.performLogin(process.env.AUTH_COOKIE + "expires=Thu, 01 Jan 1970 00:00:01 GMT;", true).then(function() {
                 browser.ignoreSynchronization = true;
                 done();
             }, function(err) {
@@ -142,7 +146,7 @@ describe('When viewing RecordEdit app', function() {
         });
 
         afterAll(function(done) {
-            chaisePage.performLogin(process.env.AUTH_COOKIE).then(function() {
+            chaisePage.performLogin(process.env.AUTH_COOKIE, false).then(function() {
                 done();
             }, function(err) {
                 console.log(err);

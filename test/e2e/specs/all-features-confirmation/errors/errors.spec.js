@@ -530,9 +530,7 @@ describe('Error related test cases,', function() {
             it('On click of OK button the page should redirect to RecordSet', function(done){
                 chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
                     btn.click();
-                    return browser.switchTo().alert();
-                }).then(function(alert){
-                    alert.accept();
+                    return browser.switchTo().alert().accept();
                 }).then(function(){
                     return browser.driver.getCurrentUrl();
                 }).then (function(currentUrl) {
