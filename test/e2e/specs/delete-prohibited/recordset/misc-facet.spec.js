@@ -640,12 +640,13 @@ describe("Other facet features, ", function() {
             beforeAll(function (done) {
                 browser.ignoreSynchronization=true;
                 browser.get(uri);
+                browser.switchTo().alert().accept();
                 chaisePage.waitForElementInverse(element(by.id("spinner")));
 
                 browser.getCurrentUrl().then(function (url) {
                     var uri = url.replace("recordset", "record");
                     browser.get(uri);
-
+                    
                     chaisePage.waitForElement(element(by.id('tblRecord')));
                     done();
                 }).catch(chaisePage.catchTestError(done));
