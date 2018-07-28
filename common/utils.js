@@ -78,7 +78,9 @@
         "hideErrDetails" : "Hide Error Details",
         "tooltip": {
             downloadCSV: "Click to download all matched results",
-            permalink: "This link stores your search criteria as a URL. Right click and save."
+            permalink: "This link stores your search criteria as a URL. Right click and save.",
+            actionCol: "Click on the action buttons to view, edit, or delete each record",
+            viewCol: "Click on the eye button to view the detailed page associated with each record"
         },
         "URLLimitMessage": "Maximum URL length reached. Cannot perform the requested action."
     })
