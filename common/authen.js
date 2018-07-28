@@ -5,7 +5,7 @@
 
     .factory('Session', ['messageMap', 'modalUtils', 'StorageService', '$cookies', '$http', '$interval', '$log', '$q', 'UriUtils', '$window', '$rootScope', function (messageMap, modalUtils, StorageService, $cookies, $http, $interval, $log, $q, UriUtils, $window, $rootScope) {
 
-        var chaiseConfig = $rootScope.chaiseConfig;
+        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
 
         // authn API no longer communicates through ermrest, removing the need to check for ermrest location
         var serviceURL = $window.location.origin;

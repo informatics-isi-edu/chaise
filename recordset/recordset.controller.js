@@ -12,7 +12,7 @@
 
         $scope.vm = recordsetModel;
         recordsetModel.RECORDEDIT_MAX_ROWS = 200;
-        var chaiseConfig = $rootScope.chaiseConfig;
+        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
         $scope.navbarBrand = (chaiseConfig['navbarBrand'] !== undefined? chaiseConfig.navbarBrand : "");
         $scope.navbarBrandImage = (chaiseConfig['navbarBrandImage'] !== undefined? chaiseConfig.navbarBrandImage : "");
         $scope.navbarBrandText = (chaiseConfig['navbarBrandText'] !== undefined? chaiseConfig.navbarBrandText : "Chaise");

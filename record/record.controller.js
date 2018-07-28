@@ -21,7 +21,7 @@
         vm.rowFocus = {};
         vm.sidePanToggleBtnIndicator = "Show";
 
-        var chaiseConfig = $rootScope.chaiseConfig;
+        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
         $scope.recordSidePanOpen = chaiseConfig.hideTableOfContents === true ? false : true;
         vm.tooltip = messageMap.tooltip;
         vm.gotoRelatedTable = function(sectionId, index) {

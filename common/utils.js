@@ -8,11 +8,8 @@
           "layout": "list",
           "feedbackURL": "",
           "helpURL": "",
-          "ermrestLocation": (window.location.protocol) + "//" + (window.location.host),
+          "ermrestLocation": (location.origin) + "/ermrest",
           "recordResource": "/record",
-          "showBadgeCounts": false,
-          "tableThreshold": 0,
-          "showAllAttributes": false,
           "headTitle": "Chaise",
           "navbarBrandText": "Chaise",
           "logoutURL": "/",
@@ -20,9 +17,6 @@
           "dataBrowser": "/chaise/search",
           "defaultAnnotationColor": "red",
           "confirmDelete": true,
-          "hideSearchTextFacet": false,
-          "maxColumns": 6,
-          "showUnfilteredResults": false,
           "editRecord": true,
           "deleteRecord": true,
           "signUpURL": "",
@@ -31,10 +25,7 @@
               "newTab": true,
               "children": []
           },
-          "sidebarPosition": "right",
-          "attributesSidebarHeading": "Choose Attributes",
           "allowErrorDismissal": true,
-          "searchPageSize": 25,
           "showFaceting": true,
           "hideTableOfContents": false,
           "showExportButton": false,
@@ -55,7 +46,17 @@
             "extraAttribute": "Mouse Anatomic Source",
             "chosenAttribute": "Data Type",
             "chosenValue": "Expression microarray - gene"
-          }
+          },
+          // Search related properties
+          "showBadgeCounts": false,
+          "tableThreshold": 0,
+          "showAllAttributes": false,
+          "showUnfilteredResults": false,
+          "sidebarPosition": "right",
+          "attributesSidebarHeading": "Choose Attributes",
+          "hideSearchTextFacet": false,
+          "maxColumns": 6,
+          "searchPageSize": 25
     })
 
     .constant("appTagMapping", {
@@ -221,7 +222,7 @@
     .factory('UriUtils', ['$injector', '$rootScope', '$window', 'appContextMapping', 'appTagMapping', 'ContextUtils', 'Errors', 'messageMap', 'parsedFilter',
         function($injector, $rootScope, $window, appContextMapping, appTagMapping, ContextUtils, Errors, messageMap, ParsedFilter) {
         var chaiseBaseURL;
-        //var chaiseConfig = $rootScope.chaiseConfig;
+        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
         /**
          * @function
          * @param {Object} location - location Object from the $window resource
@@ -256,7 +257,7 @@
 
             // If the hash is empty, check for defaults
             if (hash == '' || hash === undefined || hash.length == 1) {
-                if (typeof chaiseConfig != 'undefined' && chaiseConfig.defaultCatalog) {
+                if (chaiseConfig.defaultCatalog) {
                     if (chaiseConfig.defaultTables) {
                         catalogId = chaiseConfig.defaultCatalog;
 
@@ -295,7 +296,7 @@
 
                 // if no catalog id for some reason
                 if (catalogId === '' || catalogId === undefined || catalogId === null) {
-                    if (typeof chaiseConfig != 'undefined' &&  chaiseConfig.defaultCatalog) {
+                    if (chaiseConfig.defaultCatalog) {
                         catalogId = chaiseConfig.defaultCatalog;
                     } else {
                         // no defined or default catalog
@@ -310,7 +311,7 @@
                 // there is no '/' character (only a catalog id) or a trailing '/' after the id
                 if (hash.indexOf('/') === -1 || hash.substring(hash.indexOf('/')).length === 1) {
                     // check for default Table
-                    if (typeof chaiseConfig != 'undefined' &&  chaiseConfig.defaultTables) {
+                    if (chaiseConfig.defaultTables) {
                         var tableConfig = chaiseConfig.defaultTables[catalogId];
                         if (tableConfig) {
                             hash = '/' + fixedEncodeURIComponent(tableConfig.schema) + ':' + fixedEncodeURIComponent(tableConfig.table);
@@ -337,7 +338,7 @@
                 }
             }
 
-            var baseUri = typeof chaiseConfig != 'undefined' && chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : location.origin + '/ermrest';
+            var baseUri = chaiseConfig.ermrestLocation;
             var path = '/catalog/' + catalogId + '/entity' + hash;
             return baseUri + path;
         }
@@ -419,7 +420,7 @@
             // typical deployment location for ermrest.
             context.serviceURL = location.origin + '/ermrest';
 
-            if (typeof chaiseConfig != 'undefined' && chaiseConfig.ermrestLocation) {
+            if (chaiseConfig.ermrestLocation) {
                 context.serviceURL = chaiseConfig.ermrestLocation;
             }
 
@@ -1436,21 +1437,17 @@
      }])
 
     .service('headInjector', ['$window', '$rootScope', 'MathUtils',  function($window, $rootScope, MathUtils) {
-        //var chaiseConfig = $rootScope.chaiseConfig;
+        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
         function addCustomCSS() {
-            if (typeof chaiseConfig != 'undefined' && chaiseConfig['customCSS'] !== undefined) {
-                var fileref = document.createElement("link");
-                fileref.setAttribute("rel", "stylesheet");
-                fileref.setAttribute("type", "text/css");
-                fileref.setAttribute("href", chaiseConfig['customCSS']);
-                document.getElementsByTagName("head")[0].appendChild(fileref);
-            }
+          var fileref = document.createElement("link");
+          fileref.setAttribute("rel", "stylesheet");
+          fileref.setAttribute("type", "text/css");
+          fileref.setAttribute("href", chaiseConfig['customCSS']);
+          document.getElementsByTagName("head")[0].appendChild(fileref);
         }
 
         function addTitle() {
-            if (typeof chaiseConfig != 'undefined' && chaiseConfig.headTitle !== undefined) {
-                document.getElementsByTagName('head')[0].getElementsByTagName('title')[0].innerHTML = chaiseConfig.headTitle;
-            }
+          document.getElementsByTagName('head')[0].getElementsByTagName('title')[0].innerHTML = chaiseConfig.headTitle;
         }
 
         // sets the WID if it doesn't already exist

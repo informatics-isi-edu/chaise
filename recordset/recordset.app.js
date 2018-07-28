@@ -82,7 +82,7 @@
 
             UriUtils.setOrigin();
 
-            var chaiseConfig = $rootScope.chaiseConfig;
+            var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
             context.chaiseBaseURL = $window.location.href.replace($window.location.hash, '');
             var modifyEnabled = chaiseConfig.editRecord === false ? false : true;
             var deleteEnabled = chaiseConfig.deleteRecord === true ? true : false;

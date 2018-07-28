@@ -146,7 +146,7 @@
     .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$window', 'errorMessages', 'Errors', 'DataUtils', 'UriUtils', 'modalUtils', '$document',
           function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $window, errorMessages, Errors, DataUtils, UriUtils, modalUtils, $document) {
 
-        var chaiseConfig = $rootScope.chaiseConfig;
+        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
         var reloadCb = function() {
             window.location.reload();
         };

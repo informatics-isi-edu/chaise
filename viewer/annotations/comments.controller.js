@@ -3,8 +3,8 @@
 
     angular.module('chaise.viewer')
 
-    .controller('CommentsController', ['AuthService', 'CommentsService', 'ConfigUtils', '$scope', '$uibModal', 'comments', function AnnotationsController(AuthService, CommentsService, ConfigUtils, $scope, $uibModal, comments) {
-        var chaiseConfig = ConfigUtils.getConfigJSON();
+    .controller('CommentsController', ['AuthService', 'CommentsService', '$rootScope', '$scope', '$uibModal', 'comments', function AnnotationsController(AuthService, CommentsService, $rootScope, $scope, $uibModal, comments) {
+        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
         var vm = this;
         vm.comments = comments;
         vm.newComment = {

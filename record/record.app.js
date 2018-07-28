@@ -52,7 +52,7 @@
             context = {},
             errorData = {};
 
-        var chaiseConfig = $rootScope.chaiseConfig;
+        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
 
         $rootScope.displayReady = false;
         $rootScope.showSpinner = false; // this property is set from common modules for controlling the spinner at a global level that is out of the scope of the app

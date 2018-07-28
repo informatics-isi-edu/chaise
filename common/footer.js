@@ -9,14 +9,14 @@
 
     angular.module('chaise.footer', [])
         .directive('footer', ['ERMrest', '$timeout', '$rootScope', function(ERMrest, $timeout, $rootScope) {
-          var chaiseConfig = $rootScope.chaiseConfig;
-          var footerText = $rootScope.chaiseConfig.footerMarkdown;
+          var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
+          var footerText = chaiseConfig.footerMarkdown;
           return {
                 restrict: 'E',
                 scope: {},
                 templateUrl: '../common/templates/footer.html',
                 link: function(scope, ele) {
-                    var footerText = chaiseConfig.footerMarkdown ? chaiseConfig.footerMarkdown : "**Please check** [Privacy Policy](/privacy-policy/){target='_blank'}";
+                    var footerText = chaiseConfig.footerMarkdown;
                     angular.isUndefinedOrNull = function(val) {
                         return val == '' || angular.isUndefined(val) || val === null
                     }

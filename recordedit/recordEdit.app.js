@@ -82,7 +82,7 @@
         var session,
             context = { booleanValues: ['', true, false] };
 
-        var chaiseConfig = $rootScope.chaiseConfig;
+        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
         $rootScope.showColumnSpinner = [{}];
 
         $rootScope.displayReady = false;
