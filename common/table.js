@@ -259,7 +259,6 @@
                         }
                     }
 
-                    console.log("# of rows before visual paging: ", rowLimit);
                     vm.rowValues.length = 0;
                     if (rowValues.length > rowLimit) {
                         vm.pushRowsSpinner = true;
