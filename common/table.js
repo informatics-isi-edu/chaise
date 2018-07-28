@@ -240,10 +240,9 @@
                 }).then(function (rows) {
                     if (rows) vm.disabledRows = rows;
                     var rowValues = DataUtils.getRowValuesFromPage(vm.page);
-                    var cellLimit = 300;
+                    var cellLimit = 500;
                     // calculate how many rows can be shown based on # of columns
-                    // var rowLimit = Math.ceil(cellLimit/vm.page.reference.columns.length);
-                    var rowLimit = 2;
+                    var rowLimit = Math.ceil(cellLimit/vm.page.reference.columns.length);
 
                     var pushMoreRows = function(prevInd) {
                         if (rowValues[prevInd]) {
@@ -253,12 +252,17 @@
                                 $timeout(function () {
                                     pushMoreRows(nextLimit);
                                 });
+                            } else {
+                                // we reached the end of the data to page in
+                                vm.pushRowsSpinner = false;
                             }
                         }
                     }
 
                     console.log("# of rows before visual paging: ", rowLimit);
+                    vm.rowValues.length = 0;
                     if (rowValues.length > rowLimit) {
+                        vm.pushRowsSpinner = true;
                         pushMoreRows(0);
                     } else {
                         vm.rowValues = rowValues;
