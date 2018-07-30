@@ -7,7 +7,8 @@
         MAX_CONCURENT_REQUEST: 4,
         MAX_URL_LENGTH: 2000,
         PAGE_SIZE: 10,
-        AUTO_SEARCH_TIMEOUT: 2000
+        AUTO_SEARCH_TIMEOUT: 2000,
+        CELL_LIMIT: 500
     })
 
     /**
@@ -239,31 +240,41 @@
                     return vm.getDisabledTuples ? vm.getDisabledTuples(page, vm.pageLimit) : '';
                 }).then(function (rows) {
                     if (rows) vm.disabledRows = rows;
+                    var pushMore;
+                    $timeout.cancel(pushMore);
                     var rowValues = DataUtils.getRowValuesFromPage(vm.page);
-                    var cellLimit = 500;
                     // calculate how many rows can be shown based on # of columns
-                    var rowLimit = Math.ceil(cellLimit/vm.page.reference.columns.length);
+                    var rowLimit = Math.ceil(tableConstants.CELL_LIMIT/vm.page.reference.columns.length);
 
-                    var pushMoreRows = function(prevInd) {
-                        if (rowValues[prevInd]) {
-                            var nextLimit = prevInd + rowLimit;
-                            Array.prototype.push.apply(vm.rowValues, rowValues.slice(prevInd, nextLimit));
-                            if (rowValues[nextLimit]) {
-                                $timeout(function () {
-                                    pushMoreRows(nextLimit);
-                                });
-                            } else {
-                                // we reached the end of the data to page in
-                                vm.pushRowsSpinner = false;
-                            }
+                    function _pushMoreRows(rows, prevInd, limit, uri) {
+                        var nextLimit = prevInd + limit;
+                        Array.prototype.push.apply(vm.rowValues, rows.slice(prevInd, nextLimit));
+                        if (rows[nextLimit]) {
+                            console.log("recurse");
+                            pushMore = $timeout(function () {
+                                if (uri === vm.reference.uri) {
+                                    _pushMoreRows(rows, nextLimit, limit, uri);
+                                } else {
+                                    console.log(uri);
+                                    console.log(vm.reference.uri);
+                                    console.log("break out of timeout");
+                                    $timeout.cancel(pushMore);
+                                    return;
+                                }
+                            });
+                        } else {
+                            // we reached the end of the data to page in
+                            vm.pushRowsSpinner = false;
                         }
                     }
 
                     vm.rowValues.length = 0;
+                    console.log(rowValues.length);
                     if (rowValues.length > rowLimit) {
                         vm.pushRowsSpinner = true;
-                        pushMoreRows(0);
+                        _pushMoreRows(rowValues, 0, rowLimit, vm.reference.uri);
                     } else {
+                        vm.pushRowsSpinner = false;
                         vm.rowValues = rowValues;
                     }
 
