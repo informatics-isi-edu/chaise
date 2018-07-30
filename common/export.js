@@ -8,16 +8,41 @@
             restrict: 'AE',
             templateUrl: '../common/templates/export.html',
             scope: {
-                reference: "<",
-                hasValues: "<"
+                reference: "=",
+                hasValues: "="
             },
             link: function (scope, element, attributes) {
                 scope.isLoading = false;
 
+                // TODO: The object below "scope.exportOptions" needs to be initialized before "updateExportFormats"
+                // or "submit" is called.
+                var base_url = scope.reference.location.service;
+                scope.exportOptions = {
+                    host: base_url.substring(0, base_url.lastIndexOf("/")),
+                    format: {},
+                    formatOptions: {
+                        "BAG": {
+                            name: scope.reference.location.tableName,
+                            algs: ["md5"],
+                            archiver: "zip",
+                            metadata: {},
+                            table_format: "csv"
+                        }
+                    },
+                    defaultFormat: {
+                        name: "CSV", type: "DIRECT", template: null
+                    },
+                    defaultFormats: [
+                        {name: "CSV", type: "DIRECT", template: null},
+                        {name: "JSON", type: "DIRECT", template: null},
+                        {name: "BDBag", type: "BAG", template: null}
+                    ],
+                    supportedFormats: []
+                };
+
                 scope.updateExportFormats = function () {
                     scope.exportOptions.format = JSON.parse(JSON.stringify(scope.exportOptions.defaultFormat));
-                    scope.exportOptions.supportedFormats =
-                        JSON.parse(JSON.stringify(scope.exportOptions.defaultFormats));
+                    scope.exportOptions.supportedFormats = JSON.parse(JSON.stringify(scope.exportOptions.defaultFormats));
                     var exportAnnotations = null;
                     if (scope.reference.table.annotations.contains("tag:isrd.isi.edu,2016:export")) {
                         exportAnnotations = scope.reference.table.annotations.get("tag:isrd.isi.edu,2016:export");
@@ -44,32 +69,6 @@
 
                 scope.submit = function () {
                     scope.isLoading = true;
-
-                    // TODO: The object below "scope.exportOptions" needs to be initialized before "updateExportFormats"
-                    // or "submit" is called.
-                    var base_url = scope.reference.location.service;
-                    scope.exportOptions = {
-                        host: base_url.substring(0, base_url.lastIndexOf("/")),
-                        format: {},
-                        formatOptions: {
-                            "BAG": {
-                                name: scope.reference.location.tableName,
-                                algs: ["md5"],
-                                archiver: "zip",
-                                metadata: {},
-                                table_format: "csv"
-                            }
-                        },
-                        defaultFormat: {
-                            name: "CSV", type: "DIRECT", template: null
-                        },
-                        defaultFormats: [
-                            {name: "CSV", type: "DIRECT", template: null},
-                            {name: "JSON", type: "DIRECT", template: null},
-                            {name: "BDBag", type: "BAG", template: null}
-                        ],
-                        supportedFormats: []
-                    };
 
                     // TODO: this function is meant to be triggered by a change of the current table context
                     scope.updateExportFormats();
