@@ -1,7 +1,7 @@
 {
     "catalog": {},
     "schema": {
-        "name": "recordset-product-add",
+        "name": "product-recordset-add",
         "createNew": true,
         "path": "test/e2e/data_setup/schema/recordset/product-add.json"
     },

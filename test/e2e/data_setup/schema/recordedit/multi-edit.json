@@ -1,7 +1,7 @@
 {
     "schema_name": "multi-edit",
     "tables": {
-        "multi-add-table": {
+        "multi-edit-table": {
             "comment": "Table to represent adding multiple entities",
             "kind": "table",
             "keys": [
