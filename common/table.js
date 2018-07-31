@@ -227,7 +227,8 @@
                 _attachExtraAttributes(vm);
             }
 
-            $timeout.cancel(pushMore); // probably doesn't do anything
+            // cancel timeout loop that may still be running and hide the spinner and "Loading ..."
+            $timeout.cancel(pushMore);
             vm.pushRowsSpinner = false;
             vm.dirtyResult = false;
             vm.hasLoaded = false;
@@ -248,19 +249,20 @@
                     // calculate how many rows can be shown based on # of columns
                     var rowLimit = Math.ceil(tableConstants.CELL_LIMIT/vm.page.reference.columns.length);
 
-                    function _pushMoreRows(rows, prevInd, limit, counter) {
+                    // recursive function for adding more rows to the DOM
+                    function _pushMoreRows(prevInd, limit, counter) {
                         if (counter === vm.flowControlObject.counter) {
                             var nextLimit = prevInd + limit;
-                            Array.prototype.push.apply(vm.rowValues, rows.slice(prevInd, nextLimit));
-                            if (rows[nextLimit]) {
-                                $log.debug("recurse");
+                            // combines all of the second array (rowValues) with the first one (vm.rowValues)
+                            Array.prototype.push.apply(vm.rowValues, rowValues.slice(prevInd, nextLimit));
+                            if (rowValues[nextLimit]) {
+                                $log.debug("counter", counter, ": recurse");
                                 pushMore = $timeout(function () {
                                     if (counter === vm.flowControlObject.counter) {
-                                        _pushMoreRows(rows, nextLimit, limit, counter);
+                                        _pushMoreRows(nextLimit, limit, counter);
                                     } else {
-                                        console.log("previous: ", counter);
-                                        console.log("current: ", vm.flowControlObject.counter);
-                                        console.log("break out of timeout");
+                                        $log.debug("current counter: ", vm.flowControlObject.counter);
+                                        $log.debug("counter", counter, ": break out of timeout inside push more rows");
                                         $timeout.cancel(pushMore);
                                         vm.pushRowsSpinner = false;
                                     }
@@ -270,21 +272,18 @@
                                 vm.pushRowsSpinner = false;
                             }
                         } else {
-                            $log.debug("break out of push more");
+                            $log.debug("counter", counter, ": break out of push more rows");
                             $timeout.cancel(pushMore);
                             vm.pushRowsSpinner = false;
                         }
                     }
 
-
-                    console.log(vm.reference.uri);
-                    console.log(rowValues.length);
+                    $log.debug("counter", current, ": row values length ", rowValues.length);
                     vm.rowValues.length = 0;
                     if (rowValues.length > rowLimit) {
                         vm.pushRowsSpinner = true;
-                        _pushMoreRows(rowValues, 0, rowLimit, current);
+                        _pushMoreRows(0, rowLimit, current);
                     } else {
-                        vm.pushRowsSpinner = false;
                         vm.rowValues = rowValues;
                     }
 
