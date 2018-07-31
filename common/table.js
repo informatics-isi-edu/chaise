@@ -215,6 +215,8 @@
             $log.debug("after result update: " + (res ? "successful." : "unsuccessful."));
         }
 
+        // comment $timeout why
+        var pushMore;
         /**
          * @private
          * Does the actual read for the main entity. Returns a promise that will
@@ -225,6 +227,8 @@
                 _attachExtraAttributes(vm);
             }
 
+            $timeout.cancel(pushMore); // probably doesn't do anything
+            vm.pushRowsSpinner = false;
             vm.dirtyResult = false;
             vm.hasLoaded = false;
             var defer = $q.defer();
@@ -240,39 +244,45 @@
                     return vm.getDisabledTuples ? vm.getDisabledTuples(page, vm.pageLimit) : '';
                 }).then(function (rows) {
                     if (rows) vm.disabledRows = rows;
-                    var pushMore;
-                    $timeout.cancel(pushMore);
                     var rowValues = DataUtils.getRowValuesFromPage(vm.page);
                     // calculate how many rows can be shown based on # of columns
                     var rowLimit = Math.ceil(tableConstants.CELL_LIMIT/vm.page.reference.columns.length);
 
-                    function _pushMoreRows(rows, prevInd, limit, uri) {
-                        var nextLimit = prevInd + limit;
-                        Array.prototype.push.apply(vm.rowValues, rows.slice(prevInd, nextLimit));
-                        if (rows[nextLimit]) {
-                            console.log("recurse");
-                            pushMore = $timeout(function () {
-                                if (uri === vm.reference.uri) {
-                                    _pushMoreRows(rows, nextLimit, limit, uri);
-                                } else {
-                                    console.log(uri);
-                                    console.log(vm.reference.uri);
-                                    console.log("break out of timeout");
-                                    $timeout.cancel(pushMore);
-                                    return;
-                                }
-                            });
+                    function _pushMoreRows(rows, prevInd, limit, counter) {
+                        if (counter === vm.flowControlObject.counter) {
+                            var nextLimit = prevInd + limit;
+                            Array.prototype.push.apply(vm.rowValues, rows.slice(prevInd, nextLimit));
+                            if (rows[nextLimit]) {
+                                $log.debug("recurse");
+                                pushMore = $timeout(function () {
+                                    if (counter === vm.flowControlObject.counter) {
+                                        _pushMoreRows(rows, nextLimit, limit, counter);
+                                    } else {
+                                        console.log("previous: ", counter);
+                                        console.log("current: ", vm.flowControlObject.counter);
+                                        console.log("break out of timeout");
+                                        $timeout.cancel(pushMore);
+                                        vm.pushRowsSpinner = false;
+                                    }
+                                });
+                            } else {
+                                // we reached the end of the data to page in
+                                vm.pushRowsSpinner = false;
+                            }
                         } else {
-                            // we reached the end of the data to page in
+                            $log.debug("break out of push more");
+                            $timeout.cancel(pushMore);
                             vm.pushRowsSpinner = false;
                         }
                     }
 
-                    vm.rowValues.length = 0;
+
+                    console.log(vm.reference.uri);
                     console.log(rowValues.length);
+                    vm.rowValues.length = 0;
                     if (rowValues.length > rowLimit) {
                         vm.pushRowsSpinner = true;
-                        _pushMoreRows(rowValues, 0, rowLimit, vm.reference.uri);
+                        _pushMoreRows(rowValues, 0, rowLimit, current);
                     } else {
                         vm.pushRowsSpinner = false;
                         vm.rowValues = rowValues;
