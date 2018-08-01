@@ -32,14 +32,9 @@
                             ng-href="{{ edit() }}" tooltip-placement="bottom" uib-tooltip="{{ ((vm.pageLimit > vm.RECORDEDIT_MAX_ROWS) ? 'Editing disabled when items per page > ' + vm.RECORDEDIT_MAX_ROWS : 'Click here to edit this page of records.' ) }}">
                             <span class="glyphicon glyphicon-pencil"></span> <strong>Edit</strong>
                         </a>&nbsp;&nbsp;
-                        <span ng-if="ctrl.showExportButton">
-                            <export has-values="vm.rowValues.length>0" reference="vm.reference"></export>
-                            &nbsp;&nbsp;
-                        </span>
-                        <!-- Download Link -->
-                        <a id="downloadCSV-link" ng-if="vm.rowValues.length>0" ng-href={{vm.reference.csvDownloadLink}} tooltip-placement="bottom" uib-tooltip={{::tooltip.downloadCSV}}>
-                            <span class="glyphicon glyphicon-download-alt"></span> <strong>Download CSV</strong>
-                        </a>&nbsp;&nbsp;
+                        <!-- download CSV included by default -->
+                        <export has-values="vm.rowValues.length>0" reference="vm.reference" style="position:relative;"></export>
+                        &nbsp;&nbsp;
                         <!-- permalink -->
                         <a id="permalink" ng-href="{{ permalink() }}" tooltip-placement="bottom" uib-tooltip={{::tooltip.permalink}}>
                             <span class="glyphicon glyphicon-bookmark"></span> <strong>Permalink</strong>
