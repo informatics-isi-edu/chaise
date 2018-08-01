@@ -25,41 +25,46 @@
                 scope.exporter = null;
 
                 scope.exportOptions = {
-                    supportedFormats: [{name: "CSV", type: "DIRECT", template: null}]
+                    supportedFormats: [
+                        {
+                            outputs: [],
+                            name: "default_csv",
+                            format_name: "CSV",
+                            format_type: "DIRECT"
+                        }
+                    ]
                 };
 
-                scope.submit = function (format) {
+                scope.submit = function (template) {
                     scope.isLoading = true;
                     // The actual export code - it invokes a (synchronous) web service call to either
                     // ermrest (for single table CSV or JSON export) or ioboxd (if bag or multi-file export)
-                    _doExport(format);
+                    _doExport(template);
                 };
 
                 scope.$watch('hasValues', function (newValue, oldValue) {
                     if (newValue) {
                         formatOptions.BAG.name = scope.reference.location.tableName;
+
                         _updateExportFormats();
                     }
                 });
 
                 function _updateExportFormats() {
-                    var templates = ERMrest.readTemplatesAnnotation(scope.reference);
+                    var templates = scope.reference.table.exportTemplates
 
                     templates.forEach(function (template) {
-                        var name = template.name;
-                        var format_name = template.format_name;
-                        var format_type = template.format_type;
-                        if (format_name) {
-                            var format = {name: format_name, type: format_type, template: template};
-                            scope.exportOptions.supportedFormats.push(format);
+                        if (template.format_name) {
+                            // matches object format set for default case with CSV
+                            scope.exportOptions.supportedFormats.push(template);
                         }
                     });
                 }
 
-                function _doExport(format) {
-                    scope.exporter = new ERMrest.Exporter(scope.reference, format, formatOptions);
-                    var formatName = format.name;
-                    var formatType = format.type;
+                function _doExport(template) {
+                    scope.exporter = new ERMrest.Exporter(scope.reference, template);
+                    var formatName = template.format_name;
+                    var formatType = template.format_type;
                     switch (formatType) {
                         case "DIRECT":
                             if (formatName === "CSV") {
@@ -73,8 +78,7 @@
                             break;
                         case "BAG":
                         case "FILE":
-                            var exportParams = scope.exporter.exportParameters;
-                            var exportParametersString = JSON.stringify(exportParams, null, "  ");
+                            var exportParametersString = JSON.stringify(scope.exporter.exportParameters, null, "  ");
 
                             // begin export and start a timer
                             console.info("Executing external export with the following parameters:\n" + exportParametersString);
@@ -86,7 +90,7 @@
                                 scope.isLoading = false;
                             }).catch(function (error) {
                                 console.timeEnd('External export duration');
-                                AlertsService.addAlert("Export failed for " + exportParams.catalog.host + "/iobox/export/ with " + error.message, "error");
+                                AlertsService.addAlert("Export failed for " + scope.exporter.exportParameters.catalog.host + "/iobox/export/ with " + error.message, "error");
                                 scope.isLoading = false;
                             });
                             break;

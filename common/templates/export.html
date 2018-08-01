@@ -4,7 +4,7 @@
     <span class="caret"></span>
 </a>
 <ul ng-if="hasValues" class="dropdown-menu" style="min-width:unset; top:20px;">
-    <li ng-repeat="format in exportOptions.supportedFormats">
-        <a ng-click="submit(format)">{{format.name}}</a>
+    <li ng-repeat="template in exportOptions.supportedFormats">
+        <a ng-click="submit(template)">{{template.format_name}}</a>
     </li>
 </ul>
