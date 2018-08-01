@@ -6,6 +6,9 @@ var testParams = {
         columnName: "id",
         value: 1,
         operator: "="
+    },
+    tooltip:{
+        viewCol: "Click on the eye button to view the detailed page associated with each record"
     }
 };
 
@@ -37,6 +40,13 @@ describe('When viewing Recordset app', function() {
         describe('the action column', function() {
             it("should display 'View' as the column header", function() {
                 expect(element.all(by.tagName('th')).get(0).getText()).toBe("View");
+            });
+
+            it("should have the correct tooltip", function(){
+                var viewCol = element(by.css('.actions-header'));
+                recordsetPage.getColumnComment(viewCol).then(function(comment){
+                    expect(comment).toBe(testParams.tooltip.viewCol);
+                });
             });
 
             it('should display the view button', function() {

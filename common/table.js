@@ -976,7 +976,7 @@
         };
     }])
 
-    .directive('recordTable', ['DataUtils', 'recordTableUtils', function(DataUtils, recordTableUtils) {
+    .directive('recordTable', ['DataUtils', 'recordTableUtils', 'messageMap', function(DataUtils, recordTableUtils, messageMap) {
 
         return {
             restrict: 'E',
@@ -995,6 +995,7 @@
                 recordTableUtils.registerTableCallbacks(scope, elem, attr);
 
                 scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
+                scope.tooltip = messageMap.tooltip;
             }
         };
     }])

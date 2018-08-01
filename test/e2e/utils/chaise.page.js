@@ -1405,10 +1405,15 @@ function chaisePage() {
         }
     };
 
-    this.performLogin = function(cookie, defer) {
+    this.performLogin = function(cookie, isAlertPresent, defer) {
         defer = defer || require('q').defer();
 
         browser.get(process.env.CHAISE_BASE_URL + "/login/");
+
+        if(isAlertPresent){
+            browser.switchTo().alert().accept();
+        }
+        
         browser.ignoreSynchronization = true;
 
         browser.wait(protractor.ExpectedConditions.visibilityOf(element(by.id("loginApp"))), browser.params.defaultTimeout).then(function() {
