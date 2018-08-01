@@ -1078,7 +1078,7 @@ var recordsetPage = function() {
     // just getting the text content returns a stringified JSON value (that is not properly stringified) with hidden characters, stringifying that shows the hidden characters
     // but if we parse the odd stringfied version to JSON then stringify it, we can effectively clean up those hidden characters and get a simple string reprsentation
     this.getJsonbFacetOptionsText = function (idx) {
-        return browser.executeScript("return $('#fc-" + idx + " .chaise-checkbox label').map(function(i, a) { return (i != 0 ? JSON.stringify(JSON.parse(a.textContent.trim())) : a.textContent.trim() ); });");
+        return browser.executeScript("return $('#fc-" + idx + " .chaise-checkbox label').map(function(i, a) { try { return JSON.stringify(JSON.parse(a.textContent.trim())); } catch(e) { return a.textContent.trim()} });");
     }
 
     this.getFacetOption = function (idx, option) {
@@ -1124,6 +1124,10 @@ var recordsetPage = function() {
     this.getModalSubmit = function () {
         return element(by.css(".modal-body")).element(by.id("multi-select-submit-btn"));
     }
+
+    this.getRangeFacetForm = function (idx) {
+        return element(by.id("fc-"+ idx)).element(by.css("fieldset"));
+    };
 
     // there's integer/float/date/timestamp inputs
     this.getRangeMinInput = function (idx, className) {
