@@ -2,6 +2,8 @@ site_name: Chaise
 site_description: Computer-human access interface with schema evolution
 theme: readthedocs
 site_url: https://informatics-isi-edu.github.io/chaise/
+extra_css:
+  - /css/extra.css
 
 copyright: Copyright &copy; 2018 <a href="<https://github.com/informatics-isi-edu/chaise>">chaise</a>.
 

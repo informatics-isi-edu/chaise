@@ -64,12 +64,12 @@ and rows flipped).
 
 ## Available Applications
 
-Chaise is suite of following applications:
+Chaise is suite of the following applications:
 
 - [record](record/): Shows all the information for an entity.
 - [recordset](recordset): Shows a set of entities that can be faceted.
-- [recordedit](recordedit): Gives the ability of add/update multiple rows.
-- [viewer](viewer/)
+- [recordedit](recordedit): Gives the ability to add(or update) single or multiple entities.
+- [viewer](viewer/):High resolution pyramidal, tiled image visualization tool with pan and zoom capability.
 
 ## Dependencies
 
