@@ -7,7 +7,7 @@ The below table explains the usage of the default parameters:
 | Parameter | Values | Default Value | chaise-config.js | URL | Remarks |
 |-----------|--------|---------------|------------------|-----|---------|
 | catalog | A catalog id | 1 | "catalog":\<id\> | catalog=\<id\> | The catalog id has a numeric value |
-| schema | A schema name | N/A | "schema":\<name\> | schema=\<name\> | A default value can be established through the [schema annotation default keys](https://github.com/informatics-isi-edu/chaise/blob/master/doc/annotation.md#schema-annotations). <br> A random schema of the catalog is selected if it is not specified otherwise. |
+| schema | A schema name | N/A | "schema":\<name\> | schema=\<name\> | A default value can be established through the [schema annotation default keys](../search/annotation.md#schema-annotations). <br> A random schema of the catalog is selected if it is not specified otherwise. |
 | layout | list <br> table <br> card | list | "layout":\<value\> | layout=\<value\> | The view the summary page will be rendered. |
 | facetPolicy | on_demand | N/A | "facetPolicy":\<value\> | N/A | If present with the _on_demand_ value, requests (for facets count and for facets distinct values) will be issued only for the selected facets. <br> At start up, the facets with the "top" annotation will be selected.<br>  On demand, you can check also other facets. |
 | feedbackURL | A URL for a form to provide feedback. | None | "feedbackURL":\<URL\> | N/A | |
@@ -18,7 +18,7 @@ The below table explains the usage of the default parameters:
 | tableThreshold | Number of rows. | 0 | "tableThreshold":\<value\> | N/A | Max number of rows default to transpose view. |
 | showAllAttributes | A boolean | False | "showAllAttributes":\<value\> | N/A | If present and True, select all the attributes in the search page. |
 | headTitle | An application name | Chaise | "headTitle":\<value\> | N/A | The application name. |
-| customCSS | A URL | N/A | "customCSS":\<value\> | N/A | The URL for a style sheet file to be applied for the application header. This is typically a relative URL to a dedicated stylesheet in the CSS folder of the related static site repo (For example, in RBK, it's /assets/css/chaise.css in the rbk-www repo). More information can be found [here](https://github.com/informatics-isi-edu/chaise/wiki/Custom-CSS-Styling-tips) |
+| customCSS | A URL | N/A | "customCSS":\<value\> | N/A | The URL for a style sheet file to be applied for the application header. This is typically a relative URL to a dedicated stylesheet in the CSS folder of the related static site repo (For example, in RBK, it's /assets/css/chaise.css in the rbk-www repo). More information can be found [here](custom-css.md) |
 | navbarBrand | A URL | N/A | "navbarBrand":\<value\> | N/A | The URL for the branding logo in the top navigation bar. |
 | navbarBrandText | A string | Chaise | "navbarBrandText":\<value\> | N/A | The value to be displayed in the navigation bar. |
 | navbarBrandImage | A URL | N/A | "navbarBrandImage":\<value\> | N/A | The URL for an image to be displayed in the navigation bar. |
