@@ -8,12 +8,12 @@ copyright: Copyright &copy; 2018 <a href="<https://github.com/informatics-isi-ed
 pages:
     - Welcome to the documentation: index.md
     - User Documents:
-        - Configuration: user-docs/configuration.md
-        - Contexts: user-docs/context.md
+        - Chaise Configuration: user-docs/chaise-config.md
+        - Contexts: user-docs/contexts.md
         - Custom CSS: user-docs/custom-css.md
         - Logging: user-docs/logging.md
     - Developer Documents:
-        - Dev Guide: dev-docs/dev.md
+        - Dev Guide: dev-docs/dev-guide.md
         - E2E Testing: dev-docs/e2e-test.md
         - Manual Testing: dev-docs/manual-test.md
         - Style Guide: dev-docs/style-guide.md

@@ -62,9 +62,14 @@ to further override the rendering decisions and annotations, for instance, to
 present a nested table of data in a transposed layout (i.e., with the columns
 and rows flipped).
 
-See the [heuristics guide](./doc/heuristics.md) for more information.
+## Available Applications
 
-# Quick start guide
+Chaise is suite of following applications:
+
+- [record](record/): Shows all the information for an entity.
+- [recordset](recordset): Shows a set of entities that can be faceted.
+- [recordedit](recordedit): Gives the ability of add/update multiple rows.
+- [viewer](viewer/)
 
 ## Dependencies
 
@@ -148,7 +153,7 @@ $ make install
 
 ## How to configure
 
-See the [configuration guide](./doc/configuration.md). For more information on how Chaise uses the ERMrest annotations see [the contexts guide](./doc/contexts.md).
+See the [configuration guide](./docs/user-docs/chaise-config.md).
 
 ## How to run
 
@@ -160,7 +165,7 @@ Once deployed the apps can be found at `http://<hostname>/chaise/<app>`, where `
 
 This section assumes you have already installed _and tested_ [ermrestjs]. If you have not, stop here and do that first, then return this step.
 
-Before running the test cases you need to set `ERMREST_URL`, `CHAISE_BASE_URL`, `AUTH_COOKIE`, and `REMOTE_CHAISE_DIR_PATH` environment variables. See [How to Get Your AUTH_COOKIE](https://github.com/informatics-isi-edu/chaise/wiki/E2E-tests-guide#how-to-get-your-auth_cookie).
+Before running the test cases you need to set `ERMREST_URL`, `CHAISE_BASE_URL`, `AUTH_COOKIE`, and `REMOTE_CHAISE_DIR_PATH` environment variables. See [How to Get Your AUTH_COOKIE](docs/dev-docs/e2e-test.md#how-to-get-your-auth_cookie).
 
 The example here is based on the assumption that the tests are installed and executed against a deployment to a userdir.
 
@@ -183,4 +188,4 @@ Make will invoke `npm install` to download and install all additional
 dependencies under the local `node_modules` directory relative to the project
 directory.
 
-For more information, see the [E2E tests guide](https://github.com/informatics-isi-edu/chaise/wiki/E2E-tests-guide).
+For more information, see the [E2E tests guide](docs/dev-docs/e2e-test.md).

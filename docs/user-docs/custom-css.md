@@ -1,6 +1,6 @@
 # Custom CSS Styling Tips
 
-The default styling for specific elements can be altered by adding a custom css file to the deployment folder. This folder path then must be added as the value for the `customCSS` in config option for [chaise-config.js](https://github.com/informatics-isi-edu/chaise/blob/master/doc/configuration.md). For example:
+The default styling for specific elements can be altered by adding a custom css file to the deployment folder. This folder path then must be added as the value for the `customCSS` in config option for [chaise-config.js](chaise-config.md). For example:
 
 ```javascript
  var chaiseConfig = {

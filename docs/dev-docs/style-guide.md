@@ -126,7 +126,7 @@ To add Bootstrap to your project:
 
 Note, if you prefer, you can download jQuery, add it to your web files and link to that.
 
-## [Custom Styles/css](https://github.com/informatics-isi-edu/chaise/wiki/Custom-CSS-Styling-tips)
+## [Custom Styles/css](../user-docs/custom.css.md)
 The style of the `Chaise` application can be overridden by providing a custom CSS document that is loaded after the rest of the styles. See the above link for more information.
 
 ## Normalize.css

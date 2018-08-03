@@ -1,6 +1,6 @@
 # Schema Annotations
 
-**Chaise** is using the following current [schema annotations keys](https://github.com/informatics-isi-edu/ermrest/blob/master/api-doc/model/naming.md#schema-annotations):
+**Chaise** is using the following current [schema annotations keys](https://github.com/informatics-isi-edu/ermrest/blob/master/docs/api-doc/model/naming.md#schema-annotations):
 
  - **comment**: contains a JSON array
 
@@ -37,7 +37,7 @@ Exclude the tables of the _Microscopy_ schema:
 
 # Table Annotations
 
-**Chaise** is using the following current [table annotations keys](https://github.com/informatics-isi-edu/ermrest/blob/master/api-doc/model/naming.md#table-annotations):
+**Chaise** is using the following current [table annotations keys](https://github.com/informatics-isi-edu/ermrest/blob/master/docs/api-doc/model/naming.md#table-annotations):
 
  - **comment**: contains a JSON array
  - **description**: contains a JSON object
@@ -101,7 +101,7 @@ Display the _dataset_ table as _FaceBase 1 Data_:
 
 # Column Annotations
 
-**Chaise** is using the following current [column annotations keys](https://github.com/informatics-isi-edu/ermrest/blob/master/api-doc/model/naming.md#column-annotations):
+**Chaise** is using the following current [column annotations keys](https://github.com/informatics-isi-edu/ermrest/blob/master/docs/api-doc/model/naming.md#column-annotations):
 
  - **comment**: contains a JSON array
  - **description**: contains a JSON object
@@ -187,7 +187,7 @@ Display the _organism_ column in the first position of the facets:
 
 # Foreign Key Annotations
 
-**Chaise** is using the following current [foreign key annotations](https://github.com/informatics-isi-edu/ermrest/blob/master/api-doc/model/naming.md#foreign-key-annotations):
+**Chaise** is using the following current [foreign key annotations](https://github.com/informatics-isi-edu/ermrest/blob/master/docs/api-doc/model/naming.md#foreign-key-annotations):
 
  - **comment**: contains a JSON array
 
