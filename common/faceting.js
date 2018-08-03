@@ -927,6 +927,8 @@
 
                 if (appliedLen >= tableConstants.PAGE_SIZE) {
                     scope.checkboxRows = appliedFiltersToCheckBoxRows(scope);
+                    // there might be more, we're not sure
+                    scope.hasMore = false;
                     defer.resolve(true);
                     return defer.promise;
                 }
@@ -944,8 +946,7 @@
 
                         scope.checkboxRows = appliedFiltersToCheckBoxRows(scope);
 
-                        // always show the "show details button"
-                        scope.hasMore = true;
+                        scope.hasMore = page.hasNext;
 
                         page.tuples.forEach(function (tuple) {
                             // if we're showing enough rows
@@ -1304,7 +1305,9 @@
                                 // if the load more text link isn't present, save some space for it
                                 // TODO: seems like showFindMore solved the case of adding the extra height twice
                                 //   - i think because the below (isOpen and !isLoading) watch event fires off first
-                                if (!scope.hasMore && !scope.showFindMore) addedHeight += findMoreHeight;
+                                // if (!scope.hasMore && !scope.showFindMore) addedHeight += findMoreHeight;
+                                // TODO the line above didn't have any effect since hasMore was always true,
+                                // so I commented it. We should eventually remove this.
                                 choicePickerElem.style.height = addedHeight + "px";
                             }, 0);
                         } else if (newVal == false) {
