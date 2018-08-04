@@ -3,6 +3,29 @@
 
     angular.module('chaise.faceting', ['plotly'])
 
+        .factory('facetingUtils', ['defaultDisplayname', function (defaultDisplayname) {
+            function getNullFilter(selected) {
+                return {
+                    selected: (typeof selected == 'boolean') ? selected: false,
+                    uniqueId: null,
+                    displayname: {"value": defaultDisplayname.null, "isHTML": true}
+                };
+            }
+
+            function getNotNullFilter(selected) {
+                return {
+                    selected: (typeof selected == 'boolean') ? selected: false,
+                    isNotNull: true,
+                    displayname: {"value": defaultDisplayname.notNull, "isHTML": true}
+                };
+            }
+
+            return {
+                getNotNullFilter: getNotNullFilter,
+                getNullFilter: getNullFilter
+            };
+        }])
+
         .directive('faceting', ['recordTableUtils', '$timeout', '$rootScope', function (recordTableUtils, $timeout, $rootScope) {
 
             return {
@@ -188,7 +211,7 @@
             };
         }])
 
-        .directive('rangePicker', ['$timeout', '$q', '$log', 'dataFormats', 'logActions', function ($timeout, $q, $log, dataFormats, logActions) {
+        .directive('rangePicker', ['dataFormats', 'facetingUtils', '$log', 'logActions', '$q', '$timeout', function (dataFormats, facetingUtils, $log, logActions, $q, $timeout) {
             return {
                 restrict: 'AE',
                 templateUrl: '../common/templates/faceting/range-picker.html',
@@ -210,7 +233,7 @@
                     }
 
                     ctrl.initializeFacet = function () {
-                        return $scope.initialRows();;
+                        return $scope.initialRows();
                     }
                 }],
                 require: ['^faceting', 'rangePicker'],
@@ -229,7 +252,7 @@
                     scope.parentCtrl = parentCtrl;
 
                     scope.relayout = false;
-                    scope.ranges = [];
+                    scope.ranges = [facetingUtils.getNotNullFilter()];
                     scope.histogramDataStack = [];
                     // draw the plot
                     scope.plot = {
@@ -286,6 +309,7 @@
                             uniqueId: filter.uniqueId,
                             displayname: {value: filter.toString(), isHTML: false},
                             selected: selected,
+                            disabled: scope.facetColumn.hasNotNullFilter,
                             metaData: {
                                 min: filter.min,
                                 minExclusive: filter.minExclusive,
@@ -310,7 +334,40 @@
 
                     // callback for the list directive
                     scope.onSelect = function (row, $event) {
-                        var res;
+                        var res, i;
+
+                        // if the selected row is null
+                        if (row.isNotNull) {
+                            if (row.selected) {
+                                res = scope.facetColumn.addNotNullFilter();
+                            } else {
+                                res = scope.facetColumn.removeNotNullFilter();
+                            }
+
+                            if (res && !scope.parentCtrl.updateVMReference(res, scope.index)) {
+                                $log.debug("rejected because of url length limit.");
+                                row.selected = !row.selected;
+                                $event.preventDefault();
+                                return;
+                            }
+
+                            // we should disable or enable other ranges
+                            if (row.selected) {
+                                scope.facetModel.appliedFilters = [facetingUtils.getNotNullFilter(true)];
+                                for (i = 1; i < scope.ranges.length; i++) {
+                                    scope.ranges[i].selected = false;
+                                    scope.ranges[i].disabled = true;
+                                }
+                            } else {
+                                scope.facetModel.appliedFilters = [];
+                                for (i = 1; i < scope.ranges.length; i++) {
+                                    scope.ranges[i].disabled = false;
+                                }
+                            }
+
+                            return;
+                        }
+
                         if (row.selected) {
                             res = scope.facetColumn.addRangeFilter(row.metaData.min, row.metaData.minExclusive, row.metaData.max, row.metaData.maxExclusive);
                         } else {
@@ -368,8 +425,16 @@
                     // Look at the filters available for the facet and add rows to represent the preset filters
                     scope.initialRows = function () {
                         var defer = $q.defer();
-                        scope.ranges = [];
                         scope.facetModel.appliedFilters = [];
+
+                        // if we have the not-null filter, other filters are not important and can be ignored
+                        if (scope.facetColumn.hasNotNullFilter) {
+                            scope.facetModel.appliedFilters.push(facetingUtils.getNotNullFilter(true));
+                            scope.ranges = [facetingUtils.getNotNullFilter(true)];
+                            return defer.resolve(true), defer.promise;
+                        }
+
+                        scope.ranges = [facetingUtils.getNotNullFilter()];
 
                         for (var i = 0; i < scope.facetColumn.rangeFilters.length; i++) {
                             var filter = scope.facetColumn.rangeFilters[i];
@@ -386,19 +451,22 @@
                         }
 
                         // return a promise that can be acted on
-                        defer.resolve();
+                        defer.resolve(true);
                         return defer.promise;
                     };
 
                     // some of the facets might have been cleared, this function will unselect those
                     scope.syncSelected = function () {
+                        scope.ranges[0].selected = scope.facetColumn.hasNotNullFilter;
+
                         var filterIndex = function (uniqueId) {
                             return scope.facetColumn.rangeFilters.findIndex(function (f) {
-                                return f.uniqueId = uniqueId;
+                                return f.uniqueId == uniqueId;
                             });
                         }
 
-                        for (var i = 0; i < scope.ranges.length; i++) {
+                        //scope.ranges[0] is the notnull filter
+                        for (var i = 1; i < scope.ranges.length; i++) {
                             // if couldn't find the filter, then it should be unselected
                             if (filterIndex(scope.ranges[i].uniqueId) === -1) {
                                 scope.ranges[i].selected = false;
@@ -746,15 +814,8 @@
         }])
 
         .directive('choicePicker',
-            ["AlertsService", "defaultDisplayname", 'logActions', "$log", 'modalUtils', '$q', 'tableConstants', '$timeout',
-            function (AlertsService, defaultDisplayname, logActions, $log, modalUtils, $q, tableConstants, $timeout) {
-
-            // the not_null filter with appropriate attributes
-            var notNullFilter = {
-                selected: true,
-                isNotNull: true,
-                displayname: {"value": defaultDisplayname.notNull, "isHTML": true}
-            };
+            ["AlertsService", 'facetingUtils', 'logActions', "$log", 'modalUtils', '$q', 'tableConstants', '$timeout',
+            function (AlertsService, facetingUtils, logActions, $log, modalUtils, $q, tableConstants, $timeout) {
 
             /**
              * Given tuple and the columnName that should be used, return
@@ -783,7 +844,7 @@
 
                 // if not_null exist, other filters are not relevant
                 if (scope.facetColumn.hasNotNullFilter) {
-                    scope.facetModel.appliedFilters.push(notNullFilter);
+                    scope.facetModel.appliedFilters.push(facetingUtils.getNotNullFilter(true));
                     defer.resolve();
                 }
                 else if (scope.facetColumn.choiceFilters.length === 0) {
@@ -808,6 +869,31 @@
             }
 
             /**
+             * This will update the checkboxRows rows so that:
+             * - not null filter is the first checkbox.
+             * - already applied filters will be added.
+             */
+            function appliedFiltersToCheckBoxRows(scope) {
+                var res = [];
+                // if it does, then it's part of applied filters.
+                if (!scope.facetColumn.hasNotNullFilter) {
+                    res.push(facetingUtils.getNotNullFilter());
+                }
+
+                // add already applied filters.
+                Array.prototype.push.apply(res, scope.facetModel.appliedFilters.map(function (f) {
+                    return {
+                        isNotNull: f.isNotNull,
+                        uniqueId: f.uniqueId,
+                        displayname: f.displayname,
+                        tuple: f.tuple, // might be null
+                        selected: true
+                    };
+                }));
+                return res;
+            }
+
+            /**
              * Update facet column rows
              * Will return a promise, which will be resolved with:
              * - true, if the respond is the result of latest request.
@@ -818,16 +904,6 @@
              */
             function updateFacetColumn(scope) {
                 var defer = $q.defer();
-
-                var appliedFilterToRow = function (f) {
-                    return {
-                        isNotNull: f.isNotNull,
-                        uniqueId: f.uniqueId,
-                        displayname: f.displayname,
-                        tuple: f.tuple, // might be null
-                        selected: true
-                    };
-                };
 
                 // console.log("updating FACET: " + scope.index);
 
@@ -848,8 +924,11 @@
 
 
                 var appliedLen = scope.facetModel.appliedFilters.length;
+
                 if (appliedLen >= tableConstants.PAGE_SIZE) {
-                    scope.checkboxRows = scope.facetModel.appliedFilters.map(appliedFilterToRow);
+                    scope.checkboxRows = appliedFiltersToCheckBoxRows(scope);
+                    // there might be more, we're not sure
+                    scope.hasMore = false;
                     defer.resolve(true);
                     return defer.promise;
                 }
@@ -865,10 +944,9 @@
                             return defer.promise;
                         }
 
-                        scope.checkboxRows = scope.facetModel.appliedFilters.map(appliedFilterToRow);
+                        scope.checkboxRows = appliedFiltersToCheckBoxRows(scope);
 
-                        // always show the "show details button"
-                        scope.hasMore = true;
+                        scope.hasMore = page.hasNext;
 
                         page.tuples.forEach(function (tuple) {
                             // if we're showing enough rows
@@ -947,7 +1025,7 @@
                         }
 
                         if (changeRef) {
-                            scope.facetModel.appliedFilters = [notNullFilter];
+                            scope.facetModel.appliedFilters = [facetingUtils.getNotNullFilter(true)];
                         }
                     } else if (Array.isArray(res)){
                         var tuples = res;
@@ -1145,7 +1223,7 @@
                             var i;
                             if (row.selected) {
                                 // if user selects not_null, we must deselect and disable other options
-                                scope.facetModel.appliedFilters = [notNullFilter];
+                                scope.facetModel.appliedFilters = [facetingUtils.getNotNullFilter(true)];
                                 for (i = 1; i < scope.checkboxRows.length; i++) {
                                     scope.checkboxRows[i].selected = false;
                                     scope.checkboxRows[i].disabled = true;
@@ -1227,7 +1305,9 @@
                                 // if the load more text link isn't present, save some space for it
                                 // TODO: seems like showFindMore solved the case of adding the extra height twice
                                 //   - i think because the below (isOpen and !isLoading) watch event fires off first
-                                if (!scope.hasMore && !scope.showFindMore) addedHeight += findMoreHeight;
+                                // if (!scope.hasMore && !scope.showFindMore) addedHeight += findMoreHeight;
+                                // TODO the line above didn't have any effect since hasMore was always true,
+                                // so I commented it. We should eventually remove this.
                                 choicePickerElem.style.height = addedHeight + "px";
                             }, 0);
                         } else if (newVal == false) {
@@ -1251,6 +1331,110 @@
                     });
                 }
             };
+        }])
+
+        .directive("checkPresence", ['facetingUtils', '$q', '$log', function(facetingUtils, $q, $log) {
+            function hasNullFilter(scope) {
+                return scope.facetColumn.choiceFilters.filter(function (f) {
+                    return f.term == null;
+                }).length > 0;
+            }
+
+            return {
+                restrict: 'AE',
+                templateUrl: '../common/templates/faceting/check-presence.html',
+                scope: {
+                    facetColumn: "=",
+                    facetModel: "=",
+                    index: "=",
+                    facetPanelOpen: "="
+                },
+                controller: ['$scope', function ($scope) {
+                    var ctrl = this;
+
+                    // register the update facet function
+                    ctrl.updateFacet = function () {
+                        return $scope.updateFacetColumn($scope);
+                    };
+
+                    // register the initialize facet function
+                    ctrl.initializeFacet =  function () {
+                        return $scope.initializeFacetColumn($scope);
+                    };
+                }],
+                require: ['^faceting', 'checkPresence'],
+                link: function (scope, element, attr, ctrls) {
+                    var parentCtrl = ctrls[0],
+                        currentCtrl = ctrls[1];
+
+                    // register this controller in the parent
+                    parentCtrl.register(currentCtrl, scope.facetColumn, scope.index);
+                    scope.parentCtrl = parentCtrl;
+
+                    scope.checkboxRows = [facetingUtils.getNotNullFilter(), facetingUtils.getNullFilter()];
+
+                    scope.updateFacetColumn = function () {
+                        var defer = $q.defer();
+                        scope.facetModel.appliedFilters = [];
+
+                        scope.checkboxRows[0].selected = false;
+                        if (scope.facetColumn.hasNotNullFilter) {
+                            scope.checkboxRows[0].selected = true;
+                            scope.facetModel.appliedFilters.push(facetingUtils.getNotNullFilter());
+                        }
+
+                        scope.checkboxRows[1].selected = false;
+                        if (hasNullFilter(scope)) {
+                            scope.checkboxRows[1].selected = true;
+                            scope.facetModel.appliedFilters.push(facetingUtils.getNotNullFilter());
+                        }
+
+                        return defer.resolve(true), defer.promise;
+                    };
+
+                    scope.initializeFacetColumn = function () {
+                        var defer = $q.defer();
+                        // this function is expected but we don't need any extra logic here.
+                        return defer.resolve(true), defer.promise;
+                    };
+
+                    scope.onRowClick = function (row, $event) {
+                        var ref;
+                        if (row.isNotNull) {
+                            if (row.selected) {
+                                ref = scope.facetColumn.addNotNullFilter();
+                            } else {
+                                ref = scope.facetColumn.removeNotNullFilter();
+                            }
+                            $log.debug("request for facet (index=" + scope.facetColumn.index + ") add not-null filter.'");
+                        } else {
+                            if (row.selected) {
+                                ref = scope.facetColumn.addChoiceFilters([row.uniqueId]);
+                            } else {
+                                ref = scope.facetColumn.removeChoiceFilters([row.uniqueId]);
+                            }
+                            $log.debug("request for facet (index=" + scope.facetColumn.index + ") choice add null filter.");
+                        }
+
+                        if (!scope.parentCtrl.updateVMReference(ref, scope.index)) {
+                            $log.debug("URL limit reached. Reverting the change.");
+                            row.selected = !row.selected;
+                            $event.preventDefault();
+                            return;
+                        }
+
+                        if (row.selected) {
+                            scope.facetModel.appliedFilters.push(row.isNotNull ? facetingUtils.getNotNullFilter() : facetingUtils.getNullFilter());
+                        } else {
+                            scope.facetModel.appliedFilters = scope.facetModel.appliedFilters.filter(function (f) {
+                                return f.uniqueId !== row.uniqueId;
+                            });
+                        }
+
+                    };
+                }
+            };
+
         }])
 
         .directive('facetingCollapseBtn', function () {

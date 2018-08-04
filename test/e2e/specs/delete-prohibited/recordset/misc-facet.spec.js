@@ -8,9 +8,9 @@ var testParams = {
     table_name: "main",
     filter_secondary_key: {
         facetIdx: 14,
-        option: 0,
+        option: 1,
         modalOption: 1,
-        totalNumOptions: 10,
+        totalNumOptions: 11,
         numRows: 10,
         numRowsAfterModal: 20
 
@@ -19,12 +19,12 @@ var testParams = {
         option: 0,
         result_num_w_not_null: 20,
         modal_available_options: 20,
-        disabled_rows_w_not_null: 9,
+        disabled_rows_w_not_null: 10,
         options_w_not_null: [
-            'All Records With Value', '1', '2', '3', '4', '5', '6', '7', '8', '9'
+            'All Records With Value', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'
         ],
         options_wo_not_null: [
-            '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'
+            'All Records With Value', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'
         ]
     },
     customFilter: {
@@ -33,21 +33,21 @@ var testParams = {
         numRowsWFacet: 1,
         numRowsWOFilter: 1,
         facet: 0,
-        totalNumOptions: 7,
-        options: ["1", "2", "6", "7", "8", "9", "10"],
-        optionsWOFilter: ["2", "1", "3", "4", "5", "6", "7", "8", "9", "10"],
-        option: 1
+        totalNumOptions: 8,
+        options: ["All Records With Value", "1", "2", "6", "7", "8", "9", "10"],
+        optionsWOFilter: ["All Records With Value", "2", "1", "3", "4", "5", "6", "7", "8", "9", "10"],
+        option: 2
     },
     maximumLength: {
-        facetIdx: 15,
-        option: 0,
+        facetIdx: 16,
+        option: 1,
         numRows: 25,
         modalOption: 10,
-        totalNumOptions: 25,
+        totalNumOptions: 26,
         filteredNumRows: 14,
         secondFacetIdx: 6,
-        secondFacetOption: 0,
-        secondFacetNumOptions: 6
+        secondFacetOption: 1,
+        secondFacetNumOptions: 7
     },
     recordColumns: [ "text_col", "longtext_col", "markdown_col", "int_col", "float_col", "date_col", "timestamp_col", "boolean_col", "jsonb_col", "1-o7Ye2EkulrWcCVFNHi3A", "hmZyP_Ufo3E5v_nmdTXyyA" ],
     recordValues: {
@@ -150,7 +150,7 @@ describe("Other facet features, ", function() {
                 expect(chaisePage.recordsetPage.getCheckedModalOptions().count()).toBe(1, "number of checked rows missmatch.");
                 return chaisePage.recordsetPage.getModalOptions();
             }).then(function (options) {
-                expect(options[testParams.filter_secondary_key.option+1].isSelected()).toBeTruthy("the correct option was not selected.");
+                expect(options[testParams.filter_secondary_key.option].isSelected()).toBeTruthy("the correct option was not selected.");
                 done();
             }).catch(chaisePage.catchTestError(done));
         });
@@ -607,7 +607,7 @@ describe("Other facet features, ", function() {
             });
 
             it("select a facet option and select a row for the input", function (done) {
-                chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(0, 0)).then(function () {
+                chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(0, 1)).then(function () {
                     browser.wait(function () {
                         return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
                             return (ct == 1);
@@ -687,7 +687,7 @@ describe("Other facet features, ", function() {
             });
 
             it("select a facet option and select a row to associate", function (done) {
-                chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(0, 0)).then(function () {
+                chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(0, 1)).then(function () {
                     browser.wait(function () {
                         return chaisePage.recordsetPage.getRecordsetTableModalOptions().count().then(function (ct) {
                             return (ct == 1);
