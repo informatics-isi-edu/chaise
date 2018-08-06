@@ -1,3 +1,4 @@
+// 1 - loading scripts outside IIFE
 function loadModule() {
     (function () {
         'use strict';
@@ -96,101 +97,205 @@ CSS_DEPS.forEach(function (url) {
 });
 loadJSDeps(JS_DEPS[0], fileLoaded);
 
+// 2 - loading scripts inside IIFE
+/*
+(function() {
+    'use strict';
+    var chaisePath = chaiseConfig['chaisePath'];
 
-// (function() {
-//     'use strict';
-//     var chaisePath = chaiseConfig['chaisePath'];
+    const JS_DEPS = [
+        'scripts/vendor/jquery-latest.min.js',
+        'scripts/vendor/ui-bootstrap-tpls-2.5.0.min.js',
+        'common/vendor/angular-animate.min.js',
+        '../ermrestjs/ermrest.js',
+        'common/alerts.js',
+        'common/authen.js',
+        'common/errors.js',
+        'common/filters.js',
+        'common/login.js',
+        'common/modal.js',
+        'common/storage.js',
+        'common/utils.js',
+        'common/vendor/angular-cookies.min.js',
+        'scripts/vendor/bootstrap.js',
+    ];
 
-//     const JS_DEPS = [
-//         'scripts/vendor/jquery-latest.min.js',
-//         'scripts/vendor/ui-bootstrap-tpls-2.5.0.min.js',
-//         'common/vendor/angular-animate.min.js',
-//         '../ermrestjs/ermrest.js',
-//         'common/alerts.js',
-//         'common/authen.js',
-//         'common/errors.js',
-//         'common/filters.js',
-//         'common/login.js',
-//         'common/modal.js',
-//         'common/storage.js',
-//         'common/utils.js',
-//         'common/vendor/angular-cookies.min.js',
-//         'scripts/vendor/bootstrap.js',
-//     ];
+    const CSS_DEPS = [
+        'styles/vendor/bootstrap.min.css',
+        'common/styles/app.css'
+    ];
 
-//     const CSS_DEPS = [
-//         'styles/vendor/bootstrap.min.css',
-//         'common/styles/app.css'
-//     ];
-
-//     var head = document.getElementsByTagName('head')[0];
-//     function loadStylesheets(url){
-//         var link = document.createElement('link');
-//         link.rel = 'stylesheet';
-//         link.type = 'text/css';
-//         link.href = chaisePath + url;
-//         head.appendChild(link);
-//     }
-//     function loadScripts(url, callback){
-//         var script = document.createElement('script');
-//         script.type = 'text/javascript';
-//         script.src = chaisePath + url;
-//         script.onload = callback;
-//         //script.onreadystatechange = callback;
-//         head.appendChild(script);
-//     }
+    var head = document.getElementsByTagName('head')[0];
+    function loadStylesheets(url){
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = chaisePath + url;
+        head.appendChild(link);
+    }
+    function loadJSDeps(url, callback){
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = chaisePath + url;
+        script.onload = callback;
+        //script.onreadystatechange = callback;
+        head.appendChild(script);
+    }
    
-//     function loadModule(){
-//         angular.module('chaise.loginapp', [
-//             'chaise.alerts',
-//             'chaise.authen',
-//             'chaise.login',
-//             'chaise.modal',
-//             'chaise.utils',
-//             'ermrestjs',
-//             'ngCookies',
-//             'ngAnimate',
-//             'ui.bootstrap'])
+    function loadModule(){
+        angular.module('chaise.loginapp', [
+            'chaise.alerts',
+            'chaise.authen',
+            'chaise.login',
+            'chaise.modal',
+            'chaise.utils',
+            'ermrestjs',
+            'ngCookies',
+            'ngAnimate',
+            'ui.bootstrap'])
 
-//         .config(['$cookiesProvider', function($cookiesProvider) {
-//             $cookiesProvider.defaults.path = '/';
-//         }])
+        .config(['$cookiesProvider', function($cookiesProvider) {
+            $cookiesProvider.defaults.path = '/';
+        }])
 
-//         .config(['$uibTooltipProvider', function($uibTooltipProvider) {
-//             $uibTooltipProvider.options({appendToBody: true});
-//         }])
+        .config(['$uibTooltipProvider', function($uibTooltipProvider) {
+            $uibTooltipProvider.options({appendToBody: true});
+        }])
         
-//         .config(['$logProvider', function($logProvider) {
-//             $logProvider.debugEnabled(chaiseConfig.debug === true);
-//         }])
+        .config(['$logProvider', function($logProvider) {
+            $logProvider.debugEnabled(chaiseConfig.debug === true);
+        }])
         
-//         .run(['AlertsService', 'messageMap', 'Session', 'ERMrest', 'UiUtils', 'UriUtils',
-//             function(AlertsService, messageMap, Session, ERMrest, UiUtils, UriUtils) {
-//             try {
-//                 var subId = Session.subscribeOnChange(function() {
-//                     Session.unsubscribeOnChange(subId);
-//                     var session = Session.getSessionValue();
-//                     if (!session && Session.showPreviousSessionAlert()) 
-//                         AlertsService.addAlert(messageMap.previousSession.message, 'warning', Session.createPromptExpirationToken);
-//                 });
-//                 UriUtils.setLocationChangeHandling();
-//                 UiUtils.setBootstrapDropdownButtonBehavior();
-//             } catch (exception) {
-//                 throw exception;
-//             }
-//         }]);
-//     }
-//     var count = 0;
-//     function fileLoaded(){
-//         count = count+1;
-//         if(count == JS_DEPS.length){
-//             loadModule();
-//         } else {
-//             loadScripts(JS_DEPS[count], fileLoaded);
-//         }
-//     }
-//     CSS_DEPS.forEach(function(url){
-//         loadStylesheets(url);
-//     });
-//     loadScripts(JS_DEPS[0], fileLoaded);
-// })();
+        .run(['AlertsService', 'messageMap', 'Session', 'ERMrest', 'UiUtils', 'UriUtils',
+            function(AlertsService, messageMap, Session, ERMrest, UiUtils, UriUtils) {
+            try {
+                var subId = Session.subscribeOnChange(function() {
+                    Session.unsubscribeOnChange(subId);
+                    var session = Session.getSessionValue();
+                    if (!session && Session.showPreviousSessionAlert()) 
+                        AlertsService.addAlert(messageMap.previousSession.message, 'warning', Session.createPromptExpirationToken);
+                });
+                UriUtils.setLocationChangeHandling();
+                UiUtils.setBootstrapDropdownButtonBehavior();
+            } catch (exception) {
+                throw exception;
+            }
+        }]);
+    }
+    var jsFileCount = 0;
+    function fileLoaded(){
+        jsFileCount = jsFileCount+1;
+        if(jsFileCount == JS_DEPS.length){
+            loadModule();
+        } else {
+            loadJSDeps(JS_DEPS[jsFileCount], fileLoaded);
+        }
+    }
+    CSS_DEPS.forEach(function(url){
+        loadStylesheets(url);
+    });
+    loadJSDeps(JS_DEPS[0], fileLoaded);
+})();
+*/
+
+// 3 - Array.reduce with promise return
+/*
+(function() {
+    'use strict';
+    var chaisePath = chaiseConfig['chaisePath'];
+
+    const JS_DEPS = [
+        'scripts/vendor/jquery-latest.min.js',
+        'scripts/vendor/ui-bootstrap-tpls-2.5.0.min.js',
+        'common/vendor/angular-animate.min.js',
+        '../ermrestjs/ermrest.js',
+        'common/alerts.js',
+        'common/authen.js',
+        'common/errors.js',
+        'common/filters.js',
+        'common/login.js',
+        'common/modal.js',
+        'common/storage.js',
+        'common/utils.js',
+        'common/vendor/angular-cookies.min.js',
+        'scripts/vendor/bootstrap.js',
+    ];
+
+    const CSS_DEPS = [
+        'styles/vendor/bootstrap.min.css',
+        'common/styles/app.css'
+    ];
+
+    var head = document.getElementsByTagName('head')[0];
+    function loadStylesheets(url){
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = chaisePath + url;
+        head.appendChild(link);
+    }
+    function loadJSDeps(url, callback){
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = chaisePath + url;
+        script.onload = callback;
+        //script.onreadystatechange = callback;
+        head.appendChild(script);
+    }
+   
+    function loadModule(){
+        angular.module('chaise.loginapp', [
+            'chaise.alerts',
+            'chaise.authen',
+            'chaise.login',
+            'chaise.modal',
+            'chaise.utils',
+            'ermrestjs',
+            'ngCookies',
+            'ngAnimate',
+            'ui.bootstrap'])
+
+        .config(['$cookiesProvider', function($cookiesProvider) {
+            $cookiesProvider.defaults.path = '/';
+        }])
+
+        .config(['$uibTooltipProvider', function($uibTooltipProvider) {
+            $uibTooltipProvider.options({appendToBody: true});
+        }])
+        
+        .config(['$logProvider', function($logProvider) {
+            $logProvider.debugEnabled(chaiseConfig.debug === true);
+        }])
+        
+        .run(['AlertsService', 'messageMap', 'Session', 'ERMrest', 'UiUtils', 'UriUtils',
+            function(AlertsService, messageMap, Session, ERMrest, UiUtils, UriUtils) {
+            try {
+                var subId = Session.subscribeOnChange(function() {
+                    Session.unsubscribeOnChange(subId);
+                    var session = Session.getSessionValue();
+                    if (!session && Session.showPreviousSessionAlert()) 
+                        AlertsService.addAlert(messageMap.previousSession.message, 'warning', Session.createPromptExpirationToken);
+                });
+                UriUtils.setLocationChangeHandling();
+                UiUtils.setBootstrapDropdownButtonBehavior();
+            } catch (exception) {
+                throw exception;
+            }
+        }]);
+    }
+    var jsFileCount = 0;
+    function fileLoaded(){
+       
+        jsFileCount = jsFileCount+1;
+        if(jsFileCount == JS_DEPS.length){
+            loadModule();
+        }
+        return  new Promise(function(resolve, reject){resolve('Success');});
+    }
+
+    CSS_DEPS.forEach(function(url){
+        loadStylesheets(url);
+    });
+    JS_DEPS.reduce((promiseChain, dep) => promiseChain.then(()=>loadJSDeps(dep, fileLoaded)), Promise.resolve());
+})();
+*/
