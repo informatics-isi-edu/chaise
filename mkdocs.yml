@@ -1,0 +1,26 @@
+site_name: Chaise
+site_description: Computer-human access interface with schema evolution
+theme: readthedocs
+site_url: https://informatics-isi-edu.github.io/chaise/
+extra_css:
+  - /css/extra.css
+
+copyright: Copyright &copy; 2018 <a href="<https://github.com/informatics-isi-edu/chaise>">chaise</a>.
+
+pages:
+    - Welcome to the documentation: index.md
+    - User Documents:
+        - Chaise Configuration: user-docs/chaise-config.md
+        - Contexts: user-docs/contexts.md
+        - Custom CSS: user-docs/custom-css.md
+        - Logging: user-docs/logging.md
+    - Developer Documents:
+        - Dev Guide: dev-docs/dev-guide.md
+        - E2E Testing: dev-docs/e2e-test.md
+        - Manual Testing: dev-docs/manual-test.md
+        - Style Guide: dev-docs/style-guide.md
+        - Test FAQ: dev-docs/test-faq.md
+    - Search:
+        - Annotation: search/annotation.md
+        - Heuristics: search/heuristics.md
+        - URLs: search/urls.md

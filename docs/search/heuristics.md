@@ -5,9 +5,9 @@ presentation of tabular data from an
 [ERMrest](http://github.com/informatics-isi-edu/ermrest) service instance. They
 are intended to complement several sources of domain information:
 
-- [ERMrest model resources](http://github.com/informatics-isi-edu/ermrest/blob/master/api-doc/model/rest.md#schemata-retrieval) a.k.a. table schemata
-- [ERMrest model annotations](http://github.com/informatics-isi-edu/ermrest/blob/master/api-doc/index.md#model-annotations)
-  - [Proposed common ERMrest annotations](http://github.com/informatics-isi-edu/ermrest/blob/master/user-doc/annotation.md)
+- [ERMrest model resources](http://github.com/informatics-isi-edu/ermrest/blob/master/docs/api-doc/model/rest.md#schemata-retrieval) a.k.a. table schemata
+- [ERMrest model annotations](http://github.com/informatics-isi-edu/ermrest/blob/master/docs/api-doc/index.md#model-annotations)
+  - [Proposed common ERMrest annotations](http://github.com/informatics-isi-edu/ermrest/blob/master/docs/user-doc/annotation.md)
 - User preferences via GUI controls, cookies, etc.?
 
 ## Status
@@ -131,7 +131,7 @@ of all records matching the criteria.
 ### Paging
 
 Record-sets SHOULD be presented using
-[paged data access](http://github.com/informatics-isi-edu/ermrest/blob/master/api-doc/data/naming.md#data-paging).
+[paged data access](http://github.com/informatics-isi-edu/ermrest/blob/master/docs/api-doc/data/naming.md#data-paging).
 
 - The paging key SHOULD be an existing key column (or composite key) found in
   the table definition of the model.
@@ -214,7 +214,7 @@ RECOMMENDED:
 
 ### Recognizing Vocabularies
 
-1. A use of the [vocabulary annotation](https://github.com/informatics-isi-edu/ermrest/blob/master/user-doc/annotation.md#2015-vocabulary)
+1. A use of the [vocabulary annotation](https://github.com/informatics-isi-edu/ermrest/blob/master/docs/user-doc/annotation.md#2015-vocabulary)
    identifies a vocabulary table and assigns a mapping to its columns.
 2. A single-column table where its integer or textual column is also its key
    and one or more tables make foreign-key references to the table. Consider
