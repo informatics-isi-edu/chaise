@@ -35,11 +35,11 @@ var testParams = {
         json_value:JSON.stringify({"name":"testing_json"}),
         json_disabled_value:JSON.stringify(98.786),
         json_disabled_no_default_value: "Automatically generated",
-        rid_disabled_value: "Automatically generated",
-        rcb_disabled_value: "Automatically generated",
-        rmb_disabled_value: "Automatically generated",
-        rct_disabled_value: "Automatically generated",
-        rmt_disabled_value: "Automatically generated"
+        rid_disabled_value: "Not Allowed",
+        rcb_disabled_value: "Not Allowed",
+        rmb_disabled_value: "Not Allowed",
+        rct_disabled_value: "Not Allowed",
+        rmt_disabled_value: "Not Allowed"
     },
     record_column_values: {
     // data values
