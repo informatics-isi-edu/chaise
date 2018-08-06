@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html class="">
+<head>
+  <title>Welcome | RBK</title>
+  <script src="../chaise-config.js"></script>
+  <script src="../scripts/vendor/angular.js"></script>
+  <script src="./login.app.js"></script>
+</head>
+
+<body>
+    <div class="wrap">
+      
+      <header id="header">
+        
+        <nav id="navbar" class="navbar navbar-default navbar-fixed-top">
+            <div class="container-fluid">
+                <div class="row">
+                <div class="col-sm-4 col-md-4">
+                    <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="mobile-menu">MENU</span>
+                    </button>
+                    <a class="navbar-brand" href="/">
+                        <span id="brand-text">ReBuilding A Kidney</span>
+                    </a>
+                    </div>
+                    
+                </div>
+                <div class="col-sm-6 col-md-6">
+                    <!-- Collect the nav links, forms, and other content for toggling -->
+                    
+                    <div class="navbar-collapse collapse" id="navbar-collapse">
+                    <ul class="nav navbar-nav">
+                    
+                        
+                        <li class="dropdown toplevel">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">About<span class="caret"></span></a>
+                        <ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu">
+                        
+                        
+                            <li><a href="/about/" target="">About RBK</a>
+                            </li>
+                        
+                        
+                        
+                            <li><a href="/about/usage.html" target="">Citing RBK</a>
+                            </li>
+                        
+                        
+                        
+                            <li><a href="/publications/" target="">Publications</a>
+                            </li>
+                        
+                        
+                        
+                            <li><a href="/privacy-policy/" target="">Privacy Policy</a>
+                            </li>
+                        
+                        
+                        </ul>
+                        
+                            </li>
+                    
+                        
+                        <li class="dropdown toplevel">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Resources<span class="caret"></span></a>
+                        <ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu">
+                        
+                        
+                            <li><a href="/resources/" target="">Resources Overview</a>
+                            </li>
+                        
+                        
+                        
+                            <li><a href="/chaise/recordset/#2/Common:Gene" target="">Search by Genes</a>
+                            </li>
+                        
+                        
+                        
+                            <li><a href="/chaise/recordset/#2/Protocol:Protocol" target="">Lab Protocols</a>
+                            </li>
+                        
+                        
+                        
+                            <li><a href="/chaise/recordset/#2/Cell_Line:Parental_Cell_Line" target="">Transgenic Lines</a>
+                            </li>
+                        
+                        
+                        
+                            <li><a href="/chaise/recordset/#2/Antibody:Antibody_Tests" target="">Antibody Validation</a>
+                            </li>
+                        
+                        
+                        
+                            <li><a href="/chaise/recordset/#2/RNASeq:Experiment" target="">Gene Expression Data</a>
+                            </li>
+                        
+                        
+                        
+                            <li><a href="/chaise/recordset/#2/Common:Collection" target="">Collections</a>
+                            </li>
+                        
+                        
+                        
+                            <li><a href="/tools/" target="">Tools</a>
+                            </li>
+                        
+                        
+                        
+                            <li><a href="/internal/" target="">Internal</a>
+                            </li>
+                        
+                        
+                        </ul>
+                        
+                            </li>
+                    
+                                            
+                            <li class="toplevel">
+                            <a href="/projects/">Projects</a>
+                            
+                            </li>
+                    
+                                            
+                            <li class="toplevel">
+                            <a href="/collaborate.html">Collaborating</a>
+                            
+                            </li>
+                    
+                                            
+                            <li class="toplevel">
+                            <a href="/news/">News</a>
+                            
+                            </li>
+                    
+                                            
+                            <li class="toplevel">
+                            <a href="/contact.html">Contact</a>
+                            
+                            </li>
+                    
+                        
+                        <li class="dropdown toplevel">
+                        <a href="/help/" class="dropdown-toggle" data-toggle="dropdown">Help<span class="caret"></span></a>
+                        <ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu">
+                        
+                        
+                            <li><a href="https://github.com/informatics-isi-edu/gudmap-rbk/wiki/Using-the-GUDMAP-RBK-Data-Browser" target="">Using the RBK Browser</a>
+                            </li>
+                        
+                        
+                        
+                            <li><a href="https://github.com/informatics-isi-edu/gudmap-rbk/wiki" target="">Submitting Data</a>
+                            </li>
+                        
+                        
+                        
+                            <li><a href="https://github.com/informatics-isi-edu/gudmap-rbk/wiki/Create-citable-datasets" target="">Creating Citable Datasets</a>
+                            </li>
+                        
+                        
+                        
+                            <li><a href="/about/usage.html" target="">Citing Consortium Data</a>
+                            </li>
+                        
+                        
+                        </ul>
+                        
+                            </li>
+                    
+                    </ul>
+                    </div><!-- /.navbar-collapse -->
+                </div><!-- /.col- -->
+                <div class="col-sm-2 col-md-2" ng-app="chaise.loginapp">
+                    <login></login>
+                </div>
+                </div><!-- /.row -->
+            </div><!-- /.container-fluid -->
+        </nav>
+      
+      </header>	
+
+    </div>
+  
+    <footer id="footer">
+
+        <div class="lockup">
+            <p class="pull-right" style="padding-top:40px;">
+            <a href="http://deriva.isrd.isi.edu/">
+                <img src="" alt="Logo of the DERIVA system" height="80px">
+            </a>
+            </p>
+            <div class="content-wrap">
+
+            <p class="copyright">&copy; 2018 |
+                <a href="/privacy-policy/">Privacy Policy</a> | <a href="/about/#citing">Citing RBK</a> <br/>
+                (Re)Building a Kidney is funded by the <a href="https://www.niddk.nih.gov/">National Institute of Diabetes and Digestive and Kidney Diseases (NIDDK)</a>.
+            </p>
+
+            </div>
+            
+        </div>
+
+    </footer>
+</body>
+</html>
