@@ -1,6 +1,6 @@
 <div class="range-picker">
     <record-list on-row-click="onSelect" range-options="rangeOptions" rows="ranges"></record-list>
-    <range-inputs type="rangeOptions.type" add-range-cb="rangeOptions.callback" abs-min="rangeOptions.absMin" abs-max="rangeOptions.absMax" model="rangeOptions.model"></range-inputs>
+    <range-inputs type="rangeOptions.type" add-range-cb="rangeOptions.callback" abs-min="rangeOptions.absMin" abs-max="rangeOptions.absMax" model="rangeOptions.model" disabled="facetColumn.hasNotNullFilter"></range-inputs>
     <div ng-if="facetModel.initialized && facetModel.isOpen && facetPanelOpen && showHistogram()">
         <div class="divider"></div>
         <div class="plotly-actions btn-group pull-right" style="z-index: 1">
