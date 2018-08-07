@@ -6,7 +6,7 @@
     .constant('tableConstants', {
         MAX_CONCURENT_REQUEST: 4,
         MAX_URL_LENGTH: 2000,
-        PAGE_SIZE: 10,
+        PAGE_SIZE: 11, // one is not-null
         AUTO_SEARCH_TIMEOUT: 2000
     })
 
