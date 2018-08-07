@@ -1403,11 +1403,13 @@
     .service('headInjector', ['$window', '$rootScope', 'MathUtils',  function($window, $rootScope, MathUtils) {
         var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
         function addCustomCSS() {
-          var fileref = document.createElement("link");
-          fileref.setAttribute("rel", "stylesheet");
-          fileref.setAttribute("type", "text/css");
-          fileref.setAttribute("href", chaiseConfig['customCSS']);
-          document.getElementsByTagName("head")[0].appendChild(fileref);
+          if (chaiseConfig['customCSS'] !== undefined) {
+            var fileref = document.createElement("link");
+            fileref.setAttribute("rel", "stylesheet");
+            fileref.setAttribute("type", "text/css");
+            fileref.setAttribute("href", chaiseConfig['customCSS']);
+            document.getElementsByTagName("head")[0].appendChild(fileref);
+          }  
         }
 
         function addTitle() {
