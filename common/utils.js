@@ -4,59 +4,21 @@
     angular.module('chaise.utils', ['chaise.errors'])
 
     .constant("defaultChaiseConfig", {
-          "catalog": 1,
-          "layout": "list",
-          "feedbackURL": "",
-          "helpURL": "",
-          "ermrestLocation": (location.origin) + "/ermrest",
-          "recordResource": "/record",
+          "ermrestLocation": window.location.origin + "/ermrest",
           "headTitle": "Chaise",
           "navbarBrandText": "Chaise",
           "logoutURL": "/",
           "maxRecordsetRowHeight": 160,
-          "dataBrowser": "/chaise/search",
-          "defaultAnnotationColor": "red",
           "confirmDelete": true,
-          "editRecord": true,
-          "deleteRecord": true,
+          "editRecord": false,
+          "deleteRecord": false,
           "signUpURL": "",
           "profileURL": "",
-          "navbarMenu": {
-              "newTab": true,
-              "children": []
-          },
-          "allowErrorDismissal": true,
-          "showFaceting": true,
+          "allowErrorDismissal": false,
+          "showFaceting": false,
           "hideTableOfContents": false,
           "showExportButton": false,
-          "navbarBrand": "/",
-          "navbarBrandImage": null,
-          "customCSS": "/assets/css/chaise.css",
-          "footerMarkdown": "**Please check** [Privacy Policy](/privacy-policy/){target='_blank'}",
-          "maxRelatedTablesOpen":15,
-          "plotViewEnabled": false,
-          "recordUiGridEnabled": false,
-          "recordUiGridExportCSVEnabled": true,
-          "recordUiGridExportPDFEnabled": true,
-          "tour": {
-            "pickRandom": false,
-            "searchInputAttribute": "Data",
-            "searchChosenAttribute": "Data Type",
-            "searchInputValue": "micro",
-            "extraAttribute": "Mouse Anatomic Source",
-            "chosenAttribute": "Data Type",
-            "chosenValue": "Expression microarray - gene"
-          },
-          // Search related properties
-          "showBadgeCounts": false,
-          "tableThreshold": 0,
-          "showAllAttributes": false,
-          "showUnfilteredResults": false,
-          "sidebarPosition": "right",
-          "attributesSidebarHeading": "Choose Attributes",
-          "hideSearchTextFacet": false,
-          "maxColumns": 6,
-          "searchPageSize": 25
+          "navbarBrand": ""
     })
 
     .constant("appTagMapping", {
