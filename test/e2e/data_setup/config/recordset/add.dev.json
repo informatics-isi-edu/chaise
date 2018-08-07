@@ -3,7 +3,7 @@
     "schemaConfigurations": [
         "recordset/add.config.json"
     ],
-    "schema": "recordset-product-add"
+    "schema": "product-recordset-add"
   },
   "cleanup" : true
 }

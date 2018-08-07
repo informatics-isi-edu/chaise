@@ -122,10 +122,74 @@ var importSchemas = function(configs, defer, authCookie, catalogId, entities) {
     });
 };
 
-exports.importSchemas = function(schemaConfigurations, catalogId) {
-    var defer = q.defer();
-    importSchemas(schemaConfigurations.slice(0), defer, catalogId, {});
-    return defer.promise;
+/**
+ * Will send a request to create all the given schemas at once. It will take
+ * care of changing the configs to be what the function in ErmrestDataUtils accepts.
+ * It will not return anything, but will reject or resolve the given defer object.
+ *
+ * NOTE the catalogId that is passed is not used in this function, I wanted to follow
+ * the same pattern as the existing function, but we can completely remove that.
+ * We're always create a new catalog in here. We're not reusing the same catalog.
+ *
+ * @param  {object} configs    the schema configurations
+ * @param  {object} defer      the defer object
+ * @param  {string} authCookie the webauthn cookie
+ * @param  {string} catalogId  catalog id
+ * @param  {object} entities   the container for the entities
+ */
+var bulkImportSchemas = function(configs, defer, authCookie, catalogId, entities) {
+    var schemas = {};
+
+    var config, schema, schemaName;
+
+    if (!configs || configs.length === 0) {
+        return defer.resolve({catalogId: catalogId, entities: {}}), defer.promise;
+    }
+
+    // create the settings based on the acceptable strucutre.
+    // please refer to ermest data utils documentation for the strucutre
+    var settings = {
+        url: process.env.ERMREST_URL,
+        authCookie: authCookie
+    };
+
+    configs.forEach(function (config) {
+        schemas[config.schema.name] = {
+            path: config.schema.path
+        };
+
+        if (config.entities) {
+            schemas[config.schema.name].entities = config.entities.path;
+        }
+    });
+
+    // we could pass the acls here in the catalog
+    settings.setup = {catalog: {}, schemas: schemas};
+
+    // reuse the same catalogid
+    if (catalogId) settings.setup.catalog.id = catalogId;
+
+    ermrestUtils.createSchemasAndEntities(settings).then(function (data) {
+        process.env.catalogId = data.catalogId;
+        if (data.schemas) {
+            for(schemaName in data.schemas) {
+                if (!data.schemas.hasOwnProperty(schemaName)) continue;
+
+                schema = data.schemas[schemaName];
+                entities[schema.name] = {};
+
+                for (var t in schema.tables) {
+                    if (!schema.tables.hasOwnProperty(t)) continue;
+
+                    entities[schema.name][t] = schema.tables[t].entities;
+                }
+            }
+            console.log("Attached entities for the schemas");
+        }
+        defer.resolve({entities: entities, catalogId: data.catalogId});
+    }).catch(function (err) {
+        defer.reject(err);
+    });
 };
 
 exports.setup = function(testConfiguration) {
@@ -140,7 +204,7 @@ exports.setup = function(testConfiguration) {
 
     var defer1 = Q.defer();
     // Call setup to import data for tests as specified in the configuration
-    importSchemas(schemaConfigurations.slice(0), defer1, testConfiguration.authCookie, undefined, entities);
+    bulkImportSchemas(schemaConfigurations, defer1, testConfiguration.authCookie, undefined, entities);
 
     defer1.promise.then(function(res) {
 
@@ -198,7 +262,8 @@ exports.tear = function(testConfiguration, catalogId, defer) {
     ermrestUtils.tear({
       url: process.env.ERMREST_URL,
       catalogId: catalogId,
-      setup: testConfiguration.setup.schemaConfigurations[0]
+      setup: testConfiguration.setup.schemaConfigurations[0],
+      authCookie: process.env.AUTH_COOKIE
     }).done(function() {
       cleanupDone = true;
     });

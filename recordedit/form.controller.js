@@ -28,6 +28,7 @@
         vm.submit = submit;
         vm.readyToSubmit = false;
         vm.submissionButtonDisabled = false;
+        vm.successfulSubmission = false;
         vm.redirectAfterSubmission = redirectAfterSubmission;
         vm.searchPopup = searchPopup;
         vm.createRecord = createRecord;
@@ -160,6 +161,7 @@
             var page = result.successful;
             var failedPage = result.failed;
             var resultsReference = page.reference;
+            vm.successfulSubmission = true;
             if (model.rows.length == 1) {
                 vm.redirectAfterSubmission(page);
             }
@@ -800,6 +802,13 @@
             $timeout(function() {
                   resizeColumns();
             }, TIMER_INTERVAL, false);
+        });
+
+        $window.addEventListener("beforeunload", function(e) {
+            if(vm.successfulSubmission){
+                return undefined;
+            }
+            e.returnValue = "Do you want to leave this page? Changes you have made will not be saved.";
         });
     }]);
 })();

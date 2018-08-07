@@ -131,8 +131,7 @@
                             var predicate = scope.reference.location.ermrestCompactPath;
 
                             queryFrags.push(api);
-                            var predicateContainsTargetEntity = predicate.indexOf(table) !== -1;
-                            if (predicateContainsTargetEntity) {
+                            if (predicate.startsWith("M:=" + table)) {
                                 queryFrags.push(predicate);
                             } else {
                                 queryFrags.push(predicate);

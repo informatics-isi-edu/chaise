@@ -6,7 +6,7 @@
     .constant('tableConstants', {
         MAX_CONCURENT_REQUEST: 4,
         MAX_URL_LENGTH: 2000,
-        PAGE_SIZE: 10,
+        PAGE_SIZE: 11, // one is not-null
         AUTO_SEARCH_TIMEOUT: 2000
     })
 
@@ -976,7 +976,7 @@
         };
     }])
 
-    .directive('recordTable', ['DataUtils', 'recordTableUtils', function(DataUtils, recordTableUtils) {
+    .directive('recordTable', ['DataUtils', 'recordTableUtils', 'messageMap', function(DataUtils, recordTableUtils, messageMap) {
 
         return {
             restrict: 'E',
@@ -995,6 +995,7 @@
                 recordTableUtils.registerTableCallbacks(scope, elem, attr);
 
                 scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
+                scope.tooltip = messageMap.tooltip;
             }
         };
     }])

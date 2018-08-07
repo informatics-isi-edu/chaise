@@ -5,8 +5,7 @@ var testParams = {
 
 describe("Domain filter pattern support,", function() {
 
-    var EC = protractor.ExpectedConditions,
-        sleepTimer = 200;
+    var EC = protractor.ExpectedConditions;
 
     var testModalCount = function (colName, expectedCount, done, choose) {
         var errorCB = function (err) {
@@ -40,7 +39,6 @@ describe("Domain filter pattern support,", function() {
         }).then(function(ct) {
             expect(ct).toBe(expectedCount, "count missmatch.");
 
-            var promise;
             if (!choose) {
                 chaisePage.recordEditPage.getModalCloseBtn().click().then(function () {
                     successCB();
@@ -218,6 +216,7 @@ describe("Domain filter pattern support,", function() {
             beforeAll(function() {
                 browser.ignoreSynchronization=true;
                 browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/fk-filter-pattern:" + testParams.table_name + "/id=1");
+                browser.switchTo().alert().accept();
                 chaisePage.waitForElement(element(by.id("submit-record-button")));
             });
 
