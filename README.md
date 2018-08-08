@@ -12,8 +12,10 @@ based on a small set of baseline assumptions, combined with its rendering
 interactions with the data. Chaise is developed in JavaScript, HTML, and CSS
 which runs in most modern Web browsers. This includes Chrome 13 (or better),
 Firefox 7 (or better), Internet Explorer 10 (or better including ME Edge), and
-Safari 6 (or better). Chaise is the front-end component of the suite of tools
-including [ERMrest], [Hatrac], and [IObox].
+Safari 6 (or better). Chaise is the front-end component of the [Deriva Platform].
+Chaise utilizes [ERMrestJS] client library to interact with the Deriva services
+including including [ERMrest], [Hatrac], and [ioboxd].
+
 
 [heuristics]: https://en.wikipedia.org/wiki/Heuristic_%28computer_science%29
 [relational data]: https://en.wikipedia.org/wiki/Relational_database
@@ -21,7 +23,8 @@ including [ERMrest], [Hatrac], and [IObox].
 [Web resources]: https://en.wikipedia.org/wiki/Web_resource
 [ERMrest]: https://github.com/informatics-isi-edu/ermrest
 [Hatrac]: https://github.com/informatics-isi-edu/hatrac
-[IObox]: https://github.com/informatics-isi-edu/iobox
+[ioboxd]: https://github.com/informatics-isi-edu/ioboxd
+[Deriva Platform]: http://isrd.isi.edu/deriva
 
 ## Dynamic Rendering Approach
 
@@ -189,3 +192,17 @@ dependencies under the local `node_modules` directory relative to the project
 directory.
 
 For more information, see the [E2E tests guide](docs/dev-docs/e2e-test.md).
+
+## Help and Contact
+
+Please direct questions and comments to the [project issue tracker](https://github.com/informatics-isi-edu/ermrestjs/issues) at GitHub.
+
+## License
+
+ERMrestJS is made available as open source under the Apache License, Version 2.0. Please see the [LICENSE file](LICENSE) for more information.
+
+## About Us
+
+ERMrestJS is developed in the
+[Informatics group](http://www.isi.edu/research_groups/informatics/home)
+at the [USC Information Sciences Institute](http://www.isi.edu).
