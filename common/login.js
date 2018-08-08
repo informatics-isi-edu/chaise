@@ -6,11 +6,13 @@
         'chaise.authen',
         'ui.bootstrap'
     ])
-        .directive('login', ['$rootScope', 'Session', 'modalUtils', function ($rootScope, Session, modalUtils) {
+        .directive('login', ['$rootScope', 'Session', 'modalUtils', '$window', function ($rootScope, Session, modalUtils, $window) {
+            var chaisePath = chaiseConfig['chaisePath'] !== undefined? chaiseConfig['chaisePath'] : "./chaise/";
+            var path = $window.location.pathname.includes("/chaise/") ? "../" : chaisePath;
             return {
                 restrict: 'E',
                 scope: {},
-                templateUrl: '../common/templates/login.html',
+                templateUrl: path+"common/templates/login.html",
                 link: function (scope) {
                     scope.signUpURL = chaiseConfig.signUpURL;
                     scope.profileURL = chaiseConfig.profileURL;
