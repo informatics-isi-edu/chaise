@@ -737,6 +737,26 @@
           return $window.location.origin + $window.location.pathname + catalogString + "/" + path;
         }
 
+        /* Gives the path of the chaise deployment directory.
+           If we access it from an app inside chaise folder then it returns the pathname before the appName in the url
+           otherwise if we access it from an app outside chaise then: 
+                1. It returns the chaise path mentioned in the chaiseConfig 
+                2. If ChaiseConfig doesn't specify the chaisePath, then it returns the default value '/chaise/'
+        */
+
+        function chaiseDeploymentPath() {
+            var appNames = ["record", "recordset", "recordedit", "search"];
+            var currentAppName = appNamefromUrlPathname($window.location.pathname);
+            if (appNames.includes(currentAppName)) {
+                var index = $window.location.pathname.indexOf(currentAppName);
+                return $window.location.pathname.substring(0, index);
+            } else if (chaiseConfig['chaiseBasePath'] !== undefined) {
+                return chaiseConfig['chaiseBasePath'];
+            } else {
+                return '/chaise/';
+            }
+        }
+
         return {
             queryStringToJSON: queryStringToJSON,
             appTagToURL: appTagToURL,
@@ -749,7 +769,8 @@
             isBrowserIE: isBrowserIE,
             getQueryParams: getQueryParams,
             appNamefromUrlPathname: appNamefromUrlPathname,
-            createRedirectLinkFromPath: createRedirectLinkFromPath
+            createRedirectLinkFromPath: createRedirectLinkFromPath,
+            chaiseDeploymentPath: chaiseDeploymentPath
         }
     }])
 
@@ -1176,21 +1197,21 @@
     }])
 
     // directive for including the loading spinner
-    .directive('loadingSpinner', function () {
+    .directive('loadingSpinner', ['UriUtils', function (UriUtils) {
         return {
             restrict: 'E',
-            templateUrl: '../common/templates/spinner.html'
+            templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/spinner.html'
         }
-    })
+    }])
 
     // directive for including a smaller loading spinner with less styling
-    .directive('loadingSpinnerSm', function () {
+    .directive('loadingSpinnerSm', ['UriUtils', function (UriUtils) {
         return {
             restrict: 'A',
             transclude: true,
-            templateUrl: '../common/templates/spinner-sm.html'
+            templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/spinner-sm.html'
         }
-    })
+    }])
 
     // directive to show tooltip when data in the row is truncated because of width limitations
     .directive('chaiseEnableTooltipWidth', ['$timeout', function ($timeout) {

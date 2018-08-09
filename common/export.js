@@ -1,12 +1,12 @@
 (function () {
     'use strict';
 
-    angular.module('chaise.export', [])
+    angular.module('chaise.export', ['chaise.utils'])
 
     .directive('export', ['$http', 'UriUtils', 'AlertsService', function ($http, UriUtils, AlertsService) {
         return {
             restrict: 'AE',
-            templateUrl: '../common/templates/export.html',
+            templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/export.html',
             scope: {
                 reference: "<",
                 hasValues: "<"

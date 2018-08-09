@@ -1,14 +1,14 @@
 (function () {
     'use strict';
 
-    angular.module('chaise.upload', ['ermrestjs'])
+    angular.module('chaise.upload', ['ermrestjs', 'chaise.utils'])
 
 
-        .directive('upload', [ '$timeout', 'AlertsService', 'ERMrest', function($timeout, AlertsService, ERMrest) {
+        .directive('upload', [ '$timeout', 'AlertsService', 'ERMrest', 'UriUtils', function($timeout, AlertsService, ERMrest, UriUtils) {
 
             return {
                 restrict: 'AE',
-                templateUrl: '../common/templates/upload.html',
+                templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/upload.html',
                 scope: {
                     column: '=',
                     values: '=',
