@@ -47,3 +47,4 @@ The below table explains the usage of the default parameters:
 | showFaceting | Boolean | false | "showFaceting" : \<value\> | N/A | If true, shows the faceting panel on the recordset app.
 | hideTableOfContents | Boolean | false | "hideTableOfContents" : \<value\> | N/A | If true, hides the table of contents panel on the record app. By default table of contents will be visible.
 | showExportButton | Boolean | false | "showExportButton" : \<value\> | N/A | If true, shows the experimental export button.
+| chaiseBasePath | A URL | "/chaise/" | "chaiseBasePath" : \<value\> | N/A | The path of chaise deployment directory. It is used when accessing Chaise modules from outside of Chaise App.

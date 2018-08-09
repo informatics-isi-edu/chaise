@@ -102,7 +102,7 @@
             // If url is valid
             if (areFilesValid(submissionRowsCopy, rsReference)) {
                 modalUtils.showModal({
-                    templateUrl: "../common/templates/uploadProgress.modal.html",
+                    templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/uploadProgress.modal.html",
                     controller: "UploadModalDialogController",
                     controllerAs: "ctrl",
                     size: "md",
@@ -351,7 +351,7 @@
                     params: params
                 },
                 size: "xl",
-                templateUrl: "../common/templates/searchPopup.modal.html"
+                templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
             }, function dataSelected(tuples) {
                 // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
                 // set data in view model (model.rows) and submission model (model.submissionRows)

@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    angular.module('chaise.export', [])
+    angular.module('chaise.export', ['chaise.utils'])
 
     .directive('export', ['AlertsService', 'logActions', 'modalUtils', '$timeout', function (AlertsService, logActions, modalUtils, $timeout) {
 
@@ -95,7 +95,7 @@
 
         return {
             restrict: 'AE',
-            templateUrl: '../common/templates/export.html',
+            templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/export.html',
             scope: {
                 reference: "=",
                 hasValues: "=",

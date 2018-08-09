@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    angular.module('chaise.faceting', ['plotly'])
+    angular.module('chaise.faceting', ['plotly', 'chaise.utils'])
 
         .factory('facetingUtils', ['defaultDisplayname', function (defaultDisplayname) {
             function getNullFilter(selected) {
@@ -26,11 +26,11 @@
             };
         }])
 
-        .directive('faceting', ['recordTableUtils', '$timeout', '$rootScope', function (recordTableUtils, $timeout, $rootScope) {
+        .directive('faceting', ['recordTableUtils', '$timeout', '$rootScope', 'UriUtils', function (recordTableUtils, $timeout, $rootScope, UriUtils) {
 
             return {
                 restrict: 'AE',
-                templateUrl: '../common/templates/faceting/faceting.html',
+                templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/faceting/faceting.html',
                 scope: {
                     vm: "="
                 },
@@ -211,10 +211,10 @@
             };
         }])
 
-        .directive('rangePicker', ['dataFormats', 'facetingUtils', '$log', 'logActions', '$q', '$timeout', function (dataFormats, facetingUtils, $log, logActions, $q, $timeout) {
+        .directive('rangePicker', ['dataFormats', 'facetingUtils', '$log', 'logActions', '$q', '$timeout', 'UriUtils', function (dataFormats, facetingUtils, $log, logActions, $q, $timeout, UriUtils) {
             return {
                 restrict: 'AE',
-                templateUrl: '../common/templates/faceting/range-picker.html',
+                templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/faceting/range-picker.html',
                 scope: {
                     facetColumn: "=",
                     facetModel: "=",
@@ -814,8 +814,8 @@
         }])
 
         .directive('choicePicker',
-            ["AlertsService", 'facetingUtils', 'logActions', "$log", 'modalUtils', '$q', 'tableConstants', '$timeout',
-            function (AlertsService, facetingUtils, logActions, $log, modalUtils, $q, tableConstants, $timeout) {
+            ["AlertsService", 'facetingUtils', 'logActions', "$log", 'modalUtils', '$q', 'tableConstants', '$timeout', 'UriUtils',
+            function (AlertsService, facetingUtils, logActions, $log, modalUtils, $q, tableConstants, $timeout, UriUtils) {
 
             /**
              * Given tuple and the columnName that should be used, return
@@ -1072,7 +1072,7 @@
 
             return {
                 restrict: 'AE',
-                templateUrl: '../common/templates/faceting/choice-picker.html',
+                templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/faceting/choice-picker.html',
                 scope: {
                     facetColumn: "=",
                     facetModel: "=",
@@ -1183,7 +1183,7 @@
                                 params: params
                             },
                             size: "xl",
-                            templateUrl: "../common/templates/searchPopup.modal.html"
+                            templateUrl:  UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
                         }, modalDataChanged(scope, true), false, false);
                     };
 
@@ -1333,7 +1333,7 @@
             };
         }])
 
-        .directive("checkPresence", ['facetingUtils', '$q', '$log', function(facetingUtils, $q, $log) {
+        .directive("checkPresence", ['facetingUtils', '$q', '$log', 'UriUtils', function(facetingUtils, $q, $log, UriUtils) {
             function hasNullFilter(scope) {
                 return scope.facetColumn.choiceFilters.filter(function (f) {
                     return f.term == null;
@@ -1342,7 +1342,7 @@
 
             return {
                 restrict: 'AE',
-                templateUrl: '../common/templates/faceting/check-presence.html',
+                templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/faceting/check-presence.html',
                 scope: {
                     facetColumn: "=",
                     facetModel: "=",
@@ -1437,10 +1437,10 @@
 
         }])
 
-        .directive('facetingCollapseBtn', function () {
+        .directive('facetingCollapseBtn', ['UriUtils', function (UriUtils) {
             return {
                 restrict: 'E',
-                templateUrl: '../common/templates/faceting/collapse-btn.html',
+                templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/faceting/collapse-btn.html',
                 scope: {
                     togglePanel: "=",       // function for toggling the panel open/closed
                     tooltipMessage: "@",    // tooltip message
@@ -1468,5 +1468,5 @@
                     }
                 }
             }
-        });
+        }]);
 })();
