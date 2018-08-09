@@ -998,10 +998,6 @@ var recordsetPage = function() {
         return element(by.id("page-size-" + limit));
     };
 
-    this.getDownloadButton = function () {
-        return element(by.id("downloadCSV-link"));
-    };
-
     this.getPermalinkButton = function() {
         return element(by.id('permalink'));
     };
@@ -1413,7 +1409,7 @@ function chaisePage() {
         if(isAlertPresent){
             browser.switchTo().alert().accept();
         }
-        
+
         browser.ignoreSynchronization = true;
 
         browser.wait(protractor.ExpectedConditions.visibilityOf(element(by.id("loginApp"))), browser.params.defaultTimeout).then(function() {

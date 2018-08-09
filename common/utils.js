@@ -128,7 +128,9 @@
         "recordDelete": "delete/record", // delete record (record)
         "recordEditDelete": "delete/recordedit", // delete record (recordedit)
         "recordsetDelete": "delete/recordset", // delete a row (recordset)
-        "recordRelatedDelete": "delete/recordset/related" // delete a row from related entities (record) has referrer
+        "recordRelatedDelete": "delete/recordset/related", // delete a row from related entities (record) has referrer
+
+        "export": "recordset/export"
 
     })
 

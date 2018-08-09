@@ -10,8 +10,8 @@
             if (postRenderCB) {
                 modalInstance.rendered.then(postRenderCB).catch(function (error) {
                     $log.warn(error);
-                });    
-            }            
+                });
+            }
             modalInstance.result.then(successCB).catch(function (response) {
                 if (rejectCB) {
                     rejectCB(response);
@@ -257,6 +257,15 @@
                 $rootScope.session.attributes[i].id= $rootScope.session.attributes[i].id.substring(24);
                 vm.groupList.push($rootScope.session.attributes[i]);
             }
+        }
+    }])
+
+    .controller('ExportProgressController', ['$uibModalInstance', 'params', function ConfirmDeleteController($uibModalInstance, params) {
+        var vm = this;
+        vm.cancel = cancel;
+        vm.params = params;
+        function cancel() {
+            $uibModalInstance.dismiss('cancel');
         }
     }])
 

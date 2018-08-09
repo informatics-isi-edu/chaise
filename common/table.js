@@ -254,7 +254,6 @@
                     if (current !== vm.flowControlObject.counter) {
                         return defer.resolve(false);
                     }
-
                     vm.hasLoaded = true;
                     vm.initialized = true;
                     if (DataUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
@@ -378,6 +377,10 @@
 
             // if it's true change, otherwise don't change.
             vm.dirtyResult = updateResult || vm.dirtyResult;
+            // if the result is dirty, then we should get new data and we should
+            // set the hasLoaded to false.
+            vm.hasLoaded = !vm.dirtyResult;
+
             vm.dirtyCount = updateCount || vm.dirtyCount;
 
             $timeout(function () {
