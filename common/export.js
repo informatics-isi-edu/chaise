@@ -3,7 +3,7 @@
 
     angular.module('chaise.export', ['chaise.utils'])
 
-    .directive('export', ['AlertsService', 'logActions', 'modalUtils', '$timeout', function (AlertsService, logActions, modalUtils, $timeout) {
+    .directive('export', ['AlertsService', 'logActions', 'modalUtils', '$timeout', 'UriUtils', function (AlertsService, logActions, modalUtils, $timeout, UriUtils) {
 
         /**
          * Cancel the current export request
@@ -55,7 +55,7 @@
                     console.info("Executing external export with the following parameters:\n" + exportParametersString);
                     console.time('External export duration');
                     scope.progressModal = modalUtils.showModal({
-                        templateUrl: "../common/templates/exportProgress.modal.html",
+                        templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/exportProgress.modal.html",
                         controller: "ExportProgressController",
                         windowClass: "export-progress",
                         controllerAs: "ctrl",
