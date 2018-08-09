@@ -162,7 +162,7 @@
         var logInHelper = function(logInTypeCb, win, cb, type){
             var referrerId = (new Date().getTime());
 
-            var url = serviceURL + '/authn/preauth?referrer='+UriUtils.fixedEncodeURIComponent($window.location.origin+"/"+ UriUtils.chaiseDeploymentPath() + "/login?referrerid=" + referrerId);
+            var url = serviceURL + '/authn/preauth?referrer='+UriUtils.fixedEncodeURIComponent($window.location.origin+"/"+ UriUtils.chaiseDeploymentPath() + "login?referrerid=" + referrerId);
             var config = {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
