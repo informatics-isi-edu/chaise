@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .controller('CommentsController', ['AuthService', 'CommentsService', '$scope', '$uibModal', 'comments', function AnnotationsController(AuthService, CommentsService, $scope, $uibModal, comments) {
+    .controller('CommentsController', ['AuthService', 'CommentsService', '$scope', '$uibModal', 'comments', 'UriUtils', function AnnotationsController(AuthService, CommentsService, $scope, $uibModal, comments, UriUtils) {
         var vm = this;
         vm.comments = comments;
         vm.newComment = {
@@ -53,7 +53,7 @@
         function deleteComment(comment) {
             if (chaiseConfig.confirmDelete == undefined ||  chaiseConfig.confirmDelete){
                 var modalInstance = $uibModal.open({
-                    templateUrl: '../common/templates/delete-link/confirm_delete.modal.html',
+                    templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/delete-link/confirm_delete.modal.html',
                     controller: 'ConfirmDeleteController',
                     controllerAs: 'ctrl',
                     size: 'sm'
