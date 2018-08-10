@@ -61,7 +61,8 @@
         * @example: <record-action-bar related-table-ref-display="tableModel.reference.display.type" tab-model-display="tableModel.displayType"
         *        toggle-related-table-display-type='toggleRelatedTableDisplayType({dataModel:tableModel})' can-edit-related="canEditRelated({ref:relatedReferenceDisplayTable[$index]})"
         *        can-create-related="canCreateRelated0({ref:tableModel.reference})"
-        *        add-related-record="addRelatedRecord({ref:tableModel.reference})" to-record-set="toRecordSet({ref:tableModel.reference})">
+        *        add-related-record="addRelatedRecord({ref:tableModel.reference})" to-record-set="toRecordSet({ref:tableModel.reference})"
+        *        displayname="tableModel.reference.displayname.value" parent-displayname="tableModel.reference.parentDisplayname.value">
         *        </record-action-bar>
         * @param {string} relatedTableRefDisplay: Related table ref. display type
         * @param {string} tabModelDisplay: Display type of individual model
@@ -69,6 +70,8 @@
         * @param {callback} canCreateRelated: function to check canCreate()
         * @param {callback} addRelatedRecord: function to check add feature
         * @param {callback} toRecordSet:view more record function
+        * @param {string} displayname: Display name of related table
+        * @param {string} parentDisplayname: Display name of parent table
         */
         .directive('recordActionBar', function() {
             return {
@@ -81,7 +84,9 @@
                     canEditRelated: '&',
                     canCreateRelated: '&',
                     addRelatedRecord: '&',
-                    toRecordSet: '&'
+                    toRecordSet: '&',
+                    displayname: '=',
+                    parentDisplayname: '='
                 },
                 templateUrl: '../common/templates/recordAction.html',
                 link: function(scope, ele, attr) {

@@ -6,6 +6,7 @@ var EC = protractor.ExpectedConditions;
 var testParams = {
     schemaName: "product-unordered-related-tables-links",
     table_name: "accommodation",
+    subTitle: "Accommodations",
     key: {
         name: "id",
         value: "2004",
@@ -96,7 +97,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         }
     };
     describe("for a related entity, ", function () {
-        recordHelpers.testRelatedTable(related_table, pageReadyCondition);
+        recordHelpers.testRelatedTable(related_table, pageReadyCondition, testParams.subTitle);
         recordHelpers.testAddRelatedTable(related_table.add, false, function () {
             var input = chaisePage.recordEditPage.getInputById(0, "price");
             return input.sendKeys("247.00");
@@ -115,7 +116,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         }
     };
     describe("for a related entity with search applink, ", function () {
-        recordHelpers.testRelatedTable(rel_applink_search, pageReadyCondition);
+        recordHelpers.testRelatedTable(rel_applink_search, pageReadyCondition, testParams.subTitle);
     });
 
     var rel_name_with_row_markdown_pattern = {
@@ -130,7 +131,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         isMarkdown: true
     };
     describe("for a related entity with row_markdown_pattern, ", function () {
-        recordHelpers.testRelatedTable(rel_name_with_row_markdown_pattern, pageReadyCondition);
+        recordHelpers.testRelatedTable(rel_name_with_row_markdown_pattern, pageReadyCondition, testParams.subTitle);
     });
 
     var association_table = {
@@ -169,7 +170,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         }
     };
     describe("for a pure and binary association,", function () {
-        recordHelpers.testRelatedTable(association_table, pageReadyCondition);
+        recordHelpers.testRelatedTable(association_table, pageReadyCondition, testParams.subTitle);
 
         recordHelpers.testAddAssociationTable(association_table.add, false, pageReadyCondition);
     });
@@ -186,7 +187,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         canEdit: true
     };
     describe("for a pure and binary association with page_size, ", function () {
-        recordHelpers.testRelatedTable(association_with_page_size, pageReadyCondition);
+        recordHelpers.testRelatedTable(association_with_page_size, pageReadyCondition, testParams.subTitle);
 
         it ("Opened modal by `Add` button should honor the page_size.", function () {
             var addRelatedRecordLink = chaisePage.recordPage.getAddRecordLink(association_with_page_size.displayname);
@@ -225,7 +226,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         canDelete: true
     };
     describe("for a pure and binary association with row_markdown_pattern, ", function () {
-        recordHelpers.testRelatedTable(association_with_markdown, pageReadyCondition);
+        recordHelpers.testRelatedTable(association_with_markdown, pageReadyCondition, testParams.subTitle);
     });
 
     var path_related = {
@@ -250,7 +251,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         canDelete: true
     };
     describe("for a related entity with a path of length 3, ", function () {
-        recordHelpers.testRelatedTable(path_related, pageReadyCondition);
+        recordHelpers.testRelatedTable(path_related, pageReadyCondition, testParams.subTitle);
     });
 
     var related_w_agg = {
@@ -275,6 +276,6 @@ describe ("Viewing exisiting record with related entities, ", function () {
         canDelete: true
     };
     describe("for a related entity with aggregate columns.", function () {
-        recordHelpers.testRelatedTable(related_w_agg, pageReadyCondition);
+        recordHelpers.testRelatedTable(related_w_agg, pageReadyCondition, testParams.subTitle);
     });
 });
