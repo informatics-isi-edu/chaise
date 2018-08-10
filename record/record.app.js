@@ -125,6 +125,7 @@
                     }
 
                     model.column = col;
+                    model.baseTableName = $rootScope.reference.displayname.value
                     $rootScope.columnModels.push(model);
                 });
 
@@ -142,7 +143,8 @@
                         open: openByDefault,
                         displayType: ref.display.type,
                         displayname: ref.displayname,
-                        tableModel: recordAppUtils.getTableModel(ref, "compact/brief", $rootScope.tuple)
+                        tableModel: recordAppUtils.getTableModel(ref, "compact/brief", $rootScope.tuple),
+                        baseTableName: $rootScope.reference.displayname.value
                     });
                 });
 
