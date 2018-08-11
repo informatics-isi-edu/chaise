@@ -125,7 +125,7 @@
                     }
 
                     model.column = col;
-                    model.baseTableName = $rootScope.reference.displayname.value
+                    model.baseTableName = $rootScope.reference.displayname.value;
                     $rootScope.columnModels.push(model);
                 });
 

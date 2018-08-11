@@ -71,7 +71,7 @@
         * @param {callback} addRelatedRecord: function to check add feature
         * @param {callback} toRecordSet:view more record function
         * @param {string} displayname: Display name of related table
-        * @param {string} baseTableName: Display name of parent table
+        * @param {string} baseTableName: Display name of base table
         */
         .directive('recordActionBar', function() {
             return {
