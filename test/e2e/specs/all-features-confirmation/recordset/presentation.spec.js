@@ -174,7 +174,6 @@ var testParams = {
         page_size: 10
     },
     tooltip: {
-        downloadCSV: "Click to download all matched results",
         permalink: "This link stores your search criteria as a URL. Right click and save.",
         actionCol: "Click on the action buttons to view, edit, or delete each record"
     }
@@ -215,17 +214,6 @@ describe('View recordset,', function() {
                 var tooltip = chaisePage.getTooltipDiv();
                 chaisePage.waitForElement(tooltip).then(function () {
                     expect(tooltip.getText()).toBe(testParams.tooltip.permalink, "Incorrect tooltip on the Permalink button");
-                    browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
-                });
-            });
-
-            it('should display the Download CSV button & a tooltip on hovering over it', function () {
-                var downloadCSV = chaisePage.recordsetPage.getDownloadButton();
-                expect(downloadCSV.isDisplayed()).toBe(true, "The Download CSV button is not visible on the recordset app");
-                browser.actions().mouseMove(downloadCSV).perform();
-                var tooltip = chaisePage.getTooltipDiv();
-                chaisePage.waitForElement(tooltip).then(function () {
-                    expect(tooltip.getText()).toBe(testParams.tooltip.downloadCSV, "Incorrect tooltip on the Download CSV button");
                     browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
                 });
             });
@@ -380,34 +368,6 @@ describe('View recordset,', function() {
                     // clear search
                     return clearSearchButton.click();
                 })
-            });
-
-            it("action columns should show Download CSV button if records present else should not show download button", function() {
-                var downloadButton;
-                var searchBox = chaisePage.recordsetPage.getMainSearchBox(),
-                searchSubmitButton = chaisePage.recordsetPage.getSearchSubmitButton(),
-                clearSearchButton = chaisePage.recordsetPage.getSearchClearButton();
-
-                searchBox.sendKeys('testing_json');
-                searchSubmitButton.click().then(function() {
-                    return chaisePage.waitForElementInverse(element(by.id("spinner")));
-                }).then(function() {
-                    return chaisePage.recordsetPage.getDownloadButton();
-                }).then(function(downloadButton) {
-                    expect(downloadButton.isDisplayed).toBeTruthy("Download button is not present!");
-                    return clearSearchButton.click();
-                }).then( function(){
-                    return chaisePage.waitForElementInverse(element(by.id("spinner")));
-                }).then (function() {
-                    searchBox.sendKeys("abcdefghijklm");
-                    return searchSubmitButton.click();
-                }).then ( function(){
-                    return chaisePage.waitForElementInverse(element(by.id("spinner")));
-                    return chaisePage.recordsetPage.getDownloadButton();
-                }).then( function(downloadButton){
-                    expect(downloadButton.isDisplayed).toBeFalsy();
-                    return clearSearchButton.click();
-                });
             });
 
             it("action columns should show view button that redirects to the record page", function() {

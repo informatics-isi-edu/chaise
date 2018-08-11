@@ -194,11 +194,9 @@
                 canClose: false,
                 showLogin: showLogin
             };
-            var chaisePath = chaiseConfig['chaisePath'] !== undefined? chaiseConfig['chaisePath'] : "./chaise/";
-            var path = $window.location.pathname.includes("/chaise/") ? "../" : chaisePath;
             var modalProperties = {
                 windowClass: "modal-error",
-                templateUrl: path + "common/templates/errorDialog.modal.html",
+                templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/errorDialog.modal.html',
                 controller: 'ErrorModalController',
                 controllerAs: 'ctrl',
                 backdrop: 'static',

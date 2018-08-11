@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .controller('AnnotationsController', ['AuthService', 'annotations', 'comments', 'anatomies', 'AnnotationsService', 'CommentsService', '$window', '$rootScope','$scope', '$timeout', '$uibModal', 'AlertsService', function AnnotationsController(AuthService, annotations, comments, anatomies, AnnotationsService, CommentsService, $window, $rootScope, $scope, $timeout, $uibModal, AlertsService) {
+    .controller('AnnotationsController', ['AuthService', 'annotations', 'comments', 'anatomies', 'AnnotationsService', 'CommentsService', '$window', '$rootScope','$scope', '$timeout', '$uibModal', 'AlertsService', 'UriUtils', function AnnotationsController(AuthService, annotations, comments, anatomies, AnnotationsService, CommentsService, $window, $rootScope, $scope, $timeout, $uibModal, AlertsService, UriUtils) {
         var vm = this;
         vm.annotations = annotations;
         vm.anatomies = anatomies;
@@ -203,7 +203,7 @@
             if (!hasComments(annotation)) {
                 if (chaiseConfig.confirmDelete == undefined || chaiseConfig.confirmDelete){
                     var modalInstance = $uibModal.open({
-                        templateUrl: '../common/templates/delete-link/confirm_delete.modal.html',
+                        templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/delete-link/confirm_delete.modal.html',
                         controller: 'ConfirmDeleteController',
                         controllerAs: 'ctrl',
                         size: 'sm'

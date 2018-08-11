@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    angular.module('chaise.record.table', ['chaise.ellipses'])
+    angular.module('chaise.record.table', ['chaise.ellipses', 'chaise.utils'])
 
     .constant('tableConstants', {
         MAX_CONCURENT_REQUEST: 4,
@@ -254,7 +254,6 @@
                     if (current !== vm.flowControlObject.counter) {
                         return defer.resolve(false);
                     }
-
                     vm.hasLoaded = true;
                     vm.initialized = true;
                     if (DataUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
@@ -378,6 +377,10 @@
 
             // if it's true change, otherwise don't change.
             vm.dirtyResult = updateResult || vm.dirtyResult;
+            // if the result is dirty, then we should get new data and we should
+            // set the hasLoaded to false.
+            vm.hasLoaded = !vm.dirtyResult;
+
             vm.dirtyCount = updateCount || vm.dirtyCount;
 
             $timeout(function () {
@@ -976,11 +979,11 @@
         };
     }])
 
-    .directive('recordTable', ['DataUtils', 'recordTableUtils', 'messageMap', function(DataUtils, recordTableUtils, messageMap) {
+    .directive('recordTable', ['DataUtils', 'recordTableUtils', 'messageMap', 'UriUtils', function(DataUtils, recordTableUtils, messageMap, UriUtils) {
 
         return {
             restrict: 'E',
-            templateUrl: '../common/templates/table.html',
+            templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/table.html',
             scope: {
                 vm: '=',
                 /*
@@ -1000,10 +1003,10 @@
         };
     }])
 
-    .directive('recordTableSelectFaceting', ['recordTableUtils', function (recordTableUtils) {
+    .directive('recordTableSelectFaceting', ['recordTableUtils', 'UriUtils', function (recordTableUtils, UriUtils) {
         return {
             restrict: "E",
-            templateUrl: '../common/templates/table.html',
+            templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/table.html',
             scope: {
                 vm: '=',
                 /*
@@ -1044,11 +1047,11 @@
         }
     }])
 
-    .directive('recordList', ['recordTableUtils', 'defaultDisplayname', '$timeout', function(recordTableUtils, defaultDisplayname, $timeout) {
+    .directive('recordList', ['recordTableUtils', 'defaultDisplayname', '$timeout', 'UriUtils', function(recordTableUtils, defaultDisplayname, $timeout, UriUtils) {
 
         return {
             restrict: 'E',
-            templateUrl: '../common/templates/list.html',
+            templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/list.html',
             scope: {
                 initialized: '=?',
                 onRowClick: '=',
@@ -1081,11 +1084,11 @@
         }
     }])
 
-    .directive('recordsetSelectFaceting', ['recordTableUtils', function(recordTableUtils) {
+    .directive('recordsetSelectFaceting', ['recordTableUtils', 'UriUtils', function(recordTableUtils, UriUtils) {
 
         return {
             restrict: 'E',
-            templateUrl: "../common/templates/recordsetSelectFaceting.html",
+            templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/recordsetSelectFaceting.html",
             scope: {
                 mode: "=?",
                 vm: '=',
@@ -1160,11 +1163,11 @@
         };
     }])
 
-    .directive('recordset', ['recordTableUtils', function(recordTableUtils) {
+    .directive('recordset', ['recordTableUtils', 'UriUtils', function(recordTableUtils, UriUtils) {
 
         return {
             restrict: 'E',
-            templateUrl: '../common/templates/recordset.html',
+            templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/recordset.html',
             scope: {
                 vm: '=',
                 onSelectedRowsChanged: '&?',       // set row click function

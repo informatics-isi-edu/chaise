@@ -6,13 +6,11 @@
         'chaise.authen',
         'ui.bootstrap'
     ])
-        .directive('login', ['$rootScope', 'Session', 'modalUtils', '$window', function ($rootScope, Session, modalUtils, $window) {
-            var chaisePath = chaiseConfig['chaisePath'] !== undefined? chaiseConfig['chaisePath'] : "./chaise/";
-            var path = $window.location.pathname.includes("/chaise/") ? "../" : chaisePath;
+        .directive('login', ['$rootScope', 'Session', 'modalUtils', 'UriUtils', function ($rootScope, Session, modalUtils, UriUtils) {
             return {
                 restrict: 'E',
                 scope: {},
-                templateUrl: path+"common/templates/login.html",
+                templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/login.html',
                 link: function (scope) {
                     scope.signUpURL = chaiseConfig.signUpURL;
                     scope.profileURL = chaiseConfig.profileURL;
@@ -48,7 +46,7 @@
 
                     scope.openProfile = function openProfile() {
                         modalUtils.showModal({
-                            templateUrl: "../common/templates/profile.modal.html",
+                            templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/profile.modal.html",
                             controller: "profileModalDialogController",
                             controllerAs: "ctrl"
                         }, false, false, false);
