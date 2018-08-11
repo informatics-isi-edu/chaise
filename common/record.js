@@ -62,7 +62,7 @@
         *        toggle-related-table-display-type='toggleRelatedTableDisplayType({dataModel:tableModel})' can-edit-related="canEditRelated({ref:relatedReferenceDisplayTable[$index]})"
         *        can-create-related="canCreateRelated0({ref:tableModel.reference})"
         *        add-related-record="addRelatedRecord({ref:tableModel.reference})" to-record-set="toRecordSet({ref:tableModel.reference})"
-        *        displayname="tableModel.reference.displayname.value" parent-displayname="tableModel.reference.parentDisplayname.value">
+        *        displayname="tableModel.reference.displayname.value" base-table-name="tableModel.baseTableName">
         *        </record-action-bar>
         * @param {string} relatedTableRefDisplay: Related table ref. display type
         * @param {string} tabModelDisplay: Display type of individual model
@@ -71,7 +71,7 @@
         * @param {callback} addRelatedRecord: function to check add feature
         * @param {callback} toRecordSet:view more record function
         * @param {string} displayname: Display name of related table
-        * @param {string} parentDisplayname: Display name of parent table
+        * @param {string} baseTableName: Display name of parent table
         */
         .directive('recordActionBar', function() {
             return {
@@ -86,7 +86,7 @@
                     addRelatedRecord: '&',
                     toRecordSet: '&',
                     displayname: '=',
-                    parentDisplayname: '='
+                    baseTableName: '='
                 },
                 templateUrl: '../common/templates/recordAction.html',
                 link: function(scope, ele, attr) {

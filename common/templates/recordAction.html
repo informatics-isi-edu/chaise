@@ -3,7 +3,7 @@
     <span ng-if="relatedTableRefDisplay == 'markdown'">
         <a class="toggle-display-link" ng-click="toggleRelatedTableDisplayType({dataModel:dataModel})">
             <span ng-show="tabModelDisplay == 'markdown'">
-                <span class="hide-tooltip-border" ng-if="canEditRelated({ref:ref})" ng-attr-uib-tooltip="Edit {{displayname}} related to this {{parentDisplayname}}" tooltip-placement='auto top'>Edit</span>
+                <span class="hide-tooltip-border" ng-if="canEditRelated({ref:ref})" ng-attr-uib-tooltip="Edit {{displayname}} related to this {{baseTableName}}" tooltip-placement='auto top'>Edit</span>
                 <span class="hide-tooltip-border" ng-if="!canEditRelated({ref:ref})" ng-attr-uib-tooltip="Display related {{displayname}} in tabular mode" tooltip-placement='auto top'>Table Display</span>
             </span>
             <span ng-show="tabModelDisplay != 'markdown'">
@@ -12,9 +12,9 @@
             </span>
         </a>&nbsp;|</span>
     <span ng-if="canCreateRelated({ref:ref})">
-        <a class="add-records-link" ng-click="addRelatedRecord({ref:ref})" ng-attr-uib-tooltip="Add more {{displayname}} related to this {{parentDisplayname}}" tooltip-placement='auto top'>Add</a>
+        <a class="add-records-link" ng-click="addRelatedRecord({ref:ref})" ng-attr-uib-tooltip="Add more {{displayname}} related to this {{baseTableName}}" tooltip-placement='auto top'>Add</a>
         &nbsp;|</span>
-    <span><a class="more-results-link" ng-click="toRecordSet({ref:ref})" ng-attr-uib-tooltip="View more {{displayname}} related to this {{parentDisplayname}}" tooltip-placement='auto top'>View More</a></span>
+    <span><a class="more-results-link" ng-click="toRecordSet({ref:ref})" ng-attr-uib-tooltip="View more {{displayname}} related to this {{baseTableName}}" tooltip-placement='auto top'>View More</a></span>
     <div ng-transclude></div>
 </div>
 </div>
