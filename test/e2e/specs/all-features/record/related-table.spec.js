@@ -6,7 +6,6 @@ var EC = protractor.ExpectedConditions;
 var testParams = {
     schemaName: "product-unordered-related-tables-links",
     table_name: "accommodation",
-    subTitle: "Accommodations",
     key: {
         name: "id",
         value: "2004",
@@ -56,6 +55,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         schemaName: "product-unordered-related-tables-links",
         displayname: "booking",
         name: "booking",
+        baseTable:"Accommodations",
         count: 6,
         canDelete: true,
         canEdit: true,
@@ -97,7 +97,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         }
     };
     describe("for a related entity, ", function () {
-        recordHelpers.testRelatedTable(related_table, pageReadyCondition, testParams.subTitle);
+        recordHelpers.testRelatedTable(related_table, pageReadyCondition);
         recordHelpers.testAddRelatedTable(related_table.add, false, function () {
             var input = chaisePage.recordEditPage.getInputById(0, "price");
             return input.sendKeys("247.00");
@@ -109,6 +109,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         schemaName: "product-unordered-related-tables-links",
         displayname: "schedule",
         name: "schedule",
+        baseTable:"Accommodations",
         count: 2,
         viewMore: {
             displayname: "schedule",
@@ -116,7 +117,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         }
     };
     describe("for a related entity with search applink, ", function () {
-        recordHelpers.testRelatedTable(rel_applink_search, pageReadyCondition, testParams.subTitle);
+        recordHelpers.testRelatedTable(rel_applink_search, pageReadyCondition);
     });
 
     var rel_name_with_row_markdown_pattern = {
@@ -124,6 +125,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         schemaName: "product-unordered-related-tables-links",
         displayname: "media",
         name: "media",
+        baseTable:"Accommodations",
         count: 1,
         canDelete: true,
         canEdit: false,
@@ -131,7 +133,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         isMarkdown: true
     };
     describe("for a related entity with row_markdown_pattern, ", function () {
-        recordHelpers.testRelatedTable(rel_name_with_row_markdown_pattern, pageReadyCondition, testParams.subTitle);
+        recordHelpers.testRelatedTable(rel_name_with_row_markdown_pattern, pageReadyCondition);
     });
 
     var association_table = {
@@ -140,6 +142,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         displayname: "association_table",
         name: "association_table",
         relatedName: "related_table",
+        baseTable:"Accommodations",
         isAssociation: true,
         viewMore: {
             displayname: "related_table",
@@ -170,7 +173,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         }
     };
     describe("for a pure and binary association,", function () {
-        recordHelpers.testRelatedTable(association_table, pageReadyCondition, testParams.subTitle);
+        recordHelpers.testRelatedTable(association_table, pageReadyCondition);
 
         recordHelpers.testAddAssociationTable(association_table.add, false, pageReadyCondition);
     });
@@ -181,13 +184,14 @@ describe ("Viewing exisiting record with related entities, ", function () {
         displayname: "accommodation_image",
         name: "accommodation_image",
         relatedName: "related_name",
+        baseTable:"Accommodations",
         count: 3,
         page_size: 2,
         isAssociation: true,
         canEdit: true
     };
     describe("for a pure and binary association with page_size, ", function () {
-        recordHelpers.testRelatedTable(association_with_page_size, pageReadyCondition, testParams.subTitle);
+        recordHelpers.testRelatedTable(association_with_page_size, pageReadyCondition);
 
         it ("Opened modal by `Add` button should honor the page_size.", function () {
             var addRelatedRecordLink = chaisePage.recordPage.getAddRecordLink(association_with_page_size.displayname);
@@ -219,6 +223,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         displayname: "association_table_markdown",
         name: "association_table_markdown",
         relatedName: "related_table",
+        baseTable:"Accommodations",
         isAssociation: true,
         isMarkdown: true,
         count: 1,
@@ -226,7 +231,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         canDelete: true
     };
     describe("for a pure and binary association with row_markdown_pattern, ", function () {
-        recordHelpers.testRelatedTable(association_with_markdown, pageReadyCondition, testParams.subTitle);
+        recordHelpers.testRelatedTable(association_with_markdown, pageReadyCondition);
     });
 
     var path_related = {
@@ -234,6 +239,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         schemaName: "product-unordered-related-tables-links",
         displayname: "related_table_2",
         name: "related_table_2",
+        baseTable:"Accommodations",
         viewMore: {
             displayname: "related_table_2",
             filter: "base table association related: Super 8 North Hollywood Motel"
@@ -251,7 +257,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         canDelete: true
     };
     describe("for a related entity with a path of length 3, ", function () {
-        recordHelpers.testRelatedTable(path_related, pageReadyCondition, testParams.subTitle);
+        recordHelpers.testRelatedTable(path_related, pageReadyCondition);
     });
 
     var related_w_agg = {
@@ -259,6 +265,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         schemaName: "product-unordered-related-tables-links",
         displayname: "table_w_aggregates",
         name: "table_w_aggregates",
+        baseTable:"Accommodations",
         viewMore: {
             displayname: "table_w_aggregates",
             filter: "fk_to_accommodation : Super 8 North Hollywood Motel"
@@ -276,6 +283,6 @@ describe ("Viewing exisiting record with related entities, ", function () {
         canDelete: true
     };
     describe("for a related entity with aggregate columns.", function () {
-        recordHelpers.testRelatedTable(related_w_agg, pageReadyCondition, testParams.subTitle);
+        recordHelpers.testRelatedTable(related_w_agg, pageReadyCondition);
     });
 });

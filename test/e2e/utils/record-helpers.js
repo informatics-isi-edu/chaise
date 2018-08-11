@@ -416,8 +416,9 @@ exports.testPresentation = function (tableParams) {
 
 		for (var i = 0; i < tableParams.inline_columns.length; i++) {
 			var p = tableParams.inline_columns[i];
+			p.baseTable = tableParams.subTitle;
 			describe ("for " + p.title + ", ", function (){
-				exports.testRelatedTable(p, pageReadyCondition, tableParams.subTitle);
+				exports.testRelatedTable(p, pageReadyCondition);
 			});
 
 		}
@@ -453,7 +454,7 @@ exports.testPresentation = function (tableParams) {
  * testEdit
  * testDelete
  */
-exports.testRelatedTable = function (params, pageReadyCondition, parentTable) {
+exports.testRelatedTable = function (params, pageReadyCondition) {
 	var currentEl, markdownToggleLink, toggled = false;
 	beforeAll(function() {
 		pageReadyCondition();
@@ -504,7 +505,7 @@ exports.testRelatedTable = function (params, pageReadyCondition, parentTable) {
 
 			it('should have the correct tooltip.', function(){
 				chaisePage.recordPage.getColumnComment(viewMoreBtn).then(function(comment){
-					expect(comment).toBe("View more " + params.displayname + " related to this " + parentTable, "Incorrect tooltip on View More button");
+					expect(comment).toBe("View more " + params.displayname + " related to this " + params.baseTable, "Incorrect tooltip on View More button");
 				});
 			});
 
@@ -552,7 +553,7 @@ exports.testRelatedTable = function (params, pageReadyCondition, parentTable) {
 						expect(markdownToggleLink.isDisplayed()).toBeTruthy();
 						expect(markdownToggleLink.getText()).toBe("Edit");						
 						chaisePage.recordPage.getColumnComment(markdownToggleLink.element(by.cssContainingText(".hide-tooltip-border", "Edit"))).then(function(comment){
-							expect(comment).toBe("Edit " + params.displayname + " related to this " + parentTable, "Incorrect tooltip on Edit button");
+							expect(comment).toBe("Edit " + params.displayname + " related to this " + params.baseTable, "Incorrect tooltip on Edit button");
 						});
 					});
 				} else {
@@ -609,7 +610,7 @@ exports.testRelatedTable = function (params, pageReadyCondition, parentTable) {
 				expect(addBtn.isPresent()).toBe(params.canCreate);
 				if(params.canCreate){
 					chaisePage.recordPage.getColumnComment(addBtn).then(function(comment){
-						expect(comment).toBe("Add more " + params.displayname + " related to this " + parentTable, "Incorrect tooltip on Add button");
+						expect(comment).toBe("Add more " + params.displayname + " related to this " + params.baseTable, "Incorrect tooltip on Add button");
 					});
 				}
 			});
