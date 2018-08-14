@@ -84,10 +84,10 @@ Please direct questions and comments to the [project issue tracker](https://gith
 
 ## License
 
-ERMrestJS is made available as open source under the Apache License, Version 2.0. Please see the [LICENSE file](LICENSE) for more information.
+Chaise is made available as open source under the Apache License, Version 2.0. Please see the [LICENSE file](LICENSE) for more information.
 
 ## About Us
 
-ERMrestJS is developed in the
+Chaise is developed in the
 [Informatics group](http://www.isi.edu/research_groups/informatics/home)
 at the [USC Information Sciences Institute](http://www.isi.edu).
