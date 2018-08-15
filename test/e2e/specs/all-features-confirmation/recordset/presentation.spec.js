@@ -298,43 +298,46 @@ describe('View recordset,', function() {
             it("should have '2' options in the dropdown menu.", function (done) {
                 chaisePage.recordsetPage.getExportDropdown().click().then(function () {
                     expect(chaisePage.recordsetPage.getExportOptions().count()).toBe(2, "incorrect number of export options");
+                    // close the dropdown
                     return chaisePage.recordsetPage.getExportDropdown().click();
                 }).then(function () {
                     done();
                 });
             });
 
-            it("should have 'CSV' as a download option and download the file.", function() {
-                chaisePage.recordsetPage.getExportDropdown().click().then(function () {
-                    var csvOption = chaisePage.recordsetPage.getExportOption("CSV");
-                    expect(csvOption.getText()).toBe("CSV");
-                    return csvOption.click();
-                }).then(function () {
-                    return browser.wait(function() {
-                        return fs.existsSync(process.env.DOWNLOADS_PATH + '/Accommodations.csv');
-                    }, 10000);
-                }).then(null, function () {
-                    expect(false).toBeTruthy("Accommodations.csv was not downloaded");
-                });
-            });
-
-            it("should have 'BDBag' as a download option and download the file.", function() {
-                chaisePage.recordsetPage.getExportDropdown().click().then(function () {
-                    var bagOption = chaisePage.recordsetPage.getExportOption("BDBag");
-                    expect(bagOption.getText()).toBe("BDBag");
-                    return bagOption.click();
-                }).then(function () {
-                    return chaisePage.waitForElement(element(by.css(".export-progress")));
-                }).then(function () {
-                    return chaisePage.waitForElementInverse(element(by.css(".export-progress")));
-                }).then(function () {
-                    browser.wait(function() {
-                        return fs.existsSync(process.env.DOWNLOADS_PATH + '/accommodation.zip');
-                    }, 10000).then(null, function () {
-                        expect(false).toBeTruthy("accommodation.zip was not downloaded");
+            if (!process.env.TRAVIS) {
+                it("should have 'CSV' as a download option and download the file.", function() {
+                    chaisePage.recordsetPage.getExportDropdown().click().then(function () {
+                        var csvOption = chaisePage.recordsetPage.getExportOption("CSV");
+                        expect(csvOption.getText()).toBe("CSV");
+                        return csvOption.click();
+                    }).then(function () {
+                        return browser.wait(function() {
+                            return fs.existsSync(process.env.DOWNLOADS_PATH + '/Accommodations.csv');
+                        }, 10000);
+                    }).then(null, function () {
+                        expect(false).toBeTruthy("Accommodations.csv was not downloaded");
                     });
                 });
-            });
+
+                it("should have 'BDBag' as a download option and download the file.", function() {
+                    chaisePage.recordsetPage.getExportDropdown().click().then(function () {
+                        var bagOption = chaisePage.recordsetPage.getExportOption("BDBag");
+                        expect(bagOption.getText()).toBe("BDBag");
+                        return bagOption.click();
+                    }).then(function () {
+                        return chaisePage.waitForElement(element(by.css(".export-progress")));
+                    }).then(function () {
+                        return chaisePage.waitForElementInverse(element(by.css(".export-progress")));
+                    }).then(function () {
+                        browser.wait(function() {
+                            return fs.existsSync(process.env.DOWNLOADS_PATH + '/accommodation.zip');
+                        }, 10000).then(null, function () {
+                            expect(false).toBeTruthy("accommodation.zip was not downloaded");
+                        });
+                    });
+                });
+            }
 
             it("should show line under columns which have a comment and inspect the comment value too", function() {
                 var columns = accommodationParams.columns.filter(function(c) {
