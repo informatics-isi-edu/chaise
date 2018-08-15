@@ -295,10 +295,12 @@ describe('View recordset,', function() {
                 });
             });
 
-            it("should have '2' options in the dropdown menu.", function () {
+            it("should have '2' options in the dropdown menu.", function (done) {
                 chaisePage.recordsetPage.getExportDropdown().click().then(function () {
                     expect(chaisePage.recordsetPage.getExportOptions().count()).toBe(2, "incorrect number of export options");
                     return chaisePage.recordsetPage.getExportDropdown().click();
+                }).then(function () {
+                    done();
                 });
             });
 
@@ -338,7 +340,9 @@ describe('View recordset,', function() {
                 var columns = accommodationParams.columns.filter(function(c) {
                     return (c.value != null && typeof c.comment == 'string');
                 });
-                chaisePage.recordsetPage.getColumnsWithUnderline().then(function(pageColumns) {
+                chaisePage.waitForElementInverse(element(by.css(".export-progress"))).then(function () {
+                    return chaisePage.recordsetPage.getColumnsWithUnderline()
+                }).then(function(pageColumns) {
                     expect(pageColumns.length).toBe(columns.length);
                     var index = 0;
                     pageColumns.forEach(function(c) {
