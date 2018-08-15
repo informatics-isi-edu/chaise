@@ -74,7 +74,7 @@ before_install:
   - cd ..
   - git clone https://github.com/informatics-isi-edu/ioboxd.git
   - cd ioboxd
-  - make deploy
+  - sudo make deploy
   - cd ..
   - curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
   - sudo apt-get install -y nodejs
