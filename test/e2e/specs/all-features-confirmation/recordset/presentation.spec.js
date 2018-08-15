@@ -1,4 +1,6 @@
-var chaisePage = require('../../../utils/chaise.page.js');;
+var chaisePage = require('../../../utils/chaise.page.js');
+var recordSetHelpers = require('../../../utils/recordset-helpers.js');
+var fs = require('fs');
 var testParams = {
     accommodation_tuple: {
         schemaName: "product-recordset",
@@ -9,6 +11,7 @@ var testParams = {
         key: { name: "id", value: "2001", operator: "::gt::"},
         shortest_key_filter: "RID=",
         sortby: "no_of_rooms",
+        file_names: ["Accommodations.csv", "accommodation.zip"],
         columns: [
             { title: "Name of Accommodation", value: "Sherathon Hotel", type: "text"},
             { title: "Website", value: "<p class=\"ng-scope\"><a href=\"http://www.starwoodhotels.com/sheraton/index.html\">Link to Website</a></p>", type: "text", comment: "A valid url of the accommodation"},
@@ -174,6 +177,7 @@ var testParams = {
         page_size: 10
     },
     tooltip: {
+        exportDropdown: "Click to choose an export format.",
         permalink: "This link stores your search criteria as a URL. Right click and save.",
         actionCol: "Click on the action buttons to view, edit, or delete each record"
     }
@@ -197,6 +201,15 @@ describe('View recordset,', function() {
         });
 
         describe("Presentation ,", function() {
+
+            if (!process.env.TRAVIS) {
+                beforeAll(function() {
+                    // delete files that may have been downloaded before
+                    console.log("delete files");
+                    recordSetHelpers.deleteDownloadedFiles(accommodationParams.file_names);
+                });
+            }
+
             var recEditUrl =  '';
             it("should have '" + accommodationParams.title +  "' as title", function() {
                 var title = chaisePage.recordsetPage.getPageTitleElement();
@@ -271,6 +284,56 @@ describe('View recordset,', function() {
                 });
             });
 
+            it("should display the Export dropdown button with proper tooltip.", function() {
+                var exportDropdown = chaisePage.recordsetPage.getExportDropdown();
+                expect(exportDropdown.isDisplayed()).toBe(true, "The export dropdown button is not visible on the recordset app");
+                browser.actions().mouseMove(exportDropdown).perform();
+                var tooltip = chaisePage.getTooltipDiv();
+                chaisePage.waitForElement(tooltip).then(function () {
+                    expect(tooltip.getText()).toBe(testParams.tooltip.exportDropdown, "Incorrect tooltip on the export dropdown button");
+                    browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
+                });
+            });
+
+            it("should have '2' options in the dropdown menu.", function () {
+                chaisePage.recordsetPage.getExportDropdown().click().then(function () {
+                    expect(chaisePage.recordsetPage.getExportOptions().count()).toBe(2, "incorrect number of export options");
+                    return chaisePage.recordsetPage.getExportDropdown().click();
+                });
+            });
+
+            it("should have 'CSV' as a download option and download the file.", function() {
+                chaisePage.recordsetPage.getExportDropdown().click().then(function () {
+                    var csvOption = chaisePage.recordsetPage.getExportOption("CSV");
+                    expect(csvOption.getText()).toBe("CSV");
+                    return csvOption.click();
+                }).then(function () {
+                    return browser.wait(function() {
+                        return fs.existsSync(process.env.DOWNLOADS_PATH + '/Accommodations.csv');
+                    }, 10000);
+                }).then(null, function () {
+                    expect(false).toBeTruthy("Accommodations.csv was not downloaded");
+                });
+            });
+
+            it("should have 'BDBag' as a download option and download the file.", function() {
+                chaisePage.recordsetPage.getExportDropdown().click().then(function () {
+                    var bagOption = chaisePage.recordsetPage.getExportOption("BDBag");
+                    expect(bagOption.getText()).toBe("BDBag");
+                    return bagOption.click();
+                }).then(function () {
+                    return chaisePage.waitForElement(element(by.css(".export-progress")));
+                }).then(function () {
+                    return chaisePage.waitForElementInverse(element(by.css(".export-progress")));
+                }).then(function () {
+                    browser.wait(function() {
+                        return fs.existsSync(process.env.DOWNLOADS_PATH + '/accommodation.zip');
+                    }, 10000).then(null, function () {
+                        expect(false).toBeTruthy("accommodation.zip was not downloaded");
+                    });
+                });
+            });
+
             it("should show line under columns which have a comment and inspect the comment value too", function() {
                 var columns = accommodationParams.columns.filter(function(c) {
                     return (c.value != null && typeof c.comment == 'string');
@@ -295,7 +358,6 @@ describe('View recordset,', function() {
                 chaisePage.recordsetPage.getColumnComment(actionCol).then(function(comment){
                     expect(comment).toBe(testParams.tooltip.actionCol);
                 });
-
             });
 
             it("apply different searches, ", function(done) {
@@ -506,6 +568,14 @@ describe('View recordset,', function() {
                     expect(ct).toBe(3);
                 });
             });
+
+            if (!process.env.TRAVIS) {
+                afterAll(function() {
+                    // delete files that have been downloaded during tests
+                    console.log("delete files");
+                    recordSetHelpers.deleteDownloadedFiles(accommodationParams.file_names);
+                });
+            }
 
         });
 

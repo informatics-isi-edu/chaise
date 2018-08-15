@@ -998,6 +998,18 @@ var recordsetPage = function() {
         return element(by.id("page-size-" + limit));
     };
 
+    this.getExportDropdown = function () {
+        return element(by.tagName("export")).element(by.tagName("button"));
+    };
+
+    this.getExportOptions = function () {
+        return element(by.tagName("export")).all(by.tagName("li"));
+    };
+
+    this.getExportOption = function (optionName) {
+        return element(by.css(".export-" + optionName));
+    };
+
     this.getPermalinkButton = function() {
         return element(by.id('permalink'));
     };

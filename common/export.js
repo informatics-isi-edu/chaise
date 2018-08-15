@@ -123,7 +123,7 @@
                 };
 
                 scope.$watch('hasValues', function (newValue, oldValue) {
-                    if (newValue) {
+                    if (newValue && scope.exportOptions.supportedFormats.length === 1) {
                         _updateExportFormats(scope);
                     }
                 });
