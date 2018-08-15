@@ -6,6 +6,6 @@
 </button>
 <ul ng-if="hasValues" class="dropdown-menu" style="min-width:unset; top:20px;">
     <li ng-repeat="template in exportOptions.supportedFormats">
-        <a class="export-{{template.format_name}}" ng-click="submit(template)">{{template.format_name}}</a>
+        <a class="export-{{::makeSafeIdAttr(template.format_name)}}" ng-click="submit(template)">{{template.format_name}}</a>
     </li>
 </ul>

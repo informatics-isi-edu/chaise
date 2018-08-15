@@ -284,7 +284,7 @@ describe('View recordset,', function() {
                 });
             });
 
-            it("should display the Export dropdown button with proper tooltip.", function() {
+            it("should display the Export dropdown button with proper tooltip.", function(done) {
                 var exportDropdown = chaisePage.recordsetPage.getExportDropdown();
                 expect(exportDropdown.isDisplayed()).toBe(true, "The export dropdown button is not visible on the recordset app");
                 browser.actions().mouseMove(exportDropdown).perform();
@@ -292,6 +292,10 @@ describe('View recordset,', function() {
                 chaisePage.waitForElement(tooltip).then(function () {
                     expect(tooltip.getText()).toBe(testParams.tooltip.exportDropdown, "Incorrect tooltip on the export dropdown button");
                     browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
+                    done();
+                }).catch(function (err) {
+                    console.log(err);
+                    done.fail();
                 });
             });
 
@@ -302,39 +306,52 @@ describe('View recordset,', function() {
                     return chaisePage.recordsetPage.getExportDropdown().click();
                 }).then(function () {
                     done();
+                }).catch(function (err) {
+                    console.log(err);
+                    done.fail();
                 });
             });
 
             if (!process.env.TRAVIS) {
-                it("should have 'CSV' as a download option and download the file.", function() {
+                it("should have 'CSV' as a download option and download the file.", function(done) {
                     chaisePage.recordsetPage.getExportDropdown().click().then(function () {
                         var csvOption = chaisePage.recordsetPage.getExportOption("CSV");
                         expect(csvOption.getText()).toBe("CSV");
                         return csvOption.click();
                     }).then(function () {
-                        return browser.wait(function() {
+                        browser.wait(function() {
                             return fs.existsSync(process.env.DOWNLOADS_PATH + '/Accommodations.csv');
-                        }, 10000);
-                    }).then(null, function () {
-                        expect(false).toBeTruthy("Accommodations.csv was not downloaded");
+                        }, browser.params.defaultTimeout).then(function () {
+                            done();
+                        }, function () {
+                            expect(false).toBeTruthy("Accommodations.csv was not downloaded");
+                        });
+                    }).catch(function (err) {
+                        console.log(err);
+                        done.fail();
                     });
                 });
 
-                it("should have 'BDBag' as a download option and download the file.", function() {
+                it("should have 'BDBag' as a download option and download the file.", function(done) {
                     chaisePage.recordsetPage.getExportDropdown().click().then(function () {
                         var bagOption = chaisePage.recordsetPage.getExportOption("BDBag");
                         expect(bagOption.getText()).toBe("BDBag");
                         return bagOption.click();
                     }).then(function () {
-                        return chaisePage.waitForElement(element(by.css(".export-progress")));
+                        return chaisePage.waitForElement(chaisePage.recordsetPage.getExportModal());
                     }).then(function () {
-                        return chaisePage.waitForElementInverse(element(by.css(".export-progress")));
+                        return chaisePage.waitForElementInverse(chaisePage.recordsetPage.getExportModal());
                     }).then(function () {
                         browser.wait(function() {
                             return fs.existsSync(process.env.DOWNLOADS_PATH + '/accommodation.zip');
-                        }, 10000).then(null, function () {
+                        }, browser.params.defaultTimeout).then(function () {
+                            done();
+                        }, function () {
                             expect(false).toBeTruthy("accommodation.zip was not downloaded");
                         });
+                    }).catch(function (err) {
+                        console.log(err);
+                        done.fail();
                     });
                 });
             }

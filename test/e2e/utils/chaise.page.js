@@ -1007,8 +1007,13 @@ var recordsetPage = function() {
     };
 
     this.getExportOption = function (optionName) {
-        return element(by.css(".export-" + optionName));
+        var option = makeSafeIdAttr(optionName);
+        return element(by.css(".export-" + option));
     };
+
+    this.getExportModal = function () {
+        return element(by.css(".export-progress"));
+    }
 
     this.getPermalinkButton = function() {
         return element(by.id('permalink'));
