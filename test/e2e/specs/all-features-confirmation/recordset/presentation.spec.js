@@ -320,7 +320,7 @@ describe('View recordset,', function() {
                         return csvOption.click();
                     }).then(function () {
                         browser.wait(function() {
-                            return fs.existsSync(process.env.DOWNLOADS_PATH + '/Accommodations.csv');
+                            return fs.existsSync(process.env.PWD + "/test/e2e/Accommodations.csv");
                         }, browser.params.defaultTimeout).then(function () {
                             done();
                         }, function () {
@@ -343,7 +343,7 @@ describe('View recordset,', function() {
                         return chaisePage.waitForElementInverse(chaisePage.recordsetPage.getExportModal());
                     }).then(function () {
                         browser.wait(function() {
-                            return fs.existsSync(process.env.DOWNLOADS_PATH + '/accommodation.zip');
+                            return fs.existsSync(process.env.PWD + "/test/e2e/accommodation.zip");
                         }, browser.params.defaultTimeout).then(function () {
                             done();
                         }, function () {

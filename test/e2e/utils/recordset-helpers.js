@@ -80,7 +80,7 @@ exports.testSelectFacetOption = function (facetIdx, filterIdx, facetName, filter
 
 exports.deleteDownloadedFiles = function (fileNames) {
     fileNames.forEach(function (name) {
-        var filename = process.env.DOWNLOADS_PATH + '/' + name;
+        var filename = process.env.PWD + "/test/e2e/" + name;
         if (fs.existsSync(filename)) {
             // delete if there is any existing file with same name
             fs.unlinkSync(filename);
