@@ -125,7 +125,7 @@
                     }
 
                     model.column = col;
-                    model.baseTableName = $rootScope.reference.table.name;
+                    model.baseTableName = $rootScope.reference.displayname.value;
                     $rootScope.columnModels.push(model);
                 });
 
@@ -144,7 +144,7 @@
                         displayType: ref.display.type,
                         displayname: ref.displayname,
                         tableModel: recordAppUtils.getTableModel(ref, "compact/brief", $rootScope.tuple),
-                        baseTableName: $rootScope.reference.table.name
+                        baseTableName: $rootScope.reference.displayname.value
                     });
                 });
 
