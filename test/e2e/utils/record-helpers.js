@@ -270,7 +270,7 @@ exports.testPresentation = function (tableParams) {
             chaisePage.waitForElement(chaisePage.recordPage.getEntityTitleElement());
             return chaisePage.recordPage.getEntityTitle();
         }).then(function (pageTitle) {
-            expect(pageTitle).toBe("3,005", "Page title did not match. Invalid image id");
+            expect(pageTitle).toBe("3005", "Page title did not match. Invalid image id");
             return chaisePage.recordPage.getEntitySubTitle();
         }).then(function (pageSubTitle){
             expect(pageSubTitle).toBe("file", "Page subtitle did not match. Invalid image id");

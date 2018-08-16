@@ -126,7 +126,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         count: 1,
         canDelete: true,
         canEdit: false,
-        markdownValue: "<p>2,004</p>\n",
+        markdownValue: "<p>2004</p>\n",
         isMarkdown: true
     };
     describe("for a related entity with row_markdown_pattern, ", function () {
