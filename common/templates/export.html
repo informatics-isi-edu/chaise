@@ -1,11 +1,11 @@
-<button ng-if="hasValues" href="#" class="dropdown-toggle btn-primary btn btn-inverted btn-no-boundry" data-toggle="dropdown" ng-disabled="disabled"
-   tooltip-placement="left" uib-tooltip= "{{disabled ? 'Wait for the entities to load.' : 'Click to export all matched results in zipped bag format.'}}">
+<button ng-if="hasValues" class="dropdown-toggle btn-primary btn btn-inverted btn-no-boundry" data-toggle="dropdown" ng-disabled="disabled"
+   tooltip-placement="left" uib-tooltip= "Click to choose an export format.">
     <span class="glyphicon" ng-class="{'glyphicon-export': !isLoading, 'glyphicon-refresh glyphicon-refresh-animate': isLoading}"></span>
     <strong>Export </strong>
     <span class="caret"></span>
 </button>
 <ul ng-if="hasValues" class="dropdown-menu" style="min-width:unset; top:20px;">
     <li ng-repeat="template in exportOptions.supportedFormats">
-        <a ng-click="submit(template)">{{template.format_name}}</a>
+        <a class="export-{{::makeSafeIdAttr(template.format_name)}}" ng-click="submit(template)">{{template.format_name}}</a>
     </li>
 </ul>

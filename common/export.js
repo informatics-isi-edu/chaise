@@ -3,7 +3,7 @@
 
     angular.module('chaise.export', ['chaise.utils'])
 
-    .directive('export', ['AlertsService', 'logActions', 'modalUtils', '$timeout', 'UriUtils', function (AlertsService, logActions, modalUtils, $timeout, UriUtils) {
+    .directive('export', ['AlertsService', 'DataUtils', 'logActions', 'modalUtils', '$timeout', 'UriUtils', function (AlertsService, DataUtils, logActions, modalUtils, $timeout, UriUtils) {
 
         /**
          * Cancel the current export request
@@ -104,6 +104,7 @@
             link: function (scope, element, attributes) {
                 scope.isLoading = false;
                 scope.exporter = null;
+                scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
                 scope.exportOptions = {
                     supportedFormats: [
@@ -123,7 +124,7 @@
                 };
 
                 scope.$watch('hasValues', function (newValue, oldValue) {
-                    if (newValue) {
+                    if (newValue && scope.exportOptions.supportedFormats.length === 1) {
                         _updateExportFormats(scope);
                     }
                 });
