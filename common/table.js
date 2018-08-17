@@ -261,20 +261,21 @@
                     var rowLimit = Math.ceil(tableConstants.CELL_LIMIT/vm.page.reference.columns.length);
 
                     // recursive function for adding more rows to the DOM
-                    function _pushMoreRows(prevInd, limit, counter) {
-                        if (counter === vm.flowControlObject.counter) {
+                    function _pushMoreRows(prevInd, limit, pushMoreID) {
+                        if ($rootScope.pushMoreID === pushMoreID) {
                             var nextLimit = prevInd + limit;
                             // combines all of the second array (rowValues) with the first one (vm.rowValues)
                             Array.prototype.push.apply(vm.rowValues, rowValues.slice(prevInd, nextLimit));
                             if (rowValues[nextLimit]) {
-                                $log.debug("counter", counter, ": recurse with", vm.rowValues.length);
-                                pushMore = $timeout(function () {
-                                    if (counter === vm.flowControlObject.counter) {
-                                        _pushMoreRows(nextLimit, limit, counter);
+                                $log.debug("counter", current, ": recurse with", vm.rowValues.length);
+                                $timeout(function () {
+                                    if ($rootScope.pushMoreID === pushMoreID) {
+                                        _pushMoreRows(nextLimit, limit, pushMoreID);
                                     } else {
-                                        $log.debug("current counter: ", vm.flowControlObject.counter);
-                                        $log.debug("counter", counter, ": break out of timeout inside push more rows");
-                                        $timeout.cancel(pushMore);
+                                        $log.debug("current global counter: ", vm.flowControlObject.counter);
+                                        $log.debug("counter", current, ": break out of timeout inside push more rows");
+                                        $log.debug("counter", current, ": with uuid", pushMoreID);
+                                        $log.debug("counter", current, ": with global uuid", $rootScope.pushMoreID);
                                         vm.pushRowsSpinner = false;
                                     }
                                 });
@@ -283,17 +284,21 @@
                                 vm.pushRowsSpinner = false;
                             }
                         } else {
-                            $log.debug("counter", counter, ": break out of push more rows");
-                            $timeout.cancel(pushMore);
+                            $log.debug("current global counter: ", vm.flowControlObject.counter);
+                            $log.debug("counter", current, ": break out of push more rows");
+                            $log.debug("counter", current, ": with uuid", pushMoreID);
+                            $log.debug("counter", current, ": with global uuid", $rootScope.pushMoreID);
                             vm.pushRowsSpinner = false;
                         }
                     }
 
                     $log.debug("counter", current, ": row values length ", rowValues.length);
-                    vm.rowValues.length = 0;
+                    vm.rowValues = [];
                     if (rowValues.length > rowLimit) {
                         vm.pushRowsSpinner = true;
-                        _pushMoreRows(0, rowLimit, current);
+                        var uniqueIdentifier = $rootScope.pushMoreID = MathUtils.uuid();
+                        $log.debug("counter", current, ": before push more rows with uuid", uniqueIdentifier);
+                        _pushMoreRows(0, rowLimit, uniqueIdentifier);
                     } else {
                         vm.rowValues = rowValues;
                     }
