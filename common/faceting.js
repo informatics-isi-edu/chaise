@@ -1127,7 +1127,7 @@
                             } else {
                                 ref = scope.facetColumn.removeChoiceFilters([row.uniqueId]);
                             }
-                            $log.debug("request for facet (index=" + scope.facetColumn.index + ") choice add. uniqueId='" + row.uniqueId);
+                            $log.debug("request for facet (index=" + scope.facetColumn.index + ") choice " + (row.selected ? "add" : "remove") + ". uniqueId='" + row.uniqueId);
                         }
 
 

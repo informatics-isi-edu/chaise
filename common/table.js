@@ -126,7 +126,7 @@
 
                 vm.flowControlObject.occupiedSlots++;
                 (function (i, current) {
-                    $log.debug("getting aggregated values for column (index=" + i + ")");
+                    $log.debug("counter", current, ": getting aggregated values for column (index=" + i + ")");
                     _updateColumnAggregate(vm, i, current, logObject, hideSpinner).then(function (res) {
                         _afterUpdateColumnAggregate(vm, res, i);
                         updatePageCB(vm);
@@ -174,7 +174,7 @@
          */
         function _afterUpdateColumnAggregate(vm, res, colIndex) {
             vm.flowControlObject.occupiedSlots--;
-            $log.debug("after aggregated value for column (index=" + colIndex + ") update: " + (res? "successful." : "unsuccessful."));
+            $log.debug("counter", vm.flowControlObject.counter, ": after aggregated value for column (index=" + colIndex + ") update: " + (res? "successful." : "unsuccessful."));
         }
 
         /**
@@ -185,19 +185,25 @@
          * @param  {boolean} hideSpinner  Indicates whether we should show spinner for columns or not
          */
         function updateMainEntity(vm, updatePageCB, hideSpinner) {
-            if (!vm.dirtyResult || !_haveFreeSlot(vm)) return;
+            if (!vm.dirtyResult || !_haveFreeSlot(vm)) {
+                $log.debug("counter", vm.flowControlObject.counter, ": break out of update main");
+                return;
+            }
 
             vm.flowControlObject.occupiedSlots++;
             vm.dirtyResult = false;
 
-            $log.debug("updating result");
-            _readMainEntity(vm, hideSpinner).then(function (res) {
-                _afterUpdateMainEntity(vm, res);
-                updatePageCB(vm);
-            }).catch(function (err) {
-                _afterUpdateMainEntity(vm, true);
-                throw err;
-            });
+            (function (currentCounter) {
+                $log.debug("counter", currentCounter, ": updating result");
+                _readMainEntity(vm, hideSpinner, currentCounter).then(function (res) {
+                    _afterUpdateMainEntity(vm, res, currentCounter);
+                    $log.debug("counter", vm.flowControlObject.counter, ": just before update page");
+                    updatePageCB(vm);
+                }).catch(function (err) {
+                    _afterUpdateMainEntity(vm, true, currentCounter);
+                    throw err;
+                });
+            })(vm.flowControlObject.counter);
         }
 
         /**
@@ -205,14 +211,14 @@
          * This will be called after updateMainEntity. which will set the flags
          * based on success or failure of request.
          */
-        function _afterUpdateMainEntity(vm, res) {
+        function _afterUpdateMainEntity(vm, res, counter) {
             if (res) {
                 // we got the results, let's just update the url
                 $rootScope.$emit('reference-modified');
             }
             vm.flowControlObject.occupiedSlots--;
             vm.dirtyResult = !res;
-            $log.debug("after result update: " + (res ? "successful." : "unsuccessful."));
+            $log.debug("counter", counter, ": after result update: " + (res ? "successful." : "unsuccessful."));
         }
 
         // comment $timeout why
@@ -222,7 +228,7 @@
          * Does the actual read for the main entity. Returns a promise that will
          * be resolved with `true` if the request was successful.
          */
-        function _readMainEntity (vm, hideSpinner) {
+        function _readMainEntity (vm, hideSpinner, counterer) {
             if (!vm.columnModels) {
                 _attachExtraAttributes(vm);
             }
@@ -244,6 +250,11 @@
 
                     return vm.getDisabledTuples ? vm.getDisabledTuples(page, vm.pageLimit) : '';
                 }).then(function (rows) {
+                    if (current !== vm.flowControlObject.counter) {
+                        defer.resolve(false);
+                        return defer.promise;
+                    }
+
                     if (rows) vm.disabledRows = rows;
                     var rowValues = DataUtils.getRowValuesFromPage(vm.page);
                     // calculate how many rows can be shown based on # of columns
@@ -256,7 +267,7 @@
                             // combines all of the second array (rowValues) with the first one (vm.rowValues)
                             Array.prototype.push.apply(vm.rowValues, rowValues.slice(prevInd, nextLimit));
                             if (rowValues[nextLimit]) {
-                                $log.debug("counter", counter, ": recurse");
+                                $log.debug("counter", counter, ": recurse with", vm.rowValues.length);
                                 pushMore = $timeout(function () {
                                     if (counter === vm.flowControlObject.counter) {
                                         _pushMoreRows(nextLimit, limit, counter);
@@ -309,7 +320,7 @@
                     }
                     defer.reject(err);
                 });
-            }) (vm.flowControlObject.counter);
+            }) (counterer);
             return defer.promise;
         }
 
@@ -324,7 +335,7 @@
             currFm.isLoading = !res;
             currFm.processed = res || currFm.processed;
 
-            $log.debug("after facet (index="+i+") update: " + (res ? "successful." : "unsuccessful."));
+            $log.debug("counter", vm.flowControlObject.counter, ": after facet (index="+i+") update: " + (res ? "successful." : "unsuccessful."));
         }
 
         /**
@@ -379,7 +390,7 @@
         function _afterUpdateCount (vm, res) {
             vm.flowControlObject.occupiedSlots--;
             vm.dirtyCount = !res;
-            $log.debug("after count update: " + (res ? "successful." : "unsuccessful."));
+            $log.debug("counter", vm.flowControlObject.counter, ": after count update: " + (res ? "successful." : "unsuccessful."));
         }
 
         /**
@@ -448,6 +459,7 @@
          * @param  {Object} vm The table view model
          */
         function _updatePage(vm) {
+            $log.debug("counter", vm.flowControlObject.counter, ": running update page");
             if (!_haveFreeSlot(vm)) {
                 return;
             }
@@ -470,7 +482,7 @@
                         fm.processed = true;
 
                         (function (i) {
-                            $log.debug("updating facet (index="+i+")");
+                            $log.debug("counter", vm.flowControlObject.counter, ": updating facet (index="+i+")");
                             vm.facetModels[i].updateFacet().then(function (res) {
                                 _afterFacetUpdate(vm, i, res);
                                 _updatePage(vm);
@@ -486,9 +498,9 @@
                     vm.flowControlObject.occupiedSlots++;
                     var index = vm.facetsToInitialize.shift();
                     (function (i) {
-                        $log.debug("initializing facet (index="+index+")");
+                        $log.debug("counter", vm.flowControlObject.counter, ": initializing facet (index="+index+")");
                         vm.facetModels[i].initializeFacet().then(function (res) {
-                            $log.debug("after facet (index="+ i +") initialize: " + (res ? "successful." : "unsuccessful."));
+                            $log.debug("counter", vm.flowControlObject.counter, ": after facet (index="+ i +") initialize: " + (res ? "successful." : "unsuccessful."));
                             vm.flowControlObject.occupiedSlots--;
                             _updatePage(vm);
                         }).catch(function (err) {
@@ -505,7 +517,7 @@
                 vm.flowControlObject.occupiedSlots++;
                 vm.dirtyCount = false;
 
-                $log.debug("updating count");
+                $log.debug("counter", vm.flowControlObject.counter, ": updating count");
                 _updateCount(vm).then(function (res) {
                     _afterUpdateCount(vm, res);
                     _updatePage(vm);
