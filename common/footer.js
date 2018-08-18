@@ -7,13 +7,13 @@
 (function() {
     'use strict';
 
-    angular.module('chaise.footer', [])
-        .directive('footer', ['ERMrest', '$timeout', function(ERMrest, $timeout) {
+    angular.module('chaise.footer', ['chaise.utils'])
+        .directive('footer', ['ERMrest', '$timeout', 'UriUtils', function(ERMrest, $timeout, UriUtils) {
 
             return {
                 restrict: 'E',
                 scope: {},
-                templateUrl: '../common/templates/footer.html',
+                templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/footer.html',
                 link: function(scope, ele) {
                     var footerText = chaiseConfig.footerMarkdown;
                     angular.isUndefinedOrNull = function(val) {

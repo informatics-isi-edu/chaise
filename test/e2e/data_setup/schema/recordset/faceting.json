@@ -107,6 +107,17 @@
                     "name": "boolean_col",
                     "type": {
                         "typename": "boolean"
+                    },
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:column-display" : {
+                            "compact": {
+                                "pre_format": {
+                                    "format": "%t",
+                                    "bool_true_value": "Yes",
+                                    "bool_false_value": "No"
+                                }
+                            }
+                        }
                     }
                 },
                 {
@@ -132,11 +143,21 @@
                     "type": {
                         "typename": "text"
                     }
+                },
+                {
+                    "name": "text_col_2",
+                    "type": {
+                        "typename": "text"
+                    }
                 }
             ],
             "annotations": {
                 "tag:isrd.isi.edu,2016:visible-columns" : {
                     "compact": ["id"],
+                    "detailed": [
+                        "text_col", "longtext_col", "markdown_col", "int_col", "float_col", "date_col", "timestamp_col", "boolean_col", "jsonb_col",
+                        ["faceting", "main_fk1"], ["faceting", "main_fk2"]
+                    ],
                     "filter": {
                         "and": [
                             {"source": "id", "ux_mode": "choices", "choices": ["1"], "comment": "ID comment"},
@@ -155,6 +176,7 @@
                             {"source": [{"inbound": ["faceting", "main_f3_assoc_fk1"]}, {"outbound": ["faceting", "main_f3_assoc_fk2"]}, "term"]},
                             {"source": [{"inbound": ["faceting", "f4_fk1"]}, "id"], "entity": false, "ux_mode": "choices"},
                             {"source": [{"outbound": ["faceting", "main_fk1"]}, "term"], "markdown_name": "F1 with Term", "comment": "F1 with Term comment"},
+                            {"source": "text_col_2", "ux_mode": "check_presence", "markdown_name": "Check Presence Text"},
                             {"source": "col_w_long_values"}
                         ]
                     }

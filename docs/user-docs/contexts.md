@@ -1,7 +1,7 @@
 # Annotation Contexts Used By Chaise
 
 This document describes the annotation "contexts" used by Chaise. For more on annotation
-contexts see the [ERMrest user documentation on annotations](https://github.com/informatics-isi-edu/ermrest/blob/master/user-doc/annotation.md).
+contexts see the [ERMrest user documentation on annotations](https://github.com/informatics-isi-edu/ermrest/blob/master/docs/user-doc/annotation.md).
 
 |              | compact         | compact/brief | detailed        | entry | entry/edit | entry/create | filter | name | * |
 |--------------|-----------------|---------------|-----------------|-------|------------|--------------|--------|------|---|

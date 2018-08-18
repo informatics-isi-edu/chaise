@@ -1,4 +1,6 @@
-var chaisePage = require('../../../utils/chaise.page.js');;
+var chaisePage = require('../../../utils/chaise.page.js');
+var recordSetHelpers = require('../../../utils/recordset-helpers.js');
+var fs = require('fs');
 var testParams = {
     accommodation_tuple: {
         schemaName: "product-recordset",
@@ -9,6 +11,7 @@ var testParams = {
         key: { name: "id", value: "2001", operator: "::gt::"},
         shortest_key_filter: "RID=",
         sortby: "no_of_rooms",
+        file_names: ["Accommodations.csv", "accommodation.zip"],
         columns: [
             { title: "Name of Accommodation", value: "Sherathon Hotel", type: "text"},
             { title: "Website", value: "<p class=\"ng-scope\"><a href=\"http://www.starwoodhotels.com/sheraton/index.html\">Link to Website</a></p>", type: "text", comment: "A valid url of the accommodation"},
@@ -174,8 +177,9 @@ var testParams = {
         page_size: 10
     },
     tooltip: {
-        downloadCSV: "Click to download all matched results",
-        permalink: "This link stores your search criteria as a URL. Right click and save."
+        exportDropdown: "Click to choose an export format.",
+        permalink: "This link stores your search criteria as a URL. Right click and save.",
+        actionCol: "Click on the action buttons to view, edit, or delete each record"
     }
 };
 
@@ -197,6 +201,15 @@ describe('View recordset,', function() {
         });
 
         describe("Presentation ,", function() {
+
+            if (!process.env.TRAVIS) {
+                beforeAll(function() {
+                    // delete files that may have been downloaded before
+                    console.log("delete files");
+                    recordSetHelpers.deleteDownloadedFiles(accommodationParams.file_names);
+                });
+            }
+
             var recEditUrl =  '';
             it("should have '" + accommodationParams.title +  "' as title", function() {
                 var title = chaisePage.recordsetPage.getPageTitleElement();
@@ -214,17 +227,6 @@ describe('View recordset,', function() {
                 var tooltip = chaisePage.getTooltipDiv();
                 chaisePage.waitForElement(tooltip).then(function () {
                     expect(tooltip.getText()).toBe(testParams.tooltip.permalink, "Incorrect tooltip on the Permalink button");
-                    browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
-                });
-            });
-
-            it('should display the Download CSV button & a tooltip on hovering over it', function () {
-                var downloadCSV = chaisePage.recordsetPage.getDownloadButton();
-                expect(downloadCSV.isDisplayed()).toBe(true, "The Download CSV button is not visible on the recordset app");
-                browser.actions().mouseMove(downloadCSV).perform();
-                var tooltip = chaisePage.getTooltipDiv();
-                chaisePage.waitForElement(tooltip).then(function () {
-                    expect(tooltip.getText()).toBe(testParams.tooltip.downloadCSV, "Incorrect tooltip on the Download CSV button");
                     browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
                 });
             });
@@ -282,11 +284,85 @@ describe('View recordset,', function() {
                 });
             });
 
+            it("should display the Export dropdown button with proper tooltip.", function(done) {
+                var exportDropdown = chaisePage.recordsetPage.getExportDropdown();
+                expect(exportDropdown.isDisplayed()).toBe(true, "The export dropdown button is not visible on the recordset app");
+                browser.actions().mouseMove(exportDropdown).perform();
+                var tooltip = chaisePage.getTooltipDiv();
+                chaisePage.waitForElement(tooltip).then(function () {
+                    expect(tooltip.getText()).toBe(testParams.tooltip.exportDropdown, "Incorrect tooltip on the export dropdown button");
+                    browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
+                    done();
+                }).catch(function (err) {
+                    console.log(err);
+                    done.fail();
+                });
+            });
+
+            it("should have '2' options in the dropdown menu.", function (done) {
+                chaisePage.recordsetPage.getExportDropdown().click().then(function () {
+                    expect(chaisePage.recordsetPage.getExportOptions().count()).toBe(2, "incorrect number of export options");
+                    // close the dropdown
+                    return chaisePage.recordsetPage.getExportDropdown().click();
+                }).then(function () {
+                    done();
+                }).catch(function (err) {
+                    console.log(err);
+                    done.fail();
+                });
+            });
+
+            if (!process.env.TRAVIS) {
+                it("should have 'CSV' as a download option and download the file.", function(done) {
+                    chaisePage.recordsetPage.getExportDropdown().click().then(function () {
+                        var csvOption = chaisePage.recordsetPage.getExportOption("CSV");
+                        expect(csvOption.getText()).toBe("CSV");
+                        return csvOption.click();
+                    }).then(function () {
+                        browser.wait(function() {
+                            return fs.existsSync(process.env.PWD + "/test/e2e/Accommodations.csv");
+                        }, browser.params.defaultTimeout).then(function () {
+                            done();
+                        }, function () {
+                            expect(false).toBeTruthy("Accommodations.csv was not downloaded");
+                        });
+                    }).catch(function (err) {
+                        console.log(err);
+                        done.fail();
+                    });
+                });
+
+                it("should have 'BDBag' as a download option and download the file.", function(done) {
+                    chaisePage.recordsetPage.getExportDropdown().click().then(function () {
+                        var bagOption = chaisePage.recordsetPage.getExportOption("BDBag");
+                        expect(bagOption.getText()).toBe("BDBag");
+                        return bagOption.click();
+                    }).then(function () {
+                        return chaisePage.waitForElement(chaisePage.recordsetPage.getExportModal());
+                    }).then(function () {
+                        return chaisePage.waitForElementInverse(chaisePage.recordsetPage.getExportModal());
+                    }).then(function () {
+                        browser.wait(function() {
+                            return fs.existsSync(process.env.PWD + "/test/e2e/accommodation.zip");
+                        }, browser.params.defaultTimeout).then(function () {
+                            done();
+                        }, function () {
+                            expect(false).toBeTruthy("accommodation.zip was not downloaded");
+                        });
+                    }).catch(function (err) {
+                        console.log(err);
+                        done.fail();
+                    });
+                });
+            }
+
             it("should show line under columns which have a comment and inspect the comment value too", function() {
                 var columns = accommodationParams.columns.filter(function(c) {
                     return (c.value != null && typeof c.comment == 'string');
                 });
-                chaisePage.recordsetPage.getColumnsWithUnderline().then(function(pageColumns) {
+                chaisePage.waitForElementInverse(element(by.css(".export-progress"))).then(function () {
+                    return chaisePage.recordsetPage.getColumnsWithUnderline()
+                }).then(function(pageColumns) {
                     expect(pageColumns.length).toBe(columns.length);
                     var index = 0;
                     pageColumns.forEach(function(c) {
@@ -299,6 +375,12 @@ describe('View recordset,', function() {
                             expect(actualComment).toBe(comment);
                         });
                     });
+                });
+
+                //Check tooltip of Action column
+                var actionCol = element(by.css('.actions-header'));
+                chaisePage.recordsetPage.getColumnComment(actionCol).then(function(comment){
+                    expect(comment).toBe(testParams.tooltip.actionCol);
                 });
             });
 
@@ -372,34 +454,6 @@ describe('View recordset,', function() {
                     // clear search
                     return clearSearchButton.click();
                 })
-            });
-
-            it("action columns should show Download CSV button if records present else should not show download button", function() {
-                var downloadButton;
-                var searchBox = chaisePage.recordsetPage.getMainSearchBox(),
-                searchSubmitButton = chaisePage.recordsetPage.getSearchSubmitButton(),
-                clearSearchButton = chaisePage.recordsetPage.getSearchClearButton();
-
-                searchBox.sendKeys('testing_json');
-                searchSubmitButton.click().then(function() {
-                    return chaisePage.waitForElementInverse(element(by.id("spinner")));
-                }).then(function() {
-                    return chaisePage.recordsetPage.getDownloadButton();
-                }).then(function(downloadButton) {
-                    expect(downloadButton.isDisplayed).toBeTruthy("Download button is not present!");
-                    return clearSearchButton.click();
-                }).then( function(){
-                    return chaisePage.waitForElementInverse(element(by.id("spinner")));
-                }).then (function() {
-                    searchBox.sendKeys("abcdefghijklm");
-                    return searchSubmitButton.click();
-                }).then ( function(){
-                    return chaisePage.waitForElementInverse(element(by.id("spinner")));
-                    return chaisePage.recordsetPage.getDownloadButton();
-                }).then( function(downloadButton){
-                    expect(downloadButton.isDisplayed).toBeFalsy();
-                    return clearSearchButton.click();
-                });
             });
 
             it("action columns should show view button that redirects to the record page", function() {
@@ -538,6 +592,14 @@ describe('View recordset,', function() {
                     expect(ct).toBe(3);
                 });
             });
+
+            if (!process.env.TRAVIS) {
+                afterAll(function() {
+                    // delete files that have been downloaded during tests
+                    console.log("delete files");
+                    recordSetHelpers.deleteDownloadedFiles(accommodationParams.file_names);
+                });
+            }
 
         });
 

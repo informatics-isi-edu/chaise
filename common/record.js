@@ -1,7 +1,7 @@
 (function() {
     'use strict';
 
-    angular.module('chaise.record.display', ['chaise.record.table'])
+    angular.module('chaise.record.display', ['chaise.record.table', 'chaise.utils'])
 
         .filter('trustedHTML', ['$sce', function($sce) {
             return function(text) {
@@ -19,7 +19,7 @@
          * @param {array} values: Array with column values
          * @param {callback} toggleRelatedTableDisplayType: function to determine object display type
          */
-        .directive('recordDisplay', ['DataUtils','$timeout', function(DataUtils, $timeout) {
+        .directive('recordDisplay', ['DataUtils','$timeout', 'UriUtils', function(DataUtils, $timeout, UriUtils) {
             return {
                 restrict: 'E',
                 transclude: true,
@@ -33,7 +33,7 @@
                     toRecordSet: '&',
                     showEmptyRelatedTables: '='
                 },
-                templateUrl: '../common/templates/record.html',
+                templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/record.html',
                 controller: function($scope) {
                     $scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
                 },
@@ -70,7 +70,7 @@
         * @param {callback} addRelatedRecord: function to check add feature
         * @param {callback} toRecordSet:view more record function
         */
-        .directive('recordActionBar', function() {
+        .directive('recordActionBar', ['UriUtils', function(UriUtils) {
             return {
                 restrict: 'E',
                 transclude: true,
@@ -83,10 +83,10 @@
                     addRelatedRecord: '&',
                     toRecordSet: '&'
                 },
-                templateUrl: '../common/templates/recordAction.html',
+                templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/recordAction.html',
                 link: function(scope, ele, attr) {
                     scope.tabtype = attr.tabtype;
                 }
             };
-        });
+        }]);
 })();

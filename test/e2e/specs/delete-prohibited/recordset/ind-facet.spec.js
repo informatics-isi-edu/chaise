@@ -1,12 +1,14 @@
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
+var recordSetHelpers = require('../../../utils/recordset-helpers.js');
+
 var EC = protractor.ExpectedConditions;
 var testParams = {
     schema_name: "faceting",
     table_name: "main",
     sort: "@sort(id)",
-    totalNumFacets: 16,
-    facetNames: [ "id", "int_col", "float_col", "date_col", "timestamp_col", "text_col", "longtext_col", "markdown_col", "boolean_col", "jsonb_col", "F1", "to_name", "f3 (term)", "from_name", "F1 with Term", "col_w_long_values" ],
+    totalNumFacets: 17,
+    facetNames: [ "id", "int_col", "float_col", "date_col", "timestamp_col", "text_col", "longtext_col", "markdown_col", "boolean_col", "jsonb_col", "F1", "to_name", "f3 (term)", "from_name", "F1 with Term", "Check Presence Text", "col_w_long_values" ],
     defaults: {
         openFacetNames: [ "id", "int_col", "to_name" ],
         numFilters: 2,
@@ -39,16 +41,17 @@ var testParams = {
         {
             name: "id",
             type: "choice",
-            totalNumOptions: 10,
-            option: 2,
+            totalNumOptions: 11,
+            option: 3,
             filter: "id: 3",
             numRows: 1,
-            options: [ '1', '2', '3', '4', '5', '6', '7', '8', '9', '10' ],
+            options: [ 'All Records With Value', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10' ],
             comment: "ID comment"
         },
         {
             name: "int_col",
             type: "numeric",
+            notNullNumRows: 20,
             listElems: 1,
             invalid: 1.1,
             error: "Please enter an integer value.",
@@ -120,6 +123,7 @@ var testParams = {
             name: "timestamp_col",
             type: "timestamp",
             listElems: 0,
+            notNullNumRows: 20,
             invalid: {
                 date: "2001-14-04",
                 dateError: "Please enter a date value in YYYY-MM-DD format.",
@@ -151,102 +155,110 @@ var testParams = {
         {
             name: "text_col",
             type: "choice",
-            totalNumOptions: 10,
-            option: 0,
+            totalNumOptions: 11,
+            option: 1,
             filter: "text_col: one",
             numRows: 6,
-            options: [ 'one', 'Empty', 'two', 'No Value', 'seven', 'eight', 'elevens', 'four', 'six', 'ten' ]
+            options: [ 'All Records With Value', 'one', 'Empty', 'two', 'No Value', 'seven', 'eight', 'elevens', 'four', 'six', 'ten' ]
         },
         {
             name: "longtext_col",
             type: "choice",
-            totalNumOptions: 10,
-            option: 2,
+            totalNumOptions: 11,
+            option: 3,
             filter: "longtext_col: two",
             numRows: 5,
-            options: [ 'Empty', 'one', 'two', 'No Value', 'eight', 'eleven', 'five', 'four', 'nine', 'seven' ],
+            options: [ 'All Records With Value', 'Empty', 'one', 'two', 'No Value', 'eight', 'eleven', 'five', 'four', 'nine', 'seven' ],
             comment: "A lengthy comment for the facet of the longtext_col. This should be displyed properly in the facet."
         },
         {
             name: "markdown_col",
             type: "choice",
-            totalNumOptions: 10,
-            option: 4,
+            totalNumOptions: 11,
+            option: 5,
             filter: "markdown_col: eight",
             numRows: 1,
-            options: [ 'Empty', 'one', 'two', 'No Value', 'eight', 'eleven', 'five', 'four', 'nine', 'seven' ]
+            options: [ 'All Records With Value', 'Empty', 'one', 'two', 'No Value', 'eight', 'eleven', 'five', 'four', 'nine', 'seven' ]
         },
         {
             name: "boolean_col",
             type: "choice",
-            totalNumOptions: 3,
-            option: 1,
-            filter: "boolean_col: true",
+            totalNumOptions: 4,
+            option: 2,
+            filter: "boolean_col: Yes",
             numRows: 10,
-            options: [ 'false', 'true', 'No Value' ]
+            options: [ 'All Records With Value', 'No', 'Yes', 'No Value' ]
         },
         {
             name: "jsonb_col",
             type: "choice",
-            totalNumOptions: 10,
-            option: 6,
+            totalNumOptions: 11,
+            option: 7,
             filter: 'jsonb_col: { "key": "four" }',
             numRows: 1,
-            options: [ 'No Value', '{"key":"one"}', '{"key":"two"}', '{"key":"eight"}', '{"key":"eleven"}', '{"key":"five"}', '{"key":"four"}', '{"key":"nine"}', '{"key":"seven"}', '{"key":"six"}' ]
+            options: [ 'All Records With Value', 'No Value', '{"key":"one"}', '{"key":"two"}', '{"key":"eight"}', '{"key":"eleven"}', '{"key":"five"}', '{"key":"four"}', '{"key":"nine"}', '{"key":"seven"}', '{"key":"six"}' ]
         },
         {
             name: "F1",
             type: "choice",
-            totalNumOptions: 10,
-            option: 1,
+            totalNumOptions: 11,
+            option: 2,
             filter: "F1 : two",
             numRows: 10,
-            options: [ 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten' ]
+            options: [ 'All Records With Value', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten' ]
         },
         {
             name: "to_name",
             type: "choice",
-            totalNumOptions: 10,
-            option: 0,
+            totalNumOptions: 11,
+            option: 1,
             filter: "to_name: one",
             numRows: 10,
-            options: [ 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten' ],
+            options: [ 'All Records With Value', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten' ],
             comment: "open facet"
         },
         {
             name: "f3 (term)",
             type: "choice",
-            totalNumOptions: 3,
-            option: 1,
+            totalNumOptions: 4,
+            option: 2,
             filter: "f3 (term): one",
             numRows: 6,
-            options: [ "No Value", 'one', 'two' ]
+            options: [ 'All Records With Value', "No Value", 'one', 'two' ]
         },
         {
             name: "from_name",
             type: "choice",
-            totalNumOptions: 10,
-            option: 5,
+            totalNumOptions: 11,
+            option: 6,
             filter: "from_name: 5",
             numRows: 1,
-            options: [ 'No Value', '1', '2', '3', '4', '5', '6', '7', '8', '9' ]
+            options: [ 'All Records With Value', 'No Value', '1', '2', '3', '4', '5', '6', '7', '8', '9']
         },
         {
             name: "F1 with Term",
             type: "choice",
-            totalNumOptions: 10,
-            option: 1,
+            totalNumOptions: 11,
+            option: 2,
             filter: "F1 with Term : two",
             numRows: 10,
-            options: [ 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten' ],
+            options: [ 'All Records With Value', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten' ],
             comment: "F1 with Term comment"
+        },
+        {
+            name: "Check Presence Text",
+            type: "check_presence",
+            notNullNumRows: 9,
+            notNullFilter: "Check Presence Text : All Records With Value",
+            nullNumRows: 21,
+            nullFilter: "Check Presence Text : No Value"
         }
     ],
     multipleFacets: [
-        { facetIdx: 10, option: 1, numOptions: 10, numRows: 10 },
-        { facetIdx: 11, option: 0, numOptions: 2, numRows: 5 },
-        { facetIdx: 12, option: 0, numOptions: 1, numRows: 5 },
-        { facetIdx: 13, option: 1, numOptions: 5, numRows: 1 }
+        { facetIdx: 10, option: 2, numOptions: 11, numRows: 10 },
+        { facetIdx: 11, option: 1, numOptions: 3, numRows: 5 },
+        { facetIdx: 12, option: 1, numOptions: 2, numRows: 5 },
+        { facetIdx: 13, option: 2, numOptions: 6, numRows: 1 }
     ]
 };
 
@@ -348,13 +360,13 @@ describe("Viewing Recordset with Faceting,", function() {
 
                     browser.wait(function () {
                         return chaisePage.recordsetPage.getFacetOptions(0).count().then(function(ct) {
-                            return ct == 3;
+                            return ct == 4;
                         });
                     }, browser.params.defaultTimeout);
 
                     return chaisePage.recordsetPage.getFacetOptions(0).count();
                 }).then(function (ct) {
-                    expect(ct).toBe(3, "Facet values after search are incorrect");
+                    expect(ct).toBe(4, "Facet values after search are incorrect");
 
                     return chaisePage.recordsetPage.getFacetSearchBoxClear(0).click();
                 });
@@ -483,7 +495,7 @@ describe("Viewing Recordset with Faceting,", function() {
             it("should have 1 row selected in show more popup for entity.", function (done) {
                 var showMore = chaisePage.recordsetPage.getShowMore(11);
 
-                chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(11, 0)).then(function () {
+                chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(11, 1)).then(function () {
                     // open show more, verify only 1 row checked, check another and submit
                     return showMore.click()
                 }).then(function () {
@@ -645,7 +657,6 @@ describe("Viewing Recordset with Faceting,", function() {
                                 });
                             });
                         });
-
                     } else if (facetParams.type == "numeric" || facetParams.type == "date" ) {
                         describe("for range facet: " + facetParams.name + ",", function () {
                             var minInput, maxInput, minClear, maxClear;
@@ -659,7 +670,7 @@ describe("Viewing Recordset with Faceting,", function() {
                                 maxClear = chaisePage.recordsetPage.getInputClear(idx, testParams.maxInputClearClass);
                             });
 
-                            it("should open the facet, test validators, filter on a range, and update the search criteria.", function () {
+                            it("should open the facet, test validators, filter on a range, and update the search criteria.", function (done) {
                                 // open facet
                                 browser.wait(function () {
                                     return chaisePage.recordsetPage.getClosedFacets().count().then(function(ct) {
@@ -674,7 +685,7 @@ describe("Viewing Recordset with Faceting,", function() {
 
                                     return chaisePage.recordsetPage.getFacetOptions(idx).count();
                                 }).then(function (ct) {
-                                    expect(ct).toBe(facetParams.listElems, "There are more list elements for '" + facetParams.name + "' facet than expected");
+                                    expect(ct).toBe(facetParams.listElems + 1, "There are more list elements for '" + facetParams.name + "' facet than expected");
 
                                     // test validators
                                     minInput.sendKeys(facetParams.invalid);
@@ -730,10 +741,36 @@ describe("Viewing Recordset with Faceting,", function() {
                                     return minClear.click();
                                 }).then(function () {
                                     return maxClear.click();
-                                });
+                                }).then(function () {
+                                    done();
+                                }).catch(chaisePage.catchTestError(done));
                             });
 
-                            it("should filter on just a min value and update the search criteria.", function () {
+                            if (facetParams.notNullNumRows) {
+                                it ("should be able to filter not-null values.", function (done) {
+                                    var notNulloption = chaisePage.recordsetPage.getFacetOption(idx, 0);
+                                    chaisePage.clickButton(notNulloption).then(function () {
+                                        // wait for table rows to load
+                                        browser.wait(function () {
+                                            return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                                                return ct == facetParams.notNullNumRows;
+                                            });
+                                        }, browser.params.defaultTimeout);
+
+                                        return chaisePage.recordsetPage.getRows().count();
+                                    }).then(function(ct) {
+                                        expect(ct).toBe(facetParams.notNullNumRows, "number of rows (for not-null) is incorrect for '" + facetParams.name + "' facet");
+                                        expect(chaisePage.recordsetPage.getRangeFacetForm(idx).getAttribute('disabled')).toEqual('true', "form enabled after selecting not-null for '" + facetParams.name + "' facet");
+
+                                        return clearAll.click();
+                                    }).then(function () {
+                                        browser.wait(EC.not(EC.visibilityOf(clearAll)), browser.params.defaultTimeout);
+                                        done();
+                                    }).catch(chaisePage.catchTestError(done));
+                                });
+                            }
+
+                            it("should filter on just a min value and update the search criteria.", function (done) {
                                 var minInput = chaisePage.recordsetPage.getRangeMinInput(idx, testParams.minInputClass),
                                 minClear = chaisePage.recordsetPage.getInputClear(idx, testParams.minInputClearClass);
 
@@ -770,10 +807,12 @@ describe("Viewing Recordset with Faceting,", function() {
                                     browser.wait(EC.not(EC.visibilityOf(clearAll)), browser.params.defaultTimeout);
 
                                     return minClear.click();
-                                });
+                                }).then(function () {
+                                    done();
+                                }).catch(chaisePage.catchTestError(done));
                             });
 
-                            it("should filter on just a max value and update the search criteria.", function () {
+                            it("should filter on just a max value and update the search criteria.", function (done) {
                                 var maxInput = chaisePage.recordsetPage.getRangeMaxInput(idx, testParams.maxInputClass),
                                 maxClear = chaisePage.recordsetPage.getInputClear(idx, testParams.maxInputClearClass);
 
@@ -808,12 +847,15 @@ describe("Viewing Recordset with Faceting,", function() {
                                     return clearAll.click();
                                 }).then(function () {
                                     browser.wait(EC.not(EC.visibilityOf(clearAll)), browser.params.defaultTimeout);
-                                    // close the facet
-                                    return chaisePage.recordsetPage.getFacetById(idx).click();
-                                }).catch(function (exc) {
-                                    console.dir(exc);
-                                });
+                                    done();
+                                }).catch(chaisePage.catchTestError(done));
                             });
+
+                            it ("should close the facet.", function (done) {
+                                chaisePage.recordsetPage.getFacetById(idx).click().then(function () {
+                                    done();
+                                }).catch(chaisePage.catchTestError(done));
+                            })
                         });
 
                     } else if (facetParams.type == "timestamp") {
@@ -849,7 +891,7 @@ describe("Viewing Recordset with Faceting,", function() {
 
                                     return chaisePage.recordsetPage.getFacetOptions(idx).count();
                                 }).then(function (ct) {
-                                    expect(ct).toBe(facetParams.listElems, "There are more list elements for '" + facetParams.name + "' facet than expected");
+                                    expect(ct).toBe(facetParams.listElems + 1, "There are more list elements for '" + facetParams.name + "' facet than expected");
 
                                     // test validators
                                     minDateInput.sendKeys(facetParams.invalid.date);
@@ -936,6 +978,30 @@ describe("Viewing Recordset with Faceting,", function() {
                                 })
                             });
 
+                            if (facetParams.notNullNumRows) {
+                                it ("should be able to filter not-null values.", function (done) {
+                                    var notNulloption = chaisePage.recordsetPage.getFacetOption(idx, 0);
+                                    chaisePage.clickButton(notNulloption).then(function () {
+                                        // wait for table rows to load
+                                        browser.wait(function () {
+                                            return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                                                return ct == facetParams.notNullNumRows;
+                                            });
+                                        }, browser.params.defaultTimeout);
+
+                                        return chaisePage.recordsetPage.getRows().count();
+                                    }).then(function(ct) {
+                                        expect(ct).toBe(facetParams.notNullNumRows, "number of rows (for not-null) is incorrect for '" + facetParams.name + "' facet");
+                                        expect(chaisePage.recordsetPage.getRangeFacetForm(idx).getAttribute('disabled')).toEqual('true', "form enabled after selecting not-null for '" + facetParams.name + "' facet");
+
+                                        return clearAll.click();
+                                    }).then(function () {
+                                        browser.wait(EC.not(EC.visibilityOf(clearAll)), browser.params.defaultTimeout);
+                                        done();
+                                    }).catch(chaisePage.catchTestError(done));
+                                });
+                            }
+
                             it("should filter on just a min value and update the search criteria.", function () {
                                 // test just min being set
                                 minDateInput.sendKeys(facetParams.justMin.date);
@@ -1017,6 +1083,36 @@ describe("Viewing Recordset with Faceting,", function() {
                                     return chaisePage.recordsetPage.getFacetById(idx).click();
                                 }).catch(function (exc) {
                                     console.dir(exc);
+                                });
+                            });
+                        });
+                    } else if (facetParams.type == "check_presence") {
+                        describe("for check_presence facet: " + facetParams.name + ",", function () {
+                            it("should open the facet and the two options should be available.", function (done) {
+                                browser.wait(function () {
+                                    return chaisePage.recordsetPage.getClosedFacets().count().then(function (ct) {
+                                        return ct == testParams.totalNumFacets;
+                                    });
+                                }, browser.params.defaultTimeout);
+
+                                recordSetHelpers.openFacetAndTestFilterOptions(
+                                    testParams.name, idx, ['All Records With Value', 'No Value'], done
+                                );
+                            });
+
+                            it("selecting the not-null option, should only show the applicable rows.", function (done) {
+                                recordSetHelpers.testSelectFacetOption(idx, 0, facetParams.name, facetParams.notNullFilter, facetParams.notNullNumRows, done);
+                            });
+
+                            it("selecting the null option, should only show the applicable rows.", function (done) {
+                                recordSetHelpers.testSelectFacetOption(idx, 1, facetParams.name, facetParams.nullFilter, facetParams.nullNumRows, done);
+                            });
+
+                            it ("should close the facet.", function (done) {
+                                chaisePage.recordsetPage.getFacetById(idx).click().then(function () {
+                                    done();
+                                }).catch(function (err) {
+                                    done.fail(err);
                                 });
                             });
                         });

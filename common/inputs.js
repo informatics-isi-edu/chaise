@@ -1,18 +1,19 @@
 (function() {
     'use strict';
 
-    angular.module('chaise.inputs', ['chaise.validators'])
+    angular.module('chaise.inputs', ['chaise.validators', 'chaise.utils'])
 
-    .directive('rangeInputs', ['dataFormats', 'integerLimits', function(dataFormats, integerLimits) {
+    .directive('rangeInputs', ['dataFormats', 'integerLimits', 'UriUtils', function(dataFormats, integerLimits, UriUtils) {
         return {
             restrict: 'E',
-            templateUrl: '../common/templates/inputs/rangeInputs.html',
+            templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/inputs/rangeInputs.html',
             scope: {
                 type: '=',
                 addRangeCb: '=',
                 absMin: '=?',
                 absMax: '=?',
-                model: '=?'
+                model: '=?',
+                disabled: "=?"
             },
             link: function(scope, elem, attr) {
                 function emptyOrNull(val) {
@@ -84,7 +85,7 @@
                 // returns a boolean to disable the add button if both min and max are not set
                 // for timestamps/datetime, we don't care if the time is not set
                 scope.disableAdd = function () {
-                    return (scope.displayType(scope.type) == "datetime") ? ( emptyOrNull(scope.model.min.date) && emptyOrNull(scope.model.max.date) ) : ( emptyOrNull(scope.model.min) && emptyOrNull(scope.model.max) );
+                    return scope.disabled || ((scope.displayType(scope.type) == "datetime") ? ( emptyOrNull(scope.model.min.date) && emptyOrNull(scope.model.max.date) ) : ( emptyOrNull(scope.model.min) && emptyOrNull(scope.model.max) ));
                 };
 
                 scope.addRange = function () {

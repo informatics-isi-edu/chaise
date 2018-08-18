@@ -1,4 +1,4 @@
-<div class="form-inline" ng-form="minMaxForm">
+<fieldset class="form-inline" ng-form="minMaxForm" ng-disabled="disabled" ng-class="{'disabled-form': disabled}">
     <!-- From value (min of range) -->
     <div class="form-group range-inputs-width" ng-switch="displayType(type)">
         <label for="from-val">From:</label>
@@ -185,4 +185,4 @@
         <div ng-message="float" ng-show="minMaxForm.numericMin.$error.float">Please enter a decimal value.</div>
         <div ng-message="improperRange" ng-show="minMaxForm.$error.improperRange">'From' value cannot be greater than the 'To' value.</div>
     </div>
-</div>
+</fieldset>
