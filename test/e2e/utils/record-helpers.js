@@ -258,9 +258,8 @@ exports.testPresentation = function (tableParams) {
     it("click event on image_id in inline display should open new tab with file details",function(){
         var allHandle;
         chaisePage.waitForElement(element(by.id('entity-booking'))).then(function(){
-          // This selector captures link of first record under image_id column of booking inline entry in
-          // accommodation table of product-record schema with id 2002;
-            return browser.executeScript("return $('#divRecordSet  td:nth-child(6) a')");
+          // This selector captures link of first record under image_id column (5th column) of booking inline entry
+            return browser.executeScript("return $('.t_booking td:nth-child(5) a')");
         }).then(function(imageLinks){
             browser.executeScript("return window.open(arguments[0], '_blank')", imageLinks[0]);
             return browser.getAllWindowHandles();
