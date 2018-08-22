@@ -85,11 +85,15 @@
                         console.timeEnd('External export duration');
                         scope.progressModal.close("Done");
                         scope.isLoading = false;
-                        AlertsService.addAlert("Export failed. Please report this problem to your system administrators. Details: " + error.message, "error");
+                        error.subMessage = error.message;
+                        error.message = "Export failed. Please report this problem to your system administrators.";
+                        ErrorService.handleException(error, true);
+                        // AlertsService.addAlert("Export failed. Please report this problem to your system administrators. Details: " + error.message, "error");
                     });
                     break;
                 default:
-                    AlertsService.addAlert("Unsupported export format: " + formatType + ". Please report this problem to your system administrators.");
+                    ErrorService.handleException(new Error("Unsupported export format: " + formatType + ". Please report this problem to your system administrators."), true);
+                    // AlertsService.addAlert("Unsupported export format: " + formatType + ". Please report this problem to your system administrators.");
             }
         }
 
