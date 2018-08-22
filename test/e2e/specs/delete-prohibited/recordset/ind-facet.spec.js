@@ -185,9 +185,9 @@ var testParams = {
             type: "choice",
             totalNumOptions: 4,
             option: 2,
-            filter: "boolean_col: true",
+            filter: "boolean_col: Yes",
             numRows: 10,
-            options: [ 'All Records With Value', 'false', 'true', 'No Value' ]
+            options: [ 'All Records With Value', 'No', 'Yes', 'No Value' ]
         },
         {
             name: "jsonb_col",

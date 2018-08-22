@@ -99,7 +99,13 @@ span[uib-tooltip], .show-tooltip-border[uib-tooltip] {
     max-width: inherit;
 }
 
-.btn.btn-primary.btn-inverted {
+.btn.btn-no-boundry {
+    border: none;
+    background: transparent !important;
+    padding: 0;
+}
+
+.btn.btn-primary.btn-inverted, .btn.btn-primary.btn-inverted:focus, .btn.btn-primary.btn-inverted:hover {
     color: #337ab7;
     background-color: white;
 }

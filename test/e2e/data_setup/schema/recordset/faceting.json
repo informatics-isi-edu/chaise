@@ -107,6 +107,17 @@
                     "name": "boolean_col",
                     "type": {
                         "typename": "boolean"
+                    },
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:column-display" : {
+                            "compact": {
+                                "pre_format": {
+                                    "format": "%t",
+                                    "bool_true_value": "Yes",
+                                    "bool_false_value": "No"
+                                }
+                            }
+                        }
                     }
                 },
                 {

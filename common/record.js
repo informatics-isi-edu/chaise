@@ -1,7 +1,7 @@
 (function() {
     'use strict';
 
-    angular.module('chaise.record.display', ['chaise.record.table'])
+    angular.module('chaise.record.display', ['chaise.record.table', 'chaise.utils'])
 
         .filter('trustedHTML', ['$sce', function($sce) {
             return function(text) {
@@ -19,7 +19,7 @@
          * @param {array} values: Array with column values
          * @param {callback} toggleRelatedTableDisplayType: function to determine object display type
          */
-        .directive('recordDisplay', ['DataUtils','$timeout', function(DataUtils, $timeout) {
+        .directive('recordDisplay', ['DataUtils','$timeout', 'UriUtils', function(DataUtils, $timeout, UriUtils) {
             return {
                 restrict: 'E',
                 transclude: true,
@@ -33,7 +33,7 @@
                     toRecordSet: '&',
                     showEmptyRelatedTables: '='
                 },
-                templateUrl: '../common/templates/record.html',
+                templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/record.html',
                 controller: function($scope) {
                     $scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
                 },
@@ -73,7 +73,7 @@
         * @param {string} displayname: Display name of related table
         * @param {string} baseTableName: Display name of base table
         */
-        .directive('recordActionBar', function() {
+        .directive('recordActionBar', ['UriUtils', function(UriUtils) {
             return {
                 restrict: 'E',
                 transclude: true,
@@ -88,10 +88,10 @@
                     displayname: '=',
                     baseTableName: '='
                 },
-                templateUrl: '../common/templates/recordAction.html',
+                templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/recordAction.html',
                 link: function(scope, ele, attr) {
                     scope.tabtype = attr.tabtype;
                 }
             };
-        });
+        }]);
 })();

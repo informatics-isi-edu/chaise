@@ -63,11 +63,11 @@
         };
     }])
 
-    .directive('alerts', ['AlertsService', 'Session', function(AlertsService, Session) {
+    .directive('alerts', ['AlertsService', 'Session', 'UriUtils', function(AlertsService, Session, UriUtils) {
 
         return {
             restrict: 'E',
-            templateUrl: '../common/templates/alerts.html',
+            templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/alerts.html',
             scope: {
                 alerts: '='
             },

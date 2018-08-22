@@ -197,7 +197,7 @@
 
             var modalProperties = {
                 windowClass: "modal-error",
-                templateUrl: '../common/templates/errorDialog.modal.html',
+                templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/errorDialog.modal.html',
                 controller: 'ErrorModalController',
                 controllerAs: 'ctrl',
                 backdrop: 'static',
