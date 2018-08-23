@@ -149,6 +149,12 @@
                     "type": {
                         "typename": "text"
                     }
+                },
+                {
+                    "name": "jsonb_sort_col",
+                    "type": {
+                        "typename": "text"
+                    }
                 }
             ],
             "annotations": {
@@ -170,7 +176,7 @@
                             {"source": "longtext_col", "comment": "A lengthy comment for the facet of the longtext_col. This should be displyed properly in the facet."},
                             {"source": "markdown_col"},
                             {"source": "boolean_col"},
-                            {"source": "jsonb_col"},
+                            {"source": "jsonb_col", "order": [{"num_occurrences": true, "descending": true}, "jsonb_sort_col"]},
                             {"source": [{"outbound": ["faceting", "main_fk1"]}, "id"], "markdown_name": "**F1**"},
                             {"source": [{"outbound": ["faceting", "main_fk2"]}, "id"], "open": true, "comment": "open facet"},
                             {"source": [{"inbound": ["faceting", "main_f3_assoc_fk1"]}, {"outbound": ["faceting", "main_f3_assoc_fk2"]}, "term"]},

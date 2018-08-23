@@ -193,10 +193,10 @@ var testParams = {
             name: "jsonb_col",
             type: "choice",
             totalNumOptions: 11,
-            option: 7,
+            option: 5,
             filter: 'jsonb_col: { "key": "four" }',
             numRows: 1,
-            options: [ 'All Records With Value', 'No Value', '{"key":"one"}', '{"key":"two"}', '{"key":"eight"}', '{"key":"eleven"}', '{"key":"five"}', '{"key":"four"}', '{"key":"nine"}', '{"key":"seven"}', '{"key":"six"}' ]
+            options: [ 'All Records With Value', 'No Value', '{"key":"one"}', '{"key":"two"}', '{"key":"three"}', '{"key":"four"}', '{"key":"five"}', '{"key":"six"}', '{"key":"seven"}', '{"key":"eight"}', '{"key":"nine"}' ]
         },
         {
             name: "F1",
