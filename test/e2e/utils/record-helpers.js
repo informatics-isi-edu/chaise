@@ -503,7 +503,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 			});
 
 			it('should have the correct tooltip.', function(){
-				chaisePage.recordPage.getColumnComment(viewMoreBtn).then(function(comment){
+				chaisePage.recordPage.getColumnCommentHTML(viewMoreBtn).then(function(comment){
 					expect(comment).toBe("View more " + params.displayname + " related to this " + params.baseTable, "Incorrect tooltip on View More button");
 				});
 			});
@@ -551,7 +551,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 						// revert is `Display`
 						expect(markdownToggleLink.isDisplayed()).toBeTruthy();
 						expect(markdownToggleLink.getText()).toBe("Edit");						
-						chaisePage.recordPage.getColumnComment(markdownToggleLink.element(by.cssContainingText(".hide-tooltip-border", "Edit"))).then(function(comment){
+						chaisePage.recordPage.getColumnCommentHTML(markdownToggleLink.element(by.cssContainingText(".hide-tooltip-border", "Edit"))).then(function(comment){
 							expect(comment).toBe("Edit " + params.displayname + " related to this " + params.baseTable, "Incorrect tooltip on Edit button");
 						});
 					});
@@ -608,7 +608,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 				var addBtn = chaisePage.recordPage.getAddRecordLink(params.displayname, params.isInline);
 				expect(addBtn.isPresent()).toBe(params.canCreate);
 				if(params.canCreate){
-					chaisePage.recordPage.getColumnComment(addBtn).then(function(comment){
+					chaisePage.recordPage.getColumnCommentHTML(addBtn).then(function(comment){
 						expect(comment).toBe("Add more " + params.displayname + " related to this " + params.baseTable, "Incorrect tooltip on Add button");
 					});
 				}
