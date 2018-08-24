@@ -73,7 +73,7 @@
         * @param {string} displayname: Display name of related table
         * @param {string} baseTableName: Display name of base table
         */
-        .directive('recordActionBar', ['UriUtils', function(UriUtils) {
+        .directive('recordActionBar', ['UriUtils', 'DataUtils', function(UriUtils, DataUtils) {
             return {
                 restrict: 'E',
                 transclude: true,
@@ -89,6 +89,15 @@
                     baseTableName: '='
                 },
                 templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/recordAction.html',
+                controller: function($scope) {
+                    $scope.makeSafeHTML = function(attr){
+                        if(!attr.isHTML) {
+                            return DataUtils.makeSafeHTML(attr.value);
+                        } else {
+                            return attr.value;
+                        }
+                    }
+                },
                 link: function(scope, ele, attr) {
                     scope.tabtype = attr.tabtype;
                 }

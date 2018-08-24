@@ -3,24 +3,17 @@
     <span ng-if="relatedTableRefDisplay == 'markdown'">
         <a class="toggle-display-link" ng-click="toggleRelatedTableDisplayType({dataModel:dataModel})">
             <span ng-show="tabModelDisplay == 'markdown'">
-                <span class="hide-tooltip-border" ng-if="canEditRelated({ref:ref}) && (displayname.isHTML || baseTableName.isHTML)" ng-attr-uib-tooltip-html="Edit {{displayname.value}} related to this {{baseTableName.value}}" tooltip-placement='auto top'>Edit</span>
-                <span class="hide-tooltip-border" ng-if="!canEditRelated({ref:ref}) && displayname.isHTML" ng-attr-uib-tooltip-html="Display related {{displayname.value}} in tabular mode" tooltip-placement='auto top'>Table Display</span>
-                <span class="hide-tooltip-border" ng-if="canEditRelated({ref:ref}) && !displayname.isHTML && !baseTableName.isHTML" ng-attr-uib-tooltip="Edit {{displayname.value}} related to this {{baseTableName.value}}" tooltip-placement='auto top'>Edit</span>
-                <span class="hide-tooltip-border" ng-if="!canEditRelated({ref:ref}) && !displayname.isHTML" ng-attr-uib-tooltip="Display related {{displayname.value}} in tabular mode" tooltip-placement='auto top'>Table Display</span>
+                <span class="hide-tooltip-border" ng-if="canEditRelated({ref:ref})" ng-attr-uib-tooltip-html="Edit {{makeSafeHTML(displayname)}} related to this {{makeSafeHTML(baseTableName)}}" tooltip-placement='auto top'>Edit</span>
+                <span class="hide-tooltip-border" ng-if="!canEditRelated({ref:ref})" ng-attr-uib-tooltip-html="Display related {{makeSafeHTML(displayname)}} in tabular mode" tooltip-placement='auto top'>Table Display</span>
             </span>
             <span ng-show="tabModelDisplay != 'markdown'">
                 <span class="hide-tooltip-border" ng-if="canEditRelated({ref:ref})" ng-attr-uib-tooltip="Switch back to the display mode" tooltip-placement='auto top'>Display</span>
                 <span class="hide-tooltip-border" ng-if="!canEditRelated({ref:ref})" ng-attr-uib-tooltip="Switch back to the previous display" tooltip-placement='auto top'>Revert Display</span>
             </span>
         </a>&nbsp;|</span>
-    <span ng-if="canCreateRelated({ref:ref}) && (displayname.isHTML || baseTableName.isHTML)">
-        <a class="add-records-link" ng-click="addRelatedRecord({ref:ref})" ng-attr-uib-tooltip-html="Add more {{displayname.value}} related to this {{baseTableName.value}}" tooltip-placement='auto top'>Add</a>
+    <span ng-if="canCreateRelated({ref:ref})">
+        <a class="add-records-link" ng-click="addRelatedRecord({ref:ref})" ng-attr-uib-tooltip-html="Add more {{makeSafeHTML(displayname)}} related to this {{makeSafeHTML(baseTableName)}}" tooltip-placement='auto top'>Add</a>
         &nbsp;|</span>
-    <span ng-if="displayname.isHTML || baseTableName.isHTML"><a class="more-results-link" ng-click="toRecordSet({ref:ref})" ng-attr-uib-tooltip-html="View more {{displayname.value}} related to this {{baseTableName.value}}" tooltip-placement='auto top'>View More</a></span>
-    <span ng-if="canCreateRelated({ref:ref}) && !displayname.isHTML && !baseTableName.isHTML">
-        <a class="add-records-link" ng-click="addRelatedRecord({ref:ref})" ng-attr-uib-tooltip="Add more {{displayname.value}} related to this {{baseTableName.value}}" tooltip-placement='auto top'>Add</a>
-        &nbsp;|</span>
-    <span ng-if="!displayname.isHTML && !baseTableName.isHTML"><a class="more-results-link" ng-click="toRecordSet({ref:ref})" ng-attr-uib-tooltip="View more {{displayname.value}} related to this {{baseTableName.value}}" tooltip-placement='auto top'>View More</a></span>
-    <div ng-transclude></div>
+    <span><a class="more-results-link" ng-click="toRecordSet({ref:ref})" ng-attr-uib-tooltip-html="View more {{makeSafeHTML(displayname)}} related to this {{makeSafeHTML(baseTableName)}}" tooltip-placement='auto top'>View More</a></span>    
 </div>
 </div>
