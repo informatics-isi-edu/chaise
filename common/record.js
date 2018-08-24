@@ -89,18 +89,24 @@
                     baseTableName: '='
                 },
                 templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/recordAction.html',
-                controller: function($scope) {
-                    $scope.makeSafeHTML = function(attr){
-                        if(!attr.isHTML) {
-                            return DataUtils.makeSafeHTML(attr.value);
-                        } else {
-                            return attr.value;
-                        }
-                    }
-                },
+                controller: "RecordActionController",
+                controllerAs: "ctrl",
                 link: function(scope, ele, attr) {
-                    scope.tabtype = attr.tabtype;
+                    scope.tabtype = attr.tabtype;                    
                 }
             };
+        }])
+        .controller('RecordActionController', ['DataUtils', '$scope', function RecordActionController(DataUtils, $scope) {
+            $scope.tooltip = {};
+            if (!$scope.displayname.isHTML) {
+                $scope.tooltip.entityName = DataUtils.makeSafeHTML($scope.displayname.value);
+            } else {
+                $scope.tooltip.entityName = $scope.displayname.value;
+            }
+            if (!$scope.baseTableName.isHTML) {
+                $scope.tooltip.baseTableName = DataUtils.makeSafeHTML($scope.baseTableName.value);
+            } else {
+                $scope.tooltip.baseTableName = $scope.baseTableName.value;
+            }
         }]);
 })();
