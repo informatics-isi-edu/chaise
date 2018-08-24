@@ -62,7 +62,7 @@
         *        toggle-related-table-display-type='toggleRelatedTableDisplayType({dataModel:tableModel})' can-edit-related="canEditRelated({ref:relatedReferenceDisplayTable[$index]})"
         *        can-create-related="canCreateRelated0({ref:tableModel.reference})"
         *        add-related-record="addRelatedRecord({ref:tableModel.reference})" to-record-set="toRecordSet({ref:tableModel.reference})"
-        *        displayname="tableModel.reference.displayname.value" base-table-name="tableModel.baseTableName">
+        *        displayname="tableModel.reference.displayname" base-table-name="tableModel.baseTableName">
         *        </record-action-bar>
         * @param {string} relatedTableRefDisplay: Related table ref. display type
         * @param {string} tabModelDisplay: Display type of individual model
@@ -73,7 +73,7 @@
         * @param {string} displayname: Display name of related table
         * @param {string} baseTableName: Display name of base table
         */
-        .directive('recordActionBar', ['UriUtils', 'DataUtils', function(UriUtils, DataUtils) {
+        .directive('recordActionBar', ['UriUtils', function(UriUtils) {
             return {
                 restrict: 'E',
                 transclude: true,
@@ -92,7 +92,7 @@
                 controller: "RecordActionController",
                 controllerAs: "ctrl",
                 link: function(scope, ele, attr) {
-                    scope.tabtype = attr.tabtype;                    
+                    scope.tabtype = attr.tabtype;
                 }
             };
         }])
