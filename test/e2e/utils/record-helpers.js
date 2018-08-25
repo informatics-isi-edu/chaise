@@ -504,7 +504,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 
 			it('should have the correct tooltip.', function(){
 				chaisePage.recordPage.getColumnCommentHTML(viewMoreBtn).then(function(comment){
-					expect(comment).toBe("View more " + params.displayname + " related to this " + params.baseTable, "Incorrect tooltip on View More button");
+					expect(comment).toBe("'View more " + params.displayname + " related to this " + params.baseTable + "'", "Incorrect tooltip on View More button");
 				});
 			});
 
@@ -552,7 +552,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 						expect(markdownToggleLink.isDisplayed()).toBeTruthy();
 						expect(markdownToggleLink.getText()).toBe("Edit");						
 						chaisePage.recordPage.getColumnCommentHTML(markdownToggleLink.element(by.cssContainingText(".hide-tooltip-border", "Edit"))).then(function(comment){
-							expect(comment).toBe("Edit " + params.displayname + " related to this " + params.baseTable, "Incorrect tooltip on Edit button");
+							expect(comment).toBe("'Edit " + params.displayname + " related to this " + params.baseTable + "'", "Incorrect tooltip on Edit button");
 						});
 					});
 				} else {
@@ -609,7 +609,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 				expect(addBtn.isPresent()).toBe(params.canCreate);
 				if(params.canCreate){
 					chaisePage.recordPage.getColumnCommentHTML(addBtn).then(function(comment){
-						expect(comment).toBe("Add more " + params.displayname + " related to this " + params.baseTable, "Incorrect tooltip on Add button");
+						expect(comment).toBe("'Add more " + params.displayname + " related to this " + params.baseTable + "'", "Incorrect tooltip on Add button");
 					});
 				}
 			});
