@@ -560,8 +560,8 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 						// revert is `Revert Display`
 						expect(markdownToggleLink.isDisplayed()).toBeTruthy();
 						expect(markdownToggleLink.getText()).toBe("Table Display");
-						chaisePage.recordPage.getColumnComment(markdownToggleLink.element(by.cssContainingText(".hide-tooltip-border", "Table Display"))).then(function(comment){
-							expect(comment).toBe("Display related " + params.displayname + " in tabular mode", "Incorrect tooltip on Table Display button");
+						chaisePage.recordPage.getColumnCommentHTML(markdownToggleLink.element(by.cssContainingText(".hide-tooltip-border", "Table Display"))).then(function(comment){
+							expect(comment).toBe("'Display related " + params.displayname + " in tabular mode'", "Incorrect tooltip on Table Display button");
 						});
 					});
 				}
