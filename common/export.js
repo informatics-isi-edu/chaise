@@ -3,7 +3,7 @@
 
     angular.module('chaise.export', ['chaise.utils'])
 
-    .directive('export', ['AlertsService', 'DataUtils', 'logActions', 'modalUtils', '$timeout', 'UriUtils', function (AlertsService, DataUtils, logActions, modalUtils, $timeout, UriUtils) {
+    .directive('export', ['AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'modalUtils', '$timeout', 'UriUtils', function (AlertsService, DataUtils, ErrorService, logActions, modalUtils, $timeout, UriUtils) {
 
         /**
          * Cancel the current export request
@@ -85,11 +85,13 @@
                         console.timeEnd('External export duration');
                         scope.progressModal.close("Done");
                         scope.isLoading = false;
-                        AlertsService.addAlert("Export failed. Please report this problem to your system administrators. Details: " + error.message, "error");
+                        error.subMessage = error.message;
+                        error.message = "Export failed. Please report this problem to your system administrators.";
+                        ErrorService.handleException(error, true);
                     });
                     break;
                 default:
-                    AlertsService.addAlert("Unsupported export format: " + formatType + ". Please report this problem to your system administrators.");
+                    ErrorService.handleException(new Error("Unsupported export format: " + formatType + ". Please report this problem to your system administrators."), true);
             }
         }
 
