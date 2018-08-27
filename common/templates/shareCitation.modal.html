@@ -1,0 +1,9 @@
+<div class="modal-header" class="share-header">
+    <h2 class="modal-title text-center"><strong>Share Citation</strong>
+        <button class="btn btn-default pull-right modal-close" type="button" ng-click="ctrl.cancel()">X</button>
+    </h2>
+</div>
+<div id="share-citation" class="modal-body">
+    {{::ctrl.author}}; {{::ctrl.title}}, {{::ctrl.journal}}, {{::ctrl.year}}, {{::ctrl.id}},
+    <a>{{::ctrl.url}}</a>
+</div>

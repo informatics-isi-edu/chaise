@@ -90,9 +90,16 @@
 
         vm.sharePopup = function () {
             modalUtils.showModal({
-
-            })
-        }
+                templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/share.modal.html",
+                controller: "ShareCitationController",
+                windowClass: "share-citation",
+                controllerAs: "ctrl",
+                size: "md",
+                resolve: {
+                    params: $rootScope.tuple.citation
+                }
+            }, false, false);
+        };
 
         vm.permalink = function () {
             return $window.location.href;
