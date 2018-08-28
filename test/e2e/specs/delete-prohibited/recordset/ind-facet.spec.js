@@ -7,8 +7,11 @@ var testParams = {
     schema_name: "faceting",
     table_name: "main",
     sort: "@sort(id)",
-    totalNumFacets: 17,
-    facetNames: [ "id", "int_col", "float_col", "date_col", "timestamp_col", "text_col", "longtext_col", "markdown_col", "boolean_col", "jsonb_col", "F1", "to_name", "f3 (term)", "from_name", "F1 with Term", "Check Presence Text", "col_w_long_values" ],
+    totalNumFacets: 19,
+    facetNames: [ "id", "int_col", "float_col", "date_col", "timestamp_col", "text_col",
+                  "longtext_col", "markdown_col", "boolean_col", "jsonb_col", "F1",
+                  "to_name", "f3 (term)", "from_name", "F1 with Term", "Check Presence Text",
+                  "col_w_column_order_false", "col_w_column_order", "col_w_long_values" ],
     defaults: {
         openFacetNames: [ "id", "int_col", "to_name" ],
         numFilters: 2,
@@ -252,6 +255,15 @@ var testParams = {
             notNullFilter: "Check Presence Text : All Records With Value",
             nullNumRows: 21,
             nullFilter: "Check Presence Text : No Value"
+        },
+        {
+            name: "col_w_column_order_false",
+            type: "choice",
+            totalNumOptions: 8,
+            option: 1,
+            filter: "col_w_column_order_false: 01",
+            numRows: 9,
+            options: [ 'All Records With Value', '01', '02', '03', '04', '05', '06', '07']
         }
     ],
     multipleFacets: [

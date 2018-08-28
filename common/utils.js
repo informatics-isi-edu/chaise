@@ -941,7 +941,7 @@
         * @param {String} string
         * @return {String} a string suitable for use in the `id` attributes of HTML elements
         */
-        function makeSafeIdAttr(string) {
+        function makeSafeIdAttr(string, val) {
             return String(string)
                 .replace(/&/g, '&amp;')
                 .replace(/\s/g, '&nbsp;') // any whitespace
