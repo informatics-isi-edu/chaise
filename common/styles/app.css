@@ -774,6 +774,7 @@ input.search-progress {
     opacity: 0.7 !important;
 }
 
+/* .window-class first */
 .modal-login-instruction .modal-dialog {
     position: absolute;
     top: 50%;
@@ -1102,7 +1103,7 @@ footer .container1 {
     text-align: right;
 }
 /************* Profile Card ****************/
-#profile-modal li{
+#profile-modal li, .share-citation li{
     list-style-type : disc;
 }
 .modal-dialog .profileValue{

@@ -271,7 +271,8 @@
 
     .controller('ShareCitationController', ['$uibModalInstance', 'params', function ($uibModalInstance, params) {
         var vm = this;
-        vm.params = params;
+        vm.cancel = cancel;
+        vm.citation = params.citation;
         function cancel() {
             $uibModalInstance.dismiss('cancel');
         }

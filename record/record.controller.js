@@ -88,17 +88,18 @@
             });
         };
 
-        vm.sharePopup = function () {
+        vm.sharePopup = function() {
             modalUtils.showModal({
-                templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/share.modal.html",
+                templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/shareCitation.modal.html",
                 controller: "ShareCitationController",
                 windowClass: "share-citation",
                 controllerAs: "ctrl",
-                size: "md",
                 resolve: {
-                    params: $rootScope.tuple.citation
+                    params: {
+                        citation: $rootScope.tuple.citation
+                    }
                 }
-            }, false, false);
+            }, false, false, false); // not defining any extra callbacks
         };
 
         vm.permalink = function () {
