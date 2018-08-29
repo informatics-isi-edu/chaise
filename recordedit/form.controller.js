@@ -276,7 +276,7 @@
             var errorData = {};
             if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
                 modalUtils.showModal({
-                    templateUrl: "../common/templates/delete-link/confirm_delete.modal.html",
+                    templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/delete-link/confirm_delete.modal.html",
                     controller: "ConfirmDeleteController",
                     controllerAs: "ctrl",
                     size: "sm"
@@ -348,7 +348,7 @@
                     params: params
                 },
                 size: "xl",
-                templateUrl: "../common/templates/searchPopup.modal.html"
+                templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
             }, function dataSelected(tuple) {
                 // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
                 // set data in view model (model.rows) and submission model (model.submissionRows)

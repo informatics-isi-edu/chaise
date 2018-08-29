@@ -12,8 +12,16 @@ exports.getConfig = function(options) {
       //using firefox causes problems - not showing the right result and -
       //Apache log shows firefox is not requesting the server.
       'chromeOptions' : {
-         args: ['--lang=en',
-                '--window-size=1920,1920']
+          args: ['--lang=en',
+                 '--window-size=1920,1920'],
+          // Set download path and avoid prompting for download even though
+          // this is already the default on Chrome but for completeness
+          prefs: {
+              download: {
+                  'prompt_for_download': false,
+                  'default_directory': process.env.PWD + "/test/e2e/"
+              }
+          }
       },
       'os': 'MacOS El Capitan 10.11',
       'platform': 'OS X 10.11',

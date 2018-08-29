@@ -262,4 +262,13 @@
         }
     }])
 
+    .controller('ExportProgressController', ['$uibModalInstance', 'params', function ConfirmDeleteController($uibModalInstance, params) {
+        var vm = this;
+        vm.cancel = cancel;
+        vm.params = params;
+        function cancel() {
+            $uibModalInstance.dismiss('cancel');
+        }
+    }])
+
 })();

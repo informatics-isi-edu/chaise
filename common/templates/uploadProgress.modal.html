@@ -1,5 +1,4 @@
 <div class="modal-header">
-	<button class="btn btn-default pull-right modal-close" type="button" ng-click="ctrl.cancel()">X</button>
     <h2 class="modal-title">{{ctrl.title}}</h2>
 </div>
 <div class="modal-body">
@@ -74,4 +73,7 @@
 	        </tr>
 	    </tbody>
 	</table>
+</div>
+<div class="modal-footer">
+    <button id="confirm-btn" class="btn btn-primary btn-inverted" type="button" ng-click="ctrl.cancel()" uib-tooltip="Click Here if you want to cancel the request." tooltip-placement="bottom">Cancel</button>
 </div>

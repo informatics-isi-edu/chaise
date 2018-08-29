@@ -406,6 +406,27 @@
           "compact": {
             "page_size": 15
           }
+        },
+        "tag:isrd.isi.edu,2016:export": {
+          "templates": [
+            {
+              "outputs": [
+                {
+                  "source": {
+                    "table": "product-recordset:accommodation",
+                    "api": "entity"
+                  },
+                  "destination": {
+                    "type": "csv",
+                    "name": "Accommodations_Bag"
+                  }
+                }
+              ],
+              "name": "export_data_bag",
+              "format_name": "BDBag",
+              "format_type": "BAG"
+            }
+          ]
         }
       }
     },

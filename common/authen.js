@@ -26,24 +26,7 @@
                 _changeCbs[k]();
             }
         };
-
-        /**
-         * Return deployment specific path name
-         * @return {String} string representation of the path name "~username/chaise", "chaise", "path/to/deployment/data"
-         */
-        var getDeploymentPathName = function() {
-            var splits = $window.location.pathname.split('/');
-            splits.splice(0, 1);
-            if(splits[splits.length-1] == ""){
-                splits.splice(splits.length-1, 1);
-            }
-            if(splits[splits.length-1] == 'index.html'){
-                splits.splice(splits.length-1, 1);
-            }
-            splits.splice(splits.length-1, 1);
-            return splits.join('/');
-        };
-
+       
         /**
          * Functions that interact with the StorageService tokens
          * There are 2 keys stored under the LOCAL_STORAGE_KEY object, PROMPT_EXPIRATION_KEY and PREVIOUS_SESSION_KEY
@@ -119,7 +102,7 @@
 
                 var modalInstance = modalUtils.showModal({
                     windowClass: "modal-login-instruction",
-                    templateUrl: "../common/templates/loginDialog.modal.html",
+                    templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/loginDialog.modal.html",
                     controller: 'LoginDialogController',
                     controllerAs: 'ctrl',
                     resolve: {
@@ -181,7 +164,7 @@
         var logInHelper = function(logInTypeCb, win, cb, type){
             var referrerId = (new Date().getTime());
 
-            var url = serviceURL + '/authn/preauth?referrer='+UriUtils.fixedEncodeURIComponent($window.location.origin+"/"+getDeploymentPathName() + "/login?referrerid=" + referrerId);
+            var url = serviceURL + '/authn/preauth?referrer='+UriUtils.fixedEncodeURIComponent($window.location.origin+"/"+ UriUtils.chaiseDeploymentPath() + "login?referrerid=" + referrerId);
             var config = {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',

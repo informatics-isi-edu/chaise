@@ -998,9 +998,22 @@ var recordsetPage = function() {
         return element(by.id("page-size-" + limit));
     };
 
-    this.getDownloadButton = function () {
-        return element(by.id("downloadCSV-link"));
+    this.getExportDropdown = function () {
+        return element(by.tagName("export")).element(by.tagName("button"));
     };
+
+    this.getExportOptions = function () {
+        return element(by.tagName("export")).all(by.tagName("li"));
+    };
+
+    this.getExportOption = function (optionName) {
+        var option = makeSafeIdAttr(optionName);
+        return element(by.css(".export-" + option));
+    };
+
+    this.getExportModal = function () {
+        return element(by.css(".export-progress"));
+    }
 
     this.getPermalinkButton = function() {
         return element(by.id('permalink'));
@@ -1413,7 +1426,7 @@ function chaisePage() {
         if(isAlertPresent){
             browser.switchTo().alert().accept();
         }
-        
+
         browser.ignoreSynchronization = true;
 
         browser.wait(protractor.ExpectedConditions.visibilityOf(element(by.id("loginApp"))), browser.params.defaultTimeout).then(function() {

@@ -1,10 +1,10 @@
 (function() {
     'use strict';
     angular.module('chaise.navbar', [
-        'chaise.login'
+        'chaise.login',
+        'chaise.utils'
     ])
-    .directive('navbar', [ '$rootScope', function($rootScope) {
-
+    .directive('navbar', [ '$rootScope', 'UriUtils' function($rootScope, UriUtils) {
         var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
 
     // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
@@ -37,7 +37,7 @@
         return {
             restrict: 'EA',
             scope: {},
-            templateUrl: '../common/templates/navbar.html',
+            templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/navbar.html',
             link: function(scope) {
                 scope.brandURL = chaiseConfig.navbarBrand;
                 scope.brandText = chaiseConfig.navbarBrandText || chaiseConfig.headTitle;
@@ -47,13 +47,13 @@
         };
     }])
 
-    .directive('navbarMenu', ['$compile', function($compile) {
+    .directive('navbarMenu', ['$compile', 'UriUtils', function($compile, UriUtils) {
         return {
             restrict: 'EA',
             scope: {
                 menu: '='
             },
-            templateUrl: '../common/templates/navbarMenu.html',
+            templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/navbarMenu.html',
             compile: function(el) {
                 var contents = el.contents().remove();
                 var compiled;

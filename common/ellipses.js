@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    angular.module('chaise.ellipses', [])
+    angular.module('chaise.ellipses', ['chaise.utils'])
 
     .filter('trustedHTML', ['$sce', function($sce){
         return function(text) {
@@ -32,7 +32,7 @@
                     }
                 }
                 modalUtils.showModal({
-                    templateUrl: "../common/templates/delete-link/confirm_delete.modal.html",
+                    templateUrl:  UriUtils.chaiseDeploymentPath() + "common/templates/delete-link/confirm_delete.modal.html",
                     controller: "ConfirmDeleteController",
                     controllerAs: "ctrl",
                     size: "sm"
@@ -61,7 +61,7 @@
 
         return {
             restrict: 'AE',
-            templateUrl: '../common/templates/ellipses.html',
+            templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/ellipses.html',
             scope: {
                 tuple: '=',
                 rowValues: '=', // tuple's values
