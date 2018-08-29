@@ -747,7 +747,7 @@
          *      2. If ChaiseConfig doesn't specify the chaisePath, then it returns the default value '/chaise/'
         */
         function chaiseDeploymentPath() {
-            var appNames = ["record", "recordset", "recordedit", "search"];
+            var appNames = ["record", "recordset", "recordedit", "search", "login"];
             var currentAppName = appNamefromUrlPathname($window.location.pathname);
             if (appNames.includes(currentAppName)) {
                 var index = $window.location.pathname.indexOf(currentAppName);

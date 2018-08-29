@@ -188,7 +188,7 @@
                 appName: appName,
                 pageName: pageName,
                 exception: exception,
-                errorStatus: errorStatus ? errorStatus : exception.status,
+                errorStatus: exception.status ? exception.status : "Terminal Error",
                 message: message ? message : exception.message,
                 subMessage: subMessage,
                 canClose: false,
@@ -275,7 +275,6 @@
             } else {
                 logError(exception);
                 message = errorMessages.systemAdminMessage;
-                if (!errorStatus) errorStatus = "Terminal Error";
                 subMessage = exception.message;
             }
 

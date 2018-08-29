@@ -1,4 +1,4 @@
-# FAQ's related to E2E testing using Protractor and Jasmine
+# FAQs related to E2E testing using Protractor and Jasmine
 
 ***
 
