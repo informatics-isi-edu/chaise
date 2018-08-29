@@ -25,8 +25,8 @@ describe('When viewing Record app', function() {
             });
         });
 
-        it('should display the permalink', function() {
-            var permalink = recordPage.getPermalinkButton();
+        it('should display the share button', function() {
+            var permalink = recordPage.getShareButton();
             expect(permalink.isDisplayed()).toBe(true);
         });
 
@@ -66,8 +66,8 @@ describe('When viewing Record app', function() {
             });
         });
 
-        it('should display the permalink', function() {
-            var permalink = recordPage.getPermalinkButton();
+        it('should display the share button', function() {
+            var permalink = recordPage.getShareButton();
             expect(permalink.isDisplayed()).toBe(true);
         });
 
@@ -146,8 +146,8 @@ describe('When viewing Record app', function() {
             });
         });
 
-        it('should display the permalink', function() {
-            var permalink = recordPage.getPermalinkButton();
+        it('should display the share button', function() {
+            var permalink = recordPage.getShareButton();
             expect(permalink.isDisplayed()).toBe(true);
         });
 
@@ -199,8 +199,8 @@ describe('When viewing Record app', function() {
             });
         });
 
-        it('should display the permalink', function() {
-            var permalink = recordPage.getPermalinkButton();
+        it('should display the share button', function() {
+            var permalink = recordPage.getShareButton();
             expect(permalink.isDisplayed()).toBe(true);
         });
 
