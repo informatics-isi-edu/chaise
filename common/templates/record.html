@@ -16,7 +16,8 @@
                   <record-action-bar id="actionbar-{{$index}}" tabtype="entity" related-table-ref-display="col.tableModel.reference.display.type" tab-model-display="col.tableModel.displayType"
                   toggle-related-table-display-type='toggleRelatedTableDisplayType({dataModel:col.tableModel})' can-edit-related="canEditRelated({ref:col.tableModel.reference})"
                   can-create-related="canCreateRelated({ref:col.tableModel.reference})"
-                  add-related-record="addRelatedRecord({ref:col.tableModel.reference})" to-record-set="toRecordSet({ref:col.tableModel.reference})">
+                  add-related-record="addRelatedRecord({ref:col.tableModel.reference})" to-record-set="toRecordSet({ref:col.tableModel.reference})"
+                  displayname="col.column.displayname" base-table-name="col.baseTableName">
                   </record-action-bar>
                     <span ng-show="col.tableModel.displayType == 'markdown'" id="entity-{{$index}}-markdown">
                         <span ng-if="col.tableModel.page.content == '' || col.tableModel.page.content == null">
