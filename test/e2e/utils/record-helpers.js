@@ -69,7 +69,7 @@ exports.testPresentation = function (tableParams) {
         });
     });
 
-    it("should show the share dialog when clicking the share button with permalink and citation present.", function() {
+    it("should show the share dialog when clicking the share button with permalink and citation present.", function(done) {
         var shareButton = chaisePage.recordPage.getShareButton();
 
         shareButton.click().then(function () {
@@ -77,14 +77,26 @@ exports.testPresentation = function (tableParams) {
 
             // wait for dialog to open
             chaisePage.waitForElement(modalContent);
+
             // verify modal dialog contents
-            //TODO pass value from testParams
-            expect(chaisePage.recordEditPage.getModalTitle().getText()).toBe("Share Citation");
-            var listElements = element.all(by.tagName('li'));
-            expect(listElements.get(0).element(by.tagName('h2')).getText()).toBe("Share Link");
-            expect(listElements.get(0).element(by.tagName('a')).getText()).toBe(browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + testParams.table_name + "/RID=" + getRID());
+            expect(chaisePage.recordEditPage.getModalTitle().element(by.tagName("strong")).getText()).toBe("Share Citation", "Share citation modal title is incorrect");
+            expect(chaisePage.recordPage.getModalListElements().count()).toBe(tableParams.citationParams.numListElements, "Number of list elements in share citation modal is incorrect");
+
+            // verify permalink
+            expect(chaisePage.recordPage.getShareLinkHeader().getText()).toBe("Share Link", "Share Link (permalink) header is incorrect");
+            expect(chaisePage.recordPage.getPermalinkText().getText()).toBe(tableParams.citationParams.permalink, "permalink url is incorrect");
+
+            // verify citation
+            expect(chaisePage.recordPage.getCitationHeader().getText()).toBe("Citation", "Citation header is incorrect");
+            expect(chaisePage.recordPage.getCitationText().getText()).toBe(tableParams.citationParams.citation, "citation text is incorrect");
 
             // close dialog
+            return chaisePage.recordEditPage.getModalTitle().element(by.tagName("button")).click();
+        }).then(function () {
+            done();
+        }).catch(function(err){
+            console.log(err);
+            done.fail();
         });
     });
 
@@ -185,16 +197,6 @@ exports.testPresentation = function (tableParams) {
             }
         });
     });
-
-	it('should display a permalink of the record', function() {
-		var key = tableParams.key;
-		var expectedURL = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + tableParams.table_name + '/' + key.name + key.operator + key.value;
-		var actualURL = element(by.id('permalink'));
-		expect(actualURL.isDisplayed()).toBe(true);
-		actualURL.getAttribute('href').then(function(url) {
-			expect(url).toBe(expectedURL);
-		});
-	});
 
     it("should show related table names and their tables", function() {
         var displayName, tableCount, title,

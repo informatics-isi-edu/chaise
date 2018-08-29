@@ -1,5 +1,6 @@
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordHelpers = require('../../../utils/record-helpers.js');
+var moment = require('moment');
 var testParams = {
     table_name: "accommodation",
     key: {
@@ -74,8 +75,12 @@ var testParams = {
       tableToShow: 'Categories_5',
       sidePanelTableOrder:[ 'Main', 'Categories_collection\n (5)',  'media\n \n (1)', 'Categories_collection_2\n (5)',  'Categories_3\n (5)',  'Categories_4\n (5)',  'Categories_5\n (5)',  'Categories_6\n (5)'],
       panelHeading: "Contents"
-  },
-  inline_columns: [
+    },
+    citationParams: {
+        numListElements: 2,
+        citation: "Sherathon Hotel, " + moment().format("YYYY") + ", 2002, http://www.starwoodhotels.com/sheraton/index.html"
+    },
+    inline_columns: [
       {
           title: "a related entity with a path of length 3",
           name: "accommodation_collection",
@@ -164,6 +169,7 @@ describe('View existing record,', function() {
             keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
             browser.ignoreSynchronization=true;
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + testParams.table_name + "/" + keys.join("&");
+            testParams.citationParams.permalink = url;
             browser.get(url);
             var start = (new Date()).getTime();
             chaisePage.waitForElement(element(by.id('tblRecord'))).then(function() {
