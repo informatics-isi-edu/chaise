@@ -1,4 +1,4 @@
-Chaise
+Web interface (Chaise)
 ====================
 
 .. toctree::

@@ -952,6 +952,21 @@
         }
 
         /**
+        * @desc Converts passed string to a safe HTML string by replacing the following characters to HTML entities:
+        * ampersands, right angle brackets, left angle brackets, double quotes, single quotes.
+        * @param {String} string
+        * @return {String} a string suitable for use in HTML element attributes
+        */
+        function makeSafeHTML(string){
+            return String(string)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;'); 
+        }
+
+        /**
          * Throws an {InvalidInputError} if test is
          * not `True`.
          * @memberof ERMrest
@@ -979,6 +994,7 @@
             isObjectAndKeyDefined: isObjectAndKeyDefined,
             isInteger: isInteger,
             makeSafeIdAttr: makeSafeIdAttr,
+            makeSafeHTML: makeSafeHTML,
             verify: verify
         };
     }])
