@@ -83,6 +83,10 @@ span[uib-tooltip], .show-tooltip-border[uib-tooltip] {
     border-bottom: 1px dotted black;
 }
 
+.hide-tooltip-border[uib-tooltip] {
+    border-bottom: none;
+}
+
 .tooltip-inner {
     text-align: left;
 }

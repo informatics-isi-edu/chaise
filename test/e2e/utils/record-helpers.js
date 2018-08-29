@@ -415,6 +415,7 @@ exports.testPresentation = function (tableParams) {
 
 		for (var i = 0; i < tableParams.inline_columns.length; i++) {
 			var p = tableParams.inline_columns[i];
+			p.baseTable = tableParams.subTitle;
 			describe ("for " + p.title + ", ", function (){
 				exports.testRelatedTable(p, pageReadyCondition);
 			});
@@ -501,6 +502,12 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 				expect(viewMoreBtn.isDisplayed()).toBeTruthy("view more is not visible.");
 			});
 
+			it('should have the correct tooltip.', function(){
+				chaisePage.recordPage.getColumnCommentHTML(viewMoreBtn).then(function(comment){
+					expect(comment).toBe("'View more " + params.displayname + " related to this " + params.baseTable + "'", "Incorrect tooltip on View More button");
+				});
+			});
+
 			if (params.viewMore){
 				it ("should always go to recordset app with correct set of filters.", function (done) {
 					chaisePage.clickButton(viewMoreBtn).then(function () {
@@ -543,13 +550,19 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 					it ("`Edit` button should be visible to switch to tabular mode.", function () {
 						// revert is `Display`
 						expect(markdownToggleLink.isDisplayed()).toBeTruthy();
-						expect(markdownToggleLink.getText()).toBe("Edit");
+						expect(markdownToggleLink.getText()).toBe("Edit");						
+						chaisePage.recordPage.getColumnCommentHTML(markdownToggleLink.element(by.cssContainingText(".hide-tooltip-border", "Edit"))).then(function(comment){
+							expect(comment).toBe("'Edit " + params.displayname + " related to this " + params.baseTable + "'", "Incorrect tooltip on Edit button");
+						});
 					});
 				} else {
 					it ("`Table Display` button should be visible to switch to tabular mode.", function () {
 						// revert is `Revert Display`
 						expect(markdownToggleLink.isDisplayed()).toBeTruthy();
 						expect(markdownToggleLink.getText()).toBe("Table Display");
+						chaisePage.recordPage.getColumnCommentHTML(markdownToggleLink.element(by.cssContainingText(".hide-tooltip-border", "Table Display"))).then(function(comment){
+							expect(comment).toBe("'Display related " + params.displayname + " in tabular mode'", "Incorrect tooltip on Table Display button");
+						});
 					});
 				}
 
@@ -557,8 +570,14 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 					chaisePage.clickButton(markdownToggleLink).then(function() {
 						if (params.canEdit) {
 							expect(markdownToggleLink.getText()).toBe("Display", "after toggle button missmatch.");
+							chaisePage.recordPage.getColumnComment(markdownToggleLink.element(by.cssContainingText(".hide-tooltip-border", "Display"))).then(function(comment){
+								expect(comment).toBe("Switch back to the display mode", "Incorrect tooltip on Display button");
+							});
 						} else {
 							expect(markdownToggleLink.getText()).toBe("Revert Display", "after toggle button missmatch.");
+							chaisePage.recordPage.getColumnComment(markdownToggleLink.element(by.cssContainingText(".hide-tooltip-border", "Revert Display"))).then(function(comment){
+								expect(comment).toBe("Switch back to the previous display", "Incorrect tooltip on Revert Display button");
+							});
 						}
 
 						//TODO make sure table is visible
@@ -588,6 +607,11 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 			it ("`Add` button should be " + (params.canCreate ? "visible." : "invisible."), function () {
 				var addBtn = chaisePage.recordPage.getAddRecordLink(params.displayname, params.isInline);
 				expect(addBtn.isPresent()).toBe(params.canCreate);
+				if(params.canCreate){
+					chaisePage.recordPage.getColumnCommentHTML(addBtn).then(function(comment){
+						expect(comment).toBe("'Add more " + params.displayname + " related to this " + params.baseTable + "'", "Incorrect tooltip on Add button");
+					});
+				}
 			});
 		 }
 	});

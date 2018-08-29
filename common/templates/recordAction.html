@@ -3,18 +3,18 @@
     <span ng-if="relatedTableRefDisplay == 'markdown'">
         <a class="toggle-display-link" ng-click="toggleRelatedTableDisplayType({dataModel:dataModel})">
             <span ng-show="tabModelDisplay == 'markdown'">
-                <span ng-if="canEditRelated({ref:ref})">Edit</span>
-                <span ng-if="!canEditRelated({ref:ref})">Table Display</span>
+                <span class="hide-tooltip-border" ng-if="canEditRelated({ref:ref})" ng-attr-uib-tooltip-html="'Edit {{tooltip.entityName}} related to this {{tooltip.baseTableName}}'" tooltip-placement='auto top'>Edit</span>
+                <span class="hide-tooltip-border" ng-if="!canEditRelated({ref:ref})" ng-attr-uib-tooltip-html="'Display related {{tooltip.entityName}} in tabular mode'" tooltip-placement='auto top'>Table Display</span>
             </span>
             <span ng-show="tabModelDisplay != 'markdown'">
-                <span ng-if="canEditRelated({ref:ref})">Display</span>
-                <span ng-if="!canEditRelated({ref:ref})">Revert Display</span>
+                <span class="hide-tooltip-border" ng-if="canEditRelated({ref:ref})" ng-attr-uib-tooltip="Switch back to the display mode" tooltip-placement='auto top'>Display</span>
+                <span class="hide-tooltip-border" ng-if="!canEditRelated({ref:ref})" ng-attr-uib-tooltip="Switch back to the previous display" tooltip-placement='auto top'>Revert Display</span>
             </span>
         </a>&nbsp;|</span>
     <span ng-if="canCreateRelated({ref:ref})">
-        <a class="add-records-link" ng-click="addRelatedRecord({ref:ref})">Add</a>
+        <a class="add-records-link" ng-click="addRelatedRecord({ref:ref})" ng-attr-uib-tooltip-html="'Add more {{tooltip.entityName}} related to this {{tooltip.baseTableName}}'" tooltip-placement='auto top'>Add</a>
         &nbsp;|</span>
-    <span><a class="more-results-link" ng-click="toRecordSet({ref:ref})">View More</a></span>
+    <span><a class="more-results-link" ng-click="toRecordSet({ref:ref})" ng-attr-uib-tooltip-html="'View more {{tooltip.entityName}} related to this {{tooltip.baseTableName}}'" tooltip-placement='auto top'>View More</a></span>
     <div ng-transclude></div>
 </div>
 </div>

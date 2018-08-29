@@ -644,6 +644,10 @@ var recordPage = function() {
         return el.getAttribute('uib-tooltip');
     };
 
+    this.getColumnCommentHTML = function(el) {
+        return el.getAttribute('uib-tooltip-html');
+    };
+
     this.getColumnValueElements = function() {
         return browser.executeScript("return $('.entity-value > span.ng-scope > span.ng-scope');");
     };
