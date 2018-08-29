@@ -5,11 +5,13 @@
 </div>
 <div class="modal-body">
     <ul style="list-style-type: disc;">
-        <!-- <li>
-            <h2>Shared Link</h2> -->
+        <li>
+            <h2>Share Link</h2>
+            <a id="permalink" ng-href="{{::ctrl.permalink}}">{{::ctrl.permalink}}</a>
+        </li>
         <li>
             <h2>Citation</h2>
-            {{::ctrl.citation.author}}; {{::ctrl.citation.title}}, <i>{{::ctrl.citation.journal}}</i>, {{::ctrl.citation.year}}, {{::ctrl.citation.id}},
+            <span ng-if="::ctrl.citation.author">{{::ctrl.citation.author}}; </span><span ng-if="::ctrl.citation.title">{{::ctrl.citation.title}}, </span><i>{{::ctrl.citation.journal}}</i>, {{::ctrl.citation.year}}, <span ng-if="::ctrl.citation.id">{{::ctrl.citation.id}},</span>
             <a ng-href="{{::ctrl.citation.url}}">{{::ctrl.citation.url}}</a>
         </li>
         <!-- <li>

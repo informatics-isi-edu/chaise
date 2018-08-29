@@ -39,12 +39,8 @@
                         Related Records
                     </strong>
                 </a>&nbsp;&nbsp;
-                <a id="share" ng-if="$root.tuple.citation" ng-click="::ctrl.sharePopup()" uib-tooltip="Some text" tooltip-placement="bottom">
+                <a id="share" ng-click="::ctrl.sharePopup()" uib-tooltip="Some text" tooltip-placement="bottom">
                     <span class="glyphicon glyphicon-share"></span><strong> Share</strong>
-                    &nbsp;&nbsp;
-                </a>
-                <a id="permalink" ng-href="{{::ctrl.permalink()}}" uib-tooltip={{::ctrl.tooltip.permalink}} tooltip-placement="bottom">
-                    <span class="glyphicon glyphicon-bookmark"></span><strong> Permalink</strong>
                 </a>
             </div>
         </div>

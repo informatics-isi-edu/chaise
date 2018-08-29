@@ -779,6 +779,10 @@ var recordPage = function() {
         return element(by.id("show-all-related-tables"));
     };
 
+    this.getShareButton = function() {
+        return element(by.id('share'));
+    };
+
     this.getPermalinkButton = function() {
         return element(by.id('permalink'));
     };

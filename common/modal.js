@@ -273,6 +273,8 @@
         var vm = this;
         vm.cancel = cancel;
         vm.citation = params.citation;
+        vm.permalink = params.permalink;
+
         function cancel() {
             $uibModalInstance.dismiss('cancel');
         }

@@ -96,14 +96,11 @@
                 controllerAs: "ctrl",
                 resolve: {
                     params: {
-                        citation: $rootScope.tuple.citation
+                        citation: $rootScope.tuple.citation,
+                        permalink: $window.location.href
                     }
                 }
             }, false, false, false); // not defining any extra callbacks
-        };
-
-        vm.permalink = function () {
-            return $window.location.href;
         };
 
         vm.toRecordSet = function(ref) {

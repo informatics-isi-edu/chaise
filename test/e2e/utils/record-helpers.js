@@ -39,12 +39,14 @@ exports.testPresentation = function (tableParams) {
         var editButton = chaisePage.recordPage.getEditRecordButton(),
             createButton = chaisePage.recordPage.getCreateRecordButton(),
             deleteButton = chaisePage.recordPage.getDeleteRecordButton(),
-            showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton();
+            showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton(),
+            shareButton = chaisePage.recordPage.getShareButton();
 
         browser.wait(EC.elementToBeClickable(editButton), browser.params.defaultTimeout);
         browser.wait(EC.elementToBeClickable(createButton), browser.params.defaultTimeout);
         browser.wait(EC.elementToBeClickable(deleteButton), browser.params.defaultTimeout);
         browser.wait(EC.elementToBeClickable(showAllRTButton), browser.params.defaultTimeout);
+        browser.wait(EC.elementToBeClickable(shareButton), browser.params.defaultTimeout);
 
         editButton.isDisplayed().then(function (bool) {
             expect(bool).toBeTruthy();
@@ -62,8 +64,27 @@ exports.testPresentation = function (tableParams) {
             expect(bool).toBeTruthy();
         });
 
-        chaisePage.recordPage.getPermalinkButton().isDisplayed().then(function (bool) {
+        shareButton.isDisplayed().then(function (bool) {
             expect(bool).toBeTruthy();
+        });
+    });
+
+    it("should show the share dialog when clicking the share button with permalink and citation present.", function() {
+        var shareButton = chaisePage.recordPage.getShareButton();
+
+        shareButton.click().then(function () {
+            var modalContent = element(by.css('.modal-content'));
+
+            // wait for dialog to open
+            chaisePage.waitForElement(modalContent);
+            // verify modal dialog contents
+            //TODO pass value from testParams
+            expect(chaisePage.recordEditPage.getModalTitle().getText()).toBe("Share Citation");
+            var listElements = element.all(by.tagName('li'));
+            expect(listElements.get(0).element(by.tagName('h2')).getText()).toBe("Share Link");
+            expect(listElements.get(0).element(by.tagName('a')).getText()).toBe(browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + testParams.table_name + "/RID=" + getRID());
+
+            // close dialog
         });
     });
 
