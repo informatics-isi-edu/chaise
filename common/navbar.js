@@ -4,7 +4,7 @@
         'chaise.login',
         'chaise.utils'
     ])
-    .directive('navbar', [ '$rootScope', 'UriUtils' function($rootScope, UriUtils) {
+    .directive('navbar', [ '$rootScope', 'UriUtils', function($rootScope, UriUtils) {
         var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
 
     // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
