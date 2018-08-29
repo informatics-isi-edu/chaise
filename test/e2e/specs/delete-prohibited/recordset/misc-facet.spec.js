@@ -15,6 +15,25 @@ var testParams = {
         numRowsAfterModal: 20
 
     },
+    facet_order: [
+        {
+            title: "facet with order and column_order false for scalar",
+            facetIdx: 16,
+            modalOptions: ['01', '02', '03', '04', '05', '06', '07'],
+            sortable: false,
+            modalOptionsSortedByNumOfOccurences: ['07', '06', '05', '04', '03', '02', '01'],
+            columnName: "col_w_column_order_false"
+        },
+        {
+            title: "facet without order and hide_num_occurrences: true",
+            facetIdx: 17,
+            modalOptions: ['01', '13', '12', '11', '10', '09', '08', '07', '06', '05', '04', '03', '02'],
+            sortable: true,
+            modalOptionsSortedByScalar: ['13', '12', '11', '10', '09', '08', '07', '06', '05', '04', '03', '02', '01'],
+            hideNumOccurrences: true,
+            columnName: "col_w_column_order"
+        }
+    ],
     not_null: {
         option: 0,
         result_num_w_not_null: 20,
@@ -39,7 +58,7 @@ var testParams = {
         option: 2
     },
     maximumLength: {
-        facetIdx: 16,
+        facetIdx: 18,
         option: 1,
         numRows: 25,
         modalOption: 10,
@@ -174,6 +193,99 @@ describe("Other facet features, ", function() {
             }).then(function () {
                 done();
             }).catch(chaisePage.catchTestError(done));
+        });
+
+    });
+
+    describe("facet modal rows and columns, ", function () {
+        var uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
+        var clearAll, showMore, sortBtn;
+
+        beforeAll(function (done) {
+            browser.ignoreSynchronization=true;
+            browser.get(uri);
+            chaisePage.waitForElementInverse(element(by.id("spinner")));
+
+            clearAll = chaisePage.recordsetPage.getClearAllFilters();
+            browser.wait(EC.elementToBeClickable(clearAll));
+
+            clearAll.click().then(function () {
+                chaisePage.waitForElementInverse(element(by.id("spinner")));
+
+                done();
+            }).catch(chaisePage.catchTestError(done));
+        });
+
+        testParams.facet_order.forEach(function (params) {
+            describe("for " + params.title + ", ", function () {
+                it ("the rows in the modal should honor the given order.", function (done) {
+                    chaisePage.clickButton(chaisePage.recordsetPage.getFacetById(params.facetIdx)).then(function () {
+                        // wait for facet to open
+                        browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(params.facetIdx)), browser.params.defaultTimeout);
+
+                        // click on show more
+                        var showMore = chaisePage.recordsetPage.getShowMore(params.facetIdx);
+                        browser.wait(EC.elementToBeClickable(showMore));
+                        return chaisePage.clickButton(showMore);
+                    }).then(function () {
+                        chaisePage.recordsetPage.waitForInverseModalSpinner();
+
+                        return chaisePage.recordsetPage.getModalFirstColumnValues();
+                    }).then(function (values) {
+                        expect(values).toEqual(params.modalOptions, "modal options missmatch");
+                        done();
+                    }).catch(chaisePage.catchTestError(done));
+                });
+
+                if (!params.sortable) {
+                    it ("the facet column sort option should not be available.", function () {
+                        expect(chaisePage.recordsetPage.getColumnSortButton("0").isDisplayed()).toBe(false);
+                    });
+                } else {
+                    it ("users should be able to change the sort to be based on the scalar column.", function (done) {
+                        sortBtn = chaisePage.recordsetPage.getColumnSortButton("0");
+                        expect(sortBtn.isDisplayed()).toBe(true, "sort button is not available.");
+                        chaisePage.clickButton(sortBtn).then(function () {
+                            chaisePage.recordsetPage.waitForInverseModalSpinner();
+                            return chaisePage.recordsetPage.getModalFirstColumnValues();
+                        }).then(function (values) {
+                            expect(values).toEqual(params.modalOptionsSortedByScalar, "modal options missmatch");
+                            done();
+                        }).catch(chaisePage.catchTestError(done));
+                    });
+                }
+
+                it ("number of Occurrences column should be " + (params.hideNumOccurrences ? "hidden": "available") + ".", function (done) {
+                    chaisePage.recordsetPage.getModalColumnNames().then(function (columns) {
+                        expect(columns.length).toBe(params.hideNumOccurrences ? 1 : 2, "length missmatch");
+                        expect(columns[0].getText()).toBe(params.columnName, "column name missmatch");
+                        if (!params.hideNumOccurrences) {
+                            expect(columns[1].getText()).toBe("Number of Occurrences", "num of occ column name missmatch.");
+                        }
+                        done();
+                    }).catch(chaisePage.catchTestError(done));
+                });
+
+                if (!params.hideNumOccurrences) {
+                    it ("numer of Occurrences column should be available and users should be able to sort based on that.", function (done) {
+                        sortBtn = chaisePage.recordsetPage.getColumnSortButton("count");
+                        expect(sortBtn.isDisplayed()).toBe(true, "sort button is not available.");
+                        chaisePage.clickButton(sortBtn).then(function () {
+                            chaisePage.recordsetPage.waitForInverseModalSpinner();
+                            return chaisePage.recordsetPage.getModalFirstColumnValues();
+                        }).then(function (values) {
+                            expect(values).toEqual(params.modalOptionsSortedByNumOfOccurences, "modal options missmatch");
+                            done();
+                        }).catch(chaisePage.catchTestError(done));
+                    });
+                }
+
+                it ('should close the facet modal', function (done) {
+                    chaisePage.recordsetPage.getModalCloseBtn().click().then(function () {
+                        done();
+                    }).catch(chaisePage.catchTestError(done));
+                });
+            });
         });
 
     });
@@ -646,7 +758,7 @@ describe("Other facet features, ", function() {
                 browser.getCurrentUrl().then(function (url) {
                     var uri = url.replace("recordset", "record");
                     browser.get(uri);
-                    
+
                     chaisePage.waitForElement(element(by.id('tblRecord')));
                     done();
                 }).catch(chaisePage.catchTestError(done));
