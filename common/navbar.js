@@ -42,7 +42,7 @@
                 scope.brandURL = chaiseConfig.navbarBrand;
                 scope.brandText = chaiseConfig.navbarBrandText || chaiseConfig.headTitle;
                 scope.brandImage = chaiseConfig.navbarBrandImage;
-                scope.menu = chaiseConfig.navbarMenu || [];
+                scope.menu = chaiseConfig.navbarMenu.children || [];
             }
         };
     }])
