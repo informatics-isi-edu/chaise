@@ -8,7 +8,7 @@
         var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
 
     // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
-        var root = chaiseConfig.navbarMenu || {};
+        var root = chaiseConfig.navbarMenu;
         if (root) {
             // Set default newTab property at root node
             root.newTab = true;

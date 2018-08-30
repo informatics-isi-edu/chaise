@@ -10,7 +10,6 @@
           "logoutURL": "/",
           "maxRecordsetRowHeight": 160,
           "confirmDelete": true,
-          "editRecord": false,
           "deleteRecord": false,
           "signUpURL": "",
           "profileURL": "",
@@ -18,6 +17,7 @@
           "showFaceting": false,
           "hideTableOfContents": false,
           "showExportButton": false,
+          "navbarMenu": {},
           "navbarBrand": ""
     })
 
@@ -1220,25 +1220,25 @@
     }])
 
     .factory("ConfigUtils", ['$rootScope', 'defaultChaiseConfig', function($rootScope, defaultConfig) {
-      function setConfigJSON() {
-        $rootScope.chaiseConfig = {};
-        if(typeof chaiseConfig != 'undefined')
-          $rootScope.chaiseConfig = Object.assign({}, chaiseConfig);
+        function setConfigJSON() {
+            $rootScope.chaiseConfig = {};
+            if(typeof chaiseConfig != 'undefined')
+            $rootScope.chaiseConfig = Object.assign({}, chaiseConfig);
 
-        for (var property in defaultConfig) {
-          if (defaultConfig.hasOwnProperty(property)) {
-            if (typeof chaiseConfig != 'undefined' && typeof chaiseConfig[property] != 'undefined') {
-              $rootScope.chaiseConfig[property] = chaiseConfig[property];
-            } else { // property doesn't exist
-              $rootScope.chaiseConfig[property] = defaultConfig[property];
+            for (var property in defaultConfig) {
+                if (defaultConfig.hasOwnProperty(property)) {
+                    if (typeof chaiseConfig != 'undefined' && typeof chaiseConfig[property] != 'undefined') {
+                        $rootScope.chaiseConfig[property] = chaiseConfig[property];
+                    } else { // property doesn't exist
+                        $rootScope.chaiseConfig[property] = defaultConfig[property];
+                    }
+                }
             }
-          }
         }
-      }
 
-      return {
-        setConfigJSON: setConfigJSON
-      }
+        return {
+            setConfigJSON: setConfigJSON
+        }
     }])
 
     // directive for including the loading spinner
@@ -1435,7 +1435,7 @@
             fileref.setAttribute("type", "text/css");
             fileref.setAttribute("href", chaiseConfig['customCSS']);
             document.getElementsByTagName("head")[0].appendChild(fileref);
-          }  
+          }
         }
 
         function addTitle() {
