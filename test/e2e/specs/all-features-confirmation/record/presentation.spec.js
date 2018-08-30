@@ -169,7 +169,6 @@ describe('View existing record,', function() {
             keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
             browser.ignoreSynchronization=true;
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + testParams.table_name + "/" + keys.join("&");
-            testParams.citationParams.permalink = url;
             browser.get(url);
             var start = (new Date()).getTime();
             chaisePage.waitForElement(element(by.id('tblRecord'))).then(function() {

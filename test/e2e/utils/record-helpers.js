@@ -82,9 +82,11 @@ exports.testPresentation = function (tableParams) {
             expect(chaisePage.recordEditPage.getModalTitle().element(by.tagName("strong")).getText()).toBe("Share Citation", "Share citation modal title is incorrect");
             expect(chaisePage.recordPage.getModalListElements().count()).toBe(tableParams.citationParams.numListElements, "Number of list elements in share citation modal is incorrect");
 
+            return browser.getCurrentUrl();
+        }).then(function (url) {
             // verify permalink
             expect(chaisePage.recordPage.getShareLinkHeader().getText()).toBe("Share Link", "Share Link (permalink) header is incorrect");
-            expect(chaisePage.recordPage.getPermalinkText().getText()).toBe(tableParams.citationParams.permalink, "permalink url is incorrect");
+            expect(chaisePage.recordPage.getPermalinkText().getText()).toBe(url, "permalink url is incorrect");
 
             // verify citation
             expect(chaisePage.recordPage.getCitationHeader().getText()).toBe("Citation", "Citation header is incorrect");
@@ -573,7 +575,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 					it ("`Edit` button should be visible to switch to tabular mode.", function () {
 						// revert is `Display`
 						expect(markdownToggleLink.isDisplayed()).toBeTruthy();
-						expect(markdownToggleLink.getText()).toBe("Edit");						
+						expect(markdownToggleLink.getText()).toBe("Edit");
 						chaisePage.recordPage.getColumnCommentHTML(markdownToggleLink.element(by.cssContainingText(".hide-tooltip-border", "Edit"))).then(function(comment){
 							expect(comment).toBe("'Edit " + params.displayname + " related to this " + params.baseTable + "'", "Incorrect tooltip on Edit button");
 						});

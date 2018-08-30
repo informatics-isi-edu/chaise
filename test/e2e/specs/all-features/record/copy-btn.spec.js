@@ -47,7 +47,6 @@ describe('View existing record,', function() {
 
     // below are the tests for the copy button
     describe("For table " + testParams.html_table_name + ",", function() {
-        var url;
 
         beforeAll(function() {
             var keys = [];
@@ -55,7 +54,7 @@ describe('View existing record,', function() {
                 keys.push(key.name + key.operator + key.value);
             });
             browser.ignoreSynchronization=true;
-            url = browser.params.url + "/record/#" + browser.params.catalogId + "/editable-id:" + testParams.html_table_name + "/" + keys.join("&");
+            var url = browser.params.url + "/record/#" + browser.params.catalogId + "/editable-id:" + testParams.html_table_name + "/" + keys.join("&");
             browser.get(url);
             chaisePage.waitForElement(element(by.id('tblRecord')));
         });
@@ -78,6 +77,8 @@ describe('View existing record,', function() {
                 expect(chaisePage.recordEditPage.getModalTitle().element(by.tagName("strong")).getText()).toBe("Share Citation", "Share citation modal title is incorrect");
                 expect(chaisePage.recordPage.getModalListElements().count()).toBe(1, "Number of list elements in share citation modal is incorrect");
 
+                return browser.getCurrentUrl();
+            }).then(function (url) {
                 // verify permalink
                 expect(chaisePage.recordPage.getShareLinkHeader().getText()).toBe("Share Link", "Share Link (permalink) header is incorrect");
                 expect(chaisePage.recordPage.getPermalinkText().getText()).toBe(url, "permalink url is incorrect");
