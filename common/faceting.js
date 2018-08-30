@@ -912,7 +912,7 @@
                     scope.reference = scope.facetColumn.sourceReference.contextualize.compactSelect;
                     scope.columnName = scope.facetColumn.column.name;
                 } else {
-                    scope.reference = scope.facetColumn.column.groupAggregate.entityCounts;
+                    scope.reference = scope.facetColumn.scalarValuesReference;
                     // the first column will be the value column
                     scope.columnName = scope.reference.columns[0].name;
                 }
