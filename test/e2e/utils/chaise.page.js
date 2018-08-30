@@ -916,6 +916,23 @@ var recordsetPage = function() {
         return element.all(by.css('.modal-body .table-row'));
     };
 
+    this.getModalColumnNames = function() {
+        return element.all(by.css(".modal-body .table-column-displayname > span"));
+    };
+
+    this.waitForInverseModalSpinner = function () {
+        var locator = element(by.css(".modal-body #spinner"));
+        return browser.wait(protractor.ExpectedConditions.invisibilityOf(locator), browser.params.defaultTimeout);
+    };
+
+    this.getModalFirstColumnValues = function () {
+        return browser.executeScript('return $(".modal-body .table-row td:nth-child(2)").map(function (i, a) { return a.textContent.trim(); });');
+    };
+
+    this.getModalCloseBtn = function() {
+        return element(by.css(".modal-close"));
+    };
+
     this.getNoResultsRow = function() {
         return element(by.id("no-results-row"));
     };
