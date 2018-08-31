@@ -40,7 +40,7 @@
             templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/navbar.html',
             link: function(scope) {
                 scope.brandURL = chaiseConfig.navbarBrand;
-                scope.brandText = chaiseConfig.navbarBrandText || chaiseConfig.headTitle;
+                scope.brandText = chaiseConfig.navbarBrandText;
                 scope.brandImage = chaiseConfig.navbarBrandImage;
                 scope.menu = chaiseConfig.navbarMenu.children || [];
             }
