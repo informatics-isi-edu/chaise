@@ -3,8 +3,8 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'recordAppUtils', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
-        function RecordController(AlertsService, DataUtils, ErrorService, logActions, MathUtils, messageMap, modalBox, recordAppUtils, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
+    .controller('RecordController', ['AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordAppUtils', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
+        function RecordController(AlertsService, DataUtils, ErrorService, logActions, MathUtils, messageMap, modalBox, modalUtils, recordAppUtils, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
 
         var mainContainerEl = angular.element(document.getElementsByClassName('main-container')[0]);
@@ -89,8 +89,19 @@
             });
         };
 
-        vm.permalink = function getPermalink() {
-            return $window.location.href;
+        vm.sharePopup = function() {
+            modalUtils.showModal({
+                templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/shareCitation.modal.html",
+                controller: "ShareCitationController",
+                windowClass: "share-citation",
+                controllerAs: "ctrl",
+                resolve: {
+                    params: {
+                        citation: $rootScope.tuple.citation,
+                        permalink: $window.location.href
+                    }
+                }
+            }, false, false, false); // not defining any extra callbacks
         };
 
         vm.toRecordSet = function(ref) {

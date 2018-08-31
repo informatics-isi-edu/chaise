@@ -47,6 +47,7 @@ describe('View existing record,', function() {
 
     // below are the tests for the copy button
     describe("For table " + testParams.html_table_name + ",", function() {
+
         beforeAll(function() {
             var keys = [];
             testParams.html_keys.forEach(function(key) {
@@ -60,6 +61,36 @@ describe('View existing record,', function() {
 
         it("should display the entity subtitle name with html in it.", function() {
             expect(chaisePage.recordPage.getEntitySubTitle()).toBe(testParams.html_table_display);
+        });
+
+        // test that no citation appears in share modal when no citation is defined on table
+        it("should show the share dialog when clicking the share button with only permalink present.", function(done) {
+            var shareButton = chaisePage.recordPage.getShareButton();
+
+            shareButton.click().then(function () {
+                var modalContent = element(by.css('.modal-content'));
+
+                // wait for dialog to open
+                chaisePage.waitForElement(modalContent);
+
+                // verify modal dialog contents
+                expect(chaisePage.recordEditPage.getModalTitle().element(by.tagName("strong")).getText()).toBe("Share Citation", "Share citation modal title is incorrect");
+                expect(chaisePage.recordPage.getModalListElements().count()).toBe(1, "Number of list elements in share citation modal is incorrect");
+
+                return browser.getCurrentUrl();
+            }).then(function (url) {
+                // verify permalink
+                expect(chaisePage.recordPage.getShareLinkHeader().getText()).toBe("Share Link", "Share Link (permalink) header is incorrect");
+                expect(chaisePage.recordPage.getPermalinkText().getText()).toBe(url, "permalink url is incorrect");
+
+                // close dialog
+                return chaisePage.recordEditPage.getModalTitle().element(by.tagName("button")).click();
+            }).then(function () {
+                done();
+            }).catch(function(err){
+                console.log(err);
+                done.fail();
+            });
         });
     });
 

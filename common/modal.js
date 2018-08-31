@@ -262,10 +262,21 @@
         }
     }])
 
-    .controller('ExportProgressController', ['$uibModalInstance', 'params', function ConfirmDeleteController($uibModalInstance, params) {
+    .controller('ExportProgressController', ['$uibModalInstance', 'params', function ($uibModalInstance, params) {
         var vm = this;
         vm.cancel = cancel;
         vm.params = params;
+        function cancel() {
+            $uibModalInstance.dismiss('cancel');
+        }
+    }])
+
+    .controller('ShareCitationController', ['$uibModalInstance', 'params', function ($uibModalInstance, params) {
+        var vm = this;
+        vm.cancel = cancel;
+        vm.citation = params.citation;
+        vm.permalink = params.permalink;
+
         function cancel() {
             $uibModalInstance.dismiss('cancel');
         }
