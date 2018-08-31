@@ -4,18 +4,15 @@
         'chaise.login',
         'chaise.utils'
     ])
-    .directive('navbar', ['UriUtils', function(UriUtils) {
+    .directive('navbar', [ '$rootScope', 'UriUtils', function($rootScope, UriUtils) {
+        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
 
     // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
-        var root = chaiseConfig.navbarMenu = chaiseConfig.navbarMenu || {};
+        var root = chaiseConfig.navbarMenu;
         if (root) {
             // Set default newTab property at root node
-            if (!root.hasOwnProperty('newTab')) {
-                root.newTab = true;
-            }
-
+            root.newTab = true;
             var q = [root];
-
             while (q.length > 0) {
                 var obj = q.shift();
                 var parentNewTab = obj.newTab;

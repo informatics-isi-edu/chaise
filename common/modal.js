@@ -160,6 +160,8 @@
         vm.mode = params.mode;
 
         vm.hasLoaded = false;
+
+        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
         var reference = vm.reference = params.reference;
         var limit = (!angular.isUndefined(reference) && !angular.isUndefined(reference.display) && reference.display.defaultPageSize) ? reference.display.defaultPageSize : 25;
         var comment = (typeof params.comment === "string") ? params.comment: reference.table.comment;

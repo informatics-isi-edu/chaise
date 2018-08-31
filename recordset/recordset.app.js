@@ -26,6 +26,10 @@
         $cookiesProvider.defaults.path = '/';
     }])
 
+    .config(['ConfigUtilsProvider', function(ConfigUtilsProvider) {
+      ConfigUtilsProvider.$get().setConfigJSON();
+    }])
+
     // Register the 'context' object which can be accessed by config and other
     // services.
     .constant('context', {
@@ -45,6 +49,7 @@
 
     //  Enable log system, if in debug mode
     .config(['$logProvider', function($logProvider) {
+      if(typeof chaiseConfig != 'undefined' && typeof chaiseConfig.debug != 'undefined')
         $logProvider.debugEnabled(chaiseConfig.debug === true);
     }])
 
@@ -77,6 +82,7 @@
 
             UriUtils.setOrigin();
 
+            var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
             context.chaiseBaseURL = $window.location.href.replace($window.location.hash, '');
             var modifyEnabled = chaiseConfig.editRecord === false ? false : true;
             var deleteEnabled = chaiseConfig.deleteRecord === true ? true : false;
