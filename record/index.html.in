@@ -42,8 +42,8 @@
                 <!-- download CSV included by default -->
                 <export has-values="recordValues.length>0" reference="reference" style="position:relative;" disabled="!displayReady"></export>
                 &nbsp;&nbsp;
-                <a id="permalink" ng-href="{{::ctrl.permalink()}}" uib-tooltip={{::ctrl.tooltip.permalink}} tooltip-placement="bottom">
-                    <span class="glyphicon glyphicon-bookmark"></span><strong> Permalink</strong>
+                <a id="share" ng-click="::ctrl.sharePopup()" uib-tooltip="Click here to show the share dialog." tooltip-placement="bottom">
+                    <span class="glyphicon glyphicon-share"></span><strong> Share</strong>
                 </a>
             </div>
         </div>

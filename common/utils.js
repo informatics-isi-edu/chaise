@@ -3,6 +3,24 @@
 
     angular.module('chaise.utils', ['chaise.errors'])
 
+    .constant("defaultChaiseConfig", {
+          "ermrestLocation": window.location.origin + "/ermrest",
+          "headTitle": "Chaise",
+          "navbarBrandText": "Chaise",
+          "logoutURL": "/",
+          "maxRecordsetRowHeight": 160,
+          "confirmDelete": true,
+          "deleteRecord": false,
+          "signUpURL": "",
+          "profileURL": "",
+          "allowErrorDismissal": false,
+          "showFaceting": false,
+          "hideTableOfContents": false,
+          "showExportButton": false,
+          "navbarMenu": {},
+          "navbarBrand": ""
+    })
+
     .constant("appTagMapping", {
         "tag:isrd.isi.edu,2016:chaise:record": "/record",
         "tag:isrd.isi.edu,2016:chaise:detailed": "/detailed",
@@ -169,8 +187,8 @@
 
     .factory('UriUtils', ['$injector', '$rootScope', '$window', 'appContextMapping', 'appTagMapping', 'ContextUtils', 'Errors', 'messageMap', 'parsedFilter',
         function($injector, $rootScope, $window, appContextMapping, appTagMapping, ContextUtils, Errors, messageMap, ParsedFilter) {
-
         var chaiseBaseURL;
+        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
         /**
          * @function
          * @param {Object} location - location Object from the $window resource
@@ -286,7 +304,7 @@
                 }
             }
 
-            var baseUri = chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : location.origin + '/ermrest';
+            var baseUri = chaiseConfig.ermrestLocation;
             var path = '/catalog/' + catalogId + '/entity' + hash;
             return baseUri + path;
         }
@@ -963,7 +981,7 @@
                 .replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;'); 
+                .replace(/'/g, '&#39;');
         }
 
         /**
@@ -1217,6 +1235,28 @@
         }
     }])
 
+    .factory("ConfigUtils", ['$rootScope', 'defaultChaiseConfig', function($rootScope, defaultConfig) {
+        function setConfigJSON() {
+            $rootScope.chaiseConfig = {};
+            if(typeof chaiseConfig != 'undefined')
+            $rootScope.chaiseConfig = Object.assign({}, chaiseConfig);
+
+            for (var property in defaultConfig) {
+                if (defaultConfig.hasOwnProperty(property)) {
+                    if (typeof chaiseConfig != 'undefined' && typeof chaiseConfig[property] != 'undefined') {
+                        $rootScope.chaiseConfig[property] = chaiseConfig[property];
+                    } else { // property doesn't exist
+                        $rootScope.chaiseConfig[property] = defaultConfig[property];
+                    }
+                }
+            }
+        }
+
+        return {
+            setConfigJSON: setConfigJSON
+        }
+    }])
+
     // directive for including the loading spinner
     .directive('loadingSpinner', ['UriUtils', function (UriUtils) {
         return {
@@ -1402,21 +1442,20 @@
       }
      }])
 
-    .service('headInjector', ['$window', 'MathUtils', function($window, MathUtils) {
+    .service('headInjector', ['$window', '$rootScope', 'MathUtils',  function($window, $rootScope, MathUtils) {
+        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
         function addCustomCSS() {
-            if (chaiseConfig['customCSS'] !== undefined) {
-                var fileref = document.createElement("link");
-                fileref.setAttribute("rel", "stylesheet");
-                fileref.setAttribute("type", "text/css");
-                fileref.setAttribute("href", chaiseConfig['customCSS']);
-                document.getElementsByTagName("head")[0].appendChild(fileref);
-            }
+          if (chaiseConfig['customCSS'] !== undefined) {
+            var fileref = document.createElement("link");
+            fileref.setAttribute("rel", "stylesheet");
+            fileref.setAttribute("type", "text/css");
+            fileref.setAttribute("href", chaiseConfig['customCSS']);
+            document.getElementsByTagName("head")[0].appendChild(fileref);
+          }
         }
 
         function addTitle() {
-            if (chaiseConfig.headTitle !== undefined) {
-                document.getElementsByTagName('head')[0].getElementsByTagName('title')[0].innerHTML = chaiseConfig.headTitle;
-            }
+          document.getElementsByTagName('head')[0].getElementsByTagName('title')[0].innerHTML = chaiseConfig.headTitle;
         }
 
         // sets the WID if it doesn't already exist

@@ -18,7 +18,8 @@ describe('Navbar ', function() {
 
     it('should display the right title from chaiseConfig', function() {
         var actualTitle = element(by.id('brand-text'));
-        var expectedTitle = chaiseConfig.headTitle;
+        // Should be default value set by `setConfigJson()`
+        var expectedTitle = "Chaise";
         expect(actualTitle.getText()).toEqual(expectedTitle);
     });
 

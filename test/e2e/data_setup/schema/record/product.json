@@ -401,7 +401,6 @@
                  "id"], "comment": "Accommodation Image"}
             ]
         },
-
         "tag:isrd.isi.edu,2016:visible-foreign-keys" : {
           "*" : [
               ["product-record", "fk_booking_accommodation"],
@@ -429,6 +428,13 @@
               "format_type": "BAG"
             }
           ]
+        },
+        "tag:isrd.isi.edu,2018:citation": {
+            "template_engine": "handlebars",
+            "journal_pattern": "{{title}}",
+            "year_pattern":    "{{formatDate RCT 'YYYY'}}",
+            "url_pattern":     "{{website}}",
+            "id_pattern":      "{{id}}"
         }
       }
     },

@@ -783,12 +783,32 @@ var recordPage = function() {
         return element(by.id("show-all-related-tables"));
     };
 
-    this.getPermalinkButton = function() {
+    this.getShareButton = function() {
+        return element(by.id('share'));
+    };
+
+    this.getPermalinkText = function() {
         return element(by.id('permalink'));
     };
 
     this.getModalText = function() {
         return element(by.css(".modal-body"));
+    };
+
+    this.getModalListElements = function() {
+        return this.getModalText().all(by.tagName('li'));
+    };
+
+    this.getShareLinkHeader = function() {
+        return element(by.id("share-link")).element(by.tagName('h2'));
+    };
+
+    this.getCitationHeader = function() {
+        return element(by.id("citation")).element(by.tagName('h2'));
+    };
+
+    this.getCitationText = function() {
+        return element(by.id("citation-text"));
     };
 
     this.getErrorModalTitle = function(){

@@ -41,8 +41,9 @@ ermrestApp.provider('ermrest', function () {
 	}
 });
 
-ermrestApp.config(['ermrestProvider',
-                   function(ermrestProvider) {
+ermrestApp.config(['ConfigUtilsProvider', 'ermrestProvider',
+                   function(ConfigUtilsProvider, ermrestProvider) {
 	ermrestProvider.setCatalog(1);
 	ermrestProvider.setLayout('list');
+    ConfigUtilsProvider.$get().setConfigJSON();
 }]);
