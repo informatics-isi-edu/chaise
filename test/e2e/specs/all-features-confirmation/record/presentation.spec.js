@@ -1,5 +1,6 @@
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordHelpers = require('../../../utils/record-helpers.js');
+var recordSetHelpers = require('../../../utils/recordset-helpers.js');
 var testParams = {
     table_name: "accommodation",
     key: {
@@ -11,6 +12,7 @@ var testParams = {
     subTitle: "Accommodations",
     tableComment: "List of different types of accommodations",
     tables_order: ["accommodation_image (showing first 2 results)", "media (no results found)"],
+    file_names: ["Accommodations.csv", "accommodation.zip"],
     related_table_name_with_page_size_annotation: "accommodation_image",
     page_size: 2,
     related_tables: [
@@ -186,7 +188,23 @@ describe('View existing record,', function() {
         });
 
         describe("Presentation ,", function() {
+            if (!process.env.TRAVIS) {
+                beforeAll(function() {
+                    // delete files that may have been downloaded before
+                    console.log("delete files");
+                    recordSetHelpers.deleteDownloadedFiles(testParams.file_names);
+                });
+            }
+
             recordHelpers.testPresentation(testParams);
+
+            if (!process.env.TRAVIS) {
+                afterAll(function() {
+                    // delete files that have been downloaded during tests
+                    console.log("delete files");
+                    recordSetHelpers.deleteDownloadedFiles(testParams.file_names);
+                });
+            }
         });
 
     });

@@ -1,5 +1,6 @@
 var chaisePage = require('../utils/chaise.page.js');
 var mustache = require('../../../../ermrestjs/vendor/mustache.min.js');
+var fs = require('fs');
 var EC = protractor.ExpectedConditions;
 
 exports.testPresentation = function (tableParams) {
@@ -39,12 +40,14 @@ exports.testPresentation = function (tableParams) {
         var editButton = chaisePage.recordPage.getEditRecordButton(),
             createButton = chaisePage.recordPage.getCreateRecordButton(),
             deleteButton = chaisePage.recordPage.getDeleteRecordButton(),
+            exportButton = chaisePage.recordsetPage.getExportDropdown(),
             showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton();
 
         browser.wait(EC.elementToBeClickable(editButton), browser.params.defaultTimeout);
         browser.wait(EC.elementToBeClickable(createButton), browser.params.defaultTimeout);
         browser.wait(EC.elementToBeClickable(deleteButton), browser.params.defaultTimeout);
         browser.wait(EC.elementToBeClickable(showAllRTButton), browser.params.defaultTimeout);
+        browser.wait(EC.elementToBeClickable(exportButton), browser.params.defaultTimeout);
 
         editButton.isDisplayed().then(function (bool) {
             expect(bool).toBeTruthy();
@@ -62,10 +65,71 @@ exports.testPresentation = function (tableParams) {
             expect(bool).toBeTruthy();
         });
 
+        exportButton.isDisplayed().then(function (bool) {
+            expect(bool).toBeTruthy();
+        });
+
         chaisePage.recordPage.getPermalinkButton().isDisplayed().then(function (bool) {
             expect(bool).toBeTruthy();
         });
     });
+
+    it("should have '2' options in the dropdown menu.", function (done) {
+        chaisePage.recordsetPage.getExportDropdown().click().then(function () {
+            expect(chaisePage.recordsetPage.getExportOptions().count()).toBe(2, "incorrect number of export options");
+            // close the dropdown
+            return chaisePage.recordsetPage.getExportDropdown().click();
+        }).then(function () {
+            done();
+        }).catch(function (err) {
+            console.log(err);
+            done.fail();
+        });
+    });
+
+    if (!process.env.TRAVIS) {
+        it("should have 'CSV' as a download option and download the file.", function(done) {
+            chaisePage.recordsetPage.getExportDropdown().click().then(function () {
+                var csvOption = chaisePage.recordsetPage.getExportOption("CSV");
+                expect(csvOption.getText()).toBe("CSV");
+                return csvOption.click();
+            }).then(function () {
+                browser.wait(function() {
+                    return fs.existsSync(process.env.PWD + "/test/e2e/" + tableParams.file_names[0]);
+                }, browser.params.defaultTimeout).then(function () {
+                    done();
+                }, function () {
+                    expect(false).toBeTruthy("Accommodations.csv was not downloaded");
+                });
+            }).catch(function (err) {
+                console.log(err);
+                done.fail();
+            });
+        });
+
+        it("should have 'BDBag' as a download option and download the file.", function(done) {
+            chaisePage.recordsetPage.getExportDropdown().click().then(function () {
+                var bagOption = chaisePage.recordsetPage.getExportOption("BDBag");
+                expect(bagOption.getText()).toBe("BDBag");
+                return bagOption.click();
+            }).then(function () {
+                return chaisePage.waitForElement(chaisePage.recordsetPage.getExportModal());
+            }).then(function () {
+                return chaisePage.waitForElementInverse(chaisePage.recordsetPage.getExportModal());
+            }).then(function () {
+                browser.wait(function() {
+                    return fs.existsSync(process.env.PWD + "/test/e2e/" + tableParams.file_names[1]);
+                }, browser.params.defaultTimeout).then(function () {
+                    done();
+                }, function () {
+                    expect(false).toBeTruthy("accommodation.zip was not downloaded");
+                });
+            }).catch(function (err) {
+                console.log(err);
+                done.fail();
+            });
+        });
+    }
 
 	it("should render columns which are specified to be visible and in order", function() {
 		var columns = tableParams.columns.filter(function(c) {return c.value != null;});
@@ -550,7 +614,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 					it ("`Edit` button should be visible to switch to tabular mode.", function () {
 						// revert is `Display`
 						expect(markdownToggleLink.isDisplayed()).toBeTruthy();
-						expect(markdownToggleLink.getText()).toBe("Edit");						
+						expect(markdownToggleLink.getText()).toBe("Edit");
 						chaisePage.recordPage.getColumnCommentHTML(markdownToggleLink.element(by.cssContainingText(".hide-tooltip-border", "Edit"))).then(function(comment){
 							expect(comment).toBe("'Edit " + params.displayname + " related to this " + params.baseTable + "'", "Incorrect tooltip on Edit button");
 						});
