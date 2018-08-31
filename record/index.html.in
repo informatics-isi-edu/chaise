@@ -39,6 +39,9 @@
                         Related Records
                     </strong>
                 </a>&nbsp;&nbsp;
+                <!-- download CSV included by default -->
+                <export has-values="recordValues.length>0" reference="reference" style="position:relative;" disabled="!displayReady"></export>
+                &nbsp;&nbsp;
                 <a id="permalink" ng-href="{{::ctrl.permalink()}}" uib-tooltip={{::ctrl.tooltip.permalink}} tooltip-placement="bottom">
                     <span class="glyphicon glyphicon-bookmark"></span><strong> Permalink</strong>
                 </a>
