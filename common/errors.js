@@ -146,6 +146,7 @@
     .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$window', 'errorMessages', 'Errors', 'DataUtils', 'UriUtils', 'modalUtils', '$document',
           function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $window, errorMessages, Errors, DataUtils, UriUtils, modalUtils, $document) {
 
+        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
         var reloadCb = function() {
             window.location.reload();
         };
@@ -251,6 +252,7 @@
                 showLogin = false,
                 message, errorStatus;
 
+
             $rootScope.error = true;    // used to hide spinner in conjunction with a css property
 
             // don't throw an angular error if in search/viewer or one has already been thrown
@@ -308,8 +310,7 @@
  */
 var logError = function (error) {
     if (!ERMrest) return;
-
-    var ermrestUri = chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : window.location.origin + '/ermrest';
+    var ermrestUri = (typeof chaiseConfig != 'undefined' && chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : window.location.origin + '/ermrest');
     ERMrest.logError(error, ermrestUri).then(function () {
         console.log("logged the error");
     }).catch(function (err) {
@@ -326,7 +327,7 @@ window.onerror = function() {
 
     var canClose = false;
 
-    if (chaiseConfig && chaiseConfig.allowErrorDismissal) {
+    if (typeof chaiseConfig != 'undefined' && chaiseConfig.allowErrorDismissal) {
         canClose = true;
     }
 
@@ -337,7 +338,7 @@ window.onerror = function() {
         arguments[3]
     ].join(':');
 
-    var redirectLink = (chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : window.location.origin);
+    var redirectLink = (typeof chaiseConfig != 'undefined' && chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : window.location.origin);
 
     if (!document || !document.body) return;
 

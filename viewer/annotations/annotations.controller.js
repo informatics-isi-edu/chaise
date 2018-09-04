@@ -4,6 +4,7 @@
     angular.module('chaise.viewer')
 
     .controller('AnnotationsController', ['AuthService', 'annotations', 'comments', 'anatomies', 'AnnotationsService', 'CommentsService', '$window', '$rootScope','$scope', '$timeout', '$uibModal', 'AlertsService', 'UriUtils', function AnnotationsController(AuthService, annotations, comments, anatomies, AnnotationsService, CommentsService, $window, $rootScope, $scope, $timeout, $uibModal, AlertsService, UriUtils) {
+        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
         var vm = this;
         vm.annotations = annotations;
         vm.anatomies = anatomies;

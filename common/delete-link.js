@@ -22,7 +22,8 @@
 (function() {
     'use strict';
     angular.module('chaise.delete', ['chaise.utils'])
-    .directive('deleteLink', ['modalUtils', 'UriUtils', function(modalUtils, UriUtils) {
+    .directive('deleteLink', ['modalUtils', 'UriUtils', '$rootScope', function(modalUtils, UriUtils, $rootScope) {
+        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
         var TEMPLATES_PATH = UriUtils.chaiseDeploymentPath() + 'common/templates/delete-link/';
         var CONFIRM_DELETE =  (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) ? true : false;
 

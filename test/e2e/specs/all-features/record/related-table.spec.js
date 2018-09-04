@@ -55,6 +55,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         schemaName: "product-unordered-related-tables-links",
         displayname: "booking",
         name: "booking",
+        baseTable:"Accommodations",
         count: 6,
         canDelete: true,
         canEdit: true,
@@ -108,6 +109,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         schemaName: "product-unordered-related-tables-links",
         displayname: "schedule",
         name: "schedule",
+        baseTable:"Accommodations",
         count: 2,
         viewMore: {
             displayname: "schedule",
@@ -123,6 +125,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         schemaName: "product-unordered-related-tables-links",
         displayname: "media",
         name: "media",
+        baseTable:"Accommodations",
         count: 1,
         canDelete: true,
         canEdit: false,
@@ -139,6 +142,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         displayname: "association_table",
         name: "association_table",
         relatedName: "related_table",
+        baseTable:"Accommodations",
         isAssociation: true,
         viewMore: {
             displayname: "related_table",
@@ -180,6 +184,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         displayname: "accommodation_image",
         name: "accommodation_image",
         relatedName: "related_name",
+        baseTable:"Accommodations",
         count: 3,
         page_size: 2,
         isAssociation: true,
@@ -218,6 +223,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         displayname: "association_table_markdown",
         name: "association_table_markdown",
         relatedName: "related_table",
+        baseTable:"Accommodations",
         isAssociation: true,
         isMarkdown: true,
         count: 1,
@@ -233,6 +239,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         schemaName: "product-unordered-related-tables-links",
         displayname: "related_table_2",
         name: "related_table_2",
+        baseTable:"Accommodations",
         viewMore: {
             displayname: "related_table_2",
             filter: "base table association related: Super 8 North Hollywood Motel"
@@ -258,6 +265,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         schemaName: "product-unordered-related-tables-links",
         displayname: "table_w_aggregates",
         name: "table_w_aggregates",
+        baseTable:"Accommodations",
         viewMore: {
             displayname: "table_w_aggregates",
             filter: "fk_to_accommodation : Super 8 North Hollywood Motel"

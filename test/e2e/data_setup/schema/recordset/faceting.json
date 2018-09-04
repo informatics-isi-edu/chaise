@@ -149,6 +149,50 @@
                     "type": {
                         "typename": "text"
                     }
+                },
+                {
+                    "name": "jsonb_sort_col",
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "col_w_column_order",
+                    "type": {
+                        "typename": "text"
+                    },
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:column-display": {
+                            "compact/select": {
+                                "column_order": ["col_w_column_order_column_order"]
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "col_w_column_order_false",
+                    "type": {
+                        "typename": "text"
+                    },
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:column-display": {
+                            "compact/select": {
+                                "column_order": false
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "col_w_column_order_false_facet_order",
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "col_w_column_order_column_order",
+                    "type": {
+                        "typename": "text"
+                    }
                 }
             ],
             "annotations": {
@@ -170,13 +214,15 @@
                             {"source": "longtext_col", "comment": "A lengthy comment for the facet of the longtext_col. This should be displyed properly in the facet."},
                             {"source": "markdown_col"},
                             {"source": "boolean_col"},
-                            {"source": "jsonb_col"},
+                            {"source": "jsonb_col", "order": [{"num_occurrences": true, "descending": true}, "jsonb_sort_col"]},
                             {"source": [{"outbound": ["faceting", "main_fk1"]}, "id"], "markdown_name": "**F1**"},
                             {"source": [{"outbound": ["faceting", "main_fk2"]}, "id"], "open": true, "comment": "open facet"},
                             {"source": [{"inbound": ["faceting", "main_f3_assoc_fk1"]}, {"outbound": ["faceting", "main_f3_assoc_fk2"]}, "term"]},
                             {"source": [{"inbound": ["faceting", "f4_fk1"]}, "id"], "entity": false, "ux_mode": "choices"},
                             {"source": [{"outbound": ["faceting", "main_fk1"]}, "term"], "markdown_name": "F1 with Term", "comment": "F1 with Term comment"},
                             {"source": "text_col_2", "ux_mode": "check_presence", "markdown_name": "Check Presence Text"},
+                            {"source": "col_w_column_order_false", "order": [{"column": "col_w_column_order_false_facet_order", "descending": true}]},
+                            {"source": "col_w_column_order", "hide_num_occurrences": true},
                             {"source": "col_w_long_values"}
                         ]
                     }

@@ -61,7 +61,8 @@
         * @example: <record-action-bar related-table-ref-display="tableModel.reference.display.type" tab-model-display="tableModel.displayType"
         *        toggle-related-table-display-type='toggleRelatedTableDisplayType({dataModel:tableModel})' can-edit-related="canEditRelated({ref:relatedReferenceDisplayTable[$index]})"
         *        can-create-related="canCreateRelated0({ref:tableModel.reference})"
-        *        add-related-record="addRelatedRecord({ref:tableModel.reference})" to-record-set="toRecordSet({ref:tableModel.reference})">
+        *        add-related-record="addRelatedRecord({ref:tableModel.reference})" to-record-set="toRecordSet({ref:tableModel.reference})"
+        *        displayname="tableModel.reference.displayname" base-table-name="tableModel.baseTableName">
         *        </record-action-bar>
         * @param {string} relatedTableRefDisplay: Related table ref. display type
         * @param {string} tabModelDisplay: Display type of individual model
@@ -69,6 +70,8 @@
         * @param {callback} canCreateRelated: function to check canCreate()
         * @param {callback} addRelatedRecord: function to check add feature
         * @param {callback} toRecordSet:view more record function
+        * @param {string} displayname: Display name of related table
+        * @param {string} baseTableName: Display name of base table
         */
         .directive('recordActionBar', ['UriUtils', function(UriUtils) {
             return {
@@ -81,12 +84,29 @@
                     canEditRelated: '&',
                     canCreateRelated: '&',
                     addRelatedRecord: '&',
-                    toRecordSet: '&'
+                    toRecordSet: '&',
+                    displayname: '=',
+                    baseTableName: '='
                 },
                 templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/recordAction.html',
+                controller: "RecordActionController",
+                controllerAs: "ctrl",
                 link: function(scope, ele, attr) {
                     scope.tabtype = attr.tabtype;
                 }
             };
+        }])
+        .controller('RecordActionController', ['DataUtils', '$scope', function RecordActionController(DataUtils, $scope) {
+            $scope.tooltip = {};
+            if (!$scope.displayname.isHTML) {
+                $scope.tooltip.entityName = DataUtils.makeSafeHTML($scope.displayname.value);
+            } else {
+                $scope.tooltip.entityName = $scope.displayname.value;
+            }
+            if (!$scope.baseTableName.isHTML) {
+                $scope.tooltip.baseTableName = DataUtils.makeSafeHTML($scope.baseTableName.value);
+            } else {
+                $scope.tooltip.baseTableName = $scope.baseTableName.value;
+            }
         }]);
 })();
