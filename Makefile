@@ -231,7 +231,7 @@ JS=scripts
 JS_DEPS=$(JS)/vendor/jquery-1.11.1.min.js \
 	$(JS)/vendor/jquery-ui-tooltip.min.js \
 	$(JS)/vendor/jquery.nouislider.all.min.js \
-	$(JS)/vendor/bootstrap.min.js \
+	$(JS)/vendor/bootstrap-3.3.7.min.js \
 	$(JS)/vendor/jquery.cookie.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-sanitize.js \
@@ -315,7 +315,7 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.3.1.min.js \
 	$(COMMON)/upload.js \
 	$(COMMON)/recordCreate.js \
 	$(COMMON)/resizable.js \
-	$(JS)/vendor/bootstrap.js \
+	$(JS)/vendor/bootstrap-3.3.7.min.js \
 	$(JS)/vendor/ui-bootstrap-tpls-2.5.0.min.js
 
 RECORD_JS_SOURCE=$(RECORD_ASSETS)/record.app.js \
@@ -347,7 +347,7 @@ VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.3.1.min.js \
 	$(COMMON)/vendor/re-tree.js \
 	$(COMMON)/vendor/ng-device-detector.js \
 	$(COMMON)/vendor/angular-cookies.min.js \
-	$(JS)/vendor/bootstrap.js \
+	$(JS)/vendor/bootstrap-3.3.7.min.js \
 	$(JS)/vendor/ui-bootstrap-tpls-2.5.0.min.js \
 	$(JS)/vendor/select.js
 
@@ -414,7 +414,7 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.3.1.min.js \
 	$(COMMON)/markdownPreview.js \
 	$(COMMON)/footer.js \
 	$(COMMON)/recordCreate.js \
-	$(JS)/vendor/bootstrap.js \
+	$(JS)/vendor/bootstrap-3.3.7.min.js \
 	$(JS)/vendor/ui-bootstrap-tpls-2.5.0.min.js \
 	$(JS)/vendor/select.js \
 	$(JS)/vendor/angular-datepicker.js \
@@ -449,7 +449,7 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.3.1.min.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-plotly.js \
 	$(JS)/vendor/angular-sanitize.js \
-	$(JS)/vendor/bootstrap.js \
+	$(JS)/vendor/bootstrap-3.3.7.min.js \
 	$(JS)/vendor/ui-bootstrap-tpls-2.5.0.min.js \
 	$(COMMON)/vendor/angular-animate.min.js \
 	$(COMMON)/vendor/angular-scroll.min.js \
