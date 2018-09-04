@@ -79,11 +79,11 @@ exports.testPresentation = function (tableParams) {
     it("should show the share dialog when clicking the share button with permalink and citation present.", function(done) {
         var shareButton = chaisePage.recordPage.getShareButton();
 
-        shareButton.click().then(function () {
-            var modalContent = element(by.css('.modal-content'));
+        browser.wait(EC.elementToBeClickable(shareButton), browser.params.defaultTimeout);
 
+        shareButton.click().then(function () {
             // wait for dialog to open
-            chaisePage.waitForElement(modalContent);
+            chaisePage.waitForElement(chaisePage.recordPage.getShareModal());
 
             // verify modal dialog contents
             expect(chaisePage.recordEditPage.getModalTitle().element(by.tagName("strong")).getText()).toBe("Share Citation", "Share citation modal title is incorrect");
@@ -99,9 +99,15 @@ exports.testPresentation = function (tableParams) {
             expect(chaisePage.recordPage.getCitationHeader().getText()).toBe("Citation", "Citation header is incorrect");
             expect(chaisePage.recordPage.getCitationText().getText()).toBe(tableParams.citationParams.citation, "citation text is incorrect");
 
+            return chaisePage.recordPage.getShareModal();
+        }).then(function (modal) {
+            // disable animations in modal so that it doesn't "fade out" (instead it instantly disappears when closed) which we can't track with waitFor conditions
+            modal.allowAnimations(false);
+
             // close dialog
             return chaisePage.recordEditPage.getModalTitle().element(by.tagName("button")).click();
         }).then(function () {
+
             done();
         }).catch(function(err){
             console.log(err);
@@ -110,7 +116,10 @@ exports.testPresentation = function (tableParams) {
     });
 
     it("should have '2' options in the dropdown menu.", function (done) {
-        chaisePage.recordsetPage.getExportDropdown().click().then(function () {
+        var exportButton = chaisePage.recordsetPage.getExportDropdown();
+        browser.wait(EC.elementToBeClickable(exportButton), browser.params.defaultTimeout);
+
+        chaisePage.clickButton(exportButton).then(function () {
             expect(chaisePage.recordsetPage.getExportOptions().count()).toBe(2, "incorrect number of export options");
             // close the dropdown
             return chaisePage.recordsetPage.getExportDropdown().click();
