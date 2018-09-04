@@ -333,7 +333,7 @@ RECORD_CSS_SOURCE=$(RECORD_ASSETS)/record.css
 # JavaScript and CSS source for Viewer app
 VIEWER_ASSETS=viewer
 
-VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-1.11.1.min.js \
+VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.3.1.min.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-sanitize.js \
 	$(COMMON)/alerts.js \
