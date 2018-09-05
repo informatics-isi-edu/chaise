@@ -795,6 +795,10 @@ var recordPage = function() {
         return element(by.css(".modal-body"));
     };
 
+    this.getShareModal = function() {
+        return element(by.css(".share-citation"));
+    };
+
     this.getModalListElements = function() {
         return this.getModalText().all(by.tagName('li'));
     };
