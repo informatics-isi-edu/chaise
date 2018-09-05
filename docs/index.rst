@@ -1,5 +1,5 @@
 Web interface (Chaise)
-====================
+=======================
 
 .. toctree::
    :maxdepth: 4
