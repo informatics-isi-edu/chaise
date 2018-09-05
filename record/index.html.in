@@ -78,11 +78,11 @@
                                 displayname="rtm.displayname" base-table-name="rtm.baseTableName">
                             </record-action-bar>
                             <div class="row">
-                                <div class="col-xs-12">
-                                    <div ng-show="rtm.displayType == 'markdown'">
+                                <div class="col-xs-12" ng-if="rtm.open">
+                                    <div ng-if="rtm.displayType == 'markdown'">
                                         <span class="markdown-container" ng-bind-html="rtm.tableModel.page.content | trustedHTML"></span>
                                     </div>
-                                    <div ng-show="rtm.displayType != 'markdown'">
+                                    <div ng-if="rtm.displayType != 'markdown'">
                                         <record-table class="related-table" id="rt-{{::ctrl.makeSafeIdAttr(rtm.displayname.value)}}" vm="rtm.tableModel" parent-reference="reference"></record-table>
                                     </div>
                                 </div>
