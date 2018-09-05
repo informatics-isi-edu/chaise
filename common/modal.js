@@ -160,6 +160,8 @@
         vm.mode = params.mode;
 
         vm.hasLoaded = false;
+
+        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
         var reference = vm.reference = params.reference;
         var limit = (!angular.isUndefined(reference) && !angular.isUndefined(reference.display) && reference.display.defaultPageSize) ? reference.display.defaultPageSize : 25;
         var comment = (typeof params.comment === "string") ? params.comment: reference.table.comment;
@@ -260,10 +262,21 @@
         }
     }])
 
-    .controller('ExportProgressController', ['$uibModalInstance', 'params', function ConfirmDeleteController($uibModalInstance, params) {
+    .controller('ExportProgressController', ['$uibModalInstance', 'params', function ($uibModalInstance, params) {
         var vm = this;
         vm.cancel = cancel;
         vm.params = params;
+        function cancel() {
+            $uibModalInstance.dismiss('cancel');
+        }
+    }])
+
+    .controller('ShareCitationController', ['$uibModalInstance', 'params', function ($uibModalInstance, params) {
+        var vm = this;
+        vm.cancel = cancel;
+        vm.citation = params.citation;
+        vm.permalink = params.permalink;
+
         function cancel() {
             $uibModalInstance.dismiss('cancel');
         }

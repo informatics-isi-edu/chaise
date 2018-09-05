@@ -16,7 +16,7 @@ var config = pConfig.getConfig({
     },
 
 	// Specify chaiseConfigPath
-    chaiseConfigFilePath: 'test/e2e/specs/navbar/no-logo-no-brandtext/chaise-config.js'
+    chaiseConfigFilePath: 'test/e2e/specs/all-features-confirmation/chaise-config.js'
 });
 config.rootElement = '#main-content';
 exports.config = config;
