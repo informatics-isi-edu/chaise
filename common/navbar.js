@@ -11,7 +11,9 @@
         var root = chaiseConfig.navbarMenu;
         if (root) {
             // Set default newTab property at root node
-            root.newTab = true;
+            if (!root.hasOwnProperty('newTab')) {
+                root.newTab = true;
+            }
             var q = [root];
             while (q.length > 0) {
                 var obj = q.shift();
