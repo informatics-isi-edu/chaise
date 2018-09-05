@@ -37,6 +37,8 @@ var chaiseConfig = {
       chosenValue: "Expression microarray - gene"
     },
     navbarMenu: {
+        // The optional newTab property can be defined at any level. If undefined at root, newTab is treated as false
+        // Each child menu item checks for a newTab property on itself, if nothing is set, the child inherits from it's parent.
         newTab: true,
         children: [
             // {
