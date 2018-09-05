@@ -39,6 +39,9 @@
                         Related Records
                     </strong>
                 </a>&nbsp;&nbsp;
+                <!-- download CSV included by default -->
+                <export allow-export="displayReady" reference="reference" style="position:relative;" disabled="!displayReady"></export>
+                &nbsp;&nbsp;
                 <a id="share" ng-click="::ctrl.sharePopup()" uib-tooltip="Click here to show the share dialog." tooltip-placement="bottom">
                     <span class="glyphicon glyphicon-share"></span><strong> Share</strong>
                 </a>
