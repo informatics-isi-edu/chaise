@@ -16,8 +16,8 @@ module.exports = function(config) {
     files: [
       'scripts/vendor/angular.js',
       'node_modules/angular-mocks/angular-mocks.js',
-      'scripts/vendor/jquery-latest.min.js',
-      'scripts/vendor/bootstrap.js',
+      'scripts/vendor/jquery-3.3.1.min.js',
+      'scripts/vendor/bootstrap-3.3.7.min.js',
       'scripts/vendor/*.js',
       'scripts/controller/*.js',
       'scripts/*.js',
