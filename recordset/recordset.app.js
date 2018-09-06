@@ -49,8 +49,7 @@
 
     //  Enable log system, if in debug mode
     .config(['$logProvider', function($logProvider) {
-      if(typeof chaiseConfig != 'undefined' && typeof chaiseConfig.debug != 'undefined')
-        $logProvider.debugEnabled(chaiseConfig.debug === true);
+        $logProvider.debugEnabled(chaiseConfig && chaiseConfig.debug === true);
     }])
 
     // Register the 'recordsetModel' object, which can be accessed by other
