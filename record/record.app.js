@@ -9,6 +9,7 @@
         'chaise.alerts',
         'chaise.delete',
         'chaise.errors',
+        'chaise.export',
         'chaise.faceting',
         'chaise.modal',
         'chaise.navbar',
@@ -37,15 +38,22 @@
 
     //  Enable log system, if in debug mode
     .config(['$logProvider', function($logProvider) {
-        $logProvider.debugEnabled(chaiseConfig.debug === true);
+        $logProvider.debugEnabled(chaiseConfig && chaiseConfig.debug === true);
+    }])
+
+    .config(['ConfigUtilsProvider', function(ConfigUtilsProvider) {
+      ConfigUtilsProvider.$get().setConfigJSON();
     }])
 
     .run(['AlertsService', 'DataUtils', 'ERMrest', 'FunctionUtils', 'headInjector', '$log', 'MathUtils', 'messageMap', 'recordAppUtils',  '$rootScope', 'Session', '$timeout', 'UiUtils', 'UriUtils', '$window',
-        function runApp(AlertsService, DataUtils, ERMrest, FunctionUtils, headInjector, $log, MathUtils, messageMap, recordAppUtils, $rootScope, Session, $timeout, UiUtils, UriUtils , $window) {
+        function runApp(AlertsService, DataUtils, ERMrest, FunctionUtils, headInjector, $log, MathUtils, messageMap, recordAppUtils, $rootScope, Session, $timeout, UiUtils, UriUtils, $window) {
 
         var session,
             context = {},
             errorData = {};
+
+        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
+
         $rootScope.displayReady = false;
         $rootScope.showSpinner = false; // this property is set from common modules for controlling the spinner at a global level that is out of the scope of the app
 
@@ -125,6 +133,7 @@
                     }
 
                     model.column = col;
+                    model.baseTableName = $rootScope.reference.displayname;
                     $rootScope.columnModels.push(model);
                 });
 
@@ -142,7 +151,8 @@
                         open: openByDefault,
                         displayType: ref.display.type,
                         displayname: ref.displayname,
-                        tableModel: recordAppUtils.getTableModel(ref, "compact/brief", $rootScope.tuple)
+                        tableModel: recordAppUtils.getTableModel(ref, "compact/brief", $rootScope.tuple),
+                        baseTableName: $rootScope.reference.displayname
                     });
                 });
 

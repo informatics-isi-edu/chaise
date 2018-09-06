@@ -39,8 +39,11 @@
                         Related Records
                     </strong>
                 </a>&nbsp;&nbsp;
-                <a id="permalink" ng-href="{{::ctrl.permalink()}}" uib-tooltip={{::ctrl.tooltip.permalink}} tooltip-placement="bottom">
-                    <span class="glyphicon glyphicon-bookmark"></span><strong> Permalink</strong>
+                <!-- download CSV included by default -->
+                <export allow-export="displayReady" reference="reference" style="position:relative;" disabled="!displayReady"></export>
+                &nbsp;&nbsp;
+                <a id="share" ng-click="::ctrl.sharePopup()" uib-tooltip="Click here to show the share dialog." tooltip-placement="bottom">
+                    <span class="glyphicon glyphicon-share"></span><strong> Share</strong>
                 </a>
             </div>
         </div>
@@ -71,14 +74,15 @@
                             <!-- for different elements inside the accordion -->
                             <record-action-bar tabtype="related" related-table-ref-display="rtm.tableModel.reference.display.type" tab-model-display="rtm.displayType"
                                 toggle-related-table-display-type='ctrl.toggleRelatedTableDisplayType(rtm)' can-edit-related="::ctrl.canEditRelated(rtm.tableModel.reference)" can-create-related="ctrl.canCreateRelated(rtm.tableModel.reference)"
-                                add-related-record="::ctrl.addRelatedRecord(rtm.tableModel.reference)" to-record-set="::ctrl.toRecordSet(rtm.tableModel.reference)">
+                                add-related-record="::ctrl.addRelatedRecord(rtm.tableModel.reference)" to-record-set="::ctrl.toRecordSet(rtm.tableModel.reference)"
+                                displayname="rtm.displayname" base-table-name="rtm.baseTableName">
                             </record-action-bar>
                             <div class="row">
-                                <div class="col-xs-12">
-                                    <div ng-show="rtm.displayType == 'markdown'">
+                                <div class="col-xs-12" ng-if="rtm.open">
+                                    <div ng-if="rtm.displayType == 'markdown'">
                                         <span class="markdown-container" ng-bind-html="rtm.tableModel.page.content | trustedHTML"></span>
                                     </div>
-                                    <div ng-show="rtm.displayType != 'markdown'">
+                                    <div ng-if="rtm.displayType != 'markdown'">
                                         <record-table class="related-table" id="rt-{{::ctrl.makeSafeIdAttr(rtm.displayname.value)}}" vm="rtm.tableModel" parent-reference="reference"></record-table>
                                     </div>
                                 </div>

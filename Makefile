@@ -228,10 +228,10 @@ CSS_SOURCE=$(CSS)/swoop-sidebar.css \
 # JavaScript source and test specs
 JS=scripts
 
-JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
+JS_DEPS=$(JS)/vendor/jquery-1.11.1.min.js \
 	$(JS)/vendor/jquery-ui-tooltip.min.js \
 	$(JS)/vendor/jquery.nouislider.all.min.js \
-	$(JS)/vendor/bootstrap.min.js \
+	$(JS)/vendor/bootstrap-3.3.7.min.js \
 	$(JS)/vendor/jquery.cookie.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-sanitize.js \
@@ -287,7 +287,7 @@ TEMPLATES_DEPS=$(TEMPLATES)/erminit.html \
 # JavaScript and CSS source for Record(2) app
 RECORD_ASSETS=record
 
-RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
+RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.3.1.min.js \
 	$(JS)/vendor/plotly-latest.min.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-plotly.js \
@@ -300,6 +300,7 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/authen.js \
 	$(COMMON)/delete-link.js \
 	$(COMMON)/errors.js \
+	$(COMMON)/export.js \
 	$(COMMON)/faceting.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/modal.js \
@@ -315,7 +316,7 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/upload.js \
 	$(COMMON)/recordCreate.js \
 	$(COMMON)/resizable.js \
-	$(JS)/vendor/bootstrap.js \
+	$(JS)/vendor/bootstrap-3.3.7.min.js \
 	$(JS)/vendor/ui-bootstrap-tpls-2.5.0.min.js
 
 RECORD_JS_SOURCE=$(RECORD_ASSETS)/record.app.js \
@@ -333,7 +334,7 @@ RECORD_CSS_SOURCE=$(RECORD_ASSETS)/record.css
 # JavaScript and CSS source for Viewer app
 VIEWER_ASSETS=viewer
 
-VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
+VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.3.1.min.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-sanitize.js \
 	$(COMMON)/alerts.js \
@@ -347,7 +348,7 @@ VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/vendor/re-tree.js \
 	$(COMMON)/vendor/ng-device-detector.js \
 	$(COMMON)/vendor/angular-cookies.min.js \
-	$(JS)/vendor/bootstrap.js \
+	$(JS)/vendor/bootstrap-3.3.7.min.js \
 	$(JS)/vendor/ui-bootstrap-tpls-2.5.0.min.js \
 	$(JS)/vendor/select.js
 
@@ -383,7 +384,7 @@ VIEWER_CSS_SOURCE=$(VIEWER_ASSETS)/viewer.css
 # JavaScript and CSS source for RecordEdit app
 RE_ASSETS=recordedit
 
-RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
+RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.3.1.min.js \
 	$(JS)/vendor/plotly-latest.min.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-plotly.js \
@@ -414,7 +415,7 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
 	$(COMMON)/markdownPreview.js \
 	$(COMMON)/footer.js \
 	$(COMMON)/recordCreate.js \
-	$(JS)/vendor/bootstrap.js \
+	$(JS)/vendor/bootstrap-3.3.7.min.js \
 	$(JS)/vendor/ui-bootstrap-tpls-2.5.0.min.js \
 	$(JS)/vendor/select.js \
 	$(JS)/vendor/angular-datepicker.js \
@@ -444,12 +445,12 @@ RE_CSS_MDHELP=$(RE_ASSETS)/mdHelpStyle.min.css
 # JavaScript and CSS source for RecordSet app
 RECSET_ASSETS=recordset
 
-RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-latest.min.js \
+RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.3.1.min.js \
 	$(JS)/vendor/plotly-latest.min.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-plotly.js \
 	$(JS)/vendor/angular-sanitize.js \
-	$(JS)/vendor/bootstrap.js \
+	$(JS)/vendor/bootstrap-3.3.7.min.js \
 	$(JS)/vendor/ui-bootstrap-tpls-2.5.0.min.js \
 	$(COMMON)/vendor/angular-animate.min.js \
 	$(COMMON)/vendor/angular-scroll.min.js \

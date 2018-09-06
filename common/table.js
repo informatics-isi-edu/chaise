@@ -87,8 +87,8 @@
      *
      */
     .factory('recordTableUtils',
-            ['AlertsService', '$document', 'modalBox', 'DataUtils', '$timeout','Session', '$q', 'tableConstants', '$rootScope', '$log', '$window', '$cookies', 'defaultDisplayname', 'MathUtils', 'UriUtils', 'logActions',
-            function(AlertsService, $document, modalBox, DataUtils, $timeout, Session, $q, tableConstants, $rootScope, $log, $window, $cookies, defaultDisplayname, MathUtils, UriUtils, logActions) {
+            ['AlertsService', '$document', 'messageMap', 'modalBox', 'DataUtils', '$timeout','Session', '$q', 'tableConstants', '$rootScope', '$log', '$window', '$cookies', 'defaultDisplayname', 'MathUtils', 'UriUtils', 'logActions',
+            function(AlertsService, $document, messageMap, modalBox, DataUtils, $timeout, Session, $q, tableConstants, $rootScope, $log, $window, $cookies, defaultDisplayname, MathUtils, UriUtils, logActions) {
 
         function FlowControlObject(maxRequests) {
             this.maxRequests = maxRequests || tableConstants.MAX_CONCURENT_REQUEST;
@@ -652,9 +652,11 @@
         function registerTableCallbacks(scope, elem, attr) {
             if (!scope.vm) scope.vm = {};
 
+            scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
             scope.noSelect = modalBox.noSelect;
             scope.singleSelect = modalBox.singleSelectMode;
             scope.multiSelect = modalBox.multiSelectMode;
+            scope.tooltip = messageMap.tooltip;
 
             scope.$root.checkReferenceURL = function (ref) {
                 var refUri = ref.isAttributeGroup ? ref.ermrestPath : ref.location.ermrestPath;
@@ -1099,7 +1101,7 @@
         };
     }])
 
-    .directive('recordTable', ['DataUtils', 'recordTableUtils', 'messageMap', 'UriUtils', function(DataUtils, recordTableUtils, messageMap, UriUtils) {
+    .directive('recordTable', ['recordTableUtils', 'UriUtils', function(recordTableUtils, UriUtils) {
 
         return {
             restrict: 'E',
@@ -1116,9 +1118,6 @@
             },
             link: function (scope, elem, attr) {
                 recordTableUtils.registerTableCallbacks(scope, elem, attr);
-
-                scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
-                scope.tooltip = messageMap.tooltip;
             }
         };
     }])

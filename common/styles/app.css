@@ -83,6 +83,10 @@ span[uib-tooltip], .show-tooltip-border[uib-tooltip] {
     border-bottom: 1px dotted black;
 }
 
+.hide-tooltip-border[uib-tooltip] {
+    border-bottom: none;
+}
+
 .tooltip-inner {
     text-align: left;
 }
@@ -774,6 +778,7 @@ input.search-progress {
     opacity: 0.7 !important;
 }
 
+/* .window-class first */
 .modal-login-instruction .modal-dialog {
     position: absolute;
     top: 50%;
@@ -1102,7 +1107,7 @@ footer .container1 {
     text-align: right;
 }
 /************* Profile Card ****************/
-#profile-modal li{
+#profile-modal li, .share-citation li{
     list-style-type : disc;
 }
 .modal-dialog .profileValue{

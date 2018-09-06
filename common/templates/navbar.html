@@ -10,7 +10,7 @@
                 </button>
                 <a class="navbar-brand" ng-href="{{brandURL || '/' }}">
                     <span ng-if="brandImage"><img id="brand-image" ng-src="{{brandImage}}"></span>
-                    <span id="brand-text" ng-bind="brandText || 'Chaise'"></span>
+                    <span id="brand-text" ng-bind="brandText"></span>
                 </a>
             </div>
 
@@ -21,13 +21,7 @@
                     <li ng-repeat="item in menu">
                         <a ng-if="!item.children" ng-href="{{item.url}}" target="{{item.newTab ? '_blank' : '_self'}}">{{item.name}}</a>
                         <a ng-if="item.children" class="dropdown-toggle" data-toggle="dropdown">{{item.name}} <span class="caret"></span></a>
-                        <ul ng-if="item.children" class="dropdown-menu">
-                            <li ng-repeat="childItem in item.children" ng-class="{'dropdown-submenu': childItem.children}">
-                                <a ng-if="!childItem.children" ng-href="{{childItem.url}}" target="{{childItem.newTab ? '_blank' : '_self'}}">{{childItem.name}}</a>
-                                <a ng-if="childItem.children" class="dropdown-toggle" data-toggle="dropdown">{{childItem.name}}</a>
-                                <ul ng-if="childItem.children" navbar-menu menu="childItem.children" class="dropdown-menu"></ul>
-                            </li>
-                        </ul>
+                        <ul ng-if="item.children" navbar-menu menu="item.children" class="dropdown-menu"></ul>
                     </li>
                 </ul>
             </div><!--/.nav-collapse -->

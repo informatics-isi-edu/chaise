@@ -1,5 +1,6 @@
 var chaisePage = require('../utils/chaise.page.js');
 var mustache = require('../../../../ermrestjs/vendor/mustache.min.js');
+var fs = require('fs');
 var EC = protractor.ExpectedConditions;
 
 exports.testPresentation = function (tableParams) {
@@ -39,12 +40,16 @@ exports.testPresentation = function (tableParams) {
         var editButton = chaisePage.recordPage.getEditRecordButton(),
             createButton = chaisePage.recordPage.getCreateRecordButton(),
             deleteButton = chaisePage.recordPage.getDeleteRecordButton(),
-            showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton();
+            exportButton = chaisePage.recordsetPage.getExportDropdown(),
+            showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton(),
+            shareButton = chaisePage.recordPage.getShareButton();
 
         browser.wait(EC.elementToBeClickable(editButton), browser.params.defaultTimeout);
         browser.wait(EC.elementToBeClickable(createButton), browser.params.defaultTimeout);
         browser.wait(EC.elementToBeClickable(deleteButton), browser.params.defaultTimeout);
         browser.wait(EC.elementToBeClickable(showAllRTButton), browser.params.defaultTimeout);
+        browser.wait(EC.elementToBeClickable(exportButton), browser.params.defaultTimeout);
+        browser.wait(EC.elementToBeClickable(shareButton), browser.params.defaultTimeout);
 
         editButton.isDisplayed().then(function (bool) {
             expect(bool).toBeTruthy();
@@ -62,10 +67,113 @@ exports.testPresentation = function (tableParams) {
             expect(bool).toBeTruthy();
         });
 
-        chaisePage.recordPage.getPermalinkButton().isDisplayed().then(function (bool) {
+        exportButton.isDisplayed().then(function (bool) {
+            expect(bool).toBeTruthy();
+        });
+
+        shareButton.isDisplayed().then(function (bool) {
             expect(bool).toBeTruthy();
         });
     });
+
+    it("should show the share dialog when clicking the share button with permalink and citation present.", function(done) {
+        var shareButton = chaisePage.recordPage.getShareButton();
+
+        browser.wait(EC.elementToBeClickable(shareButton), browser.params.defaultTimeout);
+
+        shareButton.click().then(function () {
+            // wait for dialog to open
+            chaisePage.waitForElement(chaisePage.recordPage.getShareModal());
+
+            // verify modal dialog contents
+            expect(chaisePage.recordEditPage.getModalTitle().element(by.tagName("strong")).getText()).toBe("Share Citation", "Share citation modal title is incorrect");
+            expect(chaisePage.recordPage.getModalListElements().count()).toBe(tableParams.citationParams.numListElements, "Number of list elements in share citation modal is incorrect");
+
+            return browser.getCurrentUrl();
+        }).then(function (url) {
+            // verify permalink
+            expect(chaisePage.recordPage.getShareLinkHeader().getText()).toBe("Share Link", "Share Link (permalink) header is incorrect");
+            expect(chaisePage.recordPage.getPermalinkText().getText()).toBe(url, "permalink url is incorrect");
+
+            // verify citation
+            expect(chaisePage.recordPage.getCitationHeader().getText()).toBe("Citation", "Citation header is incorrect");
+            expect(chaisePage.recordPage.getCitationText().getText()).toBe(tableParams.citationParams.citation, "citation text is incorrect");
+
+            return chaisePage.recordPage.getShareModal();
+        }).then(function (modal) {
+            // disable animations in modal so that it doesn't "fade out" (instead it instantly disappears when closed) which we can't track with waitFor conditions
+            modal.allowAnimations(false);
+
+            // close dialog
+            return chaisePage.recordEditPage.getModalTitle().element(by.tagName("button")).click();
+        }).then(function () {
+
+            done();
+        }).catch(function(err){
+            console.log(err);
+            done.fail();
+        });
+    });
+
+    it("should have '2' options in the dropdown menu.", function (done) {
+        var exportButton = chaisePage.recordsetPage.getExportDropdown();
+        browser.wait(EC.elementToBeClickable(exportButton), browser.params.defaultTimeout);
+
+        chaisePage.clickButton(exportButton).then(function () {
+            expect(chaisePage.recordsetPage.getExportOptions().count()).toBe(2, "incorrect number of export options");
+            // close the dropdown
+            return chaisePage.recordsetPage.getExportDropdown().click();
+        }).then(function () {
+            done();
+        }).catch(function (err) {
+            console.log(err);
+            done.fail();
+        });
+    });
+
+    if (!process.env.TRAVIS) {
+        it("should have 'CSV' as a download option and download the file.", function(done) {
+            chaisePage.recordsetPage.getExportDropdown().click().then(function () {
+                var csvOption = chaisePage.recordsetPage.getExportOption("CSV");
+                expect(csvOption.getText()).toBe("CSV");
+                return csvOption.click();
+            }).then(function () {
+                browser.wait(function() {
+                    return fs.existsSync(process.env.PWD + "/test/e2e/" + tableParams.file_names[0]);
+                }, browser.params.defaultTimeout).then(function () {
+                    done();
+                }, function () {
+                    expect(false).toBeTruthy("Accommodations.csv was not downloaded");
+                });
+            }).catch(function (err) {
+                console.log(err);
+                done.fail();
+            });
+        });
+
+        it("should have 'BDBag' as a download option and download the file.", function(done) {
+            chaisePage.recordsetPage.getExportDropdown().click().then(function () {
+                var bagOption = chaisePage.recordsetPage.getExportOption("BDBag");
+                expect(bagOption.getText()).toBe("BDBag");
+                return bagOption.click();
+            }).then(function () {
+                return chaisePage.waitForElement(chaisePage.recordsetPage.getExportModal());
+            }).then(function () {
+                return chaisePage.waitForElementInverse(chaisePage.recordsetPage.getExportModal());
+            }).then(function () {
+                browser.wait(function() {
+                    return fs.existsSync(process.env.PWD + "/test/e2e/" + tableParams.file_names[1]);
+                }, browser.params.defaultTimeout).then(function () {
+                    done();
+                }, function () {
+                    expect(false).toBeTruthy("accommodation.zip was not downloaded");
+                });
+            }).catch(function (err) {
+                console.log(err);
+                done.fail();
+            });
+        });
+    }
 
 	it("should render columns which are specified to be visible and in order", function() {
 		var columns = tableParams.columns.filter(function(c) {return c.value != null;});
@@ -164,16 +272,6 @@ exports.testPresentation = function (tableParams) {
             }
         });
     });
-
-	it('should display a permalink of the record', function() {
-		var key = tableParams.key;
-		var expectedURL = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + tableParams.table_name + '/' + key.name + key.operator + key.value;
-		var actualURL = element(by.id('permalink'));
-		expect(actualURL.isDisplayed()).toBe(true);
-		actualURL.getAttribute('href').then(function(url) {
-			expect(url).toBe(expectedURL);
-		});
-	});
 
     it("should show related table names and their tables", function() {
         var displayName, tableCount, title,
@@ -415,6 +513,7 @@ exports.testPresentation = function (tableParams) {
 
 		for (var i = 0; i < tableParams.inline_columns.length; i++) {
 			var p = tableParams.inline_columns[i];
+			p.baseTable = tableParams.subTitle;
 			describe ("for " + p.title + ", ", function (){
 				exports.testRelatedTable(p, pageReadyCondition);
 			});
@@ -501,6 +600,12 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 				expect(viewMoreBtn.isDisplayed()).toBeTruthy("view more is not visible.");
 			});
 
+			it('should have the correct tooltip.', function(){
+				chaisePage.recordPage.getColumnCommentHTML(viewMoreBtn).then(function(comment){
+					expect(comment).toBe("'View more " + params.displayname + " related to this " + params.baseTable + "'", "Incorrect tooltip on View More button");
+				});
+			});
+
 			if (params.viewMore){
 				it ("should always go to recordset app with correct set of filters.", function (done) {
 					chaisePage.clickButton(viewMoreBtn).then(function () {
@@ -544,12 +649,18 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 						// revert is `Display`
 						expect(markdownToggleLink.isDisplayed()).toBeTruthy();
 						expect(markdownToggleLink.getText()).toBe("Edit");
+						chaisePage.recordPage.getColumnCommentHTML(markdownToggleLink.element(by.cssContainingText(".hide-tooltip-border", "Edit"))).then(function(comment){
+							expect(comment).toBe("'Edit " + params.displayname + " related to this " + params.baseTable + "'", "Incorrect tooltip on Edit button");
+						});
 					});
 				} else {
 					it ("`Table Display` button should be visible to switch to tabular mode.", function () {
 						// revert is `Revert Display`
 						expect(markdownToggleLink.isDisplayed()).toBeTruthy();
 						expect(markdownToggleLink.getText()).toBe("Table Display");
+						chaisePage.recordPage.getColumnCommentHTML(markdownToggleLink.element(by.cssContainingText(".hide-tooltip-border", "Table Display"))).then(function(comment){
+							expect(comment).toBe("'Display related " + params.displayname + " in tabular mode'", "Incorrect tooltip on Table Display button");
+						});
 					});
 				}
 
@@ -557,8 +668,14 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 					chaisePage.clickButton(markdownToggleLink).then(function() {
 						if (params.canEdit) {
 							expect(markdownToggleLink.getText()).toBe("Display", "after toggle button missmatch.");
+							chaisePage.recordPage.getColumnComment(markdownToggleLink.element(by.cssContainingText(".hide-tooltip-border", "Display"))).then(function(comment){
+								expect(comment).toBe("Switch back to the display mode", "Incorrect tooltip on Display button");
+							});
 						} else {
 							expect(markdownToggleLink.getText()).toBe("Revert Display", "after toggle button missmatch.");
+							chaisePage.recordPage.getColumnComment(markdownToggleLink.element(by.cssContainingText(".hide-tooltip-border", "Revert Display"))).then(function(comment){
+								expect(comment).toBe("Switch back to the previous display", "Incorrect tooltip on Revert Display button");
+							});
 						}
 
 						//TODO make sure table is visible
@@ -588,6 +705,11 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 			it ("`Add` button should be " + (params.canCreate ? "visible." : "invisible."), function () {
 				var addBtn = chaisePage.recordPage.getAddRecordLink(params.displayname, params.isInline);
 				expect(addBtn.isPresent()).toBe(params.canCreate);
+				if(params.canCreate){
+					chaisePage.recordPage.getColumnCommentHTML(addBtn).then(function(comment){
+						expect(comment).toBe("'Add more " + params.displayname + " related to this " + params.baseTable + "'", "Incorrect tooltip on Add button");
+					});
+				}
 			});
 		 }
 	});

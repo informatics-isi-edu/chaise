@@ -1,17 +1,15 @@
 # Configuring
 
-**Chaise** uses a set of default configuration parameters. You can overwrite them through the _chaise-config.js_ file and/or the search parameters in the URL. 
+**Chaise** uses a set of default configuration parameters. You can overwrite them through the `chaise-config.js` file and/or the search parameters in the URL. 
 
-A Chaise deployment includes a sample config file ([_chaise-config-sample.js](https://github.com/informatics-isi-edu/chaise/blob/master/chaise-config-sample.js)) at the root directory that you can edit and then rename to _chaise-config.js_. 
-
-The URL search parameters t
+A Chaise deployment includes a sample config file ([chaise-config-sample.js](https://github.com/informatics-isi-edu/chaise/blob/master/chaise-config-sample.js)) at the root directory that you can edit and then rename to `chaise-config.js`. 
 
 The below table explains the usage of the default parameters:
 
 | Parameter | Values | Default Value | chaise-config.js | URL | Remarks |
 |-----------|--------|---------------|------------------|-----|---------|
 | catalog | A catalog id | 1 | "catalog":\<id\> | catalog=\<id\> | The catalog id has a numeric value |
-| schema | A schema name | N/A | "schema":\<name\> | schema=\<name\> | A default value can be established through the [schema annotation default keys](../search/annotation.md#schema-annotations). <br> A random schema of the catalog is selected if it is not specified otherwise. |
+| schema | A schema name | N/A | "schema":\<name\> | schema=\<name\> | A default value can be established through the [schema annotation default keys](/chaise/search/annotation.html#schema-annotations). <br> A random schema of the catalog is selected if it is not specified otherwise. |
 | layout | list <br> table <br> card | list | "layout":\<value\> | layout=\<value\> | The view the summary page will be rendered. |
 | facetPolicy | on_demand | N/A | "facetPolicy":\<value\> | N/A | If present with the _on_demand_ value, requests (for facets count and for facets distinct values) will be issued only for the selected facets. <br> At start up, the facets with the "top" annotation will be selected.<br>  On demand, you can check also other facets. |
 | feedbackURL | A URL for a form to provide feedback. | None | "feedbackURL":\<URL\> | N/A | |
@@ -34,7 +32,7 @@ The below table explains the usage of the default parameters:
 | hideSearchTextFacet | A boolean | false | "hideSearchTextFacet":\<value\> | N/A | Whether the search box for attributes names and values should be hidden |
 | maxColumns | An integer | 6 | "maxColumns":\<value\> | N/A | The maximum number of columns to be displayed in the search result table |
 | showUnfilteredResults | A boolean | false | "showUnfilteredResults":\<value\> | N/A | If present and equal **true**, data will be displayed in the search result table even if no filter was selected. |
-| editRecord | A boolean | false | "editRecord":\<value\> | N/A | If not present or equal to **true**, the recordedit page allows for inserting records and editing records. The record page will have an edit button for both of these cases as well. If equal to **false**, a dialog appears on recordedit that disallows use of the app and the edit button does not appear in the record app |
+| editRecord | A boolean | N/A | "editRecord":\<value\> | N/A | If not present or equal to **true**, the recordedit page allows for inserting records and editing records. The record page will have an edit button for both of these cases as well. If equal to **false**, a dialog appears on recordedit that disallows use of the app for both create and edit, and the create/edit button does not appear in the record app. |
 | deleteRecord | A boolean | false | "deleteRecord":\<value\> | N/A | If present and equal to **true**, the recordedit page will show delete button if editRecord is also true, and record page will show delete button if this is true. Otherwise, hide delete buttons. |
 | defaultCatalog | A catalog id | N/A | "defaultCatalog":\<id\> | N/A | The catalog id has a numeric value. Use this parameter to specify which catalog Chaise shows by default. |
 | defaultTables | An object that specifies a catalog's the default schema and table | N/A | "defaultTables": {N: {"schema": S, "table": T}, ...} | N/A | Use this parameter to specify for each catalog `N`, which table `T` Chaise shows by default. |

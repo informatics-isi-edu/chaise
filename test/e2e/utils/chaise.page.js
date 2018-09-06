@@ -644,6 +644,10 @@ var recordPage = function() {
         return el.getAttribute('uib-tooltip');
     };
 
+    this.getColumnCommentHTML = function(el) {
+        return el.getAttribute('uib-tooltip-html');
+    };
+
     this.getColumnValueElements = function() {
         return browser.executeScript("return $('.entity-value > span.ng-scope > span.ng-scope');");
     };
@@ -779,12 +783,36 @@ var recordPage = function() {
         return element(by.id("show-all-related-tables"));
     };
 
-    this.getPermalinkButton = function() {
+    this.getShareButton = function() {
+        return element(by.id('share'));
+    };
+
+    this.getPermalinkText = function() {
         return element(by.id('permalink'));
     };
 
     this.getModalText = function() {
         return element(by.css(".modal-body"));
+    };
+
+    this.getShareModal = function() {
+        return element(by.css(".share-citation"));
+    };
+
+    this.getModalListElements = function() {
+        return this.getModalText().all(by.tagName('li'));
+    };
+
+    this.getShareLinkHeader = function() {
+        return element(by.id("share-link")).element(by.tagName('h2'));
+    };
+
+    this.getCitationHeader = function() {
+        return element(by.id("citation")).element(by.tagName('h2'));
+    };
+
+    this.getCitationText = function() {
+        return element(by.id("citation-text"));
     };
 
     this.getErrorModalTitle = function(){
@@ -910,6 +938,23 @@ var recordsetPage = function() {
 
     this.getModalRows = function () {
         return element.all(by.css('.modal-body .table-row'));
+    };
+
+    this.getModalColumnNames = function() {
+        return element.all(by.css(".modal-body .table-column-displayname > span"));
+    };
+
+    this.waitForInverseModalSpinner = function () {
+        var locator = element(by.css(".modal-body #spinner"));
+        return browser.wait(protractor.ExpectedConditions.invisibilityOf(locator), browser.params.defaultTimeout);
+    };
+
+    this.getModalFirstColumnValues = function () {
+        return browser.executeScript('return $(".modal-body .table-row td:nth-child(2)").map(function (i, a) { return a.textContent.trim(); });');
+    };
+
+    this.getModalCloseBtn = function() {
+        return element(by.css(".modal-close"));
     };
 
     this.getNoResultsRow = function() {

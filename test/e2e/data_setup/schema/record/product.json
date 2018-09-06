@@ -401,13 +401,40 @@
                  "id"], "comment": "Accommodation Image"}
             ]
         },
-
         "tag:isrd.isi.edu,2016:visible-foreign-keys" : {
           "*" : [
               ["product-record", "fk_booking_accommodation"],
               ["product-record", "fk_accommodation_image"],
               ["product-record", "fk_media_accommodation"]
           ]
+        },
+        "tag:isrd.isi.edu,2016:export": {
+          "templates": [
+            {
+              "outputs": [
+                {
+                  "source": {
+                    "table": "product-record:accommodation",
+                    "api": "entity"
+                  },
+                  "destination": {
+                    "type": "csv",
+                    "name": "Accommodations_Bag"
+                  }
+                }
+              ],
+              "name": "export_data_bag",
+              "format_name": "BDBag",
+              "format_type": "BAG"
+            }
+          ]
+        },
+        "tag:isrd.isi.edu,2018:citation": {
+            "template_engine": "handlebars",
+            "journal_pattern": "{{title}}",
+            "year_pattern":    "{{formatDate RCT 'YYYY'}}",
+            "url_pattern":     "{{website}}",
+            "id_pattern":      "{{id}}"
         }
       }
     },

@@ -44,7 +44,11 @@
 
     //  Enable log system, if in debug mode
     .config(['$logProvider', function($logProvider) {
-        $logProvider.debugEnabled(chaiseConfig.debug === true);
+        $logProvider.debugEnabled(chaiseConfig && chaiseConfig.debug === true);
+    }])
+
+    .config(['ConfigUtilsProvider', function(ConfigUtilsProvider) {
+      ConfigUtilsProvider.$get().setConfigJSON();
     }])
 
     .config(function($provide) {
@@ -77,6 +81,7 @@
         var session,
             context = { booleanValues: ['', true, false] };
 
+        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
         $rootScope.showColumnSpinner = [{}];
 
         $rootScope.displayReady = false;

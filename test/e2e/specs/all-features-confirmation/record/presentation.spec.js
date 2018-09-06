@@ -1,5 +1,8 @@
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordHelpers = require('../../../utils/record-helpers.js');
+var recordSetHelpers = require('../../../utils/recordset-helpers.js');
+var moment = require('moment');
+
 var testParams = {
     table_name: "accommodation",
     key: {
@@ -11,6 +14,7 @@ var testParams = {
     subTitle: "Accommodations",
     tableComment: "List of different types of accommodations",
     tables_order: ["accommodation_image (showing first 2 results)", "media (no results found)"],
+    file_names: ["Accommodations.csv", "accommodation.zip"],
     related_table_name_with_page_size_annotation: "accommodation_image",
     page_size: 2,
     related_tables: [
@@ -74,8 +78,12 @@ var testParams = {
       tableToShow: 'Categories_5',
       sidePanelTableOrder:[ 'Main', 'Categories_collection\n (5)',  'media\n \n (1)', 'Categories_collection_2\n (5)',  'Categories_3\n (5)',  'Categories_4\n (5)',  'Categories_5\n (5)',  'Categories_6\n (5)'],
       panelHeading: "Contents"
-  },
-  inline_columns: [
+    },
+    citationParams: {
+        numListElements: 2,
+        citation: "Sherathon Hotel, " + moment().format("YYYY") + ", 2002, http://www.starwoodhotels.com/sheraton/index.html"
+    },
+    inline_columns: [
       {
           title: "a related entity with a path of length 3",
           name: "accommodation_collection",
@@ -186,7 +194,23 @@ describe('View existing record,', function() {
         });
 
         describe("Presentation ,", function() {
+            if (!process.env.TRAVIS) {
+                beforeAll(function() {
+                    // delete files that may have been downloaded before
+                    console.log("delete files");
+                    recordSetHelpers.deleteDownloadedFiles(testParams.file_names);
+                });
+            }
+
             recordHelpers.testPresentation(testParams);
+
+            if (!process.env.TRAVIS) {
+                afterAll(function() {
+                    // delete files that have been downloaded during tests
+                    console.log("delete files");
+                    recordSetHelpers.deleteDownloadedFiles(testParams.file_names);
+                });
+            }
         });
 
     });

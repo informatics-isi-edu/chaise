@@ -8,7 +8,7 @@
         var vm = this;
         var context = $rootScope.context;
         var mainBodyEl;
-
+        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
         vm.recordEditModel = recordEditModel;
         vm.dataFormats = dataFormats;
         vm.editMode = (context.mode == context.modes.EDIT ? true : false);
