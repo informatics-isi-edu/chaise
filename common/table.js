@@ -84,6 +84,7 @@
      * event to call read on this new reference.
      * 4. `record-modified`: one of the records in the recordset table has been
      * modified. ellipses will fire this event and recordset directive will use it.
+     *
      */
     .factory('recordTableUtils',
             ['AlertsService', '$document', 'modalBox', 'DataUtils', '$timeout','Session', '$q', 'tableConstants', '$rootScope', '$log', '$window', '$cookies', 'defaultDisplayname', 'MathUtils', 'UriUtils', 'logActions',
@@ -99,9 +100,9 @@
          * returns true if we have free slots for requests.
          * @return {boolean}
          */
-        function _haveFreeSlot(vm) {
+        function _haveFreeSlot(vm, dontLog) {
             var res = vm.flowControlObject.occupiedSlots < vm.flowControlObject.maxRequests;
-            if (!res) {
+            if (!res && !dontLog) {
                 $log.debug("No free slot available.");
             }
             return res;
@@ -154,8 +155,8 @@
                     return defer.resolve(false);
                 }
                 vm.columnModels[colIndex].isLoading = false;
-                vm.rowValues.forEach(function (val, index) {
-                    vm.rowValues[index][colIndex] = values[index];
+                vm.totalRowValues.forEach(function (val, index) {
+                    vm.totalRowValues[index][colIndex] = values[index];
                 });
                 return defer.resolve(true);
             }).catch(function (err) {
@@ -186,18 +187,27 @@
          */
         function updateMainEntity(vm, updatePageCB, hideSpinner) {
             if (!vm.dirtyResult || !_haveFreeSlot(vm)) {
-                $log.debug("counter", vm.flowControlObject.counter, ": break out of update main");
+                $log.debug("break out of updateMainEntity: (not dirty or full)");
                 return;
             }
+
+            // to make sure we're sending one request at a time (no duplicate requests)
+            // if counter is the same, then the reference is the same and there's no point in sending the request
+            if (vm.lastMainRequestPending == vm.flowControlObject.counter) {
+                $log.debug("break out of updateMainEntity (duplicate)");
+                return;
+            }
+
+            vm.lastMainRequestPending = vm.flowControlObject.counter;
 
             vm.flowControlObject.occupiedSlots++;
             vm.dirtyResult = false;
 
             (function (currentCounter) {
-                $log.debug("counter", currentCounter, ": updating result");
+                $log.debug("counter", currentCounter, ": updateMainEntity");
                 _readMainEntity(vm, hideSpinner, currentCounter).then(function (res) {
                     _afterUpdateMainEntity(vm, res, currentCounter);
-                    $log.debug("counter", vm.flowControlObject.counter, ": just before update page");
+                    $log.debug("counter", currentCounter, ": after updateMainEntity, retry.");
                     updatePageCB(vm);
                 }).catch(function (err) {
                     _afterUpdateMainEntity(vm, true, currentCounter);
@@ -217,8 +227,9 @@
                 $rootScope.$emit('reference-modified');
             }
             vm.flowControlObject.occupiedSlots--;
-            vm.dirtyResult = !res;
-            $log.debug("counter", counter, ": after result update: " + (res ? "successful." : "unsuccessful."));
+            vm.dirtyResult = !res && !vm.dirtyResult;
+            vm.hasLoaded = res;
+            $log.debug("counter", counter, ": after updateMainEntity: " + (res ? "successful." : "unsuccessful."));
         }
 
         // comment $timeout why
@@ -228,7 +239,8 @@
          * Does the actual read for the main entity. Returns a promise that will
          * be resolved with `true` if the request was successful.
          */
-        function _readMainEntity (vm, hideSpinner, counterer) {
+        function _readMainEntity (vm, hideSpinner, current) {
+            $log.debug("counter", current, ": readMainEntity");
             if (!vm.columnModels) {
                 _attachExtraAttributes(vm);
             }
@@ -237,94 +249,114 @@
             $timeout.cancel(pushMore);
             vm.pushRowsSpinner = false;
             vm.dirtyResult = false;
-            vm.hasLoaded = false;
+            // vm.hasLoaded = false;
             var defer = $q.defer();
-            (function (current) {
-                vm.reference.read(vm.pageLimit, vm.logObject).then(function (page) {
-                    if (current !== vm.flowControlObject.counter) {
-                        defer.resolve(false);
-                        return defer.promise;
-                    }
+            vm.reference.read(vm.pageLimit, vm.logObject).then(function (page) {
+                if (current !== vm.flowControlObject.counter) {
+                    defer.resolve(false);
+                    return defer.promise;
+                }
 
-                    vm.page = page;
+                vm.page = page;
 
-                    return vm.getDisabledTuples ? vm.getDisabledTuples(page, vm.pageLimit) : '';
-                }).then(function (rows) {
-                    if (current !== vm.flowControlObject.counter) {
-                        defer.resolve(false);
-                        return defer.promise;
-                    }
+                return vm.getDisabledTuples ? vm.getDisabledTuples(page, vm.pageLimit) : '';
+            }).then(function (rows) {
+                if (current !== vm.flowControlObject.counter) {
+                    defer.resolve(false);
+                    return defer.promise;
+                }
 
-                    if (rows) vm.disabledRows = rows;
-                    var rowValues = DataUtils.getRowValuesFromPage(vm.page);
-                    // calculate how many rows can be shown based on # of columns
-                    var rowLimit = Math.ceil(tableConstants.CELL_LIMIT/vm.page.reference.columns.length);
+                if (rows) vm.disabledRows = rows;
 
-                    // recursive function for adding more rows to the DOM
-                    function _pushMoreRows(prevInd, limit, pushMoreID) {
-                        if ($rootScope.pushMoreID === pushMoreID) {
-                            var nextLimit = prevInd + limit;
-                            // combines all of the second array (rowValues) with the first one (vm.rowValues)
-                            Array.prototype.push.apply(vm.rowValues, rowValues.slice(prevInd, nextLimit));
-                            if (rowValues[nextLimit]) {
-                                $log.debug("counter", current, ": recurse with", vm.rowValues.length);
-                                $timeout(function () {
-                                    if ($rootScope.pushMoreID === pushMoreID) {
-                                        _pushMoreRows(nextLimit, limit, pushMoreID);
-                                    } else {
-                                        $log.debug("current global counter: ", vm.flowControlObject.counter);
-                                        $log.debug("counter", current, ": break out of timeout inside push more rows");
-                                        $log.debug("counter", current, ": with uuid", pushMoreID);
-                                        $log.debug("counter", current, ": with global uuid", $rootScope.pushMoreID);
-                                        vm.pushRowsSpinner = false;
-                                    }
-                                });
-                            } else {
-                                // we reached the end of the data to page in
-                                vm.pushRowsSpinner = false;
-                            }
+                vm.totalRowValues = DataUtils.getRowValuesFromPage(vm.page);
+
+                /*
+                 * vm.rowValues is the object that will be used to show the resultset.
+                 * vm.totalRowValues is all the row values which might be different from rowValues
+                 * if We set vm.rowValues = rowValues, angularjs will try to show that
+                 * object all at once. To show it, we're using recursive ng-repeats which
+                 * is heavy and might be slow. To mitigate the issue, if number of cells is
+                 * more than the limit (CELL_LIMIT), we're going to add the rows gradually.
+                 * This was causing problems with the flow control. It's not part of flow control
+                 * because flow control is supposed to deal with the requests to the server and not UI.
+                 * But it relies on flow control, we should not push rows midway. We must be sure that
+                 * we're calling _pushMoreRows for the final result and not any of the states in between.
+                 * So we must always check for that in each cycle. To do so, we're generating a uuid at first.
+                 * If the uuid changes, then we are aborting the addition of rows. The fact that uuid has changed,
+                 * shows that a new request has been generated for the main entity and is trying to draw the rows.
+                 */
+
+                // calculate how many rows can be shown based on # of columns
+                var rowLimit = Math.ceil(tableConstants.CELL_LIMIT/vm.page.reference.columns.length);
+
+                // recursive function for adding more rows to the DOM
+                function _pushMoreRows(prevInd, limit, pushMoreID) {
+                    if ($rootScope.pushMoreID === pushMoreID) {
+                        var nextLimit = prevInd + limit;
+                        // combines all of the second array (vm.totalRowValues) with the first one (vm.rowValues)
+                        Array.prototype.push.apply(vm.rowValues, vm.totalRowValues.slice(prevInd, nextLimit));
+                        if (vm.totalRowValues[nextLimit]) {
+                            $log.debug("counter", current, ": readMainEntity, recurse with", vm.rowValues.length);
+                            $timeout(function () {
+                                if ($rootScope.pushMoreID === pushMoreID) {
+                                    _pushMoreRows(nextLimit, limit, pushMoreID);
+                                } else {
+                                    $log.debug(
+                                        "counter", current,
+                                        ": readMainEntity, break out of timeout inside push more rows (diff uuid)",
+                                        "current uuid:", pushMoreID, "global uuid:", $rootScope.pushMoreID
+                                    );
+                                    vm.pushRowsSpinner = false;
+                                }
+                            });
                         } else {
-                            $log.debug("current global counter: ", vm.flowControlObject.counter);
-                            $log.debug("counter", current, ": break out of push more rows");
-                            $log.debug("counter", current, ": with uuid", pushMoreID);
-                            $log.debug("counter", current, ": with global uuid", $rootScope.pushMoreID);
+                            // we reached the end of the data to page in
                             vm.pushRowsSpinner = false;
                         }
-                    }
-
-                    $log.debug("counter", current, ": row values length ", rowValues.length);
-                    vm.rowValues = [];
-                    if (rowValues.length > rowLimit) {
-                        vm.pushRowsSpinner = true;
-                        var uniqueIdentifier = $rootScope.pushMoreID = MathUtils.uuid();
-                        $log.debug("counter", current, ": before push more rows with uuid", uniqueIdentifier);
-                        _pushMoreRows(0, rowLimit, uniqueIdentifier);
                     } else {
-                        vm.rowValues = rowValues;
+                        $log.debug(
+                            "counter", current,
+                            ": readMainEntity, break out of push more rows (diff uuid)",
+                            "current uuid:", pushMoreID, "global uuid:", $rootScope.pushMoreID
+                        );
+                        vm.pushRowsSpinner = false;
                     }
+                }
 
-                    vm.hasLoaded = true;
-                    vm.initialized = true;
-                    vm.aggregatesToInitialize = [];
-                    vm.reference.columns.forEach(function (c, i) {
-                        if(c.isPathColumn && c.hasAggregate) {
-                            vm.aggregatesToInitialize.push(i);
-                        }
-                    });
+                $log.debug("counter", current, ": readMainEntity, row values length ", vm.totalRowValues.length);
+                vm.rowValues = [];
+                if (vm.totalRowValues.length > rowLimit) {
+                    vm.pushRowsSpinner = true;
+                    var uniqueIdentifier = $rootScope.pushMoreID = MathUtils.uuid();
+                    $log.debug("counter", current, ": readMainEntity, before push more rows with uuid", uniqueIdentifier);
+                    _pushMoreRows(0, rowLimit, uniqueIdentifier);
+                } else {
+                    vm.rowValues = vm.totalRowValues;
+                }
 
-                    defer.resolve(true);
-                }).catch(function(err) {
-                    if (current !== vm.flowControlObject.counter) {
-                        return defer.resolve(false);
+                // vm.hasLoaded = true;
+                vm.initialized = true;
+
+                // create the array that will be used for getting result of aggregate columns.
+                vm.aggregatesToInitialize = [];
+                vm.reference.columns.forEach(function (c, i) {
+                    if(c.isPathColumn && c.hasAggregate) {
+                        vm.aggregatesToInitialize.push(i);
                     }
-                    vm.hasLoaded = true;
-                    vm.initialized = true;
-                    if (DataUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
-                      err.errorData.redirectUrl = UriUtils.createRedirectLinkFromPath(err.errorData.redirectPath);
-                    }
-                    defer.reject(err);
                 });
-            }) (counterer);
+
+                defer.resolve(true);
+            }).catch(function(err) {
+                if (current !== vm.flowControlObject.counter) {
+                    return defer.resolve(false);
+                }
+                // vm.hasLoaded = true;
+                vm.initialized = true;
+                if (DataUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
+                  err.errorData.redirectUrl = UriUtils.createRedirectLinkFromPath(err.errorData.redirectPath);
+                }
+                defer.reject(err);
+            });
             return defer.promise;
         }
 
@@ -339,7 +371,40 @@
             currFm.isLoading = !res;
             currFm.processed = res || currFm.processed;
 
-            $log.debug("counter", vm.flowControlObject.counter, ": after facet (index="+i+") update: " + (res ? "successful." : "unsuccessful."));
+            $log.debug("after facet (index="+i+") update: " + (res ? "successful." : "unsuccessful."));
+        }
+
+
+        /**
+         *  @private
+         *  Updates the total count of rows that matches the reference
+         */
+        function _updateCount(vm, updatePageCB) {
+            if (!vm.dirtyCount || !_haveFreeSlot(vm)) {
+                $log.debug("break out of updateCount: (not dirty or full)");
+                return;
+            }
+
+            // to make sure we're sending one request at a time (no duplicate requests)
+            // if counter is the same, then the reference is the same and there's no point in sending the request
+            if (vm.lastMainCountRequestPending == vm.flowControlObject.counter){
+                $log.debug("break out of updateCount: (duplicate)");
+                return;
+            }
+
+            vm.lastMainCountRequestPending = vm.flowControlObject.counter;
+            vm.flowControlObject.occupiedSlots++;
+            vm.dirtyCount = false;
+
+            (function (curr) {
+                _getRowsCount(vm, curr).then(function (res) {
+                    _afterGetRowsCount(vm, res, curr);
+                    _updatePage(vm);
+                }).catch(function (err) {
+                    _afterGetRowsCount(vm, true, curr);
+                    throw err;
+                });
+            })(vm.flowControlObject.counter);
         }
 
         /**
@@ -347,43 +412,43 @@
          * This will generate the request for getting the count.
          * Returns a promise. If it's resolved with `true` then it has been successful.
          */
-        function _updateCount (vm) {
+        function _getRowsCount (vm, current) {
+            $log.debug("counter", current, ": getRowsCount.");
+
             var  defer = $q.defer();
-            (function (current) {
-                var aggList, hasError;
-                try {
-                    // if the table doesn't have any simple key, this might throw error
-                    aggList = [vm.reference.aggregate.countAgg];
-                } catch (exp) {
-                    hasError = true;
-                }
-                if (hasError) {
-                    vm.totalRowsCnt = null;
-                    defer.resolve(true);
+            var aggList, hasError;
+            try {
+                // if the table doesn't have any simple key, this might throw error
+                aggList = [vm.reference.aggregate.countAgg];
+            } catch (exp) {
+                hasError = true;
+            }
+            if (hasError) {
+                vm.totalRowsCnt = null;
+                defer.resolve(true);
+                return defer.promise;
+            }
+
+            vm.reference.getAggregates(
+                aggList,
+                {action: logActions.recordsetCount}
+            ).then(function getAggregateCount(response) {
+                if (current !== vm.flowControlObject.counter) {
+                    defer.resolve(false);
                     return defer.promise;
                 }
 
-                vm.reference.getAggregates(
-                    aggList,
-                    {action: logActions.recordsetCount}
-                ).then(function getAggregateCount(response) {
-                    if (current !== vm.flowControlObject.counter) {
-                        defer.resolve(false);
-                        return defer.promise;
-                    }
+                vm.totalRowsCnt = response[0];
+                defer.resolve(true);
+            }).catch(function (err) {
+                if (current !== vm.flowControlObject.counter) {
+                    defer.resolve(false);
+                    return defer.promise;
+                }
 
-                    vm.totalRowsCnt = response[0];
-                    defer.resolve(true);
-                }).catch(function (err) {
-                    if (current !== vm.flowControlObject.counter) {
-                        defer.resolve(false);
-                        return defer.promise;
-                    }
-
-                    // fail silently
-                    vm.totalRowsCnt = null;
-                });
-            })(vm.flowControlObject.counter);
+                // fail silently
+                vm.totalRowsCnt = null;
+            });
             return defer.promise;
         }
 
@@ -391,10 +456,10 @@
          * @private
          * will be called after getting data for count to set the flags.
          */
-        function _afterUpdateCount (vm, res) {
+        function _afterGetRowsCount (vm, res, current) {
             vm.flowControlObject.occupiedSlots--;
             vm.dirtyCount = !res;
-            $log.debug("counter", vm.flowControlObject.counter, ": after count update: " + (res ? "successful." : "unsuccessful."));
+            $log.debug("counter", current, ": after getRowsCount: " + (res ? "successful." : "unsuccessful."));
         }
 
         /**
@@ -448,14 +513,15 @@
 
             $timeout(function () {
                 vm.flowControlObject.counter++;
-                $log.debug("adding one to counter: " + vm.flowControlObject.counter);
+                $log.debug("\n=================\ncalling update page, with new counter=" + vm.flowControlObject.counter);
+                $log.debug(vm.reference.location.ermrestCompactPath);
                 _updatePage(vm);
             }, 0);
         }
 
         /**
          * Given the table model, it will update the page.
-         * This is behaving as a flow-control system, that allows only a Maximum
+         * This is behaving as a flow control system, that allows only a Maximum
          * number of requests defined. Requests are generated in this order:
          *
          * 1. main entity
@@ -467,7 +533,7 @@
          * @param  {Object} vm The table view model
          */
         function _updatePage(vm) {
-            $log.debug("counter", vm.flowControlObject.counter, ": running update page");
+            $log.debug("counter", vm.flowControlObject.counter, ": updatePage");
             if (!_haveFreeSlot(vm)) {
                 return;
             }
@@ -490,7 +556,7 @@
                         fm.processed = true;
 
                         (function (i) {
-                            $log.debug("counter", vm.flowControlObject.counter, ": updating facet (index="+i+")");
+                            $log.debug("counter", vm.flowControlObject.counter, ": updateFacet (index="+i+")");
                             vm.facetModels[i].updateFacet().then(function (res) {
                                 _afterFacetUpdate(vm, i, res);
                                 _updatePage(vm);
@@ -506,7 +572,7 @@
                     vm.flowControlObject.occupiedSlots++;
                     var index = vm.facetsToInitialize.shift();
                     (function (i) {
-                        $log.debug("counter", vm.flowControlObject.counter, ": initializing facet (index="+index+")");
+                        $log.debug("counter", vm.flowControlObject.counter, ": initializeFacet (index="+index+")");
                         vm.facetModels[i].initializeFacet().then(function (res) {
                             $log.debug("counter", vm.flowControlObject.counter, ": after facet (index="+ i +") initialize: " + (res ? "successful." : "unsuccessful."));
                             vm.flowControlObject.occupiedSlots--;
@@ -521,18 +587,8 @@
             // update the count
             if (vm.config.hideTotalCount) {
                 vm.totalRowsCnt = null;
-            } else if (vm.dirtyCount && _haveFreeSlot(vm)) {
-                vm.flowControlObject.occupiedSlots++;
-                vm.dirtyCount = false;
-
-                $log.debug("counter", vm.flowControlObject.counter, ": updating count");
-                _updateCount(vm).then(function (res) {
-                    _afterUpdateCount(vm, res);
-                    _updatePage(vm);
-                }).catch(function (err) {
-                    _afterUpdateCount(vm, true);
-                    throw err;
-                });
+            } else {
+                _updateCount(vm, _updatePage);
             }
         }
 
