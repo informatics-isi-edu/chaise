@@ -3,8 +3,8 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'dataFormats', 'DataUtils', 'ErrorService', 'integerLimits', 'logActions', 'messageMap', 'modalBox', 'modalUtils', 'recordCreate', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
-        function FormController(AlertsService, dataFormats, DataUtils, ErrorService, integerLimits, logActions, messageMap, modalBox, modalUtils, recordCreate, recordEditModel, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
+    .controller('FormController', ['AlertsService', 'dataFormats', 'DataUtils', 'ErrorService', 'integerLimits', 'logActions', 'maskOptions', 'messageMap', 'modalBox', 'modalUtils', 'recordCreate', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
+        function FormController(AlertsService, dataFormats, DataUtils, ErrorService, integerLimits, logActions, maskOptions, messageMap, modalBox, modalUtils, recordCreate, recordEditModel, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
         var context = $rootScope.context;
         var mainBodyEl;
@@ -31,6 +31,7 @@
         vm.successfulSubmission = false;
         vm.redirectAfterSubmission = redirectAfterSubmission;
         vm.searchPopup = searchPopup;
+        vm.openSelectAll = openSelectAll;
         vm.createRecord = createRecord;
         vm.clearForeignKey = clearForeignKey;
 
@@ -61,16 +62,7 @@
         // Specifies the regexes to be used for a token in a ui-mask input. For example, the '1' key in
         // in vm.maskOptions.date means that only 0 or 1 is allowed wherever the '1' key is used in a ui-mask template.
         // See the maskDefinitions section for more info: https://github.com/angular-ui/ui-mask.
-        vm.maskOptions = {
-            date: {
-                maskDefinitions: {'1': /[0-1]/, '2': /[0-2]/, '3': /[0-3]/},
-                clearOnBlur: true
-            },
-            time: {
-                maskDefinitions: {'1': /[0-1]/, '2': /[0-2]/, '5': /[0-5]/},
-                clearOnBlur: true
-            }
-        };
+        vm.maskOptions = maskOptions;
         vm.prefillCookie = $cookies.getObject(context.queryParams.prefill);
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
@@ -392,6 +384,26 @@
             model.rows[rowIndex][column.name] = null;
         }
 
+        function openSelectAll(column) {
+            var params = {
+                column: column,
+                displayType: columnToDisplayType(column)
+            };
+
+            modalUtils.showModal({
+                animation: false,
+                controller: "RecordeditInputPopupController",
+                controllerAs: "ctrl",
+                resolve: {
+                    params: params
+                },
+                templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/inputPopup.modal.html"
+            }, function (inputValue) {
+                console.log(inputValue);
+                // set input value for each record to create. populate ui model
+            });
+        }
+
         function createRecord(column) {
             $window.open(column.reference.contextualize.entryCreate.appLink, '_blank');
         }
@@ -664,7 +676,7 @@
 
         /*------------------------code below is for fixing the column names when scrolling -----------*/
 
-        var captionColumnWidth = 150;
+        var captionColumnWidth = 190;
         var marginLeft = captionColumnWidth + 10;
 
         // Sets a fixed width for the columns, as they're positioned absolute

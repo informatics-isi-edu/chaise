@@ -102,6 +102,14 @@
                                                         <span ng-if="::column.displayname.isHTML" ng-bind-html="::column.displayname.value"></span>
                                                         <span ng-if="::!column.displayname.isHTML" ng-bind="::column.displayname.value"></span>
                                                     </span>
+                                                    <span class="pull-right btn-group">
+                                                        <button id="column-options" type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown">
+                                                            <span class="glyphicon glyphicon-menu-hamburger"></span>
+                                                        </button>
+                                                        <ul class="dropdown-menu">
+                                                            <li><a ng-click="::form.openSelectAll(column)">Select All</a></li>
+                                                        </ul>
+                                                    </span>
                                                 </td>
                                                 <td class="entity-value" ng-form="form.formContainer.row[rowIndex][column.name]" ng-repeat="(rowIndex, row) in form.recordEditModel.rows track by $index" ng-switch="form.columnToDisplayType(column);">
 

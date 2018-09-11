@@ -172,5 +172,84 @@
                 }
             }
         }
+    }])
+
+    .directive('inputSwitch', ['dataFormats', 'integerLimits', 'maskOptions', 'UriUtils', '$log', function(dataFormats, integerLimits, maskOptions, UriUtils, $log) {
+        return {
+            restrict: 'E',
+            templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/inputs/inputSwitch.html',
+            scope: {
+                column: '=',
+                displayType: '=',
+                inputValue: '=?'
+            },
+            link: function(scope, elem, attr) {
+                scope.dataFormats = dataFormats;
+                scope.maskOptions = maskOptions;
+
+                scope.int2min = integerLimits.INT_2_MIN;
+                scope.int2max = integerLimits.INT_2_MAX;
+                scope.int4min = integerLimits.INT_4_MIN;
+                scope.int4max = integerLimits.INT_4_MAX;
+                scope.int8min = integerLimits.INT_8_MIN;
+                scope.int8max = integerLimits.INT_8_MAX;
+
+                scope.booleanValues = ['', true, false];
+
+                if (scope.displayType === "timestamp") {
+                    scope.inputValue = {
+                        date: null,
+                        time: null,
+                        meridiem: 'AM'
+                    }
+                }
+
+                scope.getDisabledInputValue = function () {
+                    try {
+                        var disabled = scope.column.getInputDisabled("entry/create");
+                        if (disabled) {
+                            if (typeof disabled === 'object') return disabled.message;
+                            return '';
+                        } else if (scope.column.isForeignKey) {
+                            return 'Select a value';
+                        } else if (scope.column.isAsset) {
+                            return "No file Selected";
+                        }
+                    } catch (e) {
+                        $log.info(e);
+                    }
+                }
+
+                // Assigns the current date or timestamp to inputValue
+                scope.applyCurrentDatetime = function() {
+                    if (scope.displayType === 'timestamp' || scope.displayType === 'timestamptz') {
+                        return scope.inputValue = {
+                            date: moment().format(dataFormats.date),
+                            time: moment().format(dataFormats.time24),
+                            meridiem: moment().format('A')
+                        }
+                    }
+                    return scope.inputValue = moment().format(dataFormats.date);
+                }
+
+                // Toggle between AM/PM for a time input's model
+                scope.toggleMeridiem = function() {
+                    // Do the toggling
+                    var meridiem = scope.inputValue.meridiem;
+                    if (meridiem.charAt(0).toLowerCase() === 'a') {
+                        return inputValue.meridiem = 'PM';
+                    }
+                    return inputValue.meridiem = 'AM';
+                }
+
+                scope.blurElement = function(e) {
+                    e.currentTarget.blur();
+                }
+
+                scope.removeValue = function () {
+                    scope.inputValue = null;
+                }
+            }
+        }
     }]);
 })();

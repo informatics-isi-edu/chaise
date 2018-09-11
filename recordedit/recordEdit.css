@@ -92,7 +92,7 @@ td.entity-value {
   margin-left: 10px;
   margin-top: 1px;
   background: white;
-  z-index: 10;
+  /* z-index: 10; */
   border-right: 1px solid #ddd;
   border-left: 1px solid #ddd;
 }

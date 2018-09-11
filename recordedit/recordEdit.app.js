@@ -10,6 +10,7 @@
         'chaise.errors',
         'chaise.faceting',
         'chaise.filters',
+        'chaise.inputs',
         'chaise.modal',
         'chaise.navbar',
         'chaise.upload',

@@ -176,6 +176,17 @@
         }
     })
 
+    .constant("maskOptions", {
+        date: {
+            maskDefinitions: {'1': /[0-1]/, '2': /[0-2]/, '3': /[0-3]/},
+            clearOnBlur: true
+        },
+        time: {
+            maskDefinitions: {'1': /[0-1]/, '2': /[0-2]/, '5': /[0-5]/},
+            clearOnBlur: true
+        }
+    })
+
     .constant("integerLimits", {
         INT_2_MIN: -32768,
         INT_2_MAX: 32767,
