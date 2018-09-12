@@ -1107,7 +1107,7 @@ footer .container1 {
     text-align: right;
 }
 /************* Profile Card ****************/
-#profile-modal li, .share-citation li{
+#profile-modal li, .chaise-share-citation li{
     list-style-type : disc;
 }
 .modal-dialog .profileValue{

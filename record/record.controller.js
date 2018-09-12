@@ -93,7 +93,7 @@
             modalUtils.showModal({
                 templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/shareCitation.modal.html",
                 controller: "ShareCitationController",
-                windowClass: "share-citation",
+                windowClass: "chaise-share-citation",
                 controllerAs: "ctrl",
                 resolve: {
                     params: {
