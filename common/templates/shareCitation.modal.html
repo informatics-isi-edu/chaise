@@ -16,7 +16,9 @@
                 <a ng-href="{{::ctrl.citation.url}}">{{::ctrl.citation.url}}</a>
             </div>
         </li>
-        <!-- <li>
-            <h2>Downoad Formats</h2> -->
+        <li>
+            <h2>Downoad Citation File</h2>
+            <a download="citation-{{ctrl.citation.year}}.bibtex" ng-href="{{ctrl.downloadBibtex}}">BibTex</a>
+        </li>
     </ul>
 </div>
