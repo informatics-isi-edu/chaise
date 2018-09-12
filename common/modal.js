@@ -276,19 +276,22 @@
         vm.cancel = cancel;
         vm.citation = params.citation;
         vm.permalink = params.permalink;
+        vm.filename = params.displayname;
 
         // generate bibtex url from citation
-        var citation = params.citation;
-        var bibtextContent = "@article{\n";
-        if (citation.author) bibtextContent += "author = {" + citation.author + "},\n";
-        if (citation.title) bibtextContent += "title = {" + citation.title + "},\n";
-        bibtextContent += "journal = {" + citation.journal + "},\n";
-        bibtextContent += "year = {" + citation.year + "},\n";
-        bibtextContent += "URL = {" + citation.url + "},\n}";
+        if (params.citation) {
+            var citation = params.citation;
+            var bibtextContent = "@article{\n";
+            if (citation.author) bibtextContent += "author = {" + citation.author + "},\n";
+            if (citation.title) bibtextContent += "title = {" + citation.title + "},\n";
+            bibtextContent += "journal = {" + citation.journal + "},\n";
+            bibtextContent += "year = {" + citation.year + "},\n";
+            bibtextContent += "URL = {" + citation.url + "},\n}";
 
-        var bibtextBlob = new Blob([ bibtextContent ], { type : 'text/plain' });
-        // set downloadURL for ng-href attribute
-        vm.downloadBibtex = $window.URL.createObjectURL( bibtextBlob );
+            var bibtextBlob = new Blob([ bibtextContent ], { type : 'text/plain' });
+            // set downloadURL for ng-href attribute
+            vm.downloadBibtex = $window.URL.createObjectURL( bibtextBlob );
+        }
 
         function cancel() {
             $uibModalInstance.dismiss('cancel');

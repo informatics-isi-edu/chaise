@@ -134,7 +134,7 @@ exports.testPresentation = function (tableParams) {
                     }, browser.params.defaultTimeout).then(function () {
                         done();
                     }, function () {
-                        expect(false).toBeTruthy("citation-"+moment().format("YYYY")+".bibtex was not downloaded");
+                        expect(false).toBeTruthy(tableParams.file_names[2] + " was not downloaded");
                         done.fail();
                     });
                 });

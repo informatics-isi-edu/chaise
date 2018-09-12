@@ -18,7 +18,7 @@
         </li>
         <li id="download-citation" ng-if="::ctrl.citation">
             <h2>Download Citation</h2>
-            <a id="bibtex-download" download="citation-{{ctrl.citation.year}}.bibtex" ng-href="{{ctrl.downloadBibtex}}">BibTex</a>
+            <a id="bibtex-download" download="{{::ctrl.filename}}.bibtex" ng-href="{{::ctrl.downloadBibtex}}">BibTex</a>
         </li>
     </ul>
 </div>

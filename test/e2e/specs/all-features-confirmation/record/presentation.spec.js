@@ -14,7 +14,7 @@ var testParams = {
     subTitle: "Accommodations",
     tableComment: "List of different types of accommodations",
     tables_order: ["accommodation_image (showing first 2 results)", "media (no results found)"],
-    file_names: ["Accommodations.csv", "accommodation.zip", "citation-"+moment().format("YYYY")+".bibtex"],
+    file_names: ["Accommodations.csv", "accommodation.zip", "accommodation_"+chaisePage.getEntityRow("product-record", "accommodation", [{column: "id",value: "2002"}]).RID+".bibtex"],
     related_table_name_with_page_size_annotation: "accommodation_image",
     page_size: 2,
     related_tables: [
