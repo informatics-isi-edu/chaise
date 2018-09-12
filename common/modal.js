@@ -291,7 +291,6 @@
         vm.inputValue = null;
 
         function submit() {
-            console.log("Modal: ", vm.inputValue);
             $uibModalInstance.close(vm.inputValue);
         }
 

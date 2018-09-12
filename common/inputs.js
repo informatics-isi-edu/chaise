@@ -181,9 +181,10 @@
             scope: {
                 column: '=',
                 displayType: '=',
-                inputValue: '=?'
+                model: '=?'
             },
             link: function(scope, elem, attr) {
+                scope.model = {};
                 scope.dataFormats = dataFormats;
                 scope.maskOptions = maskOptions;
 
@@ -197,7 +198,7 @@
                 scope.booleanValues = ['', true, false];
 
                 if (scope.displayType === "timestamp") {
-                    scope.inputValue = {
+                    scope.model.value = {
                         date: null,
                         time: null,
                         meridiem: 'AM'
@@ -223,23 +224,23 @@
                 // Assigns the current date or timestamp to inputValue
                 scope.applyCurrentDatetime = function() {
                     if (scope.displayType === 'timestamp' || scope.displayType === 'timestamptz') {
-                        return scope.inputValue = {
+                        return scope.model.value = {
                             date: moment().format(dataFormats.date),
                             time: moment().format(dataFormats.time24),
                             meridiem: moment().format('A')
                         }
                     }
-                    return scope.inputValue = moment().format(dataFormats.date);
+                    return scope.model.value = moment().format(dataFormats.date);
                 }
 
                 // Toggle between AM/PM for a time input's model
                 scope.toggleMeridiem = function() {
                     // Do the toggling
-                    var meridiem = scope.inputValue.meridiem;
+                    var meridiem = scope.model.value.meridiem;
                     if (meridiem.charAt(0).toLowerCase() === 'a') {
-                        return inputValue.meridiem = 'PM';
+                        return scope.model.value.meridiem = 'PM';
                     }
-                    return inputValue.meridiem = 'AM';
+                    return scope.model.value.meridiem = 'AM';
                 }
 
                 scope.blurElement = function(e) {
@@ -247,7 +248,7 @@
                 }
 
                 scope.removeValue = function () {
-                    scope.inputValue = null;
+                    scope.model.value = null;
                 }
             }
         }

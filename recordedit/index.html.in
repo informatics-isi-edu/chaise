@@ -102,7 +102,7 @@
                                                         <span ng-if="::column.displayname.isHTML" ng-bind-html="::column.displayname.value"></span>
                                                         <span ng-if="::!column.displayname.isHTML" ng-bind="::column.displayname.value"></span>
                                                     </span>
-                                                    <span class="pull-right btn-group">
+                                                    <span ng-if="!form.isDisabled(column);" class="pull-right btn-group">
                                                         <button id="column-options" type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown">
                                                             <span class="glyphicon glyphicon-menu-hamburger"></span>
                                                         </button>

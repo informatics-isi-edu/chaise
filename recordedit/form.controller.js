@@ -398,9 +398,12 @@
                     params: params
                 },
                 templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/inputPopup.modal.html"
-            }, function (inputValue) {
-                console.log(inputValue);
+            }, function (model) {
+                console.log(model);
                 // set input value for each record to create. populate ui model
+                vm.recordEditModel.rows.forEach(function (row) {
+                    row[column.name] = model.value;
+                });
             });
         }
 
