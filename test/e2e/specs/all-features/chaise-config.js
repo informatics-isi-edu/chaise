@@ -13,29 +13,40 @@ var chaiseConfig = {
     customCSS: '/path/to/custom/css',
     maxRelatedTablesOpen: 8,
     navbarMenu: {
-       newTab: true,
-       children: [
-           {
-               name: "Search",
-               url: "/chaise/search/#1/legacy:dataset",
-               newTab: false
-           },
-           {
-               name: "RecordEdit",
-               children: [
-                   {
-                       name: "Add Records",
-                       children: [
-                           {
-                               name: "Edit Existing Record",
-                               url: "/chaise/recordedit/#1/legacy:dataset/id=5776",
-                               newTab: true
-                           }
-                       ]
-                   }
-               ],
-               newTab: true
-           }
-       ]
-   }
+        children: [
+            {
+                name: "Search",
+                url: "/chaise/search/#1/isa:dataset"
+            },
+            {
+                name: "Recordsets",
+                children: [
+                    {
+                        name: "Dataset",
+                        url: "/chaise/recordset/#1/isa:dataset"
+                    },
+                    {
+                        name: "File",
+                        url: "/chaise/recordset/#1/isa:file"
+                    }
+                ]
+            },
+            {
+                name: "RecordEdit",
+                children: [
+                    {
+                        name: "Add Records",
+                        url: "/chaise/recordedit/#1/isa:dataset",
+                        children: [
+                            {
+                                name: "Edit Existing Record",
+                                url: "/chaise/recordedit/#1/isa:dataset/id=5776",
+                                newTab: false
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
 };

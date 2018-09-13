@@ -27,23 +27,103 @@ describe('Navbar ', function() {
         expect(element(by.id('brand-image')).isPresent()).toBeFalsy();
     });
 
-    it('for the menu, should generate the correct # of list items', function() {
-        var nodesInDOM = menu.all(by.tagName('li'));
-        var counter = 0;
-        function countNodes(array) {
-            array.forEach(function(element) {
-                counter++;
-                if (element.children) {
-                    countNodes(element.children);
-                }
-            });
-            return counter;
-        }
-        countNodes(chaiseConfig.navbarMenu.children);
+    describe('for the menu', function () {
+        var allWindows;
 
-        nodesInDOM.count().then(function(count) {
-            expect(count).toEqual(counter);
+        it('should generate the correct # of list items', function() {
+            var nodesInDOM = menu.all(by.tagName('li'));
+            var counter = 7; // counted from chaise config doc rather than having code count
+
+            nodesInDOM.count().then(function(count) {
+                expect(count).toEqual(counter, "number of nodes present does not match what's defined in chaise-config");
+            });
         });
+
+        if (!process.env.TRAVIS){
+            // Menu options: ['Search', 'RecordSets', 'Dataset', 'File', 'RecordEdit', 'Add Records', 'Edit Existing Record']
+            it('top level menu with no children should use default "newTab" value and navigate in a new tab', function (done) {
+                var searchOption = menu.all(by.tagName('li')).get(0);
+                expect(searchOption.getText()).toBe("Search", "First top level menu option text is incorrect");
+
+                searchOption.click().then(function () {
+                    return browser.getAllWindowHandles();
+                }).then(function (tabs) {
+                    allWindows = tabs;
+                    expect(allWindows.length).toBe(2, "new tab wasn't opened");
+
+                    return browser.switchTo().window(allWindows[1]);
+                }).then(function () {
+                    return browser.driver.getCurrentUrl();
+                }).then(function (url) {
+                    expect(url.indexOf("/chaise/search/#1/isa:dataset")).toBeGreaterThan(0, "new tab url doesn't include '/chaise/search' path");
+                    browser.close();
+
+                    return browser.switchTo().window(allWindows[0]);
+                }).then(function () {
+                    done();
+                }).catch(function (err) {
+                    console.dir(err);
+                    done.fail();
+                });
+            });
+
+            it('first level nested link should inherit newTab value from parent when newTab is undefined and navigate in new tab', function (done) {
+                var recordsetsMenu = menu.all(by.tagName('li')).get(1);
+                expect(recordsetsMenu.getText()).toBe("RecordSets", "Second top level menu option text is incorrect");
+
+                recordsetsMenu.click().then(function () {
+                    var datasetOption = recordsetsMenu.all(by.tagName('li')).get(0);
+                    expect(datasetOption.getText()).toBe("Dataset", "First 2nd level option for 'RecordSets' is in incorrect");
+
+                    return datasetOption.click();
+                }).then(function () {
+                    return browser.getAllWindowHandles();
+                }).then(function (tabs) {
+                    allWindows = tabs;
+                    expect(allWindows.length).toBe(2, "new tab wasn't opened");
+
+                    return browser.switchTo().window(allWindows[1]);
+                }).then(function () {
+                    return browser.driver.getCurrentUrl();
+                }).then(function (url) {
+                    expect(url.indexOf("/chaise/recordset/#1/isa:dataset")).toBeGreaterThan(0, "new tab url doesn't include '/chaise/recordset' path");
+                    browser.close();
+
+                    return browser.switchTo().window(allWindows[0]);
+                }).then(function () {
+                    done();
+                }).catch(function (err) {
+                    console.dir(err);
+                    done.fail();
+                });
+            });
+
+            it('parent link should honor newTab property and navigate in the same tab', function (done) {
+                var recordeditMenu = menu.all(by.tagName('li')).get(4);
+                expect(recordeditMenu.getText()).toBe("RecordEdit", "Third top level menu option text is incorrect");
+
+                recordeditMenu.click().then(function () {
+                    var addOption = recordeditMenu.all(by.tagName('li')).get(0);
+                    expect(addOption.getText()).toBe("Add Records", "First 2nd level option for 'RecordEdit' is in incorrect");
+
+                    return addOption.click();
+                }).then(function () {
+                    return browser.getAllWindowHandles();
+                }).then(function (tabs) {
+                    allWindows = tabs;
+                    expect(allWindows.length).toBe(1, "new tab was opened");
+
+                    return browser.driver.getCurrentUrl();
+                }).then(function (url) {
+                    expect(url.indexOf("/chaise/recordedit/#1/isa:dataset")).toBeGreaterThan(0, "new tab url doesn't include '/chaise/recordedit' path");
+
+                    done();
+                }).catch(function (err) {
+                    console.dir(err);
+                    done.fail();
+                });
+            });
+        }
     });
 
     // TODO: These tests are xit'd because we don't handle tests logging in via Globus/other services just yet

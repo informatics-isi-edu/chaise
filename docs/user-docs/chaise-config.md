@@ -1,4 +1,4 @@
-# Configuring
+# Configuration File: chaise-config.js
 
 **Chaise** uses a set of default configuration parameters. You can overwrite them through the `chaise-config.js` file and/or the search parameters in the URL. 
 
