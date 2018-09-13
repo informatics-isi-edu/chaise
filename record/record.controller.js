@@ -100,7 +100,7 @@
                     params: {
                         citation: tuple.citation,
                         permalink: $window.location.href,
-                        displayname: $rootScope.reference.table.name+'_'+tuple.data.RID
+                        displayname: $rootScope.reference.table.name+'_'+tuple.uniqueId
                     }
                 }
             }, false, false, false); // not defining any extra callbacks

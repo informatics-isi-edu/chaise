@@ -282,7 +282,7 @@
         if (params.citation) {
             var citation = params.citation;
             var bibtexContent = "@article{";
-            bibtexContent += (citation.id ? citation.id+",\n" : ",\n");
+            bibtexContent += (citation.id ? citation.id+",\n" : params.displayname+",\n");
             if (citation.author) bibtexContent += "author = {" + citation.author + "},\n";
             if (citation.title) bibtexContent += "title = {" + citation.title + "},\n";
             bibtexContent += "journal = {" + citation.journal + "},\n";
