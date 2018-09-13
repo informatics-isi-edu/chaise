@@ -12,8 +12,7 @@
         <li id="citation" ng-if="::ctrl.citation">
             <h2>Citation</h2>
             <div id="citation-text">
-                <span ng-if="::ctrl.citation.author">{{::ctrl.citation.author}}; </span><span ng-if="::ctrl.citation.title">{{::ctrl.citation.title}}, </span><i>{{::ctrl.citation.journal}}</i>, {{::ctrl.citation.year}}, <span ng-if="::ctrl.citation.id">{{::ctrl.citation.id}},</span>
-                <a ng-href="{{::ctrl.citation.url}}">{{::ctrl.citation.url}}</a>
+                <span ng-if="::ctrl.citation.author">{{::ctrl.citation.author}}; </span><span ng-if="::ctrl.citation.title">{{::ctrl.citation.title}}, </span><i>{{::ctrl.citation.journal}}</i>, <a ng-href="{{::ctrl.citation.url}}">{{::ctrl.citation.url}}</a>, ({{::ctrl.citation.year}}).
             </div>
         </li>
         <li id="download-citation" ng-if="::ctrl.citation">

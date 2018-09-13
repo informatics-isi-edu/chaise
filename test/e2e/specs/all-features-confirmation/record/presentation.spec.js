@@ -81,7 +81,7 @@ var testParams = {
     },
     citationParams: {
         numListElements: 3,
-        citation: "Sherathon Hotel, " + moment().format("YYYY") + ", 2002, http://www.starwoodhotels.com/sheraton/index.html"
+        citation: "Sherathon Hotel, http://www.starwoodhotels.com/sheraton/index.html, (" + moment().format("YYYY") + ")."
     },
     inline_columns: [
       {

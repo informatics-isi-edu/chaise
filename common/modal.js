@@ -281,16 +281,17 @@
         // generate bibtex url from citation
         if (params.citation) {
             var citation = params.citation;
-            var bibtextContent = "@article{\n";
-            if (citation.author) bibtextContent += "author = {" + citation.author + "},\n";
-            if (citation.title) bibtextContent += "title = {" + citation.title + "},\n";
-            bibtextContent += "journal = {" + citation.journal + "},\n";
-            bibtextContent += "year = {" + citation.year + "},\n";
-            bibtextContent += "URL = {" + citation.url + "},\n}";
+            var bibtexContent = "@article{";
+            bibtexContent += (citation.id ? citation.id+",\n" : ",\n");
+            if (citation.author) bibtexContent += "author = {" + citation.author + "},\n";
+            if (citation.title) bibtexContent += "title = {" + citation.title + "},\n";
+            bibtexContent += "journal = {" + citation.journal + "},\n";
+            bibtexContent += "year = {" + citation.year + "},\n";
+            bibtexContent += "URL = {" + citation.url + "}\n}";
 
-            var bibtextBlob = new Blob([ bibtextContent ], { type : 'text/plain' });
+            var bibtexBlob = new Blob([ bibtexContent ], { type : 'text/plain' });
             // set downloadURL for ng-href attribute
-            vm.downloadBibtex = $window.URL.createObjectURL( bibtextBlob );
+            vm.downloadBibtex = $window.URL.createObjectURL( bibtexBlob );
         }
 
         function cancel() {
