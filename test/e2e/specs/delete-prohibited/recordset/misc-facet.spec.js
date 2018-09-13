@@ -45,6 +45,19 @@ var testParams = {
             'All Records With Value', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'
         ]
     },
+    null_modal_filter: {
+        panel: {
+            facetIdx: 5,
+            totalNumOptions: 12,
+            option: 1,
+            numRows: 5
+        },
+        modal: {
+            facetIdx: 10,
+            totalNumOptions: 7,
+            numRows: 0
+        }
+    },
     customFilter: {
         ermrestFilter: "id=1;id=2;int_col::geq::20",
         numRows: 7,
@@ -406,6 +419,108 @@ describe("Other facet features, ", function() {
                 // NOTE after this test case the modal is still open, the next test cases should just start a new url.
                 done();
             }).catch(chaisePage.catchTestError(done));
+        });
+    });
+
+    describe("No Value (null) filter, ", function () {
+        var uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
+        var clearAll, showMore, nullBtn;
+
+        beforeAll(function (done) {
+            browser.ignoreSynchronization=true;
+            browser.get(uri);
+            chaisePage.waitForElementInverse(element(by.id("spinner")));
+
+            clearAll = chaisePage.recordsetPage.getClearAllFilters();
+            browser.wait(EC.elementToBeClickable(clearAll));
+
+            clearAll.click().then(function () {
+                chaisePage.waitForElementInverse(element(by.id("spinner")));
+
+                done();
+            }).catch(chaisePage.catchTestError(done));
+
+            nullBtn = chaisePage.recordsetPage.getModalMatchNullInput();
+        });
+
+        describe("when it's already selected, ", function () {
+            var params = testParams.null_modal_filter.panel;
+            var idx = params.facetIdx;
+            it ('opening the modal should show the No value as selected.', function (done) {
+                chaisePage.clickButton(chaisePage.recordsetPage.getFacetById(idx)).then(function () {
+                    // wait for facet to open
+                    browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
+
+                    // wait for facet checkboxes to load
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getFacetOptions(idx).count().then(function(ct) {
+                            return ct == params.totalNumOptions;
+                        });
+                    }, browser.params.defaultTimeout);
+
+                    return chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(idx, params.option));
+                }).then(function () {
+                    // wait for table rows to load
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                            return ct == params.numRows;
+                        });
+                    }, browser.params.defaultTimeout);
+
+                    showMore = chaisePage.recordsetPage.getShowMore(idx);
+                    browser.wait(EC.elementToBeClickable(showMore));
+                    return chaisePage.clickButton(showMore);
+                }).then(function () {
+                    chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
+
+                    expect(nullBtn.isSelected()).toBeTruthy("checkbox is not selected");
+                    return chaisePage.recordsetPage.getModalCloseBtn().click();
+                }).then(function () {
+                    done();
+                }).catch(chaisePage.catchTestError(done));
+            });
+        });
+
+        describe("when it's not selected,", function () {
+            var params = testParams.null_modal_filter.modal;
+            var idx = params.facetIdx;
+
+            it ("opening the modal should not have the no value selected.", function (done) {
+                chaisePage.clickButton(chaisePage.recordsetPage.getFacetById(idx)).then(function () {
+                    // wait for facet to open
+                    browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
+
+                    // wait for facet checkboxes to load
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getFacetOptions(idx).count().then(function(ct) {
+                            return ct == params.totalNumOptions;
+                        });
+                    }, browser.params.defaultTimeout);
+
+                    showMore = chaisePage.recordsetPage.getShowMore(idx);
+                    browser.wait(EC.elementToBeClickable(showMore));
+                    return chaisePage.clickButton(showMore);
+                }).then(function () {
+                    chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
+
+                    expect(nullBtn.isSelected()).toBeFalsy("checkbox is selected");
+                    done();
+                }).catch(chaisePage.catchTestError(done));
+            });
+
+            it ("selecting `No Value` and submitting should change the result.", function (done) {
+                chaisePage.clickButton(nullBtn).then(function () {
+                    expect(nullBtn.isSelected()).toBeTruthy("didn't select.");
+                    return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
+                }).then(function () {
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                            return ct == params.numRows;
+                        });
+                    }, browser.params.defaultTimeout);
+                    done();
+                }).catch(chaisePage.catchTestError(done));
+            });
         });
     });
 
