@@ -9,11 +9,10 @@ var testParams = {
     filter_secondary_key: {
         facetIdx: 14,
         option: 1,
-        modalOption: 1,
+        modalOption: 2,
         totalNumOptions: 11,
         numRows: 10,
-        numRowsAfterModal: 20
-
+        numRowsAfterModal: 11
     },
     facet_order: [
         {
@@ -92,7 +91,6 @@ var testParams = {
 
 
 describe("Other facet features, ", function() {
-
     describe("selecting entity facet that is not on the shortest key.", function () {
         var facet, idx, clearAll;
         beforeAll(function (done) {
@@ -169,14 +167,14 @@ describe("Other facet features, ", function() {
                 expect(chaisePage.recordsetPage.getCheckedModalOptions().count()).toBe(1, "number of checked rows missmatch.");
                 return chaisePage.recordsetPage.getModalOptions();
             }).then(function (options) {
-                expect(options[testParams.filter_secondary_key.option].isSelected()).toBeTruthy("the correct option was not selected.");
+                expect(options[testParams.filter_secondary_key.option-1].isSelected()).toBeTruthy("the correct option was not selected.");
                 done();
             }).catch(chaisePage.catchTestError(done));
         });
 
         it ("selecting new values on the modal and submitting them, should change the filters on submit.", function (done) {
             chaisePage.recordsetPage.getModalOptions().then(function (options) {
-                return chaisePage.clickButton(options[testParams.filter_secondary_key.modalOption+1]);
+                return chaisePage.clickButton(options[testParams.filter_secondary_key.modalOption]);
             }).then(function () {
                 return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
             }).then(function () {
@@ -322,6 +320,7 @@ describe("Other facet features, ", function() {
                         return (ct > 0);
                     });
                 });
+                expect(chaisePage.recordsetPage.getModalMatchNullInput().getAttribute('disabled')).toBe('true', "null option was not disabled.");
                 expect(chaisePage.recordsetPage.getModalDisabledRows().count()).toBe(testParams.not_null.modal_available_options, "number of disabled rows missmatch.");
                 expect(chaisePage.recordsetPage.getCheckedModalOptions().count()).toBe(0, "number of checked rows missmatch.");
                 return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
@@ -358,6 +357,7 @@ describe("Other facet features, ", function() {
                 // make sure the options havn't changed
                 expect(text).toEqual(testParams.not_null.options_w_not_null, "the text of selected faacet missmatch.");
 
+                expect(chaisePage.recordsetPage.getModalMatchNullInput().getAttribute('disabled')).not.toBe('true', "null option is still disabled.");
                 expect(chaisePage.recordsetPage.getCheckedFacetOptions(testParams.not_null.option).count()).toBe(0, "number of selected filters missmatch.");
                 expect(chaisePage.recordsetPage.getDisabledFacetOptions(testParams.not_null.option).count()).toBe(0, "numer of disabled filters missmatch.");
 
@@ -557,7 +557,7 @@ describe("Other facet features, ", function() {
             });
 
             it ("changing filters and going below the URL limit should hide the alert and enable the submit button.", function (done) {
-                chaisePage.clickButton(chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(1)).then(function () {
+                chaisePage.clickButton(chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(0)).then(function () {
                     chaisePage.waitForElementInverse(alert);
                     expect(submitBtn.getAttribute('disabled')).not.toBe('true', "submit is disabled.");
                     return chaisePage.clickButton(submitBtn);
@@ -719,7 +719,7 @@ describe("Other facet features, ", function() {
             });
 
             it("select a facet option and select a row for the input", function (done) {
-                chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(0, 1)).then(function () {
+                chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(0, 2)).then(function () {
                     browser.wait(function () {
                         return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
                             return (ct == 1);
@@ -799,7 +799,7 @@ describe("Other facet features, ", function() {
             });
 
             it("select a facet option and select a row to associate", function (done) {
-                chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(0, 1)).then(function () {
+                chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(0, 2)).then(function () {
                     browser.wait(function () {
                         return chaisePage.recordsetPage.getRecordsetTableModalOptions().count().then(function (ct) {
                             return (ct == 1);

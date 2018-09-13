@@ -182,6 +182,7 @@
             rowValues:          [],
             selectedRows:       params.selectedRows,
             matchNotNull:       params.matchNotNull,
+            matchNull:          params.matchNull,
             search:             reference.location.searchTerm,
             config:             {viewable: false, editable: false, deletable: false, selectMode: params.selectMode, showFaceting: showFaceting, facetPanelOpen: params.facetPanelOpen, showNull: params.showNull === true},
             context:            params.context,
@@ -215,12 +216,11 @@
          * In that case, we might have the `matchNotNull` variable. If we do, we just need to pass that.
          */
         function getMultiSelectionResult() {
-            var res = vm.tableModel.selectedRows;
-            if (!Array.isArray(res)) res = [];
             if (vm.tableModel.matchNotNull) {
-                res = {matchNotNull: true};
+                return {matchNotNull: true};
             }
-            return res;
+            var res = vm.tableModel.selectedRows;
+            return Array.isArray(res) ? res : [];
         }
 
         /**

@@ -1168,7 +1168,7 @@ var recordsetPage = function() {
     }
 
     this.getModalOptions = function () {
-        return element(by.css(".modal-body")).all(by.css(".chaise-checkbox input"));
+        return element(by.css(".modal-body .recordset-table")).all(by.css(".chaise-checkbox input"));
     };
 
     this.getRecordsetTableModalOptions = function () {
@@ -1176,7 +1176,7 @@ var recordsetPage = function() {
     };
 
     this.getModalRecordsetTableOptionByIndex = function (index) {
-        return element(by.css(".modal-body")).element(by.css(".main-container")).all(by.css(".chaise-checkbox input")).get(index);
+        return element(by.css(".modal-body .recordset-table")).all(by.css(".chaise-checkbox input")).get(index);
     };
 
     this.getModalSubmit = function () {
@@ -1210,6 +1210,10 @@ var recordsetPage = function() {
 
     this.getModalMatchNotNullInput = function () {
         return element(by.id("rs-match-not-null"));
+    };
+
+    this.getModalMatchNullInput = function () {
+        return element(by.id("rs-match-null"));
     };
 
     this.getModalDisabledRows = function () {
