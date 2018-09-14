@@ -271,11 +271,28 @@
         }
     }])
 
-    .controller('ShareCitationController', ['$uibModalInstance', 'params', function ($uibModalInstance, params) {
+    .controller('ShareCitationController', ['$uibModalInstance', '$window', 'params', function ($uibModalInstance, $window, params) {
         var vm = this;
         vm.cancel = cancel;
         vm.citation = params.citation;
         vm.permalink = params.permalink;
+        vm.filename = params.displayname;
+
+        // generate bibtex url from citation
+        if (params.citation) {
+            var citation = params.citation;
+            var bibtexContent = "@article{";
+            bibtexContent += (citation.id ? citation.id+",\n" : params.displayname+",\n");
+            if (citation.author) bibtexContent += "author = {" + citation.author + "},\n";
+            if (citation.title) bibtexContent += "title = {" + citation.title + "},\n";
+            bibtexContent += "journal = {" + citation.journal + "},\n";
+            bibtexContent += "year = {" + citation.year + "},\n";
+            bibtexContent += "URL = {" + citation.url + "}\n}";
+
+            var bibtexBlob = new Blob([ bibtexContent ], { type : 'text/plain' });
+            // set downloadURL for ng-href attribute
+            vm.downloadBibtex = $window.URL.createObjectURL( bibtexBlob );
+        }
 
         function cancel() {
             $uibModalInstance.dismiss('cancel');

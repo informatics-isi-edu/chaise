@@ -1,22 +1,23 @@
 <div class="modal-header" class="share-header">
-    <h2 class="modal-title text-center"><strong>Share Citation</strong>
+    <h2 class="modal-title text-center"><strong>Share</strong>
         <button class="btn btn-default pull-right modal-close" type="button" ng-click="ctrl.cancel()">X</button>
     </h2>
 </div>
 <div class="modal-body">
     <ul>
         <li id="share-link">
-            <h2>Share Link</h2>
+            <h2><b>Share Link</b></h2>
             <a id="permalink" ng-href="{{::ctrl.permalink}}">{{::ctrl.permalink}}</a>
         </li>
         <li id="citation" ng-if="::ctrl.citation">
-            <h2>Citation</h2>
+            <h2><b>Citation</b></h2>
             <div id="citation-text">
-                <span ng-if="::ctrl.citation.author">{{::ctrl.citation.author}}; </span><span ng-if="::ctrl.citation.title">{{::ctrl.citation.title}}, </span><i>{{::ctrl.citation.journal}}</i>, {{::ctrl.citation.year}}, <span ng-if="::ctrl.citation.id">{{::ctrl.citation.id}},</span>
-                <a ng-href="{{::ctrl.citation.url}}">{{::ctrl.citation.url}}</a>
+                <span ng-if="::ctrl.citation.author">{{::ctrl.citation.author}} </span><span ng-if="::ctrl.citation.title">{{::ctrl.citation.title}} </span><i>{{::ctrl.citation.journal}}</i> <a ng-href="{{::ctrl.citation.url}}">{{::ctrl.citation.url}}</a> ({{::ctrl.citation.year}}).
             </div>
         </li>
-        <!-- <li>
-            <h2>Downoad Formats</h2> -->
+        <li id="download-citation" ng-if="::ctrl.citation">
+            <h3><b>Download Citation:</b></h3>
+            <a id="bibtex-download" download="{{::ctrl.filename}}.bibtex" ng-href="{{::ctrl.downloadBibtex}}">BibTex</a>
+        </li>
     </ul>
 </div>

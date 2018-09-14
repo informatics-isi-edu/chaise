@@ -65,16 +65,12 @@ describe('View existing record,', function() {
 
         // test that no citation appears in share modal when no citation is defined on table
         it("should show the share dialog when clicking the share button with only permalink present.", function(done) {
-            var shareButton = chaisePage.recordPage.getShareButton();
-
-            shareButton.click().then(function () {
-                var modalContent = element(by.css('.modal-content'));
-
+            chaisePage.recordPage.getShareButton().click().then(function () {
                 // wait for dialog to open
-                chaisePage.waitForElement(modalContent);
+                chaisePage.waitForElement(chaisePage.recordPage.getShareModal());
 
                 // verify modal dialog contents
-                expect(chaisePage.recordEditPage.getModalTitle().element(by.tagName("strong")).getText()).toBe("Share Citation", "Share citation modal title is incorrect");
+                expect(chaisePage.recordEditPage.getModalTitle().element(by.tagName("strong")).getText()).toBe("Share", "Share citation modal title is incorrect");
                 expect(chaisePage.recordPage.getModalListElements().count()).toBe(1, "Number of list elements in share citation modal is incorrect");
 
                 return browser.getCurrentUrl();
