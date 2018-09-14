@@ -187,6 +187,9 @@
             if (!isUpdate) {
                 $rootScope.recordFlowControl.occupiedSlots = 0;
                 $rootScope.recordFlowControl.counter = 0;
+            } else {
+                // we want to update the main entity on update
+                $rootScope.isMainDirty = true;
             }
             $rootScope.recordFlowControl.counter++;
 

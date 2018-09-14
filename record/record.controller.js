@@ -90,15 +90,17 @@
         };
 
         vm.sharePopup = function() {
+            var tuple = $rootScope.tuple;
             modalUtils.showModal({
                 templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/shareCitation.modal.html",
                 controller: "ShareCitationController",
-                windowClass: "share-citation",
+                windowClass: "chaise-share-citation",
                 controllerAs: "ctrl",
                 resolve: {
                     params: {
-                        citation: $rootScope.tuple.citation,
-                        permalink: $window.location.href
+                        citation: tuple.citation,
+                        permalink: $window.location.href,
+                        displayname: $rootScope.reference.table.name+'_'+tuple.uniqueId
                     }
                 }
             }, false, false, false); // not defining any extra callbacks

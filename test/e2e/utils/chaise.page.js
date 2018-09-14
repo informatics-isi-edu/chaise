@@ -796,7 +796,7 @@ var recordPage = function() {
     };
 
     this.getShareModal = function() {
-        return element(by.css(".share-citation"));
+        return element(by.css(".chaise-share-citation"));
     };
 
     this.getModalListElements = function() {
@@ -811,8 +811,16 @@ var recordPage = function() {
         return element(by.id("citation")).element(by.tagName('h2'));
     };
 
+    this.getDownloadCitationHeader = function() {
+        return element(by.id("download-citation")).element(by.tagName('h3'));
+    };
+
     this.getCitationText = function() {
         return element(by.id("citation-text"));
+    };
+
+    this.getBibtex = function() {
+        return element(by.id("bibtex-download"));
     };
 
     this.getErrorModalTitle = function(){
