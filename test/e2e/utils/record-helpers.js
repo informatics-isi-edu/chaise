@@ -99,7 +99,7 @@ exports.testPresentation = function (tableParams) {
 
         it("should show the share dialog when clicking the share button with 3 list elements.", function () {
             // verify modal dialog contents
-            expect(chaisePage.recordEditPage.getModalTitle().element(by.tagName("strong")).getText()).toBe("Share Citation", "Share citation modal title is incorrect");
+            expect(chaisePage.recordEditPage.getModalTitle().element(by.tagName("strong")).getText()).toBe("Share", "Share citation modal title is incorrect");
             expect(chaisePage.recordPage.getModalListElements().count()).toBe(tableParams.citationParams.numListElements, "Number of list elements in share citation modal is incorrect");
         });
 
@@ -122,7 +122,7 @@ exports.testPresentation = function (tableParams) {
             expect(chaisePage.recordPage.getCitationText().getText()).toBe(tableParams.citationParams.citation, "citation text is incorrect");
 
             // verify download citation
-            expect(chaisePage.recordPage.getDownloadCitationHeader().getText()).toBe("Download Citation", "Download citation header is incorrect");
+            expect(chaisePage.recordPage.getDownloadCitationHeader().getText()).toBe("Download Citation:", "Download citation header is incorrect");
             expect(chaisePage.recordPage.getBibtex().getText()).toBe("BibTex", "bibtex text is incorrect");
         });
 

@@ -70,7 +70,7 @@ describe('View existing record,', function() {
                 chaisePage.waitForElement(chaisePage.recordPage.getShareModal());
 
                 // verify modal dialog contents
-                expect(chaisePage.recordEditPage.getModalTitle().element(by.tagName("strong")).getText()).toBe("Share Citation", "Share citation modal title is incorrect");
+                expect(chaisePage.recordEditPage.getModalTitle().element(by.tagName("strong")).getText()).toBe("Share", "Share citation modal title is incorrect");
                 expect(chaisePage.recordPage.getModalListElements().count()).toBe(1, "Number of list elements in share citation modal is incorrect");
 
                 return browser.getCurrentUrl();

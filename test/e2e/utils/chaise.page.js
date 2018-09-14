@@ -812,7 +812,7 @@ var recordPage = function() {
     };
 
     this.getDownloadCitationHeader = function() {
-        return element(by.id("download-citation")).element(by.tagName('h2'));
+        return element(by.id("download-citation")).element(by.tagName('h3'));
     };
 
     this.getCitationText = function() {
