@@ -158,11 +158,11 @@ var testParams = {
         {
             name: "text_col",
             type: "choice",
-            totalNumOptions: 11,
-            option: 1,
+            totalNumOptions: 12,
+            option: 2,
             filter: "text_col: one",
             numRows: 6,
-            options: [ 'All Records With Value', 'one', 'Empty', 'two', 'No Value', 'seven', 'eight', 'elevens', 'four', 'six', 'ten' ]
+            options: [ 'All Records With Value', 'No Value', 'one', 'Empty', 'two', 'seven', 'eight', 'elevens', 'four', 'six', 'ten', 'three' ]
         },
         {
             name: "longtext_col",
@@ -171,44 +171,44 @@ var testParams = {
             option: 3,
             filter: "longtext_col: two",
             numRows: 5,
-            options: [ 'All Records With Value', 'Empty', 'one', 'two', 'No Value', 'eight', 'eleven', 'five', 'four', 'nine', 'seven' ],
+            options: [ 'No Value', 'Empty', 'one', 'two', 'eight', 'eleven', 'five', 'four', 'nine', 'seven', 'six' ],
             comment: "A lengthy comment for the facet of the longtext_col. This should be displyed properly in the facet."
         },
         {
             name: "markdown_col",
             type: "choice",
-            totalNumOptions: 11,
-            option: 5,
+            totalNumOptions: 10,
+            option: 3,
             filter: "markdown_col: eight",
             numRows: 1,
-            options: [ 'All Records With Value', 'Empty', 'one', 'two', 'No Value', 'eight', 'eleven', 'five', 'four', 'nine', 'seven' ]
+            options: [ 'Empty', 'one', 'two', 'eight', 'eleven', 'five', 'four', 'nine', 'seven' , 'six']
         },
         {
             name: "boolean_col",
             type: "choice",
             totalNumOptions: 4,
-            option: 2,
+            option: 3,
             filter: "boolean_col: Yes",
             numRows: 10,
-            options: [ 'All Records With Value', 'No', 'Yes', 'No Value' ]
+            options: [ 'All Records With Value', 'No Value', 'No', 'Yes' ]
         },
         {
             name: "jsonb_col",
             type: "choice",
-            totalNumOptions: 11,
+            totalNumOptions: 12,
             option: 5,
             filter: 'jsonb_col: { "key": "four" }',
             numRows: 1,
-            options: [ 'All Records With Value', 'No Value', '{"key":"one"}', '{"key":"two"}', '{"key":"three"}', '{"key":"four"}', '{"key":"five"}', '{"key":"six"}', '{"key":"seven"}', '{"key":"eight"}', '{"key":"nine"}' ]
+            options: [ 'All Records With Value', 'No Value', '{"key":"one"}', '{"key":"two"}', '{"key":"three"}', '{"key":"four"}', '{"key":"five"}', '{"key":"six"}', '{"key":"seven"}', '{"key":"eight"}', '{"key":"nine"}', '{"key":"ten"}' ]
         },
         {
             name: "F1",
             type: "choice",
-            totalNumOptions: 11,
-            option: 2,
+            totalNumOptions: 12,
+            option: 3,
             filter: "F1 : two",
             numRows: 10,
-            options: [ 'All Records With Value', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten' ]
+            options: [ 'All Records With Value', 'No Value', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten' ]
         },
         {
             name: "to_name",
@@ -232,11 +232,11 @@ var testParams = {
         {
             name: "from_name",
             type: "choice",
-            totalNumOptions: 11,
+            totalNumOptions: 12,
             option: 6,
             filter: "from_name: 5",
             numRows: 1,
-            options: [ 'All Records With Value', 'No Value', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+            options: [ 'All Records With Value', 'No Value', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
         },
         {
             name: "F1 with Term",
@@ -267,10 +267,10 @@ var testParams = {
         }
     ],
     multipleFacets: [
-        { facetIdx: 10, option: 2, numOptions: 11, numRows: 10 },
+        { facetIdx: 10, option: 3, numOptions: 12, numRows: 10 },
         { facetIdx: 11, option: 1, numOptions: 3, numRows: 5 },
-        { facetIdx: 12, option: 1, numOptions: 2, numRows: 5 },
-        { facetIdx: 13, option: 2, numOptions: 6, numRows: 1 }
+        { facetIdx: 12, option: 2, numOptions: 3, numRows: 5 },
+        { facetIdx: 13, option: 3, numOptions: 7, numRows: 1 }
     ]
 };
 
@@ -348,8 +348,8 @@ describe("Viewing Recordset with Faceting,", function() {
 
                     return chaisePage.recordsetPage.getModalOptions();
                 }).then(function (options) {
-                    // click the 3rd option
-                    return chaisePage.clickButton(options[2]);
+                    // click the 2nd option
+                    return chaisePage.clickButton(options[1]);
                 }).then(function () {
                     return chaisePage.recordsetPage.getModalSubmit().click();
                 }).then(function () {
@@ -519,8 +519,8 @@ describe("Viewing Recordset with Faceting,", function() {
 
                     return chaisePage.recordsetPage.getModalOptions();
                 }).then(function (options) {
-                    // click the 3rd option
-                    return chaisePage.clickButton(options[2]);
+                    // click the 2nd option
+                    return chaisePage.clickButton(options[1]);
                 }).then(function () {
                     return chaisePage.recordsetPage.getModalSubmit().click();
                 }).then(function () {
