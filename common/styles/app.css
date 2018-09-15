@@ -826,7 +826,7 @@ body.error-open loading-spinner {
 /******* Popup modal for share ********/
 
 .chaise-share-citation ul {
-    -webkit-padding-start: 10px;
+    padding-left: 10px;
 }
 
 .chaise-share-citation #share-link h2 {
