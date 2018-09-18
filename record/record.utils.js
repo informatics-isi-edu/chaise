@@ -11,8 +11,8 @@
     }])
 
     .factory('recordAppUtils',
-             ['constants', 'DataUtils', 'Errors', '$log', 'logActions', 'modalBox', '$q', 'recordTableUtils', '$rootScope',
-             function (constants, DataUtils, Errors, $log, logActions, modalBox, $q, recordTableUtils, $rootScope) {
+             ['constants', 'DataUtils', 'Errors', 'ErrorService', '$log', 'logActions', 'modalBox', '$q', 'recordTableUtils', '$rootScope',
+             function (constants, DataUtils, Errors, ErrorService, $log, logActions, modalBox, $q, recordTableUtils, $rootScope) {
 
         /**
          * returns true if we have free slots for requests.
@@ -39,7 +39,20 @@
                 readMainEntity().then(function (tuple) {
                     $rootScope.isMainDirty = false;
                     _processRequests(isUpdate);
-                }).catch(genericErrorCatch);
+                }).catch(function (err) {
+                    // show modal with different text if 400 Query Timeout Error
+                    if (err instanceof ERMrest.QueryTimeoutError) {
+                        err.subMessage = err.message;
+                        err.message = "The main entity cannot be retrieved.";
+                        ErrorService.handleException(err, true);
+                    } else {
+                        if (DataUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
+                            var redirectLink = UriUtils.createRedirectLinkFromPath(err.errorData.redirectPath);
+                            err.errorData.redirectUrl = redirectLink.replace('record', 'recordset');
+                        }
+                        throw err;
+                    }
+                });
                 return;
             }
 
@@ -148,7 +161,19 @@
                     $rootScope.recordFlowControl.occupiedSlots--;
                     model.dirtyResult = !res;
                     _processRequests(isUpdate);
-                }).catch(genericErrorCatch);
+                }).catch(function (exception) {
+                    if (err instanceof ERMrest.QueryTimeoutError) {
+                        // TODO: how to show column aggregates error
+                        // is this columns in a related table? should it be `!` on the column header?
+                        model.hasError = true;
+                    } else {
+                        if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'redirectPath')) {
+                            var redirectLink = UriUtils.createRedirectLinkFromPath(exception.errorData.redirectPath);
+                            exception.errorData.redirectUrl = redirectLink.replace('record', 'recordset');
+                        }
+                        throw exception;
+                    }
+                });
             });
         }
 

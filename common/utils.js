@@ -100,7 +100,8 @@
             actionCol: "Click on the action buttons to view, edit, or delete each record",
             viewCol: "Click on the eye button to view the detailed page associated with each record"
         },
-        "URLLimitMessage": "Maximum URL length reached. Cannot perform the requested action."
+        "URLLimitMessage": "Maximum URL length reached. Cannot perform the requested action.",
+        "queryTimeoutList": "<ul class='show-list-style'><li>Collapse any unused facets.</li><li>Remove facet constraints.</li><li>Minimize the use of the 'No Value' and 'All Records with Value' filters.</li></ul>"
     })
 
     .constant("logActions", {

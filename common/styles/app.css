@@ -833,6 +833,12 @@ body.error-open loading-spinner {
     margin-top: 5px;
 }
 
+/******** Alerts styles ********/
+
+ul.show-list-style li {
+    list-style-type: inherit;
+}
+
 /*******Bootstrap  Modal styling *********/
 
 /*When the modal fills the screen it has an even 2.5% on top and bottom*/

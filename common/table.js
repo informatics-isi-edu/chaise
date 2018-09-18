@@ -86,8 +86,8 @@
      * modified. ellipses will fire this event and recordset directive will use it.
      */
     .factory('recordTableUtils',
-            ['AlertsService', '$document', 'messageMap', 'modalBox', 'DataUtils', '$timeout','Session', '$q', 'tableConstants', '$rootScope', '$log', '$window', '$cookies', 'defaultDisplayname', 'MathUtils', 'UriUtils', 'logActions',
-            function(AlertsService, $document, messageMap, modalBox, DataUtils, $timeout, Session, $q, tableConstants, $rootScope, $log, $window, $cookies, defaultDisplayname, MathUtils, UriUtils, logActions) {
+            ['AlertsService', 'DataUtils', 'defaultDisplayname', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'Session', 'tableConstants', 'UriUtils', '$cookies', '$document', '$log', '$q', '$rootScope', '$timeout', '$window',
+            function(AlertsService, DataUtils, defaultDisplayname, ErrorService, logActions, MathUtils, messageMap, modalBox, Session, tableConstants, UriUtils, $cookies, $document, $log, $q, $rootScope, $timeout, $window) {
 
         function FlowControlObject(maxRequests) {
             this.maxRequests = maxRequests || tableConstants.MAX_CONCURENT_REQUEST;
@@ -132,7 +132,12 @@
                         updatePageCB(vm);
                     }).catch(function (err) {
                         _afterUpdateColumnAggregate(vm, false, i);
-                        throw err;
+                        // show alert if 400 Query Timeout Error
+                        if (err instanceof ERMrest.QueryTimeoutError) {
+                            vm.columnModels[i].hasError = true;
+                        } else {
+                            throw err;
+                        }
                     });
                 })(vm.aggregatesToInitialize.shift(), vm.flowControlObject.counter);
             }
@@ -198,10 +203,21 @@
                 _readMainEntity(vm, hideSpinner, currentCounter).then(function (res) {
                     _afterUpdateMainEntity(vm, res, currentCounter);
                     $log.debug("counter", vm.flowControlObject.counter, ": just before update page");
+                    // TODO remember last successful main request
+                    // when a request fails for 400 QueryTimeout, revert (change browser location) to this previous request
                     updatePageCB(vm);
                 }).catch(function (err) {
                     _afterUpdateMainEntity(vm, true, currentCounter);
-                    throw err;
+                    // show modal with different text if 400 Query Timeout Error
+                    if (err instanceof ERMrest.QueryTimeoutError) {
+                        // clear the data shown in the table
+                        vm.rowValues = [];
+                        err.subMessage = err.message;
+                        err.message = "The resultset cannot be retrieved. You can try the following to help resolve the issue:\n" + messageMap.queryTimeoutList;
+                        ErrorService.handleException(err, true);
+                    } else {
+                        throw err;
+                    }
                 });
             })(vm.flowControlObject.counter);
         }
@@ -380,6 +396,10 @@
                         return defer.promise;
                     }
 
+                    if (err instanceof ERMrest.QueryTimeoutError) {
+                        vm.countError = true;
+                    }
+
                     // fail silently
                     vm.totalRowsCnt = null;
                 });
@@ -514,7 +534,13 @@
                                 _updatePage(vm);
                             }).catch(function (err) {
                                 _afterFacetUpdate(vm, i, false);
-                                throw err;
+                                // show alert if 400 Query Timeout Error
+                                if (err instanceof ERMrest.QueryTimeoutError) {
+                                    vm.facetModels[i].hasError = true;
+                                    AlertsService.addAlert("The facet values for " + vm.facetModels[i].facetName + " cannot be retrieved. You can try the following to help resolve the issue:\n" + messageMap.queryTimeoutList, 'error');
+                                } else {
+                                    throw err;
+                                }
                             });
                         })(index);
                     });
@@ -530,7 +556,13 @@
                             vm.flowControlObject.occupiedSlots--;
                             _updatePage(vm);
                         }).catch(function (err) {
-                            throw err;
+                            // show alert if 400 Query Timeout Error
+                            if (err instanceof ERMrest.QueryTimeoutError) {
+                                vm.facetModels[i].hasError = true;
+                                AlertsService.addAlert("The facet values for " + vm.facetModels[i].facetName + " cannot be retrieved. You can try the following to help resolve the issue:\n" + messageMap.queryTimeoutList, 'error');
+                            } else {
+                                throw err;
+                            }
                         });
                     })(index);
                 }

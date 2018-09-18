@@ -48,6 +48,8 @@
                         ctrl.facetingCount++;
 
                         $scope.vm.facetModels[index] = {
+                            facetName: facetColumn.displayname.unformatted,
+                            hasError: false,
                             initialized: false,
                             isOpen: false,
                             isLoading: false,
