@@ -64,7 +64,7 @@
                 if (!model.isInline || !model.tableModel.dirtyResult) continue;
                 if (!_haveFreeSlot()) return;
                 model.tableModel.logObject = _getTableModelLogObject(model.tableModel, isUpdate ? logActions.recordInlineUpdate : logActions.recordInlineRead);
-                recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate);
+                recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate, false);
             }
 
             // main aggregates
@@ -78,7 +78,7 @@
                 if (!model.tableModel.dirtyResult) continue;
                 if (!_haveFreeSlot()) return;
                 model.tableModel.logObject = _getTableModelLogObject(model.tableModel, isUpdate ? logActions.recordRelatedUpdate : logActions.recordRelatedRead);
-                recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate);
+                recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate, false);
             }
 
             // aggregates in inline
@@ -157,21 +157,23 @@
                 if (!model.isAggregate || !_haveFreeSlot() || !model.dirtyResult) return;
                 $rootScope.recordFlowControl.occupiedSlots++;
                 model.dirtyResult = false;
+                model.isLoading = true;
                 _readMainColumnAggregate(model.column, index, $rootScope.recordFlowControl.counter).then(function (res) {
                     $rootScope.recordFlowControl.occupiedSlots--;
                     model.dirtyResult = !res;
                     _processRequests(isUpdate);
-                }).catch(function (exception) {
+                }).catch(function (err) {
+                    model.isLoading = false;
                     if (err instanceof ERMrest.QueryTimeoutError) {
                         // TODO: how to show column aggregates error
                         // is this columns in a related table? should it be `!` on the column header?
                         model.hasError = true;
                     } else {
-                        if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'redirectPath')) {
-                            var redirectLink = UriUtils.createRedirectLinkFromPath(exception.errorData.redirectPath);
-                            exception.errorData.redirectUrl = redirectLink.replace('record', 'recordset');
+                        if (DataUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
+                            var redirectLink = UriUtils.createRedirectLinkFromPath(err.errorData.redirectPath);
+                            err.errorData.redirectUrl = redirectLink.replace('record', 'recordset');
                         }
-                        throw exception;
+                        throw err;
                     }
                 });
             });
@@ -189,6 +191,7 @@
             logObject.referrer = $rootScope.reference.defaultLogInfo;
 
             column.getAggregatedValue($rootScope.page, logObject).then(function (values) {
+                $rootScope.columnModels[index].isLoading = false;
                 if ($rootScope.recordFlowControl.counter !== current) {
                     return defer.resolve(false);
                 }

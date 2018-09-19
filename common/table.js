@@ -188,8 +188,9 @@
          * @param  {object} vm           table model
          * @param  {function} updatePageCB The update page callback which we will call after getting the result.
          * @param  {boolean} hideSpinner  Indicates whether we should show spinner for columns or not
+         * @param  {boolean} isTerminal  Indicates whether we should show a terminal error or not for 400 QueryTimeoutError
          */
-        function updateMainEntity(vm, updatePageCB, hideSpinner) {
+        function updateMainEntity(vm, updatePageCB, hideSpinner, isTerminal) {
             if (!vm.dirtyResult || !_haveFreeSlot(vm)) {
                 $log.debug("counter", vm.flowControlObject.counter, ": break out of update main");
                 return;
@@ -212,9 +213,13 @@
                     if (err instanceof ERMrest.QueryTimeoutError) {
                         // clear the data shown in the table
                         vm.rowValues = [];
-                        err.subMessage = err.message;
-                        err.message = "The resultset cannot be retrieved. You can try the following to help resolve the issue:\n" + messageMap.queryTimeoutList;
-                        ErrorService.handleException(err, true);
+                        if (!isTerminal) {
+                            vm.tableError = true;
+                        } else {
+                            err.subMessage = err.message;
+                            err.message = "The resultset cannot be retrieved. You can try the following to help resolve the issue:\n" + messageMap.queryTimeoutList;
+                            ErrorService.handleException(err, true);
+                        }
                     } else {
                         throw err;
                     }
@@ -781,10 +786,6 @@
                 }
                 _attachExtraAttributes(scope.vm);
             });
-
-            if (scope.vm && scope.vm.reference) {
-                _attachExtraAttributes(scope.vm);
-            }
         }
 
         /**

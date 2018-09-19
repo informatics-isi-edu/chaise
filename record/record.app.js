@@ -110,6 +110,8 @@
                     // aggregate
                     if (col.isPathColumn && col.hasAggregate) {
                         model = {
+                            hasError: false,
+                            isLoading: true,
                             isAggregate: true,
                             dirtyResult: true
                         };
@@ -120,6 +122,8 @@
                     else if (col.isInboundForeignKey || (col.isPathColumn && col.hasPath && !col.isUnique && !col.hasAggregate)) {
                         var reference = col.reference.contextualize.compactBriefInline;
                         model = {
+                            hasError: false,
+                            isLoading: true,
                             isInline: true,
                             displayType: reference.display.type,
                             displayname: reference.displayname,

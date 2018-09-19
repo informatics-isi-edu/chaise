@@ -69,6 +69,7 @@
                             <uib-accordion-heading>
                                 <i class="pull-left glyphicon" style="margin-right: 5px;" ng-class="{'glyphicon-chevron-down': rtm.open, 'glyphicon-chevron-right': !m.open}"></i>
                                 <span ng-if="::rtm.displayname.isHTML" ng-bind-html="::rtm.displayname.value"></span><span ng-if="::!rtm.displayname.isHTML" ng-bind="::rtm.displayname.value"></span> <span ng-if="rtm.tableModel.rowValues.length==0">(no results found)</span><span ng-if="rtm.tableModel.rowValues.length!=0">(showing {{rtm.tableModel.page.hasNext ? 'first' : 'all'}} {{rtm.tableModel.rowValues.length}} results)</span>
+                                <span ng-if="rtm.tableModel.tableError" class="glyphicon glyphicon-alert" uib-tooltip="There was an issue with loading the table data." tooltip-placement="right"></span>
                             </uib-accordion-heading>
 
                             <!-- for different elements inside the accordion -->

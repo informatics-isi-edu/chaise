@@ -42,9 +42,23 @@
                         return scope.columnModels[i].isInline;
                     };
 
+                    scope.isAggregate = function (i) {
+                        return scope.columnModels[i].isAggregate;
+                    };
+
+                    // Show an error warning if the column is aggregate or inline related table and the data failed to load
+                    scope.showError = function (i) {
+                        return (scope.isInline(i) || scope.isAggregate(i)) && scope.columnModels[i].hasError;
+                    }
+
+                    // Show a loading spinner if the column is aggregate or inline related table
+                    scope.showLoader = function (i) {
+                        return (scope.isInline(i) || scope.isAggregate(i)) && scope.columnModels[i].isLoading;
+                    }
+
                     // returns true if we should show the column
                     scope.showColumn = function (i) {
-                        return (typeof scope.values[i].value === "string" && scope.values[i].value !== '') && !scope.isInline(i);
+                        return ((typeof scope.values[i].value === "string" && scope.values[i].value !== '') && !scope.isInline(i)) || scope.isAggregate(i);
                     };
 
                     // returns true if we should show a table
