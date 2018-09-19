@@ -188,7 +188,7 @@
          * @param  {object} vm           table model
          * @param  {function} updatePageCB The update page callback which we will call after getting the result.
          * @param  {boolean} hideSpinner  Indicates whether we should show spinner for columns or not
-         * @param  {boolean} isTerminal  Indicates whether we should show a terminal error or not for 400 QueryTimeoutError
+         * @param  {object} isTerminal  Indicates whether we should show a terminal error or not for 400 QueryTimeoutError
          */
         function updateMainEntity(vm, updatePageCB, hideSpinner, isTerminal) {
             if (!vm.dirtyResult || !_haveFreeSlot(vm)) {
@@ -239,6 +239,7 @@
             }
             vm.flowControlObject.occupiedSlots--;
             vm.dirtyResult = !res;
+            vm.isLoading = false;
             $log.debug("counter", counter, ": after result update: " + (res ? "successful." : "unsuccessful."));
         }
 

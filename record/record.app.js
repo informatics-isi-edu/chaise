@@ -123,7 +123,6 @@
                         var reference = col.reference.contextualize.compactBriefInline;
                         model = {
                             hasError: false,
-                            isLoading: true,
                             isInline: true,
                             displayType: reference.display.type,
                             displayname: reference.displayname,

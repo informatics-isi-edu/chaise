@@ -48,12 +48,12 @@
 
                     // Show an error warning if the column is aggregate or inline related table and the data failed to load
                     scope.showError = function (i) {
-                        return (scope.isInline(i) || scope.isAggregate(i)) && scope.columnModels[i].hasError;
+                        return ((scope.isInline(i) && scope.columnModels[i].tableModel.tableError) || (scope.isAggregate(i)&& scope.columnModels[i].hasError));
                     }
 
                     // Show a loading spinner if the column is aggregate or inline related table
                     scope.showLoader = function (i) {
-                        return (scope.isInline(i) || scope.isAggregate(i)) && scope.columnModels[i].isLoading;
+                        return ((scope.isInline(i) && scope.columnModels[i].tableModel.isLoading) || (scope.isAggregate(i) && scope.columnModels[i].isLoading));
                     }
 
                     // returns true if we should show the column
@@ -63,8 +63,7 @@
 
                     // returns true if we should show a table
                     scope.showInlineTable = function (i) {
-                        var readDone =  scope.isInline(i) && scope.columnModels[i].tableModel && scope.columnModels[i].tableModel.page;
-                        return readDone && (scope.showEmptyRelatedTables || scope.columnModels[i].tableModel.rowValues.length > 0);
+                        return scope.isInline(i) && (scope.showEmptyRelatedTables || scope.columnModels[i].tableModel.rowValues.length > 0);
                     };
                 }
             };

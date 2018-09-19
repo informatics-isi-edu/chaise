@@ -284,6 +284,8 @@
                 rowValues: [],
                 selectedRows: [],//TODO migth not be needed
                 dirtyResult: true,
+                isLoading: true,
+                tableError: false,
                 config: {
                     viewable: true,
                     editable: $rootScope.modifyRecord,
