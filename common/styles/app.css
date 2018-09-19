@@ -1740,3 +1740,8 @@ record-display .markdown-container ul > li {
     margin-left: 1em;
     padding-left: 0;
  }
+
+ record-table .markdown-container ol,
+ record-table .markdown-container ul {
+     padding-left: 1em;
+ }
