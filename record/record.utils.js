@@ -165,8 +165,6 @@
                 }).catch(function (err) {
                     model.isLoading = false;
                     if (err instanceof ERMrest.QueryTimeoutError) {
-                        // TODO: how to show column aggregates error
-                        // is this columns in a related table? should it be `!` on the column header?
                         model.hasError = true;
                     } else {
                         if (DataUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
