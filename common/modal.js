@@ -213,14 +213,15 @@
 
         /**
          * This will generate the correct object that we need to pass in case of multi-select.
-         * In that case, we might have the `matchNotNull` variable. If we do, we just need to pass that.
+         * It will return an object that,
+         * - will have `matchNotNull` attribute if match not-null is selected
+         * - otherwise the selected rows are in the `rows` attribute
          */
         function getMultiSelectionResult() {
             if (vm.tableModel.matchNotNull) {
                 return {matchNotNull: true};
             }
-            var res = vm.tableModel.selectedRows;
-            return Array.isArray(res) ? res : [];
+            return {rows: Array.isArray(vm.tableModel.selectedRows) ? vm.tableModel.selectedRows : []};
         }
 
         /**

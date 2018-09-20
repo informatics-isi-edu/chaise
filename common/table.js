@@ -1148,6 +1148,16 @@
         }
     }])
 
+    /**
+     * This directive has the same functionality as recordset directive, the only differences are:
+     * - It has matchNotNull checkbox that will disable all the other rows.
+     *   To figure out if this is selected or not, the caller should use the boolean value of vm.matchNotNull
+     *   Although to be consistent we're still adding a special row to the selectedRows, but you don't need to check for that.
+     * - A special checkbox for matchNull so users will be able to select null value.
+     *   vm.matchNull is only used internally in the directive, we're still adding the "null"
+     *   value to the vm.selectedRows
+     * NOTE removePill, removeAllPills are also changed to support these two matchNull and matchNotNull options.
+     */
     .directive('recordsetSelectFaceting', ['recordTableUtils', 'UriUtils', function(recordTableUtils, UriUtils) {
 
         return {
@@ -1211,6 +1221,10 @@
                     }
                 };
 
+                /**
+                 * Toggle the not-null checkbox.
+                 * If it is selected, we're disabling and deselcting all the other options.
+                 */
                 scope.toggleMatchNotNull = function () {
                     scope.vm.matchNotNull = !scope.vm.matchNotNull;
                     var tuples = [];
@@ -1231,6 +1245,9 @@
                     }
                 };
 
+                /**
+                 * Toggle the null filter
+                 */
                 scope.toggleMatchNull = function () {
                     scope.vm.matchNull = !scope.vm.matchNull;
                     var tuple = {uniqueId: null,  displayname: {value: null, isHTML: false}};
