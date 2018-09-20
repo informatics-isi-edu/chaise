@@ -767,6 +767,7 @@
             scope.$root.alerts = AlertsService.alerts;
             scope.$root.showSpinner = false; // this property is set from common modules for controlling the spinner at a global level that is out of the scope of the app
             scope.vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
+            scope.transformCustomFilter = DataUtils.addSpaceAfterLogicalOperators;
 
             scope.defaultDisplayname = defaultDisplayname;
 
