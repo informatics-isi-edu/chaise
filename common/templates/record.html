@@ -5,6 +5,7 @@
                 <span ng-if="::col.column.displayname.isHTML" ng-bind-html="::col.column.displayname.value"></span>
                 <span ng-if="::!col.column.displayname.isHTML" ng-bind="::col.column.displayname.value"></span>
             </span>
+            <span ng-show="showLoader($index)" class="glyphicon glyphicon-refresh glyphicon-refresh-animate aggregate-col-loader pull-right"></span>
         </td>
         <td class="entity-value col-xs-10" id="entity-{{makeSafeIdAttr(col.column.displayname.value)}}">
 
@@ -13,8 +14,8 @@
                 <span ng-if="!values[$index].isHTML">{{values[$index].value}}</span>
             </span>
             <span ng-if="showInlineTable($index)" id="entity-{{$index}}-table">
-                <record-action-bar id="actionbar-{{$index}}" tabtype="entity" related-table-ref-display="col.tableModel.reference.display.type" tab-model-display="col.tableModel.displayType"
-                    toggle-related-table-display-type='toggleRelatedTableDisplayType({dataModel:col.tableModel})' can-edit-related="canEditRelated({ref:col.tableModel.reference})"
+                <record-action-bar id="actionbar-{{$index}}" tabtype="entity" related-table-ref-display="actionBarDisplayType($index)" tab-model-display="col.tableModel.displayType"
+                    toggle-related-table-display-type='toggleRelatedTableDisplayType({dataModel:col.tableModel})' can-edit-related="canEditRelated({ref:col.tableModel.reference}) && !showError($index)"
                     can-create-related="canCreateRelated({ref:col.tableModel.reference})"
                     add-related-record="addRelatedRecord({ref:col.tableModel.reference})" to-record-set="toRecordSet({ref:col.tableModel.reference})"
                     displayname="col.column.displayname" base-table-name="col.baseTableName">
@@ -34,7 +35,6 @@
                 </div>
             </span>
             <span ng-show="showError($index)" class="glyphicon glyphicon-alert" ng-attr-uib-tooltip="There was an issue with loading the {{col.hasError ? 'column' : 'table'}} data." tooltip-placement="bottom-left"></span>
-            <span ng-show="showLoader($index)" class="glyphicon glyphicon-refresh glyphicon-refresh-animate aggregate-col-loader"></span>
         </td>
     </tr>
 </table>

@@ -74,10 +74,15 @@
                         });
                     };
 
-                    ctrl.updateFacetColumn = function (index) {
+                    /**
+                     * @param {int} index index of facetColumn
+                     * @param {boolean} noConstraints set property to run the query without constraints
+                     **/
+                    ctrl.updateFacetColumn = function (index, noConstraints) {
                         var fm = $scope.vm.facetModels[index];
                         fm.processed = false;
                         fm.isLoading = true;
+                        fm.noConstraints = noConstraints;
                         recordTableUtils.update($scope.vm);
                     };
 
@@ -99,6 +104,11 @@
                         }
                         return true;
                     };
+
+                    // retries the query for the current facet
+                    scope.retryQuery = function (index, noConstraints) {
+                        currentCtrl.updateFacetColumn(index, noConstraints);
+                    }
 
                     scope.hasFilter = function (index) {
                         if (!scope.vm.facetModels || (index !== undefined && !scope.vm.facetModels[index])) {
@@ -612,6 +622,7 @@
                                 facetLog.referrer = scope.facetColumn.reference.defaultLogInfo;
                                 facetLog.source = scope.facetColumn.dataSource;
                                 facetLog.action = logActions.recordsetFacetRead,
+                                // TODO remove the constraints if scope.facetModel.noConstraints
                                 scope.facetColumn.sourceReference.getAggregates(aggregateList, facetLog).then(function(response) {
                                     if (scope.facetColumn.sourceReference.uri !== uri) {
                                         // return false to defer.resolve() in .then() callback
@@ -963,6 +974,11 @@
                     return defer.promise;
                 }
 
+                // remove the constraints if scope.facetModel.noConstraints
+                if (scope.facetModel.noConstraints) {
+                    // no API for AttributeGroupREference.unfilteredReference
+                    // scope.reference = scope.reference.unfilteredReference;
+                }
                 // read new data if needed
                 (function (uri) {
                     var facetLog = getDefaultLogInfo(scope);

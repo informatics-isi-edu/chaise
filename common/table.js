@@ -190,7 +190,7 @@
          * @param  {boolean} hideSpinner  Indicates whether we should show spinner for columns or not
          * @param  {object} isTerminal  Indicates whether we should show a terminal error or not for 400 QueryTimeoutError
          */
-        function updateMainEntity(vm, updatePageCB, hideSpinner, isTerminal) {
+        function updateMainEntity(vm, updatePageCB, hideSpinner, notTerminal) {
             if (!vm.dirtyResult || !_haveFreeSlot(vm)) {
                 $log.debug("counter", vm.flowControlObject.counter, ": break out of update main");
                 return;
@@ -213,9 +213,9 @@
                     if (err instanceof ERMrest.QueryTimeoutError) {
                         // clear the data shown in the table
                         vm.rowValues = [];
-                        if (!isTerminal) {
-                            vm.tableError = true;
-                        } else {
+                        vm.tableError = true;
+
+                        if (!notTerminal){
                             err.subMessage = err.message;
                             err.message = "The resultset cannot be retrieved. You can try the following to help resolve the issue:\n" + messageMap.queryTimeoutList;
                             ErrorService.handleException(err, true);
@@ -539,11 +539,10 @@
                                 _afterFacetUpdate(vm, i, res);
                                 _updatePage(vm);
                             }).catch(function (err) {
-                                _afterFacetUpdate(vm, i, false);
+                                _afterFacetUpdate(vm, i, true);
                                 // show alert if 400 Query Timeout Error
                                 if (err instanceof ERMrest.QueryTimeoutError) {
                                     vm.facetModels[i].hasError = true;
-                                    AlertsService.addAlert("The facet values for " + vm.facetModels[i].facetName + " cannot be retrieved. You can try the following to help resolve the issue:\n" + messageMap.queryTimeoutList, 'error');
                                 } else {
                                     throw err;
                                 }
@@ -562,10 +561,10 @@
                             vm.flowControlObject.occupiedSlots--;
                             _updatePage(vm);
                         }).catch(function (err) {
+                            _afterFacetUpdate(vm, i, true);
                             // show alert if 400 Query Timeout Error
                             if (err instanceof ERMrest.QueryTimeoutError) {
                                 vm.facetModels[i].hasError = true;
-                                AlertsService.addAlert("The facet values for " + vm.facetModels[i].facetName + " cannot be retrieved. You can try the following to help resolve the issue:\n" + messageMap.queryTimeoutList, 'error');
                             } else {
                                 throw err;
                             }

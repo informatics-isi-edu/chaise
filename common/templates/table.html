@@ -35,8 +35,13 @@
                 ellipses ng-repeat="row in vm.rowValues track by $index" tuple="vm.page.tuples[$index]" from-tuple="vm.fromTuple" row-values="row" parent-reference="parentReference"
                 config="vm.config" context="vm.context" on-row-click-bind="onSelect" selected="isSelected(vm.page.tuples[$index])" select-disabled="isDisabled(vm.page.tuples[$index])">
             </tr>
-            <tr ng-if="vm.rowValues.length < 1">
-                <td id="no-results-row" colspan="{{vm.columnModels.length + 1}}" style="text-align: center;">No Results Found</td>
+            <tr ng-if="vm.rowValues.length < 1 || vm.tableError">
+                <td id="no-results-row" colspan="{{vm.columnModels.length + 1}}" style="text-align: center;">
+                    <span ng-if="vm.rowValues.length < 1 && !vm.tableError">No Results Found</span>
+                    <span ng-if="vm.tableError">Result Retrieval Failed
+                        <span class="glyphicon glyphicon-alert" uib-tooltip="There was an issue with loading the table data." tooltip-placement="bottom"></span>
+                    </span>
+                </td>
             </tr>
         </tbody>
     </table>

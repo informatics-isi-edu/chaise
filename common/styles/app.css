@@ -1426,8 +1426,8 @@ footer .container1 {
      cursor: pointer;
  }
 
- .faceting-container .glyphicon-alert {
-     color: #f0ad4e;
+ .glyphicon-alert {
+     color: #f0ad4e !important;
      border: none;
  }
 
@@ -1468,12 +1468,6 @@ footer .container1 {
      font-size: 14px;
      font-weight: 600;
      position: relative;
- }
-
- .faceting-container .panel .panel-title img.spinner-sm {
-     position: absolute;
-     right: 0;
-     top: 0;
  }
 
  .faceting-container{

@@ -64,7 +64,7 @@
                 if (!model.isInline || !model.tableModel.dirtyResult) continue;
                 if (!_haveFreeSlot()) return;
                 model.tableModel.logObject = _getTableModelLogObject(model.tableModel, isUpdate ? logActions.recordInlineUpdate : logActions.recordInlineRead);
-                recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate, false);
+                recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate, true);
             }
 
             // main aggregates
@@ -78,7 +78,7 @@
                 if (!model.tableModel.dirtyResult) continue;
                 if (!_haveFreeSlot()) return;
                 model.tableModel.logObject = _getTableModelLogObject(model.tableModel, isUpdate ? logActions.recordRelatedUpdate : logActions.recordRelatedRead);
-                recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate, false);
+                recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate, true);
             }
 
             // aggregates in inline

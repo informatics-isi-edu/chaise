@@ -38,6 +38,13 @@
                     $scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
                 },
                 link: function(scope){
+                    // set the display type value to false so the 'Edit |' text doesn't appear
+                    // we only watch for the value 'markdown' to show 'Edit |'
+                    scope.actionBarDisplayType = function (i) {
+                        var tm = scope.columnModels[i].tableModel;
+                        return !tm.tableError ? tm.reference.display.type : false;
+                    };
+
                     scope.isInline = function (i) {
                         return scope.columnModels[i].isInline;
                     };
