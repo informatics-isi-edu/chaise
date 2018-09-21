@@ -94,7 +94,7 @@
                     <div class="filter-label label label-default" ng-if="vm.reference.location.filter">
                         <a id="clear-custom-filters" class="remove-link" ng-click="vm.removeFilter(-1)" tooltip-placement="bottom" uib-tooltip="Clear Filters"><i class="glyphicon glyphicon-remove"></i></a>
                         <i>Custom Filter</i>:
-                        <span ng-bind="vm.reference.location.filtersString"></span>
+                        <span ng-bind="transformCustomFilter(vm.reference.location.filtersString)" tooltip-placement="bottom-left" uib-tooltip="{{transformCustomFilter(vm.reference.location.filtersString)}}" tooltip-class="custom-filter-tooltip"></span>
                     </div>
                     <div class="filter-label label label-default" ng-repeat="fc in vm.reference.facetColumns track by $index" ng-if="vm.hasFilter($index)">
                         <a class="remove-link" ng-click="vm.removeFilter($index)" tooltip-placement="bottom" uib-tooltip="Clear Facet"><i class="glyphicon glyphicon-remove"></i></a>

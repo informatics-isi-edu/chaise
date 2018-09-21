@@ -18,28 +18,39 @@ var chaiseConfig = {
     // configuration for navbar spec with no logo or brand text
     headTitle: 'show me on the navbar!',
     navbarMenu: {
-       newTab: true,
        children: [
            {
                name: "Search",
-               url: "/chaise/search/#1/legacy:dataset",
-               newTab: false
+               url: "/chaise/search/#1/isa:dataset"
+           },
+           {
+               name: "RecordSets",
+               children: [
+                   {
+                       name: "Dataset",
+                       url: "/chaise/recordset/#1/isa:dataset"
+                   },
+                   {
+                       name: "File",
+                       url: "/chaise/recordset/#1/isa:file"
+                   }
+               ]
            },
            {
                name: "RecordEdit",
                children: [
                    {
                        name: "Add Records",
+                       url: "/chaise/recordedit/#1/isa:dataset",
+                       newTab: false,
                        children: [
                            {
                                name: "Edit Existing Record",
-                               url: "/chaise/recordedit/#1/legacy:dataset/id=5776",
-                               newTab: true
+                               url: "/chaise/recordedit/#1/isa:dataset/id=5776",
                            }
                        ]
                    }
-               ],
-               newTab: true
+               ]
            }
        ]
    }

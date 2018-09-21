@@ -408,6 +408,27 @@
               ["product-record", "fk_media_accommodation"]
           ]
         },
+        "tag:isrd.isi.edu,2016:export": {
+          "templates": [
+            {
+              "outputs": [
+                {
+                  "source": {
+                    "table": "product-record:accommodation",
+                    "api": "entity"
+                  },
+                  "destination": {
+                    "type": "csv",
+                    "name": "Accommodations_Bag"
+                  }
+                }
+              ],
+              "name": "export_data_bag",
+              "format_name": "BDBag",
+              "format_type": "BAG"
+            }
+          ]
+        },
         "tag:isrd.isi.edu,2018:citation": {
             "template_engine": "handlebars",
             "journal_pattern": "{{title}}",

@@ -33,20 +33,10 @@ describe('Navbar ', function() {
 
     it('for the menu, should generate the correct # of list items', function() {
         var nodesInDOM = menu.all(by.tagName('li'));
-        var counter = 0;
-        function countNodes(array) {
-            array.forEach(function(element) {
-                counter++;
-                if (element.children) {
-                    countNodes(element.children);
-                }
-            });
-            return counter;
-        }
-        countNodes(chaiseConfig.navbarMenu.children);
+        var counter = 7; // counted from chaise config doc rather than having code count
 
         nodesInDOM.count().then(function(count) {
-            expect(count).toEqual(counter);
+            expect(count).toEqual(counter, "number of nodes present does not match what's defined in chaise-config");
         });
     });
 
@@ -111,11 +101,5 @@ describe('Navbar ', function() {
             expect(logOutLink.isDisplayed()).toBeTruthy();
             done();
         });
-    }).pend("Pending until we handle tests logging in via Globus/other services");
-
-    xit('should link to the profile URL from chaiseConfig', function() {
-        var actual = element.all(by.css('.username'));
-        expect(actual.count()).toEqual(1);
-        expect(actual.getAttribute('href')).toEqual(chaiseConfig.profileURL);
     }).pend("Pending until we handle tests logging in via Globus/other services");
 });

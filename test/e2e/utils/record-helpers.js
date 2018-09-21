@@ -1,5 +1,6 @@
 var chaisePage = require('../utils/chaise.page.js');
 var mustache = require('../../../../ermrestjs/vendor/mustache.min.js');
+var fs = require('fs');
 var EC = protractor.ExpectedConditions;
 
 exports.testPresentation = function (tableParams) {
@@ -39,6 +40,7 @@ exports.testPresentation = function (tableParams) {
         var editButton = chaisePage.recordPage.getEditRecordButton(),
             createButton = chaisePage.recordPage.getCreateRecordButton(),
             deleteButton = chaisePage.recordPage.getDeleteRecordButton(),
+            exportButton = chaisePage.recordsetPage.getExportDropdown(),
             showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton(),
             shareButton = chaisePage.recordPage.getShareButton();
 
@@ -46,6 +48,7 @@ exports.testPresentation = function (tableParams) {
         browser.wait(EC.elementToBeClickable(createButton), browser.params.defaultTimeout);
         browser.wait(EC.elementToBeClickable(deleteButton), browser.params.defaultTimeout);
         browser.wait(EC.elementToBeClickable(showAllRTButton), browser.params.defaultTimeout);
+        browser.wait(EC.elementToBeClickable(exportButton), browser.params.defaultTimeout);
         browser.wait(EC.elementToBeClickable(shareButton), browser.params.defaultTimeout);
 
         editButton.isDisplayed().then(function (bool) {
@@ -64,43 +67,152 @@ exports.testPresentation = function (tableParams) {
             expect(bool).toBeTruthy();
         });
 
+        exportButton.isDisplayed().then(function (bool) {
+            expect(bool).toBeTruthy();
+        });
+
         shareButton.isDisplayed().then(function (bool) {
             expect(bool).toBeTruthy();
         });
     });
 
-    it("should show the share dialog when clicking the share button with permalink and citation present.", function(done) {
-        var shareButton = chaisePage.recordPage.getShareButton();
+    describe("for share citation dialog,", function () {
 
-        shareButton.click().then(function () {
-            var modalContent = element(by.css('.modal-content'));
+        beforeAll(function (done) {
+            var shareButton = chaisePage.recordPage.getShareButton(),
+                shareModal = chaisePage.recordPage.getShareModal();
 
-            // wait for dialog to open
-            chaisePage.waitForElement(modalContent);
+            browser.wait(EC.elementToBeClickable(shareButton), browser.params.defaultTimeout);
 
+            shareButton.click().then(function () {
+                // wait for dialog to open
+                chaisePage.waitForElement(shareModal);
+                // disable animations in modal so that it doesn't "fade out" (instead it instantly disappears when closed) which we can't track with waitFor conditions
+                shareModal.allowAnimations(false);
+
+                done();
+            }).catch(function(err){
+                console.log(err);
+                done.fail();
+            });
+        });
+
+        it("should show the share dialog when clicking the share button with 3 list elements.", function () {
             // verify modal dialog contents
-            expect(chaisePage.recordEditPage.getModalTitle().element(by.tagName("strong")).getText()).toBe("Share Citation", "Share citation modal title is incorrect");
+            expect(chaisePage.recordEditPage.getModalTitle().element(by.tagName("strong")).getText()).toBe("Share", "Share citation modal title is incorrect");
             expect(chaisePage.recordPage.getModalListElements().count()).toBe(tableParams.citationParams.numListElements, "Number of list elements in share citation modal is incorrect");
+        });
 
-            return browser.getCurrentUrl();
-        }).then(function (url) {
-            // verify permalink
-            expect(chaisePage.recordPage.getShareLinkHeader().getText()).toBe("Share Link", "Share Link (permalink) header is incorrect");
-            expect(chaisePage.recordPage.getPermalinkText().getText()).toBe(url, "permalink url is incorrect");
+        it("should have a share link present.", function (done) {
+            browser.getCurrentUrl().then(function (url) {
+                // verify permalink
+                expect(chaisePage.recordPage.getShareLinkHeader().getText()).toBe("Share Link", "Share Link (permalink) header is incorrect");
+                expect(chaisePage.recordPage.getPermalinkText().getText()).toBe(url, "permalink url is incorrect");
 
+                done();
+            }).catch(function(err){
+                console.log(err);
+                done.fail();
+            });
+        });
+
+        it("should have a citation present,", function () {
             // verify citation
             expect(chaisePage.recordPage.getCitationHeader().getText()).toBe("Citation", "Citation header is incorrect");
             expect(chaisePage.recordPage.getCitationText().getText()).toBe(tableParams.citationParams.citation, "citation text is incorrect");
 
+            // verify download citation
+            expect(chaisePage.recordPage.getDownloadCitationHeader().getText()).toBe("Download Citation:", "Download citation header is incorrect");
+            expect(chaisePage.recordPage.getBibtex().getText()).toBe("BibTex", "bibtex text is incorrect");
+        });
+
+        if (!process.env.TRAVIS) {
+            it("should download the citation in BibTex format.", function (done) {
+                chaisePage.recordPage.getBibtex().click().then(function () {
+                    browser.wait(function() {
+                        return fs.existsSync(process.env.PWD + "/test/e2e/" + tableParams.file_names[2]);
+                    }, browser.params.defaultTimeout).then(function () {
+                        done();
+                    }, function () {
+                        expect(false).toBeTruthy(tableParams.file_names[2] + " was not downloaded");
+                        done.fail();
+                    });
+                });
+            });
+        }
+
+        afterAll(function (done){
             // close dialog
-            return chaisePage.recordEditPage.getModalTitle().element(by.tagName("button")).click();
+            chaisePage.recordEditPage.getModalTitle().element(by.tagName("button")).click().then(function () {
+                done();
+            }).catch(function(err){
+                console.log(err);
+                done.fail();
+            });
+        });
+    });
+
+    it("should have '2' options in the dropdown menu.", function (done) {
+        var exportButton = chaisePage.recordsetPage.getExportDropdown();
+        browser.wait(EC.elementToBeClickable(exportButton), browser.params.defaultTimeout);
+
+        chaisePage.clickButton(exportButton).then(function () {
+            expect(chaisePage.recordsetPage.getExportOptions().count()).toBe(2, "incorrect number of export options");
+            // close the dropdown
+            return chaisePage.recordsetPage.getExportDropdown().click();
         }).then(function () {
             done();
-        }).catch(function(err){
+        }).catch(function (err) {
             console.log(err);
             done.fail();
         });
     });
+
+    if (!process.env.TRAVIS) {
+        it("should have 'CSV' as a download option and download the file.", function(done) {
+            chaisePage.recordsetPage.getExportDropdown().click().then(function () {
+                var csvOption = chaisePage.recordsetPage.getExportOption("CSV");
+                expect(csvOption.getText()).toBe("CSV");
+                return csvOption.click();
+            }).then(function () {
+                browser.wait(function() {
+                    return fs.existsSync(process.env.PWD + "/test/e2e/" + tableParams.file_names[0]);
+                }, browser.params.defaultTimeout).then(function () {
+                    done();
+                }, function () {
+                    expect(false).toBeTruthy("Accommodations.csv was not downloaded");
+                    done.fail();
+                });
+            }).catch(function (err) {
+                console.log(err);
+                done.fail();
+            });
+        });
+
+        it("should have 'BDBag' as a download option and download the file.", function(done) {
+            chaisePage.recordsetPage.getExportDropdown().click().then(function () {
+                var bagOption = chaisePage.recordsetPage.getExportOption("BDBag");
+                expect(bagOption.getText()).toBe("BDBag");
+                return bagOption.click();
+            }).then(function () {
+                return chaisePage.waitForElement(chaisePage.recordsetPage.getExportModal());
+            }).then(function () {
+                return chaisePage.waitForElementInverse(chaisePage.recordsetPage.getExportModal());
+            }).then(function () {
+                browser.wait(function() {
+                    return fs.existsSync(process.env.PWD + "/test/e2e/" + tableParams.file_names[1]);
+                }, browser.params.defaultTimeout).then(function () {
+                    done();
+                }, function () {
+                    expect(false).toBeTruthy("accommodation.zip was not downloaded");
+                    done.fail();
+                });
+            }).catch(function (err) {
+                console.log(err);
+                done.fail();
+            });
+        });
+    }
 
 	it("should render columns which are specified to be visible and in order", function() {
 		var columns = tableParams.columns.filter(function(c) {return c.value != null;});

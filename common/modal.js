@@ -182,6 +182,7 @@
             rowValues:          [],
             selectedRows:       params.selectedRows,
             matchNotNull:       params.matchNotNull,
+            matchNull:          params.matchNull,
             search:             reference.location.searchTerm,
             config:             {viewable: false, editable: false, deletable: false, selectMode: params.selectMode, showFaceting: showFaceting, facetPanelOpen: params.facetPanelOpen, showNull: params.showNull === true},
             context:            params.context,
@@ -215,12 +216,11 @@
          * In that case, we might have the `matchNotNull` variable. If we do, we just need to pass that.
          */
         function getMultiSelectionResult() {
-            var res = vm.tableModel.selectedRows;
-            if (!Array.isArray(res)) res = [];
             if (vm.tableModel.matchNotNull) {
-                res = {matchNotNull: true};
+                return {matchNotNull: true};
             }
-            return res;
+            var res = vm.tableModel.selectedRows;
+            return Array.isArray(res) ? res : [];
         }
 
         /**
@@ -271,11 +271,28 @@
         }
     }])
 
-    .controller('ShareCitationController', ['$uibModalInstance', 'params', function ($uibModalInstance, params) {
+    .controller('ShareCitationController', ['$uibModalInstance', '$window', 'params', function ($uibModalInstance, $window, params) {
         var vm = this;
         vm.cancel = cancel;
         vm.citation = params.citation;
         vm.permalink = params.permalink;
+        vm.filename = params.displayname;
+
+        // generate bibtex url from citation
+        if (params.citation) {
+            var citation = params.citation;
+            var bibtexContent = "@article{";
+            bibtexContent += (citation.id ? citation.id+",\n" : params.displayname+",\n");
+            if (citation.author) bibtexContent += "author = {" + citation.author + "},\n";
+            if (citation.title) bibtexContent += "title = {" + citation.title + "},\n";
+            bibtexContent += "journal = {" + citation.journal + "},\n";
+            bibtexContent += "year = {" + citation.year + "},\n";
+            bibtexContent += "URL = {" + citation.url + "}\n}";
+
+            var bibtexBlob = new Blob([ bibtexContent ], { type : 'text/plain' });
+            // set downloadURL for ng-href attribute
+            vm.downloadBibtex = $window.URL.createObjectURL( bibtexBlob );
+        }
 
         function cancel() {
             $uibModalInstance.dismiss('cancel');

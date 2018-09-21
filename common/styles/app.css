@@ -823,6 +823,16 @@ body.error-open loading-spinner {
     display: none !important;
 }
 
+/******* Popup modal for share ********/
+
+.chaise-share-citation ul {
+    padding-left: 10px;
+}
+
+.chaise-share-citation #share-link h2 {
+    margin-top: 5px;
+}
+
 /*******Bootstrap  Modal styling *********/
 
 /*When the modal fills the screen it has an even 2.5% on top and bottom*/
@@ -843,6 +853,10 @@ body.error-open loading-spinner {
   margin: 2.5vh auto;
   width: auto !important;
   max-width: 60vw;
+}
+
+.modal-close {
+    padding: 3px 8px;
 }
 
 
@@ -1107,7 +1121,7 @@ footer .container1 {
     text-align: right;
 }
 /************* Profile Card ****************/
-#profile-modal li, .share-citation li{
+#profile-modal li{
     list-style-type : disc;
 }
 .modal-dialog .profileValue{
@@ -1725,4 +1739,9 @@ record-display .markdown-container ol > li,
 record-display .markdown-container ul > li {
     margin-left: 1em;
     padding-left: 0;
+ }
+
+ record-table .markdown-container ol,
+ record-table .markdown-container ul {
+     padding-left: 1em;
  }

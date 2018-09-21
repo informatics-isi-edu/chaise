@@ -248,6 +248,9 @@ describe('Record Add', function() {
             chaisePage.waitForElement(helpBtn);
         });
 
+            // TODO: multiple issues with this. promise chaining not done right so execution flow seems like it should fail
+            // , only need to verify the url changed
+            // there's no variablility because it's static so no need to exhaustively test
             it("should open a new window with the help page.",function(){
                 helpBtn.click();
                 browser.getAllWindowHandles().then(function(handles){

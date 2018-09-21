@@ -9,6 +9,7 @@
         'chaise.alerts',
         'chaise.delete',
         'chaise.errors',
+        'chaise.export',
         'chaise.faceting',
         'chaise.modal',
         'chaise.navbar',
@@ -24,25 +25,20 @@
         'chaise.recordcreate'
     ])
 
-    .config(['$cookiesProvider', function($cookiesProvider) {
+    .config(['$compileProvider', '$cookiesProvider', '$logProvider', '$uibTooltipProvider', 'ConfigUtilsProvider', function($compileProvider, $cookiesProvider, $logProvider, $uibTooltipProvider, ConfigUtilsProvider) {
+        // angular configurations
+        // allows unsafe prefixes to be downloaded
+        // full regex: "/^\s*(https?|ftp|mailto|tel|file|blob):/"
+        $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|blob):/);
         $cookiesProvider.defaults.path = '/';
-    }])
-
-    // Configure all tooltips to be attached to the body by default. To attach a
-    // tooltip on the element instead, set the `tooltip-append-to-body` attribute
-    // to `false` on the element.
-    .config(['$uibTooltipProvider', function($uibTooltipProvider) {
+        $logProvider.debugEnabled(chaiseConfig && chaiseConfig.debug === true);
+        // Configure all tooltips to be attached to the body by default. To attach a
+        // tooltip on the element instead, set the `tooltip-append-to-body` attribute
+        // to `false` on the element.
         $uibTooltipProvider.options({appendToBody: true});
-    }])
 
-    //  Enable log system, if in debug mode
-    .config(['$logProvider', function($logProvider) {
-      if(typeof chaiseConfig != 'undefined' && chaiseConfig.debug)
-        $logProvider.debugEnabled(chaiseConfig.debug === true);
-    }])
-
-    .config(['ConfigUtilsProvider', function(ConfigUtilsProvider) {
-      ConfigUtilsProvider.$get().setConfigJSON();
+        // chaise configurations
+        ConfigUtilsProvider.$get().setConfigJSON();
     }])
 
     .run(['AlertsService', 'DataUtils', 'ERMrest', 'FunctionUtils', 'headInjector', '$log', 'MathUtils', 'messageMap', 'recordAppUtils',  '$rootScope', 'Session', '$timeout', 'UiUtils', 'UriUtils', '$window',

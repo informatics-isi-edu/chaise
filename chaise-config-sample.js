@@ -37,6 +37,8 @@ var chaiseConfig = {
       chosenValue: "Expression microarray - gene"
     },
     navbarMenu: {
+        // The optional newTab property can be defined at any level. If undefined at root, newTab is treated as true
+        // Each child menu item checks for a newTab property on itself, if nothing is set, the child inherits from it's parent.
         newTab: true,
         children: [
             // {
@@ -58,8 +60,9 @@ var chaiseConfig = {
             // },
             // {
             //     // This "Create" menu item doesn't have any dropdowns.
-            //     // Use the "url" key to specify this menu item's url and to signal that it doesn't have any children.
+            //     // Use the "url" key to specify this menu item's url
             //     // URLs can be absolute or relative to the document root.
+            //     // urls can appear alongside children as well to create navigable parent links as long as it's not a top level menu option
             //     name: "Create",
             //     url: "/chaise/recordedit/#1/YOUR_CATALOG:YOUR_SCHEMA"
             // }
