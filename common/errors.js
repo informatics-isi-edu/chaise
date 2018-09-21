@@ -195,7 +195,7 @@
                 canClose: false,
                 showLogin: showLogin
             };
-            
+
             var modalProperties = {
                 windowClass: "modal-error",
                 templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/errorDialog.modal.html',
