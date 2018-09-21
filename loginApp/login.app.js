@@ -48,7 +48,7 @@ function loadModule() {
 var chaisePath = chaiseConfig['chaisePath'] !== undefined? chaiseConfig['chaisePath'] : "./chaise/";
 
 const JS_DEPS = [
-    'scripts/vendor/jquery-latest.min.js',
+    'scripts/vendor/jquery-3.3.1.min.js',
     'scripts/vendor/ui-bootstrap-tpls-2.5.0.min.js',
     'common/vendor/angular-animate.min.js',
     'common/errors.js',
@@ -61,7 +61,7 @@ const JS_DEPS = [
     'common/alerts.js',
     'common/login.js',
     'common/vendor/angular-cookies.min.js',
-    'scripts/vendor/bootstrap.js',
+    'scripts/vendor/bootstrap-3.3.7.min.js',
 ];
 
 const CSS_DEPS = [
@@ -74,7 +74,7 @@ function loadStylesheets(url) {
     var link = document.createElement('link');
     link.rel = 'stylesheet';
     link.type = 'text/css';
-    link.href = chaisePath + url;
+    link.href = chaisePath + url;    
     head.appendChild(link);
 }
 function loadJSDeps(url, callback) {
