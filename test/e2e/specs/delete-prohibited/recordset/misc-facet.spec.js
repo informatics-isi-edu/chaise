@@ -60,6 +60,7 @@ var testParams = {
     },
     customFilter: {
         ermrestFilter: "id=1;id=2;int_col::geq::20",
+        ermrestFilterDisplayed: "id=1; id=2; int_col::geq::20",
         numRows: 7,
         numRowsWFacet: 1,
         numRowsWOFilter: 1,
@@ -77,8 +78,8 @@ var testParams = {
         totalNumOptions: 26,
         filteredNumRows: 14,
         secondFacetIdx: 6,
-        secondFacetOption: 1,
-        secondFacetNumOptions: 7
+        secondFacetOption: 0,
+        secondFacetNumOptions: 6
     },
     recordColumns: [ "text_col", "longtext_col", "markdown_col", "int_col", "float_col", "date_col", "timestamp_col", "boolean_col", "jsonb_col", "1-o7Ye2EkulrWcCVFNHi3A", "hmZyP_Ufo3E5v_nmdTXyyA" ],
     recordValues: {
@@ -422,7 +423,7 @@ describe("Other facet features, ", function() {
         });
     });
 
-    describe("No Value (null) filter, ", function () {
+    xdescribe("No Value (null) filter, ", function () {
         var uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
         var clearAll, showMore, nullBtn;
 
@@ -542,7 +543,7 @@ describe("Other facet features, ", function() {
             chaisePage.recordsetPage.getFacetFilters().then(function (filters) {
                 expect(filters.length).toEqual(1, "filter is missing");
 
-                expect(filters[0].getText()).toEqual("Custom Filter: " + customFilterParams.ermrestFilter, "filter text missmatch.");
+                expect(filters[0].getText()).toEqual("Custom Filter: " + customFilterParams.ermrestFilterDisplayed, "filter text missmatch.");
 
                 expect(chaisePage.recordsetPage.getClearAllFilters().isDisplayed()).toBeTruthy("`Clear All` is not visible");
 
@@ -628,7 +629,13 @@ describe("Other facet features, ", function() {
             clearAll = chaisePage.recordsetPage.getClearAllFilters();
             browser.wait(EC.elementToBeClickable(clearAll));
 
-            clearAll.click().then(function () {
+            //close the first facet
+            chaisePage.recordsetPage.getFacetById(0).click().then(function () {
+                //close the second facet
+                return chaisePage.recordsetPage.getFacetById(1).click();
+            }).then(function () {
+                return clearAll.click();
+            }).then(function () {
                 chaisePage.waitForElementInverse(element(by.id("spinner")));
 
                 done();
@@ -834,7 +841,7 @@ describe("Other facet features, ", function() {
             });
 
             it("select a facet option and select a row for the input", function (done) {
-                chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(0, 2)).then(function () {
+                chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(0, 1)).then(function () {
                     browser.wait(function () {
                         return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
                             return (ct == 1);
@@ -914,7 +921,7 @@ describe("Other facet features, ", function() {
             });
 
             it("select a facet option and select a row to associate", function (done) {
-                chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(0, 2)).then(function () {
+                chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(0, 1)).then(function () {
                     browser.wait(function () {
                         return chaisePage.recordsetPage.getRecordsetTableModalOptions().count().then(function (ct) {
                             return (ct == 1);
