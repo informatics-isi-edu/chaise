@@ -976,8 +976,11 @@
 
                 // remove the constraints if scope.facetModel.noConstraints
                 if (scope.facetModel.noConstraints) {
-                    // no API for AttributeGroupREference.unfilteredReference
-                    // scope.reference = scope.reference.unfilteredReference;
+                    // no API for AttributeGroupReference.unfilteredReference
+                    scope.reference = scope.reference.unfilteredReference;
+                    if (scope.facetColumn.isEntityMode) {
+                        scope.reference = scope.reference.contextualize.compactSelect;
+                    }
                 }
                 // read new data if needed
                 (function (uri) {
