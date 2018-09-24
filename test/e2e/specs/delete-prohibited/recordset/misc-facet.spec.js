@@ -334,7 +334,8 @@ describe("Other facet features, ", function() {
                         return (ct > 0);
                     });
                 });
-                expect(chaisePage.recordsetPage.getModalMatchNullInput().getAttribute('disabled')).toBe('true', "null option was not disabled.");
+                // TODO uncomment this line when `null-filter` should show up in RS select with faceting
+                // expect(chaisePage.recordsetPage.getModalMatchNullInput().getAttribute('disabled')).toBe('true', "null option was not disabled.");
                 expect(chaisePage.recordsetPage.getModalDisabledRows().count()).toBe(testParams.not_null.modal_available_options, "number of disabled rows missmatch.");
                 expect(chaisePage.recordsetPage.getCheckedModalOptions().count()).toBe(0, "number of checked rows missmatch.");
                 return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
@@ -371,7 +372,8 @@ describe("Other facet features, ", function() {
                 // make sure the options havn't changed
                 expect(text).toEqual(testParams.not_null.options_w_not_null, "the text of selected faacet missmatch.");
 
-                expect(chaisePage.recordsetPage.getModalMatchNullInput().getAttribute('disabled')).not.toBe('true', "null option is still disabled.");
+                // TODO uncomment this line when `null-filter` should show up in RS select with faceting
+                // expect(chaisePage.recordsetPage.getModalMatchNullInput().getAttribute('disabled')).not.toBe('true', "null option is still disabled.");
                 expect(chaisePage.recordsetPage.getCheckedFacetOptions(testParams.not_null.option).count()).toBe(0, "number of selected filters missmatch.");
                 expect(chaisePage.recordsetPage.getDisabledFacetOptions(testParams.not_null.option).count()).toBe(0, "numer of disabled filters missmatch.");
 
