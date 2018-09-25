@@ -1444,7 +1444,7 @@
                         scope.checkboxRows[1].selected = false;
                         if (scope.facetColumn.hasNullFilter) {
                             scope.checkboxRows[1].selected = true;
-                            scope.facetModel.appliedFilters.push(facetingUtils.getNotNullFilter());
+                            scope.facetModel.appliedFilters.push(facetingUtils.getNullFilter());
                         }
 
                         return defer.resolve(true), defer.promise;

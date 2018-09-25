@@ -73,9 +73,10 @@
             <span class="chaise-checkbox">
                 <input type="checkbox" id="rs-match-not-null" ng-click="toggleMatchNotNull()" ng-checked="vm.matchNotNull"><label>Records With Values</label>
             </span>
+            <!-- TODO temporarily disabling this feature
             <span class="chaise-checkbox" ng-class="{'disabled-row': vm.matchNotNull}">
                 <input type="checkbox" id="rs-match-null" ng-click="toggleMatchNull()" ng-checked="vm.matchNull" ng-disabled="vm.matchNotNull"><label>No Value</label>
-            </span>
+            </span> -->
         </div>
         <div ng-if="vm.hasLoaded">
             <record-table-select-faceting id="rs-{{vm.makeSafeIdAttr(vm.tableDisplayName.value)}}" vm="vm" on-selected-rows-changed-bind="onSelectedRowsChanged"></record-table-select-faceting>
