@@ -53,6 +53,10 @@
             $window.location.href = $rootScope.reference.table.reference.contextualize.entryCreate.appLink;
         };
 
+        vm.toRecordset = function() {
+            $window.location.href = $rootScope.reference.table.reference.contextualize.compact.appLink;
+        };
+
         vm.canEdit = function() {
             var canEdit = ($rootScope.reference && $rootScope.reference.canUpdate && $rootScope.modifyRecord);
             // If user can edit this record (canEdit === true), then change showEmptyRelatedTables.

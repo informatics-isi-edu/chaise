@@ -620,6 +620,10 @@ var recordPage = function() {
         return this.getEntitySubTitleElement().all(by.css("span")).first().getAttribute('uib-tooltip');
     };
 
+    this.getEntitySubTitleLink = function () {
+        return this.getEntitySubTitleElement().element(by.tagName("a"));
+    };
+
     this.getColumns = function() {
         return element.all(by.css("td.entity-key"));
     };

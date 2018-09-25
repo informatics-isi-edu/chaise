@@ -6,7 +6,8 @@ var config = pConfig.getConfig({
         "presentation.spec.js",
         "create-btn.spec.js",
         "delete-btn.spec.js",
-        "edit-btn.spec.js"
+        "edit-btn.spec.js",
+        "subtitle-link.spec.js"
     ],
     setBaseUrl: function(browser, data) {
       browser.params.url = process.env.CHAISE_BASE_URL;
