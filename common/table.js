@@ -408,6 +408,9 @@
 
                     // fail silently
                     vm.totalRowsCnt = null;
+                    // need to call this here to remove ocupied slot for count request
+                    // also notifies flow control to try to fetch count again because it's incorrect (dirty)
+                    _afterUpdateCount(vm, true);
                 });
             })(vm.flowControlObject.counter);
             return defer.promise;

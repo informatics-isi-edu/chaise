@@ -13,25 +13,14 @@
                             </a>
                             <span class="pull-right">
                                 <img ng-if="vm.facetModels[$index].isLoading" class="spinner spinner-sm" src="../common/styles/images/loader.gif"/>
-                                <span ng-if="vm.facetModels[$index].hasError" class="glyphicon glyphicon-alert" uib-tooltip="There was an issue with loading the facet data." tooltip-placement="right"></span>
+                                <span ng-if="vm.facetModels[$index].hasError || vm.facetModels[$index].noConstraints" class="glyphicon glyphicon-alert" ng-attr-uib-tooltip="{{vm.facetModels[$index].noConstraints ? 'This facet is in a simplified query mode.' : 'There was an issue with loading the facet data.'}}" tooltip-placement="right"></span>
                             </span>
                         </h3>
                     </uib-accordion-heading>
-                <div ng-hide="vm.facetModels[$index].hasError" ng-switch="fc.preferredMode">
+                <div ng-switch="fc.preferredMode">
                     <range-picker ng-switch-when="ranges" facet-panel-open="vm.config.facetPanelOpen" facet-column="fc" facet-model="vm.facetModels[$index]" index="$index"></range-picker>
                     <check-presence ng-switch-when="check_presence" facet-panel-open="vm.config.facetPanelOpen" facet-column="fc" facet-model="vm.facetModels[$index]" index="$index"></check-presence>
                     <choice-picker ng-switch-default facet-panel-open="vm.config.facetPanelOpen" facet-column="fc" facet-model="vm.facetModels[$index]" index="$index"></string-picker>
-                </div>
-                <div ng-if="vm.facetModels[$index].hasError">
-                    <p>Please try the following:
-                        <ul class='show-list-style'>
-                            <li>Collapse any unused facets.</li>
-                            <li>Remove facet constraints.</li>
-                            <li>Minimize the use of the 'No Value' and 'All Records with Value' filters.</li>
-                        </ul>
-                    </p>
-                    <button id="retry-query-btn" class="btn btn-primary btn-inverted" ng-click="::retryQuery($index, false)" tooltip-placement="bottom-left" uib-tooltip="Retry the query that timed out.">Retry</button>
-                    <button id="remove-constraints-btn" class="btn btn-primary btn-inverted" ng-click="::retryQuery($index, true)" tooltip-placement="bottom-left" uib-tooltip="Retry the query that timed out without any other facet constraints applied.">Simplify</button>
                 </div>
             </div>
         </uib-accordion>

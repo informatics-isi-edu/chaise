@@ -1,23 +1,37 @@
 <div class="choice-picker">
-    <div class="input-group has-feedback search-box" ng-show="showSearch">
-        <input type="text"
-               ng-model="searchTerm"
-               class="form-control facet-search-input"
-               ng-class="{'search-progress': inputChangedPromise }"
-               on-enter="enterPressed()"
-               ng-change="inputChanged()"
-               placeholder="Search"
-               autofocus>
-        <div class="form-control-feedback coltooltip" ng-show="searchTerm && !inputChangedPromise" ng-style="{'cursor': 'pointer', 'right': '50px', 'pointer-events': 'all', 'z-index': '5'}"><!-- form-control:focus changes the z-index of the form control from 2 to 3. form-control-feedback has z-index of 2. Overriding that z index to 5 so it isn't hidden when focused-->
-            <span class="glyphicon glyphicon-remove coltooltiptext facet-search-clear search-remove" ng-click="::clearSearch()" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
+    <div ng-if="!facetModel.hasError">
+        <div class="input-group has-feedback search-box" ng-show="showSearch">
+            <input type="text"
+                ng-model="searchTerm"
+                class="form-control facet-search-input"
+                ng-class="{'search-progress': inputChangedPromise }"
+                on-enter="enterPressed()"
+                ng-change="inputChanged()"
+                placeholder="Search"
+                autofocus>
+            <div class="form-control-feedback coltooltip" ng-show="searchTerm && !inputChangedPromise" ng-style="{'cursor': 'pointer', 'right': '50px', 'pointer-events': 'all', 'z-index': '5'}"><!-- form-control:focus changes the z-index of the form control from 2 to 3. form-control-feedback has z-index of 2. Overriding that z index to 5 so it isn't hidden when focused-->
+                <span class="glyphicon glyphicon-remove coltooltiptext facet-search-clear search-remove" ng-click="::clearSearch()" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
+            </div>
+            <span class="input-group-btn">
+                <button id="search-submit" class="btn btn-primary btn-inverted" ng-click="enterPressed()" role="button" tooltip-placement="bottom"
+                    uib-tooltip-html="'<p>Use space to separate between conjunctive terms, | (no spaces) to separate disjunctive terms and quotations for exact phrases.</p><p>For example, <i><b>usc 1234</b></i> returns all records containing &ldquo;usc&rdquo; and &ldquo;1234&rdquo;.</p><p><i><b>usc|1234</b></i> returns all records containing &ldquo;usc&rdquo; or &ldquo;1234&rdquo;.</b></i></p><p><i><b>&ldquo;usc 1234&rdquo;</b></i> returns all records containing &ldquo;usc 1234&rdquo;.</p>'">
+                    &nbsp;<span class="glyphicon glyphicon-search"></span>&nbsp;<!-- Added 2 non-breaking spaces to prevent btn's margins from collapsing and to center the icon-->
+                </button>
+            </span>
         </div>
-        <span class="input-group-btn">
-            <button id="search-submit" class="btn btn-primary btn-inverted" ng-click="enterPressed()" role="button" tooltip-placement="bottom"
-                uib-tooltip-html="'<p>Use space to separate between conjunctive terms, | (no spaces) to separate disjunctive terms and quotations for exact phrases.</p><p>For example, <i><b>usc 1234</b></i> returns all records containing &ldquo;usc&rdquo; and &ldquo;1234&rdquo;.</p><p><i><b>usc|1234</b></i> returns all records containing &ldquo;usc&rdquo; or &ldquo;1234&rdquo;.</b></i></p><p><i><b>&ldquo;usc 1234&rdquo;</b></i> returns all records containing &ldquo;usc 1234&rdquo;.</p>'">
-                &nbsp;<span class="glyphicon glyphicon-search"></span>&nbsp;<!-- Added 2 non-breaking spaces to prevent btn's margins from collapsing and to center the icon-->
-            </button>
-        </span>
+        <record-list rows='checkboxRows' on-row-click='onRowClick' initialized='facetModel.initialized && facetModel.isOpen && facetPanelOpen'></record-list>
+        <a id="show-more" ng-click="openSearchPopup()"><b ng-bind="hasMore || showFindMore ? 'Show More' : 'Show Details'"></b></a>
+        <a id="reset-facet" ng-if="facetModel.noConstraints" class="pull-right" ng-click="::resetFacet()" tooltip-placement="bottom" uib-tooltip="Reset"><b>Reset</b></a>
     </div>
-    <record-list rows='checkboxRows' on-row-click='onRowClick' initialized='facetModel.initialized && facetModel.isOpen && facetPanelOpen'></record-list>
-    <a id="show-more" ng-click="openSearchPopup()"><b ng-bind="hasMore || showFindMore ? 'Show More' : 'Show Details'"></b></a>
+    <div ng-if="facetModel.hasError">
+        <p>Please try the following:
+            <ul class='show-list-style'>
+                <li>Collapse any unused facets.</li>
+                <li>Remove facet constraints.</li>
+                <li>Minimize the use of the 'No Value' and 'All Records with Value' filters.</li>
+            </ul>
+        </p>
+        <button id="retry-query-btn" class="btn btn-primary btn-inverted" ng-click="::retryQuery(false)" tooltip-placement="bottom-left" uib-tooltip="Retry the query that timed out.">Retry</button>
+        <button id="remove-constraints-btn" class="btn btn-primary btn-inverted" ng-click="::retryQuery(true)" tooltip-placement="bottom-left" uib-tooltip="Retry the query that timed out without any other facet constraints applied.">Simplify</button>
+    </div>
 </div>

@@ -48,7 +48,6 @@
                         ctrl.facetingCount++;
 
                         $scope.vm.facetModels[index] = {
-                            facetName: facetColumn.displayname.unformatted,
                             hasError: false,
                             initialized: false,
                             isOpen: false,
@@ -78,11 +77,10 @@
                      * @param {int} index index of facetColumn
                      * @param {boolean} noConstraints set property to run the query without constraints
                      **/
-                    ctrl.updateFacetColumn = function (index, noConstraints) {
+                    ctrl.updateFacetColumn = function (index) {
                         var fm = $scope.vm.facetModels[index];
                         fm.processed = false;
                         fm.isLoading = true;
-                        fm.noConstraints = noConstraints;
                         recordTableUtils.update($scope.vm);
                     };
 
@@ -104,11 +102,6 @@
                         }
                         return true;
                     };
-
-                    // retries the query for the current facet
-                    scope.retryQuery = function (index, noConstraints) {
-                        currentCtrl.updateFacetColumn(index, noConstraints);
-                    }
 
                     scope.hasFilter = function (index) {
                         if (!scope.vm.facetModels || (index !== undefined && !scope.vm.facetModels[index])) {
@@ -976,7 +969,6 @@
 
                 // remove the constraints if scope.facetModel.noConstraints
                 if (scope.facetModel.noConstraints) {
-                    // no API for AttributeGroupReference.unfilteredReference
                     scope.reference = scope.reference.unfilteredReference;
                     if (scope.facetColumn.isEntityMode) {
                         scope.reference = scope.reference.contextualize.compactSelect;
@@ -1319,6 +1311,19 @@
                             });
                         }
                     };
+
+                    // retries the query for the current facet
+                    scope.retryQuery = function (noConstraints) {
+                        scope.facetModel.hasError = false;
+                        scope.facetModel.noConstraints = noConstraints;
+                        parentCtrl.updateFacetColumn(scope.index);
+                    }
+
+                    scope.resetFacet = function () {
+                        scope.facetModel.hasError = false;
+                        scope.facetModel.noConstraints = false;
+                        parentCtrl.updateFacetColumn(scope.index);
+                    }
 
                     // TODO all these search functions can be refactored to have just one point of sending request.
                     // change the searchTerm and fire the updateFacetColumn
