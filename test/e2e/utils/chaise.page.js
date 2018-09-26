@@ -609,7 +609,7 @@ var recordPage = function() {
     };
 
     this.getEntitySubTitle = function() {
-        return browser.executeScript("return $('#page-subtitle > span').text();");
+        return browser.executeScript("return $('#page-subtitle span').text();");
     };
 
     this.getEntitySubTitleElement = function() {

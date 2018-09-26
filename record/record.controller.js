@@ -54,7 +54,7 @@
         };
 
         vm.toRecordset = function() {
-            $window.location.href = $rootScope.reference.table.reference.contextualize.compact.appLink;
+            return $rootScope.reference.table.reference.contextualize.compact.appLink;
         };
 
         vm.canEdit = function() {
