@@ -11,8 +11,8 @@
     }])
 
     .factory('recordAppUtils',
-             ['constants', 'DataUtils', 'Errors', '$log', 'logActions', 'modalBox', '$q', 'recordTableUtils', '$rootScope',
-             function (constants, DataUtils, Errors, $log, logActions, modalBox, $q, recordTableUtils, $rootScope) {
+             ['constants', 'DataUtils', 'Errors', 'ErrorService', '$log', 'logActions', 'modalBox', '$q', 'recordTableUtils', '$rootScope',
+             function (constants, DataUtils, Errors, ErrorService, $log, logActions, modalBox, $q, recordTableUtils, $rootScope) {
 
         /**
          * returns true if we have free slots for requests.
@@ -39,7 +39,20 @@
                 readMainEntity().then(function (tuple) {
                     $rootScope.isMainDirty = false;
                     _processRequests(isUpdate);
-                }).catch(genericErrorCatch);
+                }).catch(function (err) {
+                    // show modal with different text if 400 Query Timeout Error
+                    if (err instanceof ERMrest.QueryTimeoutError) {
+                        err.subMessage = err.message;
+                        err.message = "The main entity cannot be retrieved.";
+                        ErrorService.handleException(err, true);
+                    } else {
+                        if (DataUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
+                            var redirectLink = UriUtils.createRedirectLinkFromPath(err.errorData.redirectPath);
+                            err.errorData.redirectUrl = redirectLink.replace('record', 'recordset');
+                        }
+                        throw err;
+                    }
+                });
                 return;
             }
 
@@ -51,7 +64,7 @@
                 if (!model.isInline || !model.tableModel.dirtyResult) continue;
                 if (!_haveFreeSlot()) return;
                 model.tableModel.logObject = _getTableModelLogObject(model.tableModel, isUpdate ? logActions.recordInlineUpdate : logActions.recordInlineRead);
-                recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate);
+                recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate, true);
             }
 
             // main aggregates
@@ -65,7 +78,7 @@
                 if (!model.tableModel.dirtyResult) continue;
                 if (!_haveFreeSlot()) return;
                 model.tableModel.logObject = _getTableModelLogObject(model.tableModel, isUpdate ? logActions.recordRelatedUpdate : logActions.recordRelatedRead);
-                recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate);
+                recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate, true);
             }
 
             // aggregates in inline
@@ -144,11 +157,23 @@
                 if (!model.isAggregate || !_haveFreeSlot() || !model.dirtyResult) return;
                 $rootScope.recordFlowControl.occupiedSlots++;
                 model.dirtyResult = false;
+                model.isLoading = true;
                 _readMainColumnAggregate(model.column, index, $rootScope.recordFlowControl.counter).then(function (res) {
                     $rootScope.recordFlowControl.occupiedSlots--;
                     model.dirtyResult = !res;
                     _processRequests(isUpdate);
-                }).catch(genericErrorCatch);
+                }).catch(function (err) {
+                    model.isLoading = false;
+                    if (err instanceof ERMrest.QueryTimeoutError) {
+                        model.hasError = true;
+                    } else {
+                        if (DataUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
+                            var redirectLink = UriUtils.createRedirectLinkFromPath(err.errorData.redirectPath);
+                            err.errorData.redirectUrl = redirectLink.replace('record', 'recordset');
+                        }
+                        throw err;
+                    }
+                });
             });
         }
 
@@ -164,6 +189,7 @@
             logObject.referrer = $rootScope.reference.defaultLogInfo;
 
             column.getAggregatedValue($rootScope.page, logObject).then(function (values) {
+                $rootScope.columnModels[index].isLoading = false;
                 if ($rootScope.recordFlowControl.counter !== current) {
                     return defer.resolve(false);
                 }
@@ -256,6 +282,8 @@
                 rowValues: [],
                 selectedRows: [],//TODO migth not be needed
                 dirtyResult: true,
+                isLoading: true,
+                tableError: false,
                 config: {
                     viewable: true,
                     editable: $rootScope.modifyRecord,

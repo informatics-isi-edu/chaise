@@ -833,6 +833,12 @@ body.error-open loading-spinner {
     margin-top: 5px;
 }
 
+/******** Alerts styles ********/
+
+ul.show-list-style li {
+    list-style-type: inherit;
+}
+
 /*******Bootstrap  Modal styling *********/
 
 /*When the modal fills the screen it has an even 2.5% on top and bottom*/
@@ -1420,8 +1426,8 @@ footer .container1 {
      cursor: pointer;
  }
 
- .faceting-container .glyphicon-alert {
-     color: #f0ad4e;
+ .glyphicon-alert {
+     color: #f0ad4e !important;
      border: none;
  }
 
@@ -1462,12 +1468,6 @@ footer .container1 {
      font-size: 14px;
      font-weight: 600;
      position: relative;
- }
-
- .faceting-container .panel .panel-title img.spinner-sm {
-     position: absolute;
-     right: 0;
-     top: 0;
  }
 
  .faceting-container{
