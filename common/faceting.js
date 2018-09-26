@@ -615,7 +615,6 @@
                                 facetLog.referrer = scope.facetColumn.reference.defaultLogInfo;
                                 facetLog.source = scope.facetColumn.dataSource;
                                 facetLog.action = logActions.recordsetFacetRead,
-                                // TODO remove the constraints if scope.facetModel.noConstraints
                                 scope.facetColumn.sourceReference.getAggregates(aggregateList, facetLog).then(function(response) {
                                     if (scope.facetColumn.sourceReference.uri !== uri) {
                                         // return false to defer.resolve() in .then() callback
@@ -1314,14 +1313,7 @@
 
                     // retries the query for the current facet
                     scope.retryQuery = function (noConstraints) {
-                        scope.facetModel.hasError = false;
                         scope.facetModel.noConstraints = noConstraints;
-                        parentCtrl.updateFacetColumn(scope.index);
-                    }
-
-                    scope.resetFacet = function () {
-                        scope.facetModel.hasError = false;
-                        scope.facetModel.noConstraints = false;
                         parentCtrl.updateFacetColumn(scope.index);
                     }
 

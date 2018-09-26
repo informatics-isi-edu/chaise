@@ -21,7 +21,7 @@
         </div>
         <record-list rows='checkboxRows' on-row-click='onRowClick' initialized='facetModel.initialized && facetModel.isOpen && facetPanelOpen'></record-list>
         <a id="show-more" ng-click="openSearchPopup()"><b ng-bind="hasMore || showFindMore ? 'Show More' : 'Show Details'"></b></a>
-        <a id="reset-facet" ng-if="facetModel.noConstraints" class="pull-right" ng-click="::resetFacet()" tooltip-placement="bottom" uib-tooltip="Reset"><b>Reset</b></a>
+        <a id="reset-facet" ng-if="facetModel.noConstraints" class="pull-right" ng-click="::retryQuery(false)" tooltip-placement="bottom" uib-tooltip="Reset"><b>Reset</b></a>
     </div>
     <div ng-if="facetModel.hasError">
         <p>Please try the following:

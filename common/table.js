@@ -539,6 +539,7 @@
                         (function (i) {
                             $log.debug("counter", vm.flowControlObject.counter, ": updating facet (index="+i+")");
                             vm.facetModels[i].updateFacet().then(function (res) {
+                                vm.facetModels[i].hasError = false;
                                 _afterFacetUpdate(vm, i, res);
                                 _updatePage(vm);
                             }).catch(function (err) {
@@ -562,6 +563,7 @@
                         vm.facetModels[i].initializeFacet().then(function (res) {
                             $log.debug("counter", vm.flowControlObject.counter, ": after facet (index="+ i +") initialize: " + (res ? "successful." : "unsuccessful."));
                             vm.flowControlObject.occupiedSlots--;
+                            vm.facetModels[i].hasError = false;
                             _updatePage(vm);
                         }).catch(function (err) {
                             _afterFacetUpdate(vm, i, true);
