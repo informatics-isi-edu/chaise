@@ -18,7 +18,7 @@ exports.openFacetAndTestFilterOptions = function (name, facetIdx, filterOptions,
         // wait for facet checkboxes to load
         browser.wait(function () {
             return chaisePage.recordsetPage.getFacetOptions(facetIdx).count().then(function(ct) {
-                return ct == 2;
+                return ct == 1;
             });
         }, browser.params.defaultTimeout);
 
