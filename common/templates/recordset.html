@@ -21,6 +21,8 @@
                             <a class="remove-link" ng-click="removePill(row.uniqueId, $event)"><i class="glyphicon glyphicon-remove"></i></a>
                             <span ng-if="row.displayname.isHTML" ng-bind-html="row.displayname.value"></span>
                             <span ng-if="!row.displayname.isHTML" ng-bind="row.displayname.value"></span>
+                            <span ng-if="row.displayname.value == ''" ng-bind-html="defaultDisplayname.empty"></span>
+                            <span ng-if="row.displayname.value == null" ng-bind-html="defaultDisplayname.null"></span>
                         </div>
                     </div>
                 </div>
