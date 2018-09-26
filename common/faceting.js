@@ -1429,7 +1429,7 @@
                     parentCtrl.register(currentCtrl, scope.facetColumn, scope.index);
                     scope.parentCtrl = parentCtrl;
 
-                    scope.checkboxRows = [facetingUtils.getNotNullFilter(), facetingUtils.getNullFilter()];
+                    scope.checkboxRows = [facetingUtils.getNotNullFilter()];
 
                     scope.updateFacetColumn = function () {
                         var defer = $q.defer();
@@ -1482,7 +1482,9 @@
                         }
 
                         if (row.selected) {
-                            scope.facetModel.appliedFilters.push(row.isNotNull ? facetingUtils.getNotNullFilter() : facetingUtils.getNullFilter());
+                            if (row.isNotNull) {
+                                scope.facetModel.appliedFilters.push(facetingUtils.getNotNullFilter());
+                            }
                         } else {
                             scope.facetModel.appliedFilters = scope.facetModel.appliedFilters.filter(function (f) {
                                 return f.uniqueId !== row.uniqueId;
