@@ -1108,7 +1108,7 @@ describe("Viewing Recordset with Faceting,", function() {
                                 }, browser.params.defaultTimeout);
 
                                 recordSetHelpers.openFacetAndTestFilterOptions(
-                                    testParams.name, idx, ['All Records With Value', 'No Value'], done
+                                    testParams.name, idx, ['All Records With Value'], done
                                 );
                             });
 
@@ -1116,9 +1116,9 @@ describe("Viewing Recordset with Faceting,", function() {
                                 recordSetHelpers.testSelectFacetOption(idx, 0, facetParams.name, facetParams.notNullFilter, facetParams.notNullNumRows, done);
                             });
 
-                            it("selecting the null option, should only show the applicable rows.", function (done) {
-                                recordSetHelpers.testSelectFacetOption(idx, 1, facetParams.name, facetParams.nullFilter, facetParams.nullNumRows, done);
-                            });
+                            // it("selecting the null option, should only show the applicable rows.", function (done) {
+                            //     recordSetHelpers.testSelectFacetOption(idx, 1, facetParams.name, facetParams.nullFilter, facetParams.nullNumRows, done);
+                            // });
 
                             it ("should close the facet.", function (done) {
                                 chaisePage.recordsetPage.getFacetById(idx).click().then(function () {
