@@ -105,7 +105,7 @@
                 if ($rootScope.reference.location.catalog != chaiseConfig.resolver_implicit_catalog) catalogFilter = chaiseConfig.resolver_implicit_catalog + "/";
                 // catalogId in chaiseConfig property is 'false'
                 if (chaiseConfig.resolver_implicit_catalog == false) catalogFilter = $rootScope.reference.location.catalog + "/";
-                permalink = $rootScope.reference.unfilteredReference.uri + "/id/" + catalogFilter + tuple.data.RID;
+                permalink = $window.location.origin + "/id/" + catalogFilter + tuple.data.RID;
             } else {
                 permalink = $window.location.href;
             }
