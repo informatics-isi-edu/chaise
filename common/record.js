@@ -55,7 +55,7 @@
 
                     // Show an error warning if the column is aggregate or inline related table and the data failed to load
                     scope.showError = function (i) {
-                        return ((scope.isInline(i) && scope.columnModels[i].tableModel.tableError) || (scope.isAggregate(i)&& scope.columnModels[i].hasError));
+                        return ((scope.isInline(i) && scope.columnModels[i].tableModel.tableError) || (scope.isAggregate(i)&& scope.columnModels[i].columnError));
                     }
 
                     // Show a loading spinner if the column is aggregate or inline related table

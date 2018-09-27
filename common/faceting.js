@@ -48,7 +48,7 @@
                         ctrl.facetingCount++;
 
                         $scope.vm.facetModels[index] = {
-                            hasError: false,
+                            facetError: false,
                             initialized: false,
                             isOpen: false,
                             isLoading: false,
@@ -75,7 +75,6 @@
 
                     /**
                      * @param {int} index index of facetColumn
-                     * @param {boolean} noConstraints set property to run the query without constraints
                      **/
                     ctrl.updateFacetColumn = function (index) {
                         var fm = $scope.vm.facetModels[index];

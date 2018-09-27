@@ -1,5 +1,5 @@
 <div class="choice-picker">
-    <div ng-if="!facetModel.hasError">
+    <div ng-if="!facetModel.facetError">
         <div class="input-group has-feedback search-box" ng-show="showSearch">
             <input type="text"
                 ng-model="searchTerm"
@@ -23,7 +23,7 @@
         <a id="show-more" ng-click="openSearchPopup()"><b ng-bind="hasMore || showFindMore ? 'Show More' : 'Show Details'"></b></a>
         <a id="reset-facet" ng-if="facetModel.noConstraints" class="pull-right" ng-click="::retryQuery(false)" tooltip-placement="bottom" uib-tooltip="Reset"><b>Reset</b></a>
     </div>
-    <div ng-if="facetModel.hasError">
+    <div ng-if="facetModel.facetError">
         <p>Please try the following:
             <ul class='show-list-style'>
                 <li>Collapse any unused facets.</li>

@@ -129,12 +129,13 @@
                     $log.debug("counter", current, ": getting aggregated values for column (index=" + i + ")");
                     _updateColumnAggregate(vm, i, current, logObject, hideSpinner).then(function (res) {
                         _afterUpdateColumnAggregate(vm, res, i);
+                        vm.columnModels[i].columnError = false;
                         updatePageCB(vm);
                     }).catch(function (err) {
                         _afterUpdateColumnAggregate(vm, false, i);
                         // show alert if 400 Query Timeout Error
                         if (err instanceof ERMrest.QueryTimeoutError) {
-                            vm.columnModels[i].hasError = true;
+                            vm.columnModels[i].columnError = true;
                         } else {
                             throw err;
                         }
@@ -203,6 +204,7 @@
                 $log.debug("counter", currentCounter, ": updating result");
                 _readMainEntity(vm, hideSpinner, currentCounter).then(function (res) {
                     _afterUpdateMainEntity(vm, res, currentCounter);
+                    vm.tableError = false;
                     $log.debug("counter", vm.flowControlObject.counter, ": just before update page");
                     // TODO remember last successful main request
                     // when a request fails for 400 QueryTimeout, revert (change browser location) to this previous request
@@ -394,6 +396,8 @@
                         return defer.promise;
                     }
 
+                    vm.countError = false;
+
                     vm.totalRowsCnt = response[0];
                     defer.resolve(true);
                 }).catch(function (err) {
@@ -403,6 +407,7 @@
                     }
 
                     if (err instanceof ERMrest.QueryTimeoutError) {
+                        // separate from hasError above
                         vm.countError = true;
                     }
 
@@ -539,14 +544,14 @@
                         (function (i) {
                             $log.debug("counter", vm.flowControlObject.counter, ": updating facet (index="+i+")");
                             vm.facetModels[i].updateFacet().then(function (res) {
-                                vm.facetModels[i].hasError = false;
+                                vm.facetModels[i].facetError = false;
                                 _afterFacetUpdate(vm, i, res);
                                 _updatePage(vm);
                             }).catch(function (err) {
                                 _afterFacetUpdate(vm, i, true);
                                 // show alert if 400 Query Timeout Error
                                 if (err instanceof ERMrest.QueryTimeoutError) {
-                                    vm.facetModels[i].hasError = true;
+                                    vm.facetModels[i].facetError = true;
                                 } else {
                                     throw err;
                                 }
@@ -563,13 +568,13 @@
                         vm.facetModels[i].initializeFacet().then(function (res) {
                             $log.debug("counter", vm.flowControlObject.counter, ": after facet (index="+ i +") initialize: " + (res ? "successful." : "unsuccessful."));
                             vm.flowControlObject.occupiedSlots--;
-                            vm.facetModels[i].hasError = false;
+                            vm.facetModels[i].facetError = false;
                             _updatePage(vm);
                         }).catch(function (err) {
                             _afterFacetUpdate(vm, i, true);
                             // show alert if 400 Query Timeout Error
                             if (err instanceof ERMrest.QueryTimeoutError) {
-                                vm.facetModels[i].hasError = true;
+                                vm.facetModels[i].facetError = true;
                             } else {
                                 throw err;
                             }

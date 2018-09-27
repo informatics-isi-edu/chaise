@@ -161,11 +161,12 @@
                 _readMainColumnAggregate(model.column, index, $rootScope.recordFlowControl.counter).then(function (res) {
                     $rootScope.recordFlowControl.occupiedSlots--;
                     model.dirtyResult = !res;
+                    model.columnError = false;
                     _processRequests(isUpdate);
                 }).catch(function (err) {
                     model.isLoading = false;
                     if (err instanceof ERMrest.QueryTimeoutError) {
-                        model.hasError = true;
+                        model.columnError = true;
                     } else {
                         if (DataUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
                             var redirectLink = UriUtils.createRedirectLinkFromPath(err.errorData.redirectPath);
