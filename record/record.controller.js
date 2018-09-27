@@ -49,10 +49,12 @@
             return ($rootScope.reference && $rootScope.reference.canCreate && $rootScope.modifyRecord);
         };
 
+        // TODO change this to reference.unfilteredReference.contextualize...
         vm.createRecord = function() {
             $window.location.href = $rootScope.reference.table.reference.contextualize.entryCreate.appLink;
         };
 
+        // TODO change this to reference.unfilteredReference.contextualize...
         vm.toRecordset = function() {
             return $rootScope.reference.table.reference.contextualize.compact.appLink;
         };
@@ -94,7 +96,20 @@
         };
 
         vm.sharePopup = function() {
+            var permalink;
             var tuple = $rootScope.tuple;
+
+            if (chaiseConfig.resolver_implicit_catalog || chaiseConfig.resolver_implicit_catalog == false) {
+                var catalogFilter = "";
+                // catalogId in chaiseConfig property does not match current catalogId
+                if ($rootScope.reference.location.catalog != chaiseConfig.resolver_implicit_catalog) catalogFilter = chaiseConfig.resolver_implicit_catalog + "/";
+                // catalogId in chaiseConfig property is 'false'
+                if (chaiseConfig.resolver_implicit_catalog == false) catalogFilter = $rootScope.reference.location.catalog + "/";
+                permalink = $rootScope.reference.unfilteredReference.uri + "/id/" + catalogFilter + tuple.data.RID;
+            } else {
+                permalink = $window.location.href;
+            }
+
             modalUtils.showModal({
                 templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/shareCitation.modal.html",
                 controller: "ShareCitationController",
@@ -103,7 +118,7 @@
                 resolve: {
                     params: {
                         citation: tuple.citation,
-                        permalink: $window.location.href,
+                        permalink: permalink,
                         displayname: $rootScope.reference.table.name+'_'+tuple.uniqueId
                     }
                 }
