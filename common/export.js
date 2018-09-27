@@ -20,7 +20,7 @@
          * Update the list of templates in UI
          */
         function _updateExportFormats(scope) {
-            var templates = scope.reference.table.exportTemplates;
+            var templates = scope.reference.exportTemplates;
 
             templates.forEach(function (template) {
                 if (template.format_name) {

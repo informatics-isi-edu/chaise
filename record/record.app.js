@@ -99,6 +99,9 @@
 
                 var columns = $rootScope.reference.generateColumnsList(tuple), model;
 
+                $log.info("default export template: ");
+                $log.info(JSON.stringify($rootScope.reference.defaultExportTemplate, null, 1));
+
                 $rootScope.recordFlowControl = new recordAppUtils.FlowControlObject();
 
                 $rootScope.hasAggregate = false;
