@@ -105,6 +105,7 @@
                 if (chaiseConfig.resolverImplicitCatalog != $rootScope.reference.location.catalog) catalogFilter = chaiseConfig.resolverImplicitCatalog + "/";
                 // catalogId in chaiseConfig property is 'false'
                 if (chaiseConfig.resolverImplicitCatalog == false) catalogFilter = $rootScope.reference.location.catalog + "/";
+                // TODO should this be RID or uniqueId?
                 permalink = $window.location.origin + "/id/" + catalogFilter + tuple.data.RID;
             } else {
                 permalink = $window.location.href;

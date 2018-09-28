@@ -192,6 +192,8 @@ describe('View existing record,', function() {
                             expect(title).toEqual(chaiseConfig.headTitle);
                         });
                     }
+
+                    expect(chaiseConfig.resolverImplicitCatalog).toBe(1);
                 });
             });
 
