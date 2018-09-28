@@ -72,9 +72,7 @@ describe('View existing record,', function() {
 
         // test that no citation appears in share modal when no citation is defined on table
         it("should show the share dialog when clicking the share button with only permalink present.", function(done) {
-            var permalink = browser.params.url.split('/');
-            permalink.length = permalink.length-2;
-            permalink = permalink.join('/')+"/id/"+browser.params.catalogId+"/"+chaisePage.getEntityRow("editable-id", testParams.html_table_name, [{column: "id",value: "1"}]).RID;
+            permalink = browser.params.origin+"/id/"+browser.params.catalogId+"/"+chaisePage.getEntityRow("editable-id", testParams.html_table_name, [{column: "id",value: "1"}]).RID;
 
             chaisePage.recordPage.getShareButton().click().then(function () {
                 // wait for dialog to open

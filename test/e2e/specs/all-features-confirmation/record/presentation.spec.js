@@ -3,9 +3,6 @@ var recordHelpers = require('../../../utils/record-helpers.js');
 var recordSetHelpers = require('../../../utils/recordset-helpers.js');
 var moment = require('moment');
 
-var permalink = browser.params.url.split('/');
-permalink.length = permalink.length-2;
-
 var testParams = {
     table_name: "accommodation",
     key: {
@@ -84,7 +81,7 @@ var testParams = {
     },
     citationParams: {
         numListElements: 3,
-        permalink: permalink.join('/')+"/id/1/"+chaisePage.getEntityRow("product-record", "accommodation", [{column: "id",value: "2002"}]).RID,
+        permalink: browser.params.origin+"/id/1/"+chaisePage.getEntityRow("product-record", "accommodation", [{column: "id",value: "2002"}]).RID,
         citation: "Sherathon Hotel http://www.starwoodhotels.com/sheraton/index.html (" + moment().format("YYYY") + ")."
     },
     inline_columns: [
