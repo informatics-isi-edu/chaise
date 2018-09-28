@@ -8,6 +8,7 @@ var chaiseConfig = {
     defaultCatalog: 1,
     maxRelatedTablesOpen: 6,
     allowErrorDismissal : true,
+    resolverImplicitCatalog: 1,
     footerMarkdown:"**Please check** [Privacy Policy](/privacy-policy/){target='_blank'}",
     defaultTables: {
         "1": {

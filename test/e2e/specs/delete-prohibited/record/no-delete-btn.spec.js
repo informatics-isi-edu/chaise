@@ -24,9 +24,10 @@ describe('View existing record,', function() {
             chaisePage.waitForElement(element(by.id('tblRecord')));
         });
 
-        it("should load chaise-config.js and have deleteRecord=false", function() {
+        it("should load chaise-config.js and have deleteRecord=false && resolverImplicitCatalog undefined", function() {
             browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
-                expect(chaiseConfig.deleteRecord).toBe(false);
+                expect(chaiseConfig.deleteRecord).toBeFalsy();
+                expect(chaiseConfig.resolverImplicitCatalog).not.toBeDefined();
             });
         });
 
@@ -44,6 +45,25 @@ describe('View existing record,', function() {
                 expect(recPan.getAttribute("class")).toContain('close-panel', 'Side Panel is not hidden when fiddler is poining in left direction');
                 done();
             }).catch( function(err) {
+                console.log(err);
+                done.fail();
+            });
+        });
+
+        it ("Should have the proper permalink (browser url) in the share popup if resolverImplicitCatalog is undefined", function (done) {
+            var shareButton = chaisePage.recordPage.getShareButton(),
+                shareModal = chaisePage.recordPage.getShareModal();
+
+            shareButton.click().then(function () {
+                // wait for dialog to open
+                chaisePage.waitForElement(shareModal);
+
+                return browser.getCurrentUrl();
+            }).then(function (url) {
+                expect(chaisePage.recordPage.getPermalinkText().getText()).toBe(url, "permalink url is incorrect");
+
+                done();
+            }).catch(function(err){
                 console.log(err);
                 done.fail();
             });

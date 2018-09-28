@@ -99,12 +99,12 @@
             var permalink;
             var tuple = $rootScope.tuple;
 
-            if (chaiseConfig.resolver_implicit_catalog || chaiseConfig.resolver_implicit_catalog == false) {
+            if (chaiseConfig.resolverImplicitCatalog !== undefined && chaiseConfig.resolverImplicitCatalog !== null) {
                 var catalogFilter = "";
                 // catalogId in chaiseConfig property does not match current catalogId
-                if ($rootScope.reference.location.catalog != chaiseConfig.resolver_implicit_catalog) catalogFilter = chaiseConfig.resolver_implicit_catalog + "/";
+                if (chaiseConfig.resolverImplicitCatalog != $rootScope.reference.location.catalog) catalogFilter = chaiseConfig.resolverImplicitCatalog + "/";
                 // catalogId in chaiseConfig property is 'false'
-                if (chaiseConfig.resolver_implicit_catalog == false) catalogFilter = $rootScope.reference.location.catalog + "/";
+                if (chaiseConfig.resolverImplicitCatalog == false) catalogFilter = $rootScope.reference.location.catalog + "/";
                 permalink = $window.location.origin + "/id/" + catalogFilter + tuple.data.RID;
             } else {
                 permalink = $window.location.href;
