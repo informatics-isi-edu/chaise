@@ -8,7 +8,7 @@ var chaiseConfig = {
     defaultCatalog: 1,
     maxRelatedTablesOpen: 6,
     allowErrorDismissal : true,
-    resolverImplicitCatalog: 1,
+    resolverImplicitCatalog: 2, // in parallel config mode, this config is used first with catalog Id 
     footerMarkdown:"**Please check** [Privacy Policy](/privacy-policy/){target='_blank'}",
     defaultTables: {
         "1": {

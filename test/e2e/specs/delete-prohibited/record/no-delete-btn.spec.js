@@ -24,10 +24,10 @@ describe('View existing record,', function() {
             chaisePage.waitForElement(element(by.id('tblRecord')));
         });
 
-        it("should load chaise-config.js and have deleteRecord=false && resolverImplicitCatalog undefined", function() {
+        it("should load chaise-config.js and have deleteRecord=false && resolverImplicitCatalog=4", function() {
             browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
                 expect(chaiseConfig.deleteRecord).toBeFalsy();
-                expect(chaiseConfig.resolverImplicitCatalog).not.toBeDefined();
+                expect(chaiseConfig.resolverImplicitCatalog).toBe(4);
             });
         });
 
@@ -50,23 +50,25 @@ describe('View existing record,', function() {
             });
         });
 
-        it ("Should have the proper permalink (browser url) in the share popup if resolverImplicitCatalog is undefined", function (done) {
-            var shareButton = chaisePage.recordPage.getShareButton(),
-                shareModal = chaisePage.recordPage.getShareModal();
+        if (process.env.TRAVIS) {
+            it ("Should have the proper permalink in the share popup if resolverImplicitCatalog is the same as catalogId", function (done) {
+                var permalink = browser.params.origin+"/id/"+chaisePage.getEntityRow("product-record", testParams.table_name, [{column: "id",value: "4004"}]).RID;
 
-            shareButton.click().then(function () {
-                // wait for dialog to open
-                chaisePage.waitForElement(shareModal);
+                var shareButton = chaisePage.recordPage.getShareButton(),
+                    shareModal = chaisePage.recordPage.getShareModal();
 
-                return browser.getCurrentUrl();
-            }).then(function (url) {
-                expect(chaisePage.recordPage.getPermalinkText().getText()).toBe(url, "permalink url is incorrect");
+                shareButton.click().then(function () {
+                    // wait for dialog to open
+                    chaisePage.waitForElement(shareModal);
 
-                done();
-            }).catch(function(err){
-                console.log(err);
-                done.fail();
+                    expect(chaisePage.recordPage.getPermalinkText().getText()).toBe(permalink, "permalink url is incorrect");
+
+                    done();
+                }).catch(function(err){
+                    console.log(err);
+                    done.fail();
+                });
             });
-        });
+        }
     });
 });
