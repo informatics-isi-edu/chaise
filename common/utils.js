@@ -996,6 +996,14 @@
         }
 
         /**
+         * Adds space after `;` and `&``
+         * @param {String} string
+         */
+        function addSpaceAfterLogicalOperators(string) {
+            return string.replace(/&/g, '& ').replace(/;/g, '; ');
+        }
+
+        /**
          * Throws an {InvalidInputError} if test is
          * not `True`.
          * @memberof ERMrest
@@ -1024,6 +1032,7 @@
             isInteger: isInteger,
             makeSafeIdAttr: makeSafeIdAttr,
             makeSafeHTML: makeSafeHTML,
+            addSpaceAfterLogicalOperators: addSpaceAfterLogicalOperators,
             verify: verify
         };
     }])

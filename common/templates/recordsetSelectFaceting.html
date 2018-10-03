@@ -17,8 +17,8 @@
                         <a class="remove-link" ng-click="removePill(row.uniqueId, $event)"><i class="glyphicon glyphicon-remove"></i></a>
                         <span ng-if="row.displayname.value && row.displayname.isHTML" ng-bind-html="row.displayname.value"></span>
                         <span ng-if="row.displayname.value && !row.displayname.isHTML" ng-bind="row.displayname.value"></span>
-                        <span ng-if="row.displayname.value == '' && row.uniqueId != null" ng-bind-html="defaultDisplayname.empty"></span>
-                        <span ng-if="row.displayname.value == null || row.uniqueId === null" ng-bind-html="defaultDisplayname.null"></span>
+                        <span ng-if="row.displayname.value == ''" ng-bind-html="defaultDisplayname.empty"></span>
+                        <span ng-if="row.displayname.value == null" ng-bind-html="defaultDisplayname.null"></span>
                     </div>
                 </div>
             </div>
@@ -70,7 +70,13 @@
         <!-- record table -->
         <div ng-if="vm.hasLoaded" class="row">
             <div ng-if="!vm.config.hideTotalCount" id="rs-total-count" class="col-lg-3 col-md-3 col-sm-3 col-xs-12">Displaying {{vm.rowValues.length}}{{vm.totalRowsCnt ? " of " + (vm.totalRowsCnt > vm.rowValues.length ? vm.totalRowsCnt : vm.rowValues.length) : ''}} Records</div>
-            <span class="chaise-checkbox col-lg-4 col-md-4 col-sm-4 col-xs-12"><input type="checkbox" id="rs-match-not-null" ng-click="toggleMatchNotNull()" ng-checked="vm.matchNotNull"><label>Records With Values</label></span>
+            <span class="chaise-checkbox">
+                <input type="checkbox" id="rs-match-not-null" ng-click="toggleMatchNotNull()" ng-checked="vm.matchNotNull"><label>Records With Values</label>
+            </span>
+            <!-- TODO temporarily disabling this feature
+            <span class="chaise-checkbox" ng-class="{'disabled-row': vm.matchNotNull}">
+                <input type="checkbox" id="rs-match-null" ng-click="toggleMatchNull()" ng-checked="vm.matchNull" ng-disabled="vm.matchNotNull"><label>No Value</label>
+            </span> -->
         </div>
         <div ng-if="vm.hasLoaded">
             <record-table-select-faceting id="rs-{{vm.makeSafeIdAttr(vm.tableDisplayName.value)}}" vm="vm" on-selected-rows-changed-bind="onSelectedRowsChanged"></record-table-select-faceting>

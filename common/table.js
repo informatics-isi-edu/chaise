@@ -6,7 +6,7 @@
     .constant('tableConstants', {
         MAX_CONCURENT_REQUEST: 4,
         MAX_URL_LENGTH: 2000,
-        PAGE_SIZE: 11, // one is not-null
+        PAGE_SIZE: 10,
         AUTO_SEARCH_TIMEOUT: 2000,
         CELL_LIMIT: 500
     })
@@ -478,6 +478,24 @@
             // get the aggregate values only if main page is loaded
             updateColumnAggregates(vm, _updatePage);
 
+            // update the count
+            if (vm.config.hideTotalCount) {
+                vm.totalRowsCnt = null;
+            } else if (vm.dirtyCount && _haveFreeSlot(vm)) {
+                vm.flowControlObject.occupiedSlots++;
+                vm.totalRowsCnt = null;
+                vm.dirtyCount = false;
+
+                $log.debug("counter", vm.flowControlObject.counter, ": updating count");
+                _updateCount(vm).then(function (res) {
+                    _afterUpdateCount(vm, res);
+                    _updatePage(vm);
+                }).catch(function (err) {
+                    _afterUpdateCount(vm, true);
+                    throw err;
+                });
+            }
+
             // update the facets
             if (vm.facetModels) {
                 if (vm.facetsToInitialize.length === 0) {
@@ -516,23 +534,6 @@
                         });
                     })(index);
                 }
-            }
-
-            // update the count
-            if (vm.config.hideTotalCount) {
-                vm.totalRowsCnt = null;
-            } else if (vm.dirtyCount && _haveFreeSlot(vm)) {
-                vm.flowControlObject.occupiedSlots++;
-                vm.dirtyCount = false;
-
-                $log.debug("counter", vm.flowControlObject.counter, ": updating count");
-                _updateCount(vm).then(function (res) {
-                    _afterUpdateCount(vm, res);
-                    _updatePage(vm);
-                }).catch(function (err) {
-                    _afterUpdateCount(vm, true);
-                    throw err;
-                });
             }
         }
 
@@ -766,6 +767,7 @@
             scope.$root.alerts = AlertsService.alerts;
             scope.$root.showSpinner = false; // this property is set from common modules for controlling the spinner at a global level that is out of the scope of the app
             scope.vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
+            scope.transformCustomFilter = DataUtils.addSpaceAfterLogicalOperators;
 
             scope.defaultDisplayname = defaultDisplayname;
 
@@ -1147,6 +1149,16 @@
         }
     }])
 
+    /**
+     * This directive has the same functionality as recordset directive, the only differences are:
+     * - It has matchNotNull checkbox that will disable all the other rows.
+     *   To figure out if this is selected or not, the caller should use the boolean value of vm.matchNotNull
+     *   Although to be consistent we're still adding a special row to the selectedRows, but you don't need to check for that.
+     * - A special checkbox for matchNull so users will be able to select null value.
+     *   vm.matchNull is only used internally in the directive, we're still adding the "null"
+     *   value to the vm.selectedRows
+     * NOTE removePill, removeAllPills are also changed to support these two matchNull and matchNotNull options.
+     */
     .directive('recordsetSelectFaceting', ['recordTableUtils', 'UriUtils', function(recordTableUtils, UriUtils) {
 
         return {
@@ -1186,6 +1198,10 @@
 
                     var tuple = scope.vm.selectedRows.splice(index, 1)[0];
 
+                    if (key == null) {
+                        scope.vm.matchNull = false;
+                    }
+
                     if (scope.onSelectedRowsChanged) {
                         scope.onSelectedRowsChanged()(tuple, false);
                     }
@@ -1195,6 +1211,7 @@
                 scope.removeAllPills = function($event) {
                     var pre = scope.vm.selectedRows.slice();
                     scope.vm.selectedRows.clear();
+                    scope.vm.matchNull = false;
                     if (scope.vm.matchNotNull) {
                         scope.vm.matchNotNull = false;
                     } else {
@@ -1205,14 +1222,20 @@
                     }
                 };
 
+                /**
+                 * Toggle the not-null checkbox.
+                 * If it is selected, we're disabling and deselcting all the other options.
+                 */
                 scope.toggleMatchNotNull = function () {
                     scope.vm.matchNotNull = !scope.vm.matchNotNull;
                     var tuples = [];
                     if (scope.vm.matchNotNull) {
+                        scope.vm.matchNull = false;
                         scope.vm.selectedRows = tuples = [{
                             isNotNull: true,
                             displayname: {"value": scope.defaultDisplayname.notNull, "isHTML": true}
                         }];
+                        scope.vm.matchNull = false;
                     } else {
                         tuples = scope.vm.selectedRows.slice();
                         scope.vm.selectedRows.clear();
@@ -1220,6 +1243,27 @@
 
                     if (scope.onSelectedRowsChanged) {
                         scope.onSelectedRowsChanged()(tuples, scope.vm.matchNotNull);
+                    }
+                };
+
+                /**
+                 * Toggle the null filter
+                 */
+                scope.toggleMatchNull = function () {
+                    scope.vm.matchNull = !scope.vm.matchNull;
+                    var tuple = {uniqueId: null,  displayname: {value: null, isHTML: false}};
+
+                    if (scope.vm.matchNull) {
+                        scope.vm.selectedRows.push(tuple);
+                    } else {
+                        var rowIndex = scope.vm.selectedRows.findIndex(function (obj) {
+                            return obj.uniqueId == null;
+                        });
+                        scope.vm.selectedRows.splice(rowIndex, 1);
+                    }
+
+                    if (scope.onSelectedRowsChanged) {
+                        scope.onSelectedRowsChanged()(tuple, scope.vm.matchNotNull);
                     }
                 };
             }

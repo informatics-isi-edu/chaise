@@ -4,14 +4,26 @@
     angular.module('chaise.faceting', ['plotly', 'chaise.utils'])
 
         .factory('facetingUtils', ['defaultDisplayname', function (defaultDisplayname) {
-            function getNullFilter(selected) {
+
+            /**
+             * Returns an object that can be used for showing the null filter
+             * @param  {boolean} selected whether it should be selected
+             * @param  {boolean} disabled whether it should be disabled
+             */
+            function getNullFilter(selected, disabled) {
                 return {
                     selected: (typeof selected == 'boolean') ? selected: false,
+                    disabled: (typeof disabled == 'boolean') ? disabled: false,
                     uniqueId: null,
-                    displayname: {"value": defaultDisplayname.null, "isHTML": true}
+                    displayname: {"value": null, "isHTML": false}
                 };
             }
 
+            /**
+             * Returns an object that can be used for showing the not-null filter
+             * @param  {boolean} selected whether it should be selected
+             * @param  {boolean} disabled whether it should be disabled
+             */
             function getNotNullFilter(selected) {
                 return {
                     selected: (typeof selected == 'boolean') ? selected: false,
@@ -832,12 +844,14 @@
             }
 
             /**
-             * Initialzie facet column.
-             * This will take care of getting the displaynames of rows.
-             * (If it's a entity picker, the displayname will be different than the value.).
+             * Initialzie facet column. This will populate the `facetModel.appliedFilters`.
+             * We need this function because the value of filter is not necesarily what we want to add to the appliedFilters,
+             * - In entity mode, the filters are based on the key but we want the rowname.
+             * - We want to display null and not-null differently.
              *
              * NOTE should not be used directly in this directive.
-             * @param  {obj} scope The current scope
+             * NOTE this will only be called on load when the facet has preselected filters.
+             * @param {Object} scope The current scope
              */
             function initializeFacetColumn(scope) {
                 var defer = $q.defer();
@@ -851,12 +865,16 @@
                     defer.resolve();
                 }
                 else {
+                    // getChoiceDisplaynames won't return the null filter, so we need to check for it first
+                    if (scope.facetColumn.hasNullFilter) {
+                        scope.facetModel.appliedFilters.push(facetingUtils.getNullFilter(true));
+                    }
                     scope.facetColumn.getChoiceDisplaynames().then(function (filters) {
                         filters.forEach(function (f) {
                             scope.facetModel.appliedFilters.push({
                                 uniqueId: f.uniqueId,
                                 displayname: f.displayname,
-                                tuple: f.tuple // this might be null
+                                tuple: f.tuple
                             });
                         });
 
@@ -869,19 +887,38 @@
             }
 
             /**
-             * This will update the checkboxRows rows so that:
-             * - not null filter is the first checkbox.
-             * - already applied filters will be added.
+             * This will create checkbox rows for already applied filters.
+             * It will also make sure that not-null and null fitlers are the first two choices.
+             *
+             * NOTE this will be called everytime that we are updating the facet column.
+             * The updateFacetColumn is calling this function.
+             *
+             * @param {Object} scope The current scope
              */
             function appliedFiltersToCheckBoxRows(scope) {
                 var res = [];
-                // if it does, then it's part of applied filters.
-                if (!scope.facetColumn.hasNotNullFilter) {
-                    res.push(facetingUtils.getNotNullFilter());
+
+                // we should show the not-null option if:
+                // - it is selected, or
+                // - hide_not_null_choice is not available
+                if (scope.facetColumn.hasNotNullFilter || !scope.facetColumn.hideNotNullChoice) {
+                    res.push(facetingUtils.getNotNullFilter(scope.facetColumn.hasNotNullFilter));
+                }
+
+                // we should show the null option if:
+                // - it is selected, or
+                // - hide_null_choice is not available
+                if (scope.facetColumn.hasNullFilter || !scope.facetColumn.hideNullChoice) {
+                    res.push(facetingUtils.getNullFilter(scope.facetColumn.hasNullFilter, scope.facetColumn.hasNotNullFilter));
                 }
 
                 // add already applied filters.
-                Array.prototype.push.apply(res, scope.facetModel.appliedFilters.map(function (f) {
+                // the appliedFilters will have the not-null and null too, so we should filter those,
+                // since the preivous lines have taken care of them
+                Array.prototype.push.apply(res, scope.facetModel.appliedFilters.filter(function (f) {
+                    // null and not-null are already added.
+                    return f.isNotNull !== true && f.uniqueId != null;
+                }).map(function (f) {
                     return {
                         isNotNull: f.isNotNull,
                         uniqueId: f.uniqueId,
@@ -905,8 +942,6 @@
             function updateFacetColumn(scope) {
                 var defer = $q.defer();
 
-                // console.log("updating FACET: " + scope.index);
-
                 // facetColumn has changed so create the new reference
                 if (scope.facetColumn.isEntityMode) {
                     scope.reference = scope.facetColumn.sourceReference.contextualize.compactSelect;
@@ -923,8 +958,19 @@
                 }
 
 
-                var appliedLen = scope.facetModel.appliedFilters.length;
+                // maxCheckboxLen: Maximum number of checkboxes that we could show
+                // (PAGE_SIZE + if not-null is allowed + if null is allowed)
+                var maxCheckboxLen = tableConstants.PAGE_SIZE;
+                if (!scope.facetColumn.hideNotNullChoice) maxCheckboxLen++;
+                if (!scope.facetColumn.hideNullChoice) maxCheckboxLen++;
 
+                // appliedLen: number of applied filters (apart from null and not-null)
+                //if this is more than PAGE_SIZE, we don't need to read the data.
+                var appliedLen = scope.facetModel.appliedFilters.length;
+                if (scope.facetColumn.hasNullFilter) appliedLen--;
+                if (scope.facetColumn.hasNotNullFilter) appliedLen--;
+
+                // there are more than PAGE_SIZE selected rows, just display them.
                 if (appliedLen >= tableConstants.PAGE_SIZE) {
                     scope.checkboxRows = appliedFiltersToCheckBoxRows(scope);
                     // there might be more, we're not sure
@@ -937,7 +983,7 @@
                 (function (uri) {
                     var facetLog = getDefaultLogInfo(scope);
                     facetLog.action = logActions.recordsetFacetRead;
-                    scope.reference.read(appliedLen + tableConstants.PAGE_SIZE, facetLog).then(function (page) {
+                    scope.reference.read(tableConstants.PAGE_SIZE, facetLog, true).then(function (page) {
                         // if this is not the result of latest facet change
                         if (scope.reference.uri !== uri) {
                             defer.resolve(false);
@@ -950,7 +996,7 @@
 
                         page.tuples.forEach(function (tuple) {
                             // if we're showing enough rows
-                            if (scope.checkboxRows.length == tableConstants.PAGE_SIZE) {
+                            if (scope.checkboxRows.length == maxCheckboxLen) {
                                 return;
                             }
 
@@ -961,16 +1007,16 @@
                                 return row.uniqueId == value && !row.isNotNull;
                             });
 
-                            // duplicate filter
+                            // it's already selected
                             if (i !== -1) {
                                 return;
                             }
 
-                            // if we have a not_null filter, other filters must be disabled.
                             scope.checkboxRows.push({
                                 uniqueId: value,
-                                displayname: (value == null) ? {value: null, isHTML: false} : tuple.displayname,
+                                displayname: (value === null) ? {value: null, isHTML: false} : tuple.displayname,
                                 tuple:  tuple,
+                                // if we have a not_null filter, other filters must be disabled.
                                 disabled: scope.facetColumn.hasNotNullFilter,
                                 selected: false,
                             });
@@ -1027,13 +1073,18 @@
                         if (changeRef) {
                             scope.facetModel.appliedFilters = [facetingUtils.getNotNullFilter(true)];
                         }
-                    } else if (Array.isArray(res)){
-                        var tuples = res;
+                    } else {
+                        // invalid output
+                        if (!Array.isArray(res.rows)) return false;
+                        var tuples = res.rows;
+
+                        // create the list of choice filters
+                        var filters = tuples.map(function (t) {
+                            return getFilterUniqueId(t, scope.columnName);
+                        });
 
                         // create the reference using filters
-                        ref = scope.facetColumn.replaceAllChoiceFilters(tuples.map(function (t) {
-                            return getFilterUniqueId(t, scope.columnName);
-                        }));
+                        ref = scope.facetColumn.replaceAllChoiceFilters(filters);
 
                         // update the reference
                         if (!scope.parentCtrl.updateVMReference(ref, -1, !changeRef)) {
@@ -1041,23 +1092,33 @@
                         }
 
                         if (changeRef) {
-                            // create the list of applied filters, this Will
-                            // be used for genreating the checkboxRows of current facet
-                            scope.facetModel.appliedFilters = tuples.map(function (t) {
+                            scope.facetModel.appliedFilters = [];
+
+
+                            // we want to show the null first, this is used for finding it
+                            var hasNullFilter = false;
+
+                            // create the list of applied filters, this will be used for genreating the checkboxRows of current facet
+                             tuples.forEach(function (t) {
                                 var val = getFilterUniqueId(t, scope.columnName);
 
-                                // NOTE displayname will always be string, but we want to treat null and empty string differently,
-                                // therefore we have a extra case for null, to just return null.
-                                return {
+                                if (val === null) {
+                                    hasNullFilter = true;
+                                    return; // null filter will be added later
+                                }
+
+                                scope.facetModel.appliedFilters.push({
                                     uniqueId: val,
-                                    displayname: (val == null) ? {value: null, isHTML: false} : t.displayname,
+                                    displayname: (val === null) ? {value: null, isHTML: false} : t.displayname,
                                     tuple: t,
-                                };
+                                });
                             });
+
+                            // null filter should be the first applied fitler that we show
+                            if (hasNullFilter) {
+                                scope.facetModel.appliedFilters.unshift(facetingUtils.getNullFilter(true));
+                            }
                         }
-                    } else {
-                        // invalid result from the callback.
-                        return false;
                     }
 
                     if (changeRef) {
@@ -1146,6 +1207,9 @@
                         if (scope.facetColumn.hasNotNullFilter) {
                             params.matchNotNull = true;
                         }
+                        if (scope.facetColumn.hasNullFilter) {
+                            params.matchNull = true;
+                        }
 
                         params.selectedRows = [];
 
@@ -1160,12 +1224,12 @@
                             // - data is needed for the post process that we do on the data.
                             if (row.tuple && scope.facetColumn.isEntityMode) {
                                 newRow.uniqueId = row.tuple.uniqueId;
-                                newRow.data =row.tuple.data;
+                                newRow.data = row.tuple.data;
                             } else {
                                 newRow.uniqueId = row.uniqueId;
                             }
 
-                            newRow.displayname = row.displayname;
+                            newRow.displayname = (newRow.uniqueId === null) ? {value: null, isHTML: false} : row.displayname;
                             newRow.isNotNull = row.notNull;
                             params.selectedRows.push(newRow);
                         });
@@ -1334,12 +1398,6 @@
         }])
 
         .directive("checkPresence", ['facetingUtils', '$q', '$log', 'UriUtils', function(facetingUtils, $q, $log, UriUtils) {
-            function hasNullFilter(scope) {
-                return scope.facetColumn.choiceFilters.filter(function (f) {
-                    return f.term == null;
-                }).length > 0;
-            }
-
             return {
                 restrict: 'AE',
                 templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/faceting/check-presence.html',
@@ -1371,7 +1429,7 @@
                     parentCtrl.register(currentCtrl, scope.facetColumn, scope.index);
                     scope.parentCtrl = parentCtrl;
 
-                    scope.checkboxRows = [facetingUtils.getNotNullFilter(), facetingUtils.getNullFilter()];
+                    scope.checkboxRows = [facetingUtils.getNotNullFilter()];
 
                     scope.updateFacetColumn = function () {
                         var defer = $q.defer();
@@ -1383,11 +1441,11 @@
                             scope.facetModel.appliedFilters.push(facetingUtils.getNotNullFilter());
                         }
 
-                        scope.checkboxRows[1].selected = false;
-                        if (hasNullFilter(scope)) {
-                            scope.checkboxRows[1].selected = true;
-                            scope.facetModel.appliedFilters.push(facetingUtils.getNotNullFilter());
-                        }
+                        // scope.checkboxRows[1].selected = false;
+                        // if (scope.facetColumn.hasNullFilter) {
+                        //     scope.checkboxRows[1].selected = true;
+                        //     scope.facetModel.appliedFilters.push(facetingUtils.getNullFilter());
+                        // }
 
                         return defer.resolve(true), defer.promise;
                     };
@@ -1424,7 +1482,9 @@
                         }
 
                         if (row.selected) {
-                            scope.facetModel.appliedFilters.push(row.isNotNull ? facetingUtils.getNotNullFilter() : facetingUtils.getNullFilter());
+                            if (row.isNotNull) {
+                                scope.facetModel.appliedFilters.push(facetingUtils.getNotNullFilter());
+                            }
                         } else {
                             scope.facetModel.appliedFilters = scope.facetModel.appliedFilters.filter(function (f) {
                                 return f.uniqueId !== row.uniqueId;

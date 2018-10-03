@@ -609,7 +609,7 @@ var recordPage = function() {
     };
 
     this.getEntitySubTitle = function() {
-        return browser.executeScript("return $('#page-subtitle > span').text();");
+        return browser.executeScript("return $('#page-subtitle span').text();");
     };
 
     this.getEntitySubTitleElement = function() {
@@ -618,6 +618,10 @@ var recordPage = function() {
 
     this.getEntitySubTitleTooltip = function () {
         return this.getEntitySubTitleElement().all(by.css("span")).first().getAttribute('uib-tooltip');
+    };
+
+    this.getEntitySubTitleLink = function () {
+        return this.getEntitySubTitleElement().element(by.tagName("a"));
     };
 
     this.getColumns = function() {
@@ -796,7 +800,7 @@ var recordPage = function() {
     };
 
     this.getShareModal = function() {
-        return element(by.css(".share-citation"));
+        return element(by.css(".chaise-share-citation"));
     };
 
     this.getModalListElements = function() {
@@ -811,8 +815,16 @@ var recordPage = function() {
         return element(by.id("citation")).element(by.tagName('h2'));
     };
 
+    this.getDownloadCitationHeader = function() {
+        return element(by.id("download-citation")).element(by.tagName('h3'));
+    };
+
     this.getCitationText = function() {
         return element(by.id("citation-text"));
+    };
+
+    this.getBibtex = function() {
+        return element(by.id("bibtex-download"));
     };
 
     this.getErrorModalTitle = function(){
@@ -1168,7 +1180,7 @@ var recordsetPage = function() {
     }
 
     this.getModalOptions = function () {
-        return element(by.css(".modal-body")).all(by.css(".chaise-checkbox input"));
+        return element(by.css(".modal-body .recordset-table")).all(by.css(".chaise-checkbox input"));
     };
 
     this.getRecordsetTableModalOptions = function () {
@@ -1176,7 +1188,7 @@ var recordsetPage = function() {
     };
 
     this.getModalRecordsetTableOptionByIndex = function (index) {
-        return element(by.css(".modal-body")).element(by.css(".main-container")).all(by.css(".chaise-checkbox input")).get(index);
+        return element(by.css(".modal-body .recordset-table")).all(by.css(".chaise-checkbox input")).get(index);
     };
 
     this.getModalSubmit = function () {
@@ -1210,6 +1222,10 @@ var recordsetPage = function() {
 
     this.getModalMatchNotNullInput = function () {
         return element(by.id("rs-match-not-null"));
+    };
+
+    this.getModalMatchNullInput = function () {
+        return element(by.id("rs-match-null"));
     };
 
     this.getModalDisabledRows = function () {

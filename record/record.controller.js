@@ -53,6 +53,10 @@
             $window.location.href = $rootScope.reference.table.reference.contextualize.entryCreate.appLink;
         };
 
+        vm.toRecordset = function() {
+            return $rootScope.reference.table.reference.contextualize.compact.appLink;
+        };
+
         vm.canEdit = function() {
             var canEdit = ($rootScope.reference && $rootScope.reference.canUpdate && $rootScope.modifyRecord);
             // If user can edit this record (canEdit === true), then change showEmptyRelatedTables.
@@ -90,15 +94,17 @@
         };
 
         vm.sharePopup = function() {
+            var tuple = $rootScope.tuple;
             modalUtils.showModal({
                 templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/shareCitation.modal.html",
                 controller: "ShareCitationController",
-                windowClass: "share-citation",
+                windowClass: "chaise-share-citation",
                 controllerAs: "ctrl",
                 resolve: {
                     params: {
-                        citation: $rootScope.tuple.citation,
-                        permalink: $window.location.href
+                        citation: tuple.citation,
+                        permalink: $window.location.href,
+                        displayname: $rootScope.reference.table.name+'_'+tuple.uniqueId
                     }
                 }
             }, false, false, false); // not defining any extra callbacks
