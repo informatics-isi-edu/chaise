@@ -219,7 +219,8 @@
 
                         if (!notTerminal){
                             err.subMessage = err.message;
-                            err.message = "The resultset cannot be retrieved. You can try the following to help resolve the issue:\n" + messageMap.queryTimeoutList;
+                            err.message = "The result set cannot be retrieved. Try the following to reduce the query time:\n" + messageMap.queryTimeoutList;
+                            console.log(err);
                             ErrorService.handleException(err, true);
                         }
                     } else {

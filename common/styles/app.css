@@ -142,6 +142,9 @@ span[uib-tooltip], .show-tooltip-border[uib-tooltip] {
   border-color: #ccc !important;
 }
 
+.disabled-cell {
+    background-color: #ccc;
+}
 
 /**************** SPINNER **************/
 

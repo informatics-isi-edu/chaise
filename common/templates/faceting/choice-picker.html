@@ -21,17 +21,17 @@
         </div>
         <record-list rows='checkboxRows' on-row-click='onRowClick' initialized='facetModel.initialized && facetModel.isOpen && facetPanelOpen'></record-list>
         <a id="show-more" ng-click="openSearchPopup()"><b ng-bind="hasMore || showFindMore ? 'Show More' : 'Show Details'"></b></a>
-        <a id="reset-facet" ng-if="facetModel.noConstraints" class="pull-right" ng-click="::retryQuery(false)" tooltip-placement="bottom" uib-tooltip="Reset"><b>Reset</b></a>
+        <a id="reset-facet" ng-if="facetModel.noConstraints" class="pull-right" ng-click="::retryQuery(false)" tooltip-placement="bottom" uib-tooltip="Retry updating the facet values with constraints."><b>Retry</b></a>
     </div>
     <div ng-if="facetModel.facetError">
-        <p>Please try the following:
+        <p>Query timeout: The facet values cannot be retrieved. Try the following to reduce the query time:
             <ul class='show-list-style'>
-                <li>Collapse any unused facets.</li>
-                <li>Remove facet constraints.</li>
-                <li>Minimize the use of the 'No Value' and 'All Records with Value' filters.</li>
+                <li>Reduce the number of facet constraints.</li>
+                <li>Minimize the use of 'No Value' and 'All Records with Value' filters.</li>
             </ul>
+            Click Simplify to retrieve facet values without constraints.
         </p>
-        <button id="retry-query-btn" class="btn btn-primary btn-inverted" ng-click="::retryQuery(false)" tooltip-placement="bottom-left" uib-tooltip="Retry the query that timed out.">Retry</button>
-        <button id="remove-constraints-btn" class="btn btn-primary btn-inverted" ng-click="::retryQuery(true)" tooltip-placement="bottom-left" uib-tooltip="Retry the query that timed out without any other facet constraints applied.">Simplify</button>
+        <button id="retry-query-btn" class="btn btn-primary btn-inverted" ng-click="::retryQuery(false)" tooltip-placement="bottom-left" uib-tooltip="Retry updating the facet values with constraints.">Retry</button>
+        <button id="remove-constraints-btn" class="btn btn-primary btn-inverted" ng-click="::retryQuery(true)" tooltip-placement="bottom-left" uib-tooltip="Provide facet values without any constraints applied.">Simplify</button>
     </div>
 </div>
