@@ -95,24 +95,41 @@
             });
         };
 
-        var resolvePermalink = function () {
+        /**
+         * The following cases need to be handled for the resolverImplicitCatalog value:
+         *  - if undefined:                                 use current chaise path
+         *  - if false:                                     /id/currCatalog/RID
+         *  - if resolverImplicitCatalog == currCatalog:    /id/RID
+         *  - if resolverImplicitCatalog != currCatalog:    /id/resolverImplicitCatalog/RID
+         **/
+        var resolvePermalink = function (tuple) {
             var resolverId = chaiseConfig.resolverImplicitCatalog;
+            var currCatalog = $rootScope.reference.location.catalogId;
 
             // null or undefined or no RID
             if (resolverId == null || !tuple.data || !tuple.data.RID) {
                 return $window.location.href;
             }
 
-            if () {
-                
+            // if false we want the current catalog id
+            if (resolverId === false) {
+                return $window.location.origin + "/id/" + currCatalog + "/" + tuple.data.RID;
             }
+
+            // if it's a number (isNaN tries to parse to integer before checking)
+            if (!isNaN(resolverId)) {
+                var catalog = (resolverId != currCatalog) ? resolverId+"/" : "";
+                return $window.location.origin + "/id/" + catalog + tuple.data.RID;
+            }
+
+            // any other values are not allowed so default to current url as permalink
+            return $window.location.href;
         }
 
         vm.sharePopup = function() {
-            var permalink $window.location.href;
             var tuple = $rootScope.tuple;
 
-            var permalink = resolvePermalink();
+            var permalink = resolvePermalink(tuple);
             // if no RID value is present, default to using the window's location
             if (chaiseConfig.resolverImplicitCatalog !== undefined && chaiseConfig.resolverImplicitCatalog !== null && tuple.data.RID) {
                 var catalogFilter = "";
