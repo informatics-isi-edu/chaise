@@ -103,17 +103,10 @@ exports.testPresentation = function (tableParams) {
             expect(chaisePage.recordPage.getModalListElements().count()).toBe(tableParams.citationParams.numListElements, "Number of list elements in share citation modal is incorrect");
         });
 
-        it("should have a share link present.", function (done) {
-            browser.getCurrentUrl().then(function (url) {
-                // verify permalink
-                expect(chaisePage.recordPage.getShareLinkHeader().getText()).toBe("Share Link", "Share Link (permalink) header is incorrect");
-                expect(chaisePage.recordPage.getPermalinkText().getText()).toBe(url, "permalink url is incorrect");
-
-                done();
-            }).catch(function(err){
-                console.log(err);
-                done.fail();
-            });
+        it("should have a share link present.", function () {
+            // verify permalink
+            expect(chaisePage.recordPage.getShareLinkHeader().getText()).toBe("Share Link", "Share Link (permalink) header is incorrect");
+            expect(chaisePage.recordPage.getPermalinkText().getText()).toBe(tableParams.citationParams.permalink, "permalink url is incorrect");
         });
 
         it("should have a citation present,", function () {
