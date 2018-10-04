@@ -130,15 +130,6 @@
             var tuple = $rootScope.tuple;
 
             var permalink = resolvePermalink(tuple);
-            // if no RID value is present, default to using the window's location
-            if (chaiseConfig.resolverImplicitCatalog !== undefined && chaiseConfig.resolverImplicitCatalog !== null && tuple.data.RID) {
-                var catalogFilter = "";
-                // catalogId in chaiseConfig property does not match current catalogId
-                if (chaiseConfig.resolverImplicitCatalog != $rootScope.reference.location.catalog) catalogFilter = chaiseConfig.resolverImplicitCatalog + "/";
-                // catalogId in chaiseConfig property is 'false'
-                if (chaiseConfig.resolverImplicitCatalog == false) catalogFilter = $rootScope.reference.location.catalog + "/";
-                permalink = $window.location.origin + "/id/" + catalogFilter + tuple.data.RID;
-            }
 
             modalUtils.showModal({
                 templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/shareCitation.modal.html",
