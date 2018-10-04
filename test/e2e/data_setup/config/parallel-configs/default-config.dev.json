@@ -1,6 +1,8 @@
 {
     "setup": {
         "schemaConfigurations": [
+            "record/links.config.json",
+
             "recordedit/immutable-inputs.config.json",
             "recordedit/add-multi.config.json",
             "recordedit/composite-key.config.json",

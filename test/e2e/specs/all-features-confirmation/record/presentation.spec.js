@@ -81,6 +81,7 @@ var testParams = {
     },
     citationParams: {
         numListElements: 3,
+        permalink: browser.params.origin+"/id/2/"+chaisePage.getEntityRow("product-record", "accommodation", [{column: "id",value: "2002"}]).RID,
         citation: "Sherathon Hotel http://www.starwoodhotels.com/sheraton/index.html (" + moment().format("YYYY") + ")."
     },
     inline_columns: [
@@ -179,7 +180,7 @@ describe('View existing record,', function() {
             });
         });
 
-        it('should load document title defined in chaise-config.js and have deleteRecord=true', function() {
+        it('should load document title defined in chaise-config.js and have deleteRecord=true and resolverImplicitCatalog=2', function() {
             browser.manage().logs().get('browser').then(function(browserLog) {
                 browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
                     expect(chaiseConfig.deleteRecord).toBe(true);
@@ -188,6 +189,8 @@ describe('View existing record,', function() {
                             expect(title).toEqual(chaiseConfig.headTitle);
                         });
                     }
+
+                    expect(chaiseConfig.resolverImplicitCatalog).toBe(2);
                 });
             });
 

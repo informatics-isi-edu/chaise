@@ -1,0 +1,44 @@
+{
+    "schema_name": "links",
+    "tables": {
+        "links-table": {
+            "kind": "table",
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "id"
+                    ]
+                }
+            ],
+            "foreign_keys": [],
+            "table_name": "links-table",
+            "schema_name": "links",
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "type": {
+                        "typename": "int"
+                    }
+                }, {
+                    "name": "text",
+                    "type": {
+                        "typename": "text"
+                    }
+                }, {
+                    "name": "int",
+                    "type": {
+                        "typename": "int"
+                    }
+                }
+            ],
+            "annotations": {}
+        }
+    },
+    "table_names": [
+        "html-name-table"
+    ],
+    "comment": null,
+    "annotations": {}
+}
