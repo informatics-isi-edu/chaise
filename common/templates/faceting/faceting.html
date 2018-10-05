@@ -13,7 +13,7 @@
                             </a>
                             <span class="pull-right">
                                 <img ng-if="vm.facetModels[$index].isLoading" class="spinner spinner-sm" src="../common/styles/images/loader.gif"/>
-                                <span ng-if="vm.facetModels[$index].facetError || vm.facetModels[$index].noConstraints" class="glyphicon glyphicon-alert" ng-attr-uib-tooltip="{{vm.facetModels[$index].noConstraints ? 'Showing facet values without any constraints applied.' : 'Query timeout: The facet values cannot be retrieved for updates.'}}" tooltip-placement="right"></span>
+                                <span ng-if="vm.facetModels[$index].facetError || vm.facetModels[$index].noConstraints" class="glyphicon glyphicon-alert" ng-attr-uib-tooltip="{{vm.facetModels[$index].noConstraints ? 'Showing facet values without any constraints applied.' : 'Request timeout: The facet values cannot be retrieved for updates.'}}" tooltip-placement="right"></span>
                             </span>
                         </h3>
                     </uib-accordion-heading>

@@ -54,6 +54,18 @@ table.table-fixed-layout {
     width: 100%;
 }
 
+.table-hover>tbody>tr:hover {
+    background-color: #fcf8e3;
+}
+
+.table-striped>tbody>tr:nth-child(odd):hover {
+    background-color: #f6f4ea !important;
+}
+
+table>tbody>tr>td.disabled-cell {
+    background-color: #ddd;
+}
+
 .chaise-body {
     overflow: hidden;
 }
@@ -142,9 +154,6 @@ span[uib-tooltip], .show-tooltip-border[uib-tooltip] {
   border-color: #ccc !important;
 }
 
-.disabled-cell {
-    background-color: #ccc;
-}
 
 /**************** SPINNER **************/
 
