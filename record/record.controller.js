@@ -119,7 +119,7 @@
 
             // if it's a number (isNaN tries to parse to integer before checking)
             if (!isNaN(resolverId)) {
-                var catalog = (resolverId != currCatalog) ? resolverId+"/" : "";
+                var catalog = (resolverId != currCatalog) ? currCatalog+"/" : "";
                 return $window.location.origin + "/id/" + catalog + tuple.data.RID;
             }
 
