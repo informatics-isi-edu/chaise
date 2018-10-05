@@ -609,7 +609,7 @@ var recordPage = function() {
     };
 
     this.getEntitySubTitle = function() {
-        return browser.executeScript("return $('#page-subtitle > span').text();");
+        return browser.executeScript("return $('#page-subtitle span').text();");
     };
 
     this.getEntitySubTitleElement = function() {
@@ -618,6 +618,10 @@ var recordPage = function() {
 
     this.getEntitySubTitleTooltip = function () {
         return this.getEntitySubTitleElement().all(by.css("span")).first().getAttribute('uib-tooltip');
+    };
+
+    this.getEntitySubTitleLink = function () {
+        return this.getEntitySubTitleElement().element(by.tagName("a"));
     };
 
     this.getColumns = function() {

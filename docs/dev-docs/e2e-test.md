@@ -62,7 +62,7 @@ and then run the following command:
 $ make testparallel
 ```
 
-### How To Get Your AUTH_COOKIE
+### How To Get Your AUTH COOKIE
 
 1. Open up [https://dev.isrd.isi.edu/chaise/search/](https://dev.isrd.isi.edu/chaise/search/) website.
 2. Login. The account that you are using must have delete and create access. We use this cookie to create and delete catalogs.
