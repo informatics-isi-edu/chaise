@@ -147,6 +147,8 @@ exports.parameterize = function(config, configParams) {
         if (typeof configParams.setBaseUrl == 'function') configParams.setBaseUrl(browser, data);
         else browser.params.url = browser.baseUrl;
 
+        browser.params.origin = process.env.ERMREST_URL.slice(0, process.env.ERMREST_URL.indexOf('/ermrest'));
+
         // Visit the default page and set the authorization cookie if required
         if (testConfiguration.authCookie) {
           console.log("setting up cookie");

@@ -1,0 +1,15 @@
+{
+    "catalog": {},
+    "schema": {
+        "name": "links",
+        "createNew": true,
+        "path": "test/e2e/data_setup/schema/record/links.json"
+    },
+    "tables": {
+        "createNew": true
+    },
+    "entities": {
+        "createNew": true,
+        "path": "test/e2e/data_setup/data/links"
+    }
+}

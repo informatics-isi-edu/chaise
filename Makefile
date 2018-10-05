@@ -35,6 +35,7 @@ E2EDrecord=test/e2e/specs/all-features-confirmation/record/presentation-btn.conf
 E2EDrecordCopy=test/e2e/specs/all-features/record/copy-btn.conf.js
 E2ErecordNoDeleteBtn=test/e2e/specs/delete-prohibited/record/no-delete-btn.conf.js
 E2EDrecordRelatedTable=test/e2e/specs/all-features/record/related-table.conf.js
+E2EDrecordLinks=test/e2e/specs/default-config/record/links.conf.js
 # Recordset tests
 E2EDrecordset=test/e2e/specs/all-features-confirmation/recordset/presentation.conf.js
 E2EDrecordsetEdit=test/e2e/specs/default-config/recordset/edit.conf.js
@@ -63,7 +64,7 @@ Manualrecordset=test/manual/specs/recordset.conf.js
 NAVBAR_TESTS=$(E2Enavbar) $(E2EnavbarHeadTitle)
 SEARCH_TESTS=$(E2Esearch)
 RECORDSET_TESTS=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit) $(E2EDrecordsetIndFacet) $(E2EDrecordsetHistFacet)
-RECORD_TESTS=$(E2EDrecord) $(E2ErecordNoDeleteBtn) $(E2EDrecordRelatedTable) $(E2EDrecordCopy)
+RECORD_TESTS=$(E2EDrecord) $(E2ErecordNoDeleteBtn) $(E2EDrecordRelatedTable) $(E2EDrecordCopy) $(E2EDrecordLinks)
 RECORDADD_TESTS=$(E2EDIrecordAdd) $(E2EDIrecordMultiAdd) $(E2EDIrecordImmutable)
 RECORDEDIT_TESTS=$(E2EDIrecordEdit) $(E2EDIrecordMultiEdit) $(E2EDrecordEditCompositeKey) $(E2ErecordEditNoDeleteBtn) $(E2EDrecordEditSubmissionDisabled) $(E2EDIrecordEditMultiColTypes) $(E2EDrecordEditDomainFilter)
 PERMISSIONS_TESTS=$(E2EmultiPermissionsVisibility)
