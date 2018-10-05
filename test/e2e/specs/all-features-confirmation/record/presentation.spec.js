@@ -81,7 +81,7 @@ var testParams = {
     },
     citationParams: {
         numListElements: 3,
-        permalink: browser.params.origin+"/id/2/"+chaisePage.getEntityRow("product-record", "accommodation", [{column: "id",value: "2002"}]).RID,
+        permalink: browser.params.origin+"/id/"+browser.params.catalogId+"/"+chaisePage.getEntityRow("product-record", "accommodation", [{column: "id",value: "2002"}]).RID,
         citation: "Sherathon Hotel http://www.starwoodhotels.com/sheraton/index.html (" + moment().format("YYYY") + ")."
     },
     inline_columns: [
