@@ -64,6 +64,7 @@
                             isOpen: false,
                             isLoading: false,
                             processed: true,
+                            noConstraints: false,
                             appliedFilters: [],
                             updateFacet: childCtrl.updateFacet,
                             initializeFacet: childCtrl.initializeFacet

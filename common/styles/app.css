@@ -55,31 +55,31 @@ table.table-fixed-layout {
 }
 
 /* table hover */
-table>tbody>tr:hover {
+record-table tbody>tr:hover {
     background-color: #f7f0cf !important;
 }
 
 /* odd row hover for striped table */
-.table-striped>tbody>tr:nth-child(odd):hover {
+record-table tbody>tr:nth-child(odd):hover {
     background-color: #efebda !important;
 }
 
-table>tbody>tr>td.disabled-cell {
+record-table tbody>tr>td.disabled-cell {
     background-color: #f4f4f4;
 }
 
 /* odd disabled cells need to be darker */
-.table-striped>tbody>tr:nth-child(odd)>td.disabled-cell{
+record-table tbody>tr:nth-child(odd)>td.disabled-cell{
     background-color: #ebebeb;
 }
 
 /* match color from row highlight for disabled cells */
-table>tbody>tr:hover>td.disabled-cell {
+record-table tbody>tr:hover>td.disabled-cell {
     background-color: #f7f0cf !important;
 }
 
 /* odd disabled cells need to match odd row hover for striped table above */
-.table-striped>tbody>tr:nth-child(odd):hover>td.disabled-cell {
+record-table tbody>tr:nth-child(odd):hover>td.disabled-cell {
     background-color: #efebda !important;
 }
 
