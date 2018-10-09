@@ -400,10 +400,34 @@
                 templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/inputPopup.modal.html"
             }, function (model) {
                 console.log(model);
-                // set input value for each record to create. populate ui model
-                vm.recordEditModel.rows.forEach(function (row) {
-                    row[column.name] = model.value;
-                });
+                if (params.displayType === "popup-select") {
+                    // set data in view model (model.rows) and submission model (model.submissionRows)
+
+                    // udpate the foreign key data
+                    vm.recordEditModel.foreignKeyData.forEach(function (fkeyData) {
+                        fkeyData[column.foreignKey.name] = model.data;
+                    });
+
+                    var foreignKeyColumns = column.foreignKey.colset.columns;
+                    for (var i = 0; i < foreignKeyColumns.length; i++) {
+                        var referenceCol = foreignKeyColumns[i];
+                        var foreignTableCol = column.foreignKey.mapping.get(referenceCol);
+
+                        vm.recordEditModel.submissionRows.forEach(function (submissionRow) {
+                            submissionRow[referenceCol.name] = model.data[foreignTableCol.name];
+                        });
+                    }
+
+                    vm.recordEditModel.rows.forEach(function (row) {
+                        row[column.name] = model.displayname.value;
+                    });
+                } else {
+                    console.log(model);
+                    // set input value for each record to create. populate ui model
+                    vm.recordEditModel.rows.forEach(function (row) {
+                        row[column.name] = model.value;
+                    });
+                }
             });
         }
 
@@ -679,7 +703,7 @@
 
         /*------------------------code below is for fixing the column names when scrolling -----------*/
 
-        var captionColumnWidth = 150;
+        var captionColumnWidth = 190;
         var marginLeft = captionColumnWidth + 10;
 
         // Sets a fixed width for the columns, as they're positioned absolute

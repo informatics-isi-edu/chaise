@@ -174,14 +174,16 @@
         }
     }])
 
-    .directive('inputSwitch', ['dataFormats', 'integerLimits', 'maskOptions', 'UriUtils', '$log', function(dataFormats, integerLimits, maskOptions, UriUtils, $log) {
+    .directive('inputSwitch', ['dataFormats', 'integerLimits', 'maskOptions', 'modalBox', 'modalUtils', 'UriUtils', '$log', '$rootScope', function(dataFormats, integerLimits, maskOptions, modalBox, modalUtils, UriUtils, $log, $rootScope) {
         return {
             restrict: 'E',
             templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/inputs/inputSwitch.html',
             scope: {
                 column: '=',
                 displayType: '=',
-                model: '=?'
+                model: '=?',
+                submissionRow: '=?',
+                foreignKeyData: '=?'
             },
             link: function(scope, elem, attr) {
                 scope.model = {};
@@ -203,6 +205,8 @@
                         time: null,
                         meridiem: 'AM'
                     }
+                } else if (scope.displayType === "file") {
+                    scope.model.value = {};
                 }
 
                 scope.getDisabledInputValue = function () {
@@ -241,6 +245,40 @@
                         return scope.model.value.meridiem = 'PM';
                     }
                     return scope.model.value.meridiem = 'AM';
+                }
+
+                scope.searchPopup = function() {
+
+                    var params = {};
+
+                    params.reference = scope.column.filteredRef(scope.submissionRow, scope.foreignKeyData).contextualize.compactSelect;
+                    params.reference.session = $rootScope.session;
+                    params.context = "compact/select";
+                    params.selectedRows = [];
+                    params.selectMode = modalBox.singleSelectMode;
+                    params.showFaceting = true;
+                    params.facetPanelOpen = false;
+
+                    modalUtils.showModal({
+                        animation: false,
+                        controller: "SearchPopupController",
+                        controllerAs: "ctrl",
+                        resolve: {
+                            params: params
+                        },
+                        size: "xl",
+                        templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
+                    }, function dataSelected(tuple) {
+                        // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
+
+                        scope.fkDisplayName = tuple.displayname;
+                        scope.model = tuple;
+                    }, false, false);
+                }
+
+                scope.clearForeignKey = function() {
+                    scope.model = null;
+                    scope.fkDisplayName = null;
                 }
 
                 scope.blurElement = function(e) {
