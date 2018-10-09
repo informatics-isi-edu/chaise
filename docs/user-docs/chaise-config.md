@@ -1,8 +1,8 @@
 # Configuration File: chaise-config.js
 
-**Chaise** uses a set of default configuration parameters. You can overwrite them through the `chaise-config.js` file and/or the search parameters in the URL. 
+**Chaise** uses a set of default configuration parameters. You can overwrite them through the `chaise-config.js` file and/or the search parameters in the URL.
 
-A Chaise deployment includes a sample config file ([chaise-config-sample.js](https://github.com/informatics-isi-edu/chaise/blob/master/chaise-config-sample.js)) at the root directory that you can edit and then rename to `chaise-config.js`. 
+A Chaise deployment includes a sample config file ([chaise-config-sample.js](https://github.com/informatics-isi-edu/chaise/blob/master/chaise-config-sample.js)) at the root directory that you can edit and then rename to `chaise-config.js`.
 
 The below table explains the usage of the default parameters:
 
@@ -45,8 +45,9 @@ The below table explains the usage of the default parameters:
 | allowErrorDismissal | Boolean | false | "allowErrorDismissal" : \<value\> | N/A | All terminal error message display an error message dialog that is not dismissable by default. Set this property to true if you want to allow dismissable error message dialogs.
 | searchPageSize | Integer | 25 | "searchPageSize" : \<value\> | N/A | If present, its value represents the number of records to be displayed on a page in the search view.
 | footerMarkdown | A footer markdown string | N/A | "footerMarkdown" : \<value\> | N/A | If present, it creates a footer at the bottom of the app with the markdown text.
-| maxRelatedTablesOpen | An integer | N/A | "maxRelatedTablesOpen" : \<value\> | N/A | It defines maximum number of expanded related table on a page during initial loading. If related tables exceed this value then all of them shall be collapsed.
+| maxRelatedTablesOpen | Integer | N/A | "maxRelatedTablesOpen" : \<value\> | N/A | It defines maximum number of expanded related table on a page during initial loading. If related tables exceed this value then all of them shall be collapsed.
 | showFaceting | Boolean | false | "showFaceting" : \<value\> | N/A | If true, shows the faceting panel on the recordset app.
 | hideTableOfContents | Boolean | false | "hideTableOfContents" : \<value\> | N/A | If true, hides the table of contents panel on the record app. By default table of contents will be visible.
 | showExportButton | Boolean | false | "showExportButton" : \<value\> | N/A | If true, shows the experimental export button.
 | chaiseBasePath | A URL | "/chaise/" | "chaiseBasePath" : \<value\> | N/A | The path of chaise deployment directory. It is used when accessing Chaise modules from outside of Chaise App.
+| resolverImplicitCatalog | Integer | N/A | "resolverImplicitCatalog" : \<value\> | N/A | Set to a catalog number, N, if your resolver accepts /id/X instead of /id/N/X and you prefer to share records with this shorter URL. Set to false if you prefer Chaise to always use the catalog-qualified form /id/N/X. If the property is `undefined`, the link will be the default permalink (the current browser location).
