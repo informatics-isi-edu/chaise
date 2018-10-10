@@ -103,11 +103,11 @@
                                                         <span ng-if="::!column.displayname.isHTML" ng-bind="::column.displayname.value"></span>
                                                     </span>
                                                     <span ng-if="!form.isDisabled(column);" class="pull-right btn-group">
-                                                        <button id="column-options" type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown">
+                                                        <button id="column-options-{{::form.makeSafeIdAttr(column.displayname.value)}}" type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown">
                                                             <span class="glyphicon glyphicon-menu-hamburger"></span>
                                                         </button>
                                                         <ul class="dropdown-menu">
-                                                            <li><a ng-click="::form.openSelectAll(column)">Select All</a></li>
+                                                            <li><a id="select-all-{{::form.makeSafeIdAttr(column.displayname.value)}}" ng-click="::form.openSelectAll(column)">Select All</a></li>
                                                         </ul>
                                                     </span>
                                                 </td>

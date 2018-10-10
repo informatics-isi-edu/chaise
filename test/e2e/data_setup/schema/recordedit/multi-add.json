@@ -13,7 +13,25 @@
                     ]
                 }
             ],
-            "foreign_keys": [],
+            "foreign_keys": [
+                {
+                    "names": [["multi-add", "fk1"]],
+                    "foreign_key_columns": [
+                        {
+                            "column_name": "fk_to_f1",
+                            "table_name": "multi-add-table",
+                            "schema_name": "multi-add"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "column_name": "id",
+                            "table_name": "f1",
+                            "schema_name": "multi-add"
+                        }
+                    ]
+                }
+            ],
             "table_name": "multi-add-table",
             "schema_name": "multi-add",
             "column_definitions": [
@@ -43,17 +61,100 @@
                     "type": {
                         "typename": "int"
                     }
+                }, {
+                    "name": "date",
+                    "type": {
+                        "typename": "date"
+                    }
+                }, {
+                    "name": "timestamp",
+                    "type": {
+                        "typename": "timestamp"
+                    }
+                }, {
+                    "name": "fk_to_f1",
+                    "type": {
+                        "typename": "int4"
+                    }
+                }, {
+                    "name": "uri",
+                    "default": null,
+                    "nullok": true,
+                    "type": {
+                        "typename": "text"
+                    },
+                    "annotations": {
+                        "tag:isrd.isi.edu,2017:asset": {
+                            "url_pattern":"/hatrac/js/chaise/{{{_int}}}/{{{_uri.md5_hex}}}",
+                            "filename_column" : "filename",
+                            "byte_count_column": "bytes",
+                            "md5": "md5"
+                        }
+                    }
+                },
+                {
+                    "comment": null,
+                    "name": "filename",
+                    "default": null,
+                    "nullok": true,
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "comment": null,
+                    "name": "bytes",
+                    "default": null,
+                    "nullok": true,
+                    "type": {
+                        "typename": "int8"
+                    }
+                },
+                {
+                    "comment": null,
+                    "name": "md5",
+                    "default": null,
+                    "nullok": true,
+                    "type": {
+                        "typename": "text"
+                    }
                 }
             ],
             "annotations": {
                 "tag:isrd.isi.edu,2016:visible-columns" : {
-                    "*": ["id", "text", "int"]
+                    "*": ["id", "text", "int", "date", "timestamp", ["multi-add", "fk1"], "uri"]
                 }
             }
+        },
+        "f1": {
+            "kind": "table",
+            "table_name": "f1",
+            "schema_name": "multi-add",
+            "keys": [
+                {"unique_columns": ["id"]},
+                {"unique_columns": ["term"]}
+            ],
+            "foreign_keys": [],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": {
+                        "typename": "serial4"
+                    }
+                },
+                {
+                    "name": "term",
+                    "type": {
+                        "typename": "text"
+                    }
+                }
+            ]
         }
     },
     "table_names": [
-        "multi-add-table"
+        "multi-add-table",
+        "f1"
     ],
     "comment": null,
     "annotations": {}

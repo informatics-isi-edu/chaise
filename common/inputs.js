@@ -189,6 +189,9 @@
                 scope.model = {};
                 scope.dataFormats = dataFormats;
                 scope.maskOptions = maskOptions;
+                scope.fileExtensionTypes = function () {
+                    return scope.column.filenameExtFilter.join(", ");
+                }
 
                 scope.int2min = integerLimits.INT_2_MIN;
                 scope.int2max = integerLimits.INT_2_MAX;

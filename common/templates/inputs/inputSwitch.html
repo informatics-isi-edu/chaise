@@ -1,12 +1,12 @@
-<div class="entity-value" ng-switch="displayType">
+<div class="entity-value" ng-switch="displayType" ng-form="inputContainer">
 
     <!-- date input-->
     <div ng-switch-when="date">
         <div class="input-group">
             <input class="form-control" type="text" ng-model="model.value" placeholder="{{dataFormats.date}}" name="{{::column.name}}" ui-mask="{{maskOptions.date.mask}}" ui-options="maskOptions.date.options" model-view-value="true" date></input>
             <span class="input-group-btn">
-                <button type="button" class="btn btn-primary btn-inverted" ng-click="::applyCurrentDatetime();">Today</button>
-                <button type="button" class="btn btn-danger btn-inverted" ng-click="::removeValue()">Clear</button>
+                <button type="button" name="{{::column.name}}-today" class="btn btn-primary btn-inverted" ng-click="::applyCurrentDatetime();">Today</button>
+                <button type="button" name="{{::column.name}}-clear" class="btn btn-danger btn-inverted" ng-click="::removeValue()">Clear</button>
             </span>
         </div>
     </div>
@@ -17,13 +17,13 @@
             <div class="col-xs-12">
                 <div class="input-group">
                     <span class="input-group-addon">Date</span>
-                    <input class="form-control input-timestamptz" type="text" ng-model="model.value.date" placeholder="{{dataFormats.date}}" name="{{::column.name}}" ui-mask="maskOptions.date.mask" ui-options="maskOptions.date.options" model-view-value="true" date timestamp validate-values="model.value"></input>
+                    <input class="form-control input-timestamptz" type="text" ng-model="model.value.date" placeholder="{{dataFormats.date}}" name="{{::column.name}}" ui-mask="{{maskOptions.date.mask}}" ui-options="maskOptions.date.options" model-view-value="true" date timestamp validate-values="model.value"></input>
                 </div>
             </div>
             <div class="col-xs-12">
                 <div class="input-group">
                     <span class="input-group-addon">Time</span>
-                    <input class="form-control" type="text" ng-model="model.value.time" placeholder="{{dataFormats.time24}}" name="{{::column.name}}" ui-mask="maskOptions.time.mask" ui-options="maskOptions.time.options" model-view-value="true" time timestamp validate-values="model.value"></input>
+                    <input class="form-control" type="text" ng-model="model.value.time" placeholder="{{dataFormats.time24}}" name="{{::column.name}}" ui-mask="{{maskOptions.time.mask}}" ui-options="maskOptions.time.options" model-view-value="true" time timestamp validate-values="model.value"></input>
                     <span class="input-group-btn">
                         <button class="btn btn-primary btn-inverted" name="{{::column.name}}" type="button" ng-click="::toggleMeridiem();" ng-bind="model.value.meridiem || 'AM'">AM</button>
                     </span>
@@ -59,26 +59,26 @@
 
     <!-- int2 input -->
     <input ng-switch-when="integer2" ng-model="model.value" name="{{::column.name}}" type="number" class="form-control" min="{{::int2min}}" max="{{::int2max}}" integer>
-        <!-- <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty  || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int2'">
-            <div ng-message="min">This field requires a value greater than {{form.int2min}}.</div>
-            <div ng-message="max">This field requires a value smaller than {{form.int2max}}.</div>
-        </div> -->
+        <div ng-messages="inputContainer.$error" ng-show="inputContainer.$dirty  || inputContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int2'">
+            <div ng-message="min">This field requires a value greater than {{int2min}}.</div>
+            <div ng-message="max">This field requires a value smaller than {{int2max}}.</div>
+        </div>
     </input>
 
     <!-- int4 input -->
     <input ng-switch-when="integer4" ng-model="model.value" name="{{::column.name}}" type="number" class="form-control" min="{{::int4min}}" max="{{::int4max}}" integer>
-        <!-- <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty  || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int4'">
-            <div ng-message="min">This field requires a value greater than {{form.int4min}}.</div>
-            <div ng-message="max">This field requires a value smaller than {{form.int4max}}.</div>
-        </div> -->
+        <div ng-messages="inputContainer.$error" ng-show="inputContainer.$dirty  || inputContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int4'">
+            <div ng-message="min">This field requires a value greater than {{int4min}}.</div>
+            <div ng-message="max">This field requires a value smaller than {{int4max}}.</div>
+        </div>
     </input>
 
     <!-- int8 input -->
     <input ng-switch-when="integer8" ng-model="model.value" name="{{::column.name}}" type="number" class="form-control" min="{{::int8min}}" max="{{::int8max}}" integer>
-        <!-- <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int8'">
-            <div ng-message="min">This field requires a value greater than {{form.int8min}}.</div>
-            <div ng-message="max">This field requires a value smaller than {{form.int8max}}.</div>
-        </div> -->
+        <div ng-messages="inputContainer.$error" ng-show="inputContainer.$dirty || inputContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int8'">
+            <div ng-message="min">This field requires a value greater than {{int8min}}.</div>
+            <div ng-message="max">This field requires a value smaller than {{int8max}}.</div>
+        </div>
     </input>
 
     <!-- float/decimal/numeric -->
@@ -116,16 +116,16 @@
     <input ng-switch-default ng-model="model.value" name="{{::column.name}}" type="text" class="form-control" empty-to-null></input>
 
     <!-- Validation error messages to show when the form field is touched -->
-    <!-- <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.$error || form.formContainer.$submitted" class="text-danger" role="alert">
-        <div ng-message="date">Please enter a date value in {{form.dataFormats.date}} format.</div>
-        <div ng-message="time">Please enter a time value in 12-hr {{form.dataFormats.time24}} format.</div>
-        <div ng-message="timestampDate">Please enter a date value in {{form.dataFormats.date}} format.</div>
-        <div ng-message="timestampTime">Please enter a time value in 12-hr {{form.dataFormats.time24}} format.</div>
+    <div ng-messages="inputContainer.$error" ng-show="inputContainer.$error || inputContainer.$submitted" class="text-danger" role="alert">
+        <div ng-message="date">Please enter a date value in {{dataFormats.date}} format.</div>
+        <div ng-message="time">Please enter a time value in 12-hr {{dataFormats.time24}} format.</div>
+        <div ng-message="timestampDate">Please enter a date value in {{dataFormats.date}} format.</div>
+        <div ng-message="timestampTime">Please enter a time value in 12-hr {{dataFormats.time24}} format.</div>
         <div ng-message="integer">Please enter an integer value.</div>
         <div ng-message="float">Please enter a decimal value.</div>
         <div ng-message="json">Please enter a valid JSON value.</div>
-        <div ng-message="fileExtension">Please select a file with the following type: {{form.fileExtensionTypes(column)}}</div>
-    </div> -->
+        <div ng-message="fileExtension">Please select a file with the following type: {{fileExtensionTypes}}</div>
+    </div>
 
     <!-- Validation error messages to show when the form is submitted -->
     <!-- <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.$submitted" class="text-danger" role="alert">

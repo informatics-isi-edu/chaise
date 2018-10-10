@@ -397,9 +397,9 @@
                 resolve: {
                     params: params
                 },
-                templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/inputPopup.modal.html"
+                templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/inputPopup.modal.html",
+                windowClass: "modal-select-all"
             }, function (model) {
-                console.log(model);
                 if (params.displayType === "popup-select") {
                     // set data in view model (model.rows) and submission model (model.submissionRows)
 
@@ -421,11 +421,32 @@
                     vm.recordEditModel.rows.forEach(function (row) {
                         row[column.name] = model.displayname.value;
                     });
+                    // need to set each property to avoid having a reference to the same object
+
                 } else {
-                    console.log(model);
                     // set input value for each record to create. populate ui model
                     vm.recordEditModel.rows.forEach(function (row) {
-                        row[column.name] = model.value;
+                        if (params.displayType === "file") {
+                            row[column.name] = {}
+                            Object.keys(model.value).forEach(function (key) {
+                                if (key !== "hatracObj") {
+                                    row[column.name][key] = model.value[key];
+                                }
+                            });
+                            // TODO: This is duplicated in the upload-input directive.
+                            // Should be removed in both places and only created at submission time
+                            row[column.name].hatracObj = new ERMrest.Upload(row[column.name].file, {
+                                column: column,
+                                reference: $rootScope.reference
+                            });
+                        } else if (params.displayType === "timestamp") {
+                            row[column.name] = {}
+                            row[column.name].date = model.value.date;
+                            row[column.name].time = model.value.time;
+                            row[column.name].meridiem = model.value.meridiem;
+                        } else {
+                            row[column.name] = model.value;
+                        }
                     });
                 }
             });

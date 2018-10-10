@@ -193,7 +193,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
             });
         });
     });
-    
+
     if (tableParams.table_name === "accommodation") {
         it("should give a warning when leaving the edit page with unsaved changes", function (done) {
             var EC = protractor.ExpectedConditions;
@@ -212,7 +212,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
             });
         });
     }
-    
+
     var testMultipleRecords = function(recordIndex) {
 
         // helper functions:
@@ -1523,7 +1523,7 @@ exports.deleteFiles = function(files) {
     });
 };
 
-var selectFile = function(file, fileInput, txtInput) {
+exports.selectFile = function(file, fileInput, txtInput) {
     var filePath = require('path').join(__dirname , "/../data_setup/uploaded_files/" + file.path);
 
     fileInput.sendKeys(filePath);
@@ -1563,10 +1563,10 @@ exports.testFileInput = function (colName, recordIndex, file, currentValue, prin
                         browser.sleep(50);
 
                         expect(txtInput.getAttribute('value')).toBe("", "couldn't clear the button.");
-                        selectFile(file, fileInput, txtInput);
+                        exports.selectFile(file, fileInput, txtInput);
                     });
                 } else {
-                    selectFile(file, fileInput, txtInput);
+                    exports.selectFile(file, fileInput, txtInput);
                 }
 
                 if (testValidation) {

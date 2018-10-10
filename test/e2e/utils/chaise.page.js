@@ -327,6 +327,40 @@ var recordEditPage = function() {
         return browser.executeScript("return $(arguments[0].siblings('.help-block'));", el);
     };
 
+    this.getColumnOptionsDropdown = function (name) {
+        var columnDisplayName = makeSafeIdAttr(name);
+        return element(by.id("column-options-"+columnDisplayName));
+    };
+
+    this.getSelectAll = function (name) {
+        var columnDisplayName = makeSafeIdAttr(name);
+        return element(by.id("select-all-"+columnDisplayName));
+    };
+
+    this.getSelectAllModal = function () {
+        return element(by.className("modal-select-all"));
+    }
+
+    this.getSelectAllDate = function (name) {
+        return this.getSelectAllModal().element(by.css('input[name="' + name + '"][date]'));
+    }
+
+    this.getSelectAllTime = function (name) {
+        return this.getSelectAllModal().element(by.css('input[name="' + name + '"][time]'));
+    }
+
+    this.getSelectAllPopupBtn = function () {
+        return this.getSelectAllModal().element(by.className("modal-popup-btn"));
+    }
+
+    this.getSelectAllFileInput = function (name) {
+        return this.getSelectAllModal().element(by.css('input[name="' + name + '"]'));
+    }
+
+    this.getSelectAllApply = function () {
+        return element(by.id("select-all-apply"));
+    }
+
     this.getDropdown = function(el, index) {
         index = index || 0;
         return browser.executeScript("return $(arguments[0]).parents('tr').find('.select2-container:visible')[" + index + "];", el);
