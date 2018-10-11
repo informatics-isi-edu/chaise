@@ -238,32 +238,34 @@ describe('Record Add', function() {
                 });
             });
 
-            it(testParams.uri_col_name, function (done) {
-                var colName = testParams.uri_col_name,
+            if (!process.env.TRAVIS && testParams.files.length > 0) {
+                it(testParams.uri_col_name, function (done) {
+                    var colName = testParams.uri_col_name,
                     file = testParams.files[0];
 
-                chaisePage.recordEditPage.getColumnOptionsDropdown(colName).click().then(function () {
-                    return chaisePage.recordEditPage.getSelectAll(colName).click();
-                }).then(function () {
-                    // select (set) file
-                    var fileInput = chaisePage.recordEditPage.getSelectAllFileInput(colName),
+                    chaisePage.recordEditPage.getColumnOptionsDropdown(colName).click().then(function () {
+                        return chaisePage.recordEditPage.getSelectAll(colName).click();
+                    }).then(function () {
+                        // select (set) file
+                        var fileInput = chaisePage.recordEditPage.getSelectAllFileInput(colName),
                         txtInput = chaisePage.recordEditPage.getSelectAllFileInput("txt"+colName);
 
-                    recordEditHelpers.selectFile(file, fileInput, txtInput);
+                        recordEditHelpers.selectFile(file, fileInput, txtInput);
 
-                    return chaisePage.recordEditPage.getSelectAllApply().click();
-                }).then(function () {
-                    // verify the values
-                    expect(uploadInput1.getAttribute('value')).toBe(file.name);
-                    expect(uploadInput2.getAttribute('value')).toBe(file.name);
-                    expect(uploadInput3.getAttribute('value')).toBe(file.name);
+                        return chaisePage.recordEditPage.getSelectAllApply().click();
+                    }).then(function () {
+                        // verify the values
+                        expect(uploadInput1.getAttribute('value')).toBe(file.name);
+                        expect(uploadInput2.getAttribute('value')).toBe(file.name);
+                        expect(uploadInput3.getAttribute('value')).toBe(file.name);
 
-                    done();
-                }).catch(function (err) {
-                    console.dir(err);
-                    done.fail();
+                        done();
+                    }).catch(function (err) {
+                        console.dir(err);
+                        done.fail();
+                    });
                 });
-            });
+            }
         });
 
         describe("change values in the forms without affecting the other forms, ", function() {
@@ -353,16 +355,18 @@ describe('Record Add', function() {
                 });
             });
 
-            it("should clear the uri value in form 3.", function () {
-                var file = testParams.files[0];
-                chaisePage.recordEditPage.getForeignKeyInputRemoveBtns().then(function(removeBtns) {
-                    return chaisePage.clickButton(removeBtns[5]);
-                }).then(function () {
-                    expect(uploadInput1.getAttribute('value')).toBe(file.name);
-                    expect(uploadInput2.getAttribute('value')).toBe(file.name);
-                    expect(uploadInput3.getAttribute('value')).toBe("");
+            if (!process.env.TRAVIS && testParams.files.length > 0) {
+                it("should clear the uri value in form 3.", function () {
+                    var file = testParams.files[0];
+                    chaisePage.recordEditPage.getForeignKeyInputRemoveBtns().then(function(removeBtns) {
+                        return chaisePage.clickButton(removeBtns[5]);
+                    }).then(function () {
+                        expect(uploadInput1.getAttribute('value')).toBe(file.name);
+                        expect(uploadInput2.getAttribute('value')).toBe(file.name);
+                        expect(uploadInput3.getAttribute('value')).toBe("");
+                    });
                 });
-            });
+            }
         });
 
         //test submission
