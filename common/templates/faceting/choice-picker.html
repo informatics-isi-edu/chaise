@@ -1,5 +1,5 @@
 <div class="choice-picker">
-    <div ng-if="!facetModel.facetError">
+    <div ng-hide="facetModel.facetError">
         <div class="input-group has-feedback search-box" ng-show="showSearch">
             <input type="text"
                 ng-model="searchTerm"
@@ -23,7 +23,7 @@
         <a id="show-more" ng-click="openSearchPopup()"><b ng-bind="hasMore || showFindMore ? 'Show More' : 'Show Details'"></b></a>
         <a id="reset-facet" ng-if="facetModel.noConstraints" class="pull-right" ng-click="::retryQuery(false)" tooltip-placement="bottom" uib-tooltip="Retry updating the facet values with constraints."><b>Retry</b></a>
     </div>
-    <div ng-if="facetModel.facetError">
+    <div ng-show="facetModel.facetError">
         <p>Request timeout: The facet values cannot be retrieved. Try the following to reduce the query time:
             <ul class='show-list-style'>
                 <li>Reduce the number of facet constraints.</li>
