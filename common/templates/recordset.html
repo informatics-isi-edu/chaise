@@ -126,7 +126,10 @@
 
             <!-- record table -->
             <div id="recordset-table-container" ng-if="vm.initialized">
-                <h3 ng-if="!vm.config.hideTotalCount" id="rs-total-count" class="replace-margin">Displaying {{vm.rowValues.length}}{{vm.totalRowsCnt ? " of " + (vm.totalRowsCnt > vm.rowValues.length ? vm.totalRowsCnt : vm.rowValues.length) : ''}} Records <img id="push-rows-spinner" ng-show="vm.pushRowsSpinner" src="../common/styles/images/loader.gif" class="spinner spinner-sm"/></h3>
+                <h3 ng-if="!vm.config.hideTotalCount" id="rs-total-count" class="replace-margin">Displaying {{vm.rowValues.length}}{{(vm.totalRowsCnt && !vm.tableError) ? " of " + (vm.totalRowsCnt > vm.rowValues.length ? vm.totalRowsCnt : vm.rowValues.length) : ''}} Records
+                    <img id="push-rows-spinner" ng-show="vm.pushRowsSpinner" src="../common/styles/images/loader.gif" class="spinner spinner-sm"/>
+                    <span ng-if="vm.countError" class="glyphicon glyphicon-alert" uib-tooltip="Request timeout: total count cannot be retrieved. Refresh the page later to try again." tooltip-placement="bottom"></span>
+                </h3>
                 <record-table id="rs-{{vm.makeSafeIdAttr(vm.tableDisplayName.value)}}" vm="vm" on-selected-rows-changed-bind="onSelectedRowsChanged"></record-table>
                 <span id="push-rows-loading" ng-show="vm.pushRowsSpinner">Loading...</span>
             </div>

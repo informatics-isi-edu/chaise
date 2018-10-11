@@ -24,6 +24,7 @@
         var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
         $scope.recordSidePanOpen = chaiseConfig.hideTableOfContents === true ? false : true;
         vm.tooltip = messageMap.tooltip;
+        vm.queryTimeoutTooltip = messageMap.queryTimeoutTooltip;
         vm.gotoRelatedTable = function(sectionId, index) {
             var safeSectionId = vm.makeSafeIdAttr(sectionId);
             var pageSection = "rt-heading-" + safeSectionId;

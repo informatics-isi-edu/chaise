@@ -19,7 +19,7 @@
          * @param {array} values: Array with column values
          * @param {callback} toggleRelatedTableDisplayType: function to determine object display type
          */
-        .directive('recordDisplay', ['DataUtils','$timeout', 'UriUtils', function(DataUtils, $timeout, UriUtils) {
+        .directive('recordDisplay', ['DataUtils', 'messageMap', '$timeout', 'UriUtils', function(DataUtils, messageMap, $timeout, UriUtils) {
             return {
                 restrict: 'E',
                 transclude: true,
@@ -38,19 +38,41 @@
                     $scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
                 },
                 link: function(scope){
+                    scope.queryTimeoutTooltip = messageMap.queryTimeoutTooltip;
+
+                    // set the display type value to false so the 'Edit |' text doesn't appear
+                    // we only watch for the value 'markdown' to show 'Edit |'
+                    scope.actionBarDisplayType = function (i) {
+                        var tm = scope.columnModels[i].tableModel;
+                        return !tm.tableError ? tm.reference.display.type : false;
+                    };
+
                     scope.isInline = function (i) {
                         return scope.columnModels[i].isInline;
                     };
 
+                    scope.isAggregate = function (i) {
+                        return scope.columnModels[i].isAggregate;
+                    };
+
+                    // Show an error warning if the column is aggregate or inline related table and the data failed to load
+                    scope.showError = function (i) {
+                        return ((scope.isInline(i) && scope.columnModels[i].tableModel.tableError) || (scope.isAggregate(i)&& scope.columnModels[i].columnError));
+                    }
+
+                    // Show a loading spinner if the column is aggregate or inline related table
+                    scope.showLoader = function (i) {
+                        return ((scope.isInline(i) && scope.columnModels[i].tableModel.isLoading) || (scope.isAggregate(i) && scope.columnModels[i].isLoading));
+                    }
+
                     // returns true if we should show the column
                     scope.showColumn = function (i) {
-                        return (typeof scope.values[i].value === "string" && scope.values[i].value !== '') && !scope.isInline(i);
+                        return ((typeof scope.values[i].value === "string" && scope.values[i].value !== '') && !scope.isInline(i)) || scope.isAggregate(i);
                     };
 
                     // returns true if we should show a table
                     scope.showInlineTable = function (i) {
-                        var readDone =  scope.isInline(i) && scope.columnModels[i].tableModel && scope.columnModels[i].tableModel.page;
-                        return readDone && (scope.showEmptyRelatedTables || scope.columnModels[i].tableModel.rowValues.length > 0);
+                        return scope.isInline(i) && (scope.showEmptyRelatedTables || scope.columnModels[i].tableModel.rowValues.length > 0);
                     };
                 }
             };
