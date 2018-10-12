@@ -99,6 +99,9 @@
 
                 var columns = $rootScope.reference.generateColumnsList(tuple), model;
 
+                $log.info("default export template is accessible through `defaultExportTemplate` variable. To get the string value of it call `angular.toJson(defaultExportTemplate, 1)`");
+                $window.defaultExportTemplate = $rootScope.reference.defaultExportTemplate;
+
                 $rootScope.recordFlowControl = new recordAppUtils.FlowControlObject();
 
                 $rootScope.hasAggregate = false;

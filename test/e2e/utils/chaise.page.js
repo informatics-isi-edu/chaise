@@ -1110,6 +1110,10 @@ var recordsetPage = function() {
         return element(by.id('permalink'));
     };
 
+    this.getTableHeader = function () {
+        return element(by.tagName("thead"));
+    }
+
     this.getRecordsetColumnHeader = function (name) {
         return element(by.id(name + "-header"));
     };

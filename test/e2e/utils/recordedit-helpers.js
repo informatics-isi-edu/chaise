@@ -5,74 +5,6 @@ var chance = require('chance').Chance();
 var exec = require('child_process').execSync;
 var EC = protractor.ExpectedConditions;
 
-//test params for markdownPreview
-var markdownTestParams = [{
-    "raw": "RBK Project ghriwvfw nwoeifwiw qb2372b wuefiquhf pahele kabhi na phelke kabhiy gqeequhwqh",
-    "markdown": "<h3>RBK Project ghriwvfw nwoeifwiw qb2372b wuefiquhf pahele kabhi na phelke kabhiy gqeequhwqh</h3>\n",
-    "comm":"Ctrl+H"
-},
-  {
-    "raw":"E15.5 embryonic kidneys for sections\n" +
-          "- E18.5 embryonic kidneys for cDNA synthesis\n"+
-          "- Sterile PBS\n" +
-          "- QIAShredder columns (Qiagen, cat no. 79654)\n" +
-          "- DEPC-Treated Water",
-   "markdown":  "<ul>\n"+
-                "<li>E15.5 embryonic kidneys for sections</li>\n" +
-                "<li>E18.5 embryonic kidneys for cDNA synthesis</li>\n" +
-                "<li>Sterile PBS</li>\n" +
-                "<li>QIAShredder columns (Qiagen, cat no. 79654)</li>\n" +
-                "<li>DEPC-Treated Water</li>\n" +
-                "</ul>\n",
-    "comm":"Ctrl+U"
-  },
-  {
-    "raw": "This is bold text. nuf2uh3498hcuh23uhcu29hh  nfwnfi2nfn k2mr2ijri. Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru",
-    "markdown": "<p><strong>This is bold text. nuf2uh3498hcuh23uhcu29hh  nfwnfi2nfn k2mr2ijri. Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru</strong></p>\n",
-    "comm":"Ctrl+B"
-  },
-  {
-    "raw":"This is italic text fcj2ij3ijjcn 2i3j2ijc3roi2joicj. Hum ja rahal chi gaam ta pher kail aaib. Khana kha ka aib rehal chi parson tak.",
-    "markdown":"<p><em>This is italic text fcj2ij3ijjcn 2i3j2ijc3roi2joicj. Hum ja rahal chi gaam ta pher kail aaib. Khana kha ka aib rehal chi parson tak.</em></p>\n",
-    "comm":"Ctrl+I"
-  },
-  {
-    "raw":"~~Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru~~",
-    "markdown":"<p><s>Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru</s></p>\n",
-    "comm":" "
-  },
-  {
-    "raw": "X^2^+Y^2^+Z^2^=0",
-    "markdown": "<p>X<sup>2</sup>+Y<sup>2</sup>+Z<sup>2</sup>=0</p>\n",
-    "comm":" "
-  }
-];
-
-var JSONTestParams=[
-    {
-        stringVal:"{}",
-    },
-    {
-        stringVal:"{\"name\":\"tester\"}",
-    },
-    {
-        stringVal:"6534.9987",
-    },
-    {
-        stringVal:"null",
-    },
-    {
-        stringVal:"          ",
-    },
-    {
-        stringVal:JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2),
-        expectedValue:true
-    }
-
-];
-
-
-
 /**
  * Test presentation, validation, and inputting a value for different column types in recordedit app.
  *
@@ -364,43 +296,101 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
             if (jsonCols.length > 0) {
                 describe("JSON fields, ", function () {
+                    var JSONTestParams=[
+                        { stringVal:"{}" },
+                        { stringVal:"{\"name\":\"tester\"}" },
+                        { stringVal:"6534.9987" },
+                        { stringVal:"null" },
+                        { stringVal:"          "}
+                    ];
+
                     it("should show textarea input for JSON datatype and then set the value", function() {
                         jsonCols.forEach(function(c) {
-                        chaisePage.recordEditPage.getTextAreaForAcolumn(c.name, recordIndex).then(function(jsonTxtArea) {
-                            expect(jsonTxtArea.isDisplayed()).toBeTruthy();
-                            jsonTxtArea.column = c;
+                            chaisePage.recordEditPage.getTextAreaForAcolumn(c.name, recordIndex).then(function(jsonTxtArea) {
+                                expect(jsonTxtArea.isDisplayed()).toBeTruthy();
+                                jsonTxtArea.column = c;
 
-                            JSONDataTypeFields.push(jsonTxtArea);
-                            var value = getRecordValue(c.name);
+                                JSONDataTypeFields.push(jsonTxtArea);
+                                var value = getRecordValue(c.name);
 
-                            if (value != undefined) {
-                                expect(jsonTxtArea.getAttribute('value')).toBe(value, colError(c.name , "Doesn't have the expected value."));
-                            }
+                                if (value != undefined) {
+                                    expect(jsonTxtArea.getAttribute('value')).toBe(value, colError(c.name , "Doesn't have the expected value."));
+                                }
+                            });
                         });
                     });
-                 });
 
-                 it("should only allow valid JSON values", function(){
-                     jsonCols.forEach(function(c) {
-                         chaisePage.recordEditPage.getTextAreaForAcolumn(c.name, recordIndex).then(function(jsonTxtArea) {
-                             for (i = 0; i < JSONTestParams.length; i++) {
-                                 jsonTxtArea.clear();
-                                 (function(input){
-                                     c._value = input;
-                                     jsonTxtArea.sendKeys(input);
-                                     chaisePage.recordEditPage.getJSONInputErrorMessage(jsonTxtArea, 'json').then(function(error){
-                                         expect(error).toBe(null, colError(c.name , "Some Valid JSON Values were not accepted"));
-                                     });
-                                 })(JSONTestParams[i].stringVal);
-                             }//for
-                         });
-                     });
-                 });
-             });
-         }
+                    it("should only allow valid JSON values", function(){
+                        jsonCols.forEach(function(c) {
+                            chaisePage.recordEditPage.getTextAreaForAcolumn(c.name, recordIndex).then(function(jsonTxtArea) {
+                                for (i = 0; i < JSONTestParams.length; i++) {
+                                    jsonTxtArea.clear();
+                                    (function(input){
+                                        c._value = input;
+                                        jsonTxtArea.sendKeys(input);
+                                        chaisePage.recordEditPage.getJSONInputErrorMessage(jsonTxtArea, 'json').then(function(error){
+                                            expect(error).toBe(null, colError(c.name , "Some Valid JSON Values were not accepted"));
+                                        });
+                                    })(JSONTestParams[i].stringVal);
+                                }//for
+                            });
+                        });
+                    });
+
+                    it("set the correct value.", function () {
+                        jsonCols.forEach(function(c) {
+                            chaisePage.recordEditPage.getTextAreaForAcolumn(c.name, recordIndex).then(function(jsonTxtArea) {
+                                jsonTxtArea.clear();
+                                var input = getRecordInput(c.name, "");
+                                c._value = input;
+                                jsonTxtArea.sendKeys(input);
+                                expect(jsonTxtArea.getAttribute('value')).toEqual(input, colError(c.name, "Couldn't change the value."));
+                            });
+                        });
+                    });
+                });
+            }
 
             if (markdownCols.length > 0) {
                 describe("Markdown fields, ", function () {
+                    //test params for markdownPreview
+                    var markdownTestParams = [{
+                            "raw": "RBK Project ghriwvfw nwoeifwiw qb2372b wuefiquhf pahele kabhi na phelke kabhiy gqeequhwqh",
+                            "markdown": "<h3>RBK Project ghriwvfw nwoeifwiw qb2372b wuefiquhf pahele kabhi na phelke kabhiy gqeequhwqh</h3>\n",
+                            "comm":"Ctrl+H"
+                        }, {
+                            "raw":"E15.5 embryonic kidneys for sections\n" +
+                                "- E18.5 embryonic kidneys for cDNA synthesis\n"+
+                                "- Sterile PBS\n" +
+                                "- QIAShredder columns (Qiagen, cat no. 79654)\n" +
+                                "- DEPC-Treated Water",
+                            "markdown":  "<ul>\n"+
+                                "<li>E15.5 embryonic kidneys for sections</li>\n" +
+                                "<li>E18.5 embryonic kidneys for cDNA synthesis</li>\n" +
+                                "<li>Sterile PBS</li>\n" +
+                                "<li>QIAShredder columns (Qiagen, cat no. 79654)</li>\n" +
+                                "<li>DEPC-Treated Water</li>\n" +
+                                "</ul>\n",
+                            "comm":"Ctrl+U"
+                        }, {
+                            "raw": "This is bold text. nuf2uh3498hcuh23uhcu29hh  nfwnfi2nfn k2mr2ijri. Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru",
+                            "markdown": "<p><strong>This is bold text. nuf2uh3498hcuh23uhcu29hh  nfwnfi2nfn k2mr2ijri. Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru</strong></p>\n",
+                            "comm":"Ctrl+B"
+                        }, {
+                            "raw":"This is italic text fcj2ij3ijjcn 2i3j2ijc3roi2joicj. Hum ja rahal chi gaam ta pher kail aaib. Khana kha ka aib rehal chi parson tak.",
+                            "markdown":"<p><em>This is italic text fcj2ij3ijjcn 2i3j2ijc3roi2joicj. Hum ja rahal chi gaam ta pher kail aaib. Khana kha ka aib rehal chi parson tak.</em></p>\n",
+                            "comm":"Ctrl+I"
+                        }, {
+                            "raw":"~~Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru~~",
+                            "markdown":"<p><s>Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru</s></p>\n",
+                            "comm":" "
+                        }, {
+                            "raw": "X^2^+Y^2^+Z^2^=0",
+                            "markdown": "<p>X<sup>2</sup>+Y<sup>2</sup>+Z<sup>2</sup>=0</p>\n",
+                            "comm":" "
+                        }
+                    ];
+
                     it('should have the correct value.', function () {
                         markdownCols.forEach(function(c) {
                             var inp = chaisePage.recordEditPage.getInputById(recordIndex, c.title);
@@ -1387,9 +1377,14 @@ exports.testSubmission = function (tableParams, isEditMode) {
             });
 
             //NOTE: in travis we're not uploading the file and therefore this test case will fail
-            if (!process.env.TRAVIS && tableParams.files.length > 0) {
-                it('table must show correct resutls.', function() {
-                    chaisePage.recordsetPage.getRows().then(function(rows) {
+            if (tableParams.not_travis) {
+                it('table must show correct results.', function() {
+
+                    chaisePage.recordsetPage.getTableHeader().all(by.tagName("th")).then(function (headerCells) {
+                        expect(headerCells.length).toBe(tableParams.result_columns.length, "number of cells in table header is incorrect");
+
+                        return chaisePage.recordsetPage.getRows();
+                    }).then(function(rows) {
                         // same row count
                         expect(rows.length).toBe(tableParams.results.length, "number of rows are not as expected.");
 
