@@ -54,6 +54,35 @@ table.table-fixed-layout {
     width: 100%;
 }
 
+/* table hover */
+record-table tbody>tr:hover {
+    background-color: #f7f0cf !important;
+}
+
+/* odd row hover for striped table */
+record-table tbody>tr:nth-child(odd):hover {
+    background-color: #efebda !important;
+}
+
+record-table tbody>tr>td.disabled-cell {
+    background-color: #f4f4f4;
+}
+
+/* odd disabled cells need to be darker */
+record-table tbody>tr:nth-child(odd)>td.disabled-cell{
+    background-color: #ebebeb;
+}
+
+/* match color from row highlight for disabled cells */
+record-table tbody>tr:hover>td.disabled-cell {
+    background-color: #f7f0cf !important;
+}
+
+/* odd disabled cells need to match odd row hover for striped table above */
+record-table tbody>tr:nth-child(odd):hover>td.disabled-cell {
+    background-color: #efebda !important;
+}
+
 .chaise-body {
     overflow: hidden;
 }
@@ -833,6 +862,12 @@ body.error-open loading-spinner {
     margin-top: 5px;
 }
 
+/******** Alerts styles ********/
+
+ul.show-list-style li {
+    list-style-type: inherit;
+}
+
 /*******Bootstrap  Modal styling *********/
 
 /*When the modal fills the screen it has an even 2.5% on top and bottom*/
@@ -1420,8 +1455,8 @@ footer .container1 {
      cursor: pointer;
  }
 
- .faceting-container .glyphicon-alert {
-     color: #f0ad4e;
+ .glyphicon-alert {
+     color: #f0ad4e !important;
      border: none;
  }
 
@@ -1462,12 +1497,6 @@ footer .container1 {
      font-size: 14px;
      font-weight: 600;
      position: relative;
- }
-
- .faceting-container .panel .panel-title img.spinner-sm {
-     position: absolute;
-     right: 0;
-     top: 0;
  }
 
  .faceting-container{
