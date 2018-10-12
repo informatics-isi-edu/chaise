@@ -254,9 +254,7 @@
          * be resolved with `true` if the request was successful.
          */
         function _readMainEntity (vm, hideSpinner, counterer) {
-            if (!vm.columnModels) {
-                _attachExtraAttributes(vm);
-            }
+            _attachExtraAttributes(vm);
 
             // cancel timeout loop that may still be running and hide the spinner and "Loading ..."
             $timeout.cancel(pushMore);
@@ -595,6 +593,8 @@
          * In this case, columnModels is the attribute that need to be updated.
          */
         function _attachExtraAttributes(vm) {
+            if (vm.attributesAlreadyAttached) return;
+            vm.attributesAlreadyAttached = true;
             vm.columnModels = [];
             vm.reference.columns.forEach(function (col) {
                 vm.columnModels.push({
@@ -792,7 +792,7 @@
             scope.$watch(function () {
                 return (scope.vm && scope.vm.reference) ? scope.vm.reference.columns : null;
             }, function (newValue, oldValue) {
-                if(angular.equals(newValue, oldValue) || !newValue){
+                if(!newValue){
                     return;
                 }
                 _attachExtraAttributes(scope.vm);
@@ -1022,7 +1022,7 @@
             scope.$watch(function () {
                 return (scope.vm && scope.vm.reference) ? scope.vm.reference.columns : null;
             }, function (newValue, oldValue) {
-                if(angular.equals(newValue, oldValue) || !newValue){
+                if(!newValue){
                     return;
                 }
                 _attachExtraAttributes(scope.vm);

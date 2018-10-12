@@ -12,6 +12,7 @@ var testParams = {
         table_name: "accommodation",
         table_displayname: "Accommodations",
         table_comment: "List of different types of accommodations",
+        not_travis: true,
         primary_keys: ["id"],
         columns: [
             { name: "id", generated: true, immutable: true, title: "Id", type: "serial4", nullok: false},
@@ -21,27 +22,27 @@ var testParams = {
             { name: "rating", title: "User Rating", type: "float4", nullok: false},
             { name: "summary", title: "Summary", type: "longtext", nullok: false},
             { name: "description", title: "Description", type: "markdown"},
+            { name: "json_col", title: "json_col", type:"json"},
             { name: "no_of_rooms", title: "Number of Rooms", type: "int2"},
             { name: "opened_on", title: "Operational Since", type: "timestamptz", nullok: false },
             { name: "date_col", title: "date_col", type: "date"},
-            { name: "luxurious", title: "Is Luxurious", type: "boolean" },
-            { name: "json_col", title: "json_col", type:"json"}
+            { name: "luxurious", title: "Is Luxurious", type: "boolean" }
         ],
         inputs: [
             {"title": "new title 1", "website": "https://example1.com", "category": {index: 0, value: "Hotel"},
-             "rating": "1", "summary": "This is the summary of this column 1.", "description": "## Description 1",
+             "rating": "1", "summary": "This is the summary of this column 1.", "description": "## Description 1", "json_col": JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2),
              "no_of_rooms": "1", "opened_on": moment("2017-01-01 01:01:01", "YYYY-MM-DD hh:mm:ss"), "date_col": "2017-01-01", "luxurious": false},
             {"title": "new title 2", "website": "https://example2.com", "category": {index: 1, value: "Ranch"},
-             "rating": "2",  "summary": "This is the summary of this column 2.", "description": "## Description 2",
+             "rating": "2",  "summary": "This is the summary of this column 2.", "description": "## Description 2", "json_col": JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2),
              "no_of_rooms": "2", "opened_on": moment("2017-02-02 02:02:02", "YYYY-MM-DD hh:mm:ss"), "date_col": "2017-02-02", "luxurious":  true}
         ],
         formsAfterInput: 3,
         result_columns: [
-            "title", "website", "product-add_fk_category", "rating", "summary", "description", "no_of_rooms", "opened_on", "date_col", "luxurious"
+            "title", "website", "product-add_fk_category", "rating", "summary", "description", "json_col", "no_of_rooms", "opened_on", "date_col", "luxurious"
         ],
         results: [
-            ["new title 1",  {"link":"https://example1.com/", "value":"Link to Website"}, {"link":"{{{chaise_url}}}/record/#{{catalog_id}}/product-add:category/term=Hotel", "value":"Hotel"}, "1.0000", "This is the summary of this column 1.", "Description 1", "1", "2017-01-01 01:01:01", "2017-01-01", "false"],
-            ["new title 2",  {"link":"https://example2.com/", "value":"Link to Website"}, {"link":"{{{chaise_url}}}/record/#{{catalog_id}}/product-add:category/term=Ranch", "value":"Ranch"}, "2.0000", "This is the summary of this column 2.", "Description 2", "2", "2017-02-02 02:02:02", "2017-02-02", "true"]
+            ["new title 1",  {"link":"https://example1.com/", "value":"Link to Website"}, {"link":"{{{chaise_url}}}/record/#{{catalog_id}}/product-add:category/term=Hotel", "value":"Hotel"}, "1.0000", "This is the summary of this column 1.", "Description 1", JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2), "1", "2017-01-01 01:01:01", "2017-01-01", "false"],
+            ["new title 2",  {"link":"https://example2.com/", "value":"Link to Website"}, {"link":"{{{chaise_url}}}/record/#{{catalog_id}}/product-add:category/term=Ranch", "value":"Ranch"}, "2.0000", "This is the summary of this column 2.", "Description 2", JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2), "2", "2017-02-02 02:02:02", "2017-02-02", "true"]
         ],
         files: []
     }, {
@@ -49,6 +50,7 @@ var testParams = {
        table_name: "file",
        table_displayname: "file",
        table_comment: "asset/object",
+       not_travis: !process.env.TRAVIS,
        primary_keys: ["id"],
        columns: [
            { name: "fileid", title: "fileid", type: "int4" },
