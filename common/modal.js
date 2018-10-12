@@ -307,8 +307,6 @@
         vm.column = params.column;
         vm.displayType = params.displayType;
         vm.inputValue = null;
-        vm.submissionRow = params.submissionRow;
-        vm.foreignKeyData = params.foreignKeyData;
 
         function submit() {
             $uibModalInstance.close(vm.inputValue);

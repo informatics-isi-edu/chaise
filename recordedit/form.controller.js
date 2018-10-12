@@ -421,11 +421,10 @@
                     vm.recordEditModel.rows.forEach(function (row) {
                         row[column.name] = model.displayname.value;
                     });
-                    // need to set each property to avoid having a reference to the same object
-
                 } else {
                     // set input value for each record to create. populate ui model
                     vm.recordEditModel.rows.forEach(function (row) {
+                        // need to set each property to avoid having a reference to the same object
                         if (params.displayType === "file") {
                             row[column.name] = {}
                             Object.keys(model.value).forEach(function (key) {

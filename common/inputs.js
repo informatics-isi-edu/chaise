@@ -254,7 +254,7 @@
 
                     var params = {};
 
-                    params.reference = scope.column.filteredRef(scope.submissionRow, scope.foreignKeyData).contextualize.compactSelect;
+                    params.reference = scope.column.filteredRef(null, null).contextualize.compactSelect;
                     params.reference.session = $rootScope.session;
                     params.context = "compact/select";
                     params.selectedRows = [];
