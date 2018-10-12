@@ -20,10 +20,10 @@
          * Update the list of templates in UI
          */
         function _updateExportFormats(scope) {
-            var templates = scope.reference.table.exportTemplates;
+            var templates = scope.reference.exportTemplates;
 
             templates.forEach(function (template) {
-                if (template.format_name) {
+                if (template.displayname) {
                     // matches object format set for default case with CSV
                     scope.exportOptions.supportedFormats.push(template);
                 }
@@ -34,8 +34,8 @@
          * Send the request for export
          */
         function _doExport(scope, template) {
-            var formatName = template.format_name;
-            var formatType = template.format_type;
+            var formatName = template.displayname;
+            var formatType = template.type;
             switch (formatType) {
                 case "DIRECT":
                     if (formatName === "CSV") {
@@ -64,7 +64,7 @@
                         keyboard: false,
                         resolve: {
                             params: {
-                                format_name: template.format_name
+                                displayname: template.displayname
                             }
                         }
                     }, null, function () {
@@ -112,9 +112,8 @@
                     supportedFormats: [
                         {
                             outputs: [],
-                            name: "default_csv",
-                            format_name: "CSV",
-                            format_type: "DIRECT"
+                            displayname: "CSV",
+                            type: "DIRECT"
                         }
                     ]
                 };
