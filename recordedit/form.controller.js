@@ -475,7 +475,10 @@
 
         function removeFormRow(index) {
             vm.recordEditModel.rows.splice(index, 1);
+            vm.recordEditModel.oldRows.splice(index, 1);
             vm.recordEditModel.submissionRows.splice(index, 1);
+            vm.recordEditModel.foreignKeyData.splice(index, 1);
+            $rootScope.tuples.splice(index, 1);
             $timeout(function() {
                 onResize();
                 $rootScope.showSpinner = false;
