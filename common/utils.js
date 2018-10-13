@@ -178,6 +178,9 @@
         }
     })
 
+    // Specifies the regexes to be used for a token in a ui-mask input. For example, the '1' key in
+    // in vm.maskOptions.date means that only 0 or 1 is allowed wherever the '1' key is used in a ui-mask template.
+    // See the maskDefinitions section for more info: https://github.com/angular-ui/ui-mask.
     .constant("maskOptions", {
         date: {
             mask: "2999-19-39",

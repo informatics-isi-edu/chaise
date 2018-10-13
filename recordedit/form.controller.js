@@ -59,9 +59,6 @@
         vm.clearModel = clearModel;
         vm.fileExtensionTypes = fileExtensionTypes;
         vm.blurElement = blurElement;
-        // Specifies the regexes to be used for a token in a ui-mask input. For example, the '1' key in
-        // in vm.maskOptions.date means that only 0 or 1 is allowed wherever the '1' key is used in a ui-mask template.
-        // See the maskDefinitions section for more info: https://github.com/angular-ui/ui-mask.
         vm.maskOptions = maskOptions;
         vm.prefillCookie = $cookies.getObject(context.queryParams.prefill);
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
@@ -303,6 +300,8 @@
             }
         }
 
+        // NOTE: If changes are made to this function, changes should also be made to the similar function in the inputSwitch directive
+        // TODO: remove when RE has been refactored to use the inputSwitch directive for all form inputs
         function searchPopup(rowIndex, column) {
 
             if (isDisabled(column)) return;
@@ -365,6 +364,8 @@
             }, false, false);
         }
 
+        // NOTE: If changes are made to this function, changes should also be made to the similar function in the inputSwitch directive
+        // TODO: remove when RE has been refactored to use the inputSwitch directive for all form inputs
         function clearForeignKey(rowIndex, column) {
             var model = vm.recordEditModel;
 
@@ -400,6 +401,9 @@
                 templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/inputPopup.modal.html",
                 windowClass: "modal-select-all"
             }, function (model) {
+                // There's a special case for the foreign key popup that needs to populate multiple different models
+                // values need to be set for `foreignKeyData` to be used properly for submission row calculation
+                // values need to be set in view model (`recordEditModel.rows`) and the submission model (`recordEditModel.submissionRows`)
                 if (params.displayType === "popup-select") {
                     // set data in view model (model.rows) and submission model (model.submissionRows)
 
@@ -576,6 +580,8 @@
             return false;
         }
 
+        // NOTE: If changes are made to this function, changes should also be made to the similar function in the inputSwitch directive
+        // TODO: remove when RE has been refactored to use the inputSwitch directive for all form inputs
         function getDisabledInputValue(column, value) {
             try {
                 var disabled = column.getInputDisabled(context.appContext);
@@ -596,6 +602,8 @@
             }
         }
 
+        // NOTE: If changes are made to this function, changes should also be made to the similar function in the inputSwitch directive
+        // TODO: remove when RE has been refactored to use the inputSwitch directive for all form inputs
         // Assigns the current date or timestamp to a column's model
         function applyCurrentDatetime(modelIndex, columnName, columnType) {
             if (columnType === 'timestamp' || columnType === 'timestamptz') {
@@ -608,6 +616,8 @@
             return vm.recordEditModel.rows[modelIndex][columnName] = moment().format(dataFormats.date);
         }
 
+        // NOTE: If changes are made to this function, changes should also be made to the similar function in the inputSwitch directive
+        // TODO: remove when RE has been refactored to use the inputSwitch directive for all form inputs
         // Toggle between AM/PM for a time input's model
         function toggleMeridiem(modelIndex, columnName) {
             // If the entire timestamp model doesn't exist, initialize it with a default meridiem
@@ -622,6 +632,8 @@
             return vm.recordEditModel.rows[modelIndex][columnName].meridiem = 'AM';
         }
 
+        // NOTE: If changes are made to this function, changes should also be made to the similar function in the inputSwitch directive
+        // TODO: remove when RE has been refactored to use the inputSwitch directive for all form inputs
         function clearModel(modelIndex, columnName, columnType) {
             if (columnType === 'timestamp' || columnType === 'timestamptz') {
                 return vm.recordEditModel.rows[modelIndex][columnName] = {date: null, time: null, meridiem: 'AM'};
@@ -641,6 +653,8 @@
             return fileExtensionFilter.join(", ");
         }
 
+        // NOTE: If changes are made to this function, changes should also be made to the similar function in the inputSwitch directive
+        // TODO: remove when RE has been refactored to use the inputSwitch directive for all form inputs
         // Given an $event, this will blur or removes the focus from the element that triggerd the event
         function blurElement(e) {
             e.currentTarget.blur();

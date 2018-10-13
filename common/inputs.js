@@ -214,7 +214,7 @@
 
                 scope.getDisabledInputValue = function () {
                     try {
-                        var disabled = scope.column.getInputDisabled("entry/create");
+                        var disabled = scope.column.inputDisabled;
                         if (disabled) {
                             if (typeof disabled === 'object') return disabled.message;
                             return '';
@@ -288,8 +288,13 @@
                     e.currentTarget.blur();
                 }
 
+                // Used to remove the value in date and timestamp inputs when the "Clear" button is clicked
                 scope.removeValue = function () {
-                    scope.model.value = null;
+                    if (scope.displayType === 'timestamp' || scope.displayType === 'timestamptz') {
+                        scope.model.value = {date: null, time: null, meridiem: 'AM'};
+                    } else {
+                        scope.model.value = null;
+                    }
                 }
             }
         }
