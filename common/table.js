@@ -86,8 +86,8 @@
      * modified. ellipses will fire this event and recordset directive will use it.
      */
     .factory('recordTableUtils',
-            ['AlertsService', '$document', 'messageMap', 'modalBox', 'DataUtils', '$timeout','Session', '$q', 'tableConstants', '$rootScope', '$log', '$window', '$cookies', 'defaultDisplayname', 'MathUtils', 'UriUtils', 'logActions',
-            function(AlertsService, $document, messageMap, modalBox, DataUtils, $timeout, Session, $q, tableConstants, $rootScope, $log, $window, $cookies, defaultDisplayname, MathUtils, UriUtils, logActions) {
+            ['AlertsService', 'DataUtils', 'defaultDisplayname', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'Session', 'tableConstants', 'UriUtils', '$cookies', '$document', '$log', '$q', '$rootScope', '$timeout', '$window',
+            function(AlertsService, DataUtils, defaultDisplayname, ErrorService, logActions, MathUtils, messageMap, modalBox, Session, tableConstants, UriUtils, $cookies, $document, $log, $q, $rootScope, $timeout, $window) {
 
         function FlowControlObject(maxRequests) {
             this.maxRequests = maxRequests || tableConstants.MAX_CONCURENT_REQUEST;
@@ -129,10 +129,16 @@
                     $log.debug("counter", current, ": getting aggregated values for column (index=" + i + ")");
                     _updateColumnAggregate(vm, i, current, logObject, hideSpinner).then(function (res) {
                         _afterUpdateColumnAggregate(vm, res, i);
+                        vm.columnModels[i].columnError = false;
                         updatePageCB(vm);
                     }).catch(function (err) {
                         _afterUpdateColumnAggregate(vm, false, i);
-                        throw err;
+                        // show alert if 400 Query Timeout Error
+                        if (err instanceof ERMrest.QueryTimeoutError) {
+                            vm.columnModels[i].columnError = true;
+                        } else {
+                            throw err;
+                        }
                     });
                 })(vm.aggregatesToInitialize.shift(), vm.flowControlObject.counter);
             }
@@ -183,8 +189,9 @@
          * @param  {object} vm           table model
          * @param  {function} updatePageCB The update page callback which we will call after getting the result.
          * @param  {boolean} hideSpinner  Indicates whether we should show spinner for columns or not
+         * @param  {object} isTerminal  Indicates whether we should show a terminal error or not for 400 QueryTimeoutError
          */
-        function updateMainEntity(vm, updatePageCB, hideSpinner) {
+        function updateMainEntity(vm, updatePageCB, hideSpinner, notTerminal) {
             if (!vm.dirtyResult || !_haveFreeSlot(vm)) {
                 $log.debug("counter", vm.flowControlObject.counter, ": break out of update main");
                 return;
@@ -197,11 +204,28 @@
                 $log.debug("counter", currentCounter, ": updating result");
                 _readMainEntity(vm, hideSpinner, currentCounter).then(function (res) {
                     _afterUpdateMainEntity(vm, res, currentCounter);
+                    vm.tableError = false;
                     $log.debug("counter", vm.flowControlObject.counter, ": just before update page");
+                    // TODO remember last successful main request
+                    // when a request fails for 400 QueryTimeout, revert (change browser location) to this previous request
                     updatePageCB(vm);
                 }).catch(function (err) {
                     _afterUpdateMainEntity(vm, true, currentCounter);
-                    throw err;
+                    // show modal with different text if 400 Query Timeout Error
+                    if (err instanceof ERMrest.QueryTimeoutError) {
+                        // clear the data shown in the table
+                        vm.rowValues = [];
+                        vm.tableError = true;
+
+                        if (!notTerminal){
+                            err.subMessage = err.message;
+                            err.message = "The result set cannot be retrieved. Try the following to reduce the query time:\n" + messageMap.queryTimeoutList;
+                            console.log(err);
+                            ErrorService.handleException(err, true);
+                        }
+                    } else {
+                        throw err;
+                    }
                 });
             })(vm.flowControlObject.counter);
         }
@@ -218,6 +242,7 @@
             }
             vm.flowControlObject.occupiedSlots--;
             vm.dirtyResult = !res;
+            vm.isLoading = false;
             $log.debug("counter", counter, ": after result update: " + (res ? "successful." : "unsuccessful."));
         }
 
@@ -229,9 +254,7 @@
          * be resolved with `true` if the request was successful.
          */
         function _readMainEntity (vm, hideSpinner, counterer) {
-            if (!vm.columnModels) {
-                _attachExtraAttributes(vm);
-            }
+            _attachExtraAttributes(vm);
 
             // cancel timeout loop that may still be running and hide the spinner and "Loading ..."
             $timeout.cancel(pushMore);
@@ -372,6 +395,8 @@
                         return defer.promise;
                     }
 
+                    vm.countError = false;
+
                     vm.totalRowsCnt = response[0];
                     defer.resolve(true);
                 }).catch(function (err) {
@@ -380,8 +405,16 @@
                         return defer.promise;
                     }
 
+                    if (err instanceof ERMrest.QueryTimeoutError) {
+                        // separate from hasError above
+                        vm.countError = true;
+                    }
+
                     // fail silently
                     vm.totalRowsCnt = null;
+                    // need to call this here to remove ocupied slot for count request
+                    // also notifies flow control to try to fetch count again because it's incorrect (dirty)
+                    _afterUpdateCount(vm, true);
                 });
             })(vm.flowControlObject.counter);
             return defer.promise;
@@ -510,11 +543,17 @@
                         (function (i) {
                             $log.debug("counter", vm.flowControlObject.counter, ": updating facet (index="+i+")");
                             vm.facetModels[i].updateFacet().then(function (res) {
+                                vm.facetModels[i].facetError = false;
                                 _afterFacetUpdate(vm, i, res);
                                 _updatePage(vm);
                             }).catch(function (err) {
-                                _afterFacetUpdate(vm, i, false);
-                                throw err;
+                                _afterFacetUpdate(vm, i, true);
+                                // show alert if 400 Query Timeout Error
+                                if (err instanceof ERMrest.QueryTimeoutError) {
+                                    vm.facetModels[i].facetError = true;
+                                } else {
+                                    throw err;
+                                }
                             });
                         })(index);
                     });
@@ -528,9 +567,16 @@
                         vm.facetModels[i].initializeFacet().then(function (res) {
                             $log.debug("counter", vm.flowControlObject.counter, ": after facet (index="+ i +") initialize: " + (res ? "successful." : "unsuccessful."));
                             vm.flowControlObject.occupiedSlots--;
+                            vm.facetModels[i].facetError = false;
                             _updatePage(vm);
                         }).catch(function (err) {
-                            throw err;
+                            _afterFacetUpdate(vm, i, true);
+                            // show alert if 400 Query Timeout Error
+                            if (err instanceof ERMrest.QueryTimeoutError) {
+                                vm.facetModels[i].facetError = true;
+                            } else {
+                                throw err;
+                            }
                         });
                     })(index);
                 }
@@ -547,6 +593,8 @@
          * In this case, columnModels is the attribute that need to be updated.
          */
         function _attachExtraAttributes(vm) {
+            if (vm.attributesAlreadyAttached) return;
+            vm.attributesAlreadyAttached = true;
             vm.columnModels = [];
             vm.reference.columns.forEach(function (col) {
                 vm.columnModels.push({
@@ -744,15 +792,11 @@
             scope.$watch(function () {
                 return (scope.vm && scope.vm.reference) ? scope.vm.reference.columns : null;
             }, function (newValue, oldValue) {
-                if(angular.equals(newValue, oldValue) || !newValue){
+                if(!newValue){
                     return;
                 }
                 _attachExtraAttributes(scope.vm);
             });
-
-            if (scope.vm && scope.vm.reference) {
-                _attachExtraAttributes(scope.vm);
-            }
         }
 
         /**
@@ -978,7 +1022,7 @@
             scope.$watch(function () {
                 return (scope.vm && scope.vm.reference) ? scope.vm.reference.columns : null;
             }, function (newValue, oldValue) {
-                if(angular.equals(newValue, oldValue) || !newValue){
+                if(!newValue){
                     return;
                 }
                 _attachExtraAttributes(scope.vm);

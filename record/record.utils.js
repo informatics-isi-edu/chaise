@@ -11,8 +11,8 @@
     }])
 
     .factory('recordAppUtils',
-             ['constants', 'DataUtils', 'Errors', '$log', 'logActions', 'modalBox', '$q', 'recordTableUtils', '$rootScope',
-             function (constants, DataUtils, Errors, $log, logActions, modalBox, $q, recordTableUtils, $rootScope) {
+             ['constants', 'DataUtils', 'Errors', 'ErrorService', '$log', 'logActions', 'messageMap', 'modalBox', '$q', 'recordTableUtils', '$rootScope',
+             function (constants, DataUtils, Errors, ErrorService, $log, logActions, messageMap, modalBox, $q, recordTableUtils, $rootScope) {
 
         /**
          * returns true if we have free slots for requests.
@@ -51,7 +51,7 @@
                 if (!model.isInline || !model.tableModel.dirtyResult) continue;
                 if (!_haveFreeSlot()) return;
                 model.tableModel.logObject = _getTableModelLogObject(model.tableModel, isUpdate ? logActions.recordInlineUpdate : logActions.recordInlineRead);
-                recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate);
+                recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate, true);
             }
 
             // main aggregates
@@ -65,7 +65,7 @@
                 if (!model.tableModel.dirtyResult) continue;
                 if (!_haveFreeSlot()) return;
                 model.tableModel.logObject = _getTableModelLogObject(model.tableModel, isUpdate ? logActions.recordRelatedUpdate : logActions.recordRelatedRead);
-                recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate);
+                recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate, true);
             }
 
             // aggregates in inline
@@ -144,11 +144,24 @@
                 if (!model.isAggregate || !_haveFreeSlot() || !model.dirtyResult) return;
                 $rootScope.recordFlowControl.occupiedSlots++;
                 model.dirtyResult = false;
+                model.isLoading = true;
                 _readMainColumnAggregate(model.column, index, $rootScope.recordFlowControl.counter).then(function (res) {
                     $rootScope.recordFlowControl.occupiedSlots--;
                     model.dirtyResult = !res;
+                    model.columnError = false;
                     _processRequests(isUpdate);
-                }).catch(genericErrorCatch);
+                }).catch(function (err) {
+                    model.isLoading = false;
+                    if (err instanceof ERMrest.QueryTimeoutError) {
+                        model.columnError = true;
+                    } else {
+                        if (DataUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
+                            var redirectLink = UriUtils.createRedirectLinkFromPath(err.errorData.redirectPath);
+                            err.errorData.redirectUrl = redirectLink.replace('record', 'recordset');
+                        }
+                        throw err;
+                    }
+                });
             });
         }
 
@@ -164,6 +177,7 @@
             logObject.referrer = $rootScope.reference.defaultLogInfo;
 
             column.getAggregatedValue($rootScope.page, logObject).then(function (values) {
+                $rootScope.columnModels[index].isLoading = false;
                 if ($rootScope.recordFlowControl.counter !== current) {
                     return defer.resolve(false);
                 }
@@ -232,11 +246,18 @@
          * @param  {object} exception error object
          */
         function genericErrorCatch(exception) {
-            if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'redirectPath')) {
-                var redirectLink = UriUtils.createRedirectLinkFromPath(exception.errorData.redirectPath);
-                exception.errorData.redirectUrl = redirectLink.replace('record', 'recordset');
+            // show modal with different text if 400 Query Timeout Error
+            if (exception instanceof ERMrest.QueryTimeoutError) {
+                exception.subMessage = exception.message;
+                exception.message = "The main entity cannot be retrieved. Refresh the page later to try again.";
+                ErrorService.handleException(exception, true);
+            } else {
+                if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'redirectPath')) {
+                    var redirectLink = UriUtils.createRedirectLinkFromPath(exception.errorData.redirectPath);
+                    exception.errorData.redirectUrl = redirectLink.replace('record', 'recordset');
+                }
+                throw exception;
             }
-            throw exception;
         }
 
         /**
@@ -256,13 +277,16 @@
                 rowValues: [],
                 selectedRows: [],//TODO migth not be needed
                 dirtyResult: true,
+                isLoading: true,
+                tableError: false,
                 config: {
                     viewable: true,
                     editable: $rootScope.modifyRecord,
                     deletable: $rootScope.modifyRecord && $rootScope.showDeleteButton,
                     selectMode: modalBox.noSelect
                 },
-                flowControlObject: $rootScope.recordFlowControl
+                flowControlObject: $rootScope.recordFlowControl,
+                queryTimeoutTooltip: messageMap.queryTimeoutTooltip
             };
         }
 

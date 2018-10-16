@@ -414,7 +414,6 @@
               "outputs": [
                 {
                   "source": {
-                    "table": "product-record:accommodation",
                     "api": "entity"
                   },
                   "destination": {
@@ -423,9 +422,8 @@
                   }
                 }
               ],
-              "name": "export_data_bag",
-              "format_name": "BDBag",
-              "format_type": "BAG"
+              "displayname": "BDBag",
+              "type": "BAG"
             }
           ]
         },

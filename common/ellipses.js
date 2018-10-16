@@ -71,7 +71,8 @@
                 fromTuple: '=?',
                 selected: '=',
                 selectDisabled: "=?",
-                parentReference: "=?"
+                parentReference: "=?",
+                columnModels: "="
             },
             link: function (scope, element) {
 

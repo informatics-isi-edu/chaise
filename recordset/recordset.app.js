@@ -96,6 +96,7 @@
                 facetPanelOpen: showFaceting
             };
 
+            recordsetModel.queryTimeoutTooltip = messageMap.queryTimeoutTooltip;
             $rootScope.alerts = AlertsService.alerts;
 
             $rootScope.location = $window.location.href;

@@ -59,10 +59,12 @@
                         ctrl.facetingCount++;
 
                         $scope.vm.facetModels[index] = {
+                            facetError: false,
                             initialized: false,
                             isOpen: false,
                             isLoading: false,
                             processed: true,
+                            noConstraints: false,
                             appliedFilters: [],
                             updateFacet: childCtrl.updateFacet,
                             initializeFacet: childCtrl.initializeFacet
@@ -83,6 +85,9 @@
                         });
                     };
 
+                    /**
+                     * @param {int} index index of facetColumn
+                     **/
                     ctrl.updateFacetColumn = function (index) {
                         var fm = $scope.vm.facetModels[index];
                         fm.processed = false;
@@ -982,6 +987,13 @@
                     return defer.promise;
                 }
 
+                // remove the constraints if scope.facetModel.noConstraints
+                if (scope.facetModel.noConstraints) {
+                    scope.reference = scope.reference.unfilteredReference;
+                    if (scope.facetColumn.isEntityMode) {
+                        scope.reference = scope.reference.contextualize.compactSelect;
+                    }
+                }
                 // read new data if needed
                 (function (uri) {
                     var facetLog = getDefaultLogInfo(scope);
@@ -1319,6 +1331,12 @@
                             });
                         }
                     };
+
+                    // retries the query for the current facet
+                    scope.retryQuery = function (noConstraints) {
+                        scope.facetModel.noConstraints = noConstraints;
+                        parentCtrl.updateFacetColumn(scope.index);
+                    }
 
                     // TODO all these search functions can be refactored to have just one point of sending request.
                     // change the searchTerm and fire the updateFacetColumn
