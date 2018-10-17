@@ -131,10 +131,10 @@
                     scope.removeFilter = function (index) {
                         var newRef;
                         if (index === "filters") {
-                            // only delete custom filters on the reference (not the facet)
+                            // only remove custom filters on the reference (not the facet)
                             newRef = scope.vm.reference.removeAllFacetFilters(false, true, true);
-                        } else if (index === "cfacets") { // remove custom facet
-                            // TODO change This
+                        } else if (index === "cfacets") {
+                            // only remove custom facets on the reference
                             newRef = scope.vm.reference.removeAllFacetFilters(true, false, true);
                         } else if (typeof index === 'undefined') {
                             // // delete all filters and facets
