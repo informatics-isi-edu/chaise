@@ -843,7 +843,7 @@
                     // Which are the key and value for the row
 
                     var keytdHeight = trs[i].children[0].getAttribute('data-height');
-                    if (keytdHeight == null) {
+                    if (keytdHeight == null || keytdHeight == 0) {
                         keytdHeight = trs[i].children[0].offsetHeight;
                         trs[i].children[0].setAttribute('data-height', keytdHeight);
                     }
