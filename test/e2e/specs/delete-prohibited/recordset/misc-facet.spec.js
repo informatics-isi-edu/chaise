@@ -962,6 +962,7 @@ describe("Other facet features, ", function() {
         });
     });
 
+    /***********************************************************  local test cases ***********************************************************/
     if (process.env.TRAVIS) return;
     // NOTE the following test cases will only run locally.
 
