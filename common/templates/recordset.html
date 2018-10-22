@@ -82,8 +82,8 @@
             </div>
 
             <div id="facet-filters-container" ng-if="vm.initialized">
-                <div class="total-filters facet-filters" ng-if="vm.reference.location.facets || vm.reference.location.searchTerm || vm.reference.location.filter">
-                    <a id="clear-all-filters" class="remove-link" ng-click="vm.removeFilter()" ng-if="vm.hasFilter() || vm.reference.location.searchTerm || vm.reference.location.filter">
+                <div class="total-filters facet-filters" ng-if="vm.reference.location.facets || vm.reference.location.searchTerm || vm.reference.location.filter || vm.reference.location.customFacets">
+                    <a id="clear-all-filters" class="remove-link" ng-click="vm.removeFilter()" ng-if="vm.hasFilter() || vm.reference.location.searchTerm || vm.reference.location.filter || vm.reference.location.customFacets">
                         <span class="filter-label label label-primary label-inverted" uib-tooltip="Clear all Facets" tooltip-placement="bottom">
                             Clear All
                         </span>
@@ -94,9 +94,14 @@
                         <span ng-bind="vm.reference.location.searchTerm"></span>
                     </div>
                     <div class="filter-label label label-default" ng-if="vm.reference.location.filter">
-                        <a id="clear-custom-filters" class="remove-link" ng-click="vm.removeFilter(-1)" tooltip-placement="bottom" uib-tooltip="Clear Filters"><i class="glyphicon glyphicon-remove"></i></a>
+                        <a id="clear-custom-filters" class="remove-link" ng-click="vm.removeFilter('filters')" tooltip-placement="bottom" uib-tooltip="Clear Filters"><i class="glyphicon glyphicon-remove"></i></a>
                         <i>Custom Filter</i>:
                         <span ng-bind="transformCustomFilter(vm.reference.location.filtersString)" tooltip-placement="bottom-left" uib-tooltip="{{transformCustomFilter(vm.reference.location.filtersString)}}" tooltip-class="custom-filter-tooltip"></span>
+                    </div>
+                    <div class="filter-label label label-default" ng-if="vm.reference.location.customFacets">
+                        <a id="clear-custom-facets" class="remove-link" ng-click="vm.removeFilter('cfacets')" tooltip-placement="bottom" uib-tooltip="Clear Custom Facets"><i class="glyphicon glyphicon-remove"></i></a>
+                        <i>Custom Facets</i>:
+                        <span ng-bind="vm.reference.location.customFacets.displayname" tooltip-placement="bottom-left" uib-tooltip="{{vm.reference.location.customFacets.displayname}}" tooltip-class="custom-filter-tooltip"></span>
                     </div>
                     <div class="filter-label label label-default" ng-repeat="fc in vm.reference.facetColumns track by $index" ng-if="vm.hasFilter($index)">
                         <a class="remove-link" ng-click="vm.removeFilter($index)" tooltip-placement="bottom" uib-tooltip="Clear Facet"><i class="glyphicon glyphicon-remove"></i></a>
@@ -126,7 +131,10 @@
 
             <!-- record table -->
             <div id="recordset-table-container" ng-if="vm.initialized">
-                <h3 ng-if="!vm.config.hideTotalCount" id="rs-total-count" class="replace-margin">Displaying {{vm.rowValues.length}}{{vm.totalRowsCnt ? " of " + (vm.totalRowsCnt > vm.rowValues.length ? vm.totalRowsCnt : vm.rowValues.length) : ''}} Records <img id="push-rows-spinner" ng-show="vm.pushRowsSpinner" src="../common/styles/images/loader.gif" class="spinner spinner-sm"/></h3>
+                <h3 ng-if="!vm.config.hideTotalCount" id="rs-total-count" class="replace-margin">Displaying {{vm.rowValues.length}}{{(vm.totalRowsCnt && !vm.tableError) ? " of " + (vm.totalRowsCnt > vm.rowValues.length ? vm.totalRowsCnt : vm.rowValues.length) : ''}} Records
+                    <img id="push-rows-spinner" ng-show="vm.pushRowsSpinner" src="../common/styles/images/loader.gif" class="spinner spinner-sm"/>
+                    <span ng-if="vm.countError" class="glyphicon glyphicon-alert" uib-tooltip="Request timeout: total count cannot be retrieved. Refresh the page later to try again." tooltip-placement="bottom"></span>
+                </h3>
                 <record-table id="rs-{{vm.makeSafeIdAttr(vm.tableDisplayName.value)}}" vm="vm" on-selected-rows-changed-bind="onSelectedRowsChanged"></record-table>
                 <span id="push-rows-loading" ng-show="vm.pushRowsSpinner">Loading...</span>
             </div>

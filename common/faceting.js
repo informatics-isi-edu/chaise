@@ -59,10 +59,12 @@
                         ctrl.facetingCount++;
 
                         $scope.vm.facetModels[index] = {
+                            facetError: false,
                             initialized: false,
                             isOpen: false,
                             isLoading: false,
                             processed: true,
+                            noConstraints: false,
                             appliedFilters: [],
                             updateFacet: childCtrl.updateFacet,
                             initializeFacet: childCtrl.initializeFacet
@@ -83,6 +85,9 @@
                         });
                     };
 
+                    /**
+                     * @param {int} index index of facetColumn
+                     **/
                     ctrl.updateFacetColumn = function (index) {
                         var fm = $scope.vm.facetModels[index];
                         fm.processed = false;
@@ -125,9 +130,12 @@
 
                     scope.removeFilter = function (index) {
                         var newRef;
-                        if (index === -1) {
-                            // only delete custom filters on the reference (not the facet)
-                            newRef = scope.vm.reference.removeAllFacetFilters(true);
+                        if (index === "filters") {
+                            // only remove custom filters on the reference (not the facet)
+                            newRef = scope.vm.reference.removeAllFacetFilters(false, true, true);
+                        } else if (index === "cfacets") {
+                            // only remove custom facets on the reference
+                            newRef = scope.vm.reference.removeAllFacetFilters(true, false, true);
                         } else if (typeof index === 'undefined') {
                             // // delete all filters and facets
                             newRef = scope.vm.reference.removeAllFacetFilters();
@@ -216,8 +224,8 @@
                     }
 
                     // TODO I am attaching the removeFilter to the vm here, maybe I shouldn't?
-                    scope.vm.removeFilter = function (colId, id) {
-                        scope.removeFilter(colId, id);
+                    scope.vm.removeFilter = function (colId) {
+                        scope.removeFilter(colId);
                     }
                 }
             };
@@ -986,6 +994,13 @@
                     return defer.promise;
                 }
 
+                // remove the constraints if scope.facetModel.noConstraints
+                if (scope.facetModel.noConstraints) {
+                    scope.reference = scope.reference.unfilteredReference;
+                    if (scope.facetColumn.isEntityMode) {
+                        scope.reference = scope.reference.contextualize.compactSelect;
+                    }
+                }
                 // read new data if needed
                 (function (uri) {
                     var facetLog = getDefaultLogInfo(scope);
@@ -1323,6 +1338,12 @@
                             });
                         }
                     };
+
+                    // retries the query for the current facet
+                    scope.retryQuery = function (noConstraints) {
+                        scope.facetModel.noConstraints = noConstraints;
+                        parentCtrl.updateFacetColumn(scope.index);
+                    }
 
                     // TODO all these search functions can be refactored to have just one point of sending request.
                     // change the searchTerm and fire the updateFacetColumn

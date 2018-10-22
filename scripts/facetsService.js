@@ -552,11 +552,10 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 			return;
 		}
 		$.each(templates, function(i, template) {
-			var name = template['name'];
-			var format_name = template['format_name'] || null;
-			var format_type = template['format_type'] || "FILE";
-			if (format_name) {
-				var format = {name:format_name, type:format_type, template: template};
+			var displayname = template['displayname'] || null;
+			var format_type = template['type'] || "FILE";
+			if (displayname) {
+				var format = {name:displayname, type:format_type, template: template};
 				FacetsData.exportOptions.supportedFormats.push(format);
 			}
 		});
@@ -861,13 +860,13 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 					this);
 		//setTimeout(this.refreshPlot, 60000, window.location.href, this);
 	};
-	
+
 	this.refreshPlot = function refreshPlot(url, that) {
 		if (url == window.location.href) {
 			that.renderPlot();
 		}
 	};
-	
+
 	this.errorGetPlotData = function (jqXHR, textStatus, errorThrown, url, param)
 	{
 		handleError(jqXHR, textStatus, errorThrown, url);

@@ -1076,6 +1076,10 @@ var recordsetPage = function() {
         return element(by.id('permalink'));
     };
 
+    this.getTableHeader = function () {
+        return element(by.tagName("thead"));
+    }
+
     this.getRecordsetColumnHeader = function (name) {
         return element(by.id(name + "-header"));
     };
@@ -1132,6 +1136,10 @@ var recordsetPage = function() {
     this.getClearCustomFilters = function () {
         return element(by.id("clear-custom-filters"));
     }
+
+    this.getClearCustomFacets = function () {
+        return element(by.id("clear-custom-facets"));
+    };
 
     this.getFacetOptions = function (idx) {
         return element(by.id("fc-" + idx)).all(by.css(".chaise-checkbox label"));
