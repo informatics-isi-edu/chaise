@@ -264,7 +264,11 @@
                     scope.parentCtrl = parentCtrl;
 
                     scope.relayout = false;
-                    scope.ranges = [facetingUtils.getNotNullFilter()];
+                    scope.ranges = [];
+                    if (!scope.facetColumn.hideNotNullChoice) {
+                        scope.ranges.push(facetingUtils.getNotNullFilter());
+                    }
+
                     scope.histogramDataStack = [];
                     // draw the plot
                     scope.plot = {
@@ -438,15 +442,16 @@
                     scope.initialRows = function () {
                         var defer = $q.defer();
                         scope.facetModel.appliedFilters = [];
+                        scope.ranges = [];
 
                         // if we have the not-null filter, other filters are not important and can be ignored
                         if (scope.facetColumn.hasNotNullFilter) {
                             scope.facetModel.appliedFilters.push(facetingUtils.getNotNullFilter(true));
-                            scope.ranges = [facetingUtils.getNotNullFilter(true)];
+                            scope.ranges.push(facetingUtils.getNotNullFilter(true));
                             return defer.resolve(true), defer.promise;
+                        } else if (!scope.facetColumn.hideNotNullChoice) {
+                            scope.ranges.push(facetingUtils.getNotNullFilter());
                         }
-
-                        scope.ranges = [facetingUtils.getNotNullFilter()];
 
                         for (var i = 0; i < scope.facetColumn.rangeFilters.length; i++) {
                             var filter = scope.facetColumn.rangeFilters[i];
@@ -469,7 +474,9 @@
 
                     // some of the facets might have been cleared, this function will unselect those
                     scope.syncSelected = function () {
-                        scope.ranges[0].selected = scope.facetColumn.hasNotNullFilter;
+                        if (scope.facetColumn.hasNotNullFilter) {
+                            scope.ranges[0].selected = scope.facetColumn.hasNotNullFilter;
+                        }
 
                         var filterIndex = function (uniqueId) {
                             return scope.facetColumn.rangeFilters.findIndex(function (f) {
@@ -1429,23 +1436,34 @@
                     parentCtrl.register(currentCtrl, scope.facetColumn, scope.index);
                     scope.parentCtrl = parentCtrl;
 
-                    scope.checkboxRows = [facetingUtils.getNotNullFilter()];
+                    scope.checkboxRows = [];
 
                     scope.updateFacetColumn = function () {
                         var defer = $q.defer();
                         scope.facetModel.appliedFilters = [];
+                        scope.checkboxRows = [];
 
-                        scope.checkboxRows[0].selected = false;
-                        if (scope.facetColumn.hasNotNullFilter) {
-                            scope.checkboxRows[0].selected = true;
-                            scope.facetModel.appliedFilters.push(facetingUtils.getNotNullFilter());
+                        // show not-null if it exists or hide_not_null_choice is missing.
+                        if (!scope.facetColumn.hideNotNullChoice) {
+                            scope.checkboxRows.push(facetingUtils.getNotNullFilter());
+                            if (scope.facetColumn.hasNotNullFilter) {
+                                scope.checkboxRows[0].selected = true;
+                                scope.facetModel.appliedFilters.push(facetingUtils.getNotNullFilter());
+                            }
                         }
 
-                        // scope.checkboxRows[1].selected = false;
-                        // if (scope.facetColumn.hasNullFilter) {
-                        //     scope.checkboxRows[1].selected = true;
-                        //     scope.facetModel.appliedFilters.push(facetingUtils.getNullFilter());
-                        // }
+                        // not-null might not be available and this could be 0
+                        var nullFilterIndex = 1;
+
+                        // show null
+                        if (!scope.facetColumn.hideNullChoice) {
+                            nullFilterIndex = scope.checkboxRows.push(facetingUtils.getNullFilter()) - 1;
+                            if (scope.facetColumn.hasNullFilter) {
+                                scope.checkboxRows[nullFilterIndex].selected = true;
+                                scope.facetModel.appliedFilters.push(facetingUtils.getNullFilter());
+                            }
+                        }
+
 
                         return defer.resolve(true), defer.promise;
                     };
@@ -1482,9 +1500,7 @@
                         }
 
                         if (row.selected) {
-                            if (row.isNotNull) {
-                                scope.facetModel.appliedFilters.push(facetingUtils.getNotNullFilter());
-                            }
+                            scope.facetModel.appliedFilters.push(row.isNotNull ? facetingUtils.getNotNullFilter() : facetingUtils.getNullFilter());
                         } else {
                             scope.facetModel.appliedFilters = scope.facetModel.appliedFilters.filter(function (f) {
                                 return f.uniqueId !== row.uniqueId;
