@@ -180,10 +180,8 @@
             templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/inputs/inputSwitch.html',
             scope: {
                 column: '=',
-                displayType: '=',
-                model: '=?',
-                submissionRow: '=?',
-                foreignKeyData: '=?'
+                columnModel: '=',
+                model: '=?'
             },
             link: function(scope, elem, attr) {
                 scope.model = {};
@@ -202,13 +200,13 @@
 
                 scope.booleanValues = ['', true, false];
 
-                if (scope.displayType === "timestamp") {
+                if (scope.columnModel.displayType === "timestamp") {
                     scope.model.value = {
                         date: null,
                         time: null,
                         meridiem: 'AM'
                     }
-                } else if (scope.displayType === "file") {
+                } else if (scope.columnModel.displayType === "file") {
                     scope.model.value = {};
                 }
 
@@ -230,7 +228,7 @@
 
                 // Assigns the current date or timestamp to inputValue
                 scope.applyCurrentDatetime = function() {
-                    if (scope.displayType === 'timestamp' || scope.displayType === 'timestamptz') {
+                    if (scope.columnModel.displayType === 'timestamp' || scope.columnModel.displayType === 'timestamptz') {
                         return scope.model.value = {
                             date: moment().format(dataFormats.date),
                             time: moment().format(dataFormats.time24),
@@ -275,7 +273,7 @@
                         // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
 
                         scope.fkDisplayName = tuple.displayname;
-                        scope.model = tuple;
+                        scope.model.value = tuple;
                     }, false, false);
                 }
 
@@ -290,7 +288,7 @@
 
                 // Used to remove the value in date and timestamp inputs when the "Clear" button is clicked
                 scope.removeValue = function () {
-                    if (scope.displayType === 'timestamp' || scope.displayType === 'timestamptz') {
+                    if (scope.columnModel.displayType === 'timestamp' || scope.columnModel.displayType === 'timestamptz') {
                         scope.model.value = {date: null, time: null, meridiem: 'AM'};
                     } else {
                         scope.model.value = null;

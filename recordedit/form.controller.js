@@ -3,8 +3,8 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'dataFormats', 'DataUtils', 'ErrorService', 'integerLimits', 'logActions', 'maskOptions', 'messageMap', 'modalBox', 'modalUtils', 'recordCreate', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
-        function FormController(AlertsService, dataFormats, DataUtils, ErrorService, integerLimits, logActions, maskOptions, messageMap, modalBox, modalUtils, recordCreate, recordEditModel, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
+    .controller('FormController', ['AlertsService', 'dataFormats', 'DataUtils', 'ErrorService', 'integerLimits', 'logActions', 'maskOptions', 'messageMap', 'modalBox', 'modalUtils', 'recordCreate', 'recordEditAppUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
+        function FormController(AlertsService, dataFormats, DataUtils, ErrorService, integerLimits, logActions, maskOptions, messageMap, modalBox, modalUtils, recordCreate, recordEditAppUtils, recordEditModel, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
         var context = $rootScope.context;
         var mainBodyEl;
@@ -18,9 +18,9 @@
             editor: "https://jbt.github.io/markdown-editor/#RZDLTsMwEEX3/opBXQCRmqjlsYBVi5CKxGOBWFWocuOpM6pjR54Jbfl6nKY08mbO1dwj2yN4pR+ENx23Juw8PBuSEJU6B3zwovdgAzIED1IhONwINNqjezxyRG6dkLcQWmlaAWIwxI3TBzT/pUi2klypLJsHZ0BwL1kGSq1eRDsq6Rf7cKXUCBaoTeebJBho2tGAN0cc+LbnIbg7BUNyr9SnrhuH6dUsCjKYNYm4m+bap3McP6L2NqX/y+9tvcaYLti3Jvm5Ns2H3k0+FBdpvfsGDUvuHY789vuqEmn4oShsCNZhXob6Ou+3LxmqsAMJQL50rUHQHqjWFpW6WM7gpPn6fAIXbBhUUe9yS1K1605XkN+EWGuhksfENEbTFmWlibGoNQvG4ijlouVy3MQE8cAVoTO7EE2ibd54e/0H",
             cheatsheet: "http://commonmark.org/help/"
         };
-        vm.isDisabled = isDisabled;
+        vm.isDisabled = recordEditAppUtils.isDisabled;
         vm.isRequired = isRequired;
-        vm.getDisabledInputValue = getDisabledInputValue;
+        vm.getDisabledInputValue = recordEditAppUtils.getDisabledInputValue;
 
         vm.alerts = AlertsService.alerts;
         vm.closeAlert = AlertsService.deleteAlert;
@@ -29,9 +29,9 @@
         vm.readyToSubmit = false;
         vm.submissionButtonDisabled = false;
         vm.successfulSubmission = false;
+        vm.showSelectAll = false;
         vm.redirectAfterSubmission = redirectAfterSubmission;
         vm.searchPopup = searchPopup;
-        vm.openSelectAll = openSelectAll;
         vm.createRecord = createRecord;
         vm.clearForeignKey = clearForeignKey;
 
@@ -49,9 +49,6 @@
         vm.int4max = integerLimits.INT_4_MAX;
         vm.int8min = integerLimits.INT_8_MIN;
         vm.int8max = integerLimits.INT_8_MAX;
-
-        vm.columnToDisplayType = columnToDisplayType;
-        vm.matchType = matchType;
 
         vm.applyCurrentDatetime = applyCurrentDatetime;
         vm.datepickerOpened = {}; // Tracks which datepickers on the form are open
@@ -212,8 +209,8 @@
                     setMainContainerHeight();
                     UiUtils.setFooterStyle(1);
                 }, 0);
+            }
         }
-    }
 
         function submit() {
             var originalTuple,
@@ -302,9 +299,9 @@
 
         // NOTE: If changes are made to this function, changes should also be made to the similar function in the inputSwitch directive
         // TODO: remove when RE has been refactored to use the inputSwitch directive for all form inputs
-        function searchPopup(rowIndex, column) {
+        function searchPopup(columnIndex, rowIndex, column) {
 
-            if (isDisabled(column)) return;
+            if (vm.isDisabled(column, vm.prefillCookie)) return;
 
             var originalTuple,
                 editOrCopy = true,
@@ -383,76 +380,6 @@
             }
 
             model.rows[rowIndex][column.name] = null;
-        }
-
-        function openSelectAll(column) {
-            var params = {
-                column: column,
-                displayType: columnToDisplayType(column)
-            };
-
-            modalUtils.showModal({
-                animation: false,
-                controller: "RecordeditInputPopupController",
-                controllerAs: "ctrl",
-                resolve: {
-                    params: params
-                },
-                templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/inputPopup.modal.html",
-                windowClass: "modal-select-all"
-            }, function (model) {
-                // There's a special case for the foreign key popup that needs to populate multiple different models
-                // values need to be set for `foreignKeyData` to be used properly for submission row calculation
-                // values need to be set in view model (`recordEditModel.rows`) and the submission model (`recordEditModel.submissionRows`)
-                if (params.displayType === "popup-select") {
-                    // set data in view model (model.rows) and submission model (model.submissionRows)
-
-                    // udpate the foreign key data
-                    vm.recordEditModel.foreignKeyData.forEach(function (fkeyData) {
-                        fkeyData[column.foreignKey.name] = model.data;
-                    });
-
-                    var foreignKeyColumns = column.foreignKey.colset.columns;
-                    for (var i = 0; i < foreignKeyColumns.length; i++) {
-                        var referenceCol = foreignKeyColumns[i];
-                        var foreignTableCol = column.foreignKey.mapping.get(referenceCol);
-
-                        vm.recordEditModel.submissionRows.forEach(function (submissionRow) {
-                            submissionRow[referenceCol.name] = model.data[foreignTableCol.name];
-                        });
-                    }
-
-                    vm.recordEditModel.rows.forEach(function (row) {
-                        row[column.name] = model.displayname.value;
-                    });
-                } else {
-                    // set input value for each record to create. populate ui model
-                    vm.recordEditModel.rows.forEach(function (row) {
-                        // need to set each property to avoid having a reference to the same object
-                        if (params.displayType === "file") {
-                            row[column.name] = {}
-                            Object.keys(model.value).forEach(function (key) {
-                                if (key !== "hatracObj") {
-                                    row[column.name][key] = model.value[key];
-                                }
-                            });
-                            // TODO: This is duplicated in the upload-input directive.
-                            // Should be removed in both places and only created at submission time
-                            row[column.name].hatracObj = new ERMrest.Upload(row[column.name].file, {
-                                column: column,
-                                reference: $rootScope.reference
-                            });
-                        } else if (params.displayType === "timestamp") {
-                            row[column.name] = {}
-                            row[column.name].date = model.value.date;
-                            row[column.name].time = model.value.time;
-                            row[column.name].meridiem = model.value.meridiem;
-                        } else {
-                            row[column.name] = model.value;
-                        }
-                    });
-                }
-            });
         }
 
         function createRecord(column) {
@@ -545,63 +472,6 @@
             }, 10);
         }
 
-        function columnToDisplayType(column) {
-            var displayType;
-
-            if (column.isForeignKey) {
-                displayType = 'popup-select';
-            } else if (column.isAsset) {
-                displayType = 'file';
-            } else {
-                displayType = UiUtils.getDisplayType(column.type);
-            }
-            return displayType;
-        }
-
-        // Returns true if column.getInputDisabled returns truthy OR if column was prefilled via cookie
-        function isDisabled(column) {
-            try {
-                if (column.getInputDisabled(context.appContext)) {
-                    return true;
-                } else if (vm.prefillCookie) {
-                    return vm.prefillCookie.constraintName == column.name;
-                }
-                return false;
-            } catch (e) {
-                $log.info(e);
-            }
-        }
-
-        // Returns true if a column type is found in the given array of types
-        function matchType(columnType, types) {
-            if (types.indexOf(columnType) !== -1) {
-                return true;
-            }
-            return false;
-        }
-
-        // NOTE: If changes are made to this function, changes should also be made to the similar function in the inputSwitch directive
-        // TODO: remove when RE has been refactored to use the inputSwitch directive for all form inputs
-        function getDisabledInputValue(column, value) {
-            try {
-                var disabled = column.getInputDisabled(context.appContext);
-                if (disabled) {
-                    if (typeof disabled === 'object') {
-                        return disabled.message;
-                    } else if (vm.editMode) {
-                        return value;
-                    }
-                    return '';
-                } else if (column.isForeignKey) {
-                    return 'Select a value';
-                } else if (column.isAsset) {
-                    return "No file Selected";
-                }
-            } catch (e) {
-                $log.info(e);
-            }
-        }
-
         // NOTE: If changes are made to this function, changes should also be made to the similar function in the inputSwitch directive
         // TODO: remove when RE has been refactored to use the inputSwitch directive for all form inputs
         // Assigns the current date or timestamp to a column's model
@@ -642,10 +512,260 @@
         }
 
         function isRequired(column) {
-            if (!column.nullok && !isDisabled(column)) {
+            if (!column.nullok && !vm.isDisabled(column, vm.prefillCookie)) {
                 return true;
             }
             return false;
+        }
+
+// **** Functions for set all input
+        var selectAllOpen = false;
+        function clearAllInput (model) {
+            if (model.displayType === "timestamp") {
+                model.allInput.value = {
+                    date: null,
+                    time: null,
+                    meridiem: 'AM'
+                }
+            } else if (model.displayType === "file") {
+                model.allInput.value = {};
+            } else {
+                model.allInput.value = null;
+            }
+        }
+
+        function getTsValue (value, outputFormat) {
+            if (isObj) {
+                if (value.date) {
+                    // if time isn't set, default to midnight
+                    if (value.time === null) value.time = '00:00:00'
+                    value = moment(value.date + value.time + value.meridiem, dataFormats.date + dataFormats.time12 + 'A').format(dataFormats.datetime.display);
+                } else {
+                    value = null;
+                }
+            } else {
+                if (value && value.date) {
+                    console.log(value);
+                    var ts = moment(value);
+                    value = {
+                        date: ts.format(dataFormats.date),
+                        time: ts.format(dataFormats.time12),
+                        meridiem: ts.format('A')
+                    }
+                } else {
+                    value = {
+                        date: null,
+                        time: null,
+                        meridiem: 'AM'
+                    }
+                }
+            }
+
+            return value;
+        }
+
+        function closeAllInput (model) {
+            clearAllInput(model);
+
+            // reset column view model values
+            model.showSelectAll = false;
+            model.highlightRow = false;
+            selectAllOpen = false;
+        }
+
+        // toggles the state of the select all dialog
+        vm.toggleSelectAll = function toggleSelectAll(index) {
+            var model = vm.recordEditModel.columnModels[index];
+            if (selectAllOpen) {
+                // close the other select all dialog first
+                vm.recordEditModel.columnModels.forEach(function (cm, idx) {
+                    // don't change the state of the current one
+                    if (idx === index) return;
+
+                    cm.showSelectAll = false;
+                    cm.highlightRow = false;
+                });
+            }
+
+            model.showSelectAll = !model.showSelectAll;
+            model.highlightRow = !model.highlightRow;
+            // This should match the current column model property
+            selectAllOpen = model.showSelectAll;
+
+            // change view/display model value into an object or string depending on state
+            vm.recordEditModel.columnModels.forEach(function (cm) {
+                if (cm.displayType == "timestamp") {
+                    vm.recordEditModel.rows.forEach(function (row) {
+                        var value = row[cm.column.name];
+                        if (cm.showSelectAll) {
+                            // if selectAll is open for TS column, make sure value is a string (in display format)
+                            // if other type (null or string), don't change the value
+                            if (typeof value == "object") {
+                                if (value.date) {
+                                    // if time isn't set, default to midnight
+                                    if (value.time === null) value.time = '00:00:00'
+                                    value = moment(value.date + value.time + value.meridiem, dataFormats.date + dataFormats.time12 + 'A').format(dataFormats.datetime.display);
+                                } else {
+                                    value = null;
+                                }
+                            }
+                        } else {
+                            if (value && typeof value == "string" ) {
+                                // if selectAll is not open, make sure value is a string before trying to convert to an object
+                                var ts = moment(value);
+                                value = {
+                                    date: ts.format(dataFormats.date),
+                                    time: ts.format(dataFormats.time12),
+                                    meridiem: ts.format('A')
+                                }
+                            } else if (value == null) {
+                                value = {
+                                    date: null,
+                                    time: null,
+                                    meridiem: 'AM'
+                                }
+                            }
+                        }
+                        row[cm.column.name] = value;
+                    });
+                }
+            });
+        }
+
+        // closes the select all and
+        vm.cancelSelectAll = function cancelSelectAll(index) {
+            var model = vm.recordEditModel.columnModels[index];
+            model.showSelectAll = false;
+            model.highlightRow = false;
+            selectAllOpen = false;
+
+            closeAllInput(model);
+
+            if (model.displayType === "timestamp") {
+                vm.recordEditModel.rows.forEach(function (row) {
+                    // the current row value is in the "disabled" format (aka a string)
+                    var value = row[model.column.name];
+                    if (value) {
+                        var ts = moment(value);
+                        value = {
+                            date: ts.format(dataFormats.date),
+                            time: ts.format(dataFormats.time12),
+                            meridiem: ts.format('A')
+                        }
+                    } else {
+                        value = {
+                            date: null,
+                            time: null,
+                            meridiem: 'AM'
+                        }
+                    }
+                    row[model.column.name] = value;
+                });
+            }
+        }
+
+        vm.applySelectAll = function applySelectAll(index) {
+            var model = vm.recordEditModel;
+            var columnModel = model.columnModels[index];
+            var value = columnModel.allInput.value;
+            var column = columnModel.column;
+
+            var displayType = columnModel.displayType;
+            if (displayType === "popup-select") {
+                // value should be an ERMrest.tuple object
+                // set data in view model (model.rows) and submission model (model.submissionRows)
+
+                // udpate the foreign key data
+                model.foreignKeyData.forEach(function (fkeyData) {
+                    fkeyData[column.foreignKey.name] = value.data;
+                });
+
+                var foreignKeyColumns = column.foreignKey.colset.columns;
+                for (var i = 0; i < foreignKeyColumns.length; i++) {
+                    var referenceCol = foreignKeyColumns[i];
+                    var foreignTableCol = column.foreignKey.mapping.get(referenceCol);
+
+                    model.submissionRows.forEach(function (submissionRow) {
+                        submissionRow[referenceCol.name] = value.data[foreignTableCol.name];
+                    });
+                }
+
+                model.rows.forEach(function (row) {
+                    row[column.name] = value.displayname.value;
+                });
+            } else {
+                // set input value for each record to create. populate ui model
+                model.rows.forEach(function (row) {
+                    // need to set each property to avoid having a reference to the same object
+                    if (displayType === "file") {
+                        row[column.name] = {}
+                        Object.keys(value).forEach(function (key) {
+                            if (key !== "hatracObj") {
+                                row[column.name][key] = model[key];
+                            }
+                        });
+                        // TODO: This is duplicated in the upload-input directive.
+                        // Should be removed in both places and only created at submission time
+                        row[column.name].hatracObj = new ERMrest.Upload(row[column.name].file, {
+                            column: column,
+                            reference: $rootScope.reference
+                        });
+                    } else if (displayType === "timestamp") {
+                        row[column.name] = {}
+                        row[column.name].date = value.date;
+                        row[column.name].time = value.time;
+                        row[column.name].meridiem = value.meridiem;
+                    } else {
+                        row[column.name] = value;
+                    }
+                });
+            }
+
+            closeAllInput(columnModel);
+            if (columnModel.displayType === "timestamp") {
+                vm.recordEditModel.rows.forEach(function (row) {
+                    // the current row value is in the "view model" format (aka an object)
+                    // this function (applySelectAll) applies or clears the values
+                    // the values are an object and need to be an object
+                    var value = row[column.name];
+                    // if there's no date set, we don't have a value to convert and apply to the inputs
+                    if (!value.date) {
+                        value = {
+                            date: null,
+                            time: null,
+                            meridiem: 'AM'
+                        }
+                    }
+                    row[column.name] = value;
+                });
+            }
+        }
+
+        vm.showApplyOrClear = function showApplyOrClear(index) {
+            var columnModel = vm.recordEditModel.columnModels[index];
+            if (!columnModel || !columnModel.allInput) return "Clear All";
+
+            var noValue = true;
+            if (columnModel.displayType === "timestamp") {
+                // We don't care if a time value is set or not, time is meaningless without a date
+                if (columnModel.allInput.value && columnModel.allInput.value.date) noValue = false;
+            } else if (columnModel.displayType === "file") {
+                if (columnModel.allInput.value && columnModel.allInput.value.uri) noValue = false;
+            } else {
+                if (columnModel.allInput.value) noValue = false;
+            }
+            return noValue ? "Clear All" : "Apply All";
+        }
+
+        // controls the Clear All/Apply All
+        // We have 2 ways to determine a disabled input, or rather, when an input should be shown as disabled
+        //   1. we check the column beforehand and determine if the input should ALWAYS be disabled
+        //   2.
+        vm.inputTypeOrDisabled = function inputTypeOrDisabled(index) {
+            try {
+                var model = vm.recordEditModel.columnModels[index];
+                return model.showSelectAll ? "disabled" : model.displayType;
+            } catch (err) {}
         }
 
         function fileExtensionTypes(column) {
@@ -772,7 +892,7 @@
         var scrollContainer = formContainerEl.find('#formEditScroll');
 
         var elemHeight;
-        var trs;
+        var trs, selectAllTrs;
         var scope = $rootScope;
 
 
@@ -835,7 +955,10 @@
                 if (!elemHeight) elemHeight = elem.outerHeight();
 
                 // Get all rows of the table
-                if (!trs) trs = elem.find('tr.entity');
+                if (!trs) {
+                    trs = elem.find('tr.shift-form');
+                    selectAllTrs = elem.find('tr.select-all-row');
+                }
 
                 // iterate over each row
                 for(var i=0;i<trs.length;i++) {
@@ -857,8 +980,21 @@
                     // else change coltdHeight for viceversa condition
                     if (keytdHeight > valuetdHeight) {
                         trs[i].children[1].height = keytdHeight;
+
                     } else if (valuetdHeight > keytdHeight)  {
                         trs[i].children[0].height = valuetdHeight;
+                    }
+
+                    if (i !== 0) {
+                        // use -1 because there is no extra <tr> for the header row
+                        var idx = i-1;
+                        // get the height of the input div
+                        // HTML structure tr > td(entity-value) > div > span/input-switch/button
+                        var allValueTdHeight = selectAllTrs[idx].children[1].children[0].children[1].offsetHeight + 10;
+
+                        // set key height to the height of the input div
+                        selectAllTrs[idx].children[0].height = allValueTdHeight;
+                        selectAllTrs[idx].children[1].height = allValueTdHeight;
                     }
                 }
             }

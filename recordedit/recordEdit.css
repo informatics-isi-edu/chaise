@@ -85,27 +85,27 @@ td.entity-value {
   max-width: none;
 }
 
-#formEdit > table > tbody > tr >  td:first-child {
+#formEdit > table > tbody > tr.shift-form > td:first-child, .match-entity-key {
   position: absolute !important;
   left: 0;
   top: auto;
   margin-left: 10px;
-  margin-top: 1px;
+  margin-top: 0px;
   background: white;
   /* z-index: 10; */
   border-right: 1px solid #ddd;
   border-left: 1px solid #ddd;
 }
 
-#formEdit.createMode > table > tbody >  tr:first-child >  td {
+/* #formEdit.createMode > table > tbody >  tr:first-child >  td {
   height: 48px !important;
-}
+} */
 
-#formEdit.editMode > table > tbody >  tr:first-child >  td {
+/* #formEdit.editMode > table > tbody >  tr:first-child >  td {
   padding-top: 7px;
-}
+} */
 
-#formEdit > table > tbody >  tr:first-child >  td {
+#formEdit > table > tbody:first-child > tr.shift-form:first-child >  td {
   border-top: 1px solid #ddd;
   margin-top: 0px;
   color: #999;
@@ -117,10 +117,16 @@ td.entity-value {
   border-right:1px solid #ddd;
 }
 
-
-td.entity-key, #formEdit >  table > tbody >  tr:first-child >  td:first-child {
-  min-width: 190px;
+#formEdit > table > tbody > tr > td.entity-value {
+    border-top: none;
+    border-bottom: none;
+    word-wrap: break-word;
 }
+
+
+/* td.entity-key, #formEdit >  table > tbody >  tr:first-child >  td:first-child {
+  min-width: 190px;
+} */
 
 .add-button {
   position: absolute;
@@ -140,11 +146,15 @@ td.entity-key, #formEdit >  table > tbody >  tr:first-child >  td:first-child {
   color: #999;
 }
 
-#formEdit.createMode >  table > tbody >  tr:first-child >  td:first-child {
+/* #formEdit.createMode >  table > tbody >  tr:first-child >  td:first-child {
   height: 49px !important;
+} */
+
+/* #formEdit.editMode >  table > tbody >  tr:first-child >  td:first-child {} */
+tbody.highlight{
+  background-color: #f7f0cf !important;
 }
 
-#formEdit.editMode >  table > tbody >  tr:first-child >  td:first-child {}
 
 .form-control[disabled] {
   color: #888888;
@@ -161,9 +171,9 @@ td.entity-key, #formEdit >  table > tbody >  tr:first-child >  td:first-child {
     opacity: 1;
 }
 
-#formEdit.editMode >  table > tbody >  tr >  td:last-child {
+/* #formEdit >  table > tbody >  tr >  td:last-child {
   border-right: 0px;
-}
+} */
 
 #formEditScroll {
   overflow-x: auto;
@@ -180,7 +190,7 @@ td.entity-key, #formEdit >  table > tbody >  tr:first-child >  td:first-child {
 @media all and (-webkit-min-device-pixel-ratio:0) and (min-resolution: .001dpcm) {
   #formEdit {
     border-bottom: 1px solid #ddd;
-    border-right: 1px solid #ddd;
+    /* border-right: 1px solid #ddd; */
   }
 
   #formEdit >  table {

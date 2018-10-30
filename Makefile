@@ -426,7 +426,8 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-1.11.1.min.js \
 
 RE_JS_SOURCE=$(RE_ASSETS)/recordEdit.app.js \
 	$(RE_ASSETS)/model.js \
-	$(RE_ASSETS)/form.controller.js
+	$(RE_ASSETS)/form.controller.js \
+	$(RE_ASSETS)/recordedit.utils.js
 
 RE_JS_MDHELP=$(RE_ASSETS)/mdHelp.controller.js
 

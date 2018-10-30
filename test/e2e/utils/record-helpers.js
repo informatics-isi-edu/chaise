@@ -260,6 +260,7 @@ exports.testPresentation = function (tableParams) {
         var columns = tableParams.columns.filter(function (c) { return c.value != null; });
         expect(element.all(by.className('entity-value')).count()).toEqual(columns.length, "length missmatch.");
         var index = -1, columnUrl, aTag;
+        browser.pause();
         columns.forEach(function (column) {
             var errMessage = "value mismatch for column " + column.title;
 

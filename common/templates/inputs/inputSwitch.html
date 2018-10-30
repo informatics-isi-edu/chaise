@@ -1,4 +1,4 @@
-<div class="entity-value" ng-switch="displayType" ng-form="inputContainer">
+<div ng-switch="columnModel.displayType" ng-form="inputContainer">
 
     <!-- date input-->
     <div ng-switch-when="date">
@@ -30,7 +30,7 @@
                 </div>
             </div>
             <div class="col-xs-12">
-                <div class="btn-group" role="group">
+                <div class="btn-group pull-right" role="group">
                     <button type="button" name="{{::column.name}}-now" class="btn btn-primary btn-inverted" ng-click="::applyCurrentDatetime();">Now</button>
                     <button type="button" name="{{::column.name}}-clear" class="btn btn-danger btn-inverted" ng-click="::removeValue();">Clear</button>
                 </div>
@@ -111,6 +111,9 @@
     <div ng-switch-when="json">
         <textarea json ng-model="model.value" rows="5" name="{{::column.name}}" class="form-control" empty-to-null></textarea>
     </div>
+
+    <!-- disabled -->
+    <input ng-switch-when="disabled" ng-model="model.value" name="{{::column.name}}" type="text" class="form-control" disabled="true" placeholder="getDisabledInputValue()" empty-to-null></input>
 
     <!-- shorttext/default text input -->
     <input ng-switch-default ng-model="model.value" name="{{::column.name}}" type="text" class="form-control" empty-to-null></input>

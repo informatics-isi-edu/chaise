@@ -76,8 +76,8 @@
         }]);
     })
 
-    .run(['AlertsService', 'dataFormats', 'DataUtils', 'ERMrest', 'ErrorService', 'FunctionUtils', 'headInjector', 'logActions', 'MathUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', 'messageMap', 'Errors',
-        function runRecordEditApp(AlertsService, dataFormats, DataUtils, ERMrest, ErrorService, FunctionUtils, headInjector, logActions, MathUtils, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies, messageMap, Errors) {
+    .run(['AlertsService', 'dataFormats', 'DataUtils', 'ERMrest', 'ErrorService', 'FunctionUtils', 'headInjector', 'logActions', 'MathUtils', 'recordEditAppUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', 'messageMap', 'Errors',
+        function runRecordEditApp(AlertsService, dataFormats, DataUtils, ERMrest, ErrorService, FunctionUtils, headInjector, logActions, MathUtils, recordEditAppUtils, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies, messageMap, Errors) {
 
         var session,
             context = { booleanValues: ['', true, false] };
@@ -304,6 +304,13 @@
 
                                 for (var i = 0; i < $rootScope.reference.columns.length; i++) {
                                     column = $rootScope.reference.columns[i];
+                                    recordEditModel.columnModels[i] = {
+                                        allInput: null,
+                                        column: column,
+                                        displayType: recordEditAppUtils.columnToDisplayType(column, $rootScope.cookieObj),
+                                        highlightRow: false,
+                                        showSelectAll: false
+                                    };
 
                                     // If input is disabled, there's no need to transform the column value.
                                     if (column.getInputDisabled(context.appContext)) {
@@ -402,6 +409,13 @@
                             // default model initialiation is null
                             var initialModelValue = null;
                             var column = $rootScope.reference.columns[i];
+                            recordEditModel.columnModels[i] = {
+                                allInput: null,
+                                column: column,
+                                displayType: recordEditAppUtils.columnToDisplayType(column, $rootScope.cookieObj),
+                                highlightRow: false,
+                                showSelectAll: false
+                            };
 
                             if (recordEditModel.rows[0][column.name]) {
                                 // check the recordEditModel to see if the value was set because of a prefill condition
