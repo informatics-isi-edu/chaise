@@ -229,8 +229,8 @@ describe('Record Add', function() {
                 return browser.manage().getCookie('test');
             }).then(function(cookie) {
                 if (cookie) {
-                    var field = element.all(by.css('.popup-select-value')).first();
-                    expect(field.getText()).toBe(testCookie.rowname.value);
+                    var field = chaisePage.recordEditPage.getInputById(0, "Category");
+                    expect(field.getAttribute("value")).toBe(testCookie.rowname.value);
                 } else {
                     // Fail the test
                     expect('Cookie did not load').toEqual('but cookie should have loaded');

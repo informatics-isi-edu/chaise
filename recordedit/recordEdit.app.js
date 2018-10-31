@@ -316,10 +316,7 @@
                                     if (column.getInputDisabled(context.appContext)) {
                                         // if not copy, populate the field without transforming it
                                         if (context.mode != context.modes.COPY) {
-                                            // the structure for asset type columns is an object with a 'url' property
-                                            if (column.isAsset) {
-                                                recordEditModel.rows[j][column.name] = { url: values[i] || "" };
-                                            } else if (column.type.name == "timestamptz") {
+                                            if (column.type.name == "timestamptz") {
                                                 recordEditModel.rows[j][column.name] = moment(values[i]).format(dataFormats.datetime.return);
                                             } else {
                                                 recordEditModel.rows[j][column.name] = values[i];
@@ -360,6 +357,7 @@
                                             value = (!isNaN(floatVal) ? floatVal : null);
                                             break;
                                         default:
+                                            // the structure for asset type columns is an object with a 'url' property
                                             if (column.isAsset) {
                                                 value = { url: values[i] || "" };
                                             } else {

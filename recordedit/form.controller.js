@@ -341,6 +341,7 @@
                 // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
                 // set data in view model (model.rows) and submission model (model.submissionRows)
 
+                console.log(tuple);
                 // udpate the foreign key data
                 vm.recordEditModel.foreignKeyData[rowIndex][column.foreignKey.name] = tuple.data;
 
@@ -534,36 +535,6 @@
             }
         }
 
-        function getTsValue (value, outputFormat) {
-            if (isObj) {
-                if (value.date) {
-                    // if time isn't set, default to midnight
-                    if (value.time === null) value.time = '00:00:00'
-                    value = moment(value.date + value.time + value.meridiem, dataFormats.date + dataFormats.time12 + 'A').format(dataFormats.datetime.display);
-                } else {
-                    value = null;
-                }
-            } else {
-                if (value && value.date) {
-                    console.log(value);
-                    var ts = moment(value);
-                    value = {
-                        date: ts.format(dataFormats.date),
-                        time: ts.format(dataFormats.time12),
-                        meridiem: ts.format('A')
-                    }
-                } else {
-                    value = {
-                        date: null,
-                        time: null,
-                        meridiem: 'AM'
-                    }
-                }
-            }
-
-            return value;
-        }
-
         function closeAllInput (model) {
             clearAllInput(model);
 
@@ -594,10 +565,10 @@
 
             // change view/display model value into an object or string depending on state
             vm.recordEditModel.columnModels.forEach(function (cm) {
-                if (cm.displayType == "timestamp") {
-                    vm.recordEditModel.rows.forEach(function (row) {
-                        var value = row[cm.column.name];
-                        if (cm.showSelectAll) {
+                vm.recordEditModel.rows.forEach(function (row) {
+                    var value = row[cm.column.name];
+                    if (cm.showSelectAll) {
+                        if (cm.displayType == "timestamp") {
                             // if selectAll is open for TS column, make sure value is a string (in display format)
                             // if other type (null or string), don't change the value
                             if (typeof value == "object") {
@@ -609,7 +580,11 @@
                                     value = null;
                                 }
                             }
-                        } else {
+                        } else if (cm.displayType == "file") {
+                            console.log(value);
+                        }
+                    } else {
+                        if (cm.displayType == "timestamp") {
                             if (value && typeof value == "string" ) {
                                 // if selectAll is not open, make sure value is a string before trying to convert to an object
                                 var ts = moment(value);
@@ -626,9 +601,9 @@
                                 }
                             }
                         }
-                        row[cm.column.name] = value;
-                    });
-                }
+                    }
+                    row[cm.column.name] = value;
+                });
             });
         }
 

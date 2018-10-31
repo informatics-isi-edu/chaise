@@ -116,7 +116,7 @@
                                                         <!-- date input-->
                                                         <div ng-switch-when="date">
                                                             <div class="input-group">
-                                                                <input class="form-control" type="text" ng-model="form.recordEditModel.rows[rowIndex][column.name]" placeholder="{{form.dataFormats.date}}" name="{{::column.name}}" ui-mask="9999-19-39" ui-options="form.maskOptions.date.options" model-view-value="true" ng-required="::form.isRequired(column);" date></input>
+                                                                <input id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" class="form-control" type="text" ng-model="form.recordEditModel.rows[rowIndex][column.name]" placeholder="{{form.dataFormats.date}}" name="{{::column.name}}" ui-mask="9999-19-39" ui-options="form.maskOptions.date.options" model-view-value="true" ng-required="::form.isRequired(column);" date></input>
                                                                 <span class="input-group-btn">
                                                                     <button type="button" class="btn btn-primary btn-inverted" ng-click="::form.applyCurrentDatetime(rowIndex, column.name, column.type.name);">Today</button>
                                                                     <button type="button" class="btn btn-danger btn-inverted" ng-click="::form.clearModel(rowIndex, column.name, column.type.name);">Clear</button>
