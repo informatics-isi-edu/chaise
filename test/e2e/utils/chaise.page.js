@@ -1171,6 +1171,10 @@ var recordsetPage = function() {
         return element(by.id("clear-custom-filters"));
     }
 
+    this.getClearCustomFacets = function () {
+        return element(by.id("clear-custom-facets"));
+    };
+
     this.getFacetOptions = function (idx) {
         return element(by.id("fc-" + idx)).all(by.css(".chaise-checkbox label"));
     }
