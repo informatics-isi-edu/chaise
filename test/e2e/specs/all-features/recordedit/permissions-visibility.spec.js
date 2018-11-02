@@ -85,7 +85,8 @@ describe('When viewing RecordEdit app', function() {
             });
 
             it('should not show the add [+] button in the modal for a read-only table', function() {
-                var input = recordEditPage.getForeignKeyInputs().get(1);
+                // index is 2 because of show all
+                var input = recordEditPage.getForeignKeyInputs().get(2);
                 var modalTitle = recordEditPage.getModalTitle();
                 input.click();
                 chaisePage.waitForElement(modalTitle).then(function() {
@@ -96,7 +97,8 @@ describe('When viewing RecordEdit app', function() {
             });
 
             it('should show the add [+] button in the modal for a table that allows update and create', function() {
-                var input = recordEditPage.getForeignKeyInputs().get(2);
+                // index is 4 because of show all
+                var input = recordEditPage.getForeignKeyInputs().get(4);
                 var modalTitle = recordEditPage.getModalTitle();
                 input.click();
                 chaisePage.waitForElement(modalTitle).then(function() {
@@ -107,7 +109,8 @@ describe('When viewing RecordEdit app', function() {
             });
 
             it('should not show the add [+] button in the modal for a table that only allows delete', function() {
-                var input = recordEditPage.getForeignKeyInputs().get(3);
+                // index is 6 because of show all
+                var input = recordEditPage.getForeignKeyInputs().get(6);
                 var modalTitle = recordEditPage.getModalTitle();
                 input.click();
                 chaisePage.waitForElement(modalTitle).then(function() {

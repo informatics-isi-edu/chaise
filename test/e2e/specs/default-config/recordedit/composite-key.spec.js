@@ -32,10 +32,7 @@ describe('Edit a record,', function() {
                 // make sure recordedit is loaded
                 chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
 
-                    return chaisePage.recordEditPage.getModalPopupBtnsUsingScript();
-                }).then(function(popupBtns) {
-
-                    return chaisePage.clickButton(popupBtns[7]);
+                    return chaisePage.recordEditPage.getForeignKeyInputButton("Person", 0).click();
                 }).then(function() {
                     // wait for the modal to open
                     browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
@@ -51,14 +48,12 @@ describe('Edit a record,', function() {
                 }).then(function(ct) {
                     expect(ct).toBe(3);
 
-                    return rows.get(0).element(by.css(".select-action-button"));
-                }).then(function(selectButton) {
-                    console.log(selectButton);
-                    return selectButton.click();
+                    return rows.get(0).all(by.css(".select-action-button"));
+                }).then(function(selectButtons) {
+                    return selectButtons[0].click();
                 }).then(function() {
                     browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), browser.params.defaultTimeout);
 
-                    browser.pause();
                     var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputDisplay("Person", 0);
                     expect(foreignKeyInput.getText()).toBe(testParams.column_values["sIfIZTdKhErJ9HC3xhuSbA"], "Foreign Key input display value is incorrect");
                     done();

@@ -341,7 +341,6 @@
                 // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
                 // set data in view model (model.rows) and submission model (model.submissionRows)
 
-                console.log(tuple);
                 // udpate the foreign key data
                 vm.recordEditModel.foreignKeyData[rowIndex][column.foreignKey.name] = tuple.data;
 
