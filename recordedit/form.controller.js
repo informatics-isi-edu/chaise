@@ -574,7 +574,7 @@
                     var value = row[cm.column.name];
                     if (cm.showSelectAll) {
                         if (cm.displayType == "timestamp") {
-                            // if selectAll is open for TS column, make sure value is a string (in display format)
+                            // if selectAll is open for TS column, make sure value is converted to a string (in display format)
                             // if other type (null or string), don't change the value
                             if (typeof value == "object") {
                                 if (value.date) {
@@ -619,7 +619,7 @@
             });
         }
 
-        // closes the select all and
+        // closes the select all and resets the input
         vm.cancelSelectAll = function cancelSelectAll(index) {
             var model = vm.recordEditModel.columnModels[index];
             model.showSelectAll = false;
@@ -628,6 +628,7 @@
 
             closeAllInput(model);
 
+            // change display values for object display
             if (model.displayType === "timestamp") {
                 vm.recordEditModel.rows.forEach(function (row) {
                     // the current row value is in the "disabled" format (aka a string)
@@ -736,6 +737,7 @@
             }
         }
 
+        // controls the Clear All/Apply All
         vm.showApplyOrClear = function showApplyOrClear(index) {
             var columnModel = vm.recordEditModel.columnModels[index];
             if (!columnModel || !columnModel.allInput) return "Clear All";
@@ -752,10 +754,9 @@
             return noValue ? "Clear All" : "Apply All";
         }
 
-        // controls the Clear All/Apply All
         // We have 2 ways to determine a disabled input, or rather, when an input should be shown as disabled
         //   1. we check the column beforehand and determine if the input should ALWAYS be disabled
-        //   2.
+        //   2. If the select all dialog is open, the form inputs should be disabled
         vm.inputTypeOrDisabled = function inputTypeOrDisabled(index) {
             try {
                 var model = vm.recordEditModel.columnModels[index];

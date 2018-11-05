@@ -612,7 +612,6 @@
 
         function _callonSelectedRowsChanged (scope, tuples, isSelected) {
             if (scope.onSelectedRowsChangedBind) {
-                console.log("both should be here")
                 return scope.onSelectedRowsChangedBind()(tuples, isSelected);
             } else if (scope.onSelectedRowsChanged) {
                 return scope.onSelectedRowsChanged()(tuples, isSelected);

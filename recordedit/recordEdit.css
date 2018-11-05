@@ -97,14 +97,6 @@ td.entity-value {
   border-left: 1px solid #ddd;
 }
 
-/* #formEdit.createMode > table > tbody >  tr:first-child >  td {
-  height: 48px !important;
-} */
-
-/* #formEdit.editMode > table > tbody >  tr:first-child >  td {
-  padding-top: 7px;
-} */
-
 #formEdit > table > tbody:first-child > tr.shift-form:first-child >  td {
   border-top: 1px solid #ddd;
   margin-top: 0px;
@@ -122,11 +114,6 @@ td.entity-value {
     border-bottom: none;
     word-wrap: break-word;
 }
-
-
-/* td.entity-key, #formEdit >  table > tbody >  tr:first-child >  td:first-child {
-  min-width: 190px;
-} */
 
 .add-button {
   position: absolute;
@@ -146,11 +133,6 @@ td.entity-value {
   color: #999;
 }
 
-/* #formEdit.createMode >  table > tbody >  tr:first-child >  td:first-child {
-  height: 49px !important;
-} */
-
-/* #formEdit.editMode >  table > tbody >  tr:first-child >  td:first-child {} */
 tbody.highlight{
   background-color: #f7f0cf !important;
 }
@@ -170,10 +152,6 @@ tbody.highlight{
     background-color: #eee;
     opacity: 1;
 }
-
-/* #formEdit >  table > tbody >  tr >  td:last-child {
-  border-right: 0px;
-} */
 
 #formEditScroll {
   overflow-x: auto;

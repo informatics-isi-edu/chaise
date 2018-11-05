@@ -444,7 +444,6 @@
                                 if (defaultSet) {
                                     initialModelValue = { url: column.default };
                                 } else if (!inputDisabled) {
-                                    console.log("here");
                                     // If there are no defaults, then just initialize asset columns with the app's default obj
                                     initialModelValue = { url: "" }
                                 }
@@ -466,7 +465,6 @@
 
                             recordEditModel.rows[0][column.name] = initialModelValue;
                         }
-                        console.log(recordEditModel.rows);
 
                         $rootScope.displayReady = true;
                         // if there is a session, user isn't allowed to create

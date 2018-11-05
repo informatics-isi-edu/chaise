@@ -300,21 +300,4 @@
         }
     }])
 
-    .controller('RecordeditInputPopupController', ['$uibModalInstance', 'params', function ($uibModalInstance, params) {
-        var vm = this;
-        vm.submit = submit;
-        vm.cancel = cancel;
-        vm.column = params.column;
-        vm.displayType = params.displayType;
-        vm.inputValue = null;
-
-        function submit() {
-            $uibModalInstance.close(vm.inputValue);
-        }
-
-        function cancel() {
-            $uibModalInstance.dismiss('cancel');
-        }
-    }])
-
 })();
