@@ -41,8 +41,8 @@
     <!-- modal popup input -->
     <div ng-switch-when="popup-select" class="form-group has-feedback input-group modal-popup">
         <label class="sr-only"></label>
-        <div contenteditable="false" class="form-control popup-select-value" ng-style="{'cursor': 'pointer'}" ng-click="::searchPopup()" ng-bind-html="(fkDisplayName.value ? fkDisplayName.value : getDisabledInputValue())"></div>
-        <div class="form-control-feedback coltooltip" ng-hide="!fkDisplayName.value" ng-style="{'cursor': 'pointer', 'right': '40px', 'pointer-events': 'all'}">
+        <div contenteditable="false" class="form-control popup-select-value" ng-style="{'cursor': 'pointer'}" ng-click="::searchPopup()" ng-bind-html="(columnModel.fkDisplayName.value ? columnModel.fkDisplayName.value : getDisabledInputValue())"></div>
+        <div class="form-control-feedback coltooltip" ng-hide="!columnModel.fkDisplayName.value" ng-style="{'cursor': 'pointer', 'right': '40px', 'pointer-events': 'all'}">
             <span class="glyphicon glyphicon-remove coltooltiptext foreignkey-remove" ng-click="::clearForeignKey()" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
         </div>
         <!-- <div class="form-control-feedback" ng-show="showColumnSpinner[rowIndex][column.name]" ng-style="{'right': '60px', 'pointer-events': 'all', 'color': '#C3C3C3'}">
@@ -54,7 +54,7 @@
             </button>
         </span>
         <!-- So that the foreign key input can be validated -->
-        <input type="hidden" ng-model="fkDisplayName.value" />
+        <input type="hidden" ng-model="columnModel.fkDisplayName.value" />
     </div>
 
     <!-- int2 input -->
@@ -104,7 +104,7 @@
 
     <!-- File input -->
     <div ng-switch-when="file">
-        <upload reference="::$root.reference" column="::column" placeholder="getDisabledInputValue()" value="::model.value"></upload>
+        <upload reference="::$root.reference" column="::column" placeholder="getDisabledInputValue()" value="model.value"></upload>
     </div>
 
     <!--JSON input -->

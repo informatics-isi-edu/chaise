@@ -272,14 +272,14 @@
                     }, function dataSelected(tuple) {
                         // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
 
-                        scope.fkDisplayName = tuple.displayname;
+                        scope.columnModel.fkDisplayName = tuple.displayname;
                         scope.model.value = tuple;
                     }, false, false);
                 }
 
                 scope.clearForeignKey = function() {
                     scope.model = null;
-                    scope.fkDisplayName = null;
+                    scope.columnModel.fkDisplayName = null;
                 }
 
                 scope.blurElement = function(e) {

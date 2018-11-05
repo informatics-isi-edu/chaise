@@ -57,6 +57,7 @@
                                         reference: scope.reference
                                     });
                                     scope.value.url = scope.value.file.name;
+                                    console.log(scope.value);
                                     scope.$apply();
                                 }
                             });

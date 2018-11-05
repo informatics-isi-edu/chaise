@@ -22,7 +22,7 @@
         function getDisabledInputValue(column, value) {
             try {
                 var disabled = column.inputDisabled;
-                if (isDisabled(column)) {
+                if (disabled) {
                     if (typeof disabled === 'object') {
                         return disabled.message;
                     } else if ($rootScope.context.mode == $rootScope.context.modes.EDIT) {

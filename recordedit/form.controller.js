@@ -528,7 +528,13 @@
                     meridiem: 'AM'
                 }
             } else if (model.displayType === "file") {
-                model.allInput.value = {};
+                // clear the input by reseting the object and forcing the display to be ""
+                model.allInput.value.url = "";
+                delete model.allInput.value.file;
+                delete model.allInput.value.hatracObj;
+            } else if (model.displayType === "popup-select") {
+                model.fkDisplayName = null;
+                model.allInput.value = null;
             } else {
                 model.allInput.value = null;
             }
@@ -564,7 +570,7 @@
 
             // change view/display model value into an object or string depending on state
             vm.recordEditModel.columnModels.forEach(function (cm) {
-                vm.recordEditModel.rows.forEach(function (row) {
+                vm.recordEditModel.rows.forEach(function (row, index) {
                     var value = row[cm.column.name];
                     if (cm.showSelectAll) {
                         if (cm.displayType == "timestamp") {
@@ -580,7 +586,9 @@
                                 }
                             }
                         } else if (cm.displayType == "file") {
-                            console.log(value);
+                            // copy file values to submission model to preserve them
+                            vm.recordEditModel.submissionRows[index][cm.column.name] = value;
+                            value = value.url;
                         }
                     } else {
                         if (cm.displayType == "timestamp") {
@@ -598,6 +606,11 @@
                                     time: null,
                                     meridiem: 'AM'
                                 }
+                            }
+                        } else if (cm.displayType == "file") {
+                            // copy file values from submission model (if they exist)
+                            if (vm.recordEditModel.submissionRows[index][cm.column.name]) {
+                                value = vm.recordEditModel.submissionRows[index][cm.column.name];
                             }
                         }
                     }
@@ -634,6 +647,11 @@
                         }
                     }
                     row[model.column.name] = value;
+                });
+            } else if (model.displayType == "file") {
+                vm.recordEditModel.rows.forEach(function (row, index) {
+                    // copy file values from submission model
+                    row[model.column.name] = vm.recordEditModel.submissionRows[index][model.column.name];
                 });
             }
         }
@@ -675,15 +693,18 @@
                         row[column.name] = {}
                         Object.keys(value).forEach(function (key) {
                             if (key !== "hatracObj") {
-                                row[column.name][key] = model[key];
+                                row[column.name][key] = value[key];
                             }
                         });
                         // TODO: This is duplicated in the upload-input directive.
                         // Should be removed in both places and only created at submission time
-                        row[column.name].hatracObj = new ERMrest.Upload(row[column.name].file, {
-                            column: column,
-                            reference: $rootScope.reference
-                        });
+                        if (row[column.name].file) {
+                            // if condition guards for "clear all" case
+                            row[column.name].hatracObj = new ERMrest.Upload(row[column.name].file, {
+                                column: column,
+                                reference: $rootScope.reference
+                            });
+                        }
                     } else if (displayType === "timestamp") {
                         row[column.name] = {}
                         row[column.name].date = value.date;
@@ -724,7 +745,7 @@
                 // We don't care if a time value is set or not, time is meaningless without a date
                 if (columnModel.allInput.value && columnModel.allInput.value.date) noValue = false;
             } else if (columnModel.displayType === "file") {
-                if (columnModel.allInput.value && columnModel.allInput.value.uri) noValue = false;
+                if (columnModel.allInput.value && columnModel.allInput.value.url) noValue = false;
             } else {
                 if (columnModel.allInput.value) noValue = false;
             }

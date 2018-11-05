@@ -106,7 +106,7 @@
                                                             <span ng-if="::!column.displayname.isHTML" ng-bind="::column.displayname.value"></span>
                                                         </span>
                                                         <span ng-if="(!form.isDisabled(column, form.prefillCookie) || form.recordEditModel.columnModels[columnIndex].showSelectAll) && form.recordEditModel.rows.length > 1" class="pull-right btn-group">
-                                                            <button id="column-options-{{::form.makeSafeIdAttr(column.displayname.value)}}" type="button" class="btn btn-sm btn-default" ng-click="::form.toggleSelectAll(columnIndex)" tooltip-placement="bottom" uib-tooltip="{{form.recordEditModel.columnModels[columnIndex].showSelectAll ? 'Click to close the set all input.' : 'Click to set a value for all records.'}}">
+                                                            <button id="select-all-{{::form.makeSafeIdAttr(column.displayname.value)}}" type="button" class="btn btn-sm btn-default" ng-click="::form.toggleSelectAll(columnIndex)" tooltip-placement="bottom" uib-tooltip="{{form.recordEditModel.columnModels[columnIndex].showSelectAll ? 'Click to close the set all input.' : 'Click to set a value for all records.'}}">
                                                                 <span class="glyphicon" ng-class="form.recordEditModel.columnModels[columnIndex].showSelectAll ? 'glyphicon-ban-circle' : 'glyphicon-pencil'"></span>
                                                             </button>
                                                         </span>
@@ -255,10 +255,10 @@
                                                         <!-- "The is a row of text" -->
                                                         <div style="position: absolute;">
                                                             <span class="pull-left">Set value for all records: </span>
-                                                            <input-switch class="pull-left" column="column" column-model="form.recordEditModel.columnModels[columnIndex]" model="form.recordEditModel.columnModels[columnIndex].allInput" style="width: 250px; margin: 0px 5px;"></input-switch>
+                                                            <input-switch id="select-all-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" class="pull-left" column="column" column-model="form.recordEditModel.columnModels[columnIndex]" model="form.recordEditModel.columnModels[columnIndex].allInput" style="width: 250px; margin: 0px 5px;"></input-switch>
                                                             <span class="btn-group">
-                                                                <button id="select-all-apply" class="btn btn-primary btn-inverted pull-left" type="button" ng-click="form.applySelectAll(columnIndex)" ng-bind-html="form.showApplyOrClear(columnIndex)"></button>
-                                                                <button id="select-all-cancel" class="btn btn-danger btn-inverted pull-left" type="button" ng-click="form.cancelSelectAll(columnIndex)">Cancel</button>
+                                                                <button id="select-all-apply-{{::form.makeSafeIdAttr(column.displayname.value)}}" class="btn btn-primary btn-inverted pull-left" type="button" ng-click="form.applySelectAll(columnIndex)" ng-bind-html="form.showApplyOrClear(columnIndex)"></button>
+                                                                <button id="select-all-cancel-{{::form.makeSafeIdAttr(column.displayname.value)}}" class="btn btn-danger btn-inverted pull-left" type="button" ng-click="form.cancelSelectAll(columnIndex)">Cancel</button>
                                                             </span>
                                                         </div>
                                                     </td>

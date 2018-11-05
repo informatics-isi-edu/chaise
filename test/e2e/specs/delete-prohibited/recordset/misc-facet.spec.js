@@ -613,7 +613,6 @@ describe("Other facet features, ", function() {
             chaisePage.recordsetPage.getClearCustomFilters().click().then(function () {
                 chaisePage.waitForElementInverse(element(by.id("spinner")));
 
-                browser.pause();
                 expect(chaisePage.recordsetPage.getRows().count()).toEqual(customFilterParams.numRowsWOFilter, "total row count missmatch.");
 
                 expect(chaisePage.recordsetPage.getFacetOptionsText(idx)).toEqual(customFilterParams.optionsWOFilter, "options missmatch.");

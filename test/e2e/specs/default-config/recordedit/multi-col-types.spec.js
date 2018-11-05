@@ -163,68 +163,68 @@ describe('When editing a record', function() {
         it('should submit the right data to the DB', function() {
             // Edit each column with the new row data
             testParams.table_1.row.forEach(function(column) {
-                    var newValue = column.value;
-                    var name = column.name;
-                    switch (column.displayType) {
-                        case 'popup-select':
-                            // Clear the foreign key field for fk_col b/c fk_col needs to be null
-                            if (name === 'fk_col') {
-                                var clearBtns = element.all(by.css('.foreignkey-remove'));
-                                chaisePage.clickButton(clearBtns.get(1));
-                            }
-                            // Select a non-null value for fk_null_col b/c fk_null_col needs to be non-null
-                            if (name === 'fk_null_col') {
-                                element.all(by.css('.modal-popup-btn')).first().click().then(function() {
-                                    return chaisePage.waitForElement(element.all(by.id('divRecordSet')).first());
-                                }).then(function() {
-                                    // Get the first row in the modal popup table, find the row's select-action-buttons, and click the 1st one.
-                                    return chaisePage.recordsetPage.getRows().first().all(by.css('.select-action-button')).first().click();
-                                }).catch(function(error) {
-                                    console.log(error);
-                                    expect('Something went wrong in this promise chain.').toBe('Please see error message.');
-                                });
-                            }
-                            break;
-                        case 'timestamp':
-                        case 'timestamptz':
-                            var inputs = recordEditPage.getTimestampInputsForAColumn(name, 0);
-                            var dateInput = inputs.date, timeInput = inputs.time, meridiemBtn = inputs.meridiem;
-
-                            dateInput.clear().then(function() {
-                                if (newValue) dateInput.sendKeys(newValue.date);
-
-                                return timeInput.clear();
+                var newValue = column.value;
+                var name = column.name;
+                switch (column.displayType) {
+                    case 'popup-select':
+                        // Clear the foreign key field for fk_col b/c fk_col needs to be null
+                        if (name === 'fk_col') {
+                            var clearBtns = element.all(by.css('.foreignkey-remove'));
+                            chaisePage.clickButton(clearBtns.get(1));
+                        }
+                        // Select a non-null value for fk_null_col b/c fk_null_col needs to be non-null
+                        if (name === 'fk_null_col') {
+                            element.all(by.css('.modal-popup-btn')).first().click().then(function() {
+                                return chaisePage.waitForElement(element.all(by.id('divRecordSet')).first());
                             }).then(function() {
-                                if (newValue) timeInput.sendKeys(newValue.time);
+                                // Get the first row in the modal popup table, find the row's select-action-buttons, and click the 1st one.
+                                return chaisePage.recordsetPage.getRows().first().all(by.css('.select-action-button')).first().click();
+                            }).catch(function(error) {
+                                console.log(error);
+                                expect('Something went wrong in this promise chain.').toBe('Please see error message.');
+                            });
+                        }
+                        break;
+                    case 'timestamp':
+                    case 'timestamptz':
+                        var inputs = recordEditPage.getTimestampInputsForAColumn(name, 0);
+                        var dateInput = inputs.date, timeInput = inputs.time, meridiemBtn = inputs.meridiem;
 
-                                if (newValue) return meridiemBtn.click();
-                            }).catch(function(error) {
-                                console.log(error);
-                                expect('Something went wrong in this promise chain.').toBe('Please see error message.');
-                            });
-                            break;
-                        case 'date':
-                            var input = recordEditPage.getDateInputForAColumn(name, 0);
-                            input.clear().then(function() {
-                                 if (newValue) input.sendKeys(newValue);
-                            }).catch(function(error) {
-                                console.log(error);
-                                expect('Something went wrong in this promise chain.').toBe('Please see error message.');
-                            });
-                            break;
-                        case 'boolean':
-                            var dropdown = recordEditPage.getInputById(0, name);
-                            recordEditPage.selectDropdownValue(dropdown, newValue);
-                            break;
-                        default:
-                            var input = recordEditPage.getInputById(0, name);
-                            input.clear().then(function() {
-                                if (newValue) input.sendKeys(newValue);
-                            }).catch(function(error) {
-                                console.log(error);
-                                expect('Something went wrong in this promise chain.').toBe('Please see error message.');
-                            });
-                    }
+                        dateInput.clear().then(function() {
+                            if (newValue) dateInput.sendKeys(newValue.date);
+
+                            return timeInput.clear();
+                        }).then(function() {
+                            if (newValue) timeInput.sendKeys(newValue.time);
+
+                            if (newValue) return meridiemBtn.click();
+                        }).catch(function(error) {
+                            console.log(error);
+                            expect('Something went wrong in this promise chain.').toBe('Please see error message.');
+                        });
+                        break;
+                    case 'date':
+                        var input = recordEditPage.getDateInputForAColumn(name, 0);
+                        input.clear().then(function() {
+                            if (newValue) input.sendKeys(newValue);
+                        }).catch(function(error) {
+                            console.log(error);
+                            expect('Something went wrong in this promise chain.').toBe('Please see error message.');
+                        });
+                        break;
+                    case 'boolean':
+                        var dropdown = recordEditPage.getInputById(0, name);
+                        recordEditPage.selectDropdownValue(dropdown, newValue);
+                        break;
+                    default:
+                        var input = recordEditPage.getInputById(0, name);
+                        input.clear().then(function() {
+                            if (newValue) input.sendKeys(newValue);
+                        }).catch(function(error) {
+                            console.log(error);
+                            expect('Something went wrong in this promise chain.').toBe('Please see error message.');
+                        });
+                }   // match to switch statement
             });
 
 
