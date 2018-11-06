@@ -370,7 +370,7 @@ exports.testPresentation = function (tableParams) {
             expect(mdRecord.isDisplayed()).toBeTruthy();
             return element(by.id('actionbar-4'));
         }).then( function(actionBar){
-            expect(actionBar.getAttribute('innerText')).toBe('Edit  | Add  | View More\n','Action bar text did not match.');
+            expect(actionBar.getAttribute('innerText')).toBe('Edit  | Add  | View More','Action bar text did not match.');
             return browser.executeScript("return $('a.toggle-display-link').click()");
         }).then(function(editLink){
             return element(by.id('entity-4-recTab'));
