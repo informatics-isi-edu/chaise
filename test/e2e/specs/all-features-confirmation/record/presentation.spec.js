@@ -76,7 +76,7 @@ var testParams = {
       id: "2003",
       tocCount: 8,
       tableToShow: 'Categories_5',
-      sidePanelTableOrder:[ 'Main', 'Categories_collection\n (5)',  'media\n \n (1)', 'Categories_collection_2\n (5)',  'Categories_3\n (5)',  'Categories_4\n (5)',  'Categories_5\n (5)',  'Categories_6\n (5)'],
+      sidePanelTableOrder:[ 'Main', 'Categories_collection (5)',  'media (1)', 'Categories_collection_2 (5)',  'Categories_3 (5)',  'Categories_4 (5)',  'Categories_5 (5)',  'Categories_6 (5)'],
       panelHeading: "Contents"
     },
     citationParams: {
