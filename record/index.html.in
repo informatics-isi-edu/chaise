@@ -120,6 +120,10 @@
                                 </a>
                             </li>
                         </div>
+                        <li id="rt-toc-loading" ng-show="loading" class="toc-loading">
+                            <img class="spinner spinner-sm" src="../common/styles/images/loader.gif"/>
+                            Loading...
+                        </li>
                     </ul>
                 </div>
             </div>
