@@ -3,6 +3,45 @@
 
     angular.module('chaise.inputs', ['chaise.validators', 'chaise.utils'])
 
+    .factory('inputUtils', ['dataFormats', '$rootScope', function(dataFormats, $rootScope) {
+        function applyCurrentDatetime(displayType) {
+            if (displayType === 'timestamp' || displayType === 'timestamptz') {
+                return {
+                    date: moment().format(dataFormats.date),
+                    time: moment().format(dataFormats.time24),
+                    meridiem: moment().format('A')
+                }
+            }
+            return moment().format(dataFormats.date);
+        }
+
+        function clearDatetime(columnType) {
+            if (columnType === 'timestamp' || columnType === 'timestamptz') {
+                return {date: null, time: null, meridiem: 'AM'};
+            }
+            return null;
+        }
+
+        function fileExtensionTypes(column) {
+            return column.filenameExtFilter.join(", ");
+        }
+
+        function toggleMeridiem(meridiem) {
+            // Do the toggling
+            if (meridiem.charAt(0).toLowerCase() === 'a') {
+                return 'PM';
+            }
+            return 'AM';
+        }
+
+        return {
+            applyCurrentDatetime: applyCurrentDatetime,
+            clearDatetime: clearDatetime,
+            fileExtensionTypes: fileExtensionTypes,
+            toggleMeridiem: toggleMeridiem
+        };
+    }])
+
     .directive('rangeInputs', ['dataFormats', 'integerLimits', 'UriUtils', function(dataFormats, integerLimits, UriUtils) {
         return {
             restrict: 'E',
@@ -174,7 +213,7 @@
         }
     }])
 
-    .directive('inputSwitch', ['dataFormats', 'integerLimits', 'maskOptions', 'modalBox', 'modalUtils', 'UriUtils', '$log', '$rootScope', function(dataFormats, integerLimits, maskOptions, modalBox, modalUtils, UriUtils, $log, $rootScope) {
+    .directive('inputSwitch', ['dataFormats', 'inputUtils', 'integerLimits', 'maskOptions', 'modalBox', 'modalUtils', 'UriUtils', '$log', '$rootScope', function(dataFormats, inputUtils, integerLimits, maskOptions, modalBox, modalUtils, UriUtils, $log, $rootScope) {
         return {
             restrict: 'E',
             templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/inputs/inputSwitch.html',
@@ -187,9 +226,7 @@
                 scope.model = {};
                 scope.dataFormats = dataFormats;
                 scope.maskOptions = maskOptions;
-                scope.fileExtensionTypes = function () {
-                    return scope.column.filenameExtFilter.join(", ");
-                }
+                scope.fileExtensionTypes = inputUtils.fileExtensionTypes;
 
                 scope.int2min = integerLimits.INT_2_MIN;
                 scope.int2max = integerLimits.INT_2_MAX;
@@ -227,25 +264,14 @@
                 }
 
                 // Assigns the current date or timestamp to inputValue
-                scope.applyCurrentDatetime = function() {
-                    if (scope.columnModel.displayType === 'timestamp' || scope.columnModel.displayType === 'timestamptz') {
-                        return scope.model.value = {
-                            date: moment().format(dataFormats.date),
-                            time: moment().format(dataFormats.time24),
-                            meridiem: moment().format('A')
-                        }
-                    }
-                    return scope.model.value = moment().format(dataFormats.date);
+                scope.applyCurrentDatetime = function () {
+                    scope.model.value = inputUtils.applyCurrentDatetime(scope.columnModel.displayType);
                 }
 
                 // Toggle between AM/PM for a time input's model
                 scope.toggleMeridiem = function() {
-                    // Do the toggling
-                    var meridiem = scope.model.value.meridiem;
-                    if (meridiem.charAt(0).toLowerCase() === 'a') {
-                        return scope.model.value.meridiem = 'PM';
-                    }
-                    return scope.model.value.meridiem = 'AM';
+                    var value = scope.model.value;
+                    value.meridiem = inputUtils.toggleMeridiem(value.meridiem);
                 }
 
                 scope.searchPopup = function() {
@@ -293,6 +319,7 @@
                     } else {
                         scope.model.value = null;
                     }
+                    scope.model.value = inputUtils.
                 }
             }
         }

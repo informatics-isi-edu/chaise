@@ -3,7 +3,7 @@
 
     angular.module('chaise.recordEdit')
 
-    .factory('recordEditAppUtils', ['dataFormats', 'UiUtils', '$log', '$rootScope', function (dataFormats, UiUtils, $log, $rootScope) {
+    .factory('recordEditAppUtils', ['UiUtils', '$log', '$rootScope', function (UiUtils, $log, $rootScope) {
         function columnToDisplayType(column, prefillCookie) {
             var displayType;
 

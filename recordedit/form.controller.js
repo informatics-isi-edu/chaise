@@ -3,8 +3,8 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'dataFormats', 'DataUtils', 'ErrorService', 'integerLimits', 'logActions', 'maskOptions', 'messageMap', 'modalBox', 'modalUtils', 'recordCreate', 'recordEditAppUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
-        function FormController(AlertsService, dataFormats, DataUtils, ErrorService, integerLimits, logActions, maskOptions, messageMap, modalBox, modalUtils, recordCreate, recordEditAppUtils, recordEditModel, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
+    .controller('FormController', ['AlertsService', 'dataFormats', 'DataUtils', 'ErrorService', 'inputUtils', 'integerLimits', 'logActions', 'maskOptions', 'messageMap', 'modalBox', 'modalUtils', 'recordCreate', 'recordEditAppUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
+        function FormController(AlertsService, dataFormats, DataUtils, ErrorService, inputUtils, integerLimits, logActions, maskOptions, messageMap, modalBox, modalUtils, recordCreate, recordEditAppUtils, recordEditModel, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
         var context = $rootScope.context;
         var mainBodyEl;
@@ -12,7 +12,6 @@
         vm.recordEditModel = recordEditModel;
         vm.dataFormats = dataFormats;
         vm.editMode = (context.mode == context.modes.EDIT ? true : false);
-        vm.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
         vm.booleanValues = context.booleanValues;
         vm.mdHelpLinks = { // Links to Markdown references to be used in help text
             editor: "https://jbt.github.io/markdown-editor/#RZDLTsMwEEX3/opBXQCRmqjlsYBVi5CKxGOBWFWocuOpM6pjR54Jbfl6nKY08mbO1dwj2yN4pR+ENx23Juw8PBuSEJU6B3zwovdgAzIED1IhONwINNqjezxyRG6dkLcQWmlaAWIwxI3TBzT/pUi2klypLJsHZ0BwL1kGSq1eRDsq6Rf7cKXUCBaoTeebJBho2tGAN0cc+LbnIbg7BUNyr9SnrhuH6dUsCjKYNYm4m+bap3McP6L2NqX/y+9tvcaYLti3Jvm5Ns2H3k0+FBdpvfsGDUvuHY789vuqEmn4oShsCNZhXob6Ou+3LxmqsAMJQL50rUHQHqjWFpW6WM7gpPn6fAIXbBhUUe9yS1K1605XkN+EWGuhksfENEbTFmWlibGoNQvG4ijlouVy3MQE8cAVoTO7EE2ibd54e/0H",
@@ -40,7 +39,6 @@
         vm.showMultiInsert = false;
         vm.copyFormRow = copyFormRow;
         vm.removeFormRow = removeFormRow;
-        vm.deleteRecord = deleteRecord;
 
         vm.inputType = null;
         vm.int2min = integerLimits.INT_2_MIN;
@@ -54,7 +52,7 @@
         vm.datepickerOpened = {}; // Tracks which datepickers on the form are open
         vm.toggleMeridiem = toggleMeridiem;
         vm.clearModel = clearModel;
-        vm.fileExtensionTypes = fileExtensionTypes;
+        vm.fileExtensionTypes = inputUtils.fileExtensionTypes;
         vm.blurElement = blurElement;
         vm.maskOptions = maskOptions;
         vm.prefillCookie = $cookies.getObject(context.queryParams.prefill);
@@ -258,45 +256,6 @@
             $window.location.href = uri;
         }
 
-        function deleteRecord() {
-            var errorData = {};
-            if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
-                modalUtils.showModal({
-                    templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/delete-link/confirm_delete.modal.html",
-                    controller: "ConfirmDeleteController",
-                    controllerAs: "ctrl",
-                    size: "sm"
-                }, function success() {
-                    $rootScope.showSpinner = true;
-                    // user accepted prompt to delete
-                    $rootScope.reference.delete({action: logActions.recordEditDelete}).then(onDelete, function deleteFailure(response) {
-                        $rootScope.showSpinner = false;
-                        if (typeof response !== "string") {
-                          errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
-                          errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
-                          response.errorData = errorData;
-                          ErrorService.handleException(response, true); // call error module with isDismissible = True
-                        }
-                    });
-                }, function onError (exception) {
-                    $rootScope.showSpinner = false;
-                    AlertsService.addAlert(exception.message, 'error');
-                }, false);
-            } else {
-                $rootScope.showSpinner = true;
-                $rootScope.reference.delete().then(onDelete, function deleteFailure(response) {
-                    $rootScope.showSpinner = false;
-                    errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
-                    errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
-                    response.errorData = errorData;
-                    ErrorService.handleException(response, true); // call error module with isDismissible = True
-                }).catch(function (exception) {
-                    $rootScope.showSpinner = false;
-                    AlertsService.addAlert(exception.message, 'error');
-                });
-            }
-        }
-
         // NOTE: If changes are made to this function, changes should also be made to the similar function in the inputSwitch directive
         // TODO: remove when RE has been refactored to use the inputSwitch directive for all form inputs
         function searchPopup(columnIndex, rowIndex, column) {
@@ -472,43 +431,23 @@
             }, 10);
         }
 
-        // NOTE: If changes are made to this function, changes should also be made to the similar function in the inputSwitch directive
-        // TODO: remove when RE has been refactored to use the inputSwitch directive for all form inputs
         // Assigns the current date or timestamp to a column's model
         function applyCurrentDatetime(modelIndex, columnName, columnType) {
-            if (columnType === 'timestamp' || columnType === 'timestamptz') {
-                return vm.recordEditModel.rows[modelIndex][columnName] = {
-                    date: moment().format(dataFormats.date),
-                    time: moment().format(dataFormats.time24),
-                    meridiem: moment().format('A')
-                }
-            }
-            return vm.recordEditModel.rows[modelIndex][columnName] = moment().format(dataFormats.date);
+            vm.recordEditModel.rows[modelIndex][columnName] = inputUtils.applyCurrentDatetime(columnType);
         }
 
-        // NOTE: If changes are made to this function, changes should also be made to the similar function in the inputSwitch directive
-        // TODO: remove when RE has been refactored to use the inputSwitch directive for all form inputs
         // Toggle between AM/PM for a time input's model
         function toggleMeridiem(modelIndex, columnName) {
+            var model = vm.recordEditModel.rows[modelIndex][columnName];
             // If the entire timestamp model doesn't exist, initialize it with a default meridiem
-            if (!vm.recordEditModel.rows[modelIndex][columnName]) {
-                vm.recordEditModel.rows[modelIndex][columnName] = {meridiem: 'AM'};
-            }
+            if (!model) model = {meridiem: 'AM'};
+
             // Do the toggling
-            var meridiem = vm.recordEditModel.rows[modelIndex][columnName].meridiem;
-            if (meridiem.charAt(0).toLowerCase() === 'a') {
-                return vm.recordEditModel.rows[modelIndex][columnName].meridiem = 'PM';
-            }
-            return vm.recordEditModel.rows[modelIndex][columnName].meridiem = 'AM';
+            model.meridiem = inputUtils.toggleMeridiem(model.meridiem);
         }
 
-        // NOTE: If changes are made to this function, changes should also be made to the similar function in the inputSwitch directive
-        // TODO: remove when RE has been refactored to use the inputSwitch directive for all form inputs
         function clearModel(modelIndex, columnName, columnType) {
-            if (columnType === 'timestamp' || columnType === 'timestamptz') {
-                return vm.recordEditModel.rows[modelIndex][columnName] = {date: null, time: null, meridiem: 'AM'};
-            }
-            return vm.recordEditModel.rows[modelIndex][columnName] = null;
+            vm.recordEditModel.rows[modelIndex][columnName] = inputUtils.clearDatetime(columnType);
         }
 
         function isRequired(column) {
@@ -762,11 +701,6 @@
                 var model = vm.recordEditModel.columnModels[index];
                 return model.showSelectAll ? "disabled" : model.displayType;
             } catch (err) {}
-        }
-
-        function fileExtensionTypes(column) {
-            var fileExtensionFilter = column.filenameExtFilter;
-            return fileExtensionFilter.join(", ");
         }
 
         // NOTE: If changes are made to this function, changes should also be made to the similar function in the inputSwitch directive
