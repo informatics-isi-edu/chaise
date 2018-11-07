@@ -116,7 +116,7 @@
                                 <a uib-tooltip="{{rtm.displayname.value}}" tooltip-placement="bottom" chaise-enable-tooltip-width>
                                     <span ng-if="::rtm.displayname.isHTML" ng-bind-html="::rtm.displayname.value"></span>
                                     <span ng-if="::!rtm.displayname.isHTML" ng-bind="::rtm.displayname.value"></span>
-                                    <span>({{rtm.tableModel.rowValues.length}})</span>
+                                    <span>({{rtm.tableModel.rowValues.length}}{{rtm.tableModel.page.hasNext ? '+' : ''}})</span>
                                 </a>
                             </li>
                         </div>

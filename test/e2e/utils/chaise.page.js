@@ -899,7 +899,7 @@ var recordPage = function() {
     }
 
     this.getSidePanelTableTitles = function() {
-        return browser.executeScript("return $('.columns-container li').map(function(i, a) { return a.textContent.trim(); });");
+        return browser.executeScript("return $('.columns-container li').map(function(i, a) { return a.innerText.trim(); });");
     }
 
     this.getSidePanelFiddler = function() {
