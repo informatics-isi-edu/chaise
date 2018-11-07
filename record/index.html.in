@@ -104,7 +104,7 @@
             </div>
 
             <div class="faceting-container" style="height: 100%;" >
-                <h2 class="sidePanelHeading">Contents <img ng-show="loading" class="spinner spinner-sm" src="../common/styles/images/loader.gif"/></h2>
+                <h2 class="sidePanelHeading">Contents</h2>
                 <div class="columns-container">
                     <ul>
                         <li id="main-to-top" class="toc-heading" ng-click="scrollToTop()">
@@ -120,7 +120,7 @@
                                 </a>
                             </li>
                         </div>
-                        <li id="rt-toc-loading" ng-show="loading" class="toc-loading">
+                        <li id="rt-toc-loading" ng-show="loading" class="toc-loading" style="font-weight: 100;">
                             <img class="spinner spinner-sm" src="../common/styles/images/loader.gif"/>
                             Loading...
                         </li>
