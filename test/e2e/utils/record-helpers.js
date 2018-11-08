@@ -914,8 +914,8 @@ exports.testAddRelatedTable = function (params, isInline, inputCallback) {
 		});
 
 		it ("the opened form should have the prefill value for foreignkey.", function () {
-			var fkInput = chaisePage.recordEditPage.getForeignKeyInputDisplay(params.columnDisplayname, 0);
-			expect(fkInput.getText()).toBe(params.columnValue, "value missmatch");
+            var fkInput = chaisePage.recordEditPage.getInputById(0, params.columnDisplayname);
+			expect(fkInput.getAttribute('value')).toBe(params.columnValue, "value missmatch");
 			expect(fkInput.getAttribute('disabled')).toBe('true', "column was enabled.");
 		});
 

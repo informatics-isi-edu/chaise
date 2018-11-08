@@ -1,4 +1,4 @@
-<div ng-switch="columnModel.displayType" ng-form="inputContainer">
+<div ng-switch="columnModel.inputType" ng-form="inputContainer">
 
     <!-- date input-->
     <div ng-switch-when="date">
@@ -6,7 +6,7 @@
             <input class="form-control" type="text" ng-model="model.value" placeholder="{{dataFormats.date}}" name="{{::column.name}}" ui-mask="{{maskOptions.date.mask}}" ui-options="maskOptions.date.options" model-view-value="true" date></input>
             <span class="input-group-btn">
                 <button type="button" name="{{::column.name}}-today" class="btn btn-primary btn-inverted" ng-click="::applyCurrentDatetime();">Today</button>
-                <button type="button" name="{{::column.name}}-clear" class="btn btn-danger btn-inverted" ng-click="::removeValue()">Clear</button>
+                <button type="button" name="{{::column.name}}-clear" class="btn btn-danger btn-inverted" ng-click="::clearDatetime()">Clear</button>
             </span>
         </div>
     </div>
@@ -32,7 +32,7 @@
             <div class="col-xs-12">
                 <div class="btn-group pull-right" role="group">
                     <button type="button" name="{{::column.name}}-now" class="btn btn-primary btn-inverted" ng-click="::applyCurrentDatetime();">Now</button>
-                    <button type="button" name="{{::column.name}}-clear" class="btn btn-danger btn-inverted" ng-click="::removeValue();">Clear</button>
+                    <button type="button" name="{{::column.name}}-clear" class="btn btn-danger btn-inverted" ng-click="::clearDatetime();">Clear</button>
                 </div>
             </div>
         </div>

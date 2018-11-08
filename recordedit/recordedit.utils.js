@@ -3,10 +3,9 @@
 
     angular.module('chaise.recordEdit')
 
-    .factory('recordEditAppUtils', ['UiUtils', '$log', '$rootScope', function (UiUtils, $log, $rootScope) {
-        function columnToDisplayType(column, prefillCookie) {
-            var displayType;
+    .factory('recordEditAppUtils', ['InputUtils', 'UiUtils', '$log', '$rootScope', function (InputUtils, UiUtils, $log, $rootScope) {
 
+        function columnToInputType(column, prefillCookie) {
             if (isDisabled(column, prefillCookie)) {
                 return 'disabled';
             } else if (column.isForeignKey) {
@@ -14,47 +13,22 @@
             } else if (column.isAsset) {
                 return 'file';
             } else {
-                return UiUtils.getDisplayType(column.type);
+                return UiUtils.getInputType(column.type);
             }
         }
 
-        // used as placeholder text
-        function getDisabledInputValue(column, value) {
-            try {
-                var disabled = column.inputDisabled;
-                if (disabled) {
-                    if (typeof disabled === 'object') {
-                        return disabled.message;
-                    } else if ($rootScope.context.mode == $rootScope.context.modes.EDIT) {
-                        return value;
-                    }
-                    return '';
-                } else if (column.isForeignKey) {
-                    return 'Select a value';
-                } else if (column.isAsset) {
-                    return "No file Selected";
-                }
-            } catch (e) {
-                $log.info(e);
+        function isDisabled(column, cookie) {
+            var disabled = InputUtils.isDisabled(column);
+            if (disabled) {
+                return true;
+            } else if (cookie) {
+                return cookie.constraintName == column.name;
             }
-        }
-
-        function isDisabled(column, prefillCookie) {
-            try {
-                if (column.inputDisabled) {
-                    return true;
-                } else if (prefillCookie) {
-                    return prefillCookie.constraintName == column.name;
-                }
-                return false;
-            } catch (e) {
-                $log.info(e);
-            }
+            return false;
         }
 
         return {
-            columnToDisplayType: columnToDisplayType,
-            getDisabledInputValue: getDisabledInputValue,
+            columnToInputType: columnToInputType,
             isDisabled: isDisabled
         };
     }]);

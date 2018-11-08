@@ -76,11 +76,11 @@
         }]);
     })
 
-    .run(['AlertsService', 'dataFormats', 'DataUtils', 'ERMrest', 'ErrorService', 'FunctionUtils', 'headInjector', 'logActions', 'MathUtils', 'recordEditAppUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', 'messageMap', 'Errors',
-        function runRecordEditApp(AlertsService, dataFormats, DataUtils, ERMrest, ErrorService, FunctionUtils, headInjector, logActions, MathUtils, recordEditAppUtils, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies, messageMap, Errors) {
+    .run(['AlertsService', 'dataFormats', 'DataUtils', 'ERMrest', 'ErrorService', 'FunctionUtils', 'headInjector', 'InputUtils', 'logActions', 'MathUtils', 'recordEditAppUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', 'messageMap', 'Errors',
+        function runRecordEditApp(AlertsService, dataFormats, DataUtils, ERMrest, ErrorService, FunctionUtils, headInjector, InputUtils, logActions, MathUtils, recordEditAppUtils, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies, messageMap, Errors) {
 
         var session,
-            context = { booleanValues: ['', true, false] };
+            context = {};
 
         var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
         $rootScope.showColumnSpinner = [{}];
@@ -234,6 +234,7 @@
 
                         // Update submission model
                         var columnNames = Object.keys(cookie.keys);
+                        console.log(columnNames);
                         columnNames.forEach(function(colName) {
                             var colValue = cookie.keys[colName];
                             recordEditModel.submissionRows[newRow][colName] = colValue;
@@ -307,58 +308,45 @@
                                     recordEditModel.columnModels[i] = {
                                         allInput: null,
                                         column: column,
-                                        displayType: recordEditAppUtils.columnToDisplayType(column, $rootScope.cookieObj),
+                                        inputType: recordEditAppUtils.columnToInputType(column, $rootScope.cookieObj),
                                         highlightRow: false,
                                         showSelectAll: false
                                     };
 
-                                    // If input is disabled, there's no need to transform the column value.
-                                    if (column.getInputDisabled(context.appContext)) {
-                                        // if not copy, populate the field without transforming it
-                                        if (context.mode != context.modes.COPY) {
-                                            if (column.type.name == "timestamptz") {
-                                                recordEditModel.rows[j][column.name] = moment(values[i]).format(dataFormats.datetime.return);
-                                            } else {
-                                                recordEditModel.rows[j][column.name] = values[i];
-                                            }
-                                        }
-                                        continue;
-                                    }
+                                    var colModel = recordEditModel.columnModels[i];
+
+                                    // If input is disabled, and it's copy, we don't want to copy the value
+                                    if (colModel.inputType == "disabled" && context.mode == context.modes.COPY) continue;
 
                                     // Transform column values for use in view model
+                                    var options = { outputType: "object" }
                                     switch (column.type.name) {
                                         case "timestamp":
+                                            // If input is disabled, there's no need to transform the column value.
+                                            value = colModel.inputType == "disabled" ? values[i] : InputUtils.formatDatetime(values[i], options);
+                                            break;
                                         case "timestamptz":
-                                            if (values[i]) {
-                                                var ts = moment(values[i]);
-                                                value = {
-                                                    date: ts.format(dataFormats.date),
-                                                    time: ts.format(dataFormats.time12),
-                                                    meridiem: ts.format('A')
-                                                };
-                                            } else {
-                                                value = {
-                                                    date: null,
-                                                    time: null,
-                                                    meridiem: 'AM'
-                                                };
+                                            if (colModel.inputType == "disabled") {
+                                                options.outputType = "string";
+                                                options.outputMomentFormat = dataFormats.datetime.return;
                                             }
+                                            value = InputUtils.formatDatetime(values[i], options);
                                             break;
                                         case "int2":
                                         case "int4":
                                         case "int8":
-                                            var intVal = parseInt(values[i], 10);
-                                            value = (!isNaN(intVal) ? intVal : null);
+                                            // If input is disabled, there's no need to transform the column value.
+                                            value = colModel.inputType == "disabled" ? values[i] : InputUtils.formatInt(values[i]);
                                             break;
                                         case "float4":
                                         case "float8":
                                         case "numeric":
-                                            var floatVal = parseFloat(values[i]);
-                                            value = (!isNaN(floatVal) ? floatVal : null);
+                                            // If input is disabled, there's no need to transform the column value.
+                                            value = colModel.inputType == "disabled" ? values[i] : InputUtils.formatFloat(values[i]);
                                             break;
                                         default:
                                             // the structure for asset type columns is an object with a 'url' property
-                                            if (column.isAsset) {
+                                            if (column.isAsset && colModel.inputType !== "disabled") {
                                                 value = { url: values[i] || "" };
                                             } else {
                                                 value = values[i];
@@ -402,6 +390,10 @@
                         $rootScope.tableDisplayName = $rootScope.reference.displayname;
                         $rootScope.tableComment = $rootScope.reference.table.comment;
 
+                        if (context.queryParams.prefill) {
+                            console.log(recordEditModel.rows);
+                        }
+
                         // populate defaults
                         for (var i = 0; i < $rootScope.reference.columns.length; i++) {
                             // default model initialiation is null
@@ -410,57 +402,54 @@
                             recordEditModel.columnModels[i] = {
                                 allInput: null,
                                 column: column,
-                                displayType: recordEditAppUtils.columnToDisplayType(column, $rootScope.cookieObj),
+                                inputType: recordEditAppUtils.columnToInputType(column, $rootScope.cookieObj),
                                 highlightRow: false,
                                 showSelectAll: false
                             };
 
-                            if (recordEditModel.rows[0][column.name]) {
-                                // check the recordEditModel to see if the value was set because of a prefill condition
-                                continue;
-                            }
+                            var colModel = recordEditModel.columnModels[i];
+
+                            // check the recordEditModel to see if the value was set because of a prefill condition
+                            if (recordEditModel.rows[0][column.name]) continue;
 
                             // only want to set primitive values in the input fields so make sure it isn't a function, null, or undefined
                             var defaultSet = (column.default !== undefined && column.default !== null);
-                            // if no default is set, certain inputs have different model structures based on the input being disabled or not
-                            var inputDisabled = (column.getInputDisabled(context.appContext));
 
-                            // timestamp[tx] and asset columns have default model objects if their inputs are NOT disabled
-                            if ((column.type.name === 'timestamp' || column.type.name === 'timestamptz')) {
-                                // setup if column is type timestamp[tz]
-                                if (defaultSet) {
-                                    var ts = moment(column.default);
-                                    if (inputDisabled) {
-                                        initialModelValue = ( column.type.name === 'timestamp' ? ts.format(dataFormats.datetime.display) : ts.format(dataFormats.datetime.displayZ) );
+                            var tsOptions = {
+                                outputType: colModel.inputType == "disabled" ? "string" : "object",
+
+                            }
+                            switch (column.type.name) {
+                                // timestamp[tz] and asset columns have default model objects if their inputs are NOT disabled
+                                case 'timestamp':
+                                    tsOptions.outputMomentFormat = dataFormats.datetime.display;
+                                    // formatDatetime takes care of column.default if null || undefined
+                                    initialModelValue = InputUtils.formatDatetime(column.default, tsOptions);
+                                    break;
+                                case 'timestamptz':
+                                    tsOptions.outputMomentFormat = dataFormats.datetime.displayZ;
+                                    // formatDatetime takes care of column.default if null || undefined
+                                    initialModelValue = InputUtils.formatDatetime(column.default, tsOptions);
+                                    break;
+                                default:
+                                    if (column.isAsset) {
+                                        initialModelValue = InputUtils.formatFile(column.default, colModel.inputType == "disabled" ? "string" : "object");
+                                    } else if (column.isForeignKey) {
+                                        if (defaultSet) {
+                                            initialModelValue = column.default;
+
+                                            // initialize foreignKey data
+                                            recordEditModel.foreignKeyData[0][column.foreignKey.name] = column.defaultValues;
+
+                                            // get the actual foreign key data
+                                            getForeignKeyData(0, column.name, column.foreignKey.name, column.defaultReference, {action: logActions.recordeditDefault});
+                                        }
                                     } else {
-                                        initialModelValue = { date: ts.format(dataFormats.date), time: ts.format(dataFormats.time12), meridiem: ts.format('A') };
+                                        // all other column types
+                                        if (defaultSet) {
+                                            initialModelValue = column.default;
+                                        }
                                     }
-                                } else if (!inputDisabled) {
-                                    // If there are no defaults, then just initialize timestamp[tz] columns with the app's default obj
-                                    initialModelValue = { date: null, time: null, meridiem: 'AM' };
-                                }
-                            } else if (column.isAsset) {
-                                // setup if column is type asset
-                                if (defaultSet) {
-                                    initialModelValue = { url: column.default };
-                                } else if (!inputDisabled) {
-                                    // If there are no defaults, then just initialize asset columns with the app's default obj
-                                    initialModelValue = { url: "" }
-                                }
-                            } else if (column.isForeignKey) {
-                                if (defaultSet) {
-                                    initialModelValue =  column.default;
-                                    recordEditModel.foreignKeyData[0][column.foreignKey.name] = column.defaultValues;
-
-                                    // get the actual foreign key data
-                                    getForeignKeyData(0, column.name, column.foreignKey.name, column.defaultReference, {action: logActions.recordeditDefault});
-
-                                }
-                            } else {
-                                // all other column types
-                                if (defaultSet) {
-                                    initialModelValue = column.default;
-                                }
                             }
 
                             recordEditModel.rows[0][column.name] = initialModelValue;

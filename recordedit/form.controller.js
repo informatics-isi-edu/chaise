@@ -3,8 +3,8 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'dataFormats', 'DataUtils', 'ErrorService', 'inputUtils', 'integerLimits', 'logActions', 'maskOptions', 'messageMap', 'modalBox', 'modalUtils', 'recordCreate', 'recordEditAppUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
-        function FormController(AlertsService, dataFormats, DataUtils, ErrorService, inputUtils, integerLimits, logActions, maskOptions, messageMap, modalBox, modalUtils, recordCreate, recordEditAppUtils, recordEditModel, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
+    .controller('FormController', ['AlertsService', 'dataFormats', 'DataUtils', 'ErrorService', 'InputUtils', 'integerLimits', 'logActions', 'maskOptions', 'messageMap', 'modalBox', 'modalUtils', 'recordCreate', 'recordEditAppUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
+        function FormController(AlertsService, dataFormats, DataUtils, ErrorService, InputUtils, integerLimits, logActions, maskOptions, messageMap, modalBox, modalUtils, recordCreate, recordEditAppUtils, recordEditModel, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
         var context = $rootScope.context;
         var mainBodyEl;
@@ -12,14 +12,14 @@
         vm.recordEditModel = recordEditModel;
         vm.dataFormats = dataFormats;
         vm.editMode = (context.mode == context.modes.EDIT ? true : false);
-        vm.booleanValues = context.booleanValues;
+        vm.booleanValues = InputUtils.booleanValues;
         vm.mdHelpLinks = { // Links to Markdown references to be used in help text
             editor: "https://jbt.github.io/markdown-editor/#RZDLTsMwEEX3/opBXQCRmqjlsYBVi5CKxGOBWFWocuOpM6pjR54Jbfl6nKY08mbO1dwj2yN4pR+ENx23Juw8PBuSEJU6B3zwovdgAzIED1IhONwINNqjezxyRG6dkLcQWmlaAWIwxI3TBzT/pUi2klypLJsHZ0BwL1kGSq1eRDsq6Rf7cKXUCBaoTeebJBho2tGAN0cc+LbnIbg7BUNyr9SnrhuH6dUsCjKYNYm4m+bap3McP6L2NqX/y+9tvcaYLti3Jvm5Ns2H3k0+FBdpvfsGDUvuHY789vuqEmn4oShsCNZhXob6Ou+3LxmqsAMJQL50rUHQHqjWFpW6WM7gpPn6fAIXbBhUUe9yS1K1605XkN+EWGuhksfENEbTFmWlibGoNQvG4ijlouVy3MQE8cAVoTO7EE2ibd54e/0H",
             cheatsheet: "http://commonmark.org/help/"
         };
         vm.isDisabled = recordEditAppUtils.isDisabled;
         vm.isRequired = isRequired;
-        vm.getDisabledInputValue = recordEditAppUtils.getDisabledInputValue;
+        vm.getDisabledInputValue = getDisabledInputValue;
 
         vm.alerts = AlertsService.alerts;
         vm.closeAlert = AlertsService.deleteAlert;
@@ -48,12 +48,13 @@
         vm.int8min = integerLimits.INT_8_MIN;
         vm.int8max = integerLimits.INT_8_MAX;
 
+        // 3 following functions defined below
         vm.applyCurrentDatetime = applyCurrentDatetime;
-        vm.datepickerOpened = {}; // Tracks which datepickers on the form are open
         vm.toggleMeridiem = toggleMeridiem;
-        vm.clearModel = clearModel;
-        vm.fileExtensionTypes = inputUtils.fileExtensionTypes;
-        vm.blurElement = blurElement;
+        vm.clearDatetime = clearDatetime;
+        //
+        vm.fileExtensionTypes = InputUtils.fileExtensionTypes;
+        vm.blurElement = InputUtils.blurElement;
         vm.maskOptions = maskOptions;
         vm.prefillCookie = $cookies.getObject(context.queryParams.prefill);
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
@@ -105,16 +106,18 @@
                         case "timestamp":
                         case "timestamptz":
                             if (vm.readyToSubmit) {
-                                if (rowVal.date && rowVal.time && rowVal.meridiem) {
-                                    rowVal = moment(rowVal.date + rowVal.time + rowVal.meridiem, dataFormats.date + dataFormats.time12 + 'A').format(dataFormats.datetime.submission);
-                                } else if (rowVal.date && rowVal.time === null) {
-                                    rowVal.time = '00:00:00';
-                                    rowVal = moment(rowVal.date + rowVal.time + rowVal.meridiem, dataFormats.date + dataFormats.time12 + 'A').format(dataFormats.datetime.submission);
-                                // in create if the user doesn't change the timestamp field, it will be an object in form {time: null, date: null, meridiem: AM}
-                                // meridiem should never be null,time can be left empty (null) but the case above would catch that.
-                                } else if (!rowVal.date) {
-                                    rowVal = null;
+                                var options = {
+                                    outputType: "string",
+                                    currentMomentFormat: dataFormats.date + dataFormats.time12 + 'A',
+                                    outputMomentFormat: dataFormats.datetime.submission
                                 }
+
+                                // in create if the user doesn't change the timestamp field, it will be an object in form {time: null, date: null, meridiem: AM}
+                                // meridiem should never be null, time can be left empty (null) the case below will catch that.
+                                if (rowVal.time === null) rowVal.time = '00:00:00';
+                                var value = rowVal.date ? rowVal.date + rowVal.time + rowVal.meridiem : null;
+
+                                rowVal = InputUtils.formatDatetime(value, options);
                             }
                             break;
                         case "json":
@@ -258,10 +261,7 @@
 
         // NOTE: If changes are made to this function, changes should also be made to the similar function in the inputSwitch directive
         // TODO: remove when RE has been refactored to use the inputSwitch directive for all form inputs
-        function searchPopup(columnIndex, rowIndex, column) {
-
-            if (vm.isDisabled(column, vm.prefillCookie)) return;
-
+        function searchPopup(rowIndex, column) {
             var originalTuple,
                 editOrCopy = true,
                 params = {};
@@ -431,27 +431,38 @@
             }, 10);
         }
 
+        function getDisabledInputValue(column, value) {
+            var disabledValue = InputUtils.getDisabledInputValue(column);
+            // if value is empty string and we are in edit mode, use the previous value
+            if (disabledValue == '' && context.mode == context.modes.EDIT) {
+                disabledValue = value;
+            }
+
+            return disabledValue;
+        }
+
         // Assigns the current date or timestamp to a column's model
         function applyCurrentDatetime(modelIndex, columnName, columnType) {
-            vm.recordEditModel.rows[modelIndex][columnName] = inputUtils.applyCurrentDatetime(columnType);
+            vm.recordEditModel.rows[modelIndex][columnName] = InputUtils.applyCurrentDatetime(columnType);
         }
 
         // Toggle between AM/PM for a time input's model
         function toggleMeridiem(modelIndex, columnName) {
             var model = vm.recordEditModel.rows[modelIndex][columnName];
-            // If the entire timestamp model doesn't exist, initialize it with a default meridiem
+            // If the entire timestamp model doesn't exist, initialize it with a default meridiem before toggling
             if (!model) model = {meridiem: 'AM'};
 
             // Do the toggling
-            model.meridiem = inputUtils.toggleMeridiem(model.meridiem);
+            model.meridiem = InputUtils.toggleMeridiem(model.meridiem);
         }
 
-        function clearModel(modelIndex, columnName, columnType) {
-            vm.recordEditModel.rows[modelIndex][columnName] = inputUtils.clearDatetime(columnType);
+        // resets timestamp[tz] values and sets the rest to null
+        function clearDatetime(modelIndex, columnName, columnType) {
+            vm.recordEditModel.rows[modelIndex][columnName] = InputUtils.clearDatetime(columnType);
         }
 
         function isRequired(column) {
-            if (!column.nullok && !vm.isDisabled(column, vm.prefillCookie)) {
+            if (!column.nullok && !vm.isDisabled(column)) {
                 return true;
             }
             return false;
@@ -460,18 +471,15 @@
 // **** Functions for set all input
         var selectAllOpen = false;
         function clearAllInput (model) {
-            if (model.displayType === "timestamp") {
-                model.allInput.value = {
-                    date: null,
-                    time: null,
-                    meridiem: 'AM'
-                }
-            } else if (model.displayType === "file") {
+            var options = { outputType: "object" };
+            if (model.inputType === "timestamp") {
+                model.allInput.value = InputUtils.formatDatetime(null, options);
+            } else if (model.inputType === "file") {
                 // clear the input by reseting the object and forcing the display to be ""
-                model.allInput.value.url = "";
                 delete model.allInput.value.file;
                 delete model.allInput.value.hatracObj;
-            } else if (model.displayType === "popup-select") {
+                model.allInput.value = InputUtils.formatFile(null, options);
+            } else if (model.inputType === "popup-select") {
                 model.fkDisplayName = null;
                 model.allInput.value = null;
             } else {
@@ -512,41 +520,31 @@
                 vm.recordEditModel.rows.forEach(function (row, index) {
                     var value = row[cm.column.name];
                     if (cm.showSelectAll) {
-                        if (cm.displayType == "timestamp") {
+                        if (cm.inputType == "timestamp") {
                             // if selectAll is open for TS column, make sure value is converted to a string (in display format)
                             // if other type (null or string), don't change the value
                             if (typeof value == "object") {
-                                if (value.date) {
-                                    // if time isn't set, default to midnight
-                                    if (value.time === null) value.time = '00:00:00'
-                                    value = moment(value.date + value.time + value.meridiem, dataFormats.date + dataFormats.time12 + 'A').format(dataFormats.datetime.display);
-                                } else {
-                                    value = null;
+                                // if time isn't set, default to midnight
+                                if (value.time === null) value.time = '00:00:00'
+                                var options = {
+                                    outputType: "string",
+                                    currentMomentFormat: dataFormats.date + dataFormats.time12 + 'A',
+                                    outputMomentFormat: dataFormats.datetime.display
                                 }
+                                var valueOrNull = value.date ? value.date + value.time + value.meridiem : null;
+                                value = InputUtils.formatDatetime(valueOrNull, options);
                             }
-                        } else if (cm.displayType == "file") {
+                        } else if (cm.inputType == "file") {
                             // copy file values to submission model to preserve them
                             vm.recordEditModel.submissionRows[index][cm.column.name] = value;
                             value = value.url;
                         }
                     } else {
-                        if (cm.displayType == "timestamp") {
-                            if (value && typeof value == "string" ) {
-                                // if selectAll is not open, make sure value is a string before trying to convert to an object
-                                var ts = moment(value);
-                                value = {
-                                    date: ts.format(dataFormats.date),
-                                    time: ts.format(dataFormats.time12),
-                                    meridiem: ts.format('A')
-                                }
-                            } else if (value == null) {
-                                value = {
-                                    date: null,
-                                    time: null,
-                                    meridiem: 'AM'
-                                }
-                            }
-                        } else if (cm.displayType == "file") {
+                        if (cm.inputType == "timestamp") {
+                            var options = { outputType: "object" };
+                            // if value is a string or null, convert to object format
+                            if ((value && typeof value == "string") || value == null) value = InputUtils.formatDatetime(value, options);
+                        } else if (cm.inputType == "file") {
                             // copy file values from submission model (if they exist)
                             if (vm.recordEditModel.submissionRows[index][cm.column.name]) {
                                 value = vm.recordEditModel.submissionRows[index][cm.column.name];
@@ -568,27 +566,14 @@
             closeAllInput(model);
 
             // change display values for object display
-            if (model.displayType === "timestamp") {
+            if (model.inputType === "timestamp") {
                 vm.recordEditModel.rows.forEach(function (row) {
                     // the current row value is in the "disabled" format (aka a string)
                     var value = row[model.column.name];
-                    if (value) {
-                        var ts = moment(value);
-                        value = {
-                            date: ts.format(dataFormats.date),
-                            time: ts.format(dataFormats.time12),
-                            meridiem: ts.format('A')
-                        }
-                    } else {
-                        value = {
-                            date: null,
-                            time: null,
-                            meridiem: 'AM'
-                        }
-                    }
-                    row[model.column.name] = value;
+                    var options = { outputType: "object" };
+                    row[model.column.name] = InputUtils.formatDatetime(value, options);
                 });
-            } else if (model.displayType == "file") {
+            } else if (model.inputType == "file") {
                 vm.recordEditModel.rows.forEach(function (row, index) {
                     // copy file values from submission model
                     row[model.column.name] = vm.recordEditModel.submissionRows[index][model.column.name];
@@ -602,8 +587,8 @@
             var value = columnModel.allInput.value;
             var column = columnModel.column;
 
-            var displayType = columnModel.displayType;
-            if (displayType === "popup-select") {
+            var inputType = columnModel.inputType;
+            if (inputType === "popup-select") {
                 // value should be an ERMrest.tuple object
                 // set data in view model (model.rows) and submission model (model.submissionRows)
 
@@ -629,7 +614,7 @@
                 // set input value for each record to create. populate ui model
                 model.rows.forEach(function (row) {
                     // need to set each property to avoid having a reference to the same object
-                    if (displayType === "file") {
+                    if (inputType === "file") {
                         row[column.name] = {}
                         Object.keys(value).forEach(function (key) {
                             if (key !== "hatracObj") {
@@ -645,7 +630,7 @@
                                 reference: $rootScope.reference
                             });
                         }
-                    } else if (displayType === "timestamp") {
+                    } else if (inputType === "timestamp") {
                         row[column.name] = {}
                         row[column.name].date = value.date;
                         row[column.name].time = value.time;
@@ -657,21 +642,16 @@
             }
 
             closeAllInput(columnModel);
-            if (columnModel.displayType === "timestamp") {
+            if (columnModel.inputType === "timestamp") {
                 vm.recordEditModel.rows.forEach(function (row) {
                     // the current row value is in the "view model" format (aka an object)
                     // this function (applySelectAll) applies or clears the values
                     // the values are an object and need to be an object
-                    var value = row[column.name];
                     // if there's no date set, we don't have a value to convert and apply to the inputs
-                    if (!value.date) {
-                        value = {
-                            date: null,
-                            time: null,
-                            meridiem: 'AM'
-                        }
+                    if (!row[column.name].date) {
+                        var options = { outputType: "object" };
+                        row[column.name] = InputUtils.formatDatetime(null, options);
                     }
-                    row[column.name] = value;
                 });
             }
         }
@@ -682,11 +662,16 @@
             if (!columnModel || !columnModel.allInput) return "Clear All";
 
             var noValue = true;
-            if (columnModel.displayType === "timestamp") {
+            var value = columnModel.allInput.value;
+            if (columnModel.inputType === "timestamp") {
                 // We don't care if a time value is set or not, time is meaningless without a date
-                if (columnModel.allInput.value && columnModel.allInput.value.date) noValue = false;
-            } else if (columnModel.displayType === "file") {
-                if (columnModel.allInput.value && columnModel.allInput.value.url) noValue = false;
+                if (value && value.date) noValue = false;
+            } else if (columnModel.inputType === "file") {
+                // the url value is what determines if a file exists or not
+                if (value && value.url) noValue = false;
+            } else if (columnModel.inputType === "boolean") {
+                // check if the selected value is a boolean (true|false)
+                if (typeof value === "boolean") noValue = false;
             } else {
                 if (columnModel.allInput.value) noValue = false;
             }
@@ -699,15 +684,8 @@
         vm.inputTypeOrDisabled = function inputTypeOrDisabled(index) {
             try {
                 var model = vm.recordEditModel.columnModels[index];
-                return model.showSelectAll ? "disabled" : model.displayType;
+                return model.showSelectAll ? "disabled" : model.inputType;
             } catch (err) {}
-        }
-
-        // NOTE: If changes are made to this function, changes should also be made to the similar function in the inputSwitch directive
-        // TODO: remove when RE has been refactored to use the inputSwitch directive for all form inputs
-        // Given an $event, this will blur or removes the focus from the element that triggerd the event
-        function blurElement(e) {
-            e.currentTarget.blur();
         }
 
         // if any of the columns is showing spinner, that means it's waiting for some

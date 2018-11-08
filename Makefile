@@ -63,7 +63,8 @@ Manualrecordset=test/manual/specs/recordset.conf.js
 
 NAVBAR_TESTS=$(E2Enavbar) $(E2EnavbarHeadTitle)
 SEARCH_TESTS=$(E2Esearch)
-RECORDSET_TESTS=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit) $(E2EDrecordsetIndFacet) $(E2EDrecordsetHistFacet)
+# RECORDSET_TESTS=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit) $(E2EDrecordsetIndFacet) $(E2EDrecordsetHistFacet)
+RECORDSET_TESTS=$(E2EDrecordsetIndFacet) $(E2EDrecordsetHistFacet)
 RECORD_TESTS=$(E2EDrecord) $(E2ErecordNoDeleteBtn) $(E2EDrecordRelatedTable) $(E2EDrecordCopy) $(E2EDrecordLinks)
 RECORDADD_TESTS=$(E2EDIrecordAdd) $(E2EDIrecordMultiAdd) $(E2EDIrecordImmutable)
 RECORDEDIT_TESTS=$(E2EDIrecordEdit) $(E2EDIrecordMultiEdit) $(E2EDrecordEditCompositeKey) $(E2ErecordEditNoDeleteBtn) $(E2EDrecordEditSubmissionDisabled) $(E2EDIrecordEditMultiColTypes) $(E2EDrecordEditDomainFilter)
@@ -267,6 +268,7 @@ JS_SOURCE=$(JS)/respond.js \
 	$(COMMON)/delete-link.js \
 	$(COMMON)/errors.js \
 	$(COMMON)/filters.js \
+	$(COMMON)/inputs.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/navbar.js \
 	$(COMMON)/login.js \
@@ -304,6 +306,7 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-1.11.1.min.js \
 	$(COMMON)/export.js \
 	$(COMMON)/faceting.js \
 	$(COMMON)/filters.js \
+	$(COMMON)/inputs.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/navbar.js \
 	$(COMMON)/login.js \
@@ -315,6 +318,7 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-1.11.1.min.js \
 	$(COMMON)/bindHtmlUnsafe.js \
 	$(COMMON)/footer.js \
 	$(COMMON)/upload.js \
+	$(COMMON)/validators.js \
 	$(COMMON)/recordCreate.js \
 	$(COMMON)/resizable.js \
 	$(JS)/vendor/bootstrap-3.3.7.min.js \
