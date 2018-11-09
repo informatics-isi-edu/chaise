@@ -894,9 +894,13 @@
                     if (i !== 0) {
                         // use -1 because there is no extra <tr> for the header row
                         var idx = i-1;
-                        // get the height of the input div
-                        // HTML structure tr > td(entity-value) > div > span/input-switch/button
-                        var allValueTdHeight = selectAllTrs[idx].children[1].children[0].children[1].offsetHeight + 10;
+
+                        // get the height of the input div abd buttons (Apply/Cancel) div
+                        var inputHeight = selectAllTrs[idx].children[1].children[0].children[1].offsetHeight;
+                        var buttonsHeight = selectAllTrs[idx].children[1].children[0].children[2].offsetHeight;
+                        // HTML structure:
+                        //    tr > td(entity-value) > div > span/input-switch/button
+                        var allValueTdHeight = (inputHeight > buttonsHeight ? inputHeight : buttonsHeight) + 10;
 
                         // set key height to the height of the input div
                         selectAllTrs[idx].children[0].height = allValueTdHeight;
