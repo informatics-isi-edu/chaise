@@ -110,7 +110,7 @@
         // options include the following:
         //   - outputType - the expected output type, "string" || "object" (required)
         //   - currentMomentFormat - the current format the string is in (optional)
-        //   - outputMomentFormat - the output format the string should be in (optional)
+        //   - outputMomentFormat - the output format the string should be in (required if `string` is defined for outputType)
         function formatDatetime(value, options) {
             if (value) {
                 // create a moment object (value should be string format)

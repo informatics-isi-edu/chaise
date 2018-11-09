@@ -92,7 +92,6 @@ td.entity-value {
   margin-left: 10px;
   margin-top: 0px;
   background: white;
-  /* z-index: 10; */
   border-right: 1px solid #ddd;
   border-left: 1px solid #ddd;
 }
@@ -168,7 +167,6 @@ tbody.highlight{
 @media all and (-webkit-min-device-pixel-ratio:0) and (min-resolution: .001dpcm) {
   #formEdit {
     border-bottom: 1px solid #ddd;
-    /* border-right: 1px solid #ddd; */
   }
 
   #formEdit >  table {

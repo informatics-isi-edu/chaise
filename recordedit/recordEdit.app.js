@@ -234,7 +234,6 @@
 
                         // Update submission model
                         var columnNames = Object.keys(cookie.keys);
-                        console.log(columnNames);
                         columnNames.forEach(function(colName) {
                             var colValue = cookie.keys[colName];
                             recordEditModel.submissionRows[newRow][colName] = colValue;
@@ -389,10 +388,6 @@
                     if ($rootScope.reference.canCreate) {
                         $rootScope.tableDisplayName = $rootScope.reference.displayname;
                         $rootScope.tableComment = $rootScope.reference.table.comment;
-
-                        if (context.queryParams.prefill) {
-                            console.log(recordEditModel.rows);
-                        }
 
                         // populate defaults
                         for (var i = 0; i < $rootScope.reference.columns.length; i++) {

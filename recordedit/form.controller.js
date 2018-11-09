@@ -48,11 +48,9 @@
         vm.int8min = integerLimits.INT_8_MIN;
         vm.int8max = integerLimits.INT_8_MAX;
 
-        // 3 following functions defined below
         vm.applyCurrentDatetime = applyCurrentDatetime;
         vm.toggleMeridiem = toggleMeridiem;
         vm.clearDatetime = clearDatetime;
-        //
         vm.fileExtensionTypes = InputUtils.fileExtensionTypes;
         vm.blurElement = InputUtils.blurElement;
         vm.maskOptions = maskOptions;
