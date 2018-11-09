@@ -392,8 +392,6 @@
         vm.stickLoading = false;
         function setLoadingTextStyle() {
             var mainContainerHeight = $document[0].getElementsByClassName('main-container')[0].offsetHeight;
-            console.log("main body height: ", mainBodyEl[0].offsetHeight);
-            console.log("main container height: ", mainContainerHeight);
             if (mainBodyEl[0].offsetHeight >= mainContainerHeight) {
                 vm.stickLoading = true;
             }
