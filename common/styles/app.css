@@ -1288,6 +1288,7 @@ footer .container1 {
 
  .loading-text {
      color: #5bc0de;
+     font-weight: 600;
  }
 
  .loading-sticky {
@@ -1295,7 +1296,6 @@ footer .container1 {
      position: fixed;
      bottom: 0;
      background: white;
-     font-weight: 600;
      margin: 5px;
      padding: 5px;
  }
