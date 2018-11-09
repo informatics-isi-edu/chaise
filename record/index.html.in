@@ -93,7 +93,10 @@
                         </div>
                     </uib-accordion>
                 </div>
-                <span id="rt-loading" ng-show="loading">Loading...</span>
+                <span id="rt-loading" ng-show="loading" class="loading-text" ng-class="{'loading-sticky': ctrl.stickLoading}">
+                    <img class="spinner spinner-sm" src="../common/styles/images/loader.gif"/>
+                    Loading...
+                </span>
             </div>
             <footer ng-show="!loading && displayReady"></footer>
         </div>
@@ -120,7 +123,7 @@
                                 </a>
                             </li>
                         </div>
-                        <li id="rt-toc-loading" ng-show="loading" class="toc-loading" style="font-weight: 100;">
+                        <li id="rt-toc-loading" ng-show="loading" class="loading-text">
                             <img class="spinner spinner-sm" src="../common/styles/images/loader.gif"/>
                             Loading...
                         </li>
