@@ -1287,17 +1287,19 @@ footer .container1 {
  }
 
  .loading-text {
-     color: #5bc0de;
+     color: #446c73;
      font-weight: 600;
  }
 
  .loading-sticky {
      float: left;
      position: fixed;
+     z-index: 1;
      bottom: 0;
-     background: white;
+     background: #d9edf7;
      margin: 5px;
-     padding: 5px;
+     padding: 5px 20px;
+     border: solid #446c73 1.5px;
  }
 
  .record-container .rowFocus{
