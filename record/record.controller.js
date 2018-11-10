@@ -389,6 +389,14 @@
             }
         });
 
+        vm.stickLoading = false;
+        function setLoadingTextStyle() {
+            var mainContainerHeight = $document[0].getElementsByClassName('main-container')[0].offsetHeight;
+            if (mainBodyEl[0].offsetHeight >= mainContainerHeight) {
+                vm.stickLoading = true;
+            }
+        };
+
         // watch for the main body size to change
         $scope.$watch(function() {
             return mainBodyEl && mainBodyEl[0].offsetHeight;
@@ -396,6 +404,7 @@
             if (newValue) {
                 $timeout(function () {
                     UiUtils.setFooterStyle(0);
+                    setLoadingTextStyle();
                 }, 0);
             }
         });

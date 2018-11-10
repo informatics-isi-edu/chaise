@@ -1282,6 +1282,26 @@ footer .container1 {
      background-color: rgb(241, 241, 241);
  }
 
+ .record-toc #rt-toc-loading {
+     padding: 10px 5px 5px 5px;
+ }
+
+ .loading-text {
+     color: #446c73;
+     font-weight: 600;
+ }
+
+ .loading-sticky {
+     float: left;
+     position: fixed;
+     z-index: 1;
+     bottom: 0;
+     background: #d9edf7;
+     margin: 5px;
+     padding: 5px 20px;
+     border: solid #446c73 1.5px;
+ }
+
  .record-container .rowFocus{
      border-color: rgb(51, 122, 183) !important;
  }
