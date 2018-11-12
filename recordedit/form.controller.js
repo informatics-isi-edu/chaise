@@ -486,8 +486,6 @@
         }
 
         function closeAllInput (model) {
-            clearAllInput(model);
-
             // reset column view model values
             model.showSelectAll = false;
             model.highlightRow = false;
@@ -554,7 +552,7 @@
             });
         }
 
-        // closes the select all and resets the input
+        // closes the select all
         vm.cancelSelectAll = function cancelSelectAll(index) {
             var model = vm.recordEditModel.columnModels[index];
             model.showSelectAll = false;
@@ -577,6 +575,10 @@
                     row[model.column.name] = vm.recordEditModel.submissionRows[index][model.column.name];
                 });
             }
+        }
+
+        function setValueAllInputs () {
+            
         }
 
         vm.applySelectAll = function applySelectAll(index) {
@@ -639,7 +641,6 @@
                 });
             }
 
-            closeAllInput(columnModel);
             if (columnModel.inputType === "timestamp") {
                 vm.recordEditModel.rows.forEach(function (row) {
                     // the current row value is in the "view model" format (aka an object)
@@ -654,10 +655,14 @@
             }
         }
 
-        // controls the Clear All/Apply All
-        vm.showApplyOrClear = function showApplyOrClear(index) {
+        vm.clearSelectAll = function clearSelectAll(index) {
+            clearAllInput(vm.recordEditModel.columnModels[index]);
+        }
+
+        // decides whether apply should be disabled
+        vm.disableApply = function disableApply(index) {
             var columnModel = vm.recordEditModel.columnModels[index];
-            if (!columnModel || !columnModel.allInput) return "Clear All";
+            if (!columnModel || !columnModel.allInput) return true;
 
             var noValue = true;
             var value = columnModel.allInput.value;
@@ -673,7 +678,7 @@
             } else {
                 if (columnModel.allInput.value) noValue = false;
             }
-            return noValue ? "Clear All" : "Apply All";
+            return noValue;
         }
 
         // We have 2 ways to determine a disabled input, or rather, when an input should be shown as disabled
