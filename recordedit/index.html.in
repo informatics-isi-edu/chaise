@@ -107,7 +107,7 @@
                                                         </span>
                                                         <span ng-if="(!form.isDisabled(column, form.prefillCookie) || form.recordEditModel.columnModels[columnIndex].showSelectAll) && form.recordEditModel.rows.length > 1" class="pull-right btn-group">
                                                             <button id="select-all-{{::form.makeSafeIdAttr(column.displayname.value)}}" type="button" class="btn btn-sm btn-default" ng-click="::form.toggleSelectAll(columnIndex)" tooltip-placement="bottom" uib-tooltip="{{form.recordEditModel.columnModels[columnIndex].showSelectAll ? 'Click to close the set all input.' : 'Click to set a value for all records.'}}">
-                                                                <span class="glyphicon" ng-class="form.recordEditModel.columnModels[columnIndex].showSelectAll ? 'glyphicon-ban-circle' : 'glyphicon-pencil'"></span>
+                                                                <span class="glyphicon" ng-class="form.recordEditModel.columnModels[columnIndex].showSelectAll ? 'glyphicon-remove' : 'glyphicon-pencil'"></span>
                                                             </button>
                                                         </span>
                                                     </td>
@@ -119,7 +119,7 @@
                                                                 <input id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" class="form-control" type="text" ng-model="form.recordEditModel.rows[rowIndex][column.name]" placeholder="{{form.dataFormats.date}}" name="{{::column.name}}" ui-mask="9999-19-39" ui-options="form.maskOptions.date.options" model-view-value="true" ng-required="::form.isRequired(column);" date></input>
                                                                 <span class="input-group-btn">
                                                                     <button type="button" class="btn btn-primary btn-inverted" ng-click="::form.applyCurrentDatetime(rowIndex, column.name, column.type.name);">Today</button>
-                                                                    <button type="button" class="btn btn-danger btn-inverted" ng-click="::form.clearDatetime(rowIndex, column.name, column.type.name);">Clear</button>
+                                                                    <button type="button" class="btn btn-primary btn-inverted" ng-click="::form.clearDatetime(rowIndex, column.name, column.type.name);">Clear</button>
                                                                 </span>
                                                             </div>
                                                         </div>
@@ -145,7 +145,7 @@
                                                                 <div class="col-xs-12">
                                                                     <div class="btn-group pull-right" role="group">
                                                                         <button type="button" name="{{::column.name}}-now" class="btn btn-primary btn-inverted" ng-click="::form.applyCurrentDatetime(rowIndex, column.name, column.type.name);">Now</button>
-                                                                        <button type="button" name="{{::column.name}}-clear" class="btn btn-danger btn-inverted" ng-click="::form.clearDatetime(rowIndex, column.name, column.type.name);">Clear</button>
+                                                                        <button type="button" name="{{::column.name}}-clear" class="btn btn-primary btn-inverted" ng-click="::form.clearDatetime(rowIndex, column.name, column.type.name);">Clear</button>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -257,9 +257,9 @@
                                                             <span class="pull-left">Set value for all records: </span>
                                                             <input-switch id="select-all-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" class="pull-left" column="column" column-model="form.recordEditModel.columnModels[columnIndex]" model="form.recordEditModel.columnModels[columnIndex].allInput" style="width: 250px; margin: 0px 5px;"></input-switch>
                                                             <span class="btn-group">
-                                                                <button id="select-all-apply-{{::form.makeSafeIdAttr(column.displayname.value)}}" class="btn btn-primary btn-inverted pull-left" type="button" ng-disabled="form.disableApply(columnIndex)" ng-click="form.applySelectAll(columnIndex)">Apply All</button>
-                                                                <button id="select-all-clear-{{::form.makeSafeIdAttr(column.displayname.value)}}" class="btn btn-primary btn-inverted pull-left" type="button" ng-click="form.clearSelectAll(columnIndex)">Clear All</button>
-                                                                <button id="select-all-cancel-{{::form.makeSafeIdAttr(column.displayname.value)}}" class="btn btn-danger btn-inverted pull-left" type="button" ng-click="form.cancelSelectAll(columnIndex)">Cancel</button>
+                                                                <button id="select-all-apply-{{::form.makeSafeIdAttr(column.displayname.value)}}" class="btn btn-primary btn-inverted pull-left" type="button" ng-disabled="form.disableApply(columnIndex)" ng-click="form.applySelectAll(columnIndex)" tooltip-placement="bottom" uib-tooltip="Click to apply the value to all records.">Apply All</button>
+                                                                <button id="select-all-clear-{{::form.makeSafeIdAttr(column.displayname.value)}}" class="btn btn-primary btn-inverted pull-left" type="button" ng-click="form.clearSelectAll(columnIndex)" tooltip-placement="bottom" uib-tooltip="Click to clear all values for all records.">Clear All</button>
+                                                                <button id="select-all-cancel-{{::form.makeSafeIdAttr(column.displayname.value)}}" class="btn btn-primary btn-inverted pull-left" type="button" ng-click="form.cancelSelectAll(columnIndex)" tooltip-placement="bottom" uib-tooltip="Click to close the set all input.">Cancel</button>
                                                             </span>
                                                         </div>
                                                     </td>

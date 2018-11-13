@@ -358,6 +358,11 @@ var recordEditPage = function() {
         return element(by.id("select-all-apply-"+columnDisplayName));
     }
 
+    this.getSelectAllCancel = function (name) {
+        var columnDisplayName = makeSafeIdAttr(name);
+        return element(by.id("select-all-cancel-"+columnDisplayName));
+    }
+
     this.getDropdown = function(el, index) {
         index = index || 0;
         return browser.executeScript("return $(arguments[0]).parents('tr').find('.select2-container:visible')[" + index + "];", el);

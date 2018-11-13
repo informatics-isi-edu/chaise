@@ -155,14 +155,18 @@ describe('Record Add', function() {
             it(testParams.date_col_name, function (done) {
                 var colName = testParams.date_col_name;
                 var value = testParams.values.date.initial;
-                var applyBtn = chaisePage.recordEditPage.getSelectAllApply(colName);
+
+                var applyBtn = chaisePage.recordEditPage.getSelectAllApply(colName),
+                    cancelBtn = chaisePage.recordEditPage.getSelectAllCancel(colName);
 
                 chaisePage.clickButton(chaisePage.recordEditPage.getColumnSelectAllButton(colName)).then(function () {
-                    browser.wait(EC.elementToBeClickable(applyBtn), browser.params.defaultTimeout);
+                    browser.wait(EC.elementToBeClickable(cancelBtn), browser.params.defaultTimeout);
 
                     chaisePage.recordEditPage.getSelectAllDate(colName).sendKeys(value);
 
                     return applyBtn.click();
+                }).then(function () {
+                    return cancelBtn.click();
                 }).then(function () {
                     // verify the values
                     expect(dateInput1.date.getAttribute("value")).toBe(value);
@@ -181,15 +185,18 @@ describe('Record Add', function() {
                 var dateValue = testParams.values.timestamp.initial.date,
                     timeValue = testParams.values.timestamp.initial.time;
 
-                var applyBtn = chaisePage.recordEditPage.getSelectAllApply(colName);
+                var applyBtn = chaisePage.recordEditPage.getSelectAllApply(colName),
+                    cancelBtn = chaisePage.recordEditPage.getSelectAllCancel(colName);
 
                 chaisePage.clickButton(chaisePage.recordEditPage.getColumnSelectAllButton(colName)).then(function () {
-                    browser.wait(EC.elementToBeClickable(applyBtn), browser.params.defaultTimeout);
+                    browser.wait(EC.elementToBeClickable(cancelBtn), browser.params.defaultTimeout);
 
                     chaisePage.recordEditPage.getSelectAllDate(colName).sendKeys(dateValue);
                     chaisePage.recordEditPage.getSelectAllTime(colName).sendKeys(timeValue);
 
                     return applyBtn.click();
+                }).then(function () {
+                    return cancelBtn.click();
                 }).then(function () {
                     // verify the values
                     expect(tsInput1.date.getAttribute("value")).toBe(dateValue);
@@ -211,10 +218,11 @@ describe('Record Add', function() {
                 var colName = testParams.fk_col_name;
                 var value = testParams.values.fk.initial;
 
-                var applyBtn = chaisePage.recordEditPage.getSelectAllApply(colName);
+                var applyBtn = chaisePage.recordEditPage.getSelectAllApply(colName),
+                    cancelBtn = chaisePage.recordEditPage.getSelectAllCancel(colName);
 
                 chaisePage.clickButton(chaisePage.recordEditPage.getColumnSelectAllButton(colName)).then(function () {
-                    browser.wait(EC.elementToBeClickable(applyBtn), browser.params.defaultTimeout);
+                    browser.wait(EC.elementToBeClickable(cancelBtn), browser.params.defaultTimeout);
 
                     // open fk modal
                     return chaisePage.recordEditPage.getSelectAllPopupBtn(colName).click();
@@ -230,6 +238,8 @@ describe('Record Add', function() {
                     return chaisePage.recordsetPage.getRows().get(2).all(by.css(".select-action-button")).click();
                 }).then(function () {
                     return applyBtn.click();
+                }).then(function () {
+                    return cancelBtn.click();
                 }).then(function () {
                     // verify the values
                     expect(fkInput1.getText()).toBe(value);
@@ -248,10 +258,11 @@ describe('Record Add', function() {
                     var colName = testParams.uri_col_name,
                         file = testParams.files[0];
 
-                    var applyBtn = chaisePage.recordEditPage.getSelectAllApply(colName);
+                    var applyBtn = chaisePage.recordEditPage.getSelectAllApply(colName),
+                        cancelBtn = chaisePage.recordEditPage.getSelectAllCancel(colName);
 
                     chaisePage.clickButton(chaisePage.recordEditPage.getColumnSelectAllButton(colName)).then(function () {
-                        browser.wait(EC.elementToBeClickable(applyBtn), browser.params.defaultTimeout);
+                        browser.wait(EC.elementToBeClickable(cancelBtn), browser.params.defaultTimeout);
 
                         // select (set) file
                         var fileInput = chaisePage.recordEditPage.getSelectAllFileInput(colName, colName),
@@ -260,6 +271,8 @@ describe('Record Add', function() {
                         recordEditHelpers.selectFile(file, fileInput, txtInput);
 
                         return applyBtn.click();
+                    }).then(function () {
+                        return cancelBtn.click();
                     }).then(function () {
                         // verify the values
                         expect(uploadInput1.getAttribute('value')).toBe(file.name);

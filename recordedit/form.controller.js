@@ -227,6 +227,11 @@
             // Form data is valid, time to transform row values for submission to ERMrest
             vm.readyToSubmit = true;
             vm.submissionButtonDisabled = true;
+            // close allInput if open to ensure data is submission ready
+            model.columnModels.forEach(function (cm, index) {
+                if (cm.showSelectAll) vm.cancelSelectAll(index);
+            });
+
             for (var j = 0; j < model.rows.length; j++) {
                 // in the copy case, there will only ever be one tuple. Each additional form should be based off of the original tuple
                 if (vm.editMode) {
@@ -468,22 +473,6 @@
 
 // **** Functions for set all input
         var selectAllOpen = false;
-        function clearAllInput (model) {
-            var options = { outputType: "object" };
-            if (model.inputType === "timestamp") {
-                model.allInput.value = InputUtils.formatDatetime(null, options);
-            } else if (model.inputType === "file") {
-                // clear the input by reseting the object and forcing the display to be ""
-                delete model.allInput.value.file;
-                delete model.allInput.value.hatracObj;
-                model.allInput.value = InputUtils.formatFile(null, options);
-            } else if (model.inputType === "popup-select") {
-                model.fkDisplayName = null;
-                model.allInput.value = null;
-            } else {
-                model.allInput.value = null;
-            }
-        }
 
         function closeAllInput (model) {
             // reset column view model values
@@ -629,6 +618,7 @@
                 model.rows.forEach(function (row) {
                     row[column.name] = value.url;
                 });
+
             } else {
                 // set input value for each record to create. populate ui model
                 model.rows.forEach(function (row) {
