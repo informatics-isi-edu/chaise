@@ -319,11 +319,11 @@ describe('View existing record,', function() {
 
         it('Record count along with heading should match for the panel and related table content should be in correct order', function(done){
             chaisePage.recordPage.getSidePanelTableTitles().then(function(tableNames){
-              for (var i=0; i<tableNames.length; i++){
-                tableNames[i] = tableNames[i].replace(/ +/g, " ");
-              }
+                for (var i=0; i<tableNames.length; i++){
+                    tableNames[i] = tableNames[i].replace(/ +/g, " ");
+                }
                 expect(tableNames.length).toEqual(testParams.sidePanelTest.tocCount, "Count mismatch for number of related tables in the side panel");
-                expect(tableNames).toEqual(testParams.sidePanelTest.sidePanelTableOrder,"Order is not maintained for related tables in the side panel");
+                expect(tableNames).toEqual(testParams.sidePanelTest.sidePanelTableOrder, "Order is not maintained for related tables in the side panel");
                 return chaisePage.recordPage.getSidePanelHeading();
             }).then(function(sidePanelHeading){
                 expect(sidePanelHeading).toBe(testParams.sidePanelTest.panelHeading, "Side Panel heading did not match.");
