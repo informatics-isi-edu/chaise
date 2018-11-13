@@ -174,24 +174,11 @@
                   return false;
                 }
 
-                if (i === 0) {
-                    $rootScope.lastRendered = 0;
-
-                    // don't show the loading if it's done
-                    if ($rootScope.lastRendered === $rootScope.relatedTableModels.length-1) {
-                        $timeout(function () {
-                            $rootScope.loading = false;
-                        });
-                    }
-
-                    return true;
-                }
-
-                if ($rootScope.lastRendered === i-1)  {
+                if (i === 0 || $rootScope.lastRendered === i-1)  {
                     $rootScope.lastRendered = i;
 
                     // don't show the loading if it's done
-                    if ($rootScope.lastRendered === $rootScope.relatedTableModels.length-1) {
+                    if ($rootScope.loading && $rootScope.lastRendered === $rootScope.relatedTableModels.length-1) {
                         $timeout(function () {
                             $rootScope.loading = false;
                         });
