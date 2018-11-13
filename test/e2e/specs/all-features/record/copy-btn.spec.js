@@ -1,5 +1,6 @@
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordHelpers = require('../../../utils/record-helpers.js');
+var recordSetHelpers = require('../../../utils/recordset-helpers.js');
 var testParams = {
     table_name: "editable-id-table",
     table_displayname: "Editable Id Table",
@@ -33,6 +34,7 @@ describe('View existing record,', function() {
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-max-RT:" + relatedTableTestParams.table_name + "/" + keys.join("&");
             browser.get(url);
             chaisePage.waitForElement(chaisePage.recordPage.getEntityTitleElement(), browser.params.defaultTimeout);
+
         });
 
         it("should load chaise-config.js and have maxRelatedTablesOpen=8", function() {
@@ -44,6 +46,12 @@ describe('View existing record,', function() {
         it('should collapse related tables after it exceeds the maxRelatedTablesOpen value',function(){
             expect(element.all(by.css('.panel-open')).count()).toEqual(0);
         });
+
+        it ("should have only 'CSV' option in export menu because of `disableDefaultExport` chaise-config.", function () {
+            var options = chaisePage.recordsetPage.getExportOptions();
+            expect(options.count()).toBe(1, "count missmatch");
+        });
+
     });
 
     // below are the tests for the copy button

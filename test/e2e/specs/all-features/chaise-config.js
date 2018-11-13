@@ -13,6 +13,7 @@ var chaiseConfig = {
     customCSS: '/path/to/custom/css',
     maxRelatedTablesOpen: 8,
     resolverImplicitCatalog: false,
+    disableDefaultExport: true,
     navbarMenu: {
         children: [
             {

@@ -3,7 +3,7 @@
 
     angular.module('chaise.export', ['chaise.utils'])
 
-    .directive('export', ['AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'modalUtils', '$timeout', 'UriUtils', function (AlertsService, DataUtils, ErrorService, logActions, modalUtils, $timeout, UriUtils) {
+    .directive('export', ['AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'modalUtils', '$rootScope', '$timeout', 'UriUtils', function (AlertsService, DataUtils, ErrorService, logActions, modalUtils, $rootScope, $timeout, UriUtils) {
 
         /**
          * Cancel the current export request
@@ -20,7 +20,7 @@
          * Update the list of templates in UI
          */
         function _updateExportFormats(scope) {
-            var templates = scope.reference.exportTemplates;
+            var templates = scope.reference.getExportTemplates(!$rootScope.chaiseConfig.disableDefaultExport);
 
             templates.forEach(function (template) {
                 if (template.displayname) {
@@ -48,7 +48,11 @@
                     break;
                 case "BAG":
                 case "FILE":
-                    scope.exporter = new ERMrest.Exporter(scope.reference, template);
+                    var bagName = scope.reference.table.name;
+                    if ($rootScope.tuple) {
+                        bagName += "_" + $rootScope.tuple.uniqueId;
+                    }
+                    scope.exporter = new ERMrest.Exporter(scope.reference, bagName, template);
                     var exportParametersString = JSON.stringify(scope.exporter.exportParameters, null, "  ");
 
                     // begin export and start a timer
