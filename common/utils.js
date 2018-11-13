@@ -18,7 +18,8 @@
           "hideTableOfContents": false,
           "showExportButton": false,
           "navbarMenu": {},
-          "navbarBrand": ""
+          "navbarBrand": "",
+          "disableDefaultExport": false
     })
 
     .constant("appTagMapping", {
