@@ -179,7 +179,9 @@
 
                     // don't show the loading if it's done
                     if ($rootScope.lastRendered === $rootScope.relatedTableModels.length-1) {
-                        $rootScope.loading = false;
+                        $timeout(function () {
+                            $rootScope.loading = false;
+                        });
                     }
 
                     return true;
@@ -190,7 +192,9 @@
 
                     // don't show the loading if it's done
                     if ($rootScope.lastRendered === $rootScope.relatedTableModels.length-1) {
-                        $rootScope.loading = false;
+                        $timeout(function () {
+                            $rootScope.loading = false;
+                        });
                     }
 
                     return true;
