@@ -577,14 +577,9 @@
             }
         }
 
-        function setValueAllInputs () {
-            
-        }
-
-        vm.applySelectAll = function applySelectAll(index) {
+        function setValueAllInputs (index, value) {
             var model = vm.recordEditModel;
             var columnModel = model.columnModels[index];
-            var value = columnModel.allInput.value;
             var column = columnModel.column;
 
             var inputType = columnModel.inputType;
@@ -594,7 +589,7 @@
 
                 // udpate the foreign key data
                 model.foreignKeyData.forEach(function (fkeyData) {
-                    fkeyData[column.foreignKey.name] = value.data;
+                    fkeyData[column.foreignKey.name] = value ? value.data : null;
                 });
 
                 var foreignKeyColumns = column.foreignKey.colset.columns;
@@ -603,60 +598,86 @@
                     var foreignTableCol = column.foreignKey.mapping.get(referenceCol);
 
                     model.submissionRows.forEach(function (submissionRow) {
-                        submissionRow[referenceCol.name] = value.data[foreignTableCol.name];
+                        submissionRow[referenceCol.name] = value ? value.data[foreignTableCol.name] : null;
                     });
                 }
 
                 model.rows.forEach(function (row) {
-                    row[column.name] = value.displayname.value;
+                    row[column.name] = value ? value.displayname.value : null;
+                });
+            } else if (inputType === "file") {
+                model.submissionRows.forEach(function (submissionRow) {
+                    // need to set each property to avoid having a reference to the same object
+                    submissionRow[column.name] = {}
+                    Object.keys(value).forEach(function (key) {
+                        if (key !== "hatracObj") {
+                            submissionRow[column.name][key] = value[key];
+                        }
+                    });
+
+                    // TODO: This is duplicated in the upload-input directive.
+                    // Should be removed in both places and only created at submission time
+                    if (submissionRow[column.name].file) {
+                        // if condition guards for "clear all" case
+                        submissionRow[column.name].hatracObj = new ERMrest.Upload(submissionRow[column.name].file, {
+                            column: column,
+                            reference: $rootScope.reference
+                        });
+                    }
+                });
+
+                model.rows.forEach(function (row) {
+                    row[column.name] = value.url;
                 });
             } else {
                 // set input value for each record to create. populate ui model
                 model.rows.forEach(function (row) {
-                    // need to set each property to avoid having a reference to the same object
-                    if (inputType === "file") {
-                        row[column.name] = {}
-                        Object.keys(value).forEach(function (key) {
-                            if (key !== "hatracObj") {
-                                row[column.name][key] = value[key];
-                            }
-                        });
-                        // TODO: This is duplicated in the upload-input directive.
-                        // Should be removed in both places and only created at submission time
-                        if (row[column.name].file) {
-                            // if condition guards for "clear all" case
-                            row[column.name].hatracObj = new ERMrest.Upload(row[column.name].file, {
-                                column: column,
-                                reference: $rootScope.reference
-                            });
-                        }
-                    } else if (inputType === "timestamp") {
-                        row[column.name] = {}
-                        row[column.name].date = value.date;
-                        row[column.name].time = value.time;
-                        row[column.name].meridiem = value.meridiem;
+                    if (inputType === "timestamp") {
+                        // input stays in disabled format (a string)
+                        var options = {
+                            outputType: "string",
+                            currentMomentFormat: dataFormats.date + dataFormats.time12 + 'A',
+                            outputMomentFormat: dataFormats.datetime.display
+                        };
+                        var valueOrNull = value.date ? value.date + value.time + value.meridiem : null;
+                        row[column.name] = InputUtils.formatDatetime(valueOrNull, options);
                     } else {
                         row[column.name] = value;
                     }
                 });
             }
 
-            if (columnModel.inputType === "timestamp") {
-                vm.recordEditModel.rows.forEach(function (row) {
-                    // the current row value is in the "view model" format (aka an object)
-                    // this function (applySelectAll) applies or clears the values
-                    // the values are an object and need to be an object
-                    // if there's no date set, we don't have a value to convert and apply to the inputs
-                    if (!row[column.name].date) {
-                        var options = { outputType: "object" };
-                        row[column.name] = InputUtils.formatDatetime(null, options);
-                    }
-                });
-            }
+            // if (columnModel.inputType === "timestamp") {
+            //     vm.recordEditModel.rows.forEach(function (row) {
+            //         // the current row value is in the "view model" format (aka an object)
+            //         // this function (applySelectAll) applies or clears the values
+            //         // the values are an object and need to be an object
+            //         // if there's no date set, we don't have a value to convert and apply to the inputs
+            //         if (!row[column.name].date) {
+            //             var options = { outputType: "object" };
+            //             row[column.name] = InputUtils.formatDatetime(null, options);
+            //         }
+            //     });
+            // }
+        }
+
+        vm.applySelectAll = function applySelectAll(index) {
+            setValueAllInputs(index, vm.recordEditModel.columnModels[index].allInput.value);
         }
 
         vm.clearSelectAll = function clearSelectAll(index) {
-            clearAllInput(vm.recordEditModel.columnModels[index]);
+            var value = null;
+            var inputType = vm.recordEditModel.columnModels[index].inputType;
+            if (inputType === "timestamp") {
+                value = {
+                    date: null,
+                    time: null,
+                    meridiem: 'AM'
+                };
+            } else if (inputType === "file") {
+                value = { url: "" };
+            }
+            setValueAllInputs(index, value);
         }
 
         // decides whether apply should be disabled
