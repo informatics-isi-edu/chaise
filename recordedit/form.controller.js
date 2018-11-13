@@ -566,6 +566,7 @@
             }
         }
 
+        // takes the value and sets it on every rows view and submission model
         function setValueAllInputs (index, value) {
             var model = vm.recordEditModel;
             var columnModel = model.columnModels[index];
@@ -636,19 +637,6 @@
                     }
                 });
             }
-
-            // if (columnModel.inputType === "timestamp") {
-            //     vm.recordEditModel.rows.forEach(function (row) {
-            //         // the current row value is in the "view model" format (aka an object)
-            //         // this function (applySelectAll) applies or clears the values
-            //         // the values are an object and need to be an object
-            //         // if there's no date set, we don't have a value to convert and apply to the inputs
-            //         if (!row[column.name].date) {
-            //             var options = { outputType: "object" };
-            //             row[column.name] = InputUtils.formatDatetime(null, options);
-            //         }
-            //     });
-            // }
         }
 
         vm.applySelectAll = function applySelectAll(index) {
