@@ -14,7 +14,11 @@ var testParams = {
     subTitle: "Accommodations",
     tableComment: "List of different types of accommodations",
     tables_order: ["accommodation_image (showing first 2 results)", "media (no results found)"],
-    file_names: ["Accommodations.csv", "accommodation.zip", "accommodation_"+chaisePage.getEntityRow("product-record", "accommodation", [{column: "id",value: "2002"}]).RID+".bib"],
+    file_names: [
+        "Accommodations.csv",
+        "accommodation_" + chaisePage.getEntityRow("product-record", "accommodation", [{column: "id",value: "2002"}]).RID + ".zip",
+        "accommodation_"+chaisePage.getEntityRow("product-record", "accommodation", [{column: "id",value: "2002"}]).RID+".bib"
+    ],
     related_table_name_with_page_size_annotation: "accommodation_image",
     page_size: 2,
     related_tables: [
@@ -76,7 +80,7 @@ var testParams = {
       id: "2003",
       tocCount: 8,
       tableToShow: 'Categories_5',
-      sidePanelTableOrder:[ 'Main', 'Categories_collection\n (5)',  'media\n \n (1)', 'Categories_collection_2\n (5)',  'Categories_3\n (5)',  'Categories_4\n (5)',  'Categories_5\n (5)',  'Categories_6\n (5)'],
+      sidePanelTableOrder:[ 'Main', 'Categories_collection (5)',  'media (1)', 'Categories_collection_2 (5)',  'Categories_3 (5)',  'Categories_4 (5)',  'Categories_5 (5)',  'Categories_6 (5)'],
       panelHeading: "Contents"
     },
     citationParams: {
