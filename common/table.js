@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    angular.module('chaise.record.table', ['chaise.ellipses', 'chaise.utils'])
+    angular.module('chaise.record.table', ['chaise.ellipses', 'chaise.inputs', 'chaise.utils'])
 
     .constant('tableConstants', {
         MAX_CONCURENT_REQUEST: 4,

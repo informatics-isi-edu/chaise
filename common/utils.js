@@ -167,27 +167,6 @@
         notNull: "<i>All Records With Value</i>"
     })
 
-    .constant("dataFormats", {
-        date: "YYYY-MM-DD",
-        time12: "hh:mm:ss", // used for displaying values in recordedit properly
-        time24: "HH:mm:ss",
-        datetime:  {
-            display: "YYYY-MM-DD HH:mm:ss",
-            displayZ: "YYYY-MM-DD HH:mm:ssZ",
-            return: "YYYY-MM-DDTHH:mm:ssZ", // the format that the database returns when there are no fractional seconds to show
-            submission: "YYYY-MM-DDTHH:mm:ss.SSSZ"
-        }
-    })
-
-    .constant("integerLimits", {
-        INT_2_MIN: -32768,
-        INT_2_MAX: 32767,
-        INT_4_MIN: -2147483648,
-        INT_4_MAX: 2147483647,
-        INT_8_MIN: -9223372036854775808,
-        INT_8_MAX: 9223372036854775807
-    })
-
     .factory('UriUtils', ['$injector', '$rootScope', '$window', 'appContextMapping', 'appTagMapping', 'ContextUtils', 'Errors', 'messageMap', 'parsedFilter',
         function($injector, $rootScope, $window, appContextMapping, appTagMapping, ContextUtils, Errors, messageMap, ParsedFilter) {
         var chaiseBaseURL;
@@ -1093,48 +1072,48 @@
          * Recursively sets the display type for inputs (currently for recordedit)
          * @param {Object} type - the type object defining the columns type
          */
-        function getDisplayType(type) {
-            var displayType;
+        function getInputType(type) {
+            var inputType;
 
             switch (type.name) {
                 case 'timestamp':
                 case 'timestamptz':
-                    displayType = 'timestamp';
+                    inputType = 'timestamp';
                     break;
                 case 'date':
-                    displayType = 'date';
+                    inputType = 'date';
                     break;
                 case 'float4':
                 case 'float8':
                 case 'numeric':
-                    displayType = 'number';
+                    inputType = 'number';
                     break;
                 case 'int2':
-                    displayType = 'integer2';
+                    inputType = 'integer2';
                     break;
                 case 'int4':
-                    displayType = 'integer4';
+                    inputType = 'integer4';
                     break;
                 case 'int8':
-                    displayType = 'integer8';
+                    inputType = 'integer8';
                     break;
                 case 'boolean':
-                    displayType = 'boolean';
+                    inputType = 'boolean';
                     break;
                 case 'markdown':
                 case 'longtext':
-                    displayType = 'longtext';
+                    inputType = 'longtext';
                     break;
                 case 'json':
                 case 'jsonb':
-                    displayType= 'json';
+                    inputType = 'json';
                     break;
                 case 'shorttext':
                 default:
-                    displayType = type.baseType ? getDisplayType(type.baseType) : 'text';
+                    inputType = type.baseType ? getInputType(type.baseType) : 'text';
                     break;
             }
-            return displayType;
+            return inputType;
         }
 
         /**
@@ -1195,7 +1174,7 @@
             setBootstrapDropdownButtonBehavior: setBootstrapDropdownButtonBehavior,
             getImageAndIframes: getImageAndIframes,
             humanFileSize: humanFileSize,
-            getDisplayType: getDisplayType,
+            getInputType: getInputType,
             setFooterStyle: setFooterStyle,
             setDisplayContainerHeight: setDisplayContainerHeight
         }

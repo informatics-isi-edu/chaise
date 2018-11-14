@@ -1,6 +1,6 @@
 <fieldset class="form-inline" ng-form="minMaxForm" ng-disabled="disabled" ng-class="{'disabled-form': disabled}">
     <!-- From value (min of range) -->
-    <div class="form-group range-inputs-width" ng-switch="displayType(type)">
+    <div class="form-group range-inputs-width" ng-switch="columnToInputType(type)">
         <label for="from-val">From:</label>
         <!-- int, float, numeric -->
         <div ng-switch-when="number" class="numeric-date-width" id="from-val">
@@ -87,7 +87,7 @@
         </div>
     </div>
     <!-- To value (max of range) -->
-    <div class="form-group range-inputs-width" ng-switch="displayType(type)">
+    <div class="form-group range-inputs-width" ng-switch="columnToInputType(type)">
         <label for="to-val">To:</label>
         <!-- int, float, numeric -->
         <div ng-switch-when="number" class="numeric-date-width" id="to-val">

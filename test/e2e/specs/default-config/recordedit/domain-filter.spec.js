@@ -67,8 +67,7 @@ describe("Domain filter pattern support,", function() {
                 browser.ignoreSynchronization = true;
                 browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/fk-filter-pattern:" + testParams.table_name);
 
-                // the copy btn will be disabled while data is loading.
-                browser.wait(EC.elementToBeClickable(element(by.id("copy-record-btn"))));
+                chaisePage.waitForElement(element(by.id("submit-record-button")));
             });
 
             beforeEach(function () {
@@ -183,7 +182,7 @@ describe("Domain filter pattern support,", function() {
                 it ("after clearing the foreignkey, it should not limit the set.", function (done) {
                     chaisePage.recordEditPage.getForeignKeyInputRemoveBtns().then(function(btns) {
                         // NOTE this is not the best way to find the button, it's by index
-                        return chaisePage.clickButton(btns[btns.length-2]);
+                        return chaisePage.clickButton(btns[btns.length-4]);
                     }).then(function() {
                         return chaisePage.recordEditPage.getForeignKeyInputButton(colWFkeys, 0).click();
                     }).then(function () {
