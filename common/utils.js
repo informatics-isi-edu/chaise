@@ -18,7 +18,8 @@
           "hideTableOfContents": false,
           "showExportButton": false,
           "navbarMenu": {},
-          "navbarBrand": ""
+          "navbarBrand": "",
+          "disableDefaultExport": false
     })
 
     .constant("appTagMapping", {
@@ -100,7 +101,9 @@
             actionCol: "Click on the action buttons to view, edit, or delete each record",
             viewCol: "Click on the eye button to view the detailed page associated with each record"
         },
-        "URLLimitMessage": "Maximum URL length reached. Cannot perform the requested action."
+        "URLLimitMessage": "Maximum URL length reached. Cannot perform the requested action.",
+        "queryTimeoutList": "<ul class='show-list-style'><li>Reduce the number of facet constraints.</li><li>Minimize the use of 'No Value' and 'All Records with Value' filters.</li></ul>",
+        "queryTimeoutTooltip": "Request timeout: data cannot be retrieved. Refresh the page later to try again."
     })
 
     .constant("logActions", {

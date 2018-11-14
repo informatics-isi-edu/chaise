@@ -17,6 +17,7 @@ var testParams = {
         table_displayname: "Accommodations",
         table_comment: "List of different types of accommodations",
         key: { name: "id", value: "2000", operator: "="},
+        not_travis: true,
         primary_keys: ["id"],
         columns: [
             { name: "id", generated: true, immutable: true, title: "Id", type: "serial4", nullok: false},
@@ -26,31 +27,31 @@ var testParams = {
             { name: "rating", title: "User Rating", type: "float4", nullok: false},
             { name: "summary", title: "Summary", nullok: false, type: "longtext"},
             { name: "description", title: "Description", type: "markdown"},
+            { name: "json_col", title: "json_col", value:JSON.stringify({"name": "testing"},undefined,2) , type: "json" },
             { name: "no_of_rooms", title: "Number of Rooms", type: "int2"},
             { name: "opened_on", title: "Operational Since", type: "timestamptz", nullok: false },
             { name: "date_col", title: "date_col", type: "date"},
-            { name: "luxurious", title: "Is Luxurious", type: "boolean" },
-            { name: "json_col", title: "json_col", value:JSON.stringify({"name": "testing"},undefined,2) , type: "json" }
+            { name: "luxurious", title: "Is Luxurious", type: "boolean" }
         ],
         values: [
             {"id": "2000", "title": "Sherathon Hotel", "website": "http://www.starwoodhotels.com/sheraton/index.html", "category": "Castle", "rating": "4.3",
              "summary": "Sherathon Hotels is an international hotel company with more than 990 locations in 73 countries. The first Radisson Hotel was built in 1909 in Minneapolis, Minnesota, US. It is named after the 17th-century French explorer Pierre-Esprit Radisson.",
-             "description": "**CARING. SHARING. DARING.**", "no_of_rooms": "23", "opened_on": moment("12/9/2008, 12:00:00 AM", "MM/DD/YYYY, HH:mm:ss A"),
+             "description": "**CARING. SHARING. DARING.**",  "json_col": null, "no_of_rooms": "23", "opened_on": moment("12/9/2008, 12:00:00 AM", "MM/DD/YYYY, HH:mm:ss A"),
              "date_col": "2008-12-09", "luxurious": "true"
             }
         ],
         inputs: [
             {"title": "new title 1", "website": "https://example1.com", "category": {index: 1, value: "Ranch"},
-             "rating": "1", "summary": "This is the summary of this column 1.", "description": "## Description 1",
+             "rating": "1", "summary": "This is the summary of this column 1.", "description": "## Description 1", "json_col": JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2),
              "no_of_rooms": "1", "opened_on": moment("2017-01-01 01:01:01", "YYYY-MM-DD hh:mm:ss"), "date_col": "2017-01-01", "luxurious": false},
         ],
         result_columns: [
-            "title", "website", "product-edit_fk_category", "rating", "summary", "description", "no_of_rooms", "opened_on", "date_col", "luxurious"
+            "title", "website", "product-edit_fk_category", "rating", "summary", "description", "json_col", "no_of_rooms", "opened_on", "date_col", "luxurious"
         ],
         results: [
             ["new title 1",  {"link":"https://example1.com/", "value":"Link to Website"},
             {"link":"{{{chaise_url}}}/record/#{{catalog_id}}/product-edit:category/id=10004", "value":"Castle"},
-            "1.0000", "This is the summary of this column 1.", "Description 1", "1", "2017-01-01 01:01:01", "2017-01-01", "false"]
+            "1.0000", "This is the summary of this column 1.", "Description 1", JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2), "1", "2017-01-01 01:01:01", "2017-01-01", "false"]
         ],
         files: []
     }, {
@@ -59,6 +60,7 @@ var testParams = {
        record_displayname: "90008", //since this is in single-edit, displayname is rowname.
        table_displayname: "File",
        table_comment: "asset/object",
+       not_travis: !process.env.TRAVIS,
        primary_keys: ["id"],
        key: { name: "id", value: "90008", operator: "="},
        columns: [

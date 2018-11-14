@@ -352,7 +352,12 @@
                 },
                 size: "xl",
                 templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
-            }, function dataSelected(tuples) {
+            }, function dataSelected(res) {
+                //TODO this is written only for modal update (multi-select), isModalUpdate is unnecessary
+
+                if (!res || !res.rows) return;
+                var tuples = res.rows;
+
                 // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
                 // set data in view model (model.rows) and submission model (model.submissionRows)
                 // we assume that the data for the main table has been populated before

@@ -60,6 +60,7 @@ var testParams = {
     },
     customFilter: {
         ermrestFilter: "id=1;id=2;int_col::geq::20",
+        ermrestFilterDisplayed: "id=1; id=2; int_col::geq::20",
         numRows: 7,
         numRowsWFacet: 1,
         numRowsWOFilter: 1,
@@ -69,6 +70,18 @@ var testParams = {
         optionsWOFilter: ["All Records With Value", "2", "1", "3", "4", "5", "6", "7", "8", "9", "10"],
         option: 2
     },
+    customFacet: {
+        cfacet: { "displayname": "Custom Facet Query", "ermrest_path": "id=1;id=2;id=3;id=14;id=15;id=16;id=17;id=18" },
+        cfacetBlob: "N4IgJglgzgDgNgQwJ4DsEFsCmIBcIDCArlAC4D26ABAGIIDGmJlAioZgE5IgA0IH67TKQD6MBCQAWuEBDABeAIwBuWXIBMK+QGZNigCy6FAVkMA2QwHZDADhABfIA",
+        facet: 10,
+        totalNumOptions: 3,
+        option: 1,
+        numRows: 8,
+        numRowsWFacet: 3,
+        numRowsWOCustomFacet: 10,
+        options: ['All Records With Value', 'one', 'two'],
+        optionsWOCustomFacet: ['All Records With Value', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten']
+    },
     maximumLength: {
         facetIdx: 18,
         option: 1,
@@ -77,8 +90,8 @@ var testParams = {
         totalNumOptions: 26,
         filteredNumRows: 14,
         secondFacetIdx: 6,
-        secondFacetOption: 1,
-        secondFacetNumOptions: 7
+        secondFacetOption: 0,
+        secondFacetNumOptions: 6
     },
     recordColumns: [ "text_col", "longtext_col", "markdown_col", "int_col", "float_col", "date_col", "timestamp_col", "boolean_col", "jsonb_col", "1-o7Ye2EkulrWcCVFNHi3A", "hmZyP_Ufo3E5v_nmdTXyyA" ],
     recordValues: {
@@ -333,7 +346,8 @@ describe("Other facet features, ", function() {
                         return (ct > 0);
                     });
                 });
-                expect(chaisePage.recordsetPage.getModalMatchNullInput().getAttribute('disabled')).toBe('true', "null option was not disabled.");
+                // TODO uncomment this line when `null-filter` should show up in RS select with faceting
+                // expect(chaisePage.recordsetPage.getModalMatchNullInput().getAttribute('disabled')).toBe('true', "null option was not disabled.");
                 expect(chaisePage.recordsetPage.getModalDisabledRows().count()).toBe(testParams.not_null.modal_available_options, "number of disabled rows missmatch.");
                 expect(chaisePage.recordsetPage.getCheckedModalOptions().count()).toBe(0, "number of checked rows missmatch.");
                 return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
@@ -370,7 +384,8 @@ describe("Other facet features, ", function() {
                 // make sure the options havn't changed
                 expect(text).toEqual(testParams.not_null.options_w_not_null, "the text of selected faacet missmatch.");
 
-                expect(chaisePage.recordsetPage.getModalMatchNullInput().getAttribute('disabled')).not.toBe('true', "null option is still disabled.");
+                // TODO uncomment this line when `null-filter` should show up in RS select with faceting
+                // expect(chaisePage.recordsetPage.getModalMatchNullInput().getAttribute('disabled')).not.toBe('true', "null option is still disabled.");
                 expect(chaisePage.recordsetPage.getCheckedFacetOptions(testParams.not_null.option).count()).toBe(0, "number of selected filters missmatch.");
                 expect(chaisePage.recordsetPage.getDisabledFacetOptions(testParams.not_null.option).count()).toBe(0, "numer of disabled filters missmatch.");
 
@@ -422,7 +437,7 @@ describe("Other facet features, ", function() {
         });
     });
 
-    describe("No Value (null) filter, ", function () {
+    xdescribe("No Value (null) filter, ", function () {
         var uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
         var clearAll, showMore, nullBtn;
 
@@ -542,7 +557,7 @@ describe("Other facet features, ", function() {
             chaisePage.recordsetPage.getFacetFilters().then(function (filters) {
                 expect(filters.length).toEqual(1, "filter is missing");
 
-                expect(filters[0].getText()).toEqual("Custom Filter: " + customFilterParams.ermrestFilter, "filter text missmatch.");
+                expect(filters[0].getText()).toEqual("Custom Filter: " + customFilterParams.ermrestFilterDisplayed, "filter text missmatch.");
 
                 expect(chaisePage.recordsetPage.getClearAllFilters().isDisplayed()).toBeTruthy("`Clear All` is not visible");
 
@@ -628,7 +643,13 @@ describe("Other facet features, ", function() {
             clearAll = chaisePage.recordsetPage.getClearAllFilters();
             browser.wait(EC.elementToBeClickable(clearAll));
 
-            clearAll.click().then(function () {
+            //close the first facet
+            chaisePage.recordsetPage.getFacetById(0).click().then(function () {
+                //close the second facet
+                return chaisePage.recordsetPage.getFacetById(1).click();
+            }).then(function () {
+                return clearAll.click();
+            }).then(function () {
                 chaisePage.waitForElementInverse(element(by.id("spinner")));
 
                 done();
@@ -834,7 +855,7 @@ describe("Other facet features, ", function() {
             });
 
             it("select a facet option and select a row for the input", function (done) {
-                chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(0, 2)).then(function () {
+                chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(0, 1)).then(function () {
                     browser.wait(function () {
                         return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
                             return (ct == 1);
@@ -914,7 +935,7 @@ describe("Other facet features, ", function() {
             });
 
             it("select a facet option and select a row to associate", function (done) {
-                chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(0, 2)).then(function () {
+                chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(0, 1)).then(function () {
                     browser.wait(function () {
                         return chaisePage.recordsetPage.getRecordsetTableModalOptions().count().then(function (ct) {
                             return (ct == 1);
@@ -938,6 +959,98 @@ describe("Other facet features, ", function() {
                     done();
                 }).catch(chaisePage.catchTestError(done));
             });
+        });
+    });
+
+    /***********************************************************  local test cases ***********************************************************/
+    if (process.env.TRAVIS) return;
+    // NOTE the following test cases will only run locally.
+
+    describe("navigating to recordset with custom facet.", function () {
+        var customFacetParams = testParams.customFacet;
+        var idx = customFacetParams.facet;
+
+        beforeAll(function () {
+            var uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
+
+            uri += "/*::cfacets::" + customFacetParams.cfacetBlob;
+
+            browser.ignoreSynchronization=true;
+            browser.get(uri);
+            chaisePage.waitForElementInverse(element(by.id("spinner")));
+        });
+
+        it ("should show the applied filter and clear all button.", function (done) {
+            chaisePage.recordsetPage.getFacetFilters().then(function (filters) {
+                expect(filters.length).toEqual(1, "filter is missing");
+
+                expect(filters[0].getText()).toEqual("Custom Facets: " + customFacetParams.cfacet.displayname, "filter text missmatch.");
+
+                expect(chaisePage.recordsetPage.getClearAllFilters().isDisplayed()).toBeTruthy("`Clear All` is not visible");
+
+                done();
+            }).catch(chaisePage.catchTestError(done));
+        });
+
+        it ("main and faceting data should be based on the filter, and be able to apply new filters.", function (done) {
+            // main
+            expect(chaisePage.recordsetPage.getRows().count()).toEqual(customFacetParams.numRows, "total row count missmatch.");
+
+            chaisePage.recordsetPage.getFacetById(idx).click().then(function () {
+                browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
+
+                // wait for facet checkboxes to load
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getFacetOptions(idx).count().then(function(ct) {
+                        return ct == customFacetParams.totalNumOptions;
+                    });
+                }, browser.params.defaultTimeout);
+
+                // wait for list to be fully visible
+                browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(idx)), browser.params.defaultTimeout);
+
+                return chaisePage.recordsetPage.getFacetOptionsText(idx);
+            }).then(function (text) {
+                expect(text).toEqual(customFacetParams.options, "options missmatch.");
+
+                // select a new facet
+                return chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(idx, customFacetParams.option));
+            }).then(function () {
+                // wait for table rows to load
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                        return ct == customFacetParams.numRowsWFacet;
+                    });
+                }, browser.params.defaultTimeout);
+
+                // make sure data has been updated
+                expect(chaisePage.recordsetPage.getRows().count()).toBe(customFacetParams.numRowsWFacet, "");
+
+                // make sure filter is there
+                expect(chaisePage.recordsetPage.getFacetFilters().count()).toBe(2, "facet filter missing.");
+
+
+                done();
+            }).catch(chaisePage.catchTestError(done));
+        });
+
+        it ("clicking on `x` for Custom Filter should only clear the filter.", function (done) {
+            expect(chaisePage.recordsetPage.getClearCustomFacets().isDisplayed()).toBeTruthy("`Clear Custom Facets` is not visible.");
+
+            chaisePage.recordsetPage.getClearCustomFacets().click().then(function () {
+                // wait for table rows to load
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                        return ct == customFacetParams.numRowsWOCustomFacet;
+                    });
+                }, browser.params.defaultTimeout);
+
+                expect(chaisePage.recordsetPage.getRows().count()).toEqual(customFacetParams.numRowsWOCustomFacet, "total row count missmatch.");
+
+                expect(chaisePage.recordsetPage.getFacetOptionsText(idx)).toEqual(customFacetParams.optionsWOCustomFacet, "options missmatch.");
+
+                done();
+            }).catch(chaisePage.catchTestError(done));
         });
     });
 });

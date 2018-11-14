@@ -24,6 +24,7 @@
         var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
         $scope.recordSidePanOpen = chaiseConfig.hideTableOfContents === true ? false : true;
         vm.tooltip = messageMap.tooltip;
+        vm.queryTimeoutTooltip = messageMap.queryTimeoutTooltip;
         vm.gotoRelatedTable = function(sectionId, index) {
             var safeSectionId = vm.makeSafeIdAttr(sectionId);
             var pageSection = "rt-heading-" + safeSectionId;
@@ -49,8 +50,14 @@
             return ($rootScope.reference && $rootScope.reference.canCreate && $rootScope.modifyRecord);
         };
 
+        // TODO change this to reference.unfilteredReference.contextualize...
         vm.createRecord = function() {
             $window.location.href = $rootScope.reference.table.reference.contextualize.entryCreate.appLink;
+        };
+
+        // TODO change this to reference.unfilteredReference.contextualize...
+        vm.toRecordset = function() {
+            return $rootScope.reference.table.reference.contextualize.compact.appLink;
         };
 
         vm.canEdit = function() {
@@ -89,8 +96,42 @@
             });
         };
 
+        /**
+         * The following cases need to be handled for the resolverImplicitCatalog value:
+         *  - if undefined:                                 use current chaise path
+         *  - if false:                                     /id/currCatalog/RID
+         *  - if resolverImplicitCatalog == currCatalog:    /id/RID
+         *  - if resolverImplicitCatalog != currCatalog:    /id/resolverImplicitCatalog/RID
+         **/
+        var resolvePermalink = function (tuple) {
+            var resolverId = chaiseConfig.resolverImplicitCatalog;
+            var currCatalog = $rootScope.reference.location.catalogId;
+
+            // null or undefined or no RID
+            if (resolverId == null || !tuple.data || !tuple.data.RID) {
+                return $window.location.href;
+            }
+
+            // if false we want the current catalog id
+            if (resolverId === false) {
+                return $window.location.origin + "/id/" + currCatalog + "/" + tuple.data.RID;
+            }
+
+            // if it's a number (isNaN tries to parse to integer before checking)
+            if (!isNaN(resolverId)) {
+                var catalog = (resolverId != currCatalog) ? currCatalog+"/" : "";
+                return $window.location.origin + "/id/" + catalog + tuple.data.RID;
+            }
+
+            // any other values are not allowed so default to current url as permalink
+            return $window.location.href;
+        }
+
         vm.sharePopup = function() {
             var tuple = $rootScope.tuple;
+
+            var permalink = resolvePermalink(tuple);
+
             modalUtils.showModal({
                 templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/shareCitation.modal.html",
                 controller: "ShareCitationController",
@@ -99,7 +140,7 @@
                 resolve: {
                     params: {
                         citation: tuple.citation,
-                        permalink: $window.location.href,
+                        permalink: permalink,
                         displayname: $rootScope.reference.table.name+'_'+tuple.uniqueId
                     }
                 }
@@ -133,23 +174,14 @@
                   return false;
                 }
 
-                if (i === 0) {
-                    $rootScope.lastRendered = 0;
-
-                    // don't show the loading if it's done
-                    if ($rootScope.lastRendered === $rootScope.relatedTableModels.length-1) {
-                        $rootScope.loading = false;
-                    }
-
-                    return true;
-                }
-
-                if ($rootScope.lastRendered === i-1)  {
+                if (i === 0 || $rootScope.lastRendered === i-1)  {
                     $rootScope.lastRendered = i;
 
                     // don't show the loading if it's done
-                    if ($rootScope.lastRendered === $rootScope.relatedTableModels.length-1) {
-                        $rootScope.loading = false;
+                    if ($rootScope.loading && $rootScope.lastRendered === $rootScope.relatedTableModels.length-1) {
+                        $timeout(function () {
+                            $rootScope.loading = false;
+                        });
                     }
 
                     return true;
@@ -348,6 +380,14 @@
             }
         });
 
+        vm.stickLoading = false;
+        function setLoadingTextStyle() {
+            var mainContainerHeight = $document[0].getElementsByClassName('main-container')[0].offsetHeight;
+            if (mainBodyEl[0].offsetHeight >= mainContainerHeight) {
+                vm.stickLoading = true;
+            }
+        };
+
         // watch for the main body size to change
         $scope.$watch(function() {
             return mainBodyEl && mainBodyEl[0].offsetHeight;
@@ -355,6 +395,7 @@
             if (newValue) {
                 $timeout(function () {
                     UiUtils.setFooterStyle(0);
+                    setLoadingTextStyle();
                 }, 0);
             }
         });

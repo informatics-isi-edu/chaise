@@ -16,8 +16,10 @@
                     <span ng-if="::!recordDisplayname.isHTML" ng-bind="::recordDisplayname.value"></span>
                 </h1>
                 <h3 id="page-subtitle" class="pull-left">
-                    <span ng-if="::reference.displayname.isHTML" ng-bind-html="::reference.displayname.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::reference.table.comment ? reference.table.comment : undefined}}"></span>
-                    <span ng-if="::!reference.displayname.isHTML" ng-bind="::reference.displayname.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::reference.table.comment ? reference.table.comment : undefined}}"></span>
+                    <a ng-href="{{::ctrl.toRecordset()}}">
+                        <span ng-if="::reference.displayname.isHTML" ng-bind-html="::reference.displayname.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::reference.table.comment ? reference.table.comment : undefined}}"></span>
+                        <span ng-if="::!reference.displayname.isHTML" ng-bind="::reference.displayname.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::reference.table.comment ? reference.table.comment : undefined}}"></span>
+                    </a>
                 </h3>
             </div>
             <div class="pull-right">
@@ -69,6 +71,7 @@
                             <uib-accordion-heading>
                                 <i class="pull-left glyphicon" style="margin-right: 5px;" ng-class="{'glyphicon-chevron-down': rtm.open, 'glyphicon-chevron-right': !m.open}"></i>
                                 <span ng-if="::rtm.displayname.isHTML" ng-bind-html="::rtm.displayname.value"></span><span ng-if="::!rtm.displayname.isHTML" ng-bind="::rtm.displayname.value"></span> <span ng-if="rtm.tableModel.rowValues.length==0">(no results found)</span><span ng-if="rtm.tableModel.rowValues.length!=0">(showing {{rtm.tableModel.page.hasNext ? 'first' : 'all'}} {{rtm.tableModel.rowValues.length}} results)</span>
+                                <span ng-if="rtm.tableModel.tableError" class="glyphicon glyphicon-alert" uib-tooltip="{{ctrl.queryTimeoutTooltip}}" tooltip-placement="right"></span>
                             </uib-accordion-heading>
 
                             <!-- for different elements inside the accordion -->
@@ -90,7 +93,10 @@
                         </div>
                     </uib-accordion>
                 </div>
-                <span id="rt-loading" ng-show="loading">Loading...</span>
+                <span id="rt-loading" ng-show="loading" class="loading-text" ng-class="{'loading-sticky': ctrl.stickLoading}">
+                    <img class="spinner spinner-sm" src="../common/styles/images/loader.gif"/>
+                    Loading...
+                </span>
             </div>
             <footer ng-show="!loading && displayReady"></footer>
         </div>
@@ -113,10 +119,14 @@
                                 <a uib-tooltip="{{rtm.displayname.value}}" tooltip-placement="bottom" chaise-enable-tooltip-width>
                                     <span ng-if="::rtm.displayname.isHTML" ng-bind-html="::rtm.displayname.value"></span>
                                     <span ng-if="::!rtm.displayname.isHTML" ng-bind="::rtm.displayname.value"></span>
-                                    <span>({{rtm.tableModel.rowValues.length}})</span>
+                                    <span>({{rtm.tableModel.rowValues.length}}{{rtm.tableModel.page.hasNext ? '+' : ''}})</span>
                                 </a>
                             </li>
                         </div>
+                        <li id="rt-toc-loading" ng-show="loading" class="loading-text">
+                            <img class="spinner spinner-sm" src="../common/styles/images/loader.gif"/>
+                            Loading...
+                        </li>
                     </ul>
                 </div>
             </div>

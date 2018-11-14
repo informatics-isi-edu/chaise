@@ -14,7 +14,11 @@ var testParams = {
     subTitle: "Accommodations",
     tableComment: "List of different types of accommodations",
     tables_order: ["accommodation_image (showing first 2 results)", "media (no results found)"],
-    file_names: ["Accommodations.csv", "accommodation.zip", "accommodation_"+chaisePage.getEntityRow("product-record", "accommodation", [{column: "id",value: "2002"}]).RID+".bib"],
+    file_names: [
+        "Accommodations.csv",
+        "accommodation_" + chaisePage.getEntityRow("product-record", "accommodation", [{column: "id",value: "2002"}]).RID + ".zip",
+        "accommodation_"+chaisePage.getEntityRow("product-record", "accommodation", [{column: "id",value: "2002"}]).RID+".bib"
+    ],
     related_table_name_with_page_size_annotation: "accommodation_image",
     page_size: 2,
     related_tables: [
@@ -76,11 +80,12 @@ var testParams = {
       id: "2003",
       tocCount: 8,
       tableToShow: 'Categories_5',
-      sidePanelTableOrder:[ 'Main', 'Categories_collection\n (5)',  'media\n \n (1)', 'Categories_collection_2\n (5)',  'Categories_3\n (5)',  'Categories_4\n (5)',  'Categories_5\n (5)',  'Categories_6\n (5)'],
+      sidePanelTableOrder:[ 'Main', 'Categories_collection (5)',  'media (1)', 'Categories_collection_2 (5)',  'Categories_3 (5)',  'Categories_4 (5)',  'Categories_5 (5)',  'Categories_6 (5)'],
       panelHeading: "Contents"
     },
     citationParams: {
         numListElements: 3,
+        permalink: browser.params.origin+"/id/"+browser.params.catalogId+"/"+chaisePage.getEntityRow("product-record", "accommodation", [{column: "id",value: "2002"}]).RID,
         citation: "Sherathon Hotel http://www.starwoodhotels.com/sheraton/index.html (" + moment().format("YYYY") + ")."
     },
     inline_columns: [
@@ -97,7 +102,7 @@ var testParams = {
           viewMore: {
               name: "accommodation_collection",
               displayname: "accommodation_collections",
-              filter: "Accommodations (Cover Image): 3005"
+              filter: "Accommodations: Sherathon Hotel"
           },
           rowValues: [
               ["2000", "Sherathon Hotel"]
@@ -179,7 +184,7 @@ describe('View existing record,', function() {
             });
         });
 
-        it('should load document title defined in chaise-config.js and have deleteRecord=true', function() {
+        it('should load document title defined in chaise-config.js and have deleteRecord=true and resolverImplicitCatalog=2', function() {
             browser.manage().logs().get('browser').then(function(browserLog) {
                 browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
                     expect(chaiseConfig.deleteRecord).toBe(true);
@@ -188,6 +193,8 @@ describe('View existing record,', function() {
                             expect(title).toEqual(chaiseConfig.headTitle);
                         });
                     }
+
+                    expect(chaiseConfig.resolverImplicitCatalog).toBe(2);
                 });
             });
 
@@ -312,11 +319,11 @@ describe('View existing record,', function() {
 
         it('Record count along with heading should match for the panel and related table content should be in correct order', function(done){
             chaisePage.recordPage.getSidePanelTableTitles().then(function(tableNames){
-              for (var i=0; i<tableNames.length; i++){
-                tableNames[i] = tableNames[i].replace(/ +/g, " ");
-              }
+                for (var i=0; i<tableNames.length; i++){
+                    tableNames[i] = tableNames[i].replace(/ +/g, " ");
+                }
                 expect(tableNames.length).toEqual(testParams.sidePanelTest.tocCount, "Count mismatch for number of related tables in the side panel");
-                expect(tableNames).toEqual(testParams.sidePanelTest.sidePanelTableOrder,"Order is not maintained for related tables in the side panel");
+                expect(tableNames).toEqual(testParams.sidePanelTest.sidePanelTableOrder, "Order is not maintained for related tables in the side panel");
                 return chaisePage.recordPage.getSidePanelHeading();
             }).then(function(sidePanelHeading){
                 expect(sidePanelHeading).toBe(testParams.sidePanelTest.panelHeading, "Side Panel heading did not match.");

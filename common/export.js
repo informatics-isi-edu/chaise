@@ -3,7 +3,7 @@
 
     angular.module('chaise.export', ['chaise.utils'])
 
-    .directive('export', ['AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'modalUtils', '$timeout', 'UriUtils', function (AlertsService, DataUtils, ErrorService, logActions, modalUtils, $timeout, UriUtils) {
+    .directive('export', ['AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'modalUtils', '$rootScope', '$timeout', 'UriUtils', function (AlertsService, DataUtils, ErrorService, logActions, modalUtils, $rootScope, $timeout, UriUtils) {
 
         /**
          * Cancel the current export request
@@ -20,10 +20,10 @@
          * Update the list of templates in UI
          */
         function _updateExportFormats(scope) {
-            var templates = scope.reference.table.exportTemplates;
+            var templates = scope.reference.getExportTemplates(!$rootScope.chaiseConfig.disableDefaultExport);
 
             templates.forEach(function (template) {
-                if (template.format_name) {
+                if (template.displayname) {
                     // matches object format set for default case with CSV
                     scope.exportOptions.supportedFormats.push(template);
                 }
@@ -34,8 +34,8 @@
          * Send the request for export
          */
         function _doExport(scope, template) {
-            var formatName = template.format_name;
-            var formatType = template.format_type;
+            var formatName = template.displayname;
+            var formatType = template.type;
             switch (formatType) {
                 case "DIRECT":
                     if (formatName === "CSV") {
@@ -48,7 +48,11 @@
                     break;
                 case "BAG":
                 case "FILE":
-                    scope.exporter = new ERMrest.Exporter(scope.reference, template);
+                    var bagName = scope.reference.table.name;
+                    if ($rootScope.tuple) {
+                        bagName += "_" + $rootScope.tuple.uniqueId;
+                    }
+                    scope.exporter = new ERMrest.Exporter(scope.reference, bagName, template);
                     var exportParametersString = JSON.stringify(scope.exporter.exportParameters, null, "  ");
 
                     // begin export and start a timer
@@ -64,7 +68,7 @@
                         keyboard: false,
                         resolve: {
                             params: {
-                                format_name: template.format_name
+                                displayname: template.displayname
                             }
                         }
                     }, null, function () {
@@ -112,9 +116,8 @@
                     supportedFormats: [
                         {
                             outputs: [],
-                            name: "default_csv",
-                            format_name: "CSV",
-                            format_type: "DIRECT"
+                            displayname: "CSV",
+                            type: "DIRECT"
                         }
                     ]
                 };

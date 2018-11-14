@@ -24,9 +24,10 @@ describe('View existing record,', function() {
             chaisePage.waitForElement(element(by.id('tblRecord')));
         });
 
-        it("should load chaise-config.js and have deleteRecord=false", function() {
+        it("should load chaise-config.js and have deleteRecord=false && resolverImplicitCatalog=4", function() {
             browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
-                expect(chaiseConfig.deleteRecord).toBe(false);
+                expect(chaiseConfig.deleteRecord).toBeFalsy();
+                expect(chaiseConfig.resolverImplicitCatalog).toBe(4);
             });
         });
 
@@ -48,5 +49,26 @@ describe('View existing record,', function() {
                 done.fail();
             });
         });
+
+        if (process.env.TRAVIS) {
+            it ("Should have the proper permalink in the share popup if resolverImplicitCatalog is the same as catalogId", function (done) {
+                var permalink = browser.params.origin+"/id/"+chaisePage.getEntityRow("product-record", testParams.table_name, [{column: "id",value: "4004"}]).RID;
+
+                var shareButton = chaisePage.recordPage.getShareButton(),
+                    shareModal = chaisePage.recordPage.getShareModal();
+
+                shareButton.click().then(function () {
+                    // wait for dialog to open
+                    chaisePage.waitForElement(shareModal);
+
+                    expect(chaisePage.recordPage.getPermalinkText().getText()).toBe(permalink, "permalink url is incorrect");
+
+                    done();
+                }).catch(function(err){
+                    console.log(err);
+                    done.fail();
+                });
+            });
+        }
     });
 });
