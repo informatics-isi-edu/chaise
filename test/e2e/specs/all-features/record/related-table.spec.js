@@ -21,6 +21,7 @@ var testParams = {
         "related_table_2 (showing all 1 results)", // related entity with path length 3
         "table_w_aggregates (showing all 2 results)" // related entity with aggregate columns
     ],
+    tocHeaders: ["Main", "booking (6)", "schedule (2)", "media (1)", "association_table (1)", "accommodation_image (2+)", "association_table_markdown (1)", "related_table_2 (1)", "table_w_aggregates (2)"],
     related_table_name_with_page_size_annotation: "accommodation_image",
     related_table_name_with_link_in_table: "accommodation_image"
 };
@@ -45,9 +46,11 @@ describe ("Viewing exisiting record with related entities, ", function () {
     });
 
     it ("should show the related entities in the expected order.", function () {
-        chaisePage.recordPage.getRelatedTableTitles().then(function(headings) {
-            expect(headings).toEqual(testParams.headers);
-        });
+        expect(chaisePage.recordPage.getRelatedTableTitles()).toEqual(testParams.headers, "list of related table accordion headers is incorret");
+    });
+
+    it ("should show the related table names in the correct order in the Table of Contents", function () {
+        expect(chaisePage.recordPage.getSidePanelTableTitles()).toEqual(testParams.tocHeaders, "list of related tables in toc is incorrect");
     });
 
     var related_table = {

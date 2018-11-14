@@ -130,9 +130,12 @@
 
                     scope.removeFilter = function (index) {
                         var newRef;
-                        if (index === -1) {
-                            // only delete custom filters on the reference (not the facet)
-                            newRef = scope.vm.reference.removeAllFacetFilters(true);
+                        if (index === "filters") {
+                            // only remove custom filters on the reference (not the facet)
+                            newRef = scope.vm.reference.removeAllFacetFilters(false, true, true);
+                        } else if (index === "cfacets") {
+                            // only remove custom facets on the reference
+                            newRef = scope.vm.reference.removeAllFacetFilters(true, false, true);
                         } else if (typeof index === 'undefined') {
                             // // delete all filters and facets
                             newRef = scope.vm.reference.removeAllFacetFilters();
@@ -221,8 +224,8 @@
                     }
 
                     // TODO I am attaching the removeFilter to the vm here, maybe I shouldn't?
-                    scope.vm.removeFilter = function (colId, id) {
-                        scope.removeFilter(colId, id);
+                    scope.vm.removeFilter = function (colId) {
+                        scope.removeFilter(colId);
                     }
                 }
             };

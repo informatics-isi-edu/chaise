@@ -8,4 +8,5 @@ Web interface (Chaise)
    user-docs/chaise-config.md
    user-docs/contexts.md
    user-docs/custom-css.md
+   uesr-docs/console.md
    user-docs/logging.md
