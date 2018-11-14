@@ -78,7 +78,7 @@
                 <input type="checkbox" id="rs-match-null" ng-click="toggleMatchNull()" ng-checked="vm.matchNull" ng-disabled="vm.matchNotNull"><label>No Value</label>
             </span> -->
         </div>
-        <div ng-if="vm.hasLoaded">
+        <div ng-show="vm.hasLoaded">
             <record-table-select-faceting id="rs-{{vm.makeSafeIdAttr(vm.tableDisplayName.value)}}" vm="vm" on-selected-rows-changed-bind="onSelectedRowsChanged"></record-table-select-faceting>
         </div>
 
