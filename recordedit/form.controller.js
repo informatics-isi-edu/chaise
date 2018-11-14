@@ -573,57 +573,58 @@
             var column = columnModel.column;
 
             var inputType = columnModel.inputType;
-            if (inputType === "popup-select") {
-                // value should be an ERMrest.tuple object
-                // set data in view model (model.rows) and submission model (model.submissionRows)
+            switch (inputType) {
+                case "popup-select":
+                    // value should be an ERMrest.tuple object
+                    // set data in view model (model.rows) and submission model (model.submissionRows)
 
-                // udpate the foreign key data
-                model.foreignKeyData.forEach(function (fkeyData) {
-                    fkeyData[column.foreignKey.name] = value ? value.data : null;
-                });
-
-                var foreignKeyColumns = column.foreignKey.colset.columns;
-                for (var i = 0; i < foreignKeyColumns.length; i++) {
-                    var referenceCol = foreignKeyColumns[i];
-                    var foreignTableCol = column.foreignKey.mapping.get(referenceCol);
-
-                    model.submissionRows.forEach(function (submissionRow) {
-                        submissionRow[referenceCol.name] = value ? value.data[foreignTableCol.name] : null;
+                    // udpate the foreign key data
+                    model.foreignKeyData.forEach(function (fkeyData) {
+                        fkeyData[column.foreignKey.name] = value ? value.data : null;
                     });
-                }
 
-                model.rows.forEach(function (row) {
-                    row[column.name] = value ? value.displayname.value : null;
-                });
-            } else if (inputType === "file") {
-                model.submissionRows.forEach(function (submissionRow) {
-                    // need to set each property to avoid having a reference to the same object
-                    submissionRow[column.name] = {}
-                    Object.keys(value).forEach(function (key) {
-                        if (key !== "hatracObj") {
-                            submissionRow[column.name][key] = value[key];
+                    var foreignKeyColumns = column.foreignKey.colset.columns;
+                    for (var i = 0; i < foreignKeyColumns.length; i++) {
+                        var referenceCol = foreignKeyColumns[i];
+                        var foreignTableCol = column.foreignKey.mapping.get(referenceCol);
+
+                        model.submissionRows.forEach(function (submissionRow) {
+                            submissionRow[referenceCol.name] = value ? value.data[foreignTableCol.name] : null;
+                        });
+                    }
+
+                    model.rows.forEach(function (row) {
+                        row[column.name] = value ? value.displayname.value : null;
+                    });
+                    break;
+                case "file":
+                    model.submissionRows.forEach(function (submissionRow) {
+                        // need to set each property to avoid having a reference to the same object
+                        submissionRow[column.name] = {}
+                        Object.keys(value).forEach(function (key) {
+                            if (key !== "hatracObj") {
+                                submissionRow[column.name][key] = value[key];
+                            }
+                        });
+
+                        // TODO: This is duplicated in the upload-input directive.
+                        // Should be removed in both places and only created at submission time
+                        if (submissionRow[column.name].file) {
+                            // if condition guards for "clear all" case
+                            submissionRow[column.name].hatracObj = new ERMrest.Upload(submissionRow[column.name].file, {
+                                column: column,
+                                reference: $rootScope.reference
+                            });
                         }
                     });
 
-                    // TODO: This is duplicated in the upload-input directive.
-                    // Should be removed in both places and only created at submission time
-                    if (submissionRow[column.name].file) {
-                        // if condition guards for "clear all" case
-                        submissionRow[column.name].hatracObj = new ERMrest.Upload(submissionRow[column.name].file, {
-                            column: column,
-                            reference: $rootScope.reference
-                        });
-                    }
-                });
-
-                model.rows.forEach(function (row) {
-                    row[column.name] = value.url;
-                });
-
-            } else {
-                // set input value for each record to create. populate ui model
-                model.rows.forEach(function (row) {
-                    if (inputType === "timestamp") {
+                    model.rows.forEach(function (row) {
+                        row[column.name] = value.url;
+                    });
+                    break;
+                case "timestamp":
+                    // set input value for each record to create. populate ui model
+                    model.rows.forEach(function (row) {
                         // input stays in disabled format (a string)
                         var options = {
                             outputType: "string",
@@ -632,10 +633,13 @@
                         };
                         var valueOrNull = value.date ? value.date + value.time + value.meridiem : null;
                         row[column.name] = InputUtils.formatDatetime(valueOrNull, options);
-                    } else {
+                    });
+                    break;
+                default:
+                    model.rows.forEach(function (row) {
                         row[column.name] = value;
-                    }
-                });
+                    });
+                    break;
             }
         }
 

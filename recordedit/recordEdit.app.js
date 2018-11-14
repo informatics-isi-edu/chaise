@@ -245,6 +245,16 @@
                     $log.info('Old model.rows:', recordEditModel.oldRows);
                 }
 
+                $rootScope.reference.columns.forEach(function (column, index) {
+                    recordEditModel.columnModels[index] = {
+                        allInput: null,
+                        column: column,
+                        inputType: recordEditAppUtils.columnToInputType(column, $rootScope.cookieObj),
+                        highlightRow: false,
+                        showSelectAll: false
+                    };
+                });
+
                 // Case for editing an entity
                 if (context.mode == context.modes.EDIT || context.mode == context.modes.COPY) {
                     if ($rootScope.reference.canUpdate) {
@@ -304,14 +314,6 @@
 
                                 for (var i = 0; i < $rootScope.reference.columns.length; i++) {
                                     column = $rootScope.reference.columns[i];
-                                    recordEditModel.columnModels[i] = {
-                                        allInput: null,
-                                        column: column,
-                                        inputType: recordEditAppUtils.columnToInputType(column, $rootScope.cookieObj),
-                                        highlightRow: false,
-                                        showSelectAll: false
-                                    };
-
                                     var colModel = recordEditModel.columnModels[i];
 
                                     // If input is disabled, and it's copy, we don't want to copy the value
@@ -394,14 +396,6 @@
                             // default model initialiation is null
                             var initialModelValue = null;
                             var column = $rootScope.reference.columns[i];
-                            recordEditModel.columnModels[i] = {
-                                allInput: null,
-                                column: column,
-                                inputType: recordEditAppUtils.columnToInputType(column, $rootScope.cookieObj),
-                                highlightRow: false,
-                                showSelectAll: false
-                            };
-
                             var colModel = recordEditModel.columnModels[i];
 
                             // check the recordEditModel to see if the value was set because of a prefill condition
