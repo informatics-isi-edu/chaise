@@ -363,31 +363,11 @@ exports.testPresentation = function (tableParams) {
         });
     });
 
-    it("visible column related table should appear with action item in the entity area",function(){
-        chaisePage.waitForElement(element(by.id('entity-booking'))).then(function(){
-            return element(by.id('entity-4-markdown'));
-        }).then(function(mdRecord){
-            expect(mdRecord.isDisplayed()).toBeTruthy();
-            return element(by.id('actionbar-4'));
-        }).then( function(actionBar){
-            expect(actionBar.getAttribute('innerText')).toBe('Edit  | Add  | View More','Action bar text did not match.');
-            return browser.executeScript("return $('a.toggle-display-link').click()");
-        }).then(function(editLink){
-            return element(by.id('entity-4-recTab'));
-        }).then(function (RecordTab) {
-            expect(RecordTab.isDisplayed()).toBeTruthy();
-            return element(by.id('entity-4-recTab')).element(by.tagName('tbody')).all(by.tagName('tr')).count();
-        }).then(function (recordRowsCount){
-            expect(recordRowsCount).toBe(2,'Record row count in booking table is incorrect.');
-        }).catch(function(err){
-            console.log(err);
-            expect('Encountered an error').toBe('Please check the log', 'Inside catch block');
-        })
-    });
-
     it("click event on image_id in inline display should open new tab with file details",function(){
         var allHandle;
-        chaisePage.waitForElement(element(by.id('entity-booking'))).then(function(){
+        browser.executeScript("return $('a.toggle-display-link').click()").then(function () {
+            return chaisePage.waitForElement(element(by.id('entity-booking')))
+        }).then(function () {
           // This selector captures link of first record under image_id column (5th column) of booking inline entry
             return browser.executeScript("return $('.t_booking td:nth-child(5) a')");
         }).then(function(imageLinks){
@@ -536,23 +516,6 @@ exports.testPresentation = function (tableParams) {
             done.fail(error);
         });
     });
-
-	describe("regarding inline related entities, ", function () {
-		beforeAll(function () {
-			// make sure page is in its initial state
-			browser.driver.navigate().refresh();
-		});
-
-		for (var i = 0; i < tableParams.inline_columns.length; i++) {
-			var p = tableParams.inline_columns[i];
-			p.baseTable = tableParams.subTitle;
-			describe ("for " + p.title + ", ", function (){
-				exports.testRelatedTable(p, pageReadyCondition);
-			});
-
-		}
-	});
-
 };
 
 /**
@@ -914,8 +877,8 @@ exports.testAddRelatedTable = function (params, isInline, inputCallback) {
 		});
 
 		it ("the opened form should have the prefill value for foreignkey.", function () {
-			var fkInput = chaisePage.recordEditPage.getForeignKeyInputDisplay(params.columnDisplayname, 0);
-			expect(fkInput.getText()).toBe(params.columnValue, "value missmatch");
+            var fkInput = chaisePage.recordEditPage.getInputById(0, params.columnDisplayname);
+			expect(fkInput.getAttribute('value')).toBe(params.columnValue, "value missmatch");
 			expect(fkInput.getAttribute('disabled')).toBe('true', "column was enabled.");
 		});
 

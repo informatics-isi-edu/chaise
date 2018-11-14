@@ -7,5 +7,9 @@
     },
     "tables": {
         "createNew": true
+    },
+    "entities": {
+        "createNew": true,
+        "path": "test/e2e/data_setup/data/multi-add"
     }
 }

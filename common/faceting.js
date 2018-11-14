@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    angular.module('chaise.faceting', ['plotly', 'chaise.utils'])
+    angular.module('chaise.faceting', ['plotly', 'chaise.inputs', 'chaise.utils'])
 
         .factory('facetingUtils', ['defaultDisplayname', function (defaultDisplayname) {
 
