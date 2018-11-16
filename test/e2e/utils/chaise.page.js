@@ -506,11 +506,11 @@ var recordEditPage = function() {
 
     this.getDeleteRowButton = function(index) {
         index = index || 0;
-        return browser.executeScript("return $('delete-link button')[" + index  + "];");
+        return browser.executeScript("return $('button.remove-form-btn')[" + index  + "];");
     };
 
     this.getAllDeleteRowButtons = function() {
-        return browser.executeScript("return $('delete-link button');");
+        return browser.executeScript("return $('button.remove-form-btn');");
     };
 
     this.getDeleteModalButton = function() {

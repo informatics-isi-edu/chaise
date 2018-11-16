@@ -172,8 +172,8 @@ span[uib-tooltip], .show-tooltip-border[uib-tooltip] {
 }
 
 .remove-form-btn {
-    padding: 0px 7px;
     font-size: 18px;
+    padding: 0px 7px;
 }
 
 /**************** SPINNER **************/
