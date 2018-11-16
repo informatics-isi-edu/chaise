@@ -39,15 +39,33 @@ describe('Edit a record,', function() {
             }).then(function (button) {
                 return chaisePage.clickButton(button);
             }).then(function () {
+                chaisePage.waitForElement(element(by.id('delete-confirmation')));
+
+                // confirm delete close
+                return chaisePage.recordEditPage.getDeleteModalButton();
+            }).then(function(modalBtn) {
+                return chaisePage.clickButton(modalBtn);
+            }).then(function () {
+                return chaisePage.recordEditPage.getForms().count();
+            }).then(function (ct) {
+                expect(ct).toBe(testParams.original_rows - 1, "number of rows is incorrect after removing 1");
+
                 // remove the 6th row (7th row in the original set)
                 return chaisePage.recordEditPage.getDeleteRowButton(5);
             }).then(function (button) {
                 return chaisePage.clickButton(button);
             }).then(function () {
+                chaisePage.waitForElement(element(by.id('delete-confirmation')));
+
+                // confirm delete close
+                return chaisePage.recordEditPage.getDeleteModalButton();
+            }).then(function(modalBtn) {
+                return chaisePage.clickButton(modalBtn);
+            }).then(function () {
                 // verify number of forms is expected
                 return chaisePage.recordEditPage.getForms().count();
-            }).then(function(count) {
-                expect(count).toBe(testParams.rows_after, "incorrect number of rows to edit after removing 2");
+            }).then(function(ct) {
+                expect(ct).toBe(testParams.rows_after, "incorrect number of rows to edit after removing 2");
 
                 //change a value in 1 form
                 var textInput = chaisePage.recordEditPage.getInputById(0, "text");
