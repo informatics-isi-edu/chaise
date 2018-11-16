@@ -1233,6 +1233,9 @@
                             params.matchNull = true;
                         }
 
+                        params.hideNotNullChoice = scope.facetColumn.hideNotNullChoice;
+                        params.hideNullChoice = scope.facetColumn.hideNullChoice;
+
                         params.selectedRows = [];
 
                         // generate list of rows needed for modal

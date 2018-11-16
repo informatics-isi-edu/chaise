@@ -183,6 +183,8 @@
             selectedRows:       params.selectedRows,
             matchNotNull:       params.matchNotNull,
             matchNull:          params.matchNull,
+            hideNotNullChoice:  params.hideNotNullChoice,
+            hideNullChoice:     params.hideNullChoice,
             search:             reference.location.searchTerm,
             config:             {viewable: false, editable: false, deletable: false, selectMode: params.selectMode, showFaceting: showFaceting, facetPanelOpen: params.facetPanelOpen, showNull: params.showNull === true},
             context:            params.context,
