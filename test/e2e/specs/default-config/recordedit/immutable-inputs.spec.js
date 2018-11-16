@@ -141,7 +141,7 @@ describe('Record Add with defaults', function() {
             expect(markdownDisabledInput.getAttribute("value")).toBe(values.markdown_disabled_value, "Markdown disabled input default is incorrect");
             expect(intDisabledInput.getAttribute("value")).toBe(values.int_disabled_value, "Int disabled input default is incorrect");
             expect(floatDisabledInput.getAttribute("value")).toBe(values.float_disabled_value, "Float disabled input default is incorrect");
-            expect(chaisePage.recordEditPage.getDropdownText(booleanDisabledInput)).toBe(values.boolean_disabled_value, "Boolean disabled input default is incorrect");
+            expect(booleanDisabledInput.getAttribute("value")).toBe(values.boolean_disabled_value, "Boolean disabled input default is incorrect");
             expect(dateDisabledInput.getAttribute("value")).toBe(values.date_disabled_value, "Date disabled input default is incorrect");
             expect(jsonInputDisabled.getAttribute("value")).toBe(values.json_disabled_value, "JSON disabled input default is incorrect");
 
@@ -197,10 +197,10 @@ describe('Record Add with defaults', function() {
             browser.wait(EC.elementToBeClickable(element(by.id("copy-record-btn"))));
 
             foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputDisplay("foreign_key", 0);
-            foreignKeyDisabledInput = chaisePage.recordEditPage.getForeignKeyInputDisplay("foreign_key_disabled", 0);
+            foreignKeyDisabledInput = chaisePage.recordEditPage.getInputById(0, "foreign_key_disabled");
 
             expect(foreignKeyInput.getText()).toBe(values.foreign_key_value, "Foreign key input default is incorrect");
-            expect(foreignKeyDisabledInput.getText()).toBe(values.foreign_key_disabled_value, "Foreign key disabled default is incorrect");
+            expect(foreignKeyDisabledInput.getAttribute('value')).toBe(values.foreign_key_disabled_value, "Foreign key disabled default is incorrect");
         });
 
         // System columns
@@ -256,38 +256,12 @@ describe("Record Edit with immutable columns", function() {
         });
 
         for (var i=0; i < testParams.re_column_names.length; i++) {
-            (function(columnName) {
-                switch (columnName) {
-                    case "foreign_key_disabled":
-                        // foreign key input has value under input with id ending in "display"
-                        it("should initialize foreign key select input column: " + columnName + " with the proper value", function () {
-                            var input = chaisePage.recordEditPage.getForeignKeyInputDisplay(columnName, 0);
-                            expect(input.getText()).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
-                        });
-                        break;
-                    case "asset_disabled":
-                        // upload input has a different css structure than other inputs because of directive
-                        it("should initialize file upload select input column: " + columnName + " with the proper value", function () {
-                            var input = chaisePage.recordEditPage.getUploadInput(columnName, 0);
-                            expect(input.getAttribute('value')).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
-                        });
-                        break;
-                    case "boolean_disabled":
-                        // boolean input has a dropdown list with text in it
-                        it("should initialize select input column: " + columnName + " with the proper value", function () {
-                            var input = chaisePage.recordEditPage.getInputById(0, columnName);
-                            expect(chaisePage.recordEditPage.getDropdownText(input)).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
-                        });
-                        break;
-                    default:
-                        // normal inputs with values in input under value attribute
-                        it("should initialize text input column: " + columnName + " with the proper value", function () {
-                            var input = chaisePage.recordEditPage.getInputById(0, columnName);
-                            expect(input.getAttribute('value')).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
-                        });
-                        break;
-                }
-            })(testParams.re_column_names[i]);
+            var columnName = testParams.re_column_names[i];
+            // normal inputs with values in input under value attribute
+            it("should initialize text input column: " + columnName + " with the proper value", function () {
+                var input = chaisePage.recordEditPage.getInputById(0, columnName);
+                expect(input.getAttribute('value')).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
+            });
         };
     });
 });

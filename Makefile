@@ -267,6 +267,7 @@ JS_SOURCE=$(JS)/respond.js \
 	$(COMMON)/delete-link.js \
 	$(COMMON)/errors.js \
 	$(COMMON)/filters.js \
+	$(COMMON)/inputs.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/navbar.js \
 	$(COMMON)/login.js \
@@ -304,6 +305,7 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-1.11.1.min.js \
 	$(COMMON)/export.js \
 	$(COMMON)/faceting.js \
 	$(COMMON)/filters.js \
+	$(COMMON)/inputs.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/navbar.js \
 	$(COMMON)/login.js \
@@ -315,6 +317,7 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-1.11.1.min.js \
 	$(COMMON)/bindHtmlUnsafe.js \
 	$(COMMON)/footer.js \
 	$(COMMON)/upload.js \
+	$(COMMON)/validators.js \
 	$(COMMON)/recordCreate.js \
 	$(COMMON)/resizable.js \
 	$(JS)/vendor/bootstrap-3.3.7.min.js \
@@ -402,6 +405,7 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-1.11.1.min.js \
 	$(COMMON)/faceting.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/ellipses.js \
+	$(COMMON)/inputs.js \
 	$(COMMON)/resizable.js \
 	$(COMMON)/storage.js \
 	$(COMMON)/table.js \
@@ -425,7 +429,8 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-1.11.1.min.js \
 
 RE_JS_SOURCE=$(RE_ASSETS)/recordEdit.app.js \
 	$(RE_ASSETS)/model.js \
-	$(RE_ASSETS)/form.controller.js
+	$(RE_ASSETS)/form.controller.js \
+	$(RE_ASSETS)/recordedit.utils.js
 
 RE_JS_MDHELP=$(RE_ASSETS)/mdHelp.controller.js
 

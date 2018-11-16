@@ -84,166 +84,189 @@
                                     </div>
                                     <div ng-show="displayReady" class="col-xs-12" id="formEdit" ng-class="{'editMode': form.editMode, 'createMode': !form.editMode}" ng-style="form.formEditDivMarginLeft"><!-- no match -->
                                         <table ng-form="form.formContainer" class="table">
-                                            <tr>
-                                                <td ng-style="form.firstHeaderStyle">Record Number</td>
-                                                <td ng-style="form.headerHeight" class="form-header" ng-repeat="(rowIndex, row) in form.recordEditModel.rows track by $index">
-                                                    <div class="row">
-                                                        <div class="col-xs-12">
-                                                            <div class="pull-left" ng-bind="rowIndex + 1"></div>
-                                                            <button ng-show="form.recordEditModel.rows.length > 1" class="btn btn-primary btn-inverted btn-sm pull-right remove-form-btn" ng-click="::form.removeFormRow(rowIndex);" tooltip-placement="bottom" uib-tooltip="Click to remove this record from the form.">
-                                                                <span class="glyphicon glyphicon-remove-circle"></span>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            <tr class="entity" ng-form="form.formContainer.row[rowIndex]" ng-repeat="column in reference.columns">
-                                                <td ng-style="form.captionColumnWidth" class="entity-key col-xs-1">
-                                                    <span ng-if="::form.isRequired(column);" class="text-danger"><b>*</b></span>
-                                                    <span class="column-displayname" ng-attr-tooltip-placement="{{::(column.comment) ? 'right' : undefined}}" ng-attr-uib-tooltip="{{::(column.comment) ? column.comment : undefined}}">
-                                                        <span ng-if="::column.displayname.isHTML" ng-bind-html="::column.displayname.value"></span>
-                                                        <span ng-if="::!column.displayname.isHTML" ng-bind="::column.displayname.value"></span>
-                                                    </span>
-                                                </td>
-                                                <td class="entity-value" ng-form="form.formContainer.row[rowIndex][column.name]" ng-repeat="(rowIndex, row) in form.recordEditModel.rows track by $index" ng-switch="form.columnToDisplayType(column);">
-
-                                                    <!-- date input-->
-                                                    <div ng-switch-when="date">
-                                                        <div ng-show="form.isDisabled(column);" >
-                                                            <input id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" type="text" ng-disabled="::form.isDisabled(column);" class="form-control" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}"></input>
-                                                        </div>
-                                                        <div ng-show="!form.isDisabled(column);" class="input-group">
-                                                            <input class="form-control" type="text" ng-model="form.recordEditModel.rows[rowIndex][column.name]" placeholder="{{form.dataFormats.date}}" name="{{::column.name}}" ui-mask="9999-19-39" ui-options="form.maskOptions.date" model-view-value="true" ng-required="::form.isRequired(column);" ng-disabled="::form.isDisabled(column);" date></input>
-                                                            <span class="input-group-btn">
-                                                                <button type="button" class="btn btn-primary btn-inverted" ng-click="::form.applyCurrentDatetime(rowIndex, column.name, column.type.name);" ng-disabled="::form.isDisabled(column);">Today</button>
-                                                                <button type="button" class="btn btn-danger btn-inverted" ng-click="::form.clearModel(rowIndex, column.name, column.type.name);" ng-disabled="::form.isDisabled(column);">Clear</button>
-                                                            </span>
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- timestamp[tz] input -->
-                                                    <div ng-switch-when="timestamp">
-                                                        <input id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" type="text" ng-disabled="::form.isDisabled(column);" class="form-control" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{column.name}}" ng-show="form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}"></input>
-                                                        <div class="row" ng-show="::!form.isDisabled(column);">
+                                            <tbody>
+                                                <tr class="shift-form">
+                                                    <td ng-style="form.firstHeaderStyle">Record Number</td>
+                                                    <td ng-style="form.headerHeight" class="form-header" ng-repeat="(rowIndex, row) in form.recordEditModel.rows track by $index">
+                                                        <div class="row">
                                                             <div class="col-xs-12">
-                                                                <div class="input-group">
-                                                                    <span class="input-group-addon">Date</span>
-                                                                    <input class="form-control input-timestamptz" type="text" ng-model="form.recordEditModel.rows[rowIndex][column.name].date" placeholder="{{form.dataFormats.date}}" name="{{::column.name}}" ui-mask="9999-99-99" ui-options="form.maskOptions.date" model-view-value="true" ng-required="::form.isRequired(column);" ng-disabled="::form.isDisabled(column);" date timestamp validate-values="form.recordEditModel.rows[rowIndex][column.name]"></input>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-xs-12">
-                                                                <div class="input-group">
-                                                                    <span class="input-group-addon">Time</span>
-                                                                    <input class="form-control" type="text" ng-model="form.recordEditModel.rows[rowIndex][column.name].time" placeholder="{{form.dataFormats.time24}}" name="{{::column.name}}" model-view-value="true" ng-disabled="::form.isDisabled(column);" time timestamp validate-values="form.recordEditModel.rows[rowIndex][column.name]"></input>
-                                                                    <span class="input-group-btn">
-                                                                        <button class="btn btn-primary btn-inverted" name="{{::column.name}}" type="button" ng-click="::form.toggleMeridiem(rowIndex, column.name);" ng-bind="form.recordEditModel.rows[rowIndex][column.name].meridiem || 'AM'" ng-disabled="::form.isDisabled(column);">AM</button>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-xs-12">
-                                                                <div class="btn-group" role="group" ng-if="::!form.isDisabled(column);">
-                                                                    <button type="button" name="{{::column.name}}-now" class="btn btn-primary btn-inverted" ng-click="::form.applyCurrentDatetime(rowIndex, column.name, column.type.name);">Now</button>
-                                                                    <button type="button" name="{{::column.name}}-clear" class="btn btn-danger btn-inverted" ng-click="::form.clearModel(rowIndex, column.name, column.type.name);">Clear</button>
-                                                                </div>
+                                                                <div class="pull-left" ng-bind="rowIndex + 1"></div>
+                                                                <button ng-show="form.recordEditModel.rows.length > 1" class="btn btn-primary btn-inverted btn-sm pull-right remove-form-btn" ng-click="::form.removeFormRow(rowIndex);" tooltip-placement="bottom" uib-tooltip="Click to remove this record from the form.">
+                                                                    <span class="glyphicon glyphicon-remove-circle"></span>
+                                                                </button>
                                                             </div>
                                                         </div>
-                                                    </div>
-
-                                                    <!-- modal popup input -->
-                                                    <div ng-switch-when="popup-select" class="form-group has-feedback input-group modal-popup">
-                                                        <label class="sr-only"></label>
-                                                        <div id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-display" contenteditable="false" ng-disabled="::form.isDisabled(column);" class="form-control popup-select-value" ng-style="form.isDisabled(column) ? {'cursor': 'default'} : {'cursor': 'pointer'}" ng-click="::form.searchPopup(rowIndex, column)" ng-bind-html="(form.recordEditModel.rows[rowIndex][column.name] ? form.recordEditModel.rows[rowIndex][column.name] : form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]))"></div>
-                                                        <div class="form-control-feedback coltooltip" ng-hide="(form.isDisabled(column)) || (!form.recordEditModel.rows[rowIndex][column.name])" ng-style="{'cursor': 'pointer', 'right': '40px', 'pointer-events': 'all'}">
-                                                            <span class="glyphicon glyphicon-remove coltooltiptext foreignkey-remove" ng-click="::form.clearForeignKey(rowIndex, column)" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
-                                                        </div>
-                                                        <div class="form-control-feedback" ng-show="showColumnSpinner[rowIndex][column.name]" ng-style="{'right': '60px', 'pointer-events': 'all', 'color': '#C3C3C3'}">
-                                                            <span class="glyphicon glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
-                                                        </div>
-                                                        <span class="input-group-addon" ng-show="::!form.isDisabled(column);">
-                                                            <button ng-focus="::form.blurElement($event);" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-button" class="btn btn-primary btn-inverted modal-popup-btn" type="button" ng-click="::form.searchPopup(rowIndex, column)" ng-disabled="::form.isDisabled(column);" tooltip-placement="bottom" uib-tooltip="Choose from an existing value.">
-                                                                <span class="glyphicon glyphicon-chevron-down"></span>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                            <tbody ng-form="form.formContainer.row[rowIndex]" ng-repeat="(columnIndex, column) in reference.columns track by $index" ng-style="{'background-color': form.recordEditModel.columnModels[columnIndex].highlightRow ? '#f7f0cf' : '#FFF'}">
+                                                <tr class="shift-form">
+                                                    <td ng-style="form.captionColumnWidth" class="entity-key">
+                                                        <span ng-if="::form.isRequired(column);" class="text-danger"><b>*</b></span>
+                                                        <span class="column-displayname" ng-attr-tooltip-placement="{{::(column.comment) ? 'right' : undefined}}" ng-attr-uib-tooltip="{{::(column.comment) ? column.comment : undefined}}">
+                                                            <span ng-if="::column.displayname.isHTML" ng-bind-html="::column.displayname.value"></span>
+                                                            <span ng-if="::!column.displayname.isHTML" ng-bind="::column.displayname.value"></span>
+                                                        </span>
+                                                        <span ng-if="(!form.isDisabled(column, form.prefillCookie) || form.recordEditModel.columnModels[columnIndex].showSelectAll) && form.recordEditModel.rows.length > 1" class="pull-right btn-group">
+                                                            <button id="select-all-{{::form.makeSafeIdAttr(column.displayname.value)}}" type="button" class="btn btn-sm btn-default" ng-click="::form.toggleSelectAll(columnIndex)" tooltip-placement="bottom" uib-tooltip="{{form.recordEditModel.columnModels[columnIndex].showSelectAll ? 'Click to close the set all input.' : 'Click to set a value for all records.'}}">
+                                                                <span class="glyphicon" ng-class="form.recordEditModel.columnModels[columnIndex].showSelectAll ? 'glyphicon-remove' : 'glyphicon-pencil'"></span>
                                                             </button>
                                                         </span>
-                                                        <!-- So that the foreign key input can be validated -->
-                                                        <input type="hidden" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" ng-required="::form.isRequired(column);" />
-                                                    </div>
+                                                    </td>
+                                                    <td class="entity-value" ng-form="form.formContainer.row[rowIndex][column.name]" ng-repeat="(rowIndex, row) in form.recordEditModel.rows track by $index" ng-switch="form.inputTypeOrDisabled(columnIndex);">
 
-                                                    <!-- int2 input -->
-                                                    <input ng-switch-when="integer2" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="number" class="form-control" ng-required="::form.isRequired(column);" min="{{::form.int2min}}" max="{{::form.int2max}}" ng-disabled="::form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" integer>
-                                                        <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty  || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int2'">
-                                                            <div ng-message="min">This field requires a value greater than {{form.int2min}}.</div>
-                                                            <div ng-message="max">This field requires a value smaller than {{form.int2max}}.</div>
+                                                        <!-- date input-->
+                                                        <div ng-switch-when="date">
+                                                            <div class="input-group">
+                                                                <input id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" class="form-control" type="text" ng-model="form.recordEditModel.rows[rowIndex][column.name]" placeholder="{{form.dataFormats.date}}" name="{{::column.name}}" ui-mask="9999-19-39" ui-options="form.maskOptions.date.options" model-view-value="true" ng-required="::form.isRequired(column);" date></input>
+                                                                <span class="input-group-btn">
+                                                                    <button type="button" class="btn btn-primary btn-inverted" ng-click="::form.applyCurrentDatetime(rowIndex, column.name, column.type.name);">Today</button>
+                                                                    <button type="button" class="btn btn-primary btn-inverted" ng-click="::form.clearDatetime(rowIndex, column.name, column.type.name);">Clear</button>
+                                                                </span>
+                                                            </div>
                                                         </div>
-                                                    </input>
 
-                                                    <!-- int4 input -->
-                                                    <input ng-switch-when="integer4" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="number" class="form-control" ng-required="::form.isRequired(column);" min="{{::form.int4min}}" max="{{::form.int4max}}" ng-disabled="::form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" integer>
-                                                        <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty  || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int4'">
-                                                            <div ng-message="min">This field requires a value greater than {{form.int4min}}.</div>
-                                                            <div ng-message="max">This field requires a value smaller than {{form.int4max}}.</div>
+                                                        <!-- timestamp[tz] input -->
+                                                        <div ng-switch-when="timestamp">
+                                                            <div class="row">
+                                                                <div class="col-xs-12">
+                                                                    <div class="input-group">
+                                                                        <span class="input-group-addon">Date</span>
+                                                                        <input class="form-control input-timestamptz" type="text" ng-model="form.recordEditModel.rows[rowIndex][column.name].date" placeholder="{{form.dataFormats.date}}" name="{{::column.name}}" ui-mask="9999-99-99" ui-options="form.maskOptions.date.options" model-view-value="true" ng-required="::form.isRequired(column);" date timestamp validate-values="form.recordEditModel.rows[rowIndex][column.name]"></input>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-xs-12">
+                                                                    <div class="input-group">
+                                                                        <span class="input-group-addon">Time</span>
+                                                                        <input class="form-control" type="text" ng-model="form.recordEditModel.rows[rowIndex][column.name].time" placeholder="{{form.dataFormats.time24}}" name="{{::column.name}}" model-view-value="true" time timestamp validate-values="form.recordEditModel.rows[rowIndex][column.name]"></input>
+                                                                        <span class="input-group-btn">
+                                                                            <button class="btn btn-primary btn-inverted" name="{{::column.name}}" type="button" ng-click="::form.toggleMeridiem(rowIndex, column.name);" ng-bind="form.recordEditModel.rows[rowIndex][column.name].meridiem || 'AM'">AM</button>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-xs-12">
+                                                                    <div class="btn-group pull-right" role="group">
+                                                                        <button type="button" name="{{::column.name}}-now" class="btn btn-primary btn-inverted" ng-click="::form.applyCurrentDatetime(rowIndex, column.name, column.type.name);">Now</button>
+                                                                        <button type="button" name="{{::column.name}}-clear" class="btn btn-primary btn-inverted" ng-click="::form.clearDatetime(rowIndex, column.name, column.type.name);">Clear</button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                    </input>
 
-                                                    <!-- int8 input -->
-                                                    <input ng-switch-when="integer8" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="number" class="form-control" ng-required="::form.isRequired(column);" min="{{::form.int8min}}" max="{{::form.int8max}}" ng-disabled="::form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" integer>
-                                                        <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int8'">
-                                                            <div ng-message="min">This field requires a value greater than {{form.int8min}}.</div>
-                                                            <div ng-message="max">This field requires a value smaller than {{form.int8max}}.</div>
+                                                        <!-- modal popup input -->
+                                                        <div ng-switch-when="popup-select" class="form-group has-feedback input-group modal-popup">
+                                                            <label class="sr-only"></label>
+                                                            <div id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-display" contenteditable="false" class="form-control popup-select-value" style="{'cursor': 'pointer'}" ng-click="::form.searchPopup(rowIndex, column)" ng-bind-html="(form.recordEditModel.rows[rowIndex][column.name] ? form.recordEditModel.rows[rowIndex][column.name] : form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]))"></div>
+                                                            <div class="form-control-feedback coltooltip" ng-hide="(!form.recordEditModel.rows[rowIndex][column.name])" ng-style="{'cursor': 'pointer', 'right': '40px', 'pointer-events': 'all'}">
+                                                                <span class="glyphicon glyphicon-remove coltooltiptext foreignkey-remove" ng-click="::form.clearForeignKey(rowIndex, column)" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
+                                                            </div>
+                                                            <div class="form-control-feedback" ng-show="showColumnSpinner[rowIndex][column.name]" ng-style="{'right': '60px', 'pointer-events': 'all', 'color': '#C3C3C3'}">
+                                                                <span class="glyphicon glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
+                                                            </div>
+                                                            <span class="input-group-addon">
+                                                                <button ng-focus="::form.blurElement($event);" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-button" class="btn btn-primary btn-inverted modal-popup-btn" type="button" ng-click="::form.searchPopup(rowIndex, column)" tooltip-placement="bottom" uib-tooltip="Choose from an existing value.">
+                                                                    <span class="glyphicon glyphicon-chevron-down"></span>
+                                                                </button>
+                                                            </span>
+                                                            <!-- So that the foreign key input can be validated -->
+                                                            <input type="hidden" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" ng-required="::form.isRequired(column);" />
                                                         </div>
-                                                    </input>
 
-                                                    <!-- float/decimal/numeric -->
-                                                    <input ng-switch-when="number" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="number" class="form-control" ng-required="::form.isRequired(column);" ng-disabled="::form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" float></input>
+                                                        <!-- int2 input -->
+                                                        <input ng-switch-when="integer2" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="number" class="form-control" ng-required="::form.isRequired(column);" min="{{::form.int2min}}" max="{{::form.int2max}}" integer>
+                                                            <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty  || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int2'">
+                                                                <div ng-message="min">This field requires a value greater than {{form.int2min}}.</div>
+                                                                <div ng-message="max">This field requires a value smaller than {{form.int2max}}.</div>
+                                                            </div>
+                                                        </input>
+
+                                                        <!-- int4 input -->
+                                                        <input ng-switch-when="integer4" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="number" class="form-control" ng-required="::form.isRequired(column);" min="{{::form.int4min}}" max="{{::form.int4max}}" integer>
+                                                            <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty  || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int4'">
+                                                                <div ng-message="min">This field requires a value greater than {{form.int4min}}.</div>
+                                                                <div ng-message="max">This field requires a value smaller than {{form.int4max}}.</div>
+                                                            </div>
+                                                        </input>
+
+                                                        <!-- int8 input -->
+                                                        <input ng-switch-when="integer8" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="number" class="form-control" ng-required="::form.isRequired(column);" min="{{::form.int8min}}" max="{{::form.int8max}}" integer>
+                                                            <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int8'">
+                                                                <div ng-message="min">This field requires a value greater than {{form.int8min}}.</div>
+                                                                <div ng-message="max">This field requires a value smaller than {{form.int8max}}.</div>
+                                                            </div>
+                                                        </input>
+
+                                                        <!-- float/decimal/numeric -->
+                                                        <input ng-switch-when="number" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="number" class="form-control" ng-required="::form.isRequired(column);" float></input>
 
 
-                                                    <!-- boolean input -->
-                                                    <div ng-switch-when="boolean">
-                                                        <ui-select id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" append-to-body="true" theme="select2" ng-disabled="::form.isDisabled(column);">
-                                                            <ui-select-match name="{{::column.name}}" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}">{{$select.selected}}</ui-select-match>
-                                                            <ui-select-choices repeat="domainValue in ::form.booleanValues | filter: $select.search" >
-                                                                <div ng-bind-html="domainValue | highlight: $select.search"></div>
-                                                            </ui-select-choices>
-                                                        </ui-select>
-                                                    </div>
+                                                        <!-- boolean input -->
+                                                        <div ng-switch-when="boolean">
+                                                            <ui-select id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" append-to-body="true" theme="select2">
+                                                                <ui-select-match name="{{::column.name}}">{{$select.selected}}</ui-select-match>
+                                                                <ui-select-choices repeat="domainValue in ::form.booleanValues | filter: $select.search" >
+                                                                    <div ng-bind-html="domainValue | highlight: $select.search"></div>
+                                                                </ui-select-choices>
+                                                            </ui-select>
+                                                        </div>
 
-                                                    <!-- longtext/textarea input -->
-                                                    <div ng-switch-when="longtext">
-                                                        <textarea id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" rows="5" name="{{::column.name}}" class="form-control content-box" ng-required="::form.isRequired(column);" ng-disabled="::form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" empty-to-null markdown-editor="{'iconlibrary': 'glyph', addExtraButtons:true ,fullscreen:{ enable: false, icons: {}}, resize: 'vertical'}"></textarea>
-                                                        <a href id="previewLinkId-form-{{rowIndex}}-{{::column.name}}" class="live-preview"  markdown-preview textinput="form.recordEditModel.rows[rowIndex][column.name]"></a>
-                                                    </div>
+                                                        <!-- longtext/textarea input -->
+                                                        <div ng-switch-when="longtext">
+                                                            <textarea id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" rows="5" name="{{::column.name}}" class="form-control content-box" ng-required="::form.isRequired(column);" empty-to-null markdown-editor="{'iconlibrary': 'glyph', addExtraButtons:true ,fullscreen:{ enable: false, icons: {}}, resize: 'vertical'}"></textarea>
+                                                            <a href id="previewLinkId-form-{{rowIndex}}-{{::column.name}}" class="live-preview"  markdown-preview textinput="form.recordEditModel.rows[rowIndex][column.name]"></a>
+                                                        </div>
 
 
-                                                    <!-- File input -->
-                                                    <div ng-switch-when="file">
-                                                        <upload id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" reference="::reference"  column="::column" is-disabled="::form.isDisabled(column)" placeholder="form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name])" values="form.recordEditModel.rows[rowIndex]" value="form.recordEditModel.rows[rowIndex][column.name]"></upload>
-                                                    </div>
+                                                        <!-- File input -->
+                                                        <div ng-switch-when="file">
+                                                            <upload id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" reference="::reference"  column="::column" placeholder="::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name])" values="form.recordEditModel.rows[rowIndex]" value="form.recordEditModel.rows[rowIndex][column.name]"></upload>
+                                                        </div>
 
-                                                    <!--JSON input -->
-                                                    <div ng-switch-when="json">
-                                                        <textarea json id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" rows="5" name="{{::column.name}}" class="form-control" ng-required="::form.isRequired(column);" ng-disabled="::form.isDisabled(column);"  placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}"  empty-to-null></textarea>
-                                                    </div>
+                                                        <!--JSON input -->
+                                                        <div ng-switch-when="json">
+                                                            <textarea json id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" rows="5" name="{{::column.name}}" class="form-control" ng-required="::form.isRequired(column);" empty-to-null></textarea>
+                                                        </div>
 
-                                                    <!-- shorttext/default text input -->
-                                                    <input ng-switch-default id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="text" class="form-control" ng-required="::form.isRequired(column);" ng-disabled="::form.isDisabled(column);" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" empty-to-null></input>
+                                                        <!-- disabled -->
+                                                        <input ng-switch-when="disabled" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="text" class="form-control" disabled="true" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" empty-to-null></input>
 
-                                                    <!-- Validation error messages to show when the form field is touched -->
-                                                    <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.$error || form.formContainer.$submitted" class="text-danger" role="alert">
-                                                        <div ng-message="date">Please enter a date value in {{form.dataFormats.date}} format.</div>
-                                                        <div ng-message="time">Please enter a time value in 12-hr {{form.dataFormats.time24}} format.</div>
-                                                        <div ng-message="timestampDate">Please enter a date value in {{form.dataFormats.date}} format.</div>
-                                                        <div ng-message="timestampTime">Please enter a time value in 12-hr {{form.dataFormats.time24}} format.</div>
-                                                        <div ng-message="integer">Please enter an integer value.</div>
-                                                        <div ng-message="float">Please enter a decimal value.</div>
-                                                        <div ng-message="json">Please enter a valid JSON value.</div>
-                                                        <div ng-message="fileExtension">Please select a file with the following type: {{form.fileExtensionTypes(column)}}</div>
-                                                    </div>
+                                                        <!-- shorttext/default text input -->
+                                                        <input ng-switch-default id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="text" class="form-control" ng-required="::form.isRequired(column);" empty-to-null></input>
 
-                                                    <!-- Validation error messages to show when the form is submitted -->
-                                                    <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.$submitted" class="text-danger" role="alert">
-                                                        <div ng-message="required">Please enter a value for this field.</div>
-                                                    </div>
-                                                </td>
-                                            </tr>
+                                                        <!-- Validation error messages to show when the form field is touched -->
+                                                        <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.$error || form.formContainer.$submitted" class="text-danger" role="alert">
+                                                            <div ng-message="date">Please enter a date value in {{form.dataFormats.date}} format.</div>
+                                                            <div ng-message="time">Please enter a time value in 12-hr {{form.dataFormats.time24}} format.</div>
+                                                            <div ng-message="timestampDate">Please enter a date value in {{form.dataFormats.date}} format.</div>
+                                                            <div ng-message="timestampTime">Please enter a time value in 12-hr {{form.dataFormats.time24}} format.</div>
+                                                            <div ng-message="integer">Please enter an integer value.</div>
+                                                            <div ng-message="float">Please enter a decimal value.</div>
+                                                            <div ng-message="json">Please enter a valid JSON value.</div>
+                                                            <div ng-message="fileExtension">Please select a file with the following type: {{form.fileExtensionTypes(column)}}</div>
+                                                        </div>
+
+                                                        <!-- Validation error messages to show when the form is submitted -->
+                                                        <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.$submitted" class="text-danger" role="alert">
+                                                            <div ng-message="required">Please enter a value for this field.</div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr class="select-all-row" ng-show="form.recordEditModel.columnModels[columnIndex].showSelectAll">
+                                                    <td class="match-entity-key" style="width: 190px;"></td>
+                                                    <td colspan="{{form.recordEditModel.rows.length}}">
+                                                        <!-- "The is a row of text" -->
+                                                        <div style="position: absolute;">
+                                                            <span class="pull-left">Set value for all records: </span>
+                                                            <input-switch id="select-all-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" class="pull-left" column="column" column-model="form.recordEditModel.columnModels[columnIndex]" model="form.recordEditModel.columnModels[columnIndex].allInput" style="width: 250px; margin: 0px 5px;"></input-switch>
+                                                            <span class="btn-group">
+                                                                <button id="select-all-apply-{{::form.makeSafeIdAttr(column.displayname.value)}}" class="btn btn-primary btn-inverted pull-left" type="button" ng-disabled="form.disableApply(columnIndex)" ng-click="form.applySelectAll(columnIndex)" tooltip-placement="bottom" uib-tooltip="Click to apply the value to all records.">Apply All</button>
+                                                                <button id="select-all-clear-{{::form.makeSafeIdAttr(column.displayname.value)}}" class="btn btn-primary btn-inverted pull-left" type="button" ng-click="form.clearSelectAll(columnIndex)" tooltip-placement="bottom" uib-tooltip="Click to clear all values for all records.">Clear All</button>
+                                                                <button id="select-all-cancel-{{::form.makeSafeIdAttr(column.displayname.value)}}" class="btn btn-primary btn-inverted pull-left" type="button" ng-click="form.cancelSelectAll(columnIndex)" tooltip-placement="bottom" uib-tooltip="Click to close the set all input.">Cancel</button>
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
                                         </table>
                                     </div>
                                 </div>
