@@ -15,7 +15,8 @@
                     value: '=',
                     reference: '=',
                     isDisabled: "=?",
-                    placeholder: "="
+                    placeholder: "=",
+                    isRequired: "="
                 },
                 link: function (scope, element,attrs, ngModel) {
                     scope.fileEl;

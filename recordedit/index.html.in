@@ -217,7 +217,7 @@
 
                                                         <!-- File input -->
                                                         <div ng-switch-when="file">
-                                                            <upload id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" reference="::reference"  column="::column" placeholder="::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name])" values="form.recordEditModel.rows[rowIndex]" value="form.recordEditModel.rows[rowIndex][column.name]"></upload>
+                                                            <upload id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" reference="::reference"  column="::column" placeholder="::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name])" values="form.recordEditModel.rows[rowIndex]" value="form.recordEditModel.rows[rowIndex][column.name]" is-required="!column.nullok"></upload>
                                                         </div>
 
                                                         <!--JSON input -->
