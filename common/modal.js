@@ -42,11 +42,12 @@
             $uibModalInstance.dismiss('cancel');
         }
     }])
-    .controller('ErrorModalController', ['Errors', 'messageMap', 'params', 'Session', '$uibModalInstance', '$window', function ErrorModalController(Errors, messageMap, params, Session, $uibModalInstance, $window) {
+    .controller('ErrorModalController', ['Errors', 'messageMap', 'params', 'Session', '$rootScope', '$uibModalInstance', '$window', function ErrorModalController(Errors, messageMap, params, Session, $rootScope, $uibModalInstance, $window) {
         var vm = this;
         vm.params = params;
         vm.displayDetails = false;
-        vm.showReloadBtn = false;
+        // if Error is NoConnectionError and the display is not ready
+        vm.showReloadBtn = (ERMrest && exception instanceof ERMrest.NoConnectionError && !$rootScope.displayReady);
         vm.linkText = messageMap.showErrDetails;
 
         function isErmrestErrorNeedReplace (error) {
@@ -109,7 +110,7 @@
         };
 
         vm.reload = function () {
-            $uibModalInstance.close("reload");
+            $window.location.reload();
         };
 
         vm.login = function () {
