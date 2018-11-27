@@ -79,7 +79,7 @@
                 </span>
             </div>
         </div>
-        <div ng-if="vm.hasLoaded">
+        <div ng-show="vm.hasLoaded">
             <record-table-select-faceting id="rs-{{vm.makeSafeIdAttr(vm.tableDisplayName.value)}}" vm="vm" on-selected-rows-changed-bind="onSelectedRowsChanged"></record-table-select-faceting>
         </div>
 
