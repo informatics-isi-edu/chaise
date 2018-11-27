@@ -437,9 +437,8 @@
             }, 10);
         }
 
-        var CONFIRM_DELETE =  (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) ? true : false;
         function removeFormRow(index) {
-            if (!CONFIRM_DELETE) {
+            if (!chaiseConfig.confirmDelete) {
                 scope.$root.showSpinner = true;
                 return spliceRows(index);
             }
