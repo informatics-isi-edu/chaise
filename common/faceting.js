@@ -3,7 +3,7 @@
 
     angular.module('chaise.faceting', ['plotly', 'chaise.inputs', 'chaise.utils'])
 
-        .factory('facetingUtils', ['defaultDisplayname', function (defaultDisplayname) {
+        .factory('facetingUtils', ['defaultDisplayname', 'messageMap', function (defaultDisplayname, messageMap) {
 
             /**
              * Returns an object that can be used for showing the null filter
@@ -28,7 +28,11 @@
                 return {
                     selected: (typeof selected == 'boolean') ? selected: false,
                     isNotNull: true,
-                    displayname: {"value": defaultDisplayname.notNull, "isHTML": true}
+                    displayname: {"value": defaultDisplayname.notNull, "isHTML": true},
+                    tooltip: {
+                        value: messageMap.tooltip.notNull
+                    },
+                    alwaysShowTooltip: true
                 };
             }
 
@@ -932,7 +936,8 @@
                         uniqueId: f.uniqueId,
                         displayname: f.displayname,
                         tuple: f.tuple, // might be null
-                        selected: true
+                        selected: true,
+                        tooltip: f.displayname
                     };
                 }));
                 return res;
@@ -1034,6 +1039,7 @@
                                 // if we have a not_null filter, other filters must be disabled.
                                 disabled: scope.facetColumn.hasNotNullFilter,
                                 selected: false,
+                                tooltip: (value === null) ? {value: null, isHTML: false} : tuple.displayname,
                             });
                         });
 
@@ -1245,6 +1251,7 @@
                             }
 
                             newRow.displayname = (newRow.uniqueId === null) ? {value: null, isHTML: false} : row.displayname;
+                            newRow.tooltip = newRow.displayname;
                             newRow.isNotNull = row.notNull;
                             params.selectedRows.push(newRow);
                         });

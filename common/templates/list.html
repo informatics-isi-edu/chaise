@@ -2,9 +2,9 @@
     <span ng-if="initialized && rows.length === 0">No Results Found</span>
     <li ng-repeat="row in rows track by $index" class="chaise-checkbox ellipsis-text" ng-class="{'disabled-row': row.disabled}">
         <input id="checkbox-{{$index}}" type="checkbox" ng-checked="row.selected" ng-click="onSelect(row, $event)" ng-disabled="row.disabled" />
-        <label ng-if="row.displayname.value && row.displayname.isHTML" ng-bind-html="row.displayname.value" tooltip-enable="tooltipEnabled" uib-tooltip-html="row.displayname.value" tooltip-placement="bottom" chaise-enable-width></label>
-        <label ng-if="row.displayname.value && !row.displayname.isHTML" ng-bind="row.displayname.value" tooltip-enable="tooltipEnabled" uib-tooltip="{{row.displayname.value}}" tooltip-placement="bottom" chaise-enable-tooltip-width></label>
-        <label ng-if="row.displayname.value == ''" tooltip-enable="tooltipEnabled" uib-tooltip-html="defaultDisplayname.empty" tooltip-placement="bottom" chaise-enable-tooltip-width ng-bind-html="defaultDisplayname.empty"></label>
-        <label ng-if="row.displayname.value == null" tooltip-enable="tooltipEnabled" uib-tooltip-html="defaultDisplayname.null" tooltip-placement="bottom" chaise-enable-tooltip-width ng-bind-html="defaultDisplayname.null"></label>
+        <label ng-if="row.displayname.value && row.displayname.isHTML" ng-bind-html="row.displayname.value" tooltip-enable="tooltipEnabled || row.alwaysShowTooltip" uib-tooltip-html="row.tooltip.value" tooltip-placement="bottom" chaise-enable-tooltip-width></label>
+        <label ng-if="row.displayname.value && !row.displayname.isHTML" ng-bind="row.displayname.value" tooltip-enable="tooltipEnabled" uib-tooltip="{{row.tooltip.value}}" tooltip-placement="bottom" chaise-enable-tooltip-width></label>
+        <label ng-if="row.displayname.value == ''" uib-tooltip-html="tooltip.empty" tooltip-placement="bottom" ng-bind-html="defaultDisplayname.empty"></label>
+        <label ng-if="row.displayname.value == null" uib-tooltip-html="tooltip.null" tooltip-placement="bottom" ng-bind-html="defaultDisplayname.null"></label>
     </li>
 </ul>

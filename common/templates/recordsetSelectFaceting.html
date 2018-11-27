@@ -70,7 +70,7 @@
         <!-- record table -->
         <div ng-if="vm.hasLoaded" class="row">
             <div ng-if="!vm.config.hideTotalCount" id="rs-total-count" class="col-lg-3 col-md-3 col-sm-3 col-xs-12">Displaying {{vm.rowValues.length}}{{vm.totalRowsCnt ? " of " + (vm.totalRowsCnt > vm.rowValues.length ? vm.totalRowsCnt : vm.rowValues.length) : ''}} Records</div>
-            <span class="chaise-checkbox">
+            <span class="chaise-checkbox" uib-tooltip-html="tooltip.notNull" tooltip-placement="bottom">
                 <input type="checkbox" id="rs-match-not-null" ng-click="toggleMatchNotNull()" ng-checked="vm.matchNotNull"><label>Records With Values</label>
             </span>
             <!-- TODO temporarily disabling this feature
