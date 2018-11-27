@@ -43,13 +43,6 @@
         }
     }])
     .controller('ErrorModalController', ['Errors', 'messageMap', 'params', 'Session', '$rootScope', '$uibModalInstance', '$window', function ErrorModalController(Errors, messageMap, params, Session, $rootScope, $uibModalInstance, $window) {
-        var vm = this;
-        vm.params = params;
-        vm.displayDetails = false;
-        // if Error is NoConnectionError and the display is not ready
-        vm.showReloadBtn = (ERMrest && exception instanceof ERMrest.NoConnectionError && !$rootScope.displayReady);
-        vm.linkText = messageMap.showErrDetails;
-
         function isErmrestErrorNeedReplace (error) {
             switch (error.constructor) {
                 case ERMrest.InvalidFacetOperatorError:
@@ -59,6 +52,28 @@
                 default:
                     return false;
             }
+        }
+
+        // checks if error is -1, 0, 500, or 503
+        function isRetryError (error) {
+            switch (error.constructor) {
+                case ERMrest.NoConnectionError:
+                case ERMrest.TimedOutError:
+                case ERMrest.InternalServerError:
+                case ERMrest.ServiceUnavailableError:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        var vm = this;
+        vm.params = params;
+        vm.displayDetails = false;
+        vm.linkText = messageMap.showErrDetails;
+        vm.showReloadBtn = false;
+        if (ERMrest && isRetryError(exception)) {
+            vm.showReloadBtn = !$rootScope.displayReady;
         }
 
         var exception = params.exception,
