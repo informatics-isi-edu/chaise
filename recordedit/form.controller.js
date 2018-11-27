@@ -425,13 +425,33 @@
             return submissionRow;
         }
 
-        function removeFormRow(index) {
+        function spliceRows(index) {
             vm.recordEditModel.rows.splice(index, 1);
+            vm.recordEditModel.oldRows.splice(index, 1);
             vm.recordEditModel.submissionRows.splice(index, 1);
+            vm.recordEditModel.foreignKeyData.splice(index, 1);
+            if (vm.editMode) $rootScope.tuples.splice(index, 1);
             $timeout(function() {
                 onResize();
                 $rootScope.showSpinner = false;
             }, 10);
+        }
+
+        function removeFormRow(index) {
+            if (!chaiseConfig.confirmDelete) {
+                scope.$root.showSpinner = true;
+                return spliceRows(index);
+            }
+
+            modalUtils.showModal({
+                templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/delete-link/confirm_delete.modal.html',
+                controller: 'ConfirmDeleteController',
+                controllerAs: 'ctrl',
+                size: 'sm'
+            }, function onSuccess() {
+                scope.$root.showSpinner = true;
+                return spliceRows(index);
+            }, false, false);
         }
 
         function getDisabledInputValue(column, value) {
