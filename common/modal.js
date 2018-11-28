@@ -73,6 +73,8 @@
         vm.linkText = messageMap.showErrDetails;
         vm.showReloadBtn = false;
         if (ERMrest && isRetryError(exception)) {
+            // we are only showing the reload button for the 4 types of retriable errors while the page is loading.
+            // we discussed that it doesn't make sense to "retry" other requests that may fail after the data has loaded.
             vm.showReloadBtn = !$rootScope.displayReady;
         }
 
