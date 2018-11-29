@@ -209,18 +209,19 @@
                             {"source": "float_col", "bar_plot": false},
                             {"source": "date_col", "bar_plot": false},
                             {"source": "timestamp_col", "bar_plot": false, "comment": "timestamp column"},
-                            {"source": "shorttext_col"},
                             {"source": "text_col"},
-                            {"source": "longtext_col", "comment": "A lengthy comment for the facet of the longtext_col. This should be displyed properly in the facet.", "hide_not_null_choice": true},
-                            {"source": "markdown_col", "hide_null_choice": true, "hide_not_null_choice": true},
-                            {"source": "boolean_col"},
-                            {"source": "jsonb_col", "order": [{"num_occurrences": true, "descending": true}, "jsonb_sort_col"]},
-                            {"source": [{"outbound": ["faceting", "main_fk1"]}, "id"], "markdown_name": "**F1**"},
+                            {"source": "longtext_col", "comment": "A lengthy comment for the facet of the longtext_col. This should be displyed properly in the facet.", "hide_not_null_choice": true, "hide_null_choice": true},
+                            {"source": "markdown_col", "hide_null_choice": true, "hide_not_null_choice": true, "hide_null_choice": true},
+                            {"source": "boolean_col", "hide_null_choice": true},
+                            {"source": "jsonb_col", "order": [{"num_occurrences": true, "descending": true}, "jsonb_sort_col"], "hide_null_choice": true},
+                            {"source": [{"outbound": ["faceting", "main_fk1"]}, "id"], "markdown_name": "**F1**", "hide_not_null_choice": true},
                             {"source": [{"outbound": ["faceting", "main_fk2"]}, "id"], "open": true, "comment": "open facet", "hide_null_choice": true},
                             {"source": [{"inbound": ["faceting", "main_f3_assoc_fk1"]}, {"outbound": ["faceting", "main_f3_assoc_fk2"]}, "term"]},
-                            {"source": [{"inbound": ["faceting", "f4_fk1"]}, "id"], "entity": false, "ux_mode": "choices"},
+                            {"source": [{"inbound": ["faceting", "f4_fk1"]}, "id"], "entity": false, "ux_mode": "choices", "hide_null_choice": true},
                             {"source": [{"outbound": ["faceting", "main_fk1"]}, "term"], "markdown_name": "F1 with Term", "comment": "F1 with Term comment", "hide_null_choice": true},
                             {"source": "text_col_2", "ux_mode": "check_presence", "markdown_name": "Check Presence Text"},
+                            {"source": [{"inbound": ["faceting", "main_f3_assoc_fk1"]}, {"outbound": ["faceting", "main_f3_assoc_fk2"]}, "id"], "markdown_name": "F3 Entity"},
+                            {"source": [{"inbound": ["faceting", "main_f5_fk1"]}, {"inbound": ["faceting", "f5_fk1"]}, "id"], "markdown_name": "F5", "comment": "F5 comment"},
                             {"source": "col_w_column_order_false", "order": [{"column": "col_w_column_order_false_facet_order", "descending": true}], "hide_null_choice": true},
                             {"source": "col_w_column_order", "hide_num_occurrences": true, "hide_null_choice": true},
                             {"source": "col_w_long_values", "hide_null_choice": true}
@@ -259,6 +260,13 @@
                 "tag:isrd.isi.edu,2016:table-display": {
                     "compact": {
                         "row_order": [{"column": "id"}]
+                    }
+                },
+                "tag:isrd.isi.edu,2016:visible-columns" : {
+                    "filter": {
+                        "and": [
+                            {"source": "term", "hide_null_choice": true}
+                        ]
                     }
                 }
             }
@@ -383,7 +391,21 @@
                         "typename": "text"
                     }
                 }
-            ]
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:visible-columns" : {
+                    "filter": {
+                        "and": [
+                            {"source": "term", "hide_null_choice": true}
+                        ]
+                    }
+                },
+                "tag:isrd.isi.edu,2016:table-display": {
+                    "compact": {
+                        "row_order": [{"column": "id"}]
+                    }
+                }
+            }
         },
         "f4": {
             "kind": "table",
@@ -437,6 +459,112 @@
                 "tag:isrd.isi.edu,2016:table-display": {
                     "row_name": {
                         "row_markdown_pattern": "{{term}}"
+                    }
+                }
+            }
+        },
+        "main_f5": {
+            "kind": "table",
+            "table_name": "main_f5",
+            "schema_name": "faceting",
+            "comment": "has inbound fk to main, and f5 has inbound to it",
+            "keys": [
+                {"unique_columns": ["id"]}
+            ],
+            "foreign_keys": [
+                {
+                    "names": [["faceting", "main_f5_fk1"]],
+                    "foreign_key_columns": [
+                        {
+                            "column_name": "fk",
+                            "table_name": "main_f5",
+                            "schema_name": "faceting"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "column_name": "id",
+                            "table_name": "main",
+                            "schema_name": "faceting"
+                        }
+                    ]
+                }
+            ],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": {
+                        "typename": "int4"
+                    }
+                },
+                {
+                    "name": "fk",
+                    "type": {
+                        "typename": "int4"
+                    }
+                }
+            ]
+        },
+        "f5": {
+            "kind": "table",
+            "table_name": "f5",
+            "schema_name": "faceting",
+            "comment": "has fk to main_f5",
+            "keys": [
+                {"unique_columns":["id"]}
+            ],
+            "foreign_keys": [
+                {
+                    "names": [["faceting", "f5_fk1"]],
+                    "foreign_key_columns": [
+                        {
+                            "column_name": "fk",
+                            "table_name": "f5",
+                            "schema_name": "faceting"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "column_name": "id",
+                            "table_name": "main_f5",
+                            "schema_name": "faceting"
+                        }
+                    ]
+                }
+            ],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": {
+                        "typename": "serial4"
+                    }
+                },
+                {
+                    "name": "term",
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "fk",
+                    "type": {
+                        "typename": "int4"
+                    }
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:table-display": {
+                    "compact": {
+                        "row_order": [{"column": "id"}]
+                    }
+                },
+                "tag:isrd.isi.edu,2016:visible-columns" : {
+                    "filter": {
+                        "and": [
+                            {"source": "term", "hide_null_choice": true}
+                        ]
                     }
                 }
             }
