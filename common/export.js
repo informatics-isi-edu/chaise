@@ -52,7 +52,12 @@
                     if ($rootScope.tuple) {
                         bagName += "_" + $rootScope.tuple.uniqueId;
                     }
-                    scope.exporter = new ERMrest.Exporter(scope.reference, bagName, template);
+                    scope.exporter = new ERMrest.Exporter(
+                        scope.reference,
+                        bagName,
+                        template,
+                        $rootScope.chaiseConfig.exportServicePath
+                    );
                     var exportParametersString = JSON.stringify(scope.exporter.exportParameters, null, "  ");
 
                     // begin export and start a timer
