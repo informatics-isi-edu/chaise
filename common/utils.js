@@ -101,7 +101,7 @@
             actionCol: "Click on the action buttons to view, edit, or delete each record",
             viewCol: "Click on the eye button to view the detailed page associated with each record",
             null: "Search for any record with no value assigned",
-            empty: "Search for any record with empty string value assigned",
+            empty: "Search for any record with the empty string value",
             notNull: "Search for any record that has a value"
         },
         "URLLimitMessage": "Maximum URL length reached. Cannot perform the requested action.",
