@@ -99,7 +99,10 @@
             downloadCSV: "Click to download all matched results",
             permalink: "This link stores your search criteria as a URL. Right click and save.",
             actionCol: "Click on the action buttons to view, edit, or delete each record",
-            viewCol: "Click on the eye button to view the detailed page associated with each record"
+            viewCol: "Click on the eye button to view the detailed page associated with each record",
+            null: "Search for any record with no value assigned",
+            empty: "Search for any record with the empty string value",
+            notNull: "Search for any record that has a value"
         },
         "URLLimitMessage": "Maximum URL length reached. Cannot perform the requested action.",
         "queryTimeoutList": "<ul class='show-list-style'><li>Reduce the number of facet constraints.</li><li>Minimize the use of 'No Value' and 'All Records with Value' filters.</li></ul>",

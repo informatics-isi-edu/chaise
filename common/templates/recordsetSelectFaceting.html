@@ -71,10 +71,10 @@
         <div ng-if="vm.hasLoaded" class="row">
             <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12" ng-if="!vm.config.hideTotalCount" id="rs-total-count">Displaying {{vm.rowValues.length}}{{vm.totalRowsCnt ? " of " + (vm.totalRowsCnt > vm.rowValues.length ? vm.totalRowsCnt : vm.rowValues.length) : ''}} Records</div>
             <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                <span class="chaise-checkbox" ng-hide="vm.hideNotNullChoice">
+                <span class="chaise-checkbox" ng-hide="vm.hideNotNullChoice" uib-tooltip-html="tooltip.notNull" tooltip-placement="bottom">
                     <input type="checkbox" id="rs-match-not-null" ng-click="toggleMatchNotNull()" ng-checked="vm.matchNotNull"><label>Records With Values</label>
                 </span>
-                <span class="chaise-checkbox" ng-hide="vm.hideNullChoice" ng-class="{'disabled-row': vm.matchNotNull}">
+                <span class="chaise-checkbox" ng-hide="vm.hideNullChoice" uib-tooltip-html="tooltip.null" tooltip-placement="bottom" ng-class="{'disabled-row': vm.matchNotNull}">
                     <input type="checkbox" id="rs-match-null" ng-click="toggleMatchNull()" ng-checked="vm.matchNull" ng-disabled="vm.matchNotNull"><label>No Value</label>
                 </span>
             </div>

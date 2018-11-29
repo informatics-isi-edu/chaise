@@ -3,7 +3,7 @@
 
     angular.module('chaise.faceting', ['plotly', 'chaise.inputs', 'chaise.utils'])
 
-        .factory('facetingUtils', ['defaultDisplayname', function (defaultDisplayname) {
+        .factory('facetingUtils', ['defaultDisplayname', 'messageMap', function (defaultDisplayname, messageMap) {
 
             /**
              * Returns an object that can be used for showing the null filter
@@ -15,7 +15,12 @@
                     selected: (typeof selected == 'boolean') ? selected: false,
                     disabled: (typeof disabled == 'boolean') ? disabled: false,
                     uniqueId: null,
-                    displayname: {"value": null, "isHTML": false}
+                    displayname: {"value": null, "isHTML": false},
+                    tooltip: {
+                        value: messageMap.tooltip.null,
+                        isHTML: false
+                    },
+                    alwaysShowTooltip: true
                 };
             }
 
@@ -28,7 +33,12 @@
                 return {
                     selected: (typeof selected == 'boolean') ? selected: false,
                     isNotNull: true,
-                    displayname: {"value": defaultDisplayname.notNull, "isHTML": true}
+                    displayname: {"value": defaultDisplayname.notNull, "isHTML": true},
+                    tooltip: {
+                        value: messageMap.tooltip.notNull,
+                        isHTML: false
+                    },
+                    alwaysShowTooltip: true
                 };
             }
 
@@ -841,8 +851,8 @@
         }])
 
         .directive('choicePicker',
-            ["AlertsService", 'facetingUtils', 'logActions', "$log", 'modalUtils', '$q', 'tableConstants', '$timeout', 'UriUtils',
-            function (AlertsService, facetingUtils, logActions, $log, modalUtils, $q, tableConstants, $timeout, UriUtils) {
+            ["AlertsService", 'facetingUtils', 'logActions', "$log", 'messageMap', 'modalUtils', '$q', 'tableConstants', '$timeout', 'UriUtils',
+            function (AlertsService, facetingUtils, logActions, $log, messageMap, modalUtils, $q, tableConstants, $timeout, UriUtils) {
 
             /**
              * Given tuple and the columnName that should be used, return
@@ -934,12 +944,20 @@
                     // null and not-null are already added.
                     return f.isNotNull !== true && f.uniqueId != null;
                 }).map(function (f) {
+                    var tooltip = f.displayname;
+                    if (f.uniqueId === "") {
+                        tooltip = {
+                            value: messageMap.empty,
+                            isHTML: false
+                        };
+                    }
                     return {
-                        isNotNull: f.isNotNull,
+                        selected: true,
                         uniqueId: f.uniqueId,
                         displayname: f.displayname,
                         tuple: f.tuple, // might be null
-                        selected: true
+                        alwaysShowTooltip: (f.uniqueId === ""),
+                        tooltip: tooltip
                     };
                 }));
                 return res;
@@ -1034,13 +1052,22 @@
                                 return;
                             }
 
+                            var tooltip = tuple.displayname;
+                            if (value === "") {
+                                tooltip = {
+                                    value: messageMap.tooltip.empty,
+                                    isHTML: false
+                                };
+                            }
                             scope.checkboxRows.push({
+                                selected: false,
                                 uniqueId: value,
-                                displayname: (value === null) ? {value: null, isHTML: false} : tuple.displayname,
+                                displayname: tuple.displayname,
                                 tuple:  tuple,
                                 // if we have a not_null filter, other filters must be disabled.
                                 disabled: scope.facetColumn.hasNotNullFilter,
-                                selected: false,
+                                alwaysShowTooltip: (value === ""),
+                                tooltip: tooltip
                             });
                         });
 
@@ -1255,6 +1282,7 @@
                             }
 
                             newRow.displayname = (newRow.uniqueId === null) ? {value: null, isHTML: false} : row.displayname;
+                            newRow.tooltip = newRow.displayname;
                             newRow.isNotNull = row.notNull;
                             params.selectedRows.push(newRow);
                         });

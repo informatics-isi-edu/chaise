@@ -1156,7 +1156,7 @@
         }
     }])
 
-    .directive('recordList', ['recordTableUtils', 'defaultDisplayname', '$timeout', 'UriUtils', function(recordTableUtils, defaultDisplayname, $timeout, UriUtils) {
+    .directive('recordList', ['defaultDisplayname', 'messageMap', 'recordTableUtils', 'UriUtils', '$timeout', function(defaultDisplayname, messageMap, recordTableUtils, UriUtils, $timeout) {
 
         return {
             restrict: 'E',
@@ -1168,6 +1168,7 @@
             },
             link: function (scope, elem, attr) {
                 scope.defaultDisplayname = defaultDisplayname;
+                scope.tooltip = messageMap.tooltip;
 
                 scope.onSelect = function (row, $event) {
                     row.selected = !row.selected;
@@ -1203,7 +1204,7 @@
      *   value to the vm.selectedRows
      * NOTE removePill, removeAllPills are also changed to support these two matchNull and matchNotNull options.
      */
-    .directive('recordsetSelectFaceting', ['recordTableUtils', 'UriUtils', function(recordTableUtils, UriUtils) {
+    .directive('recordsetSelectFaceting', ['messageMap', 'recordTableUtils', 'UriUtils', function(messageMap, recordTableUtils, UriUtils) {
 
         return {
             restrict: 'E',
@@ -1221,6 +1222,7 @@
                 // TODO We should eventually add faceting here, and remove these initializations
                 scope.facetsLoaded = true;
                 scope.ignoreFaceting = true; // this is a temporary flag to avoid any faceting logic
+                scope.tooltip = messageMap.tooltip;
 
                 recordTableUtils.registerRecordsetCallbacks(scope);
 
