@@ -15,7 +15,12 @@
                     selected: (typeof selected == 'boolean') ? selected: false,
                     disabled: (typeof disabled == 'boolean') ? disabled: false,
                     uniqueId: null,
-                    displayname: {"value": null, "isHTML": false}
+                    displayname: {"value": null, "isHTML": false},
+                    tooltip: {
+                        value: messageMap.tooltip.null,
+                        isHTML: false
+                    },
+                    alwaysShowTooltip: true
                 };
             }
 
@@ -30,7 +35,8 @@
                     isNotNull: true,
                     displayname: {"value": defaultDisplayname.notNull, "isHTML": true},
                     tooltip: {
-                        value: messageMap.tooltip.notNull
+                        value: messageMap.tooltip.notNull,
+                        isHTML: false
                     },
                     alwaysShowTooltip: true
                 };
