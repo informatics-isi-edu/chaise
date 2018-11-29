@@ -19,7 +19,8 @@
           "showExportButton": false,
           "navbarMenu": {},
           "navbarBrand": "",
-          "disableDefaultExport": false
+          "disableDefaultExport": false,
+          "exportServicePath": "/iobox/export"
     })
 
     .constant("appTagMapping", {
