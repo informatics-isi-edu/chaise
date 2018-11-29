@@ -851,8 +851,8 @@
         }])
 
         .directive('choicePicker',
-            ["AlertsService", 'facetingUtils', 'logActions', "$log", 'modalUtils', '$q', 'tableConstants', '$timeout', 'UriUtils',
-            function (AlertsService, facetingUtils, logActions, $log, modalUtils, $q, tableConstants, $timeout, UriUtils) {
+            ["AlertsService", 'facetingUtils', 'logActions', "$log", 'messageMap', 'modalUtils', '$q', 'tableConstants', '$timeout', 'UriUtils',
+            function (AlertsService, facetingUtils, logActions, $log, messageMap, modalUtils, $q, tableConstants, $timeout, UriUtils) {
 
             /**
              * Given tuple and the columnName that should be used, return
@@ -944,13 +944,20 @@
                     // null and not-null are already added.
                     return f.isNotNull !== true && f.uniqueId != null;
                 }).map(function (f) {
+                    var tooltip = f.displayname;
+                    if (f.uniqueId === "") {
+                        tooltip = {
+                            value: messageMap.empty,
+                            isHTML: false
+                        };
+                    }
                     return {
-                        isNotNull: f.isNotNull,
+                        selected: true,
                         uniqueId: f.uniqueId,
                         displayname: f.displayname,
                         tuple: f.tuple, // might be null
-                        selected: true,
-                        tooltip: f.displayname
+                        alwaysShowTooltip: (f.uniqueId === ""),
+                        tooltip: tooltip
                     };
                 }));
                 return res;
@@ -1045,14 +1052,22 @@
                                 return;
                             }
 
+                            var tooltip = tuple.displayname;
+                            if (value === "") {
+                                tooltip = {
+                                    value: messageMap.tooltip.empty,
+                                    isHTML: false
+                                };
+                            }
                             scope.checkboxRows.push({
+                                selected: false,
                                 uniqueId: value,
-                                displayname: (value === null) ? {value: null, isHTML: false} : tuple.displayname,
+                                displayname: tuple.displayname,
                                 tuple:  tuple,
                                 // if we have a not_null filter, other filters must be disabled.
                                 disabled: scope.facetColumn.hasNotNullFilter,
-                                selected: false,
-                                tooltip: (value === null) ? {value: null, isHTML: false} : tuple.displayname,
+                                alwaysShowTooltip: (value === ""),
+                                tooltip: tooltip
                             });
                         });
 
