@@ -42,13 +42,7 @@
             $uibModalInstance.dismiss('cancel');
         }
     }])
-    .controller('ErrorModalController', ['Errors', 'messageMap', 'params', 'Session', '$uibModalInstance', '$window', function ErrorModalController(Errors, messageMap, params, Session, $uibModalInstance, $window) {
-        var vm = this;
-        vm.params = params;
-        vm.displayDetails = false;
-        vm.showReloadBtn = false;
-        vm.linkText = messageMap.showErrDetails;
-
+    .controller('ErrorModalController', ['Errors', 'messageMap', 'params', 'Session', '$rootScope', '$uibModalInstance', '$window', function ErrorModalController(Errors, messageMap, params, Session, $rootScope, $uibModalInstance, $window) {
         function isErmrestErrorNeedReplace (error) {
             switch (error.constructor) {
                 case ERMrest.InvalidFacetOperatorError:
@@ -58,6 +52,30 @@
                 default:
                     return false;
             }
+        }
+
+        // checks if error is -1, 0, 500, or 503
+        function isRetryError (error) {
+            switch (error.constructor) {
+                case ERMrest.NoConnectionError:
+                case ERMrest.TimedOutError:
+                case ERMrest.InternalServerError:
+                case ERMrest.ServiceUnavailableError:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        var vm = this;
+        vm.params = params;
+        vm.displayDetails = false;
+        vm.linkText = messageMap.showErrDetails;
+        vm.showReloadBtn = false;
+        if (ERMrest && isRetryError(exception)) {
+            // we are only showing the reload button for the 4 types of retriable errors while the page is loading.
+            // we discussed that it doesn't make sense to "retry" other requests that may fail after the data has loaded.
+            vm.showReloadBtn = !$rootScope.displayReady;
         }
 
         var exception = params.exception,
@@ -109,7 +127,7 @@
         };
 
         vm.reload = function () {
-            $uibModalInstance.close("reload");
+            $window.location.reload();
         };
 
         vm.login = function () {

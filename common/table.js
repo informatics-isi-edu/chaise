@@ -328,6 +328,8 @@
 
                     vm.hasLoaded = true;
                     vm.initialized = true;
+                    // globally sets when the app state is ready to interact with
+                    $rootScope.displayReady = true;
                     vm.aggregatesToInitialize = [];
                     vm.reference.columns.forEach(function (c, i) {
                         if(c.isPathColumn && c.hasAggregate) {
@@ -342,6 +344,8 @@
                     }
                     vm.hasLoaded = true;
                     vm.initialized = true;
+                    // globally sets when the app state is ready to interact with
+                    $rootScope.displayReady = true;
                     if (DataUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
                       err.errorData.redirectUrl = UriUtils.createRedirectLinkFromPath(err.errorData.redirectPath);
                     }
