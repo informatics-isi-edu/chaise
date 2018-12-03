@@ -1640,6 +1640,10 @@ footer .container1 {
     margin-bottom: 5px;
 }
 
+.chaise-list-item-tooltip {
+    margin-left: 25px;
+}
+
 .chaise-checkbox {
     position: relative;
     /*margin: 10px 0;*/
