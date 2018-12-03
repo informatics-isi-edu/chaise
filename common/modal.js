@@ -67,7 +67,10 @@
             }
         }
 
-        var vm = this;
+        var vm = this,
+            exception = params.exception,
+            reloadMessage = ' <p>  </p>';
+
         vm.params = params;
         vm.displayDetails = false;
         vm.linkText = messageMap.showErrDetails;
@@ -77,9 +80,6 @@
             // we discussed that it doesn't make sense to "retry" other requests that may fail after the data has loaded.
             vm.showReloadBtn = !$rootScope.displayReady;
         }
-
-        var exception = params.exception,
-            reloadMessage = ' <p>  </p>';
 
         // in case of adding login button, we should add extra message
         if (vm.params.showLogin) {
