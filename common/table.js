@@ -1,11 +1,14 @@
 (function () {
     'use strict';
 
+    var isIE = /*@cc_on!@*/false || !!document.documentMode, // Internet Explorer 6-11
+        isEdge = !isIE && !!window.StyleMedia; // Edge
+
     angular.module('chaise.record.table', ['chaise.ellipses', 'chaise.inputs', 'chaise.utils'])
 
     .constant('tableConstants', {
         MAX_CONCURENT_REQUEST: 4,
-        MAX_URL_LENGTH: 2000,
+        URL_PATH_LENGTH_LIMIT: (isIE || isEdge) ? 2000: 4000,
         PAGE_SIZE: 10,
         AUTO_SEARCH_TIMEOUT: 2000,
         CELL_LIMIT: 500
@@ -416,9 +419,7 @@
 
                     // fail silently
                     vm.totalRowsCnt = null;
-                    // need to call this here to remove ocupied slot for count request
-                    // also notifies flow control to try to fetch count again because it's incorrect (dirty)
-                    _afterUpdateCount(vm, true);
+                    return defer.resolve(true), defer.promise;
                 });
             })(vm.flowControlObject.counter);
             return defer.promise;
@@ -656,8 +657,8 @@
             scope.tooltip = messageMap.tooltip;
 
             scope.$root.checkReferenceURL = function (ref) {
-                var refUri = ref.isAttributeGroup ? ref.ermrestPath : ref.location.ermrestPath;
-                if (refUri.length > tableConstants.MAX_URL_LENGTH) {
+                var ermrestPath = ref.isAttributeGroup ? ref.ermrestPath : ref.readPath;
+                if (ermrestPath.length > tableConstants.URL_PATH_LENGTH_LIMIT || ref.uri.length > tableConstants.URL_PATH_LENGTH_LIMIT) {
 
                     // show the alert (the function will handle just showing one alert)
                     AlertsService.addURLLimitAlert();

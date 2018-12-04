@@ -99,14 +99,12 @@ var testParams = {
     },
     maximumLength: {
         facetIdx: 20,
-        option: 1,
         numRows: 25,
-        modalOption: 10,
-        totalNumOptions: 26,
-        filteredNumRows: 14,
-        secondFacetIdx: 6,
+        filteredNumRows: 24,
+        secondFacetIdx: 16,
         secondFacetOption: 0,
-        secondFacetNumOptions: 6
+        secondFacetNumOptions: 4,
+        option: 1
     },
     recordColumns: [ "text_col", "longtext_col", "markdown_col", "int_col", "float_col", "date_col", "timestamp_col", "boolean_col", "jsonb_col", "1-o7Ye2EkulrWcCVFNHi3A", "hmZyP_Ufo3E5v_nmdTXyyA" ],
     recordValues: {
@@ -593,6 +591,10 @@ describe("Other facet features, ", function() {
         });
     });
 
+    /***********************************************************  local test cases ***********************************************************/
+    if (process.env.TRAVIS) return;
+    // NOTE the following test cases will only run locally.
+
     describe("navigating to recordset with filters that faceting doesn't support.", function () {
         var customFilterParams = testParams.customFilter;
         var idx = customFilterParams.facet;
@@ -712,7 +714,7 @@ describe("Other facet features, ", function() {
 
         it ("searching a lenghty string should show the `Maximum URL length reached` warning.", function () {
             var mainSearch = chaisePage.recordsetPage.getMainSearchBox();
-            chaisePage.setInputValue(mainSearch, chance.string({length: 2000}));
+            chaisePage.setInputValue(mainSearch, chance.string({length: 4000}));
             chaisePage.recordsetPage.waitForInverseMainSpinner();
             expect(chaisePage.recordsetPage.getRows().count()).toBe(testParams.maximumLength.numRows, "row count missmatch.");
             checkAlert();
@@ -1015,10 +1017,6 @@ describe("Other facet features, ", function() {
             });
         });
     });
-
-    /***********************************************************  local test cases ***********************************************************/
-    if (process.env.TRAVIS) return;
-    // NOTE the following test cases will only run locally.
 
     describe("navigating to recordset with custom facet.", function () {
         var customFacetParams = testParams.customFacet;
