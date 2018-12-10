@@ -3,7 +3,7 @@
 
     angular.module('chaise.authen', ['chaise.utils', 'chaise.storage'])
 
-    .factory('Session', ['messageMap', 'modalUtils', 'StorageService', '$cookies', '$http', '$interval', '$log', '$q', 'UriUtils', '$window', '$rootScope', function (messageMap, modalUtils, StorageService, $cookies, $http, $interval, $log, $q, UriUtils, $window, $rootScope) {
+    .factory('Session', ['messageMap', 'modalUtils', 'StorageService', '$cookies', '$http', '$interval', '$log', '$uibModalStack', '$q', 'UriUtils', '$window', '$rootScope', function (messageMap, modalUtils, StorageService, $cookies, $http, $interval, $log, $uibModalStack, $q, UriUtils, $window, $rootScope) {
 
         var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
 
@@ -26,7 +26,7 @@
                 _changeCbs[k]();
             }
         };
-       
+
         /**
          * Functions that interact with the StorageService tokens
          * There are 2 keys stored under the LOCAL_STORAGE_KEY object, PROMPT_EXPIRATION_KEY and PREVIOUS_SESSION_KEY
@@ -80,7 +80,7 @@
             StorageService.updateStorage(LOCAL_STORAGE_KEY, data);
         };
 
-        var loginWindowCb = function (params, referrerId, cb, type){
+        var loginWindowCb = function (params, referrerId, cb, type, rejectCb){
             if(type.indexOf('modal')!== -1){
                 if (_session) {
                     params.title = messageMap.sessionExpired.title;
@@ -98,6 +98,9 @@
                     $interval.cancel(intervalId);
                     $cookies.remove("chaise-" + referrerId, { path: "/" });
                     closed = true;
+
+                    $uibModalStack.dismissAll("no login");
+                    rejectCb();
                 };
 
                 var modalInstance = modalUtils.showModal({
@@ -161,7 +164,7 @@
         };
 
 
-        var logInHelper = function(logInTypeCb, win, cb, type){
+        var logInHelper = function(logInTypeCb, win, cb, type, rejectCb){
             var referrerId = (new Date().getTime());
 
             var url = serviceURL + '/authn/preauth?referrer='+UriUtils.fixedEncodeURIComponent($window.location.origin+"/"+ UriUtils.chaiseDeploymentPath() + "login?referrerid=" + referrerId);
@@ -202,7 +205,7 @@
                 if(win){
                         win.location=params.login_url;
                 }
-                logInTypeCb(params,referrerId, cb, type);
+                logInTypeCb(params,referrerId, cb, type, rejectCb);
             }, function(error) {
                 throw error;
             });
@@ -319,8 +322,8 @@
              * these 2 callbacks trigger in the order of `popupCb` first then `modalCb` where modalCb is ignored more often than not
              * @param {Function} notifyErmrestCB - runs after the login process has been complete
              */
-            loginInAModal: function(notifyErmrestCB) {
-                logInHelper(loginWindowCb, "", notifyErmrestCB, 'modal');
+            loginInAModal: function(notifyErmrestCB, notifyErmrestRejectCB) {
+                logInHelper(loginWindowCb, "", notifyErmrestCB, 'modal', notifyErmrestRejectCB);
             },
 
             logout: function() {
@@ -370,6 +373,9 @@
                         defer.reject(exception);
                     });
 
+                }, function () {
+                    // returns to rejectCB in ermrestJS/http.js
+                    defer.reject();
                 });
 
                 return defer.promise;
