@@ -100,7 +100,7 @@
                     closed = true;
 
                     $uibModalStack.dismissAll("no login");
-                    rejectCb();
+                    if (rejectCb) rejectCb();
                 };
 
                 var modalInstance = modalUtils.showModal({
