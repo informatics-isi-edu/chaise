@@ -111,11 +111,11 @@ exports.testPresentation = function (tableParams) {
 
         it("should have a citation present,", function () {
             // verify citation
-            expect(chaisePage.recordPage.getCitationHeader().getText()).toBe("Citation", "Citation header is incorrect");
+            expect(chaisePage.recordPage.getCitationHeader().getText()).toBe("Data Citation", "Citation header is incorrect");
             expect(chaisePage.recordPage.getCitationText().getText()).toBe(tableParams.citationParams.citation, "citation text is incorrect");
 
             // verify download citation
-            expect(chaisePage.recordPage.getDownloadCitationHeader().getText()).toBe("Download Citation:", "Download citation header is incorrect");
+            expect(chaisePage.recordPage.getDownloadCitationHeader().getText()).toBe("Download Data Citation:", "Download citation header is incorrect");
             expect(chaisePage.recordPage.getBibtex().getText()).toBe("BibTex", "bibtex text is incorrect");
         });
 
