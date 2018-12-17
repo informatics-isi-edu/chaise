@@ -134,8 +134,9 @@
                 },
                 {
                     "name": "fk_to_f2",
+                    "nullok": false,
                     "type": {
-                        "typename": "serial4"
+                        "typename": "int4"
                     }
                 },
                 {
@@ -265,7 +266,7 @@
                 "tag:isrd.isi.edu,2016:visible-columns" : {
                     "filter": {
                         "and": [
-                            {"source": "term", "hide_null_choice": true}
+                            {"source": "term", "hide_null_choice": true, "hide_not_null_choice": true}
                         ]
                     }
                 }
@@ -396,7 +397,7 @@
                 "tag:isrd.isi.edu,2016:visible-columns" : {
                     "filter": {
                         "and": [
-                            {"source": "term", "hide_null_choice": true}
+                            {"source": "term", "hide_null_choice": true, "hide_not_null_choice": true}
                         ]
                     }
                 },
@@ -563,7 +564,7 @@
                 "tag:isrd.isi.edu,2016:visible-columns" : {
                     "filter": {
                         "and": [
-                            {"source": "term", "hide_null_choice": true}
+                            {"source": "term", "hide_null_choice": true, "hide_not_null_choice": true}
                         ]
                     }
                 }

@@ -80,10 +80,10 @@ var testParams = {
         numRowsWFacet: 1,
         numRowsWOFilter: 1,
         facet: 0,
-        totalNumOptions: 8,
-        options: ["All Records With Value", "1", "2", "6", "7", "8", "9", "10"],
-        optionsWOFilter: ["All Records With Value", "2", "1", "3", "4", "5", "6", "7", "8", "9", "10"],
-        option: 2
+        totalNumOptions: 7,
+        options: ["1", "2", "6", "7", "8", "9", "10"],
+        optionsWOFilter: ["2", "1", "3", "4", "5", "6", "7", "8", "9", "10"],
+        option: 1
     },
     customFacet: {
         cfacet: { "displayname": "Custom Facet Query", "ermrest_path": "id=1;id=2;id=3;id=14;id=15;id=16;id=17;id=18" },
@@ -876,9 +876,10 @@ describe("Other facet features, ", function() {
 
             it("should click the foreign key popup button and have the facet collapse button visible in search popup", function (done) {
                 expect(chaisePage.recordEditPage.getForms().count()).toBe(1, "number of forms shown is incorrect");
-
                 chaisePage.recordEditPage.getModalPopupBtnsUsingScript().then(function(popupBtns) {
-                    expect(popupBtns.length).toBe(2, "number of popup buttons is incorrect");
+                    //there are two foreignkeys, so there will be four of this element.
+                    //NOTE I'm not sure what's the point of this check
+                    expect(popupBtns.length).toBe(4, "number of popup buttons is incorrect");
 
                     return chaisePage.clickButton(popupBtns[0]);
                 }).then(function () {
@@ -911,7 +912,7 @@ describe("Other facet features, ", function() {
             });
 
             it("select a facet option and select a row for the input", function (done) {
-                chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(0, 1)).then(function () {
+                chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(0, 0)).then(function () {
                     browser.wait(function () {
                         return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
                             return (ct == 1);
@@ -991,7 +992,7 @@ describe("Other facet features, ", function() {
             });
 
             it("select a facet option and select a row to associate", function (done) {
-                chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(0, 1)).then(function () {
+                chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(0, 0)).then(function () {
                     browser.wait(function () {
                         return chaisePage.recordsetPage.getRecordsetTableModalOptions().count().then(function (ct) {
                             return (ct == 1);
