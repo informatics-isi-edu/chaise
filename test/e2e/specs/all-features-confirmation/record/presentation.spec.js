@@ -61,7 +61,8 @@ var testParams = {
         { title: "Max Name of accommodation_collection", comment: "maximum of title", value: "Sherathon Hotel"},
         { title: "json_col", value:'<pre>'+JSON.stringify(null,undefined,2)+'</pre>', match:"html"},
         { title: "json_col_with_markdown", value: "<p>Status is: “delivered”</p>\n", match:"html"},
-        { title: "accommodation_image_assoc", comment: "Accommodation Image", value: "3005", presentation: { type: "inline", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-record:file/", table_name: "file", key_value: [{column: "id", value: "3005"}]} }
+        { title: "accommodation_image_assoc", comment: "Accommodation Image", value: "3005", presentation: { type: "inline", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-record:file/", table_name: "file", key_value: [{column: "id", value: "3005"}]} },
+        { title: "table_w_invalid_row_markdown_pattern"}
       ],
     no_related_data: {
         key: {
@@ -98,7 +99,6 @@ var testParams = {
           canEdit: true,
           canCreate: false,
           isInline: true,
-          isTableMode: true,
           viewMore: {
               name: "accommodation_collection",
               displayname: "accommodation_collections",
@@ -121,7 +121,6 @@ var testParams = {
           canEdit: true,
           canCreate: true,
           isInline: true,
-          isTableMode: true,
           viewMore: {
               name: "table_w_aggregates",
               displayname: "table_w_aggregates",
@@ -163,6 +162,26 @@ var testParams = {
           rowEditPaths: [ // in case of association, edit should naviagte to the association table
               "accommodation_id=2002&image_id=3005"
           ],
+      },
+      {
+          title: "a related entity with invalid row markdown pattern",
+          name: "table_w_invalid_row_markdown_pattern",
+          schemaName: "product-record",
+          displayname: "table_w_invalid_row_markdown_pattern",
+          isInline: true,
+          isTableMode: true,
+          viewMore: {
+              name: "table_w_invalid_row_markdown_pattern",
+              displayname: "table_w_invalid_row_markdown_pattern",
+              filter: "Accommodations: Sherathon Hotel"
+          },
+          rowValues: [
+              ["two"]
+          ],
+          rowViewPaths: [[{
+              column: "id",
+              value: "2002"
+          }]]
       }
   ]
 };

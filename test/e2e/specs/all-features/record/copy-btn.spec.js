@@ -37,9 +37,9 @@ describe('View existing record,', function() {
 
         });
 
-        it("should load chaise-config.js and have maxRelatedTablesOpen=8", function() {
+        it("should load chaise-config.js and have maxRelatedTablesOpen=9", function() {
             browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
-                expect(chaiseConfig.maxRelatedTablesOpen).toBe(8);
+                expect(chaiseConfig.maxRelatedTablesOpen).toBe(9);
             });
         });
 

@@ -98,7 +98,6 @@
         .directive('recordActionBar', ['UriUtils', function(UriUtils) {
             return {
                 restrict: 'E',
-                transclude: true,
                 scope: {
                     relatedTableRefDisplay: '=',
                     tabModelDisplay: '=',
@@ -108,7 +107,8 @@
                     addRelatedRecord: '&',
                     toRecordSet: '&',
                     displayname: '=',
-                    baseTableName: '='
+                    baseTableName: '=',
+                    showToggleDisplayBtn: "="
                 },
                 templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/recordAction.html',
                 controller: "RecordActionController",
