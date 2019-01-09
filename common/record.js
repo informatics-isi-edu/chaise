@@ -74,6 +74,19 @@
                     scope.showInlineTable = function (i) {
                         return scope.isInline(i) && (scope.showEmptyRelatedTables || scope.columnModels[i].tableModel.rowValues.length > 0);
                     };
+
+                    /**
+                     * Whether we should provide the users with markdown display
+                     * This will return true if all the following are true:
+                     *  - reference is in markdown display mode.
+                     *  - the page.content is not returning an empty result.
+                     * @param  {integer} i inline table index
+                     * @return {boolean}   Whether we should provide the users with markdown display
+                     */
+                    scope.allowInlineTableMarkdown = function (i) {
+                        var tm = scope.columnModels[i].tableModel;
+                        return tm.reference.display.type == 'markdown' && tm.page && tm.page.content != '';
+                    };
                 }
             };
         }])

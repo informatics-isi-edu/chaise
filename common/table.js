@@ -274,11 +274,6 @@
 
                     vm.page = page;
 
-                    // we're attaching this to tableModel to avoid computing it multiple times.
-                    // it will signal the UI that we can use the value of page.content to provide a summary of results
-                    // it will check for the reference display type and also makes sure page.content is valid (not empty string)
-                    vm.allowMarkdownDisplay = vm.reference.display.type == 'markdown' && vm.page.tuples.length > 0 && vm.page.content != '';
-
                     return vm.getDisabledTuples ? vm.getDisabledTuples(page, vm.pageLimit) : '';
                 }).then(function (rows) {
                     if (current !== vm.flowControlObject.counter) {

@@ -16,20 +16,20 @@
             <span ng-if="showInlineTable($index)" id="entity-{{$index}}-table">
                 <record-action-bar id="actionbar-{{$index}}" tabtype="entity" related-table-ref-display="actionBarDisplayType($index)" tab-model-display="col.tableModel.displayType"
                     toggle-related-table-display-type='toggleRelatedTableDisplayType({dataModel:col.tableModel})' can-edit-related="canEditRelated({ref:col.tableModel.reference}) && !showError($index)"
-                    can-create-related="canCreateRelated({ref:col.tableModel.reference})" show-toggle-display-btn="col.tableModel.allowMarkdownDisplay || col.tableModel.page.content == null"
+                    can-create-related="canCreateRelated({ref:col.tableModel.reference})" show-toggle-display-btn="allowInlineTableMarkdown($index)"
                     add-related-record="addRelatedRecord({ref:col.tableModel.reference})" to-record-set="toRecordSet({ref:col.tableModel.reference})"
                     displayname="col.column.displayname" base-table-name="col.baseTableName">
                 </record-action-bar>
-                <div ng-hide="showError($index) || showLoader($index)">
-                    <span ng-if="col.tableModel.allowMarkdownDisplay || col.tableModel.page.content == null" id="entity-{{$index}}-markdown">
+                <div ng-hide="showError($index) || showLoader($index)" ng-switch="col.tableModel.displayType == 'markdown' && allowInlineTableMarkdown($index)">
+                    <span ng-switch-when="true" id="entity-{{$index}}-markdown">
                         <span ng-if="col.tableModel.page.content == null">
                             <span class="markdown-container"><em><strong>None</strong></em></span>
                         </span>
-                        <span ng-if="col.tableModel.allowMarkdownDisplay">
+                        <span ng-if="col.tableModel.page.content != null">
                             <span class="markdown-container" ng-bind-html="col.tableModel.page.content | trustedHTML"></span>
                         </span>
                     </span>
-                    <span ng-if="col.tableModel.displayType == 'table' || col.tableModel.page.content === ''" id="entity-{{$index}}-recTab">
+                    <span ng-switch-default id="entity-{{$index}}-recTab">
                         <record-table class="related-table" id="rt-{{::makeSafeIdAttr(col.column.displayname.value)}}" vm="col.tableModel"></record-table>
                     </span>
                 </div>
