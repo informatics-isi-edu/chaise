@@ -22,7 +22,7 @@
                     }
 
                     if (!angular.isUndefinedOrNull(footerText)) {
-                        ERMrest._onload().then(function() {
+                        ERMrest.onload().then(function() {
                             scope.privacyResult = ERMrest.renderMarkdown(footerText);
                         });
                     }
