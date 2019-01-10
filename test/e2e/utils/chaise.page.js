@@ -632,6 +632,14 @@ var recordEditPage = function() {
     this.getClearButton = function(el) {
         return browser.executeScript("return $(arguments[0]).parent().find('.glyphicon-remove')[0]", el);
     };
+
+    this.getMarkdownPreviewModal = function () {
+        return element(by.css(".chaise-markdown-preview-modal"));
+    };
+
+    this.getSearchPopupModal = function () {
+        return element(by.css(".search-popup-modal"));
+    };
 };
 
 var recordPage = function() {
@@ -1518,8 +1526,7 @@ function chaisePage() {
 
     this.catchTestError = function (done) {
         return function (err) {
-            console.log(err);
-            done.fail();
+            done.fail(err);
         }
     };
 

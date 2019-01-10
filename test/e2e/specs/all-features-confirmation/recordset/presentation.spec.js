@@ -36,7 +36,7 @@ var testParams = {
                 title: "NH Munich Resort",
                 website: "http://www.nh-hotels.com/hotels/munich",
                 rating: "3.2000",
-                summary: "NH Hotels has six resorts in the city of Munich. Very close to Munich Main Train Station -- the train being one of the most interesting choices of transport for travelling around Germany -- is the four-star NH München Deutscher Kaiser Hotel. In addition to the excellent quality of accommodation that it offers, the hotel is located close to Marienplatz, the monumental central square in the city, the Frauenkirche church, Stachus (Karlsplatz) and the Viktualienmarkt. Other places of interest to explore in Munich are the English garden, the spectacular Nymphenburg Palace and the German Museum, a museum of science and technology very much in keeping with the industrial spirit of the city. Do not forget to visit Munich at the end of September and beginning of October, the time for its most famous international festival: Oktoberfest! Beer, sausages, baked knuckles and other gastronomic specialities await you in a festive atmosphere on the grasslands of Theresienwiese. Not to be missed! And with NH Hotels you can choose the hotels in Munich which best suit your travel plans, with free WiFi and the possibility to bring your pets with you.\n... more",
+                summary: "NH Hotels has six resorts in the city of Munich. Very close to Munich Main Train Station -- the train being one of the most interesting choices of transport for travelling around Germany -- is the four-star NH München Deutscher Kaiser Hotel. In addition to the excellent quality of accommodation that it offers, the hotel is located close to Marienplatz, the monumental central square in the city, the Frauenkirche church, Stachus (Karlsplatz) and the Viktualienmarkt. Other places of interest to explore in Munich are the English garden, the spectacular Nymphenburg Palace and the German Museum, a museum of science and technology very much in keeping with the industrial spirit of the city. Do not forget to visit Munich at the end of September and beginning of October, the time for its most famous international festival: Oktoberfest! Beer, sausages, baked knuckles and other gastronomic specialities await you in a festive atmosphere on the grasslands of Theresienwiese. Not to be missed! And with NH Hotels you can choose the hotels in Munich which best suit your travel plans, with free WiFi and the possibility to bring your pets with you.",
                 opened_on: "1976-06-15 00:00:00",
                 luxurious: "true",
                 json_col: JSON.stringify({"name":"testing_json"},undefined,2),
@@ -458,6 +458,12 @@ describe('View recordset,', function() {
                 var filter = accommodationParams.shortest_key_filter + dataRow.RID;
 
                 chaisePage.recordsetPage.waitForInverseMainSpinner();
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getEditActionButtons().count().then(function(ct) {
+                        return ct == 4;
+                    });
+                }, browser.params.defaultTimeout);
+
                 chaisePage.recordsetPage.getViewActionButtons().then(function(viewButtons) {
                     expect(viewButtons.length).toBe(4);
                     return viewButtons[0].click();
@@ -470,7 +476,7 @@ describe('View recordset,', function() {
                 });
             });
 
-            it("action columns should show edit button that redirects to the recordedit page", function() {
+            it("action columns should show edit button that redirects to the recordedit page", function(done) {
                 var dataRow = browser.params.entities[accommodationParams.schemaName][accommodationParams.table_name].find(function (entity) {
                     return entity.id == accommodationParams.data[0].id;
                 });
@@ -478,7 +484,13 @@ describe('View recordset,', function() {
                 var allWindows;
 
                 chaisePage.recordsetPage.waitForInverseMainSpinner();
-                chaisePage.recordsetPage.getEditActionButtons().then(function(editButtons) {
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getEditActionButtons().count().then(function(ct) {
+                        return ct == 4;
+                    });
+                }, browser.params.defaultTimeout);
+
+                chaisePage.recordsetPage.getEditActionButtons().then(function (editButtons) {
                     expect(editButtons.length).toBe(4);
                     return editButtons[0].click();
                 }).then(function() {
@@ -495,6 +507,9 @@ describe('View recordset,', function() {
                     expect(browser.driver.getCurrentUrl()).toContain(result);
                     browser.close();
                     browser.switchTo().window(allWindows[0]);
+                    done();
+                }).catch(function (err) {
+                    done.fail(err);
                 });
             });
 

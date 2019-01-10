@@ -91,10 +91,7 @@ exports.testPresentation = function (tableParams) {
                 shareModal.allowAnimations(false);
 
                 done();
-            }).catch(function(err){
-                console.log(err);
-                done.fail();
-            });
+            }).catch(chaisePage.catchTestError(done));
         });
 
         it("should show the share dialog when clicking the share button with 3 list elements.", function () {
@@ -127,8 +124,7 @@ exports.testPresentation = function (tableParams) {
                     }, browser.params.defaultTimeout).then(function () {
                         done();
                     }, function () {
-                        expect(false).toBeTruthy(tableParams.file_names[2] + " was not downloaded");
-                        done.fail();
+                        done.fail(tableParams.file_names[2] + " was not downloaded");
                     });
                 });
             });
@@ -138,10 +134,7 @@ exports.testPresentation = function (tableParams) {
             // close dialog
             chaisePage.recordEditPage.getModalTitle().element(by.tagName("button")).click().then(function () {
                 done();
-            }).catch(function(err){
-                console.log(err);
-                done.fail();
-            });
+            }).catch(chaisePage.catchTestError(done));
         });
     });
 
@@ -155,10 +148,7 @@ exports.testPresentation = function (tableParams) {
             return chaisePage.recordsetPage.getExportDropdown().click();
         }).then(function () {
             done();
-        }).catch(function (err) {
-            console.log(err);
-            done.fail();
-        });
+        }).catch(chaisePage.catchTestError(done));
     });
 
     if (!process.env.TRAVIS) {
@@ -173,13 +163,9 @@ exports.testPresentation = function (tableParams) {
                 }, browser.params.defaultTimeout).then(function () {
                     done();
                 }, function () {
-                    expect(false).toBeTruthy("Accommodations.csv was not downloaded");
-                    done.fail();
+                    done.fail("Accommodations.csv was not downloaded");
                 });
-            }).catch(function (err) {
-                console.log(err);
-                done.fail();
-            });
+            }).catch(chaisePage.catchTestError(done));
         });
 
         it("should have 'BDBag' as a download option and download the file.", function(done) {
@@ -197,13 +183,9 @@ exports.testPresentation = function (tableParams) {
                 }, browser.params.defaultTimeout).then(function () {
                     done();
                 }, function () {
-                    expect(false).toBeTruthy("accommodation.zip was not downloaded");
-                    done.fail();
+                    done.fail("accommodation.zip was not downloaded");
                 });
-            }).catch(function (err) {
-                console.log(err);
-                done.fail();
-            });
+            }).catch(chaisePage.catchTestError(done));
         });
     }
 
@@ -434,10 +416,7 @@ exports.testPresentation = function (tableParams) {
             browser.wait(EC.visibilityOf(markdownEntity), browser.params.defaultTimeout);
             expect(markdownEntity.getText()).toBe('None',"Incorrect text for empty markdown!");
 			done();
-        }).catch(function(err){
-            console.log(err);
-            done.fail();
-        });
+        }).catch(chaisePage.catchTestError(done));
     });
 
     it("empty inline inbound fks should disappear when 'Hide All Related Records' was clicked.",function(done){
@@ -448,10 +427,7 @@ exports.testPresentation = function (tableParams) {
 			return chaisePage.clickButton(showAllRTButton);
 		}).then(function () {
 			done();
-		}).catch(function(err){
-            console.log(err);
-            done.fail();
-        });
+		}).catch(chaisePage.catchTestError(done));
     });
 
     // Related tables are contextualized with `compact/brief`, but if that is not specified it will inherit from `compact`
@@ -488,10 +464,7 @@ exports.testPresentation = function (tableParams) {
         }).then(function(attribute) {
             expect(attribute).not.toMatch("panel-open");
 			done();
-        }).catch(function (err) {
-			console.log(err);
-			done.fail();
-		})
+        }).catch(chaisePage.catchTestError(done));
     });
 
     // There is a media table linked to accommodations but this accommodation (Sheraton Hotel) doesn't have any media
@@ -513,9 +486,7 @@ exports.testPresentation = function (tableParams) {
         }).then(function() {
             expect(chaisePage.recordPage.getRelatedTable(tableDisplayname).isDisplayed()).toBeFalsy("third click: didn't hide.");
             done();
-        }).catch(function(error) {
-            done.fail(error);
-        });
+        }).catch(chaisePage.catchTestError(done));
     });
 
     describe("regarding inline related entities, ", function () {
@@ -691,10 +662,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 						//TODO make sure table is visible
 						toggled = true;
 						done();
-					}).catch(function(error) {
-						console.log(error);
-						done.fail();
-					});
+					}).catch(chaisePage.catchTestError(done));
 				});
 
 			} else {
@@ -766,10 +734,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 						return browser.switchTo().window(allWindows[0]);
 					}).then(function (){
 						done();
-					}).catch(function (err) {
-						console.log(err);
-						done.fail();
-					});
+					}).catch(chaisePage.catchTestError(done));
 				});
 			}
 		}
@@ -812,10 +777,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 							expect(count).toBe(currentCount-1, "count didn't change.");
 							testHeading(count, params.page_size);
 							done();
-						}).catch(function (err) {
-							console.log(err);
-							done.fail();
-						})
+						}).catch(chaisePage.catchTestError(done));
 					});
 
 				} else {
@@ -832,10 +794,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 		if (toggled) {
 			chaisePage.clickButton(markdownToggleLink).then(function() {
 				done();
-			}).catch(function(error) {
-				console.log(error);
-				done.fail();
-			});
+			}).catch(chaisePage.catchTestError(done));
 		} else {
 			done();
 		}
@@ -885,10 +844,7 @@ exports.testAddRelatedTable = function (params, isInline, inputCallback) {
 				expect(title).toBe("Create Record", "recordedit title missmatch.")
 
 				done();
-			}).catch(function (err) {
-				console.log(err);
-				done.fail();
-			});
+			}).catch(chaisePage.catchTestError(done));
 		});
 
 		it ("the opened form should have the prefill value for foreignkey.", function () {
@@ -917,10 +873,7 @@ exports.testAddRelatedTable = function (params, isInline, inputCallback) {
                     }, function (err) {throw err;});
                 });
                 checkRelatedRowValues(params.relatedDisplayname, isInline, params.rowValuesAfter, done);
-			}).catch(function(error) {
-				console.log(error);
-				done.fail();
-			});
+			}).catch(chaisePage.catchTestError(done));
 		});
 	});
 };
@@ -953,10 +906,7 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
 			}).then(function(ct){
 				expect(ct).toBe(params.totalCount, "association count missmatch.");
 				done();
-			}).catch(function(error) {
-				console.log(error);
-				done.fail();
-			});
+			}).catch(chaisePage.catchTestError(done));
 		});
 
 		it ("current values must be disabled.", function (done) {
@@ -972,10 +922,7 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
 				});
 
 				done();
-			}).catch(function(error) {
-				console.log(error);
-				done.fail();
-			});
+			}).catch(chaisePage.catchTestError(done));
 		});
 
 		it ("user should be able to select new values and submit.", function (done) {
@@ -995,10 +942,7 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
 			}).then(function (count){
 				expect(count).toBe(params.existingCount + 1);
 				done();
-			}).catch(function(error) {
-				console.log(error);
-				done.fail();
-			});
+			}).catch(chaisePage.catchTestError(done));
 		});
 
 	});
@@ -1027,8 +971,5 @@ function checkRelatedRowValues(displayname, isInline, rowValues, done) {
                 throw err;
             });
         });
-    }).catch(function(error) {
-        console.log(error);
-        done.fail();
-    });
+    }).catch(chaisePage.catchTestError(done));
 }

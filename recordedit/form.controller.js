@@ -294,6 +294,7 @@
                 animation: false,
                 controller: "SearchPopupController",
                 controllerAs: "ctrl",
+                windowClass: "search-popup-modal",
                 resolve: {
                     params: params
                 },

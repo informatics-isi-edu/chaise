@@ -427,18 +427,41 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                         let v = "button[data-hotkey='"+comm+"']";
                                         element.all(by.css(v)).get(btnIdx).click();
                                     }
+
+                                    // change input
                                     markdownField.sendKeys(input);
+
+                                    // open preview modal
+                                    let prevModal = chaisePage.recordEditPage.getMarkdownPreviewModal();
+                                    browser.wait(EC.elementToBeClickable(modalPrevBtn));
                                     modalPrevBtn.click();
+
+                                    // disable animation on the modal
+                                    browser.wait(EC.presenceOf(prevModal), browser.params.defaultTimeout);
+                                    prevModal.allowAnimations(false);
+
+                                    // wait for modal content
                                     let mdDiv = element(by.css('[ng-bind-html="ctrl.params.markdownOut"]'));
                                     browser.wait(EC.presenceOf(mdDiv), browser.params.defaultTimeout);
                                     expect(mdDiv.getAttribute('innerHTML')).toBe(markdownOut, colError(descCol.name, "Error during markdown preview generation"));
+
+                                    // close the modal
                                     element(by.className('modal-close')).click();
-                                    PrevBtn.click();        //generate preview
+                                    chaisePage.waitForElementInverse(prevModal);
+
+                                    // switch to preview mode
+                                    browser.wait(EC.elementToBeClickable(PrevBtn));
+                                    PrevBtn.click();
                                     let mdPrevDiv = element(by.className("md-preview"));
+
+                                    // wait for preview div
                                     browser.wait(EC.presenceOf(mdPrevDiv), browser.params.defaultTimeout);
                                     expect(mdPrevDiv.getAttribute('innerHTML')).toBe(markdownOut,colError(descCol.name, "Error during markdown preview generation"));
-                                    PrevBtn.click();        //editing mode
 
+                                    // switch to edit mode
+                                    browser.wait(EC.elementToBeClickable(PrevBtn));
+                                    PrevBtn.click();
+                                    chaisePage.waitForElementInverse(mdPrevDiv);
                                 })(markdownTestParams[i].raw, markdownTestParams[i].markdown, markdownTestParams[i].comm, btnIndex);
                             } //for
                         })

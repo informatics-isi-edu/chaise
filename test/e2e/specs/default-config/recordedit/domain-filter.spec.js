@@ -9,22 +9,23 @@ describe("Domain filter pattern support,", function() {
 
     var testModalCount = function (colName, expectedCount, done, choose) {
         var errorCB = function (err) {
-            console.log(err);
-            done.fail();
+            done.fail(err);
         };
         var successCB = function () {
             done();
         };
 
-        var fk,modal, rows;
+        var fk, modalText, rows, modal;
 
         fk = chaisePage.recordEditPage.getForeignKeyInputDisplay(colName, 0);
         browser.wait(EC.elementToBeClickable(fk));
         fk.click().then(function () {
-            modal = chaisePage.recordEditPage.getModalTitle();
-            browser.wait(EC.visibilityOf(modal), browser.params.defaultTimeout);
+            modalText = chaisePage.recordEditPage.getModalTitle();
+            browser.wait(EC.visibilityOf(modalText), browser.params.defaultTimeout);
 
-            return modal.getText();
+            chaisePage.recordEditPage.getSearchPopupModal().allowAnimations(false);
+
+            return modalText.getText();
         }).then(function(text) {
             expect(text.indexOf("Choose")).toBeGreaterThan(-1);
 

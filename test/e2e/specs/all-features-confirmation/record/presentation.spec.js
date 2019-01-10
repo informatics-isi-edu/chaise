@@ -355,6 +355,7 @@ describe('View existing record,', function() {
 
         it('Side panel should hide/show by clicking pull button', function(done){
             var recPan =  chaisePage.recordPage.getSidePanel();
+            recPan.allowAnimations(false);
 
             fiddlerBtn.getAttribute("class").then(function(classNameRight) {
                 expect(classNameRight).toContain('glyphicon glyphicon-triangle-right', 'Side Pan Pull button is not pointing in the right direction');

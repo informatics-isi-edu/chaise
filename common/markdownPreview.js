@@ -41,6 +41,7 @@
                     animation: false,
                     controller: "MarkdownPreviewController",
                     controllerAs: "ctrl",
+                    windowClass: "chaise-markdown-preview-modal",
                     resolve: {
                       params: params
                     },
