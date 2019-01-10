@@ -4,6 +4,7 @@ var fs = require('fs');
 var EC = protractor.ExpectedConditions;
 
 exports.testPresentation = function (tableParams) {
+    var notNullColumns = tableParams.columns.filter(function (c) { return !c.hasOwnProperty("value") || c.value != null; });
     var pageReadyCondition = function () {
 	    chaisePage.waitForElementInverse(element(by.id("spinner")));
 
@@ -31,9 +32,8 @@ exports.testPresentation = function (tableParams) {
         expect(chaisePage.recordPage.getEntitySubTitleTooltip()).toBe(tableParams.tableComment);
     });
 
-	it("should show " + tableParams.columns.filter(function(c) {return c.value != null;}).length + " columns only", function() {
-        var columns = tableParams.columns.filter(function(c) {return c.value != null;});
-		expect(chaisePage.recordPage.getColumns().count()).toBe(columns.length);
+	it("should show " +notNullColumns.length + " columns only", function() {
+		expect(chaisePage.recordPage.getColumns().count()).toBe(notNullColumns.length);
 	});
 
     it("should show the action buttons properly", function() {
@@ -208,20 +208,19 @@ exports.testPresentation = function (tableParams) {
     }
 
 	it("should render columns which are specified to be visible and in order", function() {
-		var columns = tableParams.columns.filter(function(c) {return c.value != null;});
 		chaisePage.recordPage.getAllColumnCaptions().then(function(pageColumns) {
-			expect(pageColumns.length).toBe(columns.length);
+			expect(pageColumns.length).toBe(notNullColumns.length);
 			var index = 0;
 			pageColumns.forEach(function(c) {
-                var col = columns[index++];
+                var col = notNullColumns[index++];
                 expect(c.getText()).toEqual(col.title);
 			});
 		});
 	});
 
 	it("should show line under columns which have a comment and inspect the comment value too", function() {
-		var columns = tableParams.columns.filter(function(c) {
-            return (c.value != null && typeof c.comment == 'string');
+		var columns = notNullColumns.filter(function(c) {
+            return (typeof c.comment == 'string');
         });
 		chaisePage.recordPage.getColumnsWithUnderline().then(function(pageColumns) {
 			expect(pageColumns.length).toBe(columns.length);
@@ -257,10 +256,13 @@ exports.testPresentation = function (tableParams) {
     });
 
     it("should validate the values of each column", function () {
-        var columns = tableParams.columns.filter(function (c) { return c.value != null; });
-        expect(element.all(by.className('entity-value')).count()).toEqual(columns.length, "length missmatch.");
+        expect(element.all(by.className('entity-value')).count()).toEqual(notNullColumns.length, "length missmatch.");
         var index = -1, columnUrl, aTag;
-        columns.forEach(function (column) {
+        notNullColumns.forEach(function (column) {
+            if (!column.hasOwnProperty("value")) {
+                return;
+            }
+
             var errMessage = "value mismatch for column " + column.title;
 
             var columnEls;
@@ -273,7 +275,6 @@ exports.testPresentation = function (tableParams) {
                 expect(chaisePage.recordPage.getEntityRelatedTableScope('&lt;strong&gt;User&nbsp;Rating&lt;/strong&gt;',true).getAttribute('innerHTML')).toBe(column.value, errMessage);
             } else {
                 columnEls = chaisePage.recordPage.getEntityRelatedTable(column.title);
-
                 if (column.presentation) {
                     if (column.presentation.type === "inline") columnEls = chaisePage.recordPage.getMarkdownContainer(columnEls);
 
@@ -516,6 +517,20 @@ exports.testPresentation = function (tableParams) {
             done.fail(error);
         });
     });
+
+    describe("regarding inline related entities, ", function () {
+        beforeAll(function () {
+            // make sure page is in its initial state
+            browser.driver.navigate().refresh();
+        });
+        for (var i = 0; i < tableParams.inline_columns.length; i++) {
+            var p = tableParams.inline_columns[i];
+            p.baseTable = tableParams.subTitle;
+            describe ("for " + p.title + ", ", function (){
+                exports.testRelatedTable(p, pageReadyCondition);
+            });
+        }
+    });
 };
 
 /**
@@ -628,7 +643,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 		// Display Mode
 		describe("view mode and rows, ", function () {
 
-			if (params.isMarkdown || params.isInline) {
+			if (params.isMarkdown || (params.isInline && !params.isTableMode)) {
 				it ("markdown container must be visible.", function () {
 					expect(currentEl.element(by.css('.markdown-container')).isDisplayed()).toBeTruthy("didn't have markdown");
 				});

@@ -19,9 +19,14 @@ var testParams = {
         "accommodation_image (showing first 2 results)", // association with page_size
         "association_table_markdown (showing all 1 results)", // association with markdown
         "related_table_2 (showing all 1 results)", // related entity with path length 3
-        "table_w_aggregates (showing all 2 results)" // related entity with aggregate columns
+        "table_w_aggregates (showing all 2 results)", // related entity with aggregate columns
+        "table_w_invalid_row_markdown_pattern (showing all 1 results)" // related entity with invalid row_markdown_pattern
     ],
-    tocHeaders: ["Main", "booking (6)", "schedule (2)", "media (1)", "association_table (1)", "accommodation_image (2+)", "association_table_markdown (1)", "related_table_2 (1)", "table_w_aggregates (2)"],
+    tocHeaders: [
+        "Main", "booking (6)", "schedule (2)", "media (1)", "association_table (1)",
+        "accommodation_image (2+)", "association_table_markdown (1)", "related_table_2 (1)",
+        "table_w_aggregates (2)", "table_w_invalid_row_markdown_pattern (1)"
+    ],
     related_table_name_with_page_size_annotation: "accommodation_image",
     related_table_name_with_link_in_table: "accommodation_image"
 };
@@ -287,5 +292,30 @@ describe ("Viewing exisiting record with related entities, ", function () {
     };
     describe("for a related entity with aggregate columns.", function () {
         recordHelpers.testRelatedTable(related_w_agg, pageReadyCondition);
+    });
+
+    var related_w_invalid_row_markdown_pattern = {
+        comment: "has markdown that results in empty string",
+        schemaName: "product-unordered-related-tables-links",
+        displayname: "table_w_invalid_row_markdown_pattern",
+        name: "table_w_invalid_row_markdown_pattern",
+        baseTable:"Accommodations",
+        viewMore: {
+            name: "table_w_invalid_row_markdown_pattern",
+            displayname: "table_w_invalid_row_markdown_pattern",
+            filter: "Accommodations: Super 8 North Hollywood Motel"
+        },
+        rowValues: [
+            ["four"]
+        ],
+        rowViewPaths: [
+            [{column: "id", value: "2004"}]
+        ],
+        count: 1,
+        canEdit: true
+    };
+
+    describe("for a related table with invalid row_markdown_pattern, ", function () {
+        recordHelpers.testRelatedTable(related_w_invalid_row_markdown_pattern, pageReadyCondition);
     });
 });

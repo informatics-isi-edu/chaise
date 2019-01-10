@@ -351,7 +351,8 @@
                             {"inbound": ["product-unordered-related-tables-links", "fk_related_table_2_to_related"]},
                             "id"
                         ]},
-                        ["product-unordered-related-tables-links", "fk_table_w_agg_accommodation"]
+                        ["product-unordered-related-tables-links", "fk_table_w_agg_accommodation"],
+                        {"source": [{"inbound": ["product-unordered-related-tables-links", "fk_table_invalid_markdown"]}, "id"]}
                     ]
                 }
             }
@@ -1306,23 +1307,60 @@
                     "*": {"row_order": [{"column": "id"}]}
                 }
             }
+        },
+        "table_w_invalid_row_markdown_pattern": {
+            "table_name": "table_w_invalid_row_markdown_pattern",
+            "schema_name": "product-unordered-related-tables-links",
+            "kind": "table",
+            "keys": [{
+                "unique_columns": ["id"]
+            }],
+            "foreign_keys": [{
+                "names": [
+                    ["product-unordered-related-tables-links", "fk_table_invalid_markdown"]
+                ],
+                "comment": null,
+                "foreign_key_columns": [{
+                    "table_name": "table_w_invalid_row_markdown_pattern",
+                    "schema_name": "product-unordered-related-tables-links",
+                    "column_name": "id"
+                }],
+                "annotations": {},
+                "referenced_columns": [{
+                    "table_name": "accommodation",
+                    "schema_name": "product-unordered-related-tables-links",
+                    "column_name": "id"
+                }]
+            }],
+            "column_definitions": [{
+                    "name": "id",
+                    "nullok": false,
+                    "type": {
+                        "typename": "int4"
+                    }
+                },
+                {
+                    "name": "value",
+                    "type": {
+                        "typename": "text"
+                    }
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:table-display": {
+                    "row_name": {
+                        "row_markdown_pattern": "{{{id}}}"
+                    },
+                    "*": {
+                        "row_markdown_pattern": "{{invalid_column}}"
+                    }
+                },
+                "tag:isrd.isi.edu,2016:visible-columns": {
+                    "*": ["id", "value"]
+                }
+            }
         }
     },
-    "table_names": [
-        "category",
-        "file",
-        "accommodation",
-        "accommodation_image",
-        "booking",
-        "media",
-        "related_table",
-        "association_table",
-        "association_table_markdown",
-        "related_table_markdown",
-        "schedule",
-        "related_table_2",
-        "table_w_aggregates"
-    ],
     "comment": null,
     "annotations": {
         "tag:misd.isi.edu,2015:display": {
