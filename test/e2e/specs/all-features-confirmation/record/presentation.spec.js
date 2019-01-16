@@ -253,7 +253,7 @@ describe('View existing record,', function() {
             chaisePage.waitForElementInverse(element(by.id('rt-loading')));
         });
 
-        it("should show all of the related tables in the correct order.", function() {
+        it("should show all of the related tables in the correct order.", function(done) {
 
             browser.wait(function() {
                 return chaisePage.recordPage.getRelatedTablesWithPanel().count().then(function(ct) {
@@ -272,36 +272,14 @@ describe('View existing record,', function() {
                 expect(showAllRTButton.getText()).toBe("Hide Empty Related Records", "Sow all Related tables button has wrong text");
                 return showAllRTButton.click();
             }).then(function() {
+                browser.wait(function() {
+                    return chaisePage.recordPage.getRelatedTablesWithPanelandHeading().count().then(function(ct) {
+                        return (ct == 0);
+                    });
+                }, browser.params.defaultTimeout);
                 expect(chaisePage.recordPage.getRelatedTablesWithPanelandHeading().count()).toBe(0, "Not all the related tables were hidden");
-                expect(chaisePage.recordPage.getRelatedTablesWithPanelandHeading().count()).not.toBe(testParams.no_related_data.tables_order.length, "The full set of related tables were not properly hidden");
-            })
-        });
-    });
-
-    describe("For multiple records fetched for particular filters", function() {
-
-        beforeAll(function() {
-            var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + testParams.table_name +  "/luxurious=true";
-            browser.get(url);
-            chaisePage.waitForElement(element(by.css('.modal-dialog ')));
-        });
-
-        it('A error modal window should appear with multiple records found error with correct title', function(){
-            var modalTitle = chaisePage.recordPage.getErrorModalTitle();
-            expect(modalTitle).toBe(testParams.multipleData.title, "The title of multiple record error pop is not correct");
-
-        });
-
-        it('On click of OK button the page should redirect to recordset page', function(){
-            chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
-                return btn.click();
-            }).then (function (){
-                return browser.driver.getCurrentUrl();
-            }).then (function(currentUrl) {
-                expect(currentUrl).toContain("recordset", "The redirection from record page to recordset in case of multiple records failed");
-            }).catch( function(err) {
-                console.log(err);
-            });
+                done();
+            }).catch(chaisePage.catchTestError(done));
         });
     });
 
@@ -313,11 +291,9 @@ describe('View existing record,', function() {
             recSidePanelCat_5 = chaisePage.recordPage.getSidePanelItemById(5);
             fiddlerBtn = chaisePage.recordPage.getSidePanelFiddler();
             chaisePage.waitForElement(fiddlerBtn);
-        });
 
-        it('Table of contents should be displayed by default', function(){
-            var recordSidePan = chaisePage.recordPage.getSidePanel();
-            expect(recordSidePan.isDisplayed()).toBeTruthy("Side Panel is not visible when page loads initially.");
+            //wait for toc
+            chaisePage.waitForElement(chaisePage.recordPage.getSidePanel());
         });
 
         it('On click of Related table name in TOC, page should move to the contents and open the table details', function(done){
@@ -330,10 +306,7 @@ describe('View existing record,', function() {
             }).then (function(className) {
                 expect(className).toContain("panel-open", "Related table panel is not open when clicked through TOC.");
                 done();
-            }).catch( function(err) {
-                console.log(err);
-                done.fail();
-            });
+            }).catch(chaisePage.catchTestError(done));
         });
 
         it('Record count along with heading should match for the panel and related table content should be in correct order', function(done){

@@ -123,6 +123,11 @@
             "annotations": {
                 "tag:isrd.isi.edu,2016:visible-columns" : {
                     "*": ["id", "text", "int", "date", "timestamp", ["multi-add", "fk1"], "uri"]
+                },
+                "tag:isrd.isi.edu,2016:table-display": {
+                    "*": {
+                        "row_order": [{"column": "id"}]
+                    }
                 }
             }
         },
@@ -149,7 +154,14 @@
                         "typename": "text"
                     }
                 }
-            ]
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:table-display": {
+                    "*": {
+                        "row_order": [{"column": "id"}]
+                    }
+                }
+            }
         }
     },
     "table_names": [

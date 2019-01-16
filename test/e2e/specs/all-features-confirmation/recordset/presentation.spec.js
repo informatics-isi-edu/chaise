@@ -626,10 +626,14 @@ describe('View recordset,', function() {
                 (function (k) {
                     it("should sort " + accommodationParams.sortedData[k].columnName + " column in ascending order.", function (done) {
                         // Check the presence of initial sort button
-                        expect(chaisePage.recordsetPage.getColumnSortButton(accommodationParams.sortedData[k].rawColumnName).isDisplayed()).toBe(true, accommodationParams.sortedData[k].columnName + " column doesn't contain the initial sort button.");
+                        var sortBtn = chaisePage.recordsetPage.getColumnSortButton(accommodationParams.sortedData[k].rawColumnName);
+
+                        chaisePage.waitForElement(sortBtn);
+
+                        expect(sortBtn.isDisplayed()).toBe(true, accommodationParams.sortedData[k].columnName + " column doesn't contain the initial sort button.");
 
                         // Click on sort button
-                        chaisePage.recordsetPage.getColumnSortButton(accommodationParams.sortedData[k].rawColumnName).click().then(function () {
+                        sortBtn.click().then(function () {
                             chaisePage.waitForTextInElement(rowCount, "Displaying " + recordsOnPage1 + " of " + totalRecords + " Records");
                             chaisePage.recordsetPage.waitForInverseMainSpinner();
 

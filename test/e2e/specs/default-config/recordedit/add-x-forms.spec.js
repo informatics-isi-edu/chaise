@@ -174,10 +174,7 @@ describe('Record Add', function() {
                     expect(dateInput3.date.getAttribute("value")).toBe(value);
 
                     done();
-                }).catch(function (err) {
-                    console.dir(err);
-                    done.fail();
-                });
+                }).catch(chaisePage.catchTestError(done));
             });
 
             it(testParams.timestamp_col_name, function (done) {
@@ -208,10 +205,7 @@ describe('Record Add', function() {
                     expect(tsInput3.time.getAttribute("value")).toBe(timeValue);
 
                     done();
-                }).catch(function (err) {
-                    console.dir(err);
-                    done.fail();
-                });
+                }).catch(chaisePage.catchTestError(done));
             });
 
             it(testParams.fk_col_name, function (done) {
@@ -235,7 +229,7 @@ describe('Record Add', function() {
                     }, browser.params.defaultTimeout);
 
                     // select value (the third row)
-                    return chaisePage.recordsetPage.getRows().get(2).all(by.css(".select-action-button")).click();
+                    return chaisePage.recordsetPage.getModalRows().get(2).all(by.css(".select-action-button")).click();
                 }).then(function () {
                     return applyBtn.click();
                 }).then(function () {
@@ -247,10 +241,7 @@ describe('Record Add', function() {
                     expect(fkInput3.getText()).toBe(value);
 
                     done();
-                }).catch(function (err) {
-                    console.dir(err);
-                    done.fail();
-                });
+                }).catch(chaisePage.catchTestError(done));
             });
 
             if (!process.env.TRAVIS && testParams.files.length > 0) {
@@ -280,10 +271,7 @@ describe('Record Add', function() {
                         expect(uploadInput3.getAttribute('value')).toBe(file.name);
 
                         done();
-                    }).catch(function (err) {
-                        console.dir(err);
-                        done.fail();
-                    });
+                    }).catch(chaisePage.catchTestError(done));
                 });
             }
         });
