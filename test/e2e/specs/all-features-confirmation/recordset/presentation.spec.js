@@ -800,8 +800,12 @@ describe('View recordset,', function() {
 
         it("should have " + fileParams.page_size + " rows after paging to the second page, back to the first, and then changing page size to " + fileParams.page_size + ".", function() {
             var previousBtn = chaisePage.recordsetPage.getPreviousButton();
+            var nextBtn = chaisePage.recordsetPage.getNextButton();
+
+            browser.wait(EC.elementToBeClickable(nextBtn), browser.params.defaultTimeout);
+
             // page to the next page then page back to the first page so the @before modifier is applied
-            chaisePage.recordsetPage.getNextButton().click().then(function() {
+            nextBtn.click().then(function() {
                 // wait for it to be on the second page
                 browser.wait(EC.elementToBeClickable(previousBtn), browser.params.defaultTimeout);
 
