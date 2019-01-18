@@ -11,7 +11,8 @@ Note: Change these paths based on the position of the chaise folder.
 </head>
 ```
 ## Using the <login> directive
-Add the following directive wherever yiou want to see the login app in your html body.
+1. Check the sample HTML file present at(./chaise/loginApp/login.html) for using the login app.
+2. Add the following directive wherever you want to see the login app in your html body.
 ```html
 <login></login>
 ```
