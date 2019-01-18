@@ -411,37 +411,37 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     });
 
                     it('should render correct markdown with inline preview and full preview button.', function() {
-
-                      //Both preview is being tested.
-                      markdownCols.forEach(function(descCol) {
-                        var markdownField = chaisePage.recordEditPage.getInputById(recordIndex, descCol.title);
-                        btnIndex = (recordIndex * 2) + 1;
-                        var PrevBtn = element.all(by.css('button[title="Preview"]')).get(btnIndex);       //test inline preview
-                        var modalPrevBtn = element.all(by.css('button[title="Fullscreen Preview"]')).get(btnIndex);       //test modal preview
-                        for (i = 0; i < markdownTestParams.length; i++) {
-                          markdownField.clear();
-                          (function(input, markdownOut, comm, btnIdx) {
-
-                                if(comm !=' ')
-                                { //If keyboard shortcut found for markdown elements then send click command.
+                        //Both preview is being tested.
+                        markdownCols.forEach(function(descCol) {
+                            var markdownField = chaisePage.recordEditPage.getInputById(recordIndex, descCol.title);
+                            // lgt and markdown have these input controls, select all draws an extra for each
+                            // we want the 3rd one (aka index 2 of 0-3 within that record/form column)
+                            btnIndex = (recordIndex * 2) + 2;
+                            var PrevBtn = element.all(by.css('button[title="Preview"]')).get(btnIndex);       //test inline preview
+                            var modalPrevBtn = element.all(by.css('button[title="Fullscreen Preview"]')).get(btnIndex);       //test modal preview
+                            for (i = 0; i < markdownTestParams.length; i++) {
+                                markdownField.clear();
+                                (function(input, markdownOut, comm, btnIdx) {
+                                    //If keyboard shortcut found for markdown elements then send click command.
+                                    if(comm !=' ') {
                                         let v = "button[data-hotkey='"+comm+"']";
                                         element.all(by.css(v)).get(btnIdx).click();
-                                }
-                                markdownField.sendKeys(input);
-                                modalPrevBtn.click();
-                                let mdDiv = element(by.css('[ng-bind-html="ctrl.params.markdownOut"]'));
-                                browser.wait(EC.presenceOf(mdDiv), browser.params.defaultTimeout);
-                                expect(mdDiv.getAttribute('innerHTML')).toBe(markdownOut, colError(descCol.name, "Error during markdown preview generation"));
-                                element(by.className('modal-close')).click();
-                                PrevBtn.click();        //generate preview
-                                let mdPrevDiv = element(by.className("md-preview"));
-                                browser.wait(EC.presenceOf(mdPrevDiv), browser.params.defaultTimeout);
-                                expect(mdPrevDiv.getAttribute('innerHTML')).toBe(markdownOut,colError(descCol.name, "Error during markdown preview generation"));
-                                PrevBtn.click();        //editing mode
+                                    }
+                                    markdownField.sendKeys(input);
+                                    modalPrevBtn.click();
+                                    let mdDiv = element(by.css('[ng-bind-html="ctrl.params.markdownOut"]'));
+                                    browser.wait(EC.presenceOf(mdDiv), browser.params.defaultTimeout);
+                                    expect(mdDiv.getAttribute('innerHTML')).toBe(markdownOut, colError(descCol.name, "Error during markdown preview generation"));
+                                    element(by.className('modal-close')).click();
+                                    PrevBtn.click();        //generate preview
+                                    let mdPrevDiv = element(by.className("md-preview"));
+                                    browser.wait(EC.presenceOf(mdPrevDiv), browser.params.defaultTimeout);
+                                    expect(mdPrevDiv.getAttribute('innerHTML')).toBe(markdownOut,colError(descCol.name, "Error during markdown preview generation"));
+                                    PrevBtn.click();        //editing mode
 
-                          })(markdownTestParams[i].raw, markdownTestParams[i].markdown, markdownTestParams[i].comm, btnIndex);
-                        } //for
-                      })
+                                })(markdownTestParams[i].raw, markdownTestParams[i].markdown, markdownTestParams[i].comm, btnIndex);
+                            } //for
+                        })
                     });
 
                     it('should be able to change the value.', function () {
@@ -526,7 +526,8 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                 describe("Foreign key fields,", function() {
 
                     it('should show an uneditable field for each foreign key column', function() {
-                        var expectedNumOfPopupFields = foreignKeyCols.length * (recordIndex + 1);
+                        // plus an extra foreignKeyCols.length because there is 1 select all input per foreign key column
+                        var expectedNumOfPopupFields = foreignKeyCols.length * (recordIndex + 1) + (foreignKeyCols.length);
                         var popupFields = element.all(by.css('.popup-select-value'));
                         expect(popupFields.count()).toBe(expectedNumOfPopupFields, "number of foreignkeys is not as expected.");
                         // Ensure each field is an uneditable div element (not an input)
@@ -581,7 +582,8 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             var modalTitle = chaisePage.recordEditPage.getModalTitle(),
                             EC = protractor.ExpectedConditions;
 
-                            expect(popupBtns.length).toBe(foreignKeyCols.length * (recordIndex + 1), "number of foreign keys is not as expected.");
+                            // plus an extra foreignKeyCols.length because there is 1 select all input per foreign key column
+                            expect(popupBtns.length).toBe(foreignKeyCols.length * (recordIndex + 1) + (foreignKeyCols.length), "number of foreign keys is not as expected.");
 
                             for (var i=0; i<foreignKeyCols.length; i++) {
                                 (function(i) {
@@ -1518,7 +1520,7 @@ exports.deleteFiles = function(files) {
     });
 };
 
-var selectFile = function(file, fileInput, txtInput) {
+exports.selectFile = function(file, fileInput, txtInput) {
     var filePath = require('path').join(__dirname , "/../data_setup/uploaded_files/" + file.path);
 
     fileInput.sendKeys(filePath);
@@ -1558,10 +1560,10 @@ exports.testFileInput = function (colName, recordIndex, file, currentValue, prin
                         browser.sleep(50);
 
                         expect(txtInput.getAttribute('value')).toBe("", "couldn't clear the button.");
-                        selectFile(file, fileInput, txtInput);
+                        exports.selectFile(file, fileInput, txtInput);
                     });
                 } else {
-                    selectFile(file, fileInput, txtInput);
+                    exports.selectFile(file, fileInput, txtInput);
                 }
 
                 if (testValidation) {

@@ -32,10 +32,7 @@ describe('Edit a record,', function() {
                 // make sure recordedit is loaded
                 chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
 
-                    return chaisePage.recordEditPage.getModalPopupBtnsUsingScript();
-                }).then(function(popupBtns) {
-
-                    return chaisePage.clickButton(popupBtns[3]);
+                    return chaisePage.recordEditPage.getForeignKeyInputButton("Person", 0).click();
                 }).then(function() {
                     // wait for the modal to open
                     browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);

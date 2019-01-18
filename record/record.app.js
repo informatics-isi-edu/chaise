@@ -11,6 +11,7 @@
         'chaise.errors',
         'chaise.export',
         'chaise.faceting',
+        'chaise.inputs',
         'chaise.modal',
         'chaise.navbar',
         'chaise.record.display',

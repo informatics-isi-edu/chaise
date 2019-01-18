@@ -327,6 +327,42 @@ var recordEditPage = function() {
         return browser.executeScript("return $(arguments[0].siblings('.help-block'));", el);
     };
 
+    this.getColumnSelectAllButton = function (name) {
+        var columnDisplayName = makeSafeIdAttr(name);
+        return element(by.id("select-all-"+columnDisplayName));
+    };
+
+    this.getSelectAllInput = function (name) {
+        var columnDisplayName = makeSafeIdAttr(name);
+        return element(by.id("select-all-"+columnDisplayName+"-input"));
+    }
+
+    this.getSelectAllDate = function (name) {
+        return this.getSelectAllInput(name).element(by.css('input[name="' + name + '"][date]'));
+    }
+
+    this.getSelectAllTime = function (name) {
+        return this.getSelectAllInput(name).element(by.css('input[name="' + name + '"][time]'));
+    }
+
+    this.getSelectAllPopupBtn = function (name) {
+        return this.getSelectAllInput(name).element(by.className("modal-popup-btn"));
+    }
+
+    this.getSelectAllFileInput = function (name, name2) {
+        return this.getSelectAllInput(name).element(by.css('input[name="' + name2 + '"]'));
+    }
+
+    this.getSelectAllApply = function (name) {
+        var columnDisplayName = makeSafeIdAttr(name);
+        return element(by.id("select-all-apply-"+columnDisplayName));
+    }
+
+    this.getSelectAllCancel = function (name) {
+        var columnDisplayName = makeSafeIdAttr(name);
+        return element(by.id("select-all-cancel-"+columnDisplayName));
+    }
+
     this.getDropdown = function(el, index) {
         index = index || 0;
         return browser.executeScript("return $(arguments[0]).parents('tr').find('.select2-container:visible')[" + index + "];", el);
@@ -506,11 +542,11 @@ var recordEditPage = function() {
 
     this.getDeleteRowButton = function(index) {
         index = index || 0;
-        return browser.executeScript("return $('delete-link button')[" + index  + "];");
+        return browser.executeScript("return $('button.remove-form-btn')[" + index  + "];");
     };
 
     this.getAllDeleteRowButtons = function() {
-        return browser.executeScript("return $('delete-link button');");
+        return browser.executeScript("return $('button.remove-form-btn');");
     };
 
     this.getDeleteModalButton = function() {

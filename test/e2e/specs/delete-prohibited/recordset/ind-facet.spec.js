@@ -7,11 +7,12 @@ var testParams = {
     schema_name: "faceting",
     table_name: "main",
     sort: "@sort(id)",
-    totalNumFacets: 19,
+    totalNumFacets: 21,
     facetNames: [ "id", "int_col", "float_col", "date_col", "timestamp_col", "text_col",
                   "longtext_col", "markdown_col", "boolean_col", "jsonb_col", "F1",
                   "to_name", "f3 (term)", "from_name", "F1 with Term", "Check Presence Text",
-                  "col_w_column_order_false", "col_w_column_order", "col_w_long_values" ],
+                  "F3 Entity", "F5",
+                  "col_w_column_order_false", "col_w_column_order", "col_w_long_values"],
     defaults: {
         openFacetNames: [ "id", "int_col", "to_name" ],
         numFilters: 2,
@@ -44,11 +45,11 @@ var testParams = {
         {
             name: "id",
             type: "choice",
-            totalNumOptions: 11,
-            option: 3,
+            totalNumOptions: 10,
+            option: 2,
             filter: "id: 3",
             numRows: 1,
-            options: [ 'All Records With Value', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10' ],
+            options: [ '1', '2', '3', '4', '5', '6', '7', '8', '9', '10' ],
             comment: "ID comment"
         },
         {
@@ -158,11 +159,11 @@ var testParams = {
         {
             name: "text_col",
             type: "choice",
-            totalNumOptions: 11,
+            totalNumOptions: 12,
             option: 1,
-            filter: "text_col: one",
-            numRows: 6,
-            options: [ 'All Records With Value', 'one', 'Empty', 'two', 'seven', 'eight', 'elevens', 'four', 'six', 'ten', 'three' ]
+            filter: "text_col: No Value",
+            numRows: 5,
+            options: [ 'All Records With Value', 'No Value', 'one', 'Empty', 'two', 'seven', 'eight', 'elevens', 'four', 'six', 'ten', 'three' ]
         },
         {
             name: "longtext_col",
@@ -208,16 +209,16 @@ var testParams = {
             option: 2,
             filter: "F1 : two",
             numRows: 10,
-            options: [ 'All Records With Value', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten' ]
+            options: [ 'No Value', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten' ]
         },
         {
             name: "to_name",
             type: "choice",
-            totalNumOptions: 11,
-            option: 1,
+            totalNumOptions: 10,
+            option: 0,
             filter: "to_name: one",
             numRows: 10,
-            options: [ 'All Records With Value', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten' ],
+            options: [ 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten' ],
             comment: "open facet"
         },
         {
@@ -257,6 +258,25 @@ var testParams = {
             nullFilter: "Check Presence Text : No Value"
         },
         {
+            name: "F3 Entity",
+            type: "choice",
+            totalNumOptions: 4,
+            option: 1,
+            filter: "F3 Entity : No Value",
+            numRows: 23,
+            options: [ 'All Records With Value', 'No Value', 'one', 'two']
+        },
+        {
+            name: "F5",
+            type: "choice",
+            totalNumOptions: 4,
+            option: 2,
+            filter: "F5 : one",
+            numRows: 1,
+            options: ["All Records With Value", "No Value", "one", "two"]
+
+        },
+        {
             name: "col_w_column_order_false",
             type: "choice",
             totalNumOptions: 8,
@@ -268,7 +288,7 @@ var testParams = {
     ],
     multipleFacets: [
         { facetIdx: 10, option: 2, numOptions: 11, numRows: 10 },
-        { facetIdx: 11, option: 1, numOptions: 3, numRows: 5 },
+        { facetIdx: 11, option: 0, numOptions: 2, numRows: 5 },
         { facetIdx: 12, option: 1, numOptions: 2, numRows: 5 },
         { facetIdx: 13, option: 2, numOptions: 6, numRows: 1 }
     ]
@@ -372,13 +392,13 @@ describe("Viewing Recordset with Faceting,", function() {
 
                     browser.wait(function () {
                         return chaisePage.recordsetPage.getFacetOptions(0).count().then(function(ct) {
-                            return ct == 4;
+                            return ct == 3;
                         });
                     }, browser.params.defaultTimeout);
 
                     return chaisePage.recordsetPage.getFacetOptions(0).count();
                 }).then(function (ct) {
-                    expect(ct).toBe(4, "Facet values after search are incorrect");
+                    expect(ct).toBe(3, "Facet values after search are incorrect");
 
                     return chaisePage.recordsetPage.getFacetSearchBoxClear(0).click();
                 });
@@ -487,8 +507,7 @@ describe("Viewing Recordset with Faceting,", function() {
 
             it("should show 25 rows and 0 filters after clicking 'clear all'", function () {
                 chaisePage.recordsetPage.getClearAllFilters().click().then(function () {
-                    return chaisePage.waitForElementInverse(element(by.id("spinner")));
-                }).then(function () {
+                    chaisePage.recordsetPage.waitForInverseMainSpinner();
                     //verify there's no facet string in url
                     return browser.getCurrentUrl();
                 }).then(function (url) {
@@ -507,7 +526,7 @@ describe("Viewing Recordset with Faceting,", function() {
             it("should have 1 row selected in show more popup for entity.", function (done) {
                 var showMore = chaisePage.recordsetPage.getShowMore(11);
 
-                chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(11, 1)).then(function () {
+                chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(11, 0)).then(function () {
                     // open show more, verify only 1 row checked, check another and submit
                     return showMore.click()
                 }).then(function () {
@@ -962,7 +981,7 @@ describe("Viewing Recordset with Faceting,", function() {
                                 }).then(function (filters) {
                                     return filters[0].getText();
                                 }).then(function(text) {
-                                    expect(text).toBe(facetParams.range.filter, "filter name is inccorect for '" + facetParams.name + "' facet");
+                                    expect(text).toBe(facetParams.range.filter, "filter name is incorrect for '" + facetParams.name + "' facet");
 
                                     // wait for table rows to load
                                     browser.wait(function () {
@@ -1108,7 +1127,7 @@ describe("Viewing Recordset with Faceting,", function() {
                                 }, browser.params.defaultTimeout);
 
                                 recordSetHelpers.openFacetAndTestFilterOptions(
-                                    testParams.name, idx, ['All Records With Value'], done
+                                    testParams.name, idx, ['All Records With Value', 'No Value'], done
                                 );
                             });
 
@@ -1116,9 +1135,9 @@ describe("Viewing Recordset with Faceting,", function() {
                                 recordSetHelpers.testSelectFacetOption(idx, 0, facetParams.name, facetParams.notNullFilter, facetParams.notNullNumRows, done);
                             });
 
-                            // it("selecting the null option, should only show the applicable rows.", function (done) {
-                            //     recordSetHelpers.testSelectFacetOption(idx, 1, facetParams.name, facetParams.nullFilter, facetParams.nullNumRows, done);
-                            // });
+                            it("selecting the null option, should only show the applicable rows.", function (done) {
+                                recordSetHelpers.testSelectFacetOption(idx, 1, facetParams.name, facetParams.nullFilter, facetParams.nullNumRows, done);
+                            });
 
                             it ("should close the facet.", function (done) {
                                 chaisePage.recordsetPage.getFacetById(idx).click().then(function () {
@@ -1208,14 +1227,14 @@ describe("Viewing Recordset with Faceting,", function() {
                 }, browser.params.defaultTimeout);
             });
 
-            it("should open facets, click an option in each, and verify the data after", function () {
+            it("should open facets, click an option in each, and verify the data after", function (done) {
                 // open the four facets
-                chaisePage.recordsetPage.getFacetById(testParams.multipleFacets[3].facetIdx).click().then(function () {
-                    return chaisePage.recordsetPage.getFacetById(testParams.multipleFacets[2].facetIdx).click();
+                chaisePage.clickButton(chaisePage.recordsetPage.getFacetById(testParams.multipleFacets[3].facetIdx)).then(function () {
+                    return chaisePage.clickButton(chaisePage.recordsetPage.getFacetById(testParams.multipleFacets[2].facetIdx));
                 }).then(function () {
-                    return chaisePage.recordsetPage.getFacetById(testParams.multipleFacets[1].facetIdx).click();
+                    return chaisePage.clickButton(chaisePage.recordsetPage.getFacetById(testParams.multipleFacets[1].facetIdx));
                 }).then(function () {
-                    return chaisePage.recordsetPage.getFacetById(testParams.multipleFacets[0].facetIdx).click();
+                    return chaisePage.clickButton(chaisePage.recordsetPage.getFacetById(testParams.multipleFacets[0].facetIdx));
                 }).then(function () {
                     browser.wait(function () {
                         return chaisePage.recordsetPage.getClosedFacets().count().then(function(ct) {
@@ -1248,7 +1267,10 @@ describe("Viewing Recordset with Faceting,", function() {
                     return chaisePage.recordsetPage.getRows().count();
                 }).then(function(ct) {
                     expect(ct).toBe(testParams.multipleFacets[3].numRows, "number of rows is incorrect after making multiple consecutive selections");
-                });
+                    done();
+                }).catch(function (err) {
+                    done.fail(err);
+                })
             });
         });
     });

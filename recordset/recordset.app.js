@@ -135,6 +135,13 @@
                     recordsetModel.reference.session = session;
                     recordsetModel.tableComment = recordsetModel.reference.table.comment;
 
+                    // if there's something wrong with the facet or filters in the url,
+                    // this getter will complain. We want to catch these errors here,
+                    // so we can construct the redirectPath correctly.
+                    // NOTE we might want to eventually remove this and have
+                    // the redirectPath logic in the catch all.
+                    var facetColumns = recordsetModel.reference.facetColumns;
+
                     $log.info("Reference:", recordsetModel.reference);
 
                     if (location.queryParams.limit) {

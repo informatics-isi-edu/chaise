@@ -1,0 +1,137 @@
+<div ng-switch="columnModel.inputType" ng-form="inputContainer">
+
+    <!-- date input-->
+    <div ng-switch-when="date">
+        <div class="input-group">
+            <input class="form-control" type="text" ng-model="model.value" placeholder="{{dataFormats.date}}" name="{{::column.name}}" ui-mask="{{maskOptions.date.mask}}" ui-options="maskOptions.date.options" model-view-value="true" date></input>
+            <span class="input-group-btn">
+                <button type="button" name="{{::column.name}}-today" class="btn btn-primary btn-inverted" ng-click="::applyCurrentDatetime();">Today</button>
+                <button type="button" name="{{::column.name}}-clear" class="btn btn-primary btn-inverted" ng-click="::clearDatetime()">Clear</button>
+            </span>
+        </div>
+    </div>
+
+    <!-- timestamp[tz] input -->
+    <div ng-switch-when="timestamp">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="input-group">
+                    <span class="input-group-addon">Date</span>
+                    <input class="form-control input-timestamptz" type="text" ng-model="model.value.date" placeholder="{{dataFormats.date}}" name="{{::column.name}}" ui-mask="{{maskOptions.date.mask}}" ui-options="maskOptions.date.options" model-view-value="true" date timestamp validate-values="model.value"></input>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="input-group">
+                    <span class="input-group-addon">Time</span>
+                    <input class="form-control" type="text" ng-model="model.value.time" placeholder="{{dataFormats.time24}}" name="{{::column.name}}" ui-mask="{{maskOptions.time.mask}}" ui-options="maskOptions.time.options" model-view-value="true" time timestamp validate-values="model.value"></input>
+                    <span class="input-group-btn">
+                        <button class="btn btn-primary btn-inverted" name="{{::column.name}}" type="button" ng-click="::toggleMeridiem();" ng-bind="model.value.meridiem || 'AM'">AM</button>
+                    </span>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="btn-group pull-right" role="group">
+                    <button type="button" name="{{::column.name}}-now" class="btn btn-primary btn-inverted" ng-click="::applyCurrentDatetime();">Now</button>
+                    <button type="button" name="{{::column.name}}-clear" class="btn btn-primary btn-inverted" ng-click="::clearDatetime();">Clear</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- modal popup input -->
+    <div ng-switch-when="popup-select" class="form-group has-feedback input-group modal-popup">
+        <label class="sr-only"></label>
+        <div contenteditable="false" class="form-control popup-select-value" ng-style="{'cursor': 'pointer'}" ng-click="::searchPopup()" ng-bind-html="(columnModel.fkDisplayName.value ? columnModel.fkDisplayName.value : getDisabledInputValue())"></div>
+        <div class="form-control-feedback coltooltip" ng-hide="!columnModel.fkDisplayName.value" ng-style="{'cursor': 'pointer', 'right': '40px', 'pointer-events': 'all'}">
+            <span class="glyphicon glyphicon-remove coltooltiptext foreignkey-remove" ng-click="::clearForeignKey()" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
+        </div>
+        <!-- <div class="form-control-feedback" ng-show="showColumnSpinner[rowIndex][column.name]" ng-style="{'right': '60px', 'pointer-events': 'all', 'color': '#C3C3C3'}">
+            <span class="glyphicon glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
+        </div> -->
+        <span class="input-group-addon">
+            <button ng-focus="::blurElement($event);" class="btn btn-primary btn-inverted modal-popup-btn" type="button" ng-click="searchPopup()" tooltip-placement="bottom" uib-tooltip="Choose from an existing value.">
+                <span class="glyphicon glyphicon-chevron-down"></span>
+            </button>
+        </span>
+        <!-- So that the foreign key input can be validated -->
+        <input type="hidden" ng-model="columnModel.fkDisplayName.value" />
+    </div>
+
+    <!-- int2 input -->
+    <input ng-switch-when="integer2" ng-model="model.value" name="{{::column.name}}" type="number" class="form-control" min="{{::int2min}}" max="{{::int2max}}" integer>
+        <div ng-messages="inputContainer.$error" ng-show="inputContainer.$dirty  || inputContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int2'">
+            <div ng-message="min">This field requires a value greater than {{int2min}}.</div>
+            <div ng-message="max">This field requires a value smaller than {{int2max}}.</div>
+        </div>
+    </input>
+
+    <!-- int4 input -->
+    <input ng-switch-when="integer4" ng-model="model.value" name="{{::column.name}}" type="number" class="form-control" min="{{::int4min}}" max="{{::int4max}}" integer>
+        <div ng-messages="inputContainer.$error" ng-show="inputContainer.$dirty  || inputContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int4'">
+            <div ng-message="min">This field requires a value greater than {{int4min}}.</div>
+            <div ng-message="max">This field requires a value smaller than {{int4max}}.</div>
+        </div>
+    </input>
+
+    <!-- int8 input -->
+    <input ng-switch-when="integer8" ng-model="model.value" name="{{::column.name}}" type="number" class="form-control" min="{{::int8min}}" max="{{::int8max}}" integer>
+        <div ng-messages="inputContainer.$error" ng-show="inputContainer.$dirty || inputContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int8'">
+            <div ng-message="min">This field requires a value greater than {{int8min}}.</div>
+            <div ng-message="max">This field requires a value smaller than {{int8max}}.</div>
+        </div>
+    </input>
+
+    <!-- float/decimal/numeric -->
+    <input ng-switch-when="number" ng-model="model.value" name="{{::column.name}}" type="number" class="form-control" float></input>
+
+
+    <!-- boolean input -->
+    <div ng-switch-when="boolean">
+        <ui-select ng-model="model.value" append-to-body="true" theme="select2">
+            <ui-select-match name="{{::column.name}}">{{$select.selected}}</ui-select-match>
+            <ui-select-choices repeat="domainValue in ::booleanValues | filter: $select.search" >
+                <div ng-bind-html="domainValue | highlight: $select.search"></div>
+            </ui-select-choices>
+        </ui-select>
+    </div>
+
+    <!-- longtext/textarea input -->
+    <div ng-switch-when="longtext">
+        <textarea ng-model="model.value" rows="5" name="{{::column.name}}" class="form-control content-box" empty-to-null markdown-editor="{'iconlibrary': 'glyph', addExtraButtons:true ,fullscreen:{ enable: false, icons: {}}, resize: 'vertical'}"></textarea>
+        <a href class="live-preview" markdown-preview textinput="model.value"></a>
+    </div>
+
+
+    <!-- File input -->
+    <div ng-switch-when="file">
+        <upload reference="::$root.reference" column="::column" placeholder="getDisabledInputValue()" value="model.value" is-required="false"></upload>
+    </div>
+
+    <!--JSON input -->
+    <div ng-switch-when="json">
+        <textarea json ng-model="model.value" rows="5" name="{{::column.name}}" class="form-control" empty-to-null></textarea>
+    </div>
+
+    <!-- disabled -->
+    <input ng-switch-when="disabled" ng-model="model.value" name="{{::column.name}}" type="text" class="form-control" disabled="true" placeholder="getDisabledInputValue()" empty-to-null></input>
+
+    <!-- shorttext/default text input -->
+    <input ng-switch-default ng-model="model.value" name="{{::column.name}}" type="text" class="form-control" empty-to-null></input>
+
+    <!-- Validation error messages to show when the form field is touched -->
+    <div ng-messages="inputContainer.$error" ng-show="inputContainer.$error || inputContainer.$submitted" class="text-danger" role="alert">
+        <div ng-message="date">Please enter a date value in {{dataFormats.date}} format.</div>
+        <div ng-message="time">Please enter a time value in 12-hr {{dataFormats.time24}} format.</div>
+        <div ng-message="timestampDate">Please enter a date value in {{dataFormats.date}} format.</div>
+        <div ng-message="timestampTime">Please enter a time value in 12-hr {{dataFormats.time24}} format.</div>
+        <div ng-message="integer">Please enter an integer value.</div>
+        <div ng-message="float">Please enter a decimal value.</div>
+        <div ng-message="json">Please enter a valid JSON value.</div>
+        <div ng-message="fileExtension">Please select a file with the following type: {{fileExtensionTypes(column)}}</div>
+    </div>
+
+    <!-- Validation error messages to show when the form is submitted -->
+    <!-- <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.$submitted" class="text-danger" role="alert">
+        <div ng-message="required">Please enter a value for this field.</div>
+    </div> -->
+</div>

@@ -11,11 +11,12 @@
                 templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/upload.html',
                 scope: {
                     column: '=',
-                    values: '=',
+                    values: '=?',
                     value: '=',
                     reference: '=',
-                    isDisabled: "=",
-                    placeholder: "="
+                    isDisabled: "=?",
+                    placeholder: "=",
+                    isRequired: "="
                 },
                 link: function (scope, element,attrs, ngModel) {
                     scope.fileEl;

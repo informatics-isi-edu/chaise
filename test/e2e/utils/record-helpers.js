@@ -4,6 +4,7 @@ var fs = require('fs');
 var EC = protractor.ExpectedConditions;
 
 exports.testPresentation = function (tableParams) {
+    var notNullColumns = tableParams.columns.filter(function (c) { return !c.hasOwnProperty("value") || c.value != null; });
     var pageReadyCondition = function () {
 	    chaisePage.waitForElementInverse(element(by.id("spinner")));
 
@@ -31,9 +32,8 @@ exports.testPresentation = function (tableParams) {
         expect(chaisePage.recordPage.getEntitySubTitleTooltip()).toBe(tableParams.tableComment);
     });
 
-	it("should show " + tableParams.columns.filter(function(c) {return c.value != null;}).length + " columns only", function() {
-        var columns = tableParams.columns.filter(function(c) {return c.value != null;});
-		expect(chaisePage.recordPage.getColumns().count()).toBe(columns.length);
+	it("should show " +notNullColumns.length + " columns only", function() {
+		expect(chaisePage.recordPage.getColumns().count()).toBe(notNullColumns.length);
 	});
 
     it("should show the action buttons properly", function() {
@@ -111,11 +111,11 @@ exports.testPresentation = function (tableParams) {
 
         it("should have a citation present,", function () {
             // verify citation
-            expect(chaisePage.recordPage.getCitationHeader().getText()).toBe("Citation", "Citation header is incorrect");
+            expect(chaisePage.recordPage.getCitationHeader().getText()).toBe("Data Citation", "Citation header is incorrect");
             expect(chaisePage.recordPage.getCitationText().getText()).toBe(tableParams.citationParams.citation, "citation text is incorrect");
 
             // verify download citation
-            expect(chaisePage.recordPage.getDownloadCitationHeader().getText()).toBe("Download Citation:", "Download citation header is incorrect");
+            expect(chaisePage.recordPage.getDownloadCitationHeader().getText()).toBe("Download Data Citation:", "Download citation header is incorrect");
             expect(chaisePage.recordPage.getBibtex().getText()).toBe("BibTex", "bibtex text is incorrect");
         });
 
@@ -208,20 +208,19 @@ exports.testPresentation = function (tableParams) {
     }
 
 	it("should render columns which are specified to be visible and in order", function() {
-		var columns = tableParams.columns.filter(function(c) {return c.value != null;});
 		chaisePage.recordPage.getAllColumnCaptions().then(function(pageColumns) {
-			expect(pageColumns.length).toBe(columns.length);
+			expect(pageColumns.length).toBe(notNullColumns.length);
 			var index = 0;
 			pageColumns.forEach(function(c) {
-                var col = columns[index++];
+                var col = notNullColumns[index++];
                 expect(c.getText()).toEqual(col.title);
 			});
 		});
 	});
 
 	it("should show line under columns which have a comment and inspect the comment value too", function() {
-		var columns = tableParams.columns.filter(function(c) {
-            return (c.value != null && typeof c.comment == 'string');
+		var columns = notNullColumns.filter(function(c) {
+            return (typeof c.comment == 'string');
         });
 		chaisePage.recordPage.getColumnsWithUnderline().then(function(pageColumns) {
 			expect(pageColumns.length).toBe(columns.length);
@@ -257,10 +256,13 @@ exports.testPresentation = function (tableParams) {
     });
 
     it("should validate the values of each column", function () {
-        var columns = tableParams.columns.filter(function (c) { return c.value != null; });
-        expect(element.all(by.className('entity-value')).count()).toEqual(columns.length, "length missmatch.");
+        expect(element.all(by.className('entity-value')).count()).toEqual(notNullColumns.length, "length missmatch.");
         var index = -1, columnUrl, aTag;
-        columns.forEach(function (column) {
+        notNullColumns.forEach(function (column) {
+            if (!column.hasOwnProperty("value")) {
+                return;
+            }
+
             var errMessage = "value mismatch for column " + column.title;
 
             var columnEls;
@@ -273,7 +275,6 @@ exports.testPresentation = function (tableParams) {
                 expect(chaisePage.recordPage.getEntityRelatedTableScope('&lt;strong&gt;User&nbsp;Rating&lt;/strong&gt;',true).getAttribute('innerHTML')).toBe(column.value, errMessage);
             } else {
                 columnEls = chaisePage.recordPage.getEntityRelatedTable(column.title);
-
                 if (column.presentation) {
                     if (column.presentation.type === "inline") columnEls = chaisePage.recordPage.getMarkdownContainer(columnEls);
 
@@ -363,31 +364,11 @@ exports.testPresentation = function (tableParams) {
         });
     });
 
-    it("visible column related table should appear with action item in the entity area",function(){
-        chaisePage.waitForElement(element(by.id('entity-booking'))).then(function(){
-            return element(by.id('entity-4-markdown'));
-        }).then(function(mdRecord){
-            expect(mdRecord.isDisplayed()).toBeTruthy();
-            return element(by.id('actionbar-4'));
-        }).then( function(actionBar){
-            expect(actionBar.getAttribute('innerText')).toBe('Edit  | Add  | View More','Action bar text did not match.');
-            return browser.executeScript("return $('a.toggle-display-link').click()");
-        }).then(function(editLink){
-            return element(by.id('entity-4-recTab'));
-        }).then(function (RecordTab) {
-            expect(RecordTab.isDisplayed()).toBeTruthy();
-            return element(by.id('entity-4-recTab')).element(by.tagName('tbody')).all(by.tagName('tr')).count();
-        }).then(function (recordRowsCount){
-            expect(recordRowsCount).toBe(2,'Record row count in booking table is incorrect.');
-        }).catch(function(err){
-            console.log(err);
-            expect('Encountered an error').toBe('Please check the log', 'Inside catch block');
-        })
-    });
-
     it("click event on image_id in inline display should open new tab with file details",function(){
         var allHandle;
-        chaisePage.waitForElement(element(by.id('entity-booking'))).then(function(){
+        browser.executeScript("return $('a.toggle-display-link').click()").then(function () {
+            return chaisePage.waitForElement(element(by.id('entity-booking')))
+        }).then(function () {
           // This selector captures link of first record under image_id column (5th column) of booking inline entry
             return browser.executeScript("return $('.t_booking td:nth-child(5) a')");
         }).then(function(imageLinks){
@@ -537,22 +518,19 @@ exports.testPresentation = function (tableParams) {
         });
     });
 
-	describe("regarding inline related entities, ", function () {
-		beforeAll(function () {
-			// make sure page is in its initial state
-			browser.driver.navigate().refresh();
-		});
-
-		for (var i = 0; i < tableParams.inline_columns.length; i++) {
-			var p = tableParams.inline_columns[i];
-			p.baseTable = tableParams.subTitle;
-			describe ("for " + p.title + ", ", function (){
-				exports.testRelatedTable(p, pageReadyCondition);
-			});
-
-		}
-	});
-
+    describe("regarding inline related entities, ", function () {
+        beforeAll(function () {
+            // make sure page is in its initial state
+            browser.driver.navigate().refresh();
+        });
+        for (var i = 0; i < tableParams.inline_columns.length; i++) {
+            var p = tableParams.inline_columns[i];
+            p.baseTable = tableParams.subTitle;
+            describe ("for " + p.title + ", ", function (){
+                exports.testRelatedTable(p, pageReadyCondition);
+            });
+        }
+    });
 };
 
 /**
@@ -665,7 +643,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 		// Display Mode
 		describe("view mode and rows, ", function () {
 
-			if (params.isMarkdown || params.isInline) {
+			if (params.isMarkdown || (params.isInline && !params.isTableMode)) {
 				it ("markdown container must be visible.", function () {
 					expect(currentEl.element(by.css('.markdown-container')).isDisplayed()).toBeTruthy("didn't have markdown");
 				});
@@ -914,8 +892,8 @@ exports.testAddRelatedTable = function (params, isInline, inputCallback) {
 		});
 
 		it ("the opened form should have the prefill value for foreignkey.", function () {
-			var fkInput = chaisePage.recordEditPage.getForeignKeyInputDisplay(params.columnDisplayname, 0);
-			expect(fkInput.getText()).toBe(params.columnValue, "value missmatch");
+            var fkInput = chaisePage.recordEditPage.getInputById(0, params.columnDisplayname);
+			expect(fkInput.getAttribute('value')).toBe(params.columnValue, "value missmatch");
 			expect(fkInput.getAttribute('disabled')).toBe('true', "column was enabled.");
 		});
 

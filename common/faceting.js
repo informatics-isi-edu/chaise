@@ -1,9 +1,9 @@
 (function () {
     'use strict';
 
-    angular.module('chaise.faceting', ['plotly', 'chaise.utils'])
+    angular.module('chaise.faceting', ['plotly', 'chaise.inputs', 'chaise.utils'])
 
-        .factory('facetingUtils', ['defaultDisplayname', function (defaultDisplayname) {
+        .factory('facetingUtils', ['defaultDisplayname', 'messageMap', function (defaultDisplayname, messageMap) {
 
             /**
              * Returns an object that can be used for showing the null filter
@@ -15,7 +15,12 @@
                     selected: (typeof selected == 'boolean') ? selected: false,
                     disabled: (typeof disabled == 'boolean') ? disabled: false,
                     uniqueId: null,
-                    displayname: {"value": null, "isHTML": false}
+                    displayname: {"value": null, "isHTML": false},
+                    tooltip: {
+                        value: messageMap.tooltip.null,
+                        isHTML: false
+                    },
+                    alwaysShowTooltip: true
                 };
             }
 
@@ -28,7 +33,12 @@
                 return {
                     selected: (typeof selected == 'boolean') ? selected: false,
                     isNotNull: true,
-                    displayname: {"value": defaultDisplayname.notNull, "isHTML": true}
+                    displayname: {"value": defaultDisplayname.notNull, "isHTML": true},
+                    tooltip: {
+                        value: messageMap.tooltip.notNull,
+                        isHTML: false
+                    },
+                    alwaysShowTooltip: true
                 };
             }
 
@@ -272,7 +282,11 @@
                     scope.parentCtrl = parentCtrl;
 
                     scope.relayout = false;
-                    scope.ranges = [facetingUtils.getNotNullFilter()];
+                    scope.ranges = [];
+                    if (!scope.facetColumn.hideNotNullChoice) {
+                        scope.ranges.push(facetingUtils.getNotNullFilter());
+                    }
+
                     scope.histogramDataStack = [];
                     // draw the plot
                     scope.plot = {
@@ -446,15 +460,16 @@
                     scope.initialRows = function () {
                         var defer = $q.defer();
                         scope.facetModel.appliedFilters = [];
+                        scope.ranges = [];
 
                         // if we have the not-null filter, other filters are not important and can be ignored
                         if (scope.facetColumn.hasNotNullFilter) {
                             scope.facetModel.appliedFilters.push(facetingUtils.getNotNullFilter(true));
-                            scope.ranges = [facetingUtils.getNotNullFilter(true)];
+                            scope.ranges.push(facetingUtils.getNotNullFilter(true));
                             return defer.resolve(true), defer.promise;
+                        } else if (!scope.facetColumn.hideNotNullChoice) {
+                            scope.ranges.push(facetingUtils.getNotNullFilter());
                         }
-
-                        scope.ranges = [facetingUtils.getNotNullFilter()];
 
                         for (var i = 0; i < scope.facetColumn.rangeFilters.length; i++) {
                             var filter = scope.facetColumn.rangeFilters[i];
@@ -477,7 +492,9 @@
 
                     // some of the facets might have been cleared, this function will unselect those
                     scope.syncSelected = function () {
-                        scope.ranges[0].selected = scope.facetColumn.hasNotNullFilter;
+                        if (scope.facetColumn.hasNotNullFilter) {
+                            scope.ranges[0].selected = scope.facetColumn.hasNotNullFilter;
+                        }
 
                         var filterIndex = function (uniqueId) {
                             return scope.facetColumn.rangeFilters.findIndex(function (f) {
@@ -834,8 +851,8 @@
         }])
 
         .directive('choicePicker',
-            ["AlertsService", 'facetingUtils', 'logActions', "$log", 'modalUtils', '$q', 'tableConstants', '$timeout', 'UriUtils',
-            function (AlertsService, facetingUtils, logActions, $log, modalUtils, $q, tableConstants, $timeout, UriUtils) {
+            ["AlertsService", 'facetingUtils', 'logActions', "$log", 'messageMap', 'modalUtils', '$q', 'tableConstants', '$timeout', 'UriUtils',
+            function (AlertsService, facetingUtils, logActions, $log, messageMap, modalUtils, $q, tableConstants, $timeout, UriUtils) {
 
             /**
              * Given tuple and the columnName that should be used, return
@@ -927,12 +944,20 @@
                     // null and not-null are already added.
                     return f.isNotNull !== true && f.uniqueId != null;
                 }).map(function (f) {
+                    var tooltip = f.displayname;
+                    if (f.uniqueId === "") {
+                        tooltip = {
+                            value: messageMap.empty,
+                            isHTML: false
+                        };
+                    }
                     return {
-                        isNotNull: f.isNotNull,
+                        selected: true,
                         uniqueId: f.uniqueId,
                         displayname: f.displayname,
                         tuple: f.tuple, // might be null
-                        selected: true
+                        alwaysShowTooltip: (f.uniqueId === ""),
+                        tooltip: tooltip
                     };
                 }));
                 return res;
@@ -1027,13 +1052,22 @@
                                 return;
                             }
 
+                            var tooltip = tuple.displayname;
+                            if (value === "") {
+                                tooltip = {
+                                    value: messageMap.tooltip.empty,
+                                    isHTML: false
+                                };
+                            }
                             scope.checkboxRows.push({
+                                selected: false,
                                 uniqueId: value,
-                                displayname: (value === null) ? {value: null, isHTML: false} : tuple.displayname,
+                                displayname: tuple.displayname,
                                 tuple:  tuple,
                                 // if we have a not_null filter, other filters must be disabled.
                                 disabled: scope.facetColumn.hasNotNullFilter,
-                                selected: false,
+                                alwaysShowTooltip: (value === ""),
+                                tooltip: tooltip
                             });
                         });
 
@@ -1226,6 +1260,9 @@
                             params.matchNull = true;
                         }
 
+                        params.hideNotNullChoice = scope.facetColumn.hideNotNullChoice;
+                        params.hideNullChoice = scope.facetColumn.hideNullChoice;
+
                         params.selectedRows = [];
 
                         // generate list of rows needed for modal
@@ -1245,6 +1282,7 @@
                             }
 
                             newRow.displayname = (newRow.uniqueId === null) ? {value: null, isHTML: false} : row.displayname;
+                            newRow.tooltip = newRow.displayname;
                             newRow.isNotNull = row.notNull;
                             params.selectedRows.push(newRow);
                         });
@@ -1450,23 +1488,34 @@
                     parentCtrl.register(currentCtrl, scope.facetColumn, scope.index);
                     scope.parentCtrl = parentCtrl;
 
-                    scope.checkboxRows = [facetingUtils.getNotNullFilter()];
+                    scope.checkboxRows = [];
 
                     scope.updateFacetColumn = function () {
                         var defer = $q.defer();
                         scope.facetModel.appliedFilters = [];
+                        scope.checkboxRows = [];
 
-                        scope.checkboxRows[0].selected = false;
-                        if (scope.facetColumn.hasNotNullFilter) {
-                            scope.checkboxRows[0].selected = true;
-                            scope.facetModel.appliedFilters.push(facetingUtils.getNotNullFilter());
+                        // show not-null if it exists or hide_not_null_choice is missing.
+                        if (!scope.facetColumn.hideNotNullChoice) {
+                            scope.checkboxRows.push(facetingUtils.getNotNullFilter());
+                            if (scope.facetColumn.hasNotNullFilter) {
+                                scope.checkboxRows[0].selected = true;
+                                scope.facetModel.appliedFilters.push(facetingUtils.getNotNullFilter());
+                            }
                         }
 
-                        // scope.checkboxRows[1].selected = false;
-                        // if (scope.facetColumn.hasNullFilter) {
-                        //     scope.checkboxRows[1].selected = true;
-                        //     scope.facetModel.appliedFilters.push(facetingUtils.getNullFilter());
-                        // }
+                        // not-null might not be available and this could be 0
+                        var nullFilterIndex = 1;
+
+                        // show null
+                        if (!scope.facetColumn.hideNullChoice) {
+                            nullFilterIndex = scope.checkboxRows.push(facetingUtils.getNullFilter()) - 1;
+                            if (scope.facetColumn.hasNullFilter) {
+                                scope.checkboxRows[nullFilterIndex].selected = true;
+                                scope.facetModel.appliedFilters.push(facetingUtils.getNullFilter());
+                            }
+                        }
+
 
                         return defer.resolve(true), defer.promise;
                     };
@@ -1503,9 +1552,7 @@
                         }
 
                         if (row.selected) {
-                            if (row.isNotNull) {
-                                scope.facetModel.appliedFilters.push(facetingUtils.getNotNullFilter());
-                            }
+                            scope.facetModel.appliedFilters.push(row.isNotNull ? facetingUtils.getNotNullFilter() : facetingUtils.getNullFilter());
                         } else {
                             scope.facetModel.appliedFilters = scope.facetModel.appliedFilters.filter(function (f) {
                                 return f.uniqueId !== row.uniqueId;

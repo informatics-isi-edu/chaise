@@ -196,6 +196,24 @@
             return false;
         };
 
+        /**
+         * allow related table markdown display if all the following are true:
+         *  - reference.display.type is `markdown`
+         *  - related table has data.
+         *  - related table's page.content is not empty string
+         *
+         * we are going to show the markdown display if the result if this function
+         * is true and the related table model is in markdown mode.
+         * @param  {integer} i related table index
+         * @return {boolean}   whether to show related table markdown or not.
+         */
+        vm.allowRelatedTableMarkdown = function (i) {
+            if (!$rootScope.relatedTableModels) return false;
+
+            var tm = $rootScope.relatedTableModels[i].tableModel;
+            return tm.reference.display.type == 'markdown' && tm.page && tm.page.content != '' && tm.page.tuples.length > 0;
+        };
+
         vm.noVisibleRelatedTables = function () {
             if ($rootScope.relatedTableModels) {
                 return !$rootScope.relatedTableModels.some(function (tm, index) {

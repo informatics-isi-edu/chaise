@@ -1,5 +1,6 @@
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
+var recordSetHelpers = require('../../../utils/recordset-helpers.js');
 var chance = require('chance').Chance();
 var EC = protractor.ExpectedConditions;
 
@@ -17,7 +18,7 @@ var testParams = {
     facet_order: [
         {
             title: "facet with order and column_order false for scalar",
-            facetIdx: 16,
+            facetIdx: 18,
             modalOptions: ['01', '02', '03', '04', '05', '06', '07'],
             sortable: false,
             modalOptionsSortedByNumOfOccurences: ['07', '06', '05', '04', '03', '02', '01'],
@@ -25,7 +26,7 @@ var testParams = {
         },
         {
             title: "facet without order and hide_num_occurrences: true",
-            facetIdx: 17,
+            facetIdx: 19,
             modalOptions: ['01', '13', '12', '11', '10', '09', '08', '07', '06', '05', '04', '03', '02'],
             sortable: true,
             modalOptionsSortedByScalar: ['13', '12', '11', '10', '09', '08', '07', '06', '05', '04', '03', '02', '01'],
@@ -45,7 +46,7 @@ var testParams = {
             'All Records With Value', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'
         ]
     },
-    null_modal_filter: {
+    null_filter: {
         panel: {
             facetIdx: 5,
             totalNumOptions: 12,
@@ -54,8 +55,22 @@ var testParams = {
         },
         modal: {
             facetIdx: 10,
-            totalNumOptions: 7,
+            totalNumOptions: 6,
             numRows: 0
+        },
+        right_join: {
+            firstFacet: {
+                name: "F3 Entity",
+                idx: 16,
+                totalNumOptions: 4,
+                option: 1,
+                numRows: 23
+            },
+            secondFacet: {
+                name: "F5",
+                idx:17,
+                options: ["All Records With Value", "one"]
+            }
         }
     },
     customFilter: {
@@ -65,10 +80,10 @@ var testParams = {
         numRowsWFacet: 1,
         numRowsWOFilter: 1,
         facet: 0,
-        totalNumOptions: 8,
-        options: ["All Records With Value", "1", "2", "6", "7", "8", "9", "10"],
-        optionsWOFilter: ["All Records With Value", "2", "1", "3", "4", "5", "6", "7", "8", "9", "10"],
-        option: 2
+        totalNumOptions: 7,
+        options: ["1", "2", "6", "7", "8", "9", "10"],
+        optionsWOFilter: ["2", "1", "3", "4", "5", "6", "7", "8", "9", "10"],
+        option: 1
     },
     customFacet: {
         cfacet: { "displayname": "Custom Facet Query", "ermrest_path": "id=1;id=2;id=3;id=14;id=15;id=16;id=17;id=18" },
@@ -79,19 +94,17 @@ var testParams = {
         numRows: 8,
         numRowsWFacet: 3,
         numRowsWOCustomFacet: 10,
-        options: ['All Records With Value', 'one', 'two'],
-        optionsWOCustomFacet: ['All Records With Value', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten']
+        options: ['No Value', 'one', 'two'],
+        optionsWOCustomFacet: ['No Value', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten']
     },
     maximumLength: {
-        facetIdx: 18,
-        option: 1,
+        facetIdx: 20,
         numRows: 25,
-        modalOption: 10,
-        totalNumOptions: 26,
-        filteredNumRows: 14,
-        secondFacetIdx: 6,
+        filteredNumRows: 24,
+        secondFacetIdx: 16,
         secondFacetOption: 0,
-        secondFacetNumOptions: 6
+        secondFacetNumOptions: 4,
+        option: 1
     },
     recordColumns: [ "text_col", "longtext_col", "markdown_col", "int_col", "float_col", "date_col", "timestamp_col", "boolean_col", "jsonb_col", "1-o7Ye2EkulrWcCVFNHi3A", "hmZyP_Ufo3E5v_nmdTXyyA" ],
     recordValues: {
@@ -437,7 +450,7 @@ describe("Other facet features, ", function() {
         });
     });
 
-    xdescribe("No Value (null) filter, ", function () {
+    describe("No Value (null) filter, ", function () {
         var uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
         var clearAll, showMore, nullBtn;
 
@@ -459,7 +472,7 @@ describe("Other facet features, ", function() {
         });
 
         describe("when it's already selected, ", function () {
-            var params = testParams.null_modal_filter.panel;
+            var params = testParams.null_filter.panel;
             var idx = params.facetIdx;
             it ('opening the modal should show the No value as selected.', function (done) {
                 chaisePage.clickButton(chaisePage.recordsetPage.getFacetById(idx)).then(function () {
@@ -497,7 +510,7 @@ describe("Other facet features, ", function() {
         });
 
         describe("when it's not selected,", function () {
-            var params = testParams.null_modal_filter.modal;
+            var params = testParams.null_filter.modal;
             var idx = params.facetIdx;
 
             it ("opening the modal should not have the no value selected.", function (done) {
@@ -533,11 +546,54 @@ describe("Other facet features, ", function() {
                             return ct == params.numRows;
                         });
                     }, browser.params.defaultTimeout);
+                }).then(function () {
+                    return clearAll.click();
+                }).then(function () {
+                    chaisePage.recordsetPage.waitForInverseMainSpinner();
                     done();
                 }).catch(chaisePage.catchTestError(done));
             });
         });
+
+        describe("regarding facets that require right join, ", function () {
+            var params = testParams.null_filter.right_join, idx;
+            it ("null should be provided as an option and user should be able to select it.", function (done) {
+                idx = params.firstFacet.idx;
+                chaisePage.recordsetPage.getFacetById(idx).click().then(function () {
+                    browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
+
+                    // wait for facet checkboxes to load
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getFacetOptions(idx).count().then(function(ct) {
+                            return ct == params.firstFacet.totalNumOptions;
+                        });
+                    }, browser.params.defaultTimeout);
+
+                    // wait for list to be fully visible
+                    browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(idx)), browser.params.defaultTimeout);
+
+                    return chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(idx, params.firstFacet.option));
+                }).then(function () {
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                            return ct == params.firstFacet.numRows;
+                        });
+                    }, browser.params.defaultTimeout);
+                    done();
+                }).catch(chaisePage.catchTestError(done));
+            });
+
+            it ("after selecting one, other such facets should not provide null option.", function (done) {
+                recordSetHelpers.openFacetAndTestFilterOptions(
+                    params.secondFacet.name, params.secondFacet.idx, params.secondFacet.options, done
+                );
+            });
+        });
     });
+
+    /***********************************************************  local test cases ***********************************************************/
+    if (process.env.TRAVIS) return;
+    // NOTE the following test cases will only run locally.
 
     describe("navigating to recordset with filters that faceting doesn't support.", function () {
         var customFilterParams = testParams.customFilter;
@@ -658,7 +714,7 @@ describe("Other facet features, ", function() {
 
         it ("searching a lenghty string should show the `Maximum URL length reached` warning.", function () {
             var mainSearch = chaisePage.recordsetPage.getMainSearchBox();
-            chaisePage.setInputValue(mainSearch, chance.string({length: 2000}));
+            chaisePage.setInputValue(mainSearch, chance.string({length: 4000}));
             chaisePage.recordsetPage.waitForInverseMainSpinner();
             expect(chaisePage.recordsetPage.getRows().count()).toBe(testParams.maximumLength.numRows, "row count missmatch.");
             checkAlert();
@@ -820,9 +876,10 @@ describe("Other facet features, ", function() {
 
             it("should click the foreign key popup button and have the facet collapse button visible in search popup", function (done) {
                 expect(chaisePage.recordEditPage.getForms().count()).toBe(1, "number of forms shown is incorrect");
-
                 chaisePage.recordEditPage.getModalPopupBtnsUsingScript().then(function(popupBtns) {
-                    expect(popupBtns.length).toBe(2, "number of popup buttons is incorrect");
+                    //there are two foreignkeys, so there will be four of this element.
+                    //NOTE I'm not sure what's the point of this check
+                    expect(popupBtns.length).toBe(4, "number of popup buttons is incorrect");
 
                     return chaisePage.clickButton(popupBtns[0]);
                 }).then(function () {
@@ -855,7 +912,7 @@ describe("Other facet features, ", function() {
             });
 
             it("select a facet option and select a row for the input", function (done) {
-                chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(0, 1)).then(function () {
+                chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(0, 0)).then(function () {
                     browser.wait(function () {
                         return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
                             return (ct == 1);
@@ -935,7 +992,7 @@ describe("Other facet features, ", function() {
             });
 
             it("select a facet option and select a row to associate", function (done) {
-                chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(0, 1)).then(function () {
+                chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(0, 0)).then(function () {
                     browser.wait(function () {
                         return chaisePage.recordsetPage.getRecordsetTableModalOptions().count().then(function (ct) {
                             return (ct == 1);
@@ -961,10 +1018,6 @@ describe("Other facet features, ", function() {
             });
         });
     });
-
-    /***********************************************************  local test cases ***********************************************************/
-    if (process.env.TRAVIS) return;
-    // NOTE the following test cases will only run locally.
 
     describe("navigating to recordset with custom facet.", function () {
         var customFacetParams = testParams.customFacet;
