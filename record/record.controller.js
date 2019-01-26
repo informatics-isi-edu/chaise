@@ -196,6 +196,11 @@
             return false;
         };
 
+        vm.showInlineTable = function (i) {
+            var cm = $rootScope.columnModels[i];
+            return cm.isInline && ($rootScope.showEmptyRelatedTables || cm.tableModel.rowValues.length > 0);
+        };
+
         /**
          * allow related table markdown display if all the following are true:
          *  - reference.display.type is `markdown`

@@ -13,6 +13,9 @@ var testParams = {
     title: "Sherathon Hotel",
     subTitle: "Accommodations",
     tableComment: "List of different types of accommodations",
+    tocHeaders: [
+        "Main", "accommodation_collections (1)", "table_w_aggregates (1)", "accommodation_image_assoc (1)", "table_w_invalid_row_markdown_pattern (1)", "accommodation_image (2+)"
+    ],
     tables_order: ["accommodation_image (showing first 2 results)", "media (no results found)"],
     file_names: [
         "Accommodations.csv",
