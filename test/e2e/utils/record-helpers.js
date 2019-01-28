@@ -646,7 +646,8 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 				}
 
 				it ("clicking on the toggle should change the view to tabular.", function (done) {
-					chaisePage.clickButton(markdownToggleLink).then(function() {
+					// chaisePage.clickButton(markdownToggleLink).then(function() {
+                    markdownToggleLink.click().then(function() {
 						if (params.canEdit) {
 							expect(markdownToggleLink.getText()).toBe("Display", "after toggle button missmatch.");
 							chaisePage.recordPage.getColumnComment(markdownToggleLink.element(by.cssContainingText(".hide-tooltip-border", "Display"))).then(function(comment){
