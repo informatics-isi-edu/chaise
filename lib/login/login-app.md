@@ -7,7 +7,7 @@ Note: Change these paths based on the position of the chaise folder.
 <head>
 <script src="./chaise/chaise-config.js"></script>
 <script src="./chaise/scripts/vendor/angular.js"></script>
-<script src="./chaise/loginApp/login.app.js"></script>
+<script src="./chaise/lib/login/login.app.js"></script>
 </head>
 ```
 ## Using the <login> directive
@@ -16,6 +16,12 @@ Note: Change these paths based on the position of the chaise folder.
 ```html
 <login></login>
 ```
+## Sample HTML Pages
+1. /chaise/lib/login/sample-login.html
+This is a simple html page with the login app in the navbar on the top-right. This includes the 3 dependencies required for the login app in the header and the <login> directive in the body in the header section.
+
+2. /chaise/lib/login/sample-loginOnRbk.html
+This is the RBK home page with the login app in the navbar. The styling of this page will be a little off as there are conflicts in the CSS classes used on this page and in chaise. These CSS rule conflicts will have to be resolved manually on the RBK home page by either changing the common class names like header and footer or overriding the chaise styles.
 
 ## Note
 1. The bootstrap and jQuery versions of the html page might be different from the ones used in Chaise. This might produce some inconsistent behavior in the html page.
