@@ -20,7 +20,7 @@
           "navbarMenu": {},
           "navbarBrand": "",
           "disableDefaultExport": false,
-          "exportServicePath": "/iobox/export"
+          "exportServicePath": "/deriva/export"
     })
 
     .constant("appTagMapping", {
