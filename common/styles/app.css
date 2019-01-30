@@ -1306,6 +1306,10 @@ footer .container1 {
      border: solid #446c73 1.5px;
  }
 
+ tr.rowFocus{
+     border: 2px solid rgb(51, 122, 183);
+ }
+
  .record-container .rowFocus{
      border-color: rgb(51, 122, 183) !important;
  }
