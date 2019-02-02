@@ -114,7 +114,7 @@ var testParams = {
 
 };
 
-if (!process.env.TRAVIS) {
+if (!process.env.SAUCE) {
     // keep track of namespaces that we use, so we can delete them afterwards
     testConfiguration.hatracNamespaces.push(process.env.ERMREST_URL.replace("/ermrest", "") + "/hatrac/js/chaise/" + currentTimestampTime);
 }
@@ -133,7 +133,7 @@ describe('Edit multiple existing record,', function() {
             });
 
             // don't run upload test cases on travis
-            if (process.env.TRAVIS && hasFile) {
+            if (process.env.SAUCE && hasFile) {
                 return;
             }
 

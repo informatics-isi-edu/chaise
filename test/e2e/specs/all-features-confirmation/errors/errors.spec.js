@@ -110,7 +110,7 @@ describe('Error related test cases,', function() {
               var homeAppUrl = browser.params.url,
                   homePage =   homeAppUrl.slice(0, homeAppUrl.slice(0, homeAppUrl.lastIndexOf("/")).lastIndexOf("/") + 1);
                   //Travis local URL has different structure
-                  if (process.env.TRAVIS) {
+                  if (process.env.SAUCE) {
                       homePage = currentUrl;
                   }
                 expect(currentUrl).toBe(homePage, "The redirection from record page to Home page failed");
@@ -194,7 +194,7 @@ describe('Error related test cases,', function() {
               var homeAppUrl = browser.params.url,
                   homePage =   homeAppUrl.slice(0, homeAppUrl.slice(0, homeAppUrl.lastIndexOf("/")).lastIndexOf("/") + 1);
                   //Travis local URL has different structure
-                  if (process.env.TRAVIS) {
+                  if (process.env.SAUCE) {
                       homePage = currentUrl;
                   }
                  expect(currentUrl).toBe(homePage, "The redirection from recordset page to Home page failed");

@@ -202,7 +202,7 @@ describe('View recordset,', function() {
 
         describe("Presentation ,", function() {
 
-            if (!process.env.TRAVIS) {
+            if (!process.env.SAUCE) {
                 beforeAll(function() {
                     // delete files that may have been downloaded before
                     console.log("delete files");
@@ -312,7 +312,7 @@ describe('View recordset,', function() {
                 });
             });
 
-            if (!process.env.TRAVIS) {
+            if (!process.env.SAUCE) {
                 it("should have 'CSV' as a download option and download the file.", function(done) {
                     chaisePage.recordsetPage.getExportDropdown().click().then(function () {
                         var csvOption = chaisePage.recordsetPage.getExportOption("CSV");
@@ -599,7 +599,7 @@ describe('View recordset,', function() {
                 });
             });
 
-            if (!process.env.TRAVIS) {
+            if (!process.env.SAUCE) {
                 afterAll(function() {
                     // delete files that have been downloaded during tests
                     console.log("delete files");
@@ -947,7 +947,7 @@ describe('View recordset,', function() {
             });
         });
 
-        if (!process.env.TRAVIS) {
+        if (!process.env.SAUCE) {
             describe("For when no catalog or schema:table is specified,", function() {
                 var baseUrl;
 

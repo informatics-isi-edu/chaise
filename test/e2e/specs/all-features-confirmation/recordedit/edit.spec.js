@@ -60,7 +60,7 @@ var testParams = {
        record_displayname: "90008", //since this is in single-edit, displayname is rowname.
        table_displayname: "File",
        table_comment: "asset/object",
-       not_travis: !process.env.TRAVIS,
+       not_travis: !process.env.SAUCE,
        primary_keys: ["id"],
        key: { name: "id", value: "90008", operator: "="},
        columns: [
@@ -89,7 +89,7 @@ var testParams = {
     }]
 };
 
-if (!process.env.TRAVIS) {
+if (!process.env.SAUCE) {
     // keep track of namespaces that we use, so we can delete them afterwards
     testConfiguration.hatracNamespaces.push(process.env.ERMREST_URL.replace("/ermrest", "") + "/hatrac/js/chaise/" + currentTimestampTime);
 }
@@ -100,7 +100,7 @@ describe('Edit existing record,', function() {
 
         (function(tableParams, index) {
 
-            if (!process.env.TRAVIS && tableParams.files.length > 0) {
+            if (!process.env.SAUCE && tableParams.files.length > 0) {
                 beforeAll(function() {
                     // create files that will be uploaded
                     recordEditHelpers.createFiles(tableParams.files);
@@ -142,7 +142,7 @@ describe('Edit existing record,', function() {
                     recordEditHelpers.testSubmission(tableParams, true);
                 });
 
-                if (!process.env.TRAVIS && tableParams.files.length > 0) {
+                if (!process.env.SAUCE && tableParams.files.length > 0) {
                     afterAll(function(done) {
                         recordEditHelpers.deleteFiles(tableParams.files);
                         console.log("\n");

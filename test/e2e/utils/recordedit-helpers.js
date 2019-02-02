@@ -1296,7 +1296,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                 });
             }
 
-            if (!process.env.TRAVIS && tableParams.files.length > 0 && fileCols.length > 0) {
+            if (!process.env.SAUCE && tableParams.files.length > 0 && fileCols.length > 0) {
                 describe("File fields,", function() {
                     it("should render input type as file input ", function() {
                         fileCols.forEach(function(column) {
@@ -1346,7 +1346,7 @@ exports.testSubmission = function (tableParams, isEditMode) {
         });
 
         // if there is a file upload
-        if (!process.env.TRAVIS && tableParams.files.length > 0) {
+        if (!process.env.SAUCE && tableParams.files.length > 0) {
             var timeout =  tableParams.files.length ? (tableParams.results.length * tableParams.files.length * browser.params.defaultTimeout) : browser.params.defaultTimeout;
             browser.wait(ExpectedConditions.invisibilityOf($('.upload-table')),timeout).catch(function (err) {
                 // if the element is not available (there is no file) it will return error which we should ignore.
@@ -1470,7 +1470,7 @@ exports.testSubmission = function (tableParams, isEditMode) {
         });
 
         //NOTE: in travis we're not uploading the file and therefore this test case will fail
-        if (!process.env.TRAVIS && tableParams.files.length > 0) {
+        if (!process.env.SAUCE && tableParams.files.length > 0) {
             it('should have the correct submitted values.', function () {
                 if (hasErrors) {
                     expect(undefined).toBeDefined('submission had errors.');

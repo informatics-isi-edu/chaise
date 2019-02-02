@@ -1542,7 +1542,7 @@ function chaisePage() {
         browser.ignoreSynchronization = true;
 
         browser.wait(protractor.ExpectedConditions.visibilityOf(element(by.id("loginApp"))), browser.params.defaultTimeout).then(function() {
-            browser.driver.executeScript('document.cookie="' + cookie + ';path=/;' + (process.env.TRAVIS ? '"' : 'secure;"')).then(function() {
+            browser.driver.executeScript('document.cookie="' + cookie + ';path=/;' + (process.env.SAUCE ? '"' : 'secure;"')).then(function() {
               browser.ignoreSynchronization = false;
               defer.resolve();
             });

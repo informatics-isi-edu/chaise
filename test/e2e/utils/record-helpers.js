@@ -116,7 +116,7 @@ exports.testPresentation = function (tableParams) {
             expect(chaisePage.recordPage.getBibtex().getText()).toBe("BibTex", "bibtex text is incorrect");
         });
 
-        if (!process.env.TRAVIS) {
+        if (!process.env.SAUCE) {
             it("should download the citation in BibTex format.", function (done) {
                 chaisePage.recordPage.getBibtex().click().then(function () {
                     browser.wait(function() {
@@ -151,7 +151,7 @@ exports.testPresentation = function (tableParams) {
         }).catch(chaisePage.catchTestError(done));
     });
 
-    if (!process.env.TRAVIS) {
+    if (!process.env.SAUCE) {
         it("should have 'CSV' as a download option and download the file.", function(done) {
             chaisePage.recordsetPage.getExportDropdown().click().then(function () {
                 var csvOption = chaisePage.recordsetPage.getExportOption("CSV");

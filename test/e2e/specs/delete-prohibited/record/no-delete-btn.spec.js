@@ -50,7 +50,7 @@ describe('View existing record,', function() {
             });
         });
 
-        if (process.env.TRAVIS) {
+        if (process.env.SAUCE) {
             it ("Should have the proper permalink in the share popup if resolverImplicitCatalog is the same as catalogId", function (done) {
                 var permalink = browser.params.origin+"/id/"+chaisePage.getEntityRow("product-record", testParams.table_name, [{column: "id",value: "4004"}]).RID;
 

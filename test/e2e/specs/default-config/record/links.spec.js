@@ -31,7 +31,7 @@ describe('View existing record,', function() {
             chaisePage.waitForElement(element(by.id('tblRecord')));
         });
 
-        if (!process.env.TRAVIS) {
+        if (!process.env.SAUCE) {
             describe("regadring the export button, ", function () {
                 var exportBtn;
                 beforeAll(function () {

@@ -592,7 +592,7 @@ describe("Other facet features, ", function() {
     });
 
     /***********************************************************  local test cases ***********************************************************/
-    if (process.env.TRAVIS) return;
+    if (process.env.SAUCE) return;
     // NOTE the following test cases will only run locally.
 
     describe("navigating to recordset with filters that faceting doesn't support.", function () {

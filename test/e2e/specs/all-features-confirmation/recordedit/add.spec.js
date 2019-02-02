@@ -50,7 +50,7 @@ var testParams = {
        table_name: "file",
        table_displayname: "file",
        table_comment: "asset/object",
-       not_travis: !process.env.TRAVIS,
+       not_travis: !process.env.SAUCE,
        primary_keys: ["id"],
        columns: [
            { name: "fileid", title: "fileid", type: "int4" },
@@ -99,7 +99,7 @@ var mdHelp ={
         md_strike:"<strike>strikethrough text</strike>"
 };
 // keep track of namespaces that we use, so we can delete them afterwards
-if (!process.env.TRAVIS) {
+if (!process.env.SAUCE) {
     testConfiguration.hatracNamespaces.push(process.env.ERMREST_URL.replace("/ermrest", "") + "/hatrac/js/chaise/" + currentTimestampTime);
 }
 
@@ -120,7 +120,7 @@ describe('Record Add', function() {
 
                 describe("Presentation and validation,", function() {
 
-                    if (!process.env.TRAVIS && tableParams.files.length > 0) {
+                    if (!process.env.SAUCE && tableParams.files.length > 0) {
                         beforeAll(function() {
                             // create files that will be uploaded
                             recordEditHelpers.createFiles(tableParams.files);
@@ -184,7 +184,7 @@ describe('Record Add', function() {
                     recordEditHelpers.testSubmission(tableParams);
                 });
 
-                if (!process.env.TRAVIS && tableParams.files.length > 0) {
+                if (!process.env.SAUCE && tableParams.files.length > 0) {
                     afterAll(function(done) {
                         recordEditHelpers.deleteFiles(tableParams.files);
                         console.log("\n");
