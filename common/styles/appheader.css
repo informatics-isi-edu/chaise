@@ -65,10 +65,6 @@ body > .container {
     border-radius: 0 6px 6px 6px;
 }
 
-.dropdown-submenu:hover>.dropdown-menu {
-    display: block;
-}
-
 .dropdown-submenu>a:after {
     display: block;
     content: " ";

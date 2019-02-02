@@ -1,4 +1,14 @@
 (function() {
+    function toggleMenu($event) {
+        var el = angular.element($event.target);
+        if (!el.next().hasClass('show')) {
+            el.parents('.dropdown-menu').first().find('.show').removeClass("show");
+        }
+        var $subMenu = el.next(".dropdown-menu");
+        $subMenu.toggleClass('show');
+        el.parents('li.open .dropdown-menu').addClass("show");
+    }
+
     'use strict';
     angular.module('chaise.navbar', [
         'chaise.login',
@@ -35,6 +45,8 @@
                 scope.brandText = chaiseConfig.navbarBrandText;
                 scope.brandImage = chaiseConfig.navbarBrandImage;
                 scope.menu = chaiseConfig.navbarMenu.children || [];
+
+                scope.toggleMenu = toggleMenu;
             }
         };
     }])
@@ -53,6 +65,9 @@
                     if (!compiled) {
                         compiled = $compile(contents);
                     }
+
+                    scope.toggleSubMenu = toggleMenu;
+
                     compiled(scope, function(clone) {
                         el.append(clone);
                     });
