@@ -20,7 +20,7 @@
                 <ul id="navbar-menu" class="nav navbar-nav">
                     <li ng-repeat="item in menu">
                         <a ng-if="!item.children" ng-href="{{item.url}}" target="{{item.newTab ? '_blank' : '_self'}}">{{item.name}}</a>
-                        <a ng-if="item.children" class="dropdown-toggle" ng-click="toggleMenu($event)">{{item.name}} <span class="caret"></span></a>
+                        <a ng-if="item.children" class="dropdown-toggle" data-toggle="dropdown">{{item.name}} <span class="caret"></span></a>
                         <ul ng-if="item.children" navbar-menu menu="item.children" class="dropdown-menu"></ul>
                     </li>
                 </ul>

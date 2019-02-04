@@ -1,12 +1,16 @@
 (function() {
     function toggleMenu($event) {
+        // prevent menu from closing on click
+        $event.stopPropagation();
+        $event.preventDefault();
+
         var el = angular.element($event.target);
+        // if another dropdown menu is open in the same list, close it first
         if (!el.next().hasClass('show')) {
             el.parents('.dropdown-menu').first().find('.show').removeClass("show");
         }
-        var $subMenu = el.next(".dropdown-menu");
-        $subMenu.toggleClass('show');
-        el.parents('li.open .dropdown-menu').addClass("show");
+
+        el.next(".dropdown-menu").toggle();
     }
 
     'use strict';
