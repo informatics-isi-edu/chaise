@@ -8,7 +8,7 @@
         var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
 
         // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
-        var root = chaiseConfig.navbarMenu;
+        var root = chaiseConfig.navbarMenu || {};
         // Set default newTab property at root node
         if (!root.hasOwnProperty('newTab')) {
             root.newTab = true;
@@ -34,7 +34,7 @@
                 scope.brandURL = chaiseConfig.navbarBrand;
                 scope.brandText = chaiseConfig.navbarBrandText;
                 scope.brandImage = chaiseConfig.navbarBrandImage;
-                scope.menu = chaiseConfig.navbarMenu.children || [];
+                scope.menu = chaiseConfig.navbarMenu ? chaiseConfig.navbarMenu.children : [];
             }
         };
     }])
