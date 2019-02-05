@@ -681,7 +681,7 @@ facetsService.service('FacetsService', ['$sce', 'FacetsData', function($sce, Fac
 
 	this.invokeExternalExport = function invokeExternalExport() {
 		var exportParameters = JSON.stringify(this.createExportParameters(), null, "  ");
-		var serviceUrl = HOME + "/iobox/export/" + // TODO: this service base url needs to be configurable
+		var serviceUrl = HOME + "/deriva/export/" + // TODO: this service base url needs to be configurable
 			(FacetsData.exportOptions.format["type"] == "BAG" ? "bdbag" : "file");
 		console.info("Executing external export with the following parameters:\n" + exportParameters);
 		console.time('External export duration');

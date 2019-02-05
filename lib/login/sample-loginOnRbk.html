@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html class="">
+<head>
+    <!-- Google Tag Manager -->
+    <script>(function (w, d, s, l, i) {
+        w[l] = w[l] || []; w[l].push({
+            'gtm.start':
+                new Date().getTime(), event: 'gtm.js'
+        }); var f = d.getElementsByTagName(s)[0],
+            j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+        })(window, document, 'script', 'dataLayer', 'GTM-W4S5LP');</script>
+    <!-- End Google Tag Manager -->
+    <meta charset="UTF-8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="(Re)Building a Kidney is an NIDDK-funded consortium coordinating research to generate or repair nephrons that can function within the kidney.">
+    <meta rel="author" href="">
+    <meta rel="publisher" href="">
+    <title>Welcome | RBK</title>
+    <link rel="stylesheet" href="/assets/css/all.css">
+    <link href="/assets/css/font-awesome.css" rel="stylesheet" />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <script src="/ermrestjs/ermrest.js"></script>
+    <script>
+        function search(appName) {
+            var searchParam = $('#search_param').val() == 'all' ? 'gene' : $('#search_param').val();
+            var searchText = $('input[name=x]')[0].value.trim();
+            var schemaName = "", tableName = "";
+
+            switch (searchParam) {
+                case 'anatomy':
+                    schemaName = 'Vocabulary';
+                    tableName = 'Anatomy_terms';
+                    break;
+                case 'gene':
+                    schemaName = 'Gene_Expression';
+                    tableName = 'Gene_Thumbnail_Display';
+                    break;
+            }
+
+            var facets;
+            if (typeof searchText === "string" && searchText.length > 0) {
+                // create the facet object so we can pass it to ermrestjs
+                facets = {
+                    "and": [{ "source": "*", "search": [searchText] }]
+                };
+            }
+
+            // creat a path that chaise understands
+            var path = ERMrest.createPath("2", schemaName, tableName, facets);
+
+            // the origin of webstie.
+            var origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
+
+            // create the url to open
+            var finalURL = [origin, 'chaise', appName, path].join("/");
+
+            // open the url
+            window.open(finalURL);
+        }
+    </script>
+    <!--[if lt IE 9]><script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+    <noscript>
+        <p class="bg-warning">For full functionality of this site it is necessary to enable JavaScript. Here are the <a href="http://www.enable-javascript.com/"
+                target="_blank">
+                instructions how to enable JavaScript in your web browser</a>.</p>
+    </noscript>
+    <!-- Begin Jekyll SEO tag v2.5.0 -->
+    <title>Welcome | (Re)Building a Kidney Consortium</title>
+    <meta name="generator" content="Jekyll v3.8.3" />
+    <meta property="og:title" content="Welcome" />
+    <meta property="og:locale" content="en_US" />
+    <meta name="description" content="(Re)Building a Kidney (RBK) is an NIDDK-funded consortium of research projects working to optimize approaches for the isolation, expansion, and differentiation of appropriate kidney cell types and their integration into complex structures that replicate human kidney function."
+    />
+    <meta property="og:description" content="(Re)Building a Kidney (RBK) is an NIDDK-funded consortium of research projects working to optimize approaches for the isolation, expansion, and differentiation of appropriate kidney cell types and their integration into complex structures that replicate human kidney function."
+    />
+    <meta property="og:site_name" content="(Re)Building a Kidney Consortium" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@ReBuildaKidney" />
+    <meta name="google-site-verification" content="GTM-W4S5LP" />
+    <script type="application/ld+json">
+      {"name":"(Re)Building a Kidney Consortium","description":"(Re)Building a Kidney (RBK) is an NIDDK-funded consortium of research projects working to optimize approaches for the isolation, expansion, and differentiation of appropriate kidney cell types and their integration into complex structures that replicate human kidney function.","@type":"WebSite","url":"/","publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"/assets/img/logo.png"}},"headline":"Welcome","@context":"http://schema.org"}</script>
+    <!-- End Jekyll SEO tag -->
+
+    <!-- Scripts to be included for login app -->
+    <script src="./chaise/chaise-config.js"></script>
+    <script src="./chaise/scripts/vendor/angular.js"></script>
+    <script src="./chaise/lib/login/login.app.js"></script>
+</head>
+
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W4S5LP" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    <div class="wrap">
+        <!--
+            <div class="tease">
+      The application period for our Partnership Project Program is now closed. Announcements of the awardees are expected late summer 2018. Thank you for your submissions!
+    </div>
+          -->
+        <header id="header">
+
+            <nav id="navbar" class="navbar navbar-default navbar-fixed-top">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-4 col-md-4">
+                            <div class="navbar-header">
+                                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false">
+                                    <span class="sr-only">Toggle navigation</span>
+                                    <span class="mobile-menu">MENU</span>
+                                </button>
+                                <a class="navbar-brand" href="/">
+                                    <span id="brand-text">ReBuilding A Kidney</span>
+                                </a>
+                            </div>
+
+                        </div>
+                        <div class="col-sm-6 col-md-6">
+                            <!-- Collect the nav links, forms, and other content for toggling -->
+
+                            <div class="navbar-collapse collapse" id="navbar-collapse">
+                                <ul class="nav navbar-nav">
+
+
+                                    <li class="dropdown toplevel">
+                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">About<span class="caret"></span></a>
+                                        <ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu">
+
+
+                                            <li><a href="/about/" target="">About RBK</a>
+                                            </li>
+
+
+
+                                            <li><a href="/about/usage.html" target="">Citing RBK</a>
+                                            </li>
+
+
+
+                                            <li><a href="/publications/" target="">Publications</a>
+                                            </li>
+
+
+
+                                            <li><a href="/privacy-policy/" target="">Privacy Policy</a>
+                                            </li>
+
+
+                                        </ul>
+
+                                    </li>
+
+
+                                    <li class="dropdown toplevel">
+                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Resources<span class="caret"></span></a>
+                                        <ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu">
+
+
+                                            <li><a href="/resources/" target="">Resources Overview</a>
+                                            </li>
+
+
+
+                                            <li><a href="/chaise/recordset/#2/Common:Gene" target="">Search by Genes</a>
+                                            </li>
+
+
+
+                                            <li><a href="/chaise/recordset/#2/Protocol:Protocol" target="">Lab Protocols</a>
+                                            </li>
+
+
+
+                                            <li><a href="/chaise/recordset/#2/Cell_Line:Parental_Cell_Line" target="">Transgenic
+                                                    Lines</a>
+                                            </li>
+
+
+
+                                            <li><a href="/chaise/recordset/#2/Antibody:Antibody_Tests" target="">Antibody
+                                                    Validation</a>
+                                            </li>
+
+
+
+                                            <li><a href="/chaise/recordset/#2/RNASeq:Experiment" target="">Gene Expression
+                                                    Data</a>
+                                            </li>
+
+
+
+                                            <li><a href="/chaise/recordset/#2/Common:Collection" target="">Collections</a>
+                                            </li>
+
+
+
+                                            <li><a href="/tools/" target="">Tools</a>
+                                            </li>
+
+
+
+                                            <li><a href="/internal/" target="">Internal</a>
+                                            </li>
+
+
+                                        </ul>
+
+                                    </li>
+
+
+                                    <li class="toplevel">
+                                        <a href="/projects/">Projects</a>
+
+                                    </li>
+
+
+                                    <li class="toplevel">
+                                        <a href="/collaborate.html">Collaborating</a>
+
+                                    </li>
+
+
+                                    <li class="toplevel">
+                                        <a href="/news/">News</a>
+
+                                    </li>
+
+
+                                    <li class="toplevel">
+                                        <a href="/contact.html">Contact</a>
+
+                                    </li>
+
+
+                                    <li class="dropdown toplevel">
+                                        <a href="/help/" class="dropdown-toggle" data-toggle="dropdown">Help<span class="caret"></span></a>
+                                        <ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu">
+
+
+                                            <li><a href="https://github.com/informatics-isi-edu/gudmap-rbk/wiki/Using-the-GUDMAP-RBK-Data-Browser"
+                                                    target="">Using the RBK Browser</a>
+                                            </li>
+
+
+
+                                            <li><a href="https://github.com/informatics-isi-edu/gudmap-rbk/wiki" target="">Submitting
+                                                    Data</a>
+                                            </li>
+
+
+
+                                            <li><a href="https://github.com/informatics-isi-edu/gudmap-rbk/wiki/Create-citable-datasets"
+                                                    target="">Creating Citable Datasets</a>
+                                            </li>
+
+
+
+                                            <li><a href="/about/usage.html" target="">Citing Consortium Data</a>
+                                            </li>
+
+
+                                        </ul>
+
+                                    </li>
+
+                                </ul>
+                            </div><!-- /.navbar-collapse -->
+                        </div><!-- /.col- -->
+                        <div class="col-sm-2 col-md-2">
+                            <!--login directive added in the navbar -->
+                            <login></login>
+                        </div>
+                    </div><!-- /.row -->
+                </div><!-- /.container-fluid -->
+            </nav>
+
+        </header>
+
+
+
+
+
+
+        <div class="home">
+
+
+
+            <div class="home-main">
+                <div class="row" id="home-search">
+                    <div class="col-md-12 home-search">
+                        <form class="input-group search">
+                            <div class="input-group-btn search-panel">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                    <span id="search_concept">Search by:</span> <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li><a href="#gene">Gene</a></li>
+                                    <li><a href="#anatomy">Anatomy</a></li>
+                                </ul>
+                            </div>
+                            <input type="hidden" name="search_param" value="all" id="search_param">
+                            <input type="text" class="form-control" name="x" placeholder="Search our data...">
+
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="submit" onClick="search('recordset')">
+                                    <i class="fa fa-search" aria-hidden="true"></i>
+                                </button>
+                            </span>
+
+                        </form>
+                    </div>
+                </div>
+                <div class="container content-inner">
+
+                    <section class="section-cta section row clear">
+
+                        <div class="col four blurb mobile-full">
+
+                            <section class="section-resources">
+
+                                <div class="ctas">
+
+
+                                    <div class="feature resources">
+                                        <i class="fa fa-database fa-fw cta-icon"></i>
+                                        <h2>For researchers</h2>
+                                        <ul class="fa-ul">
+                                            <li><i class="fa-li fa fa-arrow-circle-right"></i><a href="/chaise/recordset/#2/Protocol:Protocol">Lab
+                                                    Protocols</a>
+                                            </li>
+                                            <li><i class="fa-li fa fa-arrow-circle-right"></i><a href="/chaise/recordset/#2/Common:Gene">Genes</a>
+                                            </li>
+                                            <li><i class="fa-li fa fa-arrow-circle-right"></i><a href="/chaise/recordset/#2/Cell_Line:Reporter_Cell_Line">Transgenic
+                                                    Cell Lines</a>
+                                            </li>
+                                            <li><i class="fa-li fa fa-arrow-circle-right"></i><a href="/chaise/recordset/#2/Antibody:Antibody_Tests">Antibody
+                                                    Validation</a>
+                                            </li>
+                                            <li><i class="fa-li fa fa-arrow-circle-right"></i><a href="/chaise/recordset/#2/RNASeq:Experiment">Gene
+                                                    Expression Data</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    </a>
+
+                                </div>
+                            </section>
+
+                        </div>
+                        <div class="col four mobile-full">
+                            <div class="ctas">
+                                <div class="feature collaborate">
+                                    <i class="fa fa-dollar fa-fw cta-icon"></i>
+                                    <h2>Funding opportunities</h2>
+                                    <ul class="fa-ul">
+                                        <li><i class="fa-li fa fa-arrow-circle-right"></i><a href="/collaborate.html#ppp"
+                                                class="">
+                                                Apply for the Partnership Project Program
+                                            </a></li>
+                                        <li><i class="fa-li fa fa-arrow-circle-right"></i><a href="/collaborate.html#collaborator"
+                                                class="">
+                                                Apply to become a Collaborating Project
+                                            </a></li>
+                                    </ul>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col four mobile-full">
+                            <div class="ctas">
+                                <div class="feature patients">
+                                    <i class="fa fa-users fa-fw cta-icon"></i>
+                                    <h2>Resources for patients</h2>
+                                    <ul class="fa-ul">
+                                        <li><i class="fa-li fa fa-arrow-circle-right"></i><a href="http://www.isscr.org/about-stem-cells">Learn
+                                                About Stem Cells</a></li>
+                                        <li><i class="fa-li fa fa-arrow-circle-right"></i><a href="http://www.closerlookatstemcells.org/patient-resources/">Patient
+                                                Handbook on Stem Cell Therapies</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <div class="container content-inner signup highlighted">
+                <p><i class="fa fa-envelope"></i> To stay updated about <a href="/collaborate.html">funding opportunities</a>
+                    and project updates, <a href="http://eepurl.com/buBSC5">sign up for our mailing list here</a>.</p>
+            </div>
+
+            <section class="section-blurb">
+                <div class="container content-inner features">
+                    <section class="section-blurb section row clear">
+                        <div class="col six blurb mobile-full">
+                            <section id="twitter">
+                                <a class="twitter-timeline" data-lang="en" data-width="500" data-height="400" data-theme="light" data-link-color="#407cca"
+                                    dnt="true" href="https://twitter.com/ReBuildaKidney">Tweets
+                                    by ReBuildaKidney</a>
+                                <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+                            </section>
+
+                        </div>
+                        <div class="col six mobile-full">
+
+                            <section id="news">
+                                <h3>Latest News</h3>
+                                <ul class="posts">
+
+                                    <li>
+                                        <h4>
+                                            <a href="/2018/08/23/mention-senate-testimony/">RBK-related research mentioned
+                                                in Senate Health Committee testimony</a>
+                                        </h4>
+                                        <time>
+                                            08/23/2018
+                                        </time>
+                                    </li>
+
+                                    <li>
+                                        <h4>
+                                            <a href="/2018/08/08/new-funding-opps/">New funding opportunities in RMIP</a>
+                                        </h4>
+                                        <time>
+                                            08/08/2018
+                                        </time>
+                                    </li>
+
+                                    <li>
+                                        <h4>
+                                            <a href="/2018/07/18/new-projects/">RBK welcomes three new partnership projects</a>
+                                        </h4>
+                                        <time>
+                                            07/18/2018
+                                        </time>
+                                    </li>
+
+                                    <li>
+                                        <h4>
+                                            <a href="/2018/02/15/mcmahon-json-papers/">McMahon Lab publishes JASN papers
+                                                on human kidney development</a>
+                                        </h4>
+                                        <time>
+                                            02/15/2018
+                                        </time>
+                                    </li>
+
+                                </ul>
+                                <a id="more-news" href="/news/">more news ></a><br>
+                                <a href="/publications/">publications ></a>
+                            </section>
+                        </div>
+                    </section>
+                </div>
+            </section>
+
+        </div>
+
+
+
+        <div class="push"></div>
+    </div>
+    <footer id="footer">
+
+        <div class="lockup">
+            <p class="pull-right" style="padding-top:40px;">
+                <a href="http://deriva.isrd.isi.edu/">
+                    <img src="/assets/img/deriva-white.png" alt="Logo of the DERIVA system" height="80px">
+                </a>
+            </p>
+            <div class="content-wrap">
+
+                <p class="copyright">&copy; 2018 |
+                    <a href="/privacy-policy/">Privacy Policy</a> | <a href="/about/#citing">Citing RBK</a> <br/> (Re)Building
+                    a Kidney is funded by the <a href="https://www.niddk.nih.gov/">National Institute of Diabetes and Digestive
+                        and Kidney Diseases (NIDDK)</a>.
+                </p>
+
+            </div>
+
+        </div>
+
+    </footer>
+    <div class="modal fade" id="feedback" tabindex="-1" role="dialog" aria-labelledby="feedbackLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="feedbackLabel">Feedback Form</h4>
+                </div>
+                <div class="modal-body ">
+                    <div id="wufoo-s11zsu750g4r50y">
+                        Please fill out the <a href="https://isrd.wufoo.com/forms/s11zsu750g4r50y">GUDMAP/RBK feedback form</a>.
+                    </div>
+                    <script type="text/javascript">var s11zsu750g4r50y; (function (d, t) {
+                            var s = d.createElement(t), options = {
+                                'userName': 'isrd',
+                                'formHash': 's11zsu750g4r50y',
+                                'autoResize': true,
+                                'height': '689',
+                                'async': true,
+                                'host': 'wufoo.com',
+                                'header': 'show',
+                                'ssl': true
+                            };
+                            s.src = ('https:' == d.location.protocol ? 'https://' : 'http://') + 'www.wufoo.com/scripts/embed/form.js';
+                            s.onload = s.onreadystatechange = function () {
+                                var rs = this.readyState; if (rs) if (rs != 'complete') if (rs != 'loaded') return;
+                                try { s11zsu750g4r50y = new WufooForm(); s11zsu750g4r50y.initialize(options); s11zsu750g4r50y.display(); } catch (e) { }
+                            };
+                            var scr = d.getElementsByTagName(t)[0], par = scr.parentNode; par.insertBefore(s, scr);
+                        })(document, 'script');</script>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <button type="button" class="btn btn-primary btn-lg feedback" data-toggle="modal" data-target="#feedback">
+        <i class="fa fa-comments"></i>
+    </button>
+    <script src="/assets/js/functions.js" type="text/javascript"></script>
+    <script>
+        $(document).ready(function () {
+            HOME = window.location.origin;
+            $('.search-panel .dropdown-menu').find('a').click(function (e) {
+                e.preventDefault();
+                var param = $(this).attr("href").replace("#", "");
+                var concept = $(this).text();
+                $('.search-panel span#search_concept').text(concept);
+                $('.input-group #search_param').val(param);
+            });
+            $(".search .dropdown-menu li a")[0].click();
+        })
+    </script>
+</body>
+</html>
