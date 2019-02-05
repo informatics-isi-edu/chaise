@@ -97,32 +97,6 @@ describe('Navbar ', function() {
                     done.fail();
                 });
             });
-
-            it('parent link should honor newTab property and navigate in the same tab', function (done) {
-                var recordeditMenu = menu.all(by.tagName('li')).get(4);
-                expect(recordeditMenu.getText()).toBe("RecordEdit", "Third top level menu option text is incorrect");
-
-                recordeditMenu.click().then(function () {
-                    var addOption = recordeditMenu.all(by.tagName('li')).get(0);
-                    expect(addOption.getText()).toBe("Add Records", "First 2nd level option for 'RecordEdit' is in incorrect");
-
-                    return addOption.click();
-                }).then(function () {
-                    return browser.getAllWindowHandles();
-                }).then(function (tabs) {
-                    allWindows = tabs;
-                    expect(allWindows.length).toBe(1, "new tab was opened");
-
-                    return browser.driver.getCurrentUrl();
-                }).then(function (url) {
-                    expect(url.indexOf("/chaise/recordedit/#1/isa:dataset")).toBeGreaterThan(0, "new tab url doesn't include '/chaise/recordedit' path");
-
-                    done();
-                }).catch(function (err) {
-                    console.dir(err);
-                    done.fail();
-                });
-            });
         }
     });
 

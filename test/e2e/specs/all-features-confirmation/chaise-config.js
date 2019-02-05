@@ -8,7 +8,7 @@ var chaiseConfig = {
     defaultCatalog: 1,
     maxRelatedTablesOpen: 6,
     allowErrorDismissal : true,
-    resolverImplicitCatalog: 2, // in parallel config mode, this config is used first with catalog Id 
+    resolverImplicitCatalog: 2, // in parallel config mode, this config is used first with catalog Id
     footerMarkdown:"**Please check** [Privacy Policy](/privacy-policy/){target='_blank'}",
     defaultTables: {
         "1": {
@@ -42,7 +42,6 @@ var chaiseConfig = {
                children: [
                    {
                        name: "Add Records",
-                       url: "/chaise/recordedit/#1/isa:dataset",
                        newTab: false,
                        children: [
                            {
