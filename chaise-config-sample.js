@@ -62,7 +62,6 @@ var chaiseConfig = {
             //     // This "Create" menu item doesn't have any dropdowns.
             //     // Use the "url" key to specify this menu item's url
             //     // URLs can be absolute or relative to the document root.
-            //     // urls can appear alongside children as well to create navigable parent links as long as it's not a top level menu option
             //     name: "Create",
             //     url: "/chaise/recordedit/#1/YOUR_CATALOG:YOUR_SCHEMA"
             // }

@@ -12,7 +12,10 @@
             el.parents('.dropdown-menu').first().find('.show').removeClass("show");
         }
 
+
+        // open the dropdown menu
         el.next(".dropdown-menu").toggleClass("show");
+        // attach handler for when the main nav dropdown closes, close each submenu dropdown as well
         el.parents('ul.nav li.open').on('hidden.bs.dropdown', function(e) {
             $('.dropdown-submenu .show').removeClass("show");
         });
