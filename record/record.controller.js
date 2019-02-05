@@ -25,6 +25,21 @@
         $scope.recordSidePanOpen = chaiseConfig.hideTableOfContents === true ? false : true;
         vm.tooltip = messageMap.tooltip;
         vm.queryTimeoutTooltip = messageMap.queryTimeoutTooltip;
+        vm.gotoInlineTable = function(sectionId, index) {
+            var safeSectionId = vm.makeSafeIdAttr(sectionId);
+            var pageSection = "entity-" + safeSectionId;
+
+            vm.rowFocus[index] = false;
+            var el = angular.element(document.getElementById(pageSection)).parent();
+            mainContainerEl.scrollToElementAnimated(el, 40).then(function () {
+                $timeout(function () {
+                    el.addClass("rowFocus");
+                }, 100);
+                $timeout(function () {
+                    el.removeClass('rowFocus');
+                }, 1600);
+            });
+        };
         vm.gotoRelatedTable = function(sectionId, index) {
             var safeSectionId = vm.makeSafeIdAttr(sectionId);
             var pageSection = "rt-heading-" + safeSectionId;
@@ -194,6 +209,11 @@
                 return $rootScope.showEmptyRelatedTables || tableModel.rowValues.length > 0;
             }
             return false;
+        };
+
+        vm.showInlineTable = function (i) {
+            var cm = $rootScope.columnModels[i];
+            return cm.isInline && ($rootScope.showEmptyRelatedTables || cm.tableModel.rowValues.length > 0);
         };
 
         /**
