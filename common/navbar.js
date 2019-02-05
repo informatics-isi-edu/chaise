@@ -5,12 +5,17 @@
         $event.preventDefault();
 
         var el = angular.element($event.target);
-        // if another dropdown menu is open in the same list, close it first
+
+        // if the dropdown we are trying to open is closed
         if (!el.next().hasClass('show')) {
+            // find if another dropdown menu is open in the same list, close it first
             el.parents('.dropdown-menu').first().find('.show').removeClass("show");
         }
 
-        el.next(".dropdown-menu").toggle();
+        el.next(".dropdown-menu").toggleClass("show");
+        el.parents('ul.nav li.open').on('hidden.bs.dropdown', function(e) {
+            $('.dropdown-submenu .show').removeClass("show");
+        });
     }
 
     'use strict';
