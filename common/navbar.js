@@ -35,6 +35,11 @@
                 scope.brandText = chaiseConfig.navbarBrandText;
                 scope.brandImage = chaiseConfig.navbarBrandImage;
                 scope.menu = chaiseConfig.navbarMenu ? chaiseConfig.navbarMenu.children : [];
+
+                scope.templateUrl = function (url) {
+                    // TODO: shouldn't have to specify catalog and it's id here
+                    return ERMrest._renderHandlebarsTemplate(url, null, {id: "1"});
+                }
             }
         };
     }])
@@ -53,6 +58,12 @@
                     if (!compiled) {
                         compiled = $compile(contents);
                     }
+
+                    scope.templateUrl = function (url) {
+                        // TODO: shouldn't have to specify catalog and it's id here
+                        return ERMrest._renderHandlebarsTemplate(url, null, {id: "1"});
+                    }
+
                     compiled(scope, function(clone) {
                         el.append(clone);
                     });
