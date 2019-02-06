@@ -1,4 +1,26 @@
 (function() {
+    function toggleMenu($event) {
+        // prevent menu from closing on click
+        $event.stopPropagation();
+        $event.preventDefault();
+
+        var el = angular.element($event.target);
+
+        // if the dropdown we are trying to open is closed
+        if (!el.next().hasClass('show')) {
+            // find if another dropdown menu is open in the same list, close it first
+            el.parents('.dropdown-menu').first().find('.show').removeClass("show");
+        }
+
+
+        // open the dropdown menu
+        el.next(".dropdown-menu").toggleClass("show");
+        // attach handler for when the main nav dropdown closes, close each submenu dropdown as well
+        el.parents('ul.nav li.open').on('hidden.bs.dropdown', function(e) {
+            $('.dropdown-submenu .show').removeClass("show");
+        });
+    }
+
     'use strict';
     angular.module('chaise.navbar', [
         'chaise.login',
@@ -35,6 +57,8 @@
                 scope.brandText = chaiseConfig.navbarBrandText;
                 scope.brandImage = chaiseConfig.navbarBrandImage;
                 scope.menu = chaiseConfig.navbarMenu ? chaiseConfig.navbarMenu.children : [];
+
+                scope.toggleMenu = toggleMenu;
             }
         };
     }])
@@ -53,6 +77,9 @@
                     if (!compiled) {
                         compiled = $compile(contents);
                     }
+
+                    scope.toggleSubMenu = toggleMenu;
+
                     compiled(scope, function(clone) {
                         el.append(clone);
                     });
