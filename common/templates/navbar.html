@@ -18,7 +18,7 @@
             <div class="collapse navbar-collapse navbar-inverse" id="fb-navbar-main-collapse">
                 <login></login>
                 <ul id="navbar-menu" class="nav navbar-nav">
-                    <li ng-repeat="item in menu">
+                    <li ng-repeat="item in menu" class="dropdown">
                         <a ng-if="!item.children" ng-href="{{templateUrl(item.url)}}" target="{{item.newTab ? '_blank' : '_self'}}">{{item.name}}</a>
                         <a ng-if="item.children" class="dropdown-toggle" data-toggle="dropdown">{{item.name}} <span class="caret"></span></a>
                         <ul ng-if="item.children" navbar-menu menu="item.children" class="dropdown-menu"></ul>

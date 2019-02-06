@@ -518,6 +518,10 @@ exports.testPresentation = function (tableParams) {
         });
     });
 
+    it("should show the related table names in the correct order in the Table of Contents (including inline)", function () {
+        expect(chaisePage.recordPage.getSidePanelTableTitles()).toEqual(tableParams.tocHeaders, "list of related tables in toc is incorrect");
+    });
+
     describe("regarding inline related entities, ", function () {
         beforeAll(function () {
             // make sure page is in its initial state

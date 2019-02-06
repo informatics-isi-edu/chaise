@@ -1,4 +1,26 @@
 (function() {
+    function toggleMenu($event) {
+        // prevent menu from closing on click
+        $event.stopPropagation();
+        $event.preventDefault();
+
+        var el = angular.element($event.target);
+
+        // if the dropdown we are trying to open is closed
+        if (!el.next().hasClass('show')) {
+            // find if another dropdown menu is open in the same list, close it first
+            el.parents('.dropdown-menu').first().find('.show').removeClass("show");
+        }
+
+
+        // open the dropdown menu
+        el.next(".dropdown-menu").toggleClass("show");
+        // attach handler for when the main nav dropdown closes, close each submenu dropdown as well
+        el.parents('ul.nav li.open').on('hidden.bs.dropdown', function(e) {
+            $('.dropdown-submenu .show').removeClass("show");
+        });
+    }
+
     'use strict';
     angular.module('chaise.navbar', [
         'chaise.login',
@@ -40,6 +62,7 @@
                     // TODO: shouldn't have to specify catalog and it's id here
                     return ERMrest._renderHandlebarsTemplate(url, null, {id: "1"});
                 }
+                scope.toggleMenu = toggleMenu;
             }
         };
     }])
@@ -63,6 +86,7 @@
                         // TODO: shouldn't have to specify catalog and it's id here
                         return ERMrest._renderHandlebarsTemplate(url, null, {id: "1"});
                     }
+                    scope.toggleSubMenu = toggleMenu;
 
                     compiled(scope, function(clone) {
                         el.append(clone);
