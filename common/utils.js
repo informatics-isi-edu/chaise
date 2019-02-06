@@ -732,6 +732,10 @@
         // takes pathname attribute of window.location object and returns app name
         // path should be a string literal which appears before #catalog id in URL (/chaise/recordset/)
         function appNamefromUrlPathname(path){
+            if (path.includes("deriva-webapps")) {
+                var app = path.substring(path.indexOf("deriva-webapps"));
+                return app.substring(app.indexOf('/') + 1, app.lastIndexOf('/'));
+            }
           var newPath = path.slice(0, -1);
           var lastSlash = newPath.lastIndexOf('/');
           return newPath.substring(lastSlash + 1, newPath.length);

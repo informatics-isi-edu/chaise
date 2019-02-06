@@ -95,6 +95,8 @@
             vm.clickActionMessage =  messageMap.recordAvailabilityError.multipleRecords;
         } else if (exception instanceof Errors.noRecordError) {
             vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
+        } else if (exception instanceof Errors.CustomError && exception.errorData.clickActionMessage) {
+            vm.clickActionMessage = exception.errorData.clickActionMessage;
         } else if (ERMrest && exception instanceof ERMrest.InvalidFilterOperatorError) {
             vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
         } else if (ERMrest && isErmrestErrorNeedReplace(exception)) {
