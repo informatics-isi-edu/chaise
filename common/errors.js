@@ -101,7 +101,7 @@
 
             /**
             * @type {string}
-            * @desc   Error message 
+            * @desc   Error message
              */
             this.message = noDataMessageDesc;
 
