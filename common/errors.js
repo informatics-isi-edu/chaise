@@ -134,11 +134,55 @@
         InvalidInputError.prototype = Object.create(Error.prototype);
         InvalidInputError.prototype.constructor = InvalidInputError;
 
+        /**
+         * CustomError - throw custom error from Apps outside Chaise.
+         *
+         * @param  {string} header       Header of the Error Modal         * 
+         * @param  {string} message      Error message to display in Modal body. Can include HTML tags.
+         * @param  {string} redirectUrl  URL to redirect to on clicking ok.
+         * @param  {string} clickActionMessage  Message to display for the OK button. Can include HTML tags.
+         * @return {object}              Error Object
+         */
+        function CustomError(header, message, redirectUrl, clickActionMessage){  
+            /**
+             * @type {string}
+             * @desc Text to display in the Error Modal Header
+             */          
+            this.status = header;
+
+            /**
+             * @type {string}
+             * @desc Error message that shows in the Error modal body
+             */
+            this.message = message;
+
+            /**
+             * @type {object}
+             * @desc  custom object to store miscelleneous elements viz. redirectUrl, message for the ok button
+             */
+            this.errorData = {};
+
+            /**
+             * @type {string}
+             * @desc URL to redirect to when users click the OK button
+             */
+            this.errorData.redirectUrl = redirectUrl;
+
+            /**
+             * @type {string}
+             * @desc Action message to display for click of the OK button
+             */
+            this.errorData.clickActionMessage = clickActionMessage;
+        }
+        CustomError.prototype = Object.create(Error.prototype);
+        CustomError.prototype.constructor = CustomError;
+
         return {
             multipleRecordError: multipleRecordError,
             noRecordError:noRecordError,
             InvalidInputError: InvalidInputError,
-            MalformedUriError: MalformedUriError
+            MalformedUriError: MalformedUriError,
+            CustomError: CustomError
         };
     }])
 
@@ -275,6 +319,10 @@
                 if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'gotoTableDisplayname')) pageName = exception.errorData.gotoTableDisplayname;
                 if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'redirectUrl')) redirectLink = exception.errorData.redirectUrl;
                 if (exception instanceof ERMrest.NotFoundError && !Session.getSessionValue()) showLogin = true;
+            } else if (exception instanceof Errors.CustomError ) {
+                logError(exception);
+                message = exception.message;
+                redirectLink = exception.errorData.redirectUrl;
             } else {
                 logError(exception);
                 message = errorMessages.systemAdminMessage;
