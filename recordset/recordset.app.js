@@ -1,6 +1,6 @@
 (function() {
     'use strict';
-/* Configuration of the recordset App */
+/* Configuration of the Recordset App */
     angular.module('chaise.configure-recordset', [
         'chaise.modal',
         'chaise.utils',
@@ -54,8 +54,11 @@
         chaiseBaseURL: null
     })
 
-    .config(['ConfigUtilsProvider', '$cookiesProvider', '$logProvider', '$uibTooltipProvider', function(ConfigUtilsProvider, $cookiesProvider, $logProvider, $uibTooltipProvider) {
-        ConfigUtilsProvider.$get().setConfigJSON();
+    .config(['$compileProvider', '$cookiesProvider', '$logProvider', '$uibTooltipProvider', 'ConfigUtilsProvider', function($compileProvider, $cookiesProvider, $logProvider, $uibTooltipProvider, ConfigUtilsProvider) {
+        // angular configurations
+        // allows unsafe prefixes to be downloaded
+        // full regex: "/^\s*(https?|ftp|mailto|tel|file|blob):/"
+        $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|blob):/);
         $cookiesProvider.defaults.path = '/';
         //  Enable log system, if in debug mode
         $logProvider.debugEnabled(chaiseConfig && chaiseConfig.debug === true);
@@ -63,6 +66,9 @@
         // tooltip on the element instead, set the `tooltip-append-to-body` attribute
         // to `false` on the element.
         $uibTooltipProvider.options({appendToBody: true});
+
+        // chaise configurations
+        ConfigUtilsProvider.$get().setConfigJSON();
     }])
 
     // Register the 'recordsetModel' object, which can be accessed by other

@@ -1,147 +1,150 @@
 <!DOCTYPE html>
-<html lang="en" id="record" ng-app="chaise.record">
+<html lang="en" id="record">
 <head>
     <title>Record</title>
     <meta charset="utf-8" http-equiv="X-UA-Compatible" content="IE=10; IE=9; IE=8; IE=7; IE=EDGE" />
     <script src="/gtm-id.js"></script>
     %ASSETS%
 </head>
-<body ng-controller="RecordController as ctrl" class="chaise-body">
-    <navbar></navbar>
-    <div class="row">
-        <div id="bookmark-container" class="col-xs-12 meta-icons">
-            <div ng-if="recordDisplayname" id="title" class="pull-left">
-                <h1 id="page-title">
-                    <span ng-if="::recordDisplayname.isHTML" ng-bind-html="::recordDisplayname.value"></span>
-                    <span ng-if="::!recordDisplayname.isHTML" ng-bind="::recordDisplayname.value"></span>
-                </h1>
-                <h3 id="page-subtitle" class="pull-left">
-                    <a ng-href="{{::ctrl.toRecordset()}}">
-                        <span ng-if="::reference.displayname.isHTML" ng-bind-html="::reference.displayname.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::reference.table.comment ? reference.table.comment : undefined}}"></span>
-                        <span ng-if="::!reference.displayname.isHTML" ng-bind="::reference.displayname.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::reference.table.comment ? reference.table.comment : undefined}}"></span>
+<body class="chaise-body">
+    <div ng-app="chaise.configure-record"></div>
+    <div id="record-app" ng-controller="RecordController as ctrl">
+        <navbar></navbar>
+        <div class="row">
+            <div id="bookmark-container" class="col-xs-12 meta-icons">
+                <div ng-if="recordDisplayname" id="title" class="pull-left">
+                    <h1 id="page-title">
+                        <span ng-if="::recordDisplayname.isHTML" ng-bind-html="::recordDisplayname.value"></span>
+                        <span ng-if="::!recordDisplayname.isHTML" ng-bind="::recordDisplayname.value"></span>
+                    </h1>
+                    <h3 id="page-subtitle" class="pull-left">
+                        <a ng-href="{{::ctrl.toRecordset()}}">
+                            <span ng-if="::reference.displayname.isHTML" ng-bind-html="::reference.displayname.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::reference.table.comment ? reference.table.comment : undefined}}"></span>
+                            <span ng-if="::!reference.displayname.isHTML" ng-bind="::reference.displayname.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::reference.table.comment ? reference.table.comment : undefined}}"></span>
+                        </a>
+                    </h3>
+                </div>
+                <div class="pull-right">
+                    <a id="create-record" ng-click="::ctrl.createRecord()" ng-if="::ctrl.canCreate()" uib-tooltip="Click here to create a record." tooltip-placement="bottom">
+                        <span class="glyphicon glyphicon-plus"></span> <strong>Create</strong>
+                    </a>&nbsp;&nbsp;
+                    <a id="edit-record" ng-click="::ctrl.editRecord()" ng-if="::ctrl.canEdit()" uib-tooltip="Click here to edit this record." tooltip-placement="bottom">
+                        <span class="glyphicon glyphicon-pencil"></span> <strong>Edit</strong>
+                    </a>&nbsp;&nbsp;
+                    <a id="copy-record" ng-click="::ctrl.copyRecord()" ng-if="::ctrl.canEdit()" uib-tooltip="Click here to create a copy of this record." tooltip-placement="bottom">
+                        <span class="glyphicon glyphicon-copy"></span> <strong>Copy</strong>
+                    </a>&nbsp;&nbsp;
+                    <delete-link id="delete-record" callback="::ctrl.deleteRecord()" ng-if="::ctrl.canDelete()" label="Delete" uib-tooltip="Click here to delete this record." tooltip-placement="bottom" icon="true"></delete-link>&nbsp;&nbsp;
+                    <a id="show-all-related-tables" ng-click="::ctrl.toggleRelatedTables();" uib-tooltip="{{'Click here to ' + ((showEmptyRelatedTables) ? 'hide empty related entities.' : 'show empty related entities too.')}}" tooltip-placement="bottom">
+                        <span class="glyphicon" ng-class="{'glyphicon-resize-full': !showEmptyRelatedTables, 'glyphicon-resize-small': showEmptyRelatedTables}"></span>
+                        <strong>
+                            <span ng-show="!showEmptyRelatedTables">Show All</span>
+                            <span ng-show="showEmptyRelatedTables">Hide Empty</span>
+                            Related Records
+                        </strong>
+                    </a>&nbsp;&nbsp;
+                    <!-- download CSV included by default -->
+                    <export allow-export="displayReady" reference="reference" style="position:relative;" disabled="!displayReady"></export>
+                    &nbsp;&nbsp;
+                    <a id="share" ng-show="displayReady" ng-click="::ctrl.sharePopup()" uib-tooltip="Click here to show the share dialog." tooltip-placement="bottom">
+                        <span class="glyphicon glyphicon-share"></span><strong> Share</strong>
                     </a>
-                </h3>
-            </div>
-            <div class="pull-right">
-                <a id="create-record" ng-click="::ctrl.createRecord()" ng-if="::ctrl.canCreate()" uib-tooltip="Click here to create a record." tooltip-placement="bottom">
-                    <span class="glyphicon glyphicon-plus"></span> <strong>Create</strong>
-                </a>&nbsp;&nbsp;
-                <a id="edit-record" ng-click="::ctrl.editRecord()" ng-if="::ctrl.canEdit()" uib-tooltip="Click here to edit this record." tooltip-placement="bottom">
-                    <span class="glyphicon glyphicon-pencil"></span> <strong>Edit</strong>
-                </a>&nbsp;&nbsp;
-                <a id="copy-record" ng-click="::ctrl.copyRecord()" ng-if="::ctrl.canEdit()" uib-tooltip="Click here to create a copy of this record." tooltip-placement="bottom">
-                    <span class="glyphicon glyphicon-copy"></span> <strong>Copy</strong>
-                </a>&nbsp;&nbsp;
-                <delete-link id="delete-record" callback="::ctrl.deleteRecord()" ng-if="::ctrl.canDelete()" label="Delete" uib-tooltip="Click here to delete this record." tooltip-placement="bottom" icon="true"></delete-link>&nbsp;&nbsp;
-                <a id="show-all-related-tables" ng-click="::ctrl.toggleRelatedTables();" uib-tooltip="{{'Click here to ' + ((showEmptyRelatedTables) ? 'hide empty related entities.' : 'show empty related entities too.')}}" tooltip-placement="bottom">
-                    <span class="glyphicon" ng-class="{'glyphicon-resize-full': !showEmptyRelatedTables, 'glyphicon-resize-small': showEmptyRelatedTables}"></span>
-                    <strong>
-                        <span ng-show="!showEmptyRelatedTables">Show All</span>
-                        <span ng-show="showEmptyRelatedTables">Hide Empty</span>
-                        Related Records
-                    </strong>
-                </a>&nbsp;&nbsp;
-                <!-- download CSV included by default -->
-                <export allow-export="displayReady" reference="reference" style="position:relative;" disabled="!displayReady"></export>
-                &nbsp;&nbsp;
-                <a id="share" ng-show="displayReady" ng-click="::ctrl.sharePopup()" uib-tooltip="Click here to show the share dialog." tooltip-placement="bottom">
-                    <span class="glyphicon glyphicon-share"></span><strong> Share</strong>
-                </a>
+                </div>
             </div>
         </div>
-    </div>
-    <loading-spinner ng-show="(!displayReady || showSpinner) && !error"></loading-spinner>
+        <loading-spinner ng-show="(!displayReady || showSpinner) && !error"></loading-spinner>
 
-    <div id="main-content" class="record-container">
+        <div id="main-content" class="record-container">
 
-        <div class="main-container" ng-class="{'initializing': !displayReady}">
-            <div class="main-body" style="padding-right:10px; padding-left:15px;">
-                <alerts id="alerts-container" alerts="ctrl.alerts"></alerts>
+            <div class="main-container" ng-class="{'initializing': !displayReady}">
+                <div class="main-body" style="padding-right:10px; padding-left:15px;">
+                    <alerts id="alerts-container" alerts="ctrl.alerts"></alerts>
 
-                <!-- defined on $rootScope in run function -->
-                <record-display class="entity-container" column-models="columnModels" values="recordValues"
-                    toggle-related-table-display-type='ctrl.toggleRelatedTableDisplayType(dataModel)' can-edit-related="::ctrl.canEditRelated(ref)" can-create-related="::ctrl.canCreateRelated(ref)"
-                    add-related-record="ctrl.addRelatedRecord(ref)" to-record-set="ctrl.toRecordSet(ref)" show-empty-related-tables="showEmptyRelatedTables">
-                </record-display>
+                    <!-- defined on $rootScope in run function -->
+                    <record-display class="entity-container" column-models="columnModels" values="recordValues"
+                        toggle-related-table-display-type='ctrl.toggleRelatedTableDisplayType(dataModel)' can-edit-related="::ctrl.canEditRelated(ref)" can-create-related="::ctrl.canCreateRelated(ref)"
+                        add-related-record="ctrl.addRelatedRecord(ref)" to-record-set="ctrl.toRecordSet(ref)" show-empty-related-tables="showEmptyRelatedTables">
+                    </record-display>
 
-                <!-- used to delay empty accordions from displaying before simple record display -->
-                <div ng-if="displayReady" id="rt-container">
-                    <uib-accordion close-others="false">
-                        <div uib-accordion-group class="related-table-heading" id="rt-heading-{{::ctrl.makeSafeIdAttr(rtm.tableModel.reference.displayname.value)}}"  ng-repeat="rtm in relatedTableModels track by $index"  ng-show="ctrl.showRelatedTable($index)" is-open="rtm.open">
-                            <uib-accordion-heading>
-                                <i class="pull-left glyphicon" style="margin-right: 5px;" ng-class="{'glyphicon-chevron-down': rtm.open, 'glyphicon-chevron-right': !m.open}"></i>
-                                <span ng-if="::rtm.displayname.isHTML" ng-bind-html="::rtm.displayname.value"></span><span ng-if="::!rtm.displayname.isHTML" ng-bind="::rtm.displayname.value"></span> <span ng-if="rtm.tableModel.rowValues.length==0">(no results found)</span><span ng-if="rtm.tableModel.rowValues.length!=0">(showing {{rtm.tableModel.page.hasNext ? 'first' : 'all'}} {{rtm.tableModel.rowValues.length}} results)</span>
-                                <span ng-if="rtm.tableModel.tableError" class="glyphicon glyphicon-alert" uib-tooltip="{{ctrl.queryTimeoutTooltip}}" tooltip-placement="right"></span>
-                            </uib-accordion-heading>
+                    <!-- used to delay empty accordions from displaying before simple record display -->
+                    <div ng-if="displayReady" id="rt-container">
+                        <uib-accordion close-others="false">
+                            <div uib-accordion-group class="related-table-heading" id="rt-heading-{{::ctrl.makeSafeIdAttr(rtm.tableModel.reference.displayname.value)}}"  ng-repeat="rtm in relatedTableModels track by $index"  ng-show="ctrl.showRelatedTable($index)" is-open="rtm.open">
+                                <uib-accordion-heading>
+                                    <i class="pull-left glyphicon" style="margin-right: 5px;" ng-class="{'glyphicon-chevron-down': rtm.open, 'glyphicon-chevron-right': !m.open}"></i>
+                                    <span ng-if="::rtm.displayname.isHTML" ng-bind-html="::rtm.displayname.value"></span><span ng-if="::!rtm.displayname.isHTML" ng-bind="::rtm.displayname.value"></span> <span ng-if="rtm.tableModel.rowValues.length==0">(no results found)</span><span ng-if="rtm.tableModel.rowValues.length!=0">(showing {{rtm.tableModel.page.hasNext ? 'first' : 'all'}} {{rtm.tableModel.rowValues.length}} results)</span>
+                                    <span ng-if="rtm.tableModel.tableError" class="glyphicon glyphicon-alert" uib-tooltip="{{ctrl.queryTimeoutTooltip}}" tooltip-placement="right"></span>
+                                </uib-accordion-heading>
 
-                            <!-- for different elements inside the accordion -->
-                            <record-action-bar tabtype="related" tab-model-display="rtm.displayType" show-toggle-display-btn="ctrl.allowRelatedTableMarkdown($index)"
-                                toggle-related-table-display-type='ctrl.toggleRelatedTableDisplayType(rtm)' can-edit-related="ctrl.canEditRelated(rtm.tableModel.reference)" can-create-related="ctrl.canCreateRelated(rtm.tableModel.reference)"
-                                add-related-record="ctrl.addRelatedRecord(rtm.tableModel.reference)" to-record-set="ctrl.toRecordSet(rtm.tableModel.reference)"
-                                displayname="rtm.displayname" base-table-name="rtm.baseTableName">
-                            </record-action-bar>
-                            <div class="row">
-                                <div class="col-xs-12" ng-if="rtm.open" ng-switch="rtm.displayType == 'markdown' && ctrl.allowRelatedTableMarkdown($index)">
-                                    <div ng-switch-when="true">
-                                        <span class="markdown-container" ng-bind-html="rtm.tableModel.page.content | trustedHTML"></span>
-                                    </div>
-                                    <div ng-switch-default>
-                                        <record-table class="related-table" id="rt-{{::ctrl.makeSafeIdAttr(rtm.displayname.value)}}" vm="rtm.tableModel" parent-reference="reference"></record-table>
+                                <!-- for different elements inside the accordion -->
+                                <record-action-bar tabtype="related" tab-model-display="rtm.displayType" show-toggle-display-btn="ctrl.allowRelatedTableMarkdown($index)"
+                                    toggle-related-table-display-type='ctrl.toggleRelatedTableDisplayType(rtm)' can-edit-related="ctrl.canEditRelated(rtm.tableModel.reference)" can-create-related="ctrl.canCreateRelated(rtm.tableModel.reference)"
+                                    add-related-record="ctrl.addRelatedRecord(rtm.tableModel.reference)" to-record-set="ctrl.toRecordSet(rtm.tableModel.reference)"
+                                    displayname="rtm.displayname" base-table-name="rtm.baseTableName">
+                                </record-action-bar>
+                                <div class="row">
+                                    <div class="col-xs-12" ng-if="rtm.open" ng-switch="rtm.displayType == 'markdown' && ctrl.allowRelatedTableMarkdown($index)">
+                                        <div ng-switch-when="true">
+                                            <span class="markdown-container" ng-bind-html="rtm.tableModel.page.content | trustedHTML"></span>
+                                        </div>
+                                        <div ng-switch-default>
+                                            <record-table class="related-table" id="rt-{{::ctrl.makeSafeIdAttr(rtm.displayname.value)}}" vm="rtm.tableModel" parent-reference="reference"></record-table>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </uib-accordion>
+                        </uib-accordion>
+                    </div>
+                    <span id="rt-loading" ng-show="loading" class="loading-text" ng-class="{'loading-sticky': ctrl.stickLoading}">
+                        <img class="spinner spinner-sm" src="../common/styles/images/loader.gif"/>
+                        Loading...
+                    </span>
                 </div>
-                <span id="rt-loading" ng-show="loading" class="loading-text" ng-class="{'loading-sticky': ctrl.stickLoading}">
-                    <img class="spinner spinner-sm" src="../common/styles/images/loader.gif"/>
-                    Loading...
-                </span>
-            </div>
-            <footer ng-show="!loading && displayReady"></footer>
-        </div>
-
-        <div class="faceting-resizable record-toc" resizable r-directions=["left"] r-flex="true" id="record-side-pan" ng-hide="ctrl.noVisibleRelatedTables()" ng-class="{'open-panel': recordSidePanOpen, 'close-panel': !recordSidePanOpen}">
-            <div class="btn btn-primary btn-inverted" id="back-to-top" ng-click="scrollToTop()" ng-show="showTopBtn">
-                <i uib-tooltip="Scroll To Top" tooltip-placement="left" class="glyphicon glyphicon-triangle-top"></i>
+                <footer ng-show="!loading && displayReady"></footer>
             </div>
 
-            <div class="faceting-container" style="height: 100%;" >
-                <h2 class="sidePanelHeading">Contents</h2>
-                <div class="columns-container">
-                    <ul>
-                        <li id="main-to-top" class="toc-heading" ng-click="scrollToTop()">
-                            <a uib-tooltip="Main" tooltip-placement="bottom" chaise-enable-tooltip-width>Main</a>
-                        </li>
-                        <div ng-repeat="cm in columnModels track by $index" id="recordSidePan-{{$index}}" ng-if="ctrl.showInlineTable($index)" class="{{lastActiveFacet == $index ? 'focused': ''}}" ng-click="ctrl.gotoInlineTable(cm.displayname.value, $index)">
-
-                            <li id="recordSidePan-heading-{{$index}}" class="toc-heading">
-                                <a uib-tooltip="{{cm.displayname.value}}" tooltip-placement="bottom" chaise-enable-tooltip-width>
-                                    <span ng-if="::cm.displayname.isHTML" ng-bind-html="::cm.displayname.value"></span>
-                                    <span ng-if="::!cm.displayname.isHTML" ng-bind="::cm.displayname.value"></span>
-                                    <span>({{cm.tableModel.rowValues.length}}{{cm.tableModel.page.hasNext ? '+' : ''}})</span>
-                                </a>
-                            </li>
-                        </div>
-                        <div ng-repeat="rtm in relatedTableModels track by $index" id="recordSidePan-{{$index}}" ng-if="ctrl.showRelatedTable($index)" class="{{lastActiveFacet == $index ? 'focused': ''}}" ng-click="ctrl.gotoRelatedTable(rtm.displayname.value, $index)">
-
-                            <li id="recordSidePan-heading-{{$index}}" class="toc-heading">
-                                <a uib-tooltip="{{rtm.displayname.value}}" tooltip-placement="bottom" chaise-enable-tooltip-width>
-                                    <span ng-if="::rtm.displayname.isHTML" ng-bind-html="::rtm.displayname.value"></span>
-                                    <span ng-if="::!rtm.displayname.isHTML" ng-bind="::rtm.displayname.value"></span>
-                                    <span>({{rtm.tableModel.rowValues.length}}{{rtm.tableModel.page.hasNext ? '+' : ''}})</span>
-                                </a>
-                            </li>
-                        </div>
-                        <li id="rt-toc-loading" ng-show="loading" class="loading-text">
-                            <img class="spinner spinner-sm" src="../common/styles/images/loader.gif"/>
-                            Loading...
-                        </li>
-                    </ul>
+            <div class="faceting-resizable record-toc" resizable r-directions=["left"] r-flex="true" id="record-side-pan" ng-hide="ctrl.noVisibleRelatedTables()" ng-class="{'open-panel': recordSidePanOpen, 'close-panel': !recordSidePanOpen}">
+                <div class="btn btn-primary btn-inverted" id="back-to-top" ng-click="scrollToTop()" ng-show="showTopBtn">
+                    <i uib-tooltip="Scroll To Top" tooltip-placement="left" class="glyphicon glyphicon-triangle-top"></i>
                 </div>
-            </div>
-            <faceting-collapse-btn class="facet-btn" panel-open="recordSidePanOpen" toggle-panel="ctrl.togglePan" position="right" tooltip-message="{{'Click to ' + ((recordSidePanOpen) ? 'hide' : 'show') + ' table of contents.'}}" ng-class="{'open-panel': recordSidePanOpen, 'close-panel': !recordSidePanOpen}"></faceting-collapse-btn>
-        </div>
 
+                <div class="faceting-container" style="height: 100%;" >
+                    <h2 class="sidePanelHeading">Contents</h2>
+                    <div class="columns-container">
+                        <ul>
+                            <li id="main-to-top" class="toc-heading" ng-click="scrollToTop()">
+                                <a uib-tooltip="Main" tooltip-placement="bottom" chaise-enable-tooltip-width>Main</a>
+                            </li>
+                            <div ng-repeat="cm in columnModels track by $index" id="recordSidePan-{{$index}}" ng-if="ctrl.showInlineTable($index)" class="{{lastActiveFacet == $index ? 'focused': ''}}" ng-click="ctrl.gotoInlineTable(cm.displayname.value, $index)">
+
+                                <li id="recordSidePan-heading-{{$index}}" class="toc-heading">
+                                    <a uib-tooltip="{{cm.displayname.value}}" tooltip-placement="bottom" chaise-enable-tooltip-width>
+                                        <span ng-if="::cm.displayname.isHTML" ng-bind-html="::cm.displayname.value"></span>
+                                        <span ng-if="::!cm.displayname.isHTML" ng-bind="::cm.displayname.value"></span>
+                                        <span>({{cm.tableModel.rowValues.length}}{{cm.tableModel.page.hasNext ? '+' : ''}})</span>
+                                    </a>
+                                </li>
+                            </div>
+                            <div ng-repeat="rtm in relatedTableModels track by $index" id="recordSidePan-{{$index}}" ng-if="ctrl.showRelatedTable($index)" class="{{lastActiveFacet == $index ? 'focused': ''}}" ng-click="ctrl.gotoRelatedTable(rtm.displayname.value, $index)">
+
+                                <li id="recordSidePan-heading-{{$index}}" class="toc-heading">
+                                    <a uib-tooltip="{{rtm.displayname.value}}" tooltip-placement="bottom" chaise-enable-tooltip-width>
+                                        <span ng-if="::rtm.displayname.isHTML" ng-bind-html="::rtm.displayname.value"></span>
+                                        <span ng-if="::!rtm.displayname.isHTML" ng-bind="::rtm.displayname.value"></span>
+                                        <span>({{rtm.tableModel.rowValues.length}}{{rtm.tableModel.page.hasNext ? '+' : ''}})</span>
+                                    </a>
+                                </li>
+                            </div>
+                            <li id="rt-toc-loading" ng-show="loading" class="loading-text">
+                                <img class="spinner spinner-sm" src="../common/styles/images/loader.gif"/>
+                                Loading...
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <faceting-collapse-btn class="facet-btn" panel-open="recordSidePanOpen" toggle-panel="ctrl.togglePan" position="right" tooltip-message="{{'Click to ' + ((recordSidePanOpen) ? 'hide' : 'show') + ' table of contents.'}}" ng-class="{'open-panel': recordSidePanOpen, 'close-panel': !recordSidePanOpen}"></faceting-collapse-btn>
+            </div>
+
+        </div>
     </div>
 </body>
