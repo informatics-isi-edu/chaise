@@ -1,7 +1,29 @@
 (function() {
     'use strict';
+/* Configuration of the recordset App */
+    angular.module('chaise.configure-recordset', [
+        'chaise.modal',
+        'chaise.utils',
+        'ermrestjs',
+        'ngCookies',
+        'ngAnimate',
+        'ui.bootstrap'
+    ])
 
-    // The Chaise RecordSet module
+    .run(['ERMrest', function (ERMrest) {
+        try {
+            ERMrest.onload().then(function () {
+                angular.element(document).ready(function(){
+                    angular.bootstrap(document.getElementById("recordset-app"), ["chaise.recordset"]);
+                });
+            });
+        } catch (exception) {
+            throw exception;
+        }
+    }]);
+
+
+/* Recordset App */
     angular.module('chaise.recordset', [
         'chaise.authen',
         'chaise.errors',
@@ -22,14 +44,6 @@
         'duScroll',
         'ui.bootstrap'])
 
-    .config(['$cookiesProvider', function($cookiesProvider) {
-        $cookiesProvider.defaults.path = '/';
-    }])
-
-    .config(['ConfigUtilsProvider', function(ConfigUtilsProvider) {
-      ConfigUtilsProvider.$get().setConfigJSON();
-    }])
-
     // Register the 'context' object which can be accessed by config and other
     // services.
     .constant('context', {
@@ -40,16 +54,15 @@
         chaiseBaseURL: null
     })
 
-    // Configure all tooltips to be attached to the body by default. To attach a
-    // tooltip on the element instead, set the `tooltip-append-to-body` attribute
-    // to `false` on the element.
-    .config(['$uibTooltipProvider', function($uibTooltipProvider) {
-        $uibTooltipProvider.options({appendToBody: true});
-    }])
-
-    //  Enable log system, if in debug mode
-    .config(['$logProvider', function($logProvider) {
+    .config(['ConfigUtilsProvider', '$cookiesProvider', '$logProvider', '$uibTooltipProvider', function(ConfigUtilsProvider, $cookiesProvider, $logProvider, $uibTooltipProvider) {
+        ConfigUtilsProvider.$get().setConfigJSON();
+        $cookiesProvider.defaults.path = '/';
+        //  Enable log system, if in debug mode
         $logProvider.debugEnabled(chaiseConfig && chaiseConfig.debug === true);
+        // Configure all tooltips to be attached to the body by default. To attach a
+        // tooltip on the element instead, set the `tooltip-append-to-body` attribute
+        // to `false` on the element.
+        $uibTooltipProvider.options({appendToBody: true});
     }])
 
     // Register the 'recordsetModel' object, which can be accessed by other
@@ -82,6 +95,7 @@
             UriUtils.setOrigin();
 
             var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
+            context.catalogID = $window.location.hash.split('/')[0].slice(1);
             context.chaiseBaseURL = $window.location.href.replace($window.location.hash, '');
             var modifyEnabled = chaiseConfig.editRecord === false ? false : true;
             var deleteEnabled = chaiseConfig.deleteRecord === true ? true : false;

@@ -39,6 +39,9 @@
         while (q.length > 0) {
             var obj = q.shift();
             var parentNewTab = obj.newTab;
+            // template the url
+            // TODO: This is done here to prevent writing a recursive function (again) in `setConfigJSON()`
+            if (obj.url) obj.url = ERMrest.renderHandlebarsTemplate(obj.url, null, {id: $rootScope.context.catalogID});
             // If current node has children, set each child's newTab to its own existing newTab or parent's newTab
             if (Array.isArray(obj.children)) {
                 obj.children.forEach(function (child) {
@@ -58,10 +61,6 @@
                 scope.brandImage = chaiseConfig.navbarBrandImage;
                 scope.menu = chaiseConfig.navbarMenu ? chaiseConfig.navbarMenu.children : [];
 
-                scope.templateUrl = function (url) {
-                    // TODO: shouldn't have to specify catalog and it's id here
-                    return ERMrest._renderHandlebarsTemplate(url, null, {id: "1"});
-                }
                 scope.toggleMenu = toggleMenu;
             }
         };
@@ -82,10 +81,6 @@
                         compiled = $compile(contents);
                     }
 
-                    scope.templateUrl = function (url) {
-                        // TODO: shouldn't have to specify catalog and it's id here
-                        return ERMrest._renderHandlebarsTemplate(url, null, {id: "1"});
-                    }
                     scope.toggleSubMenu = toggleMenu;
 
                     compiled(scope, function(clone) {
