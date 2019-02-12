@@ -22,7 +22,7 @@
 <div ng-app="chaise.configure-recordedit"></div>
 <body class="chaise-body">
 
-    <div id="recordedit-app" class="container-fluid">
+    <div class="container-fluid">
         <navbar></navbar>
         <loading-spinner ng-show="!displayReady && !error"></loading-spinner>
         <div ng-if="reference && (reference.canCreate || reference.canUpdate)">

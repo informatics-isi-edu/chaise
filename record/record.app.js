@@ -14,7 +14,7 @@
         try {
             ERMrest.onload().then(function () {
                 angular.element(document).ready(function(){
-                    angular.bootstrap(document.getElementById("record-app"), ["chaise.record"]);
+                    angular.bootstrap(document.getElementById("record"), ["chaise.record"]);
                 });
             });
         } catch (exception) {

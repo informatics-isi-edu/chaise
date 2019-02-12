@@ -8,7 +8,7 @@
 </head>
 <body class="chaise-body">
     <div ng-app="chaise.configure-record"></div>
-    <div id="record-app" ng-controller="RecordController as ctrl">
+    <div ng-controller="RecordController as ctrl">
         <navbar></navbar>
         <div class="row">
             <div id="bookmark-container" class="col-xs-12 meta-icons">
