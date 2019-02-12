@@ -19,10 +19,9 @@
         </script>
     <![endif]-->
 </head>
-<div ng-app="chaise.configure-recordedit"></div>
 <body class="chaise-body">
-
-    <div class="container-fluid">
+    <div ng-app="chaise.configure-recordedit"></div>
+    <div class="app-container container-fluid">
         <navbar></navbar>
         <loading-spinner ng-show="!displayReady && !error"></loading-spinner>
         <div ng-if="reference && (reference.canCreate || reference.canUpdate)">
