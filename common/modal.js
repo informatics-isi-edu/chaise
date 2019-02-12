@@ -121,6 +121,11 @@
         };
 
         vm.ok = function () {
+            var dismiss = exception.clickOkToDismiss;
+            if(dismiss != null && dismiss != undefined && dismiss){
+                $uibModalInstance.dismiss('cancel');
+                return;
+            }            
             $uibModalInstance.close();
         };
 
