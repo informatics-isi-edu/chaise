@@ -40,7 +40,7 @@ html .app-container {
 }
 
 html.ng-scope .app-container {
-    display: unset;
+    display: block;
 }
 
 body {
