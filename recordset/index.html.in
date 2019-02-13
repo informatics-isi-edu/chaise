@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" id="recordset" ng-app="chaise.recordset">
+<html lang="en" id="recordset">
     <head>
         <meta charset="UTF-8">
         <title>Record Set App</title>
@@ -7,7 +7,8 @@
         %ASSETS%
     </head>
     <body class="chaise-body">
-        <div ng-controller="recordsetController as ctrl">
+        <div ng-app="chaise.configure-recordset"></div>
+        <div class="app-container" ng-controller="recordsetController as ctrl">
             <navbar></navbar>
             <div class="row">
                 <div id="bookmark-container" class="col-xs-12 meta-icons">

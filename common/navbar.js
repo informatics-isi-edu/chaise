@@ -26,7 +26,7 @@
         'chaise.login',
         'chaise.utils'
     ])
-    .directive('navbar', [ '$rootScope', 'UriUtils', function($rootScope, UriUtils) {
+    .directive('navbar', [ '$rootScope', 'ERMrest', 'UriUtils', function($rootScope, ERMrest, UriUtils) {
         var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
 
         // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
@@ -39,6 +39,9 @@
         while (q.length > 0) {
             var obj = q.shift();
             var parentNewTab = obj.newTab;
+            // template the url
+            // TODO: This is done here to prevent writing a recursive function (again) in `setConfigJSON()`
+            if (obj.url) obj.url = ERMrest.renderHandlebarsTemplate(obj.url, null, {id: $rootScope.context.catalogID});
             // If current node has children, set each child's newTab to its own existing newTab or parent's newTab
             if (Array.isArray(obj.children)) {
                 obj.children.forEach(function (child) {
