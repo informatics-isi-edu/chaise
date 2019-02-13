@@ -119,13 +119,90 @@
                 },
                 "tag:misd.isi.edu,2015:display" : {
                     "name": "<strong>Html Name</strong>"
+                },
+                "tag:isrd.isi.edu,2016:table-display": {
+                    "detailed": {
+                        "collapse_toc_panel": true,
+                        "hide_column_headers": true
+                    }
+                }
+            }
+        },
+        "fk-table": {
+            "kind": "table",
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "id"
+                    ]
+                }
+            ],
+            "foreign_keys": [
+                {
+                  "comment": null,
+                  "names": [["editable-id", "foreign_table"]],
+                  "foreign_key_columns": [
+                    {
+                      "table_name": "fk-table",
+                      "schema_name": "editable-id",
+                      "column_name": "foreign_table"
+                    }
+                  ],
+                  "annotations": {},
+                  "referenced_columns": [
+                    {
+                      "table_name": "html-name-table",
+                      "schema_name": "editable-id",
+                      "column_name": "id"
+                    }
+                  ]
+                }
+            ],
+            "table_name": "fk-table",
+            "schema_name": "editable-id",
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "default": null,
+                    "nullok": false,
+                    "type": {
+                        "typename": "int"
+                    }
+                }, {
+                    "name": "text",
+                    "default": "default text",
+                    "nullok": true,
+                    "type": {
+                        "typename": "text"
+                    }
+                }, {
+                    "name": "int",
+                    "default": 100,
+                    "nullok": true,
+                    "type": {
+                        "typename": "int"
+                    }
+                }, {
+                    "name": "foreign_table",
+                    "nullok": true,
+                    "type": {
+                        "typename": "int"
+                    }
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:visible-columns" : {
+                    "*": ["text", "int"]
                 }
             }
         }
     },
     "table_names": [
         "editable-id-table",
-        "html-name-table"
+        "html-name-table",
+        "fk-table"
     ],
     "comment": null,
     "annotations": {}
