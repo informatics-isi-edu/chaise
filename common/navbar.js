@@ -59,6 +59,9 @@
                 scope.menu = chaiseConfig.navbarMenu ? chaiseConfig.navbarMenu.children : [];
 
                 scope.toggleMenu = toggleMenu;
+                scope.toLive = function () {
+                    console.log($rootScope);
+                }
             }
         };
     }])

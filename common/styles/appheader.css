@@ -30,6 +30,13 @@ body > .container {
    color: #59C4FF;
 }
 
+#live-btn {
+    margin-right: 10px;
+    color: #59C4FF;
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
 .navbar-inverse .navbar-nav.navbar-right > li > a:hover{
    color: #FFF;
 }
