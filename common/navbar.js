@@ -26,7 +26,7 @@
         'chaise.login',
         'chaise.utils'
     ])
-    .directive('navbar', [ '$rootScope', 'ERMrest', 'UriUtils', function($rootScope, ERMrest, UriUtils) {
+    .directive('navbar', [ '$rootScope', '$window', 'ERMrest', 'UriUtils', function($rootScope, $window, ERMrest, UriUtils) {
         var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
 
         // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
@@ -62,8 +62,12 @@
                 scope.menu = chaiseConfig.navbarMenu ? chaiseConfig.navbarMenu.children : [];
 
                 scope.toggleMenu = toggleMenu;
+                scope.isVersioned = function () {
+                    return $rootScope.context.catalogID.split("@")[1] ? true : false;
+                }
+
                 scope.toLive = function () {
-                    console.log($rootScope);
+                    $window.location = $window.location.href.replace($rootScope.context.catalogID, $rootScope.context.catalogID.split("@")[0])
                 }
             }
         };
