@@ -10,15 +10,11 @@
     ])
 
     .run(['ERMrest', function (ERMrest) {
-        try {
-            ERMrest.onload().then(function () {
-                angular.element(document).ready(function(){
-                    angular.bootstrap(document.getElementById("recordedit"), ["chaise.recordEdit"]);
-                });
+        ERMrest.onload().then(function () {
+            angular.element(document).ready(function(){
+                angular.bootstrap(document.getElementById("recordedit"), ["chaise.recordEdit"]);
             });
-        } catch (exception) {
-            throw exception;
-        }
+        });
     }]);
 
 /* Recordedit App */
