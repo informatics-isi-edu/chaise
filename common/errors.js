@@ -137,13 +137,14 @@
         /**
          * CustomError - throw custom error from Apps outside Chaise.
          *
-         * @param  {string} header       Header of the Error Modal         * 
-         * @param  {string} message      Error message to display in Modal body. Can include HTML tags.
-         * @param  {string} redirectUrl  URL to redirect to on clicking ok.
+         * @param  {string} header              Header of the Error Modal         * 
+         * @param  {string} message             Error message to display in Modal body. Can include HTML tags.
+         * @param  {string} redirectUrl         URL to redirect to on clicking ok.
          * @param  {string} clickActionMessage  Message to display for the OK button. Can include HTML tags.
-         * @return {object}              Error Object
+         * @param  {string} clickOkToDismiss    Set true to dismiss the error modal on clicking the OK button
+         * @return {object}                     Error Object
          */
-        function CustomError(header, message, redirectUrl, clickActionMessage){  
+        function CustomError(header, message, redirectUrl, clickActionMessage, clickOkToDismiss){  
             /**
              * @type {string}
              * @desc Text to display in the Error Modal Header
@@ -173,6 +174,12 @@
              * @desc Action message to display for click of the OK button
              */
             this.errorData.clickActionMessage = clickActionMessage;
+
+            /**
+             * @type {boolean}
+             * @desc Set true to dismiss the error modal on clicking the OK button
+             */
+            this.clickOkToDismiss = clickOkToDismiss;
         }
         CustomError.prototype = Object.create(Error.prototype);
         CustomError.prototype.constructor = CustomError;

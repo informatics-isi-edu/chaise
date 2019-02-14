@@ -22,5 +22,5 @@
 </div>
 <div class="modal-footer">
     <button ng-show="ctrl.showReloadBtn" class="btn btn-default" type="button" ng-click="ctrl.reload()">Reload</button>
-    <button class="btn btn-danger" type="button" ng-click="ctrl.ok()">OK</button>
+    <button class="btn btn-danger" type="button" ng-click="ctrl.clickOkToDismiss ? ctrl.cancel() : ctrl.ok()">OK</button>
 </div>

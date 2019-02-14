@@ -114,7 +114,8 @@
         // <p> tag is added to maintain the space between click action message and buttons
         // Also maintains consistency  in their placement irrespective of reload message
         vm.clickActionMessage += reloadMessage;
-
+        
+        vm.clickOkToDismiss = exception.clickOkToDismiss;
         vm.showDetails = function() {
             vm.displayDetails = !vm.displayDetails;
             vm.linkText = (vm.displayDetails) ? messageMap.hideErrDetails : messageMap.showErrDetails;
