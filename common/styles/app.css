@@ -624,6 +624,11 @@ th.multi-select-width {
     color: #333;
 }
 
+
+.hide-border>td {
+    border-bottom: none !important;
+}
+
 .entity-term {
     background-color: #428bca;
     font-size: .8em;
