@@ -22,7 +22,7 @@
         vm.sidePanToggleBtnIndicator = "Show";
 
         var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
-        $scope.recordSidePanOpen = chaiseConfig.hideTableOfContents === true ? false : true;
+
         vm.tooltip = messageMap.tooltip;
         vm.queryTimeoutTooltip = messageMap.queryTimeoutTooltip;
         vm.gotoInlineTable = function(sectionId, index) {
@@ -414,6 +414,8 @@
             return $rootScope.displayReady;
         }, function (newValue, oldValue) {
             if (newValue) {
+                $rootScope.recordSidePanOpen = (chaiseConfig.hideTableOfContents === true || $rootScope.reference.display.collapseToc === true) ? false : true;
+                $rootScope.hideColumnHeaders = $rootScope.reference.display.hideColumnHeaders;
                 $timeout(setMainContainerHeight, 0);
             }
         });

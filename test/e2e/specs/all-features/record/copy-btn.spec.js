@@ -54,7 +54,7 @@ describe('View existing record,', function() {
 
     });
 
-    // below are the tests for the copy button
+    // tests for subtitle link, resolverImplicitCatalog, and no citation in share modal
     describe("For table " + testParams.html_table_name + ",", function() {
 
         beforeAll(function() {
@@ -75,6 +75,13 @@ describe('View existing record,', function() {
         it("should load chaise-config.js and have resolverImplicitCatalog=false,", function() {
             browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
                 expect(chaiseConfig.resolverImplicitCatalog).toBeFalsy();
+            });
+        });
+
+        it("should hide the column headers and collapse the table of contents based on table-display annotation.", function () {
+            chaisePage.recordPage.getColumns().then(function (cols) {
+                expect(cols[0].isDisplayed()).toBeFalsy("Column names are showing.");
+                expect(chaisePage.recordPage.getSidePanel().getAttribute("class")).toContain('close-panel', 'Side Panel is visible.');
             });
         });
 
@@ -107,6 +114,7 @@ describe('View existing record,', function() {
         });
     });
 
+    // below are the tests for the copy button
     describe("For table " + testParams.table_name + ",", function() {
 
         var table, record;
