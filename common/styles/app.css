@@ -35,6 +35,14 @@ html, body {
     height: 100%;
 }
 
+html .app-container {
+    display: none;
+}
+
+html.ng-scope .app-container {
+    display: block;
+}
+
 body {
     font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
     background-color: #FFF;

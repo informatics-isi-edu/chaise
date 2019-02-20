@@ -1,6 +1,24 @@
 (function() {
     'use strict';
+/* Configuration of the Record App */
+    angular.module('chaise.configure-record', [
+        'chaise.modal',
+        'chaise.utils',
+        'ermrestjs',
+        'ngCookies',
+        'ngAnimate',
+        'ui.bootstrap'
+    ])
 
+    .run(['ERMrest', function (ERMrest) {
+        ERMrest.onload().then(function () {
+            angular.element(document).ready(function(){
+                angular.bootstrap(document.getElementById("record"), ["chaise.record"]);
+            });
+        });
+    }]);
+
+/* Record App */
     angular.module('chaise.record', [
         'ngSanitize',
         'ngCookies',
@@ -50,6 +68,8 @@
             errorData = {};
 
         var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
+        context.catalogID = $window.location.hash.split('/')[0].slice(1);
+        context.chaiseBaseURL = $window.location.href.replace($window.location.hash, '');
 
         $rootScope.displayReady = false;
         $rootScope.showSpinner = false; // this property is set from common modules for controlling the spinner at a global level that is out of the scope of the app

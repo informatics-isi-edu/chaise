@@ -1240,7 +1240,8 @@
                 if (defaultConfig.hasOwnProperty(property)) {
                     if (typeof chaiseConfig != 'undefined' && typeof chaiseConfig[property] != 'undefined') {
                         $rootScope.chaiseConfig[property] = chaiseConfig[property];
-                    } else { // property doesn't exist
+                    } else {
+                        // property doesn't exist
                         $rootScope.chaiseConfig[property] = defaultConfig[property];
                     }
                 }
