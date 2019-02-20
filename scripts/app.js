@@ -1,7 +1,21 @@
 'use strict';
 
-/* App Module */
+angular.module('configure-search', [
+    'chaise.modal',
+    'chaise.utils',
+    'ermrestjs',
+    'ngCookies'
+])
 
+.run(['ERMrest', function (ERMrest) {
+    ERMrest.onload().then(function () {
+        angular.element(document).ready(function(){
+            angular.bootstrap(document.getElementById("search"), ["ermrestApp"]);
+        });
+    });
+}]);
+
+/* App Module */
 var ermrestApp = angular.module('ermrestApp', [
   'ngSanitize',
   'ngGrid',
