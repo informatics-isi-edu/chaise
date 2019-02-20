@@ -9,6 +9,7 @@ var ermrestApp = angular.module('ermrestApp', [
   '720kb.datepicker',
   'ui.select',
   'ngCookies',
+  'ermrestjs',
   'chaise.navbar',
   'ermLoginController',
   'facetsModel',
