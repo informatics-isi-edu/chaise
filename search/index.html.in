@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" id="search">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +9,7 @@
 </head>
 <body style="overflow:hidden;">
     <div ng-app="configure-search"></div>
-    <div id="search">
+    <div class="app-container">
         <!-- Overlay for fixed sidebar -->
         <div class="sidebar-overlay"></div>
         <!-- Row 1: Logo and Main navigation -->
