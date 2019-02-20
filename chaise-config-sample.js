@@ -62,9 +62,13 @@ var chaiseConfig = {
             //     // This "Create" menu item doesn't have any dropdowns.
             //     // Use the "url" key to specify this menu item's url
             //     // URLs can be absolute or relative to the document root.
-            //     // URLs support templating primarily for catalog substition
             //     name: "Create",
             //     url: "/chaise/recordedit/#1/YOUR_SCHEMA:YOUR_TABLE"
+            // },
+            // {
+            //      // URLs support templating primarily for catalog substition
+            //     name: "Create",
+            //     url: "/chaise/recordedit/#{{$catalog.snapshot}}/YOUR_SCHEMA:YOUR_TABLE"
             // }
         ]
     },
