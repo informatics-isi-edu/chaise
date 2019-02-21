@@ -702,7 +702,7 @@ describe("Other facet features, ", function() {
             //close the first facet
             chaisePage.recordsetPage.getFacetById(0).click().then(function () {
                 //close the second facet
-                return chaisePage.recordsetPage.getFacetById(1).click();
+                return chaisePage.clickButton(chaisePage.recordsetPage.getFacetById(1));
             }).then(function () {
                 return clearAll.click();
             }).then(function () {
