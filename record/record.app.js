@@ -11,15 +11,11 @@
     ])
 
     .run(['ERMrest', function (ERMrest) {
-        try {
-            ERMrest.onload().then(function () {
-                angular.element(document).ready(function(){
-                    angular.bootstrap(document.getElementById("record"), ["chaise.record"]);
-                });
+        ERMrest.onload().then(function () {
+            angular.element(document).ready(function(){
+                angular.bootstrap(document.getElementById("record"), ["chaise.record"]);
             });
-        } catch (exception) {
-            throw exception;
-        }
+        });
     }]);
 
 /* Record App */

@@ -13,7 +13,6 @@
 	<div class="container">
 		<!-- Row 1: Logo and Main navigation -->
 		<div id="loginApp" ng-app="ermrestApp">
-            <!-- <navbar></navbar> -->
 			<div ng-include="'../views/ermlogin.html'"></div>
 		</div>
 	</div>

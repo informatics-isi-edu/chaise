@@ -597,6 +597,12 @@ $(JS_CONFIG): chaise-config-sample.js
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-asset-block ; \
 	done
+	for script in $(ERMRESTJS_DEPS); do \
+		buildpath=$(ERMRESTJS_BLD_DIR)/$$script ; \
+		runtimepath=$(ERMRESTJS_RT_DIR)/$$script ; \
+		checksum=$$($(MD5) $$buildpath | awk '{ print $$1 }') ; \
+		echo "<script src='$$runtimepath?v=$$checksum'></script>" >> .make-asset-block ; \
+	done
 	for file in $(JS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-asset-block ; \
