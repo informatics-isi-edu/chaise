@@ -49,7 +49,6 @@ describe('Edit a record,', function() {
 
                 // check modal contents
                 var modalTitle = chaisePage.recordPage.getConfirmDeleteTitle();
-                console.log(testParams.remove_row_modal.title);
                 expect(modalTitle.getText()).toBe(testParams.remove_row_modal.title, "The title of the remove form row modal is incorrect.");
                 var modalText = chaisePage.recordPage.getModalText();
                 expect(modalText.getText()).toBe(testParams.remove_row_modal.body, "The message in remove form row modal is incorrect.");
