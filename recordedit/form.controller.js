@@ -445,10 +445,9 @@
             }
 
             modalUtils.showModal({
-                templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/delete-link/confirm_delete.modal.html',
+                templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/delete-link/confirm_form_removal.modal.html',
                 controller: 'ConfirmDeleteController',
-                controllerAs: 'ctrl',
-                size: 'sm'
+                controllerAs: 'ctrl'
             }, function onSuccess() {
                 scope.$root.showSpinner = true;
                 return spliceRows(index);

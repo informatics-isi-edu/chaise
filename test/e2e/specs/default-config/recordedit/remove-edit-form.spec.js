@@ -8,7 +8,12 @@ var testParams = {
         value: "23"
     },
     original_rows: 11,
-    rows_after: 9
+    rows_after: 9,
+    remove_row_modal:{
+        title: "Confirm Form Removal",
+        body: "Are you sure you want to remove this record from the edit form?\nNote: Removing a record from this form, will not delete the record from the database.",
+        button_text: "Remove"
+    }
 };
 
 describe('Edit a record,', function() {
@@ -39,7 +44,15 @@ describe('Edit a record,', function() {
             }).then(function (button) {
                 return chaisePage.clickButton(button);
             }).then(function () {
-                chaisePage.waitForElement(element(by.id('delete-confirmation')));
+                var removeButton = element(by.id('delete-confirmation'));
+                chaisePage.waitForElement(removeButton);
+
+                // check modal contents
+                var modalTitle = chaisePage.recordPage.getConfirmDeleteTitle();
+                expect(modalTitle.getText()).toBe(testParams.remove_row_modal.title, "The title of the remove form row modal is incorrect.");
+                var modalText = chaisePage.recordPage.getModalText();
+                expect(modalText.getText()).toBe(testParams.remove_row_modal.body, "The message in remove form row modal is incorrect.");
+                expect(removeButton.getText()).toBe(testParams.remove_row_modal.button_text, "The button text in remove form row modal is incorrect.")
 
                 // confirm delete close
                 return chaisePage.recordEditPage.getDeleteModalButton();
