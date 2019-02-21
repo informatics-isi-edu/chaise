@@ -4,7 +4,7 @@
         $event.stopPropagation();
         $event.preventDefault();
 
-        var el = angular.element($event.target);
+        var el = $($event.target);
 
         // if the dropdown we are trying to open is closed
         if (!el.next().hasClass('show')) {
@@ -43,14 +43,7 @@
             var parentNewTab = obj.newTab;
             // template the url
             // TODO: This is done here to prevent writing a recursive function (again) in `setConfigJSON()`
-            if (obj.url) {
-                // if (catalogId) {
-                    obj.url = ERMrest.renderHandlebarsTemplate(obj.url, null, {id: catalogId});
-                // } else {
-                //     $rootScope.hideNavbarMenu = true;
-                // }
-
-            }
+            if (obj.url) obj.url = ERMrest.renderHandlebarsTemplate(obj.url, null, {id: catalogId});
             // If current node has children, set each child's newTab to its own existing newTab or parent's newTab
             if (Array.isArray(obj.children)) {
                 obj.children.forEach(function (child) {
