@@ -29,7 +29,7 @@ var chaiseConfig = {
                children: [
                    {
                        name: "Dataset",
-                       url: "/chaise/recordset/#1/isa:dataset"
+                       url: "/chaise/recordset/#{{$catalog.id}}/isa:dataset"
                    },
                    {
                        name: "File",

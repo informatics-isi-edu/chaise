@@ -4,7 +4,7 @@
         $event.stopPropagation();
         $event.preventDefault();
 
-        var el = angular.element($event.target);
+        var el = $($event.target);
 
         // if the dropdown we are trying to open is closed
         if (!el.next().hasClass('show')) {
@@ -26,11 +26,13 @@
         'chaise.login',
         'chaise.utils'
     ])
-    .directive('navbar', [ '$rootScope', 'UriUtils', function($rootScope, UriUtils) {
+    .directive('navbar', [ '$rootScope', '$window', 'ERMrest', 'UriUtils', function($rootScope, $window, ERMrest, UriUtils) {
         var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
 
         // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
         var root = chaiseConfig.navbarMenu || {};
+        // get the catalog id
+        var catalogId = "" + (($rootScope.context && $rootScope.context.catalogID) ? $rootScope.context.catalogID : ($window.location.hash.split('/')[0].slice(1) || chaiseConfig.defaultCatalog));
         // Set default newTab property at root node
         if (!root.hasOwnProperty('newTab')) {
             root.newTab = true;
@@ -39,6 +41,9 @@
         while (q.length > 0) {
             var obj = q.shift();
             var parentNewTab = obj.newTab;
+            // template the url
+            // TODO: This is done here to prevent writing a recursive function (again) in `setConfigJSON()`
+            if (obj.url) obj.url = ERMrest.renderHandlebarsTemplate(obj.url, null, {id: catalogId});
             // If current node has children, set each child's newTab to its own existing newTab or parent's newTab
             if (Array.isArray(obj.children)) {
                 obj.children.forEach(function (child) {

@@ -86,7 +86,7 @@ describe('Navbar ', function() {
                 }).then(function () {
                     return browser.driver.getCurrentUrl();
                 }).then(function (url) {
-                    expect(url.indexOf("/chaise/recordset/#1/isa:dataset")).toBeGreaterThan(0, "new tab url doesn't include '/chaise/recordset' path");
+                    expect(url.indexOf("/chaise/recordset/#" + browser.params.catalogId + "/isa:dataset")).toBeGreaterThan(0, "new tab url doesn't include '/chaise/recordset' path");
                     browser.close();
 
                     return browser.switchTo().window(allWindows[0]);

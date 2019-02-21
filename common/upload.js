@@ -632,7 +632,7 @@
                             vm.totalSize += row[k].file.size;
                             tuple.push(new uploadFile(row[k], column, row));
                         } else {
-                            row[k] = (row[k].url && row[k].url.length) ? row[k].url : null;
+                            row[k] = (row[k] && row[k].url && row[k].url.length) ? row[k].url : null;
                         }
                     }
                 }
