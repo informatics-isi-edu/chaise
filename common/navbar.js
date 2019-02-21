@@ -64,6 +64,13 @@
                 scope.menu = chaiseConfig.navbarMenu ? chaiseConfig.navbarMenu.children : [];
 
                 scope.toggleMenu = toggleMenu;
+                scope.isVersioned = function () {
+                    return $rootScope.context.catalogID.split("@")[1] ? true : false;
+                }
+
+                scope.toLive = function () {
+                    $window.location = $window.location.href.replace($rootScope.context.catalogID, $rootScope.context.catalogID.split("@")[0])
+                }
             }
         };
     }])
