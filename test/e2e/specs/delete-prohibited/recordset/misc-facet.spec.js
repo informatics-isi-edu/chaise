@@ -702,7 +702,7 @@ describe("Other facet features, ", function() {
             //close the first facet
             chaisePage.recordsetPage.getFacetById(0).click().then(function () {
                 //close the second facet
-                return chaisePage.recordsetPage.getFacetById(1).click();
+                return chaisePage.clickButton(chaisePage.recordsetPage.getFacetById(1));
             }).then(function () {
                 return clearAll.click();
             }).then(function () {
@@ -862,7 +862,7 @@ describe("Other facet features, ", function() {
             beforeAll(function (done) {
                 browser.ignoreSynchronization=true;
                 browser.get(uri);
-                chaisePage.waitForElementInverse(element(by.id("spinner")));
+                chaisePage.waitForUrl('facets', browser.params.defaultTimeout);
 
                 browser.getCurrentUrl().then(function (url) {
                     var uri = url.replace("recordset", "recordedit");
@@ -946,7 +946,7 @@ describe("Other facet features, ", function() {
                 browser.ignoreSynchronization=true;
                 browser.get(uri);
                 browser.switchTo().alert().accept();
-                chaisePage.waitForElementInverse(element(by.id("spinner")));
+                chaisePage.waitForUrl('facets', browser.params.defaultTimeout);
 
                 browser.getCurrentUrl().then(function (url) {
                     var uri = url.replace("recordset", "record");
