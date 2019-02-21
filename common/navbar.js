@@ -31,6 +31,8 @@
 
         // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
         var root = chaiseConfig.navbarMenu || {};
+        // get the catalog id
+        var catalogId = "" + (($rootScope.context && $rootScope.context.catalogID) ? $rootScope.context.catalogID : ($window.location.hash.split('/')[0].slice(1) || chaiseConfig.defaultCatalog));
         // Set default newTab property at root node
         if (!root.hasOwnProperty('newTab')) {
             root.newTab = true;
@@ -41,8 +43,14 @@
             var parentNewTab = obj.newTab;
             // template the url
             // TODO: This is done here to prevent writing a recursive function (again) in `setConfigJSON()`
+            if (obj.url) {
+                // if (catalogId) {
+                    obj.url = ERMrest.renderHandlebarsTemplate(obj.url, null, {id: catalogId});
+                // } else {
+                //     $rootScope.hideNavbarMenu = true;
+                // }
 
-            if (obj.url) obj.url = ERMrest.renderHandlebarsTemplate(obj.url, null, {id: $window.location.hash.split('/')[0].slice(1)});
+            }
             // If current node has children, set each child's newTab to its own existing newTab or parent's newTab
             if (Array.isArray(obj.children)) {
                 obj.children.forEach(function (child) {
