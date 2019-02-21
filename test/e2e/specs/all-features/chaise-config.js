@@ -12,7 +12,7 @@ var chaiseConfig = {
     // config for biewer spec
     customCSS: '/path/to/custom/css',
     maxRelatedTablesOpen: 9,
-    resolverImplicitCatalog: false,
+    resolverImplicitCatalog: null,
     disableDefaultExport: true,
     navbarMenu: {
         children: [

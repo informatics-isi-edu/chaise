@@ -87,8 +87,6 @@ describe('View existing record,', function() {
 
         // test that no citation appears in share modal when no citation is defined on table
         it("should show the share dialog when clicking the share button with only permalink present.", function(done) {
-            permalink = browser.params.origin+"/id/"+browser.params.catalogId+"/"+chaisePage.getEntityRow("editable-id", testParams.html_table_name, [{column: "id",value: "1"}]).RID;
-
             chaisePage.recordPage.getShareButton().click().then(function () {
                 // wait for dialog to open
                 chaisePage.waitForElement(chaisePage.recordPage.getShareModal());
@@ -101,7 +99,7 @@ describe('View existing record,', function() {
             }).then(function (url) {
                 // verify permalink
                 expect(chaisePage.recordPage.getShareLinkHeader().getText()).toBe("Share Link", "Share Link (permalink) header is incorrect");
-                expect(chaisePage.recordPage.getPermalinkText().getText()).toBe(permalink, "permalink url is incorrect");
+                expect(chaisePage.recordPage.getPermalinkText().getText()).toBe(url, "permalink url is incorrect");
 
                 // close dialog
                 return chaisePage.recordEditPage.getModalTitle().element(by.tagName("button")).click();

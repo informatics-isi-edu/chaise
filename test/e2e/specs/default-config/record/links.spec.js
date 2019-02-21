@@ -106,7 +106,9 @@ describe('View existing record,', function() {
 
                 return browser.getCurrentUrl();
             }).then(function (url) {
-                expect(chaisePage.recordPage.getPermalinkText().getText()).toBe(url, "permalink url is incorrect");
+                // change url
+                var permalink = browser.params.origin+"/id/"+browser.params.catalogId+"/"+chaisePage.getEntityRow("links", testParams.table_name, [{column: "id",value: "1"}]).RID;
+                expect(chaisePage.recordPage.getPermalinkText().getText()).toBe(permalink, "permalink url is incorrect");
 
                 return chaisePage.recordEditPage.getModalTitle().element(by.tagName("button")).click();
             }).then(function () {
