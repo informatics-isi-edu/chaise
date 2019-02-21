@@ -112,6 +112,11 @@
         <textarea json ng-model="model.value" rows="5" name="{{::column.name}}" class="form-control" empty-to-null></textarea>
     </div>
 
+    <!--array input -->
+    <div ng-switch-when="array">
+        <textarea array column-type="{{column.type.rootName}}" custom-error-message="model.customErrorMessage" ng-model="model.value"  rows="5" name="{{::column.name}}" class="form-control" empty-to-null></textarea>
+    </div>
+
     <!-- disabled -->
     <input ng-switch-when="disabled" ng-model="model.value" name="{{::column.name}}" type="text" class="form-control" disabled="true" placeholder="getDisabledInputValue()" empty-to-null></input>
 
@@ -128,6 +133,7 @@
         <div ng-message="float">Please enter a decimal value.</div>
         <div ng-message="json">Please enter a valid JSON value.</div>
         <div ng-message="fileExtension">Please select a file with the following type: {{fileExtensionTypes(column)}}</div>
+        <div ng-message="customError">{{model.customErrorMessage}}</div>
     </div>
 
     <!-- Validation error messages to show when the form is submitted -->

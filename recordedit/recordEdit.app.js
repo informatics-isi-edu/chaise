@@ -319,6 +319,14 @@
                                     // If input is disabled, and it's copy, we don't want to copy the value
                                     if (colModel.inputType == "disabled" && context.mode == context.modes.COPY) continue;
 
+                                    // stringify the returned array value
+                                    if (column.type.isArray) {
+                                        if (values[i] !== null) {
+                                            recordEditModel.rows[j][column.name] = JSON.stringify(values[i], undefined, 2);
+                                        }
+                                        continue;
+                                    }
+
                                     // Transform column values for use in view model
                                     var options = { outputType: "object" }
                                     switch (column.type.name) {
