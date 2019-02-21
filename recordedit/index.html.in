@@ -38,8 +38,8 @@
                                         <span>{{ (form.recordEditModel.rows.length > 1) ? " Records" : " Record" }}</span>
                                 </h1>
                                 <h3 id="page-subtitle">
-                                    <span class="re-subtitle" ng-if="tableDisplayName.isHTML" ng-bind-html="tableDisplayName.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}"></span>
-                                    <span class="re-subtitle" ng-if="!tableDisplayName.isHTML" ng-bind="tableDisplayName.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}"></span>
+                                    <span class="re-subtitle" ng-if="tableDisplayName.isHTML" ng-bind-html="form.bookmarkDisplayName()" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}"></span>
+                                    <span class="re-subtitle" ng-if="!tableDisplayName.isHTML" ng-bind="form.bookmarkDisplayName()" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}"></span>
                                 </h3>
                             </div>
                             <div class="pull-right">
