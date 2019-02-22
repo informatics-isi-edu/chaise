@@ -165,8 +165,7 @@
                         switch (scope.columnType) {
                             case 'timestamptz':
                             case 'timestamp':
-                                // TODO we might want to allow only certain timestamp formats
-                                isValid = moment(val).isValid();
+                                isValid = moment(val, moment.ISO_8601, true).isValid();
                                 break;
                             case 'date':
                                 isValid = moment(val, ['YYYY-MM-DD', 'YYYY-M-DD', 'YYYY-M-D', 'YYYY-MM-D'], true).isValid();
