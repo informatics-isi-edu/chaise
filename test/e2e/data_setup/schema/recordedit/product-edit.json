@@ -335,6 +335,76 @@
             "type": {
                 "typename": "date"
             }
+        },
+        {
+          "name": "text_array",
+          "type": {
+            "is_array": true,
+            "typename": "text[]",
+            "base_type": {
+              "typename": "text"
+            }
+          }
+        },
+        {
+          "name": "boolean_array",
+          "type": {
+            "is_array": true,
+            "typename": "boolean[]",
+            "base_type": {
+              "typename": "boolean"
+            }
+          }
+        },
+        {
+          "name": "date_array",
+          "type": {
+            "is_array": true,
+            "typename": "date[]",
+            "base_type": {
+              "typename": "date"
+            }
+          }
+        },
+        {
+          "name": "timestamp_array",
+          "type": {
+            "is_array": true,
+            "typename": "timestamp[]",
+            "base_type": {
+              "typename": "timestamp"
+            }
+          }
+        },
+        {
+          "name": "timestamptz_array",
+          "type": {
+            "is_array": true,
+            "typename": "timestamptz[]",
+            "base_type": {
+              "typename": "timestamptz"
+            }
+          }
+        },
+        {
+          "name": "float4_array",
+          "type": {
+            "is_array": true,
+            "typename": "float4[]",
+            "base_type": {
+              "typename": "float4"
+            }
+          }
+        },
+        {
+          "name": "int4_array",
+          "type": {
+            "is_array": true,
+            "typename": "int4[]",
+            "base_type": {
+              "typename": "int4"
+            }
+          }
         }
       ],
       "annotations": {
@@ -349,10 +419,21 @@
           "top_columns": ["title", "rating", "category", "opened_on","json_col"]
         },
         "tag:isrd.isi.edu,2016:visible-columns" : {
-          "detailed" : ["title", "website", ["product-edit", "fk_category"], "rating", "summary","description", "no_of_rooms", "opened_on", "date_col", "luxurious","json_col"],
-          "entry/create": ["id", "title", "website", ["product-edit", "fk_category"], "rating", "summary", "description", "no_of_rooms", "opened_on", "date_col","luxurious","json_col"],
-          "entry/edit": ["id", "title", "website", ["product-edit", "fk_category"], "rating", "summary", "description", "no_of_rooms", "opened_on", "date_col","luxurious","json_col"],
-          "compact" : ["title", "website", ["product-edit", "fk_category"], "rating", "summary","description", "no_of_rooms", "opened_on", "date_col", "luxurious"]
+          "detailed" : [
+              "title", "website", ["product-edit", "fk_category"], "rating", "summary","description", "no_of_rooms", "opened_on", "date_col", "luxurious","json_col",
+              "text_array", "boolean_array", "int4_array", "float4_array", "date_array", "timestamp_array", "timestamptz_array"
+          ],
+          "entry/create": [
+              "id", "title", "website", ["product-edit", "fk_category"], "rating", "summary", "description", "no_of_rooms", "opened_on", "date_col","luxurious","json_col"
+          ],
+          "entry/edit": [
+              "id", "title", "website", ["product-edit", "fk_category"], "rating", "summary", "description", "no_of_rooms", "opened_on", "date_col","luxurious","json_col",
+              "text_array", "boolean_array", "int4_array", "float4_array", "date_array", "timestamp_array", "timestamptz_array"
+          ],
+          "compact" : [
+              "title", "website", ["product-edit", "fk_category"], "rating", "summary","description", "no_of_rooms", "opened_on", "date_col", "luxurious",
+              "text_array", "boolean_array", "int4_array", "float4_array", "date_array", "timestamp_array", "timestamptz_array"
+          ]
         },
 
         "tag:isrd.isi.edu,2016:visible-foreign-keys" : {

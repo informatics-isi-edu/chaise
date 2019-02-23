@@ -191,9 +191,10 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
         var timestampCols = filterColumns(function(c) { if (( c.type == "timestamptz" || c.type == "timestamp") && !c.isForeignKey ) return true; });;
         var fileCols = filterColumns(function(c) { if (c.type == "text" && c.isFile && !c.isForeignKey) return true; });
         var jsonCols = filterColumns(function(c) { if ((c.type === "json") && !c.isForeignKey) return true; });
+        var arrayCols = filterColumns(function(c) { if ((c.type === "array") && !c.isForeignKey) return true; });
 
 
-        var JSONDataTypeFields = [],longTextDataTypeFields = [], textDataTypeFields = [], markdownDataTypeFields = [],
+        var JSONDataTypeFields = [],longTextDataTypeFields = [], textDataTypeFields = [], markdownDataTypeFields = [], arrayDataTypeFields = [],
         booleanDataTypeFields = [], foreignKeyFields = [], datePickerFields = [], integerDataTypeFields = [], floatDataTypeFields = [], timeInputFields = [];
 
         // test cases:
@@ -230,6 +231,168 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 console.log(e);
                             });
                         }
+                    });
+                });
+            }
+
+            if (arrayCols.length > 0) {
+                describe("Array fields, ", function () {
+                    var invalidArrayValues = {
+                        "timestamp": [
+                            {
+                                "value": "2001-01-01T01:01:01",
+                                "error": "Please enter a valid array structure."
+                            },
+                            {
+                                "value": "[\"2001-01-01T01:01:01\", \"a\"]",
+                                "error": "`a` is not a valid timestamp value."
+                            }
+                        ],
+                        "timestamptz": [
+                            {
+                                "value": "2001-01-01T01:01:01-08:00",
+                                "error": "Please enter a valid array structure."
+                            },
+                            {
+                                "value": "[\"2001-01-01T01:01:01-08:00\", \"a\"]",
+                                "error": "`a` is not a valid timestamp with timezone value."
+                            }
+                        ],
+                        "date": [
+                            {
+                                "value": "2001-01-01",
+                                "error": "Please enter a valid array structure."
+                            },
+                            {
+                                "value": "[\"2001-01-01\", \"a\"]",
+                                "error": "`a` is not a valid date value."
+                            }
+                        ],
+                        "integer": [
+                            {
+                                "value": "[123",
+                                "error": "Please enter a valid array structure."
+                            },
+                            {
+                                "value": "[1, \"a\"]",
+                                "error": "`a` is not a valid integer value."
+                            }
+                        ],
+                        "number": [
+                            {
+                                "value": "1.1",
+                                "error": "Please enter a valid array structure."
+                            },
+                            {
+                                "value": "[1, \"a\"]",
+                                "error": "`a` is not a valid number value."
+                            }
+                        ],
+                        "boolean": [
+                            {
+                                "value": "true",
+                                "error": "Please enter a valid array structure."
+                            },
+                            {
+                                "value": "[true, \"a\"]",
+                                "error": "`a` is not a valid boolean value."
+                            }
+                        ],
+                        "text": [
+                            {
+                                "value": "\"test\"",
+                                "error": "Please enter a valid array structure e.g. [\"value1\", \"value2\"]"
+                            },
+                            {
+                                "value": "[1, \"a\"]",
+                                "error": "`1` is not a valid text value."
+                            }
+                        ]
+                    };
+
+                    it ("should show textarea input with correct value.", function () {
+                        arrayCols.forEach(function(c) {
+                            chaisePage.recordEditPage.getTextAreaForAcolumn(c.name, recordIndex).then(function(arrayTxtArea) {
+                                expect(arrayTxtArea.isDisplayed()).toBeTruthy(colError(c.name, "element not visible."));
+                                arrayTxtArea.column = c;
+
+                                arrayDataTypeFields.push(arrayTxtArea);
+                                var value = getRecordValue(c.name);
+
+                                if (value != undefined) {
+                                    expect(arrayTxtArea.getAttribute('value')).toBe(value, colError(c.name , "Doesn't have the expected value."));
+                                }
+                            });
+                        });
+                    });
+
+                    // test the invalid values once
+                    if (recordIndex === 0) {
+                        it ("should validate invalid array input.", function () {
+                            arrayDataTypeFields.forEach(function(arrayInput) {
+                                var c = arrayInput.column;
+
+                                if (c.generated || c.immutable) return;
+
+                                // store the original value if in edit mode.
+                                var prevValue;
+                                if (tableParams.primary_keys.indexOf(c.name) != -1) {
+                                    arrayInput.getAttribute("value").then(function(value) {
+                                        prevValue = value + "";
+                                    });
+                                }
+                                chaisePage.recordEditPage.clearInput(arrayInput);
+
+                                // test the required input
+                                if (c.nullok == false) {
+                                    chaisePage.recordEditPage.submitForm();
+                                    chaisePage.recordEditPage.getInputErrorMessage(arrayInput, 'required').then(function(err) {
+                                        expect(err.isDisplayed()).toBeTruthy(colError(c.name , "Expected to show required error."));
+                                    });
+                                }
+
+                                // test invalid values
+                                var testValues = invalidArrayValues[c.baseType];
+                                testValues.forEach(function (tv) {
+                                    c._value = tv.value;
+                                    chaisePage.recordEditPage.clearInput(arrayInput).then(function () {
+                                        return arrayInput.sendKeys(tv.value);
+                                    }).then(function () {
+                                        return chaisePage.recordEditPage.getArrayInputErrorMessage(arrayInput);
+                                    }).then(function (err) {
+                                        expect(err).toBe(tv.error, colError(c.name, "error missmatch for following value: " + tv.value));
+                                    }).catch(function (err) {
+                                        expect(true).toBe(false, colError(c.name, "failed while trying to test values."));
+                                    })
+                                });
+
+                                // Clear value
+                                chaisePage.recordEditPage.clearInput(arrayInput);
+                                expect(arrayInput.getAttribute('value')).toBe("", colError(c.name, "Expected to not clear the input."));
+
+                                //Restore the value to the original one or a valid input
+                                if (prevValue) {
+                                    arrayInput.sendKeys(prevValue);
+                                    expect(arrayInput.getAttribute('value')).toBe(validNo, colError(c.name, "Couldn't change the value."));
+                                }
+                            });
+                        });
+                    }
+
+                    it ("should be able to set the correct value.", function () {
+                        arrayDataTypeFields.forEach(function(inp) {
+                            var c = inp.column;
+
+                            if (c.generated || c.immutable) return;
+
+                            chaisePage.recordEditPage.clearInput(inp);
+                            browser.sleep(10);
+
+                            var text = getRecordInput(c.name, "[]");
+                            inp.sendKeys(text);
+
+                            expect(inp.getAttribute('value')).toEqual(text, colError(c.name, "Couldn't change the value."));
+                        });
                     });
                 });
             }
@@ -1185,7 +1348,6 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                 });
             }
-
 
             if (floatCols.length > 0) {
                 describe("Float fields,", function() {

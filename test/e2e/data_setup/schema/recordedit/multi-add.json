@@ -118,11 +118,21 @@
                     "type": {
                         "typename": "text"
                     }
+                },
+                {
+                  "name": "int_array",
+                  "type": {
+                    "is_array": true,
+                    "typename": "int4[]",
+                    "base_type": {
+                      "typename": "int4"
+                    }
+                  }
                 }
             ],
             "annotations": {
                 "tag:isrd.isi.edu,2016:visible-columns" : {
-                    "*": ["id", "text", "int", "date", "timestamp", ["multi-add", "fk1"], "uri"]
+                    "*": ["id", "text", "int", "date", "timestamp", ["multi-add", "fk1"], "uri", "int_array"]
                 }
             }
         },
