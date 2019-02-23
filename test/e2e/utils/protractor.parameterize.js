@@ -106,8 +106,17 @@ exports.parameterize = function(config, configParams) {
   config.onPrepare = function() {
 
     var SpecReporter = require('jasmine-spec-reporter');
+    var Jasmine2HtmlReporter = require('protractor-jasmine2-html-reporter');
     // add jasmine spec reporter
-    jasmine.getEnv().addReporter(new SpecReporter({displayStacktrace: 'all'}));
+    var reporterConfig = {
+        savePath: "test-failures",
+        takeScreenshots: false,
+        cleanDestination: false,
+        showPassed: false,
+        fileNamePrefix: '4',
+        fileNameDateSuffix: true
+    }
+    jasmine.getEnv().addReporter(new Jasmine2HtmlReporter(reporterConfig));
 
     browser.params.configuration = testConfiguration, defer = Q.defer();
 

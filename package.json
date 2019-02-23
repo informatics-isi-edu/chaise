@@ -50,6 +50,7 @@
     "moment-timezone": "x",
     "phantomjs-prebuilt": "x",
     "protractor": "x",
+    "protractor-jasmine2-html-reporter": "0.0.7",
     "q": "^1.4.1",
     "request": "x",
     "request-q": "x",
