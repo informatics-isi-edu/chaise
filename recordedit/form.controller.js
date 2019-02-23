@@ -61,6 +61,8 @@
             if ($rootScope.reference.displayname) return UiUtils.displaynameWVersion($rootScope.reference.displayname.value, $rootScope.reference.location.version);
         }
 
+        vm.customErrorMessage = [];
+
         // Takes a page object and uses the uri generated for the reference to construct a chaise uri
         function redirectAfterSubmission(page) {
             var rowset = vm.recordEditModel.rows,
@@ -104,9 +106,12 @@
                 var col = $rootScope.reference.columns[i];
                 var rowVal = row[col.name];
                 if (rowVal && !col.getInputDisabled(context.appContext)) {
-                    switch (col.type.name) {
-                        case "timestamp":
-                        case "timestamptz":
+                    if (col.type.isArray) {
+                        rowVal = JSON.parse(rowVal);
+                    } else {
+                        switch (col.type.name) {
+                            case "timestamp":
+                            case "timestamptz":
                             if (vm.readyToSubmit) {
                                 var options = {
                                     outputType: "string",
@@ -122,17 +127,18 @@
                                 rowVal = InputUtils.formatDatetime(value, options);
                             }
                             break;
-                        case "json":
-                        case "jsonb":
+                            case "json":
+                            case "jsonb":
                             rowVal=JSON.parse(rowVal);
                             break;
-                        default:
+                            default:
                             if (col.isAsset) {
                                 if (!vm.readyToSubmit) {
                                     rowVal = { url: "" };
                                 }
                             }
                             break;
+                        }
                     }
                 }
                 transformedRow[col.name] = rowVal;

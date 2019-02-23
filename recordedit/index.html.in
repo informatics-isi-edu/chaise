@@ -228,6 +228,11 @@
                                                             <textarea json id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" rows="5" name="{{::column.name}}" class="form-control" ng-required="::form.isRequired(column);" empty-to-null></textarea>
                                                         </div>
 
+                                                        <!--array input -->
+                                                        <div ng-switch-when="array">
+                                                            <textarea array column-type="{{column.type.rootName}}" custom-error-message="form.customErrorMessage[rowIndex][column.name]" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" rows="5" name="{{::column.name}}" class="form-control" ng-required="::form.isRequired(column);" empty-to-null></textarea>
+                                                        </div>
+
                                                         <!-- disabled -->
                                                         <input ng-switch-when="disabled" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="text" class="form-control" disabled="true" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" empty-to-null></input>
 
@@ -244,6 +249,7 @@
                                                             <div ng-message="float">Please enter a decimal value.</div>
                                                             <div ng-message="json">Please enter a valid JSON value.</div>
                                                             <div ng-message="fileExtension">Please select a file with the following type: {{form.fileExtensionTypes(column)}}</div>
+                                                            <div ng-message="customError">{{form.customErrorMessage[rowIndex][column.name]}}</div>
                                                         </div>
 
                                                         <!-- Validation error messages to show when the form is submitted -->

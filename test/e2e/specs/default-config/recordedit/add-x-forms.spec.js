@@ -13,6 +13,7 @@ var testParams = {
     timestamp_col_name: "timestamp",
     fk_col_name: "fk_to_f1",
     uri_col_name: "uri",
+    int_array_col_name: "int_array",
     files: [{
         name: "file500kb.png",
         size: "512000",
@@ -37,6 +38,10 @@ var testParams = {
         fk: {
             initial: "three",
             modified: "two"
+        },
+        int_array: {
+            initial: "[1, 2]",
+            modified: "[3, 4]"
         }
     }
 };
@@ -68,6 +73,10 @@ describe('Record Add', function() {
         var uploadInput1 = chaisePage.recordEditPage.getUploadInput(testParams.uri_col_name, 0),
             uploadInput2 = chaisePage.recordEditPage.getUploadInput(testParams.uri_col_name, 1),
             uploadInput3 = chaisePage.recordEditPage.getUploadInput(testParams.uri_col_name, 2);
+
+        var intArrInput1 = chaisePage.recordEditPage.getInputById(0, testParams.int_array_col_name),
+            intArrInput2 = chaisePage.recordEditPage.getInputById(1, testParams.int_array_col_name),
+            intArrInput3 = chaisePage.recordEditPage.getInputById(2, testParams.int_array_col_name);
 
         var index;
 
@@ -253,6 +262,34 @@ describe('Record Add', function() {
                 });
             });
 
+            it(testParams.int_array_col_name, function (done) {
+                var colName = testParams.int_array_col_name;
+                var value = testParams.values.int_array.initial;
+
+                var applyBtn = chaisePage.recordEditPage.getSelectAllApply(colName),
+                    cancelBtn = chaisePage.recordEditPage.getSelectAllCancel(colName);
+
+                chaisePage.clickButton(chaisePage.recordEditPage.getColumnSelectAllButton(colName)).then(function () {
+                    browser.wait(EC.elementToBeClickable(cancelBtn), browser.params.defaultTimeout);
+
+                    chaisePage.recordEditPage.getSelectAllTextArea(colName).sendKeys(value);
+
+                    return applyBtn.click();
+                }).then(function () {
+                    return cancelBtn.click();
+                }).then(function () {
+                    // verify the values
+                    expect(intArrInput1.getAttribute("value")).toBe(value, "input 1 missmatch.");
+                    expect(intArrInput2.getAttribute("value")).toBe(value, "input 2 missmatch.");
+                    expect(intArrInput3.getAttribute("value")).toBe(value, "input 3 missmatch.");
+
+                    done();
+                }).catch(function (err) {
+                    console.dir(err);
+                    done.fail();
+                });
+            });
+
             if (!process.env.TRAVIS && testParams.files.length > 0) {
                 it(testParams.uri_col_name, function (done) {
                     var colName = testParams.uri_col_name,
@@ -297,6 +334,10 @@ describe('Record Add', function() {
             var intInput1 = chaisePage.recordEditPage.getInputById(0, intDisplayName),
                 intInput2 = chaisePage.recordEditPage.getInputById(1, intDisplayName),
                 intInput3 = chaisePage.recordEditPage.getInputById(2, intDisplayName);
+
+            var intArrInput1 = chaisePage.recordEditPage.getInputById(0, testParams.int_array_col_name),
+                intArrInput2 = chaisePage.recordEditPage.getInputById(1, testParams.int_array_col_name),
+                intArrInput3 = chaisePage.recordEditPage.getInputById(2, testParams.int_array_col_name);
 
             //change value in form 1, test others unchanged
             it("should change text input in form 1.", function() {
@@ -373,6 +414,15 @@ describe('Record Add', function() {
                     expect(fkInput2.getText()).toBe(testParams.values.fk.initial);
                     expect(fkInput3.getText()).toBe(testParams.values.fk.initial);
                 });
+            });
+
+            it("should change int_array value in form 2.", function () {
+                chaisePage.recordEditPage.clearInput(intArrInput2);
+                intArrInput2.sendKeys(testParams.values.int_array.modified);
+
+                expect(intArrInput1.getAttribute("value")).toBe(testParams.values.int_array.initial, "input 1 missmatch.");
+                expect(intArrInput2.getAttribute("value")).toBe(testParams.values.int_array.modified, "input 2 missmatch.");
+                expect(intArrInput3.getAttribute("value")).toBe(testParams.values.int_array.initial, "input 3 missmatch.");
             });
 
             if (!process.env.TRAVIS && testParams.files.length > 0) {

@@ -6,6 +6,7 @@
     // updated float regex
     // ^(Infinity|-Infinity|NaN|-?\d+(\.\d+)?([eE][-+]?\d+)?$
     var FLOAT_REGEXP = /^\-?(\d+)?((\.)?\d+)?$/;
+
     angular.module('chaise.validators', [])
     // Validation directive for testing if an input value is an integer
     // Use: <input type="number" required integer>
@@ -93,6 +94,111 @@
             }
         };
     })
+
+    //Validation directive for array for testing if an input value is valid array
+    // Use: <textarea array>
+    .directive('array', ["UiUtils", function(UiUtils) {
+        return {
+            require: 'ngModel',
+            scope: {
+                columnType: "@",
+                customErrorMessage: "="
+            },
+            link: function(scope, elm, attrs, ctrl) {
+
+                // modify the placeholder
+                var placeholder = "";
+                switch (scope.columnType) {
+                    case 'timestamptz':
+                        placeholder = "example: [ \"2001-01-01T01:01:01-08:00\", \"2002-02-02T02:02:02-08:00\" ]"
+                    case 'timestamp':
+                        placeholder = "example: [ \"2001-01-01T01:01:01\", \"2002-02-02T02:02:02\" ]"
+                        break;
+                    case 'date':
+                        placeholder = "example: [ \"2001-01-01\", \"2001-02-02\" ]"
+                        break;
+                    case 'numeric':
+                    case 'float4':
+                    case 'float8':
+                        placeholder = "example: [ 1, 2.2 ]"
+                        break;
+                    case 'int2':
+                    case 'int4':
+                    case 'int8':
+                        placeholder = "example: [ 1, 2 ]"
+                        break;
+                    case 'boolean':
+                        placeholder = "example: [ true, false ]"
+                        break;
+                    default:
+                        placeholder = "example: [ \"value1\", \"value2\" ]"
+                        break;
+                }
+                attrs.$set('placeholder', placeholder);
+
+                // validate the array
+                ctrl.$validators.customError = function(modelValue, viewValue) {
+                    var value = modelValue || viewValue;
+                    if (ctrl.$isEmpty(value)) {
+                        return true;
+                    }
+
+                    // make sure it's an array
+                    var validArray = false, arr;
+                    try {
+                        arr = JSON.parse(value);
+                        validArray = Array.isArray(arr);
+                    } catch(e){}
+                    if (!validArray) {
+                        scope.customErrorMessage = "Please enter a valid array structure" + ((scope.columnType === "text") ? " e.g. [\"value1\", \"value2\"]" : ".");
+                        return false;
+                    }
+
+                    // validate individual array values
+                    for (var i = 0; i < arr.length; i++) {
+                        var isValid = false;
+                        var val = arr[i];
+
+                        // null is a valid value for any type
+                        if (val == null) continue;
+
+                        switch (scope.columnType) {
+                            case 'timestamptz':
+                            case 'timestamp':
+                                isValid = moment(val, moment.ISO_8601, true).isValid();
+                                break;
+                            case 'date':
+                                isValid = moment(val, ['YYYY-MM-DD', 'YYYY-M-DD', 'YYYY-M-D', 'YYYY-MM-D'], true).isValid();
+                                break;
+                            case 'numeric':
+                            case 'float4':
+                            case 'float8':
+                                isValid = FLOAT_REGEXP.test(val);
+                                break;
+                            case 'int2':
+                            case 'int4':
+                            case 'int8':
+                                isValid = INTEGER_REGEXP.test(val);
+                                break;
+                            case 'boolean':
+                                isValid = (typeof val === "boolean");
+                                break;
+                            default:
+                                isValid = (typeof val === 'string' || val instanceof String);
+                                break;
+                        }
+
+                        if (!isValid) {
+                            scope.customErrorMessage = "`" + val + "` is not a valid " + UiUtils.getSimpleColumnType(scope.columnType) + " value.";
+                            return false;
+                        }
+                    }
+
+                    return true;
+                };
+            }
+        };
+    }])
 
     // Validation directive for testing if an input value is a time
     // Use: <input type="text" time>
