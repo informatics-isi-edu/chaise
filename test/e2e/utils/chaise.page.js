@@ -353,6 +353,10 @@ var recordEditPage = function() {
         return this.getSelectAllInput(name).element(by.css('input[name="' + name2 + '"]'));
     }
 
+    this.getSelectAllTextArea = function (name) {
+        return this.getSelectAllInput(name).element(by.css('textarea[name="' + name + '"]'));
+    };
+
     this.getSelectAllApply = function (name) {
         var columnDisplayName = makeSafeIdAttr(name);
         return element(by.id("select-all-apply-"+columnDisplayName));
@@ -519,6 +523,10 @@ var recordEditPage = function() {
 
     this.getJSONInputErrorMessage = function(el, type) {
         return browser.executeScript("return $(arguments[0]).parents('div[ng-switch-when=\"json\"]').siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
+    };
+
+    this.getArrayInputErrorMessage = function(el) {
+        return browser.executeScript("return $(arguments[0]).parents('div[ng-switch-when=\"array\"]').siblings('.text-danger.ng-active').find('div').text();", el);
     };
 
     this.getDateInputErrorMessage = function(el, type) {

@@ -94,5 +94,12 @@
  "cover": 3005,
  "opened_on": "2008-12-09T00:00:00-08:00",
  "date_col": "12/9/2008",
- "luxurious": true
+ "luxurious": true,
+ "text_array": ["v2", "v3"],
+ "boolean_array": [false],
+ "int4_array": [1],
+ "float4_array": [1.1, 2.2],
+ "date_array": null,
+ "timestamp_array": ["2003-03-03T03:03:03"],
+ "timestamptz_array": ["2002-02-02T02:02:02-08:00"]
 }]

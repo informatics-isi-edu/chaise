@@ -1013,6 +1013,10 @@
     }])
 
     .factory("UiUtils", ['$document', '$log', function($document, $log) {
+
+        function displaynameWVersion(displayname, version) {
+            return displayname + (version ? " (Version " + version + ")" : "");
+        }
         /**
          *
          * To allow the dropdown button to open at the top/bottom depending on the space available
@@ -1079,6 +1083,9 @@
         function getInputType(type) {
             var inputType;
 
+            if (type.isArray) {
+                return 'array';
+            }
             switch (type.name) {
                 case 'timestamp':
                 case 'timestamptz':
@@ -1118,6 +1125,34 @@
                     break;
             }
             return inputType;
+        }
+
+        /**
+         * given a typename string, will return a more human readable version of it.
+         * @param  {string} typename
+         * @return {string}
+         */
+        function getSimpleColumnType (typename){
+          switch (typename) {
+            case "timestamp":
+              return "timestamp";
+            case "timestamptz":
+              return "timestamp with timezone";
+            case "date":
+              return "date";
+            case "float4":
+            case "float8":
+            case "numeric":
+              return "number";
+            case "boolean":
+              return "boolean";
+            case "int2":
+            case "int4":
+            case "int8":
+              return "integer";
+            default:
+              return "text";
+          }
         }
 
         /**
@@ -1175,10 +1210,12 @@
         }
 
         return {
+            displaynameWVersion: displaynameWVersion,
             setBootstrapDropdownButtonBehavior: setBootstrapDropdownButtonBehavior,
             getImageAndIframes: getImageAndIframes,
             humanFileSize: humanFileSize,
             getInputType: getInputType,
+            getSimpleColumnType: getSimpleColumnType,
             setFooterStyle: setFooterStyle,
             setDisplayContainerHeight: setDisplayContainerHeight
         }

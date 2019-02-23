@@ -57,6 +57,10 @@
             });
         };
 
+        vm.bookmarkDisplayName = function () {
+            if ($rootScope.reference.displayname) return UiUtils.displaynameWVersion($rootScope.reference.displayname.value, $rootScope.reference.location.version);
+        }
+
         vm.togglePan = function() {
             $scope.recordSidePanOpen = !$scope.recordSidePanOpen;
         };
