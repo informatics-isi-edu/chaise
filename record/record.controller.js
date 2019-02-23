@@ -126,13 +126,13 @@
             var resolverId = chaiseConfig.resolverImplicitCatalog;
             var currCatalog = $rootScope.reference.location.catalogId;
 
-            // null or undefined or no RID
-            if (resolverId == null || !tuple.data || !tuple.data.RID) {
+            // null or no RID
+            if (resolverId === null || !tuple.data || !tuple.data.RID) {
                 return $window.location.href;
             }
 
             // if false we want the current catalog id
-            if (resolverId === false) {
+            if (resolverId === false || resolverId === undefined) {
                 return $window.location.origin + "/id/" + currCatalog + "/" + tuple.data.RID;
             }
 
