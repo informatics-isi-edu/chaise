@@ -19,8 +19,8 @@
                     </h1>
                     <h3 id="page-subtitle" class="pull-left">
                         <a ng-href="{{::ctrl.toRecordset()}}">
-                            <span ng-if="::reference.displayname.isHTML" ng-bind-html="::reference.displayname.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::reference.table.comment ? reference.table.comment : undefined}}"></span>
-                            <span ng-if="::!reference.displayname.isHTML" ng-bind="::reference.displayname.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::reference.table.comment ? reference.table.comment : undefined}}"></span>
+                            <span ng-if="::reference.displayname.isHTML" ng-bind-html="ctrl.bookmarkDisplayName()" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::reference.table.comment ? reference.table.comment : undefined}}"></span>
+                            <span ng-if="::!reference.displayname.isHTML" ng-bind="ctrl.bookmarkDisplayName()" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::reference.table.comment ? reference.table.comment : undefined}}"></span>
                         </a>
                     </h3>
                 </div>

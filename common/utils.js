@@ -1013,6 +1013,10 @@
     }])
 
     .factory("UiUtils", ['$document', '$log', function($document, $log) {
+
+        function displaynameWVersion(displayname, version) {
+            return displayname + (version ? " (Version " + version + ")" : "");
+        }
         /**
          *
          * To allow the dropdown button to open at the top/bottom depending on the space available
@@ -1206,6 +1210,7 @@
         }
 
         return {
+            displaynameWVersion: displaynameWVersion,
             setBootstrapDropdownButtonBehavior: setBootstrapDropdownButtonBehavior,
             getImageAndIframes: getImageAndIframes,
             humanFileSize: humanFileSize,
