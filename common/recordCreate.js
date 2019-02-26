@@ -261,7 +261,9 @@
                 submissionRows: [{}] // rows of data
             };
             // Update view model
-            recordEditModel.rows[recordEditModel.rows.length - 1][cookie.constraintName] = cookie.rowname.value;
+            cookie.constraintNames.forEach(function (cn) {
+                recordEditModel.rows[recordEditModel.rows.length - 1][cn] = cookie.rowname.value;
+            })
 
             // Update submission model
             var columnNames = Object.keys(cookie.keys);

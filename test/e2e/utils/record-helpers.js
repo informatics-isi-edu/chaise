@@ -851,8 +851,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
  *  - tableName
  *  - schemaName
  *  - relatedDisplayname
- *  - tableDisplayname
- *  - columnDisplayname
+ *  - prefilledValues: {"col-displayname": "col-value", ..}
  *  - columnValue
  */
 exports.testAddRelatedTable = function (params, isInline, inputCallback) {
@@ -896,9 +895,11 @@ exports.testAddRelatedTable = function (params, isInline, inputCallback) {
 		});
 
 		it ("the opened form should have the prefill value for foreignkey.", function () {
-            var fkInput = chaisePage.recordEditPage.getInputById(0, params.columnDisplayname);
-			expect(fkInput.getAttribute('value')).toBe(params.columnValue, "value missmatch");
-			expect(fkInput.getAttribute('disabled')).toBe('true', "column was enabled.");
+            for (var col in params.prefilledValues) {
+                var fkInput = chaisePage.recordEditPage.getInputById(0, col);
+                expect(fkInput.getAttribute('value')).toBe(params.prefilledValues[col], "value missmatch for " + col);
+                expect(fkInput.getAttribute('disabled')).toBe(params.prefilledValues[col] === "" ? null : 'true', "disabled missmatch for " + col);
+            }
 		});
 
 		it ("submitting the form and coming back to recordset page should update the related table.", function (done) {

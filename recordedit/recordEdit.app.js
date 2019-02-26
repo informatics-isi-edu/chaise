@@ -222,20 +222,19 @@
                     var newRow = recordEditModel.rows.length - 1;
 
                     // make sure cookie is correct
-                    var hasAllKeys = cookie && ["constraintName", "columnName", "origUrl", "rowname"].every(function (k) {
+                    var hasAllKeys = cookie && ["keys", "constraintNames", "origUrl", "rowname"].every(function (k) {
                         return cookie.hasOwnProperty(k);
                     });
                     if (hasAllKeys) {
                         $rootScope.cookieObj = cookie;
 
-                        // Update view model
-                        recordEditModel.rows[newRow][cookie.columnName] = cookie.rowname.value;
+                        cookie.constraintNames.forEach(function (cn) {
+                            // Update view model
+                            recordEditModel.rows[newRow][cn] = cookie.rowname.value;
 
-                        // the foreignkey data that we already have
-                        recordEditModel.foreignKeyData[newRow][cookie.constraintName] = cookie.keys;
-
-                        // show the spinner that means we're waiting for data.
-                        $rootScope.showColumnSpinner[newRow][cookie.columnName] = true;
+                            // show the spinner that means we're waiting for data.
+                            $rootScope.showColumnSpinner[newRow][cn] = true;
+                        });
 
                         // get the actual foreignkey data
                         ERMrest.resolve(cookie.origUrl, {cid: context.appName}).then(function (ref) {
@@ -243,9 +242,9 @@
                             var logObject = $rootScope.reference.defaultLogInfo;
                             logObject.referrer = ref.defaultLogInfo;
                             logObject.action = logActions.preCreatePrefill;
-                            getForeignKeyData(newRow, cookie.columnName, cookie.constraintName, ref, logObject);
+                            getForeignKeyData(newRow, cookie.constraintNames, ref, logObject);
                         }).catch(function (err) {
-                            $rootScope.showColumnSpinner[newRow][cookie.columnName] = false;
+                            $rootScope.showColumnSpinner[newRow][cookie.constraintName] = false;
                             $log.warn(err);
                         });
 
@@ -254,6 +253,9 @@
                         columnNames.forEach(function(colName) {
                             var colValue = cookie.keys[colName];
                             recordEditModel.submissionRows[newRow][colName] = colValue;
+                            // TODO we're setting the submission rows here but not the rows..
+                            // this can be missleading since we're sending values to ermrest
+                            // but users cannot see them.
                         });
                     }
                     $log.info('Model: ', recordEditModel);
@@ -456,7 +458,7 @@
                                             recordEditModel.foreignKeyData[0][column.foreignKey.name] = column.defaultValues;
 
                                             // get the actual foreign key data
-                                            getForeignKeyData(0, column.name, column.foreignKey.name, column.defaultReference, {action: logActions.recordeditDefault});
+                                            getForeignKeyData(0, [column.name], column.defaultReference, {action: logActions.recordeditDefault});
                                         }
                                     } else {
                                         // all other column types
@@ -495,27 +497,31 @@
          * we should do extra reads to get the actual data.
          *
          * @param  {int} rowIndex The row index that this data is for (it's usually zero, first row)
-         * @param  {string} colName The name of the foreignkey pseudo column.
-         * @param  {string} fkName  The constraint name of the foreign key
+         * @param  {string[]} colNames Array of foreignkey names that can be prefilled
          * @param  {ERMrest.Refernece} fkRef   Reference to the foreign key table
          * @param  {Object} contextHeaderParams the object will be passed to read as contextHeaderParams
          */
-        function getForeignKeyData (rowIndex, colName, fkName, fkRef, logObject) {
+        function getForeignKeyData (rowIndex, colNames, fkRef, logObject) {
             fkRef.contextualize.compactSelect.read(1, logObject).then(function (page) {
-                $rootScope.showColumnSpinner[rowIndex][colName] = true;
-                if ($rootScope.showColumnSpinner[rowIndex][colName]) {
-                    // default value is validated
-                    if (page.tuples.length > 0) {
-                        recordEditModel.foreignKeyData[rowIndex][colName] = page.tuples[rowIndex].data;
-                        recordEditModel.rows[rowIndex][colName] = page.tuples[rowIndex].displayname.value;
-                    } else {
-                        recordEditModel.foreignKeyData[rowIndex][fkName] = null;
-                        recordEditModel.rows[rowIndex][colName] = null;
+                colNames.forEach(function (colName) {
+                    $rootScope.showColumnSpinner[rowIndex][colName] = true;
+                    if ($rootScope.showColumnSpinner[rowIndex][colName]) {
+                        // default value is validated
+                        if (page.tuples.length > 0) {
+                            recordEditModel.foreignKeyData[rowIndex][colName] = page.tuples[rowIndex].data;
+                            recordEditModel.rows[rowIndex][colName] = page.tuples[rowIndex].displayname.value;
+                        } else {
+                            recordEditModel.foreignKeyData[rowIndex][colName] = null;
+                            recordEditModel.rows[rowIndex][colName] = null;
+                        }
                     }
-                }
-                $rootScope.showColumnSpinner[rowIndex][colName] = false;
+
+                    $rootScope.showColumnSpinner[rowIndex][colName] = false;
+                });
             }).catch(function (err) {
-                $rootScope.showColumnSpinner[rowIndex][colName] = false;
+                colNames.forEach(function (colName) {
+                    $rootScope.showColumnSpinner[rowIndex][colName] = false;
+                });
                 $log.warn(err);
             });
         }

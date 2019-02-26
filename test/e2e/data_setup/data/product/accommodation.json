@@ -1,5 +1,6 @@
 [{
   "id": 2003,
+  "extra_id": 1,
   "no_of_rooms": 15,
   "title": "NH Munich Resort",
   "website": "http://www.nh-hotels.com/hotels/munich",
@@ -17,6 +18,7 @@
  },
  {
   "id": 2001,
+  "extra_id": 2,
   "no_of_rooms": 46,
   "title": "Radisson Hotel",
   "website": "http://www.radisson.com/",
@@ -34,6 +36,7 @@
  },
  {
   "id": 2002,
+  "extra_id": 3,
   "no_of_rooms": 23,
   "title": "Sherathon Hotel",
   "website": "http://www.starwoodhotels.com/sheraton/index.html",
@@ -51,6 +54,7 @@
  },
  {
   "id": 2004,
+  "extra_id": 4,
   "no_of_rooms": 35,
   "title": "Super 8 North Hollywood Motel",
   "website": "https://www.kayak.com/hotels/Super-8-North-Hollywood-c31809-h40498/2016-06-09/2016-06-10/2guests",
@@ -68,6 +72,7 @@
 },
 {
  "id": 4004,
+ "extra_id": 5,
  "no_of_rooms": 96,
  "title": "Hilton Hotel",
  "website": null,
@@ -83,6 +88,7 @@
 },
 {
  "id": 2000,
+ "extra_id": 6,
  "no_of_rooms": 23,
  "title": "Sherathon Hotel",
  "website": "http://www.starwoodhotels.com/sheraton/index.html",

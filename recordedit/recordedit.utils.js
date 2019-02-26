@@ -17,12 +17,12 @@
             }
         }
 
-        function isDisabled(column, cookie) {
+        function isDisabled(column, cookie)                                  {
             var disabled = InputUtils.isDisabled(column);
             if (disabled) {
                 return true;
-            } else if (cookie) {
-                return cookie.constraintName == column.name;
+            } else if (cookie && Array.isArray(cookie.constraintNames)) {
+                return cookie.constraintNames.indexOf(column.name) !== -1;
             }
             return false;
         }

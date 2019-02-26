@@ -235,8 +235,7 @@ describe('Record Add', function() {
             chaisePage.waitForElement(element(by.id("submit-record-button"))).then (function () {
                 // Write a dummy cookie for creating a record in Accommodation table
                 testCookie = {
-                    constraintName: 'npH9l-Il-ZAadyQ8VTPStA', // A FK that Accommodation table has with Category table, column._name
-                    columnName: 'npH9l-Il-ZAadyQ8VTPStA',
+                    constraintNames: ['npH9l-Il-ZAadyQ8VTPStA'], // A FK that Accommodation table has with Category table, column._name
                     rowname: {
                         value: "Castle"
                     },
