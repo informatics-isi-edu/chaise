@@ -22,10 +22,10 @@ exports.testPresentation = function (tableParams) {
         expect(title.getText()).toEqual(tableParams.title);
 	});
 
-	it("should have '" + tableParams.subTitle.toUpperCase() +"' as subTitle", function() {
+	it("should have '" + tableParams.subTitle +"' as subTitle", function() {
         var subtitle = chaisePage.recordPage.getEntitySubTitleElement();
 		chaisePage.waitForElement(subtitle);
-        expect(subtitle.getText()).toEqual(tableParams.subTitle.toUpperCase());
+        expect(subtitle.getText()).toEqual(tableParams.subTitle);
 	});
 
     it ("should have the correct table tooltip.", function () {

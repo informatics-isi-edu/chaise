@@ -76,7 +76,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
     }
 
     it ("should have the table subtitle.", function () {
-        expect(chaisePage.recordEditPage.getEntitySubtitleElement().getText()).toBe(tableParams.table_displayname.toUpperCase(), "Entity subtitle is incorrect.");
+        expect(chaisePage.recordEditPage.getEntitySubtitleElement().getText()).toBe(tableParams.table_displayname, "Entity subtitle is incorrect.");
         expect(chaisePage.recordEditPage.getEntitySubtitleTooltip()).toBe(tableParams.table_comment, "Entity subtitle tooltip is incorrect.");
     });
 
@@ -1535,7 +1535,7 @@ exports.testSubmission = function (tableParams, isEditMode) {
                 var expectedLink = process.env.CHAISE_BASE_URL + "/recordset/#" +  browser.params.catalogId + "/" + tableParams.schema_name + ":" + tableParams.table_name + linkModifier;
 
                 chaisePage.recordEditPage.getResultsetSubtitleLink().then(function (titleLink) {
-                    expect(titleLink[0].getText()).toBe(tableParams.table_displayname.toUpperCase(), "Title of result page doesn't have the expected caption.");
+                    expect(titleLink[0].getText()).toBe(tableParams.table_displayname, "Title of result page doesn't have the expected caption.");
                     expect(titleLink[0].getAttribute("href")).toBe(expectedLink , "Title of result page doesn't have the expected link.");
                 });
             });
