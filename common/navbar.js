@@ -63,13 +63,15 @@
                 scope.brandImage = chaiseConfig.navbarBrandImage;
                 scope.menu = chaiseConfig.navbarMenu ? chaiseConfig.navbarMenu.children : [];
 
+                if (!scope.catalogID) scope.catalogID = catalogId
+
                 scope.toggleMenu = toggleMenu;
                 scope.isVersioned = function () {
-                    return $rootScope.context.catalogID.split("@")[1] ? true : false;
+                    return scope.catalogID.split("@")[1] ? true : false;
                 }
 
                 scope.toLive = function () {
-                    $window.location = $window.location.href.replace($rootScope.context.catalogID, $rootScope.context.catalogID.split("@")[0])
+                    $window.location = $window.location.href.replace(scope.catalogID, scope.catalogID.split("@")[0])
                 }
             }
         };
