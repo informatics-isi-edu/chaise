@@ -1,0 +1,347 @@
+ should have the correct tooltip.| 14
+ should open the facet, select a value to filter on, and update the search criteria.| 14
+ should be displayed.| 13
+ should always go to recordset app with correct set of filters.| 10
+ should input the given values.| 10
+ title should be correct.| 9
+ 'View Details' button should have the correct link.| 9
+ rows of data should be correct and respect the given page_size.| 9
+ option for different display modes should not be presented to user.| 8
+ clicking on 'edit` button should open a tab to recordedit page.| 8
+ should validate required and invalid text input| 7
+ should validate int8(-9223372036854776000 < value < 9223372036854776000), int4(-2147483648 < value < 2147483647) and int2(-32768 < value < 32767) with range values| 7
+ should render input type as number with integer attribute| 7
+ should show text input for text and set the value.| 7
+ should select a valid value.| 6
+ should be visible.| 5
+ should change the view to the resultset table and verify the count.| 5
+ clicking on the toggle should change the view to tabular.| 5
+ markdown container must be visible.| 5
+ it should update the table and title after confirmation.| 5
+ should close the facet.| 4
+ should open the facet, test validators, filter on a range, and update the search criteria.| 4
+ should show red asterisk (*) before for fields which are required| 4
+ should render columns which are inside the visible columns annotation if defined; Default all are visible| 4
+ should display the share button| 4
+ should have a histogram displayed with min/max inputs filled in.| 4
+ should have no errors.| 4
+ should filter on just a max value and update the search criteria.| 4
+ button tooltip be `Delete`.| 4
+ should have the table subtitle.| 4
+ unzoom should be disabled, clicking zoom should zoom in and enable the unzoom button.| 4
+ zoom in once more, unzoom once, then reset the histogram.| 4
+ should not display the delete button| 4
+ zoom in again and submit the range filter should display the proper resultset.| 4
+ should point to the correct link with caption.| 4
+ should show line under columns which have a comment| 4
+ should filter on just a min value and update the search criteria.| 4
+ should have the correct title.| 4
+ On click of OK button the page should redirect to recordset page| 4
+ should display the view button| 4
+ `Edit` button should be visible to switch to tabular mode.| 4
+ clear all filters should reset the histogram.| 4
+ should not display the Edit button| 3
+ should have the correct value.| 3
+ should have the current time after clicking the "Now" button| 3
+ `Add` button should be visible.| 3
+ should have 3 inputs with validation for each timestamp column| 3
+ should render 3 options for a boolean field if nullok is true else 2| 3
+ should render input type as number with float attribute| 3
+ Error modal text indicates users about error and provides them with navigation options| 3
+ should not display the edit button| 3
+ should render correct markdown with inline preview and full preview button.| 3
+ should be returned Invalid Page Criteria| 3
+ should show textarea input for longtext datatype and then set the value.| 3
+ should have correct values.| 3
+ should show textarea input for JSON datatype and then set the value| 3
+ should be able to change the value.| 3
+ "Clear" button clear the date input respectively| 3
+ should select an option (true, false, none)| 3
+ should click add record button| 3
+ set the correct value.| 3
+ should clear the input after clicking the "Clear" button| 3
+ should show columns with generated or immutable annotations as disabled| 3
+ "Today" button should enter the current date into the input| 3
+ should not display the Copy button| 3
+ should show a dropdown| 3
+ should only allow valid JSON values| 3
+ should validate invalid text input| 3
+ should show an uneditable field for each foreign key column| 3
+ should not display the Delete button| 3
+ should open a modal search and select a foreign key value.| 3
+ should load chaise-config.js and have editRecord=true| 3
+ should show input fields and validate for date columns| 3
+ should not display the Edit link| 3
+ should redirect to recordedit app| 2
+ should give a warning when leaving the edit page with unsaved changes| 2
+ On click of OK button the page should redirect to RecordSet| 2
+ An error modal window should appear with Record Not Found title| 2
+ should have the title displayed properly.| 2
+ columns should have correct value, and selectable.| 2
+ should display the Create button| 2
+ should be redirected to record page| 2
+ `Add` button should be invisible.| 2
+ should limit the set.| 2
+ should show correct table rows.| 2
+ should not display the add record [+] button| 2
+ should close the facet modal| 2
+ should have '2' options in the dropdown menu.| 2
+ the rows in the modal should honor the given order.| 2
+ should display the right title from chaiseConfig| 2
+ that isn't set should have the full set.| 2
+ should display the related tables toggle as "Hide Empty Related Records"| 2
+ On click of OK button the page should reload the page without paging conditions| 2
+ should submit the right data to the DB| 2
+ should have create record title| 2
+ should be visible| 2
+ should display the add record [+] button| 2
+ An error modal window should appear with Invalid Input title| 2
+ should click and remove the last record| 2
+ should show line under columns which have a comment and inspect the comment value too| 2
+ Error modal should Show Error Details| 2
+ Page footer link should match with "privacy-policy"| 2
+ Error modal text indicates users about error and provides them with navigation options to Home Page| 2
+ should display the related tables toggle as "Show All Related Records"| 2
+ should not display the Create button| 2
+ should not allow to add new rows/columns| 2
+ should have edit record title| 2
+ should have the table displayname as part of the entity subtitle witht eh proper tooltip.| 2
+ 3 buttons should be visible and enabled| 2
+ should be able to filter not-null values.| 2
+ should display 'View' as the column header| 2
+ Side panel should hide/show by clicking pull button| 2
+ should display 'Actions' as the column header| 2
+ should allow to add new rows/columns| 2
+ otherwise it should not be limited.| 1
+ action columns should show view button that redirects to the record page| 1
+ clicking 'x' in the model should close it without returning a value.| 1
+ should autofocus on search box| 1
+ number of Occurrences column should be hidden.| 1
+ should have the correct tooltip| 1
+ should sort Type of Facilities column in ascending order.| 1
+ without a limit, clicking edit will show all forms with int=23.| 1
+ click event on image_id in inline display should open new tab with file details| 1
+ should clear the timestamp input in form 2 and change the value in form 3.| 1
+ should load document title defined in chaise-config.js and have deleteRecord=true and resolverImplicitCatalog=2| 1
+ should have 'ACCOMMODATIONS' as subTitle| 1
+ The proper permalink (browser url) should appear in the share popup if resolverImplicitCatalog is undefined| 1
+ should clear the date input in form 1 and change the value in form 3.| 1
+ After submitting the filters, `All Records With Value` should be on top of the list with the rest of options being disabled| 1
+ and redirect to a record page with the default values.| 1
+ should have 10 rows after paging to the second page, back to the first, and then changing page size to 10.| 1
+ should display the Export dropdown button with proper tooltip.| 1
+ with a limit of 10, clicking edit will show all forms with int=23.| 1
+ should show an "Add" link if the table is an associative relationship| 1
+ should have only 'CSV' option in export menu because of `disableDefaultExport` chaise-config.| 1
+ should change int input in form 3.| 1
+ clicking the 'x' should remove the value in the foreign key field.| 1
+ should initialize text input column: timestamptz_disabled with the proper value| 1
+ after clearing the foreignkey, it should not limit the set.| 1
+ should show related table names and their tables| 1
+ should not show an "Add" or "Unlink" link if the table doesn't allow adding a new row| 1
+ should be returned as a 409 error with deletion conflict.| 1
+ should display the Edit button| 1
+ should initialize text input column: text_disabled with the proper value| 1
+ Should have the proper permalink in the share popup if resolverImplicitCatalog is the same as catalogId| 1
+ Error modal is dismissible in case of conflict/forbidden error while deleting from ellipses| 1
+ selecting `No Value` and submitting should change the result.| 1
+ should initialize text input column: boolean_disabled with the proper value| 1
+ Record count along with heading should match for the panel and related table content should be in correct order| 1
+ should have 'Automatically Generated' in an input that is generated rather than copying the value from the copied record.| 1
+ Table of contents should be displayed by default| 1
+ On click of OK button the page should redirect to Home page| 1
+ as a delete-only user, the app should not load the form and displays error modal instead| 1
+ should not limit the fk set before setting the 2nd value for multi constrained fk.| 1
+ should limit the set after choosing a foreign key.| 1
+ should limit the set before setting the value if other foreignkey has default value.| 1
+ should redirect to record after changing the id and resubmitting.| 1
+ opening the modal should show the No value as selected.| 1
+ Deselecting `All Records With Value` should enable all the values on the list.| 1
+ should show a "Table Display" toggle link if the table has a row_markdown_pattern| 1
+ after selecting one, other such facets should not provide null option.| 1
+ After clicking back button initial page should appear| 1
+ should display the Copy button| 1
+ should sort Name of Accommodation column in descending order.| 1
+ should show 25 rows and 0 filters after clicking 'clear all'| 1
+ should initialize json columns properly if they are disabled without a default.| 1
+ warn the user when submitting data when no data was changed.| 1
+ click on the add button should open a new tab to recordedit| 1
+ should display the permalink button & a tooltip on hovering over it| 1
+ should have 4 facets| 1
+ should initialize text input column: json_disabled with the proper value| 1
+ clicking on `Add` button should open up a modal.| 1
+ should show all of the related tables in the correct order.| 1
+ date| 1
+ should show the add [+] button in the modal for a table that allows update and create| 1
+ should show the "View More" link| 1
+ should display the Delete button| 1
+ should open the profile card on click of My Profile link| 1
+ should open a new window with the help page.| 1
+ should change text input in form 2.| 1
+ should use annotated page size| 1
+ going to modal picker with `All Records With Value`, the checkmark for `All Records With Value` must be checked.| 1
+ should show the add [+] button in the modal for a FK-related table that allows creation| 1
+ should display the delete button| 1
+ should sort Category column in descending order.| 1
+ should have no errors, and should be redirected| 1
+ remove 2 forms and edit some of the data| 1
+ clicking edit will show forms based on the limit of 10 in the uri.| 1
+ no data should be represented to the user.| 1
+ Record Table of Contents panel should be hidden by default as chaiseConfig entry hideTableOfContents is true.| 1
+ should have the correct table rows.| 1
+ search using the global search box should search automatically, show the search phrase as a filter, and show the set of results| 1
+ number of Occurrences column should be available.| 1
+ should prefill simple input fields that are disabled with their default value.| 1
+ numer of Occurrences column should be available and users should be able to sort based on that.| 1
+ should intialize timestamptz columns properly with a default value.| 1
+ the facet column sort option should not be available.| 1
+ should have 1 row visible| 1
+ should generate the correct # of list items| 1
+ if foreign key has value, the foreignkey that is using its value should be limited.| 1
+ should render columns based on their markdown pattern.| 1
+ should click and add an extra record.| 1
+ should sort Number of Rooms column in ascending order.| 1
+ clicking edit action should open a new window with a new window ID and a new page ID.| 1
+ Clicking the subtitle should redirect to recordset app| 1
+ should pre-fill fields from the prefill cookie| 1
+ 'int_col' facet should not show the histogram| 1
+ should load chaise-config.js and have confirmDelete=true| 1
+ `All Records With Value` option must be available in modal picker.| 1
+ selecting the not-null option, should only show the applicable rows.| 1
+ should click the button a second time to hide the input.| 1
+ visible column related table with inline inbound fk should display 'None' in markdown display mode if no data was found.| 1
+ should initialize text input column: markdown_disabled with the proper value| 1
+ current values must be disabled.| 1
+ should click the button and show an input box.| 1
+ should have 'Sherathon Hotel' as title| 1
+ clicking view action should change current window with the same window ID and a new page ID.| 1
+ should have 21 facets| 1
+ should close the profile card on click of X on the modal window| 1
+ should display the correct values in disabled input fields| 1
+ should show the share dialog when clicking the share button with 3 list elements.| 1
+ should initialize text input column: asset_disabled with the proper value| 1
+ selecting new values on the modal and submitting them, should change the filters on submit.| 1
+ should initialize text input column: timestamp_disabled with the proper value| 1
+ should have the correct table tooltip.| 1
+ should display the Edit link| 1
+ clicking the related table heading should change the heading and hide the table.| 1
+ should load the table with 5 rows of data based on the page size annotation.| 1
+ for facet at index: 10, it should open the facet, select a value to filter on, and update the search criteria.| 1
+ apply different searches, | 1
+ should show the related table names in the correct order in the Table of Contents| 1
+ should show and hide a related table with zero values upon clicking a link to toggle visibility of related entities| 1
+ users should be able to change the sort to be based on the scalar column.| 1
+ should intialize timestamp columns properly with a default value.| 1
+ should fill in the first form add 2 more forms.| 1
+ should show 22 columns only| 1
+ should display the proper row count and total row count.| 1
+ clicking edit will show forms based on the default page size of 25.| 1
+ should initialize timestamp columns properly if they are disabled without a default.| 1
+ should not display a brand image/logo| 1
+ should open the facet, select a value to filter on.| 1
+ should initialize text input column: foreign_key_disabled with the proper value| 1
+ button tooltip should be `Unlink`.| 1
+ should sort Number of Rooms column in descending order.| 1
+ clicking on `Add` button should open recordedit.| 1
+ Error modal is dismissible in case of conflict/forbidden error| 1
+ `Table Display` button should be visible to switch to tabular mode.| 1
+ A error modal window should appear with multiple records found error with correct title| 1
+ Selecting `All Records With Value` in the list, should remove all the checked filters on facet.| 1
+ should not show a toggle display link if the table does not have a row_markdown_pattern| 1
+ should not show Loading... text when there are no related tables.| 1
+ action columns should show delete button that deletes record| 1
+ for facet at index: 11, it should open the facet, select a value to filter on, and update the search criteria.| 1
+ opening the modal should not have the no value selected.| 1
+ with a domain filter with a conjunction, should limit the set.| 1
+ no histogram should be displayed.| 1
+ should load chaise-config.js and have deleteRecord=false && resolverImplicitCatalog=4| 1
+ table must show correct results.| 1
+ should not show the add [+] button in the modal for a table that only allows delete| 1
+ should show correct tooltip for the facets.| 1
+ should not show the add [+] button in the modal for a read-only table| 1
+ An error modal window should appear with Multiple Records Found title| 1
+ On click of OK button the page should redirect Home page| 1
+ should show correct table rows| 1
+ the selected value should be selected on the modal.| 1
+ should initialize text input column: float_disabled with the proper value| 1
+ Opened modal by `Add` button should honor the page_size.| 1
+ should sort Name of Accommodation column in ascending order.| 1
+ should change fk value in form 1.| 1
+ should show the related entities in the expected order.| 1
+ should sort Category column in ascending order.| 1
+ the composite key should be filled in.| 1
+ should not limit the set before setting the value for other foreignkey in absence of default value.| 1
+ should initialize foreign key inputs with their default value.| 1
+ the opened form should have the prefill value for foreignkey.| 1
+ edit button should not be visible.| 1
+ should render columns which are specified to be visible and in order| 1
+ null should be provided as an option and user should be able to select it.| 1
+ should initialize text input column: date_disabled with the proper value| 1
+ for facet at index: 13, it should open the facet, select a value to filter on, and update the search criteria.| 1
+ should change text input in form 1.| 1
+ should show a resultset table with 201 entities.| 1
+ JSON Column value should be searchable| 1
+ should have a share link present.| 1
+ boolean facet should not have a search box present| 1
+ should show an "Add" link if the table is an inbound relationship| 1
+ should sort Operational Since column in descending order.| 1
+ empty inline inbound fks should disappear when 'Hide All Related Records' was clicked.| 1
+ action columns should show edit button that redirects to the recordedit page| 1
+ should have 'Accommodations' as title| 1
+ as a create-only user, the app should not load the form and displays error modal instead| 1
+ should open the facet and the two options should be available.| 1
+ should open facets, click an option in each, and verify the data after| 1
+ should use the brand image/logo specified in chaiseConfig| 1
+ should be redirected to record page with correct values.| 1
+ should sort Type of Facilities column in descending order.| 1
+ submitting the form and coming back to recordset page should update the related table.| 1
+ should sort Operational Since column in ascending order.| 1
+ should have 14 rows and paging buttons disabled when changing the page size to 25.| 1
+ should collapse related tables after it exceeds the maxRelatedTablesOpen value| 1
+ should prefill simple input fields that are not disabled with their default value.| 1
+ should redirect to recordedit when clicked.| 1
+ should be able to select other filters on the facet.| 1
+ should load chaise-config.js and have maxRelatedTablesOpen=9| 1
+ An error modal window should appear with Item Not Found title| 1
+ 'id' facet should have 1 row checked| 1
+ should not display a delete record button| 1
+ should show the related table names in the correct order in the Table of Contents (including inline)| 1
+ should have a citation present,| 1
+ On click of Related table name in TOC, page should move to the contents and open the table details| 1
+ should show an "Edit" toggle link if a related table has a row_markdown_pattern| 1
+ should alert the user if trying to submit data without changing the id.| 1
+ should show when the page loads.| 1
+ should have 1 row selected in show more popup for entity.| 1
+ fk_to_f1| 1
+ with a domain filter with a static value.| 1
+ should validate the values of each column| 1
+ should display the entity title and subtitle based on their markdown patterns.| 1
+ should display the edit button| 1
+ should change the view to the resultset table.| 1
+ should not show any columns with null value| 1
+ should redirect to data browser if ETags match (like normal).| 1
+ Selecting `All Records With Value` should disable all the rows.| 1
+ should have 3 facets open| 1
+ should load chaise-config.js with confirmDelete=true && defaults catalog and table set| 1
+ should have 2 filters selected| 1
+ should not limit the fk set before setting either values for multi constrained fk.| 1
+ as a read-only user, the app should not load the form and displays error modal instead| 1
+ as anonymous user| 1
+ selecting the null option, should only show the applicable rows.| 1
+ should alert the user when they try to add more forms than the limit of 200 allows.| 1
+ should have 1 row selected in show more popup for scalar picker.| 1
+ for the menu, should generate the correct # of list items| 1
+ should hide the column headers and collapse the table of contents based on table-display annotation.| 1
+ should honor the page_size annotation for the table, file, in the compact context based on inheritance.| 1
+ should show the share dialog when clicking the share button with only permalink present.| 1
+ timestamp| 1
+ should have 15 columns| 1
+ user should be able to select new values and submit.| 1
+ for facet at index: 12, it should open the facet, select a value to filter on, and update the search criteria.| 1
+ correct markdown values should be visible.| 1
+ On click of OK button the page should reload the page without paging condition but with invalid filter conditions| 1
+ should initialize system column inputs with 'Automatically Generated'.| 1
+ should display the entity subtitle name with html in it.| 1
+ should load chaise-config.js and have resolverImplicitCatalog=false,| 1
+ should show the action buttons properly| 1
+ should initialize text input column: int_disabled with the proper value| 1
