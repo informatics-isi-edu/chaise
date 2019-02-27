@@ -21,6 +21,10 @@
         });
     }
 
+    function isCatalogDefined(val) {
+        return val != undefined && val != null
+    }
+
     'use strict';
     angular.module('chaise.navbar', [
         'chaise.login',
@@ -32,7 +36,8 @@
         // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
         var root = chaiseConfig.navbarMenu || {};
         // get the catalog id
-        var catalogId = "" + (($rootScope.context && $rootScope.context.catalogID) ? $rootScope.context.catalogID : ($window.location.hash.split('/')[0].slice(1) || chaiseConfig.defaultCatalog));
+        // NOTE: this is put in a string
+        var catalogId = (($rootScope.context && $rootScope.context.catalogID) ? "" + $rootScope.context.catalogID : ("" + $window.location.hash.split('/')[0].slice(1) || "" + chaiseConfig.defaultCatalog || null));
         // Set default newTab property at root node
         if (!root.hasOwnProperty('newTab')) {
             root.newTab = true;
@@ -43,7 +48,7 @@
             var parentNewTab = obj.newTab;
             // template the url
             // TODO: This is done here to prevent writing a recursive function (again) in `setConfigJSON()`
-            if (obj.url) obj.url = ERMrest.renderHandlebarsTemplate(obj.url, null, {id: catalogId});
+            if (obj.url && isCatalogDefined(catalogId)) obj.url = ERMrest.renderHandlebarsTemplate(obj.url, null, {id: catalogId});
             // If current node has children, set each child's newTab to its own existing newTab or parent's newTab
             if (Array.isArray(obj.children)) {
                 obj.children.forEach(function (child) {
@@ -64,12 +69,14 @@
                 scope.menu = chaiseConfig.navbarMenu ? chaiseConfig.navbarMenu.children : [];
 
                 scope.toggleMenu = toggleMenu;
-                scope.isVersioned = function () {
-                    return $rootScope.context.catalogID.split("@")[1] ? true : false;
-                }
+                if (isCatalogDefined(catalogId)) {
+                    scope.isVersioned = function () {
+                        return catalogId.split("@")[1] ? true : false;
+                    }
 
-                scope.toLive = function () {
-                    $window.location = $window.location.href.replace($rootScope.context.catalogID, $rootScope.context.catalogID.split("@")[0])
+                    scope.toLive = function () {
+                        $window.location = $window.location.href.replace(catalogId, catalogId.split("@")[0])
+                    }
                 }
             }
         };

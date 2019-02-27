@@ -161,7 +161,7 @@ describe('Edit multiple existing record,', function() {
                 it("should have the table displayname as part of the entity subtitle witht eh proper tooltip.", function() {
                     // if submit button is visible, this means the recordedit page has loaded
                     chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
-                        expect(chaisePage.recordEditPage.getEntitySubtitleElement().getText()).toBe(tableParams.table_name.toUpperCase(), "Entity subtitle is incorrect.");
+                        expect(chaisePage.recordEditPage.getEntitySubtitleElement().getText()).toBe(tableParams.table_name, "Entity subtitle is incorrect.");
                         expect(chaisePage.recordEditPage.getEntitySubtitleTooltip()).toBe(tableParams.tableComment, "Subtitle comment is incorrect.");
                     });
                 });
@@ -228,7 +228,7 @@ describe('Edit multiple existing record,', function() {
                             var expectedLink = process.env.CHAISE_BASE_URL + "/recordset/#" +  browser.params.catalogId + "/" + schemaName + ":" + tableParams.table_name + "/" + keyPairs.join(";") + "@sort(" + tableParams.sortColumns + ")";
 
                             chaisePage.recordEditPage.getResultsetSubtitleLink().then(function (titleLink) {
-                                expect(titleLink[0].getText()).toBe(tableParams.table_name.toUpperCase(), "Title of result page doesn't have the expected caption.");
+                                expect(titleLink[0].getText()).toBe(tableParams.table_name, "Title of result page doesn't have the expected caption.");
                                 expect(titleLink[0].getAttribute("href")).toBe(expectedLink , "Title of result page doesn't have the expected link.");
                             });
                         });
