@@ -135,7 +135,7 @@
          * addRecords - Function that calls ermrestjs method to add data
          *
          * @param  {bool} isUpdate              flag
-         * @param  {object} derivedref          derived referene of the column that is being added
+         * @param  {object} derivedref          derived reference of the column that is being added
          * @param  {array} recordEditModel      data array
          * @param  {bool} isModalUpdate         if updating through record app
          * @param  {object} rsReference         rootscope reference from calling function
@@ -285,7 +285,7 @@
          *
          * @param  {object} ref             column reference
          * @param  {int} rowIndex           row index
-         * @param  {object} derivedref      derived referene of the column that is being added
+         * @param  {object} derivedref      derived reference of the column that is being added
          * @param  {bool} isModalUpdate     flag
          * @param  {object} rsReference     object contains rootscope reference from calling function
          * @param  {array} rsTuples         rootscope tuples array from calling function

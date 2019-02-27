@@ -5,8 +5,8 @@
 
     .factory('recordEditAppUtils', ['InputUtils', 'UiUtils', '$log', '$rootScope', function (InputUtils, UiUtils, $log, $rootScope) {
 
-        function columnToInputType(column, prefillCookie) {
-            if (isDisabled(column, prefillCookie)) {
+        function columnToInputType(column, isDisabled) {
+            if (isDisabled) {
                 return 'disabled';
             } else if (column.isForeignKey) {
                 return 'popup-select';
@@ -17,19 +17,8 @@
             }
         }
 
-        function isDisabled(column, cookie)                                  {
-            var disabled = InputUtils.isDisabled(column);
-            if (disabled) {
-                return true;
-            } else if (cookie && Array.isArray(cookie.constraintNames)) {
-                return cookie.constraintNames.indexOf(column.name) !== -1;
-            }
-            return false;
-        }
-
         return {
-            columnToInputType: columnToInputType,
-            isDisabled: isDisabled
+            columnToInputType: columnToInputType
         };
     }]);
 

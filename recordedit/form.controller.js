@@ -17,7 +17,6 @@
             editor: "https://jbt.github.io/markdown-editor/#RZDLTsMwEEX3/opBXQCRmqjlsYBVi5CKxGOBWFWocuOpM6pjR54Jbfl6nKY08mbO1dwj2yN4pR+ENx23Juw8PBuSEJU6B3zwovdgAzIED1IhONwINNqjezxyRG6dkLcQWmlaAWIwxI3TBzT/pUi2klypLJsHZ0BwL1kGSq1eRDsq6Rf7cKXUCBaoTeebJBho2tGAN0cc+LbnIbg7BUNyr9SnrhuH6dUsCjKYNYm4m+bap3McP6L2NqX/y+9tvcaYLti3Jvm5Ns2H3k0+FBdpvfsGDUvuHY789vuqEmn4oShsCNZhXob6Ou+3LxmqsAMJQL50rUHQHqjWFpW6WM7gpPn6fAIXbBhUUe9yS1K1605XkN+EWGuhksfENEbTFmWlibGoNQvG4ijlouVy3MQE8cAVoTO7EE2ibd54e/0H",
             cheatsheet: "http://commonmark.org/help/"
         };
-        vm.isDisabled = recordEditAppUtils.isDisabled;
         vm.isRequired = isRequired;
         vm.getDisabledInputValue = getDisabledInputValue;
 
@@ -54,7 +53,6 @@
         vm.fileExtensionTypes = InputUtils.fileExtensionTypes;
         vm.blurElement = InputUtils.blurElement;
         vm.maskOptions = maskOptions;
-        vm.prefillCookie = $cookies.getObject(context.queryParams.prefill);
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
         vm.bookmarkDisplayName = function () {
@@ -494,11 +492,9 @@
             vm.recordEditModel.rows[modelIndex][columnName] = InputUtils.clearDatetime(columnType);
         }
 
-        function isRequired(column) {
-            if (!column.nullok && !vm.isDisabled(column)) {
-                return true;
-            }
-            return false;
+        function isRequired(columnIndex) {
+            var cm = vm.recordEditModel.columnModels[columnIndex];
+            return cm && cm.column && !cm.column.nullok && !cm.isDisabled;
         }
 
 // **** Functions for set all input

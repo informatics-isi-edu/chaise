@@ -95,7 +95,11 @@ describe ("Viewing exisiting record with related entities, ", function () {
             prefilledValues: {
                 "fk_1": "Super 8 North Hollywood Motel", // the same fk
                 "fk_2": "Super 8 North Hollywood Motel", // superset fk
-                "fk_3": "" // supserset fk but nullok
+                "fk2_col": "4", // the second column of fk_2
+                "fk_3": "", // supserset fk but nullok
+                "fk3_col1": "",
+                "fk_4": "Super 8 North Hollywood Motel", // supserset fk
+                "fk_5": "4: four" // the second column of fk_2 that is a fk to another table
             },
             rowValuesAfter: [
                 ["247.0000",""],
