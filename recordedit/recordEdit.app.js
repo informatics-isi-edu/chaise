@@ -377,7 +377,6 @@
                         if (context.queryParams.prefill) {
                             // get the cookie with the prefill value
                             var cookie = $cookies.getObject(context.queryParams.prefill);
-                            var newRow = recordEditModel.rows.length - 1;
 
                             // make sure cookie is correct
                             var hasAllKeys = cookie && ["keys", "constraintNames", "origUrl", "rowname"].every(function (k) {
@@ -386,40 +385,19 @@
                             if (hasAllKeys) {
                                 $rootScope.cookieObj = cookie;
 
+                                // keep a record of freignkeys that are prefilled
                                 prefilledFks = cookie.constraintNames;
-                                cookie.constraintNames.forEach(function (cn) {
-                                    // Update view model
-                                    recordEditModel.rows[newRow][cn] = cookie.rowname.value;
 
-                                    // show the spinner that means we're waiting for data.
-                                    $rootScope.showColumnSpinner[newRow][cn] = true;
-                                });
-
-                                // get the actual foreignkey data
-                                ERMrest.resolve(cookie.origUrl, {cid: context.appName}).then(function (ref) {
-                                    // the table that we're logging is not the same table in url (it's the referrer that is the same)
-                                    var logObject = $rootScope.reference.defaultLogInfo;
-                                    logObject.referrer = ref.defaultLogInfo;
-                                    logObject.action = logActions.preCreatePrefill;
-                                    getForeignKeyData(newRow, cookie.constraintNames, ref, logObject);
-                                }).catch(function (err) {
-                                    $rootScope.showColumnSpinner[newRow][cookie.constraintName] = false;
-                                    $log.warn(err);
-                                });
-
-                                // Update submission and row model
+                                // keep a record of columns that are prefilled
                                 prefilledColumns = cookie.keys;
-                                for (var name in prefilledColumns) {
-                                    recordEditModel.rows[newRow][name] = prefilledColumns[name];
-                                    recordEditModel.submissionRows[newRow][name] = prefilledColumns[name];
-                                }
-                            }
-                            $log.info('Model: ', recordEditModel);
-                            // Keep a copy of the initial rows data so that we can see if user has made any changes later
-                            recordEditModel.oldRows = angular.copy(recordEditModel.rows);
-                            $log.info('Old model.rows:', recordEditModel.oldRows);
-                        }
 
+                                // process the list of prefilled foreignkeys to get additional data
+                                processPrefilledForeignKeys(cookie.constraintNames, cookie.keys, cookie.origUrl, cookie.rowname);
+
+                                // Keep a copy of the initial rows data so that we can see if user has made any changes later
+                                recordEditModel.oldRows = angular.copy(recordEditModel.rows);
+                            }
+                        }
 
                         // populate defaults
                         for (var i = 0; i < $rootScope.reference.columns.length; i++) {
@@ -472,7 +450,7 @@
 
                                         if (allPrefilled) {
                                             var defaultDisplay = column.getDefaultDisplay(prefilledColumns);
-                                            
+
                                             colModel.isDisabled = true;
                                             colModel.inputType = "disabled";
                                             initialModelValue = defaultDisplay.rowname.value;
@@ -553,5 +531,42 @@
             });
         }
 
+        /**
+         * - Attach the values for foreignkeys and columns that are prefilled.
+         * - Read the actual parent row in order to attach the foreignkeyData
+         * @param  {string[]} constraintNames An array of the name of foreign key columns
+         * @param  {Object} keys            key-value pair of raw values
+         * @param  {string} origUrl         the parent url that should be resolved to get the complete row of data
+         * @param  {Object} rowname         the default rowname that should be displayed
+         */
+        function processPrefilledForeignKeys(constraintNames, keys, origUrl, rowname) {
+            var newRow = recordEditModel.rows.length - 1;
+
+            constraintNames.forEach(function (cn) {
+                // Update view model
+                recordEditModel.rows[newRow][cn] = rowname.value;
+
+                // show the spinner that means we're waiting for data.
+                $rootScope.showColumnSpinner[newRow][cn] = true;
+            });
+
+            // get the actual foreignkey data
+            ERMrest.resolve(origUrl, {cid: context.appName}).then(function (ref) {
+                // the table that we're logging is not the same table in url (it's the referrer that is the same)
+                var logObject = $rootScope.reference.defaultLogInfo;
+                logObject.referrer = ref.defaultLogInfo;
+                logObject.action = logActions.preCreatePrefill;
+                getForeignKeyData(newRow, constraintNames, ref, logObject);
+            }).catch(function (err) {
+                $rootScope.showColumnSpinner[newRow][constraintName] = false;
+                $log.warn(err);
+            });
+
+            // Update submission and row model
+            for (var name in keys) {
+                recordEditModel.rows[newRow][name] = keys[name];
+                recordEditModel.submissionRows[newRow][name] = keys[name];
+            }
+        }
     }]);
 })();

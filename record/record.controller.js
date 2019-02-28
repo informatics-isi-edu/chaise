@@ -294,6 +294,44 @@
             recordAppUtils.resumeUpdateRecordPage();
         }
 
+        /**
+         * Whether we can pre-fill the foreignkey value given origFKR as the foreignkey
+         * relationship between parent and related table.
+         *
+         * A foreignkey can only prefilled if it's a superset of the origFKR,
+         * and extra columns are not-null.
+         *
+         * NOTE technically we can prefill all the foreignkeys that are supserset
+         * of "key" definitions that are in origFKR (assuming extra columns are not-null).
+         * For now, we decided to not do this complete check and just stick with
+         * foreignkeys that are supserset of the origFKR.
+         *
+         * @param  {Object} fk foreignkey object that we want to test
+         * @return {boolean} whether it can be prefilled
+         */
+        function foreignKeyCanBePrefilled(fk, origFKR, origFKRColNames) {
+            // origFKR will be added by default
+           if (fk === origFKR) return true;
+
+           // if fk is not from the same table, or is shorter
+           if (fk.colset.length < origFKR.length) return false;
+           if (fk.colset.columns[0].table.name !== origFKR.colset.columns[0].table.name) return false;
+
+           var len = 0;
+           for (var i = 0; i < fk.colset.length(); i++) {
+               col = fk.colset.columns[i];
+               if (col.name in origFKRColNames) {
+                   len++; // count number of columns that overlap
+               } else if (col.nullok) {
+                   // extra columns must be not-null.
+                   return false;
+               }
+           }
+
+           // the foriegnkey is superset of the origFKR
+           return len == origFKR.key.colset.length();
+        }
+
         function getPrefillCookieObject(ref) {
             var origTable;
             if (ref.derivedAssociationReference) {
@@ -306,47 +344,15 @@
             }
 
             var origFKR = ref.origFKR;
-            var origFKRLen = origFKR.key.colset.length();
             // name of foreignkey columns
-            var origFKRCols = {};
+            var origFKRColNames = {};
             origFKR.colset.columns.forEach(function (col) {
-                origFKRCols[col.name] = true;
+                origFKRColNames[col.name] = true;
             })
-
-            /**
-             * Whether we can pre-fill the foreignkey value.
-             * A foreignkey can only prefilled if it's a superset of the origFKR,
-             * and extra columns are not-null.
-             *
-             * @param  {Object} fk foreignkey object that we want to test
-             * @return {boolean} whether it can be prefilled
-             */
-             var canBePrefilled = function (fk) {
-                 // origFKR will be added by default
-                if (fk === origFKR) return true;
-
-                // if fk is not from the same table, or is shorter
-                if (fk.colset.length < origFKR.length) return false;
-                if (fk.colset.columns[0].table.name !== origFKR.colset.columns[0].table.name) return false;
-
-                var len = 0;
-                for (var i = 0; i < fk.colset.length(); i++) {
-                    col = fk.colset.columns[i];
-                    if (col.name in origFKRCols) {
-                        len++; // count number of columns that overlap
-                    } else if (col.nullok) {
-                        // extra columns must be not-null.
-                        return false;
-                    }
-                }
-
-                // the foriegnkey is superset of the origFKR
-                return len == origFKRLen;
-            };
 
             var prefilledFks = [], keys = {};
             origTable.foreignKeys.all().forEach(function (fk) {
-                if (!canBePrefilled(fk)) return;
+                if (!foreignKeyCanBePrefilled(fk, origFKR, origFKRColNames)) return;
                 prefilledFks.push(fk.name);
 
                 // add foreign key column data
