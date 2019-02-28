@@ -301,15 +301,25 @@
          * A foreignkey can only prefilled if it's a superset of the origFKR,
          * and extra columns are not-null.
          *
-         * NOTE technically we can prefill all the foreignkeys that are supserset
+         * By superset we mean that it must include all the columns of origFKR and
+         * the mapping must be exactly the same as origFKR. So for example if origFKR
+         * is T1(c1,c2) -> T2(v1,v2), the candidate foreignkey must have at least
+         * c1 and c2, and in its definition c1 must map to v1 and c2 must map to v2.
+         * It could also have any extra not-null columns.
+         *
+         * NOTE: technically we can prefill all the foreignkeys that are supserset
          * of "key" definitions that are in origFKR (assuming extra columns are not-null).
+         * For example assuming origFKR is T1(RID, c1) -> T2(RID, v1). A foreignkey definied as
+         * T1(RID, c2) -> T2(RID, v2) could be prefilled (assuming c2 is not-null).
+         * Since the RID alone is defining the one-to-one relation between the current
+         * row and the rows that we want to add for the related table.
          * For now, we decided to not do this complete check and just stick with
          * foreignkeys that are supserset of the origFKR.
          *
          * @param  {Object} fk foreignkey object that we want to test
          * @return {boolean} whether it can be prefilled
          */
-        function foreignKeyCanBePrefilled(fk, origFKR, origFKRColNames) {
+        function foreignKeyCanBePrefilled(fk, origFKR) {
             // origFKR will be added by default
            if (fk === origFKR) return true;
 
@@ -319,16 +329,25 @@
 
            var len = 0;
            for (var i = 0; i < fk.colset.length(); i++) {
-               col = fk.colset.columns[i];
-               if (col.name in origFKRColNames) {
+               var fkCol = fk.colset.columns[i];
+               var origCol = origFKR.colset.columns.find(function (col) {
+                   return col.name === fkCol.name;
+               });
+
+               // same column
+               if (origCol) {
+                   // it must map to the same column
+                   if (fk.mapping.get(fkCol).name !== origFKR.mapping.get(origCol).name) {
+                       return false;
+                   }
+
                    len++; // count number of columns that overlap
                } else if (col.nullok) {
-                   // extra columns must be not-null.
                    return false;
                }
            }
 
-           // the foriegnkey is superset of the origFKR
+           // the foriegnkey must be superset of the origFKR
            return len == origFKR.key.colset.length();
         }
 
@@ -343,16 +362,9 @@
                 origTable = ref.contextualize.entryCreate.table;
             }
 
-            var origFKR = ref.origFKR;
-            // name of foreignkey columns
-            var origFKRColNames = {};
-            origFKR.colset.columns.forEach(function (col) {
-                origFKRColNames[col.name] = true;
-            })
-
             var prefilledFks = [], keys = {};
             origTable.foreignKeys.all().forEach(function (fk) {
-                if (!foreignKeyCanBePrefilled(fk, origFKR, origFKRColNames)) return;
+                if (!foreignKeyCanBePrefilled(fk, ref.origFKR)) return;
                 prefilledFks.push(fk.name);
 
                 // add foreign key column data
