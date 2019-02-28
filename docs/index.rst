@@ -6,6 +6,7 @@ Web interface (Chaise)
    :caption: Chaise User Documents
 
    user-docs/chaise-config.md
+   user-docs/record.md
    user-docs/contexts.md
    user-docs/custom-css.md
    uesr-docs/console.md
