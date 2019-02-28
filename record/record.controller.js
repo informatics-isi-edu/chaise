@@ -307,7 +307,7 @@
          * c1 and c2, and in its definition c1 must map to v1 and c2 must map to v2.
          * It could also have any extra not-null columns.
          *
-         * NOTE: technically we can prefill all the foreignkeys that are supserset
+         * NOTE: Technically we can prefill all the foreignkeys that are supserset
          * of "key" definitions that are in origFKR (assuming extra columns are not-null).
          * For example assuming origFKR is T1(RID, c1) -> T2(RID, v1). A foreignkey definied as
          * T1(RID, c2) -> T2(RID, v2) could be prefilled (assuming c2 is not-null).
@@ -315,6 +315,17 @@
          * row and the rows that we want to add for the related table.
          * For now, we decided to not do this complete check and just stick with
          * foreignkeys that are supserset of the origFKR.
+         *
+         *
+         * NOTE: recordedit will prefill all the foreignkeys that their constituent
+         * columns are prefilled. Therefore we don't need to send the foreignkey
+         * constraint names that must be prefilled and we can only send the "keys" attribute.
+         * Recordedit page can easily deduce the foreignkey values and rowname itself.
+         * Although in that case recordedit is going to create different references for
+         * each foreignkeys eventhough they are referring to the same row of data.
+         * So instead of multiple reads, we just have to read the parent record once
+         * and use that data for all the foreignkeys that can be prefilled.
+         * For this reason, I didn't remove passing of constraintNames for now.
          *
          * @param  {Object} fk foreignkey object that we want to test
          * @return {boolean} whether it can be prefilled
