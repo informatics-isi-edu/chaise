@@ -215,58 +215,14 @@
                 }
                 context.logObject = logObj;
 
-                // Case for creating an entity, with prefilled values
-                if (context.queryParams.prefill) {
-                    // get the cookie with the prefill value
-                    var cookie = $cookies.getObject(context.queryParams.prefill);
-                    var newRow = recordEditModel.rows.length - 1;
-
-                    // make sure cookie is correct
-                    var hasAllKeys = cookie && ["constraintName", "columnName", "origUrl", "rowname"].every(function (k) {
-                        return cookie.hasOwnProperty(k);
-                    });
-                    if (hasAllKeys) {
-                        $rootScope.cookieObj = cookie;
-
-                        // Update view model
-                        recordEditModel.rows[newRow][cookie.columnName] = cookie.rowname.value;
-
-                        // the foreignkey data that we already have
-                        recordEditModel.foreignKeyData[newRow][cookie.constraintName] = cookie.keys;
-
-                        // show the spinner that means we're waiting for data.
-                        $rootScope.showColumnSpinner[newRow][cookie.columnName] = true;
-
-                        // get the actual foreignkey data
-                        ERMrest.resolve(cookie.origUrl, {cid: context.appName}).then(function (ref) {
-                            // the table that we're logging is not the same table in url (it's the referrer that is the same)
-                            var logObject = $rootScope.reference.defaultLogInfo;
-                            logObject.referrer = ref.defaultLogInfo;
-                            logObject.action = logActions.preCreatePrefill;
-                            getForeignKeyData(newRow, cookie.columnName, cookie.constraintName, ref, logObject);
-                        }).catch(function (err) {
-                            $rootScope.showColumnSpinner[newRow][cookie.columnName] = false;
-                            $log.warn(err);
-                        });
-
-                        // Update submission model
-                        var columnNames = Object.keys(cookie.keys);
-                        columnNames.forEach(function(colName) {
-                            var colValue = cookie.keys[colName];
-                            recordEditModel.submissionRows[newRow][colName] = colValue;
-                        });
-                    }
-                    $log.info('Model: ', recordEditModel);
-                    // Keep a copy of the initial rows data so that we can see if user has made any changes later
-                    recordEditModel.oldRows = angular.copy(recordEditModel.rows);
-                    $log.info('Old model.rows:', recordEditModel.oldRows);
-                }
-
                 $rootScope.reference.columns.forEach(function (column, index) {
+                    var isDisabled = InputUtils.isDisabled(column);
+
                     recordEditModel.columnModels[index] = {
                         allInput: null,
                         column: column,
-                        inputType: recordEditAppUtils.columnToInputType(column, $rootScope.cookieObj),
+                        isDisabled: isDisabled,
+                        inputType: recordEditAppUtils.columnToInputType(column, isDisabled),
                         highlightRow: false,
                         showSelectAll: false
                     };
@@ -416,6 +372,33 @@
                         $rootScope.tableDisplayName = $rootScope.reference.displayname;
                         $rootScope.tableComment = $rootScope.reference.table.comment;
 
+                        // get the prefilled values
+                        var prefilledColumns = {}, prefilledFks = [];
+                        if (context.queryParams.prefill) {
+                            // get the cookie with the prefill value
+                            var cookie = $cookies.getObject(context.queryParams.prefill);
+
+                            // make sure cookie is correct
+                            var hasAllKeys = cookie && ["keys", "constraintNames", "origUrl", "rowname"].every(function (k) {
+                                return cookie.hasOwnProperty(k);
+                            });
+                            if (hasAllKeys) {
+                                $rootScope.cookieObj = cookie;
+
+                                // keep a record of freignkeys that are prefilled
+                                prefilledFks = cookie.constraintNames;
+
+                                // keep a record of columns that are prefilled
+                                prefilledColumns = cookie.keys;
+
+                                // process the list of prefilled foreignkeys to get additional data
+                                processPrefilledForeignKeys(cookie.constraintNames, cookie.keys, cookie.origUrl, cookie.rowname);
+
+                                // Keep a copy of the initial rows data so that we can see if user has made any changes later
+                                recordEditModel.oldRows = angular.copy(recordEditModel.rows);
+                            }
+                        }
+
                         // populate defaults
                         for (var i = 0; i < $rootScope.reference.columns.length; i++) {
                             // default model initialiation is null
@@ -423,45 +406,69 @@
                             var column = $rootScope.reference.columns[i];
                             var colModel = recordEditModel.columnModels[i];
 
-                            // check the recordEditModel to see if the value was set because of a prefill condition
-                            if (recordEditModel.rows[0][column.name]) continue;
-
                             // only want to set primitive values in the input fields so make sure it isn't a function, null, or undefined
-                            var defaultSet = (column.default !== undefined && column.default !== null);
+                            var defaultValue = column.default;
+
+                            // if it's a prefilled foreignkey, the value is already set
+                            if (column.isForeignKey &&  prefilledFks.indexOf(column.name) !== -1) {
+                                colModel.isDisabled = true;
+                                colModel.inputType = "disabled";
+                                continue;
+                            }
+
+                            // if the column is prefilled, get the prefilled value instead of default
+                            if (column.name in prefilledColumns) {
+                                defaultValue = prefilledColumns[column.name];
+                                colModel.isDisabled = true;
+                                colModel.inputType = "disabled";
+                            }
 
                             var tsOptions = {
-                                outputType: colModel.inputType == "disabled" ? "string" : "object",
+                                outputType: colModel.inputType == "disabled" ? "string" : "object"
+                            };
 
-                            }
                             switch (column.type.name) {
                                 // timestamp[tz] and asset columns have default model objects if their inputs are NOT disabled
                                 case 'timestamp':
                                     tsOptions.outputMomentFormat = dataFormats.datetime.display;
                                     // formatDatetime takes care of column.default if null || undefined
-                                    initialModelValue = InputUtils.formatDatetime(column.default, tsOptions);
+                                    initialModelValue = InputUtils.formatDatetime(defaultValue, tsOptions);
                                     break;
                                 case 'timestamptz':
                                     tsOptions.outputMomentFormat = dataFormats.datetime.displayZ;
                                     // formatDatetime takes care of column.default if null || undefined
-                                    initialModelValue = InputUtils.formatDatetime(column.default, tsOptions);
+                                    initialModelValue = InputUtils.formatDatetime(defaultValue, tsOptions);
                                     break;
                                 default:
                                     if (column.isAsset) {
-                                        initialModelValue = InputUtils.formatFile(column.default, colModel.inputType == "disabled" ? "string" : "object");
+                                        initialModelValue = InputUtils.formatFile(defaultValue, colModel.inputType == "disabled" ? "string" : "object");
                                     } else if (column.isForeignKey) {
-                                        if (defaultSet) {
-                                            initialModelValue = column.default;
+                                        // if all the columns of the foreignkey are prefilled, use that instead of default
+                                        var allPrefilled = column.foreignKey.colset.columns.every(function (col) {
+                                            return prefilledColumns[col.name] != null;
+                                        });
 
+                                        if (allPrefilled) {
+                                            var defaultDisplay = column.getDefaultDisplay(prefilledColumns);
+
+                                            colModel.isDisabled = true;
+                                            colModel.inputType = "disabled";
+                                            initialModelValue = defaultDisplay.rowname.value;
+                                            // initialize foreignKey data
+                                            recordEditModel.foreignKeyData[0][column.foreignKey.name] = defaultDisplay.fkValues;
+                                            // get the actual foreign key data
+                                            getForeignKeyData(0, [column.name], defaultDisplay.reference, {action: logActions.preCreatePrefill});
+                                        } else if (defaultValue != null) {
+                                            initialModelValue = defaultValue;
                                             // initialize foreignKey data
                                             recordEditModel.foreignKeyData[0][column.foreignKey.name] = column.defaultValues;
-
                                             // get the actual foreign key data
-                                            getForeignKeyData(0, column.name, column.foreignKey.name, column.defaultReference, {action: logActions.recordeditDefault});
+                                            getForeignKeyData(0, [column.name], column.defaultReference, {action: logActions.recordeditDefault});
                                         }
                                     } else {
                                         // all other column types
-                                        if (defaultSet) {
-                                            initialModelValue = column.default;
+                                        if (defaultValue != null) {
+                                            initialModelValue = defaultValue;
                                         }
                                     }
                             }
@@ -495,30 +502,71 @@
          * we should do extra reads to get the actual data.
          *
          * @param  {int} rowIndex The row index that this data is for (it's usually zero, first row)
-         * @param  {string} colName The name of the foreignkey pseudo column.
-         * @param  {string} fkName  The constraint name of the foreign key
+         * @param  {string[]} colNames Array of foreignkey names that can be prefilled
          * @param  {ERMrest.Refernece} fkRef   Reference to the foreign key table
          * @param  {Object} contextHeaderParams the object will be passed to read as contextHeaderParams
          */
-        function getForeignKeyData (rowIndex, colName, fkName, fkRef, logObject) {
+        function getForeignKeyData (rowIndex, colNames, fkRef, logObject) {
             fkRef.contextualize.compactSelect.read(1, logObject).then(function (page) {
-                $rootScope.showColumnSpinner[rowIndex][colName] = true;
-                if ($rootScope.showColumnSpinner[rowIndex][colName]) {
-                    // default value is validated
-                    if (page.tuples.length > 0) {
-                        recordEditModel.foreignKeyData[rowIndex][colName] = page.tuples[rowIndex].data;
-                        recordEditModel.rows[rowIndex][colName] = page.tuples[rowIndex].displayname.value;
-                    } else {
-                        recordEditModel.foreignKeyData[rowIndex][fkName] = null;
-                        recordEditModel.rows[rowIndex][colName] = null;
+                colNames.forEach(function (colName) {
+                    $rootScope.showColumnSpinner[rowIndex][colName] = true;
+                    if ($rootScope.showColumnSpinner[rowIndex][colName]) {
+                        // default value is validated
+                        if (page.tuples.length > 0) {
+                            recordEditModel.foreignKeyData[rowIndex][colName] = page.tuples[rowIndex].data;
+                            recordEditModel.rows[rowIndex][colName] = page.tuples[rowIndex].displayname.value;
+                        } else {
+                            recordEditModel.foreignKeyData[rowIndex][colName] = null;
+                            recordEditModel.rows[rowIndex][colName] = null;
+                        }
                     }
-                }
-                $rootScope.showColumnSpinner[rowIndex][colName] = false;
+
+                    $rootScope.showColumnSpinner[rowIndex][colName] = false;
+                });
             }).catch(function (err) {
-                $rootScope.showColumnSpinner[rowIndex][colName] = false;
+                colNames.forEach(function (colName) {
+                    $rootScope.showColumnSpinner[rowIndex][colName] = false;
+                });
                 $log.warn(err);
             });
         }
 
+        /**
+         * - Attach the values for foreignkeys and columns that are prefilled.
+         * - Read the actual parent row in order to attach the foreignkeyData
+         * @param  {string[]} constraintNames An array of the name of foreign key columns
+         * @param  {Object} keys            key-value pair of raw values
+         * @param  {string} origUrl         the parent url that should be resolved to get the complete row of data
+         * @param  {Object} rowname         the default rowname that should be displayed
+         */
+        function processPrefilledForeignKeys(constraintNames, keys, origUrl, rowname) {
+            var newRow = recordEditModel.rows.length - 1;
+
+            constraintNames.forEach(function (cn) {
+                // Update view model
+                recordEditModel.rows[newRow][cn] = rowname.value;
+
+                // show the spinner that means we're waiting for data.
+                $rootScope.showColumnSpinner[newRow][cn] = true;
+            });
+
+            // get the actual foreignkey data
+            ERMrest.resolve(origUrl, {cid: context.appName}).then(function (ref) {
+                // the table that we're logging is not the same table in url (it's the referrer that is the same)
+                var logObject = $rootScope.reference.defaultLogInfo;
+                logObject.referrer = ref.defaultLogInfo;
+                logObject.action = logActions.preCreatePrefill;
+                getForeignKeyData(newRow, constraintNames, ref, logObject);
+            }).catch(function (err) {
+                $rootScope.showColumnSpinner[newRow][constraintName] = false;
+                $log.warn(err);
+            });
+
+            // Update submission and row model
+            for (var name in keys) {
+                recordEditModel.rows[newRow][name] = keys[name];
+                recordEditModel.submissionRows[newRow][name] = keys[name];
+            }
+        }
     }]);
 })();

@@ -92,8 +92,15 @@ describe ("Viewing exisiting record with related entities, ", function () {
             schemaName: "product-unordered-related-tables-links",
             relatedDisplayname: "booking",
             tableDisplayname: "booking",
-            columnDisplayname: "accommodation_id",
-            columnValue: "Super 8 North Hollywood Motel",
+            prefilledValues: {
+                "fk_1": "Super 8 North Hollywood Motel", // the same fk
+                "fk_2": "Super 8 North Hollywood Motel", // superset fk
+                "fk2_col": "4", // the second column of fk_2
+                "fk_3": "", // supserset fk but nullok
+                "fk3_col1": "",
+                "fk_4": "Super 8 North Hollywood Motel", // supserset fk
+                "fk_5": "4: four" // the second column of fk_2 that is a fk to another table
+            },
             rowValuesAfter: [
                 ["247.0000",""],
                 ["100.0000","2016-06-01 00:00:00"],

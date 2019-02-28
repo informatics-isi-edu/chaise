@@ -294,33 +294,112 @@
             recordAppUtils.resumeUpdateRecordPage();
         }
 
-        vm.addRelatedRecord = function(ref) {
-            // 1. Pluck required values from the ref into cookie obj by getting the values of the keys that form this FK relationship
-            // Another option is just passing the column name,
-            // but if the column is not in the list of visible columns in entry/create that can cause problems.
-            // This will work even if the column is not visible in the create mode.
-            var cookie = {
-                rowname: $rootScope.recordDisplayname, // used for display value
-                columnName: ref.origColumnName, // used to find the column that this blongs to
-                constraintName: ref.origFKR.name, // used for attaching the foreignkey data
-                origUrl: $rootScope.reference.uri // used for getting foreignkey data
-            };
-            var mapping = ref.contextualize.entryCreate.origFKR.mapping;
+        /**
+         * Whether we can pre-fill the foreignkey value given origFKR as the foreignkey
+         * relationship between parent and related table.
+         *
+         * A foreignkey can only prefilled if it's a superset of the origFKR,
+         * and extra columns are not-null.
+         *
+         * By superset we mean that it must include all the columns of origFKR and
+         * the mapping must be exactly the same as origFKR. So for example if origFKR
+         * is T1(c1,c2) -> T2(v1,v2), the candidate foreignkey must have at least
+         * c1 and c2, and in its definition c1 must map to v1 and c2 must map to v2.
+         * It could also have any extra not-null columns.
+         *
+         * NOTE: Technically we can prefill all the foreignkeys that are supserset
+         * of "key" definitions that are in origFKR (assuming extra columns are not-null).
+         * For example assuming origFKR is T1(RID, c1) -> T2(RID, v1). A foreignkey definied as
+         * T1(RID, c2) -> T2(RID, v2) could be prefilled (assuming c2 is not-null).
+         * Since the RID alone is defining the one-to-one relation between the current
+         * row and the rows that we want to add for the related table.
+         * For now, we decided to not do this complete check and just stick with
+         * foreignkeys that are supserset of the origFKR.
+         *
+         *
+         * NOTE: recordedit will prefill all the foreignkeys that their constituent
+         * columns are prefilled. Therefore we don't need to send the foreignkey
+         * constraint names that must be prefilled and we can only send the "keys" attribute.
+         * Recordedit page can easily deduce the foreignkey values and rowname itself.
+         * Although in that case recordedit is going to create different references for
+         * each foreignkeys eventhough they are referring to the same row of data.
+         * So instead of multiple reads, we just have to read the parent record once
+         * and use that data for all the foreignkeys that can be prefilled.
+         * For this reason, I didn't remove passing of constraintNames for now.
+         *
+         * @param  {Object} fk foreignkey object that we want to test
+         * @return {boolean} whether it can be prefilled
+         */
+        function foreignKeyCanBePrefilled(fk, origFKR) {
+            // origFKR will be added by default
+           if (fk === origFKR) return true;
 
-            // Get the column pair that form this FKR between this related table and the main entity
-            cookie.keys = {};
-            mapping._from.forEach(function (fromColumn, i) {
-                var toColumn = mapping._to[i];
-                // Assign the column value into cookie
-                cookie.keys[fromColumn.name] = $rootScope.tuple.data[toColumn.name];
+           // if fk is not from the same table, or is shorter
+           if (fk.colset.length < origFKR.length) return false;
+           if (fk.colset.columns[0].table.name !== origFKR.colset.columns[0].table.name) return false;
+
+           var len = 0;
+           for (var i = 0; i < fk.colset.length(); i++) {
+               var fkCol = fk.colset.columns[i];
+               var origCol = origFKR.colset.columns.find(function (col) {
+                   return col.name === fkCol.name;
+               });
+
+               // same column
+               if (origCol) {
+                   // it must map to the same column
+                   if (fk.mapping.get(fkCol).name !== origFKR.mapping.get(origCol).name) {
+                       return false;
+                   }
+
+                   len++; // count number of columns that overlap
+               } else if (col.nullok) {
+                   return false;
+               }
+           }
+
+           // the foriegnkey must be superset of the origFKR
+           return len == origFKR.key.colset.length();
+        }
+
+        function getPrefillCookieObject(ref) {
+            var origTable;
+            if (ref.derivedAssociationReference) {
+                // add association relies on the object that this returns for
+                // prefilling the data.
+                origTable = ref.derivedAssociationReference.table;
+            } else {
+                // we should contextualize to make sure the same table is shown in create mode
+                origTable = ref.contextualize.entryCreate.table;
+            }
+
+            var prefilledFks = [], keys = {};
+            origTable.foreignKeys.all().forEach(function (fk) {
+                if (!foreignKeyCanBePrefilled(fk, ref.origFKR)) return;
+                prefilledFks.push(fk.name);
+
+                // add foreign key column data
+                fk.mapping._from.forEach(function (fromColumn, i) {
+                    keys[fromColumn.name] = $rootScope.tuple.data[fk.mapping._to[i].name];
+                })
             });
+
+            return {
+                rowname: $rootScope.recordDisplayname, // the displayed value in the form
+                origUrl: $rootScope.reference.uri, // used for reading the actual foreign key data
+                constraintNames: prefilledFks, // the foreignkey columns that should be prefileld
+                keys: keys // raw values of the foreign key columns
+            };
+        }
+
+        vm.addRelatedRecord = function(ref) {
+            var cookie = getPrefillCookieObject(ref);
 
             if(ref.derivedAssociationReference){
                 recordAppUtils.pauseUpdateRecordPage();
                 recordCreate.addRelatedRecordFact(true, ref, 0, cookie, vm.editMode, vm.formContainer, vm.readyToSubmit, vm.recordsetLink, vm.submissionButtonDisabled, $rootScope.reference, $rootScope.tuples, $rootScope.session, $rootScope.context.queryParams, onSuccess, onModalClose);
                 return;
             }
-
 
             // 2. Generate a unique cookie name and set it to expire after 24hrs.
             var COOKIE_NAME = 'recordedit-' + MathUtils.getRandomInt(0, Number.MAX_SAFE_INTEGER);
