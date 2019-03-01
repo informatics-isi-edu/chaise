@@ -1267,11 +1267,10 @@
         }
     }])
 
-    .factory("ConfigUtils", ['$rootScope', 'defaultChaiseConfig', function($rootScope, defaultConfig) {
+    .factory("ConfigUtils", ['$rootScope', '$window', 'defaultChaiseConfig', function($rootScope, $window, defaultConfig) {
         function setConfigJSON() {
             $rootScope.chaiseConfig = {};
-            if(typeof chaiseConfig != 'undefined')
-            $rootScope.chaiseConfig = Object.assign({}, chaiseConfig);
+            if (typeof chaiseConfig != 'undefined') $rootScope.chaiseConfig = Object.assign({}, chaiseConfig);
 
             for (var property in defaultConfig) {
                 if (defaultConfig.hasOwnProperty(property)) {
@@ -1282,6 +1281,20 @@
                         $rootScope.chaiseConfig[property] = defaultConfig[property];
                     }
                 }
+            }
+
+            if (chaiseConfig.configRules) {
+                // loop through each config rule and look for a set that matches the current host
+                chaiseConfig.configRules.forEach(function (ruleset) {
+                    ruleset.host.forEach(function (host) {
+                        // if there is a config rule for the current host, overwrite the properties defined
+                        if (host === $window.location.hostname) {
+                            for (var property in ruleset.config) {
+                                $rootScope.chaiseConfig[property] = ruleset.config[property];
+                            }
+                        }
+                    });
+                });
             }
         }
 
