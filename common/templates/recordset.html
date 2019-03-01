@@ -113,7 +113,7 @@
                                 <span ng-if="::filter.displayname.value && !filter.displayname.isHTML" ng-bind="::filter.displayname.value"></span>
                                 <span ng-if="::filter.displayname.value == ''" ng-bind-html="defaultDisplayname.empty"></span>
                                 <span ng-if="::filter.displayname.value == null" ng-bind-html="defaultDisplayname.null"></span>
-                                <span>{{$last ? '': ','}}</span>
+                                <span style="margin-left:-4px">{{$last ? '': ','}}</span>
                             </span>
                         </span>
                         <script type="text/ng-template" id="filtersTooltipTemplate.html">
