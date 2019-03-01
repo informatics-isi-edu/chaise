@@ -353,7 +353,7 @@
                    }
 
                    len++; // count number of columns that overlap
-               } else if (col.nullok) {
+               } else if (fkCol.nullok) {
                    return false;
                }
            }
