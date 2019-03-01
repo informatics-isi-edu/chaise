@@ -783,17 +783,6 @@
                 _callonSelectedRowsChanged(scope, [tuple], isSelected);
             };
 
-            scope.$on('record-deleted', function() {
-                console.log('catching the record deleted');
-                // if there is a parent reference then this is for related
-                if (scope.parentReference) {
-                    scope.vm.logObject = {action: logActions.recordRelatedUpdate};
-                } else {
-                    scope.vm.logObject = {action: logActions.recordsetUpdate};
-                }
-                update(scope.vm, true, false, false);
-            });
-
             scope.$watch(function () {
                 return (scope.vm && scope.vm.reference) ? scope.vm.reference.columns : null;
             }, function (newValue, oldValue) {
