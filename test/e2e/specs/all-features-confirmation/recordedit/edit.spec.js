@@ -79,7 +79,7 @@ var testParams = {
        schema_name: "product-edit",
        table_name: "file",
        record_displayname: "90008", //since this is in single-edit, displayname is rowname.
-       table_displayname: "File",
+       table_displayname: "file",
        table_comment: "asset/object",
        not_travis: !process.env.TRAVIS,
        primary_keys: ["id"],

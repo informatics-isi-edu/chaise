@@ -2,11 +2,11 @@ var chaisePage = require('../../../utils/chaise.page.js');
 var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
 var testParams = {
     table_name: "accommodation",
-    column_names: ["first_name", "last_name", "sIfIZTdKhErJ9HC3xhuSbA"],
+    column_names: ["first_name", "last_name", "0YGNuO_bvxoczJ6ms2k0tQ"],
     column_values: {
         first_name: "John",
         last_name: "Doe",
-        "sIfIZTdKhErJ9HC3xhuSbA": "John Doe" // person foreignkey column
+        "0YGNuO_bvxoczJ6ms2k0tQ": "John Doe" // person foreignkey column
     }
 };
 
@@ -55,7 +55,7 @@ describe('Edit a record,', function() {
                     browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), browser.params.defaultTimeout);
 
                     var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputDisplay("Person", 0);
-                    expect(foreignKeyInput.getText()).toBe(testParams.column_values["sIfIZTdKhErJ9HC3xhuSbA"], "Foreign Key input display value is incorrect");
+                    expect(foreignKeyInput.getText()).toBe(testParams.column_values["0YGNuO_bvxoczJ6ms2k0tQ"], "Foreign Key input display value is incorrect");
                     done();
                 }).catch(function (err) {
                     console.log(err);
