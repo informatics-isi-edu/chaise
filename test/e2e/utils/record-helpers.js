@@ -811,6 +811,14 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 							return confirmButton.click();
 						}).then(function () {
 							chaisePage.waitForElementInverse(element(by.id("spinner")));
+
+                            // make sure the rows are updated
+                            browser.wait(function() {
+                                return chaisePage.recordPage.getRelatedTableRows(params.displayname, params.isInline).count().then(function(ct) {
+                                    return (ct == currentCount-1);
+                                });
+                            }, browser.params.defaultTimeout);
+
 							return chaisePage.recordPage.getRelatedTableRows(params.displayname, params.isInline).count();
 						}).then(function (count) {
 							expect(count).toBe(currentCount-1, "count didn't change.");
