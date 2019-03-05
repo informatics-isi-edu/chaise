@@ -17,7 +17,7 @@
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse navbar-inverse" id="fb-navbar-main-collapse">
                 <login></login>
-                <a ng-if="isVersioned()" id="live-btn" class="nav navbar-nav navbar-right" ng-click="::toLive()">Live Data</a>
+                <a ng-if="isVersioned()" id="live-btn" class="nav navbar-nav navbar-right" ng-click="::toLive()">View Live Data</a>
                 <ul id="navbar-menu" class="nav navbar-nav">
                     <li ng-repeat="item in menu" class="dropdown">
                         <a ng-if="!item.children" ng-href="{{item.url}}" target="{{item.newTab ? '_blank' : '_self'}}">{{item.name}}</a>

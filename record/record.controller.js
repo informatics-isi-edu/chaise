@@ -151,17 +151,21 @@
 
             var permalink = resolvePermalink(tuple);
 
+            var params = {
+                citation: tuple.citation,
+                permalink: permalink,
+                displayname: $rootScope.reference.table.name+'_'+tuple.uniqueId
+            }
+
+            var resolverId = chaiseConfig.resolverImplicitCatalog;
+            if ($rootScope.reference.location.version && resolverId !== null) params.versionedLink = $window.location.href;
             modalUtils.showModal({
                 templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/shareCitation.modal.html",
                 controller: "ShareCitationController",
                 windowClass: "chaise-share-citation",
                 controllerAs: "ctrl",
                 resolve: {
-                    params: {
-                        citation: tuple.citation,
-                        permalink: permalink,
-                        displayname: $rootScope.reference.table.name+'_'+tuple.uniqueId
-                    }
+                    params: params
                 }
             }, false, false, false); // not defining any extra callbacks
         };

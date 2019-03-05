@@ -114,7 +114,7 @@
         // <p> tag is added to maintain the space between click action message and buttons
         // Also maintains consistency  in their placement irrespective of reload message
         vm.clickActionMessage += reloadMessage;
-        
+
         vm.clickOkToDismiss = exception.clickOkToDismiss;
         vm.showDetails = function() {
             vm.displayDetails = !vm.displayDetails;
@@ -300,6 +300,7 @@
         vm.cancel = cancel;
         vm.citation = params.citation;
         vm.permalink = params.permalink;
+        vm.versionedLink = params.versionedLink;
         vm.filename = params.displayname;
 
         // generate bibtex url from citation
