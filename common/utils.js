@@ -1283,17 +1283,28 @@
                 }
             }
 
-            if (chaiseConfig.configRules) {
+            if (Array.isArray(chaiseConfig.configRules)) {
                 // loop through each config rule and look for a set that matches the current host
                 chaiseConfig.configRules.forEach(function (ruleset) {
-                    ruleset.host.forEach(function (host) {
-                        // if there is a config rule for the current host, overwrite the properties defined
-                        if (host === $window.location.hostname) {
-                            for (var property in ruleset.config) {
-                                $rootScope.chaiseConfig[property] = ruleset.config[property];
+                    // we have 1 host
+                    if (typeof ruleset.host == "string") {
+                        var arr = [];
+                        arr.push(ruleset.host);
+                        ruleset.host = arr;
+                    }
+                    if (Array.isArray(ruleset.host)) {
+                        for (var i=0; i<ruleset.host.length; i++) {
+                            // if there is a config rule for the current host, overwrite the properties defined
+                            // $window.location.host refers to the hostname and port (www.something.com:0000)
+                            // $window.location.hostname refers to just the hostname (www.something.com)
+                            if (ruleset.host[i] === $window.location.hostname && (ruleset.config && typeof ruleset.config === "object")) {
+                                for (var property in ruleset.config) {
+                                    $rootScope.chaiseConfig[property] = ruleset.config[property];
+                                }
+                                break;
                             }
                         }
-                    });
+                    }
                 });
             }
         }
