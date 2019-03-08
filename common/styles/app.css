@@ -103,7 +103,7 @@ record-table tbody>tr:nth-child(odd):hover>td.disabled-cell {
     font-size: 18px;
 }
 
-.chaise-body h3 {
+.chaise-body h3, .chaise-body .h3-class {
     font-size: 14px;
 }
 

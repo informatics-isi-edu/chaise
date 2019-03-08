@@ -97,6 +97,7 @@
         "showErrDetails" : "Show Error Details",
         "hideErrDetails" : "Hide Error Details",
         "tooltip": {
+            versionTime: "You are looking at data that was snapshotted ",
             downloadCSV: "Click to download all matched results",
             permalink: "This link stores your search criteria as a URL. Right click and save.",
             actionCol: "Click on the action buttons to view, edit, or delete each record",
@@ -1012,11 +1013,28 @@
         };
     }])
 
-    .factory("UiUtils", ['$document', '$log', function($document, $log) {
+    .factory("UiUtils", ['$document', '$log', 'dataFormats', function($document, $log, dataFormats) {
 
-        function displaynameWVersion(displayname, version) {
-            return displayname + (version ? " (Version " + version + ")" : "");
+        function versionToRelativeTS(versionAsMillis) {
+            var versionTS = moment(versionAsMillis);
+            var weekAgo = moment().subtract(7, 'days').startOf('day');
+            // if version is < a week old
+            if (versionTS.isAfter(weekAgo)) {
+                // find the difference between version and now (will be represented as a negative)
+                var timeDiff = versionTS.diff(moment());
+                // convert to a negative duration and humanize as if it's from the past
+                var displayVal = moment.duration(timeDiff).humanize(true);
+            } else {
+                var displayVal = versionTS.format(dataFormats.date)
+            }
+
+            return displayVal;
         }
+
+        function versionDate(versionAsMillis) {
+            return moment(versionAsMillis).format(dataFormats.datetime.display);
+        }
+
         /**
          *
          * To allow the dropdown button to open at the top/bottom depending on the space available
@@ -1210,7 +1228,8 @@
         }
 
         return {
-            displaynameWVersion: displaynameWVersion,
+            versionToRelativeTS: versionToRelativeTS,
+            versionDate: versionDate,
             setBootstrapDropdownButtonBehavior: setBootstrapDropdownButtonBehavior,
             getImageAndIframes: getImageAndIframes,
             humanFileSize: humanFileSize,

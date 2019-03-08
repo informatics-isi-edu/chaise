@@ -7,9 +7,10 @@
     <ul>
         <li id="share-link">
             <h2><b>Share Link</b></h2>
+            <h3 ng-if="ctrl.versionLink"><b>Data Snapshotted <span tooltip-placement="bottom" uib-tooltip="{{ctrl.versionDate}}">{{ctrl.versionDateRelative}}</span></b></h3>
+            <a ng-if="ctrl.versionLink" id="version" ng-href="{{::ctrl.versionedLink}}">{{::ctrl.versionLink}}</a>
+            <h3><b>Live Data</b></h3>
             <a id="permalink" ng-href="{{::ctrl.permalink}}">{{::ctrl.permalink}}</a>
-            <h3 ng-if="ctrl.versionedLink"><b>Versioned Link</b></h3>
-            <a ng-if="ctrl.versionedLink" id="versioned" ng-href="{{::ctrl.versionedLink}}">{{::ctrl.versionedLink}}</a>
         </li>
         <li id="citation" ng-if="::ctrl.citation">
             <h2><b>Data Citation</b></h2>

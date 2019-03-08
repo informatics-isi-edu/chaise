@@ -300,7 +300,9 @@
         vm.cancel = cancel;
         vm.citation = params.citation;
         vm.permalink = params.permalink;
-        vm.versionedLink = params.versionedLink;
+        vm.versionLink = params.versionLink;
+        vm.versionDate = params.versionDate;
+        vm.versionDateRelative = params.versionDateRelative;
         vm.filename = params.displayname;
 
         // generate bibtex url from citation
