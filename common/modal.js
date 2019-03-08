@@ -305,6 +305,12 @@
         vm.versionDateRelative = params.versionDateRelative;
         vm.filename = params.displayname;
 
+        vm.moreThanWeek = function () {
+            var weekAgo = moment().subtract(7, 'days').startOf('day');
+            var versionMoment = moment(params.versionDate);
+
+            return weekAgo.isAfter(versionMoment);
+        }
         // generate bibtex url from citation
         if (params.citation) {
             var citation = params.citation;
