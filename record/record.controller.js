@@ -58,7 +58,7 @@
         };
 
         vm.versionDisplay = function () {
-            return UiUtils.versionToRelativeTS($rootScope.reference.location.versionAsMillis);
+            return UiUtils.humanizeTimestamp($rootScope.reference.location.versionAsMillis);
         }
 
         vm.versionDate = function () {
@@ -120,20 +120,21 @@
         };
 
         /**
-         * {boolean} outputWVersion - true if version should be included in output
          * The following cases need to be handled for the resolverImplicitCatalog value:
          *  - if null:                                      use current chaise path
          *  - if false:                                     /id/currCatalog/RID
          *  - if undefined:                                 same as false
          *  - if resolverImplicitCatalog == currCatalog:    /id/RID
-         *  - if resolverImplicitCatalog != currCatalog:    /id/resolverImplicitCatalog/RID
+         *  - if resolverImplicitCatalog != currCatalog:    /id/currCatalog/RID
          **/
-        var resolvePermalink = function (tuple, outputWVersion) {
+        function resolveLivePermalink(tuple) {
             var resolverId = chaiseConfig.resolverImplicitCatalog;
             var currCatalog = $rootScope.reference.location.catalogId;
 
-            function rewriteUrlWithoutVersion() {
-                if (!outputWVersion && $rootScope.reference.location.version) {
+            // null or no RID
+            if (resolverId === null || !tuple.data || !tuple.data.RID) {
+                // If there is a version in the url we have to remove it
+                if ($rootScope.reference.location.version) {
                     var hashNoVersion = $window.location.hash.replace($rootScope.reference.location.catalog, $rootScope.reference.location.catalogId);
                     return $window.location.origin + $window.location.pathname + hashNoVersion;
                 } else {
@@ -141,29 +142,43 @@
                 }
             }
 
+            // if it's a number (isNaN tries to parse to integer before checking)
+            if (!isNaN(resolverId)) {
+                var catalog = (resolverId != currCatalog) ? currCatalog + "/" : "";
+                return $window.location.origin + "/id/" + catalog + tuple.data.RID;
+                // return (outputWVersion) ? output + '@' + $rootScope.reference.location.version : output;
+            }
+
+            // if resolverId is false or undefined OR any other values that are not allowed use the default
+            // default is to show the fully qualified resolveable link for permalink
+            return $window.location.origin + "/id/" + currCatalog + "/" + tuple.data.RID;
+        }
+
+        // NOTE: the current assumption is that url is versioned
+        function resolveVersionedPermalink(tuple) {
+            var resolverId = chaiseConfig.resolverImplicitCatalog;
+            var currCatalog = $rootScope.reference.location.catalogId;
+
             // null or no RID
             if (resolverId === null || !tuple.data || !tuple.data.RID) {
-                // only case that is different is when we have a version but don't want it in the output
-                return rewriteUrlWithoutVersion();
+                return $window.location.href;
             }
 
             // if it's a number (isNaN tries to parse to integer before checking)
             if (!isNaN(resolverId)) {
                 var catalog = (resolverId != currCatalog) ? currCatalog + "/" : "";
-                var output = $window.location.origin + "/id/" + catalog + tuple.data.RID;
-                return (outputWVersion) ? output + '@' + $rootScope.reference.location.version : output;
+                return $window.location.origin + "/id/" + catalog + tuple.data.RID + '@' + $rootScope.reference.location.version;
             }
 
             // if resolverId is false or undefined OR any other values that are not allowed use the default
             // default is to shwo the fully qualified resolveable link for permalink
-            var output = $window.location.origin + "/id/" + currCatalog + "/" + tuple.data.RID;
-            return (outputWVersion) ? output + '@' + $rootScope.reference.location.version : output;
+            return $window.location.origin + "/id/" + currCatalog + "/" + tuple.data.RID + '@' + $rootScope.reference.location.version;
         }
 
         vm.sharePopup = function() {
             var tuple = $rootScope.tuple;
 
-            var permalink = resolvePermalink(tuple, false);
+            var permalink = resolveLivePermalink(tuple);
 
             var params = {
                 citation: tuple.citation,
@@ -173,8 +188,8 @@
 
             var resolverId = chaiseConfig.resolverImplicitCatalog;
             if ($rootScope.reference.location.version) {
-                params.versionLink = resolvePermalink(tuple, true);
-                params.versionDateRelative = UiUtils.versionToRelativeTS($rootScope.reference.location.versionAsMillis);
+                params.versionLink = resolveVersionedPermalink(tuple);
+                params.versionDateRelative = UiUtils.humanizeTimestamp($rootScope.reference.location.versionAsMillis);
                 params.versionDate = UiUtils.versionDate($rootScope.reference.location.versionAsMillis);
             }
 

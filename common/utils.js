@@ -1015,8 +1015,15 @@
 
     .factory("UiUtils", ['$document', '$log', 'dataFormats', function($document, $log, dataFormats) {
 
-        function versionToRelativeTS(versionAsMillis) {
-            var versionTS = moment(versionAsMillis);
+        /**
+         * Takes a timestamp in the form of milliseconds since epoch and converts it into a relative string if
+         * the timestamp is less than a week old. If more than a week old, the timestamp is displayed as just the date
+         *
+         * @param {integer} tsMillis - a timestamp in milliseconds
+         * @returns {string} either reltive time string or date in format YYYY-MM-DD
+         */
+        function humanizeTimestamp(tsMillis) {
+            var versionTS = moment(tsMillis);
             var weekAgo = moment().subtract(7, 'days').startOf('day');
             // if version is < a week old
             if (versionTS.isAfter(weekAgo)) {
@@ -1031,8 +1038,12 @@
             return displayVal;
         }
 
-        function versionDate(versionAsMillis) {
-            return moment(versionAsMillis).format(dataFormats.datetime.display);
+        /**
+         * @param {integer} tsMillis - a timestamp in milliseconds
+         * @returns {string} datetime in format YYYY-MM-DD hh:mm:ss
+         */
+        function versionDate(tsMillis) {
+            return moment(tsMillis).format(dataFormats.datetime.display);
         }
 
         /**
@@ -1228,7 +1239,7 @@
         }
 
         return {
-            versionToRelativeTS: versionToRelativeTS,
+            humanizeTimestamp: humanizeTimestamp,
             versionDate: versionDate,
             setBootstrapDropdownButtonBehavior: setBootstrapDropdownButtonBehavior,
             getImageAndIframes: getImageAndIframes,

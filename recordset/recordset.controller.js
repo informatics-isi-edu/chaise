@@ -80,7 +80,7 @@
         };
 
         $scope.versionDisplay = function () {
-            return UiUtils.versionToRelativeTS(recordsetModel.reference.location.versionAsMillis);
+            return UiUtils.humanizeTimestamp(recordsetModel.reference.location.versionAsMillis);
         }
 
         $scope.versionDate = function () {
