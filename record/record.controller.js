@@ -133,20 +133,14 @@
 
             // null or no RID
             if (resolverId === null || !tuple.data || !tuple.data.RID) {
-                // If there is a version in the url we have to remove it
-                if ($rootScope.reference.location.version) {
-                    var hashNoVersion = $window.location.hash.replace($rootScope.reference.location.catalog, $rootScope.reference.location.catalogId);
-                    return $window.location.origin + $window.location.pathname + hashNoVersion;
-                } else {
-                    return $window.location.href;
-                }
+                // location.catalog will be in the form of `<id>` or `<id>@<version>`
+                return $window.location.href.replace('#'+$rootScope.reference.location.catalog, '#'+$rootScope.reference.location.catalogId);
             }
 
             // if it's a number (isNaN tries to parse to integer before checking)
             if (!isNaN(resolverId)) {
                 var catalog = (resolverId != currCatalog) ? currCatalog + "/" : "";
                 return $window.location.origin + "/id/" + catalog + tuple.data.RID;
-                // return (outputWVersion) ? output + '@' + $rootScope.reference.location.version : output;
             }
 
             // if resolverId is false or undefined OR any other values that are not allowed use the default
