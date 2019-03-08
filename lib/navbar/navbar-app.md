@@ -1,8 +1,9 @@
 # Use navbar app in external html pages
 
 ## Dependencies
-Include the following 3 dependencies in the <head> tag of the html page where the login app is to be included
-Note: Change these paths based on the position of the chaise folder.
+Include the following 3 dependencies in the <head> tag of the html page where the login app is to be included.
+
+Note: Change these paths based on the location of the chaise folder realtive to your html page.
 ```html
 <head>
 <script src="./chaise/chaise-config.js"></script>
