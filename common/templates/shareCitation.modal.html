@@ -7,12 +7,14 @@
     <ul>
         <li id="share-link">
             <h2><b>Share Link</b></h2>
-            <h3 ng-if="ctrl.versionLink">
-                <b>Data Snapshotted
-                    <span ng-if="ctrl.moreThanWeek()"> at </span>
-                    <span tooltip-placement="bottom" ng-attr-uib-tooltip="{{!ctrl.moreThanWeek() ? 'Data snapshotted at ' + ctrl.versionDate : undefined}}">{{ctrl.versionDateRelative}}</span>
-                </b>
-            </h3>
+            <div ng-if="ctrl.versionLink">
+                <h3>
+                    <b>Data Snapshotted
+                        <span ng-if="ctrl.moreThanWeek()"> at </span>
+                        <span tooltip-placement="bottom" ng-attr-uib-tooltip="{{!ctrl.moreThanWeek() ? 'Data snapshotted at ' + ctrl.versionDate : undefined}}">{{ctrl.versionDateRelative}}</span>
+                    </b>
+                </h3>
+            </div>
             <a ng-if="ctrl.versionLink" id="version" ng-href="{{::ctrl.versionedLink}}">{{::ctrl.versionLink}}</a>
             <h3><b>Live Data</b></h3>
             <a id="permalink" ng-href="{{::ctrl.permalink}}">{{::ctrl.permalink}}</a>
