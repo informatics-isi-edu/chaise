@@ -1,21 +1,23 @@
 # Use navbar app in external html pages
 
 ## Dependencies
-Include the following 3 dependencies in the <head> tag of the html page where the login app is to be included
-Note: Change these paths based on the position of the chaise folder.
+Include the following 3 dependencies in the <head> tag of the html page where the login app is to be included.
+
+Note: Change these paths based on the location of the chaise folder relative to your html page.
 ```html
 <head>
-<script src="./chaise/chaise-config.js"></script>
-<script src="./chaise/scripts/vendor/angular.js"></script>
-<script src="./chaise/lib/navbar/navbar.app.js"></script>
+<script src="/chaise/chaise-config.js"></script>
+<script src="/chaise/scripts/vendor/angular.js"></script>
+<script src="/chaise/lib/navbar/navbar.app.js"></script>
 </head>
 ```
 ## Using the <navbar> directive
-1. Check the sample HTML file present at(./chaise/liv/navbar/sample-navbar.html) for using the navbar app.
+1. Check the sample HTML file present at(/chaise/liv/navbar/sample-navbar.html) for using the navbar app.
 2. Add the following directive wherever you want to see the navbar app in your html body.
 ```html
 <navbar></navbar>
 ```
+3. If chaise is not installed on the parent directory of your deployment (chaise is installed in `example.com/path-to/chaise/`), make sure you have `chaiseBasePath` defined in your chaise-config file as `/path-to/chaise/`.
 
 ## Sample HTML Pages
 1. /chaise/lib/navbar/sample-navbar.html

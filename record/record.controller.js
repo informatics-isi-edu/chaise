@@ -458,6 +458,10 @@
             editRecordRequests[args.id] = {"schema": args.schema, "table": args.table};
         });
 
+        $scope.$on('record-deleted', function (event, args) {
+            recordAppUtils.updateRecordPage(true);
+        });
+
         // When page gets focus, check cookie for completed requests
         // re-read the records for that table
         $window.onfocus = function() {

@@ -1297,11 +1297,10 @@
         }
     }])
 
-    .factory("ConfigUtils", ['$rootScope', 'defaultChaiseConfig', function($rootScope, defaultConfig) {
+    .factory("ConfigUtils", ['$rootScope', '$window', 'defaultChaiseConfig', function($rootScope, $window, defaultConfig) {
         function setConfigJSON() {
             $rootScope.chaiseConfig = {};
-            if(typeof chaiseConfig != 'undefined')
-            $rootScope.chaiseConfig = Object.assign({}, chaiseConfig);
+            if (typeof chaiseConfig != 'undefined') $rootScope.chaiseConfig = Object.assign({}, chaiseConfig);
 
             for (var property in defaultConfig) {
                 if (defaultConfig.hasOwnProperty(property)) {
@@ -1312,6 +1311,31 @@
                         $rootScope.chaiseConfig[property] = defaultConfig[property];
                     }
                 }
+            }
+
+            if (Array.isArray(chaiseConfig.configRules)) {
+                // loop through each config rule and look for a set that matches the current host
+                chaiseConfig.configRules.forEach(function (ruleset) {
+                    // we have 1 host
+                    if (typeof ruleset.host == "string") {
+                        var arr = [];
+                        arr.push(ruleset.host);
+                        ruleset.host = arr;
+                    }
+                    if (Array.isArray(ruleset.host)) {
+                        for (var i=0; i<ruleset.host.length; i++) {
+                            // if there is a config rule for the current host, overwrite the properties defined
+                            // $window.location.host refers to the hostname and port (www.something.com:0000)
+                            // $window.location.hostname refers to just the hostname (www.something.com)
+                            if (ruleset.host[i] === $window.location.hostname && (ruleset.config && typeof ruleset.config === "object")) {
+                                for (var property in ruleset.config) {
+                                    $rootScope.chaiseConfig[property] = ruleset.config[property];
+                                }
+                                break;
+                            }
+                        }
+                    }
+                });
             }
         }
 

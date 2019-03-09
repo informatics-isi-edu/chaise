@@ -72,8 +72,23 @@ var chaiseConfig = {
             // }
         ]
     },
-    footerMarkdown:"**Please check** [Privacy Policy](/privacy-policy/){target='_blank'}",
-    maxRelatedTablesOpen:15
+    footerMarkdown: "**Please check** [Privacy Policy](/privacy-policy/){target='_blank'}",
+    maxRelatedTablesOpen: 15,
+    configRules: [
+        {
+            host: ["www.rebuildingakidney.org", "staging.rebuildingakidney.org", "dev.rebuildingakidney.org"], // array of host names
+            config: {
+                headTitle: "RBK/GUDMAP",
+                navbarBrand: "/resources/"
+            }
+        }, {
+            host: ["www.gudmap.org", "staging.gudmap.org", "dev.gudmap.org"], // array of host names
+            config: {
+                headTitle: "GUDMAP/RBK",
+                navbarBrand: "/"
+            }
+        }
+    ]
 };
 
 if (typeof module === 'object' && module.exports && typeof require === 'function') {

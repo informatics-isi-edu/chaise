@@ -5,17 +5,19 @@ Include the following 3 dependencies in the <head> tag of the html page where th
 Note: Change these paths based on the position of the chaise folder.
 ```html
 <head>
-<script src="./chaise/chaise-config.js"></script>
-<script src="./chaise/scripts/vendor/angular.js"></script>
-<script src="./chaise/lib/login/login.app.js"></script>
+<script src="/chaise/chaise-config.js"></script>
+<script src="/chaise/scripts/vendor/angular.js"></script>
+<script src="/chaise/lib/login/login.app.js"></script>
 </head>
 ```
 ## Using the <login> directive
-1. Check the sample HTML file present at(./chaise/loginApp/login.html) for using the login app.
+1. Check the sample HTML file present at(/chaise/loginApp/login.html) for using the login app.
 2. Add the following directive wherever you want to see the login app in your html body.
 ```html
 <login></login>
 ```
+3. If chaise is not installed on the parent directory of your deployment (chaise is installed in `example.com/path-to/chaise/`), make sure you have `chaiseBasePath` defined in your chaise-config file as `/path-to/chaise/`.
+
 ## Sample HTML Pages
 1. /chaise/lib/login/sample-login.html
 This is a simple html page with the login app in the navbar on the top-right. This includes the 3 dependencies required for the login app in the header and the <login> directive in the body in the header section.
