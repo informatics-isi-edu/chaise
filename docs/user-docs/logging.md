@@ -113,3 +113,10 @@ Currently we're only logging terminal errors (we might want to change that to lo
 ## Truncation
 
 The object that we want to log might be lengthy so we should truncate this object if it's exceeding the maximum length (we're currently limiting it to 7000). If the object has `t:1` that means it has been truncated. If the content was longer than the limit, we should truncate based on this order: facet, source, referrer. Which means that referrer has more priority over source, and source over facet.
+
+## Change Log
+
+#### March 8, 2019
+
+- [Bug fix] We realized that the first request of adding pure and binary is not using the correct action. It was using the `recordset/main/load`. We changed it to use the appropriate `pre-create/prefill/association` action with `referred` information.
+
