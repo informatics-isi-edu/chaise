@@ -114,7 +114,7 @@
         // <p> tag is added to maintain the space between click action message and buttons
         // Also maintains consistency  in their placement irrespective of reload message
         vm.clickActionMessage += reloadMessage;
-        
+
         vm.clickOkToDismiss = exception.clickOkToDismiss;
         vm.showDetails = function() {
             vm.displayDetails = !vm.displayDetails;
@@ -209,7 +209,8 @@
             search:             reference.location.searchTerm,
             config:             {viewable: false, editable: false, deletable: false, selectMode: params.selectMode, showFaceting: showFaceting, facetPanelOpen: params.facetPanelOpen, showNull: params.showNull === true},
             context:            params.context,
-            getDisabledTuples:  params.getDisabledTuples
+            getDisabledTuples:  params.getDisabledTuples,
+            logObject:          params.logObject ? params.logObject: {}
         };
 
         /**

@@ -1053,7 +1053,6 @@
                         scope.vm.focusOnFacet(firstOpen);
                     }
 
-                    scope.vm.logObject = {action: logActions.recordsetLoad};
                     initialize(scope.vm);
                 });
             };
