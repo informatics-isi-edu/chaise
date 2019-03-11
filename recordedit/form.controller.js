@@ -55,10 +55,6 @@
         vm.maskOptions = maskOptions;
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
-        vm.bookmarkDisplayName = function () {
-            if ($rootScope.reference.displayname) return UiUtils.displaynameWVersion($rootScope.reference.displayname.value, $rootScope.reference.location.version);
-        }
-
         vm.customErrorMessage = [];
 
         // Takes a page object and uses the uri generated for the reference to construct a chaise uri

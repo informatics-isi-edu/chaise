@@ -57,8 +57,12 @@
             });
         };
 
-        vm.bookmarkDisplayName = function () {
-            if ($rootScope.reference.displayname) return UiUtils.displaynameWVersion($rootScope.reference.displayname.value, $rootScope.reference.location.version);
+        vm.versionDisplay = function () {
+            return UiUtils.humanizeTimestamp($rootScope.reference.location.versionAsMillis);
+        }
+
+        vm.versionDate = function () {
+            return UiUtils.versionDate($rootScope.reference.location.versionAsMillis);
         }
 
         vm.togglePan = function() {
@@ -117,12 +121,35 @@
 
         /**
          * The following cases need to be handled for the resolverImplicitCatalog value:
-         *  - if undefined:                                 use current chaise path
+         *  - if null:                                      use current chaise path
          *  - if false:                                     /id/currCatalog/RID
+         *  - if undefined:                                 same as false
          *  - if resolverImplicitCatalog == currCatalog:    /id/RID
-         *  - if resolverImplicitCatalog != currCatalog:    /id/resolverImplicitCatalog/RID
+         *  - if resolverImplicitCatalog != currCatalog:    /id/currCatalog/RID
          **/
-        var resolvePermalink = function (tuple) {
+        function resolveLivePermalink(tuple) {
+            var resolverId = chaiseConfig.resolverImplicitCatalog;
+            var currCatalog = $rootScope.reference.location.catalogId;
+
+            // null or no RID
+            if (resolverId === null || !tuple.data || !tuple.data.RID) {
+                // location.catalog will be in the form of `<id>` or `<id>@<version>`
+                return $window.location.href.replace('#'+$rootScope.reference.location.catalog, '#'+$rootScope.reference.location.catalogId);
+            }
+
+            // if it's a number (isNaN tries to parse to integer before checking)
+            if (!isNaN(resolverId)) {
+                var catalog = (resolverId != currCatalog) ? currCatalog + "/" : "";
+                return $window.location.origin + "/id/" + catalog + tuple.data.RID;
+            }
+
+            // if resolverId is false or undefined OR any other values that are not allowed use the default
+            // default is to show the fully qualified resolveable link for permalink
+            return $window.location.origin + "/id/" + currCatalog + "/" + tuple.data.RID;
+        }
+
+        // NOTE: the current assumption is that url is versioned
+        function resolveVersionedPermalink(tuple) {
             var resolverId = chaiseConfig.resolverImplicitCatalog;
             var currCatalog = $rootScope.reference.location.catalogId;
 
@@ -131,25 +158,34 @@
                 return $window.location.href;
             }
 
-            // if false we want the current catalog id
-            if (resolverId === false || resolverId === undefined) {
-                return $window.location.origin + "/id/" + currCatalog + "/" + tuple.data.RID;
-            }
-
             // if it's a number (isNaN tries to parse to integer before checking)
             if (!isNaN(resolverId)) {
-                var catalog = (resolverId != currCatalog) ? currCatalog+"/" : "";
-                return $window.location.origin + "/id/" + catalog + tuple.data.RID;
+                var catalog = (resolverId != currCatalog) ? currCatalog + "/" : "";
+                return $window.location.origin + "/id/" + catalog + tuple.data.RID + '@' + $rootScope.reference.location.version;
             }
 
-            // any other values are not allowed so default to current url as permalink
-            return $window.location.href;
+            // if resolverId is false or undefined OR any other values that are not allowed use the default
+            // default is to shwo the fully qualified resolveable link for permalink
+            return $window.location.origin + "/id/" + currCatalog + "/" + tuple.data.RID + '@' + $rootScope.reference.location.version;
         }
 
         vm.sharePopup = function() {
             var tuple = $rootScope.tuple;
 
-            var permalink = resolvePermalink(tuple);
+            var permalink = resolveLivePermalink(tuple);
+
+            var params = {
+                citation: tuple.citation,
+                permalink: permalink,
+                displayname: $rootScope.reference.table.name+'_'+tuple.uniqueId
+            }
+
+            var resolverId = chaiseConfig.resolverImplicitCatalog;
+            if ($rootScope.reference.location.version) {
+                params.versionLink = resolveVersionedPermalink(tuple);
+                params.versionDateRelative = UiUtils.humanizeTimestamp($rootScope.reference.location.versionAsMillis);
+                params.versionDate = UiUtils.versionDate($rootScope.reference.location.versionAsMillis);
+            }
 
             modalUtils.showModal({
                 templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/shareCitation.modal.html",
@@ -157,11 +193,7 @@
                 windowClass: "chaise-share-citation",
                 controllerAs: "ctrl",
                 resolve: {
-                    params: {
-                        citation: tuple.citation,
-                        permalink: permalink,
-                        displayname: $rootScope.reference.table.name+'_'+tuple.uniqueId
-                    }
+                    params: params
                 }
             }, false, false, false); // not defining any extra callbacks
         };

@@ -79,10 +79,13 @@
             return appLink;
         };
 
-        $scope.bookmarkDisplayName = function () {
-            if (recordsetModel.tableDisplayName) return UiUtils.displaynameWVersion(recordsetModel.tableDisplayName.value, recordsetModel.reference.location.version);
+        $scope.versionDisplay = function () {
+            return UiUtils.humanizeTimestamp(recordsetModel.reference.location.versionAsMillis);
         }
 
+        $scope.versionDate = function () {
+            return UiUtils.versionDate(recordsetModel.reference.location.versionAsMillis);
+        }
 
         /*** Container Heights and other styling ***/
         // fetches the height of navbar, bookmark container, and view
