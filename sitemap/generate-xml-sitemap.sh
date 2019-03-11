@@ -1,5 +1,7 @@
 #!/bin/bash
 
+changefreq="monthly"  # always, hourly, daily, weekly, monthly, yearly, never
+
 record_urls()
 {
   # args: hostname application catalog_id schema table keycol
@@ -10,8 +12,15 @@ record_urls()
   do
     # This does NOT take into account URL encoding
     # if ${4} (schema) is something like "schema 1", the blankspace character will not be encoded properly as %20
-    echo "https://${1}/${2}/record/#${3}/${4}:${5}/${6}=${key}"
+    echo "  <url>"
+    echo "    <loc>https://${1}/${2}/record/#${3}/${4}:${5}/${6}=${key}</loc>"
+    echo "    <changefreq>${changefreq}</changefreq>"
+    echo "  </url>"
   done
 }
 
+echo '<?xml version="1.0" encoding="UTF-8"?>'
+echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
 record_urls ${1} ${2} ${3} ${4} ${5} ${6}
+echo '</urlset>'
+
