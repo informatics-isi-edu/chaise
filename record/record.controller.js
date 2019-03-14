@@ -152,50 +152,51 @@
         function resolveVersionedPermalink(tuple) {
             var resolverId = chaiseConfig.resolverImplicitCatalog;
             var currCatalog = $rootScope.reference.location.catalogId;
+            var snaptime = $rootScope.reference.table.schema.catalog.snaptime;
 
             // null or no RID
             if (resolverId === null || !tuple.data || !tuple.data.RID) {
-                return $window.location.href;
+                return $window.location.href.replace('#'+$rootScope.reference.location.catalog, '#'+$rootScope.reference.location.catalog+'@'+snaptime);
             }
 
             // if it's a number (isNaN tries to parse to integer before checking)
             if (!isNaN(resolverId)) {
                 var catalog = (resolverId != currCatalog) ? currCatalog + "/" : "";
-                return $window.location.origin + "/id/" + catalog + tuple.data.RID + '@' + $rootScope.reference.location.version;
+                return $window.location.origin + "/id/" + catalog + tuple.data.RID + '@' + ($rootScope.reference.location.version || snaptime);
             }
 
             // if resolverId is false or undefined OR any other values that are not allowed use the default
             // default is to shwo the fully qualified resolveable link for permalink
-            return $window.location.origin + "/id/" + currCatalog + "/" + tuple.data.RID + '@' + $rootScope.reference.location.version;
+            return $window.location.origin + "/id/" + currCatalog + "/" + tuple.data.RID + '@' + ($rootScope.reference.location.version || snaptime);
         }
 
         vm.sharePopup = function() {
             var tuple = $rootScope.tuple;
 
-            var permalink = resolveLivePermalink(tuple);
-
             var params = {
                 citation: tuple.citation,
-                permalink: permalink,
                 displayname: $rootScope.reference.table.name+'_'+tuple.uniqueId
             }
 
-            var resolverId = chaiseConfig.resolverImplicitCatalog;
-            if ($rootScope.reference.location.version) {
-                params.versionLink = resolveVersionedPermalink(tuple);
-                params.versionDateRelative = UiUtils.humanizeTimestamp($rootScope.reference.location.versionAsMillis);
-                params.versionDate = UiUtils.versionDate($rootScope.reference.location.versionAsMillis);
-            }
+            params.permalink = resolveLivePermalink(tuple);
+            params.versionLink = resolveVersionedPermalink(tuple);
+            params.versionDateRelative = UiUtils.humanizeTimestamp($rootScope.reference.location.versionAsMillis($rootScope.reference.table.schema.catalog.snaptime));
+            params.versionDate = UiUtils.versionDate($rootScope.reference.location.versionAsMillis($rootScope.reference.table.schema.catalog.snaptime));
 
-            modalUtils.showModal({
-                templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/shareCitation.modal.html",
-                controller: "ShareCitationController",
-                windowClass: "chaise-share-citation",
-                controllerAs: "ctrl",
-                resolve: {
-                    params: params
-                }
-            }, false, false, false); // not defining any extra callbacks
+            $rootScope.reference.table.schema.catalog.currentSnaptime().then(function (snaptime) {
+                // if current fetched snpatime doesn't match old snaptime, show a warning
+                params.showVersionWarning = (snaptime !== $rootScope.reference.table.schema.catalog.snaptime);
+            }).finally(function() {
+                modalUtils.showModal({
+                    templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/shareCitation.modal.html",
+                    controller: "ShareCitationController",
+                    windowClass: "chaise-share-citation",
+                    controllerAs: "ctrl",
+                    resolve: {
+                        params: params
+                    }
+                }, false, false, false); // not defining any extra callbacks
+            });
         };
 
         vm.toRecordSet = function(ref) {

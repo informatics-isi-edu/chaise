@@ -296,7 +296,7 @@
         }
     }])
 
-    .controller('ShareCitationController', ['$uibModalInstance', '$window', 'params', function ($uibModalInstance, $window, params) {
+    .controller('ShareCitationController', ['$uibModalInstance', '$window', 'AlertsService', 'params', function ($uibModalInstance, $window, AlertsService, params) {
         var vm = this;
         vm.cancel = cancel;
         vm.citation = params.citation;
@@ -305,12 +305,19 @@
         vm.versionDate = params.versionDate;
         vm.versionDateRelative = params.versionDateRelative;
         vm.filename = params.displayname;
+        vm.showVersionWarning = params.showVersionWarning;
 
         vm.moreThanWeek = function () {
             var weekAgo = moment().subtract(7, 'days').startOf('day');
             var versionMoment = moment(params.versionDate);
 
             return weekAgo.isAfter(versionMoment);
+        }
+
+        if (params.showVersionWarning) {
+            vm.alerts = AlertsService.alerts;
+            vm.closeAlert = AlertsService.deleteAlert;
+            AlertsService.addAlert("You are viewing old data. Click <a ng-click='reload()'>here</a> to reload the page and view the most recent data.", 'warning');
         }
         // generate bibtex url from citation
         if (params.citation) {

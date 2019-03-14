@@ -63,7 +63,7 @@
         };
     }])
 
-    .directive('alerts', ['AlertsService', 'Session', 'UriUtils', function(AlertsService, Session, UriUtils) {
+    .directive('alerts', ['AlertsService', 'Session', 'UriUtils', '$window', function(AlertsService, Session, UriUtils, $window) {
 
         return {
             restrict: 'E',
@@ -77,6 +77,9 @@
                 };
                 scope.login = function() {
                   Session.loginInAPopUp();
+                }
+                scope.reload = function() {
+                    $window.location.reload();
                 }
             }
         };
