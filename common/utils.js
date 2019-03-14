@@ -1298,6 +1298,10 @@
     }])
 
     .factory("ConfigUtils", ['$rootScope', '$window', 'defaultChaiseConfig', function($rootScope, $window, defaultConfig) {
+        function getConfigJSON() {
+            return $rootScope.chaiseConfig;
+        };
+
         function setConfigJSON() {
             $rootScope.chaiseConfig = {};
             if (typeof chaiseConfig != 'undefined') $rootScope.chaiseConfig = Object.assign({}, chaiseConfig);
@@ -1313,9 +1317,9 @@
                 }
             }
 
-            if (Array.isArray(chaiseConfig.configRules)) {
+            if (Array.isArray($rootScope.chaiseConfig.configRules)) {
                 // loop through each config rule and look for a set that matches the current host
-                chaiseConfig.configRules.forEach(function (ruleset) {
+                $rootScope.chaiseConfig.configRules.forEach(function (ruleset) {
                     // we have 1 host
                     if (typeof ruleset.host == "string") {
                         var arr = [];
@@ -1340,6 +1344,7 @@
         }
 
         return {
+            getConfigJSON: getConfigJSON,
             setConfigJSON: setConfigJSON
         }
     }])
