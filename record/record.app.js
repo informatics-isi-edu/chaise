@@ -50,14 +50,13 @@
         // full regex: "/^\s*(https?|ftp|mailto|tel|file|blob):/"
         $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|blob):/);
         $cookiesProvider.defaults.path = '/';
-        $logProvider.debugEnabled(chaiseConfig && chaiseConfig.debug === true);
         // Configure all tooltips to be attached to the body by default. To attach a
         // tooltip on the element instead, set the `tooltip-append-to-body` attribute
         // to `false` on the element.
         $uibTooltipProvider.options({appendToBody: true});
-
         // chaise configurations
         ConfigUtilsProvider.$get().setConfigJSON();
+        $logProvider.debugEnabled(ConfigUtilsProvider.$get().getConfigJSON().debug === true);
     }])
 
     .run(['AlertsService', 'DataUtils', 'ERMrest', 'FunctionUtils', 'headInjector', '$log', 'MathUtils', 'messageMap', 'recordAppUtils',  '$rootScope', 'Session', '$timeout', 'UiUtils', 'UriUtils', '$window',
