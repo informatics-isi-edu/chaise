@@ -767,20 +767,82 @@
             }
         }
 
+        /**
+         * The following cases need to be handled for the resolverImplicitCatalog value:
+         *  - if null:                                      use current chaise path (without the version if one is present)
+         *  - if false:                                     /id/currCatalog/RID
+         *  - if undefined:                                 same as false
+         *  - if resolverImplicitCatalog == currCatalog:    /id/RID
+         *  - if resolverImplicitCatalog != currCatalog:    /id/currCatalog/RID
+         **/
+        function resolveLivePermalink(tuple, reference) {
+            var resolverId = chaiseConfig.resolverImplicitCatalog;
+            var currCatalog = reference.location.catalogId;
+
+            // null or no RID
+            if (resolverId === null || !tuple.data || !tuple.data.RID) {
+                // location.catalog will be in the form of `<id>` or `<id>@<version>`
+                return $window.location.href.replace('#' + reference.location.catalog, '#' + currCatalog);
+            }
+
+            // if it's a number (isNaN tries to parse to integer before checking)
+            if (!isNaN(resolverId)) {
+                var catalog = (resolverId != currCatalog) ? currCatalog + "/" : "";
+                return $window.location.origin + "/id/" + catalog + tuple.data.RID;
+            }
+
+            // if resolverId is false or undefined OR any other values that are not allowed use the default
+            // default is to show the fully qualified resolveable link for permalink
+            return $window.location.origin + "/id/" + currCatalog + "/" + tuple.data.RID;
+        }
+
+        /**
+         * The following cases need to be handled for the resolverImplicitCatalog value:
+         *  - if null:                                      use current chaise path (include the version if none is present)
+         *  - if false:                                     /id/currCatalog/RID@version
+         *  - if undefined:                                 same as false
+         *  - if resolverImplicitCatalog == currCatalog:    /id/RID@version
+         *  - if resolverImplicitCatalog != currCatalog:    /id/currCatalog/RID@version
+         **/
+        function resolveVersionedPermalink(tuple, reference) {
+            var resolverId = chaiseConfig.resolverImplicitCatalog;
+            var currCatalog = reference.location.catalogId;
+            var snaptime = reference.table.schema.catalog.snaptime;
+            var version = reference.location.version;
+            var versionString = "@" + (version || snaptime);
+
+            // null or no RID
+            if (resolverId === null || !tuple.data || !tuple.data.RID) {
+                return $window.location.href.replace('#' + reference.location.catalog, '#' + currCatalog + versionString);
+            }
+
+            // if it's a number (isNaN tries to parse to integer before checking)
+            if (!isNaN(resolverId)) {
+                var catalog = (resolverId != currCatalog) ? currCatalog + "/" : "";
+                return $window.location.origin + "/id/" + catalog + tuple.data.RID + versionString;
+            }
+
+            // if resolverId is false or undefined OR any other values that are not allowed use the default
+            // default is to shwo the fully qualified resolveable link for permalink
+            return $window.location.origin + "/id/" + currCatalog + "/" + tuple.data.RID + versionString;
+        }
+
         return {
-            queryStringToJSON: queryStringToJSON,
-            appTagToURL: appTagToURL,
-            chaiseURItoErmrestURI: chaiseURItoErmrestURI,
-            fixedEncodeURIComponent: fixedEncodeURIComponent,
-            parseURLFragment: parseURLFragment,
-            setOrigin: setOrigin,
-            parsedFilterToERMrestFilter: parsedFilterToERMrestFilter,
-            setLocationChangeHandling: setLocationChangeHandling,
-            isBrowserIE: isBrowserIE,
-            getQueryParams: getQueryParams,
             appNamefromUrlPathname: appNamefromUrlPathname,
+            appTagToURL: appTagToURL,
+            chaiseDeploymentPath: chaiseDeploymentPath,
+            chaiseURItoErmrestURI: chaiseURItoErmrestURI,
             createRedirectLinkFromPath: createRedirectLinkFromPath,
-            chaiseDeploymentPath: chaiseDeploymentPath
+            fixedEncodeURIComponent: fixedEncodeURIComponent,
+            getQueryParams: getQueryParams,
+            isBrowserIE: isBrowserIE,
+            parseURLFragment: parseURLFragment,
+            parsedFilterToERMrestFilter: parsedFilterToERMrestFilter,
+            queryStringToJSON: queryStringToJSON,
+            resolveLivePermalink: resolveLivePermalink,
+            resolveVersionedPermalink: resolveVersionedPermalink,
+            setLocationChangeHandling: setLocationChangeHandling,
+            setOrigin: setOrigin
         }
     }])
 

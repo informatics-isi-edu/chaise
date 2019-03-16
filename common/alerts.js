@@ -76,10 +76,13 @@
                     AlertsService.deleteAlert(alert);
                 };
                 scope.login = function() {
-                  Session.loginInAPopUp();
+                    Session.loginInAPopUp();
                 }
-                scope.reload = function() {
-                    $window.location.reload();
+                scope.liveLink = function() {
+                    return UriUtils.resolveLivePermalink(scope.$root.tuple, scope.$root.reference);
+                }
+                scope.versionedLink = function() {
+                    return UriUtils.resolveVersionedPermalink(scope.$root.tuple, scope.$root.reference);
                 }
             }
         };

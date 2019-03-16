@@ -317,7 +317,7 @@
         if (params.showVersionWarning) {
             vm.alerts = AlertsService.alerts;
             vm.closeAlert = AlertsService.deleteAlert;
-            AlertsService.addAlert("You are viewing old data. Click <a ng-click='reload()'>here</a> to reload the page and view the most recent data.", 'warning');
+            AlertsService.addAlert("The displayed content may be stale due to recent changes made by other users. You may wish to review the changes prior to sharing the <a ng-href='{{liveLink()}}'>live link</a> below. Or, you may share the older content using the <a ng-href='{{versionedLink()}}'>historical link</a>.", 'warning');
         }
         // generate bibtex url from citation
         if (params.citation) {
