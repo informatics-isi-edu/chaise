@@ -63,7 +63,7 @@
         };
     }])
 
-    .directive('alerts', ['AlertsService', 'Session', 'UriUtils', '$window', function(AlertsService, Session, UriUtils, $window) {
+    .directive('alerts', ['AlertsService', 'Session', 'UriUtils', function(AlertsService, Session, UriUtils) {
 
         return {
             restrict: 'E',
@@ -74,7 +74,8 @@
             link: function (scope, elem, attr) {
                 scope.closeAlert = function(alert) {
                     AlertsService.deleteAlert(alert);
-                };
+                }
+
                 scope.login = function() {
                     Session.loginInAPopUp();
                 }
