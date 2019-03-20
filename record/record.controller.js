@@ -129,8 +129,9 @@
                 displayname: refTable.name+'_'+tuple.uniqueId
             }
 
-            params.permalink = UriUtils.resolveLivePermalink(tuple, ref);
-            params.versionLink = UriUtils.resolveVersionedPermalink(tuple, ref);
+            var versionString = "@" + (ref.location.version || refTable.schema.catalog.snaptime);
+            params.permalink = UriUtils.resolvePermalink(tuple, ref);
+            params.versionLink = UriUtils.resolvePermalink(tuple, ref, versionString);
             params.versionDateRelative = UiUtils.humanizeTimestamp(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
             params.versionDate = UiUtils.versionDate(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
 

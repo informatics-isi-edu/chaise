@@ -78,12 +78,6 @@
                 scope.login = function() {
                     Session.loginInAPopUp();
                 }
-                scope.liveLink = function() {
-                    return UriUtils.resolveLivePermalink(scope.$root.tuple, scope.$root.reference);
-                }
-                scope.versionedLink = function() {
-                    return UriUtils.resolveVersionedPermalink(scope.$root.tuple, scope.$root.reference);
-                }
             }
         };
     }]);

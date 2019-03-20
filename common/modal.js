@@ -296,16 +296,21 @@
         }
     }])
 
+    /**
+     * Params object values:
+     *   - {String} displayname - used for citation content and filename for bibtex download
+     *   - {String} permalink - link to the live catalog
+     *   - {String} versionLink - link to the current version of the live catalog
+     *   - {String} versionDate - version decoded to it's datetime
+     *   - {String} versionDateRelative - version decoded to it's datetime then presented as relative to today's date
+     *   - {boolean} showVersionWarning - decides whether to show "out of date content" warning
+     *   - {Object} citation - citation object returned from ERMrest.tuple.citation
+     *
+     */
     .controller('ShareCitationController', ['$uibModalInstance', '$window', 'AlertsService', 'params', function ($uibModalInstance, $window, AlertsService, params) {
         var vm = this;
-        vm.cancel = cancel;
-        vm.citation = params.citation;
-        vm.permalink = params.permalink;
-        vm.versionLink = params.versionLink;
-        vm.versionDate = params.versionDate;
-        vm.versionDateRelative = params.versionDateRelative;
-        vm.filename = params.displayname;
-        vm.showVersionWarning = params.showVersionWarning;
+        vm.params = params;
+        vm.warningMessage = "The displayed content may be stale due to recent changes made by other users. You may wish to review the changes prior to sharing the <a ng-href='{{ctrl.params.permalink}}'>live link</a> below. Or, you may share the older content using the <a ng-href='{{ctrl.params.versionLink}}'>historical link</a>.";
 
         vm.moreThanWeek = function () {
             var weekAgo = moment().subtract(7, 'days').startOf('day');
@@ -314,11 +319,6 @@
             return weekAgo.isAfter(versionMoment);
         }
 
-        if (params.showVersionWarning) {
-            vm.alerts = AlertsService.alerts;
-            vm.closeAlert = AlertsService.deleteAlert;
-            AlertsService.addAlert("The displayed content may be stale due to recent changes made by other users. You may wish to review the changes prior to sharing the <a ng-href='{{liveLink()}}'>live link</a> below. Or, you may share the older content using the <a ng-href='{{versionedLink()}}'>historical link</a>.", 'warning');
-        }
         // generate bibtex url from citation
         if (params.citation) {
             var citation = params.citation;
@@ -335,7 +335,11 @@
             vm.downloadBibtex = $window.URL.createObjectURL( bibtexBlob );
         }
 
-        function cancel() {
+        vm.closeAlert = function () {
+            vm.params.showVersionWarning = false;
+        }
+
+        vm.cancel = function() {
             $uibModalInstance.dismiss('cancel');
         }
     }])

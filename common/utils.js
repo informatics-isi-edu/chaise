@@ -774,57 +774,29 @@
          *  - if undefined:                                 same as false
          *  - if resolverImplicitCatalog == currCatalog:    /id/RID
          *  - if resolverImplicitCatalog != currCatalog:    /id/currCatalog/RID
+         * @param {ERMrest.Tuple} tuple - the `ermrestJS` tuple object returned from the page object when data is read
+         * @param {ERMrest.Reference} reference - the `ermrestJS` reference object associated with this current page
+         * @param {String} version - the encoded version string prepended with the '@' character
          **/
-        function resolveLivePermalink(tuple, reference) {
+        function resolvePermalink(tuple, reference, version) {
             var resolverId = chaiseConfig.resolverImplicitCatalog;
             var currCatalog = reference.location.catalogId;
 
             // null or no RID
             if (resolverId === null || !tuple.data || !tuple.data.RID) {
                 // location.catalog will be in the form of `<id>` or `<id>@<version>`
-                return $window.location.href.replace('#' + reference.location.catalog, '#' + currCatalog);
+                return $window.location.href.replace('#' + reference.location.catalog, '#' + curreCatalog + (version ? version : ""));
             }
 
             // if it's a number (isNaN tries to parse to integer before checking)
             if (!isNaN(resolverId)) {
                 var catalog = (resolverId != currCatalog) ? currCatalog + "/" : "";
-                return $window.location.origin + "/id/" + catalog + tuple.data.RID;
+                return $window.location.origin + "/id/" + catalog + tuple.data.RID + (version ? version : "");
             }
 
             // if resolverId is false or undefined OR any other values that are not allowed use the default
             // default is to show the fully qualified resolveable link for permalink
-            return $window.location.origin + "/id/" + currCatalog + "/" + tuple.data.RID;
-        }
-
-        /**
-         * The following cases need to be handled for the resolverImplicitCatalog value:
-         *  - if null:                                      use current chaise path (include the version if none is present)
-         *  - if false:                                     /id/currCatalog/RID@version
-         *  - if undefined:                                 same as false
-         *  - if resolverImplicitCatalog == currCatalog:    /id/RID@version
-         *  - if resolverImplicitCatalog != currCatalog:    /id/currCatalog/RID@version
-         **/
-        function resolveVersionedPermalink(tuple, reference) {
-            var resolverId = chaiseConfig.resolverImplicitCatalog;
-            var currCatalog = reference.location.catalogId;
-            var snaptime = reference.table.schema.catalog.snaptime;
-            var version = reference.location.version;
-            var versionString = "@" + (version || snaptime);
-
-            // null or no RID
-            if (resolverId === null || !tuple.data || !tuple.data.RID) {
-                return $window.location.href.replace('#' + reference.location.catalog, '#' + currCatalog + versionString);
-            }
-
-            // if it's a number (isNaN tries to parse to integer before checking)
-            if (!isNaN(resolverId)) {
-                var catalog = (resolverId != currCatalog) ? currCatalog + "/" : "";
-                return $window.location.origin + "/id/" + catalog + tuple.data.RID + versionString;
-            }
-
-            // if resolverId is false or undefined OR any other values that are not allowed use the default
-            // default is to shwo the fully qualified resolveable link for permalink
-            return $window.location.origin + "/id/" + currCatalog + "/" + tuple.data.RID + versionString;
+            return $window.location.origin + "/id/" + currCatalog + "/" + tuple.data.RID + (version ? version : "");
         }
 
         return {
@@ -839,8 +811,7 @@
             parseURLFragment: parseURLFragment,
             parsedFilterToERMrestFilter: parsedFilterToERMrestFilter,
             queryStringToJSON: queryStringToJSON,
-            resolveLivePermalink: resolveLivePermalink,
-            resolveVersionedPermalink: resolveVersionedPermalink,
+            resolvePermalink: resolvePermalink,
             setLocationChangeHandling: setLocationChangeHandling,
             setOrigin: setOrigin
         }
