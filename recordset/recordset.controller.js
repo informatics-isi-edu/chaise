@@ -7,15 +7,14 @@
     .controller('recordsetController', ['context', 'DataUtils', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window', 'messageMap', function(context, DataUtils, recordsetModel, Session, UiUtils, UriUtils, $document, $log, $rootScope, $scope, $timeout, $window, messageMap) {
 
         var ctrl = this;
-
-        ctrl.showExportButton = (chaiseConfig && chaiseConfig.showExportButton === true);
-
-        $scope.vm = recordsetModel;
-        recordsetModel.RECORDEDIT_MAX_ROWS = 200;
         var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
-        $scope.navbarBrand = (chaiseConfig['navbarBrand'] !== undefined? chaiseConfig.navbarBrand : "");
-        $scope.navbarBrandImage = (chaiseConfig['navbarBrandImage'] !== undefined? chaiseConfig.navbarBrandImage : "");
-        $scope.navbarBrandText = (chaiseConfig['navbarBrandText'] !== undefined? chaiseConfig.navbarBrandText : "Chaise");
+        $scope.vm = recordsetModel;
+
+        recordsetModel.RECORDEDIT_MAX_ROWS = 200;
+        ctrl.showExportButton = (chaiseConfig.showExportButton === true);
+        $scope.navbarBrand = (chaiseConfig.navbarBrand !== undefined ?  chaiseConfig.navbarBrand : "");
+        $scope.navbarBrandImage = (chaiseConfig.navbarBrandImage !== undefined ? chaiseConfig.navbarBrandImage : "");
+        $scope.navbarBrandText = (chaiseConfig.navbarBrandText !== undefined ? chaiseConfig.navbarBrandText : "Chaise");
         var mainBodyEl;
         $scope.tooltip = messageMap.tooltip;
 
