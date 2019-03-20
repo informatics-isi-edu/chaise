@@ -97,8 +97,8 @@
             UriUtils.setOrigin();
 
             var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
-            context.catalogID = $window.location.hash.split('/')[0].slice(1);
-            context.chaiseBaseURL = $window.location.href.replace($window.location.hash, '');
+            context.catalogID = UriUtils.getCatalogID();
+            context.chaiseBaseURL = $window.location.href.replace(UriUtils.getLocationHash($window.location), '');
             var modifyEnabled = chaiseConfig.editRecord === false ? false : true;
             var deleteEnabled = chaiseConfig.deleteRecord === true ? true : false;
             var showFaceting = chaiseConfig.showFaceting === true ? true : false;

@@ -68,8 +68,8 @@
             errorData = {};
 
         var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
-        context.catalogID = $window.location.hash.split('/')[0].slice(1);
-        context.chaiseBaseURL = $window.location.href.replace($window.location.hash, '');
+        context.catalogID = UriUtils.getCatalogID();
+        context.chaiseBaseURL = $window.location.href.replace(UriUtils.getLocationHash($window.location), '');
 
         $rootScope.displayReady = false;
         $rootScope.showSpinner = false; // this property is set from common modules for controlling the spinner at a global level that is out of the scope of the app

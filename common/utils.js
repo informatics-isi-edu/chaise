@@ -176,6 +176,31 @@
         function($injector, $rootScope, $window, appContextMapping, appTagMapping, ContextUtils, Errors, messageMap, ParsedFilter) {
         var chaiseBaseURL;
         var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
+
+        /**
+         * Returns the catalog id
+         * @return {String}
+         */
+        function getCatalogID() {
+            var hash = getLocationHash($window.location);
+            return hash.split('/')[0].slice(1);
+        }
+
+        /**
+         * Given a location object, will return the hash part of it
+         * (it will take care of allowing ? in place of #)
+         * @param  {Object} location the $window.location
+         * @return {String}          hash string
+         */
+        function getLocationHash(location) {
+            var hash = location.hash;
+            // allow ? to be used in place of #
+            if ((hash == '' || hash == undefined) && location.href.indexOf("?") !== -1) {
+                hash = "#" + location.href.substring(location.href.indexOf("?") + 1);
+            }
+            return hash;
+        }
+
         /**
          * @function
          * @param {Object} location - location Object from the $window resource
@@ -183,12 +208,11 @@
          * Converts a chaise URI to an ermrest resource URI object.
          * @throws {MalformedUriError} if table or catalog data are missing.
          */
-
         function chaiseURItoErmrestURI(location) {
             var tableMissing = messageMap.tableMissing,
                 catalogMissing = messageMap.catalogMissing;
 
-            var hash = location.hash,
+            var hash = getLocationHash(location),
                 ermrestUri = {},
                 catalogId;
 
@@ -316,16 +340,16 @@
          * @returns {string} url the chaise url
          */
         function appTagToURL(tag, location, context) {
-            if (!chaiseBaseURL)
-                chaiseBaseURL = $window.location.href.replace($window.location.hash, '');
-            chaiseBaseURL = chaiseBaseURL.replace("/" + $rootScope.context.appName + "/", '');
             var appPath;
             if (tag && (tag in appTagMapping)) {
                 appPath = appTagMapping[tag];
             } else {
                 appPath = ContextUtils.getValueFromContext(appContextMapping, context);
             }
-
+            var chaiseBaseURL = $window.location.origin + chaiseDeploymentPath();
+            if (chaiseBaseURL.endsWith("/")) {
+                chaiseBaseURL = chaiseBaseURL.slice(0, -1);
+            }
             var url = chaiseBaseURL + appPath + "/#" + location.catalog + "/" + location.path;
             if (location.queryParamsString && (context.indexOf("compact") === 0)) {
                 url = url + "?" + location.queryParamsString;
@@ -341,8 +365,13 @@
          */
         function getQueryParams(location) {
             var queryParams = {},
-                modifierPath = location.hash,
+                modifierPath = getLocationHash(location),
                 q_parts, i;
+
+            // allow ? to be used in place of #
+            if ((modifierPath == '' || modifierPath == undefined) && location.href.indexOf("?") !== -1) {
+                modifierPath = "#" + location.href.substring(location.href.indexOf("?") + 1);
+            }
 
             if (modifierPath.indexOf("?") !== -1) {
                 var queries = modifierPath.match(/\?(.+)/)[1].split("&");
@@ -381,7 +410,7 @@
 
             // Then, parse the URL fragment id (aka, hash). Expected format:
             //  "#catalog_id/[schema_name:]table_name[/{attribute::op::value}{&attribute::op::value}*][@sort(column[::desc::])]"
-            var hash = location.hash;
+            var hash = getLocationHash(location);
             var uri = hash;
             if (hash === undefined || hash == '' || hash.length == 1) {
                 return context;
@@ -740,7 +769,8 @@
 
         // Takes path and creates full redirect links with catalogId
         function createRedirectLinkFromPath(path){
-          var catalogString = $window.location.hash.slice(0, $window.location.hash.search("/"));
+          var hash = getLocationHash($window.location);
+          var catalogString = hash.slice(0, hash.search("/"));
           return $window.location.origin + $window.location.pathname + catalogString + "/" + path;
         }
 
@@ -780,7 +810,9 @@
             getQueryParams: getQueryParams,
             appNamefromUrlPathname: appNamefromUrlPathname,
             createRedirectLinkFromPath: createRedirectLinkFromPath,
-            chaiseDeploymentPath: chaiseDeploymentPath
+            chaiseDeploymentPath: chaiseDeploymentPath,
+            getLocationHash: getLocationHash,
+            getCatalogID: getCatalogID
         }
     }])
 
