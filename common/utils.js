@@ -368,11 +368,6 @@
                 modifierPath = getLocationHash(location),
                 q_parts, i;
 
-            // allow ? to be used in place of #
-            if ((modifierPath == '' || modifierPath == undefined) && location.href.indexOf("?") !== -1) {
-                modifierPath = "#" + location.href.substring(location.href.indexOf("?") + 1);
-            }
-
             if (modifierPath.indexOf("?") !== -1) {
                 var queries = modifierPath.match(/\?(.+)/)[1].split("&");
                 for (i = 0; i < queries.length; i++) {
