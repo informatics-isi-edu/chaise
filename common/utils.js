@@ -1302,7 +1302,8 @@
             return $rootScope.chaiseConfig;
         };
 
-        function setConfigJSON() {
+        function setConfigJSON(catalog) {
+            console.log(catalog);
             $rootScope.chaiseConfig = {};
             if (typeof chaiseConfig != 'undefined') $rootScope.chaiseConfig = Object.assign({}, chaiseConfig);
 

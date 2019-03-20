@@ -1,5 +1,6 @@
 (function() {
     'use strict';
+    var catalog;
 /* Configuration of the Recordset App */
     angular.module('chaise.configure-recordset', [
         'chaise.modal',
@@ -12,8 +13,12 @@
 
     .run(['ERMrest', function (ERMrest) {
         ERMrest.onload().then(function () {
-            angular.element(document).ready(function(){
-                angular.bootstrap(document.getElementById("recordset"), ["chaise.recordset"]);
+            ERMrest.ermrestFactory.getServer('https://dev.isrd.isi.edu/ermrest').catalogs.get("1").then(function (response) {
+                catalog = response;
+
+                angular.element(document).ready(function(){
+                    angular.bootstrap(document.getElementById("recordset"), ["chaise.recordset"]);
+                });
             });
         });
     }]);
@@ -61,7 +66,7 @@
         // to `false` on the element.
         $uibTooltipProvider.options({appendToBody: true});
         // chaise configurations
-        ConfigUtilsProvider.$get().setConfigJSON();
+        ConfigUtilsProvider.$get().setConfigJSON(catalog);
         //  Enable log system, if in debug mode
         $logProvider.debugEnabled(ConfigUtilsProvider.$get().getConfigJSON().debug === true);
     }])
