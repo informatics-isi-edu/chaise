@@ -49,53 +49,61 @@ The following are the optional attributes that you might find on requests:
 
 The table below summarizes all the requests that we currently are logging in chaise and their respective `action`.
 
-| #  | App        | Description                                 | Action                                  | Extra            | Notes                   |
-|----|------------|---------------------------------------------|-----------------------------------------|------------------|-------------------------|
-| 1  | record     | load main entity                            | record/main/load                        |                  | CNG ACT                 |
-| 2  |            | update main entity                          | record/main/update                      |                  | MISSING                 |
-| 3  |            | load aggregates in main entity              | record/aggregate                        |                  |                         |
-| 4  |            | update aggregates in main entity            | record/aggregate/update                 |                  |                         |
-| 5  |            | load inline entities                        | record/inline                           |                  |                         |
-| 6  |            | update inline entities                      | record/inline/update                    |                  |                         |
-| 7  |            | load aggregates in inline entities          | record/inline/aggregate                 |                  |                         |
-| 8  |            | update aggregates in inline entities        | record/inline/aggregate/update          |                  |                         |
-| 9  |            | load related entities                       | record/related                          | referrer         |                         |
-| 10 |            | update related entities                     | record/related/update                   | referrer         |                         |
-| 11 |            | load aggregates in related entities         | record/related/aggregate                |                  |                         |
-| 12 |            | update aggregates in related entities       | record/related/aggregate/update         |                  |                         |
-| 13 |            | read p&b values to add                      | pre-create/prefill/association          |                  |                         |
-| 14 |            | read pre selected p&b values to add         | pre-create/prefill/association/disabled |                  |                         |
-| 15 |            | create p&b                                  | create/prefill/association              |                  |                         |
-|    |            |                                             |                                         |                  |                         |
-|    |            | requests in modal in record?                |                                         |                  |                         |
-|    |            |                                             |                                         |                  |                         |
-| 1  | recordedit | create record                               | create/new                              |                  |                         |
-| 2  |            | read the foreignkey values for prefill      | pre-create/prefill                      |                  |                         |
-| 3  |            | create by add button on fk modal            | create/prefill                          |                  |                         |
-| 4  |            | read the current row for copy               | pre-create/copy                         |                  |                         |
-| 5  |            | create record from copy                     | create/copy                             |                  |                         |
-| 6  |            | creating row by clicking on add in fk modal | create/modal                            |                  |                         |
-| 7  |            | read entities to be updated                 | pre-update                              |                  | page_size is inaccurate |
-| 8  |            | update entities                             | update                                  |                  |                         |
-| 9  |            | get default value for fks                   | recordedit/default                      |                  |                         |
-|    |            |                                             |                                         |                  |                         |
-|    |            | requests in fk modal picker?                |                                         |                  |                         |
-|    |            |                                             |                                         |                  |                         |
-| 1  | recordset  | recordset main data read on load            | recordset/main/load                     |                  |                         |
-| 2  |            | recordset main data read on update          | recordset/main/update                   |                  |                         |
-| 3  |            | recordset main data read on page change     | recordset/main/page                     | sort, page       |                         |
-| 4  |            | recordset main data read on sort change     | recordset/main/sort                     | sort             |                         |
-| 5  |            | recordset main data read on limit change    | recordset/main/limit                    |                  |                         |
-| 6  |            | recordset main data read on facet change    | recordset/main/facet                    |                  |                         |
-| 7  |            | recordset get main count                    | recordset/main/count                    |                  |                         |
-| 8  |            | recordset get aggregated values             | recordset/main/aggregate                |                  |                         |
-| 9  |            | recordset read facet                        | recordset/facet                         | referrer, source |                         |
-| 10 |            | recordset click on show details             | recordset/viewmore                      | referrer, source |                         |
-|    |            |                                             |                                         |                  |                         |
-| 1  |            | delete from record                          | delete/record                           |                  |                         |
-| 2  |            | delete from recordedit                      | delete/recordedit                       |                  |                         |
-| 3  |            | delete row from recordset table             | delete/recordset                        |                  |                         |
-| 4  |            | delete related entity rows                  | delete/recorset/related                 |                  |                         |
+| App                         | Description                                    | Action                                  | Extra            | Notes                   |
+|-----------------------------|------------------------------------------------|-----------------------------------------|------------------|-------------------------|
+| chaise-wide                 | get catalog information                        | model/catalog                           |                  |                         |
+| chaise-wide                 | get catalog schemas information                | model/schema                            |                  |                         |
+| record                      | load main entity                               | record/main/load                        |                  |                         |
+|                             | update main entity                             | record/main/update                      |                  |                         |
+|                             | load aggregates in main entity                 | record/aggregate                        |                  |                         |
+|                             | update aggregates in main entity               | record/aggregate/update                 |                  |                         |
+|                             | load inline entities                           | record/inline                           |                  |                         |
+|                             | update inline entities                         | record/inline/update                    |                  |                         |
+|                             | load aggregates in inline entities             | record/inline/aggregate                 |                  |                         |
+|                             | update aggregates in inline entities           | record/inline/aggregate/update          |                  |                         |
+|                             | load related entities                          | record/related                          | referrer         |                         |
+|                             | update related entities                        | record/related/update                   | referrer         |                         |
+|                             | load aggregates in related entities            | record/related/aggregate                |                  |                         |
+|                             | update aggregates in related entities          | record/related/aggregate/update         |                  |                         |
+|                             | read p&b values to add                         | pre-create/prefill/association          |                  |                         |
+|                             | read pre selected p&b values to add            | pre-create/prefill/association/disabled |                  |                         |
+|                             | create p&b                                     | create/prefill/association              |                  |                         |
+|                             |                                                |                                         |                  |                         |
+| recordedit                  | create record                                  | create/new                              |                  |                         |
+|                             | read the foreignkey values for prefill         | pre-create/prefill                      |                  |                         |
+|                             | create by add button on fk modal               | create/prefill                          |                  |                         |
+|                             | read the current row for copy                  | pre-create/copy                         |                  |                         |
+|                             | create record from copy                        | create/copy                             |                  |                         |
+|                             | creating row by clicking on add in fk modal    | create/modal                            |                  |                         |
+|                             | read entities to be updated                    | pre-update                              |                  | page_size is inaccurate |
+|                             | update entities                                | update                                  |                  |                         |
+|                             | get default value for fks                      | recordedit/default                      |                  |                         |
+|                             |                                                |                                         |                  |                         |
+| recordset                   | recordset main data read on load               | recordset/main/load                     |                  |                         |
+| recordset/record/recordedit | recordset main data read on update             | recordset/main/update                   |                  |                         |
+| recordset/record/recordedit | recordset main data read on page change        | recordset/main/page                     | sort, page, type |                         |
+| recordset/record/recordedit | recordset main data read on sort change        | recordset/main/sort                     | sort             |                         |
+| recordset/record/recordedit | recordset main data read on limit change       | recordset/main/limit                    |                  |                         |
+| recordset/record/recordedit | recordset main data read on facet change       | recordset/main/facet                    |                  |                         |
+| recordset/record/recordedit | recordset get main count                       | recordset/main/count                    |                  |                         |
+| recordset/record/recordedit | recordset get aggregated values                | recordset/main/aggregate                |                  |                         |
+| recordset/record/recordedit | recordset read facet                           | recordset/facet                         | referrer, source |                         |
+| recordset/record/recordedit | recordset initialize preselected entity facets | recordset/facet/init                    | referrer, source |                         |
+| recordset/record/recordedit | recordset get buckets for a facet              | recordset/facet/histogram               | referrer, source |                         |
+| recordset/record/recordedit | recordset click on show details                | recordset/viewmore                      | referrer, source |                         |
+|                             |                                                |                                         |                  |                         |
+| record                      | export from recordset                          | export/recordset                        |                  |                         |
+| recordset                   | export from record                             | export/record                           |                  |                         |
+|                             |                                                |                                         |                  |                         |
+| record                      | delete from record                             | delete/record                           |                  |                         |
+| recordedit                  | delete from recordedit                         | delete/recordedit                       |                  |                         |
+| record/recordset/recordedit | delete row from recordset table                | delete/recordset                        |                  |                         |
+| record                      | delete related entity rows                     | delete/record/related                   |                  |                         |
+|                             |                                                |                                         |                  |                         |
+| viewer                      | main request                                   | viewer/main                             |                  |                         |
+|                             | get annotation table                           | viewer/annotation                       |                  |                         |
+|                             | get annotation comments                        | viewer/comment                          |                  |                         |
+|                             | get anatomy data                               | viewer/anatomy                          |                  |                         |               |
 
 ## Error Log
 
@@ -116,7 +124,24 @@ The object that we want to log might be lengthy so we should truncate this objec
 
 ## Change Log
 
+#### March 25, 2019
+
+###### Changed
+- Fixed the action of scalar column requests.
+- Changed the action for removing related entity rows from `delete/recordset/related` to `delete/record/related`.
+- Fixed the issue of reporting both load and update requests of record page as `record/main`. Now they are being logged with proper action.
+- `recordset/export` was used as action for export from both record and recordset. Now `export/record` and `export/recordset` are going to be reported.
+- Fixed a bug that would cause record load requests to be reported as update.
+
+###### Added
+- Added proper `dcctx` logging to viewer app.
+- New actions have been attached to schema (`"model/schema"`) and catalog (`"model/catalog"`) requests.
+- `catalog` has been added to all the requests.
+- `column` has been added to requests for getting a scalar facet data.
+-  If there are preselected facets, in entity mode we have to get the row-name corresponding to the selected value. Customized action (`recordset/facet/init`) has been added for this request.
+- Added proper action `recordset/facet/histogram` to the request for getting buckets of a range picker facet.
+
 #### March 8, 2019
 
-- [Bug fix] We realized that the first request of adding pure and binary is not using the correct action. It was using the `recordset/main/load`. We changed it to use the appropriate `pre-create/prefill/association` action with `referred` information.
-
+###### Changed
+ - We realized that the first request of adding pure and binary is not using the correct action. It was using the `recordset/main/load`. We changed it to use the appropriate `pre-create/prefill/association` action with `referred` information.

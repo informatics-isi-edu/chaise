@@ -40,20 +40,18 @@
         // TODO: Check if context has everything it needs before proceeding. If not, Bad Request
     }])
 
+    // set the chasie-config property
+    .config(['ConfigUtilsProvider', 'headInjectorProvider', function (ConfigUtilsProvider, headInjectorProvider) {
+        ConfigUtilsProvider.$get().setConfigJSON();
+
+        headInjectorProvider.$get().setupHead();
+    }])
+
     // Configure all tooltips to be attached to the body by default. To attach a
     // tooltip on the element instead, set the `tooltip-append-to-body` attribute
     // to `false` on the element.
     .config(['$uibTooltipProvider', function($uibTooltipProvider) {
         $uibTooltipProvider.options({appendToBody: true});
-    }])
-
-    // Get a client connection to ERMrest
-    // Note: Only Providers and Constants can be dependencies in .config blocks. So
-    // if you want to use a factory or service (e.g. $window or your custom one)
-    // in a .config block, you append 'Provider' to the dependency name and call
-    // .$get() on it. This returns a Provider instance of the factory/service.
-    .config(['ERMrestProvider', 'context', function configureClient(ERMrestProvider, context) {
-        client = ERMrestProvider.$get().ermrestFactory.getServer(context.serviceURL, {cid: context.appName});
     }])
 
     // Set user info
@@ -129,9 +127,7 @@
     }])
 
     // Hydrate values providers and set up iframe
-    .run(['headInjector', '$window', 'context', 'image', 'annotations', 'comments', 'anatomies', 'user', function runApp(headInjector, $window, context, image, annotations, comments, anatomies) {
-        headInjector.addTitle();
-        headInjector.addCustomCSS();
+    .run(['ERMrest', 'logActions', '$window', 'context', 'image', 'annotations', 'comments', 'anatomies', 'user', 'MathUtils', function runApp(ERMrest, logActions, $window, context, image, annotations, comments, anatomies, user, MathUtils) {
         var origin = $window.location.origin;
         var iframe = $window.frames[0];
         var annotoriousReady = false;
@@ -140,6 +136,7 @@
         var rectangles = [];
         var sections = [];
 
+        client = ERMrest.ermrestFactory.getServer(context.serviceURL, {cid: context.appName, pid: MathUtils.uuid(), wid: $window.name});
         client.catalogs.get(context.catalogID).then(function success(catalog) {
             var schema = catalog.schemas.get(context.schemaName);
             // So the schema and tables can be accessed in controllers
@@ -152,7 +149,13 @@
                 var imagePath = new ERMrest.DataPath(table);
                 var imagePathColumn = imagePath.context.columns.get('id');
                 var imageFilter = new ERMrest.BinaryPredicate(imagePathColumn, ERMrest.OPERATOR.EQUAL, context.imageID);
-                imagePath.filter(imageFilter).entity.get().then(function success(entity) {
+                var contextHeaderParams = {
+                    catalog: context.catalogID,
+                    schema_table: context.schemaName + ":" + context.tableName,
+                    filter: "id=" + context.imageID,
+                    action: logActions.viewerMain
+                };
+                imagePath.filter(imageFilter).entity.get(contextHeaderParams).then(function success(entity) {
                     image.entity = entity[0];
                     var waterMark = context.queryParams.waterMark;
                     if (waterMark === undefined) {
@@ -166,7 +169,13 @@
 
                     var annotationTable = schema.tables.get('annotation');
                     var annotationPath = imagePath.extend(annotationTable).datapath;
-                    annotationPath.filter(imageFilter).entity.get().then(function success(_annotations) {
+                    var contextHeaderParams = {
+                        catalog: context.catalogID,
+                        schema_table: context.schemaName + ":annotation",
+                        filter: "id=" + context.imageID,
+                        action: logActions.viewerAnnotation
+                    };
+                    annotationPath.filter(imageFilter).entity.get(contextHeaderParams).then(function success(_annotations) {
                         var length = _annotations.length;
                         for (var i = 0; i < length; i++) {
                             _annotations[i].table = annotationPath.context.table.name;
@@ -185,10 +194,16 @@
 
                         var commentTable = schema.tables.get('annotation_comment');
                         var commentPath = annotationPath.extend(commentTable).datapath;
+                        var contextHeaderParams = {
+                            catalog: context.catalogID,
+                            schema_table: context.schemaName + ":annotation_comment",
+                            filter: "id=" + context.imageID,
+                            action: logActions.viewerComment
+                        };
 
                         // Get all the comments for this image
                         // Nest comments fetch in annotations so annotations will be fetched and loaded to the DOM before the comments
-                        commentPath.filter(imageFilter).entity.get().then(function success(_comments){
+                        commentPath.filter(imageFilter).entity.get(contextHeaderParams).then(function success(_comments){
                             var length = _comments.length;
                             for (var i = 0; i < length; i++) {
                                 _comments[i].table = commentPath.context.table.name;
@@ -213,7 +228,12 @@
                 // Get all rows from "anatomy" table
                 var anatomyTable = schema.tables.get('anatomy');
                 var anatomyPath = new ERMrest.DataPath(anatomyTable);
-                anatomyPath.entity.get().then(function success(_anatomies) {
+                var contextHeaderParams = {
+                    catalog: context.catalogID,
+                    schema_table: context.schemaName + ":anatomy",
+                    action: logActions.viewerAnatomy
+                };
+                anatomyPath.entity.get(contextHeaderParams).then(function success(_anatomies) {
                     anatomies.push('No Anatomy');
                     var length = _anatomies.length;
                     for (var j = 0; j < length; j++) {

@@ -112,7 +112,8 @@
     })
 
     .constant("logActions", {
-        "recordRead": "record/main", // read the main entity (record)
+        "recordRead": "record/main/load", // read the main entity (record)
+        "recordUpdate": "record/main/update", // read the main entity (record)
         "recordRelatedRead": "record/related", // secondary
         "recordRelatedUpdate": "record/related/update", // secondary
         "recordRelatedAggregate": "record/related/aggregate", // secondary
@@ -150,13 +151,21 @@
         "recordsetFacet": "recordset/main/facet", // recordset main data read on changing facet (recordset)
         "recordsetFacetDetails": "recordset/viewmore", // getting facet details in modal (recordset)
         "recordsetFacetRead": "recordset/facet", // secondary
+        "recordsetFacetInit": "recordset/facet/init", // secondary (getting the rowname of preselected facets)
+        "recordsetFacetHistogram": "recordset/facet/histogram", // secondary (getting the histogrma buckets)
 
         "recordDelete": "delete/record", // delete record (record)
         "recordEditDelete": "delete/recordedit", // delete record (recordedit)
         "recordsetDelete": "delete/recordset", // delete a row (recordset)
-        "recordRelatedDelete": "delete/recordset/related", // delete a row from related entities (record) has referrer
+        "recordRelatedDelete": "delete/record/related", // delete a row from related entities (record) has referrer
 
-        "export": "recordset/export"
+        "recordExport": "export/record",
+        "recordsetExport": "export/recordset",
+
+        "viewerMain": "viewer/main",
+        "viewerAnnotation": "viewer/annotation",
+        "viewerComment": "viewer/comment",
+        "viewerAnatomy": "viewer/anatomy"
 
     })
 

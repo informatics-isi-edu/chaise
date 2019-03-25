@@ -511,6 +511,20 @@
                         }
                     };
 
+                    /**
+                     * Generate the object that we want to be logged alongside the action
+                     * This function does not attach action, after calling this function
+                     * we should attach the action.
+                     * @param  {object} scope the scope object
+                     */
+                    function getDefaultLogInfo(scope) {
+                        var res = scope.facetColumn.sourceReference.defaultLogInfo;
+                        res.referrer = scope.facetColumn.reference.defaultLogInfo;
+                        res.source = scope.facetColumn.dataSource;
+                        res.column = scope.facetColumn.column.name;
+                        return res;
+                    }
+
                     // range is defined by the x values of the bar graph because layout.xaxis.type is `linear` or 'category'
                     function setHistogramRange() {
                         if (isColumnOfType("timestamp")) {
@@ -584,7 +598,9 @@
                             var requestMin = isColumnOfType("timestamp") ? dateTimeToTimestamp(scope.rangeOptions.absMin) : scope.rangeOptions.absMin,
                                 requestMax = isColumnOfType("timestamp") ? dateTimeToTimestamp(scope.rangeOptions.absMax) : scope.rangeOptions.absMax;
 
-                            scope.facetColumn.column.groupAggregate.histogram(numBuckets, requestMin, requestMax).read().then(function (response) {
+                            var facetLog = getDefaultLogInfo(scope);
+                            facetLog.action = logActions.recordsetFacetHistogram;
+                            scope.facetColumn.column.groupAggregate.histogram(numBuckets, requestMin, requestMax).read(facetLog).then(function (response) {
                                 if (scope.facetColumn.sourceReference.uri !== uri) {
                                     // return breaks out of the current callback function
                                     defer.resolve(false);
@@ -642,10 +658,8 @@
                                     agg.maxAgg
                                 ];
 
-                                var facetLog = scope.facetColumn.sourceReference.defaultLogInfo;
-                                facetLog.referrer = scope.facetColumn.reference.defaultLogInfo;
-                                facetLog.source = scope.facetColumn.dataSource;
-                                facetLog.action = logActions.recordsetFacetRead,
+                                var facetLog = getDefaultLogInfo(scope);
+                                facetLog.action = logActions.recordsetFacetRead;
                                 scope.facetColumn.sourceReference.getAggregates(aggregateList, facetLog).then(function(response) {
                                     if (scope.facetColumn.sourceReference.uri !== uri) {
                                         // return false to defer.resolve() in .then() callback
@@ -894,6 +908,8 @@
                     if (scope.facetColumn.hasNullFilter) {
                         scope.facetModel.appliedFilters.push(facetingUtils.getNullFilter(true));
                     }
+                    var facetLog = getDefaultLogInfo(scope);
+                    facetLog.action = logActions.recordsetFacetInit;
                     scope.facetColumn.getChoiceDisplaynames().then(function (filters) {
                         filters.forEach(function (f) {
                             scope.facetModel.appliedFilters.push({
@@ -1091,6 +1107,9 @@
                 var res = scope.facetColumn.sourceReference.defaultLogInfo;
                 res.referrer = scope.facetColumn.reference.defaultLogInfo;
                 res.source = scope.facetColumn.dataSource;
+                if (!scope.facetColumn.isEntityMode) {
+                    res.column = scope.facetColumn.column.name;
+                }
                 return res;
             }
 

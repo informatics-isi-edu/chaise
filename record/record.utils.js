@@ -34,9 +34,10 @@
          */
         function _processRequests(isUpdate) {
             if (!_haveFreeSlot() || $rootScope.pauseRequests) return;
+            isUpdate = (typeof isUpdate === "boolean") ? isUpdate : false;
 
             if ($rootScope.isMainDirty) {
-                readMainEntity().then(function (tuple) {
+                readMainEntity(isUpdate).then(function (tuple) {
                     $rootScope.isMainDirty = false;
                     _processRequests(isUpdate);
                 }).catch(genericErrorCatch);
@@ -89,12 +90,13 @@
 
         /**
          * Read data for the main entity
+         * @param {boolean} isUpdate whether this is update request or load
          * @returns {Promise} It will be resolved with Page object.
          */
-        function readMainEntity() {
+        function readMainEntity(isUpdate) {
             var defer = $q.defer();
-
-            $rootScope.reference.read(1, {action: logActions.recordRead}).then(function (page) {
+            var action = isUpdate ? logActions.recordUpdate : logActions.recordRead;
+            $rootScope.reference.read(1, {action: action}).then(function (page) {
                 $log.info("Page: ", page);
 
                 /*
