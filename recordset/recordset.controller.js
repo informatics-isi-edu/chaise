@@ -4,10 +4,11 @@
     angular.module('chaise.recordset')
 
     // Register the recordset controller
-    .controller('recordsetController', ['context', 'DataUtils', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window', 'messageMap', function(context, DataUtils, recordsetModel, Session, UiUtils, UriUtils, $document, $log, $rootScope, $scope, $timeout, $window, messageMap) {
+    .controller('recordsetController', ['ConfigUtils', 'context', 'DataUtils', 'messageMap', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
+        function(ConfigUtils, context, DataUtils, messageMap, recordsetModel, Session, UiUtils, UriUtils, $document, $log, $rootScope, $scope, $timeout, $window) {
 
         var ctrl = this;
-        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
+        var chaiseConfig = Object.assign({}, ConfigUtils.getConfigJSON());
         $scope.vm = recordsetModel;
 
         recordsetModel.RECORDEDIT_MAX_ROWS = 200;

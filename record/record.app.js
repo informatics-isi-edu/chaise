@@ -10,10 +10,15 @@
         'ui.bootstrap'
     ])
 
-    .run(['ERMrest', function (ERMrest) {
+    .run(['ERMrest', 'ConfigUtils', 'UriUtils', '$window', function (ERMrest, ConfigUtils, UriUtils, $window) {
         ERMrest.onload().then(function () {
-            angular.element(document).ready(function(){
-                angular.bootstrap(document.getElementById("record"), ["chaise.record"]);
+            var urlParts = UriUtils.extractParts($window.location);
+            ERMrest.ermrestFactory.getServer(urlParts.service).catalogs.get(urlParts.catalogId).then(function (response) {
+                ConfigUtils.setConfigJSON(response.chaiseConfig);
+
+                angular.element(document).ready(function(){
+                    angular.bootstrap(document.getElementById("record"), ["chaise.record"]);
+                });
             });
         });
     }]);
@@ -54,19 +59,17 @@
         // tooltip on the element instead, set the `tooltip-append-to-body` attribute
         // to `false` on the element.
         $uibTooltipProvider.options({appendToBody: true});
-        // chaise configurations
-        ConfigUtilsProvider.$get().setConfigJSON();
         $logProvider.debugEnabled(ConfigUtilsProvider.$get().getConfigJSON().debug === true);
     }])
 
-    .run(['AlertsService', 'DataUtils', 'ERMrest', 'FunctionUtils', 'headInjector', '$log', 'MathUtils', 'messageMap', 'recordAppUtils',  '$rootScope', 'Session', '$timeout', 'UiUtils', 'UriUtils', '$window',
-        function runApp(AlertsService, DataUtils, ERMrest, FunctionUtils, headInjector, $log, MathUtils, messageMap, recordAppUtils, $rootScope, Session, $timeout, UiUtils, UriUtils, $window) {
+    .run(['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'FunctionUtils', 'headInjector', 'MathUtils', 'messageMap', 'recordAppUtils', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$timeout', '$window',
+        function runApp(AlertsService, ConfigUtils, DataUtils, ERMrest, FunctionUtils, headInjector, MathUtils, messageMap, recordAppUtils, Session, UiUtils, UriUtils, $log, $rootScope, $timeout, $window) {
 
         var session,
             context = {},
             errorData = {};
 
-        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
+        var chaiseConfig = Object.assign({}, ConfigUtils.getConfigJSON());
         context.catalogID = $window.location.hash.split('/')[0].slice(1);
         context.chaiseBaseURL = $window.location.href.replace($window.location.hash, '');
 

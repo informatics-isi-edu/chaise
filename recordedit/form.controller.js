@@ -3,12 +3,12 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'dataFormats', 'DataUtils', 'ErrorService', 'InputUtils', 'integerLimits', 'logActions', 'maskOptions', 'messageMap', 'modalBox', 'modalUtils', 'recordCreate', 'recordEditAppUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
-        function FormController(AlertsService, dataFormats, DataUtils, ErrorService, InputUtils, integerLimits, logActions, maskOptions, messageMap, modalBox, modalUtils, recordCreate, recordEditAppUtils, recordEditModel, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
+    .controller('FormController', ['AlertsService', 'ConfigUtils', 'dataFormats', 'DataUtils', 'ErrorService', 'InputUtils', 'integerLimits', 'logActions', 'maskOptions', 'messageMap', 'modalBox', 'modalUtils', 'recordCreate', 'recordEditAppUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
+        function FormController(AlertsService, ConfigUtils, dataFormats, DataUtils, ErrorService, InputUtils, integerLimits, logActions, maskOptions, messageMap, modalBox, modalUtils, recordCreate, recordEditAppUtils, recordEditModel, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
         var context = $rootScope.context;
         var mainBodyEl;
-        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
+        var chaiseConfig = Object.assign({}, ConfigUtils.getConfigJSON());
         vm.recordEditModel = recordEditModel;
         vm.dataFormats = dataFormats;
         vm.editMode = (context.mode == context.modes.EDIT ? true : false);

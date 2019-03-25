@@ -9,10 +9,15 @@
         'ui.bootstrap'
     ])
 
-    .run(['ERMrest', function (ERMrest) {
+    .run(['ERMrest', 'ConfigUtils', 'UriUtils', '$window', function (ERMrest, ConfigUtils, UriUtils, $window) {
         ERMrest.onload().then(function () {
-            angular.element(document).ready(function(){
-                angular.bootstrap(document.getElementById("recordedit"), ["chaise.recordEdit"]);
+            var urlParts = UriUtils.extractParts($window.location);
+            ERMrest.ermrestFactory.getServer(urlParts.service).catalogs.get(urlParts.catalogId).then(function (response) {
+                ConfigUtils.setConfigJSON(response.chaiseConfig);
+
+                angular.element(document).ready(function(){
+                    angular.bootstrap(document.getElementById("recordedit"), ["chaise.recordEdit"]);
+                });
             });
         });
     }]);
@@ -59,8 +64,6 @@
         // tooltip on the element instead, set the `tooltip-append-to-body` attribute
         // to `false` on the element.
         $uibTooltipProvider.options({appendToBody: true});
-        // chaise configurations
-        ConfigUtilsProvider.$get().setConfigJSON();
         //  Enable log system, if in debug mode
         $logProvider.debugEnabled(ConfigUtilsProvider.$get().getConfigJSON().debug === true);
     }])
@@ -89,13 +92,13 @@
         }]);
     })
 
-    .run(['AlertsService', 'dataFormats', 'DataUtils', 'ERMrest', 'ErrorService', 'FunctionUtils', 'headInjector', 'InputUtils', 'logActions', 'MathUtils', 'recordEditAppUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', 'messageMap', 'Errors',
-        function runRecordEditApp(AlertsService, dataFormats, DataUtils, ERMrest, ErrorService, FunctionUtils, headInjector, InputUtils, logActions, MathUtils, recordEditAppUtils, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies, messageMap, Errors) {
+    .run(['AlertsService', 'ConfigUtils', 'dataFormats', 'DataUtils', 'ERMrest', 'Errors', 'ErrorService', 'FunctionUtils', 'headInjector', 'InputUtils', 'logActions', 'MathUtils', 'messageMap', 'recordEditAppUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$log', '$rootScope', '$window',
+        function runRecordEditApp(AlertsService, ConfigUtils, dataFormats, DataUtils, ERMrest, Errors, ErrorService, FunctionUtils, headInjector, InputUtils, logActions, MathUtils, messageMap, recordEditAppUtils, recordEditModel, Session, UiUtils, UriUtils, $cookies, $log, $rootScope, $window) {
 
         var session,
             context = {};
 
-        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
+        var chaiseConfig = Object.assign({}, ConfigUtils.getConfigJSON());
         context.catalogID = $window.location.hash.split('/')[0].slice(1);
         context.chaiseBaseURL = $window.location.href.replace($window.location.hash, '');
 

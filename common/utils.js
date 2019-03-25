@@ -172,10 +172,25 @@
         notNull: "<i>All Records With Value</i>"
     })
 
-    .factory('UriUtils', ['$injector', '$rootScope', '$window', 'appContextMapping', 'appTagMapping', 'ContextUtils', 'Errors', 'messageMap', 'parsedFilter',
-        function($injector, $rootScope, $window, appContextMapping, appTagMapping, ContextUtils, Errors, messageMap, ParsedFilter) {
+    .factory('UriUtils', ['appContextMapping', 'appTagMapping', 'ContextUtils', 'defaultChaiseConfig', 'Errors', 'messageMap', 'parsedFilter', '$injector', '$rootScope', '$window',
+        function(appContextMapping, appTagMapping, ContextUtils, defaultChaiseConfig, Errors, messageMap, ParsedFilter, $injector, $rootScope, $window) {
         var chaiseBaseURL;
-        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
+        var chaiseConfig = Object.assign({}, $window.dcctx.chaiseConfig);
+
+        /**
+         * Simple function meant to get the parts from the uri that are necessary for getting the server and catalog instance
+         * only need service (domain + '/ermrest') and catalogId
+         * NOTE: chaise-config has not been set up yet so we are using the defaultchaise config directly
+         */
+        function extractParts (location) {
+            // use default ermrest location
+            // grab the unversioned catalog id
+            return {
+                service: defaultChaiseConfig.ermrestLocation,
+                catalogId: location.hash.split('/')[0].slice(1).split('@')[0]
+            }
+        }
+
         /**
          * @function
          * @param {Object} location - location Object from the $window resource
@@ -183,7 +198,6 @@
          * Converts a chaise URI to an ermrest resource URI object.
          * @throws {MalformedUriError} if table or catalog data are missing.
          */
-
         function chaiseURItoErmrestURI(location) {
             var tableMissing = messageMap.tableMissing,
                 catalogMissing = messageMap.catalogMissing;
@@ -768,19 +782,20 @@
         }
 
         return {
-            queryStringToJSON: queryStringToJSON,
-            appTagToURL: appTagToURL,
-            chaiseURItoErmrestURI: chaiseURItoErmrestURI,
-            fixedEncodeURIComponent: fixedEncodeURIComponent,
-            parseURLFragment: parseURLFragment,
-            setOrigin: setOrigin,
-            parsedFilterToERMrestFilter: parsedFilterToERMrestFilter,
-            setLocationChangeHandling: setLocationChangeHandling,
-            isBrowserIE: isBrowserIE,
-            getQueryParams: getQueryParams,
             appNamefromUrlPathname: appNamefromUrlPathname,
+            appTagToURL: appTagToURL,
+            chaiseDeploymentPath: chaiseDeploymentPath,
+            chaiseURItoErmrestURI: chaiseURItoErmrestURI,
             createRedirectLinkFromPath: createRedirectLinkFromPath,
-            chaiseDeploymentPath: chaiseDeploymentPath
+            extractParts: extractParts,
+            fixedEncodeURIComponent: fixedEncodeURIComponent,
+            getQueryParams: getQueryParams,
+            isBrowserIE: isBrowserIE,
+            parsedFilterToERMrestFilter: parsedFilterToERMrestFilter,
+            parseURLFragment: parseURLFragment,
+            queryStringToJSON: queryStringToJSON,
+            setLocationChangeHandling: setLocationChangeHandling,
+            setOrigin: setOrigin
         }
     }])
 
@@ -1299,49 +1314,87 @@
 
     .factory("ConfigUtils", ['$rootScope', '$window', 'defaultChaiseConfig', function($rootScope, $window, defaultConfig) {
         function getConfigJSON() {
-            return $rootScope.chaiseConfig;
+            return $window.dcctx.chaiseConfig;
         };
 
-        function setConfigJSON(catalog) {
-            console.log(catalog);
-            $rootScope.chaiseConfig = {};
-            if (typeof chaiseConfig != 'undefined') $rootScope.chaiseConfig = Object.assign({}, chaiseConfig);
+        /**
+         * Chaise Config will be applied in the following order:
+         *   1. Define chaise config defaults
+         *   2. Look at chaise-config.js
+         *     a. Apply base level configuration properties
+         *     b. Apply config-rules in order depending on matching host definitions
+         *   3. Look at chaise-config returned from the catalog
+         *     a. Apply base level configuration properties
+         *     b. Apply config-rules in order depending on matching host definitions
+         *
+         * @params {Object} catalogAnnotation - the chaise-config object returned from the 2019 chaise-config annotation tag attached to the catalog object
+         *
+         */
+        function setConfigJSON(catalogAnnotation) {
+            var cc = {};
+            // check to see if global chaise-config (chaise-config.js) is available
+            if (typeof chaiseConfig != 'undefined') cc = Object.assign({}, chaiseConfig);
 
+            // Loop over default properties (global chaise config (chaise-config.js) may not be defined)
+            // Handles case 1 and 2a
             for (var property in defaultConfig) {
-                if (defaultConfig.hasOwnProperty(property)) {
-                    if (typeof chaiseConfig != 'undefined' && typeof chaiseConfig[property] != 'undefined') {
-                        $rootScope.chaiseConfig[property] = chaiseConfig[property];
-                    } else {
-                        // property doesn't exist
-                        $rootScope.chaiseConfig[property] = defaultConfig[property];
-                    }
+                // use chaise-config.js property instead of default if defined
+                if (typeof chaiseConfig != 'undefined' && typeof chaiseConfig[property] != 'undefined') {
+                    cc[property] = chaiseConfig[property];
+                } else {
+                    // property doesn't exist
+                    cc[property] = defaultConfig[property];
                 }
             }
 
-            if (Array.isArray($rootScope.chaiseConfig.configRules)) {
-                // loop through each config rule and look for a set that matches the current host
-                $rootScope.chaiseConfig.configRules.forEach(function (ruleset) {
-                    // we have 1 host
-                    if (typeof ruleset.host == "string") {
-                        var arr = [];
-                        arr.push(ruleset.host);
-                        ruleset.host = arr;
-                    }
-                    if (Array.isArray(ruleset.host)) {
-                        for (var i=0; i<ruleset.host.length; i++) {
-                            // if there is a config rule for the current host, overwrite the properties defined
-                            // $window.location.host refers to the hostname and port (www.something.com:0000)
-                            // $window.location.hostname refers to just the hostname (www.something.com)
-                            if (ruleset.host[i] === $window.location.hostname && (ruleset.config && typeof ruleset.config === "object")) {
-                                for (var property in ruleset.config) {
-                                    $rootScope.chaiseConfig[property] = ruleset.config[property];
+            /**
+             * NOTE: defined within function scope so cc is available in the function
+             * @params {Object} config - chaise config with configRules defined
+             */
+            function applyHostConfigRules(config) {
+                if (Array.isArray(config.configRules)) {
+                    // loop through each config rule and look for a set that matches the current host
+                    config.configRules.forEach(function (ruleset) {
+                        // we have 1 host
+                        if (typeof ruleset.host == "string") {
+                            var arr = [];
+                            arr.push(ruleset.host);
+                            ruleset.host = arr;
+                        }
+                        if (Array.isArray(ruleset.host)) {
+                            for (var i=0; i<ruleset.host.length; i++) {
+                                // if there is a config rule for the current host, overwrite the properties defined
+                                // $window.location.host refers to the hostname and port (www.something.com:0000)
+                                // $window.location.hostname refers to just the hostname (www.something.com)
+                                if (ruleset.host[i] === $window.location.hostname && (ruleset.config && typeof ruleset.config === "object")) {
+                                    for (var property in ruleset.config) {
+                                        cc[property] = ruleset.config[property];
+                                    }
+                                    break;
                                 }
-                                break;
                             }
                         }
-                    }
-                });
+                    });
+                }
             }
+
+            // case 2b
+            // cc contains properties for default config and chaise-config.js configuration
+            applyHostConfigRules(cc);
+
+
+            // apply catalog annotation configuration on top of the rest of the chaise config properties
+            if (typeof catalogAnnotation == "object") {
+                // case 3a
+                for (var property in catalogAnnotation) {
+                    cc[property] = catalogAnnotation[property];
+                }
+
+                // case 3b
+                applyHostConfigRules(catalogAnnotation);
+            }
+
+            $window.dcctx.chaiseConfig = cc;
         }
 
         return {
@@ -1535,8 +1588,9 @@
       }
      }])
 
-    .service('headInjector', ['$window', '$rootScope', 'MathUtils',  function($window, $rootScope, MathUtils) {
-        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
+    .service('headInjector', ['ConfigUtils', 'MathUtils', '$window', '$rootScope', function(ConfigUtils, MathUtils, $window, $rootScope) {
+        var chaiseConfig = Object.assign({}, ConfigUtils.getConfigJSON());
+
         function addCustomCSS() {
           if (chaiseConfig['customCSS'] !== undefined) {
             var fileref = document.createElement("link");

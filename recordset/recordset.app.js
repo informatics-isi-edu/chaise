@@ -11,10 +11,11 @@
         'ui.bootstrap'
     ])
 
-    .run(['ERMrest', function (ERMrest) {
+    .run(['ERMrest', 'ConfigUtils', 'UriUtils', '$window', function (ERMrest, ConfigUtils, UriUtils, $window) {
         ERMrest.onload().then(function () {
-            ERMrest.ermrestFactory.getServer('https://dev.isrd.isi.edu/ermrest').catalogs.get("1").then(function (response) {
-                catalog = response;
+            var urlParts = UriUtils.extractParts($window.location);
+            ERMrest.ermrestFactory.getServer(urlParts.service).catalogs.get(urlParts.catalogId).then(function (response) {
+                ConfigUtils.setConfigJSON(response.chaiseConfig);
 
                 angular.element(document).ready(function(){
                     angular.bootstrap(document.getElementById("recordset"), ["chaise.recordset"]);
@@ -65,8 +66,6 @@
         // tooltip on the element instead, set the `tooltip-append-to-body` attribute
         // to `false` on the element.
         $uibTooltipProvider.options({appendToBody: true});
-        // chaise configurations
-        ConfigUtilsProvider.$get().setConfigJSON(catalog);
         //  Enable log system, if in debug mode
         $logProvider.debugEnabled(ConfigUtilsProvider.$get().getConfigJSON().debug === true);
     }])
@@ -91,8 +90,8 @@
     })
 
     // Register work to be performed after loading all modules
-    .run(['AlertsService', 'context', 'DataUtils', 'ERMrest', 'FunctionUtils', 'headInjector', 'MathUtils', 'messageMap', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', 'modalBox', 'logActions',
-        function(AlertsService, context, DataUtils, ERMrest, FunctionUtils, headInjector, MathUtils, messageMap, recordsetModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, modalBox, logActions) {
+    .run(['AlertsService', 'ConfigUtils', 'context', 'DataUtils', 'ERMrest', 'FunctionUtils', 'headInjector', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
+        function(AlertsService, ConfigUtils, context, DataUtils, ERMrest, FunctionUtils, headInjector, logActions, MathUtils, messageMap, modalBox, recordsetModel, Session, UiUtils, UriUtils, $log, $rootScope, $window) {
         try {
             var session;
 
@@ -100,7 +99,7 @@
 
             UriUtils.setOrigin();
 
-            var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
+            var chaiseConfig = Object.assign({}, ConfigUtils.getConfigJSON());
             context.catalogID = $window.location.hash.split('/')[0].slice(1);
             context.chaiseBaseURL = $window.location.href.replace($window.location.hash, '');
             var modifyEnabled = chaiseConfig.editRecord === false ? false : true;

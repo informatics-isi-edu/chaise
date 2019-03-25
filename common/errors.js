@@ -137,18 +137,18 @@
         /**
          * CustomError - throw custom error from Apps outside Chaise.
          *
-         * @param  {string} header              Header of the Error Modal         * 
+         * @param  {string} header              Header of the Error Modal         *
          * @param  {string} message             Error message to display in Modal body. Can include HTML tags.
          * @param  {string} redirectUrl         URL to redirect to on clicking ok.
          * @param  {string} clickActionMessage  Message to display for the OK button. Can include HTML tags.
          * @param  {string} clickOkToDismiss    Set true to dismiss the error modal on clicking the OK button
          * @return {object}                     Error Object
          */
-        function CustomError(header, message, redirectUrl, clickActionMessage, clickOkToDismiss){  
+        function CustomError(header, message, redirectUrl, clickActionMessage, clickOkToDismiss){
             /**
              * @type {string}
              * @desc Text to display in the Error Modal Header
-             */          
+             */
             this.status = header;
 
             /**
@@ -194,10 +194,10 @@
     }])
 
     // Factory for each error type
-    .factory('ErrorService', ['AlertsService', 'errorNames', 'Session', '$log', '$rootScope', '$window', 'errorMessages', 'Errors', 'DataUtils', 'UriUtils', 'modalUtils', '$document',
-          function ErrorService(AlertsService, errorNames, Session, $log, $rootScope, $window, errorMessages, Errors, DataUtils, UriUtils, modalUtils, $document) {
+    .factory('ErrorService', ['AlertsService', 'ConfigUtils', 'DataUtils', 'errorMessages', 'errorNames', 'Errors', 'modalUtils', 'Session', 'UriUtils', '$document', '$log', '$rootScope', '$window',
+        function ErrorService(AlertsService, ConfigUtils, DataUtils, errorMessages, errorNames, Errors, modalUtils, Session, UriUtils, $document, $log, $rootScope, $window) {
+        var chaiseConfig = Object.assign({}, ConfigUtils.getConfigJSON());
 
-        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
         var reloadCb = function() {
             window.location.reload();
         };

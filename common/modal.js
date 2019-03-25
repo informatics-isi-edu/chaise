@@ -169,9 +169,8 @@
      *  - context {String} - the current context that the directive fetches data for
      *  - selectMode {String} - the select mode the modal uses
      */
-    .controller('SearchPopupController',
-                ['$scope', '$rootScope', '$uibModalInstance', 'DataUtils', 'params', 'Session', 'modalBox', 'logActions', '$timeout',
-                function SearchPopupController($scope, $rootScope, $uibModalInstance, DataUtils, params, Session, modalBox, logActions, $timeout) {
+    .controller('SearchPopupController', ['ConfigUtils', 'DataUtils', 'params', 'Session', 'modalBox', 'logActions', '$rootScope', '$timeout', '$uibModalInstance',
+        function SearchPopupController(ConfigUtils, DataUtils, params, Session, modalBox, logActions, $rootScope, $timeout, $uibModalInstance) {
         var vm = this;
 
         vm.params = params;
@@ -182,7 +181,7 @@
 
         vm.hasLoaded = false;
 
-        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
+        var chaiseConfig = Object.assign({}, ConfigUtils.getConfigJSON());
         var reference = vm.reference = params.reference;
         var limit = (!angular.isUndefined(reference) && !angular.isUndefined(reference.display) && reference.display.defaultPageSize) ? reference.display.defaultPageSize : 25;
         var comment = (typeof params.comment === "string") ? params.comment: reference.table.comment;
