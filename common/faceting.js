@@ -519,6 +519,14 @@
                      */
                     function getDefaultLogInfo(scope) {
                         var res = scope.facetColumn.sourceReference.defaultLogInfo;
+
+                        // remove unnecessary attributes
+                        // these attributes exist on the referrer as well
+                        delete res.facet;
+                        delete res.cfacet;
+                        delete res.cfacet_str;
+                        delete res.cfacet_path;
+
                         res.referrer = scope.facetColumn.reference.defaultLogInfo;
                         res.source = scope.facetColumn.dataSource;
                         res.column = scope.facetColumn.column.name;
@@ -1110,6 +1118,13 @@
                 if (!scope.facetColumn.isEntityMode) {
                     res.column = scope.facetColumn.column.name;
                 }
+
+                // remove unnecessary attributes
+                // these attributes exist on the referrer as well
+                delete res.facet;
+                delete res.cfacet;
+                delete res.cfacet_str;
+                delete res.cfacet_path;
                 return res;
             }
 

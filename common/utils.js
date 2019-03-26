@@ -112,7 +112,7 @@
     })
 
     .constant("logActions", {
-        "recordRead": "record/main/load", // read the main entity (record)
+        "recordRead": "record/main", // read the main entity (record)
         "recordUpdate": "record/main/update", // read the main entity (record)
         "recordRelatedRead": "record/related", // secondary
         "recordRelatedUpdate": "record/related/update", // secondary
