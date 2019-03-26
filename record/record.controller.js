@@ -3,8 +3,8 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordAppUtils', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
-        function RecordController(AlertsService, DataUtils, ErrorService, logActions, MathUtils, messageMap, modalBox, modalUtils, recordAppUtils, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
+    .controller('RecordController', ['AlertsService', 'DataUtils', 'ERMrest', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordAppUtils', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
+        function RecordController(AlertsService, DataUtils, ERMrest, ErrorService, logActions, MathUtils, messageMap, modalBox, modalUtils, recordAppUtils, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
 
         var mainContainerEl = angular.element(document.getElementsByClassName('main-container')[0]);
@@ -119,83 +119,36 @@
             });
         };
 
-        /**
-         * The following cases need to be handled for the resolverImplicitCatalog value:
-         *  - if null:                                      use current chaise path
-         *  - if false:                                     /id/currCatalog/RID
-         *  - if undefined:                                 same as false
-         *  - if resolverImplicitCatalog == currCatalog:    /id/RID
-         *  - if resolverImplicitCatalog != currCatalog:    /id/currCatalog/RID
-         **/
-        function resolveLivePermalink(tuple) {
-            var resolverId = chaiseConfig.resolverImplicitCatalog;
-            var currCatalog = $rootScope.reference.location.catalogId;
-
-            // null or no RID
-            if (resolverId === null || !tuple.data || !tuple.data.RID) {
-                // location.catalog will be in the form of `<id>` or `<id>@<version>`
-                return $window.location.href.replace('#'+$rootScope.reference.location.catalog, '#'+$rootScope.reference.location.catalogId);
-            }
-
-            // if it's a number (isNaN tries to parse to integer before checking)
-            if (!isNaN(resolverId)) {
-                var catalog = (resolverId != currCatalog) ? currCatalog + "/" : "";
-                return $window.location.origin + "/id/" + catalog + tuple.data.RID;
-            }
-
-            // if resolverId is false or undefined OR any other values that are not allowed use the default
-            // default is to show the fully qualified resolveable link for permalink
-            return $window.location.origin + "/id/" + currCatalog + "/" + tuple.data.RID;
-        }
-
-        // NOTE: the current assumption is that url is versioned
-        function resolveVersionedPermalink(tuple) {
-            var resolverId = chaiseConfig.resolverImplicitCatalog;
-            var currCatalog = $rootScope.reference.location.catalogId;
-
-            // null or no RID
-            if (resolverId === null || !tuple.data || !tuple.data.RID) {
-                return $window.location.href;
-            }
-
-            // if it's a number (isNaN tries to parse to integer before checking)
-            if (!isNaN(resolverId)) {
-                var catalog = (resolverId != currCatalog) ? currCatalog + "/" : "";
-                return $window.location.origin + "/id/" + catalog + tuple.data.RID + '@' + $rootScope.reference.location.version;
-            }
-
-            // if resolverId is false or undefined OR any other values that are not allowed use the default
-            // default is to shwo the fully qualified resolveable link for permalink
-            return $window.location.origin + "/id/" + currCatalog + "/" + tuple.data.RID + '@' + $rootScope.reference.location.version;
-        }
-
         vm.sharePopup = function() {
             var tuple = $rootScope.tuple;
-
-            var permalink = resolveLivePermalink(tuple);
+            var ref = $rootScope.reference;
+            var refTable = ref.table;
 
             var params = {
                 citation: tuple.citation,
-                permalink: permalink,
-                displayname: $rootScope.reference.table.name+'_'+tuple.uniqueId
+                displayname: refTable.name+'_'+tuple.uniqueId
             }
 
-            var resolverId = chaiseConfig.resolverImplicitCatalog;
-            if ($rootScope.reference.location.version) {
-                params.versionLink = resolveVersionedPermalink(tuple);
-                params.versionDateRelative = UiUtils.humanizeTimestamp($rootScope.reference.location.versionAsMillis);
-                params.versionDate = UiUtils.versionDate($rootScope.reference.location.versionAsMillis);
-            }
+            var versionString = "@" + (ref.location.version || refTable.schema.catalog.snaptime);
+            params.permalink = UriUtils.resolvePermalink(tuple, ref);
+            params.versionLink = UriUtils.resolvePermalink(tuple, ref, versionString);
+            params.versionDateRelative = UiUtils.humanizeTimestamp(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
+            params.versionDate = UiUtils.versionDate(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
 
-            modalUtils.showModal({
-                templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/shareCitation.modal.html",
-                controller: "ShareCitationController",
-                windowClass: "chaise-share-citation",
-                controllerAs: "ctrl",
-                resolve: {
-                    params: params
-                }
-            }, false, false, false); // not defining any extra callbacks
+            refTable.schema.catalog.currentSnaptime().then(function (snaptime) {
+                // if current fetched snpatime doesn't match old snaptime, show a warning
+                params.showVersionWarning = (snaptime !== refTable.schema.catalog.snaptime);
+            }).finally(function() {
+                modalUtils.showModal({
+                    templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/shareCitation.modal.html",
+                    controller: "ShareCitationController",
+                    windowClass: "chaise-share-citation",
+                    controllerAs: "ctrl",
+                    resolve: {
+                        params: params
+                    }
+                }, false, false, false); // not defining any extra callbacks
+            });
         };
 
         vm.toRecordSet = function(ref) {

@@ -74,9 +74,10 @@
             link: function (scope, elem, attr) {
                 scope.closeAlert = function(alert) {
                     AlertsService.deleteAlert(alert);
-                };
+                }
+
                 scope.login = function() {
-                  Session.loginInAPopUp();
+                    Session.loginInAPopUp();
                 }
             }
         };
