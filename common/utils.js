@@ -785,7 +785,7 @@
             // null or no RID
             if (resolverId === null || !tuple.data || !tuple.data.RID) {
                 // location.catalog will be in the form of `<id>` or `<id>@<version>`
-                return $window.location.href.replace('#' + reference.location.catalog, '#' + curreCatalog + (version ? version : ""));
+                return $window.location.href.replace('#' + reference.location.catalog, '#' + currCatalog + (version ? version : ""));
             }
 
             // if it's a number (isNaN tries to parse to integer before checking)
