@@ -120,7 +120,8 @@
             throw error;
         }
 
-        var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
+        var res = UriUtils.chaiseURItoErmrestURI($window.location);
+        var ermrestUri = res.ermrestUri, pcid = res.pcid, ppid = res.ppid;
 
         $rootScope.context = context;
 
@@ -196,9 +197,11 @@
                 $log.info("Reference: ", $rootScope.reference);
 
 
-                // create the extra information that we want to log in ermrest
+                // create the extra information that we want to log in ermrest (with the submission request)
                 // NOTE currently we're only setting the action, we might need to add extra information here
                 var logObj = {action: logActions.update};
+                if (pcid) logObj.pcid = pcid;
+                if (ppid) logObj.ppid = ppid;
                 if (context.mode == context.modes.COPY) {
                     logObj = {action: logActions.copy};
                 } else if (context.mode == context.modes.CREATE){

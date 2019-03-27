@@ -185,21 +185,22 @@
         function($injector, $rootScope, $window, appContextMapping, appTagMapping, ContextUtils, Errors, messageMap, ParsedFilter) {
         var chaiseBaseURL;
         var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
+
         /**
          * @function
          * @param {Object} location - location Object from the $window resource
          * @desc
          * Converts a chaise URI to an ermrest resource URI object.
+         * @returns {Object} an object that has 'ermrestURI', `ppid`, and 'pcid'
          * @throws {MalformedUriError} if table or catalog data are missing.
          */
-
         function chaiseURItoErmrestURI(location) {
             var tableMissing = messageMap.tableMissing,
                 catalogMissing = messageMap.catalogMissing;
 
             var hash = location.hash,
                 ermrestUri = {},
-                catalogId;
+                catalogId, ppid, pcid;
 
             // remove query params other than limit
             if (hash.indexOf('?') !== -1) {
@@ -210,6 +211,12 @@
                 for (i = 0; i < queries.length; i++) { // add back only the valid queries
                     if (queries[i].indexOf("limit=") === 0) {
                         acceptedQueries.push(queries[i]);
+                    }
+                    if (queries[i].indexOf("pcid=") === 0) {
+                        pcid = queries[i].split("=")[1];
+                    }
+                    if (queries[i].indexOf("ppid=") === 0) {
+                        ppid = queries[i].split("=")[1];
                     }
                 }
                 if (acceptedQueries.length != 0) {
@@ -302,7 +309,7 @@
 
             var baseUri = chaiseConfig.ermrestLocation;
             var path = '/catalog/' + catalogId + '/entity' + hash;
-            return baseUri + path;
+            return {ermrestUri: baseUri + path, ppid: ppid, pcid: pcid};
         }
 
         /**
@@ -336,10 +343,20 @@
             }
 
             var url = chaiseBaseURL + appPath + "/#" + location.catalog + "/" + location.path;
-            if (location.queryParamsString && (context.indexOf("compact") === 0)) {
+            var pcontext = [];
+            if ($rootScope.context) {
+                if ($rootScope.context.appName) {
+                    pcontext.push("pcid=" + $rootScope.context.appName);
+                }
+                if ($rootScope.context.pageId) {
+                    pcontext.push("ppid=" + $rootScope.context.pageId);
+                }
+            }
+            // TODO we might want to allow only certian query parameters
+            if (location.queryParamsString) {
                 url = url + "?" + location.queryParamsString;
             }
-            return url;
+            return url + (location.queryParamsString ? "&" : "?") + pcontext.join("&");
         }
 
 

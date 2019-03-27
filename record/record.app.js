@@ -80,7 +80,8 @@
         $rootScope.modifyRecord = chaiseConfig.editRecord === false ? false : true;
         $rootScope.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
 
-        var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
+        var res = UriUtils.chaiseURItoErmrestURI($window.location);
+        var ermrestUri = res.ermrestUri, pcid = res.pcid, ppid = res.ppid;
 
         $rootScope.context = context;
 
@@ -110,7 +111,10 @@
                 $rootScope.reference.session = session;
                 $log.info("Reference: ", $rootScope.reference);
 
-                return recordAppUtils.readMainEntity();
+                var logObj = {};
+                if (pcid) logObj.pcid = pcid;
+                if (ppid) logObj.ppid = ppid;
+                return recordAppUtils.readMainEntity(false, logObj);
             }).then(function (page) {
                 var tuple = page.tuples[0];
 
@@ -180,7 +184,7 @@
 
                 $rootScope.loading = related.length > 0;
                 $timeout(function () {
-                    recordAppUtils.updateRecordPage();
+                    recordAppUtils.updateRecordPage(false);
                 });
 
             }).catch(recordAppUtils.genericErrorCatch);

@@ -31,6 +31,7 @@
          * Flow-control logic for record app.
          * This will go through different sections of the page and will update them
          * if it's needed to.
+         * @param  {Boolean} isUpdate indicates that the function has been triggered for update and not load.
          */
         function _processRequests(isUpdate) {
             if (!_haveFreeSlot() || $rootScope.pauseRequests) return;
@@ -91,12 +92,15 @@
         /**
          * Read data for the main entity
          * @param {boolean} isUpdate whether this is update request or load
+         * @param  {Object} the extra information that we want to log with the main request
          * @returns {Promise} It will be resolved with Page object.
          */
-        function readMainEntity(isUpdate) {
+        function readMainEntity(isUpdate, logObject) {
             var defer = $q.defer();
-            var action = isUpdate ? logActions.recordUpdate : logActions.recordRead;
-            $rootScope.reference.read(1, {action: action}).then(function (page) {
+
+            logObject = logObject || {};
+            logObject.action = isUpdate ? logActions.recordUpdate : logActions.recordRead;
+            $rootScope.reference.read(1, logObject).then(function (page) {
                 $log.info("Page: ", page);
 
                 /*

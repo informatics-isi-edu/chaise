@@ -120,7 +120,8 @@
 
             context.pageId = MathUtils.uuid();
 
-            var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
+            var res = UriUtils.chaiseURItoErmrestURI($window.location);
+            var ermrestUri = res.ermrestUri, pcid = res.pcid, ppid = res.ppid;
 
 
             FunctionUtils.registerErmrestCallbacks();
@@ -170,7 +171,10 @@
 
                     recordsetModel.search = recordsetModel.reference.location.searchTerm;
 
+                    // create log object that will be used for the first request
                     recordsetModel.logObject = {action: logActions.recordsetLoad};
+                    if (pcid) recordsetModel.logObject.pcid = pcid;
+                    if (ppid) recordsetModel.logObject.ppid = ppid;
 
                     recordsetModel.readyToInitialize = true;
                  }).catch(function genericCatch(exception) {
