@@ -40,6 +40,9 @@ The following are the default attributes that you can find on all the requests:
 The following are the optional attributes that you might find on requests:
 - `facet`: If url contains filter, this attributes gives you the [facet](https://github.com/informatics-isi-edu/ermrestjs/wiki/Facets-JSON-Structure) equivalent of that filter.
 - `filter`: If we couldn't represent the given filter in terms of facet. This will be just a simple string.
+- `cfacet`: If url contains custom-facets (`*::cfacets::`), this attribute will be equal to one. In this case one of the following attributes will be available:
+  - `cfacet_str`: the displayname of custom-facet (if provided in url).
+  - `cfacet_path`: the ERMrest path that was sent with the custom-facet.
 - `page_size`: The number of entities that we requested.
 - `referrer`: It's an object that has `schema_table` and `facet` (`filter`) as its attributes. This attribute is available on request that needs to capture their parent entity (for example related entities will have the main entity as referrer).
 - `source`: The source path of facet. You will find this attribute in the requests that belong to a facet.
@@ -53,7 +56,7 @@ The table below summarizes all the requests that we currently are logging in cha
 |-----------------------------|------------------------------------------------|-----------------------------------------|------------------|-------------------------|
 | chaise-wide                 | get catalog information                        | model/catalog                           |                  |                         |
 | chaise-wide                 | get catalog schemas information                | model/schema                            |                  |                         |
-| record                      | load main entity                               | record/main/load                        |                  |                         |
+| record                      | load main entity                               | record/main                             |                  |                         |
 |                             | update main entity                             | record/main/update                      |                  |                         |
 |                             | load aggregates in main entity                 | record/aggregate                        |                  |                         |
 |                             | update aggregates in main entity               | record/aggregate/update                 |                  |                         |
@@ -140,6 +143,7 @@ The object that we want to log might be lengthy so we should truncate this objec
 - `column` has been added to requests for getting a scalar facet data.
 -  If there are preselected facets, in entity mode we have to get the row-name corresponding to the selected value. Customized action (`recordset/facet/init`) has been added for this request.
 - Added proper action `recordset/facet/histogram` to the request for getting buckets of a range picker facet.
+- Added `cfacet`, `cfacet_str`, and `cfacet_path`.
 
 #### March 8, 2019
 
