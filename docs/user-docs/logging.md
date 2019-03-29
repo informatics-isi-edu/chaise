@@ -138,6 +138,10 @@ The object that we want to log might be lengthy so we should truncate this objec
 
 ###### Added
 - Added proper `dcctx` logging to viewer app.
+- `ppid` and `pcid` has been added to the main request of each app which shows the parent `pid` and `cid`. These requests are:
+  - recordset: First read of the main entity.
+  - record: First read of the main entity.
+  - recordedit: The create/edit request (the request generated when user clicks on submit).
 - New actions have been attached to schema (`"model/schema"`) and catalog (`"model/catalog"`) requests.
 - `catalog` has been added to all the requests.
 - `column` has been added to requests for getting a scalar facet data.
