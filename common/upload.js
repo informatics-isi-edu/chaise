@@ -105,7 +105,7 @@
                 If the file was marked to be skipped, the upload job is marked as complete (and never created)
 
             5.  StartUpload functions calls the start function in hatrac.js for the hatrac hatracObj for all files.
-                It keeps track of the upload progress for each file and once all are done it calls completeUpload
+                It keeps track of the upload progress for each file and once all are done it calls doQueuedJobCompletion
 
             6.  CompleteUpload calls hatrac.js to sent the upload job closure call to Ermrest for all files.
                 It keeps track of the completed jobs progress for each file and once all are done it sets the url in the row
@@ -157,7 +157,11 @@
             vm.isCreateUploadJob = false;
             vm.isFileExists = false;
 
+            // used for uploading files one by one
             vm.queue = [];
+
+            // used for finializing the upload jobs one by one
+            vm.jobCompletionQueue = [];
 
             vm.aborted = false;
 
@@ -217,15 +221,9 @@
                 vm.isUpload = false;
                 vm.rows.forEach(function(row) {
                     row.forEach(function(item) {
-                        if (item.skipUploadJob) {
-                            item.hatracObj.completeUpload().then(
-                                item.onCompleteUploadJob.bind(item),
-                                onError);
-                        } else {
-                            item.hatracObj.createUploadJob().then(
+                        item.hatracObj.createUploadJob().then(
                                 item.onJobCreated.bind(item),
-                                onError);
-                        }
+                        onError);
                     });
                 });
             };
@@ -275,19 +273,17 @@
                             item.onProgressChanged.bind(item));
             };
 
-            // This function completes upload job in hatrac.js for all files
-            var completeUpload = function() {
+            // Complete upload jobs one by one
+            var doQueuedJobCompletion = function() {
 
                 if (vm.erred || vm.aborted) return;
 
                 vm.title = "Finalizing Upload";
-                vm.rows.forEach(function(row) {
-                    row.forEach(function(item) {
-                        item.hatracObj.completeUpload().then(
-                            item.onCompleteUploadJob.bind(item),
-                            onError);
-                    });
-                });
+                var item = vm.jobCompletionQueue.shift();
+                if (!item) return;
+                item.hatracObj.completeUpload().then(
+                    item.onCompleteUploadJob.bind(item),
+                    onError);
             };
 
             // This function aborts upload for all files
@@ -435,8 +431,12 @@
                 var progress  = 0;
                 vm.isFileExists = true;
                 vm.isUpload = false;
+                var pendingFileExists = false;
                 vm.rows.forEach(function(row) {
                     row.forEach(function(item) {
+                        if (!item.fileExistsDone) {
+                            pendingFileExists = true;
+                        }
                         progress += item.fileExistsDone ? 1 : 0;
                     });
                 });
@@ -452,7 +452,8 @@
                     }
                 });
 
-                if (vm.fileExistsCount == vm.filesToUploadCt) {
+                // all the file-exists request has been returned
+                if (!pendingFileExists) {
                     createUploadJobs();
                 }
             }
@@ -470,8 +471,12 @@
 
                 // This code updates the main progress bar for job creation progress for all files
                 var progress  = 0;
+                var pendingJobCreation = false;
                 vm.rows.forEach(function(row) {
                     row.forEach(function(item) {
+                        if (!item.jobCreateDone) {
+                            pendingJobCreation = true;
+                        }
                         progress += item.jobCreateDone ? 1 : 0;
                     });
                 });
@@ -487,7 +492,8 @@
                     }
                 });
 
-                if (progress == vm.filesToUploadCt) {
+                // all the upload jobs has been created
+                if (!pendingJobCreation) {
                     startUpload();
                 }
             };
@@ -531,7 +537,7 @@
             };
 
             // This function is called as a success promise callback by startUpload function above for each file
-            // Once all files are uploaded it calls completeUpload
+            // Once all files are uploaded it calls doQueuedJobCompletion
             uploadFile.prototype.onUploadCompleted = function(url) {
 
                 if (vm.erred || vm.aborted) return;
@@ -540,19 +546,33 @@
                 this.progressPercent = 100;
                 if (!this.uploadCompleted) {
                     this.uploadCompleted = true;
-                    vm.numUploadsCompleted++;
+                    // find if there are any job pending
+                    var uploadPending = vm.rows.some(function (row) {
+                        return row.some(function (item) {
+                            return !item.uploadCompleted;
+                        });
+                    });
 
-                    // If all files have been uploaded then call completeUpload
+                    // If all files have been uploaded then call doQueuedJobCompletion
                     // to sent requests to mark the job as done
-                    if (vm.numUploadsCompleted == vm.filesToUploadCt) {
+                    if (!uploadPending) {
                         clearInterval(speedIntervalTimer);
-                        completeUpload();
+
+                        vm.jobCompletionQueue = [];
+                        vm.rows.forEach(function(row) {
+                            row.forEach(function(item) {
+                                vm.jobCompletionQueue.push(item);
+                            });
+                        });
+
+                        doQueuedJobCompletion();
+                        return;
                     }
                 }
                 startQueuedUpload();
             };
 
-            // This function is called as a success promise callback by completeUpload function above for each file
+            // This function is called as a success promise callback by doQueuedJobCompletion function above for each file
             // Once upload jobs are marked as completed it sets the url in the columns for rows
             // And closes the modal
             uploadFile.prototype.onCompleteUploadJob = function(url) {
@@ -565,8 +585,12 @@
 
                 // This code updates the main progress bar for job completion progress for all files
                 var progress  = 0;
+                var pendingJobCompletion = false;
                 vm.rows.forEach(function(row) {
                     row.forEach(function(item) {
+                        if (!item.completeUploadJob) {
+                            pendingJobCompletion = true;
+                        }
                         progress += item.completeUploadJob ? 1 : 0;
                     });
                 });
@@ -582,30 +606,33 @@
                     }
                 });
 
-                // If all files have been uploaded and their completed upload job calls are done
-                if (progress == vm.filesCt) {
-                    var index = 0;
-
-                     // Iterate over all rows that are passed as parameters to the modal controller
-                    params.rows.forEach(function(row) {
-                        var tuple = [];
-                        var rowIndex = 0;
-
-                        // Iterate over each property/column of a row
-                        for (var k in row) {
-
-                            // If the column type is object and has a file property inside it
-                            // then set the url in the corresonding column for the row as its value
-                            var column = reference.columns.find(function(c) { return c.name == k;  });
-                            if (column && row[k] != null && (column.isAsset) && typeof row[k] == 'object' && row[k].file) {
-                                row[k] = vm.rows[index][rowIndex++].versionedUrl;
-                            }
-                        }
-
-                        index++;
-                    });
-                    $uibModalInstance.close();
+                // some job completion requests are still pending
+                if (pendingJobCompletion) {
+                    doQueuedJobCompletion();
+                    return;
                 }
+
+                var index = 0;
+
+                 // Iterate over all rows that are passed as parameters to the modal controller
+                params.rows.forEach(function(row) {
+                    var tuple = [];
+                    var rowIndex = 0;
+
+                    // Iterate over each property/column of a row
+                    for (var k in row) {
+
+                        // If the column type is object and has a file property inside it
+                        // then set the url in the corresonding column for the row as its value
+                        var column = reference.columns.find(function(c) { return c.name == k;  });
+                        if (column && row[k] != null && (column.isAsset) && typeof row[k] == 'object' && row[k].file) {
+                            row[k] = vm.rows[index][rowIndex++].versionedUrl;
+                        }
+                    }
+
+                    index++;
+                });
+                $uibModalInstance.close();
             };
 
             // Iterate over all rows that are passed as parameters to the modal controller
