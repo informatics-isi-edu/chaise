@@ -107,7 +107,8 @@ var testParams = {
            name: "testfile1MB.txt",
            size: "1024000",
            displaySize: "1MB",
-           path: "testfile1MB.txt"
+           path: "testfile1MB.txt",
+           skipDeletion: true
        }, {
            name: "testfile500kb.png",
            size: "512000",
@@ -121,7 +122,7 @@ var testParams = {
            path: "testfile5MB.txt"
        }]
    }, {
-      comment: "uploading existing files in hatrac",
+      comment: "uploader when one file exists in hatrac and the other one is new",
       schema_name: "product-add",
       table_name: "file",
       table_displayname: "file",
@@ -136,7 +137,7 @@ var testParams = {
       inputs: [
           {"fileid": "1", "uri": 0, "timestamp_txt": currentTimestampTime}, // this is a new file
           {"fileid": "2", "uri": 1, "timestamp_txt": currentTimestampTime}, // the uploaded file for this already exists (uploaded in the previou step)
-          {"fileid": "3", "uri": 2, "timestamp_txt": currentTimestampTime} // this form won't be submitted
+          {"fileid": "3", "uri": 1, "timestamp_txt": currentTimestampTime} // this form won't be submitted
       ],
       formsAfterInput: 3,
       result_columns: [
@@ -144,8 +145,7 @@ var testParams = {
       ],
       results: [
           ["1", {"link": "/hatrac/js/chaise/" + currentTimestampTime + "/1/b5dad28809685d9764dbd08fa23600bc:", "value": "testfile10MB_new.txt"}, "testfile10MB_new.txt", "10,240,000"],
-          // TODO we're not sending the version number back when the file exists (we're reusing the given url without any change)
-          ["2", {"link": "/hatrac/js/chaise/" + currentTimestampTime + "/2/2ada69fe3cdadcefddc5a83144bddbb4", "value": "testfile500kb.png"}, "testfile500kb.png", "512,000"]
+          ["2", {"link": "/hatrac/js/chaise/" + currentTimestampTime + "/2/2ada69fe3cdadcefddc5a83144bddbb4:", "value": "testfile500kb.png"}, "testfile500kb.png", "512,000"]
       ],
       files : [{
           name: "testfile10MB_new.txt", // a new file with new md5
@@ -155,11 +155,45 @@ var testParams = {
       }, {
           name: "testfile500kb.png", // using the same file that has been already uploaded
           skipCreation: true,
+          skipDeletion: true,
           size: "512000",
           displaySize: "500KB",
           path: "testfile500kb.png"
+      }]
+   }, {
+      comment: "uploader when all the files already exist in hatrac",
+      schema_name: "product-add",
+      table_name: "file",
+      table_displayname: "file",
+      table_comment: "asset/object",
+      not_travis: !process.env.TRAVIS,
+      primary_keys: ["id"],
+      columns: [
+          { name: "fileid", title: "fileid", type: "int4", skipValidation: true },
+          { name: "uri", title: "uri", type: "text", isFile: true, comment: "asset/reference", skipValidation: true },
+          { name: "timestamp_txt", title: "timestamp_txt", type: "text", skipValidation: true},
+      ],
+      inputs: [
+          {"fileid": "1", "uri": 0, "timestamp_txt": currentTimestampTime}, // the uploaded file for this already exists (uploaded in the previou step)
+          {"fileid": "2", "uri": 1, "timestamp_txt": currentTimestampTime}, // the uploaded file for this already exists (uploaded in the previou step)
+          {"fileid": "3", "uri": 1, "timestamp_txt": currentTimestampTime} // this form won't be submitted
+      ],
+      formsAfterInput: 3,
+      result_columns: [
+          "fileid", "uri", "filename", "bytes"
+      ],
+      results: [
+          ["1", {"link": "/hatrac/js/chaise/" + currentTimestampTime + "/1/3a8c740953a168d9761d0ba2c9800475:", "value": "testfile1MB.txt"}, "testfile1MB.txt", "1,024,000"],
+          ["2", {"link": "/hatrac/js/chaise/" + currentTimestampTime + "/2/2ada69fe3cdadcefddc5a83144bddbb4:", "value": "testfile500kb.png"}, "testfile500kb.png", "512,000"]
+      ],
+      files : [{
+          name: "testfile1MB.txt", // using the same file that has been already uploaded
+          skipCreation: true,
+          size: "1024000",
+          displaySize: "1MB",
+          path: "testfile1MB.txt"
       }, {
-          name: "testfile500kb.png", // this form will be removed
+          name: "testfile500kb.png", // using the same file that has been already uploaded
           skipCreation: true,
           size: "512000",
           displaySize: "500KB",

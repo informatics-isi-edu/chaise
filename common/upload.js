@@ -281,6 +281,7 @@
                 vm.title = "Finalizing Upload";
                 var item = vm.jobCompletionQueue.shift();
                 if (!item) return;
+
                 item.hatracObj.completeUpload().then(
                     item.onCompleteUploadJob.bind(item),
                     onError);
