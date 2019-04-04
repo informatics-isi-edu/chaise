@@ -8,6 +8,7 @@ var moment = require('moment');
 var currentTimestampTime = moment().format("x");
 var testParams = {
     tables: [{
+        comment: "general case",
         schema_name: "product-add",
         table_name: "accommodation",
         table_displayname: "Accommodations",
@@ -77,6 +78,7 @@ var testParams = {
         ],
         files: []
     }, {
+       comment: "uploading new files",
        schema_name: "product-add",
        table_name: "file",
        table_displayname: "file",
@@ -84,9 +86,9 @@ var testParams = {
        not_travis: !process.env.TRAVIS,
        primary_keys: ["id"],
        columns: [
-           { name: "fileid", title: "fileid", type: "int4" },
-           { name: "uri", title: "uri", type: "text", isFile: true, comment: "asset/reference" },
-           { name: "timestamp_txt", title: "timestamp_txt", type: "text"},
+           { name: "fileid", title: "fileid", type: "int4", skipValidation: true },
+           { name: "uri", title: "uri", type: "text", isFile: true, comment: "asset/reference", skipValidation: true },
+           { name: "timestamp_txt", title: "timestamp_txt", type: "text", skipValidation: true},
        ],
        inputs: [
            {"fileid": "1", "uri": 0, "timestamp_txt": currentTimestampTime},
@@ -110,14 +112,60 @@ var testParams = {
            name: "testfile500kb.png",
            size: "512000",
            displaySize: "500KB",
-           path: "testfile500kb.png"
+           path: "testfile500kb.png",
+           skipDeletion: true
        }, {
            name: "testfile5MB.txt",
            size: "5242880",
            displaySize: "5MB",
            path: "testfile5MB.txt"
        }]
-    }]
+   }, {
+      comment: "uploading existing files in hatrac",
+      schema_name: "product-add",
+      table_name: "file",
+      table_displayname: "file",
+      table_comment: "asset/object",
+      not_travis: !process.env.TRAVIS,
+      primary_keys: ["id"],
+      columns: [
+          { name: "fileid", title: "fileid", type: "int4", skipValidation: true },
+          { name: "uri", title: "uri", type: "text", isFile: true, comment: "asset/reference", skipValidation: true },
+          { name: "timestamp_txt", title: "timestamp_txt", type: "text", skipValidation: true},
+      ],
+      inputs: [
+          {"fileid": "1", "uri": 0, "timestamp_txt": currentTimestampTime}, // this is a new file
+          {"fileid": "2", "uri": 1, "timestamp_txt": currentTimestampTime}, // the uploaded file for this already exists (uploaded in the previou step)
+          {"fileid": "3", "uri": 2, "timestamp_txt": currentTimestampTime} // this form won't be submitted
+      ],
+      formsAfterInput: 3,
+      result_columns: [
+          "fileid", "uri", "filename", "bytes"
+      ],
+      results: [
+          ["1", {"link": "/hatrac/js/chaise/" + currentTimestampTime + "/1/b5dad28809685d9764dbd08fa23600bc:", "value": "testfile10MB_new.txt"}, "testfile10MB_new.txt", "10,240,000"],
+          // TODO we're not sending the version number back when the file exists (we're reusing the given url without any change)
+          ["2", {"link": "/hatrac/js/chaise/" + currentTimestampTime + "/2/2ada69fe3cdadcefddc5a83144bddbb4", "value": "testfile500kb.png"}, "testfile500kb.png", "512,000"]
+      ],
+      files : [{
+          name: "testfile10MB_new.txt", // a new file with new md5
+          size: "10240000",
+          displaySize: "10MB",
+          path: "testfile10MB_new.txt"
+      }, {
+          name: "testfile500kb.png", // using the same file that has been already uploaded
+          skipCreation: true,
+          size: "512000",
+          displaySize: "500KB",
+          path: "testfile500kb.png"
+      }, {
+          name: "testfile500kb.png", // this form will be removed
+          skipCreation: true,
+          size: "512000",
+          displaySize: "500KB",
+          path: "testfile500kb.png"
+      }]
+   }]
 };
 var mdHelp ={
         raw_bold1:"**Something Bold**",
@@ -137,15 +185,20 @@ if (!process.env.TRAVIS) {
 describe('Record Add', function() {
 
     for (var i=0; i< testParams.tables.length; i++) {
-
         (function(tableParams, index) {
 
             describe("======================================================================= \n    "
-            + tableParams.inputs.length + " record(s) for table " + tableParams.table_name + ",", function() {
+            + tableParams.inputs.length + " record(s) for table " + tableParams.table_name + " testing " + tableParams.comment + ",", function() {
 
                 beforeAll(function () {
                     browser.ignoreSynchronization=true;
-                    browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/"+tableParams.schema_name+":" + tableParams.table_name);
+
+                    // if it's the same table-name, we have to reload. browser.get is not reloading the page
+                    if (index > 0 && tableParams.table_name === testParams.tables[index-1].table_name) {
+                        browser.navigate().refresh();
+                    } else {
+                        browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/"+tableParams.schema_name+":" + tableParams.table_name);
+                    }
                     chaisePage.waitForElement(element(by.id("submit-record-button")));
                 });
 
@@ -216,10 +269,9 @@ describe('Record Add', function() {
                 });
 
                 if (!process.env.TRAVIS && tableParams.files.length > 0) {
-                    afterAll(function(done) {
+                    afterAll(function() {
                         recordEditHelpers.deleteFiles(tableParams.files);
                         console.log("\n");
-                        done();
                     });
                 }
             });
