@@ -907,6 +907,10 @@ var recordPage = function() {
         return element(by.id("recordSidePan-" + idx));
     }
 
+    this.getSidePanelHeadings = function() {
+        return element.all(by.css("li.toc-heading"));
+    };
+
     this.getSidePanelHeading = function () {
         return browser.executeScript('return $(".sidePanelHeading").text()');
     }
@@ -1139,6 +1143,10 @@ var recordsetPage = function() {
 
     this.getClosedFacets = function () {
         return element.all(by.css("div[aria-expanded=false][style='height: 0px;']"));
+    }
+
+    this.getOpenFacets = function () {
+        return element.all(by.css("div[aria-expanded=true]"));
     }
 
     this.getFacetById = function (idx) {
@@ -1401,6 +1409,9 @@ function chaisePage() {
     this.getPageId = function() {
         return browser.executeScript("return angular.element('body').scope().$root.context.pageId");
     };
+    this.recordeditPageReady = function() {
+        this.waitForElement(element(by.id("submit-record-button")));
+    }
     this.setAuthCookie = function(url, authCookie) {
         if (url && authCookie) {
             // Visit the default page and set the authorization cookie if required

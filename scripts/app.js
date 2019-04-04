@@ -1,16 +1,22 @@
 'use strict';
 
 angular.module('configure-search', [
+    'chaise.config',
     'chaise.modal',
     'chaise.utils',
     'ermrestjs',
     'ngCookies'
 ])
 
-.run(['ERMrest', function (ERMrest) {
+.run(['ERMrest', 'ConfigUtils', 'UriUtils', '$window', function (ERMrest, ConfigUtils, UriUtils, $window) {
     ERMrest.onload().then(function () {
-        angular.element(document).ready(function(){
-            angular.bootstrap(document.getElementById("search"), ["ermrestApp"]);
+        var urlParts = UriUtils.extractParts($window.location);
+        ERMrest.ermrestFactory.getServer(urlParts.service).catalogs.get(urlParts.catalogId).then(function (response) {
+            ConfigUtils.setConfigJSON(response.chaiseConfig);
+
+            angular.element(document).ready(function(){
+                angular.bootstrap(document.getElementById("search"), ["ermrestApp"]);
+            });
         });
     });
 }]);
@@ -56,9 +62,7 @@ ermrestApp.provider('ermrest', function () {
 	}
 });
 
-ermrestApp.config(['ConfigUtilsProvider', 'ermrestProvider',
-                   function(ConfigUtilsProvider, ermrestProvider) {
+ermrestApp.config(['ConfigUtilsProvider', 'ermrestProvider', function(ConfigUtilsProvider, ermrestProvider) {
 	ermrestProvider.setCatalog(1);
 	ermrestProvider.setLayout('list');
-    ConfigUtilsProvider.$get().setConfigJSON();
 }]);

@@ -187,7 +187,7 @@
             // grab the unversioned catalog id
             return {
                 service: defaultChaiseConfig.ermrestLocation,
-                catalogId: location.hash.split('/')[0].slice(1).split('@')[0]
+                catalogId: location.hash.split('/')[0].slice(1).split('@')[0] || ""+chaiseConfig.defaultCatalog
             }
         }
 

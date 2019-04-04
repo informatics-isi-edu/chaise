@@ -2,6 +2,7 @@
     'use strict';
 /* Configuration of the Recordedit App */
     angular.module('chaise.configure-recordedit', [
+        'chaise.config',
         'chaise.modal',
         'chaise.utils',
         'ermrestjs',

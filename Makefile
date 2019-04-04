@@ -264,6 +264,7 @@ JS_SOURCE=$(JS)/respond.js \
 	$(COMMON)/alerts.js \
 	$(COMMON)/storage.js \
 	$(COMMON)/authen.js \
+	$(COMMON)/config.js \
 	$(COMMON)/delete-link.js \
 	$(COMMON)/errors.js \
 	$(COMMON)/filters.js \
@@ -300,6 +301,7 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-1.11.1.min.js \
 	$(COMMON)/vendor/angular-scroll.min.js \
 	$(COMMON)/alerts.js \
 	$(COMMON)/authen.js \
+	$(COMMON)/config.js \
 	$(COMMON)/delete-link.js \
 	$(COMMON)/errors.js \
 	$(COMMON)/export.js \
@@ -342,6 +344,7 @@ VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-1.11.1.min.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-sanitize.js \
 	$(COMMON)/alerts.js \
+	$(COMMON)/config.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/utils.js \
 	$(COMMON)/storage.js \
@@ -401,6 +404,7 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-1.11.1.min.js \
 	$(COMMON)/vendor/sparkMD5.min.js \
 	$(COMMON)/alerts.js \
 	$(COMMON)/authen.js \
+	$(COMMON)/config.js \
 	$(COMMON)/errors.js \
 	$(COMMON)/faceting.js \
 	$(COMMON)/filters.js \
@@ -463,6 +467,7 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-1.11.1.min.js \
 	$(COMMON)/alerts.js \
 	$(COMMON)/authen.js \
 	$(COMMON)/bindHtmlUnsafe.js \
+	$(COMMON)/config.js \
 	$(COMMON)/ellipses.js \
 	$(COMMON)/export.js \
 	$(COMMON)/errors.js \
@@ -742,7 +747,7 @@ $(JS_CONFIG): chaise-config-sample.js
 # Rule for installing for normal deployment
 .PHONY: install dont_install_in_root
 install: $(HTML) dont_install_in_root gitversion
-	rsync -avz --exclude='.*' --exclude='$(MODULES)' --exclude='wiki-images' --exclude=/chaise-config.js . $(CHAISEDIR)
+	rsync -avz --exclude='.*' --exclude='$(MODULES)' --exclude='wiki-images' . $(CHAISEDIR)
 
 .PHONY: gitversion
 gitversion:

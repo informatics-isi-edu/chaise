@@ -1,8 +1,8 @@
 (function() {
     'use strict';
-    var catalog;
 /* Configuration of the Recordset App */
     angular.module('chaise.configure-recordset', [
+        'chaise.config',
         'chaise.modal',
         'chaise.utils',
         'ermrestjs',

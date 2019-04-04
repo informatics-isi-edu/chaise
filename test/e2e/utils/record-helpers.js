@@ -649,6 +649,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 
 			if (params.isMarkdown || (params.isInline && !params.isTableMode)) {
 				it ("markdown container must be visible.", function () {
+                    chaisePage.waitForElement(currentEl.element(by.css('.markdown-container')));
 					expect(currentEl.element(by.css('.markdown-container')).isDisplayed()).toBeTruthy("didn't have markdown");
 				});
 
@@ -710,6 +711,15 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 			if (params.rowValues) {
 				// since we toggled to row, the data should be available.
 				it ("rows of data should be correct and respect the given page_size.", function (done) {
+                    // wait for table to be visible before waiting for it's contents to load
+                    viewMoreBtn = chaisePage.recordPage.getMoreResultsLink(params.displayname, params.isInline);
+                    browser.wait(EC.elementToBeClickable(viewMoreBtn), browser.params.defaultTimeout);
+                    // make sure the right # of rows are showing before verifying the contents
+                    browser.wait(function() {
+                        return chaisePage.recordPage.getRelatedTableRows(params.displayname, params.isInline).count().then(function(ct) {
+                            return (ct == params.rowValues.length);
+                        });
+                    }, browser.params.defaultTimeout);
 					checkRelatedRowValues(params.displayname, params.isInline, params.rowValues, done);
 				});
 			}

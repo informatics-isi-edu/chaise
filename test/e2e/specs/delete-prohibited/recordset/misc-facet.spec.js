@@ -140,10 +140,14 @@ describe("Other facet features, ", function() {
             chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
 
             clearAll = chaisePage.recordsetPage.getClearAllFilters();
+            chaisePage.waitForElement(clearAll);
 
             idx = testParams.filter_secondary_key.facetIdx;
             facet = chaisePage.recordsetPage.getFacetById(idx);
-            done();
+
+            chaisePage.clickButton(clearAll).then(function () {
+                done()
+            }).catch(chaisePage.catchTestError(done));
         });
 
         it('Side panel should hide/show by clicking pull button', function(done){
@@ -163,12 +167,8 @@ describe("Other facet features, ", function() {
             }).catch(chaisePage.catchTestError(done));
         });
 
-        it ("should open the facet, select a value to filter on.", function (done) {
-            chaisePage.clickButton(clearAll).then(function () {
-                return chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
-            }).then(function () {
-                return chaisePage.clickButton(facet);
-            }).then(function () {
+        it("should open the facet, select a value to filter on.", function (done) {
+            chaisePage.clickButton(facet).then(function () {
                 // wait for facet to open
                 browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
 
@@ -199,8 +199,16 @@ describe("Other facet features, ", function() {
 
         it ("the selected value should be selected on the modal.", function (done) {
             var showMore = chaisePage.recordsetPage.getShowMore(idx);
-            browser.wait(EC.elementToBeClickable(showMore));
-            chaisePage.clickButton(showMore).then(function () {
+
+            chaisePage.waitForElement(showMore);
+            console.log("before offset");
+            browser.executeScript("return arguments[0].offsetTop;", showMore.getWebElement()).then(function (offset) {
+                console.log("returned offset: ", offset);
+                return browser.executeScript('arguments[0].scrollTop = arguments[1];', element(by.css(".faceting-container")).getWebElement(), offset)
+            }).then(function() {
+                console.log("after scrolltop");
+                return chaisePage.clickButton(showMore);
+            }).then(function () {
                 chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
 
                 expect(chaisePage.recordsetPage.getCheckedModalOptions().count()).toBe(1, "number of checked rows missmatch.");

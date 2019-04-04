@@ -2,6 +2,7 @@
     'use strict';
 /* Configuration of the Record App */
     angular.module('chaise.configure-record', [
+        'chaise.config',
         'chaise.modal',
         'chaise.utils',
         'ermrestjs',

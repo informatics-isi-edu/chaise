@@ -20,7 +20,7 @@
          * Update the list of templates in UI
          */
         function _updateExportFormats(scope) {
-            var templates = scope.reference.getExportTemplates(chaiseConfig.disableDefaultExport);
+            var templates = scope.reference.getExportTemplates(!chaiseConfig.disableDefaultExport);
 
             templates.forEach(function (template) {
                 if (template.displayname) {

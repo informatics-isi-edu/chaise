@@ -3,16 +3,6 @@
 
     angular.module('chaise.authen', ['chaise.utils', 'chaise.storage'])
 
-    // initialize the dcctx (deriva-client-context object) with the global chaise config or an empty one if it's not present
-    .config(['$windowProvider', function ($windowProvider) {
-        var $window = $windowProvider.$get();
-        if (!$window.dcctx) {
-            $window.dcctx = {
-                chaiseConfig: chaiseConfig || {}
-            }
-        }
-    }])
-
     .factory('Session', ['ConfigUtils', 'messageMap', 'modalUtils', 'StorageService', 'UriUtils', '$cookies', '$http', '$interval', '$log', '$q', '$rootScope', '$uibModalStack', '$window',
         function (ConfigUtils, messageMap, modalUtils, StorageService, UriUtils, $cookies, $http, $interval, $log, $q, $rootScope, $uibModalStack, $window) {
         var chaiseConfig = Object.assign({}, ConfigUtils.getConfigJSON());
@@ -360,16 +350,6 @@
     if (pathname.indexOf('/search/') == -1 && pathname.indexOf('/viewer/') == -1 && pathname.indexOf('/login') == -1) {
 
         angular.module('chaise.authen')
-
-        // initialize the dcctx (deriva-client-context object) with the global chaise config or an empty one if it's not present
-        .config(['$windowProvider', function ($windowProvider) {
-            var $window = $windowProvider.$get();
-            if (!$window.dcctx) {
-                $window.dcctx = {
-                    chaiseConfig: chaiseConfig || {}
-                }
-            }
-        }])
 
         .run(['ERMrest', '$injector', '$q', function runRecordEditApp(ERMrest, $injector, $q) {
 
