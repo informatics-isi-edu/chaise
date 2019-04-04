@@ -194,19 +194,20 @@ describe("Other facet features, ", function() {
                 expect(ct).toBe(testParams.filter_secondary_key.numRows, "number of rows is incorrect");
                 done();
             }).catch(chaisePage.catchTestError(done));
-
         });
 
         it ("the selected value should be selected on the modal.", function (done) {
             var showMore = chaisePage.recordsetPage.getShowMore(idx);
 
-            chaisePage.waitForElement(showMore);
-            console.log("before offset");
-            browser.executeScript("return arguments[0].offsetTop;", showMore.getWebElement()).then(function (offset) {
-                console.log("returned offset: ", offset);
-                return browser.executeScript('arguments[0].scrollTop = arguments[1];', element(by.css(".faceting-container")).getWebElement(), offset)
-            }).then(function() {
-                console.log("after scrolltop");
+            chaisePage.clickButton(facet).then(function () {
+                chaisePage.waitForElement(showMore);
+            //     console.log("before offset");
+            //     return browser.executeScript("return arguments[0].offsetTop;", showMore.getWebElement())
+            // }).then(function (offset) {
+            //     console.log("returned offset: ", offset);
+            //     return browser.executeScript('arguments[0].scrollTop = arguments[1];', element(by.css(".faceting-container")).getWebElement(), offset)
+            // }).then(function() {
+            //     console.log("after scrolltop");
                 return chaisePage.clickButton(showMore);
             }).then(function () {
                 chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
