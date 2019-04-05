@@ -867,8 +867,7 @@ describe('View recordset,', function() {
             chaisePage.recordsetPage.getViewActionButtons().then(function(viewButtons) {
                 return viewButtons[0].click();
             }).then(function() {
-                var result = '/record/#' + browser.params.catalogId + "/" + accommodationParams.schemaName + ":" + accommodationParams.table_name + "/" + filter;
-                return chaisePage.waitForUrl(result, browser.params.defaultTimeout);
+                return chaisePage.recordPageReady();
             }).finally(function() {
                 expect(chaisePage.getWindowName()).toBe(windowId);
                 // pageId should change when the window changes page
@@ -896,7 +895,6 @@ describe('View recordset,', function() {
                 allWindows = handles;
                 return browser.switchTo().window(allWindows[1]);
             }).then(function() {
-                var result = '/recordedit/#' + browser.params.catalogId + "/" + accommodationParams.schemaName + ":" + accommodationParams.table_name + "/" + filter;
                 return chaisePage.recordeditPageReady();
             }).finally(function() {
                 expect(chaisePage.getWindowName()).not.toBe(windowId);

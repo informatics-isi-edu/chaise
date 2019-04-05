@@ -1409,6 +1409,10 @@ function chaisePage() {
     this.getPageId = function() {
         return browser.executeScript("return angular.element('body').scope().$root.context.pageId");
     };
+    this.recordPageReady = function() {
+        this.waitForElement(element(by.id('tblRecord')));
+        this.waitForElementInverse(element(by.id('rt-loading')));
+    }
     this.recordeditPageReady = function() {
         this.waitForElement(element(by.id("submit-record-button")));
     }

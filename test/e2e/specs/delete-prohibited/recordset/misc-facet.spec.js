@@ -197,19 +197,7 @@ describe("Other facet features, ", function() {
         });
 
         it ("the selected value should be selected on the modal.", function (done) {
-            var showMore = chaisePage.recordsetPage.getShowMore(idx);
-
-            chaisePage.clickButton(facet).then(function () {
-                chaisePage.waitForElement(showMore);
-            //     console.log("before offset");
-            //     return browser.executeScript("return arguments[0].offsetTop;", showMore.getWebElement())
-            // }).then(function (offset) {
-            //     console.log("returned offset: ", offset);
-            //     return browser.executeScript('arguments[0].scrollTop = arguments[1];', element(by.css(".faceting-container")).getWebElement(), offset)
-            // }).then(function() {
-            //     console.log("after scrolltop");
-                return chaisePage.clickButton(showMore);
-            }).then(function () {
+            chaisePage.clickButton(chaisePage.recordsetPage.getShowMore(idx)).then(function () {
                 chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
 
                 expect(chaisePage.recordsetPage.getCheckedModalOptions().count()).toBe(1, "number of checked rows missmatch.");
@@ -619,6 +607,12 @@ describe("Other facet features, ", function() {
         });
 
         it ("should show the applied filter and clear all button.", function (done) {
+            browser.wait(function () {
+                return chaisePage.recordsetPage.getFacetFilters().count().then(function(ct) {
+                    return ct == 1;
+                });
+            }, browser.params.defaultTimeout);
+
             chaisePage.recordsetPage.getFacetFilters().then(function (filters) {
                 expect(filters.length).toEqual(1, "filter is missing");
 
@@ -871,6 +865,7 @@ describe("Other facet features, ", function() {
             beforeAll(function (done) {
                 browser.ignoreSynchronization=true;
                 browser.get(uri);
+
                 chaisePage.waitForUrl('facets', browser.params.defaultTimeout);
 
                 browser.getCurrentUrl().then(function (url) {
@@ -1043,9 +1038,13 @@ describe("Other facet features, ", function() {
         });
 
         it ("should show the applied filter and clear all button.", function (done) {
-            chaisePage.recordsetPage.getFacetFilters().then(function (filters) {
-                expect(filters.length).toEqual(1, "filter is missing");
+            browser.wait(function () {
+                return chaisePage.recordsetPage.getFacetFilters().count().then(function(ct) {
+                    return ct == 1;
+                });
+            }, browser.params.defaultTimeout);
 
+            chaisePage.recordsetPage.getFacetFilters().then(function (filters) {
                 expect(filters[0].getText()).toEqual("Custom Facets: " + customFacetParams.cfacet.displayname, "filter text missmatch.");
 
                 expect(chaisePage.recordsetPage.getClearAllFilters().isDisplayed()).toBeTruthy("`Clear All` is not visible");

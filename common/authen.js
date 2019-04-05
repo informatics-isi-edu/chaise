@@ -3,8 +3,8 @@
 
     angular.module('chaise.authen', ['chaise.utils', 'chaise.storage'])
 
-    .factory('Session', ['ConfigUtils', 'messageMap', 'modalUtils', 'StorageService', 'UriUtils', '$cookies', '$http', '$interval', '$log', '$q', '$rootScope', '$uibModalStack', '$window',
-        function (ConfigUtils, messageMap, modalUtils, StorageService, UriUtils, $cookies, $http, $interval, $log, $q, $rootScope, $uibModalStack, $window) {
+    .factory('Session', ['ConfigUtils', 'messageMap', 'modalUtils', 'StorageService', 'UriUtils', '$cookies', '$http', '$interval', '$log', '$q', '$rootScope', '$sce', '$uibModalStack', '$window',
+        function (ConfigUtils, messageMap, modalUtils, StorageService, UriUtils, $cookies, $http, $interval, $log, $q, $rootScope, $sce, $uibModalStack, $window) {
         var chaiseConfig = Object.assign({}, ConfigUtils.getConfigJSON());
 
         // authn API no longer communicates through ermrest, removing the need to check for ermrest location
@@ -84,10 +84,10 @@
             if(type.indexOf('modal')!== -1){
                 if (_session) {
                     params.title = messageMap.sessionExpired.title;
-                    params.message = messageMap.sessionExpired.message;
+                    params.message = $sce.trustAsHtml(messageMap.sessionExpired.message);
                 } else {
                     params.title = messageMap.noSession.title;
-                    params.message = messageMap.noSession.message;
+                    params.message = $sce.trustAsHtml(messageMap.noSession.message);
                 }
                 var closed = false;
                 var onModalCloseSuccess = function () {

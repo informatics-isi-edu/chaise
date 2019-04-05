@@ -63,8 +63,7 @@ Manualrecordset=test/manual/specs/recordset.conf.js
 
 NAVBAR_TESTS=$(E2Enavbar) $(E2EnavbarHeadTitle)
 SEARCH_TESTS=$(E2Esearch)
-# RECORDSET_TESTS=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit) $(E2EDrecordsetIndFacet) $(E2EDrecordsetHistFacet)
-RECORDSET_TESTS=$(E2EDrecordsetIndFacet)
+RECORDSET_TESTS=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit) $(E2EDrecordsetIndFacet) $(E2EDrecordsetHistFacet)
 RECORD_TESTS=$(E2EDrecord) $(E2ErecordNoDeleteBtn) $(E2EDrecordRelatedTable) $(E2EDrecordCopy) $(E2EDrecordLinks)
 RECORDADD_TESTS=$(E2EDIrecordAdd) $(E2EDIrecordMultiAdd) $(E2EDIrecordImmutable)
 RECORDEDIT_TESTS=$(E2EDIrecordEdit) $(E2EDIrecordMultiEdit) $(E2EDrecordEditCompositeKey) $(E2ErecordEditNoDeleteBtn) $(E2EDrecordEditSubmissionDisabled) $(E2EDIrecordEditMultiColTypes) $(E2EDrecordEditDomainFilter)
@@ -748,7 +747,7 @@ $(JS_CONFIG): chaise-config-sample.js
 # Rule for installing for normal deployment
 .PHONY: install dont_install_in_root
 install: $(HTML) dont_install_in_root gitversion
-	rsync -avz --exclude='.*' --exclude='$(MODULES)' --exclude='wiki-images' . $(CHAISEDIR)
+	rsync -avz --exclude='.*' --exclude='$(MODULES)' --exclude='wiki-images' --exclude=/chaise-config.js . $(CHAISEDIR)
 
 .PHONY: gitversion
 gitversion:
