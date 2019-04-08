@@ -4,30 +4,33 @@
     </h2>
 </div>
 <div class="modal-body">
+    <div ng-if="ctrl.params.showVersionWarning" class="alert alert-dismissible alert-warning" role="alert">
+        <button type="button" class="close" ng-click="ctrl.closeAlert();" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <strong>Warning</strong> <span compile="ctrl.warningMessage"></span>
+    </div>
     <ul>
         <li id="share-link">
             <h2><b>Share Link</b></h2>
-            <div ng-if="ctrl.versionLink">
+            <div>
                 <h3>
-                    <b>Data Snapshotted
-                        <span ng-if="ctrl.moreThanWeek()"> at </span>
-                        <span tooltip-placement="bottom" ng-attr-uib-tooltip="{{!ctrl.moreThanWeek() ? 'Data snapshotted at ' + ctrl.versionDate : undefined}}">{{ctrl.versionDateRelative}}</span>
+                    <b>Historical Link
+                        <span tooltip-placement="bottom" ng-attr-uib-tooltip="{{!ctrl.moreThanWeek() ? 'Data snapshotted at ' + ctrl.params.versionDate : undefined}}">({{ctrl.params.versionDateRelative}})</span>
                     </b>
                 </h3>
             </div>
-            <a ng-if="ctrl.versionLink" id="version" ng-href="{{::ctrl.versionLink}}">{{::ctrl.versionLink}}</a>
-            <h3><b>Live Data</b></h3>
-            <a id="permalink" ng-href="{{::ctrl.permalink}}">{{::ctrl.permalink}}</a>
+            <a id="version" ng-href="{{::ctrl.params.versionLink}}">{{::ctrl.params.versionLink}}</a>
+            <h3><b>Live Link</b></h3>
+            <a id="permalink" ng-href="{{::ctrl.params.permalink}}">{{::ctrl.params.permalink}}</a>
         </li>
-        <li id="citation" ng-if="::ctrl.citation">
+        <li id="citation" ng-if="::ctrl.params.citation">
             <h2><b>Data Citation</b></h2>
             <div id="citation-text">
-                <span ng-if="::ctrl.citation.author">{{::ctrl.citation.author}} </span><span ng-if="::ctrl.citation.title">{{::ctrl.citation.title}} </span><i>{{::ctrl.citation.journal}}</i> <a ng-href="{{::ctrl.citation.url}}">{{::ctrl.citation.url}}</a> ({{::ctrl.citation.year}}).
+                <span ng-if="::ctrl.params.citation.author">{{::ctrl.params.citation.author}} </span><span ng-if="::ctrl.params.citation.title">{{::ctrl.params.citation.title}} </span><i>{{::ctrl.params.citation.journal}}</i> <a ng-href="{{::ctrl.params.citation.url}}">{{::ctrl.params.citation.url}}</a> ({{::ctrl.params.citation.year}}).
             </div>
         </li>
-        <li id="download-citation" ng-if="::ctrl.citation">
+        <li id="download-citation" ng-if="::ctrl.params.citation">
             <h3><b>Download Data Citation:</b></h3>
-            <a id="bibtex-download" download="{{::ctrl.filename}}.bib" ng-href="{{::ctrl.downloadBibtex}}">BibTex</a>
+            <a id="bibtex-download" download="{{::ctrl.params.displayname}}.bib" ng-href="{{::ctrl.downloadBibtex}}">BibTex</a>
         </li>
     </ul>
 </div>

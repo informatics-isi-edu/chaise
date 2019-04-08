@@ -96,8 +96,7 @@
             context = {};
 
         var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
-        context.catalogID = UriUtils.getCatalogID();
-        context.chaiseBaseURL = $window.location.href.replace(UriUtils.getLocationHash($window.location), '');
+        context.catalogID = UriUtils.getCatalogIDFromLocation();
 
         $rootScope.showColumnSpinner = [{}];
 

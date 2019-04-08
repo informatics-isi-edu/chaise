@@ -174,14 +174,14 @@
 
     .factory('UriUtils', ['$injector', '$rootScope', '$window', 'appContextMapping', 'appTagMapping', 'ContextUtils', 'Errors', 'messageMap', 'parsedFilter',
         function($injector, $rootScope, $window, appContextMapping, appTagMapping, ContextUtils, Errors, messageMap, ParsedFilter) {
-        var chaiseBaseURL;
         var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
 
         /**
          * Returns the catalog id
+         * TODO we might want to refactor the caller of this function
          * @return {String}
          */
-        function getCatalogID() {
+        function getCatalogIDFromLocation() {
             var hash = getLocationHash($window.location);
             return hash.split('/')[0].slice(1);
         }
@@ -189,6 +189,8 @@
         /**
          * Given a location object, will return the hash part of it
          * (it will take care of allowing ? in place of #)
+         * TODO we might want to refactor the different places that are using this
+         * function, we should not keep parsing the same location
          * @param  {Object} location the $window.location
          * @return {String}          hash string
          */
@@ -346,11 +348,7 @@
             } else {
                 appPath = ContextUtils.getValueFromContext(appContextMapping, context);
             }
-            var chaiseBaseURL = $window.location.origin + chaiseDeploymentPath();
-            if (chaiseBaseURL.endsWith("/")) {
-                chaiseBaseURL = chaiseBaseURL.slice(0, -1);
-            }
-            var url = chaiseBaseURL + appPath + "/#" + location.catalog + "/" + location.path;
+            var url = chaiseBaseURL() + appPath + "/#" + location.catalog + "/" + location.path;
             if (location.queryParamsString && (context.indexOf("compact") === 0)) {
                 url = url + "?" + location.queryParamsString;
             }
@@ -420,7 +418,6 @@
                 }
             }
 
-            context.mainURI = hash; // uri without modifiers
             var modifierPath = uri.split(hash)[1];
 
             if (modifierPath) {
@@ -792,22 +789,70 @@
             }
         }
 
+        /**
+         * Returns the chaise base url without the trailing slash
+         * TODO we might want to find a better way instead of this.
+         * @return {String}
+         */
+        function chaiseBaseURL() {
+            var res = $window.location.origin + chaiseDeploymentPath();
+            if (res.endsWith("/")) {
+                return res.slice(0, -1);
+            }
+            return res;
+        }
+
+        /**
+         * The following cases need to be handled for the resolverImplicitCatalog value:
+         *  - if resolverImplicitCatalog === null:         use current chaise path (without the version if one is present)
+         *  - if resolverImplicitCatalog === currCatalog:  /id/RID
+         *  - otherwise:                                   /id/currCatalog/RID
+         * @param {ERMrest.Tuple} tuple - the `ermrestJS` tuple object returned from the page object when data is read
+         * @param {ERMrest.Reference} reference - the `ermrestJS` reference object associated with this current page
+         * @param {String} version - the encoded version string prepended with the '@' character
+         **/
+        function resolvePermalink(tuple, reference, version) {
+            var resolverId = chaiseConfig.resolverImplicitCatalog;
+            var currCatalog = reference.location.catalogId;
+
+            // null or no RID
+            if (resolverId === null || !tuple.data || !tuple.data.RID) {
+                var url = tuple.reference.contextualize.detailed.appLink;
+                // remove query parameters
+                url = url.substring(0, url.lastIndexOf("?"));
+
+                // location.catalog will be in the form of `<id>` or `<id>@<version>`
+                return url.replace('#' + reference.location.catalog, '#' + currCatalog + (version ? version : ""));
+            }
+
+            // if it's a number (isNaN tries to parse to integer before checking) and is the same as current  catalog
+            if (!isNaN(resolverId) && resolverId === currCatalog) {
+                return $window.location.origin + "/id/" + tuple.data.RID + (version ? version : "");
+            }
+
+            // if resolverId is false or undefined OR any other values that are not allowed use the default
+            // default is to show the fully qualified resolveable link for permalink
+            return $window.location.origin + "/id/" + currCatalog + "/" + tuple.data.RID + (version ? version : "");
+        }
+
         return {
-            queryStringToJSON: queryStringToJSON,
-            appTagToURL: appTagToURL,
-            chaiseURItoErmrestURI: chaiseURItoErmrestURI,
-            fixedEncodeURIComponent: fixedEncodeURIComponent,
-            parseURLFragment: parseURLFragment,
-            setOrigin: setOrigin,
-            parsedFilterToERMrestFilter: parsedFilterToERMrestFilter,
-            setLocationChangeHandling: setLocationChangeHandling,
-            isBrowserIE: isBrowserIE,
-            getQueryParams: getQueryParams,
             appNamefromUrlPathname: appNamefromUrlPathname,
-            createRedirectLinkFromPath: createRedirectLinkFromPath,
+            appTagToURL: appTagToURL,
+            chaiseBaseURL: chaiseBaseURL,
             chaiseDeploymentPath: chaiseDeploymentPath,
+            chaiseURItoErmrestURI: chaiseURItoErmrestURI,
+            createRedirectLinkFromPath: createRedirectLinkFromPath,
+            fixedEncodeURIComponent: fixedEncodeURIComponent,
+            getCatalogIDFromLocation: getCatalogIDFromLocation,
             getLocationHash: getLocationHash,
-            getCatalogID: getCatalogID
+            getQueryParams: getQueryParams,
+            isBrowserIE: isBrowserIE,
+            parseURLFragment: parseURLFragment,
+            parsedFilterToERMrestFilter: parsedFilterToERMrestFilter,
+            queryStringToJSON: queryStringToJSON,
+            resolvePermalink: resolvePermalink,
+            setLocationChangeHandling: setLocationChangeHandling,
+            setOrigin: setOrigin
         }
     }])
 

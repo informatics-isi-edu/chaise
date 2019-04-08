@@ -22,7 +22,7 @@
     }
 
     function isCatalogDefined(val) {
-        return val != undefined && val != null
+        return val != undefined && val != null;
     }
 
     'use strict';
@@ -37,7 +37,16 @@
         var root = chaiseConfig.navbarMenu || {};
         // get the catalog id
         // NOTE: this is put in a string
-        var catalogId = (($rootScope.context && $rootScope.context.catalogID) ? "" + $rootScope.context.catalogID : ("" + UriUtils.getCatalogID() || "" + chaiseConfig.defaultCatalog || null));
+        var catalogId;
+        if ($rootScope.context && $rootScope.context.catalogID) {
+            catalogId = "" + $rootScope.context.catalogID;
+        } else if ($window.location.hash != "") {
+            catalogId = UriUtils.getCatalogIDFromLocation();
+        } else if (chaiseConfig.defaultCatalog) {
+            catalogId = "" + chaiseConfig.defaultCatalog;
+        } else {
+            catalogId = null;
+        }
         // Set default newTab property at root node
         if (!root.hasOwnProperty('newTab')) {
             root.newTab = true;
