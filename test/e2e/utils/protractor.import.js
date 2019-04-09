@@ -138,7 +138,8 @@ var importSchemas = function(configs, defer, authCookie, catalogId, entities) {
  * @param  {object} entities   the container for the entities
  */
 var bulkImportSchemas = function(configs, defer, authCookie, catalogId, entities) {
-    var schemas = {};
+    var catalog = {},
+        schemas = {};
 
     var config, schema, schemaName;
 
@@ -154,6 +155,9 @@ var bulkImportSchemas = function(configs, defer, authCookie, catalogId, entities
     };
 
     configs.forEach(function (config) {
+        // copy annotations an dACLs over t
+        catalog = config.catalog;
+
         schemas[config.schema.name] = {
             path: config.schema.path
         };
@@ -164,7 +168,7 @@ var bulkImportSchemas = function(configs, defer, authCookie, catalogId, entities
     });
 
     // we could pass the acls here in the catalog
-    settings.setup = {catalog: {}, schemas: schemas};
+    settings.setup = {catalog: catalog, schemas: schemas};
 
     // reuse the same catalogid
     if (catalogId) settings.setup.catalog.id = catalogId;
