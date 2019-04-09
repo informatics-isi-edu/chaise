@@ -40,14 +40,14 @@ var EC = protractor.ExpectedConditions;
  * @param  {Boolean} isEditMode  true if in editmode, used for testing the title.
  */
 exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
+    beforeAll(function () {
+        chaisePage.waitForElement(chaisePage.recordEditPage.getSubmitRecordButton());
+    });
 
     var visibleFields = [];
 
     if (isEditMode) {
         it("should have edit record title", function() {
-            var EC = protractor.ExpectedConditions;
-
-            browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getEntityTitleElement()), browser.params.defaultTimeout);
             var title = chaisePage.recordEditPage.getEntityTitleElement();
             expect(title.getText()).toEqual("Edit " + tableParams.record_displayname + " Record", "Edit mode title is incorrect.");
         });
@@ -61,9 +61,6 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
     } else {
         it("should have create record title", function() {
-            var EC = protractor.ExpectedConditions;
-
-            browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getEntityTitleElement()), browser.params.defaultTimeout);
             expect(chaisePage.recordEditPage.getEntityTitleElement().getText()).toBe("Create Record", "Create mode title is incorrect.");
         });
 
@@ -1218,6 +1215,8 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         integerDataTypeFields.forEach(function(intInput) {
                             var c = intInput.column;
 
+                            if (c.skipValidation) return;
+
                             if (c.generated || c.immutable) return;
 
                             var prevValue = "";
@@ -1262,8 +1261,9 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                     it("should validate int8(-9223372036854776000 < value < 9223372036854776000), int4(-2147483648 < value < 2147483647) and int2(-32768 < value < 32767) with range values", function() {
                         integerDataTypeFields.forEach(function(intInput) {
-
                             var c = intInput.column;
+
+                            if (c.skipValidation) return;
 
                             if (c.generated || c.immutable) return;
 
@@ -1664,6 +1664,7 @@ exports.testRecordAppValuesAfterSubmission = function(column_names, column_value
  */
 exports.createFiles = function(files) {
     files.forEach(function(f) {
+        if (f.skipCreation) return;
         var path = require('path').join(__dirname , "/../data_setup/uploaded_files/" + f.path);
         exec("perl -e 'print \"1\" x " + f.size + "' > " + path);
         console.log(path + " created");
@@ -1676,6 +1677,7 @@ exports.createFiles = function(files) {
  */
 exports.deleteFiles = function(files) {
     files.forEach(function(f) {
+        if (f.skipDeletion) return;
         var path = require('path').join(__dirname , "/../data_setup/uploaded_files/" + f.path);
         exec('rm ' + path);
         console.log(path + " deleted");
