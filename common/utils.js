@@ -136,7 +136,7 @@
         "preCreateAssociation": "pre-create/prefill/association", // read the association values to add new ones (record) has referrer
         "preCreateAssociationSelected": "pre-create/prefill/association/disabled", // secondary
         "preCopy": "pre-create/copy", // read the current data before copy (recordedit)
-        "recordeditDefault": "recordedit/default",
+        "recordeditDefault": "default",
 
         "update": "update", // update entity (recordedit)
         "preUpdate": "pre-update", // read entity to be updated (recordedit)
@@ -159,13 +159,12 @@
         "recordsetDelete": "delete/recordset", // delete a row (recordset)
         "recordRelatedDelete": "delete/record/related", // delete a row from related entities (record) has referrer
 
-        "recordExport": "export/record",
-        "recordsetExport": "export/recordset",
+        "export": "export",
 
-        "viewerMain": "viewer/main",
-        "viewerAnnotation": "viewer/annotation",
-        "viewerComment": "viewer/comment",
-        "viewerAnatomy": "viewer/anatomy"
+        "viewerMain": "main",
+        "viewerAnnotation": "annotation",
+        "viewerComment": "comment",
+        "viewerAnatomy": "anatomy"
 
     })
 
@@ -795,11 +794,9 @@
 
         /**
          * The following cases need to be handled for the resolverImplicitCatalog value:
-         *  - if null:                                      use current chaise path (without the version if one is present)
-         *  - if false:                                     /id/currCatalog/RID
-         *  - if undefined:                                 same as false
-         *  - if resolverImplicitCatalog == currCatalog:    /id/RID
-         *  - if resolverImplicitCatalog != currCatalog:    /id/currCatalog/RID
+         *  - if resolverImplicitCatalog === null:         use current chaise path (without the version if one is present)
+         *  - if resolverImplicitCatalog === currCatalog:  /id/RID
+         *  - otherwise:                                   /id/currCatalog/RID
          * @param {ERMrest.Tuple} tuple - the `ermrestJS` tuple object returned from the page object when data is read
          * @param {ERMrest.Reference} reference - the `ermrestJS` reference object associated with this current page
          * @param {String} version - the encoded version string prepended with the '@' character
@@ -810,14 +807,17 @@
 
             // null or no RID
             if (resolverId === null || !tuple.data || !tuple.data.RID) {
+                var url = tuple.reference.contextualize.detailed.appLink;
+                // remove query parameters
+                url = url.substring(0, url.lastIndexOf("?"));
+
                 // location.catalog will be in the form of `<id>` or `<id>@<version>`
-                return $window.location.href.replace('#' + reference.location.catalog, '#' + currCatalog + (version ? version : ""));
+                return url.replace('#' + reference.location.catalog, '#' + currCatalog + (version ? version : ""));
             }
 
-            // if it's a number (isNaN tries to parse to integer before checking)
-            if (!isNaN(resolverId)) {
-                var catalog = (resolverId != currCatalog) ? currCatalog + "/" : "";
-                return $window.location.origin + "/id/" + catalog + tuple.data.RID + (version ? version : "");
+            // if it's a number (isNaN tries to parse to integer before checking) and is the same as current  catalog
+            if (!isNaN(resolverId) && resolverId === currCatalog) {
+                return $window.location.origin + "/id/" + tuple.data.RID + (version ? version : "");
             }
 
             // if resolverId is false or undefined OR any other values that are not allowed use the default

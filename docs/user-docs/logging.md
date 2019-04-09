@@ -34,19 +34,32 @@ The following are the default attributes that you can find on all the requests:
 - `cid`: The app name (record, recordset, recordedit).
 - `wid`: The window id (randomly generated).
 - `pid`: The page id (randomly generated).
+- `catalog`: The catalog id.
 - `schema_table`: The `schema:table` combination.
 - `action`: A pre-defined string that implies what the request was for. Refer to [the action list](#action-list) for more information.
 
 The following are the optional attributes that you might find on requests:
+- `ppid` and `pcid`: The parent `pid` and `pcid`. These two attributes will be available only on a number of requests. It will indicate which app and page led to this current request. These are the requests that might have `ppid` and `pcid`.
+  - recordset: First read of the main entity.
+  - record: First read of the main entity.
+  - recordedit: The create/edit request (the request generated when user clicks on submit).
+  - viewer: First read of the main entity.
 - `facet`: If url contains filter, this attributes gives you the [facet](https://github.com/informatics-isi-edu/ermrestjs/wiki/Facets-JSON-Structure) equivalent of that filter.
 - `filter`: If we couldn't represent the given filter in terms of facet. This will be just a simple string.
 - `cfacet`: If url contains custom-facets (`*::cfacets::`), this attribute will be equal to one. In this case one of the following attributes will be available:
   - `cfacet_str`: the displayname of custom-facet (if provided in url).
   - `cfacet_path`: the ERMrest path that was sent with the custom-facet.
 - `page_size`: The number of entities that we requested.
-- `referrer`: It's an object that has `schema_table` and `facet` (`filter`) as its attributes. This attribute is available on request that needs to capture their parent entity (for example related entities will have the main entity as referrer).
 - `source`: The source path of facet. You will find this attribute in the requests that belong to a facet.
+- `column`: The column that is used for faceting. It will be attached to scalar facet requests.
+- `referrer`: It's an object that has `schema_table` and `facet`/`filter`/`cfacet_str`/`cfacet_path` as its attributes. This attribute is available on the request that needs to capture their parent context, which are
+  - record page: Any secondary request (related entities and aggregate columns). The `referrer` for these request is the main table of the page.
+  - record page: The first request generated after clicking on "add" pure and binary association entity. `referrer` will be the main entity.
+  - recordedit page: The request for getting the pre-filled value of foreign key. `referrer` is the main entity.
+  - recordset page: Any request for getting the facet data. The `referrer` is the main entity and it will include all the selected facets and filters.
 - `t`: If this attribute exists and its value is `1`, then the given object is truncated since it was lengthy. Refer to [truncation](#truncation) for more information.
+- `template`: This object will only be available for export request. It's an object with only `displayname` and `type` attributes.
+
 
 ## Action List
 
@@ -123,25 +136,85 @@ Currently we're only logging terminal errors (we might want to change that to lo
 
 ## Truncation
 
-The object that we want to log might be lengthy so we should truncate this object if it's exceeding the maximum length (we're currently limiting it to 7000). If the object has `t:1` that means it has been truncated. If the content was longer than the limit, we should truncate based on this order: facet, source, referrer. Which means that referrer has more priority over source, and source over facet.
+The object that we want to log might be lengthy. So we should truncate this object if it's exceeding the maximum length (we're currently limiting it to 6500). An object with `t:1` indicates that some attributes have been truncated.
+The truncation is done based on a set priority. We keep adding more and more attributes and as soon as we hit the limit, we're going to return that object. Attributes are added in the following order (attribute one has more priority over the next and so on):
+ - cid, pid, wid, schema_table, catalog, cfacet
+ - ppid, pcid
+ - template
+ - referrer
+ - source
+ - column
+ - cfacet_str
+ - cfacet_path
+ - filter
+ - facet
+
+For example, assume that we were trying to send the following object and it's lengthy.
+
+```
+{
+    "cid": <value>, "pid": <value>, "wid": <value>,
+    "catalog": <value>, "schema_table": <value>,
+    "referrer": {"schema_table": <value>, "facet": <referrer-facet-obj>},
+    "facet": <facet-obj>,
+    "source": <source-obj>
+}
+```
+
+We're going to include `cid`, `pid`, `wid`, `catalog`, `schema_table`, and `t` (with value 1) first. Then we're going to go based on the priority list and try to add each attribute. So we're going to add `referrer`'s `facet` step by step. As soon as we hit the limit, we're going to return that partial object. otherwise we're going to continue to `source` and then `facet`.
+
+
+
+## Analysis
+
+In this section we're going to mention some of the patterns that you can use to process the logs.
+
+#### Asset Download & CSV Default Export
+
+Since the asset download and also the default CSV export requests are simple redirects to the location, we cannot pass `dcctx` to the header. Instead, we're sending these query parameters:
+
+- `uinit=1`: To signal that this is chaise/ermrestjs that has generated the link.
+- `cid`: The `cid` of the app that user found the link from.
+
+
+The following url patterns are what's unique about each of these requests and you can use for your analysis:
+
+- Asset download: `?limit=none&accept=csv&uinit=1&cid=`
+
+- CSV default export: `uinit=1&cid=`
+
 
 ## Change Log
 
-#### March 25, 2019
+#### 4/8/19
+
+###### Commit Links
+ - [chaise]()
+ - [ermrestjs]()
 
 ###### Changed
-- Fixed the action of scalar column requests.
 - Changed the action for removing related entity rows from `delete/recordset/related` to `delete/record/related`.
-- Fixed the issue of reporting both load and update requests of record page as `record/main`. Now they are being logged with proper action.
-- `recordset/export` was used as action for export from both record and recordset. Now `export/record` and `export/recordset` are going to be reported.
 - Fixed a bug that would cause record load requests to be reported as update.
+- Fixed the issue of reporting both load and update requests of record page as `record/main`. Now they are being logged with proper action.
+  - Impact: We cannot determine the number of record page loads prior to this fix. This only affects deployments that allow their users to create new records since the update request would only fire if the user updates any of the related entities.
+- `recordset/export` was used as action for export from both record and recordset which is changed to `export`.
+- Changed the `template` object that is reported with `export` action to only include the `displayname` and `type`.
+- Instead of logging the whole template document in the `export` action, we're just going to include `displayname` and `type`.
+  ```
+  {
+    "action": "export",
+    "template": {
+        "displayname": "sample template",
+        "type": "BAG"
+    }
+  }
+  ```
+- Fixed the action of scalar column requests.
+- Changed the `recordedit/default` action to `default`.
 
 ###### Added
 - Added proper `dcctx` logging to viewer app.
-- `ppid` and `pcid` has been added to the main request of each app which shows the parent `pid` and `cid`. These requests are:
-  - recordset: First read of the main entity.
-  - record: First read of the main entity.
-  - recordedit: The create/edit request (the request generated when user clicks on submit).
+- `ppid` and `pcid` has been added to the main request of each app which shows the parent `pid` and `cid`.
 - New actions have been attached to schema (`"model/schema"`) and catalog (`"model/catalog"`) requests.
 - `catalog` has been added to all the requests.
 - `column` has been added to requests for getting a scalar facet data.
@@ -149,7 +222,10 @@ The object that we want to log might be lengthy so we should truncate this objec
 - Added proper action `recordset/facet/histogram` to the request for getting buckets of a range picker facet.
 - Added `cfacet`, `cfacet_str`, and `cfacet_path`.
 
-#### March 8, 2019
+#### 3/8/19
+
+###### Commit Links
+ - [chaise](https://github.com/informatics-isi-edu/chaise/commit/05108d07e37c1579b28ccfc58916db486f379005)
 
 ###### Changed
  - We realized that the first request of adding pure and binary is not using the correct action. It was using the `recordset/main/load`. We changed it to use the appropriate `pre-create/prefill/association` action with `referred` information.

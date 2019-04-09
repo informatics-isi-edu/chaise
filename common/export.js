@@ -80,12 +80,8 @@
                         _cancelExport(scope);
                     });
                     scope.isLoading = true;
-                    var action = logActions.recordExport;
-                    if (scope.parent === "recordset") {
-                        action = logActions.recordsetExport;
-                    }
 
-                    scope.exporter.run({action: action}).then(function (response) {
+                    scope.exporter.run({action: logActions.export}).then(function (response) {
                         // if it was canceled, just ignore the result
                         if (response.canceled) return;
 
@@ -114,8 +110,7 @@
             scope: {
                 reference: "=",
                 allowExport: "=",
-                disabled: "=",
-                parent: "@"
+                disabled: "="
             },
             link: function (scope, element, attributes) {
                 scope.isLoading = false;

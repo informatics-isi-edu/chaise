@@ -123,6 +123,8 @@
         var res = UriUtils.chaiseURItoErmrestURI($window.location);
         var ermrestUri = res.ermrestUri, pcid = res.pcid, ppid = res.ppid;
 
+        
+
         $rootScope.context = context;
 
         // will be used to determine the app mode (edit, create, or copy)

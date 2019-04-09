@@ -149,12 +149,21 @@
                 var imagePath = new ERMrest.DataPath(table);
                 var imagePathColumn = imagePath.context.columns.get('id');
                 var imageFilter = new ERMrest.BinaryPredicate(imagePathColumn, ERMrest.OPERATOR.EQUAL, context.imageID);
+
                 var contextHeaderParams = {
                     catalog: context.catalogID,
                     schema_table: context.schemaName + ":" + context.tableName,
                     filter: "id=" + context.imageID,
                     action: logActions.viewerMain
                 };
+
+                if (context.queryParams && context.queryParams.ppid) {
+                    contextHeaderParams.ppid = context.queryParams.ppid;
+                }
+
+                if (context.queryParams && context.queryParams.pcid) {
+                    contextHeaderParams.pcid = context.queryParams.pcid;
+                }
                 imagePath.filter(imageFilter).entity.get(contextHeaderParams).then(function success(entity) {
                     image.entity = entity[0];
                     var waterMark = context.queryParams.waterMark;

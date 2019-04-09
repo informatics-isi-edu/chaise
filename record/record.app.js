@@ -118,6 +118,12 @@
             }).then(function (page) {
                 var tuple = page.tuples[0];
 
+
+                // update the window location with tuple to remove query params
+                var url = tuple.reference.contextualize.detailed.appLink;
+                url = url.substring(0, url.lastIndexOf("?"));
+                $window.history.replaceState('', '', url);
+
                 // related references
                 var related = $rootScope.reference.related(tuple);
 

@@ -35,7 +35,7 @@
                             <span class="glyphicon glyphicon-pencil"></span> <strong>Edit</strong>
                         </a>&nbsp;&nbsp;
                         <!-- download CSV included by default -->
-                        <export parent="recordset" allow-export="vm.rowValues.length>0" reference="vm.reference" style="position:relative;" disabled="!vm.hasLoaded || !vm.initialized"></export>
+                        <export allow-export="vm.rowValues.length>0" reference="vm.reference" style="position:relative;" disabled="!vm.hasLoaded || !vm.initialized"></export>
                         &nbsp;&nbsp;
                         <!-- permalink -->
                         <a id="permalink" ng-href="{{ permalink() }}" tooltip-placement="bottom" uib-tooltip={{::tooltip.permalink}}>
