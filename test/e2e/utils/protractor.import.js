@@ -167,7 +167,7 @@ var bulkImportSchemas = function(configs, defer, authCookie, catalogId, entities
         }
     });
 
-    // we could pass the acls here in the catalog
+    // honoring the catalog object now, anything defined in it will be passed to ErmrestDataUtils
     settings.setup = {catalog: catalog, schemas: schemas};
 
     // reuse the same catalogid
