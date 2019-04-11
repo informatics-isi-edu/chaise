@@ -83,6 +83,10 @@
             $window.location = redirectUrl;
         }
 
+        vm.referenceTableApplink = function() {
+            return $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
+        };
+
         /*
          * Allows to tranform some form values depending on their types
          * Boolean: If the value is empty ('') then set it as null
@@ -159,8 +163,8 @@
             else {
                 AlertsService.addAlert("Your data has been submitted. Showing you the result set...", "success");
 
-                // can't use page.reference because it reflects the specific values that were inserted
-                vm.recordsetLink = $rootScope.reference.contextualize.compact.appLink;
+                // includes identifiers for specific records modified
+                vm.resultsetRecordsetLink = $rootScope.reference.contextualize.compact.appLink;
                 //set values for the view to flip to recordedit resultset view
                 vm.resultsetModel = {
                     hasLoaded: true,

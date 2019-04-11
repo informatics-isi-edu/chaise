@@ -78,9 +78,8 @@
             $window.location.href = $rootScope.reference.table.reference.contextualize.entryCreate.appLink;
         };
 
-        // TODO change this to reference.unfilteredReference.contextualize...
-        vm.toRecordset = function() {
-            return $rootScope.reference.table.reference.contextualize.compact.appLink;
+        vm.referenceTableApplink = function() {
+            return $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
         };
 
         vm.canEdit = function() {
