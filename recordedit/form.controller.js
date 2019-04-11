@@ -71,9 +71,11 @@
             // Created a single entity or Updated one
             if (rowset.length == 1) {
                 AlertsService.addAlert('Your data has been submitted. Redirecting you now to the record...', 'success');
+                // TODO can be replaced with page.reference.appLink.detailed
                 redirectUrl += "record/#" + page.reference.location.catalog + '/' + page.reference.location.compactPath;
             } else {
                 AlertsService.addAlert('Your data has been submitted. Redirecting you now to the recordset...', 'success');
+                // TODO can be replaced with page.reference.appLink.compact
                 redirectUrl += "recordset/#" + page.reference.location.catalog + '/' + page.reference.location.compactPath;
             }
 

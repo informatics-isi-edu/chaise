@@ -36,17 +36,17 @@
         // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
         var root = chaiseConfig.navbarMenu || {};
         // get the catalog id
-        // NOTE: this is put in a string        
+        // NOTE: this is put in a string
         var catalogId;
         if ($rootScope.context && $rootScope.context.catalogID) {
             catalogId = "" + $rootScope.context.catalogID;
         } else if ($window.location.hash != "") {
-            catalogId = "" + $window.location.hash.split('/')[0].slice(1);
+            catalogId = UriUtils.getCatalogIDFromLocation();
         } else if (chaiseConfig.defaultCatalog) {
             catalogId = "" + chaiseConfig.defaultCatalog;
         } else {
             catalogId = null;
-        } 
+        }
         // Set default newTab property at root node
         if (!root.hasOwnProperty('newTab')) {
             root.newTab = true;
