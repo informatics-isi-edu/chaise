@@ -819,14 +819,15 @@
             if (resolverId === null || !tuple.data || !tuple.data.RID) {
                 var url = tuple.reference.contextualize.detailed.appLink;
                 // remove query parameters
-                url = url.substring(0, url.lastIndexOf("?"));
+                var lastIndex = url.lastIndexOf("?") > 0 ? url.lastIndexOf("?") : url.length
+                url = url.substring(0, lastIndex);
 
                 // location.catalog will be in the form of `<id>` or `<id>@<version>`
                 return url.replace('#' + reference.location.catalog, '#' + currCatalog + (version ? version : ""));
             }
 
             // if it's a number (isNaN tries to parse to integer before checking) and is the same as current  catalog
-            if (!isNaN(resolverId) && resolverId === currCatalog) {
+            if (!isNaN(resolverId) && resolverId == currCatalog) {
                 return $window.location.origin + "/id/" + tuple.data.RID + (version ? version : "");
             }
 
