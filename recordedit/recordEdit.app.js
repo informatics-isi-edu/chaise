@@ -327,7 +327,10 @@
                                         default:
                                             // the structure for asset type columns is an object with a 'url' property
                                             if (column.isAsset && colModel.inputType !== "disabled") {
-                                                value = { url: values[i] || "" };
+                                                value = {
+                                                    url: values[i] || "",
+                                                    filename: tuple.data[column._filenameColumn.name]
+                                                };
                                             } else {
                                                 value = values[i];
                                             }
