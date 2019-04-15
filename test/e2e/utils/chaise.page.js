@@ -271,21 +271,21 @@ var recordEditPage = function() {
         return element(by.id('page-title'));
     };
 
-    this.getResultsetTitleElement = function() {
-        return element(by.css('.resultset-container #page-title'));
-    };
-
     this.getEntitySubtitleElement = function() {
-        return element(by.id('page-subtitle'));
+        return element(by.css('.recordedit-bookmark-container #page-subtitle > a'));
     };
 
     this.getEntitySubtitleTooltip = function () {
         // the .re-subtitle element might not exist, that's why it's different from other tooltips
-        return element.all(by.css("#page-subtitle .re-subtitle")).first().getAttribute('uib-tooltip');
+        return element(by.css('.recordedit-bookmark-container #page-subtitle .re-subtitle')).getAttribute('uib-tooltip');
+    };
+
+    this.getResultsetTitleElement = function() {
+        return element(by.css('.resultset-bookmark-container #page-title'));
     };
 
     this.getResultsetSubtitleLink = function () {
-        return element.all(by.css('#page-subtitle > a'));
+        return element(by.css('.resultset-bookmark-container #page-subtitle > a'));
     };
 
     this.getAllColumnCaptions = function() {

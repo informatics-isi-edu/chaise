@@ -59,11 +59,9 @@ describe('View existing record,', function() {
 
         beforeAll(function() {
             var keys = [];
-            testParams.html_keys.forEach(function(key) {
-                keys.push(key.name + key.operator + key.value);
-            });
             browser.ignoreSynchronization=true;
-            var url = browser.params.url + "/record/#" + browser.params.catalogId + "/editable-id:" + testParams.html_table_name + "/" + keys.join("&");
+            var RID = chaisePage.getEntityRow("editable-id", testParams.html_table_name, [{column: "id", value: "1"}]).RID
+            var url = browser.params.url + "/record/#" + browser.params.catalogId + "/editable-id:" + testParams.html_table_name + "/RID=" + RID;
             browser.get(url);
             chaisePage.waitForElement(element(by.id('tblRecord')));
         });

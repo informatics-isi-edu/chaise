@@ -895,7 +895,7 @@ describe("Other facet features, ", function() {
                     sidePanelBtn = chaisePage.recordPage.getSidePanelFiddler();
                     chaisePage.waitForElement(sidePanelBtn);
 
-                    expect(sidePanelBtn.getAttribute("class")).toContain(testParams.glyphRightClass, "side panel should be closed, button is displayed wrong");
+                    expect(sidePanelBtn.getAttribute("class")).toContain(testParams.glyphLeftClass, "side panel should be open by default, button is displayed wrong");
                     done();
                 }).catch(chaisePage.catchTestError(done));
             });
@@ -905,7 +905,7 @@ describe("Other facet features, ", function() {
                     var sidePanel = chaisePage.recordPage.getSidePanel();
                     browser.wait(EC.visibilityOf(sidePanel), browser.params.defaultTimeout);
 
-                    expect(sidePanelBtn.getAttribute("class")).toContain(testParams.glyphLeftClass, "side panel should be open, button is displayed wrong");
+                    expect(sidePanelBtn.getAttribute("class")).toContain(testParams.glyphRightClass, "side panel should be closed, button is displayed wrong");
                     expect(sidePanel.isDisplayed()).toBeTruthy("Side panel is not visible after opening it");
                     done();
                 }).catch(chaisePage.catchTestError(done));

@@ -417,7 +417,7 @@
                     params.selectedRows = [];
                     params.selectMode = modalBox.singleSelectMode;
                     params.showFaceting = true;
-                    params.facetPanelOpen = false;
+                    params.facetPanelOpen = true;
 
                     modalUtils.showModal({
                         animation: false,

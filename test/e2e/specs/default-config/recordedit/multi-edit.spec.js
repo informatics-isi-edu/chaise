@@ -226,11 +226,10 @@ describe('Edit multiple existing record,', function() {
 
                         it('should point to the correct link with caption.', function () {
                             var expectedLink = process.env.CHAISE_BASE_URL + "/recordset/#" +  browser.params.catalogId + "/" + schemaName + ":" + tableParams.table_name + "/" + keyPairs.join(";") + "@sort(" + tableParams.sortColumns + ")";
+                            var titleLink = chaisePage.recordEditPage.getResultsetSubtitleLink();
 
-                            chaisePage.recordEditPage.getResultsetSubtitleLink().then(function (titleLink) {
-                                expect(titleLink[0].getText()).toBe(tableParams.table_name, "Title of result page doesn't have the expected caption.");
-                                expect(titleLink[0].getAttribute("href")).toBe(expectedLink , "Title of result page doesn't have the expected link.");
-                            });
+                            expect(titleLink.getText()).toBe(tableParams.table_name, "Title of result page doesn't have the expected caption.");
+                            expect(titleLink.getAttribute("href")).toBe(expectedLink , "Title of result page doesn't have the expected link.");
                         });
 
                         it('should show correct table rows.', function() {

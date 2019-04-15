@@ -182,8 +182,34 @@
 
     .factory('UriUtils', ['$injector', '$rootScope', '$window', 'appContextMapping', 'appTagMapping', 'ContextUtils', 'Errors', 'messageMap', 'parsedFilter',
         function($injector, $rootScope, $window, appContextMapping, appTagMapping, ContextUtils, Errors, messageMap, ParsedFilter) {
-        var chaiseBaseURL;
         var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
+
+        /**
+         * Returns the catalog id
+         * TODO we might want to refactor the caller of this function
+         * @return {String}
+         */
+        function getCatalogIDFromLocation() {
+            var hash = getLocationHash($window.location);
+            return hash.split('/')[0].slice(1);
+        }
+
+        /**
+         * Given a location object, will return the hash part of it
+         * (it will take care of allowing ? in place of #)
+         * TODO we might want to refactor the different places that are using this
+         * function, we should not keep parsing the same location
+         * @param  {Object} location the $window.location
+         * @return {String}          hash string
+         */
+        function getLocationHash(location) {
+            var hash = location.hash;
+            // allow ? to be used in place of #
+            if ((hash == '' || hash == undefined) && location.href.indexOf("?") !== -1) {
+                hash = "#" + location.href.substring(location.href.indexOf("?") + 1);
+            }
+            return hash;
+        }
 
         /**
          * @function
@@ -197,7 +223,7 @@
             var tableMissing = messageMap.tableMissing,
                 catalogMissing = messageMap.catalogMissing;
 
-            var hash = location.hash,
+            var hash = getLocationHash(location),
                 ermrestUri = {},
                 catalogId, ppid, pcid;
 
@@ -331,9 +357,6 @@
          * @returns {string} url the chaise url
          */
         function appTagToURL(tag, location, context) {
-            if (!chaiseBaseURL)
-                chaiseBaseURL = $window.location.href.replace($window.location.hash, '');
-            chaiseBaseURL = chaiseBaseURL.replace("/" + $rootScope.context.appName + "/", '');
             var appPath;
             if (tag && (tag in appTagMapping)) {
                 appPath = appTagMapping[tag];
@@ -341,7 +364,7 @@
                 appPath = ContextUtils.getValueFromContext(appContextMapping, context);
             }
 
-            var url = chaiseBaseURL + appPath + "/#" + location.catalog + "/" + location.path;
+            var url = chaiseBaseURL() + appPath + "/#" + location.catalog + "/" + location.path;
             var pcontext = [];
             if ($rootScope.context) {
                 if ($rootScope.context.appName) {
@@ -355,7 +378,10 @@
             if (location.queryParamsString) {
                 url = url + "?" + location.queryParamsString;
             }
-            return url + (location.queryParamsString ? "&" : "?") + pcontext.join("&");
+            if (pcontext.length > 0) {
+                url = url + (location.queryParamsString ? "&" : "?") + pcontext.join("&");
+            }
+            return url;
         }
 
 
@@ -366,7 +392,7 @@
          */
         function getQueryParams(location) {
             var queryParams = {},
-                modifierPath = location.hash,
+                modifierPath = getLocationHash(location),
                 q_parts, i;
 
             if (modifierPath.indexOf("?") !== -1) {
@@ -406,7 +432,7 @@
 
             // Then, parse the URL fragment id (aka, hash). Expected format:
             //  "#catalog_id/[schema_name:]table_name[/{attribute::op::value}{&attribute::op::value}*][@sort(column[::desc::])]"
-            var hash = location.hash;
+            var hash = getLocationHash(location);
             var uri = hash;
             if (hash === undefined || hash == '' || hash.length == 1) {
                 return context;
@@ -421,7 +447,6 @@
                 }
             }
 
-            context.mainURI = hash; // uri without modifiers
             var modifierPath = uri.split(hash)[1];
 
             if (modifierPath) {
@@ -765,7 +790,8 @@
 
         // Takes path and creates full redirect links with catalogId
         function createRedirectLinkFromPath(path){
-          var catalogString = $window.location.hash.slice(0, $window.location.hash.search("/"));
+          var hash = getLocationHash($window.location);
+          var catalogString = hash.slice(0, hash.search("/"));
           return $window.location.origin + $window.location.pathname + catalogString + "/" + path;
         }
 
@@ -793,6 +819,19 @@
         }
 
         /**
+         * Returns the chaise base url without the trailing slash
+         * TODO we might want to find a better way instead of this.
+         * @return {String}
+         */
+        function chaiseBaseURL() {
+            var res = $window.location.origin + chaiseDeploymentPath();
+            if (res.endsWith("/")) {
+                return res.slice(0, -1);
+            }
+            return res;
+        }
+
+        /**
          * The following cases need to be handled for the resolverImplicitCatalog value:
          *  - if resolverImplicitCatalog === null:         use current chaise path (without the version if one is present)
          *  - if resolverImplicitCatalog === currCatalog:  /id/RID
@@ -809,14 +848,15 @@
             if (resolverId === null || !tuple.data || !tuple.data.RID) {
                 var url = tuple.reference.contextualize.detailed.appLink;
                 // remove query parameters
-                url = url.substring(0, url.lastIndexOf("?"));
+                var lastIndex = url.lastIndexOf("?") > 0 ? url.lastIndexOf("?") : url.length
+                url = url.substring(0, lastIndex);
 
                 // location.catalog will be in the form of `<id>` or `<id>@<version>`
                 return url.replace('#' + reference.location.catalog, '#' + currCatalog + (version ? version : ""));
             }
 
             // if it's a number (isNaN tries to parse to integer before checking) and is the same as current  catalog
-            if (!isNaN(resolverId) && resolverId === currCatalog) {
+            if (!isNaN(resolverId) && resolverId == currCatalog) {
                 return $window.location.origin + "/id/" + tuple.data.RID + (version ? version : "");
             }
 
@@ -828,10 +868,13 @@
         return {
             appNamefromUrlPathname: appNamefromUrlPathname,
             appTagToURL: appTagToURL,
+            chaiseBaseURL: chaiseBaseURL,
             chaiseDeploymentPath: chaiseDeploymentPath,
             chaiseURItoErmrestURI: chaiseURItoErmrestURI,
             createRedirectLinkFromPath: createRedirectLinkFromPath,
             fixedEncodeURIComponent: fixedEncodeURIComponent,
+            getCatalogIDFromLocation: getCatalogIDFromLocation,
+            getLocationHash: getLocationHash,
             getQueryParams: getQueryParams,
             isBrowserIE: isBrowserIE,
             parseURLFragment: parseURLFragment,
