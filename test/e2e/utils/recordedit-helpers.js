@@ -73,7 +73,11 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
     }
 
     it ("should have the table subtitle.", function () {
-        expect(chaisePage.recordEditPage.getEntitySubtitleElement().getText()).toBe(tableParams.table_displayname, "Entity subtitle is incorrect.");
+        var expectedLink = process.env.CHAISE_BASE_URL + "/recordset/#" +  browser.params.catalogId + "/" + tableParams.schema_name + ":" + tableParams.table_name;
+        var subtitleEl = chaisePage.recordEditPage.getEntitySubtitleElement();
+
+        expect(subtitleEl.getText()).toBe(tableParams.table_displayname, "Entity subtitle is incorrect.");
+        expect(subtitleEl.getAttribute("href")).toBe(expectedLink, "Title of result page doesn't have the expected link.");
         expect(chaisePage.recordEditPage.getEntitySubtitleTooltip()).toBe(tableParams.table_comment, "Entity subtitle tooltip is incorrect.");
     });
 
@@ -1533,11 +1537,10 @@ exports.testSubmission = function (tableParams, isEditMode) {
                 }
 
                 var expectedLink = process.env.CHAISE_BASE_URL + "/recordset/#" +  browser.params.catalogId + "/" + tableParams.schema_name + ":" + tableParams.table_name + linkModifier;
+                var titleLink = chaisePage.recordEditPage.getResultsetSubtitleLink();
 
-                chaisePage.recordEditPage.getResultsetSubtitleLink().then(function (titleLink) {
-                    expect(titleLink[0].getText()).toBe(tableParams.table_displayname, "Title of result page doesn't have the expected caption.");
-                    expect(titleLink[0].getAttribute("href")).toBe(expectedLink , "Title of result page doesn't have the expected link.");
-                });
+                expect(titleLink.getText()).toBe(tableParams.table_displayname, "Title of result page doesn't have the expected caption.");
+                expect(titleLink.getAttribute("href")).toBe(expectedLink , "Title of result page doesn't have the expected link.");
             });
 
             //NOTE: in travis we're not uploading the file and therefore this test case will fail

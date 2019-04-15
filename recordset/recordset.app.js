@@ -50,10 +50,8 @@
     // services.
     .constant('context', {
         appName:'recordset',
-        mainURI: null,  // the main URL portion up to filters (without modifiers)
         catalogID: null,
-        tableName: null,
-        chaiseBaseURL: null
+        tableName: null
     })
 
     .config(['$compileProvider', '$cookiesProvider', '$logProvider', '$uibTooltipProvider', 'ConfigUtilsProvider', function($compileProvider, $cookiesProvider, $logProvider, $uibTooltipProvider, ConfigUtilsProvider) {
@@ -100,8 +98,9 @@
             UriUtils.setOrigin();
 
             var chaiseConfig = Object.assign({}, ConfigUtils.getConfigJSON());
-            context.catalogID = $window.location.hash.split('/')[0].slice(1);
-            context.chaiseBaseURL = $window.location.href.replace($window.location.hash, '');
+            context.catalogID = UriUtils.getCatalogIDFromLocation();
+            context.chaiseBaseURL = UriUtils.chaiseBaseURL();
+
             var modifyEnabled = chaiseConfig.editRecord === false ? false : true;
             var deleteEnabled = chaiseConfig.deleteRecord === true ? true : false;
             var showFaceting = chaiseConfig.showFaceting === true ? true : false;

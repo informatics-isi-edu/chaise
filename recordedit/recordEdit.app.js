@@ -100,8 +100,8 @@
             context = {};
 
         var chaiseConfig = Object.assign({}, ConfigUtils.getConfigJSON());
-        context.catalogID = $window.location.hash.split('/')[0].slice(1);
-        context.chaiseBaseURL = $window.location.href.replace($window.location.hash, '');
+        context.catalogID = UriUtils.getCatalogIDFromLocation();
+        context.chaiseBaseURL = UriUtils.chaiseBaseURL();
 
         $rootScope.showColumnSpinner = [{}];
 
@@ -332,7 +332,10 @@
                                         default:
                                             // the structure for asset type columns is an object with a 'url' property
                                             if (column.isAsset && colModel.inputType !== "disabled") {
-                                                value = { url: values[i] || "" };
+                                                value = {
+                                                    url: values[i] || "",
+                                                    filename: tuple.data[column._filenameColumn.name]
+                                                };
                                             } else {
                                                 value = values[i];
                                             }

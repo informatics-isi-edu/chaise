@@ -36,8 +36,8 @@
                 return $window.location.href;
             }
 
-            //var url = context.mainURI;
-            var url = context.chaiseBaseURL + "#" + recordsetModel.reference.location.catalog + "/" +
+            //TODO we could use the reference.appLink instead of this
+            var url = UriUtils.chaiseBaseURL() + "/recordset/#" + recordsetModel.reference.location.catalog + "/" +
                 recordsetModel.reference.location.compactPath;
 
             // add sort modifier

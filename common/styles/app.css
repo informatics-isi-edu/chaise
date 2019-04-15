@@ -697,6 +697,9 @@ th.multi-select-width {
 .markdown-container li {
     list-style-type: inherit;
 }
+.markdown-container li:only-child {
+    list-style-type: none;
+}
 .markdown-container ul {
     list-style-type: disc;
 }

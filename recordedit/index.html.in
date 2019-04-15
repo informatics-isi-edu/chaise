@@ -29,7 +29,7 @@
                 <div ng-hide="form.resultset">
                     <loading-spinner ng-show="form.submissionButtonDisabled || showSpinner"></loading-spinner>
                     <div class="row">
-                        <div id="bookmark-container" class="col-xs-12 meta-icons">
+                        <div id="bookmark-container" class="col-xs-12 meta-icons recordedit-bookmark-container">
                             <div id="title" class="pull-left">
                                 <h1 id="page-title">
                                         <span>{{ form.editMode ? "Edit " : "Create " }}</span>
@@ -38,8 +38,10 @@
                                         <span>{{ (form.recordEditModel.rows.length > 1) ? " Records" : " Record" }}</span>
                                 </h1>
                                 <h3 id="page-subtitle">
-                                    <span class="re-subtitle" ng-if="tableDisplayName.isHTML" ng-bind-html="tableDisplayName.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}"></span>
-                                    <span class="re-subtitle" ng-if="!tableDisplayName.isHTML" ng-bind="tableDisplayName.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}"></span>
+                                    <a ng-href="{{::form.referenceTableApplink()}}">
+                                        <span class="re-subtitle" ng-if="tableDisplayName.isHTML" ng-bind-html="tableDisplayName.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}"></span>
+                                        <span class="re-subtitle" ng-if="!tableDisplayName.isHTML" ng-bind="tableDisplayName.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}"></span>
+                                    </a>
                                 </h3>
                             </div>
                             <div class="pull-right">
@@ -284,13 +286,13 @@
                 </div>
                 <div class="resultset-container" ng-if="form.resultset">
                     <div class="row">
-                        <div id="bookmark-container" class="col-xs-12 meta-icons">
+                        <div id="bookmark-container" class="col-xs-12 meta-icons resultset-bookmark-container">
                             <div id="title" class="pull-left">
                                 <h1 id="page-title">
                                     <span>{{ form.resultsetModel.rowValues.length }}/{{ form.resultsetModel.pageLimit }} Records <span ng-if="::!form.editMode">Created</span><span ng-if="::form.editMode">Updated</span> Successfully</span>
                                 </h1>
                                 <h3 id="page-subtitle">
-                                    <a ng-href="{{::form.recordsetLink}}">
+                                    <a ng-href="{{::form.resultsetRecordsetLink}}">
                                         <span class="re-subtitle" ng-if="tableDisplayName.isHTML" ng-bind-html="tableDisplayName.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}"></span>
                                         <span class="re-subtitle" ng-if="!tableDisplayName.isHTML" ng-bind="tableDisplayName.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}"></span>
                                     </a>

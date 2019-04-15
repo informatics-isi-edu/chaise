@@ -71,15 +71,21 @@
             // Created a single entity or Updated one
             if (rowset.length == 1) {
                 AlertsService.addAlert('Your data has been submitted. Redirecting you now to the record...', 'success');
+                // TODO can be replaced with page.reference.appLink.detailed
                 redirectUrl += "record/#" + page.reference.location.catalog + '/' + page.reference.location.compactPath;
             } else {
                 AlertsService.addAlert('Your data has been submitted. Redirecting you now to the recordset...', 'success');
+                // TODO can be replaced with page.reference.appLink.compact
                 redirectUrl += "recordset/#" + page.reference.location.catalog + '/' + page.reference.location.compactPath;
             }
 
             // Redirect to record or recordset app..
             $window.location = redirectUrl;
         }
+
+        vm.referenceTableApplink = function() {
+            return $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
+        };
 
         /*
          * Allows to tranform some form values depending on their types
@@ -157,8 +163,8 @@
             else {
                 AlertsService.addAlert("Your data has been submitted. Showing you the result set...", "success");
 
-                // can't use page.reference because it reflects the specific values that were inserted
-                vm.recordsetLink = $rootScope.reference.contextualize.compact.appLink;
+                // includes identifiers for specific records modified
+                vm.resultsetRecordsetLink = $rootScope.reference.contextualize.compact.appLink;
                 //set values for the view to flip to recordedit resultset view
                 vm.resultsetModel = {
                     hasLoaded: true,
@@ -293,7 +299,7 @@
             params.selectedRows = [];
             params.selectMode = modalBox.singleSelectMode;
             params.showFaceting = true;
-            params.facetPanelOpen = false;
+            params.facetPanelOpen = true;
 
             modalUtils.showModal({
                 animation: false,

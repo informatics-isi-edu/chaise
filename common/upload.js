@@ -57,7 +57,7 @@
                                         column: scope.column,
                                         reference: scope.reference
                                     });
-                                    scope.value.url = scope.value.file.name;
+                                    scope.value.url = scope.value.filename = scope.value.file.name;
                                     scope.$apply();
                                 }
                             });
@@ -74,10 +74,22 @@
 
                     scope.clear = function() {
                         scope.value.url = "";
+                        scope.value.filename = "";
                         delete scope.value.file;
                         delete scope.value.hatracObj;
                         scope.fileEl.val("");
                     };
+
+                    scope.setFilename = function () {
+                        var value = scope.value;
+                        if (value) {
+                            if (value.filename) {
+                                return value.filename;
+                            } else {
+                                return value.url;
+                            }
+                        }
+                    }
                 }
             };
         }])
