@@ -229,7 +229,7 @@ describe('Edit multiple existing record,', function() {
                             var titleLink = chaisePage.recordEditPage.getResultsetSubtitleLink();
 
                             expect(titleLink.getText()).toBe(tableParams.table_name, "Title of result page doesn't have the expected caption.");
-                            expect(titleLink.getAttribute("href")).toBe(expectedLink , "Title of result page doesn't have the expected link.");
+                            expect(titleLink.getAttribute("href")).toContain(expectedLink , "Title of result page doesn't have the expected link.");
                         });
 
                         it('should show correct table rows.', function() {

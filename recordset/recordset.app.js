@@ -119,7 +119,7 @@
             context.pageId = MathUtils.uuid();
 
             var res = UriUtils.chaiseURItoErmrestURI($window.location);
-            var ermrestUri = res.ermrestUri, pcid = res.pcid, ppid = res.ppid;
+            var ermrestUri = res.ermrestUri, pcid = res.pcid, ppid = res.ppid, isIndexed = res.isIndexed;
 
 
             FunctionUtils.registerErmrestCallbacks();
@@ -173,6 +173,7 @@
                     recordsetModel.logObject = {action: logActions.recordsetLoad};
                     if (pcid) recordsetModel.logObject.pcid = pcid;
                     if (ppid) recordsetModel.logObject.ppid = ppid;
+                    if (isIndexed) recordsetModel.logObject.indexed = 1;
 
                     recordsetModel.readyToInitialize = true;
                  }).catch(function genericCatch(exception) {

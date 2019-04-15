@@ -190,7 +190,7 @@
          * @return {String}
          */
         function getCatalogIDFromLocation() {
-            var hash = getLocationHash($window.location);
+            var hash = getLocationHash($window.location).hash;
             return hash.split('/')[0].slice(1);
         }
 
@@ -200,15 +200,16 @@
          * TODO we might want to refactor the different places that are using this
          * function, we should not keep parsing the same location
          * @param  {Object} location the $window.location
-         * @return {String}          hash string
+         * @return {Object} with 'hash' and 'isIndexed'
          */
         function getLocationHash(location) {
-            var hash = location.hash;
+            var hash = location.hash, isIndexed = false;
             // allow ? to be used in place of #
             if ((hash == '' || hash == undefined) && location.href.indexOf("?") !== -1) {
                 hash = "#" + location.href.substring(location.href.indexOf("?") + 1);
+                isIndexed = true;
             }
-            return hash;
+            return {hash: hash, isIndexed: isIndexed};
         }
 
         /**
@@ -223,9 +224,11 @@
             var tableMissing = messageMap.tableMissing,
                 catalogMissing = messageMap.catalogMissing;
 
-            var hash = getLocationHash(location),
+            var hashObj = getLocationHash(location),
                 ermrestUri = {},
                 catalogId, ppid, pcid;
+
+            var hash = hashObj.hash, isIndexed = hashObj.isIndexed;
 
             // remove query params other than limit
             if (hash.indexOf('?') !== -1) {
@@ -334,7 +337,7 @@
 
             var baseUri = chaiseConfig.ermrestLocation;
             var path = '/catalog/' + catalogId + '/entity' + hash;
-            return {ermrestUri: baseUri + path, ppid: ppid, pcid: pcid};
+            return {ermrestUri: baseUri + path, ppid: ppid, pcid: pcid, isIndexed: isIndexed};
         }
 
         /**
@@ -392,7 +395,7 @@
          */
         function getQueryParams(location) {
             var queryParams = {},
-                modifierPath = getLocationHash(location),
+                modifierPath = getLocationHash(location).hash,
                 q_parts, i;
 
             if (modifierPath.indexOf("?") !== -1) {
@@ -432,7 +435,7 @@
 
             // Then, parse the URL fragment id (aka, hash). Expected format:
             //  "#catalog_id/[schema_name:]table_name[/{attribute::op::value}{&attribute::op::value}*][@sort(column[::desc::])]"
-            var hash = getLocationHash(location);
+            var hash = getLocationHash(location).hash;
             var uri = hash;
             if (hash === undefined || hash == '' || hash.length == 1) {
                 return context;
@@ -790,7 +793,7 @@
 
         // Takes path and creates full redirect links with catalogId
         function createRedirectLinkFromPath(path){
-          var hash = getLocationHash($window.location);
+          var hash = getLocationHash($window.location).hash;
           var catalogString = hash.slice(0, hash.search("/"));
           return $window.location.origin + $window.location.pathname + catalogString + "/" + path;
         }
@@ -865,6 +868,11 @@
             return $window.location.origin + "/id/" + currCatalog + "/" + tuple.data.RID + (version ? version : "");
         }
 
+        function removeParentContext(url) {
+            url = url.substring(0, url.lastIndexOf("?"));
+            $window.history.replaceState('', '', url);
+        }
+
         return {
             appNamefromUrlPathname: appNamefromUrlPathname,
             appTagToURL: appTagToURL,
@@ -874,12 +882,12 @@
             createRedirectLinkFromPath: createRedirectLinkFromPath,
             fixedEncodeURIComponent: fixedEncodeURIComponent,
             getCatalogIDFromLocation: getCatalogIDFromLocation,
-            getLocationHash: getLocationHash,
             getQueryParams: getQueryParams,
             isBrowserIE: isBrowserIE,
             parseURLFragment: parseURLFragment,
             parsedFilterToERMrestFilter: parsedFilterToERMrestFilter,
             queryStringToJSON: queryStringToJSON,
+            removeParentContext: removeParentContext,
             resolvePermalink: resolvePermalink,
             setLocationChangeHandling: setLocationChangeHandling,
             setOrigin: setOrigin

@@ -80,7 +80,7 @@
         $rootScope.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
 
         var res = UriUtils.chaiseURItoErmrestURI($window.location);
-        var ermrestUri = res.ermrestUri, pcid = res.pcid, ppid = res.ppid;
+        var ermrestUri = res.ermrestUri, pcid = res.pcid, ppid = res.ppid, isIndexed = res.isIndexed;
 
         $rootScope.context = context;
 
@@ -113,13 +113,16 @@
                 var logObj = {};
                 if (pcid) logObj.pcid = pcid;
                 if (ppid) logObj.ppid = ppid;
+                if (isIndexed) logObj.indexed = 1;
                 return recordAppUtils.readMainEntity(false, logObj);
             }).then(function (page) {
                 var tuple = page.tuples[0];
 
 
                 // update the window location with tuple to remove query params
+                // and also change the url to always be based on RID
                 var url = tuple.reference.contextualize.detailed.appLink;
+                UriUtils.removeParentContext(url);
                 url = url.substring(0, url.lastIndexOf("?"));
                 $window.history.replaceState('', '', url);
 

@@ -120,9 +120,9 @@
         }
 
         var res = UriUtils.chaiseURItoErmrestURI($window.location);
-        var ermrestUri = res.ermrestUri, pcid = res.pcid, ppid = res.ppid;
+        var ermrestUri = res.ermrestUri, pcid = res.pcid, ppid = res.ppid, isIndexed = res.isIndexed;
 
-        
+
 
         $rootScope.context = context;
 
@@ -130,6 +130,8 @@
         // We are not passing the query parameters that are used for app mode,
         // so we cannot use the queryParams that parser is returning.
         context.queryParams = UriUtils.getQueryParams($window.location);
+
+        // TODO we should remvoe ppid and pcid from the url. but what about the rest?
 
         context.appName = "recordedit";
         context.pageId = MathUtils.uuid();
@@ -203,6 +205,7 @@
                 var logObj = {action: logActions.update};
                 if (pcid) logObj.pcid = pcid;
                 if (ppid) logObj.ppid = ppid;
+                if (isIndexed) logObj.indexed = 1;
                 if (context.mode == context.modes.COPY) {
                     logObj = {action: logActions.copy};
                 } else if (context.mode == context.modes.CREATE){
