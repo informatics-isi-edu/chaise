@@ -291,9 +291,13 @@ describe('Error related test cases,', function() {
         it('After clicking back button initial page should appear', function(done){
             chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
                 return btn.click();
-            }).then (function (){
+            }).then (function () {
+                return chaisePage.recordsetPageReady();
+            }).then(function () {
                 return browser.navigate().back();
-            }).then(function (){
+            }).then(function () {
+                return chaisePage.recordPageReady();
+            }).then(function () {
                 return browser.driver.getCurrentUrl();
             }).then (function(currentUrl) {
                 expect(currentUrl).toContain('id=269111', "The back button failed to go back to previous page.");

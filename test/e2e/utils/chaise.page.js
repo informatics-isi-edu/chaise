@@ -1409,6 +1409,9 @@ function chaisePage() {
     this.getPageId = function() {
         return browser.executeScript("return angular.element('body').scope().$root.context.pageId");
     };
+    this.recordsetPageReady = function() {
+        this.waitForElement(element(by.id("divRecordSet")));
+    }
     this.recordPageReady = function() {
         this.waitForElement(element(by.id('tblRecord')));
         this.waitForElementInverse(element(by.id('rt-loading')));
