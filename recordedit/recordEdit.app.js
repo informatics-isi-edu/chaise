@@ -7,7 +7,6 @@
         'chaise.utils',
         'ermrestjs',
         'ngCookies',
-        'ngAnimate',
         'ui.bootstrap'
     ])
 
