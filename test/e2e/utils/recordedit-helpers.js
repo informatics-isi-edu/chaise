@@ -1543,7 +1543,7 @@ exports.testSubmission = function (tableParams, isEditMode) {
                 var titleLink = chaisePage.recordEditPage.getResultsetSubtitleLink();
 
                 expect(titleLink.getText()).toBe(tableParams.table_displayname, "Title of result page doesn't have the expected caption.");
-                expect(titleLink.getAttribute("href")).toBe(expectedLink , "Title of result page doesn't have the expected link.");
+                expect(titleLink.getAttribute("href")).toContain(expectedLink , "Title of result page doesn't have the expected link.");
             });
 
             //NOTE: in travis we're not uploading the file and therefore this test case will fail
