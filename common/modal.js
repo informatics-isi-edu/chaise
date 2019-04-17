@@ -42,7 +42,7 @@
             $uibModalInstance.dismiss('cancel');
         }
     }])
-    .controller('ErrorModalController', ['Errors', 'messageMap', 'params', 'Session', '$rootScope', '$uibModalInstance', '$window', function ErrorModalController(Errors, messageMap, params, Session, $rootScope, $uibModalInstance, $window) {
+    .controller('ErrorModalController', ['Errors', 'messageMap', 'params', 'Session', '$rootScope', '$sce', '$uibModalInstance', '$window', function ErrorModalController(Errors, messageMap, params, Session, $rootScope, $sce, $uibModalInstance, $window) {
         function isErmrestErrorNeedReplace (error) {
             switch (error.constructor) {
                 case ERMrest.InvalidFacetOperatorError:
@@ -84,9 +84,9 @@
         // in case of adding login button, we should add extra message
         if (vm.params.showLogin) {
             if (ERMrest && exception instanceof ERMrest.NotFoundError) {
-                vm.params.message = vm.params.message + messageMap.maybeNeedLogin;
+                vm.params.message = $sce.trustAsHtml(vm.params.message + messageMap.maybeNeedLogin);
             } else if (exception instanceof Errors.noRecordError) {
-                vm.params.message = messageMap.noRecordForFilter + '<br>' + messageMap.maybeUnauthorizedMessage;
+                vm.params.message = $sce.trustAsHtml(messageMap.noRecordForFilter + '<br>' + messageMap.maybeUnauthorizedMessage);
             }
         }
 
@@ -113,7 +113,7 @@
 
         // <p> tag is added to maintain the space between click action message and buttons
         // Also maintains consistency  in their placement irrespective of reload message
-        vm.clickActionMessage += reloadMessage;
+        vm.clickActionMessage = $sce.trustAsHtml(vm.clickActionMessage + reloadMessage);
 
         vm.clickOkToDismiss = exception.clickOkToDismiss;
         vm.showDetails = function() {

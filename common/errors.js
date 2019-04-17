@@ -241,8 +241,8 @@
                 pageName: pageName,
                 exception: exception,
                 errorStatus: exception.status ? exception.status : "Terminal Error",
-                message: message ? message : exception.message,
-                subMessage: subMessage,
+                message: message ? $sce.trustAsHtml(message) : $sce.trustAsHtml(exception.message),
+                subMessage: $sce.trustAsHtml(subMessage),
                 canClose: false,
                 showLogin: showLogin
             };
@@ -333,7 +333,7 @@
                 redirectLink = exception.errorData.redirectUrl;
             } else {
                 logError(exception);
-                message = $sce.trustAsHtml(errorMessages.systemAdminMessage);
+                message = errorMessages.systemAdminMessage;
                 subMessage = exception.message;
             }
 

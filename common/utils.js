@@ -192,7 +192,7 @@
                 return "" + chaiseConfig.defaultCatalog;
             }
 
-            return null;
+            return "";
         }
 
         /**
