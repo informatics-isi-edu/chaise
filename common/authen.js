@@ -5,8 +5,6 @@
 
     .factory('Session', ['ConfigUtils', 'messageMap', 'modalUtils', 'StorageService', 'UriUtils', '$cookies', '$http', '$interval', '$log', '$q', '$rootScope', '$sce', '$uibModalStack', '$window',
         function (ConfigUtils, messageMap, modalUtils, StorageService, UriUtils, $cookies, $http, $interval, $log, $q, $rootScope, $sce, $uibModalStack, $window) {
-        var chaiseConfig = Object.assign({}, ConfigUtils.getConfigJSON());
-
         // authn API no longer communicates through ermrest, removing the need to check for ermrest location
         var serviceURL = $window.location.origin;
 
@@ -327,6 +325,7 @@
             },
 
             logout: function() {
+                var chaiseConfig = ConfigUtils.getConfigJSON();
                 var logoutURL = chaiseConfig['logoutURL'] ? chaiseConfig['logoutURL'] : '/';
                 var url = serviceURL + "/authn/session";
 

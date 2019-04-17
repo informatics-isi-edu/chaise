@@ -172,10 +172,9 @@
         notNull: "<i>All Records With Value</i>"
     })
 
-    .factory('UriUtils', ['appContextMapping', 'appTagMapping', 'ContextUtils', 'defaultChaiseConfig', 'Errors', 'messageMap', 'parsedFilter', '$injector', '$rootScope', '$window',
-        function(appContextMapping, appTagMapping, ContextUtils, defaultChaiseConfig, Errors, messageMap, ParsedFilter, $injector, $rootScope, $window) {
+    .factory('UriUtils', ['appContextMapping', 'appTagMapping', 'ConfigUtils', 'ContextUtils', 'defaultChaiseConfig', 'Errors', 'messageMap', 'parsedFilter', '$injector', '$rootScope', '$window',
+        function(appContextMapping, appTagMapping, ConfigUtils, ContextUtils, defaultChaiseConfig, Errors, messageMap, ParsedFilter, $injector, $rootScope, $window) {
         var chaiseBaseURL;
-        var chaiseConfig = Object.assign({}, $window.dcctx.chaiseConfig);
 
         /**
          * Simple function meant to get the parts from the uri that are necessary for getting the server and catalog instance
@@ -187,7 +186,7 @@
             // grab the unversioned catalog id
             return {
                 service: defaultChaiseConfig.ermrestLocation,
-                catalogId: getCatalogIDFromLocation().split('@')[0] || ""+chaiseConfig.defaultCatalog
+                catalogId: getCatalogIDFromLocation().split('@')[0] || ""+chaiseConfig.defaultCatalog // get from the global config
             }
         }
 
@@ -227,7 +226,8 @@
          */
         function chaiseURItoErmrestURI(location) {
             var tableMissing = messageMap.tableMissing,
-                catalogMissing = messageMap.catalogMissing;
+                catalogMissing = messageMap.catalogMissing,
+                chaiseConfig = ConfigUtils.getConfigJSON();
 
             var hash = getLocationHash(location),
                 ermrestUri = {},
@@ -402,6 +402,7 @@
          * Parses the URL to create the context object
          */
         function parseURLFragment(location, context) {
+            var chaiseConfig = ConfigUtils.getConfigJSON();
             var i, row, value;
             if (!context) {
                 var context = {};
@@ -789,6 +790,7 @@
          *      2. If ChaiseConfig doesn't specify the chaisePath, then it returns the default value '/chaise/'
         */
         function chaiseDeploymentPath() {
+            var chaiseConfig = ConfigUtils.getConfigJSON();
             var appNames = ["record", "recordset", "recordedit", "search", "login"];
             var currentAppName = appNamefromUrlPathname($window.location.pathname);
             if (appNames.includes(currentAppName)) {
@@ -827,6 +829,7 @@
          * @param {String} version - the encoded version string prepended with the '@' character
          **/
         function resolvePermalink(tuple, reference, version) {
+            var chaiseConfig = ConfigUtils.getConfigJSON();
             var resolverId = chaiseConfig.resolverImplicitCatalog;
             var currCatalog = reference.location.catalogId;
 

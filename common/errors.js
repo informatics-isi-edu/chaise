@@ -196,7 +196,6 @@
     // Factory for each error type
     .factory('ErrorService', ['AlertsService', 'ConfigUtils', 'DataUtils', 'errorMessages', 'errorNames', 'Errors', 'modalUtils', 'Session', 'UriUtils', '$document', '$log', '$rootScope', '$window',
         function ErrorService(AlertsService, ConfigUtils, DataUtils, errorMessages, errorNames, Errors, modalUtils, Session, UriUtils, $document, $log, $rootScope, $window) {
-        var chaiseConfig = Object.assign({}, ConfigUtils.getConfigJSON());
 
         var reloadCb = function() {
             window.location.reload();
@@ -214,6 +213,7 @@
          * errorStatus  - (optional) error "name" (if defined, overwrites exception.status)
          */
         function errorPopup(exception, pageName, redirectLink, subMessage, stackTrace, isDismissible, showLogin, message, errorStatus) {
+            var chaiseConfig = ConfigUtils.getConfigJSON();
             var appName = UriUtils.appNamefromUrlPathname($window.location.pathname),
                 session = Session.getSessionValue(),
                 providedLink = true;
@@ -294,6 +294,7 @@
 
         // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
         function handleException(exception, isDismissible) {
+            var chaiseConfig = ConfigUtils.getConfigJSON();
             $log.info(exception);
 
             // arguments for `errorPopup()` in order for method declaration
