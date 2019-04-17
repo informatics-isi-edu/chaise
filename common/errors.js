@@ -194,8 +194,8 @@
     }])
 
     // Factory for each error type
-    .factory('ErrorService', ['AlertsService', 'ConfigUtils', 'DataUtils', 'errorMessages', 'errorNames', 'Errors', 'modalUtils', 'Session', 'UriUtils', '$document', '$log', '$rootScope', '$window',
-        function ErrorService(AlertsService, ConfigUtils, DataUtils, errorMessages, errorNames, Errors, modalUtils, Session, UriUtils, $document, $log, $rootScope, $window) {
+    .factory('ErrorService', ['AlertsService', 'ConfigUtils', 'DataUtils', 'errorMessages', 'errorNames', 'Errors', 'modalUtils', 'Session', 'UriUtils', '$document', '$log', '$rootScope', '$sce', '$window',
+        function ErrorService(AlertsService, ConfigUtils, DataUtils, errorMessages, errorNames, Errors, modalUtils, Session, UriUtils, $document, $log, $rootScope, $sce, $window) {
 
         var reloadCb = function() {
             window.location.reload();
@@ -333,7 +333,7 @@
                 redirectLink = exception.errorData.redirectUrl;
             } else {
                 logError(exception);
-                message = errorMessages.systemAdminMessage;
+                message = $sce.trustAsHtml(errorMessages.systemAdminMessage);
                 subMessage = exception.message;
             }
 

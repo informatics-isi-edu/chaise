@@ -176,18 +176,23 @@
         function(appContextMapping, appTagMapping, ConfigUtils, ContextUtils, defaultChaiseConfig, Errors, messageMap, ParsedFilter, $injector, $rootScope, $window) {
         var chaiseBaseURL;
 
-        /**
-         * Simple function meant to get the parts from the uri that are necessary for getting the server and catalog instance
-         * only need service (domain + '/ermrest') and catalogId
-         * NOTE: chaise-config has not been set up yet so we are using the defaultchaise config directly
-         */
-        function extractParts (location) {
-            // use default ermrest location
-            // grab the unversioned catalog id
-            return {
-                service: defaultChaiseConfig.ermrestLocation,
-                catalogId: getCatalogIDFromLocation().split('@')[0] || ""+chaiseConfig.defaultCatalog // get from the global config
+        function getCatalogId() {
+            var chaiseConfig = ConfigUtils.getConfigJSON();
+
+            if ($rootScope.context && $rootScope.context.catalogID) {
+                return "" + $rootScope.context.catalogID;
             }
+
+            // NOTE: what if it's '?' instead of '#'
+            if ($window.location.hash != "") {
+                return getCatalogIDFromLocation();
+            }
+
+            if (chaiseConfig.defaultCatalog) {
+                return "" + chaiseConfig.defaultCatalog;
+            }
+
+            return null;
         }
 
         /**
@@ -196,8 +201,13 @@
          * @return {String}
          */
         function getCatalogIDFromLocation() {
-            var hash = getLocationHash($window.location);
-            return hash.split('/')[0].slice(1);
+            try {
+                var hash = getLocationHash($window.location);
+                return hash.split('/')[0].slice(1);
+            } catch (exception) {
+                // pass to error handler
+                throw exception;
+            }
         }
 
         /**
@@ -861,8 +871,8 @@
             chaiseDeploymentPath: chaiseDeploymentPath,
             chaiseURItoErmrestURI: chaiseURItoErmrestURI,
             createRedirectLinkFromPath: createRedirectLinkFromPath,
-            extractParts: extractParts,
             fixedEncodeURIComponent: fixedEncodeURIComponent,
+            getCatalogId: getCatalogId,
             getCatalogIDFromLocation: getCatalogIDFromLocation,
             getLocationHash: getLocationHash,
             getQueryParams: getQueryParams,

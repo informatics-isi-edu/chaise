@@ -11,15 +11,12 @@
         'ui.bootstrap'
     ])
 
-    .run(['ERMrest', 'ConfigUtils', 'UriUtils', '$window', function (ERMrest, ConfigUtils, UriUtils, $window) {
-        ERMrest.onload().then(function () {
-            var urlParts = UriUtils.extractParts($window.location);
-            ERMrest.ermrestFactory.getServer(urlParts.service).catalogs.get(urlParts.catalogId).then(function (response) {
-                ConfigUtils.setConfigJSON(response.chaiseConfig);
+    .run(['$rootScope', function ($rootScope) {
+        // When the configuration module's run block emits the `configuration-done` event, attach the app to the DOM
+        $rootScope.$on("configuration-done", function () {
 
-                angular.element(document).ready(function(){
-                    angular.bootstrap(document.getElementById("record"), ["chaise.record"]);
-                });
+            angular.element(document).ready(function(){
+                angular.bootstrap(document.getElementById("record"), ["chaise.record"]);
             });
         });
     }]);
