@@ -119,7 +119,10 @@
             throw error;
         }
 
-        var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
+        var res = UriUtils.chaiseURItoErmrestURI($window.location);
+        var ermrestUri = res.ermrestUri, pcid = res.pcid, ppid = res.ppid, isQueryParameter = res.isQueryParameter;
+
+
 
         $rootScope.context = context;
 
@@ -127,6 +130,8 @@
         // We are not passing the query parameters that are used for app mode,
         // so we cannot use the queryParams that parser is returning.
         context.queryParams = UriUtils.getQueryParams($window.location);
+
+        // TODO we should remvoe ppid and pcid from the url. but what about the rest?
 
         context.appName = "recordedit";
         context.pageId = MathUtils.uuid();
@@ -195,9 +200,12 @@
                 $log.info("Reference: ", $rootScope.reference);
 
 
-                // create the extra information that we want to log in ermrest
+                // create the extra information that we want to log in ermrest (with the submission request)
                 // NOTE currently we're only setting the action, we might need to add extra information here
                 var logObj = {action: logActions.update};
+                if (pcid) logObj.pcid = pcid;
+                if (ppid) logObj.ppid = ppid;
+                if (isQueryParameter) logObj.cqp = 1;
                 if (context.mode == context.modes.COPY) {
                     logObj = {action: logActions.copy};
                 } else if (context.mode == context.modes.CREATE){
