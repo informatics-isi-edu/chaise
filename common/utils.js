@@ -200,16 +200,16 @@
          * TODO we might want to refactor the different places that are using this
          * function, we should not keep parsing the same location
          * @param  {Object} location the $window.location
-         * @return {Object} with 'hash' and 'isIndexed'
+         * @return {Object} with 'hash' and 'isQueryParameter'
          */
         function getLocationHash(location) {
-            var hash = location.hash, isIndexed = false;
+            var hash = location.hash, isQueryParameter = false;
             // allow ? to be used in place of #
             if ((hash == '' || hash == undefined) && location.href.indexOf("?") !== -1) {
                 hash = "#" + location.href.substring(location.href.indexOf("?") + 1);
-                isIndexed = true;
+                isQueryParameter = true;
             }
-            return {hash: hash, isIndexed: isIndexed};
+            return {hash: hash, isQueryParameter: isQueryParameter};
         }
 
         /**
@@ -217,7 +217,7 @@
          * @param {Object} location - location Object from the $window resource
          * @desc
          * Converts a chaise URI to an ermrest resource URI object.
-         * @returns {Object} an object that has 'ermrestURI', `ppid`, and 'pcid'
+         * @returns {Object} an object that has 'ermrestURI', `ppid`, 'pcid', and `isQueryParameter`
          * @throws {MalformedUriError} if table or catalog data are missing.
          */
         function chaiseURItoErmrestURI(location) {
@@ -228,7 +228,7 @@
                 ermrestUri = {},
                 catalogId, ppid, pcid;
 
-            var hash = hashObj.hash, isIndexed = hashObj.isIndexed;
+            var hash = hashObj.hash, isQueryParameter = hashObj.isQueryParameter;
 
             // remove query params other than limit
             if (hash.indexOf('?') !== -1) {
@@ -337,7 +337,7 @@
 
             var baseUri = chaiseConfig.ermrestLocation;
             var path = '/catalog/' + catalogId + '/entity' + hash;
-            return {ermrestUri: baseUri + path, ppid: ppid, pcid: pcid, isIndexed: isIndexed};
+            return {ermrestUri: baseUri + path, ppid: ppid, pcid: pcid, isQueryParameter: isQueryParameter};
         }
 
         /**

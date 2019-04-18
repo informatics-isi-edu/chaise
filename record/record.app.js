@@ -80,7 +80,7 @@
         $rootScope.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
 
         var res = UriUtils.chaiseURItoErmrestURI($window.location);
-        var ermrestUri = res.ermrestUri, pcid = res.pcid, ppid = res.ppid, isIndexed = res.isIndexed;
+        var ermrestUri = res.ermrestUri, pcid = res.pcid, ppid = res.ppid, isQueryParameter = res.isQueryParameter;
 
         $rootScope.context = context;
 
@@ -113,7 +113,7 @@
                 var logObj = {};
                 if (pcid) logObj.pcid = pcid;
                 if (ppid) logObj.ppid = ppid;
-                if (isIndexed) logObj.indexed = 1;
+                if (isQueryParameter) logObj.cqp = 1;
                 return recordAppUtils.readMainEntity(false, logObj);
             }).then(function (page) {
                 var tuple = page.tuples[0];

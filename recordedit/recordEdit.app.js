@@ -120,7 +120,7 @@
         }
 
         var res = UriUtils.chaiseURItoErmrestURI($window.location);
-        var ermrestUri = res.ermrestUri, pcid = res.pcid, ppid = res.ppid, isIndexed = res.isIndexed;
+        var ermrestUri = res.ermrestUri, pcid = res.pcid, ppid = res.ppid, isQueryParameter = res.isQueryParameter;
 
 
 
@@ -205,7 +205,7 @@
                 var logObj = {action: logActions.update};
                 if (pcid) logObj.pcid = pcid;
                 if (ppid) logObj.ppid = ppid;
-                if (isIndexed) logObj.indexed = 1;
+                if (isQueryParameter) logObj.cqp = 1;
                 if (context.mode == context.modes.COPY) {
                     logObj = {action: logActions.copy};
                 } else if (context.mode == context.modes.CREATE){

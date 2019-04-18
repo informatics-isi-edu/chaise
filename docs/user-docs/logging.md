@@ -59,7 +59,7 @@ The following are the optional attributes that you might find on requests:
   - recordset page: Any request for getting the facet data. The `referrer` is the main entity and it will include all the selected facets and filters.
 - `t`: If this attribute exists and its value is `1`, then the given object is truncated since it was lengthy. Refer to [truncation](#truncation) for more information.
 - `template`: This object will only be available for export request. It's an object with only `displayname` and `type` attributes.
-- `indexed`: When a user uses a link that includes the `?` instead of the `#`. These urls are only used to help with google indexing and should be used only for navigating users from search engines to chaise apps.
+- `cqp` (chaise query parameter): When a user uses a link that includes the `?` instead of the `#`. These urls are only used to help with google indexing and should be used only for navigating users from search engines to chaise apps.
 
 ## Action List
 
@@ -139,7 +139,7 @@ Currently we're only logging terminal errors (we might want to change that to lo
 
 The object that we want to log might be lengthy. So we should truncate this object if it's exceeding the maximum length (we're currently limiting it to 6500). An object with `t:1` indicates that some attributes have been truncated.
 The truncation is done based on a set priority. We keep adding more and more attributes and as soon as we hit the limit, we're going to return that object. Attributes are added in the following order (attribute one has more priority over the next and so on):
- - cid, pid, wid, schema_table, catalog, cfacet, indexed, ppid, pcid
+ - cid, pid, wid, schema_table, catalog, cfacet, cqp, ppid, pcid
  - template
  - referrer
  - source
@@ -221,6 +221,7 @@ The following url patterns are what's unique about each of these requests and yo
 -  If there are preselected facets, in entity mode we have to get the row-name corresponding to the selected value. Customized action (`recordset/facet/init`) has been added for this request.
 - Added proper action `recordset/facet/histogram` to the request for getting buckets of a range picker facet.
 - Added `cfacet`, `cfacet_str`, and `cfacet_path`.
+- Added `cqp` attribute to track urls that are using `?` (query parameter) instead of `#` (hash fragment).
 
 #### 03/08/19
 
