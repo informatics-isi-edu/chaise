@@ -335,12 +335,27 @@
                                         default:
                                             // the structure for asset type columns is an object with a 'url' property
                                             if (column.isAsset && colModel.inputType !== "disabled") {
+                                                var metadata = column.getMetadata(tuple.data);
                                                 value = {
                                                     url: values[i] || "",
-                                                    filename: tuple.data[column._filenameColumn.name]
+                                                    filename: metadata.filename,
+                                                    filesize: metadata.byteCount
                                                 };
                                             } else {
                                                 value = values[i];
+                                            }
+
+                                            // if in copy mode and copying an asset column with metadata available, attach that to the submission model
+                                            if (column.isAsset && context.mode == context.modes.COPY) {
+                                                // may not have been set or fetched above because of disabled case
+                                                // we still want to copy the metadata
+                                                var metadata = column.getMetadata(tuple.data);
+
+                                                // I don't think this should be done brute force like this
+                                                if (metadata.filename) recordEditModel.submissionRows[j][column.filenameColumn.name] = metadata.filename;
+                                                if (metadata.byteCount) recordEditModel.submissionRows[j][column.byteCountColumn.name] = metadata.byteCount;
+                                                if (metadata.md5) recordEditModel.submissionRows[j][column.md5.name] = metadata.md5;
+                                                if (metadata.sha256) recordEditModel.submissionRows[j][column.sha256.name] = metadata.sha256;
                                             }
                                             break;
                                     }
