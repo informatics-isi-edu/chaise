@@ -1,14 +1,34 @@
 (function() {
     'use strict';
 /* Configuration of the Recordedit App */
+
+    /**
+     * Module Dependencies:
+     *   config.js
+     *   utils.js
+     *    |--errors.js - needed for utils
+     *    |  |--alerts.js
+     *    |  |  |--filters.js
+     *    |  |
+     *    |  |--authen.js
+     *    |  |  |--storage.js
+     *    |  |
+     *    |  |--modal.js
+     *    |
+     *    |--inputs.js
+     *       |--validators.js
+     */
     angular.module('chaise.configure-recordedit', [
         'chaise.config',
-        'chaise.modal',
         'chaise.utils',
         'ermrestjs',
         'ngCookies',
         'ui.bootstrap'
     ])
+
+    .constant('context', {
+        appName:'recordedit'
+    })
 
     .run(['$rootScope', function ($rootScope) {
         // When the configuration module's run block emits the `configuration-done` event, attach the app to the DOM

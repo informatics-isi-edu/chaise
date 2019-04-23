@@ -183,9 +183,10 @@
                 return "" + $rootScope.context.catalogID;
             }
 
-            // NOTE: what if it's '?' instead of '#'
-            if ($window.location.hash != "") {
-                return getCatalogIDFromLocation();
+            // function may return `null`
+            var id = getCatalogIDFromLocation();
+            if (id) {
+                return "" + id;
             }
 
             if (chaiseConfig.defaultCatalog) {
@@ -205,8 +206,7 @@
                 var hash = getLocationHash($window.location);
                 return hash.split('/')[0].slice(1);
             } catch (exception) {
-                // pass to error handler
-                throw exception;
+                return null;
             }
         }
 
@@ -224,7 +224,8 @@
             if ((hash == '' || hash == undefined) && location.href.indexOf("?") !== -1) {
                 hash = "#" + location.href.substring(location.href.indexOf("?") + 1);
             }
-            return hash;
+            // if no hash, return null
+            return hash || null;
         }
 
         /**
@@ -244,7 +245,7 @@
                 catalogId;
 
             // remove query params other than limit
-            if (hash.indexOf('?') !== -1) {
+            if (hash && hash.indexOf('?') !== -1) {
                 var queries = hash.match(/\?(.+)/)[1].split("&"); // get the query params
                 var acceptedQueries = [], i;
 
@@ -260,7 +261,7 @@
             }
 
             // If the hash is empty, check for defaults
-            if (hash == '' || hash === undefined || hash.length == 1) {
+            if (hash == '' || hash === null || hash.length == 1) {
                 if (chaiseConfig.defaultCatalog) {
                     if (chaiseConfig.defaultTables) {
                         catalogId = chaiseConfig.defaultCatalog;
@@ -1676,20 +1677,20 @@
      }])
 
     .service('headInjector', ['ConfigUtils', 'MathUtils', '$window', '$rootScope', function(ConfigUtils, MathUtils, $window, $rootScope) {
-        var chaiseConfig = Object.assign({}, ConfigUtils.getConfigJSON());
-
         function addCustomCSS() {
-          if (chaiseConfig['customCSS'] !== undefined) {
-            var fileref = document.createElement("link");
-            fileref.setAttribute("rel", "stylesheet");
-            fileref.setAttribute("type", "text/css");
-            fileref.setAttribute("href", chaiseConfig['customCSS']);
-            document.getElementsByTagName("head")[0].appendChild(fileref);
-          }
+            var chaiseConfig = ConfigUtils.getConfigJSON();
+            if (chaiseConfig['customCSS'] !== undefined) {
+                var fileref = document.createElement("link");
+                fileref.setAttribute("rel", "stylesheet");
+                fileref.setAttribute("type", "text/css");
+                fileref.setAttribute("href", chaiseConfig['customCSS']);
+                document.getElementsByTagName("head")[0].appendChild(fileref);
+            }
         }
 
         function addTitle() {
-          document.getElementsByTagName('head')[0].getElementsByTagName('title')[0].innerHTML = chaiseConfig.headTitle;
+            var chaiseConfig = ConfigUtils.getConfigJSON();
+            document.getElementsByTagName('head')[0].getElementsByTagName('title')[0].innerHTML = chaiseConfig.headTitle;
         }
 
         // sets the WID if it doesn't already exist

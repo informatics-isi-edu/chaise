@@ -3,20 +3,24 @@
 
     angular.module('chaise.config', ['ermrestjs'])
 
-    .run(['ConfigUtils', 'ERMrest', 'UriUtils', '$rootScope', '$window', function(ConfigUtils, ERMrest, UriUtils, $rootScope, $window) {
+    .run(['ConfigUtils', 'context', 'ERMrest', 'headInjector', 'MathUtils', 'UriUtils', '$rootScope', '$window', function(ConfigUtils, context, ERMrest, headInjector, MathUtils, UriUtils, $rootScope, $window) {
+        headInjector.setWindowName();
         // initialize dcctx object
-        $window.dcctx = {}
+        $window.dcctx = {
+            cid: context.appName,
+            pid: MathUtils.uuid(),
+            wid: $window.name
+        }
         // set chaise configuration based on what is in `chaise-config.js` first
         ConfigUtils.setConfigJSON();
 
         ERMrest.onload().then(function () {
             var cc = ConfigUtils.getConfigJSON(),
                 service = cc.ermrestLocation,
-                // Get the catalog id and strip off the version
-                catalogId = UriUtils.getCatalogId().split('@')[0];
+                catalogId = UriUtils.getCatalogId();
 
             if (catalogId) {
-                ERMrest.ermrestFactory.getServer(service).catalogs.get(catalogId).then(function (response) {
+                ERMrest.ermrestFactory.getServer(service, { cid: dcctx.cid, pid: dcctx.pid, wid: dcctx.wid }).catalogs.get(catalogId).then(function (response) {
                     ConfigUtils.setConfigJSON(response.chaiseConfig);
 
                     $rootScope.$emit("configuration-done");

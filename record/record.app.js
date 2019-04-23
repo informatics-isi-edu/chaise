@@ -1,15 +1,35 @@
 (function() {
     'use strict';
 /* Configuration of the Record App */
+
+    /**
+     * Module Dependencies:
+     *   config.js
+     *   utils.js
+     *    |--errors.js - needed for utils
+     *    |  |--alerts.js
+     *    |  |  |--filters.js
+     *    |  |
+     *    |  |--authen.js
+     *    |  |  |--storage.js
+     *    |  |
+     *    |  |--modal.js
+     *    |
+     *    |--inputs.js
+     *       |--validators.js
+     */
     angular.module('chaise.configure-record', [
         'chaise.config',
-        'chaise.modal',
         'chaise.utils',
         'ermrestjs',
         'ngCookies',
         'ngAnimate',
         'ui.bootstrap'
     ])
+
+    .constant('context', {
+        appName:'record'
+    })
 
     .run(['$rootScope', function ($rootScope) {
         // When the configuration module's run block emits the `configuration-done` event, attach the app to the DOM
