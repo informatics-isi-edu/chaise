@@ -27,9 +27,7 @@
         'ui.bootstrap'
     ])
 
-    .constant('context', {
-        appName:'record'
-    })
+    .constant('appName', 'record')
 
     .run(['$rootScope', function ($rootScope) {
         // When the configuration module's run block emits the `configuration-done` event, attach the app to the DOM
@@ -84,10 +82,11 @@
         function runApp(AlertsService, ConfigUtils, DataUtils, ERMrest, FunctionUtils, headInjector, MathUtils, messageMap, recordAppUtils, Session, UiUtils, UriUtils, $log, $rootScope, $timeout, $window) {
 
         var session,
-            context = {},
             errorData = {};
 
-        var chaiseConfig = Object.assign({}, ConfigUtils.getConfigJSON());
+        var context = ConfigUtils.getContextJSON(),
+            chaiseConfig = ConfigUtils.getConfigJSON();
+
         context.catalogID = UriUtils.getCatalogIDFromLocation();
         context.chaiseBaseURL = UriUtils.chaiseBaseURL();
 
@@ -103,12 +102,6 @@
 
         var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
 
-        $rootScope.context = context;
-
-        // The context object won't change unless the app is reloaded
-        context.appName = "record";
-        context.pageId = MathUtils.uuid();
-
         FunctionUtils.registerErmrestCallbacks();
 
         // Subscribe to on change event for session
@@ -117,7 +110,7 @@
             // Unsubscribe onchange event to avoid this function getting called again
             Session.unsubscribeOnChange(subId);
 
-            ERMrest.resolve(ermrestUri, { cid: context.appName, pid: context.pageId, wid: $window.name }).then(function getReference(reference) {
+            ERMrest.resolve(ermrestUri, { cid: context.cid, pid: context.pid, wid: context.wid }).then(function getReference(reference) {
                 context.filter = reference.location.filter;
                 context.facets = reference.location.facets;
 

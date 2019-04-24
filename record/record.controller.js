@@ -12,7 +12,6 @@
         var addRecordRequests = {}; // <generated unique id : reference of related table>
         var editRecordRequests = {}; // generated id: {schemaName, tableName}
         var updated = {};
-        var context = $rootScope.context;
         var completed = {};
         var modalUpdate = false;
         vm.alerts = AlertsService.alerts;
@@ -21,7 +20,7 @@
         vm.rowFocus = {};
         vm.sidePanToggleBtnIndicator = "Show";
 
-        var chaiseConfig = Object.assign({}, ConfigUtils.getConfigJSON());
+        var chaiseConfig = ConfigUtils.getConfigJSON();
 
         vm.tooltip = messageMap.tooltip;
         vm.queryTimeoutTooltip = messageMap.queryTimeoutTooltip;
@@ -381,7 +380,7 @@
 
             if(ref.derivedAssociationReference){
                 recordAppUtils.pauseUpdateRecordPage();
-                recordCreate.addRelatedRecordFact(true, ref, 0, cookie, vm.editMode, vm.formContainer, vm.readyToSubmit, vm.recordsetLink, vm.submissionButtonDisabled, $rootScope.reference, $rootScope.tuples, $rootScope.session, $rootScope.context.queryParams, onSuccess, onModalClose);
+                recordCreate.addRelatedRecordFact(true, ref, 0, cookie, vm.editMode, vm.formContainer, vm.readyToSubmit, vm.recordsetLink, vm.submissionButtonDisabled, $rootScope.reference, $rootScope.tuples, $rootScope.session, ConfigUtils.getContextJSON().queryParams, onSuccess, onModalClose);
                 return;
             }
 

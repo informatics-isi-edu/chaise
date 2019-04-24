@@ -27,9 +27,7 @@
         'ui.bootstrap'
     ])
 
-    .constant('context', {
-        appName:'recordset'
-    })
+    .constant('appName', 'recordset')
 
     .run(['$rootScope', function ($rootScope) {
         // When the configuration module's run block emits the `configuration-done` event, attach the app to the DOM
@@ -40,7 +38,6 @@
             });
         });
     }]);
-
 
 /* Recordset App */
     angular.module('chaise.recordset', [
@@ -62,14 +59,6 @@
         'ngAnimate',
         'duScroll',
         'ui.bootstrap'])
-
-    // Register the 'context' object which can be accessed by config and other
-    // services.
-    .constant('context', {
-        appName:'recordset',
-        catalogID: null,
-        tableName: null
-    })
 
     .config(['$compileProvider', '$cookiesProvider', '$logProvider', '$uibTooltipProvider', 'ConfigUtilsProvider', function($compileProvider, $cookiesProvider, $logProvider, $uibTooltipProvider, ConfigUtilsProvider) {
         // angular configurations
@@ -105,8 +94,8 @@
     })
 
     // Register work to be performed after loading all modules
-    .run(['AlertsService', 'ConfigUtils', 'context', 'DataUtils', 'ERMrest', 'FunctionUtils', 'headInjector', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
-        function(AlertsService, ConfigUtils, context, DataUtils, ERMrest, FunctionUtils, headInjector, logActions, MathUtils, messageMap, modalBox, recordsetModel, Session, UiUtils, UriUtils, $log, $rootScope, $window) {
+    .run(['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'FunctionUtils', 'headInjector', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
+        function(AlertsService, ConfigUtils, DataUtils, ERMrest, FunctionUtils, headInjector, logActions, MathUtils, messageMap, modalBox, recordsetModel, Session, UiUtils, UriUtils, $log, $rootScope, $window) {
         try {
             var session;
 
@@ -114,7 +103,9 @@
 
             UriUtils.setOrigin();
 
-            var chaiseConfig = Object.assign({}, ConfigUtils.getConfigJSON());
+            var context = ConfigUtils.getContextJSON(),
+                chaiseConfig = ConfigUtils.getConfigJSON();
+
             context.catalogID = UriUtils.getCatalogIDFromLocation();
             context.chaiseBaseURL = UriUtils.chaiseBaseURL();
 
@@ -136,9 +127,6 @@
 
             $rootScope.location = $window.location.href;
             recordsetModel.hasLoaded = false;
-            $rootScope.context = context;
-
-            context.pageId = MathUtils.uuid();
 
             var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
 
@@ -151,7 +139,8 @@
                 // Unsubscribe onchange event to avoid this function getting called again
                 Session.unsubscribeOnChange(subId);
 
-                ERMrest.resolve(ermrestUri, { cid: context.appName, pid: context.pageId, wid: $window.name }).then(function getReference(reference) {
+                // TODO: the header params don't need to be included if they are part of the `getServer` call in config.js
+                ERMrest.resolve(ermrestUri, { cid: context.cid, pid: context.pid, wid: context.wid }).then(function getReference(reference) {
                     session = Session.getSessionValue();
                     if (!session && Session.showPreviousSessionAlert()) AlertsService.addAlert(messageMap.previousSession.message, 'warning', Session.createPromptExpirationToken);
 
@@ -166,7 +155,7 @@
                     context.tableName = reference.table.name;
 
                     recordsetModel.reference = reference.contextualize.compact;
-                    recordsetModel.context = "compact";
+                    recordsetModel.context = context.appContext = "compact";
                     recordsetModel.reference.session = session;
                     recordsetModel.tableComment = recordsetModel.reference.table.comment;
 

@@ -4,7 +4,7 @@
 
 var ermLoginController = angular.module('ermLoginController', ['chaise.config']);
 
-ermLoginController.constant('context', { appName: 'oldlogin' });
+ermLoginController.constant('appName', 'oldlogin');
 ermLoginController.controller('LoginCtrl', ['$sce', '$scope', 'ermrest', 'UriUtils','$cookies',
                                            function($sce, $scope, ermrest, uriUtils, $cookies) {
 

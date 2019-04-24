@@ -1407,7 +1407,7 @@ function chaisePage() {
         return browser.executeScript("return window.name;");
     };
     this.getPageId = function() {
-        return browser.executeScript("return angular.element('body').scope().$root.context.pageId");
+        return browser.executeScript("return window.dcctx.pid");
     };
     this.recordsetPageReady = function() {
         this.waitForElement(element(by.id("divRecordSet")));

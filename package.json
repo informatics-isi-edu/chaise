@@ -53,8 +53,7 @@
     "q": "^1.4.1",
     "request": "x",
     "request-q": "x",
-    "set-cookie-parser": "x",
-    "webdriver-manager": "x"
+    "set-cookie-parser": "x"
   },
   "dependencies": {
     "markdown-it-editor": "^1.1.4"

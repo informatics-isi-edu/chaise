@@ -4,8 +4,8 @@
     angular.module('chaise.recordset')
 
     // Register the recordset controller
-    .controller('recordsetController', ['ConfigUtils', 'context', 'DataUtils', 'messageMap', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
-        function(ConfigUtils, context, DataUtils, messageMap, recordsetModel, Session, UiUtils, UriUtils, $document, $log, $rootScope, $scope, $timeout, $window) {
+    .controller('recordsetController', ['ConfigUtils', 'DataUtils', 'messageMap', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
+        function(ConfigUtils, DataUtils, messageMap, recordsetModel, Session, UiUtils, UriUtils, $document, $log, $rootScope, $scope, $timeout, $window) {
 
         var ctrl = this;
         var chaiseConfig = Object.assign({}, ConfigUtils.getConfigJSON());

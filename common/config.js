@@ -3,11 +3,11 @@
 
     angular.module('chaise.config', ['ermrestjs'])
 
-    .run(['ConfigUtils', 'context', 'ERMrest', 'headInjector', 'MathUtils', 'UriUtils', '$rootScope', '$window', function(ConfigUtils, context, ERMrest, headInjector, MathUtils, UriUtils, $rootScope, $window) {
+    .run(['appName', 'ConfigUtils', 'ERMrest', 'headInjector', 'MathUtils', 'UriUtils', '$rootScope', '$window', function(appName, ConfigUtils, ERMrest, headInjector, MathUtils, UriUtils, $rootScope, $window) {
         headInjector.setWindowName();
         // initialize dcctx object
         $window.dcctx = {
-            cid: context.appName,
+            cid: appName,
             pid: MathUtils.uuid(),
             wid: $window.name
         }

@@ -525,7 +525,7 @@ $(MIN): $(JS_SOURCE) $(BIN)
 
 # Rule to ensure Node bin scripts are present
 $(BIN): $(MODULES)
-	node_modules/protractor/bin/webdriver-manager update
+	node_modules/protractor/bin/webdriver-manager update --versions.standalone 3.6.0
 
 # Rule to install Node modules locally
 $(MODULES): package.json

@@ -178,9 +178,11 @@
 
         function getCatalogId() {
             var chaiseConfig = ConfigUtils.getConfigJSON();
+            var context = ConfigUtils.getContextJSON();
 
-            if ($rootScope.context && $rootScope.context.catalogID) {
-                return "" + $rootScope.context.catalogID;
+            // Context ($window.dcctx) should ALWAYS be defined
+            if (context.catalogID) {
+                return "" + context.catalogID;
             }
 
             // function may return `null`
@@ -416,7 +418,7 @@
             var chaiseConfig = ConfigUtils.getConfigJSON();
             var i, row, value;
             if (!context) {
-                var context = {};
+                var context = ConfigUtils.getContextJSON();
             }
             // First, configure the service URL, assuming its this origin plus the
             // typical deployment location for ermrest.
@@ -1401,8 +1403,12 @@
     }])
 
     .factory("ConfigUtils", ['$rootScope', '$window', 'defaultChaiseConfig', function($rootScope, $window, defaultConfig) {
+        function getContextJSON() {
+            return $window.dcctx;
+        };
+
         function getConfigJSON() {
-            return $window.dcctx.chaiseConfig;
+            return getContextJSON().chaiseConfig;
         };
 
         /**
@@ -1486,6 +1492,7 @@
         }
 
         return {
+            getContextJSON: getContextJSON,
             getConfigJSON: getConfigJSON,
             setConfigJSON: setConfigJSON
         }
