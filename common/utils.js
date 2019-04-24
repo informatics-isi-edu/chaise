@@ -113,6 +113,7 @@
 
     .constant("logActions", {
         "recordRead": "record/main", // read the main entity (record)
+        "recordUpdate": "record/main/update", // read the main entity (record)
         "recordRelatedRead": "record/related", // secondary
         "recordRelatedUpdate": "record/related/update", // secondary
         "recordRelatedAggregate": "record/related/aggregate", // secondary
@@ -135,7 +136,7 @@
         "preCreateAssociation": "pre-create/prefill/association", // read the association values to add new ones (record) has referrer
         "preCreateAssociationSelected": "pre-create/prefill/association/disabled", // secondary
         "preCopy": "pre-create/copy", // read the current data before copy (recordedit)
-        "recordeditDefault": "recordedit/default",
+        "recordeditDefault": "default",
 
         "update": "update", // update entity (recordedit)
         "preUpdate": "pre-update", // read entity to be updated (recordedit)
@@ -150,13 +151,20 @@
         "recordsetFacet": "recordset/main/facet", // recordset main data read on changing facet (recordset)
         "recordsetFacetDetails": "recordset/viewmore", // getting facet details in modal (recordset)
         "recordsetFacetRead": "recordset/facet", // secondary
+        "recordsetFacetInit": "recordset/facet/init", // secondary (getting the rowname of preselected facets)
+        "recordsetFacetHistogram": "recordset/facet/histogram", // secondary (getting the histogrma buckets)
 
         "recordDelete": "delete/record", // delete record (record)
         "recordEditDelete": "delete/recordedit", // delete record (recordedit)
         "recordsetDelete": "delete/recordset", // delete a row (recordset)
-        "recordRelatedDelete": "delete/recordset/related", // delete a row from related entities (record) has referrer
+        "recordRelatedDelete": "delete/record/related", // delete a row from related entities (record) has referrer
 
-        "export": "recordset/export"
+        "export": "export",
+
+        "viewerMain": "main",
+        "viewerAnnotation": "annotation",
+        "viewerComment": "comment",
+        "viewerAnatomy": "anatomy"
 
     })
 
@@ -205,7 +213,7 @@
          */
         function getCatalogIDFromLocation() {
             try {
-                var hash = getLocationHash($window.location);
+                var hash = getLocationHash($window.location).hash;
                 return hash.split('/')[0].slice(1);
             } catch (exception) {
                 return null;
@@ -218,16 +226,16 @@
          * TODO we might want to refactor the different places that are using this
          * function, we should not keep parsing the same location
          * @param  {Object} location the $window.location
-         * @return {String}          hash string
+         * @return {Object} with 'hash' and 'isQueryParameter'
          */
         function getLocationHash(location) {
-            var hash = location.hash;
+            var hash = location.hash, isQueryParameter = false;
             // allow ? to be used in place of #
             if ((hash == '' || hash == undefined) && location.href.indexOf("?") !== -1) {
                 hash = "#" + location.href.substring(location.href.indexOf("?") + 1);
+                isQueryParameter = true;
             }
-            // if no hash, return null
-            return hash || null;
+            return {hash: hash || null, isQueryParameter: isQueryParameter};
         }
 
         /**
@@ -235,6 +243,7 @@
          * @param {Object} location - location Object from the $window resource
          * @desc
          * Converts a chaise URI to an ermrest resource URI object.
+         * @returns {Object} an object that has 'ermrestURI', `ppid`, 'pcid', and `isQueryParameter`
          * @throws {MalformedUriError} if table or catalog data are missing.
          */
         function chaiseURItoErmrestURI(location) {
@@ -242,9 +251,11 @@
                 catalogMissing = messageMap.catalogMissing,
                 chaiseConfig = ConfigUtils.getConfigJSON();
 
-            var hash = getLocationHash(location),
+            var hashObj = getLocationHash(location),
                 ermrestUri = {},
-                catalogId;
+                catalogId, ppid, pcid;
+
+            var hash = hashObj.hash, isQueryParameter = hashObj.isQueryParameter;
 
             // remove query params other than limit
             if (hash && hash.indexOf('?') !== -1) {
@@ -255,6 +266,12 @@
                 for (i = 0; i < queries.length; i++) { // add back only the valid queries
                     if (queries[i].indexOf("limit=") === 0) {
                         acceptedQueries.push(queries[i]);
+                    }
+                    if (queries[i].indexOf("pcid=") === 0) {
+                        pcid = queries[i].split("=")[1];
+                    }
+                    if (queries[i].indexOf("ppid=") === 0) {
+                        ppid = queries[i].split("=")[1];
                     }
                 }
                 if (acceptedQueries.length != 0) {
@@ -347,7 +364,7 @@
 
             var baseUri = chaiseConfig.ermrestLocation;
             var path = '/catalog/' + catalogId + '/entity' + hash;
-            return baseUri + path;
+            return {ermrestUri: baseUri + path, ppid: ppid, pcid: pcid, isQueryParameter: isQueryParameter};
         }
 
         /**
@@ -376,9 +393,23 @@
             } else {
                 appPath = ContextUtils.getValueFromContext(appContextMapping, context);
             }
+
             var url = chaiseBaseURL() + appPath + "/#" + location.catalog + "/" + location.path;
-            if (location.queryParamsString && (context.indexOf("compact") === 0)) {
+            var pcontext = [];
+            if ($rootScope.context) {
+                if ($rootScope.context.appName) {
+                    pcontext.push("pcid=" + $rootScope.context.appName);
+                }
+                if ($rootScope.context.pageId) {
+                    pcontext.push("ppid=" + $rootScope.context.pageId);
+                }
+            }
+            // TODO we might want to allow only certian query parameters
+            if (location.queryParamsString) {
                 url = url + "?" + location.queryParamsString;
+            }
+            if (pcontext.length > 0) {
+                url = url + (location.queryParamsString ? "&" : "?") + pcontext.join("&");
             }
             return url;
         }
@@ -391,7 +422,7 @@
          */
         function getQueryParams(location) {
             var queryParams = {},
-                modifierPath = getLocationHash(location),
+                modifierPath = getLocationHash(location).hash,
                 q_parts, i;
 
             if (modifierPath.indexOf("?") !== -1) {
@@ -432,7 +463,7 @@
 
             // Then, parse the URL fragment id (aka, hash). Expected format:
             //  "#catalog_id/[schema_name:]table_name[/{attribute::op::value}{&attribute::op::value}*][@sort(column[::desc::])]"
-            var hash = getLocationHash(location);
+            var hash = getLocationHash(location).hash;
             var uri = hash;
             if (hash === undefined || hash == '' || hash.length == 1) {
                 return context;
@@ -790,7 +821,7 @@
 
         // Takes path and creates full redirect links with catalogId
         function createRedirectLinkFromPath(path){
-          var hash = getLocationHash($window.location);
+          var hash = getLocationHash($window.location).hash;
           var catalogString = hash.slice(0, hash.search("/"));
           return $window.location.origin + $window.location.pathname + catalogString + "/" + path;
         }
@@ -867,6 +898,11 @@
             return $window.location.origin + "/id/" + currCatalog + "/" + tuple.data.RID + (version ? version : "");
         }
 
+        function removeParentContext(url) {
+            url = url.substring(0, url.lastIndexOf("?"));
+            $window.history.replaceState('', '', url);
+        }
+
         return {
             appNamefromUrlPathname: appNamefromUrlPathname,
             appTagToURL: appTagToURL,
@@ -877,12 +913,12 @@
             fixedEncodeURIComponent: fixedEncodeURIComponent,
             getCatalogId: getCatalogId,
             getCatalogIDFromLocation: getCatalogIDFromLocation,
-            getLocationHash: getLocationHash,
             getQueryParams: getQueryParams,
             isBrowserIE: isBrowserIE,
             parsedFilterToERMrestFilter: parsedFilterToERMrestFilter,
             parseURLFragment: parseURLFragment,
             queryStringToJSON: queryStringToJSON,
+            removeParentContext: removeParentContext,
             resolvePermalink: resolvePermalink,
             setLocationChangeHandling: setLocationChangeHandling,
             setOrigin: setOrigin

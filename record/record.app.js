@@ -100,7 +100,8 @@
         $rootScope.modifyRecord = chaiseConfig.editRecord === false ? false : true;
         $rootScope.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
 
-        var ermrestUri = UriUtils.chaiseURItoErmrestURI($window.location);
+        var res = UriUtils.chaiseURItoErmrestURI($window.location);
+        var ermrestUri = res.ermrestUri, pcid = res.pcid, ppid = res.ppid, isQueryParameter = res.isQueryParameter;
 
         FunctionUtils.registerErmrestCallbacks();
 
@@ -124,9 +125,21 @@
                 $rootScope.reference.session = session;
                 $log.info("Reference: ", $rootScope.reference);
 
-                return recordAppUtils.readMainEntity();
+                var logObj = {};
+                if (pcid) logObj.pcid = pcid;
+                if (ppid) logObj.ppid = ppid;
+                if (isQueryParameter) logObj.cqp = 1;
+                return recordAppUtils.readMainEntity(false, logObj);
             }).then(function (page) {
                 var tuple = page.tuples[0];
+
+
+                // update the window location with tuple to remove query params
+                // and also change the url to always be based on RID
+                var url = tuple.reference.contextualize.detailed.appLink;
+                UriUtils.removeParentContext(url);
+                url = url.substring(0, url.lastIndexOf("?"));
+                $window.history.replaceState('', '', url);
 
                 // related references
                 var related = $rootScope.reference.related(tuple);
@@ -194,7 +207,7 @@
 
                 $rootScope.loading = related.length > 0;
                 $timeout(function () {
-                    recordAppUtils.updateRecordPage();
+                    recordAppUtils.updateRecordPage(false);
                 });
 
             }).catch(recordAppUtils.genericErrorCatch);

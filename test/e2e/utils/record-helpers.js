@@ -286,7 +286,7 @@ exports.testPresentation = function (tableParams) {
                         });
                         columnUrl += "RID=" + dataRow.RID;
 
-                        expect(aTag.getAttribute('href')).toEqual(columnUrl, errMessage + " for url");
+                        expect(aTag.getAttribute('href')).toContain(columnUrl, errMessage + " for url");
                         expect(aTag.getText()).toEqual(column.value, errMessage + " for caption");
                     });
                 } else {
@@ -900,7 +900,7 @@ exports.testAddRelatedTable = function (params, isInline, inputCallback) {
 				// ... and then get the url from this new tab...
 				return browser.driver.getCurrentUrl();
 			}).then(function(url) {
-				expect(url.indexOf('?prefill=')).toBeGreaterThan(-1, "didn't have prefill");
+				expect(url.indexOf('prefill=')).toBeGreaterThan(-1, "didn't have prefill");
 
 				var title = chaisePage.recordEditPage.getFormTitle().getText();
 				expect(title).toBe("Create Record", "recordedit title missmatch.")

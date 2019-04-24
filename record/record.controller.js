@@ -94,7 +94,16 @@
         };
 
         vm.copyRecord = function() {
-            $window.location.href = $rootScope.reference.contextualize.entryCreate.appLink + "?copy=true&limit=1";
+            var appLink = $rootScope.reference.contextualize.entryCreate.appLink;
+            var separator = "?";
+            // if appLink already has query params, add &
+            // NOTE: With the ppid and pcid implementation appLink will always have
+            // that, this is just to avoid further changes if we reverted that change.
+            if (appLink.indexOf("?") !== -1) {
+                separator = "&";
+            }
+
+            $window.location.href = appLink + separator + "copy=true&limit=1";
         };
 
         vm.canDelete = function() {

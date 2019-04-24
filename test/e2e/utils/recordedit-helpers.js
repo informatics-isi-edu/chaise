@@ -74,10 +74,13 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
     it ("should have the table subtitle.", function () {
         var expectedLink = process.env.CHAISE_BASE_URL + "/recordset/#" +  browser.params.catalogId + "/" + tableParams.schema_name + ":" + tableParams.table_name;
+        expectedLink += "?pcid=";
         var subtitleEl = chaisePage.recordEditPage.getEntitySubtitleElement();
 
         expect(subtitleEl.getText()).toBe(tableParams.table_displayname, "Entity subtitle is incorrect.");
-        expect(subtitleEl.getAttribute("href")).toBe(expectedLink, "Title of result page doesn't have the expected link.");
+
+        // because of pcid and ppid we cannot test the whole url
+        expect(subtitleEl.getAttribute("href")).toContain(expectedLink, "Title of result page doesn't have the expected link.");
         expect(chaisePage.recordEditPage.getEntitySubtitleTooltip()).toBe(tableParams.table_comment, "Entity subtitle tooltip is incorrect.");
     });
 
@@ -1540,7 +1543,7 @@ exports.testSubmission = function (tableParams, isEditMode) {
                 var titleLink = chaisePage.recordEditPage.getResultsetSubtitleLink();
 
                 expect(titleLink.getText()).toBe(tableParams.table_displayname, "Title of result page doesn't have the expected caption.");
-                expect(titleLink.getAttribute("href")).toBe(expectedLink , "Title of result page doesn't have the expected link.");
+                expect(titleLink.getAttribute("href")).toContain(expectedLink , "Title of result page doesn't have the expected link.");
             });
 
             //NOTE: in travis we're not uploading the file and therefore this test case will fail

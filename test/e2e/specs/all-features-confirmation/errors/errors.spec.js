@@ -75,7 +75,7 @@ describe('Error related test cases,', function() {
               var newapplink = url.replace("record", "recordset"),
                   lastSlash = newapplink.lastIndexOf("/"),
                   recordsetUrl = newapplink.slice(0, lastSlash);
-                expect(currentUrl).toBe(recordsetUrl, "The redirection from record page to recordset in case of multiple records failed");
+                expect(currentUrl).toContain(recordsetUrl, "The redirection from record page to recordset in case of multiple records failed");
                 done();
             }).catch(catchError(done));
         });
@@ -159,7 +159,7 @@ describe('Error related test cases,', function() {
                 var newapplink = url.replace("record", "recordset"),
                     lastSlash = newapplink.lastIndexOf("/"),
                     recordsetUrl = newapplink.slice(0, lastSlash);
-                expect(currentUrl).toBe(recordsetUrl, "The redirection from record page to recordset in case of multiple records failed");
+                expect(currentUrl).toContain(recordsetUrl, "The redirection from record page to recordset in case of multiple records failed");
                 done();
             }).catch(catchError(done));
         });
@@ -543,7 +543,7 @@ describe('Error related test cases,', function() {
                   var newapplink = url.replace("recordedit", "recordset"),
                       lastSlash = newapplink.lastIndexOf("/"),
                       recordsetUrl = newapplink.slice(0, lastSlash);
-                    expect(currentUrl).toBe(recordsetUrl, "The redirection from recordedit page to recordset failed");
+                    expect(currentUrl).toContain(recordsetUrl, "The redirection from recordedit page to recordset failed");
                     done();
                 }).catch(catchError(done));
             });

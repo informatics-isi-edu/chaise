@@ -63,7 +63,9 @@ describe('View existing record,', function() {
             var RID = chaisePage.getEntityRow("editable-id", testParams.html_table_name, [{column: "id", value: "1"}]).RID
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/editable-id:" + testParams.html_table_name + "/RID=" + RID;
             browser.get(url);
+            // TODO use recordPageReady
             chaisePage.waitForElement(element(by.id('tblRecord')));
+            chaisePage.waitForElementInverse(element(by.id('rt-loading')));
         });
 
         it("should display the entity subtitle name with html in it.", function() {
@@ -97,7 +99,7 @@ describe('View existing record,', function() {
             }).then(function (url) {
                 // verify permalink
                 expect(chaisePage.recordPage.getShareLinkHeader().getText()).toBe("Share Link", "Share Link (permalink) header is incorrect");
-                expect(chaisePage.recordPage.getPermalinkText().getText()).toBe(url, "permalink url is incorrect");
+                expect(chaisePage.recordPage.getPermalinkText().getText()).toContain(url, "permalink url is incorrect");
 
                 // close dialog
                 return chaisePage.recordEditPage.getModalTitle().element(by.tagName("button")).click();
@@ -123,7 +125,9 @@ describe('View existing record,', function() {
             browser.ignoreSynchronization=true;
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/editable-id:" + testParams.table_name + "/" + keys.join("&");
             browser.get(url);
+            // TODO use recordPageReady
             chaisePage.waitForElement(element(by.id('tblRecord')));
+            chaisePage.waitForElementInverse(element(by.id('rt-loading')));
         });
 
         it("should load chaise-config.js and have editRecord=true", function() {
@@ -165,7 +169,7 @@ describe('View existing record,', function() {
                 });
             });
 
-            it("should redirect to recordedit when clicked.", function() {
+            it("should redirect to recordedit when clicked.", function(done) {
                 var titleElement = chaisePage.recordEditPage.getEntityTitleElement();
 
                 copyButton.click().then(function() {
@@ -187,9 +191,9 @@ describe('View existing record,', function() {
                 }).then(function(ct) {
                     // only 1 row is copied at this time
                     expect(ct).toBe(1);
+                    done();
                 }).catch(function(error) {
-                    console.log(error);
-                    expect('There was an error.').toBe('Please check the error message.');
+                    done.fail(error);
                 });
             });
 
