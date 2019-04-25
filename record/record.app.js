@@ -79,7 +79,7 @@
         $rootScope.modifyRecord = chaiseConfig.editRecord === false ? false : true;
         $rootScope.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
 
-        var res = UriUtils.chaiseURItoErmrestURI($window.location);
+        var res = UriUtils.chaiseURItoErmrestURI($window.location, true);
         var ermrestUri = res.ermrestUri, pcid = res.pcid, ppid = res.ppid, isQueryParameter = res.isQueryParameter;
 
         $rootScope.context = context;
