@@ -396,14 +396,11 @@
 
             var url = chaiseBaseURL() + appPath + "/#" + location.catalog + "/" + location.path;
             var pcontext = [];
-            if ($rootScope.context) {
-                if ($rootScope.context.appName) {
-                    pcontext.push("pcid=" + $rootScope.context.appName);
-                }
-                if ($rootScope.context.pageId) {
-                    pcontext.push("ppid=" + $rootScope.context.pageId);
-                }
-            }
+
+            var contextObj = ConfigUtils.getContextJSON();
+            pcontext.push("pcid=" + contextObj.appName);
+            pcontext.push("ppid=" + contextObj.pageId);
+
             // TODO we might want to allow only certian query parameters
             if (location.queryParamsString) {
                 url = url + "?" + location.queryParamsString;

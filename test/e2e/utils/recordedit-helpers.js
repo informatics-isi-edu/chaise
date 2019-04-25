@@ -74,12 +74,13 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
     it ("should have the table subtitle.", function () {
         var expectedLink = process.env.CHAISE_BASE_URL + "/recordset/#" +  browser.params.catalogId + "/" + tableParams.schema_name + ":" + tableParams.table_name;
+        expectedLink += "?pcid=";
         var subtitleEl = chaisePage.recordEditPage.getEntitySubtitleElement();
 
         expect(subtitleEl.getText()).toBe(tableParams.table_displayname, "Entity subtitle is incorrect.");
 
         // because of pcid and ppid we cannot test the whole url
-        expect(subtitleEl.getAttribute("href")).toBe(expectedLink, "Title of result page doesn't have the expected link.");
+        expect(subtitleEl.getAttribute("href")).toContain(expectedLink, "Title of result page doesn't have the expected link.");
         expect(chaisePage.recordEditPage.getEntitySubtitleTooltip()).toBe(tableParams.table_comment, "Entity subtitle tooltip is incorrect.");
     });
 
