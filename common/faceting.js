@@ -48,7 +48,7 @@
             };
         }])
 
-        .directive('faceting', ['recordTableUtils', '$timeout', '$rootScope', 'UriUtils', function (recordTableUtils, $timeout, $rootScope, UriUtils) {
+        .directive('faceting', ['$log', 'recordTableUtils', '$rootScope', '$timeout', 'UriUtils', function ($log, recordTableUtils, $rootScope, $timeout, UriUtils) {
 
             return {
                 restrict: 'AE',
@@ -70,6 +70,8 @@
 
                         $scope.vm.facetModels[index] = {
                             facetError: false,
+                            // some facets require extra step to process preselected filters
+                            preProcessed: true,
                             initialized: false,
                             isOpen: false,
                             isLoading: false,
@@ -77,7 +79,7 @@
                             noConstraints: false,
                             appliedFilters: [],
                             updateFacet: childCtrl.updateFacet,
-                            initializeFacet: childCtrl.initializeFacet
+                            preProcessFacet: childCtrl.preProcessFacet
                         };
 
                         if (ctrl.facetingCount === $scope.vm.reference.facetColumns.length) {
@@ -96,17 +98,19 @@
                     };
 
                     /**
+                     * Only update this given facet
                      * @param {int} index index of facetColumn
                      **/
                     ctrl.updateFacetColumn = function (index) {
                         var fm = $scope.vm.facetModels[index];
                         fm.processed = false;
                         fm.isLoading = true;
-                        recordTableUtils.update($scope.vm);
+                        $log.debug("faceting: sending a request to update the facet index=" + index);
+                        recordTableUtils.update($scope.vm, false, false, false, true);
                     };
 
-                    ctrl.focusOnFacet = function (index) {
-                        $scope.focusOnFacet(index);
+                    ctrl.focusOnFacet = function (index, dontUpdate) {
+                        $scope.focusOnFacet(index, dontUpdate);
                     };
                 }],
                 require: 'faceting',
@@ -213,10 +217,10 @@
                         });
                     };
 
-                    scope.focusOnFacet = function (index) {
+                    scope.focusOnFacet = function (index, dontUpdate) {
                         var fm = scope.vm.facetModels[index];
 
-                        if (!fm.isOpen) {
+                        if (!fm.isOpen && (dontUpdate !== true)) {
                             fm.isOpen = true;
                             scope.toggleFacet(index);
                         }
@@ -224,8 +228,8 @@
                         scope.scrollToFacet(index);
                     };
 
-                    scope.vm.focusOnFacet = function (index) {
-                        return scope.focusOnFacet(index);
+                    scope.vm.focusOnFacet = function (index, dontUpdate) {
+                        return scope.focusOnFacet(index, dontUpdate);
                     }
 
                     // TODO I am attaching the removeFilter to the vm here, maybe I shouldn't?
@@ -262,7 +266,7 @@
                         return $scope.updateFacetData();
                     }
 
-                    ctrl.initializeFacet = function () {
+                    ctrl.preProcessFacet = function () {
                         return $scope.initialRows();
                     }
                 }],
@@ -379,7 +383,7 @@
                             }
 
                             if (res && !scope.parentCtrl.updateVMReference(res, scope.index)) {
-                                $log.debug("rejected because of url length limit.");
+                                $log.debug("faceting: rejected because of url length limit.");
                                 row.selected = !row.selected;
                                 $event.preventDefault();
                                 return;
@@ -408,10 +412,10 @@
                             res = scope.facetColumn.removeRangeFilter(row.metaData.min, row.metaData.minExclusive, row.metaData.max, row.metaData.maxExclusive);
                         }
 
-                        $log.debug("request for facet (index="+scope.facetColumn.index+") range " + (row.selected ? "add" : "remove") + '. min=' + row.metaData.min + ", max=" + row.metaData.max);
+                        $log.debug("faceting: request for facet (index="+scope.facetColumn.index+") range " + (row.selected ? "add" : "remove") + '. min=' + row.metaData.min + ", max=" + row.metaData.max);
 
                         if (res && !scope.parentCtrl.updateVMReference(res.reference, scope.index)) {
-                            $log.debug("rejected because of url length limit.");
+                            $log.debug("faceting: rejected because of url length limit.");
                             row.selected != row.selected;
                             $event.preventDefault();
                         } else {
@@ -436,7 +440,7 @@
                         }
 
                         if (!scope.parentCtrl.updateVMReference(res.reference, scope.index)) {
-                            $log.debug("rejected because of url length limit.");
+                            $log.debug("faceting: rejected because of url length limit.");
                             return; // uri limit
                         }
 
@@ -444,7 +448,7 @@
                             return obj.uniqueId == res.filter.uniqueId;
                         });
 
-                        $log.debug("request for facet (index="+scope.facetColumn.index +") range add. min='" + min + ", max=" + max);
+                        $log.debug("faceting: request for facet (index="+scope.facetColumn.index +") range add. min='" + min + ", max=" + max);
 
                         scope.facetModel.appliedFilters.push(createAppliedFilter(res.filter));
                         if (rowIndex === -1) {
@@ -900,7 +904,7 @@
              * NOTE this will only be called on load when the facet has preselected filters.
              * @param {Object} scope The current scope
              */
-            function initializeFacetColumn(scope) {
+            function preProcessFacetColumn(scope) {
                 var defer = $q.defer();
 
                 // if not_null exist, other filters are not relevant
@@ -1232,8 +1236,8 @@
                     };
 
                     // register the initialize facet function
-                    ctrl.initializeFacet =  function () {
-                        return initializeFacetColumn($scope);
+                    ctrl.preProcessFacet =  function () {
+                        return preProcessFacetColumn($scope);
                     };
                 }],
                 require: ['^faceting', 'choicePicker'],
@@ -1349,21 +1353,21 @@
                             } else {
                                 ref = scope.facetColumn.removeNotNullFilter();
                             }
-                            $log.debug("request for facet (index=" + scope.facetColumn.index + ") choice add. Not null filter.'");
+                            $log.debug("faceting: request for facet (index=" + scope.facetColumn.index + ") choice add. Not null filter.'");
                         } else {
                             if (row.selected) {
                                 ref = scope.facetColumn.addChoiceFilters([row.uniqueId]);
                             } else {
                                 ref = scope.facetColumn.removeChoiceFilters([row.uniqueId]);
                             }
-                            $log.debug("request for facet (index=" + scope.facetColumn.index + ") choice " + (row.selected ? "add" : "remove") + ". uniqueId='" + row.uniqueId);
+                            $log.debug("faceting: request for facet (index=" + scope.facetColumn.index + ") choice " + (row.selected ? "add" : "remove") + ". uniqueId='" + row.uniqueId);
                         }
 
 
                         // if the updateVMReference failed (due to url length limit),
                         // we should revert the change back
                         if (!scope.parentCtrl.updateVMReference(ref, scope.index)) {
-                            $log.debug("URL limit reached. Reverting the change.");
+                            $log.debug("faceting: URL limit reached. Reverting the change.");
                             row.selected = !row.selected;
                             $event.preventDefault();
                             return;
@@ -1421,7 +1425,7 @@
                         if (scope.$root.checkReferenceURL(ref)) {
                             scope.searchTerm = term;
 
-                            $log.debug("request for facet (index=" + scope.facetColumn.index + ") update. new search=" + term);
+                            $log.debug("faceting: request for facet (index=" + scope.facetColumn.index + ") update. new search=" + term);
                             scope.parentCtrl.updateFacetColumn(scope.index);
                         }
                     };
@@ -1437,7 +1441,7 @@
                         // Wait for the user to stop typing for a second and then fire the search
                         scope.inputChangedPromise = $timeout(function() {
                             scope.inputChangedPromise = null;
-                            $log.debug("request for facet (index=" + scope.facetColumn.index + ") update. new search=" + scope.searchTerm);
+                            $log.debug("faceting: request for facet (index=" + scope.facetColumn.index + ") update. new search=" + scope.searchTerm);
                             scope.parentCtrl.updateFacetColumn(scope.index);
                         }, tableConstants.AUTO_SEARCH_TIMEOUT);
                     };
@@ -1446,7 +1450,7 @@
                     scope.clearSearch = function() {
                         scope.searchTerm = null;
                         if (scope.reference.location.searchTerm) {
-                            $log.debug("request for facet (index=" + scope.facetColumn.index + ") update. new search=null");
+                            $log.debug("faceting: request for facet (index=" + scope.facetColumn.index + ") update. new search=null");
                             scope.parentCtrl.updateFacetColumn(scope.index);
                         }
                     };
@@ -1509,8 +1513,8 @@
                     };
 
                     // register the initialize facet function
-                    ctrl.initializeFacet =  function () {
-                        return $scope.initializeFacetColumn($scope);
+                    ctrl.preProcessFacet =  function () {
+                        return $scope.preProcessFacetColumn($scope);
                     };
                 }],
                 require: ['^faceting', 'checkPresence'],
@@ -1554,7 +1558,7 @@
                         return defer.resolve(true), defer.promise;
                     };
 
-                    scope.initializeFacetColumn = function () {
+                    scope.preProcessFacetColumn = function () {
                         var defer = $q.defer();
                         // this function is expected but we don't need any extra logic here.
                         return defer.resolve(true), defer.promise;
@@ -1568,18 +1572,18 @@
                             } else {
                                 ref = scope.facetColumn.removeNotNullFilter();
                             }
-                            $log.debug("request for facet (index=" + scope.facetColumn.index + ") add not-null filter.'");
+                            $log.debug("faceting: request for facet (index=" + scope.facetColumn.index + ") add not-null filter.'");
                         } else {
                             if (row.selected) {
                                 ref = scope.facetColumn.addChoiceFilters([row.uniqueId]);
                             } else {
                                 ref = scope.facetColumn.removeChoiceFilters([row.uniqueId]);
                             }
-                            $log.debug("request for facet (index=" + scope.facetColumn.index + ") choice add null filter.");
+                            $log.debug("faceting: request for facet (index=" + scope.facetColumn.index + ") choice add null filter.");
                         }
 
                         if (!scope.parentCtrl.updateVMReference(ref, scope.index)) {
-                            $log.debug("URL limit reached. Reverting the change.");
+                            $log.debug("faceting: URL limit reached. Reverting the change.");
                             row.selected = !row.selected;
                             $event.preventDefault();
                             return;
