@@ -188,7 +188,7 @@
                 cc = ConfigUtils.getConfigJSON();
 
             try {
-                catalogId += chaiseURItoErmrestURI($window.location).catalogId;
+                catalogId += chaiseURItoErmrestURI($window.location, true).catalogId;
             } catch (err) {
                 if (cc.defaultCatalog) catalogId += cc.defaultCatalog;
             }
@@ -199,12 +199,16 @@
         /**
          * @function
          * @param {Object} location - location Object from the $window resource
+         * @param {boolean} returnObject - Whether we should just return the url
+         *  or an object with all the different attributes
          * @desc
-         * Converts a chaise URI to an ermrest resource URI object.
-         * @returns {Object} an object that has 'ermrestURI', `ppid`, 'pcid', and `isQueryParameter`
+         * Converts a chaise URI to an ermrest resource URI object or string.
+         * @returns {string|Object}
+         * if returnObject = true: an object that has 'ermrestURI', `ppid`, 'pcid', and `isQueryParameter`
+         * otherwise it will return the ermrest uri string.
          * @throws {MalformedUriError} if table or catalog data are missing.
          */
-        function chaiseURItoErmrestURI(location) {
+        function chaiseURItoErmrestURI(location, returnObject) {
             var tableMissing = messageMap.tableMissing,
                 catalogMissing = messageMap.catalogMissing,
                 chaiseConfig = ConfigUtils.getConfigJSON();
@@ -335,15 +339,20 @@
 
             var baseUri = chaiseConfig.ermrestLocation;
             var path = '/catalog/' + catalogId + '/entity' + hash;
-            return {
-                ermrestUri: baseUri + path,
-                catalogId: catalogId,
-                hash: originalHash,
-                ppid: ppid,
-                pcid: pcid,
-                queryParams: queryParams,
-                isQueryParameter: isQueryParameter
-            };
+
+            if (returnObject) {
+                return {
+                    ermrestUri: baseUri + path,
+                    catalogId: catalogId,
+                    hash: originalHash,
+                    ppid: ppid,
+                    pcid: pcid,
+                    queryParams: queryParams,
+                    isQueryParameter: isQueryParameter
+                };
+            } else {
+                return baseUri + path;
+            }
         }
 
         /**
@@ -418,7 +427,7 @@
 
             // Then, parse the URL fragment id (aka, hash). Expected format:
             //  "#catalog_id/[schema_name:]table_name[/{attribute::op::value}{&attribute::op::value}*][@sort(column[::desc::])]"
-            var hash = chaiseURItoErmrestURI(location).hash;
+            var hash = chaiseURItoErmrestURI(location, true).hash;
             var uri = hash;
             if (hash === undefined || hash == '' || hash.length == 1) {
                 return context;
@@ -776,7 +785,7 @@
 
         // Takes path and creates full redirect links with catalogId
         function createRedirectLinkFromPath(path){
-          return $window.location.origin + $window.location.pathname + '#' + chaiseURItoErmrestURI($window.location).catalogId + "/" + path;
+          return $window.location.origin + $window.location.pathname + '#' + chaiseURItoErmrestURI($window.location, true).catalogId + "/" + path;
         }
 
         /**

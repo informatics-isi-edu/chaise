@@ -127,7 +127,7 @@
             $rootScope.location = $window.location.href;
             recordsetModel.hasLoaded = false;
 
-            var res = UriUtils.chaiseURItoErmrestURI($window.location);
+            var res = UriUtils.chaiseURItoErmrestURI($window.location, true);
             var ermrestUri = res.ermrestUri,
                 pcid = res.pcid,
                 ppid = res.ppid,
