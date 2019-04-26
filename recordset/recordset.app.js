@@ -106,7 +106,6 @@
             var context = ConfigUtils.getContextJSON(),
                 chaiseConfig = ConfigUtils.getConfigJSON();
 
-            context.catalogID = UriUtils.getCatalogIDFromLocation();
             context.chaiseBaseURL = UriUtils.chaiseBaseURL();
 
             var modifyEnabled = chaiseConfig.editRecord === false ? false : true;
@@ -129,7 +128,12 @@
             recordsetModel.hasLoaded = false;
 
             var res = UriUtils.chaiseURItoErmrestURI($window.location);
-            var ermrestUri = res.ermrestUri, pcid = res.pcid, ppid = res.ppid, isQueryParameter = res.isQueryParameter;
+            var ermrestUri = res.ermrestUri,
+                pcid = res.pcid,
+                ppid = res.ppid,
+                isQueryParameter = res.isQueryParameter;
+
+            context.catalogID = res.catalogId;
 
 
             FunctionUtils.registerErmrestCallbacks();

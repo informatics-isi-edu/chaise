@@ -87,7 +87,6 @@
         var context = ConfigUtils.getContextJSON(),
             chaiseConfig = ConfigUtils.getConfigJSON();
 
-        context.catalogID = UriUtils.getCatalogIDFromLocation();
         context.chaiseBaseURL = UriUtils.chaiseBaseURL();
 
         $rootScope.displayReady = false;
@@ -101,7 +100,12 @@
         $rootScope.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
 
         var res = UriUtils.chaiseURItoErmrestURI($window.location);
-        var ermrestUri = res.ermrestUri, pcid = res.pcid, ppid = res.ppid, isQueryParameter = res.isQueryParameter;
+        var ermrestUri = res.ermrestUri,
+            pcid = res.pcid,
+            ppid = res.ppid,
+            isQueryParameter = res.isQueryParameter;
+
+        context.catalogID = res.catalogId;
 
         FunctionUtils.registerErmrestCallbacks();
 

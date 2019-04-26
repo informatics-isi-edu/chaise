@@ -182,60 +182,18 @@
 
     .factory('UriUtils', ['appContextMapping', 'appTagMapping', 'ConfigUtils', 'ContextUtils', 'defaultChaiseConfig', 'Errors', 'messageMap', 'parsedFilter', '$injector', '$rootScope', '$window',
         function(appContextMapping, appTagMapping, ConfigUtils, ContextUtils, defaultChaiseConfig, Errors, messageMap, ParsedFilter, $injector, $rootScope, $window) {
-        var chaiseBaseURL;
 
         function getCatalogId() {
-            var chaiseConfig = ConfigUtils.getConfigJSON();
-            var context = ConfigUtils.getContextJSON();
+            var catalogId = "",
+                cc = ConfigUtils.getConfigJSON();
 
-            // Context ($window.dcctx) should ALWAYS be defined
-            if (context.catalogID) {
-                return "" + context.catalogID;
-            }
-
-            // function may return `null`
-            var id = getCatalogIDFromLocation();
-            if (id) {
-                return "" + id;
-            }
-
-            if (chaiseConfig.defaultCatalog) {
-                return "" + chaiseConfig.defaultCatalog;
-            }
-
-            return "";
-        }
-
-        /**
-         * Returns the catalog id
-         * TODO we might want to refactor the caller of this function
-         * @return {String}
-         */
-        function getCatalogIDFromLocation() {
             try {
-                var hash = getLocationHash($window.location).hash;
-                return hash.split('/')[0].slice(1);
-            } catch (exception) {
-                return null;
+                catalogId += chaiseURItoErmrestURI($window.location).catalogId;
+            } catch (err) {
+                if (cc.defaultCatalog) catalogId += cc.defaultCatalog;
             }
-        }
 
-        /**
-         * Given a location object, will return the hash part of it
-         * (it will take care of allowing ? in place of #)
-         * TODO we might want to refactor the different places that are using this
-         * function, we should not keep parsing the same location
-         * @param  {Object} location the $window.location
-         * @return {Object} with 'hash' and 'isQueryParameter'
-         */
-        function getLocationHash(location) {
-            var hash = location.hash, isQueryParameter = false;
-            // allow ? to be used in place of #
-            if ((hash == '' || hash == undefined) && location.href.indexOf("?") !== -1) {
-                hash = "#" + location.href.substring(location.href.indexOf("?") + 1);
-                isQueryParameter = true;
-            }
-            return {hash: hash || null, isQueryParameter: isQueryParameter};
+            return catalogId;
         }
 
         /**
@@ -251,11 +209,20 @@
                 catalogMissing = messageMap.catalogMissing,
                 chaiseConfig = ConfigUtils.getConfigJSON();
 
-            var hashObj = getLocationHash(location),
-                ermrestUri = {},
-                catalogId, ppid, pcid;
+            var hash = location.hash,
+                isQueryParameter = false;
 
-            var hash = hashObj.hash, isQueryParameter = hashObj.isQueryParameter;
+            // allow ? to be used in place of #
+            if ((hash == '' || hash == undefined) && location.href.indexOf("?") !== -1) {
+                hash = "#" + location.href.substring(location.href.indexOf("?") + 1);
+                isQueryParameter = true;
+            }
+            // capture the hash before it's split for use in ermrestURI generation
+            var originalHash = hash;
+
+            var ermrestUri = {},
+                queryParams = {},
+                catalogId, ppid, pcid;
 
             // remove query params other than limit
             if (hash && hash.indexOf('?') !== -1) {
@@ -263,7 +230,9 @@
                 var acceptedQueries = [], i;
 
                 hash = hash.slice(0, hash.indexOf('?')); // remove queries
-                for (i = 0; i < queries.length; i++) { // add back only the valid queries
+                // add back only the valid queries
+                // "valid queries" are ones that the ermrest APIs allow in the uri (like limit)
+                for (i = 0; i < queries.length; i++) {
                     if (queries[i].indexOf("limit=") === 0) {
                         acceptedQueries.push(queries[i]);
                     }
@@ -273,6 +242,8 @@
                     if (queries[i].indexOf("ppid=") === 0) {
                         ppid = queries[i].split("=")[1];
                     }
+                    var q_parts = queries[i].split("=");
+                    queryParams[decodeURIComponent(q_parts[0])] = decodeURIComponent(q_parts[1]);
                 }
                 if (acceptedQueries.length != 0) {
                     hash = hash + "?" + acceptedQueries.join("&");
@@ -364,7 +335,15 @@
 
             var baseUri = chaiseConfig.ermrestLocation;
             var path = '/catalog/' + catalogId + '/entity' + hash;
-            return {ermrestUri: baseUri + path, ppid: ppid, pcid: pcid, isQueryParameter: isQueryParameter};
+            return {
+                ermrestUri: baseUri + path,
+                catalogId: catalogId,
+                hash: originalHash,
+                ppid: ppid,
+                pcid: pcid,
+                queryParams: queryParams,
+                isQueryParameter: isQueryParameter
+            };
         }
 
         /**
@@ -411,27 +390,6 @@
             return url;
         }
 
-
-        /**
-         * Return query params
-         * @param  {Object} location window.location object
-         * @return {Object} key-value pairs of query params
-         */
-        function getQueryParams(location) {
-            var queryParams = {},
-                modifierPath = getLocationHash(location).hash,
-                q_parts, i;
-
-            if (modifierPath.indexOf("?") !== -1) {
-                var queries = modifierPath.match(/\?(.+)/)[1].split("&");
-                for (i = 0; i < queries.length; i++) {
-                    q_parts = queries[i].split("=");
-                    queryParams[decodeURIComponent(q_parts[0])] = decodeURIComponent(q_parts[1]);
-                }
-            }
-            return queryParams;
-        }
-
         /**
          * NOTE: DO NOT USE THIS FUNCTION, EMRESTJS will take care of parsing.
          * old apps is using are, that's why we should still keep this function.
@@ -460,7 +418,7 @@
 
             // Then, parse the URL fragment id (aka, hash). Expected format:
             //  "#catalog_id/[schema_name:]table_name[/{attribute::op::value}{&attribute::op::value}*][@sort(column[::desc::])]"
-            var hash = getLocationHash(location).hash;
+            var hash = chaiseURItoErmrestURI(location).hash;
             var uri = hash;
             if (hash === undefined || hash == '' || hash.length == 1) {
                 return context;
@@ -818,9 +776,7 @@
 
         // Takes path and creates full redirect links with catalogId
         function createRedirectLinkFromPath(path){
-          var hash = getLocationHash($window.location).hash;
-          var catalogString = hash.slice(0, hash.search("/"));
-          return $window.location.origin + $window.location.pathname + catalogString + "/" + path;
+          return $window.location.origin + $window.location.pathname + '#' + chaiseURItoErmrestURI($window.location).catalogId + "/" + path;
         }
 
         /**
@@ -909,8 +865,6 @@
             createRedirectLinkFromPath: createRedirectLinkFromPath,
             fixedEncodeURIComponent: fixedEncodeURIComponent,
             getCatalogId: getCatalogId,
-            getCatalogIDFromLocation: getCatalogIDFromLocation,
-            getQueryParams: getQueryParams,
             isBrowserIE: isBrowserIE,
             parsedFilterToERMrestFilter: parsedFilterToERMrestFilter,
             parseURLFragment: parseURLFragment,

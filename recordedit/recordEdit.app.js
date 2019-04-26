@@ -116,7 +116,6 @@
         var context = ConfigUtils.getContextJSON(),
             chaiseConfig = ConfigUtils.getConfigJSON();
 
-        context.catalogID = UriUtils.getCatalogIDFromLocation();
         context.chaiseBaseURL = UriUtils.chaiseBaseURL();
 
         $rootScope.showColumnSpinner = [{}];
@@ -141,14 +140,17 @@
         }
 
         var res = UriUtils.chaiseURItoErmrestURI($window.location);
-        var ermrestUri = res.ermrestUri, pcid = res.pcid, ppid = res.ppid, isQueryParameter = res.isQueryParameter;
+        var ermrestUri = res.ermrestUri,
+            pcid = res.pcid,
+            ppid = res.ppid,
+            isQueryParameter = res.isQueryParameter;
 
-
+        context.catalogID = res.catalogId;
 
         // will be used to determine the app mode (edit, create, or copy)
         // We are not passing the query parameters that are used for app mode,
         // so we cannot use the queryParams that parser is returning.
-        context.queryParams = UriUtils.getQueryParams($window.location);
+        context.queryParams = res.queryParams;
         context.MAX_ROWS_TO_ADD = 201;
 
         // modes = create, edit, copy
