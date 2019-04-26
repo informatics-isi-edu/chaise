@@ -135,8 +135,9 @@
             }
         }
 
+        // set the recordset height when it's loaded or we have the facets
         $scope.$watch(function() {
-            return recordsetModel.hasLoaded && recordsetModel.initialized;
+            return (recordsetModel.hasLoaded && recordsetModel.initialized) || (recordsetModel.config.showFaceting && recordsetModel.reference);
         }, function (newValue, oldValue) {
             if (newValue) {
                 $timeout(setRecordsetHeight, 0);

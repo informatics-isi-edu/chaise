@@ -118,7 +118,7 @@
 
             context.pageId = MathUtils.uuid();
 
-            var res = UriUtils.chaiseURItoErmrestURI($window.location);
+            var res = UriUtils.chaiseURItoErmrestURI($window.location, true);
             var ermrestUri = res.ermrestUri, pcid = res.pcid, ppid = res.ppid, isQueryParameter = res.isQueryParameter;
 
 

@@ -215,12 +215,16 @@
         /**
          * @function
          * @param {Object} location - location Object from the $window resource
+         * @param {boolean} returnObject - Whether we should just return the url
+         *  or an object with all the different attributes
          * @desc
-         * Converts a chaise URI to an ermrest resource URI object.
-         * @returns {Object} an object that has 'ermrestURI', `ppid`, 'pcid', and `isQueryParameter`
+         * Converts a chaise URI to an ermrest resource URI object or string.
+         * @returns {string|Object}
+         * if returnObject = true: an object that has 'ermrestURI', `ppid`, 'pcid', and `isQueryParameter`
+         * otherwise it will return the ermrest uri string.
          * @throws {MalformedUriError} if table or catalog data are missing.
          */
-        function chaiseURItoErmrestURI(location) {
+        function chaiseURItoErmrestURI(location, returnObject) {
             var tableMissing = messageMap.tableMissing,
                 catalogMissing = messageMap.catalogMissing;
 
@@ -337,7 +341,11 @@
 
             var baseUri = chaiseConfig.ermrestLocation;
             var path = '/catalog/' + catalogId + '/entity' + hash;
-            return {ermrestUri: baseUri + path, ppid: ppid, pcid: pcid, isQueryParameter: isQueryParameter};
+            if (returnObject) {
+                return {ermrestUri: baseUri + path, ppid: ppid, pcid: pcid, isQueryParameter: isQueryParameter};
+            } else {
+                return baseUri + path;
+            }
         }
 
         /**
