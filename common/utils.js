@@ -1484,6 +1484,7 @@
                 applyHostConfigRules(catalogAnnotation);
             }
 
+            if (!$window.dcctx) $window.dcctx = {};
             $window.dcctx.chaiseConfig = cc;
         }
 
