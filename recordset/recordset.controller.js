@@ -8,7 +8,7 @@
         function(ConfigUtils, DataUtils, messageMap, recordsetModel, Session, UiUtils, UriUtils, $document, $log, $rootScope, $scope, $timeout, $window) {
 
         var ctrl = this;
-        var chaiseConfig = Object.assign({}, ConfigUtils.getConfigJSON());
+        var chaiseConfig = ConfigUtils.getConfigJSON();
         $scope.vm = recordsetModel;
 
         recordsetModel.RECORDEDIT_MAX_ROWS = 200;

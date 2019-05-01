@@ -21,7 +21,8 @@
 
             if (catalogId) {
                 ERMrest.ermrestFactory.getServer(service, { cid: $window.dcctx.cid, pid: $window.dcctx.pid, wid: $window.dcctx.wid }).catalogs.get(catalogId).then(function (response) {
-                    ConfigUtils.setConfigJSON(response.chaiseConfig);
+                    // we already setup the defaults and the configuration based on chaise-config.js
+                    if (response.chaiseConfig) ConfigUtils.setConfigJSON(response.chaiseConfig);
 
                     $rootScope.$emit("configuration-done");
                 });

@@ -4,7 +4,7 @@
     angular.module('chaise.export', ['chaise.utils'])
 
     .directive('export', ['AlertsService', 'ConfigUtils', 'DataUtils', 'ErrorService', 'logActions', 'modalUtils', '$rootScope', '$timeout', 'UriUtils', '$window', function (AlertsService, ConfigUtils, DataUtils, ErrorService, logActions, modalUtils, $rootScope, $timeout, UriUtils, $window) {
-        var chaiseConfig = Object.assign({}, ConfigUtils.getConfigJSON());
+        var chaiseConfig = ConfigUtils.getConfigJSON();
         /**
          * Cancel the current export request
          */

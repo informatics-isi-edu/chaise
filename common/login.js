@@ -7,7 +7,7 @@
         'ui.bootstrap'
     ])
         .directive('login', ['ConfigUtils', 'modalUtils', 'Session', 'UriUtils', '$rootScope', function (ConfigUtils, modalUtils, Session, UriUtils, $rootScope) {
-            var chaiseConfig = Object.assign({}, ConfigUtils.getConfigJSON());
+            var chaiseConfig = ConfigUtils.getConfigJSON();
             return {
                 restrict: 'E',
                 scope: {},
