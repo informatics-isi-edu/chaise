@@ -57,7 +57,7 @@ var testParams = {
                 "no_of_rooms": "1", "opened_on": moment("2017-01-01 01:01:01", "YYYY-MM-DD hh:mm:ss"), "date_col": "2017-01-01", "luxurious": false,
                 "text_array": "[\"v1\", \"v2\"]", "boolean_array": "[true]", "int4_array": "[1, 2]", "float4_array": "[1, 2.2]",
                 "date_array": "[\"2001-01-01\", \"2002-02-02\"]", "timestamp_array": "[null, \"2001-01-01T01:01:01\"]",
-                "timestamptz_array": "[null, \"2001-01-01T01:01:01-08:00\"]"
+                "timestamptz_array": "[null, \""+moment("2001-01-01T01:01:01-08:00", "YYYY-MM-DDTHH:mm:ssZ").format("YYYY-MM-DDTHH:mm:ssZ")+"\"]"
             }
         ],
         result_columns: [

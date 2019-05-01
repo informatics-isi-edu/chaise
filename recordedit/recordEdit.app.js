@@ -1,16 +1,39 @@
 (function() {
     'use strict';
 /* Configuration of the Recordedit App */
+
+    /**
+     * Module Dependencies:
+     *   config.js
+     *    |--ermrestJS
+     *    |
+     *    |--utils.js
+     *       |--errors.js - needed for utils
+     *       |  |--alerts.js
+     *       |  |  |--filters.js
+     *       |  |
+     *       |  |--authen.js
+     *       |  |  |--storage.js
+     *       |  |
+     *       |  |--modal.js
+     *       |
+     *       |--inputs.js
+     *          |--validators.js
+     */
     angular.module('chaise.configure-recordedit', [
-        'chaise.modal',
+        'chaise.config',
         'chaise.utils',
         'ermrestjs',
         'ngCookies',
         'ui.bootstrap'
     ])
 
-    .run(['ERMrest', function (ERMrest) {
-        ERMrest.onload().then(function () {
+    .constant('appName', 'recordedit')
+
+    .run(['$rootScope', function ($rootScope) {
+        // When the configuration module's run block emits the `configuration-done` event, attach the app to the DOM
+        $rootScope.$on("configuration-done", function () {
+
             angular.element(document).ready(function(){
                 angular.bootstrap(document.getElementById("recordedit"), ["chaise.recordEdit"]);
             });
@@ -59,8 +82,6 @@
         // tooltip on the element instead, set the `tooltip-append-to-body` attribute
         // to `false` on the element.
         $uibTooltipProvider.options({appendToBody: true});
-        // chaise configurations
-        ConfigUtilsProvider.$get().setConfigJSON();
         //  Enable log system, if in debug mode
         $logProvider.debugEnabled(ConfigUtilsProvider.$get().getConfigJSON().debug === true);
     }])
@@ -89,14 +110,15 @@
         }]);
     })
 
-    .run(['AlertsService', 'dataFormats', 'DataUtils', 'ERMrest', 'ErrorService', 'FunctionUtils', 'headInjector', 'InputUtils', 'logActions', 'MathUtils', 'recordEditAppUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', '$cookies', 'messageMap', 'Errors',
-        function runRecordEditApp(AlertsService, dataFormats, DataUtils, ERMrest, ErrorService, FunctionUtils, headInjector, InputUtils, logActions, MathUtils, recordEditAppUtils, recordEditModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, $cookies, messageMap, Errors) {
+    .run(['AlertsService', 'ConfigUtils', 'dataFormats', 'DataUtils', 'ERMrest', 'Errors', 'ErrorService', 'FunctionUtils', 'headInjector', 'InputUtils', 'logActions', 'MathUtils', 'messageMap', 'recordEditAppUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$log', '$rootScope', '$window',
+        function runRecordEditApp(AlertsService, ConfigUtils, dataFormats, DataUtils, ERMrest, Errors, ErrorService, FunctionUtils, headInjector, InputUtils, logActions, MathUtils, messageMap, recordEditAppUtils, recordEditModel, Session, UiUtils, UriUtils, $cookies, $log, $rootScope, $window) {
 
-        var session,
-            context = {};
+        var session;
 
-        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
-        context.catalogID = UriUtils.getCatalogIDFromLocation();
+        var context = ConfigUtils.getContextJSON(),
+            chaiseConfig = ConfigUtils.getConfigJSON();
+
+        context.chaiseBaseURL = UriUtils.chaiseBaseURL();
 
         $rootScope.showColumnSpinner = [{}];
 
@@ -120,21 +142,17 @@
         }
 
         var res = UriUtils.chaiseURItoErmrestURI($window.location, true);
-        var ermrestUri = res.ermrestUri, pcid = res.pcid, ppid = res.ppid, isQueryParameter = res.isQueryParameter;
+        var ermrestUri = res.ermrestUri,
+            pcid = res.pcid,
+            ppid = res.ppid,
+            isQueryParameter = res.isQueryParameter;
 
-
-
-        $rootScope.context = context;
+        context.catalogID = res.catalogId;
 
         // will be used to determine the app mode (edit, create, or copy)
         // We are not passing the query parameters that are used for app mode,
         // so we cannot use the queryParams that parser is returning.
-        context.queryParams = UriUtils.getQueryParams($window.location);
-
-        // TODO we should remvoe ppid and pcid from the url. but what about the rest?
-
-        context.appName = "recordedit";
-        context.pageId = MathUtils.uuid();
+        context.queryParams = res.queryParams;
         context.MAX_ROWS_TO_ADD = 201;
 
         // modes = create, edit, copy
@@ -142,7 +160,6 @@
         // edit is contextualized to entry/edit
         // copy is contextualized to entry/create
         // NOTE: copy is technically creating an entity so it needs the proper visible column list as well as the data for the record associated with the given filter
-
         context.modes = {
             COPY: "copy",
             CREATE: "create",
@@ -168,7 +185,7 @@
             }
 
             // On resolution
-            ERMrest.resolve(ermrestUri, { cid: context.appName, pid: context.pageId, wid: $window.name }).then(function getReference(reference) {
+            ERMrest.resolve(ermrestUri, { cid: context.cid, pid: context.pid, wid: context.wid }).then(function getReference(reference) {
 
 
                 // we are using filter to determine app mode, the logic for getting filter
@@ -560,7 +577,7 @@
             });
 
             // get the actual foreignkey data
-            ERMrest.resolve(origUrl, {cid: context.appName}).then(function (ref) {
+            ERMrest.resolve(origUrl, {cid: context.cid}).then(function (ref) {
                 // the table that we're logging is not the same table in url (it's the referrer that is the same)
                 var logObject = $rootScope.reference.defaultLogInfo;
                 logObject.referrer = ref.defaultLogInfo;

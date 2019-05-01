@@ -1,0 +1,9 @@
+{
+    "setup": {
+        "schemaConfigurations": [
+            "navbar/catalog-chaise-config.config.json"
+        ],
+        "schema": "catalog-config-navbar"
+    },
+    "cleanup": true
+}

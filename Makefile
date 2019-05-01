@@ -47,6 +47,7 @@ E2EDviewer=test/e2e/specs/all-features/viewer/presentation.conf.js
 # misc tests
 E2Enavbar=test/e2e/specs/all-features/navbar/protractor.conf.js
 E2EnavbarHeadTitle=test/e2e/specs/all-features-confirmation/navbar/protractor.conf.js
+E2EnavbarCatalogConfig=test/e2e/specs/delete-prohibited/navbar/protractor.conf.js
 E2EmultiPermissionsVisibility=test/e2e/specs/all-features/permissions-visibility.conf.js
 # footer test
 E2Efooter=test/e2e/specs/all-features-confirmation/footer/protractor.conf.js
@@ -61,7 +62,7 @@ DefaultConfigParallel=test/e2e/specs/default-config/protractor.conf.js
 Manualrecordset=test/manual/specs/recordset.conf.js
 
 
-NAVBAR_TESTS=$(E2Enavbar) $(E2EnavbarHeadTitle)
+NAVBAR_TESTS=$(E2Enavbar) $(E2EnavbarHeadTitle) $(E2EnavbarCatalogConfig)
 SEARCH_TESTS=$(E2Esearch)
 RECORDSET_TESTS=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit) $(E2EDrecordsetIndFacet) $(E2EDrecordsetHistFacet)
 RECORD_TESTS=$(E2EDrecord) $(E2ErecordNoDeleteBtn) $(E2EDrecordRelatedTable) $(E2EDrecordCopy) $(E2EDrecordLinks)
@@ -264,6 +265,7 @@ JS_SOURCE=$(JS)/respond.js \
 	$(COMMON)/alerts.js \
 	$(COMMON)/storage.js \
 	$(COMMON)/authen.js \
+	$(COMMON)/config.js \
 	$(COMMON)/delete-link.js \
 	$(COMMON)/errors.js \
 	$(COMMON)/filters.js \
@@ -300,6 +302,7 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-1.11.1.min.js \
 	$(COMMON)/vendor/angular-scroll.min.js \
 	$(COMMON)/alerts.js \
 	$(COMMON)/authen.js \
+	$(COMMON)/config.js \
 	$(COMMON)/delete-link.js \
 	$(COMMON)/errors.js \
 	$(COMMON)/export.js \
@@ -342,6 +345,7 @@ VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-1.11.1.min.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-sanitize.js \
 	$(COMMON)/alerts.js \
+	$(COMMON)/config.js \
 	$(COMMON)/filters.js \
 	$(COMMON)/utils.js \
 	$(COMMON)/storage.js \
@@ -401,6 +405,7 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-1.11.1.min.js \
 	$(COMMON)/vendor/sparkMD5.min.js \
 	$(COMMON)/alerts.js \
 	$(COMMON)/authen.js \
+	$(COMMON)/config.js \
 	$(COMMON)/errors.js \
 	$(COMMON)/faceting.js \
 	$(COMMON)/filters.js \
@@ -463,6 +468,7 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-1.11.1.min.js \
 	$(COMMON)/alerts.js \
 	$(COMMON)/authen.js \
 	$(COMMON)/bindHtmlUnsafe.js \
+	$(COMMON)/config.js \
 	$(COMMON)/ellipses.js \
 	$(COMMON)/export.js \
 	$(COMMON)/errors.js \

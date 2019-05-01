@@ -51,6 +51,13 @@ describe ("Viewing exisiting record with related entities, ", function () {
     });
 
     it ("should show the related entities in the expected order.", function () {
+        // wait for expected # of related tables to be visible before checking titles
+        // this ensures the page content is loaded AND visible
+        browser.wait(function() {
+            return chaisePage.recordPage.getSidePanelHeadings().count().then(function(ct) {
+                return (ct == testParams.tocHeaders.length);
+            });
+        }, browser.params.defaultTimeout);
         expect(chaisePage.recordPage.getRelatedTableTitles()).toEqual(testParams.headers, "list of related table accordion headers is incorret");
     });
 

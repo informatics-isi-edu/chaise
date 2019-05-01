@@ -8,8 +8,8 @@
     'use strict';
 
     angular.module('chaise.footer', ['chaise.utils'])
-        .directive('footer', ['ERMrest', '$timeout', '$rootScope', 'UriUtils', function(ERMrest, $timeout, $rootScope, UriUtils) {
-            var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
+        .directive('footer', ['ConfigUtils', 'ERMrest', 'UriUtils', '$rootScope', '$timeout', function(ConfigUtils, ERMrest, UriUtils, $rootScope, $timeout) {
+            var chaiseConfig = ConfigUtils.getConfigJSON();
             var footerText = chaiseConfig.footerMarkdown;
             return {
                 restrict: 'E',

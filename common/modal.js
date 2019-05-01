@@ -42,7 +42,7 @@
             $uibModalInstance.dismiss('cancel');
         }
     }])
-    .controller('ErrorModalController', ['Errors', 'messageMap', 'params', 'Session', '$rootScope', '$uibModalInstance', '$window', function ErrorModalController(Errors, messageMap, params, Session, $rootScope, $uibModalInstance, $window) {
+    .controller('ErrorModalController', ['Errors', 'messageMap', 'params', 'Session', '$rootScope', '$sce', '$uibModalInstance', '$window', function ErrorModalController(Errors, messageMap, params, Session, $rootScope, $sce, $uibModalInstance, $window) {
         function isErmrestErrorNeedReplace (error) {
             switch (error.constructor) {
                 case ERMrest.InvalidFacetOperatorError:
@@ -84,9 +84,9 @@
         // in case of adding login button, we should add extra message
         if (vm.params.showLogin) {
             if (ERMrest && exception instanceof ERMrest.NotFoundError) {
-                vm.params.message = vm.params.message + messageMap.maybeNeedLogin;
+                vm.params.message = $sce.trustAsHtml(vm.params.message + messageMap.maybeNeedLogin);
             } else if (exception instanceof Errors.noRecordError) {
-                vm.params.message = messageMap.noRecordForFilter + '<br>' + messageMap.maybeUnauthorizedMessage;
+                vm.params.message = $sce.trustAsHtml(messageMap.noRecordForFilter + '<br>' + messageMap.maybeUnauthorizedMessage);
             }
         }
 
@@ -113,7 +113,7 @@
 
         // <p> tag is added to maintain the space between click action message and buttons
         // Also maintains consistency  in their placement irrespective of reload message
-        vm.clickActionMessage += reloadMessage;
+        vm.clickActionMessage = $sce.trustAsHtml(vm.clickActionMessage + reloadMessage);
 
         vm.clickOkToDismiss = exception.clickOkToDismiss;
         vm.showDetails = function() {
@@ -169,9 +169,8 @@
      *  - context {String} - the current context that the directive fetches data for
      *  - selectMode {String} - the select mode the modal uses
      */
-    .controller('SearchPopupController',
-                ['$scope', '$rootScope', '$uibModalInstance', 'DataUtils', 'params', 'Session', 'modalBox', 'logActions', '$timeout',
-                function SearchPopupController($scope, $rootScope, $uibModalInstance, DataUtils, params, Session, modalBox, logActions, $timeout) {
+    .controller('SearchPopupController', ['ConfigUtils', 'DataUtils', 'params', 'Session', 'modalBox', 'logActions', '$rootScope', '$timeout', '$uibModalInstance',
+        function SearchPopupController(ConfigUtils, DataUtils, params, Session, modalBox, logActions, $rootScope, $timeout, $uibModalInstance) {
         var vm = this;
 
         vm.params = params;
@@ -182,7 +181,7 @@
 
         vm.hasLoaded = false;
 
-        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
+        var chaiseConfig = ConfigUtils.getConfigJSON();
         var reference = vm.reference = params.reference;
         var limit = (!angular.isUndefined(reference) && !angular.isUndefined(reference.display) && reference.display.defaultPageSize) ? reference.display.defaultPageSize : 25;
         var comment = (typeof params.comment === "string") ? params.comment: reference.table.comment;

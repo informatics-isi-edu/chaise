@@ -3,10 +3,8 @@
 
     angular.module('chaise.authen', ['chaise.utils', 'chaise.storage'])
 
-    .factory('Session', ['messageMap', 'modalUtils', 'StorageService', '$cookies', '$http', '$interval', '$log', '$uibModalStack', '$q', 'UriUtils', '$window', '$rootScope', function (messageMap, modalUtils, StorageService, $cookies, $http, $interval, $log, $uibModalStack, $q, UriUtils, $window, $rootScope) {
-
-        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
-
+    .factory('Session', ['ConfigUtils', 'messageMap', 'modalUtils', 'StorageService', 'UriUtils', '$cookies', '$http', '$interval', '$log', '$q', '$rootScope', '$sce', '$uibModalStack', '$window',
+        function (ConfigUtils, messageMap, modalUtils, StorageService, UriUtils, $cookies, $http, $interval, $log, $q, $rootScope, $sce, $uibModalStack, $window) {
         // authn API no longer communicates through ermrest, removing the need to check for ermrest location
         var serviceURL = $window.location.origin;
 
@@ -84,10 +82,10 @@
             if(type.indexOf('modal')!== -1){
                 if (_session) {
                     params.title = messageMap.sessionExpired.title;
-                    params.message = messageMap.sessionExpired.message;
+                    params.message = $sce.trustAsHtml(messageMap.sessionExpired.message);
                 } else {
                     params.title = messageMap.noSession.title;
-                    params.message = messageMap.noSession.message;
+                    params.message = $sce.trustAsHtml(messageMap.noSession.message);
                 }
                 var closed = false;
                 var onModalCloseSuccess = function () {
@@ -333,6 +331,7 @@
             },
 
             logout: function() {
+                var chaiseConfig = ConfigUtils.getConfigJSON();
                 var logoutURL = chaiseConfig['logoutURL'] ? chaiseConfig['logoutURL'] : '/';
                 var url = serviceURL + "/authn/session";
 
@@ -356,6 +355,7 @@
     if (pathname.indexOf('/search/') == -1 && pathname.indexOf('/viewer/') == -1 && pathname.indexOf('/login') == -1) {
 
         angular.module('chaise.authen')
+
         .run(['ERMrest', '$injector', '$q', function runRecordEditApp(ERMrest, $injector, $q) {
 
             var Session = $injector.get("Session");
