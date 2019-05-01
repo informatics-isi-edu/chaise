@@ -5,18 +5,20 @@
     /**
      * Module Dependencies:
      *   config.js
-     *   utils.js
-     *    |--errors.js - needed for utils
-     *    |  |--alerts.js
-     *    |  |  |--filters.js
-     *    |  |
-     *    |  |--authen.js
-     *    |  |  |--storage.js
-     *    |  |
-     *    |  |--modal.js
+     *    |--ermrestJS
      *    |
-     *    |--inputs.js
-     *       |--validators.js
+     *    |--utils.js
+     *       |--errors.js - needed for utils
+     *       |  |--alerts.js
+     *       |  |  |--filters.js
+     *       |  |
+     *       |  |--authen.js
+     *       |  |  |--storage.js
+     *       |  |
+     *       |  |--modal.js
+     *       |
+     *       |--inputs.js
+     *          |--validators.js
      */
     angular.module('chaise.configure-recordedit', [
         'chaise.config',

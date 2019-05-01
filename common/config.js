@@ -1,7 +1,7 @@
 (function() {
     'use strict';
 
-    angular.module('chaise.config', ['ermrestjs'])
+    angular.module('chaise.config', ['chaise.utils', 'ermrestjs'])
 
     .run(['appName', 'ConfigUtils', 'ERMrest', 'headInjector', 'MathUtils', 'UriUtils', '$rootScope', '$window', function(appName, ConfigUtils, ERMrest, headInjector, MathUtils, UriUtils, $rootScope, $window) {
         headInjector.setWindowName();
@@ -20,7 +20,7 @@
                 catalogId = UriUtils.getCatalogId();
 
             if (catalogId) {
-                ERMrest.ermrestFactory.getServer(service, { cid: dcctx.cid, pid: dcctx.pid, wid: dcctx.wid }).catalogs.get(catalogId).then(function (response) {
+                ERMrest.ermrestFactory.getServer(service, { cid: $window.dcctx.cid, pid: $window.dcctx.pid, wid: $window.dcctx.wid }).catalogs.get(catalogId).then(function (response) {
                     ConfigUtils.setConfigJSON(response.chaiseConfig);
 
                     $rootScope.$emit("configuration-done");
