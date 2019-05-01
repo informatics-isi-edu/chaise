@@ -449,19 +449,8 @@
         }
 
         function removeFormRow(index) {
-            if (!chaiseConfig.confirmDelete) {
-                scope.$root.showSpinner = true;
-                return spliceRows(index);
-            }
-
-            modalUtils.showModal({
-                templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/delete-link/confirm_form_removal.modal.html',
-                controller: 'ConfirmDeleteController',
-                controllerAs: 'ctrl'
-            }, function onSuccess() {
-                scope.$root.showSpinner = true;
-                return spliceRows(index);
-            }, false, false);
+            scope.$root.showSpinner = true;
+            return spliceRows(index);
         }
 
         function getDisabledInputValue(column, value) {
