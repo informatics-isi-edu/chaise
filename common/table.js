@@ -481,6 +481,13 @@
          * @param  {boolean} updateResult if it's true we will update the table.
          * @param  {boolean} updateCount  if it's true we will update the displayed total count.
          * @param  {boolean} updateFacets if it's true we will udpate the opened facets.
+         * @param  {boolean} sameCounter if it's true, the flow-control counter won't be updated.
+         *
+         * NOTE: sameCounter=true is used just to signal that we want to get results of the current
+         * page status. For example when a facet opens or when users add a search term to a single facet.
+         * we don't want to update the whole page in that case, just the facet itself.
+         * If while doing so, the whole page updates, the updateFacet function itself should ignore the
+         * stale request by looking at the request url.
          */
         function update (vm, updateResult, updateCount, updateFacets, sameCounter) {
             $log.debug("counter", vm.flowControlObject.counter ,"update called with res=" + updateResult + ", cnt=" + updateCount + ", facets=" + updateFacets + ", sameCnt=" + sameCounter);
