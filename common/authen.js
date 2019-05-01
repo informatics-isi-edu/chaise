@@ -180,6 +180,12 @@
                 if (data['redirect_url'] !== undefined) {
                     login_url = data['redirect_url'];
                 } else if (data['login_form'] !== undefined) {
+                    // we want to use the old login flow to login
+                    // (login in the same window so when login does occur, it changes the same page instead of the page in the window that pops up)
+                    win = $window;
+                    // prevents the dialog from popping up shortly before the page redirects to login
+                    type = "";
+                    var referrer = $window.location.href;
                     var login_form = data['login_form'];
                     login_url = '../login?referrer=' + UriUtils.fixedEncodeURIComponent(referrer);
                     var method = login_form['method'];
