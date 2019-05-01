@@ -64,18 +64,18 @@ describe("Viewing Recordset with Faceting,", function() {
             browser.get(uri);
             chaisePage.waitForElementInverse(element(by.id("spinner")));
 
+            browser.wait(function () {
+                return chaisePage.recordsetPage.getAllFacets().count().then(function(ct) {
+                    return ct == testParams.totalNumFacets;
+                });
+            }, browser.params.defaultTimeout);
+
             // close the first facet
             chaisePage.recordsetPage.getFacetById(0).click();
         });
 
         it("should have " + testParams.totalNumFacets + " facets", function () {
-            chaisePage.recordsetPage.getAllFacets().count().then(function (ct) {
-                expect(ct).toBe(testParams.totalNumFacets, "Number of facets is incorrect");
-
-                return chaisePage.recordsetPage.getFacetTitles();
-            }).then(function (titles) {
-                expect(titles).toEqual(testParams.facetNames, "Displayed list of facets is incorrect");
-            });
+            expect(chaisePage.recordsetPage.getFacetTitles()).toEqual(testParams.facetNames, "Displayed list of facets is incorrect");
         });
 
         describe("testing histogram functions for each facet type", function () {

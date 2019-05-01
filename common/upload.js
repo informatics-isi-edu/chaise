@@ -4,7 +4,7 @@
     angular.module('chaise.upload', ['ermrestjs', 'chaise.utils'])
 
 
-        .directive('upload', [ '$timeout', 'AlertsService', 'ERMrest', 'UriUtils', function($timeout, AlertsService, ERMrest, UriUtils) {
+        .directive('upload', [ '$timeout', 'AlertsService', 'ConfigUtils', 'ERMrest', 'UriUtils', function($timeout, AlertsService, ConfigUtils, ERMrest, UriUtils) {
 
             return {
                 restrict: 'AE',
@@ -25,6 +25,7 @@
                     $timeout(function() {
 
                         scope.fileEl = angular.element(element[0].querySelector('input[type="file"]'));
+                        scope.context = ConfigUtils.getContextJSON();
 
                         // Bind change event file input
                         scope.fileEl

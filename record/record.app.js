@@ -1,8 +1,27 @@
 (function() {
     'use strict';
 /* Configuration of the Record App */
+
+    /**
+     * Module Dependencies:
+     *   config.js
+     *    |--ermrestJS
+     *    |
+     *    |--utils.js
+     *       |--errors.js - needed for utils
+     *       |  |--alerts.js
+     *       |  |  |--filters.js
+     *       |  |
+     *       |  |--authen.js
+     *       |  |  |--storage.js
+     *       |  |
+     *       |  |--modal.js
+     *       |
+     *       |--inputs.js
+     *          |--validators.js
+     */
     angular.module('chaise.configure-record', [
-        'chaise.modal',
+        'chaise.config',
         'chaise.utils',
         'ermrestjs',
         'ngCookies',
@@ -10,8 +29,12 @@
         'ui.bootstrap'
     ])
 
-    .run(['ERMrest', function (ERMrest) {
-        ERMrest.onload().then(function () {
+    .constant('appName', 'record')
+
+    .run(['$rootScope', function ($rootScope) {
+        // When the configuration module's run block emits the `configuration-done` event, attach the app to the DOM
+        $rootScope.$on("configuration-done", function () {
+
             angular.element(document).ready(function(){
                 angular.bootstrap(document.getElementById("record"), ["chaise.record"]);
             });
@@ -54,20 +77,19 @@
         // tooltip on the element instead, set the `tooltip-append-to-body` attribute
         // to `false` on the element.
         $uibTooltipProvider.options({appendToBody: true});
-        // chaise configurations
-        ConfigUtilsProvider.$get().setConfigJSON();
         $logProvider.debugEnabled(ConfigUtilsProvider.$get().getConfigJSON().debug === true);
     }])
 
-    .run(['AlertsService', 'DataUtils', 'ERMrest', 'FunctionUtils', 'headInjector', '$log', 'MathUtils', 'messageMap', 'recordAppUtils',  '$rootScope', 'Session', '$timeout', 'UiUtils', 'UriUtils', '$window',
-        function runApp(AlertsService, DataUtils, ERMrest, FunctionUtils, headInjector, $log, MathUtils, messageMap, recordAppUtils, $rootScope, Session, $timeout, UiUtils, UriUtils, $window) {
+    .run(['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'FunctionUtils', 'headInjector', 'MathUtils', 'messageMap', 'recordAppUtils', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$timeout', '$window',
+        function runApp(AlertsService, ConfigUtils, DataUtils, ERMrest, FunctionUtils, headInjector, MathUtils, messageMap, recordAppUtils, Session, UiUtils, UriUtils, $log, $rootScope, $timeout, $window) {
 
         var session,
-            context = {},
             errorData = {};
 
-        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
-        context.catalogID = UriUtils.getCatalogIDFromLocation();
+        var context = ConfigUtils.getContextJSON(),
+            chaiseConfig = ConfigUtils.getConfigJSON();
+
+        context.chaiseBaseURL = UriUtils.chaiseBaseURL();
 
         $rootScope.displayReady = false;
         $rootScope.showSpinner = false; // this property is set from common modules for controlling the spinner at a global level that is out of the scope of the app
@@ -80,13 +102,12 @@
         $rootScope.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
 
         var res = UriUtils.chaiseURItoErmrestURI($window.location, true);
-        var ermrestUri = res.ermrestUri, pcid = res.pcid, ppid = res.ppid, isQueryParameter = res.isQueryParameter;
+        var ermrestUri = res.ermrestUri,
+            pcid = res.pcid,
+            ppid = res.ppid,
+            isQueryParameter = res.isQueryParameter;
 
-        $rootScope.context = context;
-
-        // The context object won't change unless the app is reloaded
-        context.appName = "record";
-        context.pageId = MathUtils.uuid();
+        context.catalogID = res.catalogId;
 
         FunctionUtils.registerErmrestCallbacks();
 
@@ -96,7 +117,7 @@
             // Unsubscribe onchange event to avoid this function getting called again
             Session.unsubscribeOnChange(subId);
 
-            ERMrest.resolve(ermrestUri, { cid: context.appName, pid: context.pageId, wid: $window.name }).then(function getReference(reference) {
+            ERMrest.resolve(ermrestUri, { cid: context.cid, pid: context.pid, wid: context.wid }).then(function getReference(reference) {
                 context.filter = reference.location.filter;
                 context.facets = reference.location.facets;
 

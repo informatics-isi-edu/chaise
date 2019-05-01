@@ -1,14 +1,34 @@
 'use strict';
 
+/**
+ * Module Dependencies:
+ *   config.js
+ *   utils.js
+ *    |--errors.js - needed for utils
+ *    |  |--alerts.js
+ *    |  |  |--filters.js
+ *    |  |
+ *    |  |--authen.js
+ *    |  |  |--storage.js
+ *    |  |
+ *    |  |--modal.js
+ *    |
+ *    |--inputs.js
+ *       |--validators.js
+ */
 angular.module('configure-search', [
-    'chaise.modal',
+    'chaise.config',
     'chaise.utils',
     'ermrestjs',
     'ngCookies'
 ])
 
-.run(['ERMrest', function (ERMrest) {
-    ERMrest.onload().then(function () {
+.constant('appName', 'search')
+
+.run(['$rootScope', function ($rootScope) {
+    // When the configuration module's run block emits the `configuration-done` event, attach the app to the DOM
+    $rootScope.$on("configuration-done", function () {
+
         angular.element(document).ready(function(){
             angular.bootstrap(document.getElementById("search"), ["ermrestApp"]);
         });
@@ -56,9 +76,7 @@ ermrestApp.provider('ermrest', function () {
 	}
 });
 
-ermrestApp.config(['ConfigUtilsProvider', 'ermrestProvider',
-                   function(ConfigUtilsProvider, ermrestProvider) {
+ermrestApp.config(['ermrestProvider', function(ermrestProvider) {
 	ermrestProvider.setCatalog(1);
 	ermrestProvider.setLayout('list');
-    ConfigUtilsProvider.$get().setConfigJSON();
 }]);

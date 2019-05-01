@@ -457,9 +457,13 @@ describe('View recordset,', function() {
                 });
                 var filter = accommodationParams.shortest_key_filter + dataRow.RID;
 
-                chaisePage.recordsetPage.waitForInverseMainSpinner();
+                browser.wait(function() {
+                    return chaisePage.recordsetPage.getViewActionButtons().count().then(function(ct) {
+                        return (ct == 4);
+                    });
+                }, browser.params.defaultTimeout);
+
                 chaisePage.recordsetPage.getViewActionButtons().then(function(viewButtons) {
-                    expect(viewButtons.length).toBe(4);
                     return viewButtons[0].click();
                 }).then(function() {
                     var result = '/record/#' + browser.params.catalogId + "/" + accommodationParams.schemaName + ":" + accommodationParams.table_name + "/" + filter;
@@ -477,9 +481,13 @@ describe('View recordset,', function() {
                 var filter = accommodationParams.shortest_key_filter + dataRow.RID;
                 var allWindows;
 
-                chaisePage.recordsetPage.waitForInverseMainSpinner();
+                browser.wait(function() {
+                    return chaisePage.recordsetPage.getEditActionButtons().count().then(function(ct) {
+                        return (ct == 4);
+                    });
+                }, browser.params.defaultTimeout);
+
                 chaisePage.recordsetPage.getEditActionButtons().then(function(editButtons) {
-                    expect(editButtons.length).toBe(4);
                     return editButtons[0].click();
                 }).then(function() {
                     return browser.getAllWindowHandles();
@@ -561,9 +569,12 @@ describe('View recordset,', function() {
                 var deleteButton;
                 var EC = protractor.ExpectedConditions;
 
-                chaisePage.recordsetPage.waitForInverseMainSpinner();
+                browser.wait(function() {
+                    return chaisePage.recordsetPage.getDeleteActionButtons().count().then(function(ct) {
+                        return (ct == 4);
+                    });
+                }, browser.params.defaultTimeout);
                 chaisePage.recordsetPage.getDeleteActionButtons().then(function(deleteButtons) {
-                    expect(deleteButtons.length).toBe(4);
                     deleteButton = deleteButtons[3];
                     return deleteButton.click();
                 }).then(function() {
@@ -856,8 +867,7 @@ describe('View recordset,', function() {
             chaisePage.recordsetPage.getViewActionButtons().then(function(viewButtons) {
                 return viewButtons[0].click();
             }).then(function() {
-                var result = '/record/#' + browser.params.catalogId + "/" + accommodationParams.schemaName + ":" + accommodationParams.table_name + "/" + filter;
-                return chaisePage.waitForUrl(result, browser.params.defaultTimeout);
+                return chaisePage.recordPageReady();
             }).finally(function() {
                 expect(chaisePage.getWindowName()).toBe(windowId);
                 // pageId should change when the window changes page
@@ -885,8 +895,7 @@ describe('View recordset,', function() {
                 allWindows = handles;
                 return browser.switchTo().window(allWindows[1]);
             }).then(function() {
-                var result = '/recordedit/#' + browser.params.catalogId + "/" + accommodationParams.schemaName + ":" + accommodationParams.table_name + "/" + filter;
-                return chaisePage.waitForUrl(result, browser.params.defaultTimeout);
+                return chaisePage.recordeditPageReady();
             }).finally(function() {
                 expect(chaisePage.getWindowName()).not.toBe(windowId);
                 // pageId should change when a new window is opened
@@ -908,7 +917,9 @@ describe('View recordset,', function() {
             var chaiseConfig, keys = [];
             keys.push(accommodationParams.key.name + accommodationParams.key.operator + accommodationParams.key.value);
             var url = browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:" + accommodationParams.table_name + "/" + keys.join("&") + "@sort(" + accommodationParams.sortby + ")";
+            browser.ignoreSynchronization=true;
             browser.get(url);
+
             chaisePage.waitForElement(element(by.id('page-title')), browser.params.defaultTimeout).then(function() {
                 return browser.executeScript('return chaiseConfig');
             }).then(function(config) {

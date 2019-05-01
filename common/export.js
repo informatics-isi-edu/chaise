@@ -3,8 +3,8 @@
 
     angular.module('chaise.export', ['chaise.utils'])
 
-    .directive('export', ['AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'modalUtils', '$rootScope', '$timeout', 'UriUtils', function (AlertsService, DataUtils, ErrorService, logActions, modalUtils, $rootScope, $timeout, UriUtils) {
-
+    .directive('export', ['AlertsService', 'ConfigUtils', 'DataUtils', 'ErrorService', 'logActions', 'modalUtils', '$rootScope', '$timeout', 'UriUtils', '$window', function (AlertsService, ConfigUtils, DataUtils, ErrorService, logActions, modalUtils, $rootScope, $timeout, UriUtils, $window) {
+        var chaiseConfig = ConfigUtils.getConfigJSON();
         /**
          * Cancel the current export request
          */
@@ -20,7 +20,7 @@
          * Update the list of templates in UI
          */
         function _updateExportFormats(scope) {
-            var templates = scope.reference.getExportTemplates(!$rootScope.chaiseConfig.disableDefaultExport);
+            var templates = scope.reference.getExportTemplates(!chaiseConfig.disableDefaultExport);
 
             templates.forEach(function (template) {
                 if (template.displayname) {
@@ -56,7 +56,7 @@
                         scope.reference,
                         bagName,
                         template,
-                        $rootScope.chaiseConfig.exportServicePath
+                        chaiseConfig.exportServicePath
                     );
                     var exportParametersString = JSON.stringify(scope.exporter.exportParameters, null, "  ");
 

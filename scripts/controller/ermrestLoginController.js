@@ -2,15 +2,16 @@
 
 /* Controllers */
 
-var ermLoginController = angular.module('ermLoginController', []);
+var ermLoginController = angular.module('ermLoginController', ['chaise.config']);
 
+ermLoginController.constant('appName', 'oldlogin');
 ermLoginController.controller('LoginCtrl', ['$sce', '$scope', 'ermrest', 'UriUtils','$cookies',
                                            function($sce, $scope, ermrest, uriUtils, $cookies) {
 
 
    	var queryString = uriUtils.queryStringToJSON(window.location.search);
    	if (queryString.referrerid && (typeof queryString.action == 'undefined') && window.opener) {
-			
+
 		// if browser is IE then clear the referrerId from cookiestore
 		// else postmessage to parent window and close itslef
    		if (uriUtils.isBrowserIE()) {
