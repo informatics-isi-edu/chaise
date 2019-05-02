@@ -386,8 +386,8 @@
             var pcontext = [];
 
             var contextObj = ConfigUtils.getContextJSON();
-            pcontext.push("pcid=" + contextObj.appName);
-            pcontext.push("ppid=" + contextObj.pageId);
+            pcontext.push("pcid=" + contextObj.cid);
+            pcontext.push("ppid=" + contextObj.pid);
 
             // TODO we might want to allow only certian query parameters
             if (location.queryParamsString) {
@@ -1399,6 +1399,16 @@
     }])
 
     .factory("ConfigUtils", ['$rootScope', '$window', 'defaultChaiseConfig', function($rootScope, $window, defaultConfig) {
+
+        /**
+         * Will return the dcctx object that has the following attributes:
+         *  - cid: client id (app name)
+         *  - wid: window id
+         *  - pid: page id
+         *  - chaiseConfig: The chaiseConfig object
+         *  - server: An ERMrest.Server object that can be used for http requests
+         * @return {Object} dcctx object
+         */
         function getContextJSON() {
             return $window.dcctx;
         };

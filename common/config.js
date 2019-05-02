@@ -20,7 +20,10 @@
                 catalogId = UriUtils.getCatalogId();
 
             if (catalogId) {
-                ERMrest.ermrestFactory.getServer(service, { cid: $window.dcctx.cid, pid: $window.dcctx.pid, wid: $window.dcctx.wid }).catalogs.get(catalogId).then(function (response) {
+                // the server object that can be used in other places
+                $window.dcctx.server = ERMrest.ermrestFactory.getServer(service, { cid: $window.dcctx.cid, pid: $window.dcctx.pid, wid: $window.dcctx.wid });
+
+                $window.dcctx.server.catalogs.get(catalogId).then(function (response) {
                     // we already setup the defaults and the configuration based on chaise-config.js
                     if (response.chaiseConfig) ConfigUtils.setConfigJSON(response.chaiseConfig);
 
