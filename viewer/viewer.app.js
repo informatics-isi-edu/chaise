@@ -1,6 +1,44 @@
 (function() {
     'use strict';
 
+    /**
+     * Module Dependencies:
+     *   config.js
+     *    |--ermrestJS
+     *    |
+     *    |--utils.js
+     *       |--errors.js - needed for utils
+     *       |  |--alerts.js
+     *       |  |  |--filters.js
+     *       |  |
+     *       |  |--authen.js
+     *       |  |  |--storage.js
+     *       |  |
+     *       |  |--modal.js
+     *       |
+     *       |--inputs.js
+     *          |--validators.js
+     */
+    angular.module('chaise.configure-viewer', [
+        'chaise.config',
+        'chaise.utils',
+        'ermrestjs',
+        'ngCookies',
+        'ui.bootstrap'
+    ])
+
+    .constant('appName', 'viewer')
+
+    .run(['$rootScope', function ($rootScope) {
+        // When the configuration module's run block emits the `configuration-done` event, attach the app to the DOM
+        $rootScope.$on("configuration-done", function () {
+
+            angular.element(document).ready(function(){
+                angular.bootstrap(document.getElementById("viewer"), ["chaise.viewer"]);
+            });
+        });
+    }]);
+
     var client;
 
     angular.module('chaise.viewer', [
@@ -13,6 +51,7 @@
         'chaise.errors',
         'chaise.delete',
         'chaise.modal',
+        'chaise.utils',
         'ui.select',
         'ui.bootstrap',
         'ng.deviceDetector'
@@ -41,8 +80,7 @@
     }])
 
     // set the chasie-config property
-    .config(['ConfigUtilsProvider', 'headInjectorProvider', function (ConfigUtilsProvider, headInjectorProvider) {
-        ConfigUtilsProvider.$get().setConfigJSON();
+    .config(['headInjectorProvider', function (headInjectorProvider) {
 
         headInjectorProvider.$get().setupHead();
     }])
@@ -54,9 +92,12 @@
         $uibTooltipProvider.options({appendToBody: true});
     }])
 
+    // TODO we should be able to remove this part completely. Why do we even need the user info?
+    // Also `getSession` will never reject the promise. it will always resolve and if the
+    // user session doesn't exist it will be resolved with `null`. So the logic here is broken.
     // Set user info
-    .config(['userProvider', 'context', 'SessionProvider', function configureUser(userProvider, context, SessionProvider) {
-
+    .config(['userProvider', 'context', 'SessionProvider', 'ConfigUtilsProvider', function configureUser(userProvider, context, SessionProvider, ConfigUtilsProvider) {
+        var chaiseConfig = ConfigUtilsProvider.$get().getConfigJSON();
         SessionProvider.$get().getSession().then(function success(session) {
             var groups = chaiseConfig.userGroups || context.groups;
             // session.attributes is an array of objects that have a display_name and id
