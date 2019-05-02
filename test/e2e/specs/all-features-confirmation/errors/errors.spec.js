@@ -291,9 +291,13 @@ describe('Error related test cases,', function() {
         it('After clicking back button initial page should appear', function(done){
             chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
                 return btn.click();
-            }).then (function (){
+            }).then (function () {
+                return chaisePage.recordsetPageReady();
+            }).then(function () {
                 return browser.navigate().back();
-            }).then(function (){
+            }).then(function () {
+                return chaisePage.recordPageReady();
+            }).then(function () {
                 return browser.driver.getCurrentUrl();
             }).then (function(currentUrl) {
                 expect(currentUrl).toContain('id=269111', "The back button failed to go back to previous page.");
@@ -464,9 +468,10 @@ describe('Error related test cases,', function() {
 
           it('On click of OK button the page should reload the page without paging conditions', function(done){
               chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
-                  chaisePage.clickButton(btn);
+                  return chaisePage.clickButton(btn);
+              }).then(function() {
                   return browser.driver.getCurrentUrl();
-              }).then (function(currentUrl) {
+              }).then(function(currentUrl) {
                  recordsetPage = pageTestUrl.slice(0, pageTestUrl.search('@'));
                  expect(currentUrl).toBe(recordsetPage, "The redirection to Recordset page failed");
                  done();

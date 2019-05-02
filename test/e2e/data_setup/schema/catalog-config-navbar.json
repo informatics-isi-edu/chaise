@@ -1,0 +1,54 @@
+{
+    "schema_name": "catalog-config-navbar",
+    "tables": {
+        "config-table": {
+            "kind": "table",
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "id"
+                    ]
+                }
+            ],
+            "foreign_keys": [],
+            "table_name": "config-table",
+            "schema_name": "catalog-config-navbar",
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "default": null,
+                    "nullok": false,
+                    "type": {
+                        "typename": "serial4"
+                    },
+                    "annotations": {
+                        "comment": [
+                            "hidden"
+                        ],
+                        "tag:isrd.isi.edu,2016:generated": null,
+                        "tag:isrd.isi.edu,2016:immutable": null
+                    }
+                }, {
+                    "name": "text",
+                    "nullok": true,
+                    "type": {
+                        "typename": "text"
+                    }
+                }, {
+                    "name": "int",
+                    "nullok": true,
+                    "type": {
+                        "typename": "int"
+                    }
+                }
+            ]
+        }
+    },
+    "table_names": [
+        "config-table"
+    ],
+    "comment": null,
+    "annotations": {}
+}
