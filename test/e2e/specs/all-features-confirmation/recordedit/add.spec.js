@@ -273,17 +273,11 @@ describe('Record Add', function() {
 
                         it("should click and remove the last record", function() {
                             chaisePage.recordEditPage.getDeleteRowButton(tableParams.formsAfterInput - 1).then(function(button) {
-                                chaisePage.clickButton(button);
-
-                                browser.wait(protractor.ExpectedConditions.visibilityOf(element(by.id('delete-confirmation'))), browser.params.defaultTimeout);
-
-                                chaisePage.recordEditPage.getDeleteModalButton().then(function(modalBtn) {
-                                    chaisePage.clickButton(modalBtn);
-                                    browser.sleep(50);
-                                    chaisePage.recordEditPage.getAllDeleteRowButtons().then(function(buttons) {
-                                        expect(buttons.length).toBe(tableParams.formsAfterInput - 1);
-                                    });
-                                });
+                                return chaisePage.clickButton(button);
+                            }).then(function () {
+                                return chaisePage.recordEditPage.getAllDeleteRowButtons();
+                            }).then(function(buttons) {
+                                expect(buttons.length).toBe(tableParams.formsAfterInput - 1);
                             });
                         });
                     } else {
