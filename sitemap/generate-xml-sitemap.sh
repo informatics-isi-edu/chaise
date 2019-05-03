@@ -5,6 +5,7 @@ catalog_id="$2"
 schema="$3"
 table="$4"
 keycol="RID" # should not be changed without changing the output URL format too
+app="chaise/record"
 changefreq="monthly"  # choices: always, hourly, daily, weekly, monthly, yearly, never
 
 echo '<?xml version="1.0" encoding="UTF-8"?>'
@@ -18,7 +19,7 @@ do
   # This does NOT take into account URL encoding. All arguments to this script
   # should have been encoded before passing to this script.
   echo "  <url>"
-  echo "    <loc>https://${hostname}/id/${catalog_id}/${key}</loc>"
+  echo "    <loc>https://${hostname}/${app}/?${catalog_id}/${schema}:${table}/${keycol}=${key}</loc>"
   echo "    <changefreq>${changefreq}</changefreq>"
   echo "  </url>"
 done
