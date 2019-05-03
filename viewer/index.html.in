@@ -22,7 +22,7 @@
     <div class="configure-container" ng-app="chaise.configure-viewer">
         <loading-spinner></loading-spinner>
     </div>
-    <div class="container-fluid">
+    <div class="container-fluid app-container">
         <div ng-controller="AlertsController as alerts" id="alert" class="row">
             <div class="col-md-12">
                 <div ng-repeat="alert in alerts.alerts" class="alert alert-dismissable" ng-class="{'alert-danger': alert.type == 'error'}" role="alert">
