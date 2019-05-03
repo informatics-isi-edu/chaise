@@ -4,9 +4,9 @@ hostname="$1"
 catalog_id="$2"
 schema="$3"
 table="$4"
+changefreq=${5:-"weekly"}  # choices: always, hourly, daily, weekly, monthly, yearly, never
 keycol="RID" # should not be changed without changing the output URL format too
 app="chaise/record"
-changefreq="monthly"  # choices: always, hourly, daily, weekly, monthly, yearly, never
 
 echo '<?xml version="1.0" encoding="UTF-8"?>'
 echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
