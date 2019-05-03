@@ -7,7 +7,9 @@
         %ASSETS%
     </head>
     <body class="chaise-body">
-        <div ng-app="chaise.configure-recordset"></div>
+        <div class="configure-container" ng-app="chaise.configure-recordset">
+            <loading-spinner></loading-spinner>
+        </div>
         <div class="app-container" ng-controller="recordsetController as ctrl">
             <navbar></navbar>
             <div class="row">

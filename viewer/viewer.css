@@ -121,7 +121,7 @@ a.cardlink.delete {
     width: 97%;
 }
 
-#viewer.col-md-9 {
+#viewer-container.col-md-9 {
 	position: fixed;
     top: 0;
     right: 0;
@@ -171,11 +171,11 @@ a.cardlink.delete {
 @keyframes fadeIn { from { opacity:0; left:-200; } to { opacity:0.95; left:0; } }
 
 .fade-in {
-	-webkit-animation:fadeIn ease-in 1;  
+	-webkit-animation:fadeIn ease-in 1;
 	-moz-animation:fadeIn ease-in 1;
 	animation:fadeIn ease-in 1;
 
-	-webkit-animation-fill-mode:forwards;  
+	-webkit-animation-fill-mode:forwards;
 	-moz-animation-fill-mode:forwards;
 	animation-fill-mode:forwards;
 
@@ -190,11 +190,11 @@ a.cardlink.delete {
 @keyframes fadeOut { from { opacity:0.95; left:0; } to { opacity:0; left:-200; } }
 
 .fade-out {
-	-webkit-animation:fadeOut ease-in 1;  
+	-webkit-animation:fadeOut ease-in 1;
 	-moz-animation:fadeOut ease-in 1;
 	animation:fadeOut ease-in 1;
 
-	-webkit-animation-fill-mode:forwards;  
+	-webkit-animation-fill-mode:forwards;
 	-moz-animation-fill-mode:forwards;
 	animation-fill-mode:forwards;
 
@@ -212,5 +212,3 @@ a.cardlink.delete {
     background-color: #002D73;
     border-color: #1E4E9A;
 }
-
-
