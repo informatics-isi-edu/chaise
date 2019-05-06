@@ -1398,7 +1398,7 @@
         }
     }])
 
-    .factory("ConfigUtils", ['$rootScope', '$window', 'defaultChaiseConfig', function($rootScope, $window, defaultConfig) {
+    .factory("ConfigUtils", ['defaultChaiseConfig', '$http', '$rootScope', '$window', function(defaultConfig, $http, $rootScope, $window) {
 
         /**
          * Will return the dcctx object that has the following attributes:
@@ -1498,10 +1498,21 @@
             $window.dcctx.chaiseConfig = cc;
         }
 
+        /**
+         * Returns the http service that should be used in chaise
+         * NOTE: This has been added for backward compatibility.
+         * The window.dcctx.server should always be available if config app has been included
+         * @return {Object}
+         */
+        function getHTTPService() {
+            return getContextJSON().server ? getContextJSON().server.http : $http;
+        };
+
         return {
             getContextJSON: getContextJSON,
             getConfigJSON: getConfigJSON,
-            setConfigJSON: setConfigJSON
+            setConfigJSON: setConfigJSON,
+            getHTTPService: getHTTPService
         }
     }])
 

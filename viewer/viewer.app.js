@@ -92,13 +92,12 @@
         $uibTooltipProvider.options({appendToBody: true});
     }])
 
-    // TODO we should be able to remove this part completely. Why do we even need the user info?
-    // Also `getSession` will never reject the promise. it will always resolve and if the
-    // user session doesn't exist it will be resolved with `null`. So the logic here is broken.
-    // Set user info
     .config(['userProvider', 'context', 'SessionProvider', 'ConfigUtilsProvider', function configureUser(userProvider, context, SessionProvider, ConfigUtilsProvider) {
         var chaiseConfig = ConfigUtilsProvider.$get().getConfigJSON();
         SessionProvider.$get().getSession().then(function success(session) {
+            // there's no active session
+            if (!session) return;
+
             var groups = chaiseConfig.userGroups || context.groups;
             // session.attributes is an array of objects that have a display_name and id
             // We MUST use the id field to check for role inclusion as it is the unique identifier
@@ -136,39 +135,12 @@
             console.log('User: ', user);
             return;
         }, function error(response) {
-            // TODO: Abstract this away..
-            if (response.status == 401 || response.status == 404) {
-                if (chaiseConfig.authnProvider == 'goauth') {
-                    // TODO: Is it worth injecting $window here?
-                    getGoauth(encodeSafeURIComponent(window.location.href));
-                }
-                console.log(response);
-                throw response;
-            }
+            throw response;
         });
-
-        function getGoauth(referrer) {
-            var url = '/ermrest/authn/preauth?referrer=' + referrer;
-            // Inject $http service
-            var $http = angular.injector(['ng']).get('$http');
-            $http.get(url).then(function success(response) {
-                console.log('Success: ', response);
-                window.open(response.data.redirect_url, '_self');
-            }, function error(response) {
-                console.log('Error: ', response);
-                throw response;
-            });
-        }
-
-        function encodeSafeURIComponent (str) {
-            return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
-                return '%' + c.charCodeAt(0).toString(16).toUpperCase();
-            });
-        }
     }])
 
     // Hydrate values providers and set up iframe
-    .run(['ERMrest', 'logActions', '$window', 'context', 'image', 'annotations', 'comments', 'anatomies', 'user', 'MathUtils', function runApp(ERMrest, logActions, $window, context, image, annotations, comments, anatomies, user, MathUtils) {
+    .run(['ConfigUtils', 'ERMrest', 'logActions', '$window', 'context', 'image', 'annotations', 'comments', 'anatomies', 'user', 'MathUtils', function runApp(ConfigUtils, ERMrest, logActions, $window, context, image, annotations, comments, anatomies, user, MathUtils) {
         var origin = $window.location.origin;
         var iframe = $window.frames[0];
         var annotoriousReady = false;
@@ -177,8 +149,7 @@
         var rectangles = [];
         var sections = [];
 
-        client = ERMrest.ermrestFactory.getServer(context.serviceURL, {cid: context.appName, pid: MathUtils.uuid(), wid: $window.name});
-        client.catalogs.get(context.catalogID).then(function success(catalog) {
+        ConfigUtils.getContextJSON().server.catalogs.get(context.catalogID).then(function success(catalog) {
             var schema = catalog.schemas.get(context.schemaName);
             // So the schema and tables can be accessed in controllers
             context.schema = schema;
