@@ -254,7 +254,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         ],
                         "timestamptz": [
                             {
-                                "value": "2001-01-01T01:01:01-08:00",
+                                "value": moment("2001-01-01T01:01:01-08:00", "YYYY-MM-DDTHH:mm:ssZ").format("YYYY-MM-DDTHH:mm:ssZ"),
                                 "error": "Please enter a valid array structure."
                             },
                             {

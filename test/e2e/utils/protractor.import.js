@@ -155,8 +155,17 @@ var bulkImportSchemas = function(configs, defer, authCookie, catalogId, entities
     };
 
     configs.forEach(function (config) {
-        // copy annotations an dACLs over t
-        catalog = config.catalog;
+        // copy annotations and ACLs over to the submitted catalog object
+        if (config.catalog && typeof config.catalog === "object") {
+            // if empty object, this loop is skipped
+            for (var prop in config.catalog) {
+                // if property is set already
+                if (catalog[prop]) {
+                    console.log(prop + " is already defined on catalog object, overriding previously set value with new one")
+                }
+                catalog[prop] = config.catalog[prop];
+            }
+        }
 
         schemas[config.schema.name] = {
             path: config.schema.path
