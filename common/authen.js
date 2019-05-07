@@ -3,8 +3,8 @@
 
     angular.module('chaise.authen', ['chaise.utils', 'chaise.storage'])
 
-    .factory('Session', ['ConfigUtils', 'messageMap', 'modalUtils', 'StorageService', 'UriUtils', '$cookies', '$http', '$interval', '$log', '$q', '$rootScope', '$sce', '$uibModalStack', '$window',
-        function (ConfigUtils, messageMap, modalUtils, StorageService, UriUtils, $cookies, $http, $interval, $log, $q, $rootScope, $sce, $uibModalStack, $window) {
+    .factory('Session', ['ConfigUtils', 'messageMap', 'modalUtils', 'StorageService', 'UriUtils', '$cookies', '$interval', '$log', '$q', '$rootScope', '$sce', '$uibModalStack', '$window',
+        function (ConfigUtils, messageMap, modalUtils, StorageService, UriUtils, $cookies, $interval, $log, $q, $rootScope, $sce, $uibModalStack, $window) {
         // authn API no longer communicates through ermrest, removing the need to check for ermrest location
         var serviceURL = $window.location.origin;
 
@@ -173,7 +173,7 @@
                 }
             };
 
-            $http.get(url, config).then(function(response){
+            ConfigUtils.getHTTPService().get(url, config).then(function(response){
                 var data = response.data;
 
                 var login_url = "";
@@ -251,7 +251,7 @@
              * @param  {string=} context undefined or "401"
              */
             getSession: function(context) {
-                return $http.get(serviceURL + "/authn/session").then(function(response) {
+                return ConfigUtils.getHTTPService().get(serviceURL + "/authn/session").then(function(response) {
                     if (context === "401" && shouldReloadPageAfterLogin(response.data)) {
                         window.location.reload();
                         return response.data;
@@ -274,7 +274,7 @@
              * Meant for validating the server session and verify if it's still active or not
              */
             validateSession: function () {
-                return $http.get(serviceURL + "/authn/session").then(function(response) {
+                return ConfigUtils.getHTTPService().get(serviceURL + "/authn/session").then(function(response) {
                     _session = response.data;
                     return _session;
                 }).catch(function(err) {
@@ -337,7 +337,7 @@
 
                 url += '?logout_url=' + UriUtils.fixedEncodeURIComponent(logoutURL);
 
-                $http.delete(url).then(function(response) {
+                ConfigUtils.getHTTPService().delete(url).then(function(response) {
                     StorageService.deleteStorageNamespace(LOCAL_STORAGE_KEY);
                     $window.location = response.data.logout_url;
                 }, function(error) {
