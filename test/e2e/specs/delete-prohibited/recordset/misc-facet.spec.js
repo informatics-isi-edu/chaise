@@ -140,10 +140,14 @@ describe("Other facet features, ", function() {
             chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
 
             clearAll = chaisePage.recordsetPage.getClearAllFilters();
+            chaisePage.waitForElement(clearAll);
 
             idx = testParams.filter_secondary_key.facetIdx;
             facet = chaisePage.recordsetPage.getFacetById(idx);
-            done();
+
+            chaisePage.clickButton(clearAll).then(function () {
+                done()
+            }).catch(chaisePage.catchTestError(done));
         });
 
         it('Side panel should hide/show by clicking pull button', function(done){
@@ -163,12 +167,8 @@ describe("Other facet features, ", function() {
             }).catch(chaisePage.catchTestError(done));
         });
 
-        it ("should open the facet, select a value to filter on.", function (done) {
-            chaisePage.clickButton(clearAll).then(function () {
-                return chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
-            }).then(function () {
-                return chaisePage.clickButton(facet);
-            }).then(function () {
+        it("should open the facet, select a value to filter on.", function (done) {
+            chaisePage.clickButton(facet).then(function () {
                 // wait for facet to open
                 browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
 
@@ -194,13 +194,10 @@ describe("Other facet features, ", function() {
                 expect(ct).toBe(testParams.filter_secondary_key.numRows, "number of rows is incorrect");
                 done();
             }).catch(chaisePage.catchTestError(done));
-
         });
 
         it ("the selected value should be selected on the modal.", function (done) {
-            var showMore = chaisePage.recordsetPage.getShowMore(idx);
-            browser.wait(EC.elementToBeClickable(showMore));
-            chaisePage.clickButton(showMore).then(function () {
+            chaisePage.clickButton(chaisePage.recordsetPage.getShowMore(idx)).then(function () {
                 chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
 
                 expect(chaisePage.recordsetPage.getCheckedModalOptions().count()).toBe(1, "number of checked rows missmatch.");
@@ -610,6 +607,12 @@ describe("Other facet features, ", function() {
         });
 
         it ("should show the applied filter and clear all button.", function (done) {
+            browser.wait(function () {
+                return chaisePage.recordsetPage.getFacetFilters().count().then(function(ct) {
+                    return ct == 1;
+                });
+            }, browser.params.defaultTimeout);
+
             chaisePage.recordsetPage.getFacetFilters().then(function (filters) {
                 expect(filters.length).toEqual(1, "filter is missing");
 
@@ -862,6 +865,7 @@ describe("Other facet features, ", function() {
             beforeAll(function (done) {
                 browser.ignoreSynchronization=true;
                 browser.get(uri);
+
                 chaisePage.waitForUrl('facets', browser.params.defaultTimeout);
 
                 browser.getCurrentUrl().then(function (url) {
@@ -1034,9 +1038,13 @@ describe("Other facet features, ", function() {
         });
 
         it ("should show the applied filter and clear all button.", function (done) {
-            chaisePage.recordsetPage.getFacetFilters().then(function (filters) {
-                expect(filters.length).toEqual(1, "filter is missing");
+            browser.wait(function () {
+                return chaisePage.recordsetPage.getFacetFilters().count().then(function(ct) {
+                    return ct == 1;
+                });
+            }, browser.params.defaultTimeout);
 
+            chaisePage.recordsetPage.getFacetFilters().then(function (filters) {
                 expect(filters[0].getText()).toEqual("Custom Facets: " + customFacetParams.cfacet.displayname, "filter text missmatch.");
 
                 expect(chaisePage.recordsetPage.getClearAllFilters().isDisplayed()).toBeTruthy("`Clear All` is not visible");

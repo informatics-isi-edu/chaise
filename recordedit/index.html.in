@@ -20,7 +20,9 @@
     <![endif]-->
 </head>
 <body class="chaise-body">
-    <div ng-app="chaise.configure-recordedit"></div>
+    <div class="configure-container" ng-app="chaise.configure-recordedit">
+        <loading-spinner></loading-spinner>
+    </div>
     <div class="app-container container-fluid">
         <navbar></navbar>
         <loading-spinner ng-show="!displayReady && !error"></loading-spinner>

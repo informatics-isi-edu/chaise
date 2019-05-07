@@ -4,8 +4,9 @@ hostname="$1"
 catalog_id="$2"
 schema="$3"
 table="$4"
+changefreq=${5:-"weekly"}  # choices: always, hourly, daily, weekly, monthly, yearly, never
 keycol="RID" # should not be changed without changing the output URL format too
-changefreq="monthly"  # choices: always, hourly, daily, weekly, monthly, yearly, never
+app="chaise/record"
 
 echo '<?xml version="1.0" encoding="UTF-8"?>'
 echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
@@ -18,7 +19,7 @@ do
   # This does NOT take into account URL encoding. All arguments to this script
   # should have been encoded before passing to this script.
   echo "  <url>"
-  echo "    <loc>https://${hostname}/id/${catalog_id}/${key}</loc>"
+  echo "    <loc>https://${hostname}/${app}/?${catalog_id}/${schema}:${table}/${keycol}=${key}</loc>"
   echo "    <changefreq>${changefreq}</changefreq>"
   echo "  </url>"
 done

@@ -1,6 +1,44 @@
 (function() {
     'use strict';
 
+    /**
+     * Module Dependencies:
+     *   config.js
+     *    |--ermrestJS
+     *    |
+     *    |--utils.js
+     *       |--errors.js - needed for utils
+     *       |  |--alerts.js
+     *       |  |  |--filters.js
+     *       |  |
+     *       |  |--authen.js
+     *       |  |  |--storage.js
+     *       |  |
+     *       |  |--modal.js
+     *       |
+     *       |--inputs.js
+     *          |--validators.js
+     */
+    angular.module('chaise.configure-viewer', [
+        'chaise.config',
+        'chaise.utils',
+        'ermrestjs',
+        'ngCookies',
+        'ui.bootstrap'
+    ])
+
+    .constant('appName', 'viewer')
+
+    .run(['$rootScope', function ($rootScope) {
+        // When the configuration module's run block emits the `configuration-done` event, attach the app to the DOM
+        $rootScope.$on("configuration-done", function () {
+
+            angular.element(document).ready(function(){
+                angular.bootstrap(document.getElementById("viewer"), ["chaise.viewer"]);
+            });
+        });
+    }]);
+
     var client;
 
     angular.module('chaise.viewer', [
@@ -13,6 +51,7 @@
         'chaise.errors',
         'chaise.delete',
         'chaise.modal',
+        'chaise.utils',
         'ui.select',
         'ui.bootstrap',
         'ng.deviceDetector'
@@ -41,8 +80,7 @@
     }])
 
     // set the chasie-config property
-    .config(['ConfigUtilsProvider', 'headInjectorProvider', function (ConfigUtilsProvider, headInjectorProvider) {
-        ConfigUtilsProvider.$get().setConfigJSON();
+    .config(['headInjectorProvider', function (headInjectorProvider) {
 
         headInjectorProvider.$get().setupHead();
     }])
@@ -54,10 +92,12 @@
         $uibTooltipProvider.options({appendToBody: true});
     }])
 
-    // Set user info
-    .config(['userProvider', 'context', 'SessionProvider', function configureUser(userProvider, context, SessionProvider) {
-
+    .config(['userProvider', 'context', 'SessionProvider', 'ConfigUtilsProvider', function configureUser(userProvider, context, SessionProvider, ConfigUtilsProvider) {
+        var chaiseConfig = ConfigUtilsProvider.$get().getConfigJSON();
         SessionProvider.$get().getSession().then(function success(session) {
+            // there's no active session
+            if (!session) return;
+
             var groups = chaiseConfig.userGroups || context.groups;
             // session.attributes is an array of objects that have a display_name and id
             // We MUST use the id field to check for role inclusion as it is the unique identifier
@@ -95,39 +135,12 @@
             console.log('User: ', user);
             return;
         }, function error(response) {
-            // TODO: Abstract this away..
-            if (response.status == 401 || response.status == 404) {
-                if (chaiseConfig.authnProvider == 'goauth') {
-                    // TODO: Is it worth injecting $window here?
-                    getGoauth(encodeSafeURIComponent(window.location.href));
-                }
-                console.log(response);
-                throw response;
-            }
+            throw response;
         });
-
-        function getGoauth(referrer) {
-            var url = '/ermrest/authn/preauth?referrer=' + referrer;
-            // Inject $http service
-            var $http = angular.injector(['ng']).get('$http');
-            $http.get(url).then(function success(response) {
-                console.log('Success: ', response);
-                window.open(response.data.redirect_url, '_self');
-            }, function error(response) {
-                console.log('Error: ', response);
-                throw response;
-            });
-        }
-
-        function encodeSafeURIComponent (str) {
-            return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
-                return '%' + c.charCodeAt(0).toString(16).toUpperCase();
-            });
-        }
     }])
 
     // Hydrate values providers and set up iframe
-    .run(['ERMrest', 'logActions', '$window', 'context', 'image', 'annotations', 'comments', 'anatomies', 'user', 'MathUtils', function runApp(ERMrest, logActions, $window, context, image, annotations, comments, anatomies, user, MathUtils) {
+    .run(['ConfigUtils', 'ERMrest', 'logActions', '$window', 'context', 'image', 'annotations', 'comments', 'anatomies', 'user', 'MathUtils', function runApp(ConfigUtils, ERMrest, logActions, $window, context, image, annotations, comments, anatomies, user, MathUtils) {
         var origin = $window.location.origin;
         var iframe = $window.frames[0];
         var annotoriousReady = false;
@@ -136,8 +149,7 @@
         var rectangles = [];
         var sections = [];
 
-        client = ERMrest.ermrestFactory.getServer(context.serviceURL, {cid: context.appName, pid: MathUtils.uuid(), wid: $window.name});
-        client.catalogs.get(context.catalogID).then(function success(catalog) {
+        ConfigUtils.getContextJSON().server.catalogs.get(context.catalogID).then(function success(catalog) {
             var schema = catalog.schemas.get(context.schemaName);
             // So the schema and tables can be accessed in controllers
             context.schema = schema;

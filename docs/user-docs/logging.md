@@ -186,7 +186,15 @@ The following url patterns are what's unique about each of these requests and yo
 
 ## Change Log
 
-#### 04/18/19
+### 05/06/19
+
+###### Commit Links
+ - [chaise](https://github.com/informatics-isi-edu/chaise/commit/8dc53a5e61e3b32dfae3279bb000baf9b2f51fb1)
+ 
+###### Added
+  - We are going to send `cid`, `wid`, and `pid` headers with authen requests from now on.
+
+### 04/18/19
 
 ###### Commit Links
  - [chaise](https://github.com/informatics-isi-edu/chaise/commit/777febb1811620522344314e383238ece936047f)
@@ -223,7 +231,7 @@ The following url patterns are what's unique about each of these requests and yo
 - Added `cfacet`, `cfacet_str`, and `cfacet_path`.
 - Added `cqp` attribute to track urls that are using `?` (query parameter) instead of `#` (hash fragment).
 
-#### 03/08/19
+### 03/08/19
 
 ###### Commit Links
  - [chaise](https://github.com/informatics-isi-edu/chaise/commit/05108d07e37c1579b28ccfc58916db486f379005)

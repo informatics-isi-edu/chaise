@@ -62,7 +62,7 @@
 
                     // Show a loading spinner if the column is aggregate or inline related table
                     scope.showLoader = function (i) {
-                        return ((scope.isInline(i) && scope.columnModels[i].tableModel.isLoading) || (scope.isAggregate(i) && scope.columnModels[i].isLoading));
+                        return ((scope.isInline(i) && !scope.columnModels[i].tableModel.hasLoaded) || (scope.isAggregate(i) && scope.columnModels[i].isLoading));
                     }
 
                     // returns true if we should show the column

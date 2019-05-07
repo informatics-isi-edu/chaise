@@ -27,13 +27,12 @@ Arguments for the script:
 
 Assumptions:
 1. `table` has proper "system columns" including the `RID`
-2. `hostname` has a properly configured `ermresolve` service operating at `/id`
+2. `hostname` has a properly configured `chaise/record` app
 
 Limitations:
 - The script does not URL encode arguments. You need to URL encode them before 
   passing them to the script.
-- The script only produces sitemap url locations based on the "ermresolve" 
-  service.
+- The script only produces sitemap url locations based on the Chaise Record app.
 
 ### Deployment
 

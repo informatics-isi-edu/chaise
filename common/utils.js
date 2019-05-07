@@ -180,36 +180,20 @@
         notNull: "<i>All Records With Value</i>"
     })
 
-    .factory('UriUtils', ['$injector', '$rootScope', '$window', 'appContextMapping', 'appTagMapping', 'ContextUtils', 'Errors', 'messageMap', 'parsedFilter',
-        function($injector, $rootScope, $window, appContextMapping, appTagMapping, ContextUtils, Errors, messageMap, ParsedFilter) {
-        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
+    .factory('UriUtils', ['appContextMapping', 'appTagMapping', 'ConfigUtils', 'ContextUtils', 'defaultChaiseConfig', 'Errors', 'messageMap', 'parsedFilter', '$injector', '$rootScope', '$window',
+        function(appContextMapping, appTagMapping, ConfigUtils, ContextUtils, defaultChaiseConfig, Errors, messageMap, ParsedFilter, $injector, $rootScope, $window) {
 
-        /**
-         * Returns the catalog id
-         * TODO we might want to refactor the caller of this function
-         * @return {String}
-         */
-        function getCatalogIDFromLocation() {
-            var hash = getLocationHash($window.location).hash;
-            return hash.split('/')[0].slice(1);
-        }
+        function getCatalogId() {
+            var catalogId = "",
+                cc = ConfigUtils.getConfigJSON();
 
-        /**
-         * Given a location object, will return the hash part of it
-         * (it will take care of allowing ? in place of #)
-         * TODO we might want to refactor the different places that are using this
-         * function, we should not keep parsing the same location
-         * @param  {Object} location the $window.location
-         * @return {Object} with 'hash' and 'isQueryParameter'
-         */
-        function getLocationHash(location) {
-            var hash = location.hash, isQueryParameter = false;
-            // allow ? to be used in place of #
-            if ((hash == '' || hash == undefined) && location.href.indexOf("?") !== -1) {
-                hash = "#" + location.href.substring(location.href.indexOf("?") + 1);
-                isQueryParameter = true;
+            try {
+                catalogId += chaiseURItoErmrestURI($window.location, true).catalogId;
+            } catch (err) {
+                if (cc.defaultCatalog) catalogId += cc.defaultCatalog;
             }
-            return {hash: hash, isQueryParameter: isQueryParameter};
+
+            return catalogId;
         }
 
         /**
@@ -226,21 +210,33 @@
          */
         function chaiseURItoErmrestURI(location, returnObject) {
             var tableMissing = messageMap.tableMissing,
-                catalogMissing = messageMap.catalogMissing;
+                catalogMissing = messageMap.catalogMissing,
+                chaiseConfig = ConfigUtils.getConfigJSON();
 
-            var hashObj = getLocationHash(location),
-                ermrestUri = {},
+            var hash = location.hash,
+                isQueryParameter = false;
+
+            // allow ? to be used in place of #
+            if ((hash == '' || hash == undefined) && location.href.indexOf("?") !== -1) {
+                hash = "#" + location.href.substring(location.href.indexOf("?") + 1);
+                isQueryParameter = true;
+            }
+            // capture the hash before it's split for use in ermrestURI generation
+            var originalHash = hash;
+
+            var ermrestUri = {},
+                queryParams = {},
                 catalogId, ppid, pcid;
 
-            var hash = hashObj.hash, isQueryParameter = hashObj.isQueryParameter;
-
             // remove query params other than limit
-            if (hash.indexOf('?') !== -1) {
+            if (hash && hash.indexOf('?') !== -1) {
                 var queries = hash.match(/\?(.+)/)[1].split("&"); // get the query params
                 var acceptedQueries = [], i;
 
                 hash = hash.slice(0, hash.indexOf('?')); // remove queries
-                for (i = 0; i < queries.length; i++) { // add back only the valid queries
+                // add back only the valid queries
+                // "valid queries" are ones that the ermrest APIs allow in the uri (like limit)
+                for (i = 0; i < queries.length; i++) {
                     if (queries[i].indexOf("limit=") === 0) {
                         acceptedQueries.push(queries[i]);
                     }
@@ -250,6 +246,8 @@
                     if (queries[i].indexOf("ppid=") === 0) {
                         ppid = queries[i].split("=")[1];
                     }
+                    var q_parts = queries[i].split("=");
+                    queryParams[decodeURIComponent(q_parts[0])] = decodeURIComponent(q_parts[1]);
                 }
                 if (acceptedQueries.length != 0) {
                     hash = hash + "?" + acceptedQueries.join("&");
@@ -257,7 +255,7 @@
             }
 
             // If the hash is empty, check for defaults
-            if (hash == '' || hash === undefined || hash.length == 1) {
+            if (hash == '' || hash === null || hash.length == 1) {
                 if (chaiseConfig.defaultCatalog) {
                     if (chaiseConfig.defaultTables) {
                         catalogId = chaiseConfig.defaultCatalog;
@@ -341,8 +339,17 @@
 
             var baseUri = chaiseConfig.ermrestLocation;
             var path = '/catalog/' + catalogId + '/entity' + hash;
+
             if (returnObject) {
-                return {ermrestUri: baseUri + path, ppid: ppid, pcid: pcid, isQueryParameter: isQueryParameter};
+                return {
+                    ermrestUri: baseUri + path,
+                    catalogId: catalogId,
+                    hash: originalHash,
+                    ppid: ppid,
+                    pcid: pcid,
+                    queryParams: queryParams,
+                    isQueryParameter: isQueryParameter
+                };
             } else {
                 return baseUri + path;
             }
@@ -377,14 +384,11 @@
 
             var url = chaiseBaseURL() + appPath + "/#" + location.catalog + "/" + location.path;
             var pcontext = [];
-            if ($rootScope.context) {
-                if ($rootScope.context.appName) {
-                    pcontext.push("pcid=" + $rootScope.context.appName);
-                }
-                if ($rootScope.context.pageId) {
-                    pcontext.push("ppid=" + $rootScope.context.pageId);
-                }
-            }
+
+            var contextObj = ConfigUtils.getContextJSON();
+            pcontext.push("pcid=" + contextObj.cid);
+            pcontext.push("ppid=" + contextObj.pid);
+
             // TODO we might want to allow only certian query parameters
             if (location.queryParamsString) {
                 url = url + "?" + location.queryParamsString;
@@ -393,27 +397,6 @@
                 url = url + (location.queryParamsString ? "&" : "?") + pcontext.join("&");
             }
             return url;
-        }
-
-
-        /**
-         * Return query params
-         * @param  {Object} location window.location object
-         * @return {Object} key-value pairs of query params
-         */
-        function getQueryParams(location) {
-            var queryParams = {},
-                modifierPath = getLocationHash(location).hash,
-                q_parts, i;
-
-            if (modifierPath.indexOf("?") !== -1) {
-                var queries = modifierPath.match(/\?(.+)/)[1].split("&");
-                for (i = 0; i < queries.length; i++) {
-                    q_parts = queries[i].split("=");
-                    queryParams[decodeURIComponent(q_parts[0])] = decodeURIComponent(q_parts[1]);
-                }
-            }
-            return queryParams;
         }
 
         /**
@@ -427,9 +410,10 @@
          * Parses the URL to create the context object
          */
         function parseURLFragment(location, context) {
+            var chaiseConfig = ConfigUtils.getConfigJSON();
             var i, row, value;
             if (!context) {
-                var context = {};
+                var context = ConfigUtils.getContextJSON();
             }
             // First, configure the service URL, assuming its this origin plus the
             // typical deployment location for ermrest.
@@ -443,7 +427,7 @@
 
             // Then, parse the URL fragment id (aka, hash). Expected format:
             //  "#catalog_id/[schema_name:]table_name[/{attribute::op::value}{&attribute::op::value}*][@sort(column[::desc::])]"
-            var hash = getLocationHash(location).hash;
+            var hash = chaiseURItoErmrestURI(location, true).hash;
             var uri = hash;
             if (hash === undefined || hash == '' || hash.length == 1) {
                 return context;
@@ -801,9 +785,7 @@
 
         // Takes path and creates full redirect links with catalogId
         function createRedirectLinkFromPath(path){
-          var hash = getLocationHash($window.location).hash;
-          var catalogString = hash.slice(0, hash.search("/"));
-          return $window.location.origin + $window.location.pathname + catalogString + "/" + path;
+          return $window.location.origin + $window.location.pathname + '#' + chaiseURItoErmrestURI($window.location, true).catalogId + "/" + path;
         }
 
         /**
@@ -814,6 +796,7 @@
          *      2. If ChaiseConfig doesn't specify the chaisePath, then it returns the default value '/chaise/'
         */
         function chaiseDeploymentPath() {
+            var chaiseConfig = ConfigUtils.getConfigJSON();
             var appNames = ["record", "recordset", "recordedit", "search", "login"];
             var currentAppName = appNamefromUrlPathname($window.location.pathname);
             if (appNames.includes(currentAppName)) {
@@ -852,6 +835,7 @@
          * @param {String} version - the encoded version string prepended with the '@' character
          **/
         function resolvePermalink(tuple, reference, version) {
+            var chaiseConfig = ConfigUtils.getConfigJSON();
             var resolverId = chaiseConfig.resolverImplicitCatalog;
             var currCatalog = reference.location.catalogId;
 
@@ -889,11 +873,10 @@
             chaiseURItoErmrestURI: chaiseURItoErmrestURI,
             createRedirectLinkFromPath: createRedirectLinkFromPath,
             fixedEncodeURIComponent: fixedEncodeURIComponent,
-            getCatalogIDFromLocation: getCatalogIDFromLocation,
-            getQueryParams: getQueryParams,
+            getCatalogId: getCatalogId,
             isBrowserIE: isBrowserIE,
-            parseURLFragment: parseURLFragment,
             parsedFilterToERMrestFilter: parsedFilterToERMrestFilter,
+            parseURLFragment: parseURLFragment,
             queryStringToJSON: queryStringToJSON,
             removeParentContext: removeParentContext,
             resolvePermalink: resolvePermalink,
@@ -1415,55 +1398,123 @@
         }
     }])
 
-    .factory("ConfigUtils", ['$rootScope', '$window', 'defaultChaiseConfig', function($rootScope, $window, defaultConfig) {
-        function getConfigJSON() {
-            return $rootScope.chaiseConfig;
+    .factory("ConfigUtils", ['defaultChaiseConfig', '$http', '$rootScope', '$window', function(defaultConfig, $http, $rootScope, $window) {
+
+        /**
+         * Will return the dcctx object that has the following attributes:
+         *  - cid: client id (app name)
+         *  - wid: window id
+         *  - pid: page id
+         *  - chaiseConfig: The chaiseConfig object
+         *  - server: An ERMrest.Server object that can be used for http requests
+         * @return {Object} dcctx object
+         */
+        function getContextJSON() {
+            return $window.dcctx;
         };
 
-        function setConfigJSON() {
-            $rootScope.chaiseConfig = {};
-            if (typeof chaiseConfig != 'undefined') $rootScope.chaiseConfig = Object.assign({}, chaiseConfig);
+        function getConfigJSON() {
+            return getContextJSON().chaiseConfig;
+        };
 
+        /**
+         * Chaise Config will be applied in the following order:
+         *   1. Define chaise config defaults
+         *   2. Look at chaise-config.js
+         *     a. Apply base level configuration properties
+         *     b. Apply config-rules in order depending on matching host definitions
+         *   3. Look at chaise-config returned from the catalog
+         *     a. Apply base level configuration properties
+         *     b. Apply config-rules in order depending on matching host definitions
+         *
+         * @params {Object} catalogAnnotation - the chaise-config object returned from the 2019 chaise-config annotation tag attached to the catalog object
+         *
+         */
+        function setConfigJSON(catalogAnnotation) {
+            var cc = {};
+            // check to see if global chaise-config (chaise-config.js) is available
+            if (typeof chaiseConfig != 'undefined') cc = Object.assign({}, chaiseConfig);
+
+            // Loop over default properties (global chaise config (chaise-config.js) may not be defined)
+            // Handles case 1 and 2a
             for (var property in defaultConfig) {
-                if (defaultConfig.hasOwnProperty(property)) {
-                    if (typeof chaiseConfig != 'undefined' && typeof chaiseConfig[property] != 'undefined') {
-                        $rootScope.chaiseConfig[property] = chaiseConfig[property];
-                    } else {
-                        // property doesn't exist
-                        $rootScope.chaiseConfig[property] = defaultConfig[property];
-                    }
+                // use chaise-config.js property instead of default if defined
+                if (typeof chaiseConfig != 'undefined' && typeof chaiseConfig[property] != 'undefined') {
+                    cc[property] = chaiseConfig[property];
+                } else {
+                    // property doesn't exist
+                    cc[property] = defaultConfig[property];
                 }
             }
 
-            if (Array.isArray($rootScope.chaiseConfig.configRules)) {
-                // loop through each config rule and look for a set that matches the current host
-                $rootScope.chaiseConfig.configRules.forEach(function (ruleset) {
-                    // we have 1 host
-                    if (typeof ruleset.host == "string") {
-                        var arr = [];
-                        arr.push(ruleset.host);
-                        ruleset.host = arr;
-                    }
-                    if (Array.isArray(ruleset.host)) {
-                        for (var i=0; i<ruleset.host.length; i++) {
-                            // if there is a config rule for the current host, overwrite the properties defined
-                            // $window.location.host refers to the hostname and port (www.something.com:0000)
-                            // $window.location.hostname refers to just the hostname (www.something.com)
-                            if (ruleset.host[i] === $window.location.hostname && (ruleset.config && typeof ruleset.config === "object")) {
-                                for (var property in ruleset.config) {
-                                    $rootScope.chaiseConfig[property] = ruleset.config[property];
+            /**
+             * NOTE: defined within function scope so cc is available in the function
+             * @params {Object} config - chaise config with configRules defined
+             */
+            function applyHostConfigRules(config) {
+                if (Array.isArray(config.configRules)) {
+                    // loop through each config rule and look for a set that matches the current host
+                    config.configRules.forEach(function (ruleset) {
+                        // we have 1 host
+                        if (typeof ruleset.host == "string") {
+                            var arr = [];
+                            arr.push(ruleset.host);
+                            ruleset.host = arr;
+                        }
+                        if (Array.isArray(ruleset.host)) {
+                            for (var i=0; i<ruleset.host.length; i++) {
+                                // if there is a config rule for the current host, overwrite the properties defined
+                                // $window.location.host refers to the hostname and port (www.something.com:0000)
+                                // $window.location.hostname refers to just the hostname (www.something.com)
+                                if (ruleset.host[i] === $window.location.hostname && (ruleset.config && typeof ruleset.config === "object")) {
+                                    for (var property in ruleset.config) {
+                                        cc[property] = ruleset.config[property];
+                                    }
+                                    break;
                                 }
-                                break;
                             }
                         }
-                    }
-                });
+                    });
+                }
             }
+
+            // case 2b
+            // cc contains properties for default config and chaise-config.js configuration
+            applyHostConfigRules(cc);
+
+
+            // apply catalog annotation configuration on top of the rest of the chaise config properties
+            if (typeof catalogAnnotation == "object") {
+                // case 3a
+                for (var property in catalogAnnotation) {
+                    cc[property] = catalogAnnotation[property];
+                }
+
+                // case 3b
+                applyHostConfigRules(catalogAnnotation);
+            }
+
+            if (!$window.dcctx) $window.dcctx = {};
+            $window.dcctx.chaiseConfig = cc;
         }
 
+        /**
+         * Returns the http service that should be used in chaise
+         * NOTE: This has been added for backward compatibility.
+         * The window.dcctx.server should always be available if config app has been included
+         * TODO this function should return the $window.dcctx.server.http if it's available.
+         * But it was causing issues in case of 401 and we reverted it for now.
+         * @return {Object}
+         */
+        function getHTTPService() {
+            return $http;
+        };
+
         return {
+            getContextJSON: getContextJSON,
             getConfigJSON: getConfigJSON,
-            setConfigJSON: setConfigJSON
+            setConfigJSON: setConfigJSON,
+            getHTTPService: getHTTPService
         }
     }])
 
@@ -1652,20 +1703,21 @@
       }
      }])
 
-    .service('headInjector', ['$window', '$rootScope', 'MathUtils',  function($window, $rootScope, MathUtils) {
-        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
+    .service('headInjector', ['ConfigUtils', 'MathUtils', '$window', '$rootScope', function(ConfigUtils, MathUtils, $window, $rootScope) {
         function addCustomCSS() {
-          if (chaiseConfig['customCSS'] !== undefined) {
-            var fileref = document.createElement("link");
-            fileref.setAttribute("rel", "stylesheet");
-            fileref.setAttribute("type", "text/css");
-            fileref.setAttribute("href", chaiseConfig['customCSS']);
-            document.getElementsByTagName("head")[0].appendChild(fileref);
-          }
+            var chaiseConfig = ConfigUtils.getConfigJSON();
+            if (chaiseConfig['customCSS'] !== undefined) {
+                var fileref = document.createElement("link");
+                fileref.setAttribute("rel", "stylesheet");
+                fileref.setAttribute("type", "text/css");
+                fileref.setAttribute("href", chaiseConfig['customCSS']);
+                document.getElementsByTagName("head")[0].appendChild(fileref);
+            }
         }
 
         function addTitle() {
-          document.getElementsByTagName('head')[0].getElementsByTagName('title')[0].innerHTML = chaiseConfig.headTitle;
+            var chaiseConfig = ConfigUtils.getConfigJSON();
+            document.getElementsByTagName('head')[0].getElementsByTagName('title')[0].innerHTML = chaiseConfig.headTitle;
         }
 
         // sets the WID if it doesn't already exist

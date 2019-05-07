@@ -241,78 +241,6 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
             if (arrayCols.length > 0) {
                 describe("Array fields, ", function () {
-                    var invalidArrayValues = {
-                        "timestamp": [
-                            {
-                                "value": "2001-01-01T01:01:01",
-                                "error": "Please enter a valid array structure."
-                            },
-                            {
-                                "value": "[\"2001-01-01T01:01:01\", \"a\"]",
-                                "error": "`a` is not a valid timestamp value."
-                            }
-                        ],
-                        "timestamptz": [
-                            {
-                                "value": "2001-01-01T01:01:01-08:00",
-                                "error": "Please enter a valid array structure."
-                            },
-                            {
-                                "value": "[\"2001-01-01T01:01:01-08:00\", \"a\"]",
-                                "error": "`a` is not a valid timestamp with timezone value."
-                            }
-                        ],
-                        "date": [
-                            {
-                                "value": "2001-01-01",
-                                "error": "Please enter a valid array structure."
-                            },
-                            {
-                                "value": "[\"2001-01-01\", \"a\"]",
-                                "error": "`a` is not a valid date value."
-                            }
-                        ],
-                        "integer": [
-                            {
-                                "value": "[123",
-                                "error": "Please enter a valid array structure."
-                            },
-                            {
-                                "value": "[1, \"a\"]",
-                                "error": "`a` is not a valid integer value."
-                            }
-                        ],
-                        "number": [
-                            {
-                                "value": "1.1",
-                                "error": "Please enter a valid array structure."
-                            },
-                            {
-                                "value": "[1, \"a\"]",
-                                "error": "`a` is not a valid number value."
-                            }
-                        ],
-                        "boolean": [
-                            {
-                                "value": "true",
-                                "error": "Please enter a valid array structure."
-                            },
-                            {
-                                "value": "[true, \"a\"]",
-                                "error": "`a` is not a valid boolean value."
-                            }
-                        ],
-                        "text": [
-                            {
-                                "value": "\"test\"",
-                                "error": "Please enter a valid array structure e.g. [\"value1\", \"value2\"]"
-                            },
-                            {
-                                "value": "[1, \"a\"]",
-                                "error": "`1` is not a valid text value."
-                            }
-                        ]
-                    };
 
                     it ("should show textarea input with correct value.", function () {
                         arrayCols.forEach(function(c) {
@@ -324,7 +252,15 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 var value = getRecordValue(c.name);
 
                                 if (value != undefined) {
-                                    expect(arrayTxtArea.getAttribute('value')).toBe(value, colError(c.name , "Doesn't have the expected value."));
+                                    if (c.name === "timestamptz_array") {
+                                        arrayTxtArea.getAttribute('value').then(function (inputValue) {
+                                            var parts = inputValue.split('"');
+                                            inputValue = parts[0] + '"' + moment(parts[1], "YYYY-MM-DDTHH:mm:ssZ").format("YYYY-MM-DDTHH:mm:ssZ") + '"' + parts[2];
+                                            expect(inputValue).toBe(value, colError(c.name , "Doesn't have the expected value."));
+                                        })
+                                    } else {
+                                        expect(arrayTxtArea.getAttribute('value')).toBe(value, colError(c.name , "Doesn't have the expected value."));
+                                    }
                                 }
                             });
                         });
@@ -332,6 +268,79 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                     // test the invalid values once
                     if (recordIndex === 0) {
+                        var invalidArrayValues = {
+                            "timestamp": [
+                                {
+                                    "value": "2001-01-01T01:01:01",
+                                    "error": "Please enter a valid array structure."
+                                },
+                                {
+                                    "value": "[\"2001-01-01T01:01:01\", \"a\"]",
+                                    "error": "`a` is not a valid timestamp value."
+                                }
+                            ],
+                            "timestamptz": [
+                                {
+                                    "value": "2001-01-01T01:01:01-08:00",
+                                    "error": "Please enter a valid array structure."
+                                },
+                                {
+                                    "value": "[\"2001-01-01T01:01:01-08:00\", \"a\"]",
+                                    "error": "`a` is not a valid timestamp with timezone value."
+                                }
+                            ],
+                            "date": [
+                                {
+                                    "value": "2001-01-01",
+                                    "error": "Please enter a valid array structure."
+                                },
+                                {
+                                    "value": "[\"2001-01-01\", \"a\"]",
+                                    "error": "`a` is not a valid date value."
+                                }
+                            ],
+                            "integer": [
+                                {
+                                    "value": "[123",
+                                    "error": "Please enter a valid array structure."
+                                },
+                                {
+                                    "value": "[1, \"a\"]",
+                                    "error": "`a` is not a valid integer value."
+                                }
+                            ],
+                            "number": [
+                                {
+                                    "value": "1.1",
+                                    "error": "Please enter a valid array structure."
+                                },
+                                {
+                                    "value": "[1, \"a\"]",
+                                    "error": "`a` is not a valid number value."
+                                }
+                            ],
+                            "boolean": [
+                                {
+                                    "value": "true",
+                                    "error": "Please enter a valid array structure."
+                                },
+                                {
+                                    "value": "[true, \"a\"]",
+                                    "error": "`a` is not a valid boolean value."
+                                }
+                            ],
+                            "text": [
+                                {
+                                    "value": "\"test\"",
+                                    "error": "Please enter a valid array structure e.g. [\"value1\", \"value2\"]"
+                                },
+                                {
+                                    "value": "[1, \"a\"]",
+                                    "error": "`1` is not a valid text value."
+                                }
+                            ]
+                        };
+
                         it ("should validate invalid array input.", function () {
                             arrayDataTypeFields.forEach(function(arrayInput) {
                                 var c = arrayInput.column;

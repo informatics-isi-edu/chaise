@@ -1,8 +1,27 @@
 (function() {
     'use strict';
 /* Configuration of the Recordset App */
+
+    /**
+     * Module Dependencies:
+     *   config.js
+     *    |--ermrestJS
+     *    |
+     *    |--utils.js
+     *       |--errors.js - needed for utils
+     *       |  |--alerts.js
+     *       |  |  |--filters.js
+     *       |  |
+     *       |  |--authen.js
+     *       |  |  |--storage.js
+     *       |  |
+     *       |  |--modal.js
+     *       |
+     *       |--inputs.js
+     *          |--validators.js
+     */
     angular.module('chaise.configure-recordset', [
-        'chaise.modal',
+        'chaise.config',
         'chaise.utils',
         'ermrestjs',
         'ngCookies',
@@ -10,14 +29,17 @@
         'ui.bootstrap'
     ])
 
-    .run(['ERMrest', function (ERMrest) {
-        ERMrest.onload().then(function () {
+    .constant('appName', 'recordset')
+
+    .run(['$rootScope', function ($rootScope) {
+        // When the configuration module's run block emits the `configuration-done` event, attach the app to the DOM
+        $rootScope.$on("configuration-done", function () {
+
             angular.element(document).ready(function(){
                 angular.bootstrap(document.getElementById("recordset"), ["chaise.recordset"]);
             });
         });
     }]);
-
 
 /* Recordset App */
     angular.module('chaise.recordset', [
@@ -40,14 +62,6 @@
         'duScroll',
         'ui.bootstrap'])
 
-    // Register the 'context' object which can be accessed by config and other
-    // services.
-    .constant('context', {
-        appName:'recordset',
-        catalogID: null,
-        tableName: null
-    })
-
     .config(['$compileProvider', '$cookiesProvider', '$logProvider', '$uibTooltipProvider', 'ConfigUtilsProvider', function($compileProvider, $cookiesProvider, $logProvider, $uibTooltipProvider, ConfigUtilsProvider) {
         // angular configurations
         // allows unsafe prefixes to be downloaded
@@ -58,8 +72,6 @@
         // tooltip on the element instead, set the `tooltip-append-to-body` attribute
         // to `false` on the element.
         $uibTooltipProvider.options({appendToBody: true});
-        // chaise configurations
-        ConfigUtilsProvider.$get().setConfigJSON();
         //  Enable log system, if in debug mode
         $logProvider.debugEnabled(ConfigUtilsProvider.$get().getConfigJSON().debug === true);
     }])
@@ -84,8 +96,8 @@
     })
 
     // Register work to be performed after loading all modules
-    .run(['AlertsService', 'context', 'DataUtils', 'ERMrest', 'FunctionUtils', 'headInjector', 'MathUtils', 'messageMap', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window', 'modalBox', 'logActions',
-        function(AlertsService, context, DataUtils, ERMrest, FunctionUtils, headInjector, MathUtils, messageMap, recordsetModel, Session, UiUtils, UriUtils, $log, $rootScope, $window, modalBox, logActions) {
+    .run(['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'FunctionUtils', 'headInjector', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
+        function(AlertsService, ConfigUtils, DataUtils, ERMrest, FunctionUtils, headInjector, logActions, MathUtils, messageMap, modalBox, recordsetModel, Session, UiUtils, UriUtils, $log, $rootScope, $window) {
         try {
             var session;
 
@@ -93,8 +105,10 @@
 
             UriUtils.setOrigin();
 
-            var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
-            context.catalogID = UriUtils.getCatalogIDFromLocation();
+            var context = ConfigUtils.getContextJSON(),
+                chaiseConfig = ConfigUtils.getConfigJSON();
+
+            context.chaiseBaseURL = UriUtils.chaiseBaseURL();
 
             var modifyEnabled = chaiseConfig.editRecord === false ? false : true;
             var deleteEnabled = chaiseConfig.deleteRecord === true ? true : false;
@@ -114,12 +128,14 @@
 
             $rootScope.location = $window.location.href;
             recordsetModel.hasLoaded = false;
-            $rootScope.context = context;
-
-            context.pageId = MathUtils.uuid();
 
             var res = UriUtils.chaiseURItoErmrestURI($window.location, true);
-            var ermrestUri = res.ermrestUri, pcid = res.pcid, ppid = res.ppid, isQueryParameter = res.isQueryParameter;
+            var ermrestUri = res.ermrestUri,
+                pcid = res.pcid,
+                ppid = res.ppid,
+                isQueryParameter = res.isQueryParameter;
+
+            context.catalogID = res.catalogId;
 
 
             FunctionUtils.registerErmrestCallbacks();
@@ -130,7 +146,8 @@
                 // Unsubscribe onchange event to avoid this function getting called again
                 Session.unsubscribeOnChange(subId);
 
-                ERMrest.resolve(ermrestUri, { cid: context.appName, pid: context.pageId, wid: $window.name }).then(function getReference(reference) {
+                // TODO: the header params don't need to be included if they are part of the `getServer` call in config.js
+                ERMrest.resolve(ermrestUri, { cid: context.cid, pid: context.pid, wid: context.wid }).then(function getReference(reference) {
                     session = Session.getSessionValue();
                     if (!session && Session.showPreviousSessionAlert()) AlertsService.addAlert(messageMap.previousSession.message, 'warning', Session.createPromptExpirationToken);
 
@@ -145,7 +162,7 @@
                     context.tableName = reference.table.name;
 
                     recordsetModel.reference = reference.contextualize.compact;
-                    recordsetModel.context = "compact";
+                    recordsetModel.context = context.appContext = "compact";
                     recordsetModel.reference.session = session;
                     recordsetModel.tableComment = recordsetModel.reference.table.comment;
 

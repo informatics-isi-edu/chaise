@@ -47,7 +47,7 @@ var testParams = {
              "date_col": "2008-12-09", "luxurious": "true",
              "text_array": "[\n  \"v2\",\n  \"v3\"\n]", "boolean_array": "[\n  false\n]", "int4_array": "[\n  1\n]", "float4_array": "[\n  1.1,\n  2.2\n]",
              "date_array": null, "timestamp_array": "[\n  \"2003-03-03T03:03:03\"\n]",
-             "timestamptz_array": "[\n  \"2002-02-02T02:02:02-08:00\"\n]"
+             "timestamptz_array": "[\n  \""+moment("2002-02-02T02:02:02-08:00", "YYYY-MM-DDTHH:mm:ssZ").format("YYYY-MM-DDTHH:mm:ssZ")+"\"\n]"
             }
         ],
         inputs: [

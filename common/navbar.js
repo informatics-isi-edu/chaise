@@ -30,23 +30,12 @@
         'chaise.login',
         'chaise.utils'
     ])
-    .directive('navbar', [ '$rootScope', '$window', 'ERMrest', 'UriUtils', function($rootScope, $window, ERMrest, UriUtils) {
-        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
+    .directive('navbar', ['ConfigUtils', 'ERMrest', 'UriUtils', '$rootScope', '$window', function(ConfigUtils, ERMrest, UriUtils, $rootScope, $window) {
+        var chaiseConfig = ConfigUtils.getConfigJSON();
 
         // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
         var root = chaiseConfig.navbarMenu || {};
-        // get the catalog id
-        // NOTE: this is put in a string
-        var catalogId;
-        if ($rootScope.context && $rootScope.context.catalogID) {
-            catalogId = "" + $rootScope.context.catalogID;
-        } else if ($window.location.hash != "") {
-            catalogId = UriUtils.getCatalogIDFromLocation();
-        } else if (chaiseConfig.defaultCatalog) {
-            catalogId = "" + chaiseConfig.defaultCatalog;
-        } else {
-            catalogId = null;
-        }
+        var catalogId = UriUtils.getCatalogId();
         // Set default newTab property at root node
         if (!root.hasOwnProperty('newTab')) {
             root.newTab = true;
@@ -72,6 +61,8 @@
             scope: {},
             templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/navbar.html',
             link: function(scope) {
+                var chaiseConfig = ConfigUtils.getConfigJSON();
+
                 scope.brandURL = chaiseConfig.navbarBrand;
                 scope.brandText = chaiseConfig.navbarBrandText;
                 scope.brandImage = chaiseConfig.navbarBrandImage;

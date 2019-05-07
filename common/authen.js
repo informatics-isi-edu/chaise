@@ -3,10 +3,8 @@
 
     angular.module('chaise.authen', ['chaise.utils', 'chaise.storage'])
 
-    .factory('Session', ['messageMap', 'modalUtils', 'StorageService', '$cookies', '$http', '$interval', '$log', '$uibModalStack', '$q', 'UriUtils', '$window', '$rootScope', function (messageMap, modalUtils, StorageService, $cookies, $http, $interval, $log, $uibModalStack, $q, UriUtils, $window, $rootScope) {
-
-        var chaiseConfig = Object.assign({}, $rootScope.chaiseConfig);
-
+    .factory('Session', ['ConfigUtils', 'messageMap', 'modalUtils', 'StorageService', 'UriUtils', '$cookies', '$interval', '$log', '$q', '$rootScope', '$sce', '$uibModalStack', '$window',
+        function (ConfigUtils, messageMap, modalUtils, StorageService, UriUtils, $cookies, $interval, $log, $q, $rootScope, $sce, $uibModalStack, $window) {
         // authn API no longer communicates through ermrest, removing the need to check for ermrest location
         var serviceURL = $window.location.origin;
 
@@ -84,10 +82,10 @@
             if(type.indexOf('modal')!== -1){
                 if (_session) {
                     params.title = messageMap.sessionExpired.title;
-                    params.message = messageMap.sessionExpired.message;
+                    params.message = $sce.trustAsHtml(messageMap.sessionExpired.message);
                 } else {
                     params.title = messageMap.noSession.title;
-                    params.message = messageMap.noSession.message;
+                    params.message = $sce.trustAsHtml(messageMap.noSession.message);
                 }
                 var closed = false;
                 var onModalCloseSuccess = function () {
@@ -175,13 +173,19 @@
                 }
             };
 
-            $http.get(url, config).then(function(response){
+            ConfigUtils.getHTTPService().get(url, config).then(function(response){
                 var data = response.data;
 
                 var login_url = "";
                 if (data['redirect_url'] !== undefined) {
                     login_url = data['redirect_url'];
                 } else if (data['login_form'] !== undefined) {
+                    // we want to use the old login flow to login
+                    // (login in the same window so when login does occur, it changes the same page instead of the page in the window that pops up)
+                    win = $window;
+                    // prevents the dialog from popping up shortly before the page redirects to login
+                    type = "";
+                    var referrer = $window.location.href;
                     var login_form = data['login_form'];
                     login_url = '../login?referrer=' + UriUtils.fixedEncodeURIComponent(referrer);
                     var method = login_form['method'];
@@ -247,7 +251,7 @@
              * @param  {string=} context undefined or "401"
              */
             getSession: function(context) {
-                return $http.get(serviceURL + "/authn/session").then(function(response) {
+                return ConfigUtils.getHTTPService().get(serviceURL + "/authn/session").then(function(response) {
                     if (context === "401" && shouldReloadPageAfterLogin(response.data)) {
                         window.location.reload();
                         return response.data;
@@ -270,7 +274,7 @@
              * Meant for validating the server session and verify if it's still active or not
              */
             validateSession: function () {
-                return $http.get(serviceURL + "/authn/session").then(function(response) {
+                return ConfigUtils.getHTTPService().get(serviceURL + "/authn/session").then(function(response) {
                     _session = response.data;
                     return _session;
                 }).catch(function(err) {
@@ -327,12 +331,13 @@
             },
 
             logout: function() {
+                var chaiseConfig = ConfigUtils.getConfigJSON();
                 var logoutURL = chaiseConfig['logoutURL'] ? chaiseConfig['logoutURL'] : '/';
                 var url = serviceURL + "/authn/session";
 
                 url += '?logout_url=' + UriUtils.fixedEncodeURIComponent(logoutURL);
 
-                $http.delete(url).then(function(response) {
+                ConfigUtils.getHTTPService().delete(url).then(function(response) {
                     StorageService.deleteStorageNamespace(LOCAL_STORAGE_KEY);
                     $window.location = response.data.logout_url;
                 }, function(error) {
@@ -350,6 +355,7 @@
     if (pathname.indexOf('/search/') == -1 && pathname.indexOf('/viewer/') == -1 && pathname.indexOf('/login') == -1) {
 
         angular.module('chaise.authen')
+
         .run(['ERMrest', '$injector', '$q', function runRecordEditApp(ERMrest, $injector, $q) {
 
             var Session = $injector.get("Session");

@@ -208,7 +208,7 @@
                 _readMainEntity(vm, hideSpinner, currentCounter).then(function (res) {
                     _afterUpdateMainEntity(vm, res, currentCounter);
                     vm.tableError = false;
-                    $log.debug("counter", vm.flowControlObject.counter, ": just before update page");
+                    $log.debug("counter", currentCounter, ": read is done. just before update page (to update the rest of the page)");
                     // TODO remember last successful main request
                     // when a request fails for 400 QueryTimeout, revert (change browser location) to this previous request
                     updatePageCB(vm);
@@ -245,7 +245,7 @@
             }
             vm.flowControlObject.occupiedSlots--;
             vm.dirtyResult = !res;
-            vm.isLoading = false;
+            vm.hasLoaded = true;
             $log.debug("counter", counter, ": after result update: " + (res ? "successful." : "unsuccessful."));
         }
 
@@ -272,6 +272,7 @@
                         return defer.promise;
                     }
 
+                    $log.debug("counter", current, ": read main successful.");
                     vm.page = page;
 
                     return vm.getDisabledTuples ? vm.getDisabledTuples(page, vm.pageLimit) : '';
@@ -329,7 +330,6 @@
                         vm.rowValues = rowValues;
                     }
 
-                    vm.hasLoaded = true;
                     vm.initialized = true;
                     // globally sets when the app state is ready to interact with
                     $rootScope.displayReady = true;
@@ -345,7 +345,6 @@
                     if (current !== vm.flowControlObject.counter) {
                         return defer.resolve(false);
                     }
-                    vm.hasLoaded = true;
                     vm.initialized = true;
                     // globally sets when the app state is ready to interact with
                     $rootScope.displayReady = true;
@@ -374,65 +373,89 @@
 
         /**
          * @private
+         * Calls _getMainRowsCount to update the count. won't return any values
+         */
+        function _updateMainCount (vm, updatePageCB) {
+            if (!vm.dirtyCount || !_haveFreeSlot(vm)) {
+                $log.debug("counter", vm.flowControlObject.counter , ": break out of updateCount: (not dirty or full)");
+                return;
+            }
+
+            vm.flowControlObject.occupiedSlots++;
+            vm.dirtyCount = false;
+
+            (function (curr) {
+                _getMainRowsCount(vm, curr).then(function (res) {
+                    _afterGetMainRowsCount(vm, res, curr);
+                    updatePageCB(vm);
+                }).catch(function (err) {
+                    _afterGetMainRowsCount(vm, true, curr);
+                    throw err;
+                });
+            })(vm.flowControlObject.counter);
+        }
+
+        /**
+         * @private
          * This will generate the request for getting the count.
          * Returns a promise. If it's resolved with `true` then it has been successful.
          */
-        function _updateCount (vm) {
-            var  defer = $q.defer();
-            (function (current) {
-                var aggList, hasError;
-                try {
-                    // if the table doesn't have any simple key, this might throw error
-                    aggList = [vm.reference.aggregate.countAgg];
-                } catch (exp) {
-                    hasError = true;
-                }
-                if (hasError) {
-                    vm.totalRowsCnt = null;
-                    defer.resolve(true);
-                    return defer.promise;
-                }
+        function _getMainRowsCount(vm, current) {
+             $log.debug("counter", current, ": getRowsCount.");
+             var  defer = $q.defer();
+             var aggList, hasError;
+             try {
+                 // if the table doesn't have any simple key, this might throw error
+                 aggList = [vm.reference.aggregate.countAgg];
+             } catch (exp) {
+                 hasError = true;
+             }
+             if (hasError) {
+                 vm.totalRowsCnt = null;
+                 defer.resolve(true);
+                 return defer.promise;
+             }
 
-                vm.reference.getAggregates(
-                    aggList,
-                    {action: logActions.recordsetCount}
-                ).then(function getAggregateCount(response) {
-                    if (current !== vm.flowControlObject.counter) {
-                        defer.resolve(false);
-                        return defer.promise;
-                    }
+             vm.reference.getAggregates(
+                 aggList,
+                 {action: logActions.recordsetCount}
+             ).then(function getAggregateCount(response) {
+                 if (current !== vm.flowControlObject.counter) {
+                     defer.resolve(false);
+                     return defer.promise;
+                 }
 
-                    vm.countError = false;
+                 vm.countError = false;
 
-                    vm.totalRowsCnt = response[0];
-                    defer.resolve(true);
-                }).catch(function (err) {
-                    if (current !== vm.flowControlObject.counter) {
-                        defer.resolve(false);
-                        return defer.promise;
-                    }
+                 vm.totalRowsCnt = response[0];
+                 defer.resolve(true);
+             }).catch(function (err) {
+                 if (current !== vm.flowControlObject.counter) {
+                     defer.resolve(false);
+                     return defer.promise;
+                 }
 
-                    if (err instanceof ERMrest.QueryTimeoutError) {
-                        // separate from hasError above
-                        vm.countError = true;
-                    }
+                 if (err instanceof ERMrest.QueryTimeoutError) {
+                     // separate from hasError above
+                     vm.countError = true;
+                 }
 
-                    // fail silently
-                    vm.totalRowsCnt = null;
-                    return defer.resolve(true), defer.promise;
-                });
-            })(vm.flowControlObject.counter);
-            return defer.promise;
+                 // fail silently
+                 vm.totalRowsCnt = null;
+                 return defer.resolve(true), defer.promise;
+             });
+
+             return defer.promise;
         }
 
         /**
          * @private
          * will be called after getting data for count to set the flags.
          */
-        function _afterUpdateCount (vm, res) {
+        function _afterGetMainRowsCount (vm, res, current) {
             vm.flowControlObject.occupiedSlots--;
             vm.dirtyCount = !res;
-            $log.debug("counter", vm.flowControlObject.counter, ": after count update: " + (res ? "successful." : "unsuccessful."));
+            $log.debug("counter", current, ": after _getMainRowsCount: " + (res ? "successful." : "unsuccessful."));
         }
 
         /**
@@ -458,8 +481,17 @@
          * @param  {boolean} updateResult if it's true we will update the table.
          * @param  {boolean} updateCount  if it's true we will update the displayed total count.
          * @param  {boolean} updateFacets if it's true we will udpate the opened facets.
+         * @param  {boolean} sameCounter if it's true, the flow-control counter won't be updated.
+         *
+         * NOTE: sameCounter=true is used just to signal that we want to get results of the current
+         * page status. For example when a facet opens or when users add a search term to a single facet.
+         * we don't want to update the whole page in that case, just the facet itself.
+         * If while doing so, the whole page updates, the updateFacet function itself should ignore the
+         * stale request by looking at the request url.
          */
-        function update (vm, updateResult, updateCount, updateFacets) {
+        function update (vm, updateResult, updateCount, updateFacets, sameCounter) {
+            $log.debug("counter", vm.flowControlObject.counter ,"update called with res=" + updateResult + ", cnt=" + updateCount + ", facets=" + updateFacets + ", sameCnt=" + sameCounter);
+
             if (updateFacets) {
                 vm.facetModels.forEach(function (fm, index) {
                     if (vm.lastActiveFacet === index) {
@@ -485,8 +517,10 @@
             vm.dirtyCount = updateCount || vm.dirtyCount;
 
             $timeout(function () {
-                vm.flowControlObject.counter++;
-                $log.debug("adding one to counter: " + vm.flowControlObject.counter);
+                if (!sameCounter) {
+                    vm.flowControlObject.counter++;
+                    $log.debug("adding one to counter, new: " + vm.flowControlObject.counter);
+                }
                 _updatePage(vm);
             }, 0);
         }
@@ -519,26 +553,15 @@
             // update the count
             if (vm.config.hideTotalCount) {
                 vm.totalRowsCnt = null;
-            } else if (vm.dirtyCount && _haveFreeSlot(vm)) {
-                vm.flowControlObject.occupiedSlots++;
-                vm.totalRowsCnt = null;
-                vm.dirtyCount = false;
-
-                $log.debug("counter", vm.flowControlObject.counter, ": updating count");
-                _updateCount(vm).then(function (res) {
-                    _afterUpdateCount(vm, res);
-                    _updatePage(vm);
-                }).catch(function (err) {
-                    _afterUpdateCount(vm, true);
-                    throw err;
-                });
+            } else {
+                _updateMainCount(vm, _updatePage);
             }
 
             // update the facets
             if (vm.facetModels) {
-                if (vm.facetsToInitialize.length === 0) {
+                if (vm.facetsToPreProcess.length === 0) {
                     vm.facetModels.forEach(function (fm, index) {
-                        if (fm.processed || !_haveFreeSlot(vm)) {
+                        if (!fm.preProcessed || fm.processed || !_haveFreeSlot(vm)) {
                             return;
                         }
 
@@ -566,16 +589,16 @@
                 // initialize facets
                 else if (_haveFreeSlot(vm)){
                     vm.flowControlObject.occupiedSlots++;
-                    var index = vm.facetsToInitialize.shift();
-                    (function (i) {
+                    var index = vm.facetsToPreProcess.shift();
+                    (function (i, currentCounter) {
                         $log.debug("counter", vm.flowControlObject.counter, ": initializing facet (index="+index+")");
-                        vm.facetModels[i].initializeFacet().then(function (res) {
-                            $log.debug("counter", vm.flowControlObject.counter, ": after facet (index="+ i +") initialize: " + (res ? "successful." : "unsuccessful."));
+                        vm.facetModels[i].preProcessFacet().then(function (res) {
+                            $log.debug("counter", currentCounter, ": after facet (index="+ i +") initialize: " + (res ? "successful." : "unsuccessful."));
                             vm.flowControlObject.occupiedSlots--;
+                            vm.facetModels[i].preProcessed = true;
                             vm.facetModels[i].facetError = false;
                             _updatePage(vm);
                         }).catch(function (err) {
-                            _afterFacetUpdate(vm, i, true);
                             // show alert if 400 Query Timeout Error
                             if (err instanceof ERMrest.QueryTimeoutError) {
                                 vm.facetModels[i].facetError = true;
@@ -583,7 +606,7 @@
                                 throw err;
                             }
                         });
-                    })(index);
+                    })(index, vm.flowControlObject.counter);
                 }
             }
         }
@@ -811,7 +834,7 @@
 
             scope.vm.isIdle = true;
             scope.vm.facetModels = [];
-            scope.vm.facetsToInitialize = [];
+            scope.vm.facetsToPreProcess = [];
             scope.vm.flowControlObject = new FlowControlObject();
 
             scope.setPageLimit = function(limit) {
@@ -825,7 +848,7 @@
                 var previous = scope.vm.page.previous;
                 if (previous && scope.$root.checkReferenceURL(previous)) {
                     scope.vm.reference = previous;
-                    $log.debug('going to previous page. updating..');
+                    $log.debug('counter', scope.vm.flowControlObject.counter ,': request for previous page');
 
                     scope.vm.logObject = {
                         action: logActions.recordsetPage,
@@ -841,7 +864,7 @@
                 var next = scope.vm.page.next;
                 if (next && scope.$root.checkReferenceURL(next)) {
                     scope.vm.reference = next;
-                    $log.debug('going to next page. updating..');
+                    $log.debug('counter', scope.vm.flowControlObject.counter ,': request for next page');
 
                     scope.vm.logObject = {
                         action: logActions.recordsetPage,
@@ -899,7 +922,7 @@
                      scope.vm.reference = ref;
                      scope.vm.lastActiveFacet = -1;
                      scope.vm.logObject = {action: logActions.recordsetFacet};
-                     $log.debug("search changed to `" + term + "`. updating..");
+                     $log.debug('counter', scope.vm.flowControlObject.counter ,': new search term=' + term);
                      update(scope.vm, true, true, true);
                  }
             };
@@ -969,7 +992,7 @@
 
                 // read
                 if (completed > 0 || updated) {
-                    $log.debug("fouced on page after change, updating...");
+                    $log.debug('counter', scope.vm.flowControlObject.counter ,': focused on page after update');
                     updated = false;
                     scope.vm.lastActiveFacet = -1;
                     if (scope.parentReference) {
@@ -990,14 +1013,14 @@
 
             scope.$on('facet-modified', function ($event) {
                 $log.debug("-----------------------------");
-                $log.debug('facet-modified in recordset directive');
+                $log.debug('counter', scope.vm.flowControlObject.counter, ': facet-modified in recordset directive');
                 scope.vm.logObject = {action: logActions.recordsetFacet};
                 update(scope.vm, true, true, true);
             });
 
             scope.$on('record-deleted', function ($event) {
                 $log.debug("-----------------------------");
-                $log.debug('record-deleted in recordset directive');
+                $log.debug('counter', scope.vm.flowControlObject.counter, ': record-deleted in recordset directive');
                 scope.vm.lastActiveFacet = -1;
                 scope.vm.logObject = {action: logActions.recordsetUpdate};
                 update(scope.vm, true, true, true);
@@ -1007,7 +1030,7 @@
             // row data has been modified (from ellipses) do read
             scope.$on('record-modified', function($event) {
                 $log.debug("-----------------------------");
-                $log.debug('record-modified in recordset directive');
+                $log.debug('counter', scope.vm.flowControlObject.counter, ': record-modified in recordset directive');
                 scope.vm.lastActiveFacet = -1;
                 scope.vm.logObject = {action: logActions.recordsetUpdate};
                 update(scope.vm, true, true, true);
@@ -1038,19 +1061,26 @@
                     // location, so we should call read after that.
                     if (!scope.ignoreFaceting && scope.vm.reference.facetColumns.length > 0) {
                         var firstOpen = -1;
-                        // create the facetsToInitialize and also open facets
+                        // create the facetsToPreProcess and also open facets
                         scope.vm.reference.facetColumns.forEach(function (fc, index) {
                             if (fc.isOpen) {
                                 firstOpen = (firstOpen == -1 || firstOpen > index) ? index : firstOpen;
-                                scope.vm.facetsToInitialize.push(index);
+                                scope.vm.facetsToPreProcess.push(index);
                                 scope.vm.facetModels[index].processed = false;
                                 scope.vm.facetModels[index].isOpen = true;
                                 scope.vm.facetModels[index].isLoading = true;
+                                scope.vm.facetModels[index].preProcessed = false;
                             }
                         });
 
-                        firstOpen = (firstOpen !== -1) ? firstOpen : 0;
-                        scope.vm.focusOnFacet(firstOpen);
+                        // all the facets are closed, open the first one
+                        if (firstOpen === -1) {
+                            firstOpen = 0;
+                            scope.vm.facetModels[0].processed = false;
+                            scope.vm.facetModels[0].isOpen = true;
+                            scope.vm.facetModels[0].isLoading = true;
+                        }
+                        scope.vm.focusOnFacet(firstOpen, true);
                     }
 
                     initialize(scope.vm);
