@@ -1562,6 +1562,7 @@ function chaisePage() {
 
         browser.wait(protractor.ExpectedConditions.visibilityOf(element(by.id("loginApp"))), browser.params.defaultTimeout).then(function() {
             browser.driver.executeScript('document.cookie="' + cookie + ';path=/;' + (process.env.TRAVIS ? '"' : 'secure;"')).then(function() {
+                console.log("cookie set")
               browser.ignoreSynchronization = false;
               defer.resolve();
             });

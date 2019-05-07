@@ -172,6 +172,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
         var getRecordValue = function(colName) {
             if (Array.isArray(tableParams.values) && tableParams.values.length > recordIndex && typeof tableParams.values[recordIndex][colName] !== undefined) {
+                if (colName == "opened_on") console.log(tableParams.values[recordIndex][colName])
                 return tableParams.values[recordIndex][colName];
             }
         }
@@ -252,6 +253,10 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 var value = getRecordValue(c.name);
 
                                 if (value != undefined) {
+                                    if (c.name === "timestamptz_array") {
+                                        var parts = value.split('"');
+                                        value = parts[0] + '"' + moment(parts[1], "YYYY-MM-DDTHH:mm:ssZ").format("YYYY-MM-DDTHH:mm:ssZ") + '"' + parts[2];
+                                    }
                                     expect(arrayTxtArea.getAttribute('value')).toBe(value, colError(c.name , "Doesn't have the expected value."));
                                 }
                             });
