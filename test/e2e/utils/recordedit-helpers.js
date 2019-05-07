@@ -172,7 +172,6 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
         var getRecordValue = function(colName) {
             if (Array.isArray(tableParams.values) && tableParams.values.length > recordIndex && typeof tableParams.values[recordIndex][colName] !== undefined) {
-                if (colName == "opened_on") console.log(tableParams.values[recordIndex][colName])
                 return tableParams.values[recordIndex][colName];
             }
         }

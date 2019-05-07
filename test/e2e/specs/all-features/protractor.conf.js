@@ -5,7 +5,6 @@ var config = pConfig.getConfig({
     configFileName: 'parallel-configs/all-features.dev.json',
     specs: [
         "*/*.spec.js"
-        // "recordedit/permissions-visibility.spec.js"
     ],
     setBaseUrl: function(browser, data) {
         browser.params.url = process.env.CHAISE_BASE_URL;
