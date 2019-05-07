@@ -186,6 +186,14 @@ The following url patterns are what's unique about each of these requests and yo
 
 ## Change Log
 
+#### 05/06/19
+
+###### Commit Links
+ - [chaise](https://github.com/informatics-isi-edu/chaise/commit/8dc53a5e61e3b32dfae3279bb000baf9b2f51fb1)
+ 
+###### Added
+  - We are going to send `cid`, `wid`, and `pid` headers with authen requests from now on.
+
 #### 04/18/19
 
 ###### Commit Links
