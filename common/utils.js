@@ -1502,10 +1502,12 @@
          * Returns the http service that should be used in chaise
          * NOTE: This has been added for backward compatibility.
          * The window.dcctx.server should always be available if config app has been included
+         * TODO this function should return the $window.dcctx.server.http if it's available.
+         * But it was causing issues in case of 401 and we reverted it for now.
          * @return {Object}
          */
         function getHTTPService() {
-            return getContextJSON().server ? getContextJSON().server.http : $http;
+            return $http;
         };
 
         return {
