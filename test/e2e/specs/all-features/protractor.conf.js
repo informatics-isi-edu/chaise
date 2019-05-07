@@ -4,8 +4,8 @@ var config = pConfig.getConfig({
     // This config is meant to be run as part of the parallel tests configuration
     configFileName: 'parallel-configs/all-features.dev.json',
     specs: [
-        // "*/*.spec.js"
-        "recordedit/permissions-visibility.spec.js"
+        "*/*.spec.js"
+        // "recordedit/permissions-visibility.spec.js"
     ],
     setBaseUrl: function(browser, data) {
         browser.params.url = process.env.CHAISE_BASE_URL;
