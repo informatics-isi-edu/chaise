@@ -132,9 +132,9 @@ before_script:
 
 script:
   - make build
-  - make testfullfeaturesconfirmation
+  # - make testfullfeaturesconfirmation
   # - make testdefaultconfig
-  # - make testfullfeatures
+  - make testfullfeatures
   # - make testdeleteprohibited
 
 after_failure:
