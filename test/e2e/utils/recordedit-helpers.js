@@ -254,10 +254,14 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                                 if (value != undefined) {
                                     if (c.name === "timestamptz_array") {
-                                        var parts = value.split('"');
-                                        value = parts[0] + '"' + moment(parts[1], "YYYY-MM-DDTHH:mm:ssZ").format("YYYY-MM-DDTHH:mm:ssZ") + '"' + parts[2];
+                                        arrayTxtArea.getAttribute('value').then(function (inputValue) {
+                                            var parts = inputValue.split('"');
+                                            inputValue = parts[0] + '"' + moment(parts[1], "YYYY-MM-DDTHH:mm:ssZ").format("YYYY-MM-DDTHH:mm:ssZ") + '"' + parts[2];
+                                            expect(inputValue).toBe(value, colError(c.name , "Doesn't have the expected value."));
+                                        })
+                                    } else {
+                                        expect(arrayTxtArea.getAttribute('value')).toBe(value, colError(c.name , "Doesn't have the expected value."));
                                     }
-                                    expect(arrayTxtArea.getAttribute('value')).toBe(value, colError(c.name , "Doesn't have the expected value."));
                                 }
                             });
                         });
