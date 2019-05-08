@@ -322,11 +322,9 @@
                 // change defaults
                 pageName = "Recordset";
                 redirectLink = exception.errorData.redirectUrl;
-                if (exception instanceof Errors.noRecordError && !Session.getSessionValue()) showLogin = true;
             } else if (ERMrest && exception instanceof ERMrest.ERMrestError ) {
                 if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'gotoTableDisplayname')) pageName = exception.errorData.gotoTableDisplayname;
                 if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'redirectUrl')) redirectLink = exception.errorData.redirectUrl;
-                if (exception instanceof ERMrest.NotFoundError && !Session.getSessionValue()) showLogin = true;
             } else if (exception instanceof Errors.CustomError ) {
                 logError(exception);
                 message = exception.message;
@@ -336,6 +334,8 @@
                 message = errorMessages.systemAdminMessage;
                 subMessage = exception.message;
             }
+
+            if (!Session.getSessionValue()) showLogin = true;
 
             errorPopup(exception, pageName, redirectLink, subMessage, stackTrace, isDismissible, showLogin, message, errorStatus);
 
