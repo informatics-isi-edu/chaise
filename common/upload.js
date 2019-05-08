@@ -85,21 +85,15 @@
                     scope.setFilename = function () {
                         var value = scope.value;
                         if (value) {
-                            if (value.filename) {
-                                return value.filename;
-                            } else {
-                                return value.url;
-                            }
+                            // value.filename will always be either the stored filename or the "caption" (text stripped of the hatrac path)
+                            return value.filename;
                         }
                     }
 
                     scope.fileTooltip = function () {
                         var value = scope.value;
-                        if (value.filename) {
-                            return (value.filesize ? "- " + value.filename + "<br>- " + value.filesize + " bytes" : value.filename);
-                        } else {
-                            return value.url;
-                        }
+                        // value.filename will always be either the stored filename or the "caption" (text stripped of the hatrac path)
+                        return (value.filesize ? "- " + value.filename + "<br>- " + value.filesize + " bytes" : value.filename);
                     }
                 }
             };

@@ -355,7 +355,7 @@
                                                 var metadata = column.getMetadata(tuple.data);
                                                 value = {
                                                     url: values[i] || "",
-                                                    filename: metadata.filename,
+                                                    filename: metadata.filename || metadata.caption,
                                                     filesize: metadata.byteCount
                                                 };
                                             } else {
