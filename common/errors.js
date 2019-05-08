@@ -194,8 +194,8 @@
     }])
 
     // Factory for each error type
-    .factory('ErrorService', ['AlertsService', 'ConfigUtils', 'DataUtils', 'errorMessages', 'errorNames', 'Errors', 'modalUtils', 'Session', 'UriUtils', '$document', '$log', '$rootScope', '$sce', '$window',
-        function ErrorService(AlertsService, ConfigUtils, DataUtils, errorMessages, errorNames, Errors, modalUtils, Session, UriUtils, $document, $log, $rootScope, $sce, $window) {
+    .factory('ErrorService', ['AlertsService', 'ConfigUtils', 'DataUtils', 'errorMessages', 'errorNames', 'Errors', 'messageMap', 'modalUtils', 'Session', 'UriUtils', '$document', '$log', '$rootScope', '$window',
+        function ErrorService(AlertsService, ConfigUtils, DataUtils, errorMessages, errorNames, Errors, messageMap, modalUtils, Session, UriUtils, $document, $log, $rootScope, $window) {
 
         var reloadCb = function() {
             window.location.reload();
@@ -241,8 +241,8 @@
                 pageName: pageName,
                 exception: exception,
                 errorStatus: exception.status ? exception.status : "Terminal Error",
-                message: message ? $sce.trustAsHtml(message) : $sce.trustAsHtml(exception.message),
-                subMessage: $sce.trustAsHtml(subMessage),
+                message: message,
+                subMessage: subMessage,
                 canClose: false,
                 showLogin: showLogin
             };
@@ -303,7 +303,8 @@
                 subMessage = (exception.subMessage ? exception.subMessage : undefined),
                 stackTrace = ( (exception.errorData && exception.errorData.stack) ? exception.errorData.stack : undefined),
                 showLogin = false,
-                message, errorStatus;
+                message = exception.message,
+                errorStatus;
 
 
             $rootScope.error = true;    // used to hide spinner in conjunction with a css property
@@ -327,7 +328,6 @@
                 if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'redirectUrl')) redirectLink = exception.errorData.redirectUrl;
             } else if (exception instanceof Errors.CustomError ) {
                 logError(exception);
-                message = exception.message;
                 redirectLink = exception.errorData.redirectUrl;
             } else {
                 logError(exception);
@@ -335,7 +335,15 @@
                 subMessage = exception.message;
             }
 
-            if (!Session.getSessionValue()) showLogin = true;
+            if (!Session.getSessionValue()) {
+                showLogin = true;
+                if (exception instanceof Errors.noRecordError) {
+                    // if no logged in user, change the message
+                    message = messageMap.noRecordForFilter + '<br>' + messageMap.maybeUnauthorizedMessage;
+                } else {
+                    message += " " + messageMap.maybeNeedLogin;
+                }
+            }
 
             errorPopup(exception, pageName, redirectLink, subMessage, stackTrace, isDismissible, showLogin, message, errorStatus);
 

@@ -81,15 +81,6 @@
             vm.showReloadBtn = !$rootScope.displayReady;
         }
 
-        // in case of adding login button, we should add extra message
-        if (vm.params.showLogin) {
-            if (ERMrest && exception instanceof ERMrest.NotFoundError) {
-                vm.params.message = $sce.trustAsHtml(vm.params.message + messageMap.maybeNeedLogin);
-            } else if (exception instanceof Errors.noRecordError) {
-                vm.params.message = $sce.trustAsHtml(messageMap.noRecordForFilter + '<br>' + messageMap.maybeUnauthorizedMessage);
-            }
-        }
-
         // set the click action message
         if (exception instanceof Errors.multipleRecordError) {
             vm.clickActionMessage =  messageMap.recordAvailabilityError.multipleRecords;
@@ -113,7 +104,10 @@
 
         // <p> tag is added to maintain the space between click action message and buttons
         // Also maintains consistency  in their placement irrespective of reload message
+        // NOTE: $sce.trustAsHtml done in one place after setting everything
         vm.clickActionMessage = $sce.trustAsHtml(vm.clickActionMessage + reloadMessage);
+        vm.params.message = $sce.trustAsHtml(vm.params.message);
+        vm.params.subMessage = $sce.trustAsHtml(vm.params.subMessage);
 
         vm.clickOkToDismiss = exception.clickOkToDismiss;
         vm.showDetails = function() {
