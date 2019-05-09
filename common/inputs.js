@@ -143,27 +143,6 @@
             return column.filenameExtFilter.join(", ");
         }
 
-        // value should be in string format or undefined
-        //   - undefined means set to null
-        // outputType - the expected output type, "string" || "object"
-        function formatFile(value, outputType) {
-            // value should ALWAYS be a string for file inputs
-            if (value) {
-                if (outputType == "object") {
-                    return { url: value }
-                } else if (outputType == "string") {
-                    return value;
-                }
-            } else {
-                if (outputType == "object") {
-                    // there is no value and we want an object
-                    return { url: "" };
-                } else {
-                    return null;
-                }
-            }
-        }
-
         /* Foregin Key specific functions */
         // Given an $event, this will blur or removes the focus from the element that triggerd the event
         function blurElement(e) {
@@ -177,7 +156,6 @@
             clearDatetime: clearDatetime,
             fileExtensionTypes: fileExtensionTypes,
             formatDatetime: formatDatetime,
-            formatFile: formatFile,
             formatFloat: formatFloat,
             formatInt: formatInt,
             getDisabledInputValue: getDisabledInputValue,
