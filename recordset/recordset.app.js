@@ -1,33 +1,8 @@
 (function() {
     'use strict';
-/* Configuration of the Recordset App */
 
-    /**
-     * Module Dependencies:
-     *   config.js
-     *    |--ermrestJS
-     *    |
-     *    |--utils.js
-     *       |--errors.js - needed for utils
-     *       |  |--alerts.js
-     *       |  |  |--filters.js
-     *       |  |
-     *       |  |--authen.js
-     *       |  |  |--storage.js
-     *       |  |
-     *       |  |--modal.js
-     *       |
-     *       |--inputs.js
-     *          |--validators.js
-     */
-    angular.module('chaise.configure-recordset', [
-        'chaise.config',
-        'chaise.utils',
-        'ermrestjs',
-        'ngCookies',
-        'ngAnimate',
-        'ui.bootstrap'
-    ])
+/* Configuration of the Recordset App */
+    angular.module('chaise.configure-recordset', ['chaise.config'])
 
     .constant('appName', 'recordset')
 
