@@ -59,6 +59,7 @@
                                         reference: scope.reference
                                     });
                                     scope.value.url = scope.value.filename = scope.value.file.name;
+                                    scope.value.filesize = scope.value.file.size;
                                     scope.$apply();
                                 }
                             });
@@ -84,12 +85,15 @@
                     scope.setFilename = function () {
                         var value = scope.value;
                         if (value) {
-                            if (value.filename) {
-                                return value.filename;
-                            } else {
-                                return value.url;
-                            }
+                            // value.filename will always be either the stored filename or the "caption" (text stripped of the hatrac path)
+                            return value.filename;
                         }
+                    }
+
+                    scope.fileTooltip = function () {
+                        var value = scope.value;
+                        // value.filename will always be either the stored filename or the "caption" (text stripped of the hatrac path)
+                        return (value.filesize ? "- " + value.filename + "<br>- " + value.filesize + " bytes" : value.filename);
                     }
                 }
             };
