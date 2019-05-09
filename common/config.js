@@ -1,7 +1,29 @@
 (function() {
     'use strict';
 
-    angular.module('chaise.config', ['chaise.utils', 'ermrestjs'])
+    /**
+     * Module Dependencies:
+     *    |--ermrestJS
+     *    |
+     *    |--utils.js
+     *       |--errors.js - needed for utils
+     *       |  |--alerts.js
+     *       |  |  |--filters.js
+     *       |  |
+     *       |  |--authen.js
+     *       |  |  |--storage.js
+     *       |  |
+     *       |  |--modal.js
+     *       |
+     *       |--inputs.js
+     *          |--validators.js
+     */
+    angular.module('chaise.config', [
+        'chaise.utils',
+        'ermrestjs',
+        'ngCookies',
+        'ui.bootstrap'
+    ])
 
     .run(['appName', 'ConfigUtils', 'ERMrest', 'headInjector', 'MathUtils', 'UriUtils', '$rootScope', '$window', function(appName, ConfigUtils, ERMrest, headInjector, MathUtils, UriUtils, $rootScope, $window) {
         headInjector.setWindowName();

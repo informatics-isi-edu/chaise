@@ -1,31 +1,7 @@
 (function() {
     'use strict';
 
-    /**
-     * Module Dependencies:
-     *   config.js
-     *    |--ermrestJS
-     *    |
-     *    |--utils.js
-     *       |--errors.js - needed for utils
-     *       |  |--alerts.js
-     *       |  |  |--filters.js
-     *       |  |
-     *       |  |--authen.js
-     *       |  |  |--storage.js
-     *       |  |
-     *       |  |--modal.js
-     *       |
-     *       |--inputs.js
-     *          |--validators.js
-     */
-    angular.module('chaise.configure-viewer', [
-        'chaise.config',
-        'chaise.utils',
-        'ermrestjs',
-        'ngCookies',
-        'ui.bootstrap'
-    ])
+    angular.module('chaise.configure-viewer', ['chaise.config'])
 
     .constant('appName', 'viewer')
 

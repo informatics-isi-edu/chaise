@@ -1,32 +1,8 @@
 (function() {
     'use strict';
-/* Configuration of the Recordedit App */
 
-    /**
-     * Module Dependencies:
-     *   config.js
-     *    |--ermrestJS
-     *    |
-     *    |--utils.js
-     *       |--errors.js - needed for utils
-     *       |  |--alerts.js
-     *       |  |  |--filters.js
-     *       |  |
-     *       |  |--authen.js
-     *       |  |  |--storage.js
-     *       |  |
-     *       |  |--modal.js
-     *       |
-     *       |--inputs.js
-     *          |--validators.js
-     */
-    angular.module('chaise.configure-recordedit', [
-        'chaise.config',
-        'chaise.utils',
-        'ermrestjs',
-        'ngCookies',
-        'ui.bootstrap'
-    ])
+/* Configuration of the Recordedit App */
+    angular.module('chaise.configure-recordedit', ['chaise.config'])
 
     .constant('appName', 'recordedit')
 
