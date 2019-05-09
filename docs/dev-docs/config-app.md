@@ -1,6 +1,6 @@
 # Configuration App
 
-> If the new Chaise app does not rely on any of the chaise-config attributes (or is using any of the chaise/common components), you do not need a separate config app.
+> This app is only needed for the Chaise apps that rely on chaise-config attributes (or is using any of the chaise/common components that rely on them).
 
 Since chaise-config can be configured through annotation, we had to make a http request to get its value from the catalog annotation. This means that the chaise-config will be available during the runtime and after an asynchronous call. Because of this we had to delay the loading of Chaise apps and introduce an extra app which its whole purpose is populating the necessary configuration variables.
 
@@ -38,6 +38,7 @@ This will delay your app until the configuration is completely done. To make sur
             <loading-spinner></loading-spinner>
         </div>
         <div class="app-container" ng-controller="<APP_CONTROLLER> as ctrl">
+            <!-- Main content -->
         </div>
     </body>
 </html>    
