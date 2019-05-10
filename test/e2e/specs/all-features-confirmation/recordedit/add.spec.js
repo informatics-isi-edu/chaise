@@ -106,20 +106,23 @@ var testParams = {
        files : [{
            name: "testfile1MB.txt",
            size: "1024000",
-           displaySize: "1MB",
+           displaySize: "1000 kB",
            path: "testfile1MB.txt",
-           skipDeletion: true
+           skipDeletion: true,
+           tooltip: "- testfile1MB.txt\n- 1000 kB"
        }, {
            name: "testfile500kb.png",
            size: "512000",
-           displaySize: "500KB",
+           displaySize: "500 kB",
            path: "testfile500kb.png",
-           skipDeletion: true
+           skipDeletion: true,
+           tooltip: "- testfile500kB.png\n- 500 kB"
        }, {
            name: "testfile5MB.txt",
            size: "5242880",
-           displaySize: "5MB",
-           path: "testfile5MB.txt"
+           displaySize: "5000 kB",
+           path: "testfile5MB.txt",
+           tooltip: "- testfile5MB.txt\n- 5000 kB"
        }]
    }, {
       comment: "uploader when one file exists in hatrac and the other one is new",
@@ -218,7 +221,7 @@ if (!process.env.TRAVIS) {
 
 describe('Record Add', function() {
 
-    for (var i=0; i< testParams.tables.length; i++) {
+    for (var i=1; i< testParams.tables.length; i++) {
         (function(tableParams, index) {
 
             describe("======================================================================= \n    "

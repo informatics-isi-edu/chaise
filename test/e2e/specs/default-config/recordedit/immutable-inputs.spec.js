@@ -35,6 +35,9 @@ var testParams = {
         json_value:JSON.stringify({"name":"testing_json"}),
         json_disabled_value:JSON.stringify(98.786),
         json_disabled_no_default_value: "Automatically generated",
+        asset_value: "http://images.trvl-media.com/hotels/1000000/30000/28200/28110/28110_191_z.jpg",
+        asset_disabled_value: "http://images.trvl-media.com/hotels/1000000/30000/28200/28110/28110_191_z.jpg",
+        asset_disabled_no_default_value: "Automatically generated",
         rid_disabled_value: "Automatically generated",
         rcb_disabled_value: "Automatically generated",
         rmb_disabled_value: "Automatically generated",
@@ -83,7 +86,8 @@ var testParams = {
         timestamptz_disabled: "2010-06-13T17:22:00-07:00",
         json_disabled: JSON.stringify(98.786),
         // Value of "filename" column for the current record
-        asset_disabled: "Four Points Sherathon 3"
+        // asset_disabled: "Four Points Sherathon 3"
+        asset_disabled: "http://images.trvl-media.com/hotels/1000000/30000/28200/28110/28110_191_z.jpg"
     }
 };
 
@@ -204,6 +208,27 @@ describe('Record Add with defaults', function() {
             expect(foreignKeyDisabledInput.getAttribute('value')).toBe(values.foreign_key_disabled_value, "Foreign key disabled default is incorrect");
         });
 
+        // Asset columns
+        it("should initialize asset column inputs with their default value.", function() {
+            // the copy btn will be disabled while data is loading.
+            browser.wait(EC.elementToBeClickable(element(by.id("copy-record-btn"))));
+
+            chaisePage.recordEditPage.getInputForAColumn("txtasset", 0).then(function (assetInput) {
+                expect(assetInput.getAttribute('value')).toBe(values.asset_value, "Asset input default is incorrect");
+
+                return chaisePage.recordEditPage.getInputForAColumn("txtasset_disabled", 0);
+            }).then(function (assetDisabledInput) {
+                expect(assetDisabledInput.getAttribute('value')).toBe(values.asset_disabled_value, "Asset disabled default is incorrect");
+            });
+        });
+
+        it("should initialize asset columns properly if they are disabled without a default.", function() {
+            chaisePage.recordEditPage.getInputForAColumn("txtasset_disabled_no_default", 0).then(function (assetInput) {
+                expect(assetInput.getAttribute("value")).toBe("", "The disabled asset value is incorrect");
+                expect(assetInput.getAttribute("placeholder")).toBe(values.asset_disabled_no_default_value, "The disabled asset placeholder is incorrect");
+            });
+        });
+
         // System columns
         it("should initialize system column inputs with 'Automatically Generated'.", function() {
             var ridDisabledInput = chaisePage.recordEditPage.getInputById(0, "RID"),
@@ -264,6 +289,13 @@ describe("Record Edit with immutable columns", function() {
                     if (columnName == "asset_disabled") {
                         chaisePage.recordEditPage.getInputForAColumn("txt"+columnName, 0).then(function (input) {
                             expect(input.getAttribute('value')).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
+
+                            // test the tooltip on hover
+                            browser.actions().mouseMove(input).perform();
+                            var tooltip = chaisePage.getTooltipDiv();
+                            chaisePage.waitForElement(tooltip).then(function () {
+                                expect(tooltip.getText()).toBe(testParams.re_column_values[columnName], "Incorrect tooltip on the Asset input");
+                            });
                         });
                     } else {
                         var input = chaisePage.recordEditPage.getInputById(0, columnName);

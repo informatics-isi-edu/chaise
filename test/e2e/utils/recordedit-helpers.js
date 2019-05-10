@@ -1708,6 +1708,13 @@ exports.selectFile = function(file, fileInput, txtInput) {
 
     expect(fileInput.getAttribute('value')).toContain(file.name, "didn't select the correct file.");
     expect(txtInput.getAttribute('value')).toBe(file.name, "didn't show the correct file name after selection.");
+
+    // test the tooltip on hover
+    browser.actions().mouseMove(txtInput).perform();
+    var tooltip = chaisePage.getTooltipDiv();
+    chaisePage.waitForElement(tooltip).then(function () {
+        expect(tooltip.getText()).toBe(file.tooltip, "Incorrect tooltip on the Permalink button");
+    });
 };
 
 /**
