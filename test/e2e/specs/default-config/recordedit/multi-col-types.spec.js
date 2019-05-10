@@ -118,9 +118,16 @@ describe('When editing a record', function() {
     // Tests that check the values for regular, non-disabled input fields are in 01-recordedit.edit.spec.js
     it('should display the correct values in disabled input fields', function(done) {
         testParams.table_w_generated_columns.row.forEach(function checkInput(col) {
-            var input = recordEditPage.getInputById(0, col.name);
-            expect(input.isEnabled()).toBeFalsy("col " + col.name + " was not disabled.");
-            expect(input.getAttribute('value')).toBe(col.value, "col " + col.name + " value missmatch.");
+            if (col.name == "asset_col_gen") {
+                chaisePage.recordEditPage.getInputForAColumn("txt"+col.name, 0).then(function (input) {
+                    expect(input.isEnabled()).toBeFalsy("col " + col.name + " was not disabled.");
+                    expect(input.getAttribute('value')).toBe(col.value, "col " + col.name + " value missmatch.");
+                });
+            } else {
+                var input = recordEditPage.getInputById(0, col.name);
+                expect(input.isEnabled()).toBeFalsy("col " + col.name + " was not disabled.");
+                expect(input.getAttribute('value')).toBe(col.value, "col " + col.name + " value missmatch.");
+            }
             done();
         });
     });

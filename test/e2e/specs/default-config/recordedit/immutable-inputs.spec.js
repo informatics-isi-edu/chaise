@@ -82,7 +82,8 @@ var testParams = {
         timestamp_disabled: "2012-06-22T18:36:00",
         timestamptz_disabled: "2010-06-13T17:22:00-07:00",
         json_disabled: JSON.stringify(98.786),
-        asset_disabled: "http://images.trvl-media.com/hotels/1000000/30000/28200/28110/28110_191_z.jpg"
+        // Value of "filename" column for the current record
+        asset_disabled: "Four Points Sherathon 3"
     }
 };
 
@@ -256,12 +257,20 @@ describe("Record Edit with immutable columns", function() {
         });
 
         for (var i=0; i < testParams.re_column_names.length; i++) {
-            var columnName = testParams.re_column_names[i];
-            // normal inputs with values in input under value attribute
-            it("should initialize text input column: " + columnName + " with the proper value", function () {
-                var input = chaisePage.recordEditPage.getInputById(0, columnName);
-                expect(input.getAttribute('value')).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
-            });
+            (function(index) {
+                var columnName = testParams.re_column_names[index];
+                // normal inputs with values in input under value attribute
+                it("should initialize text input column: " + columnName + " with the proper value", function () {
+                    if (columnName == "asset_disabled") {
+                        chaisePage.recordEditPage.getInputForAColumn("txt"+columnName, 0).then(function (input) {
+                            expect(input.getAttribute('value')).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
+                        });
+                    } else {
+                        var input = chaisePage.recordEditPage.getInputById(0, columnName);
+                        expect(input.getAttribute('value')).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
+                    }
+                });
+            })(i);
         };
     });
 });
