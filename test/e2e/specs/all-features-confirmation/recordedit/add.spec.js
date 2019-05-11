@@ -116,13 +116,13 @@ var testParams = {
            displaySize: "500 kB",
            path: "testfile500kb.png",
            skipDeletion: true,
-           tooltip: "- testfile500kB.png\n- 500 kB"
+           tooltip: "- testfile500kb.png\n- 500 kB"
        }, {
            name: "testfile5MB.txt",
            size: "5242880",
            displaySize: "5000 kB",
            path: "testfile5MB.txt",
-           tooltip: "- testfile5MB.txt\n- 5000 kB"
+           tooltip: "- testfile5MB.txt\n- 5 MB"
        }]
    }, {
       comment: "uploader when one file exists in hatrac and the other one is new",
@@ -153,15 +153,17 @@ var testParams = {
       files : [{
           name: "testfile10MB_new.txt", // a new file with new md5
           size: "10240000",
-          displaySize: "10MB",
-          path: "testfile10MB_new.txt"
+          displaySize: "9.77 MB",
+          path: "testfile10MB_new.txt",
+          tooltip: "- testfile10MB_new.txt\n- 9.77 MB"
       }, {
           name: "testfile500kb.png", // using the same file that has been already uploaded
           skipCreation: true,
           skipDeletion: true,
           size: "512000",
-          displaySize: "500KB",
-          path: "testfile500kb.png"
+          displaySize: "500 kB",
+          path: "testfile500kb.png",
+          tooltip: "- testfile500kb.png\n- 500 kB"
       }]
    }, {
       comment: "uploader when all the files already exist in hatrac",
@@ -193,14 +195,16 @@ var testParams = {
           name: "testfile1MB.txt", // using the same file that has been already uploaded
           skipCreation: true,
           size: "1024000",
-          displaySize: "1MB",
-          path: "testfile1MB.txt"
+          displaySize: "1000 kB",
+          path: "testfile1MB.txt",
+          tooltip: "- testfile1MB.txt\n- 1000 kB"
       }, {
           name: "testfile500kb.png", // using the same file that has been already uploaded
           skipCreation: true,
           size: "512000",
-          displaySize: "500KB",
-          path: "testfile500kb.png"
+          displaySize: "500 kB",
+          path: "testfile500kb.png",
+          tooltip: "- testfile500kb.png\n- 500 kB"
       }]
    }]
 };
@@ -221,7 +225,7 @@ if (!process.env.TRAVIS) {
 
 describe('Record Add', function() {
 
-    for (var i=1; i< testParams.tables.length; i++) {
+    for (var i=0; i< testParams.tables.length; i++) {
         (function(tableParams, index) {
 
             describe("======================================================================= \n    "

@@ -1710,10 +1710,15 @@ exports.selectFile = function(file, fileInput, txtInput) {
     expect(txtInput.getAttribute('value')).toBe(file.name, "didn't show the correct file name after selection.");
 
     // test the tooltip on hover
-    browser.actions().mouseMove(txtInput).perform();
+    // move the mouse first to force any other tooltips to hide
+    browser.actions().mouseMove(chaisePage.recordEditPage.getEntityTitleElement()).perform();
     var tooltip = chaisePage.getTooltipDiv();
-    chaisePage.waitForElement(tooltip).then(function () {
-        expect(tooltip.getText()).toBe(file.tooltip, "Incorrect tooltip on the Permalink button");
+    chaisePage.waitForElementInverse(tooltip).then(function () {
+        browser.actions().mouseMove(txtInput).perform();
+
+        return chaisePage.waitForElement(tooltip)
+    }).then(function () {
+        expect(tooltip.getText()).toBe(file.tooltip, "Incorrect tooltip on the File Input");
     });
 };
 
