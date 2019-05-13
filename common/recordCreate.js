@@ -122,7 +122,10 @@
                         // happens with an error with code 0 (Timeout Error)
                         $log.warn(exception);
                         var message = exception.message || messageMap.errorMessageMissing;
-                        AlertsService.addAlert(message, 'error');
+                        // if online, we don't know how to handle the error
+                        if ($window.navigator.onLine) {
+                            AlertsService.addAlert(message, 'error');
+                        }
                     }
                 }, false, false);
             } else {

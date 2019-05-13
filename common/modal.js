@@ -4,7 +4,7 @@
     angular.module('chaise.modal', ['chaise.utils'])
 
     //TODO
-    .factory('modalUtils', ["$uibModal", "$log", function ($uibModal, $log) {
+    .factory('modalUtils', ["$log", "$uibModal", "$window", function ($log, $uibModal, $window) {
         function showModal(params, successCB, rejectCB, postRenderCB) {
             var modalInstance = $uibModal.open(params);
             if (postRenderCB) {
@@ -16,6 +16,11 @@
                 if (rejectCB) {
                     rejectCB(response);
                 } else if (typeof response !== "string") {
+                    // there is no internet connection, so templates couldn't be fetched
+                    // set a flag on the response (error) object
+                    if (response.message.includes("Error: [$compile:tpload]")) {
+                        response.online = $window.navigator.onLine;
+                    }
                     throw response;
                 }
             });

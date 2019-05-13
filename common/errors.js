@@ -305,7 +305,12 @@
                 showLogin = false,
                 message, errorStatus;
 
-
+            // if network is offline, use offline dialog workflow
+            if (exception.online === false) {
+                console.log("In offline exception condition");
+                offlineErrorTemplate(exception);
+                return null;
+            }
             $rootScope.error = true;    // used to hide spinner in conjunction with a css property
 
             // don't throw an angular error if in search/viewer or one has already been thrown
@@ -436,5 +441,44 @@ window.onerror = function() {
     }
 
     logError(error);
-
 };
+
+var errorVisible = false;
+var offlineErrorTemplate = function (error) {
+    var errorVisible = document.getElementById('divErrorModal');
+    if (!document || !document.body || errorVisible) return;
+
+    var errName = error.constructor.name;
+    errName = (errName.toLowerCase() !== 'error') ? errName : "Terminal Error";
+
+    var html  = '<div modal-render="true" tabindex="-1" role="dialog" class="modal fade in" index="0" animate="animate" modal-animation="true" style="z-index: 1050; display: block;">'
+        + '<div class="modal-dialog" style="width:90% !important;">'
+            + '<div class="modal-content" uib-modal-transclude="">'
+                + '<div class="modal-header">'
+                    + '<button class="btn btn-default pull-right modal-close" type="button" onclick="document.getElementById(\'divErrorModal\').remove();">X</button>'
+                    + '<h2 class="modal-title ">Error: ' + errName + '</h2>'
+                + '</div>'
+                + '<div class="modal-body ">'
+                    + 'An unexpected error has occurred. Please check that you are still connected to your network. If you continue to face this issue, please contact the system administrator.'
+                    + '<br><br>'
+                    + 'Click OK to return to the Home Page.'
+                    + '<br>'
+                    + '<span class="terminalError"><br>'
+                        + '<pre  style="word-wrap: unset;">' + error.message + '<br><span style="padding-left:20px;">' + error.stack + '</span></pre>'
+                    + '</span>'
+                + '</div>'
+                + '<div class="modal-footer">'
+                    + '<button class="btn btn-danger" type="button" onclick="document.getElementById(\'divErrorModal\').remove();">OK</button>'
+                + '</div>'
+            + '</div>'
+        + '</div>'
+    + '</div>'
+    + '<div class="modal-backdrop fade in" style="z-index: 1040;"></div>';
+
+    var el = document.createElement('div');
+    el.id = "divErrorModal";
+    el.innerHTML = html;
+
+    document.body.appendChild(el);
+    errorVisible = true;
+}
