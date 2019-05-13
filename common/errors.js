@@ -307,9 +307,8 @@
 
             // if network is offline, use offline dialog workflow
             if (exception.online === false) {
-                console.log("In offline exception condition");
                 offlineErrorTemplate(exception);
-                return null;
+                return;
             }
             $rootScope.error = true;    // used to hide spinner in conjunction with a css property
 
