@@ -94,19 +94,22 @@ var testParams = {
                     name: "testfile500kb_1.png",
                     size: "512000",
                     displaySize: "500KB",
-                    path: "testfile500kb_1.png"
+                    path: "testfile500kb_1.png",
+                    tooltip: "- testfile500kb_1.png\n- 500 kB"
                 },
                 {
                     name: "testfile500kb_2.png",
                     size: "512000",
                     displaySize: "500KB",
-                    path: "testfile500kb_2.png"
+                    path: "testfile500kb_2.png",
+                    tooltip: "- testfile500kb_2.png\n- 500 kB"
                 },
                 {
                     name: "testfile500kb_3.png",
                     size: "512000",
                     displaySize: "500KB",
-                    path: "testfile500kb_3.png"
+                    path: "testfile500kb_3.png",
+                    tooltip: "- testfile500kb_3.png\n- 500 kB"
                 }
             ]
         }

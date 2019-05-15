@@ -4,7 +4,7 @@
     angular.module('chaise.upload', ['ermrestjs', 'chaise.utils'])
 
 
-        .directive('upload', [ '$timeout', 'AlertsService', 'ConfigUtils', 'ERMrest', 'UriUtils', function($timeout, AlertsService, ConfigUtils, ERMrest, UriUtils) {
+        .directive('upload', [ '$timeout', 'AlertsService', 'ConfigUtils', 'ERMrest', 'InputUtils', 'UiUtils', 'UriUtils', function($timeout, AlertsService, ConfigUtils, ERMrest, InputUtils, UiUtils, UriUtils) {
 
             return {
                 restrict: 'AE',
@@ -22,10 +22,12 @@
                     scope.fileEl;
                     scope.fileElId = "fileInput" +  Math.round(Math.random() * 100000);
 
-                    $timeout(function() {
 
+
+                    $timeout(function() {
                         scope.fileEl = angular.element(element[0].querySelector('input[type="file"]'));
                         scope.context = ConfigUtils.getContextJSON();
+                        scope.isDisabled = InputUtils.isDisabled(scope.column);
 
                         // Bind change event file input
                         scope.fileEl
@@ -93,7 +95,7 @@
                     scope.fileTooltip = function () {
                         var value = scope.value;
                         // value.filename will always be either the stored filename or the "caption" (text stripped of the hatrac path)
-                        return (value.filesize ? "- " + value.filename + "<br>- " + value.filesize + " bytes" : value.filename);
+                        return (value.filesize ? "- " + value.filename + "<br>- " + UiUtils.humanFileSize(value.filesize) : value.filename);
                     }
                 }
             };
