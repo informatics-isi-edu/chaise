@@ -112,32 +112,32 @@
                         switch (col.type.name) {
                             case "timestamp":
                             case "timestamptz":
-                            if (vm.readyToSubmit) {
-                                var options = {
-                                    outputType: "string",
-                                    currentMomentFormat: dataFormats.date + dataFormats.time12 + 'A',
-                                    outputMomentFormat: dataFormats.datetime.submission
+                                if (vm.readyToSubmit) {
+                                    var options = {
+                                        outputType: "string",
+                                        currentMomentFormat: dataFormats.date + dataFormats.time12 + 'A',
+                                        outputMomentFormat: dataFormats.datetime.submission
+                                    }
+
+                                    // in create if the user doesn't change the timestamp field, it will be an object in form {time: null, date: null, meridiem: AM}
+                                    // meridiem should never be null, time can be left empty (null) the case below will catch that.
+                                    if (rowVal.time === null) rowVal.time = '00:00:00';
+                                    var value = rowVal.date ? rowVal.date + rowVal.time + rowVal.meridiem : null;
+
+                                    rowVal = InputUtils.formatDatetime(value, options);
                                 }
-
-                                // in create if the user doesn't change the timestamp field, it will be an object in form {time: null, date: null, meridiem: AM}
-                                // meridiem should never be null, time can be left empty (null) the case below will catch that.
-                                if (rowVal.time === null) rowVal.time = '00:00:00';
-                                var value = rowVal.date ? rowVal.date + rowVal.time + rowVal.meridiem : null;
-
-                                rowVal = InputUtils.formatDatetime(value, options);
-                            }
-                            break;
+                                break;
                             case "json":
                             case "jsonb":
-                            rowVal=JSON.parse(rowVal);
-                            break;
+                                rowVal=JSON.parse(rowVal);
+                                break;
                             default:
-                            if (col.isAsset) {
-                                if (!vm.readyToSubmit) {
-                                    rowVal = { url: "" };
+                                if (col.isAsset) {
+                                    if (!vm.readyToSubmit) {
+                                        rowVal = { url: "" };
+                                    }
                                 }
-                            }
-                            break;
+                                break;
                         }
                     }
                 }

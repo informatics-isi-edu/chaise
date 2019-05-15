@@ -290,7 +290,34 @@
                         "tag:isrd.isi.edu,2016:immutable": null
                     }
                 }, {
+                    "name": "asset",
+                    "default": "http://images.trvl-media.com/hotels/1000000/30000/28200/28110/28110_191_z.jpg",
+                    "nullok": true,
+                    "type": {
+                        "typename": "text"
+                    },
+                    "annotations": {
+                        "tag:isrd.isi.edu,2017:asset": {
+                            "url_pattern": "/hatrac/js/chaise/{{{_timestamptz}}}/{{{_asset.md5_hex}}}"
+                        },
+                        "tag:isrd.isi.edu,2016:generated": null,
+                        "tag:isrd.isi.edu,2016:immutable": null
+                    }
+                }, {
                     "name": "asset_disabled",
+                    "default": "http://images.trvl-media.com/hotels/1000000/30000/28200/28110/28110_191_z.jpg",
+                    "nullok": true,
+                    "type": {
+                        "typename": "text"
+                    },
+                    "annotations": {
+                        "tag:isrd.isi.edu,2017:asset": {
+                            "url_pattern": "/hatrac/js/chaise/{{{_timestamptz}}}/{{{_asset.md5_hex}}}"
+                        },
+                        "tag:isrd.isi.edu,2016:immutable": null
+                    }
+                }, {
+                    "name": "asset_disabled_no_default",
                     "default": null,
                     "nullok": true,
                     "type": {
@@ -298,39 +325,16 @@
                     },
                     "annotations": {
                         "tag:isrd.isi.edu,2017:asset": {
-                            "url_pattern": "/hatrac/js/chaise/{{{_timestamptz}}}/{{{_asset.md5_hex}}}",
-                            "filename_column": "filename",
-                            "byte_count_column": "bytes",
-                            "md5": "md5"
+                            "url_pattern": "/hatrac/js/chaise/{{{_timestamptz}}}/{{{_asset.md5_hex}}}"
                         },
+                        "tag:isrd.isi.edu,2016:generated": null,
                         "tag:isrd.isi.edu,2016:immutable": null
-                    }
-                }, {
-                    "name": "filename",
-                    "default": null,
-                    "nullok": true,
-                    "type": {
-                        "typename": "text"
-                    }
-                }, {
-                    "name": "bytes",
-                    "default": null,
-                    "nullok": true,
-                    "type": {
-                        "typename": "int8"
-                    }
-                }, {
-                    "name": "md5",
-                    "default": null,
-                    "nullok": true,
-                    "type": {
-                        "typename": "text"
                     }
                 }
             ],
             "annotations": {
                 "tag:isrd.isi.edu,2016:visible-columns": {
-                    "entry/create": ["text", "text_disabled", "markdown", "markdown_disabled", ["defaults", "fk_text"], ["defaults", "fk_text_disabled"], "int", "int_disabled", "float", "float_disabled", "boolean_true", "boolean_false", "boolean_disabled", "date", "date_disabled", "timestamp", "timestamp_disabled", "timestamp_disabled_no_default", "timestamptz", "timestamptz_disabled", "timestamptz_disabled_no_default", "json", "json_disabled", "json_disabled_no_default", "RID", "RCB", "RMB", "RCT", "RMT"],
+                    "entry/create": ["text", "text_disabled", "markdown", "markdown_disabled", ["defaults", "fk_text"], ["defaults", "fk_text_disabled"], "int", "int_disabled", "float", "float_disabled", "boolean_true", "boolean_false", "boolean_disabled", "date", "date_disabled", "timestamp", "timestamp_disabled", "timestamp_disabled_no_default", "timestamptz", "timestamptz_disabled", "timestamptz_disabled_no_default", "json", "json_disabled", "json_disabled_no_default", "asset", "asset_disabled", "asset_disabled_no_default", "RID", "RCB", "RMB", "RCT", "RMT"],
                     "entry/edit": ["text", "text_disabled", "markdown_disabled", ["defaults", "fk_text_disabled"], "int_disabled", "float_disabled", "boolean_disabled", "date_disabled", "timestamp_disabled", "timestamptz_disabled", "json_disabled", "asset_disabled"],
                     "detailed": ["text", "text_disabled", "markdown", "markdown_disabled", ["defaults", "fk_text"], ["defaults", "fk_text_disabled"], "int", "int_disabled", "float", "float_disabled", "boolean_true", "boolean_false", "boolean_disabled", "date", "date_disabled", "timestamp", "timestamp_disabled", "timestamp_disabled_no_default", "timestamptz", "timestamptz_disabled", "timestamptz_disabled_no_default", "json", "json_disabled", "json_disabled_no_default"]
                 }
