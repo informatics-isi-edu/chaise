@@ -101,7 +101,7 @@ var testParams = {
             {name: "timestamptz_col_gen", value: "2016-01-18T00:00:00-08:00", displayType: "disabled"},
             {name: "date_col_gen", value: "2016-08-15", displayType: "disabled"},
             {name: "fk_col_gen", value: "Abraham Lincoln", displayType: "disabled"},
-            {name: "asset_col_gen", value: "http://test.com/hatract/test", displayType: "disabled"}
+            {name: "asset_col_gen", value: "http://test.com/hatract/test", displayType: "upload"}
         ]
     }
 };
@@ -118,7 +118,8 @@ describe('When editing a record', function() {
     // Tests that check the values for regular, non-disabled input fields are in 01-recordedit.edit.spec.js
     it('should display the correct values in disabled input fields', function(done) {
         testParams.table_w_generated_columns.row.forEach(function checkInput(col) {
-            if (col.name == "asset_col_gen") {
+            // Upload input is disabled, but not the same displayType (input field) as other disabled inputs
+            if (col.displayType == "upload") {
                 chaisePage.recordEditPage.getInputForAColumn("txt"+col.name, 0).then(function (input) {
                     expect(input.isEnabled()).toBeFalsy("col " + col.name + " was not disabled.");
                     expect(input.getAttribute('value')).toBe(col.value, "col " + col.name + " value missmatch.");
