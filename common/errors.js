@@ -306,12 +306,10 @@
                 message = exception.message,
                 errorStatus;
 
-            // if network is offline, use offline dialog workflow
-            if (exception.online === false) {
-                offlineErrorTemplate(exception);
-                return;
-            }
             $rootScope.error = true;    // used to hide spinner in conjunction with a css property
+
+            // if network is offline, use offline dialog workflow
+            if (!$window.navigator.onLine) return offlineModalTemplate(exception, "Please check that you are still connected to your network. ", null, true);
 
             // don't throw an angular error if in search/viewer or one has already been thrown
             if (exceptionFlag || window.location.pathname.indexOf('/search/') != -1 || window.location.pathname.indexOf('/viewer/') != -1) return;
@@ -372,6 +370,7 @@
 
 })();
 
+/** Functions to execute outside of the scope of angular **/
 
 /**
  * Log the error in ermrest
@@ -386,6 +385,53 @@ var logError = function (error) {
         console.log("couldn't log the error.");
     });
 };
+
+var errorVisible = false;
+// generic template for error dialogs when the server or nerwork is not available
+var offlineModalTemplate = function (error, dialogMessage, redirectLink, canClose) {
+    var errorVisible = document.getElementById('divErrorModal');
+    if (!document || !document.body || errorVisible) return;
+
+    var errName = error.constructor.name;
+    errName = (errName.toLowerCase() !== 'error') ? errName : "Terminal Error";
+
+    var html  = '<div modal-render="true" tabindex="-1" role="dialog" class="modal fade in" index="0" animate="animate" modal-animation="true" style="z-index: 1050; display: block;">'
+        + '<div class="modal-dialog" style="width:90% !important;">'
+            + '<div class="modal-content" uib-modal-transclude="">'
+                + '<div class="modal-header">'
+                    + (canClose ? '<button class="btn btn-default pull-right modal-close" type="button" onclick="document.getElementById(\'divErrorModal\').remove();">X</button>' : '')
+                    + '<h2 class="modal-title ">Error: ' + errName + '</h2>'
+                + '</div>'
+                + '<div class="modal-body ">'
+                    + 'An unexpected error has occurred. ' + dialogMessage + 'If you continue to face this issue, please contact the system administrator.'
+                    + '<br><br>'
+                    + 'Click OK to return to the Home Page.'
+                    + '<br>'
+                    + '<span class="terminalError"><br>'
+                        + '<pre  style="word-wrap: unset;">' + error.message + '<br><span style="padding-left:20px;">' + error.stack + '</span></pre>'
+                    + '</span>'
+                + '</div>'
+                + '<div class="modal-footer">'
+                    + '<button class="btn btn-danger" type="button" onclick=' + (redirectLink ? '"window.location.replace(\'' + redirectLink + '\');"' : '"document.getElementById(\'divErrorModal\').remove();"') + '>OK</button>'
+                + '</div>'
+            + '</div>'
+        + '</div>'
+    + '</div>'
+    + '<div class="modal-backdrop fade in" style="z-index: 1040;"></div>';
+
+    if (canClose) {
+        var el = document.createElement('div');
+        el.id = "divErrorModal";
+        el.innerHTML = html;
+
+        document.body.appendChild(el);
+    } else {
+        document.body.innerHTML = html;
+    }
+
+    errorVisible = true;
+    logError(error);
+}
 
 window.onerror = function() {
 
@@ -408,84 +454,6 @@ window.onerror = function() {
     ].join(':');
 
     var redirectLink = (typeof chaiseConfig != 'undefined' && chaiseConfig.dataBrowser ? chaiseConfig.dataBrowser : window.location.origin);
-
-    if (!document || !document.body) return;
-
-    var errName = error.constructor.name;
-    errName = (errName.toLowerCase() !== 'error') ? errName : "Terminal Error";
-
-    var html  = '<div modal-render="true" tabindex="-1" role="dialog" class="modal fade in" index="0" animate="animate" modal-animation="true" style="z-index: 1050; display: block;">'
-        + '<div class="modal-dialog" style="width:90% !important;">'
-            + '<div class="modal-content" uib-modal-transclude="">'
-                + '<div class="modal-header">'
-                    + (canClose ? '<button class="btn btn-default pull-right modal-close" type="button" onclick="document.getElementById(\"divErrorModal\").remove();">X</button>' : '')
-                    + '<h2 class="modal-title ">Error: ' + errName + '</h2>'
-                + '</div>'
-                + '<div class="modal-body ">'
-                    + 'An unexpected error has occurred. Try clearing your cache. If you continue to face this issue, please contact the system administrator.'
-                    + '<br><br>'
-                    + 'Click OK to return to the Home Page.'
-                    + '<br>'
-                    + '<span class="terminalError"><br>'
-                        + '<pre  style="word-wrap: unset;">' + error.message + '<br><span style="padding-left:20px;">' + error.stack + '</span></pre>'
-                    + '</span>'
-                + '</div>'
-                + '<div class="modal-footer">'
-                    + '<button class="btn btn-danger" type="button" onclick="window.location.replace(\'' + redirectLink + '\');">OK</button>'
-                + '</div>'
-            + '</div>'
-        + '</div>'
-    + '</div>'
-    + '<div class="modal-backdrop fade in" style="z-index: 1040;"></div>';
-
-    if (canClose) {
-        var el = document.createElement('div');
-        el.id = "divErrorModal";
-        el.innerHTML = html;
-        document.body.appendChild(el);
-    } else {
-        document.body.innerHTML = html;
-    }
-
-    logError(error);
+    var message = "Try clearing your cache. ";
+    offlineModalTemplate(error, message, redirectLink, canClose);
 };
-
-var errorVisible = false;
-var offlineErrorTemplate = function (error) {
-    var errorVisible = document.getElementById('divErrorModal');
-    if (!document || !document.body || errorVisible) return;
-
-    var errName = error.constructor.name;
-    errName = (errName.toLowerCase() !== 'error') ? errName : "Terminal Error";
-
-    var html  = '<div modal-render="true" tabindex="-1" role="dialog" class="modal fade in" index="0" animate="animate" modal-animation="true" style="z-index: 1050; display: block;">'
-        + '<div class="modal-dialog" style="width:90% !important;">'
-            + '<div class="modal-content" uib-modal-transclude="">'
-                + '<div class="modal-header">'
-                    + '<button class="btn btn-default pull-right modal-close" type="button" onclick="document.getElementById(\'divErrorModal\').remove();">X</button>'
-                    + '<h2 class="modal-title ">Error: ' + errName + '</h2>'
-                + '</div>'
-                + '<div class="modal-body ">'
-                    + 'An unexpected error has occurred. Please check that you are still connected to your network. If you continue to face this issue, please contact the system administrator.'
-                    + '<br><br>'
-                    + 'Click OK to return to the Home Page.'
-                    + '<br>'
-                    + '<span class="terminalError"><br>'
-                        + '<pre  style="word-wrap: unset;">' + error.message + '<br><span style="padding-left:20px;">' + error.stack + '</span></pre>'
-                    + '</span>'
-                + '</div>'
-                + '<div class="modal-footer">'
-                    + '<button class="btn btn-danger" type="button" onclick="document.getElementById(\'divErrorModal\').remove();">OK</button>'
-                + '</div>'
-            + '</div>'
-        + '</div>'
-    + '</div>'
-    + '<div class="modal-backdrop fade in" style="z-index: 1040;"></div>';
-
-    var el = document.createElement('div');
-    el.id = "divErrorModal";
-    el.innerHTML = html;
-
-    document.body.appendChild(el);
-    errorVisible = true;
-}
