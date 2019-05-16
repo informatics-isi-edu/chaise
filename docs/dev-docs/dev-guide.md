@@ -2,9 +2,44 @@
 
 This is a guide for people who develop Chaise. Because this is not an exhaustive guide, consider looking through @johnpapa's [Angular 1 style guide](https://github.com/johnpapa/angular-styleguide/tree/master/a1) to understand the spirit and conventions of Angular development.
 
+## General
+
+### Extracting `common` code
+- When writing functionality that can already be found in another part of Chaise, that's usually a good candidate for pulling this functionality out and into the `chaise/common` folder. Instead of refactoring the common functionality out of an app, a good practice is to simply copy the existing functionality into the `common` folder and then have the existing functionality call the code in `chaise/common`. Actual refactoring will occur in a later cycle. This minimizes disruptions to existing apps and encourages code reuse.
+- An example: I'm working on a Feature X for the RecordEdit app, and this function has been already been written into the Search app. Instead of duplicating the function in both apps, I copy the code for Feature X from Search into `chaise/common` and genericize the function as necessary. In Data Entry, I simply call the code in `chaise/common` to get Feature X. In Search, the function's body is replaced with a call to the Feature X function in `chaise/common`.
+
+### Session
+The Navbar fetches the session object for information to display in the Navbar. Each app needs to also individually fetch the session so that we can make sure the session is available before trying to do anything with the reference.
+NOTE: This was causing a race condition before when we were relying on the session being fetched in the navbar and attaching it to $rootScope.
+
+
+### Use variable vs string in lookup
+The purpose of using variables or enumeration is to avoid rewriting (or copy-and-pasting) the same string in multiple places.
+- if you have more than one call site in more than one script, then define the variable in the utilities.js script and add it to the module (e.g., module._tag_default = "tag:...default") and it may then be used by code in different ermrestjs scripts (e.g., referencing module._tag_default somewhere). Note that this is not being added to the public interface. Code outside of the various ermrestjs scripts are not intended to use these variables. Hence we follow the underscore prefix convention _variableName, which by convention indicates that the variable should be considered private to the module and clients are at least warned not to use it.
+- Example: The `messageMap` constant can be used to store and display user-facing messages in Chaise.
+
+[Ermrestjs#68](https://github.com/informatics-isi-edu/ermrestjs/issues/68) contains detail discussion related to this topic.
+
+### Naming Conventions
+There are a few naming conventions that are being used across the apps. This pertains to variables, module names, and file names.
+- File names should be written in camel case (camelCase) with identifying information separated by `.` (`*.controller.js`, `*.app.js`, `*.html`).
+- Angular modules need to be defined like the following `chaise.*`. Chaise identifies the set of apps it applies to and the `*` is that modules purpose in chaise.
+- Service, Factory, Provider, Controller, and other angular classes should be defined with camel case text leading with a capital letter. For example: `ErrorDialogController` is the convention for naming controllers. Don't shorten the text to `ctrl` because we should be using controller as syntax and want to have a more readable structure to our code.
+- Variables should follow a similar naming convention using camel case text. Variables and functions that are prefixed with an underscore `_`, should be treated as private variables and used with caution.
+- Folder names should be different from file names. Of course folders don't have an extension so it's more apparent that they are folders, but developers should use `-` separated names for folders, i.e. `common\templates\data-link`.
+
 ## Angular-related
 * Use `controllerAs` syntax instead of `$scope` whenever possible and refrain from using `$rootscope`
 * Angular allows for users to define a module and later extend that module with new **services**, **controllers**, **factories**, **providers**, and so on. These other components should be defined in separate files to avoid having one single `*.app.js` file.
+
+### Angular Developer Guides
+- [View Templating](https://code.angularjs.org/1.6.9/docs/guide/templates)
+- [Data Binding with Templates](https://code.angularjs.org/1.6.9/docs/guide/databinding) ([tutorial](https://www.w3schools.com/angular/angular_databinding.asp))
+- [Modules](https://code.angularjs.org/1.6.9/docs/guide/module) ([tutorial](https://www.w3schools.com/angular/angular_modules.asp))
+- [Directives](https://code.angularjs.org/1.6.9/docs/guide/directive) ([tutorial](https://www.w3schools.com/angular/angular_directives.asp))
+- [Dependency Injection](https://code.angularjs.org/1.6.9/docs/guide/di)
+- [Services and Factories](https://code.angularjs.org/1.6.9/docs/guide/services) ([tutorial](https://www.w3schools.com/angular/angular_services.asp))
+- [App Bootstrapping](https://code.angularjs.org/1.6.9/docs/guide/bootstrap)
 
 ### One-Time Binding
 - Use one-time binding for improved performance.
@@ -213,29 +248,3 @@ The `window.onerror` handler may be called by the browser for many error conditi
 ### References
 - This old article discussed issues with window.onerror. https://danlimerick.wordpress.com/2014/01/18/how-to-catch-javascript-errors-with-window-onerror-even-on-chrome-and-firefox/
 - This article summarizes window.onerror support for each browser and provide an example to wrap a function so the exception can be logged. Maybe we can use the same method? https://blog.sentry.io/2016/01/04/client-javascript-reporting-window-onerror.html
-
-## General
-
-### Extracting `common` code
-- When writing functionality that can already be found in another part of Chaise, that's usually a good candidate for pulling this functionality out and into the `chaise/common` folder. Instead of refactoring the common functionality out of an app, a good practice is to simply copy the existing functionality into the `common` folder and then have the existing functionality call the code in `chaise/common`. Actual refactoring will occur in a later cycle. This minimizes disruptions to existing apps and encourages code reuse.
-- An example: I'm working on a Feature X for the RecordEdit app, and this function has been already been written into the Search app. Instead of duplicating the function in both apps, I copy the code for Feature X from Search into `chaise/common` and genericize the function as necessary. In Data Entry, I simply call the code in `chaise/common` to get Feature X. In Search, the function's body is replaced with a call to the Feature X function in `chaise/common`.
-
-### Session
-The Navbar fetches the session object for information to display in the Navbar. Each app needs to also individually fetch the session so that we can make sure the session is available before trying to do anything with the reference.
-NOTE: This was causing a race condition before when we were relying on the session being fetched in the navbar and attaching it to $rootScope.
-
-
-### Use variable vs string in lookup
-The purpose of using variables or enumeration is to avoid rewriting (or copy-and-pasting) the same string in multiple places.
-- if you have more than one call site in more than one script, then define the variable in the utilities.js script and add it to the module (e.g., module._tag_default = "tag:...default") and it may then be used by code in different ermrestjs scripts (e.g., referencing module._tag_default somewhere). Note that this is not being added to the public interface. Code outside of the various ermrestjs scripts are not intended to use these variables. Hence we follow the underscore prefix convention _variableName, which by convention indicates that the variable should be considered private to the module and clients are at least warned not to use it.
-- Example: The `messageMap` constant can be used to store and display user-facing messages in Chaise.
-
-[Ermrestjs#68](https://github.com/informatics-isi-edu/ermrestjs/issues/68) contains detail discussion related to this topic.
-
-### Naming Conventions
-There are a few naming conventions that are being used across the apps. This pertains to variables, module names, and file names.
-- File names should be written in camel case (camelCase) with identifying information separated by `.` (`*.controller.js`, `*.app.js`, `*.html`).
-- Angular modules need to be defined like the following `chaise.*`. Chaise identifies the set of apps it applies to and the `*` is that modules purpose in chaise.
-- Service, Factory, Provider, Controller, and other angular classes should be defined with camel case text leading with a capital letter. For example: `ErrorDialogController` is the convention for naming controllers. Don't shorten the text to `ctrl` because we should be using controller as syntax and want to have a more readable structure to our code.
-- Variables should follow a similar naming convention using camel case text. Variables and functions that are prefixed with an underscore `_`, should be treated as private variables and used with caution.
-- Folder names should be different from file names. Of course folders don't have an extension so it's more apparent that they are folders, but developers should use `-` separated names for folders, i.e. `common\templates\data-link`.
