@@ -1,6 +1,6 @@
 # Developer Guide
 
-This is a guide for people who develop Chaise. Because this is not an exhaustive guide, consider looking through @johnpapa's [Angular 1 style guide](https://github.com/johnpapa/angular-styleguide/tree/master/a1) to understand the spirit and conventions of Angular development.
+This is a guide for people who develop Chaise. Because this is not an exhaustive guide, consider looking through @johnpapa's [Angular 1 style guide](https://github.com/johnpapa/angular-styleguide/tree/master/a1) to understand the spirit and conventions of Angular development. We also have our own [Chaise style guide](https://github.com/informatics-isi-edu/chaise/blob/master/docs/dev-docs/style-guide.md), that explains the use of different libraries (bootstrap) and other HTML and CSS combinations.
 
 ## General
 
@@ -44,6 +44,9 @@ There are a few naming conventions that are being used across the apps. This per
 ### One-Time Binding
 - Use one-time binding for improved performance.
 - If you know an Angular expression won't change its value after the first digest (e.g. displaying an ERMrest table name), prepend the binding with `::` to benefit from one-time binding. For more details about this, see the One-Time Binding section of the [doc on Angular expressions](https://docs.angularjs.org/guide/expression).
+
+### Common Config
+We have a configuration app that is loaded into the DOM before each of our angular apps to do some setup before attaching the app instance. More info can be found in the [Config app guide](https://github.com/informatics-isi-edu/chaise/blob/master/docs/dev-docs/config-app.md).
 
 ## Error Handling
 
