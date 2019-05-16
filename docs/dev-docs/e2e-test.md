@@ -1,6 +1,6 @@
 # End to End Testing Documentation
 
-For now, we only have E2E tests in Chaise. E2E tests are automation tests that simulate a user interacting with the app and assert or expect the app would act correctly accordingly. This document will explain how you can configure and run the e2e test cases. Please use [this link](https://github.com/informatics-isi-edu/chaise/new/master/docs/dev-docs/e2e-test-writing.md) to find more information about how to write new test cases.
+For now, we only have E2E tests in Chaise. E2E tests are automation tests that simulate a user interacting with the app and assert or expect the app would act correctly accordingly. This document will explain how you can configure and run the e2e test cases. Please use [this link](e2e-test-writing.md) to find more information about how to write new test cases.
 
 
 ## Tools used
@@ -353,4 +353,4 @@ While running tests on **TRAVIS** you don't need to set the `REMOTE_CHAISE_DIR_P
 
 ## Writing test
 
-Please use [this link](https://github.com/informatics-isi-edu/chaise/new/master/docs/dev-docs/e2e-test-writing.md) to find more information about how to write new test cases.
+Please use [this link](e2e-test-writing.md) to find more information about how to write new test cases.
