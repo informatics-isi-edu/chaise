@@ -238,21 +238,22 @@ exports.testPresentation = function (tableParams) {
 		});
 	});
 
-    it("should render columns based on their markdown pattern.", function() {
-        var columnDisplayTag = "tag:misd.isi.edu,2015:display";
-        var columns = tableParams.columns.filter(function(c) {
-            return (c.annotations && c.annotations[columnDisplayTag]);
-        });
+    it("should render columns based on their markdown pattern.", function(done) {
+        var columns = tableParams.columns.filter(function(c) {return c.markdown_title;});
         chaisePage.recordPage.getColumnCaptionsWithHtml().then(function(pageColumns) {
-            expect(pageColumns.length).toBe(columns.length);
-            var index = 0;
-            pageColumns.forEach(function(c) {
-                var value = columns[index++].annotations[columnDisplayTag].markdown_name;
+            expect(pageColumns.length).toBe(columns.length, "number of captions with markdown name doesn't match.");
+            pageColumns.forEach(function(c, i) {
+                var col = columns[i];
                 c.getAttribute("innerHTML").then(function(html) {
-                    expect(html).toBe(value);
-                });
+                    expect(html).toBe(col.markdown_title, "invalid name for column `" +  col.title + "`.");
+                    if (i === pageColumns.length - 1) done();
+                }).catch(function (err) {
+                    done.fail(err);
+                })
             });
-        });
+        }).catch(function (err) {
+            done.fail(err);
+        })
     });
 
     it("should validate the values of each column", function () {
