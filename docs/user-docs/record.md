@@ -18,8 +18,8 @@ The list of related entities comes from the `visible-foreign-keys` annotation de
 
 Users can add new related entities by click on the "Add" button on top right corner of a related entity. Chaise will behave differently based on the related entity type.
 
-- If it's an association related entity, Chaise will open a modal picker that will allow users to select entities for the related table.
-  - [Associative entities](https://en.wikipedia.org/wiki/Associative_entity) are entities in another table that establish many-to-many relationships between entities. To illustrate this, let's assume table A has two foreign keys, one to table B and another to C (B <- A -> C). Then we can say that C and B are in associative relationship and for a reference that encapsulates B, a reference that encapsulates C is a related reference. Table A must have the following properties to be counted as associative table:
+- If it's a pure and binary association related entity, Chaise will open a modal picker that will allow users to select entities for the related table.
+  - [Associative entities](https://en.wikipedia.org/wiki/Associative_entity) are entities in another table that establish _many-to-many_ relationships between entities. To illustrate this, let's assume table `A` has two foreign keys, one to table `B` and another to `C` (`B <- A -> C`). Then we can say that `C` and `B` are in associative relationship and for a reference that encapsulates `B`, a reference that encapsulates `C` is a related reference. Table `A` must have the following properties to be counted as pure and binary associative table:
 
     - Should have only two foreign keys (binary).
     - Must have a unique constraint key of the foreign key columns.
