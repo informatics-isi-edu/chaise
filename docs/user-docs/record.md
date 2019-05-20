@@ -24,6 +24,7 @@ Users can add new related entities by click on the "Add" button on top right cor
     - Should have only two foreign keys (binary).
     - Must have a unique constraint key of the foreign key columns.
     - Cannot have any other unique constraint key (As an exception to this rule, table can have an extra key that is made of one serial type column.).
+    - There is no extra column that is not part of any keys (pure).
 
 - Otherwise, Chaise will open a recordedit page in a new tab. In this page, some of the visible data are going to be pre-filled. Chaise will pre-fill any data that is defined by the one-to-one relationship between the parent and related table. This includes,
   - The foreign key relationship that is defining the related table (let's call this foreign key "original").
