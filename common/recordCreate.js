@@ -245,9 +245,13 @@
                         if (!session && exception instanceof ERMrest.ConflictError) throw new ERMrest.UnauthorizedError();
                         // append link to end of alert.
                         if (exception instanceof ERMrest.DuplicateConflictError) {
-                            exception.message += " Click here to see the conflicting record that already exists."
+                            ERMrest.resolve(exception.uri).then(function (ref) {
+                                exception.message += ' Click <a href="' + ref.contextualize.detailed.appLink + '">here</a> to see the conflicting record that already exists.';
+                                AlertsService.addAlert(exception.message, 'error');
+                            });
+                        } else {
+                            AlertsService.addAlert(exception.message, (exception instanceof ERMrest.NoDataChangedError ? 'warning' : 'error') );
                         }
-                        AlertsService.addAlert(exception.message, (exception instanceof ERMrest.NoDataChangedError ? 'warning' : 'error') );
                     });
                 });
 
