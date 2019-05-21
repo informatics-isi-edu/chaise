@@ -246,7 +246,7 @@
                         // append link to end of alert.
                         if (exception instanceof ERMrest.DuplicateConflictError) {
                             ERMrest.resolve(exception.uri).then(function (ref) {
-                                exception.message += ' Click <a href="' + ref.contextualize.detailed.appLink + '">here</a> to see the conflicting record that already exists.';
+                                exception.message += ' Click <a href="' + ref.contextualize.detailed.appLink + '" target="_blank">here</a> to see the conflicting record that already exists.';
                                 AlertsService.addAlert(exception.message, 'error');
                             });
                         } else {
