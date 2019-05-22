@@ -284,6 +284,7 @@ describe('View existing record,', function() {
     describe("For multiple records fetched for particular filters", function() {
 
         beforeAll(function() {
+            browser.ignoreSynchronization=true;
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + testParams.table_name +  "/luxurious=true";
             browser.get(url);
             chaisePage.waitForElement(element(by.css('.modal-dialog ')));

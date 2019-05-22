@@ -4,7 +4,7 @@
     angular.module('chaise.modal', ['chaise.utils'])
 
     //TODO
-    .factory('modalUtils', ["$uibModal", "$log", function ($uibModal, $log) {
+    .factory('modalUtils', ["$log", "$uibModal", "$window", function ($log, $uibModal, $window) {
         function showModal(params, successCB, rejectCB, postRenderCB) {
             var modalInstance = $uibModal.open(params);
             if (postRenderCB) {
