@@ -1507,7 +1507,7 @@
          * @return {Object}
          */
         function getHTTPService() {
-            return $http;
+            return getContextJSON().server ? getContextJSON().server.http : $http;
         };
 
         return {

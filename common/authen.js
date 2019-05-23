@@ -170,7 +170,8 @@
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
                     'Accept': 'application/json'
-                }
+                },
+                allowUnauthorized: true
             };
 
             ConfigUtils.getHTTPService().get(url, config).then(function(response){
@@ -251,7 +252,7 @@
              * @param  {string=} context undefined or "401"
              */
             getSession: function(context) {
-                return ConfigUtils.getHTTPService().get(serviceURL + "/authn/session").then(function(response) {
+                return ConfigUtils.getHTTPService().get(serviceURL + "/authn/session", {allowUnauthorized: true}).then(function(response) {
                     if (context === "401" && shouldReloadPageAfterLogin(response.data)) {
                         window.location.reload();
                         return response.data;
@@ -274,7 +275,7 @@
              * Meant for validating the server session and verify if it's still active or not
              */
             validateSession: function () {
-                return ConfigUtils.getHTTPService().get(serviceURL + "/authn/session").then(function(response) {
+                return ConfigUtils.getHTTPService().get(serviceURL + "/authn/session", {allowUnauthorized: true}).then(function(response) {
                     _session = response.data;
                     return _session;
                 }).catch(function(err) {
@@ -337,7 +338,7 @@
 
                 url += '?logout_url=' + UriUtils.fixedEncodeURIComponent(logoutURL);
 
-                ConfigUtils.getHTTPService().delete(url).then(function(response) {
+                ConfigUtils.getHTTPService().delete(url, {allowUnauthorized: true}).then(function(response) {
                     StorageService.deleteStorageNamespace(LOCAL_STORAGE_KEY);
                     $window.location = response.data.logout_url;
                 }, function(error) {
