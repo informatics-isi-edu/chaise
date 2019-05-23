@@ -17,8 +17,9 @@ var testParams = {
     files: [{
         name: "file500kb.png",
         size: "512000",
-        displaySize: "500KB",
-        path: "file500kb.png"
+        displaySize: "500 kB",
+        path: "file500kb.png",
+        tooltip:"- file500kb.png\n- 500 kB"
     }],
     values: {
         date: {

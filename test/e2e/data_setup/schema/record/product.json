@@ -385,7 +385,8 @@
                                 "id"
                             ],
                             "aggregate": "cnt",
-                            "comment": "Count of Id"
+                            "comment": "Count of thumbnail collection",
+                            "markdown_name": "# thumbnail collection"
                         },
                         {
                             "source": [{
@@ -397,7 +398,8 @@
                                 "id"
                             ],
                             "aggregate": "cnt_d",
-                            "comment": "Count Distinct of Id"
+                            "comment": "Count distinct of thumbnail collection",
+                            "markdown_name": "# distinct thumbnail collection"
                         },
                         {
                             "source": [{
@@ -409,7 +411,8 @@
                                 "title"
                             ],
                             "aggregate": "min",
-                            "comment": "Minimum of title"
+                            "comment": "Minimum of title",
+                            "markdown_name": "Min Name of accommodation_collection"
                         },
                         {
                             "source": [{
@@ -421,7 +424,8 @@
                                 "title"
                             ],
                             "aggregate": "max",
-                            "comment": "maximum of title"
+                            "comment": "maximum of title",
+                            "markdown_name": "Max Name of accommodation_collection"
                         },
                         "json_col", "json_col_with_markdown",
                         {

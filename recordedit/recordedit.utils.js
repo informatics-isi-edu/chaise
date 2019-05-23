@@ -6,12 +6,13 @@
     .factory('recordEditAppUtils', ['InputUtils', 'UiUtils', '$log', '$rootScope', function (InputUtils, UiUtils, $log, $rootScope) {
 
         function columnToInputType(column, isDisabled) {
-            if (isDisabled) {
+            // asset columns should always use the upload directive
+            if (column.isAsset) {
+                return 'file';
+            } else if (isDisabled) {
                 return 'disabled';
             } else if (column.isForeignKey) {
                 return 'popup-select';
-            } else if (column.isAsset) {
-                return 'file';
             } else {
                 return UiUtils.getInputType(column.type);
             }

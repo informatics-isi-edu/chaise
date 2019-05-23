@@ -327,7 +327,7 @@
                                             break;
                                         default:
                                             // the structure for asset type columns is an object with a 'url' property
-                                            if (column.isAsset && colModel.inputType !== "disabled") {
+                                            if (column.isAsset) {
                                                 var metadata = column.getMetadata(tuple.data);
                                                 value = {
                                                     url: values[i] || "",
@@ -458,7 +458,15 @@
                                     break;
                                 default:
                                     if (column.isAsset) {
-                                        initialModelValue = InputUtils.formatFile(defaultValue, colModel.inputType == "disabled" ? "string" : "object");
+                                        var metaObj = {};
+                                        metaObj[column.name] = defaultValue;
+
+                                        var metadata = column.getMetadata(metaObj);
+                                        initialModelValue = {
+                                            url: metadata.url || "",
+                                            filename: metadata.filename || metadata.caption || "",
+                                            filesize: metadata.byteCount || ""
+                                        }
                                     } else if (column.isForeignKey) {
                                         // if all the columns of the foreignkey are prefilled, use that instead of default
                                         var allPrefilled = column.foreignKey.colset.columns.every(function (col) {
