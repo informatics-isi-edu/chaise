@@ -89,8 +89,8 @@
      * modified. ellipses will fire this event and recordset directive will use it.
      */
     .factory('recordTableUtils',
-            ['AlertsService', 'DataUtils', 'defaultDisplayname', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'Session', 'tableConstants', 'UriUtils', '$cookies', '$document', '$log', '$q', '$rootScope', '$timeout', '$window',
-            function(AlertsService, DataUtils, defaultDisplayname, ErrorService, logActions, MathUtils, messageMap, modalBox, Session, tableConstants, UriUtils, $cookies, $document, $log, $q, $rootScope, $timeout, $window) {
+            ['AlertsService', 'ConfigUtils', 'DataUtils', 'defaultDisplayname', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'Session', 'tableConstants', 'UriUtils', '$cookies', '$document', '$log', '$q', '$rootScope', '$timeout', '$window',
+            function(AlertsService, ConfigUtils, DataUtils, defaultDisplayname, ErrorService, logActions, MathUtils, messageMap, modalBox, Session, tableConstants, UriUtils, $cookies, $document, $log, $q, $rootScope, $timeout, $window) {
 
         function FlowControlObject(maxRequests) {
             this.maxRequests = maxRequests || tableConstants.MAX_CONCURENT_REQUEST;
@@ -805,6 +805,30 @@
 
                 _callonSelectedRowsChanged(scope, [tuple], isSelected);
             };
+
+            // NOTE: For some reason this is being registered/triggered twice when the download widget is part of the record table (main body of record)
+            $timeout(function () {
+                var downloadElements = angular.element(".download");
+                downloadElements.on('click', function (e) {
+                    e.preventDefault();
+                    var spinnerHTML = ' <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>';
+                    //show spinner
+                    e.target.innerHTML += spinnerHTML;
+
+                    var dcctx = ConfigUtils.getContextJSON();
+                    // make a HEAD request to check if the user can fetch the file
+                    dcctx.server.http.head(e.target.href).then(function (response) {
+                        // fetch the file for the user
+                        $window.open(e.target.href, '_blank');
+                    }).catch(function (exception) {
+                        // If an error occurs while a user is trying to download the file, allow them to dismiss the dialog
+                        ErrorService.handleException(exception, true);
+                    }).finally(function () {
+                        // remove the spinner
+                        e.target.innerHTML = e.target.innerHTML.slice(0, e.target.innerHTML.indexOf(spinnerHTML));
+                    });
+                });
+            });
 
             scope.$watch(function () {
                 return (scope.vm && scope.vm.reference) ? scope.vm.reference.columns : null;
