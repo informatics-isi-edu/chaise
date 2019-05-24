@@ -811,22 +811,28 @@
                 var downloadElements = angular.element(".download");
                 downloadElements.on('click', function (e) {
                     e.preventDefault();
-                    var spinnerHTML = ' <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>';
-                    //show spinner
-                    e.target.innerHTML += spinnerHTML;
 
-                    var dcctx = ConfigUtils.getContextJSON();
-                    // make a HEAD request to check if the user can fetch the file
-                    dcctx.server.http.head(e.target.href).then(function (response) {
-                        // fetch the file for the user
-                        $window.open(e.target.href, '_blank');
-                    }).catch(function (exception) {
-                        // If an error occurs while a user is trying to download the file, allow them to dismiss the dialog
-                        ErrorService.handleException(exception, true);
-                    }).finally(function () {
-                        // remove the spinner
-                        e.target.innerHTML = e.target.innerHTML.slice(0, e.target.innerHTML.indexOf(spinnerHTML));
-                    });
+                    if (!e.target.inProgress) {
+                        e.target.inProgress = true;
+
+                        var spinnerHTML = ' <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>';
+                        //show spinner
+                        e.target.innerHTML += spinnerHTML;
+
+                        var dcctx = ConfigUtils.getContextJSON();
+                        // make a HEAD request to check if the user can fetch the file
+                        dcctx.server.http.head(e.target.href).then(function (response) {
+                            // fetch the file for the user
+                            $window.open(e.target.href, '_blank');
+                        }).catch(function (exception) {
+                            // If an error occurs while a user is trying to download the file, allow them to dismiss the dialog
+                            ErrorService.handleException(exception, true);
+                        }).finally(function () {
+                            // remove the spinner
+                            e.target.innerHTML = e.target.innerHTML.slice(0, e.target.innerHTML.indexOf(spinnerHTML));
+                            e.target.inProgress = false;
+                        });
+                    }
                 });
             });
 
