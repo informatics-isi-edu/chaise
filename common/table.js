@@ -89,8 +89,8 @@
      * modified. ellipses will fire this event and recordset directive will use it.
      */
     .factory('recordTableUtils',
-            ['AlertsService', 'ConfigUtils', 'DataUtils', 'defaultDisplayname', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'Session', 'tableConstants', 'UriUtils', '$cookies', '$document', '$log', '$q', '$rootScope', '$timeout', '$window',
-            function(AlertsService, ConfigUtils, DataUtils, defaultDisplayname, ErrorService, logActions, MathUtils, messageMap, modalBox, Session, tableConstants, UriUtils, $cookies, $document, $log, $q, $rootScope, $timeout, $window) {
+            ['AlertsService', 'DataUtils', 'defaultDisplayname', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'Session', 'tableConstants', 'UriUtils', '$cookies', '$document', '$log', '$q', '$rootScope', '$timeout', '$window',
+            function(AlertsService, DataUtils, defaultDisplayname, ErrorService, logActions, MathUtils, messageMap, modalBox, Session, tableConstants, UriUtils, $cookies, $document, $log, $q, $rootScope, $timeout, $window) {
 
         function FlowControlObject(maxRequests) {
             this.maxRequests = maxRequests || tableConstants.MAX_CONCURENT_REQUEST;
@@ -806,36 +806,6 @@
                 _callonSelectedRowsChanged(scope, [tuple], isSelected);
             };
 
-            // NOTE: For some reason this is being registered/triggered twice when the download widget is part of the record table (main body of record)
-            $timeout(function () {
-                var downloadElements = angular.element(".download");
-                downloadElements.on('click', function (e) {
-                    e.preventDefault();
-
-                    if (!e.target.inProgress) {
-                        e.target.inProgress = true;
-
-                        var spinnerHTML = ' <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>';
-                        //show spinner
-                        e.target.innerHTML += spinnerHTML;
-
-                        var dcctx = ConfigUtils.getContextJSON();
-                        // make a HEAD request to check if the user can fetch the file
-                        dcctx.server.http.head(e.target.href).then(function (response) {
-                            // fetch the file for the user
-                            $window.open(e.target.href, '_blank');
-                        }).catch(function (exception) {
-                            // If an error occurs while a user is trying to download the file, allow them to dismiss the dialog
-                            ErrorService.handleException(exception, true);
-                        }).finally(function () {
-                            // remove the spinner
-                            e.target.innerHTML = e.target.innerHTML.slice(0, e.target.innerHTML.indexOf(spinnerHTML));
-                            e.target.inProgress = false;
-                        });
-                    }
-                });
-            });
-
             scope.$watch(function () {
                 return (scope.vm && scope.vm.reference) ? scope.vm.reference.columns : null;
             }, function (newValue, oldValue) {
@@ -1144,7 +1114,7 @@
         };
     }])
 
-    .directive('recordTable', ['recordTableUtils', 'UriUtils', function(recordTableUtils, UriUtils) {
+    .directive('recordTable', ['recordTableUtils', 'UriUtils', 'UiUtils', '$timeout', function(recordTableUtils, UriUtils, UiUtils, $timeout) {
 
         return {
             restrict: 'E',
@@ -1161,6 +1131,17 @@
             },
             link: function (scope, elem, attr) {
                 recordTableUtils.registerTableCallbacks(scope, elem, attr);
+
+                // when record table contents have finished loading, we signal that with the `hasLoaded` flag
+                scope.$watch(function() {
+                    return scope.vm.hasLoaded && scope.vm.initialized;
+                }, function (newValue, oldValue) {
+                    if (newValue) {
+                        $timeout(function () {
+                            UiUtils.overrideDownloadClickBehavior(elem);
+                        }, 0);
+                    }
+                });
             }
         };
     }])
