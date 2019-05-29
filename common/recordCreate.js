@@ -244,7 +244,7 @@
                         if (!session && exception instanceof ERMrest.ConflictError) throw new ERMrest.UnauthorizedError();
                         // append link to end of alert.
                         if (exception instanceof ERMrest.DuplicateConflictError) {
-                            exception.message += ' Click <a href="' + exception.errorData.reference.contextualize.detailed.appLink + '" target="_blank">here</a> to see the conflicting record that already exists.';
+                            exception.message += ' Click <a href="' + exception.duplicateReference.contextualize.detailed.appLink + '" target="_blank">here</a> to see the conflicting record that already exists.';
                             AlertsService.addAlert(exception.message, 'error');
                         } else {
                             AlertsService.addAlert(exception.message, (exception instanceof ERMrest.NoDataChangedError ? 'warning' : 'error') );
