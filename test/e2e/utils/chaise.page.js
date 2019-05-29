@@ -592,6 +592,10 @@ var recordEditPage = function() {
         return browser.executeScript("return $('.alert-danger:visible')[0];");
     };
 
+    this.getAlertErrorLinkHref = function() {
+        return browser.executeScript("return $('.alert-danger:visible a')[0].getAttribute('href');");
+    };
+
     this.getAlertWarning = function() {
         return browser.executeScript("return $('.alert-warning:visible')[0];");
     };
