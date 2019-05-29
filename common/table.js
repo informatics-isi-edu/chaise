@@ -1114,7 +1114,7 @@
         };
     }])
 
-    .directive('recordTable', ['recordTableUtils', 'UriUtils', 'UiUtils', '$timeout', function(recordTableUtils, UriUtils, UiUtils, $timeout) {
+    .directive('recordTable', ['recordTableUtils', 'UiUtils', 'UriUtils', '$timeout', function(recordTableUtils, UiUtils, UriUtils, $timeout) {
 
         return {
             restrict: 'E',
