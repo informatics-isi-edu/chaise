@@ -171,7 +171,7 @@
                     'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
                     'Accept': 'application/json'
                 },
-                allowUnauthorized: true
+                skipHTTP401Handling: true
             };
 
             ConfigUtils.getHTTPService().get(url, config).then(function(response){
@@ -212,7 +212,7 @@
                 }
                 logInTypeCb(params,referrerId, cb, type, rejectCb);
             }, function(error) {
-                throw error;
+                throw ERMrest.responseToError(error);
             });
         };
 
@@ -252,7 +252,7 @@
              * @param  {string=} context undefined or "401"
              */
             getSession: function(context) {
-                return ConfigUtils.getHTTPService().get(serviceURL + "/authn/session", {allowUnauthorized: true}).then(function(response) {
+                return ConfigUtils.getHTTPService().get(serviceURL + "/authn/session", {skipHTTP401Handling: true}).then(function(response) {
                     if (context === "401" && shouldReloadPageAfterLogin(response.data)) {
                         window.location.reload();
                         return response.data;
@@ -262,7 +262,7 @@
                     _executeListeners();
                     return _session;
                 }).catch(function(err) {
-                    $log.warn(err);
+                    $log.warn(ERMrest.responseToError(err));
 
                     _session = null;
                     _executeListeners();
@@ -275,11 +275,11 @@
              * Meant for validating the server session and verify if it's still active or not
              */
             validateSession: function () {
-                return ConfigUtils.getHTTPService().get(serviceURL + "/authn/session", {allowUnauthorized: true}).then(function(response) {
+                return ConfigUtils.getHTTPService().get(serviceURL + "/authn/session", {skipHTTP401Handling: true}).then(function(response) {
                     _session = response.data;
                     return _session;
                 }).catch(function(err) {
-                    $log.warn(err);
+                    $log.warn(ERMrest.responseToError(err));
 
                     _session = null;
                     return _session;
@@ -338,7 +338,7 @@
 
                 url += '?logout_url=' + UriUtils.fixedEncodeURIComponent(logoutURL);
 
-                ConfigUtils.getHTTPService().delete(url, {allowUnauthorized: true}).then(function(response) {
+                ConfigUtils.getHTTPService().delete(url, {skipHTTP401Handling: true}).then(function(response) {
                     StorageService.deleteStorageNamespace(LOCAL_STORAGE_KEY);
                     $window.location = response.data.logout_url;
                 }, function(error) {
@@ -361,10 +361,10 @@
 
             var Session = $injector.get("Session");
 
-            // Bind callback function by invoking setHttpUnauthorizedFn handler passing the callback
+            // Bind callback function by invoking setHTTP401Handler handler passing the callback
             // This callback will be called whenever 401 HTTP error is encountered unless there is
             // already login flow in progress
-            ERMrest.setHttpUnauthorizedFn(function() {
+            ERMrest.setHTTP401Handler(function() {
                 var defer = $q.defer();
 
                 // Call login in a new modal window to perform authentication
