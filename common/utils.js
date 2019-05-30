@@ -1114,7 +1114,7 @@
         };
     }])
 
-    .factory("UiUtils", ['$document', '$log', '$window', 'ConfigUtils', 'dataFormats', 'ErrorService', function($document, $log, $window, ConfigUtils, dataFormats, ErrorService) {
+    .factory("UiUtils", ['$document', '$log', '$window', 'ConfigUtils', 'dataFormats', 'ERMrest', 'ErrorService', function($document, $log, $window, ConfigUtils, dataFormats, ERMrest, ErrorService) {
 
         /**
          * Takes a timestamp in the form of milliseconds since epoch and converts it into a relative string if
@@ -1357,7 +1357,7 @@
                         $window.open(e.target.href, '_blank');
                     }).catch(function (exception) {
                         // If an error occurs while a user is trying to download the file, allow them to dismiss the dialog
-                        ErrorService.handleException(exception, true);
+                        ErrorService.handleException(ERMrest.responseToError(exception), true);
                     }).finally(function () {
                         // remove the spinner
                         e.target.innerHTML = e.target.innerHTML.slice(0, e.target.innerHTML.indexOf(spinnerHTML));
