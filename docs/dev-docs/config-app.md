@@ -13,7 +13,7 @@ The following is how you should define the configuration app:
 ```javascript
 
 // define the configure-appname app which is using the chaise.config
-angular.module('chaise.configure-<APP_NAME>', ['chaise.config'])
+angular.module('<NAMESPACE>.configure-<APP_NAME>', ['chaise.config'])
 
 // this constant is used for `cid` (e.g. recordset)
 .constant('appName', '<APP_NAME>')
@@ -22,7 +22,7 @@ angular.module('chaise.configure-<APP_NAME>', ['chaise.config'])
     $rootScope.$on("configuration-done", function () {
         angular.element(document).ready(function(){
             // attach the actual app to the given element.
-            angular.bootstrap(document.getElementById("<APP_NAME>"), ["chaise.<APP_NAME>"]);
+            angular.bootstrap(document.getElementById("<APP_NAME>"), ["<NAMESPACE>.<APP_NAME>"]);
         });
     });
 }]);
@@ -34,7 +34,7 @@ This will delay your app until the configuration is completely done. To make sur
 ```html
 <html lang="en" id="<APP_NAME>">
     <body>
-        <div class="configure-container" ng-app="chaise.configure-<APP>">
+        <div class="configure-container" ng-app="<NAMESPACE>.configure-<APP_NAME>">
             <loading-spinner></loading-spinner>
         </div>
         <div class="app-container" ng-controller="<APP_CONTROLLER> as ctrl">
@@ -61,5 +61,5 @@ html.ng-scope .configure-container {
 ```
 
 This will,
-  - Ensure that the `chaise.configure-<APP>` is the first app that will be loaded.
+  - Ensure that the `<NAMESPACE>.configure-<APP>` is the first app that will be loaded.
   - Hide the main content and show a loading spinner while getting the catalog annotation.

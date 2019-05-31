@@ -92,13 +92,13 @@
                     onModalClose();
                 }
 
-                var onModalClose = function() {
+                var onModalClose = function(response) {
                     $interval.cancel(intervalId);
                     $cookies.remove("chaise-" + referrerId, { path: "/" });
                     closed = true;
 
                     $uibModalStack.dismissAll("no login");
-                    if (rejectCb) rejectCb();
+                    if (rejectCb) rejectCb(response);
                 };
 
                 var modalInstance = modalUtils.showModal({
@@ -380,9 +380,9 @@
                         defer.reject(exception);
                     });
 
-                }, function () {
+                }, function (response) {
                     // returns to rejectCB in ermrestJS/http.js
-                    defer.reject();
+                    defer.reject(response);
                 });
 
                 return defer.promise;

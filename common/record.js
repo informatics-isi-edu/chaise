@@ -19,7 +19,7 @@
          * @param {array} values: Array with column values
          * @param {callback} toggleRelatedTableDisplayType: function to determine object display type
          */
-        .directive('recordDisplay', ['DataUtils', 'messageMap', '$timeout', 'UriUtils', function(DataUtils, messageMap, $timeout, UriUtils) {
+        .directive('recordDisplay', ['DataUtils', 'messageMap', 'UriUtils', function(DataUtils, messageMap, UriUtils) {
             return {
                 restrict: 'E',
                 transclude: true,
@@ -37,7 +37,7 @@
                 controller: function($scope) {
                     $scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
                 },
-                link: function(scope){
+                link: function(scope, elem, attr){
                     scope.queryTimeoutTooltip = messageMap.queryTimeoutTooltip;
 
                     // set the display type value to false so the 'Edit |' text doesn't appear
