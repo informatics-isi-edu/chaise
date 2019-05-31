@@ -1114,7 +1114,7 @@
         };
     }])
 
-    .factory("UiUtils", ['$document', '$log', '$window', 'ConfigUtils', 'dataFormats', 'ERMrest', 'ErrorService', function($document, $log, $window, ConfigUtils, dataFormats, ERMrest, ErrorService) {
+    .factory("UiUtils", ['$document', '$log', 'dataFormats', function($document, $log, dataFormats) {
 
         /**
          * Takes a timestamp in the form of milliseconds since epoch and converts it into a relative string if
