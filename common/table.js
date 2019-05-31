@@ -1114,7 +1114,7 @@
         };
     }])
 
-    .directive('recordTable', ['recordTableUtils', 'UiUtils', 'UriUtils', '$timeout', function(recordTableUtils, UiUtils, UriUtils, $timeout) {
+    .directive('recordTable', ['recordTableUtils', 'UriUtils', function(recordTableUtils, UriUtils) {
 
         return {
             restrict: 'E',
@@ -1131,17 +1131,6 @@
             },
             link: function (scope, elem, attr) {
                 recordTableUtils.registerTableCallbacks(scope, elem, attr);
-
-                // when record table contents have finished loading, we signal that with the `hasLoaded` flag
-                scope.$watch(function() {
-                    return scope.vm.hasLoaded && scope.vm.initialized;
-                }, function (newValue, oldValue) {
-                    if (newValue) {
-                        $timeout(function () {
-                            UiUtils.overrideDownloadClickBehavior(elem);
-                        }, 0);
-                    }
-                });
             }
         };
     }])

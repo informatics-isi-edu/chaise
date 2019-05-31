@@ -19,7 +19,7 @@
          * @param {array} values: Array with column values
          * @param {callback} toggleRelatedTableDisplayType: function to determine object display type
          */
-        .directive('recordDisplay', ['DataUtils', 'messageMap', 'UiUtils', 'UriUtils', '$timeout', function(DataUtils, messageMap, UiUtils, UriUtils, $timeout) {
+        .directive('recordDisplay', ['DataUtils', 'messageMap', 'UriUtils', function(DataUtils, messageMap, UriUtils) {
             return {
                 restrict: 'E',
                 transclude: true,
@@ -87,17 +87,6 @@
                         var tm = scope.columnModels[i].tableModel;
                         return tm.reference.display.type == 'markdown' && tm.page && tm.page.content != '';
                     };
-
-                    // when record display contents have finished loading, we signal that with the `displayReady` flag
-                    scope.$watch(function() {
-                        return scope.$root.displayReady;
-                    }, function (newValue, oldValue) {
-                        if (newValue) {
-                            $timeout(function () {
-                                UiUtils.overrideDownloadClickBehavior(elem);
-                            }, 0);
-                        }
-                    });
                 }
             };
         }])
