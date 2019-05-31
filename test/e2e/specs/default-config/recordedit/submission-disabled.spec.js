@@ -5,15 +5,16 @@ var testParams = {
         name: "id",
         value: "1000",
         operator: "="
-    }
+    },
+    conflict_table_name: "duplicate_key_conflict",
+    conflict_column: "duplicate_id",
+    conflict_key: "1000",
+    conflict_message: "Error The entry cannot be created/updated. Please use a different duplicate_id for this record. Click here to see the conflicting record that already exists."
 };
 
-describe('Add a record,', function() {
+describe("For error handling strategies on submission,", function() {
 
-    describe("For table " + testParams.table_name + ",", function() {
-
-        var record,
-            submitBtn;
+    describe("when editing a record without changing data,", function() {
 
         beforeAll(function () {
             var keys = [];
@@ -22,8 +23,7 @@ describe('Add a record,', function() {
             browser.ignoreSynchronization = true;
             browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/submission-disabled:" + testParams.table_name + "/" + keys.join("&"));
 
-            submitBtn = chaisePage.recordEditPage.getSubmitRecordButton();
-            chaisePage.waitForElement(submitBtn);
+            chaisePage.recordeditPageReady();
         });
 
         // NOTE: adding this test here because eventually we are going to change the behavior
@@ -40,33 +40,34 @@ describe('Add a record,', function() {
                 expect(text.indexOf("Warning No data was changed in the update request. Please check the form content and resubmit the data.")).toBeGreaterThan(-1, "The alert warning message was incorrect");
             });
         });
+    });
 
-        xit("the delete button should be disabled during submission and re-enabled after a conflict error.", function() {
-            var EC = protractor.ExpectedConditions,
-                deleteBtn = chaisePage.recordEditPage.getDeleteRecordButton();
+    describe("when creating a record,", function() {
 
+        var uri;
 
-            chaisePage.recordEditPage.getInputForAColumn("id", 0).then(function(idInput) {
-                chaisePage.recordEditPage.clearInput(idInput);
-                browser.sleep(10);
+        beforeAll(function () {
+            browser.ignoreSynchronization = true;
+            uri = browser.params.url + "/recordedit/#" + browser.params.catalogId + "/submission-disabled:" + testParams.conflict_table_name;
+            browser.get(uri);
 
-                idInput.sendKeys("2001");
-                expect(idInput.getAttribute('value')).toBe("2001");
+            chaisePage.recordeditPageReady();
+        });
 
-                // continue running code while $http request is processed. Submit and delete should be disabled while data is being processed
-                // TODO proxy the request and set a delay on that proxy
-                browser.ignoreSynchronization = false;
-                chaisePage.recordEditPage.submitForm();
+        it("a conflict error should show an alert with a link to the conflicting record.", function() {
+            chaisePage.recordEditPage.getInputForAColumn(testParams.conflict_column, 0).then(function(idInput) {
+                idInput.sendKeys(testParams.conflict_key);
+                expect(idInput.getAttribute('value')).toBe(testParams.conflict_key, "input does not show the correct value");
 
-                // expect(submitBtn.isEnabled()).toBe(false);
-                browser.wait(EC.not(EC.elementToBeClickable(deleteBtn)), browser.params.defaultTimeout);
-                expect(deleteBtn.isEnabled()).toBe(false);
+                return chaisePage.recordEditPage.submitForm();
+            }).then(function () {
+                return browser.wait(function() { return chaisePage.recordEditPage.getAlertError(); }, browser.params.defaultTimeout);
+            }).then(function(alert) {
+                expect(alert.getText()).toContain(testParams.conflict_message, "alert message is incorrect");
 
-
-                // browser.wait(EC.elementToBeClickable(submitBtn), browser.params.defaultTimeout);
-                // expect(submitBtn.isEnabled()).toBeTruthy();
-                // expect(deleteBtn.isEnabled()).toBeTruthy();
+                var duplicate_uri = uri.replace('recordedit', 'record') + '/' + testParams.conflict_column + '=' + testParams.conflict_key;
+                expect(chaisePage.recordEditPage.getAlertErrorLinkHref()).toContain(duplicate_uri, "link to duplicate record is incorrect");
             });
-        }).pend("Marked pending until we decide how to throttle requests for chaise");
+        });
     });
 });

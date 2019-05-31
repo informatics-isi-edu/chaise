@@ -50,10 +50,26 @@
                     "*": ["id", "text", "int"]
                 }
             }
+        },
+        "duplicate_key_conflict": {
+            "kind": "table",
+            "table_name": "duplicate_key_conflict",
+            "schema_name": "submission-disabled",
+            "keys": [{
+                "unique_columns": ["duplicate_id"]
+            }],
+            "column_definitions": [
+                {
+                    "name": "duplicate_id",
+                    "nullok": false,
+                    "type": {"typename":"int4"}
+                }
+            ]
         }
     },
     "table_names": [
-        "submission-disabled-table"
+        "submission-disabled-table",
+        "duplicate_key_conflict"
     ],
     "comment": null,
     "annotations": {}

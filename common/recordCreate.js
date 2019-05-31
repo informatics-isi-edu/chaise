@@ -242,7 +242,13 @@
                     // validate session will never throw an error, so it's safe to not write a reject callback or catch clause
                     Session.validateSession().then(function (session) {
                         if (!session && exception instanceof ERMrest.ConflictError) throw new ERMrest.UnauthorizedError();
-                        AlertsService.addAlert(exception.message, (exception instanceof ERMrest.NoDataChangedError ? 'warning' : 'error') );
+                        // append link to end of alert.
+                        if (exception instanceof ERMrest.DuplicateConflictError) {
+                            exception.message += ' Click <a href="' + exception.duplicateReference.contextualize.detailed.appLink + '" target="_blank">here</a> to see the conflicting record that already exists.';
+                            AlertsService.addAlert(exception.message, 'error');
+                        } else {
+                            AlertsService.addAlert(exception.message, (exception instanceof ERMrest.NoDataChangedError ? 'warning' : 'error') );
+                        }
                     });
                 });
 
