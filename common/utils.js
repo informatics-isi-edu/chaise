@@ -1742,7 +1742,12 @@
                     var downloadLink = angular.element('<a></a>');
                     downloadLink.attr('href', e.target.href);
                     downloadLink.attr('download', '');
+                    downloadLink.attr('visibility', 'hidden');
+                    downloadLink.attr('display', 'none');
+                    // Append to page
+                    document.body.appendChild(downloadLink[0]);
                     downloadLink[0].click();
+                    document.body.removeChild(downloadLink[0]);
                 }).catch(function (exception) {
                     // error/login modal was closed
                     if (typeof exception == 'string') return;
