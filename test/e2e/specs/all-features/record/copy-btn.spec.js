@@ -88,8 +88,10 @@ describe('View existing record,', function() {
         // test that no citation appears in share modal when no citation is defined on table
         it("should show the share dialog when clicking the share button with only permalink present.", function(done) {
             chaisePage.recordPage.getShareButton().click().then(function () {
+                var shareDialog = chaisePage.recordPage.getShareModal();
                 // wait for dialog to open
-                chaisePage.waitForElement(chaisePage.recordPage.getShareModal());
+                chaisePage.waitForElement(shareDialog);
+                shareDialog.allowAnimations(false);
 
                 // verify modal dialog contents
                 expect(chaisePage.recordEditPage.getModalTitle().element(by.tagName("strong")).getText()).toBe("Share", "Share citation modal title is incorrect");
@@ -100,6 +102,53 @@ describe('View existing record,', function() {
                 // verify permalink
                 expect(chaisePage.recordPage.getShareLinkHeader().getText()).toBe("Share Link", "Share Link (permalink) header is incorrect");
                 expect(chaisePage.recordPage.getPermalinkText().getText()).toContain(url, "permalink url is incorrect");
+
+                // close dialog
+                return chaisePage.recordEditPage.getModalTitle().element(by.tagName("button")).click();
+            }).then(function () {
+                done();
+            }).catch(function(err){
+                console.log(err);
+                done.fail();
+            });
+        });
+
+        it("open a new tab, update the current record, close the tab, and then verify the share dialog alert warning appears", function (done) {
+            var allWindows;
+
+            browser.driver.getCurrentUrl().then(function(url) {
+                url = url.replace('/record/', '/recordedit/');
+
+                // open the same record in edit mode in another window
+                return browser.executeScript('window.open(arguments[0]);', url);
+            }).then(function () {
+                return browser.getAllWindowHandles();
+            }).then(function (handles) {
+                allWindows = handles;
+                return browser.switchTo().window(allWindows[1]);
+            }).then(function () {
+                return chaisePage.recordeditPageReady();
+            }).then(function () {
+                // edit the entity
+                var textInput = chaisePage.recordEditPage.getInputById(0, "text");
+                textInput.sendKeys(" edited");
+
+                return chaisePage.recordEditPage.submitForm();
+            }).then(function () {
+                return chaisePage.recordPageReady();
+            }).then(function () {
+                return browser.switchTo().window(allWindows[0]);
+            }).then(function () {
+                return chaisePage.recordPage.getShareButton().click()
+            }).then(function () {
+                var shareDialog = chaisePage.recordPage.getShareModal();
+                // wait for dialog to open
+                chaisePage.waitForElement(shareDialog);
+                shareDialog.allowAnimations(false);
+
+                return chaisePage.recordEditPage.getAlertWarning()
+            }).then(function (alert) {
+                expect(alert.isDisplayed()).toBeTruthy("Alert warning the user that they may be seeing stale data is not present");
 
                 // close dialog
                 return chaisePage.recordEditPage.getModalTitle().element(by.tagName("button")).click();
