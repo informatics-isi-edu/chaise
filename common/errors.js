@@ -293,7 +293,7 @@
         var exceptionFlag = false;
 
         // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
-        function handleException(exception, isDismissible) {
+        function handleException(exception, isDismissible, skipLoginDialog) {
             var chaiseConfig = ConfigUtils.getConfigJSON();
             $log.info(exception);
 
@@ -315,7 +315,7 @@
             if (exceptionFlag || window.location.pathname.indexOf('/search/') != -1 || window.location.pathname.indexOf('/viewer/') != -1) return;
 
             // If not authorized, ask user to sign in first
-            if (ERMrest && exception instanceof ERMrest.UnauthorizedError) {
+            if (!skipLoginDialog && ERMrest && exception instanceof ERMrest.UnauthorizedError) {
                 // Unauthorized (needs to login)
                 Session.loginInAModal(reloadCb);
                 return;

@@ -86,6 +86,7 @@
         "actionMessageWReplace" : {
           clickActionMessage: "Click <b>OK</b> to reload this page without @errorStatus."
         },
+        "unauthenticatedAssetRetrieval" : "You must be authenticated to download this asset.",
         "errorMessageMissing": "An unexpected error has occurred. Please try again",
         "tableMissing": "No table specified in the form of 'schema-name:table-name' and no Default is set.",
         "maybeNeedLogin": "You may need to login to see the model or data.",
@@ -1703,7 +1704,7 @@
       }
      }])
 
-    .service('headInjector', ['ConfigUtils', 'ERMrest', 'ErrorService', 'MathUtils', '$rootScope', '$window', function(ConfigUtils, ERMrest, ErrorService, MathUtils, $rootScope, $window) {
+    .service('headInjector', ['ConfigUtils', 'ERMrest', 'ErrorService', 'MathUtils', 'messageMap', '$rootScope', '$window', function(ConfigUtils, ERMrest, ErrorService, MathUtils, messageMap, $rootScope, $window) {
         function addCustomCSS() {
             var chaiseConfig = ConfigUtils.getConfigJSON();
             if (chaiseConfig['customCSS'] !== undefined) {
@@ -1737,7 +1738,8 @@
 
                 var dcctx = ConfigUtils.getContextJSON();
                 // make a HEAD request to check if the user can fetch the file
-                dcctx.server.http.head(e.target.href).then(function (response) {
+
+                dcctx.server.http.head(e.target.href, {skipHTTP401Handling: true}).then(function (response) {
                     // fetch the file for the user
                     var downloadLink = angular.element('<a></a>');
                     downloadLink.attr('href', e.target.href);
@@ -1751,9 +1753,17 @@
                 }).catch(function (exception) {
                     // error/login modal was closed
                     if (typeof exception == 'string') return;
+                    var ermrestError = ERMrest.responseToError(exception);
+                    var skipLoginDialog = false;
+
+                    if (ermrestError instanceof ERMrest.UnauthorizedError) {
+                        ermrestError.status = messageMap.unauthorizedErrorCode;
+                        ermrestError.message  = messageMap.unauthenticatedAssetRetrieval;
+                        skipLoginDialog = true;
+                    }
 
                     // If an error occurs while a user is trying to download the file, allow them to dismiss the dialog
-                    ErrorService.handleException(ERMrest.responseToError(exception), true);
+                    ErrorService.handleException(ermrestError, true, skipLoginDialog);
                 }).finally(function () {
                     // remove the spinner
                     e.target.innerHTML = e.target.innerHTML.slice(0, e.target.innerHTML.indexOf(spinnerHTML));

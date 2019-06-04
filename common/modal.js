@@ -42,7 +42,8 @@
             $uibModalInstance.dismiss('cancel');
         }
     }])
-    .controller('ErrorModalController', ['Errors', 'messageMap', 'params', 'Session', '$rootScope', '$sce', '$uibModalInstance', '$window', function ErrorModalController(Errors, messageMap, params, Session, $rootScope, $sce, $uibModalInstance, $window) {
+    .controller('ErrorModalController', ['ConfigUtils', 'Errors', 'messageMap', 'params', 'Session', '$rootScope', '$sce', '$uibModalInstance', '$window', function ErrorModalController(ConfigUtils, Errors, messageMap, params, Session, $rootScope, $sce, $uibModalInstance, $window) {
+        var cc = ConfigUtils.getConfigJSON();
         function isErmrestErrorNeedReplace (error) {
             switch (error.constructor) {
                 case ERMrest.InvalidFacetOperatorError:
@@ -75,6 +76,8 @@
         vm.displayDetails = false;
         vm.linkText = messageMap.showErrDetails;
         vm.showReloadBtn = false;
+        vm.showDownloadPolicy = (cc.assetDownloadPolicyURL && cc.assetDownloadPolicyURL.trim().length > 0 && typeof cc.assetDownloadPolicyURL == "string");
+        if (vm.showDownloadPolicy) vm.downloadPolicy = cc.assetDownloadPolicyURL;
         if (ERMrest && isRetryError(exception)) {
             // we are only showing the reload button for the 4 types of retriable errors while the page is loading.
             // we discussed that it doesn't make sense to "retry" other requests that may fail after the data has loaded.
