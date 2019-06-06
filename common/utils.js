@@ -86,7 +86,6 @@
         "actionMessageWReplace" : {
           clickActionMessage: "Click <b>OK</b> to reload this page without @errorStatus."
         },
-        "unauthenticatedAssetRetrieval" : "You must be authenticated to download this asset.",
         "errorMessageMissing": "An unexpected error has occurred. Please try again",
         "tableMissing": "No table specified in the form of 'schema-name:table-name' and no Default is set.",
         "maybeNeedLogin": "You may need to login to see the model or data.",
@@ -1704,7 +1703,7 @@
       }
      }])
 
-    .service('headInjector', ['ConfigUtils', 'ERMrest', 'ErrorService', 'MathUtils', 'messageMap', '$rootScope', '$window', function(ConfigUtils, ERMrest, ErrorService, MathUtils, messageMap, $rootScope, $window) {
+    .service('headInjector', ['ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', 'MathUtils', '$rootScope', '$window', function(ConfigUtils, ERMrest, Errors, ErrorService, MathUtils, $rootScope, $window) {
         function addCustomCSS() {
             var chaiseConfig = ConfigUtils.getConfigJSON();
             if (chaiseConfig['customCSS'] !== undefined) {
@@ -1754,16 +1753,13 @@
                     // error/login modal was closed
                     if (typeof exception == 'string') return;
                     var ermrestError = ERMrest.responseToError(exception);
-                    var skipLoginDialog = false;
 
                     if (ermrestError instanceof ERMrest.UnauthorizedError) {
-                        ermrestError.status = messageMap.unauthorizedErrorCode;
-                        ermrestError.message  = messageMap.unauthenticatedAssetRetrieval;
-                        skipLoginDialog = true;
+                        ermrestError = new Errors.UnauthorizedAssetAccess();
                     }
 
                     // If an error occurs while a user is trying to download the file, allow them to dismiss the dialog
-                    ErrorService.handleException(ermrestError, true, skipLoginDialog);
+                    ErrorService.handleException(ermrestError, true);
                 }).finally(function () {
                     // remove the spinner
                     e.target.innerHTML = e.target.innerHTML.slice(0, e.target.innerHTML.indexOf(spinnerHTML));

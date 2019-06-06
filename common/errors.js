@@ -23,6 +23,7 @@
         multipleDataErrorCode : "Multiple Records Found",
         multipleDataMessage : "There are more than 1 record found for the filters provided.",
         facetFilterMissing : "No filtering criteria was specified to identify a specific record.",
+        unauthorizedAssetRetrieval : "You must be an authorized user to download this asset.",
         systemAdminMessage : "An unexpected error has occurred. Try clearing your cache. If you continue to face this issue, please contact the system administrator."
     })
 
@@ -134,6 +135,23 @@
         InvalidInputError.prototype = Object.create(Error.prototype);
         InvalidInputError.prototype.constructor = InvalidInputError;
 
+        function UnauthorizedAssetAccess() {
+            /**
+            * @type {string}
+            * @desc   Error message status; acts as Title text for error dialog
+             */
+            this.status = errorNames.unauthorized;
+
+            /**
+            * @type {string}
+            * @desc   Error message
+             */
+            this.message = errorMessages.unauthorizedAssetRetrieval;
+        }
+
+        UnauthorizedAssetAccess.prototype = Object.create(Error.prototype);
+        UnauthorizedAssetAccess.prototype.constructor = UnauthorizedAssetAccess;
+
         /**
          * CustomError - throw custom error from Apps outside Chaise.
          *
@@ -189,6 +207,7 @@
             noRecordError:noRecordError,
             InvalidInputError: InvalidInputError,
             MalformedUriError: MalformedUriError,
+            UnauthorizedAssetAccess: UnauthorizedAssetAccess,
             CustomError: CustomError
         };
     }])
@@ -293,7 +312,7 @@
         var exceptionFlag = false;
 
         // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
-        function handleException(exception, isDismissible, skipLoginDialog) {
+        function handleException(exception, isDismissible) {
             var chaiseConfig = ConfigUtils.getConfigJSON();
             $log.info(exception);
 
@@ -315,7 +334,7 @@
             if (exceptionFlag || window.location.pathname.indexOf('/search/') != -1 || window.location.pathname.indexOf('/viewer/') != -1) return;
 
             // If not authorized, ask user to sign in first
-            if (!skipLoginDialog && ERMrest && exception instanceof ERMrest.UnauthorizedError) {
+            if (ERMrest && exception instanceof ERMrest.UnauthorizedError) {
                 // Unauthorized (needs to login)
                 Session.loginInAModal(reloadCb);
                 return;
