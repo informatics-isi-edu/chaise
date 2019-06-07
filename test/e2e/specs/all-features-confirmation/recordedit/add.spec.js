@@ -378,7 +378,7 @@ describe('Record Add', function() {
                 allWindows = handles;
                 return browser.switchTo().window(allWindows[1]);
             }).then(function() {
-                return chaisePage.waitForElement(element(by.id("mdhelp-record")));
+                return chaisePage.waitForElement(element(by.id("main-content")));
             }).then(function() {
                 expect(element(by.id('mainTable')).all(by.tagName('tr')).count()).toBe(18,'Table row count could not be matched.');
                 expect(element(by.id('rBold1')).getText()).toBe(mdHelp.raw_bold1,'First raw Bold text help not found');
