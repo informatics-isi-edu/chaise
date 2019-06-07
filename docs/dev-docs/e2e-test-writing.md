@@ -136,3 +136,14 @@ describe("Setting Login cookie", function() {
 You should try to put the performLogin function inside an `it` statement or `beforeAll`/`beforeEach` statement, so that it is executed in the flow of test.
 
 **NOTE**: Our Travis environment doesn't uses HTTPS for CHAISE. When we setup the cookie we set the secure flag in the path for cookie depending on environment. [Reference](http://resources.infosecinstitute.com/securing-cookies-httponly-secure-flags/#gref)
+
+## Asynchronous actions
+
+Currently the asynchronous actions are implemented with promise manager of Selenium.
+The alternate approach to this can be the use of `async/await`.
+
+We shouldn't be using both the approaches together as the behaviour is unpredicatable. For adding `async/await` couple of things to keep in mind:
+1. Make sure you disabled control flow / promise manager. Mixing awaits with enabled control flow may lead to unpredictable results.
+2. Do not forget to prepend ALL your async actions with await (usually this is all protractor api methods). If you will forgot to do this - action without await won't be queued with other actions, so order of actions will be broken. [Source](https://stackoverflow.com/questions/44691940/explain-about-async-await-in-protractor/44701633#44701633)
+
+**NOTE**: Currently `async/await` is only used for viewport in [deriva-webapps](https://github.com/informatics-isi-edu/deriva-webapps/blob/c7ca3e890c7bf73b23c49ac4cbff5ee2733fa93c/test/e2e/utils/common/deriva-webapps.js#L73).
