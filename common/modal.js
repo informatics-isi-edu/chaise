@@ -86,22 +86,22 @@
 
         // set the click action message
         if (exception instanceof Errors.multipleRecordError) {
-            vm.clickActionMessage =  messageMap.recordAvailabilityError.multipleRecords;
+            vm.clickActionMessage =  messageMap.clickActionMessage.multipleRecords;
         } else if (exception instanceof Errors.noRecordError) {
-            vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
-        } else if (exception instanceof Errors.CustomError && exception.errorData.clickActionMessage) {
+            vm.clickActionMessage = messageMap.clickActionMessage.noRecordsFound;
+        } else if ( (exception instanceof Errors.CustomError && exception.errorData.clickActionMessage) || exception instanceof Errors.UnauthorizedAssetAccess) {
             vm.clickActionMessage = exception.errorData.clickActionMessage;
         } else if (ERMrest && exception instanceof ERMrest.InvalidFilterOperatorError) {
-            vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
+            vm.clickActionMessage = messageMap.clickActionMessage.noRecordsFound;
         } else if (ERMrest && isErmrestErrorNeedReplace(exception)) {
-            vm.clickActionMessage = messageMap.actionMessageWReplace.clickActionMessage.replace('@errorStatus', vm.params.errorStatus);
+            vm.clickActionMessage = messageMap.clickActionMessage.messageWReplace.replace('@errorStatus', vm.params.errorStatus);
         } else {
-            vm.clickActionMessage = messageMap.recordAvailabilityError.pageRedirect + vm.params.pageName + '. ';
+            vm.clickActionMessage = messageMap.clickActionMessage.pageRedirect + vm.params.pageName + '. ';
 
             // TODO it might be more appropriate to move the following outside the if-else
             if (vm.params.appName == 'recordedit'){
                 vm.showReloadBtn = true;
-                reloadMessage = ' <p>' + messageMap.terminalError.reloadMessage +' </p>';
+                reloadMessage = ' <p>' + messageMap.clickActionMessage.reloadMessage +' </p>';
             }
         }
 

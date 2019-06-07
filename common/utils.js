@@ -74,17 +74,14 @@
             title: "You need to be logged in to continue.",
             message: "To open the login window press"
         },
-        "recordAvailabilityError" : {
-          "multipleRecords": "Click <b>OK</b> to show all the matched records.",
-          "noRecordsFound": "Click <b>OK</b> to show the list of all records.",
-          "pageRedirect": "Click <b>OK</b> to go to the "
-        },
-        "terminalError" : {
-          "okBtnMessage": "Click <b>OK</b> to go to the Recordset.",
-          "reloadMessage": "Click <b>Reload</b> to start over."
-        },
-        "actionMessageWReplace" : {
-          clickActionMessage: "Click <b>OK</b> to reload this page without @errorStatus."
+        "clickActionMessage": {
+            "messageWReplace": "Click <b>OK</b> to reload this page without @errorStatus.",
+            "dismissDialog": "Click <b>OK</b> to dismiss this dialog.",
+            "multipleRecords": "Click <b>OK</b> to show all the matched records.",
+            "noRecordsFound": "Click <b>OK</b> to show the list of all records.",
+            "okBtnMessage": "Click <b>OK</b> to go to the Recordset.",
+            "reloadMessage": "Click <b>Reload</b> to start over.",
+            "pageRedirect": "Click <b>OK</b> to go to the "
         },
         "errorMessageMissing": "An unexpected error has occurred. Please try again",
         "tableMissing": "No table specified in the form of 'schema-name:table-name' and no Default is set.",

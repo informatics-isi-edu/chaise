@@ -27,7 +27,7 @@
         systemAdminMessage : "An unexpected error has occurred. Try clearing your cache. If you continue to face this issue, please contact the system administrator."
     })
 
-    .factory('Errors', ['errorNames', 'errorMessages', function(errorNames, errorMessages) {
+    .factory('Errors', ['errorNames', 'errorMessages', 'messageMap', function(errorNames, errorMessages, messageMap) {
 
         // errorData object holds additional information viz. stacktrace, redirectUrl
         // Make sure to check cross-browser cmpatibility for stack attribute of Error Object
@@ -137,16 +137,34 @@
 
         function UnauthorizedAssetAccess() {
             /**
-            * @type {string}
-            * @desc   Error message status; acts as Title text for error dialog
+             * @type {object}
+             * @desc  custom object to store miscellaneous elements viz. stacktrace
+             */
+            this.errorData = {};
+
+            /**
+             * @type {string}
+             * @desc   Error message status; acts as Title text for error dialog
              */
             this.status = errorNames.unauthorized;
 
             /**
-            * @type {string}
-            * @desc   Error message
+             * @type {string}
+             * @desc   Error message
              */
             this.message = errorMessages.unauthorizedAssetRetrieval;
+
+            /**
+             * @type {string}
+             * @desc Action message to display for click of the OK button
+             */
+            this.errorData.clickActionMessage = messageMap.clickActionMessage.dismissDialog;
+
+            /**
+             * @type {boolean}
+             * @desc Set true to dismiss the error modal on clicking the OK button
+             */
+            this.clickOkToDismiss = true;
         }
 
         UnauthorizedAssetAccess.prototype = Object.create(Error.prototype);
@@ -350,7 +368,7 @@
             } else if (exception instanceof Errors.CustomError ) {
                 logError(exception);
                 redirectLink = exception.errorData.redirectUrl;
-            } else {
+            } else if (!exception instanceof Errors.UnauthorizedAssetAccess) {
                 logError(exception);
                 message = errorMessages.systemAdminMessage;
                 subMessage = exception.message;
