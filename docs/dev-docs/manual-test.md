@@ -149,3 +149,8 @@ Follow this [link](https://dev.gpcrconsortium.org/chaise/recordedit/#1/assets:cp
 Follow this [link](https://dev.gpcrconsortium.org/chaise/recordedit/#1/assets:cpm@sort(last_modified_timestamp::desc::,id)?limit=25) and submit the page. You should be able to change entities with Site name as USC. The 2 entities associated with iHuman shouldn't be editable.
 
 What should appear is a page of results with multiple tables. The first table should be those entities that have successfully been updated, whereas the second table presents the data that couldn't be updated. The first table should have entities with the `Site name` `USC`. The second table should have entities with the `Site name` `iHuman`.
+
+# Testing UX that relies on data or model change events
+
+## Share dialog stale warning 
+The share dialog has an alert warning that shows when the user is viewing stale data. This can happen if the current record's values are updated after you laoded the record page or the model itself has changed. The data changed event is test in the e2e tests. The model change event requires manual testing. This can be tested on any table on `dev.isrd` as long as you can modify that table's model. [Here](https://github.com/informatics-isi-edu/chaise/wiki/Ermrest-Howto-(set-ACL,-cookies)#add-column-to-existing-table) is a template for the curl command.
