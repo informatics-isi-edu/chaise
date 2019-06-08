@@ -209,29 +209,29 @@ function addNewButtons() {
           },
           callback: function(e) {
               // Give/remove ~~ surround the selection
-              // var chunk, cursor, selected = e.getSelection(),
-              // content = e.getContent();
-              //
-              // if (selected.length === 0) {
-              //     // Give extra word
-              //     chunk = e.__localize('strikethrough');
-              // } else {
-              //     chunk = selected.text;
-              // }
-              //
-              // // transform selection and set the cursor into chunked text
-              // if (content.substr(selected.start - 2, 2) === '~~' &&
-              // content.substr(selected.end, 2) === '~~') {
-              //     e.setSelection(selected.start - 2, selected.end + 2);
-              //     e.replaceSelection(chunk);
-              //     cursor = selected.start - 2;
-              // } else {
-              //     e.replaceSelection('~~' + chunk + '~~');
-              //     cursor = selected.start + 2;
-              // }
-              //
-              // // Set the cursor
-              // e.setSelection(cursor, cursor + chunk.length);
+              var chunk, cursor, selected = e.getSelection(),
+              content = e.getContent();
+
+              if (selected.length === 0) {
+                  // Give extra word
+                  chunk = e.__localize('<RID>');
+              } else {
+                  chunk = selected.text;
+              }
+
+              // transform selection and set the cursor into chunked text
+              if (content.substr(selected.start - 2, 2) === '[[' &&
+              content.substr(selected.end, 2) === ']]') {
+                  e.setSelection(selected.start - 2, selected.end + 2);
+                  e.replaceSelection(chunk);
+                  cursor = selected.start - 2;
+              } else {
+                  e.replaceSelection('[[' + chunk + ']]');
+                  cursor = selected.start + 2;
+              }
+
+              // Set the cursor
+              e.setSelection(cursor, cursor + chunk.length);
           }
       }]
   }
