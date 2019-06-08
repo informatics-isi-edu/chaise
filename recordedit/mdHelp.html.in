@@ -72,6 +72,15 @@
                             <td class="markdown-container"><a href="#" target="_blank">Link</a></td>
                         </tr>
                         <tr>
+                            <td class="rawInput" id="rRidLink1">
+                                [[RID]]
+                            </td>
+                            <td class="rawInput" id="rRidLink2">
+                                [RID](http://xyz/id/RID)
+                            </td>
+                            <td class="markdown-container" id="oRidLink"><a href="/id/RID" target="_blank">RID</a></td>
+                        </tr>
+                        <tr>
                             <td class="rawInput">
                                 ![Image](http://xyz/a.png)
                             </td>

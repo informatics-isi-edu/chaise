@@ -216,7 +216,10 @@ var mdHelp ={
         raw_italic2:"_Some Italic_",
         md_italic:"<em>Some Italic</em>",
         raw_strike:"~~strikethrough text~~",
-        md_strike:"<strike>strikethrough text</strike>"
+        md_strike:"<strike>strikethrough text</strike>",
+        raw_rid1:"[[RID]]",
+        raw_rid2:"[RID](http://xyz/id/RID)",
+        md_rid:'<a href="/id/RID" target="_blank">RID</a>',
 };
 // keep track of namespaces that we use, so we can delete them afterwards
 if (!process.env.TRAVIS) {
@@ -362,6 +365,7 @@ describe('Record Add', function() {
 
     describe('Markdown Editor Help button is clicked, ', function() {
         beforeAll(function() {
+            browser.ignoreSynchronization = true;
             browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-add:accommodation");
             helpBtn = element.all(by.css('button[title=Help]')).get(0);
             chaisePage.waitForElement(helpBtn);
@@ -380,7 +384,7 @@ describe('Record Add', function() {
             }).then(function() {
                 return chaisePage.waitForElement(element(by.id("main-content")));
             }).then(function() {
-                expect(element(by.id('mainTable')).all(by.tagName('tr')).count()).toBe(18,'Table row count could not be matched.');
+                expect(element(by.id('mainTable')).all(by.tagName('tr')).count()).toBe(19,'Table row count could not be matched.');
                 expect(element(by.id('rBold1')).getText()).toBe(mdHelp.raw_bold1,'First raw Bold text help not found');
                 expect(element(by.id('rBold2')).getText()).toBe(mdHelp.raw_bold2,'Second raw Bold text help not found');
                 expect(element(by.id('oBold')).getAttribute('innerHTML')).toBe(mdHelp.md_bold,'Markdown Bold text help not found');
@@ -389,6 +393,10 @@ describe('Record Add', function() {
                 expect(element(by.id('oItalic')).getAttribute('innerHTML')).toBe(mdHelp.md_italic,'Markdown Italic text help not found');
                 expect(element(by.id('rStrike1')).getText()).toBe(mdHelp.raw_strike,'Strikethrough text help not found');
                 expect(element(by.id('oStrike')).getAttribute('innerHTML')).toBe(mdHelp.md_strike,'Markdown Strike text help not found');
+                // test RID link help text
+                expect(element(by.id('rRidLink1')).getText()).toBe(mdHelp.raw_rid1,'Strikethrough text help not found');
+                expect(element(by.id('rRidLink2')).getText()).toBe(mdHelp.raw_rid2,'Strikethrough text help not found');
+                expect(element(by.id('oRidLink')).getAttribute('innerHTML')).toBe(mdHelp.md_rid,'Markdown Strike text help not found');
             }).then(function() {
                 // - Go back to initial Record page
                 browser.close();
