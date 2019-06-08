@@ -108,7 +108,7 @@
         // <p> tag is added to maintain the space between click action message and buttons
         // Also maintains consistency  in their placement irrespective of reload message
         // NOTE: $sce.trustAsHtml done in one place after setting everything
-        vm.clickActionMessage = $sce.trustAsHtml(vm.clickActionMessage + reloadMessage);
+        vm.clickActionMessage = vm.clickActionMessage + reloadMessage;
         vm.params.message = $sce.trustAsHtml(vm.params.message);
         vm.params.subMessage = $sce.trustAsHtml(vm.params.subMessage);
 

@@ -23,7 +23,7 @@
         multipleDataErrorCode : "Multiple Records Found",
         multipleDataMessage : "There are more than 1 record found for the filters provided.",
         facetFilterMissing : "No filtering criteria was specified to identify a specific record.",
-        unauthorizedAssetRetrieval : "You must be an authorized user to download this asset.",
+        unauthorizedAssetRetrieval : "You must be logged in and authorized to download this asset.",
         systemAdminMessage : "An unexpected error has occurred. Try clearing your cache. If you continue to face this issue, please contact the system administrator."
     })
 
@@ -146,7 +146,7 @@
              * @type {string}
              * @desc   Error message status; acts as Title text for error dialog
              */
-            this.status = errorNames.unauthorized;
+            this.status = messageMap.unauthorizedErrorCode;
 
             /**
              * @type {string}
@@ -158,7 +158,7 @@
              * @type {string}
              * @desc Action message to display for click of the OK button
              */
-            this.errorData.clickActionMessage = messageMap.clickActionMessage.dismissDialog;
+            this.errorData.clickActionMessage = messageMap.clickActionMessage.loginOrDismissDialog;
 
             /**
              * @type {boolean}
@@ -377,7 +377,7 @@
             // There's no message
             if (message.trim().length < 1) message = errorMessages.systemAdminMessage;
 
-            if (!Session.getSessionValue()) {
+            if (!Session.getSessionValue() && !exception instanceof Errors.UnauthorizedAssetAccess) {
                 showLogin = true;
                 if (exception instanceof Errors.noRecordError) {
                     // if no logged in user, change the message

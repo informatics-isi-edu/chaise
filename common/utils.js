@@ -76,7 +76,7 @@
         },
         "clickActionMessage": {
             "messageWReplace": "Click <b>OK</b> to reload this page without @errorStatus.",
-            "dismissDialog": "Click <b>OK</b> to dismiss this dialog.",
+            "loginOrDismissDialog": "Click <a ng-click='ctrl.login()'>Login</a> to log in to the system, or click <b>OK</b> to dismiss this dialog.",
             "multipleRecords": "Click <b>OK</b> to show all the matched records.",
             "noRecordsFound": "Click <b>OK</b> to show the list of all records.",
             "okBtnMessage": "Click <b>OK</b> to go to the Recordset.",
