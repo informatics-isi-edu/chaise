@@ -74,17 +74,14 @@
             title: "You need to be logged in to continue.",
             message: "To open the login window press"
         },
-        "recordAvailabilityError" : {
-          "multipleRecords": "Click <b>OK</b> to show all the matched records.",
-          "noRecordsFound": "Click <b>OK</b> to show the list of all records.",
-          "pageRedirect": "Click <b>OK</b> to go to the "
-        },
-        "terminalError" : {
-          "okBtnMessage": "Click <b>OK</b> to go to the Recordset.",
-          "reloadMessage": "Click <b>Reload</b> to start over."
-        },
-        "actionMessageWReplace" : {
-          clickActionMessage: "Click <b>OK</b> to reload this page without @errorStatus."
+        "clickActionMessage": {
+            "messageWReplace": "Click <b>OK</b> to reload this page without @errorStatus.",
+            "loginOrDismissDialog": "Click <a ng-click='ctrl.login()'>Login</a> to log in to the system, or click <b>OK</b> to dismiss this dialog.",
+            "multipleRecords": "Click <b>OK</b> to show all the matched records.",
+            "noRecordsFound": "Click <b>OK</b> to show the list of all records.",
+            "okBtnMessage": "Click <b>OK</b> to go to the Recordset.",
+            "reloadMessage": "Click <b>Reload</b> to start over.",
+            "pageRedirect": "Click <b>OK</b> to go to the "
         },
         "errorMessageMissing": "An unexpected error has occurred. Please try again",
         "tableMissing": "No table specified in the form of 'schema-name:table-name' and no Default is set.",
@@ -1703,7 +1700,7 @@
       }
      }])
 
-    .service('headInjector', ['ConfigUtils', 'ERMrest', 'ErrorService', 'MathUtils', '$rootScope', '$window', function(ConfigUtils, ERMrest, ErrorService, MathUtils, $rootScope, $window) {
+    .service('headInjector', ['ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', 'MathUtils', '$rootScope', '$window', function(ConfigUtils, ERMrest, Errors, ErrorService, MathUtils, $rootScope, $window) {
         function addCustomCSS() {
             var chaiseConfig = ConfigUtils.getConfigJSON();
             if (chaiseConfig['customCSS'] !== undefined) {
@@ -1737,7 +1734,8 @@
 
                 var dcctx = ConfigUtils.getContextJSON();
                 // make a HEAD request to check if the user can fetch the file
-                dcctx.server.http.head(e.target.href).then(function (response) {
+
+                dcctx.server.http.head(e.target.href, {skipHTTP401Handling: true}).then(function (response) {
                     // fetch the file for the user
                     var downloadLink = angular.element('<a></a>');
                     downloadLink.attr('href', e.target.href);
@@ -1751,9 +1749,14 @@
                 }).catch(function (exception) {
                     // error/login modal was closed
                     if (typeof exception == 'string') return;
+                    var ermrestError = ERMrest.responseToError(exception);
+
+                    if (ermrestError instanceof ERMrest.UnauthorizedError) {
+                        ermrestError = new Errors.UnauthorizedAssetAccess();
+                    }
 
                     // If an error occurs while a user is trying to download the file, allow them to dismiss the dialog
-                    ErrorService.handleException(ERMrest.responseToError(exception), true);
+                    ErrorService.handleException(ermrestError, true);
                 }).finally(function () {
                     // remove the spinner
                     e.target.innerHTML = e.target.innerHTML.slice(0, e.target.innerHTML.indexOf(spinnerHTML));

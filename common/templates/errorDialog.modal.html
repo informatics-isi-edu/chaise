@@ -3,15 +3,17 @@
     <h2 class="modal-title">{{::ctrl.params.errorStatus}}</h2>
 </div>
 <div class="modal-body">
-  <span ng-bind-html="ctrl.params.message"></span>
-  <span ng-if="ctrl.params.showLogin"><a id="login-link" ng-click="ctrl.login()"> Please login</a> to continue.</span>
+    <span ng-bind-html="ctrl.params.message"></span>
+    <span ng-if="ctrl.params.showLogin"><a id="login-link" ng-click="ctrl.login()"> Please login</a> to continue.</span>
+    <span ng-if="ctrl.showDownloadPolicy">The download instructions can be found <a id="download-policy-link" ng-href="{{ctrl.downloadPolicy}}">here</a>.</span>
 
     <br><br>
 
-    <span ng-bind-html="ctrl.clickActionMessage"></span>
+    <span compile="ctrl.clickActionMessage"></span>
     <a ng-show="ctrl.params.subMessage" ng-click="ctrl.showDetails()" id="toggle-error-details">
-      <i class="pull-left glyphicon glyphicon-triangle-right" ng-class="{'glyphicon-triangle-bottom': ctrl.displayDetails, 'glyphicon-triangle-right': !ctrl.displayDetails}"></i>
-    {{ctrl.linkText}}</a>
+        <i class="pull-left glyphicon glyphicon-triangle-right" ng-class="{'glyphicon-triangle-bottom': ctrl.displayDetails, 'glyphicon-triangle-right': !ctrl.displayDetails}"></i>
+        {{ctrl.linkText}}
+    </a>
 
     <br>
 

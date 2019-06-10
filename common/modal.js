@@ -42,7 +42,8 @@
             $uibModalInstance.dismiss('cancel');
         }
     }])
-    .controller('ErrorModalController', ['Errors', 'messageMap', 'params', 'Session', '$rootScope', '$sce', '$uibModalInstance', '$window', function ErrorModalController(Errors, messageMap, params, Session, $rootScope, $sce, $uibModalInstance, $window) {
+    .controller('ErrorModalController', ['ConfigUtils', 'Errors', 'messageMap', 'params', 'Session', '$rootScope', '$sce', '$uibModalInstance', '$window', function ErrorModalController(ConfigUtils, Errors, messageMap, params, Session, $rootScope, $sce, $uibModalInstance, $window) {
+        var cc = ConfigUtils.getConfigJSON();
         function isErmrestErrorNeedReplace (error) {
             switch (error.constructor) {
                 case ERMrest.InvalidFacetOperatorError:
@@ -75,6 +76,8 @@
         vm.displayDetails = false;
         vm.linkText = messageMap.showErrDetails;
         vm.showReloadBtn = false;
+        vm.showDownloadPolicy = (cc.assetDownloadPolicyURL && cc.assetDownloadPolicyURL.trim().length > 0 && typeof cc.assetDownloadPolicyURL == "string");
+        if (vm.showDownloadPolicy) vm.downloadPolicy = cc.assetDownloadPolicyURL;
         if (ERMrest && isRetryError(exception)) {
             // we are only showing the reload button for the 4 types of retriable errors while the page is loading.
             // we discussed that it doesn't make sense to "retry" other requests that may fail after the data has loaded.
@@ -83,29 +86,29 @@
 
         // set the click action message
         if (exception instanceof Errors.multipleRecordError) {
-            vm.clickActionMessage =  messageMap.recordAvailabilityError.multipleRecords;
+            vm.clickActionMessage =  messageMap.clickActionMessage.multipleRecords;
         } else if (exception instanceof Errors.noRecordError) {
-            vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
-        } else if (exception instanceof Errors.CustomError && exception.errorData.clickActionMessage) {
+            vm.clickActionMessage = messageMap.clickActionMessage.noRecordsFound;
+        } else if ( (exception instanceof Errors.CustomError && exception.errorData.clickActionMessage) || exception instanceof Errors.UnauthorizedAssetAccess) {
             vm.clickActionMessage = exception.errorData.clickActionMessage;
         } else if (ERMrest && exception instanceof ERMrest.InvalidFilterOperatorError) {
-            vm.clickActionMessage = messageMap.recordAvailabilityError.noRecordsFound;
+            vm.clickActionMessage = messageMap.clickActionMessage.noRecordsFound;
         } else if (ERMrest && isErmrestErrorNeedReplace(exception)) {
-            vm.clickActionMessage = messageMap.actionMessageWReplace.clickActionMessage.replace('@errorStatus', vm.params.errorStatus);
+            vm.clickActionMessage = messageMap.clickActionMessage.messageWReplace.replace('@errorStatus', vm.params.errorStatus);
         } else {
-            vm.clickActionMessage = messageMap.recordAvailabilityError.pageRedirect + vm.params.pageName + '. ';
+            vm.clickActionMessage = messageMap.clickActionMessage.pageRedirect + vm.params.pageName + '. ';
 
             // TODO it might be more appropriate to move the following outside the if-else
             if (vm.params.appName == 'recordedit'){
                 vm.showReloadBtn = true;
-                reloadMessage = ' <p>' + messageMap.terminalError.reloadMessage +' </p>';
+                reloadMessage = ' <p>' + messageMap.clickActionMessage.reloadMessage +' </p>';
             }
         }
 
         // <p> tag is added to maintain the space between click action message and buttons
         // Also maintains consistency  in their placement irrespective of reload message
         // NOTE: $sce.trustAsHtml done in one place after setting everything
-        vm.clickActionMessage = $sce.trustAsHtml(vm.clickActionMessage + reloadMessage);
+        vm.clickActionMessage = vm.clickActionMessage + reloadMessage;
         vm.params.message = $sce.trustAsHtml(vm.params.message);
         vm.params.subMessage = $sce.trustAsHtml(vm.params.subMessage);
 

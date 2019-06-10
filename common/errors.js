@@ -23,10 +23,11 @@
         multipleDataErrorCode : "Multiple Records Found",
         multipleDataMessage : "There are more than 1 record found for the filters provided.",
         facetFilterMissing : "No filtering criteria was specified to identify a specific record.",
+        unauthorizedAssetRetrieval : "You must be logged in and authorized to download this asset.",
         systemAdminMessage : "An unexpected error has occurred. Try clearing your cache. If you continue to face this issue, please contact the system administrator."
     })
 
-    .factory('Errors', ['errorNames', 'errorMessages', function(errorNames, errorMessages) {
+    .factory('Errors', ['errorNames', 'errorMessages', 'messageMap', function(errorNames, errorMessages, messageMap) {
 
         // errorData object holds additional information viz. stacktrace, redirectUrl
         // Make sure to check cross-browser cmpatibility for stack attribute of Error Object
@@ -134,6 +135,41 @@
         InvalidInputError.prototype = Object.create(Error.prototype);
         InvalidInputError.prototype.constructor = InvalidInputError;
 
+        function UnauthorizedAssetAccess() {
+            /**
+             * @type {object}
+             * @desc  custom object to store miscellaneous elements viz. stacktrace
+             */
+            this.errorData = {};
+
+            /**
+             * @type {string}
+             * @desc   Error message status; acts as Title text for error dialog
+             */
+            this.status = messageMap.unauthorizedErrorCode;
+
+            /**
+             * @type {string}
+             * @desc   Error message
+             */
+            this.message = errorMessages.unauthorizedAssetRetrieval;
+
+            /**
+             * @type {string}
+             * @desc Action message to display for click of the OK button
+             */
+            this.errorData.clickActionMessage = messageMap.clickActionMessage.loginOrDismissDialog;
+
+            /**
+             * @type {boolean}
+             * @desc Set true to dismiss the error modal on clicking the OK button
+             */
+            this.clickOkToDismiss = true;
+        }
+
+        UnauthorizedAssetAccess.prototype = Object.create(Error.prototype);
+        UnauthorizedAssetAccess.prototype.constructor = UnauthorizedAssetAccess;
+
         /**
          * CustomError - throw custom error from Apps outside Chaise.
          *
@@ -189,6 +225,7 @@
             noRecordError:noRecordError,
             InvalidInputError: InvalidInputError,
             MalformedUriError: MalformedUriError,
+            UnauthorizedAssetAccess: UnauthorizedAssetAccess,
             CustomError: CustomError
         };
     }])
@@ -331,7 +368,7 @@
             } else if (exception instanceof Errors.CustomError ) {
                 logError(exception);
                 redirectLink = exception.errorData.redirectUrl;
-            } else {
+            } else if (!exception instanceof Errors.UnauthorizedAssetAccess) {
                 logError(exception);
                 message = errorMessages.systemAdminMessage;
                 subMessage = exception.message;
@@ -340,7 +377,7 @@
             // There's no message
             if (message.trim().length < 1) message = errorMessages.systemAdminMessage;
 
-            if (!Session.getSessionValue()) {
+            if (!Session.getSessionValue() && !exception instanceof Errors.UnauthorizedAssetAccess) {
                 showLogin = true;
                 if (exception instanceof Errors.noRecordError) {
                     // if no logged in user, change the message
