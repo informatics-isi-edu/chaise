@@ -179,7 +179,7 @@ function addNewButtons() {
   //       }]
   // },
   {
-      name: "groupPrev",
+      name: "groupUtil",
       data: [{
           name: "cmdModalPrev",
           title: "Fullscreen Preview",
@@ -198,14 +198,14 @@ function addNewButtons() {
       }]
   },
   {
-      name: "groupFont",
+      name: "groupLink",
       data: [{
           name: "cmdRidLink",
           title: "RID link",
-          btnClass: 'btn btn-primary btn-inverted',
+          btnClass: 'btn btn-default',
           icon: {
               // fa: "fa fa-arrows-alt",
-              glyph: "glyphicon glyphicon-pencil"
+              glyph: "chaise-icon chaise-RID"
           },
           callback: function(e) {
               // Give/remove ~~ surround the selection
