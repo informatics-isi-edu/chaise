@@ -266,6 +266,8 @@
                                 $rootScope.tableComment = $rootScope.reference.table.comment;
                             }
                             $rootScope.tableDisplayName = $rootScope.reference.displayname;
+                            $rootScope.idSafeTableName = DataUtils.makeSafeIdAttr($rootScope.reference.table.name);
+                            $rootScope.idSafeSchemaName = DataUtils.makeSafeIdAttr($rootScope.reference.table.schema.name);
 
                             for (var j = 0; j < page.tuples.length; j++) {
                                 // initialize row objects {column-name: value,...}
@@ -388,6 +390,8 @@
                     if ($rootScope.reference.canCreate) {
                         $rootScope.tableDisplayName = $rootScope.reference.displayname;
                         $rootScope.tableComment = $rootScope.reference.table.comment;
+                        $rootScope.idSafeTableName = DataUtils.makeSafeIdAttr($rootScope.reference.table.name);
+                        $rootScope.idSafeSchemaName = DataUtils.makeSafeIdAttr($rootScope.reference.table.schema.name);
 
                         // get the prefilled values
                         var prefilledColumns = {}, prefilledFks = [];

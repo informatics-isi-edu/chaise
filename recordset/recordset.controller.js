@@ -11,6 +11,8 @@
         var chaiseConfig = ConfigUtils.getConfigJSON();
         $scope.vm = recordsetModel;
 
+        $scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
+
         recordsetModel.RECORDEDIT_MAX_ROWS = 200;
         ctrl.showExportButton = (chaiseConfig.showExportButton === true);
         $scope.navbarBrand = (chaiseConfig.navbarBrand !== undefined ?  chaiseConfig.navbarBrand : "");
