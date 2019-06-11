@@ -16,10 +16,14 @@
                     <b>Versioned Link
                         <span tooltip-placement="bottom" ng-attr-uib-tooltip="{{!ctrl.moreThanWeek() ? 'Data snapshotted at ' + ctrl.params.versionDate : undefined}}">({{ctrl.params.versionDateRelative}})</span>
                     </b>
+                    <span class="glyphicon glyphicon-copy version-copy" ng-click="::ctrl.copyToClipboard(ctrl.params.versionLink)" uib-tooltip="Copy link URL to clipboard." tooltip-placement="bottom"></span>
                 </h3>
             </div>
             <a id="version" ng-href="{{::ctrl.params.versionLink}}">{{::ctrl.params.versionLink}}</a>
-            <h3><b>Live Link</b></h3>
+            <h3>
+                <b>Live Link</b>
+                <span class="glyphicon glyphicon-copy" ng-click="::ctrl.copyToClipboard(ctrl.params.permalink)"  uib-tooltip="Copy link URL to clipboard." tooltip-placement="bottom"></span>
+            </h3>
             <a id="permalink" ng-href="{{::ctrl.params.permalink}}">{{::ctrl.params.permalink}}</a>
         </li>
         <li id="citation" ng-if="::ctrl.params.citation">

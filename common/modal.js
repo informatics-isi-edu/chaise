@@ -76,7 +76,7 @@
         vm.displayDetails = false;
         vm.linkText = messageMap.showErrDetails;
         vm.showReloadBtn = false;
-        vm.showDownloadPolicy = (cc.assetDownloadPolicyURL && cc.assetDownloadPolicyURL.trim().length > 0 && typeof cc.assetDownloadPolicyURL == "string");
+        vm.showDownloadPolicy = (vm.params.exception instanceof Errors.UnauthorizedAssetAccess && cc.assetDownloadPolicyURL && cc.assetDownloadPolicyURL.trim().length > 0 && typeof cc.assetDownloadPolicyURL == "string");
         if (vm.showDownloadPolicy) vm.downloadPolicy = cc.assetDownloadPolicyURL;
         if (ERMrest && isRetryError(exception)) {
             // we are only showing the reload button for the 4 types of retriable errors while the page is loading.
@@ -303,7 +303,7 @@
      *   - {Object} citation - citation object returned from ERMrest.tuple.citation
      *
      */
-    .controller('ShareCitationController', ['$uibModalInstance', '$window', 'params', function ($uibModalInstance, $window, params) {
+    .controller('ShareCitationController', [$uibModalInstance', '$window', 'params', function ($uibModalInstance, $window, params) {
         var vm = this;
         vm.params = params;
         vm.warningMessage = "The displayed content may be stale due to recent changes made by other users. You may wish to review the changes prior to sharing the <a ng-href='{{ctrl.params.permalink}}'>live link</a> below. Or, you may share the older content using the <a ng-href='{{ctrl.params.versionLink}}'>versioned link</a>.";
@@ -329,6 +329,24 @@
             var bibtexBlob = new Blob([ bibtexContent ], { type : 'text/plain' });
             // set downloadURL for ng-href attribute
             vm.downloadBibtex = $window.URL.createObjectURL( bibtexBlob );
+        }
+
+        vm.copyToClipboard = function (text) {
+            // Create a dummy input to put the text string into it, select it, then copy it
+            // this has to be done because of HTML security and not letting scripts just copy stuff to the clipboard
+            // it has to be a user initiated action that is done through the DOM object
+            var dummy = angular.element('<input></input>');
+            dummy.attr("visibility", "hidden");
+            dummy.attr("display", "none");
+
+            document.body.appendChild(dummy[0]);
+
+            dummy.attr("id", "copy_id");
+            document.getElementById("copy_id").value = text;
+            dummy.select();
+            document.execCommand("copy");
+
+            document.body.removeChild(dummy[0]);
         }
 
         vm.closeAlert = function () {
