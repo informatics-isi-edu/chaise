@@ -839,6 +839,10 @@ var recordPage = function() {
         return element(by.id('share'));
     };
 
+    this.getVersionedLinkText = function() {
+        return element(by.id('version'));
+    };
+
     this.getPermalinkText = function() {
         return element(by.id('permalink'));
     };
@@ -857,6 +861,10 @@ var recordPage = function() {
 
     this.getShareLinkHeader = function() {
         return element(by.id("share-link")).element(by.tagName('h2'));
+    };
+
+    this.getShareLinkSubHeaders = function() {
+        return element(by.id("share-link")).all(by.tagName('h3'));
     };
 
     this.getCitationHeader = function() {

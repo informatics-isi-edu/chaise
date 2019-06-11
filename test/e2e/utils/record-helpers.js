@@ -103,11 +103,59 @@ exports.testPresentation = function (tableParams) {
             expect(chaisePage.recordPage.getModalListElements().count()).toBe(tableParams.citationParams.numListElements, "Number of list elements in share citation modal is incorrect");
         });
 
-        it("should have a share link present.", function () {
-            // verify permalink
+        it("should have a share header present.", function () {
             expect(chaisePage.recordPage.getShareLinkHeader().getText()).toBe("Share Link", "Share Link (permalink) header is incorrect");
-            expect(chaisePage.recordPage.getPermalinkText().getText()).toBe(tableParams.citationParams.permalink, "permalink url is incorrect");
         });
+
+        it("should have a versioned link and permalink present.", function () {
+            chaisePage.recordPage.getShareLinkSubHeaders().then(function (subheaders) {
+                // verify versioned link
+                expect(subheaders[0].getText()).toContain("Versioned Link", "versioned link header is incorrect");
+                expect(chaisePage.recordPage.getVersionedLinkText().getText()).toContain(tableParams.citationParams.permalink, "versioned link url does not contain the permalink");
+
+                // verify permalink
+                expect(subheaders[1].getText()).toContain("Live Link", "versioned link header is incorrect");
+                expect(chaisePage.recordPage.getPermalinkText().getText()).toBe(tableParams.citationParams.permalink, "permalink url is incorrect");
+            })
+        });
+
+        it("should have 2 copy to clipboard icons visible.", function () {
+            expect(element(by.id("share-link")).all(by.css(".glyphicon.glyphicon-copy")).count()).toBe(2, "wrong number of copy to clipboard icons");
+        });
+
+        /** NOTE: the copy buttons functionality isn't being tested because it seems really hacky to test this feature
+         * below commented code is what it would take to test one of the button clicks and whether it copied properly
+         */
+        // it("should have 2 copy to clipboard icons visible and verify they copy the content.", function () {
+        //     var copyIcons, copyInput;
+        //
+        //     element(by.id("share-link")).all(by.css(".glyphicon.glyphicon-copy")).then(function (icons) {
+        //         copyIcons = icons;
+        //
+        //         expect(icons.length).toBe(2, "wrong number of copy to clipboard icons");
+        //
+        //         // click icon to copy text
+        //         return copyIcons[0].click();
+        //     }).then(function () {
+        //         // creating a new input element
+        //         return browser.executeScript(function () {
+        //             var el = document.createElement('input');
+        //             el.setAttribute('id', 'copy_input');
+        //
+        //             document.getElementById("share-link").appendChild(el);
+        //         });
+        //     }).then(function () {
+        //         // use the browser to send the keys "ctrl/cmd" + "v" to paste contents
+        //         copyInput = element(by.id("copy_input"));
+        //         copyInput.sendKeys(protractor.Key.chord(protractor.Key.SHIFT, protractor.Key.INSERT));
+        //
+        //         return chaisePage.recordPage.getVersionedLinkText().getText();
+        //     }).then(function (versionedLink) {
+        //
+        //         // select the input and get it's "value" attribute to verify the pasted contents
+        //         expect(copyInput.getAttribute('value')).toBe(versionedLink, "copied text for versioned link is incorrect");
+        //     });
+        // });
 
         it("should have a citation present,", function () {
             // verify citation
