@@ -158,6 +158,8 @@
                         recordsetModel.pageLimit = 25;
                     }
                     recordsetModel.tableDisplayName = recordsetModel.reference.displayname;
+                    recordsetModel.tableName = recordsetModel.reference.table.name;
+                    recordsetModel.schemaName = recordsetModel.reference.table.schema.name;
 
                     recordsetModel.search = recordsetModel.reference.location.searchTerm;
 

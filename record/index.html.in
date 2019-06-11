@@ -10,7 +10,7 @@
     <div class="configure-container" ng-app="chaise.configure-record">
         <loading-spinner></loading-spinner>
     </div>
-    <div class="app-container" ng-controller="RecordController as ctrl">
+    <div class="app-container r_s_{{ctrl.makeSafeIdAttr(reference.table.schema.name)}} r_t_{{ctrl.makeSafeIdAttr(reference.table.name)}}" ng-controller="RecordController as ctrl">
         <navbar></navbar>
         <div class="row">
             <div id="bookmark-container" class="col-xs-12 meta-icons">

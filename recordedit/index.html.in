@@ -23,7 +23,7 @@
     <div class="configure-container" ng-app="chaise.configure-recordedit">
         <loading-spinner></loading-spinner>
     </div>
-    <div class="app-container container-fluid">
+    <div class="app-container container-fluid re_s_{{idSafeSchemaName}} re_t_{{idSafeTableName}}">
         <navbar></navbar>
         <loading-spinner ng-show="!displayReady && !error"></loading-spinner>
         <div ng-if="reference && (reference.canCreate || reference.canUpdate)">
