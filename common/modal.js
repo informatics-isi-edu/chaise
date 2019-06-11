@@ -76,7 +76,7 @@
         vm.displayDetails = false;
         vm.linkText = messageMap.showErrDetails;
         vm.showReloadBtn = false;
-        vm.showDownloadPolicy = (cc.assetDownloadPolicyURL && cc.assetDownloadPolicyURL.trim().length > 0 && typeof cc.assetDownloadPolicyURL == "string");
+        vm.showDownloadPolicy = (vm.params.exception instanceof Errors.UnauthorizedAssetAccess && cc.assetDownloadPolicyURL && cc.assetDownloadPolicyURL.trim().length > 0 && typeof cc.assetDownloadPolicyURL == "string");
         if (vm.showDownloadPolicy) vm.downloadPolicy = cc.assetDownloadPolicyURL;
         if (ERMrest && isRetryError(exception)) {
             // we are only showing the reload button for the 4 types of retriable errors while the page is loading.
