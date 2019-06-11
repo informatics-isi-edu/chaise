@@ -564,6 +564,10 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             "raw": "X^2^+Y^2^+Z^2^=0",
                             "markdown": "<p>X<sup>2</sup>+Y<sup>2</sup>+Z<sup>2</sup>=0</p>\n",
                             "comm":" "
+                        }, {
+                            "raw": "[[RID]]",
+                            "markdown": '<p><a href="/id/RID">RID</a></p>\n',
+                            "comm":" "
                         }
                     ];
 

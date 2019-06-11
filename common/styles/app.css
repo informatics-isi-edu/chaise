@@ -30,6 +30,18 @@
     content: '\00A2';
 }
 
+.chaise-icon.chaise-RID::before {
+    content: 'RID';
+}
+
+.chaise-icon.chaise-RID {
+    font-size: 16px;
+}
+
+.btn-sm[data-handler="bootstrap-markdown-cmdRidLink"] {
+    padding: 5px 3px;
+}
+
 /****************** GLOBAL ******************/
 html, body {
     height: 100%;
