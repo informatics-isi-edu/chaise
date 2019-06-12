@@ -106,6 +106,7 @@ before_install:
   - cd ..
   - git clone https://github.com/informatics-isi-edu/ermrestjs.git
   - cd ermrestjs
+  - git checkout pseudo-template
   - sudo npm install
   - bower install
   - sudo make build
