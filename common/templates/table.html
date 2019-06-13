@@ -8,10 +8,10 @@
                     <span ng-switch-when="single-select">Select</span>
                     <div ng-switch-when="multi-select">
                         <button id="table-select-all-rows" type="button" ng-click="::selectAll($event)" class="btn btn-sm btn-primary btn-inverted btn-condensed" tooltip-placement="bottom" uib-tooltip="Select all rows on this page" ng-disabled="vm.matchNotNull">
-                            <span class="glyphicon glyphicon-check"></span> All
+                            <span class="glyphicon glyphicon-check"></span> All on Page
                         </button>
                         <button type="button" ng-click="::selectNone($event)" class="btn btn-sm btn-primary btn-inverted btn-condensed" tooltip-placement="bottom" uib-tooltip="Deselect all rows on this page"  ng-disabled="vm.matchNotNull">
-                            <span class="glyphicon glyphicon-unchecked"></span> None
+                            <span class="glyphicon glyphicon-unchecked"></span> None on Page
                         </button>
                     </div>
                 </th>
