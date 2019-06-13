@@ -415,9 +415,11 @@
                     $rootScope.displayReady = true;
                     // TODO could be better
                     vm.aggregatesToInitialize = [];
-                    vm.reference.activeList.aggregates.forEach(function (c, i) {
-                        vm.aggregatesToInitialize.push(i);
-                    });
+                    if (vm.reference.activeList) {
+                        vm.reference.activeList.aggregates.forEach(function (c, i) {
+                            vm.aggregatesToInitialize.push(i);
+                        });
+                    }
 
                     defer.resolve(true);
                 }).catch(function(err) {
@@ -706,8 +708,8 @@
             vm.reference.columns.forEach(function (col) {
                 vm.columnModels.push({
                     column: col,
-                    isLoading: col.waitFor.length > 0,
-                    hasWaitFor: col.waitFor.length > 0
+                    isLoading: col.waitFor && col.waitFor.length > 0,
+                    hasWaitFor: col.waitFor && col.waitFor.length > 0
                 });
             });
 
