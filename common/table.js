@@ -763,6 +763,7 @@
                     }
                 }
 
+                scope.vm.currentPageSelected = false;
                 if (tuples.length > 0) {
                     _callonSelectedRowsChanged(scope, tuples, false);
                 }
@@ -781,6 +782,8 @@
                         tuples.push(tuple);
                     }
                 }
+
+                scope.vm.currentPageSelected = true;
                 if (tuples.length > 0) {
                     _callonSelectedRowsChanged(scope, tuples, true);
                 }

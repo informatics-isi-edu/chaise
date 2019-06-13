@@ -135,6 +135,10 @@
                     <img id="push-rows-spinner" ng-show="vm.pushRowsSpinner" src="../common/styles/images/loader.gif" class="spinner spinner-sm"/>
                     <span ng-if="vm.countError" class="glyphicon glyphicon-alert" uib-tooltip="Request timeout: total count cannot be retrieved. Refresh the page later to try again." tooltip-placement="bottom"></span>
                 </h3>
+                <div ng-if="vm.currentPageSelected && vm.totalRowsCnt > vm.rowValues.length" class="alert alert-dismissible alert-warning" role="alert">
+                    <button type="button" class="close" ng-click="closeAlert();" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <strong>Warning</strong> <span>All {{vm.rowValues.length}} rows on this page are selected.</span>
+                </div>
                 <record-table id="rs-{{vm.makeSafeIdAttr(vm.tableDisplayName.value)}}" vm="vm" on-selected-rows-changed-bind="onSelectedRowsChanged"></record-table>
                 <span id="push-rows-loading" ng-show="vm.pushRowsSpinner">Loading...</span>
             </div>
