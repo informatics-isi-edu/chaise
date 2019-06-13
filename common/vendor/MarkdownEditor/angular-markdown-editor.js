@@ -25,7 +25,7 @@
 * These are few optons to manipulate editor behavior:
 * 'autofocus', 'saveable', 'iconlibrary', 'hideable', 'width','height','resize','language',
 * 'footer','fullscreen','hiddenButtons','initialstate','showButtons','additionalButtons'.
-* Note:Only editor feature was used from this module. Preview was implemented through 
+* Note:Only editor feature was used from this module. Preview was implemented through
 * ERMrest markdownIt component
 */
 angular
@@ -179,25 +179,63 @@ function addNewButtons() {
   //       }]
   // },
   {
-        name: "groupPrev",
-        data: [{
+      name: "groupUtil",
+      data: [{
           name: "cmdModalPrev",
           title: "Fullscreen Preview",
           btnClass: 'btn btn-primary btn-inverted',
           icon: {
-            fa: "fa fa-arrows-alt",
-            glyph: "glyphicon glyphicon-fullscreen"
+              fa: "fa fa-arrows-alt",
+              glyph: "glyphicon glyphicon-fullscreen"
           },
           callback: function(e) {
-            var name = e.$element[0].name;
-            var id = e.$element[0].id;
+              var name = e.$element[0].name;
+              var id = e.$element[0].id;
 
               var idToS = '#previewLinkId-'+id.slice(0,id.indexOf("-",6))+'-'+name;     //Get rowIndex so that correct form is used during multi-edit preview
               angular.element(idToS).triggerHandler('click');
           }
-        }]
+      }]
+  },
+  {
+      name: "groupLink",
+      data: [{
+          name: "cmdRidLink",
+          title: "RID link",
+          btnClass: 'btn btn-default',
+          icon: {
+              // fa: "fa fa-arrows-alt",
+              glyph: "chaise-icon chaise-RID"
+          },
+          callback: function(e) {
+              // Give/remove ~~ surround the selection
+              var chunk, cursor, selected = e.getSelection(),
+              content = e.getContent();
+
+              if (selected.length === 0) {
+                  // Give extra word
+                  chunk = e.__localize('<RID>');
+              } else {
+                  chunk = selected.text;
+              }
+
+              // transform selection and set the cursor into chunked text
+              if (content.substr(selected.start - 2, 2) === '[[' &&
+              content.substr(selected.end, 2) === ']]') {
+                  e.setSelection(selected.start - 2, selected.end + 2);
+                  e.replaceSelection(chunk);
+                  cursor = selected.start - 2;
+              } else {
+                  e.replaceSelection('[[' + chunk + ']]');
+                  cursor = selected.start + 2;
+              }
+
+              // Set the cursor
+              e.setSelection(cursor, cursor + chunk.length);
+          }
+      }]
   }
-]];
+  ]];
 }
 
 /** Evaluate a function name passed as string and run it from the scope.

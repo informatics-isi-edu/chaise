@@ -14,6 +14,8 @@ Custom style classes with modified styling attributes can be added in `chaise.cs
 
 ## Changing chaise table styles
 With the current HTML structure, it is possible to apply different styles to the table directive. There are a few key HTML ids/classes to be aware of:
+ - `navbar`
+   - identifies the navbar that is displayed on top of every app.
  - `recordset` identifier (`#recordset`)
    - identifies (scopes) the HTML used only for the `recordset` application
    - should be specified when CSS rules are to be applied ONLY to `recordset` app
@@ -31,6 +33,12 @@ With the current HTML structure, it is possible to apply different styles to the
    - identifies the related tables container
    - should be specified when CSS rules are to be applied to only the related tables portion of `record` app
    - can be used to scope CSS rules to the related tables not in the main body
+ - `r_s_<schema.name>` and `r_t_<table.name>` classes
+   - identifies the record page for the particular table or schema.
+ - `rs_s_<schema.name>` and `rs_t_<table.name>` classes
+   - identifies the recordset page for the particular table or schema.
+ - `re_s_<schema.name>` and `re_t_<table.name>` classes
+   - identifies the recordedit page for the particular table or schema.
  - `s_<schema.name>` class (`.s_<schema.name>`) and `t_<table.name>` class (`.t_<table.name>`)
    - identifies the record table directive, for applying styling to the whole table (`<table>`) DOM element
    - schema class should be specified when scoping CSS rules to all tables in that schema
@@ -49,29 +57,54 @@ More often than not, you will want to apply styling for each of the columns rath
 <html id="<appname>"
   <head>...</head>
   <body>
-    ...
-      <div class="s_<schema.name> t_<table.name>">
-        <table>
-          <thead>
-            <tr>
-              <th class="c_<column.name>">...</th>
-            </tr>
-          <thead>
-          <tbody>...</tbody>
-        </table>
-      </div> <!-- end schema name, table name div -->
-    ...
+    <div class="app-container <app-abbr>_s_<schema.name> <app-abbr>_t_<table.name>">
+      <navbar></navbar>
+      ...
+        <div class="s_<schema.name> t_<table.name>">
+          <table>
+            <thead>
+              <tr>
+                <th class="c_<column.name>">...</th>
+              </tr>
+            <thead>
+            <tbody>...</tbody>
+          </table>
+        </div> <!-- end schema name, table name div -->
+      ...
+    </div> <!-- end of app-container -->
   </body>
 </html>
 ```
 
-### General example:
-For the a generic `#catalog/schema:table`, the following rule can be used to apply styling to a specific column:
+### Examples:
+
+- Hide everything except the result table in recordset:
+
 ```css
-.s_schema.t_table .c_column {
-  ...
+.rs_s_schema.rs_t_table .faceting-resizable, 
+.rs_s_schema.rs_t_table faceting-collapse-btn,
+.rs_s_schema.rs_t_table #recordset-controls-container,
+.rs_s_schema.rs_t_table #facet-filters-container {
+  display: none;
 }
 ```
+
+- Hide navbar in recordedit:
+
+```css
+.re_s_schema.re_t_table navbar {
+  display: none;
+}
+```
+
+- Change the width of a column in tabular displays:
+
+```css
+.s_schema.t_table .c_column {
+  min-width: 200px;
+}
+```
+
 
 ### More specific examples (using RBK [.../#2/Gene_Expression:Specimen](https://dev.rebuildingakidney.org/chaise/recordset/#2/Gene_Expression:Specimen)):
 ```css

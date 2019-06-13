@@ -437,7 +437,7 @@ RE_JS_SOURCE=$(RE_ASSETS)/recordEdit.app.js \
 	$(RE_ASSETS)/form.controller.js \
 	$(RE_ASSETS)/recordedit.utils.js
 
-RE_JS_MDHELP=$(RE_ASSETS)/mdHelp.controller.js
+RE_JS_MDHELP=$(RE_ASSETS)/mdHelp.app.js
 
 
 RE_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \

@@ -10,7 +10,7 @@
         <div class="configure-container" ng-app="chaise.configure-recordset">
             <loading-spinner></loading-spinner>
         </div>
-        <div class="app-container" ng-controller="recordsetController as ctrl">
+        <div class="app-container rs_s_{{makeSafeIdAttr(vm.schemaName)}} rs_t_{{makeSafeIdAttr(vm.tableName)}}" ng-controller="recordsetController as ctrl">
             <navbar></navbar>
             <div class="row">
                 <div id="bookmark-container" class="col-xs-12 meta-icons">
