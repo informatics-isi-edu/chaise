@@ -898,6 +898,10 @@ body.error-open loading-spinner {
     margin-top: 5px;
 }
 
+.chaise-share-citation span.glyphicon-copy {
+    cursor: pointer;
+}
+
 /******** Alerts styles ********/
 
 ul.show-list-style li {

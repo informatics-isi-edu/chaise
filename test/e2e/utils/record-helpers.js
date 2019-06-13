@@ -123,39 +123,37 @@ exports.testPresentation = function (tableParams) {
             expect(element(by.id("share-link")).all(by.css(".glyphicon.glyphicon-copy")).count()).toBe(2, "wrong number of copy to clipboard icons");
         });
 
-        /** NOTE: the copy buttons functionality isn't being tested because it seems really hacky to test this feature
-         * below commented code is what it would take to test one of the button clicks and whether it copied properly
-         */
-        // it("should have 2 copy to clipboard icons visible and verify they copy the content.", function () {
-        //     var copyIcons, copyInput;
-        //
-        //     element(by.id("share-link")).all(by.css(".glyphicon.glyphicon-copy")).then(function (icons) {
-        //         copyIcons = icons;
-        //
-        //         expect(icons.length).toBe(2, "wrong number of copy to clipboard icons");
-        //
-        //         // click icon to copy text
-        //         return copyIcons[0].click();
-        //     }).then(function () {
-        //         // creating a new input element
-        //         return browser.executeScript(function () {
-        //             var el = document.createElement('input');
-        //             el.setAttribute('id', 'copy_input');
-        //
-        //             document.getElementById("share-link").appendChild(el);
-        //         });
-        //     }).then(function () {
-        //         // use the browser to send the keys "ctrl/cmd" + "v" to paste contents
-        //         copyInput = element(by.id("copy_input"));
-        //         copyInput.sendKeys(protractor.Key.chord(protractor.Key.SHIFT, protractor.Key.INSERT));
-        //
-        //         return chaisePage.recordPage.getVersionedLinkText().getText();
-        //     }).then(function (versionedLink) {
-        //
-        //         // select the input and get it's "value" attribute to verify the pasted contents
-        //         expect(copyInput.getAttribute('value')).toBe(versionedLink, "copied text for versioned link is incorrect");
-        //     });
-        // });
+        // NOTE: the copy buttons functionality isn't being tested because it seems really hacky to test this feature
+        xit("should have 2 copy to clipboard icons visible and verify they copy the content.", function () {
+            var copyIcons, copyInput;
+
+            element(by.id("share-link")).all(by.css(".glyphicon.glyphicon-copy")).then(function (icons) {
+                copyIcons = icons;
+
+                expect(icons.length).toBe(2, "wrong number of copy to clipboard icons");
+
+                // click icon to copy text
+                return copyIcons[0].click();
+            }).then(function () {
+                // creating a new input element
+                return browser.executeScript(function () {
+                    var el = document.createElement('input');
+                    el.setAttribute('id', 'copy_input');
+
+                    document.getElementById("share-link").appendChild(el);
+                });
+            }).then(function () {
+                // use the browser to send the keys "ctrl/cmd" + "v" to paste contents
+                copyInput = element(by.id("copy_input"));
+                copyInput.sendKeys(protractor.Key.chord(protractor.Key.SHIFT, protractor.Key.INSERT));
+
+                return chaisePage.recordPage.getVersionedLinkText().getText();
+            }).then(function (versionedLink) {
+
+                // select the input and get it's "value" attribute to verify the pasted contents
+                expect(copyInput.getAttribute('value')).toBe(versionedLink, "copied text for versioned link is incorrect");
+            });
+        }).pend("Test case feels hacky to test a feature of the OS that can't be tested by just verifying the value was copied.");
 
         it("should have a citation present,", function () {
             // verify citation
