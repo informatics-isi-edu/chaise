@@ -456,9 +456,16 @@ exports.testPresentation = function (tableParams) {
 		// delete the first row
         chaisePage.clickButton(getRowDeleteBtn(0)).then(function(){
 			browser.wait(EC.visibilityOf(confirmButton), browser.params.defaultTimeout);
-			return confirmButton.click();
+			return chaisePage.clickButton(confirmButton);
         }).then(function () {
 			chaisePage.waitForElementInverse(element(by.id("spinner")));
+
+            // make sure there is 1 row
+            browser.wait(function() {
+                return chaisePage.recordPage.getRelatedTableRows(bookingName).count().then(function(ct) {
+                    return (ct==1);
+                });
+            }, browser.params.defaultTimeout);
 
 			// delete the other row
             return chaisePage.clickButton(getRowDeleteBtn(0));

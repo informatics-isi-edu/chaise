@@ -781,6 +781,7 @@
                         tuples.push(tuple);
                     }
                 }
+
                 if (tuples.length > 0) {
                     _callonSelectedRowsChanged(scope, tuples, true);
                 }
