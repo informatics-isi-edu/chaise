@@ -63,3 +63,10 @@ html.ng-scope .configure-container {
 This will,
   - Ensure that the `<NAMESPACE>.configure-<APP>` is the first app that will be loaded.
   - Hide the main content and show a loading spinner while getting the catalog annotation.
+
+Note:
+Each app will need to handle making sure the dependencies are available still. `record`, `recordset`, and `recordedit` all include the dependencies as part of the `make all` command. When that is run, the dependencies are added to the `index.html` templates as proper source tags. 
+
+`Login` and `Navbar` app handle this differently. Those depencies are defined in `*.app.js` because of how those apps are used. The intent is that they can be injected into a static page and all you need to do is include the `app.js` as a source and the rest of the dependencies are handled by that script. Those 2 scripts will attach the necesssary dependencies to the html as part of the execution of the script.
+
+This is different in the case of the webapps. Those currently have the dependencies defined directly in the html rather than in the makefile. This was done out of simplicity to get a working proof of concept webapp running before investing in refactoring.
