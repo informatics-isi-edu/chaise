@@ -331,6 +331,24 @@
             vm.downloadBibtex = $window.URL.createObjectURL( bibtexBlob );
         }
 
+        vm.copyToClipboard = function (text) {
+            // Create a dummy input to put the text string into it, select it, then copy it
+            // this has to be done because of HTML security and not letting scripts just copy stuff to the clipboard
+            // it has to be a user initiated action that is done through the DOM object
+            var dummy = angular.element('<input></input>');
+            dummy.attr("visibility", "hidden");
+            dummy.attr("display", "none");
+
+            document.body.appendChild(dummy[0]);
+
+            dummy.attr("id", "copy_id");
+            document.getElementById("copy_id").value = text;
+            dummy.select();
+            document.execCommand("copy");
+
+            document.body.removeChild(dummy[0]);
+        }
+
         vm.closeAlert = function () {
             vm.params.showVersionWarning = false;
         }
