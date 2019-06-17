@@ -49,11 +49,13 @@
                     // we already setup the defaults and the configuration based on chaise-config.js
                     if (response.chaiseConfig) ConfigUtils.setConfigJSON(response.chaiseConfig);
 
+                    headInjector.addCanonicalTag();
                     $rootScope.$emit("configuration-done");
                 });
                 // no need to add a catch block here, errors has been includedso handleException has been configured to be the default handler
             } else {
                 // there's no catalog to fetch (may be an index page)
+                headInjector.addCanonicalTag();
                 $rootScope.$emit("configuration-done");
             }
         });
