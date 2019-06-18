@@ -131,7 +131,7 @@
         function setRecordsetHeight() {
             var elements = fetchMainElements();
             // if these 2 values are not set yet, don't set the height
-            if (elements.navbarHeight && elements.bookmarkHeight) {
+            if (elements.navbarHeight !== undefined && elements.bookmarkHeight) {
                 UiUtils.setDisplayContainerHeight(elements);
                 // no need to fetch and verify the faceting elements (navbar and bookmark are the same container as the ones used in main elements function)
                 if (chaiseConfig.showFaceting) UiUtils.setDisplayContainerHeight(fetchFacetingElements());

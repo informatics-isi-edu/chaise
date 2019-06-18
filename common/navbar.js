@@ -32,6 +32,7 @@
     ])
     .directive('navbar', ['ConfigUtils', 'ERMrest', 'UriUtils', '$rootScope', '$window', function(ConfigUtils, ERMrest, UriUtils, $rootScope, $window) {
         var chaiseConfig = ConfigUtils.getConfigJSON();
+        $rootScope.hideNavbar = UriUtils.getQueryParams($window.location.hash).hideNavbar === "true" ? true : false;
 
         // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
         var root = chaiseConfig.navbarMenu || {};
