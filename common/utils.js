@@ -857,6 +857,17 @@
             return $window.location.origin + "/id/" + currCatalog + "/" + tuple.data.RID + (version ? version : "");
         }
 
+        // if '?' is used instead of '#' (?catalog/schema:table), return in the proper form (#catalog/schema:table)
+        function getHash(location) {
+            var hash = location.hash
+
+            // allow ? to be used in place of #
+            if ((hash == '' || hash == undefined) && location.href.indexOf("?") !== -1) {
+                hash = "#" + location.href.substring(location.href.indexOf("?") + 1);
+            }
+
+            return hash;
+        }
         /**
          * @param {String} hash - window.location.hash string
          */
@@ -883,6 +894,7 @@
             createRedirectLinkFromPath: createRedirectLinkFromPath,
             fixedEncodeURIComponent: fixedEncodeURIComponent,
             getCatalogId: getCatalogId,
+            getHash: getHash,
             isBrowserIE: isBrowserIE,
             parsedFilterToERMrestFilter: parsedFilterToERMrestFilter,
             parseURLFragment: parseURLFragment,
@@ -1742,7 +1754,10 @@
             if (chaiseConfig['includeCanonicalTag'] == true) {
                 var canonicalTag = document.createElement("link");
                 canonicalTag.setAttribute("rel", "canonical");
-                var canonicalURL = $window.location.origin + $window.location.pathname + UriUtils.stripSortAndQueryParams($window.location.hash);
+
+                // the hash returned from this function handles the case when '#' is switched with '?'
+                var hash = UriUtils.getHash($window.location);
+                var canonicalURL = $window.location.origin + $window.location.pathname + UriUtils.stripSortAndQueryParams(hash);
                 canonicalTag.setAttribute("href", canonicalURL);
                 document.getElementsByTagName("head")[0].appendChild(canonicalTag);
                 console.log(document.getElementsByTagName("head")[0]);
