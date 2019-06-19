@@ -865,8 +865,8 @@
         function getQueryParams(hash) {
             var params = {};
             if (hash.indexOf("?") !== -1) {
-                var queries = modifierPath.match(/\?(.+)/)[1].split("&");
-                for (i = 0; i < queries.length; i++) {
+                var queries = hash.match(/\?(.+)/)[1].split("&");
+                for (var i = 0; i < queries.length; i++) {
                     var q_parts = queries[i].split("=");
                     params[decodeURIComponent(q_parts[0])] = decodeURIComponent(q_parts[1]);
                 }
