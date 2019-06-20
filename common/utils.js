@@ -857,6 +857,29 @@
             return $window.location.origin + "/id/" + currCatalog + "/" + tuple.data.RID + (version ? version : "");
         }
 
+        // if '?' is used instead of '#' (?catalog/schema:table), return in the proper form (#catalog/schema:table)
+        function getHash(location) {
+            var hash = location.hash
+
+            // allow ? to be used in place of #
+            if ((hash == '' || hash == undefined) && location.href.indexOf("?") !== -1) {
+                hash = "#" + location.href.substring(location.href.indexOf("?") + 1);
+            }
+
+            return hash;
+        }
+        /**
+         * @param {String} hash - window.location.hash string
+         */
+        function stripSortAndQueryParams(hash) {
+            // '@' appears first, search for that before searching for '?'
+            if (hash.indexOf('@') > -1) {
+                return hash.split('@')[0];
+            } else {
+                return hash.split('?')[0];
+            }
+        }
+
         function removeParentContext(url) {
             url = url.substring(0, url.lastIndexOf("?"));
             $window.history.replaceState('', '', url);
@@ -883,6 +906,7 @@
             createRedirectLinkFromPath: createRedirectLinkFromPath,
             fixedEncodeURIComponent: fixedEncodeURIComponent,
             getCatalogId: getCatalogId,
+            getHash: getHash,
             getQueryParams: getQueryParams,
             isBrowserIE: isBrowserIE,
             parsedFilterToERMrestFilter: parsedFilterToERMrestFilter,
@@ -891,7 +915,8 @@
             removeParentContext: removeParentContext,
             resolvePermalink: resolvePermalink,
             setLocationChangeHandling: setLocationChangeHandling,
-            setOrigin: setOrigin
+            setOrigin: setOrigin,
+            stripSortAndQueryParams: stripSortAndQueryParams
         }
     }])
 
@@ -1713,7 +1738,7 @@
       }
      }])
 
-    .service('headInjector', ['ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', 'MathUtils', '$rootScope', '$window', function(ConfigUtils, ERMrest, Errors, ErrorService, MathUtils, $rootScope, $window) {
+    .service('headInjector', ['ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', 'MathUtils', 'UriUtils', '$rootScope', '$window', function(ConfigUtils, ERMrest, Errors, ErrorService, MathUtils, UriUtils, $rootScope, $window) {
         function addCustomCSS() {
             var chaiseConfig = ConfigUtils.getConfigJSON();
             if (chaiseConfig['customCSS'] !== undefined) {
@@ -1734,6 +1759,21 @@
         function setWindowName() {
             if (!$window.name) {
                 $window.name = MathUtils.uuid();
+            }
+        }
+
+        function addCanonicalTag() {
+            var chaiseConfig = ConfigUtils.getConfigJSON();
+            if (chaiseConfig['includeCanonicalTag'] == true) {
+                var canonicalTag = document.createElement("link");
+                canonicalTag.setAttribute("rel", "canonical");
+
+                // the hash returned from this function handles the case when '#' is switched with '?'
+                var hash = UriUtils.getHash($window.location);
+                var canonicalURL = $window.location.origin + $window.location.pathname + UriUtils.stripSortAndQueryParams(hash);
+                canonicalTag.setAttribute("href", canonicalURL);
+                document.getElementsByTagName("head")[0].appendChild(canonicalTag);
+                console.log(document.getElementsByTagName("head")[0]);
             }
         }
 
@@ -1785,6 +1825,7 @@
         }
 
         return {
+            addCanonicalTag: addCanonicalTag,
             addCustomCSS: addCustomCSS,
             addTitle: addTitle,
             setWindowName: setWindowName,
