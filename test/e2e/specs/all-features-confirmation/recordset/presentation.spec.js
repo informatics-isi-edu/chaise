@@ -24,7 +24,7 @@ var testParams = {
             { title: "json_col_with_markdown", value: "Status is: delivered"},
             { title: "Category", value: "Hotel", comment: "Type of accommodation ('Resort/Hotel/Motel')"},
             { title: "Type of Facilities", value: "Upscale", comment: "Type of facilities ('Luxury/Upscale/Basic')"},
-            { title: "Image Count", value: "1", comment: "Image Count"},
+            { title: "Image Count", value: "#1", comment: "Image Count"},
             { title: "Image Distinct Count", value: "1", comment: "Image Distinct Count"},
             { title: "Min Image ID", value: "1", comment: "Min Image ID"},
             { title: "Max Image ID", value: "1", comment: "Max Image ID"}
@@ -43,8 +43,8 @@ var testParams = {
                 json_col_with_markdown: "Status is: “delivered”",
                 category: "Resort",
                 type_of_facilities: "Luxury",
-                count_image_id: "1",
-                count_distinct_image_id: "1",
+                count_image_id: "#1",
+                count_distinct_image_id: "1 distinct",
                 min_image_id: "3001",
                 max_image_id: "3001"
             },
@@ -61,8 +61,8 @@ var testParams = {
                 json_col_with_markdown: "Status is: “delivered”",
                 category: "Hotel",
                 type_of_facilities: "Upscale",
-                count_image_id: "4",
-                count_distinct_image_id: "4",
+                count_image_id: "#4",
+                count_distinct_image_id: "4 distinct",
                 min_image_id: "3005",
                 max_image_id: "30007"
             },
@@ -79,8 +79,8 @@ var testParams = {
                 json_col_with_markdown: "Status is: “Processing”",
                 category: "Motel",
                 type_of_facilities: "Basic",
-                count_image_id: "3",
-                count_distinct_image_id: "3",
+                count_image_id: "#3",
+                count_distinct_image_id: "3 distinct",
                 min_image_id: "3009",
                 max_image_id: "3011"
             },
