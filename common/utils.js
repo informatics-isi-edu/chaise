@@ -385,6 +385,7 @@
             var contextObj = ConfigUtils.getContextJSON();
             pcontext.push("pcid=" + contextObj.cid);
             pcontext.push("ppid=" + contextObj.pid);
+            if (contextObj.hideNavbar != undefined) pcontext.push("hideNavbar=" + contextObj.hideNavbar)
 
             // TODO we might want to allow only certian query parameters
             if (location.queryParamsString) {
@@ -880,11 +881,6 @@
             }
         }
 
-        function removeParentContext(url) {
-            url = url.substring(0, url.lastIndexOf("?"));
-            $window.history.replaceState('', '', url);
-        }
-
         /**
          * Given a location href and key, return the query param value that matches that key
          * @param {String} url - the full url for the current page
@@ -922,7 +918,6 @@
             parsedFilterToERMrestFilter: parsedFilterToERMrestFilter,
             parseURLFragment: parseURLFragment,
             queryStringToJSON: queryStringToJSON,
-            removeParentContext: removeParentContext,
             resolvePermalink: resolvePermalink,
             setLocationChangeHandling: setLocationChangeHandling,
             setOrigin: setOrigin,

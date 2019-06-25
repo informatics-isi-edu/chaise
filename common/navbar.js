@@ -32,25 +32,9 @@
     ])
     .directive('navbar', ['ConfigUtils', 'ERMrest', 'UriUtils', '$rootScope', '$window', function(ConfigUtils, ERMrest, UriUtils, $rootScope, $window) {
         var chaiseConfig = ConfigUtils.getConfigJSON();
+        var dcctx = ConfigUtils.getContextJSON();
 
-        var inIframe = $window.self !== $window.parent;
-
-        var hideNavbarParam;
-        if (UriUtils.getQueryParam($window.location.href, "hideNavbar") === "true") {
-            hideNavbarParam = true;
-        } else if (UriUtils.getQueryParam($window.location.href, "hideNavbar") === "false") {
-            // matters for when we are inside an iframe
-            hideNavbarParam = false;
-        } else {
-            hideNavbarParam = null;
-        }
-        /**
-         * first case: in iframe and hideNavbar = !false
-         *      - could be true or null, null meaning use default of hide navbar in iframe
-         * second case: hideNavbar = true
-         *      - doesn't matter if in an iframe or not, if true, hide it
-         */
-        $rootScope.hideNavbar = (inIframe && hideNavbarParam !== false) || hideNavbarParam === true;
+        $rootScope.hideNavbar = dcctx.hideNavbar;
 
         // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
         var root = chaiseConfig.navbarMenu || {};

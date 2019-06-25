@@ -27,11 +27,14 @@
 
     .run(['appName', 'ConfigUtils', 'ERMrest', 'headInjector', 'MathUtils', 'UriUtils', '$rootScope', '$window', function(appName, ConfigUtils, ERMrest, headInjector, MathUtils, UriUtils, $rootScope, $window) {
         headInjector.setWindowName();
+
         // initialize dcctx object
+        var hideNavbar = UriUtils.getQueryParam($window.location.href, "hideNavbar") === "true" ? true : false;
         $window.dcctx = {
             cid: appName,
             pid: MathUtils.uuid(),
-            wid: $window.name
+            wid: $window.name,
+            hideNavbar: hideNavbar
         }
         // set chaise configuration based on what is in `chaise-config.js` first
         ConfigUtils.setConfigJSON();
