@@ -385,7 +385,8 @@
             var contextObj = ConfigUtils.getContextJSON();
             pcontext.push("pcid=" + contextObj.cid);
             pcontext.push("ppid=" + contextObj.pid);
-            if (contextObj.hideNavbar != undefined) pcontext.push("hideNavbar=" + contextObj.hideNavbar)
+            // only add the value to the applink function if it's true
+            if (contextObj.hideNavbar) pcontext.push("hideNavbar=" + contextObj.hideNavbar)
 
             // TODO we might want to allow only certian query parameters
             if (location.queryParamsString) {

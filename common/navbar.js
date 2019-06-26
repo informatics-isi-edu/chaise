@@ -32,9 +32,6 @@
     ])
     .directive('navbar', ['ConfigUtils', 'ERMrest', 'UriUtils', '$rootScope', '$window', function(ConfigUtils, ERMrest, UriUtils, $rootScope, $window) {
         var chaiseConfig = ConfigUtils.getConfigJSON();
-        var dcctx = ConfigUtils.getContextJSON();
-
-        $rootScope.hideNavbar = dcctx.hideNavbar;
 
         // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
         var root = chaiseConfig.navbarMenu || {};
@@ -65,7 +62,9 @@
             templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/navbar.html',
             link: function(scope) {
                 var chaiseConfig = ConfigUtils.getConfigJSON();
+                var dcctx = ConfigUtils.getContextJSON();
 
+                scope.hideNavbar = dcctx.hideNavbar;
                 scope.brandURL = chaiseConfig.navbarBrand;
                 scope.brandText = chaiseConfig.navbarBrandText;
                 scope.brandImage = chaiseConfig.navbarBrandImage;
