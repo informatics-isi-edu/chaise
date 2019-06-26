@@ -48,7 +48,15 @@ You can get your cookie by querying the database, or using the following simple 
 
 
 ## How To Run Tests
+### Prerequistes
+- After setting up the environment variables, make sure that the `https://dev.isrd.isi.edu/~<your-user-directory>` directory has the public access(if not, give the folder the following permissions `chmod 755 <your-user-directory>`).
 
+- Upload your code on the `https://dev.isrd.isi.edu/~<your-user-directory>` by the running the following command in your local chaise repository. (This will upload your local code to the remote server)
+```sh
+$ make install
+```
+
+### Test cases
 - To execute all test cases in sequential order, set the following:
 ```sh
 export SHARDING=false
