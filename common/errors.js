@@ -377,7 +377,7 @@
             // There's no message
             if (message.trim().length < 1) message = errorMessages.systemAdminMessage;
 
-            if (!Session.getSessionValue() && !exception instanceof Errors.UnauthorizedAssetAccess) {
+            if (!Session.getSessionValue() && !(exception instanceof Errors.UnauthorizedAssetAccess)) {
                 showLogin = true;
                 if (exception instanceof Errors.noRecordError) {
                     // if no logged in user, change the message

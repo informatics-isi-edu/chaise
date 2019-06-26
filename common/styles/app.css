@@ -143,6 +143,7 @@ span[uib-tooltip], .show-tooltip-border[uib-tooltip] {
 .tooltip-inner {
     text-align: left;
     max-width: none;
+    white-space:pre-wrap;
 }
 
 .filters-tooltip {
@@ -896,6 +897,10 @@ body.error-open loading-spinner {
 
 .chaise-share-citation #share-link h2 {
     margin-top: 5px;
+}
+
+.chaise-share-citation span.glyphicon-copy {
+    cursor: pointer;
 }
 
 /******** Alerts styles ********/

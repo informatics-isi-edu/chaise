@@ -1654,7 +1654,7 @@ exports.testSubmission = function (tableParams, isEditMode) {
  * Checks for if values are defined and set properly
  */
 exports.testRecordAppValuesAfterSubmission = function(column_names, column_values) {
-    chaisePage.waitForElement(element(by.id('tblRecord')));
+    chaisePage.recordPageReady();
 
     for (var i = 0; i < column_names.length; i++) {
         var columnName = column_names[i];
