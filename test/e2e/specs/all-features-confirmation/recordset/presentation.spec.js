@@ -13,21 +13,23 @@ var testParams = {
         sortby: "no_of_rooms",
         file_names: ["Accommodations.csv", "accommodation.zip"],
         columns: [
-            { title: "Name of Accommodation", value: "Sherathon Hotel", type: "text"},
-            { title: "Website", value: "<p class=\"ng-scope\"><a href=\"http://www.starwoodhotels.com/sheraton/index.html\">Link to Website</a></p>", type: "text", comment: "A valid url of the accommodation"},
-            { title: "User Rating", value: "4.3000", type: "float4"},
-            { title: "Number of Rooms", value: "23", type: "int4"},
-            { title: "Summary", value: "Sherathon Hotels is an international hotel company with more than 990 locations in 73 countries. The first Radisson Hotel was built in 1909 in Minneapolis, Minnesota, US. It is named after the 17th-century French explorer Pierre-Esprit Radisson.", type: "longtext"},
-            { title: "Operational Since", value: "2008-12-09 00:00:00", type: "timestamptz" },
-            { title: "Is Luxurious", value: "true", type: "boolean" },
-            { title: "json_col", value:JSON.stringify({"name":"testing JSON"},undefined,2), type: "json" },
-            { title: "json_col_with_markdown", value: "Status is: delivered"},
-            { title: "Category", value: "Hotel", comment: "Type of accommodation ('Resort/Hotel/Motel')"},
-            { title: "Type of Facilities", value: "Upscale", comment: "Type of facilities ('Luxury/Upscale/Basic')"},
-            { title: "Image Count", value: "1", comment: "Image Count"},
-            { title: "Image Distinct Count", value: "1", comment: "Image Distinct Count"},
-            { title: "Min Image ID", value: "1", comment: "Min Image ID"},
-            { title: "Max Image ID", value: "1", comment: "Max Image ID"}
+            { title: "Name of Accommodation"},
+            { title: "Website", comment: "A valid url of the accommodation"},
+            { title: "User Rating"},
+            { title: "Number of Rooms"},
+            { title: "Summary"},
+            { title: "Operational Since"},
+            { title: "Is Luxurious"},
+            { title: "json_col"},
+            { title: "json_col_with_markdown"},
+            { title: "no_of_beds", comment: "test all-outbound + waitfor for normal columns"},
+            { title: "no_of_baths", comment: "waitfor normal columns on multiple aggregates"},
+            { title: "Category", comment: "Type of accommodation ('Resort/Hotel/Motel')"},
+            { title: "Type of Facilities", comment: "Type of facilities ('Luxury/Upscale/Basic')"},
+            { title: "Image Count", comment: "Image Count"},
+            { title: "Image Distinct Count", comment: "Image Distinct Count"},
+            { title: "Min Image ID", comment: "Min Image ID"},
+            { title: "summary of Image ID", comment: "Summary of Image ID"},
         ],
         data: [
             {
@@ -41,12 +43,14 @@ var testParams = {
                 luxurious: "true",
                 json_col: JSON.stringify({"name":"testing_json"},undefined,2),
                 json_col_with_markdown: "Status is: “delivered”",
+                no_of_beds: "beds: 1, id: 2003, has gym, thumbnail: NH Hotel, Munich, image id cnt: 1",
+                no_of_baths: "baths: 1, id: 2003, images: 3001",
                 category: "Resort",
                 type_of_facilities: "Luxury",
                 count_image_id: "1",
                 count_distinct_image_id: "1",
                 min_image_id: "3001",
-                max_image_id: "3001"
+                max_image_id: "rating: 3.2000, max: 3001, count: 1, category: Resort"
             },
             {
                 id: 2002,
@@ -59,12 +63,14 @@ var testParams = {
                 luxurious: "true",
                 json_col: JSON.stringify(null,undefined,2),
                 json_col_with_markdown: "Status is: “delivered”",
+                no_of_beds: "beds: 1, id: 2002, has gym, image id cnt: 4",
+                no_of_baths: "baths: 1, id: 2002, images: 3005, 3006, 3008, 30007",
                 category: "Hotel",
                 type_of_facilities: "Upscale",
                 count_image_id: "4",
                 count_distinct_image_id: "4",
                 min_image_id: "3005",
-                max_image_id: "30007"
+                max_image_id: "rating: 4.3000, max: 30007, count: 4, category: Hotel"
             },
             {
                 id: 2004,
@@ -77,12 +83,14 @@ var testParams = {
                 luxurious: "false",
                 json_col: JSON.stringify({"age": 25,"name": "Testing"},undefined,2),
                 json_col_with_markdown: "Status is: “Processing”",
+                no_of_beds: "beds: 1, id: 2004, thumbnail: Motel thumbnail, image id cnt: 3",
+                no_of_baths: "baths: 1, id: 2004, images: 3009, 3010, 3011",
                 category: "Motel",
                 type_of_facilities: "Basic",
                 count_image_id: "3",
                 count_distinct_image_id: "3",
                 min_image_id: "3009",
-                max_image_id: "3011"
+                max_image_id: "rating: 2.8000, max: 3011, count: 3, category: Motel"
             },
             {
                 id: 4004,
@@ -95,6 +103,8 @@ var testParams = {
                 luxurious: "true",
                 json_col: "9876.3543",
                 json_col_with_markdown: "Status is: “Processing”",
+                no_of_beds: "beds: 1, id: 4004, has gym, image id cnt:",
+                no_of_baths: "baths: 1, id: 4004",
                 category: "Hotel",
                 type_of_facilities: "Upscale",
                 count_image_id: "",
@@ -146,7 +156,7 @@ var testParams = {
             {
                 columnName:"Category",
                 rawColumnName: "F8V7Ebs7zt7towDneZvefw",
-                columnPosition: 10,
+                columnPosition: 12,
                 page1:{
                     asc: ["Hotel", "Hotel", "Hotel"],
                     desc: ["Resort", "Motel", "Hotel"]
@@ -159,7 +169,7 @@ var testParams = {
             {
                 columnName:"Type of Facilities",
                 rawColumnName: "hZ7Jzy0aC3Q3KQqz4DIXTw",
-                columnPosition: 11,
+                columnPosition: 13,
                 page1:{
                     asc: ["Basic", "Luxury", "Upscale"],
                     desc: ["Upscale", "Upscale", "Upscale"]
@@ -263,12 +273,14 @@ describe('View recordset,', function() {
                                 expect(cells[7].getText()).toBe(accommodationParams.data[index].luxurious, "luxurious column missmatch for row=" + index);
                                 expect(cells[8].getText()).toBe(accommodationParams.data[index].json_col, "json_col column missmatch for row=" + index);
                                 expect(cells[9].getText()).toBe(accommodationParams.data[index].json_col_with_markdown, "json_col_with_markdown column missmatch for row=" + index);
-                                expect(cells[10].getText()).toBe(accommodationParams.data[index].category, "category column missmatch for row=" + index);
-                                expect(cells[11].getText()).toBe(accommodationParams.data[index].type_of_facilities, "type of facilities column missmatch for row=" + index);
-                                expect(cells[12].getText()).toBe(accommodationParams.data[index].count_image_id, "count_image_id column missmatch for row=" + index);
-                                expect(cells[13].getText()).toBe(accommodationParams.data[index].count_distinct_image_id, "count_distinct_image_id column missmatch for row=" + index);
-                                expect(cells[14].getText()).toBe(accommodationParams.data[index].min_image_id, "min_image_id column missmatch for row=" + index);
-                                expect(cells[15].getText()).toBe(accommodationParams.data[index].max_image_id, "max_image_id column missmatch for row=" + index);
+                                expect(cells[10].getText()).toBe(accommodationParams.data[index].no_of_beds, "no_of_beds column missmatch for row=" + index);
+                                expect(cells[11].getText()).toBe(accommodationParams.data[index].no_of_baths, "no_of_baths column missmatch for row=" + index);
+                                expect(cells[12].getText()).toBe(accommodationParams.data[index].category, "category column missmatch for row=" + index);
+                                expect(cells[13].getText()).toBe(accommodationParams.data[index].type_of_facilities, "type of facilities column missmatch for row=" + index);
+                                expect(cells[14].getText()).toBe(accommodationParams.data[index].count_image_id, "count_image_id column missmatch for row=" + index);
+                                expect(cells[15].getText()).toBe(accommodationParams.data[index].count_distinct_image_id, "count_distinct_image_id column missmatch for row=" + index);
+                                expect(cells[16].getText()).toBe(accommodationParams.data[index].min_image_id, "min_image_id column missmatch for row=" + index);
+                                expect(cells[17].getText()).toBe(accommodationParams.data[index].max_image_id, "max_image_id column missmatch for row=" + index);
                             });
                         }(i))
                     }
@@ -356,7 +368,7 @@ describe('View recordset,', function() {
 
             it("should show line under columns which have a comment and inspect the comment value too", function() {
                 var columns = accommodationParams.columns.filter(function(c) {
-                    return (c.value != null && typeof c.comment == 'string');
+                    return typeof c.comment == 'string';
                 });
                 chaisePage.recordsetPage.getColumnsWithUnderline().then(function(pageColumns) {
                     expect(pageColumns.length).toBe(columns.length);

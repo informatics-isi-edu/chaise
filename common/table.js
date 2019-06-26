@@ -203,6 +203,16 @@
             $log.debug("counter", vm.flowControlObject.counter, ": after aggregated value for column (index=" + colIndex + ") update: " + (res? "successful." : "unsuccessful."));
         }
 
+        /**
+         * This will be called after the data for an aggregate column has returned.
+         * It will,
+         *  - update the templateVariables.
+         *  - update the aggregateResults
+         *  - update the column value if all of its dependent requests are back.
+         * @param  {Object} vm       vm object
+         * @param  {integer} colIndex index of aggregate column
+         * @param  {Object} values   the returned value
+         */
         function afterReadAggregate(vm, colIndex, values) {
             var agg = vm.reference.activeList.aggregates[colIndex];
             var sourceDefinitions = vm.reference.table.sourceDefinitions;
@@ -210,7 +220,7 @@
             values.forEach(function (val, valIndex) {
 
                 // update the templateVariables
-                if (agg.objects.length > 0 && Array.isArray(sourceDefinitions.sourceMapping[agg.name])) {
+                if (agg.objects.length > 0 && Array.isArray(sourceDefinitions.sourceMapping[agg.column.name])) {
                     // NOTE: not needed
                     if (!Array.isArray(vm.templateVariables)) {
                         vm.templateVariables = new Array(values.length);
@@ -219,18 +229,22 @@
                     if (!vm.templateVariables[valIndex]) {
                         vm.templateVariables[valIndex] = {};
                     }
-                    vm.aggregateResults[valIndex][agg.name] = val;
 
-                    sourceDefinitions.sourceMapping[agg.name].forEach(function (k) {
-                        //TODO
-                        if (vm.templateVariables["$self"]) {
+                    sourceDefinitions.sourceMapping[agg.column.name].forEach(function (k) {
+                        if (val.templateVariables["$self"]) {
                             vm.templateVariables[valIndex][k] = val.templateVariables["$self"];
                         }
-                        if (vm.templateVariables["$_self"]) {
+                        if (val.templateVariables["$_self"]) {
                             vm.templateVariables[valIndex]["_" + k] = val.templateVariables["$_self"];
                         }
                     });
                 }
+
+                // update the aggregateResults
+                if (vm.aggregateResults[valIndex] === undefined) {
+                    vm.aggregateResults[valIndex] = {};
+                }
+                vm.aggregateResults[valIndex][agg.columnName] = val;
 
                 // attach the values to the appropriate objects
                 agg.objects.forEach(function (obj) {
@@ -242,23 +256,16 @@
                     var hasAll = model.column.waitFor.every(function (col) {
                         return col.isUnique || col.name in vm.aggregateResults[valIndex];
                     });
-                    if (!hasAll) return;
+                    if (!(hasAll && (model.column.name in vm.aggregateResults[valIndex] || model.column.isUnique))) return;
 
-                    if (obj.isWaitFor) {
-                        var displayValue = model.column.sourceFormatPresentation(
-                            vm.templateVariables,
-                            vm.aggregateResults[valIndex][obj.name],
-                            vm.page.tuples[valIndex]
-                        );
-                        if (displayValue) {
-                            model.isLoading = false;
-                            vm.rowValues[valIndex][obj.index] = val;
-                        }
-                    }
-                    else {
-                        model.isLoading = false;
-                        vm.rowValues[valIndex][obj.index] = val;
-                    }
+                    var displayValue = model.column.sourceFormatPresentation(
+                        vm.templateVariables[valIndex],
+                        vm.aggregateResults[valIndex][model.column.name],
+                        vm.page.tuples[valIndex]
+                    );
+
+                    model.isLoading = false;
+                    vm.rowValues[valIndex][obj.index] = displayValue;
                 });
             });
 
@@ -708,8 +715,8 @@
             vm.reference.columns.forEach(function (col) {
                 vm.columnModels.push({
                     column: col,
-                    isLoading: col.waitFor && col.waitFor.length > 0,
-                    hasWaitFor: col.waitFor && col.waitFor.length > 0
+                    isLoading: col.hasWaitFor || !col.isUnique,
+                    hasWaitFor: col.hasWaitFor || !col.isUnique
                 });
             });
 
