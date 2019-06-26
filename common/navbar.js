@@ -75,7 +75,9 @@
             templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/navbar.html',
             link: function(scope) {
                 var chaiseConfig = ConfigUtils.getConfigJSON();
+                var dcctx = ConfigUtils.getContextJSON();
 
+                scope.hideNavbar = dcctx.hideNavbar;
                 scope.brandURL = chaiseConfig.navbarBrand;
                 scope.brandText = chaiseConfig.navbarBrandText;
                 scope.brandImage = chaiseConfig.navbarBrandImage;

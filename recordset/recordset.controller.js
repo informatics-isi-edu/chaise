@@ -9,6 +9,7 @@
 
         var ctrl = this;
         var chaiseConfig = ConfigUtils.getConfigJSON();
+        var dcctx = ConfigUtils.getContextJSON();
         $scope.vm = recordsetModel;
 
         $scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
@@ -53,6 +54,11 @@
             // add ermrestjs supported queryParams
             if (recordsetModel.reference.location.queryParamsString) {
                 url = url + "?" + recordsetModel.reference.location.queryParamsString;
+            }
+
+            // add hideNavbar if present/defined
+            if (dcctx.hideNavbar) {
+                url = url + (recordsetModel.reference.location.queryParamsString ? "&" : "?") + "hideNavbar=" + dcctx.hideNavbar;
             }
 
             return url;
@@ -131,7 +137,7 @@
         function setRecordsetHeight() {
             var elements = fetchMainElements();
             // if these 2 values are not set yet, don't set the height
-            if (elements.navbarHeight && elements.bookmarkHeight) {
+            if (elements.navbarHeight !== undefined && elements.bookmarkHeight) {
                 UiUtils.setDisplayContainerHeight(elements);
                 // no need to fetch and verify the faceting elements (navbar and bookmark are the same container as the ones used in main elements function)
                 if (chaiseConfig.showFaceting) UiUtils.setDisplayContainerHeight(fetchFacetingElements());

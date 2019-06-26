@@ -115,11 +115,13 @@
                 var tuple = page.tuples[0];
 
 
-                // update the window location with tuple to remove query params
+                // update the window location with tuple to remove query params (namely ppid and pcid)
                 // and also change the url to always be based on RID
                 var url = tuple.reference.contextualize.detailed.appLink;
-                UriUtils.removeParentContext(url);
                 url = url.substring(0, url.lastIndexOf("?"));
+
+                // add hideNavbar param back if true
+                if (context.hideNavbar) url += "?hideNavbar=" + context.hideNavbar;
                 $window.history.replaceState('', '', url);
 
                 // related references

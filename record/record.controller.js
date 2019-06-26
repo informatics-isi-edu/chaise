@@ -483,7 +483,7 @@
         function setMainContainerHeight() {
             var elements = fetchContainerElements();
             // if these values are not set yet, don't set the height
-            if(elements.navbarHeight && elements.bookmarkHeight) {
+            if(elements.navbarHeight !== undefined && elements.bookmarkHeight) {
                 UiUtils.setDisplayContainerHeight(elements);
             }
         };

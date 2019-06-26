@@ -385,6 +385,8 @@
             var contextObj = ConfigUtils.getContextJSON();
             pcontext.push("pcid=" + contextObj.cid);
             pcontext.push("ppid=" + contextObj.pid);
+            // only add the value to the applink function if it's true
+            if (contextObj.hideNavbar) pcontext.push("hideNavbar=" + contextObj.hideNavbar)
 
             // TODO we might want to allow only certian query parameters
             if (location.queryParamsString) {
@@ -752,7 +754,7 @@
             };
         }
 
-
+        // Takes any string, finds the '?' character, and splits all content after '?' assuming they are in the form of key=value&key2=value&...
         function queryStringToJSON(queryString) {
             queryString  = queryString || $window.location.search;
             if (queryString.indexOf('?') > -1){
@@ -880,9 +882,26 @@
             }
         }
 
-        function removeParentContext(url) {
-            url = url.substring(0, url.lastIndexOf("?"));
-            $window.history.replaceState('', '', url);
+        /**
+         * Given a location href and key, return the query param value that matches that key
+         * @param {String} url - the full url for the current page
+         * @param {String} key - the key of the query parameter you want the value of
+         * @returns {String} the value of that key or null, if that key doesn't exist as a query parameter
+         *
+         * Note: This won't handle the case where the url might be like this:
+         * '?catalog/schema:table/limit=20' where limit is a column name
+         */
+        function getQueryParam(url, key) {
+            var params = {};
+            var idx = url.lastIndexOf("?");
+            if (idx !== -1) {
+                var queries = url.slice(idx+1).split("&");
+                for (var i = 0; i < queries.length; i++) {
+                    var q_parts = queries[i].split("=");
+                    params[decodeURIComponent(q_parts[0])] = decodeURIComponent(q_parts[1]);
+                }
+            }
+            return params[key];
         }
 
         return {
@@ -895,11 +914,11 @@
             fixedEncodeURIComponent: fixedEncodeURIComponent,
             getCatalogId: getCatalogId,
             getHash: getHash,
+            getQueryParam: getQueryParam,
             isBrowserIE: isBrowserIE,
             parsedFilterToERMrestFilter: parsedFilterToERMrestFilter,
             parseURLFragment: parseURLFragment,
             queryStringToJSON: queryStringToJSON,
-            removeParentContext: removeParentContext,
             resolvePermalink: resolvePermalink,
             setLocationChangeHandling: setLocationChangeHandling,
             setOrigin: setOrigin,
@@ -1760,7 +1779,6 @@
                 var canonicalURL = $window.location.origin + $window.location.pathname + UriUtils.stripSortAndQueryParams(hash);
                 canonicalTag.setAttribute("href", canonicalURL);
                 document.getElementsByTagName("head")[0].appendChild(canonicalTag);
-                console.log(document.getElementsByTagName("head")[0]);
             }
         }
 
