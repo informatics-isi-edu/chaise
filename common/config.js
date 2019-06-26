@@ -28,8 +28,9 @@
     .run(['appName', 'ConfigUtils', 'ERMrest', 'headInjector', 'MathUtils', 'UriUtils', '$rootScope', '$window', function(appName, ConfigUtils, ERMrest, headInjector, MathUtils, UriUtils, $rootScope, $window) {
         headInjector.setWindowName();
 
+        // we don't care if the param is any other value than true
+        var hideNavbar = UriUtils.getQueryParam($window.location.href, "hideNavbar") === "true";
         // initialize dcctx object
-        var hideNavbar = UriUtils.getQueryParam($window.location.href, "hideNavbar") === "true" ? true : false;
         $window.dcctx = {
             cid: appName,
             pid: MathUtils.uuid(),

@@ -120,8 +120,8 @@
                 var url = tuple.reference.contextualize.detailed.appLink;
                 url = url.substring(0, url.lastIndexOf("?"));
 
-                // add hideNavbar param back if present/defined
-                if (context.hideNavbar != undefined) url += "?hideNavbar=" + context.hideNavbar;
+                // add hideNavbar param back if true
+                if (context.hideNavbar) url += "?hideNavbar=" + context.hideNavbar;
                 $window.history.replaceState('', '', url);
 
                 // related references

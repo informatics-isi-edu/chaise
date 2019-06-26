@@ -57,7 +57,7 @@
             }
 
             // add hideNavbar if present/defined
-            if (dcctx.hideNavbar != undefined) {
+            if (dcctx.hideNavbar) {
                 url = url + (recordsetModel.reference.location.queryParamsString ? "&" : "?") + "hideNavbar=" + dcctx.hideNavbar;
             }
 
