@@ -750,7 +750,7 @@
             var elements = fetchContainerElements(idx);
             // if the navbarHeight is not set yet, don't set the height
             // no bookmark container here
-            if(elements.navbarHeight) {
+            if(elements.navbarHeight !== undefined) {
                 UiUtils.setDisplayContainerHeight(elements);
             }
         }

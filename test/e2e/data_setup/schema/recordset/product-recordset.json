@@ -368,21 +368,39 @@
           "compact" : [
               "title", "website", "rating", "no_of_rooms", "summary","terms", "opened_on", "luxurious","json_col", "json_col_with_markdown",
               ["product-recordset", "fk_category"],
-              {"source": [
-                {"outbound": ["product-recordset", "fk_category"]},
-                {"outbound": ["product-recordset", "fk_facilities"]},
-                "type"
-              ], "markdown_name": "Type of Facilities"},
-              {"source": [
-                  {"inbound": ["product-recordset", "fk_accommodation_image"]},
-                  {"outbound": ["product-recordset", "fk_accommodation_image_2"]},
-                  "id"
-              ], "aggregate": "cnt", "markdown_name": "Image Count", "comment": "Image Count"},
-              {"source": [
-                  {"inbound": ["product-recordset", "fk_accommodation_image"]},
-                  {"outbound": ["product-recordset", "fk_accommodation_image_2"]},
-                  "id"
-              ], "aggregate": "cnt_d", "markdown_name": "Image Distinct Count", "comment": "Image Distinct Count"},
+              {
+                  "source": [
+                      {"outbound": ["product-recordset", "fk_category"]},
+                      {"outbound": ["product-recordset", "fk_facilities"]},
+                      "type"
+                  ],
+                  "display": {
+                      "markdown_pattern": "[{{{$self.rowName}}}]({{{$self.uri.detailed}}})"
+                  },
+                  "markdown_name": "Type of Facilities"
+              },
+              {
+                  "source": [
+                      {"inbound": ["product-recordset", "fk_accommodation_image"]},
+                      {"outbound": ["product-recordset", "fk_accommodation_image_2"]},
+                      "id"
+                  ],
+                  "display": {
+                      "markdown_pattern": "{{#if (ne $self 0)}}#{{{$self}}}{{/if}}",
+                      "template_engine": "handlebars"
+                  },
+                  "aggregate": "cnt", "markdown_name": "Image Count", "comment": "Image Count"},
+              {
+                  "source": [
+                      {"inbound": ["product-recordset", "fk_accommodation_image"]},
+                      {"outbound": ["product-recordset", "fk_accommodation_image_2"]},
+                      "id"
+                  ],
+                  "display": {
+                      "markdown_pattern": "{{#if (ne $self 0)}}{{{$self}}} distinct{{/if}}",
+                      "template_engine": "handlebars"
+                  },
+                  "aggregate": "cnt_d", "markdown_name": "Image Distinct Count", "comment": "Image Distinct Count"},
               {"source": [
                   {"inbound": ["product-recordset", "fk_accommodation_image"]},
                   {"outbound": ["product-recordset", "fk_accommodation_image_2"]},

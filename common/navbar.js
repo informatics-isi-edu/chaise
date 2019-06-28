@@ -1,24 +1,37 @@
 (function() {
+    function hasClass(ele, className) {
+      var className = " " + className + " ";
+      if ((" " + ele.className + " ").replace(/[\n\t]/g, " ").indexOf(className) > -1) {
+        return true;
+      }
+      return false;
+    }
+
+    function getNextSibling(elem, selector) {
+      var sibling = elem.nextElementSibling;
+      if (!selector) return sibling;
+      while (sibling) {
+        if (sibling.matches(selector)) return sibling;
+        sibling = sibling.nextElementSibling
+      }
+    };
+
+    function onToggle(open) {
+      var elems = document.querySelectorAll(".dropdown-menu.show");
+      [].forEach.call(elems, function(el) {
+        el.classList.remove("show");
+      });
+    }
+
     function toggleMenu($event) {
-        // prevent menu from closing on click
-        $event.stopPropagation();
-        $event.preventDefault();
-
-        var el = $($event.target);
-
-        // if the dropdown we are trying to open is closed
-        if (!el.next().hasClass('show')) {
-            // find if another dropdown menu is open in the same list, close it first
-            el.parents('.dropdown-menu').first().find('.show').removeClass("show");
-        }
-
-
-        // open the dropdown menu
-        el.next(".dropdown-menu").toggleClass("show");
-        // attach handler for when the main nav dropdown closes, close each submenu dropdown as well
-        el.parents('ul.nav li.open').on('hidden.bs.dropdown', function(e) {
-            $('.dropdown-submenu .show').removeClass("show");
+      $event.stopPropagation();
+      $event.preventDefault();
+      if (!hasClass(getNextSibling($event.target,".dropdown-menu"),"show")) {
+        $event.target.closest(".dropdown-menu").querySelectorAll('.show').forEach(function(el) {
+          el.classList.remove("show");
         });
+      }
+      getNextSibling($event.target,".dropdown-menu").classList.toggle("show");
     }
 
     function isCatalogDefined(val) {
@@ -62,13 +75,16 @@
             templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/navbar.html',
             link: function(scope) {
                 var chaiseConfig = ConfigUtils.getConfigJSON();
+                var dcctx = ConfigUtils.getContextJSON();
 
+                scope.hideNavbar = dcctx.hideNavbar;
                 scope.brandURL = chaiseConfig.navbarBrand;
                 scope.brandText = chaiseConfig.navbarBrandText;
                 scope.brandImage = chaiseConfig.navbarBrandImage;
                 scope.menu = chaiseConfig.navbarMenu ? chaiseConfig.navbarMenu.children : [];
 
                 scope.toggleMenu = toggleMenu;
+                scope.onToggle = onToggle;
                 if (isCatalogDefined(catalogId)) {
                     scope.isVersioned = function () {
                         return catalogId.split("@")[1] ? true : false;
