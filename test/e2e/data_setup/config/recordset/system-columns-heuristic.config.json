@@ -1,0 +1,15 @@
+{
+    "catalog": {},
+    "schema": {
+        "name": "system-columns-heuristic",
+        "createNew": true,
+        "path": "test/e2e/data_setup/schema/recordset/system-columns-heuristic.json"
+    },
+    "tables": {
+        "createNew": true
+    },
+    "entities": {
+        "createNew": true,
+        "path": "test/e2e/data_setup/data/system-columns-heuristic"
+    }
+}

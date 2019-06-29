@@ -180,6 +180,14 @@ var testParams = {
         exportDropdown: "Click to choose an export format.",
         permalink: "This link stores your search criteria as a URL. Right click and save.",
         actionCol: "Click on the action buttons to view, edit, or delete each record"
+    },
+    system_columns: {
+        table_name: "system-columns",
+        compactConfig: ['RCB', 'RMT'],
+        detailedCofnig: true,
+        compactColumnsSystemColumnsTable: ['RID', 'id', 'text', 'int', 'RCB', 'RMT'],
+        detailedColumns: ['RID', 'id', 'text', 'int', 'RCB', 'RMB', 'RCT', 'RMT'],
+        compactColumnsPersonTable: ['RID', 'id', 'text', 'RCB', 'RMT'] // no int column because it's the fireogn key link (would be redundent)
     }
 };
 
@@ -973,6 +981,63 @@ describe('View recordset,', function() {
                         return modalTitle.getText();
                     }).then(function (title) {
                         expect(title).toBe("Invalid URI");
+                    });
+                });
+            });
+
+            describe("should load chaise-config.js with system columns heuristic properties", function () {
+                var systemColumnsParams = testParams.system_columns;
+                beforeAll(function () {
+                    browser.ignoreSynchronization=true;
+                    var url = browser.params.url + "/recordset/#" + browser.params.catalogId + "/system-columns-heuristic:" + systemColumnsParams.table_name;
+                    browser.get(url); // won't fetch the change because hash didn't change, changes the url
+                    browser.refresh(); // hash didn't change, so page won't actually fetch unless reloaded
+
+                    chaisePage.recordsetPageReady();
+                });
+
+                it('should load chaise-config.js with confirmDelete=true && defaults catalog and table set', function() {
+                    browser.executeScript('return chaiseConfig').then(function(config) {
+                        expect(config.SystemColumnsDisplayCompact).toEqual(systemColumnsParams.compactConfig);
+                        expect(config.SystemColumnsDisplayDetailed).toBeTruthy();
+                    }).catch(function(error) {
+                        console.log('ERROR:', error);
+                        // Fail the test
+                        expect('There was an error in this promise chain.').toBe('See the error msg for more info.');
+                    });
+                });
+
+                it("with SystemColumnsDisplayCompact: ['RCB', 'RMT'], should have proper columns.", function () {
+                    chaisePage.recordsetPage.getColumnNames().then(function(columns) {
+                        expect(columns.length).toBe(systemColumnsParams.compactColumnsSystemColumnsTable.length);
+                        for (var i = 0; i < columns.length; i++) {
+                            expect(columns[i].getText()).toEqual(systemColumnsParams.compactColumnsSystemColumnsTable[i]);
+                        }
+                    });
+                });
+
+                it("SystemColumnsDisplayDetailed: true, should have proper columns after clicking a row.", function () {
+                    chaisePage.recordsetPage.getViewActionButtons().then(function (buttons) {
+                        expect(buttons.length).toBe(1);
+                        return buttons[0].click();
+                    }).then(function () {
+                        return chaisePage.recordPageReady();
+                    }).then(function () {
+                        return chaisePage.recordPage.getColumns();
+                    }).then(function (columns) {
+                        expect(columns.length).toBe(systemColumnsParams.detailedColumns.length);
+                        for (var i = 0; i < columns.length; i++) {
+                            expect(columns[i].getText()).toEqual(systemColumnsParams.detailedColumns[i]);
+                        }
+                    });
+                });
+
+                it("on record page, SystemColumnsDisplayCompact should also be honored for related tables.", function () {
+                    chaisePage.recordPage.getRelatedTableColumnNamesByTable("person").then(function (columns) {
+                        expect(columns.length).toBe(systemColumnsParams.compactColumnsPersonTable.length);
+                        for (var i = 0; i < columns.length; i++) {
+                            expect(columns[i].getText()).toEqual(systemColumnsParams.compactColumnsPersonTable[i]);
+                        }
                     });
                 });
             });
