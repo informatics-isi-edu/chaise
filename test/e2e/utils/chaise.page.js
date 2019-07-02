@@ -1008,6 +1008,10 @@ var recordsetPage = function() {
         return element.all(by.css('.table-row'));
     };
 
+    this.getRowCells = function (el) {
+        return el.all(by.tagName("td"));
+    };
+
     this.getModalRows = function () {
         return element.all(by.css('.modal-body .table-row'));
     };

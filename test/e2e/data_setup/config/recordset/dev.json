@@ -1,7 +1,8 @@
 {
     "setup": {
         "schemaConfigurations": [
-            "recordset/config.json"
+            "recordset/config.json",
+            "recordset/active-list.config.json"
         ],
         "schema": "product-recordset"
     },

@@ -385,7 +385,7 @@
             {
               "source": "title",
               "display": {
-                "waitfor": ["RID", "facilities_all_outbound_entity"]
+                "wait_for": ["RID", "facilities_all_outbound_entity"]
               }
             },
             "website",
@@ -399,7 +399,7 @@
             {
               "source": "json_col_with_markdown",
               "display": {
-                "waitfor": [
+                "wait_for": [
                   "image_id_aggregate_entity_array_d"
                 ]
               }
@@ -408,7 +408,7 @@
               "source": "no_of_beds",
               "display": {
                 "markdown_pattern": "beds: {{{$self}}}, id: {{{id_alias}}}{{#if facilities_all_outbound_entity.values._gym}}, has gym{{/if}}{{# $fkey_product-recordset_fk_thumbnail}}, thumbnail: {{{values.filename}}}{{/$fkey_product-recordset_fk_thumbnail}}, image id cnt: {{{image_id_aggregate_cnt}}}",
-                "waitfor": ["image_id_aggregate_cnt", "facilities_all_outbound_entity"],
+                "wait_for": ["image_id_aggregate_cnt", "facilities_all_outbound_entity"],
                 "template_engine": "handlebars"
               },
               "comment": "test all-outbound + waitfor for normal columns"
@@ -416,14 +416,14 @@
             {
               "source": "no_of_baths",
               "display": {
-                "waitfor": [
+                "wait_for": [
                   "image_id_aggregate_entity_array_d",
                   "image_id_aggregate_cnt_d"
                 ],
                 "markdown_pattern": "baths: {{{$self}}}, id: {{{id}}}{{#if (gt _image_id_aggregate_cnt_d  0) }}, images: {{#each image_id_aggregate_entity_array_d}}[{{{this.rowName}}}]({{{this.uri.detailed}}}){{#unless @last}}, {{/unless}}{{/each}}{{/if}}",
                 "template_engine": "handlebars"
               },
-              "comment": "waitfor normal columns on multiple aggregates"
+              "comment": "wait_for normal columns on multiple aggregates"
             },
             [
               "product-recordset",
@@ -441,7 +441,7 @@
               "comment": "Image Distinct Count",
               "markdown_name": "Image Distinct Count",
               "display": {
-                "waitfor": [
+                "wait_for": [
                   "image_id_aggregate_cnt"
                 ]
               }
@@ -456,7 +456,7 @@
               "comment": "Summary of Image ID",
               "markdown_name": "summary of Image ID",
               "display": {
-                "waitfor": [
+                "wait_for": [
                   "image_id_aggregate_cnt_d", "self_link_id"
                 ],
                 "markdown_pattern": "rating: {{{self_link_id.values.rating}}}, max: {{{image_id_aggregate_max}}}, count: {{_image_id_aggregate_cnt_d}}, category: {{{$fkey_product-recordset_fk_category.rowName}}}",

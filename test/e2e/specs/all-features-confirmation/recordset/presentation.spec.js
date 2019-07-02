@@ -23,7 +23,7 @@ var testParams = {
             { title: "json_col"},
             { title: "json_col_with_markdown"},
             { title: "no_of_beds", comment: "test all-outbound + waitfor for normal columns"},
-            { title: "no_of_baths", comment: "waitfor normal columns on multiple aggregates"},
+            { title: "no_of_baths", comment: "wait_for normal columns on multiple aggregates"},
             { title: "Category", comment: "Type of accommodation ('Resort/Hotel/Motel')"},
             { title: "Type of Facilities", comment: "Type of facilities ('Luxury/Upscale/Basic')"},
             { title: "Image Count", comment: "Image Count"},
@@ -190,6 +190,12 @@ var testParams = {
         exportDropdown: "Click to choose an export format.",
         permalink: "This link stores your search criteria as a URL. Right click and save.",
         actionCol: "Click on the action buttons to view, edit, or delete each record"
+    },
+    activeList: {
+        schemaName: "active_list_schema",
+        table_name: "main",
+        sortby: "main_id"
+        // data is defined in place because we need rid value
     }
 };
 
@@ -197,6 +203,78 @@ describe('View recordset,', function() {
 
     var accommodationParams = testParams.accommodation_tuple,
         fileParams = testParams.file_tuple;
+
+
+    if (!process.env.TRAVIS) {
+        describe("For recordset with columns with waitfor, ", function () {
+            var activeListParams = testParams.activeList;
+            beforeAll(function () {
+                browser.ignoreSynchronization=true;
+                browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + activeListParams.schemaName + ":" + activeListParams.table_name + "@sort(" + activeListParams.sortby + ")");
+
+                chaisePage.waitForElement(element(by.id("divRecordSet")));
+                chaisePage.recordsetPage.waitForAggregates();
+            });
+
+            it ("should show correct table rows.", function (done) {
+                var activeListData = [
+                    [
+                        "main one", // self_link_rowname
+                        "current: main one(1234501, 1,234,501), id: 01, array: 1,234,521, 1,234,522, 1,234,523, 1,234,524, 1,234,525", // self_link_id
+                        "1,234,501", //normal_col_int_col
+                        "current cnt: 5 - 1,234,511, 1234511, cnt_i1: 5", //normal_col_int_col_2
+                        "outbound1 one", //outbound_entity_o1
+                        "current: outbound2 one(1234521, 1,234,521), self_link_rowname: 1,234,501", //outbound_entity_o2
+                        "1,234,511", //outbound_scalar_o1
+                        "current: 1,234,521, 1234521, max_i1: 1,234,525, array i1: inbound1 one(1234521, 1,234,521), inbound1 two(1234522, 1,234,522)", //outbound_scalar_o2
+                        "outbound1_outbound1 one", // all_outbound_entity_o1_o1
+                        "current: outbound2_outbound1 one(12345111, 12,345,111), array: 12345221| 12345222", // all_outbound_entity_o2_o1
+                        "12,345,111", // all_outbound_scalar_o1_o1
+                        "current: 12,345,111, 12345111, o1_o1_o1: outbound1_outbound1_outbound1 one, o2_o1: 12,345,111", //all_outbound_scalar_o2_o1
+                        "inbound1 one, inbound1 two", // array_d_entity_i1
+                        "current: inbound2 one(12345221, 12,345,221), cnt: 5", // array_d_entity_i2
+                        "1,234,521, 1,234,522, 1,234,523, 1,234,524, 1,234,525", // array_d_scalar_i1
+                        "current: 12,345,221, 12,345,222 - 12345221| 12345222, max: 12,345,225", // array_d_scalar_i2
+                        "5", //cnt_i1
+                        "current: 5, 5, cnt_i1: 5, array_i3: inbound3 one", //cnt_i2
+                        "5", //cnt_d_i1
+                        "current: 5, 5, cnt_i1: 5, cnt_i2: 5, array_i4: i01, i02, i03, i04, i05", //cnt_d_i2
+                        "1,234,521", //min_i1
+                        "current: 12,345,221, 12345221, 12,345,111", //min_i2
+                        "1,234,525", //max_i1
+                        "current: 12,345,225, 12345225", //max_i2
+                    ],
+                    [
+                        "main two", "", "1,234,502",
+                        "", "", "", "", "", "", "",
+                        "", "", "", "", "", "", "",
+                        "", "", "", "", "", "", ""
+                    ]
+                ];
+
+                chaisePage.recordsetPage.getRows().then(function (rows) {
+                    expect(rows.length).toBe(activeListData.length, "row length missmatch.");
+                    rows.forEach(function (row, rowIndex) {
+                        var expectedRow = activeListData[rowIndex];
+                        chaisePage.recordsetPage.getRowCells(row).then(function (cells) {
+                            expect(cells.length).toBe(expectedRow.length + 1, "cells length missmatch for row index=" + rowIndex);
+
+                            var expectedCell
+                            for (var cellIndex = 0; cellIndex < expectedRow.length; cellIndex++) {
+                                expectedCell = expectedRow[cellIndex];
+                                expect(cells[cellIndex + 1].getText()).toBe(expectedCell, "data missmatch in row index=" + rowIndex + ", cell index=" + cellIndex);
+                            }
+
+                            if (rowIndex === rows.length - 1) {
+                                done();
+                            }
+
+                        }).catch(chaisePage.catchTestError());
+                    });
+                }).catch(chaisePage.catchTestError(done));
+            });
+        });
+    }
 
     describe("For table " + accommodationParams.table_name + ",", function() {
 

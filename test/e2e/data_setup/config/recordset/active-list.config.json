@@ -1,0 +1,15 @@
+{
+    "catalog": {},
+    "schema": {
+        "name": "active_list_schema",
+        "createNew": true,
+        "path": "test/e2e/data_setup/schema/recordset/active-list.json"
+    },
+    "tables": {
+        "createNew": true
+    },
+    "entities": {
+        "createNew": true,
+        "path": "test/e2e/data_setup/data/active-list"
+    }
+}
