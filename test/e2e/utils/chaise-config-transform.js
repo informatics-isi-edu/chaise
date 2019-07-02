@@ -7,4 +7,3 @@ if (process.env.ERMREST_URL) {
 
 var str = "var chaiseConfig=" + JSON.stringify(config, undefined , 2) + ";";
 fs.writeFile(__dirname + '/../../../chaise-config.js', str);
-
