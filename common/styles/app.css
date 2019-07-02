@@ -149,6 +149,9 @@ span[uib-tooltip], .show-tooltip-border[uib-tooltip] {
 .filters-tooltip {
     margin-right: 2%;
 }
+.filters-tooltip .tooltip-inner {
+    white-space: normal;
+}
 
 .filters-tooltip .tooltip-inner {
     max-width: inherit;
