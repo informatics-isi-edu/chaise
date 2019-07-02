@@ -1563,7 +1563,7 @@
             var cc = getConfigJSON();
 
             var mode = null;
-            if (context == 'compact' && cc.SystemColumnsDisplayCompact)  {
+            if (context.indexOf('compact') != -1 && cc.SystemColumnsDisplayCompact)  {
                 mode = cc.SystemColumnsDisplayCompact;
             } else if (context == 'detailed' && cc.SystemColumnsDisplayDetailed) {
                 mode = cc.SystemColumnsDisplayDetailed;
