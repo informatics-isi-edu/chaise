@@ -9,6 +9,8 @@ var chaiseConfig = {
     maxRelatedTablesOpen: 6,
     allowErrorDismissal : true,
     resolverImplicitCatalog: 2, // in parallel config mode, this config is used first with catalog Id
+    SystemColumnsDisplayCompact: ['RCB', 'RMT'],
+    SystemColumnsDisplayDetailed: true,
     footerMarkdown:"**Please check** [Privacy Policy](/privacy-policy/){target='_blank'}",
     defaultTables: {
         "1": {

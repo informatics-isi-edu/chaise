@@ -1,11 +1,12 @@
 var chaisePage = require('../../../utils/chaise.page.js');
 
 describe('Navbar ', function() {
-    var navbar, chaiseConfig, EC = protractor.ExpectedConditions;
+    var url, navbar, chaiseConfig, EC = protractor.ExpectedConditions;
 
     beforeAll(function () {
         browser.ignoreSynchronization=true;
-        browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/catalog-config-navbar:config-table");
+        url = browser.params.url + "/recordset/#" + browser.params.catalogId + "/catalog-config-navbar:config-table";
+        browser.get(url);
         navbar = element(by.id('mainnav'));
         browser.executeScript('return chaiseConfig;').then(function(config) {
             chaiseConfig = config;
@@ -34,5 +35,12 @@ describe('Navbar ', function() {
         expect(actualLogo.isDisplayed()).toBeTruthy();
         expect(actualLogo.getAttribute('src')).not.toMatch(wrongLogo, "the logo matched and shouldn't");
         expect(actualLogo.getAttribute('src')).toMatch(expectedLogo, "the expected logo is not shown");
+    });
+
+    it('should hide the navbar bar if the hideNavbar query parameter is set to true', function () {
+        browser.get(url + "?hideNavbar=true");
+        browser.wait(EC.presenceOf(navbar), browser.params.defaultTimeout);
+
+        expect(navbar.isDisplayed()).toBeFalsy();
     });
 });
