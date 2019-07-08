@@ -926,10 +926,11 @@
         }
     }])
 
-    .factory('FunctionUtils', ['Session', 'UriUtils', function(Session, UriUtils) {
+    .factory('FunctionUtils', ['ConfigUtils', 'Session', 'UriUtils', function(ConfigUtils, Session, UriUtils) {
         function registerErmrestCallbacks() {
             ERMrest.appLinkFn(UriUtils.appTagToURL);
             ERMrest.onHTTPSuccess(Session.extendPromptExpirationToken);
+            ERMrest.systemColumnsHeuristicsMode(ConfigUtils.systemColumnsMode);
         }
 
         return {
@@ -1551,11 +1552,32 @@
             return getContextJSON().server ? getContextJSON().server.http : $http;
         };
 
+        /**
+         * Given the context, returns the value of the chaise config property for system column heuristics
+         * @params {String} context - the current app context
+         * @return {boolean|Array|null} boolean - value to show or hide all system columns
+         *                              Array - order of which columns to show
+         *                              null - no value defined for the current context
+         */
+        function systemColumnsMode(context) {
+            var cc = getConfigJSON();
+
+            var mode = null;
+            if (context.indexOf('compact') != -1 && cc.SystemColumnsDisplayCompact)  {
+                mode = cc.SystemColumnsDisplayCompact;
+            } else if (context == 'detailed' && cc.SystemColumnsDisplayDetailed) {
+                mode = cc.SystemColumnsDisplayDetailed;
+            }
+
+            return mode;
+        }
+
         return {
             getContextJSON: getContextJSON,
             getConfigJSON: getConfigJSON,
             setConfigJSON: setConfigJSON,
-            getHTTPService: getHTTPService
+            getHTTPService: getHTTPService,
+            systemColumnsMode: systemColumnsMode
         }
     }])
 

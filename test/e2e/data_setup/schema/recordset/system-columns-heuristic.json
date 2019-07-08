@@ -1,0 +1,104 @@
+{
+    "schema_name": "system-columns-heuristic",
+    "tables": {
+        "system-columns": {
+            "comment": "Table to represent system columns heuristics being applied for visible-columns",
+            "kind": "table",
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "id"
+                    ]
+                }
+            ],
+            "foreign_keys": [],
+            "table_name": "system-columns",
+            "schema_name": "system-columns-heuristic",
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "default": null,
+                    "nullok": false,
+                    "type": {
+                        "typename": "int"
+                    }
+                }, {
+                    "name": "text",
+                    "nullok": true,
+                    "type": {
+                        "typename": "text"
+                    }
+                }, {
+                    "name": "int",
+                    "nullok": true,
+                    "type": {
+                        "typename": "int"
+                    }
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:visible-foreign-keys" : {
+                    "detailed" : [
+                        ["system-columns-heuristic", "fk_person"]
+                    ]
+                }
+            }
+        },
+        "person": {
+            "comment": "Table to represent a person FK from RCB column",
+            "kind": "table",
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "id"
+                    ]
+                }
+            ],
+            "foreign_keys": [{
+                "comment": null,
+                "names": [["system-columns-heuristic", "fk_person"]],
+                "foreign_key_columns": [{
+                    "table_name": "person",
+                    "schema_name": "system-columns-heuristic",
+                    "column_name": "int"
+                }],
+                "referenced_columns": [{
+                    "table_name": "system-columns",
+                    "schema_name": "system-columns-heuristic",
+                    "column_name": "id"
+                }]
+            }],
+            "table_name": "person",
+            "schema_name": "system-columns-heuristic",
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "default": null,
+                    "nullok": false,
+                    "type": {
+                        "typename": "int"
+                    }
+                }, {
+                    "name": "int",
+                    "nullok": true,
+                    "type": {
+                        "typename": "int"
+                    }
+                }, {
+                    "name": "text",
+                    "nullok": true,
+                    "type": {
+                        "typename": "text"
+                    }
+                }
+            ],
+            "annotations": {}
+        }
+    },
+    "comment": null,
+    "annotations": {}
+}
