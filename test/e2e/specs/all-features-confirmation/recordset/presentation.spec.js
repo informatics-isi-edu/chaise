@@ -185,9 +185,9 @@ var testParams = {
         table_name: "system-columns",
         compactConfig: ['RCB', 'RMT'],
         detailedCofnig: true,
-        compactColumnsSystemColumnsTable: ['RID', 'id', 'text', 'int', 'RCB', 'RMT'],
+        compactColumnsSystemColumnsTable: ['id', 'text', 'int', 'RCB', 'RMT'],
         detailedColumns: ['RID', 'id', 'text', 'int', 'RCB', 'RMB', 'RCT', 'RMT'],
-        compactColumnsPersonTable: ['RID', 'id', 'text', 'RCB', 'RMT'] // no int column because it's the fireogn key link (would be redundent)
+        compactColumnsPersonTable: ['id', 'text', 'RCB', 'RMT'] // no int column because it's the fireogn key link (would be redundent)
     }
 };
 
