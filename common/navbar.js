@@ -59,7 +59,24 @@
             var parentNewTab = obj.newTab;
             // template the url
             // TODO: This is done here to prevent writing a recursive function (again) in `setConfigJSON()`
-            if (obj.url && isCatalogDefined(catalogId)) obj.url = ERMrest.renderHandlebarsTemplate(obj.url, null, {id: catalogId});
+            if (obj.url && isCatalogDefined(catalogId)) {
+                obj.url = ERMrest.renderHandlebarsTemplate(obj.url, null, {id: catalogId});
+                // only append pcid/ppid if link is to the same origin
+                // same origin urls will be relative, check for http instead(?)
+                // if http, make sure not same origin
+                if (obj.url.indexOf("http") == -1 || obj.url.indexOf($window.location.origin) != -1) {
+                    var paramChar = "";
+                    if (obj.url.lastIndexOf("?") !== -1) {
+                        // already a `?` in the url
+                        paramChar += '&';
+                    } else {
+                        paramChar += '?';
+                    }
+                    // pcid should always be navbar
+                    // ppid should be the pid for the current page
+                    obj.url += paramChar + "pcid=navbar&ppid=" + $window.dcctx.pid;
+                }
+            }
             // If current node has children, set each child's newTab to its own existing newTab or parent's newTab
             if (Array.isArray(obj.children)) {
                 obj.children.forEach(function (child) {
