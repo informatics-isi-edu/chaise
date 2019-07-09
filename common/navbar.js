@@ -61,10 +61,19 @@
             // TODO: This is done here to prevent writing a recursive function (again) in `setConfigJSON()`
             if (obj.url && isCatalogDefined(catalogId)) {
                 obj.url = ERMrest.renderHandlebarsTemplate(obj.url, null, {id: catalogId});
-                // only append pcid/ppid if link is to the same origin
-                // same origin urls will be relative, check for http instead(?)
-                // if http, make sure not same origin
-                if (obj.url.indexOf("http") == -1 || obj.url.indexOf($window.location.origin) != -1) {
+
+                function isChaiseUrl (url) {
+                    function isChaiseApp (url) {
+                        return (url.indexOf("record") != -1 || url.indexOf("recordset") != -1 || url.indexOf("recordedit") != -1);
+                    }
+                    // first check for same origin (easiest to know if a chaise url)
+                    // check for chaise app if not
+                    return (url.indexOf($window.location.origin) != -1 || isChaiseApp(url));
+                }
+
+                // only append pcid/ppid if link is to a chaise url
+                // same origin urls may be relative
+                if (isChaiseUrl(obj.url)) {
                     var paramChar = "";
                     if (obj.url.lastIndexOf("?") !== -1) {
                         // already a `?` in the url
@@ -74,7 +83,7 @@
                     }
                     // pcid should always be navbar
                     // ppid should be the pid for the current page
-                    obj.url += paramChar + "pcid=navbar&ppid=" + $window.dcctx.pid;
+                    obj.url += paramChar + "pcid=navbar&ppid=" + ConfigUtils.getContextJSON().pid;
                 }
             }
             // If current node has children, set each child's newTab to its own existing newTab or parent's newTab
