@@ -194,8 +194,49 @@ var testParams = {
     activeList: {
         schemaName: "active_list_schema",
         table_name: "main",
-        sortby: "main_id"
-        // data is defined in place because we need rid value
+        sortby: "main_id",
+        data: [
+            [
+                "main one", // self_link_rowname
+                "current: main one(1234501, 1,234,501), id: 01, array: 1,234,521, 1,234,522, 1,234,523, 1,234,524, 1,234,525", // self_link_id
+                "1,234,501", //normal_col_int_col
+                "current cnt: 5 - 1,234,511, 1234511, cnt_i1: 5", //normal_col_int_col_2
+                "outbound1 one", //outbound_entity_o1
+                "current: outbound2 one(1234521, 1,234,521), self_link_rowname: 1,234,501", //outbound_entity_o2
+                "1,234,511", //outbound_scalar_o1
+                "current: 1,234,521, 1234521, max_i1: 1,234,525, array i1: inbound1 one(1234521, 1,234,521), inbound1 two(1234522, 1,234,522)", //outbound_scalar_o2
+                "outbound1_outbound1 one", // all_outbound_entity_o1_o1
+                "current: outbound2_outbound1 one(12345111, 12,345,111), array: 12345221| 12345222", // all_outbound_entity_o2_o1
+                "12,345,111", // all_outbound_scalar_o1_o1
+                "current: 12,345,111, 12345111, o1_o1_o1: outbound1_outbound1_outbound1 one, o2_o1: 12,345,111", //all_outbound_scalar_o2_o1
+                "inbound1 one, inbound1 two", // array_d_entity_i1
+                "current: inbound2 one(12345221, 12,345,221), cnt: 5", // array_d_entity_i2
+                "1,234,521, 1,234,522, 1,234,523, 1,234,524, 1,234,525", // array_d_scalar_i1
+                "current: 12,345,221, 12,345,222 - 12345221| 12345222, max: 12,345,225", // array_d_scalar_i2
+                "5", //cnt_i1
+                "current: 5, 5, cnt_i1: 5, array_i3: inbound3 one", //cnt_i2
+                "5", //cnt_d_i1
+                "current: 5, 5, cnt_i1: 5, cnt_i2: 5, array_i4: i01, i02, i03, i04, i05", //cnt_d_i2
+                "1,234,521", //min_i1
+                "current: 12,345,221, 12345221, 12,345,111", //min_i2
+                "1,234,525", //max_i1
+                "current: 12,345,225, 12345225", //max_i2
+            ],
+            [
+                "main two", "", "1,234,502",
+                "", "", "", "", "", "", "",
+                "", "", "", "", "", "", "",
+                "", "", "", "", "", "", ""
+            ]
+        ]
+    },
+    system_columns: {
+        table_name: "system-columns",
+        compactConfig: ['RCB', 'RMT'],
+        detailedCofnig: true,
+        compactColumnsSystemColumnsTable: ['RID', 'id', 'text', 'int', 'RCB', 'RMT'],
+        detailedColumns: ['RID', 'id', 'text', 'int', 'RCB', 'RMB', 'RCT', 'RMT'],
+        compactColumnsPersonTable: ['RID', 'id', 'text', 'RCB', 'RMT'] // no int column because it's the fireogn key link (would be redundent)
     }
 };
 
@@ -208,6 +249,8 @@ describe('View recordset,', function() {
     if (!process.env.TRAVIS) {
         describe("For recordset with columns with waitfor, ", function () {
             var activeListParams = testParams.activeList;
+            var activeListData = activeListParams.data;
+
             beforeAll(function () {
                 browser.ignoreSynchronization=true;
                 browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + activeListParams.schemaName + ":" + activeListParams.table_name + "@sort(" + activeListParams.sortby + ")");
@@ -217,41 +260,6 @@ describe('View recordset,', function() {
             });
 
             it ("should show correct table rows.", function (done) {
-                var activeListData = [
-                    [
-                        "main one", // self_link_rowname
-                        "current: main one(1234501, 1,234,501), id: 01, array: 1,234,521, 1,234,522, 1,234,523, 1,234,524, 1,234,525", // self_link_id
-                        "1,234,501", //normal_col_int_col
-                        "current cnt: 5 - 1,234,511, 1234511, cnt_i1: 5", //normal_col_int_col_2
-                        "outbound1 one", //outbound_entity_o1
-                        "current: outbound2 one(1234521, 1,234,521), self_link_rowname: 1,234,501", //outbound_entity_o2
-                        "1,234,511", //outbound_scalar_o1
-                        "current: 1,234,521, 1234521, max_i1: 1,234,525, array i1: inbound1 one(1234521, 1,234,521), inbound1 two(1234522, 1,234,522)", //outbound_scalar_o2
-                        "outbound1_outbound1 one", // all_outbound_entity_o1_o1
-                        "current: outbound2_outbound1 one(12345111, 12,345,111), array: 12345221| 12345222", // all_outbound_entity_o2_o1
-                        "12,345,111", // all_outbound_scalar_o1_o1
-                        "current: 12,345,111, 12345111, o1_o1_o1: outbound1_outbound1_outbound1 one, o2_o1: 12,345,111", //all_outbound_scalar_o2_o1
-                        "inbound1 one, inbound1 two", // array_d_entity_i1
-                        "current: inbound2 one(12345221, 12,345,221), cnt: 5", // array_d_entity_i2
-                        "1,234,521, 1,234,522, 1,234,523, 1,234,524, 1,234,525", // array_d_scalar_i1
-                        "current: 12,345,221, 12,345,222 - 12345221| 12345222, max: 12,345,225", // array_d_scalar_i2
-                        "5", //cnt_i1
-                        "current: 5, 5, cnt_i1: 5, array_i3: inbound3 one", //cnt_i2
-                        "5", //cnt_d_i1
-                        "current: 5, 5, cnt_i1: 5, cnt_i2: 5, array_i4: i01, i02, i03, i04, i05", //cnt_d_i2
-                        "1,234,521", //min_i1
-                        "current: 12,345,221, 12345221, 12,345,111", //min_i2
-                        "1,234,525", //max_i1
-                        "current: 12,345,225, 12345225", //max_i2
-                    ],
-                    [
-                        "main two", "", "1,234,502",
-                        "", "", "", "", "", "", "",
-                        "", "", "", "", "", "", "",
-                        "", "", "", "", "", "", ""
-                    ]
-                ];
-
                 chaisePage.recordsetPage.getRows().then(function (rows) {
                     expect(rows.length).toBe(activeListData.length, "row length missmatch.");
                     rows.forEach(function (row, rowIndex) {
@@ -275,7 +283,7 @@ describe('View recordset,', function() {
             });
         });
     }
-
+/*
     describe("For table " + accommodationParams.table_name + ",", function() {
 
         beforeAll(function () {
@@ -999,7 +1007,7 @@ describe('View recordset,', function() {
             });
         });
     });
-
+*/
     describe("For chaise config properties", function () {
         var EC = protractor.ExpectedConditions;
 
@@ -1063,6 +1071,63 @@ describe('View recordset,', function() {
                         return modalTitle.getText();
                     }).then(function (title) {
                         expect(title).toBe("Invalid URI");
+                    });
+                });
+            });
+
+            describe("should load chaise-config.js with system columns heuristic properties", function () {
+                var systemColumnsParams = testParams.system_columns;
+                beforeAll(function () {
+                    browser.ignoreSynchronization=true;
+                    var url = browser.params.url + "/recordset/#" + browser.params.catalogId + "/system-columns-heuristic:" + systemColumnsParams.table_name;
+                    browser.get(url); // won't fetch the change because hash didn't change, changes the url
+                    browser.refresh(); // hash didn't change, so page won't actually fetch unless reloaded
+
+                    chaisePage.recordsetPageReady();
+                });
+
+                it('should load chaise-config.js with confirmDelete=true && defaults catalog and table set', function() {
+                    browser.executeScript('return chaiseConfig').then(function(config) {
+                        expect(config.SystemColumnsDisplayCompact).toEqual(systemColumnsParams.compactConfig);
+                        expect(config.SystemColumnsDisplayDetailed).toBeTruthy();
+                    }).catch(function(error) {
+                        console.log('ERROR:', error);
+                        // Fail the test
+                        expect('There was an error in this promise chain.').toBe('See the error msg for more info.');
+                    });
+                });
+
+                it("with SystemColumnsDisplayCompact: ['RCB', 'RMT'], should have proper columns.", function () {
+                    chaisePage.recordsetPage.getColumnNames().then(function(columns) {
+                        expect(columns.length).toBe(systemColumnsParams.compactColumnsSystemColumnsTable.length);
+                        for (var i = 0; i < columns.length; i++) {
+                            expect(columns[i].getText()).toEqual(systemColumnsParams.compactColumnsSystemColumnsTable[i]);
+                        }
+                    });
+                });
+
+                it("SystemColumnsDisplayDetailed: true, should have proper columns after clicking a row.", function () {
+                    chaisePage.recordsetPage.getViewActionButtons().then(function (buttons) {
+                        expect(buttons.length).toBe(1);
+                        return buttons[0].click();
+                    }).then(function () {
+                        return chaisePage.recordPageReady();
+                    }).then(function () {
+                        return chaisePage.recordPage.getColumns();
+                    }).then(function (columns) {
+                        expect(columns.length).toBe(systemColumnsParams.detailedColumns.length);
+                        for (var i = 0; i < columns.length; i++) {
+                            expect(columns[i].getText()).toEqual(systemColumnsParams.detailedColumns[i]);
+                        }
+                    });
+                });
+
+                it("on record page, SystemColumnsDisplayCompact should also be honored for related tables.", function () {
+                    chaisePage.recordPage.getRelatedTableColumnNamesByTable("person").then(function (columns) {
+                        expect(columns.length).toBe(systemColumnsParams.compactColumnsPersonTable.length);
+                        for (var i = 0; i < columns.length; i++) {
+                            expect(columns[i].getText()).toEqual(systemColumnsParams.compactColumnsPersonTable[i]);
+                        }
                     });
                 });
             });
