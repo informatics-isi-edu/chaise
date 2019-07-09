@@ -78,7 +78,6 @@
             link: function (scope, element) {
 
                 var init = function() {
-
                     scope.overflow = []; // for each cell in the row
                     scope.hideContent = false;
                     scope.linkText = "more";
@@ -183,24 +182,21 @@
                         }
                     }
 
-                    // Resizerow is called whenever there is a change in rowValues model
+                    // Resizerow is called whenever there is a data change in rowValues model
                     // It iterates over all the td elements and extracts image and iframes from it
-                    // After which it binds onload event to adjust height
-                    // It also calls updateHeight for the same td, for any oveflown textual content
+                    // After which it binds onload event to adjust height if more content will load after the initial height is set
+                    // It also calls updateHeight for the same td, for any overflown textual content
                     var resizeRow = function() {
                         if (containsOverflow == false) {
-
-                            //Iterate over table data in the row
+                            // Iterate over table data in the row to update height in case content is too large
                             for (var i = 0; i < element[0].children.length; i++) {
-
                                 // Get all images and iframes inside the td
                                 var imagesAndIframes = UiUtils.getImageAndIframes(element[0].children[i]);
-
                                 // Bind onload event and updateheight for particular td index
                                 imagesAndIframes.forEach(function(el) {
-                                    var index = i;
                                     el.onload = function() {
-                                        updateHeight(index, el);
+                                        // make sure we are comparing the containing td's height with max height instead of image height
+                                        updateHeight(i, el.closest("td"));
                                     };
                                 });
 
@@ -213,12 +209,10 @@
 
 
                 // Watch for change in rowValues, this is useful in case of pagination
-                // As Angular just changes the content and doesnot destroys elements
-                scope.$watchCollection('rowValues', function (v) {
-                    init();
-
-                    // add timeout only if maxRecordsetRowHeight is not false in chaiseConfig
-                    if (chaiseConfig.maxRecordsetRowHeight != false ) {
+                // As Angular just changes the content and does not destroys elements
+                scope.$watchCollection('rowValues', function (newValue, oldValue) {
+                    // add timeout only if the row data has changed and maxRecordsetRowHeight is not false in chaiseConfig
+                    if (newValue !== oldValue && chaiseConfig.maxRecordsetRowHeight != false) {
                         $timeout(function() {
                             containsOverflow = false;
                             resizeRow();
