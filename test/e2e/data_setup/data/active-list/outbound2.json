@@ -1,0 +1,10 @@
+[
+    {
+        "outbound2_id": "o11", "outbound2_id1": "o111", "outbound2_id2": "o112",
+        "rowname_col": "outbound2 one", "int_col": 1234521, "fk1_col1": "oo11"
+    },
+    {
+        "outbound2_id": "o12", "outbound2_id1": "o121", "outbound2_id2": "o122",
+        "rowname_col": "outbound2 two", "int_col": 1234522
+    }
+]

@@ -1,0 +1,7 @@
+[
+    {"inbound1_id": "i01", "rowname_col": "inbound1 one", "int_col": 1234521, "fk1_col1": "01"},
+    {"inbound1_id": "i02", "rowname_col": "inbound1 two", "int_col": 1234522, "fk1_col1": "01"},
+    {"inbound1_id": "i03", "rowname_col": "inbound1 three", "int_col": 1234523, "fk1_col1": "01"},
+    {"inbound1_id": "i04", "rowname_col": "inbound1 four", "int_col": 1234524, "fk1_col1": "01"},
+    {"inbound1_id": "i05", "rowname_col": "inbound1 five", "int_col": 1234525, "fk1_col1": "01"}
+]

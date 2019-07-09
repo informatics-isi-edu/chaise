@@ -132,13 +132,25 @@
                     $log.debug("counter", current, ": getting aggregated values for column (index=" + i + ")");
                     _updateColumnAggregate(vm, i, current, logObject, hideSpinner).then(function (res) {
                         _afterUpdateColumnAggregate(vm, res, i);
-                        vm.columnModels[i].columnError = false;
+                        //TODO does this make sense?
+                        vm.reference.activeList.aggregates[i].objects.forEach(function (obj) {
+                            // this is only called in recordset so it won't be related
+                            if (obj.column) {
+                                vm.columnModels[obj.index].columnError = false;
+                            }
+                        });
                         updatePageCB(vm);
                     }).catch(function (err) {
                         _afterUpdateColumnAggregate(vm, false, i);
                         // show alert if 400 Query Timeout Error
                         if (err instanceof ERMrest.QueryTimeoutError) {
-                            vm.columnModels[i].columnError = true;
+                            vm.reference.activeList.aggregates[i].objects.forEach(function (obj) {
+                                // this is only called in recordset so it won't be related
+                                if (obj.column) {
+                                    vm.columnModels[obj.index].columnError = true;
+                                }
+                            });
+
                         } else {
                             throw err;
                         }
@@ -154,18 +166,23 @@
          */
         function _updateColumnAggregate(vm, colIndex, current, logObject, hideSpinner) {
             var defer = $q.defer();
-            vm.columnModels[colIndex].isLoading = !hideSpinner;
+            // show spinner for all the dependent columns
+            vm.reference.activeList.aggregates[colIndex].objects.forEach(function (obj) {
+                // this is only called in recordset so it won't be related
+                if (obj.column) {
+                    vm.columnModels[obj.index].isLoading = !hideSpinner;
+                }
+            });
+
             logObject = logObject || {action: logActions.recordsetAggregate};
+            //TODO maybe change?
             logObject.colIndex = colIndex;
 
-            vm.columnModels[colIndex].column.getAggregatedValue(vm.page, logObject).then(function (values) {
+            vm.reference.activeList.aggregates[colIndex].column.getAggregatedValue(vm.page, logObject).then(function (values) {
                 if (vm.flowControlObject.counter !== current) {
                     return defer.resolve(false);
                 }
-                vm.columnModels[colIndex].isLoading = false;
-                vm.rowValues.forEach(function (val, index) {
-                    vm.rowValues[index][colIndex] = values[index];
-                });
+                afterReadAggregate(vm, colIndex, values);
                 return defer.resolve(true);
             }).catch(function (err) {
                 if (vm.flowControlObject.counter !== current) {
@@ -184,6 +201,74 @@
         function _afterUpdateColumnAggregate(vm, res, colIndex) {
             vm.flowControlObject.occupiedSlots--;
             $log.debug("counter", vm.flowControlObject.counter, ": after aggregated value for column (index=" + colIndex + ") update: " + (res? "successful." : "unsuccessful."));
+        }
+
+        /**
+         * This will be called after the data for an aggregate column has returned.
+         * It will,
+         *  - update the templateVariables.
+         *  - update the aggregateResults
+         *  - update the column value if all of its dependent requests are back.
+         * @param  {Object} vm       vm object
+         * @param  {integer} colIndex index of aggregate column
+         * @param  {Object} values   the returned value
+         */
+        function afterReadAggregate(vm, colIndex, values) {
+            var agg = vm.reference.activeList.aggregates[colIndex];
+            var sourceDefinitions = vm.reference.table.sourceDefinitions;
+
+            values.forEach(function (val, valIndex) {
+
+                // update the templateVariables
+                if (agg.objects.length > 0 && Array.isArray(sourceDefinitions.sourceMapping[agg.column.name])) {
+                    // NOTE: not needed
+                    if (!Array.isArray(vm.templateVariables)) {
+                        vm.templateVariables = new Array(values.length);
+                    }
+
+                    if (!vm.templateVariables[valIndex]) {
+                        vm.templateVariables[valIndex] = {};
+                    }
+
+                    sourceDefinitions.sourceMapping[agg.column.name].forEach(function (k) {
+                        if (val.templateVariables["$self"]) {
+                            vm.templateVariables[valIndex][k] = val.templateVariables["$self"];
+                        }
+                        if (val.templateVariables["$_self"]) {
+                            vm.templateVariables[valIndex]["_" + k] = val.templateVariables["$_self"];
+                        }
+                    });
+                }
+
+                // update the aggregateResults
+                if (vm.aggregateResults[valIndex] === undefined) {
+                    vm.aggregateResults[valIndex] = {};
+                }
+                vm.aggregateResults[valIndex][agg.columnName] = val;
+
+                // attach the values to the appropriate objects
+                agg.objects.forEach(function (obj) {
+                    // this is only called in recordset so it won't be related
+                    if (!obj.column) return;
+                    var model = vm.columnModels[obj.index];
+
+                    // do we have all the waitfor results?
+                    var hasAll = model.column.waitFor.every(function (col) {
+                        return col.isUnique || col.name in vm.aggregateResults[valIndex];
+                    });
+                    if (!(hasAll && (model.column.name in vm.aggregateResults[valIndex] || model.column.isUnique))) return;
+
+                    var displayValue = model.column.sourceFormatPresentation(
+                        vm.templateVariables[valIndex],
+                        vm.aggregateResults[valIndex][model.column.name],
+                        vm.page.tuples[valIndex]
+                    );
+
+                    model.isLoading = false;
+                    vm.rowValues[valIndex][obj.index] = displayValue;
+                });
+            });
+
         }
 
         /**
@@ -274,6 +359,8 @@
 
                     $log.debug("counter", current, ": read main successful.");
                     vm.page = page;
+                    vm.templateVariables = page.templateVariables;
+                    vm.aggregateResults = new Array(vm.page.tuples.length);
 
                     return vm.getDisabledTuples ? vm.getDisabledTuples(page, vm.pageLimit) : '';
                 }).then(function (rows) {
@@ -333,12 +420,13 @@
                     vm.initialized = true;
                     // globally sets when the app state is ready to interact with
                     $rootScope.displayReady = true;
+                    // TODO could be better
                     vm.aggregatesToInitialize = [];
-                    vm.reference.columns.forEach(function (c, i) {
-                        if(c.isPathColumn && c.hasAggregate) {
+                    if (vm.reference.activeList) {
+                        vm.reference.activeList.aggregates.forEach(function (c, i) {
                             vm.aggregatesToInitialize.push(i);
-                        }
-                    });
+                        });
+                    }
 
                     defer.resolve(true);
                 }).catch(function(err) {
@@ -626,7 +714,9 @@
             vm.columnModels = [];
             vm.reference.columns.forEach(function (col) {
                 vm.columnModels.push({
-                    column: col
+                    column: col,
+                    isLoading: col.hasWaitFor || !col.isUnique,
+                    hasWaitFor: col.hasWaitFor || !col.isUnique
                 });
             });
 
