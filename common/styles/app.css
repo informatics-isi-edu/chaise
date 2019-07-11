@@ -1,3 +1,4 @@
+
 @font-face {
     font-family: 'chaise-icons';
 
@@ -769,6 +770,12 @@ th.multi-select-width {
     background-image: none;
     border: 1px solid transparent;
     border-radius: 4px;
+}
+
+.markdown-container .asset-source-description {
+    margin: 0 5px;
+    vertical-align: -9px;
+    font-size: 13px;
 }
 
 /***************** ellipses ***************/
