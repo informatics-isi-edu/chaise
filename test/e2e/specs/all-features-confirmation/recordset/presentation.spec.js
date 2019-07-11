@@ -283,7 +283,7 @@ describe('View recordset,', function() {
             });
         });
     }
-/*
+
     describe("For table " + accommodationParams.table_name + ",", function() {
 
         beforeAll(function () {
@@ -1007,7 +1007,7 @@ describe('View recordset,', function() {
             });
         });
     });
-*/
+
     describe("For chaise config properties", function () {
         var EC = protractor.ExpectedConditions;
 
