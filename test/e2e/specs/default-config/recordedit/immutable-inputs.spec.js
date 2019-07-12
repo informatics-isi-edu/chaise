@@ -35,8 +35,8 @@ var testParams = {
         json_value:JSON.stringify({"name":"testing_json"}),
         json_disabled_value:JSON.stringify(98.786),
         json_disabled_no_default_value: "Automatically generated",
-        asset_value: "http://images.trvl-media.com/hotels/1000000/30000/28200/28110/28110_191_z.jpg",
-        asset_disabled_value: "http://images.trvl-media.com/hotels/1000000/30000/28200/28110/28110_191_z.jpg",
+        asset_value: "28110_191_z.jpg",
+        asset_disabled_value: "28110_191_z.jpg",
         asset_disabled_no_default_value: "Automatically generated",
         rid_disabled_value: "Automatically generated",
         rcb_disabled_value: "Automatically generated",
@@ -87,7 +87,7 @@ var testParams = {
         json_disabled: JSON.stringify(98.786),
         // Value of "filename" column for the current record
         // asset_disabled: "Four Points Sherathon 3"
-        asset_disabled: "http://images.trvl-media.com/hotels/1000000/30000/28200/28110/28110_191_z.jpg"
+        asset_disabled: "28110_191_z.jpg"
     }
 };
 
