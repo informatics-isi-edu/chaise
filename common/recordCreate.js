@@ -324,7 +324,8 @@
                 var defer = $q.defer();
                 var disabledRows = [], index;
 
-                domainRef.setSamePaging(page).read(pageSize, {action: logActions.preCreateAssociationSelected}).then(function (newPage) {
+                // fourth input: preserve the paging (read will remove the before if number of results is less than the limit)
+                domainRef.setSamePaging(page).read(pageSize, {action: logActions.preCreateAssociationSelected}, false, true).then(function (newPage) {
                     newPage.tuples.forEach(function (newTuple) {
                         index = page.tuples.findIndex(function (tuple) {
                             return tuple.uniqueId == newTuple.uniqueId;
