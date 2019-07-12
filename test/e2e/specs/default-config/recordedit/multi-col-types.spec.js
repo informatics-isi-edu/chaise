@@ -101,7 +101,7 @@ var testParams = {
             {name: "timestamptz_col_gen", value: "2016-01-18T00:00:00-08:00", displayType: "disabled"},
             {name: "date_col_gen", value: "2016-08-15", displayType: "disabled"},
             {name: "fk_col_gen", value: "Abraham Lincoln", displayType: "disabled"},
-            {name: "asset_col_gen", value: "http://test.com/hatract/test", displayType: "upload"}
+            {name: "asset_col_gen", value: "test", displayType: "upload"}
         ]
     }
 };
