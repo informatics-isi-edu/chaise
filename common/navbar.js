@@ -75,33 +75,28 @@
             if (obj.url && isCatalogDefined(catalogId)) {
                 obj.url = ERMrest.renderHandlebarsTemplate(obj.url, null, {id: catalogId});
 
-                // same origin urls may be relative
-                function isChaiseApp (url) {
-                    var appNames = ["record", "recordset", "recordedit", "search", "login"];
-                    var path = "chaise/";
-                    if (chaiseConfig && typeof chaiseConfig.chaiseBasePath === "string") {
-                        var path = chaiseConfig.chaiseBasePath;
-                        // append "/" if not present
-                        if (path[path.length-1] !== "/") path += "/";
-                    }
-                    path = $window.location.host + path;
+                var appNames = ["record", "recordset", "recordedit", "search", "login"];
+                var path = "/chaise/";
+                if (chaiseConfig && typeof chaiseConfig.chaiseBasePath === "string") {
+                    var path = chaiseConfig.chaiseBasePath;
+                    // append "/" if not present
+                    if (path[path.length-1] !== "/") path += "/";
+                }
+                path = $window.location.host + path;
 
-                    // parses the url into a location object
-                    var eleUrl = document.createElement('a');
-                    eleUrl.href = url;
+                // parses the url into a location object
+                var eleUrl = document.createElement('a');
+                eleUrl.href = obj.url;
 
-                    var isChaise = false;
-                    for (var i=0; i<appNames.length; i++) {
-                        var name = appNames[i];
-                        // path/appName exists in our url
-                        if (eleUrl.href.indexOf(path + name) !== -1) isChaise = true;
-                    }
-
-                    return isChaise;
+                var isChaise = false;
+                for (var i=0; i<appNames.length; i++) {
+                    var name = appNames[i];
+                    // path/appName exists in our url
+                    if (eleUrl.href.indexOf(path + name) !== -1) isChaise = true;
                 }
 
                 // only append pcid/ppid if link is to a chaise url
-                if (isChaiseApp(obj.url)) {
+                if (isChaise) {
                     var dcctx = ConfigUtils.getContextJSON();
                     obj.url = addLogParams(obj.url, dcctx);
                 }
