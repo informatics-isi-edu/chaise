@@ -84,12 +84,17 @@
                         // append "/" if not present
                         if (path[path.length-1] !== "/") path += "/";
                     }
+                    path = $window.location.host + path;
+
+                    // parses the url into a location object
+                    var eleUrl = document.createElement('a');
+                    eleUrl.href = url;
 
                     var isChaise = false;
                     for (var i=0; i<appNames.length; i++) {
                         var name = appNames[i];
                         // path/appName exists in our url
-                        if (url.indexOf(path + name) !== -1) isChaise = true;
+                        if (eleUrl.href.indexOf(path + name) !== -1) isChaise = true;
                     }
 
                     return isChaise;
