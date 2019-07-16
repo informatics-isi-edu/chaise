@@ -196,7 +196,7 @@
             UiUtils.setBootstrapDropdownButtonBehavior();
         } catch (exception) {
             // pass to error handler
-            ErrorService.handleException(exception);
+            throw exception;
         }
     }]);
 
