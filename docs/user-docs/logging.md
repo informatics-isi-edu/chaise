@@ -200,6 +200,13 @@ If the user clicked on a link in the navbar, the `PCID` will properly denote wha
 
 ## Change Log
 
+### 07/16/19
+
+##### Commit Links
+ - [chaise](https://github.com/informatics-isi-edu/chaise/commit/65de409b3229533be76a1537d55a83a9bec84bb3)
+
+###### Added
+ - Added `pcid` and `ppid` to navbar links that are for the same origin/host.
 
 ### 07/12/19
 
