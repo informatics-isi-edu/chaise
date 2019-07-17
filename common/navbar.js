@@ -38,6 +38,19 @@
         return val != undefined && val != null;
     }
 
+    function addLogParams(url, dcctx) {
+        // if `?` already in the url, use &
+        var paramChar = url.lastIndexOf("?") !== -1 ? "&" : "?";
+
+        var pcid = "navbar";
+        // if not navbar app, append appname
+        if (dcctx.cid !== "navbar") {
+            pcid += "/" + dcctx.cid;
+        }
+        // ppid should be the pid for the current page
+        return url + paramChar + "pcid=" + pcid + "&ppid=" + dcctx.pid;
+    }
+
     'use strict';
     angular.module('chaise.navbar', [
         'chaise.login',
@@ -59,7 +72,35 @@
             var parentNewTab = obj.newTab;
             // template the url
             // TODO: This is done here to prevent writing a recursive function (again) in `setConfigJSON()`
-            if (obj.url && isCatalogDefined(catalogId)) obj.url = ERMrest.renderHandlebarsTemplate(obj.url, null, {id: catalogId});
+            if (obj.url && isCatalogDefined(catalogId)) {
+                obj.url = ERMrest.renderHandlebarsTemplate(obj.url, null, {id: catalogId});
+
+                var appNames = ["record", "recordset", "recordedit", "search", "login"];
+                var path = "/chaise/";
+                if (chaiseConfig && typeof chaiseConfig.chaiseBasePath === "string") {
+                    var path = chaiseConfig.chaiseBasePath;
+                    // append "/" if not present
+                    if (path[path.length-1] !== "/") path += "/";
+                }
+                path = $window.location.host + path;
+
+                // parses the url into a location object
+                var eleUrl = document.createElement('a');
+                eleUrl.href = obj.url;
+
+                var isChaise = false;
+                for (var i=0; i<appNames.length; i++) {
+                    var name = appNames[i];
+                    // path/appName exists in our url
+                    if (eleUrl.href.indexOf(path + name) !== -1) isChaise = true;
+                }
+
+                // only append pcid/ppid if link is to a chaise url
+                if (isChaise) {
+                    var dcctx = ConfigUtils.getContextJSON();
+                    obj.url = addLogParams(obj.url, dcctx);
+                }
+            }
             // If current node has children, set each child's newTab to its own existing newTab or parent's newTab
             if (Array.isArray(obj.children)) {
                 obj.children.forEach(function (child) {
@@ -91,7 +132,7 @@
                     }
 
                     scope.toLive = function () {
-                        $window.location = $window.location.href.replace(catalogId, catalogId.split("@")[0])
+                        $window.location = addLogParams($window.location.href.replace(catalogId, catalogId.split("@")[0]), dcctx);
                     }
                 }
             }
