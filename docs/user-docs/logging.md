@@ -183,6 +183,20 @@ The following url patterns are what's unique about each of these requests and yo
 
 - CSV default export: `uinit=1&cid=`
 
+## PCID list
+
+The following is the list of `PCID`'s that will be present on main entity requests in the chaise apps. `CID` will always represent what app the request was made from, `PCID` will represent what app the user navigated from when the main entity request was triggered.
+
+ - `record`
+ - `recordset`
+ - `recordedit`
+ - `navbar`
+ - `navbar/record`
+ - `navbar/recordset`
+ - `navbar/recordedit`
+
+If the user clicked on a link in the navbar, the `PCID` will properly denote what app the user came from that had the navbar present. A static page that uses the navbar app, will set the `PCID` as `navbar`. Otherwise the appname will be appended (i.e.   `navbar/<appname>`). This is true for the [deriva-webapps](https://github.com/informatics-isi-edu/deriva-webapps/wiki/Logging-in-WebApps#pcid-list) as well.
+
 
 ## Change Log
 
