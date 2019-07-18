@@ -790,7 +790,7 @@ describe("Other facet features, ", function() {
 
                     browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(secondFacetIdx)), browser.params.defaultTimeout);
 
-                    return chaisePage.clickButton(secondFacetOption);
+                    return secondFacetOption.click();
                 }).then(function () {
                         checkAlert();
                         expect(secondFacetOption.isSelected()).toBeFalsy("the option is checked.");
