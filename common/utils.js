@@ -1821,30 +1821,32 @@
             }
         }
 
-        function clickAssetDownload(href) {
-            // fetch the file for the user
-            var downloadLink = angular.element('<a></a>');
-            downloadLink.attr('href', href);
-            downloadLink.attr('download', '');
-            downloadLink.attr('visibility', 'hidden');
-            downloadLink.attr('display', 'none');
-            // Append to page
-            document.body.appendChild(downloadLink[0]);
-            downloadLink[0].click();
-            document.body.removeChild(downloadLink[0]);
-        }
-
         function overrideDownloadClickBehavior() {
             angular.element('body').on('click', "a.asset-permission", function (e) {
+
+                function clickAssetDownload() {
+                    // fetch the file for the user
+                    var downloadLink = angular.element('<a></a>');
+                    downloadLink.attr('href', e.target.href);
+                    downloadLink.attr('download', '');
+                    downloadLink.attr('visibility', 'hidden');
+                    downloadLink.attr('display', 'none');
+                    downloadLink.attr('target', '_blank');
+                    // Append to page
+                    document.body.appendChild(downloadLink[0]);
+                    downloadLink[0].click();
+                    document.body.removeChild(downloadLink[0]);
+                }
+
+                function hideSpinner() {
+                    e.target.innerHTML = e.target.innerHTML.slice(0, e.target.innerHTML.indexOf(spinnerHTML));
+                }
+
                 e.preventDefault();
 
                 var spinnerHTML = ' <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>';
                 //show spinner
                 e.target.innerHTML += spinnerHTML;
-
-                function hideSpinner() {
-                    e.target.innerHTML = e.target.innerHTML.slice(0, e.target.innerHTML.indexOf(spinnerHTML));
-                }
 
                 // if same origin, verify authorization
                 if (UriUtils.isSameOrigin(e.target.href)) {
@@ -1853,7 +1855,7 @@
                     // make a HEAD request to check if the user can fetch the file
 
                     dcctx.server.http.head(e.target.href, {skipRetryBrowserError: true, skipHTTP401Handling: true}).then(function (response) {
-                        clickAssetDownload(e.target.href);
+                        clickAssetDownload();
                     }).catch(function (exception) {
                         // error/login modal was closed
                         if (typeof exception == 'string') return;
@@ -1877,13 +1879,12 @@
                         templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/redirect.modal.html",
                         controller: 'RedirectController',
                         controllerAs: 'ctrl',
-                        // openedClass: 'modal-login',
-                        backdrop: 'static',
-                        keyboard: false
+                        animation: false,
+                        size: "sm",
                     }
                     // show modal dialog with countdown before redirecting to "asset"
                     modalUtils.showModal(modalProperties, function () {
-                        clickAssetDownload(e.target.href);
+                        clickAssetDownload();
                         // remove the spinner
                         hideSpinner();
                     }, hideSpinner);

@@ -363,6 +363,11 @@
         vm.countdown = 5;
         vm.cancel = cancel;
 
+        vm.redirectNow = function () {
+            $interval.cancel(countdownTimer);
+            $uibModalInstance.close();
+        }
+
         // start a countdown that runs until the interval is cancelled
         var countdownTimer = $interval(function (){vm.countdown--}, 1000, 0);
 
@@ -372,9 +377,8 @@
         }
 
         $timeout(function (){
-            $interval.cancel(countdownTimer);
             // close the dialog after 5 seconds and trigger success callback
-            $uibModalInstance.close();
+            vm.redirectNow();
         }, 5000);
     }])
 
