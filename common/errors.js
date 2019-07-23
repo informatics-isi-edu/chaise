@@ -135,7 +135,13 @@
         InvalidInputError.prototype = Object.create(Error.prototype);
         InvalidInputError.prototype.constructor = InvalidInputError;
 
-        function UnauthorizedAssetAccess() {
+        /**
+         * Error class that is used when the user tries to acces an asset when they are not authorized or forbidden
+         *
+         * @param {integer} code - the error code returned from the request, 401 or 403
+         * @return {object}        Error Object
+         */
+        function UnauthorizedAssetAccess(code) {
             /**
              * @type {object}
              * @desc  custom object to store miscellaneous elements viz. stacktrace
@@ -158,7 +164,7 @@
              * @type {string}
              * @desc Action message to display for click of the OK button
              */
-            this.errorData.clickActionMessage = messageMap.clickActionMessage.loginOrDismissDialog;
+            this.errorData.clickActionMessage = code == 401 ? messageMap.clickActionMessage.loginOrDismissDialog : messageMap.clickActionMessage.dismissDialog;
 
             /**
              * @type {boolean}

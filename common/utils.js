@@ -77,6 +77,7 @@
         "clickActionMessage": {
             "messageWReplace": "Click <b>OK</b> to reload this page without @errorStatus.",
             "loginOrDismissDialog": "Click <a ng-click='ctrl.login()'>Login</a> to log in to the system, or click <b>OK</b> to dismiss this dialog.",
+            "dismissDialog": "Click <b>OK</b> to dismiss this dialog.",
             "multipleRecords": "Click <b>OK</b> to show all the matched records.",
             "noRecordsFound": "Click <b>OK</b> to show the list of all records.",
             "okBtnMessage": "Click <b>OK</b> to go to the Recordset.",
@@ -1862,7 +1863,7 @@
                         var ermrestError = ERMrest.responseToError(exception);
 
                         if (ermrestError instanceof ERMrest.UnauthorizedError || ermrestError instanceof ERMrest.ForbiddenError) {
-                            ermrestError = new Errors.UnauthorizedAssetAccess();
+                            ermrestError = new Errors.UnauthorizedAssetAccess(ermrestError.code);
                         }
 
                         // If an error occurs while a user is trying to download the file, allow them to dismiss the dialog
