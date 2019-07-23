@@ -358,4 +358,24 @@
         }
     }])
 
+    .controller('RedirectController', ['$interval', '$timeout', '$uibModalInstance', function ($interval, $timeout, $uibModalInstance) {
+        var vm = this;
+        vm.countdown = 5;
+        vm.cancel = cancel;
+
+        // start a countdown that runs until the interval is cancelled
+        var countdownTimer = $interval(function (){vm.countdown--}, 1000, 0);
+
+        function cancel() {
+            $interval.cancel(countdownTimer);
+            $uibModalInstance.dismiss('cancel');
+        }
+
+        $timeout(function (){
+            $interval.cancel(countdownTimer);
+            // close the dialog after 5 seconds and trigger success callback
+            $uibModalInstance.close();
+        }, 5000);
+    }])
+
 })();

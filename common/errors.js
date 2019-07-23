@@ -340,7 +340,7 @@
                 subMessage = (exception.subMessage ? exception.subMessage : undefined),
                 stackTrace = ( (exception.errorData && exception.errorData.stack) ? exception.errorData.stack : undefined),
                 showLogin = false,
-                message = exception.message,
+                message = exception.message || "", // initialize message to empty string if not defined
                 errorStatus;
 
             $rootScope.error = true;    // used to hide spinner in conjunction with a css property
