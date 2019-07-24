@@ -91,6 +91,8 @@
         "unauthorizedMessage" : "You are not authorized to perform this action.",
         "reportErrorToAdmin" : " Please report this problem to your system administrators.",
         "noRecordForFilter" : "No matching record found for the given filter or facet.",
+        "loginRequired": "Login Required",
+        "permissionDenied": "Permission Denied",
         "unauthorizedErrorCode" : "Unauthorized Access",
         "showErrDetails" : "Show Error Details",
         "hideErrDetails" : "Hide Error Details",
@@ -1822,22 +1824,22 @@
             }
         }
 
+        function clickHref(href) {
+            // fetch the file for the user
+            var downloadLink = angular.element('<a></a>');
+            downloadLink.attr('href', href);
+            downloadLink.attr('download', '');
+            downloadLink.attr('visibility', 'hidden');
+            downloadLink.attr('display', 'none');
+            downloadLink.attr('target', '_blank');
+            // Append to page
+            document.body.appendChild(downloadLink[0]);
+            downloadLink[0].click();
+            document.body.removeChild(downloadLink[0]);
+        }
+
         function overrideDownloadClickBehavior() {
             angular.element('body').on('click', "a.asset-permission", function (e) {
-
-                function clickAssetDownload() {
-                    // fetch the file for the user
-                    var downloadLink = angular.element('<a></a>');
-                    downloadLink.attr('href', e.target.href);
-                    downloadLink.attr('download', '');
-                    downloadLink.attr('visibility', 'hidden');
-                    downloadLink.attr('display', 'none');
-                    downloadLink.attr('target', '_blank');
-                    // Append to page
-                    document.body.appendChild(downloadLink[0]);
-                    downloadLink[0].click();
-                    document.body.removeChild(downloadLink[0]);
-                }
 
                 function hideSpinner() {
                     e.target.innerHTML = e.target.innerHTML.slice(0, e.target.innerHTML.indexOf(spinnerHTML));
@@ -1856,14 +1858,14 @@
                     // make a HEAD request to check if the user can fetch the file
 
                     dcctx.server.http.head(e.target.href, {skipRetryBrowserError: true, skipHTTP401Handling: true}).then(function (response) {
-                        clickAssetDownload();
+                        clickHref(e.target.href);
                     }).catch(function (exception) {
                         // error/login modal was closed
                         if (typeof exception == 'string') return;
                         var ermrestError = ERMrest.responseToError(exception);
 
                         if (ermrestError instanceof ERMrest.UnauthorizedError || ermrestError instanceof ERMrest.ForbiddenError) {
-                            ermrestError = new Errors.UnauthorizedAssetAccess(ermrestError.code);
+                            ermrestError = new Errors.PermissionedAssetAccess(ermrestError.code);
                         }
 
                         // If an error occurs while a user is trying to download the file, allow them to dismiss the dialog
@@ -1872,24 +1874,28 @@
                         // remove the spinner
                         hideSpinner();
                     });
-                } else {
-                    // asset-permission will be appended via display annotation or by heuristic if no annotation
-                    // this else case should only occur if display annotation contains asset-permission and asset is not the same host
-                    var modalProperties = {
-                        windowClass: "modal-redirect",
-                        templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/redirect.modal.html",
-                        controller: 'RedirectController',
-                        controllerAs: 'ctrl',
-                        animation: false,
-                        size: "sm",
-                    }
-                    // show modal dialog with countdown before redirecting to "asset"
-                    modalUtils.showModal(modalProperties, function () {
-                        clickAssetDownload();
-                        // remove the spinner
-                        hideSpinner();
-                    }, hideSpinner);
                 }
+            });
+        }
+
+        function overrideExternalLinkBehavior() {
+            angular.element('body').on('click', "a.external-link", function (e) {
+                e.preventDefault();
+
+                // asset-permission will be appended via display annotation or by heuristic if no annotation
+                // this else case should only occur if display annotation contains asset-permission and asset is not the same host
+                var modalProperties = {
+                    windowClass: "modal-redirect",
+                    templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/redirect.modal.html",
+                    controller: 'RedirectController',
+                    controllerAs: 'ctrl',
+                    animation: false,
+                    size: "sm",
+                }
+                // show modal dialog with countdown before redirecting to "asset"
+                modalUtils.showModal(modalProperties, function () {
+                    clickHref(e.target.href);
+                }, false);
             });
         }
 
@@ -1898,6 +1904,7 @@
             addTitle();
             setWindowName();
             overrideDownloadClickBehavior();
+            overrideExternalLinkBehavior();
         }
 
         return {

@@ -24,10 +24,12 @@
         multipleDataMessage : "There are more than 1 record found for the filters provided.",
         facetFilterMissing : "No filtering criteria was specified to identify a specific record.",
         unauthorizedAssetRetrieval : "You must be logged in and authorized to download this asset.",
+        forbiddenAssetRetrieval : " is logged in but not authorized to download this asset.",
         systemAdminMessage : "An unexpected error has occurred. Try clearing your cache. If you continue to face this issue, please contact the system administrator."
     })
 
-    .factory('Errors', ['errorNames', 'errorMessages', 'messageMap', function(errorNames, errorMessages, messageMap) {
+    .factory('Errors', ['ConfigUtils', 'errorNames', 'errorMessages', 'messageMap', function(ConfigUtils, errorNames, errorMessages, messageMap) {
+        var dcctx = ConfigUtils.getContextJSON();
 
         // errorData object holds additional information viz. stacktrace, redirectUrl
         // Make sure to check cross-browser cmpatibility for stack attribute of Error Object
@@ -141,7 +143,7 @@
          * @param {integer} code - the error code returned from the request, 401 or 403
          * @return {object}        Error Object
          */
-        function UnauthorizedAssetAccess(code) {
+        function PermissionedAssetAccess(code) {
             /**
              * @type {object}
              * @desc  custom object to store miscellaneous elements viz. stacktrace
@@ -152,29 +154,39 @@
              * @type {string}
              * @desc   Error message status; acts as Title text for error dialog
              */
-            this.status = messageMap.unauthorizedErrorCode;
+            this.status = null;
 
             /**
              * @type {string}
              * @desc   Error message
              */
-            this.message = errorMessages.unauthorizedAssetRetrieval;
+            this.message = null;
 
             /**
              * @type {string}
              * @desc Action message to display for click of the OK button
              */
-            this.errorData.clickActionMessage = code == 401 ? messageMap.clickActionMessage.loginOrDismissDialog : messageMap.clickActionMessage.dismissDialog;
+            this.errorData.clickActionMessage = null;
 
             /**
              * @type {boolean}
              * @desc Set true to dismiss the error modal on clicking the OK button
              */
             this.clickOkToDismiss = true;
+
+            if (code == 401) {
+                this.status = messageMap.loginRequired;
+                this.message = errorMessages.unauthorizedAssetRetrieval;
+                this.errorData.clickActionMessage = messageMap.clickActionMessage.loginOrDismissDialog;
+            } else { // code == 403
+                this.status = messageMap.permissionDenied;
+                this.message = dcctx.user + errorMessages.forbiddenAssetRetrieval;
+                this.errorData.clickActionMessage = messageMap.clickActionMessage.dismissDialog;
+            }
         }
 
-        UnauthorizedAssetAccess.prototype = Object.create(Error.prototype);
-        UnauthorizedAssetAccess.prototype.constructor = UnauthorizedAssetAccess;
+        PermissionedAssetAccess.prototype = Object.create(Error.prototype);
+        PermissionedAssetAccess.prototype.constructor = PermissionedAssetAccess;
 
         /**
          * CustomError - throw custom error from Apps outside Chaise.
@@ -231,7 +243,7 @@
             noRecordError:noRecordError,
             InvalidInputError: InvalidInputError,
             MalformedUriError: MalformedUriError,
-            UnauthorizedAssetAccess: UnauthorizedAssetAccess,
+            PermissionedAssetAccess: PermissionedAssetAccess,
             CustomError: CustomError
         };
     }])
@@ -374,7 +386,7 @@
             } else if (exception instanceof Errors.CustomError ) {
                 logError(exception);
                 redirectLink = exception.errorData.redirectUrl;
-            } else if (!exception instanceof Errors.UnauthorizedAssetAccess) {
+            } else if (!exception instanceof Errors.PermissionedAssetAccess) {
                 logError(exception);
                 message = errorMessages.systemAdminMessage;
                 subMessage = exception.message;
@@ -383,7 +395,7 @@
             // There's no message
             if (message.trim().length < 1) message = errorMessages.systemAdminMessage;
 
-            if (!Session.getSessionValue() && !(exception instanceof Errors.UnauthorizedAssetAccess)) {
+            if (!Session.getSessionValue() && !(exception instanceof Errors.PermissionedAssetAccess)) {
                 showLogin = true;
                 if (exception instanceof Errors.noRecordError) {
                     // if no logged in user, change the message

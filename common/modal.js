@@ -76,7 +76,7 @@
         vm.displayDetails = false;
         vm.linkText = messageMap.showErrDetails;
         vm.showReloadBtn = false;
-        vm.showDownloadPolicy = (vm.params.exception instanceof Errors.UnauthorizedAssetAccess && cc.assetDownloadPolicyURL && cc.assetDownloadPolicyURL.trim().length > 0 && typeof cc.assetDownloadPolicyURL == "string");
+        vm.showDownloadPolicy = (vm.params.exception instanceof Errors.PermissionedAssetAccess && cc.assetDownloadPolicyURL && cc.assetDownloadPolicyURL.trim().length > 0 && typeof cc.assetDownloadPolicyURL == "string");
         if (vm.showDownloadPolicy) vm.downloadPolicy = cc.assetDownloadPolicyURL;
         if (ERMrest && isRetryError(exception)) {
             // we are only showing the reload button for the 4 types of retriable errors while the page is loading.
@@ -89,7 +89,7 @@
             vm.clickActionMessage =  messageMap.clickActionMessage.multipleRecords;
         } else if (exception instanceof Errors.noRecordError) {
             vm.clickActionMessage = messageMap.clickActionMessage.noRecordsFound;
-        } else if ( (exception instanceof Errors.CustomError && exception.errorData.clickActionMessage) || exception instanceof Errors.UnauthorizedAssetAccess) {
+        } else if ( (exception instanceof Errors.CustomError && exception.errorData.clickActionMessage) || exception instanceof Errors.PermissionedAssetAccess) {
             vm.clickActionMessage = exception.errorData.clickActionMessage;
         } else if (ERMrest && exception instanceof ERMrest.InvalidFilterOperatorError) {
             vm.clickActionMessage = messageMap.clickActionMessage.noRecordsFound;
@@ -257,28 +257,28 @@
         }
     }])
 
-    .controller('profileModalDialogController', ['$uibModalInstance','$rootScope', 'Session','UriUtils',function ($uibModalInstance, $rootScope, Session, UriUtils){
+    .controller('profileModalDialogController', ['$uibModalInstance','$rootScope', 'ConfigUtils', 'Session','UriUtils',function ($uibModalInstance, $rootScope, ConfigUtils, Session, UriUtils){
+        var dcctx = ConfigUtils.getContextJSON();
         var vm = this;
         vm.groupList =[];
         vm.identities = [];
-        vm.client= {};
+        vm.client = {};
         vm.cancel = function() {
             $uibModalInstance.dismiss("cancel");
         };
-        $rootScope.session = Session.getSessionValue();
-        vm.client =$rootScope.session.client;
+        var session = dcctx.session;
+        vm.client = session.client;
 
-        var user = $rootScope.session.client;
-        vm.user = user.full_name || user.display_name  || user.email || user.id;
-        for(var i = 0; i<  $rootScope.session.client.identities.length; i++){
-            vm.identities.push($rootScope.session.client.identities[i]);
+        var user = vm.user = dcctx.user;
+        for(var i = 0; i<session.client.identities.length; i++){
+            vm.identities.push(session.client.identities[i]);
         }
 
 
-        for(var i = 0; i<  $rootScope.session.attributes.length; i++){
-            if($rootScope.session.attributes[i].display_name && $rootScope.session.attributes[i].display_name !== user.display_name){
-                $rootScope.session.attributes[i].id= $rootScope.session.attributes[i].id.substring(24);
-                vm.groupList.push($rootScope.session.attributes[i]);
+        for(var i = 0; i<session.attributes.length; i++){
+            if(session.attributes[i].display_name && session.attributes[i].display_name !== user.display_name){
+                session.attributes[i].id = session.attributes[i].id.substring(24);
+                vm.groupList.push(session.attributes[i]);
             }
         }
     }])
