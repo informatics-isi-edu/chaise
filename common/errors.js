@@ -138,12 +138,11 @@
         InvalidInputError.prototype.constructor = InvalidInputError;
 
         /**
-         * Error class that is used when the user tries to acces an asset when they are not authorized or forbidden
+         * Error class that is used when the user tries to acces an asset when they are not authorized
          *
-         * @param {integer} code - the error code returned from the request, 401 or 403
          * @return {object}        Error Object
          */
-        function PermissionedAssetAccess(code) {
+        function UnauthorizedAssetAccess() {
             /**
              * @type {object}
              * @desc  custom object to store miscellaneous elements viz. stacktrace
@@ -154,39 +153,69 @@
              * @type {string}
              * @desc   Error message status; acts as Title text for error dialog
              */
-            this.status = null;
+            this.status = messageMap.loginRequired;
 
             /**
              * @type {string}
              * @desc   Error message
              */
-            this.message = null;
+            this.message = errorMessages.unauthorizedAssetRetrieval;
 
             /**
              * @type {string}
              * @desc Action message to display for click of the OK button
              */
-            this.errorData.clickActionMessage = null;
+            this.errorData.clickActionMessage = messageMap.clickActionMessage.loginOrDismissDialog;
 
             /**
              * @type {boolean}
              * @desc Set true to dismiss the error modal on clicking the OK button
              */
             this.clickOkToDismiss = true;
-
-            if (code == 401) {
-                this.status = messageMap.loginRequired;
-                this.message = errorMessages.unauthorizedAssetRetrieval;
-                this.errorData.clickActionMessage = messageMap.clickActionMessage.loginOrDismissDialog;
-            } else { // code == 403
-                this.status = messageMap.permissionDenied;
-                this.message = dcctx.user + errorMessages.forbiddenAssetRetrieval;
-                this.errorData.clickActionMessage = messageMap.clickActionMessage.dismissDialog;
-            }
         }
 
-        PermissionedAssetAccess.prototype = Object.create(Error.prototype);
-        PermissionedAssetAccess.prototype.constructor = PermissionedAssetAccess;
+        UnauthorizedAssetAccess.prototype = Object.create(Error.prototype);
+        UnauthorizedAssetAccess.prototype.constructor = UnauthorizedAssetAccess;
+
+        /**
+         * Error class that is used when the user tries to acces an asset when they are forbidden
+         *
+         * @return {object}        Error Object
+         */
+        function ForbiddenAssetAccess() {
+            /**
+             * @type {object}
+             * @desc  custom object to store miscellaneous elements viz. stacktrace
+             */
+            this.errorData = {};
+
+            /**
+             * @type {string}
+             * @desc   Error message status; acts as Title text for error dialog
+             */
+            this.status = messageMap.permissionDenied;
+
+            /**
+             * @type {string}
+             * @desc   Error message
+             */
+            this.message = dcctx.user + errorMessages.forbiddenAssetRetrieval;
+
+            /**
+             * @type {string}
+             * @desc Action message to display for click of the OK button
+             */
+            this.errorData.clickActionMessage = messageMap.clickActionMessage.dismissDialog;
+
+            /**
+             * @type {boolean}
+             * @desc Set true to dismiss the error modal on clicking the OK button
+             */
+            this.clickOkToDismiss = true;
+        }
+
+        ForbiddenAssetAccess.prototype = Object.create(Error.prototype);
+        ForbiddenAssetAccess.prototype.constructor = ForbiddenAssetAccess;
 
         /**
          * CustomError - throw custom error from Apps outside Chaise.
@@ -243,7 +272,8 @@
             noRecordError:noRecordError,
             InvalidInputError: InvalidInputError,
             MalformedUriError: MalformedUriError,
-            PermissionedAssetAccess: PermissionedAssetAccess,
+            UnauthorizedAssetAccess: UnauthorizedAssetAccess,
+            ForbiddenAssetAccess: ForbiddenAssetAccess,
             CustomError: CustomError
         };
     }])
@@ -376,6 +406,8 @@
                 return;
             }
 
+            var assetPermissionError = (exception instanceof Errors.UnauthorizedAssetAccess || exception instanceof Errors.ForbiddenAssetAccess);
+
             if (exception instanceof Errors.multipleRecordError || exception instanceof Errors.noRecordError){
                 // change defaults
                 pageName = "Recordset";
@@ -386,7 +418,7 @@
             } else if (exception instanceof Errors.CustomError ) {
                 logError(exception);
                 redirectLink = exception.errorData.redirectUrl;
-            } else if (!exception instanceof Errors.PermissionedAssetAccess) {
+            } else if (!assetPermissionError) {
                 logError(exception);
                 message = errorMessages.systemAdminMessage;
                 subMessage = exception.message;
@@ -395,7 +427,7 @@
             // There's no message
             if (message.trim().length < 1) message = errorMessages.systemAdminMessage;
 
-            if (!Session.getSessionValue() && !(exception instanceof Errors.PermissionedAssetAccess)) {
+            if (!Session.getSessionValue() && !assetPermissionError) {
                 showLogin = true;
                 if (exception instanceof Errors.noRecordError) {
                     // if no logged in user, change the message

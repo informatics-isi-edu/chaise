@@ -1864,8 +1864,10 @@
                         if (typeof exception == 'string') return;
                         var ermrestError = ERMrest.responseToError(exception);
 
-                        if (ermrestError instanceof ERMrest.UnauthorizedError || ermrestError instanceof ERMrest.ForbiddenError) {
-                            ermrestError = new Errors.PermissionedAssetAccess(ermrestError.code);
+                        if (ermrestError instanceof ERMrest.UnauthorizedError) {
+                            ermrestError = new Errors.UnauthorizedAssetAccess();
+                        } else if (ermrestError instanceof ERMrest.ForbiddenError) {
+                            ermrestError = new Errors.ForbiddenAssetAccess();
                         }
 
                         // If an error occurs while a user is trying to download the file, allow them to dismiss the dialog
