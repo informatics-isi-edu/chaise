@@ -750,6 +750,10 @@ $(JS_CONFIG): chaise-config-sample.js
 install: $(HTML) dont_install_in_root gitversion
 	rsync -avz --exclude='.*' --exclude='$(MODULES)' --exclude='wiki-images' --exclude=/chaise-config.js . $(CHAISEDIR)
 
+.PHONY: install-w-config dont_install_in_root
+install-w-config: $(HTML) dont_install_in_root gitversion
+	rsync -avz --exclude='.*' --exclude='$(MODULES)' --exclude='wiki-images' . $(CHAISEDIR)
+
 .PHONY: gitversion
 gitversion:
 	sh ./git_version_info.sh
