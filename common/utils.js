@@ -1845,6 +1845,7 @@
         }
 
         function setupHead() {
+            addCanonicalTag();
             addCustomCSS();
             addTitle();
             setWindowName();
