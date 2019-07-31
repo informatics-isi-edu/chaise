@@ -106,7 +106,6 @@ before_install:
   - cd ..
   - git clone https://github.com/informatics-isi-edu/ermrestjs.git
   - cd ermrestjs
-  - git checkout asset-validaiton-origin
   - sudo npm install
   - bower install
   - sudo make build
