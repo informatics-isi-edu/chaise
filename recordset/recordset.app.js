@@ -76,8 +76,6 @@
         try {
             var session;
 
-            headInjector.setupHead();
-
             UriUtils.setOrigin();
 
             var context = ConfigUtils.getContextJSON(),
