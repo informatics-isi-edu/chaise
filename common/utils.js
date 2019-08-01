@@ -1888,7 +1888,7 @@
                 // this else case should only occur if display annotation contains asset-permission and asset is not the same host
                 var modalProperties = {
                     windowClass: "modal-redirect",
-                    templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/redirect.modal.html",
+                    templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/externalLink.modal.html",
                     controller: 'RedirectController',
                     controllerAs: 'ctrl',
                     animation: false,
