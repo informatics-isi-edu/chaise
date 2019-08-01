@@ -726,8 +726,8 @@
             vm.reference.columns.forEach(function (col) {
                 vm.columnModels.push({
                     column: col,
-                    isLoading: col.hasWaitFor || !col.isUnique,
-                    hasWaitFor: col.hasWaitFor || !col.isUnique
+                    isLoading: col.hasWaitFor === true || col.isUnique === false,
+                    hasWaitFor: col.hasWaitFor === true || col.isUnique === false
                 });
             });
 
