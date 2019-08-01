@@ -424,7 +424,18 @@
                     vm.aggregatesToInitialize = [];
                     if (vm.reference.activeList) {
                         vm.reference.activeList.aggregates.forEach(function (c, i) {
-                            vm.aggregatesToInitialize.push(i);
+                            if (vm.page.tuples.length > 0) {
+                                vm.aggregatesToInitialize.push(i);
+                            } else {
+                                // there are not matching rows, so there's no point in creating
+                                // aggregate requests.
+                                // make sure the spinner is hidden for the pending columns.
+                                c.objects.forEach(function (obj) {
+                                    if (obj.column) {
+                                        vm.columnModels[obj.index].isLoading = false;
+                                    }
+                                })
+                            }
                         });
                     }
 
