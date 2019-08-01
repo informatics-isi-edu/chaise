@@ -187,7 +187,7 @@
                 }
 
                 $rootScope.reference.session = session;
-                $rootScope.session = session;
+                $rootScope.session = context.session = session;
 
                 $log.info("Reference: ", $rootScope.reference);
 
