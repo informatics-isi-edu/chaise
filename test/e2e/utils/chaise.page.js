@@ -1341,8 +1341,12 @@ var recordsetPage = function() {
     };
 
     this.waitForAggregates = function (timeout) {
-        var locator = element.all(by.css('aggregate-col-loader'));
-        return browser.wait(protractor.ExpectedConditions.invisibilityOf(locator), timeout || browser.params.defaultTimeout);
+        var locator = element.all(by.css('.aggregate-col-loader'));
+        return browser.wait(function () {
+            return locator.isDisplayed().then(function (arr) {
+                return arr.includes(true) === false;
+            })
+        }, timeout || browser.params.defaultTimeout);
     };
 
     this.getWarningAlert = function () {
