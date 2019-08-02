@@ -282,6 +282,11 @@
     .factory('ErrorService', ['AlertsService', 'ConfigUtils', 'DataUtils', 'errorMessages', 'errorNames', 'Errors', 'messageMap', 'modalUtils', 'Session', 'UriUtils', '$document', '$log', '$rootScope', '$window',
         function ErrorService(AlertsService, ConfigUtils, DataUtils, errorMessages, errorNames, Errors, messageMap, modalUtils, Session, UriUtils, $document, $log, $rootScope, $window) {
 
+        // NOTE: overriding `window.onerror` in the ErrorService scope
+        $window.onerror = function () {
+          return handleException(arguments[4]);
+        };
+
         var reloadCb = function() {
             window.location.reload();
         };
