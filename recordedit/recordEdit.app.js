@@ -112,7 +112,6 @@
         $rootScope.showSpinner = false;
 
         UriUtils.setOrigin();
-        headInjector.setupHead();
 
         // This is to allow the dropdown button to open at the top/bottom depending on the space available
         UiUtils.setBootstrapDropdownButtonBehavior();
@@ -198,7 +197,7 @@
                 }
 
                 $rootScope.reference.session = session;
-                $rootScope.session = session;
+                $rootScope.session = context.session = session;
 
                 $log.info("Reference: ", $rootScope.reference);
 

@@ -46,7 +46,6 @@
 
     .run(['headInjector', 'UiUtils', 'UriUtils', function (headInjector, UiUtils, UriUtils) {
         UriUtils.setOrigin();
-        headInjector.setupHead();
         // This is to allow the dropdown button to open at the top/bottom depending on the space available
         UiUtils.setBootstrapDropdownButtonBehavior();
 

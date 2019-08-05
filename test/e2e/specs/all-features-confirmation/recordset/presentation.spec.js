@@ -281,6 +281,15 @@ describe('View recordset,', function() {
                     });
                 }).catch(chaisePage.catchTestError(done));
             });
+
+            it ("going to a page with no results, the loader for columns should hide.", function (done) {
+                browser.ignoreSynchronization=true;
+                browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + activeListParams.schemaName + ":" + activeListParams.table_name + "/main_id=03");
+
+                chaisePage.waitForElement(element(by.id("divRecordSet")));
+                chaisePage.recordsetPage.waitForAggregates();
+                done();
+            })
         });
     }
 

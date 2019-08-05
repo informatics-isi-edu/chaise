@@ -25,7 +25,7 @@ var testParams = {
             columnName: "col_w_column_order_false"
         },
         {
-            title: "facet without order and hide_num_occurrences: true",
+            title: "facet without order and hide_num_occurrences : true",
             facetIdx: 19,
             modalOptions: ['01', '13', '12', '11', '10', '09', '08', '07', '06', '05', '04', '03', '02'],
             sortable: true,
@@ -122,9 +122,9 @@ var testParams = {
     },
     glyphLeftClass: "glyphicon-triangle-left",
     glyphRightClass: "glyphicon-triangle-right",
-    foreignKeyPopupFacetFilter: "term: eight",
+    foreignKeyPopupFacetFilter: "term : eight",
     associationRTName: "main_f3_assoc",
-    associationPopupFacetFilter: "term: five",
+    associationPopupFacetFilter: "term : five",
     associationPopupSelectedRowsFilter: "five"
 };
 
@@ -616,7 +616,7 @@ describe("Other facet features, ", function() {
             chaisePage.recordsetPage.getFacetFilters().then(function (filters) {
                 expect(filters.length).toEqual(1, "filter is missing");
 
-                expect(filters[0].getText()).toEqual("Custom Filter: " + customFilterParams.ermrestFilterDisplayed, "filter text missmatch.");
+                expect(filters[0].getText()).toEqual("Custom Filter : " + customFilterParams.ermrestFilterDisplayed, "filter text missmatch.");
 
                 expect(chaisePage.recordsetPage.getClearAllFilters().isDisplayed()).toBeTruthy("`Clear All` is not visible");
 
@@ -790,7 +790,7 @@ describe("Other facet features, ", function() {
 
                     browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(secondFacetIdx)), browser.params.defaultTimeout);
 
-                    return chaisePage.clickButton(secondFacetOption);
+                    return secondFacetOption.click();
                 }).then(function () {
                         checkAlert();
                         expect(secondFacetOption.isSelected()).toBeFalsy("the option is checked.");
@@ -1045,7 +1045,7 @@ describe("Other facet features, ", function() {
             }, browser.params.defaultTimeout);
 
             chaisePage.recordsetPage.getFacetFilters().then(function (filters) {
-                expect(filters[0].getText()).toEqual("Custom Facets: " + customFacetParams.cfacet.displayname, "filter text missmatch.");
+                expect(filters[0].getText()).toEqual("Custom Filter : " + customFacetParams.cfacet.displayname, "filter text missmatch.");
 
                 expect(chaisePage.recordsetPage.getClearAllFilters().isDisplayed()).toBeTruthy("`Clear All` is not visible");
 

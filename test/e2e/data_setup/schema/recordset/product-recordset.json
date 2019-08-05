@@ -496,7 +496,7 @@
             }
           ]
         },
-        "tag:isrd.isi.edu,2019:source_definitions": {
+        "tag:isrd.isi.edu,2019:source-definitions": {
           "columns": true,
           "fkeys": true,
           "sources": {

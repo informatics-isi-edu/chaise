@@ -230,7 +230,7 @@ CSS_SOURCE=$(CSS)/swoop-sidebar.css \
 # JavaScript source and test specs
 JS=scripts
 
-JS_DEPS=$(JS)/vendor/jquery-1.11.1.min.js \
+JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
 	$(JS)/vendor/jquery-ui-tooltip.min.js \
 	$(JS)/vendor/jquery.nouislider.all.min.js \
 	$(JS)/vendor/bootstrap-3.3.7.min.js \
@@ -291,7 +291,7 @@ TEMPLATES_DEPS=$(TEMPLATES)/erminit.html \
 # JavaScript and CSS source for Record(2) app
 RECORD_ASSETS=record
 
-RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-1.11.1.min.js \
+RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
 	$(JS)/vendor/plotly-latest.min.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-plotly.js \
@@ -341,7 +341,7 @@ RECORD_CSS_SOURCE=$(RECORD_ASSETS)/record.css
 # JavaScript and CSS source for Viewer app
 VIEWER_ASSETS=viewer
 
-VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-1.11.1.min.js \
+VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-sanitize.js \
 	$(COMMON)/alerts.js \
@@ -392,7 +392,7 @@ VIEWER_CSS_SOURCE=$(VIEWER_ASSETS)/viewer.css
 # JavaScript and CSS source for RecordEdit app
 RE_ASSETS=recordedit
 
-RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-1.11.1.min.js \
+RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
 	$(JS)/vendor/plotly-latest.min.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-plotly.js \
@@ -456,7 +456,7 @@ RE_CSS_MDHELP=$(RE_ASSETS)/mdHelpStyle.min.css
 # JavaScript and CSS source for RecordSet app
 RECSET_ASSETS=recordset
 
-RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-1.11.1.min.js \
+RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
 	$(JS)/vendor/plotly-latest.min.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-plotly.js \
@@ -762,6 +762,10 @@ $(JS_CONFIG): chaise-config-sample.js
 .PHONY: install dont_install_in_root
 install: $(HTML) dont_install_in_root gitversion
 	rsync -avz --exclude='.*' --exclude='$(MODULES)' --exclude='wiki-images' --exclude=/chaise-config.js . $(CHAISEDIR)
+
+.PHONY: install-w-config dont_install_in_root
+install-w-config: $(HTML) dont_install_in_root gitversion
+	rsync -avz --exclude='.*' --exclude='$(MODULES)' --exclude='wiki-images' . $(CHAISEDIR)
 
 .PHONY: gitversion
 gitversion:

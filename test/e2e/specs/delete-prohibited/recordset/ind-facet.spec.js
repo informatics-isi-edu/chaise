@@ -21,12 +21,12 @@ var testParams = {
     },
     searchBox: {
         term: "one",
-        filter: "Search: one",
+        filter: "Search : one",
         numRows: 6,
         term2: "eve",
         term2Rows: 4,
         term3: "ns",
-        term3Filter: "Search: evens",
+        term3Filter: "Search : evens",
         term3Rows: 1
     },
     minInputClass: "range-min",
@@ -47,7 +47,7 @@ var testParams = {
             type: "choice",
             totalNumOptions: 10,
             option: 2,
-            filter: "id: 3",
+            filter: "id : 3",
             numRows: 1,
             options: [ '1', '2', '3', '4', '5', '6', '7', '8', '9', '10' ],
             comment: "ID comment"
@@ -62,17 +62,17 @@ var testParams = {
             range: {
                 min: 5,
                 max: 10,
-                filter: "int_col: 5 to 10",
+                filter: "int_col : 5 to 10",
                 numRows: 6
             },
             justMin: {
                 min: 6,
-                filter: "int_col: ≥ 6",
+                filter: "int_col : ≥ 6",
                 numRows: 17
             },
             justMax: {
                 max: 12,
-                filter: "int_col: ≤ 12",
+                filter: "int_col : ≤ 12",
                 numRows: 15
             },
             comment: "int comment"
@@ -86,17 +86,17 @@ var testParams = {
             range: {
                 min: 6.5,
                 max: 12.2,
-                filter: "float_col: 6.5000 to 12.2000",
+                filter: "float_col : 6.5000 to 12.2000",
                 numRows: 12
             },
             justMin: {
                 min: 8.9,
-                filter: "float_col: ≥ 8.9000",
+                filter: "float_col : ≥ 8.9000",
                 numRows: 14
             },
             justMax: {
                 max: 7.45,
-                filter: "float_col: ≤ 7.4500",
+                filter: "float_col : ≤ 7.4500",
                 numRows: 4
             }
         },
@@ -109,17 +109,17 @@ var testParams = {
             range: {
                 min: "2002-06-14",
                 max: "2007-12-12",
-                filter: "date_col: 2002-06-14 to 2007-12-12",
+                filter: "date_col : 2002-06-14 to 2007-12-12",
                 numRows: 5
             },
             justMin: {
                 min: "2009-12-14",
-                filter: "date_col: ≥ 2009-12-14",
+                filter: "date_col : ≥ 2009-12-14",
                 numRows: 3
             },
             justMax: {
                 max: "2007-04-18",
-                filter: "date_col: ≤ 2007-04-18",
+                filter: "date_col : ≤ 2007-04-18",
                 numRows: 14
             }
         },
@@ -139,19 +139,19 @@ var testParams = {
                 minTime: "10:08:00",
                 maxDate: "2007-12-06",
                 maxTime: "17:26:12",
-                filter: "timestamp_col: 2004-05-20 10:08:00 to 2007-12-06 17:26:12",
+                filter: "timestamp_col : 2004-05-20 10:08:00 to 2007-12-06 17:26:12",
                 numRows: 3
             },
             justMin: {
                 date: "2004-05-20",
                 time: "10:08:00",
-                filter: "timestamp_col: ≥ 2004-05-20 10:08:00",
+                filter: "timestamp_col : ≥ 2004-05-20 10:08:00",
                 numRows: 8
             },
             justMax: {
                 date: "2007-12-06",
                 time: "17:26:12",
-                filter: "timestamp_col: ≤ 2007-12-06 17:26:12",
+                filter: "timestamp_col : ≤ 2007-12-06 17:26:12",
                 numRows: 15
             },
             comment: "timestamp column"
@@ -161,7 +161,7 @@ var testParams = {
             type: "choice",
             totalNumOptions: 12,
             option: 1,
-            filter: "text_col: No Value",
+            filter: "text_col : No Value",
             numRows: 5,
             options: [ 'All Records With Value', 'No Value', 'one', 'Empty', 'two', 'seven', 'eight', 'elevens', 'four', 'six', 'ten', 'three' ]
         },
@@ -170,7 +170,7 @@ var testParams = {
             type: "choice",
             totalNumOptions: 10,
             option: 2,
-            filter: "longtext_col: two",
+            filter: "longtext_col : two",
             numRows: 5,
             options: [ 'Empty', 'one', 'two', 'eight', 'eleven', 'five', 'four', 'nine', 'seven', 'six' ],
             comment: "A lengthy comment for the facet of the longtext_col. This should be displyed properly in the facet."
@@ -180,7 +180,7 @@ var testParams = {
             type: "choice",
             totalNumOptions: 10,
             option: 3,
-            filter: "markdown_col: eight",
+            filter: "markdown_col : eight",
             numRows: 1,
             options: [ 'Empty', 'one', 'two', 'eight', 'eleven', 'five', 'four', 'nine', 'seven' , 'six']
         },
@@ -189,7 +189,7 @@ var testParams = {
             type: "choice",
             totalNumOptions: 3,
             option: 2,
-            filter: "boolean_col: Yes",
+            filter: "boolean_col : Yes",
             numRows: 10,
             options: [ 'All Records With Value', 'No', 'Yes' ]
         },
@@ -198,7 +198,7 @@ var testParams = {
             type: "choice",
             totalNumOptions: 11,
             option: 4,
-            filter: 'jsonb_col: { "key": "four" }',
+            filter: 'jsonb_col : { "key": "four" }',
             numRows: 1,
             options: [ 'All Records With Value', '{"key":"one"}', '{"key":"two"}', '{"key":"three"}', '{"key":"four"}', '{"key":"five"}', '{"key":"six"}', '{"key":"seven"}', '{"key":"eight"}', '{"key":"nine"}', '{"key":"ten"}' ]
         },
@@ -216,7 +216,7 @@ var testParams = {
             type: "choice",
             totalNumOptions: 10,
             option: 0,
-            filter: "to_name: one",
+            filter: "to_name : one",
             numRows: 10,
             options: [ 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten' ],
             comment: "open facet"
@@ -226,7 +226,7 @@ var testParams = {
             type: "choice",
             totalNumOptions: 3,
             option: 1,
-            filter: "f3 (term): one",
+            filter: "f3 (term) : one",
             numRows: 6,
             options: [ 'All Records With Value', 'one', 'two' ]
         },
@@ -235,7 +235,7 @@ var testParams = {
             type: "choice",
             totalNumOptions: 11,
             option: 5,
-            filter: "from_name: 5",
+            filter: "from_name : 5",
             numRows: 1,
             options: [ 'All Records With Value', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
         },
@@ -281,7 +281,7 @@ var testParams = {
             type: "choice",
             totalNumOptions: 8,
             option: 1,
-            filter: "col_w_column_order_false: 01",
+            filter: "col_w_column_order_false : 01",
             numRows: 9,
             options: [ 'All Records With Value', '01', '02', '03', '04', '05', '06', '07']
         }
@@ -506,7 +506,7 @@ describe("Viewing Recordset with Faceting,", function() {
             });
 
             it("should show 25 rows and 0 filters after clicking 'clear all'", function () {
-                chaisePage.recordsetPage.getClearAllFilters().click().then(function () {
+                chaisePage.clickButton(chaisePage.recordsetPage.getClearAllFilters()).then(function () {
                     chaisePage.recordsetPage.waitForInverseMainSpinner();
                     //verify there's no facet string in url
                     return browser.getCurrentUrl();
