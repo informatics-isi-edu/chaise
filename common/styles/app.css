@@ -1226,7 +1226,7 @@ footer .container1 {
  }
 
  .filter-label {
-     padding: .2em .2em .3em;
+     padding: .2em .3em .3em;
  }
 
  .total-filters .filter-label {
@@ -1237,12 +1237,33 @@ footer .container1 {
      position: relative;
      border: 1px solid #ccc;
      overflow: hidden;
-     max-width: 300px;
+     max-width: 350px;
      text-overflow: ellipsis;
+     height: 26px;
+ }
+
+ .total-filters .filter-label .remove-link,
+ .total-filters .filter-label .filter-label-title,
+ .total-filters .filter-label .filter-label-colon,
+ .total-filters .filter-label .filter-label-value {
+     vertical-align: middle;
+ }
+
+ .total-filters .filter-label .remove-link i {
+     top: 0.1em;
  }
 
  .total-filters .filter-label span {
      border: none;
+ }
+
+ .total-filters .filter-label .filter-label-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    max-width: 150px;
+    margin-right: -2px;
+    padding: 0.1em 0;
  }
 
  .total-filters .remove-link .filter-label {
@@ -1260,13 +1281,6 @@ footer .container1 {
     background-color: #f1f1f1;
     color: #333;
     font-weight: 500;
- }
-
- .total-filters .filter-label {
-     font-size: 1em;
-     margin-right:5px;
-     margin-bottom: 5px;
-     display:inline-block;
  }
 
  .recordset-container.without-faceting .main-container{
