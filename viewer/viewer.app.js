@@ -33,6 +33,18 @@
         'ng.deviceDetector'
     ])
 
+    .config(['$provide', function($provide) {
+        $provide.decorator('$templateRequest', ['ConfigUtils', '$delegate', function (ConfigUtils, $delegate) {
+            // return a function that will be called when a template needs t be fetched
+            return function(templateUrl) {
+                var dcctx = ConfigUtils.getContextJSON();
+                var versionedTemplateUrl = templateUrl + (templateUrl.indexOf('chaise') !== -1 ? "?v=" + dcctx.version : "");
+
+                return $delegate(versionedTemplateUrl);
+            }
+        }])
+    }])
+
     // Configure the context info from the URI
     .config(['context', 'UriUtilsProvider', function configureContext(context, UriUtilsProvider) {
         var utils = UriUtilsProvider.$get();

@@ -42,7 +42,7 @@
         'chaise.recordcreate'
     ])
 
-    .config(['$compileProvider', '$cookiesProvider', '$logProvider', '$uibTooltipProvider', 'ConfigUtilsProvider', function($compileProvider, $cookiesProvider, $logProvider, $uibTooltipProvider, ConfigUtilsProvider) {
+    .config(['$compileProvider', '$cookiesProvider', '$logProvider', '$provide', '$uibTooltipProvider', 'ConfigUtilsProvider', function($compileProvider, $cookiesProvider, $logProvider, $provide, $uibTooltipProvider, ConfigUtilsProvider) {
         // angular configurations
         // allows unsafe prefixes to be downloaded
         // full regex: "/^\s*(https?|ftp|mailto|tel|file|blob):/"
@@ -53,6 +53,16 @@
         // to `false` on the element.
         $uibTooltipProvider.options({appendToBody: true});
         $logProvider.debugEnabled(ConfigUtilsProvider.$get().getConfigJSON().debug === true);
+
+        $provide.decorator('$templateRequest', ['ConfigUtils', '$delegate', function (ConfigUtils, $delegate) {
+            // return a function that will be called when a template needs t be fetched
+            return function(templateUrl) {
+                var dcctx = ConfigUtils.getContextJSON();
+                var versionedTemplateUrl = templateUrl + (templateUrl.indexOf('chaise') !== -1 ? "?v=" + dcctx.version : "");
+
+                return $delegate(versionedTemplateUrl);
+            }
+        }])
     }])
 
     .run(['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'FunctionUtils', 'headInjector', 'MathUtils', 'messageMap', 'recordAppUtils', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$timeout', '$window',

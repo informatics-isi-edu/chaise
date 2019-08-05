@@ -561,33 +561,46 @@ search/index.html: search/index.html.in .make-asset-block .make-template-block
 		-e '/%TEMPLATES%/ {' -e 'r .make-template-block' -e 'd' -e '}' \
 		search/index.html.in > search/index.html
 
-login/index.html: login/index.html.in .make-asset-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
+login/index.html: login/index.html.in .make-add-version-tag .make-asset-block
+	sed -e '/%VERSION%/ {' -e 'r .make-add-version-tag' -e 'd' -e '}' \
+		-e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
 		login/index.html.in > login/index.html
 
-record/index.html: record/index.html.in .make-record-asset-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-record-asset-block' -e 'd' -e '}' \
+record/index.html: record/index.html.in .make-add-version-tag .make-record-asset-block
+	sed -e '/%VERSION%/ {' -e 'r .make-add-version-tag' -e 'd' -e '}' \
+		-e '/%ASSETS%/ {' -e 'r .make-record-asset-block' -e 'd' -e '}' \
 		record/index.html.in > record/index.html
 
-recordset/index.html: recordset/index.html.in .make-rs-asset-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-rs-asset-block' -e 'd' -e '}' \
+recordset/index.html: recordset/index.html.in .make-add-version-tag .make-rs-asset-block
+	sed -e '/%VERSION%/ {' -e 'r .make-add-version-tag' -e 'd' -e '}' \
+		-e '/%ASSETS%/ {' -e 'r .make-rs-asset-block' -e 'd' -e '}' \
 		recordset/index.html.in > recordset/index.html
 
-viewer/index.html: viewer/index.html.in .make-viewer-asset-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-viewer-asset-block' -e 'd' -e '}' \
+viewer/index.html: viewer/index.html.in .make-add-version-tag .make-viewer-asset-block
+	sed -e '/%VERSION%/ {' -e 'r .make-add-version-tag' -e 'd' -e '}' \
+		-e '/%ASSETS%/ {' -e 'r .make-viewer-asset-block' -e 'd' -e '}' \
 		viewer/index.html.in > viewer/index.html
 
-recordedit/index.html: recordedit/index.html.in .make-de-asset-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-de-asset-block' -e 'd' -e '}' \
+recordedit/index.html: recordedit/index.html.in .make-add-version-tag .make-de-asset-block
+	sed -e '/%VERSION%/ {' -e 'r .make-add-version-tag' -e 'd' -e '}' \
+		-e '/%ASSETS%/ {' -e 'r .make-de-asset-block' -e 'd' -e '}' \
 		recordedit/index.html.in > recordedit/index.html
 
-recordedit/mdHelp.html: recordedit/mdHelp.html.in .make-md-asset-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-md-asset-block' -e 'd' -e '}' \
-	recordedit/mdHelp.html.in > recordedit/mdHelp.html
+recordedit/mdHelp.html: recordedit/mdHelp.html.in .make-add-version-tag .make-md-asset-block
+	sed -e '/%VERSION%/ {' -e 'r .make-add-version-tag' -e 'd' -e '}' \
+		-e '/%ASSETS%/ {' -e 'r .make-md-asset-block' -e 'd' -e '}' \
+		recordedit/mdHelp.html.in > recordedit/mdHelp.html
 
 $(JS_CONFIG): chaise-config-sample.js
 	cp -n chaise-config-sample.js $(JS_CONFIG) || true
 	touch $(JS_CONFIG)
+
+.make-add-version-tag:
+	> .make-add-version-tag
+	for x in 1; do \
+		version=`date +%Y%m%d%H%M%S` ; \
+		echo "<meta name='version' content='$$version'/>" >> .make-add-version-tag ; \
+	done
 
 .make-asset-block: $(CSS_DEPS) $(CSS_SOURCE) $(JS_DEPS) $(JS_SOURCE) $(JS_CONFIG)
 	> .make-asset-block
