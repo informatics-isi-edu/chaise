@@ -245,12 +245,11 @@
                         // append link to end of alert.
                         if (exception instanceof ERMrest.DuplicateConflictError) {
                             exception.message += ' Click <a href="' + exception.duplicateReference.contextualize.detailed.appLink + '" target="_blank">here</a> to see the conflicting record that already exists.';
-                            if (isModalUpdate) {
-                                // pure and binary add on record page, we want a popup error
-                                ErrorService.handleException(exception, true);
-                            } else {
-                                AlertsService.addAlert(exception.message, 'error');
-                            }
+                        }
+
+                        if (isModalUpdate) {
+                            // pure and binary add on record page, we want a popup error
+                            ErrorService.handleException(exception, true);
                         } else {
                             AlertsService.addAlert(exception.message, (exception instanceof ERMrest.NoDataChangedError ? 'warning' : 'error') );
                         }
