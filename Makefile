@@ -559,31 +559,31 @@ html: $(HTML)
 search/index.html: search/index.html.in .make-asset-block .make-template-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
 		-e '/%TEMPLATES%/ {' -e 'r .make-template-block' -e 'd' -e '}' \
-		search/index.html.in > search/index.html
+		search/index.html.in common/templates/noscript.html > search/index.html
 
 login/index.html: login/index.html.in .make-asset-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
-		login/index.html.in > login/index.html
+		login/index.html.in common/templates/noscript.html > login/index.html
 
 record/index.html: record/index.html.in .make-record-asset-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-record-asset-block' -e 'd' -e '}' \
-		record/index.html.in > record/index.html
+		record/index.html.in common/templates/noscript.html > record/index.html
 
 recordset/index.html: recordset/index.html.in .make-rs-asset-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-rs-asset-block' -e 'd' -e '}' \
-		recordset/index.html.in > recordset/index.html
+		recordset/index.html.in common/templates/noscript.html > recordset/index.html
 
 viewer/index.html: viewer/index.html.in .make-viewer-asset-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-viewer-asset-block' -e 'd' -e '}' \
-		viewer/index.html.in > viewer/index.html
+		viewer/index.html.in common/templates/noscript.html > viewer/index.html
 
 recordedit/index.html: recordedit/index.html.in .make-de-asset-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-de-asset-block' -e 'd' -e '}' \
-		recordedit/index.html.in > recordedit/index.html
+		recordedit/index.html.in common/templates/noscript.html > recordedit/index.html
 
 recordedit/mdHelp.html: recordedit/mdHelp.html.in .make-md-asset-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-md-asset-block' -e 'd' -e '}' \
-	recordedit/mdHelp.html.in > recordedit/mdHelp.html
+	recordedit/mdHelp.html.in common/templates/noscript.html > recordedit/mdHelp.html
 
 $(JS_CONFIG): chaise-config-sample.js
 	cp -n chaise-config-sample.js $(JS_CONFIG) || true
