@@ -208,19 +208,7 @@ var testParams = {
       }]
    }]
 };
-var mdHelp ={
-        raw_bold1:"**Something Bold**",
-        raw_bold2:"__Something Bold__",
-        md_bold:"<strong>Something Bold</strong>",
-        raw_italic1:"*Some Italic*",
-        raw_italic2:"_Some Italic_",
-        md_italic:"<em>Some Italic</em>",
-        raw_strike:"~~strikethrough text~~",
-        md_strike:"<strike>strikethrough text</strike>",
-        raw_rid1:"[[RID]]",
-        raw_rid2:"[RID](http://xyz/id/RID)",
-        md_rid:'<a href="/id/RID" target="_blank">RID</a>',
-};
+
 // keep track of namespaces that we use, so we can delete them afterwards
 if (!process.env.TRAVIS) {
     testConfiguration.hatracNamespaces.push(process.env.ERMREST_URL.replace("/ermrest", "") + "/hatrac/js/chaise/" + currentTimestampTime);
@@ -371,39 +359,30 @@ describe('Record Add', function() {
             chaisePage.waitForElement(helpBtn);
         });
 
-            // TODO: multiple issues with this. promise chaining not done right so execution flow seems like it should fail
-            // , only need to verify the url changed
-            // there's no variablility because it's static so no need to exhaustively test
-            it("should open a new window with the help page.",function(){
-                helpBtn.click();
-                browser.getAllWindowHandles().then(function(handles){
-                return handles;
+        it("should open a new window with the help page.",function(done){
+            helpBtn.click().then(function () {
+                console.log("")
+                return browser.getAllWindowHandles();
             }).then(function(handles) {
                 allWindows = handles;
+                console.log("handled");
                 return browser.switchTo().window(allWindows[1]);
             }).then(function() {
                 return chaisePage.waitForElement(element(by.id("main-content")));
             }).then(function() {
-                expect(element(by.id('mainTable')).all(by.tagName('tr')).count()).toBe(19,'Table row count could not be matched.');
-                expect(element(by.id('rBold1')).getText()).toBe(mdHelp.raw_bold1,'First raw Bold text help not found');
-                expect(element(by.id('rBold2')).getText()).toBe(mdHelp.raw_bold2,'Second raw Bold text help not found');
-                expect(element(by.id('oBold')).getAttribute('innerHTML')).toBe(mdHelp.md_bold,'Markdown Bold text help not found');
-                expect(element(by.id('rItalic1')).getText()).toBe(mdHelp.raw_italic1,'First raw Italic text help not found');
-                expect(element(by.id('rItalic2')).getText()).toBe(mdHelp.raw_italic2,'Second raw Italic text help not found');
-                expect(element(by.id('oItalic')).getAttribute('innerHTML')).toBe(mdHelp.md_italic,'Markdown Italic text help not found');
-                expect(element(by.id('rStrike1')).getText()).toBe(mdHelp.raw_strike,'Strikethrough text help not found');
-                expect(element(by.id('oStrike')).getAttribute('innerHTML')).toBe(mdHelp.md_strike,'Markdown Strike text help not found');
-                // test RID link help text
-                expect(element(by.id('rRidLink1')).getText()).toBe(mdHelp.raw_rid1,'Strikethrough text help not found');
-                expect(element(by.id('rRidLink2')).getText()).toBe(mdHelp.raw_rid2,'Strikethrough text help not found');
-                expect(element(by.id('oRidLink')).getAttribute('innerHTML')).toBe(mdHelp.md_rid,'Markdown Strike text help not found');
+                // this is a static page, we just want to make sure this is the correct page.
+                // we don't need to test every element.
+                expect(element(by.id('mainTable')).all(by.tagName('tr')).count()).toBe(21,'Table row count could not be matched.');
+                expect(element(by.id('rBold1')).getText()).toBe("**Something Bold**",'first row, first column missmatch');
+                expect(element(by.id('rBold2')).getText()).toBe("__Something Bold__",'first row, second column missmatch');
+                expect(element(by.id('oBold')).getAttribute('innerHTML')).toBe("<strong>Something Bold</strong>",'first row, third column missmatch');
+                done();
             }).then(function() {
                 // - Go back to initial Record page
                 browser.close();
                 browser.switchTo().window(allWindows[0]);
             }).catch(function(error) {
-                console.dir(error);
-                expect('Something went wrong with this promise chain.').toBe('Please see error message.','While checking markdown help page');
+                done.fail(error);
             });
         });
     });
