@@ -6,11 +6,11 @@
             <div ng-if="vm.config.selectMode == 'multi-select' && !vm.config.hideSelectedRows" class="row total-filters selected-rows">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                     <a class="remove-link" ng-click="removeAllPills($event)" ng-disabled="vm.selectedRows.length < 1">
-                        <span class="filter-label label label-primary label-inverted" ng-if="vm.selectedRows.length < 1">
-                            No Item Selected
+                        <span class="filter-label label label-default label-inverted no-item-label" ng-if="vm.selectedRows.length < 1" style="cursor: default;">
+                            No item selected
                         </span>
-                        <span class="filter-label label label-primary label-inverted" ng-if="vm.selectedRows.length > 0">
-                            Clear All
+                        <span class="filter-label label label-primary" ng-if="vm.selectedRows.length > 0">
+                            Clear all selections
                         </span>
                     </a>
                     <div ng-if="vm.selectedRows.length > 0" class="filter-label label label-default" ng-repeat="row in vm.selectedRows track by $index" tooltip-enable="tooltipEnabled" uib-tooltip="{{row.displayname.value}}" tooltip-placement="bottom" chaise-enable-tooltip-width>

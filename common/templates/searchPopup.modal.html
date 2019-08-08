@@ -4,12 +4,16 @@
         <span ng-if="::ctrl.tableModel.tableDisplayName.isHTML" ng-bind-html="::ctrl.tableModel.tableDisplayName.value" ng-attr-tooltip-placement="bottom" ng-attr-uib-tooltip="{{::ctrl.tableModel.tableComment ? ctrl.tableModel.tableComment : undefined}}"></span>
         <span ng-if="::!ctrl.tableModel.tableDisplayName.isHTML" ng-bind="::ctrl.tableModel.tableDisplayName.value" ng-attr-tooltip-placement="bottom" ng-attr-uib-tooltip="{{::ctrl.tableModel.tableComment ? ctrl.tableModel.tableComment : undefined}}"></span>
     </h2>
+    <span ng-if="ctrl.tableModel.config.selectMode=='multi-select'">
+        <button id="multi-select-submit-btn" ng-disabled="ctrl.tableModel.selectedRows.length < 1"
+                class="btn btn-primary btn-inverted pull-right" type="button" ng-click="ctrl.submit()"
+                tooltip-placement="bottom" uib-tooltip="{{ctrl.tableModel.selectedRows.length < 1 ? '' : 'submit selected items'}}" ng-disabled="ctrl.disableSubmit">
+            Submit
+        </button>
+    </span>
 </div>
 <div class="modal-body" style="overflow: auto;">
     <loading-spinner ng-show="!ctrl.tableModel.hasLoaded && !ctrl.tableModel.backgroundSearch"></loading-spinner>
-    <span ng-if="ctrl.tableModel.config.selectMode=='multi-select'" ng-hide="ctrl.tableModel.selectedRows.length < 1">
-        <button id="multi-select-submit-btn" class="btn btn-primary btn-inverted pull-right" type="button" ng-click="ctrl.submit()" ng-disabled="ctrl.disableSubmit">Submit</button>
-    </span>
     <div ng-switch="ctrl.mode">
         <!-- switch when 'selectFaceting' -->
         <recordset-select-faceting ng-switch-when="selectFaceting" vm="ctrl.tableModel" on-selected-rows-changed="ctrl.onSelectedRowsChanged" allow-create="false"></recordset-select-faceting>

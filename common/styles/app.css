@@ -964,36 +964,6 @@ ul.show-list-style li {
   min-height: 40vh;
 }
 
-/* Sets the table's maximum height to 70% of the screen height and adds a border at the bottom */
-.modal-body .outer-table {
-    max-height: 70vh;
-    border: 1px solid lightgrey;
-}
-
-/* Sets the margin-bottom for the table inside modal to 0px*/
-.modal-body .outer-table .table {
-    margin-bottom: 0px;
-    overflow: scroll;
-}
-
-@media (max-width: 800px) {
-    .modal-body .outer-table {
-        max-height: 67vh;
-    }
-}
-
-@media (max-width: 600px) {
-    .modal-body .outer-table {
-        max-height: 60vh;
-    }
-}
-
-@media (max-width: 500px) {
-    .modal-body .outer-table {
-        max-height: 55vh;
-    }
-}
-
 .modal-body #spinner {
   width: 100%;
   text-align: center;
@@ -1212,7 +1182,13 @@ footer .container1 {
 .modal-dialog .profileValue{
     padding-left: 32px;
 }
- /********** faceting ************/
+
+ /********** selected rows chiclets ***********/
+ .selected-rows-filters > div {
+     padding: 0;
+ }
+
+ /********** filter and selected rows chiclets ************/
  .total-filters {
     margin-bottom: 10px;
     margin-left: 0px;
@@ -1650,6 +1626,11 @@ footer .container1 {
      border-color: #337ab7;
  }
 
+ .filter-label.label-default.label-inverted {
+     color: #333;
+     background-color: #f1f1f1;
+ }
+
  .filter-label {
      background-color: white;
      color: #333;
@@ -1818,9 +1799,14 @@ input[type=number]::-moz-placeholder {
 /************** search popup **************/
 #multi-select-submit-btn {
     position: absolute;
-    right: 10px;
-    top: 10px;
+    right: 50px;
+    top: 15px;
     z-index: 2;
+    padding: 3px 12px;
+}
+
+.search-popup .modal-header {
+  background-color: #f1f1f1;
 }
 
 .selected-rows {
