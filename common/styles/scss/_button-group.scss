@@ -33,8 +33,8 @@
 
     .chaise-btn-group {
         // Prevent double borders when buttons are next to each other
-        > .chaise-btn-group:not(:first-child),
-        > .chaise-btn:not(:first-child) {
+        > .chaise-btn-group:not(:first-child):not([disabled]),
+        > .chaise-btn:not(:first-child):not([disabled]) {
             margin-left: -$btn-border-width;
         }
         // Reset rounded corners

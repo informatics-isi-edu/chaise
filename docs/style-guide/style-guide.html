@@ -11,7 +11,10 @@
 
     <link rel='stylesheet' type='text/css' href='style-guide.css'>
 
-    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+    <link rel="stylesheet"
+      href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/default.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js"></script>
+
 </head>
 
 <body class="chaise-body">
@@ -31,24 +34,68 @@
                         Typography is the concept of having highly legible headers and body paragraphs, and clear labels.
                     </p>
 
-                    <p>
-                        The Chaise application uses Helvetica Neue as the primary font for all text. The following is the default CSS styles for all text:
-                    </p>
-
-                    <pre class="prettyprint lang-css">
-body {
-  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-  font-size: 14px;
-  line-height: 20px;
-}</pre>
-
-                    <div class="text-tags">
-                        <h1>H1 - 35px</h1>
-                        <h2>H2 - 24.5px</h2>
-                        <h3>H3 - 21px</h3>
-                        <h4>H4 - 17.5px</h4>
-                        <p>Paragraph - 14px</p>
+                    <div class="font-text">
+                        <h3>Font</h3>
+                        <p>
+                            The Chaise application uses Helvetica Neue as the primary font for all text.
+                        </p>
                     </div>
+
+                    <div class="body-text">
+                        <h3>Body</h3>
+
+                        <p>
+                            Chaise's global default <code>font-size</code> is <em>14px</em>, with a <code>line-height</code> of <em>1.428</em>. This is applied to the <code>&lt;body&gt;</code> and all paragraphs
+                        </p>
+
+                        <div class="example">
+                            <div class="example-content">
+                                <p>
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc scelerisque vitae nisl tempus blandit. Nam at tellus sit amet ex consequat euismod. Aenean placerat dui a imperdiet dignissim. Fusce non nulla sed lectus interdum consequat. Praesent vehicula odio ut mauris posuere semper sit amet vitae enim. Vivamus faucibus quam in felis commodo eleifend. Nunc varius sit amet est eget euismod. Nullam aliquam purus et ornare efficitur. Nunc a leo eu est sodales facilisis sed quis tortor. Morbi quam massa, aliquam eu accumsan ac, dignissim eget ligula.
+                                </p>
+                            </div>
+                            <div class="code-content html">
+                                <p>...</p>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="heading-text">
+                        <h3>Headings</h3>
+
+                        <p>
+                            HTML headings, <code>&lt;h1&gt;</code> through <code>&lt;h4&gt;</code>, are available. <code>.h1-class</code> through <code>.h4-class</code> classes are also available, for when you want to match the font styling of a heading but still want your text to be displayed inline.
+                        </p>
+
+                        <div class="example">
+                            <table class="table">
+                                <tbody>
+                                    <tr>
+                                        <td><h1>h1. Chaise heading</h1></td>
+                                        <td class="heading-info">35px</td>
+                                        <td class="heading-info">2.5em</td>
+                                    </tr>
+                                    <tr>
+                                        <td><h2>h2. Chaise heading</h2></td>
+                                        <td class="heading-info">24.5px</td>
+                                        <td class="heading-info">1.75em</td>
+                                    </tr>
+                                    <tr>
+                                        <td><h3>h3. Chaise heading</h3></td>
+                                        <td class="heading-info">21px</td>
+                                        <td class="heading-info">1.em</td>
+                                    </tr>
+                                    <tr>
+                                        <td><h4>h4. Chaise heading</h4></td>
+                                        <td class="heading-info">17.5px</td>
+                                        <td class="heading-info">1.2em</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
                 </div>
                 <div class="guide-section">
                     <h2 class="guide-section-header" id="iconography">Iconography</h2>
@@ -62,88 +109,103 @@ body {
                             <li>
                                 <span class="chaise-icon chaise-sidebar-close"></span>
                                 <div>Close side bar</div>
+                                <div class="class-info">.chaise-icon .chaise-sidebar-close</div>
                             </li>
                             <li>
                                 <span class="fas fa-chevron-down"></span>
                                 <div>Opened Accordion</div>
+                                <div class="class-info">.fas .fa-chevron-down</div>
                             </li>
                             <li>
                                 <span class="fas fa-chevron-right"></span>
                                 <div>
                                     Closed Accordion
                                 </div>
+                                <div class="class-info">.fas .fa-chevron-right</div>
                             </li>
                             <li>
                                 <span class="glyphicon glyphicon-search"></span>
                                 <div>
                                     Search
                                 </div>
+                                <div class="class-info">.glyphicon .glyphicon-search</div>
                             </li>
                             <li>
                                 <span class="fas fa-long-arrow-alt-up"></span>
                                 <div>
                                     Ascending sort
                                 </div>
+                                <div class="class-info">.fas .fa-long-arrow-alt-up</div>
                             </li>
                             <li>
                                 <span class="fas fa-long-arrow-alt-down"></span>
                                 <div>
                                     Descending sort
                                 </div>
+                                <div class="class-info">.fas .fa-long-arrow-alt-down</div>
                             </li>
                             <li>
                                 <span class="fas fa-arrows-alt-v"></span>
                                 <div>
                                     Not sorted
                                 </div>
+                                <div class="class-info">.fas .fa-arrows-alt-v</div>
                             </li>
                             <li>
                                 <span class="chaise-icon chaise-view-details"></span>
                                 <div>
                                     View details
                                 </div>
+                                <div class="class-info">.chaise-icon .chaise-view-details</div>
                             </li>
                             <li>
                                 <span class="chaise-icon chaise-zoom-in"></span>
                                 <div>
                                     Zoom in
                                 </div>
+                                <div class="class-info">.chaise-icon .chaise-zoom-in</div>
                             </li>
                             <li>
                                 <span class="chaise-icon chaise-zoom-out"></span>
                                 <div>
                                     Zoom out
                                 </div>
+                                <div class="class-info">.chaise-icon .chaise-zoom-out</div>
                             </li>
                             <li>
                                 <span class="fas fa-sync-alt"></span>
                                 <div>
                                     Refresh
                                 </div>
+                                <div class="class-info">.fas .fa-sync-alt</div>
                             </li>
                             <li>
                                 <span class="glyphicon glyphicon-th-list"></span>
                                 <div>
                                     Show all sections
                                 </div>
+                                <div class="class-info">.glyphicon .glyphicon-th-list</div>
                             </li>
                             <li>
                                 <span class="fas fa-info"></span>
                                 <div>
                                     Tooltip information
                                 </div>
+                                <div class="class-info">.fas .fa-info</div>
                             </li>
                             <li>
                                 <span class="glyphicon glyphicon-share"></span>
                                 <div>
                                     Share and Cite
                                 </div>
+                                <div class="class-info">.glyphicon .glyphicon-share</div>
                             </li>
                             <li>
                                 <span class="glyphicon glyphicon-new-window"></span>
                                 <div>
                                     External link
                                 </div>
+                                <div class="class-info">.glyphicon .glyphicon-new-window</div>
                             </li>
 
                             <li>
@@ -151,6 +213,7 @@ body {
                                 <div>
                                     Download link
                                 </div>
+                                <div class="class-info">.glyphicon .glyphicon-download-alt</div>
                             </li>
 
                             <li>
@@ -158,12 +221,15 @@ body {
                                 <div>
                                     Export
                                 </div>
+                                <div class="class-info">.glyphicon .glyphicon-export</div>
                             </li>
+
                             <li>
                                 <span class="glyphicon glyphicon-plus"></span>
                                 <div>
                                     Create
                                 </div>
+                                <div class="class-info">.glyphicon .glyphicon-plus</div>
                             </li>
 
                             <li>
@@ -171,6 +237,7 @@ body {
                                 <div>
                                     Copy
                                 </div>
+                                <div class="class-info">.glyphicon .glyphicon-copy</div>
                             </li>
 
                             <li>
@@ -178,6 +245,7 @@ body {
                                 <div>
                                     Edit
                                 </div>
+                                <div class="class-info">.glyphicon .glyphicon-pencil</div>
 
                             </li>
 
@@ -186,6 +254,7 @@ body {
                                 <div>
                                     Delete
                                 </div>
+                                <div class="class-info">.glyphicon .glyphicon-trash</div>
                             </li>
 
                             <li>
@@ -193,6 +262,7 @@ body {
                                 <div>
                                     Clear
                                 </div>
+                                <div class="class-info">.glyphicon .glyphicon-remove</div>
                             </li>
 
                             <li>
@@ -200,6 +270,7 @@ body {
                                 <div>
                                     Open modal
                                 </div>
+                                <div class="class-info">.far .fa-window-restore</div>
                             </li>
 
                             <li>
@@ -207,6 +278,7 @@ body {
                                 <div>
                                     Table display mode
                                 </div>
+                                <div class="class-info">.fas .fa-table</div>
                             </li>
 
                             <li>
@@ -214,6 +286,7 @@ body {
                                 <div>
                                     Custom display mode
                                 </div>
+                                <div class="class-info">.glyphicon .glyphicon-th</div>
                             </li>
 
                             <li>
@@ -221,6 +294,7 @@ body {
                                 <div>
                                     Full screen (View more)
                                 </div>
+                                <div class="class-info">.glyphicon .glyphicon-fullscreen</div>
                             </li>
                         </ul>
                     </div>
@@ -658,7 +732,31 @@ body {
                         </div>
 
                         <h3 id="section-headers">Section Headers</h3>
+                        <div id="rt-container">
+                            <uib-accordion close-others="false">
+                                <div uib-accordion-group class="related-table-heading" is-open="true">
+                                    <uib-accordion-heading>
+                                        <i class="pull-left glyphicon glyphicon-chevron-down" style="margin-right: 5px;" ></i>
+                                        <span>Related Table Header</span> <span>(showing first 5 results)</span>
+                                    </uib-accordion-heading>
 
+                                    <div class="record-action-bar pull-right">
+                                        <button class="chaise-btn chaise-btn-secondary">
+                                            <span class="chaise-btn-icon glyphicon glyphicon-plus"></span>
+                                            <span>Add Record</span>
+                                        </button>
+                                        <button class="chaise-btn chaise-btn-secondary">
+                                            <span class="chaise-btn-icon glyphicon glyphicon-th"></span>
+                                            <span>Custom Mode</span>
+                                        </button>
+                                        <button class="chaise-btn chaise-btn-secondary">
+                                            <span class="chaise-btn-icon glyphicon glyphicon-fullscreen"></span>
+                                            <span>Full Screen</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </uib-accordion>
+                        </div>
                     </div>
                 </div>
 
@@ -705,5 +803,16 @@ body {
         </div>
     </div>
 </body>
+
+<script>
+    hljs.configure({useBR: true});
+
+    var divContent = document.querySelectorAll('div.code-content');
+
+    divContent.forEach(function(element) {
+        element.innerHTML = element.innerHTML.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        hljs.highlightBlock(element);
+    });
+</script>
 
 </html>

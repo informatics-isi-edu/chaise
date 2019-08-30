@@ -13,9 +13,6 @@ h2.guide-section-header {
   border-bottom: 1px solid #CCCCCC;
   padding-bottom: 10px; }
 
-.text-tags {
-  margin-left: 20px; }
-
 .icon-table {
   overflow: hidden; }
   .icon-table ul {
@@ -41,7 +38,8 @@ h2.guide-section-header {
     word-wrap: break-word;
     /* Help out IE10+ with class names */ }
   .icon-table .class-info {
-    display: none; }
+    display: none;
+    color: #e6e6e6; }
   .icon-table li:hover {
     color: #FFFFFF;
     background-color: #4674A7; }

@@ -7,6 +7,8 @@
 }
 
 .chaise-table.table {
+    border-top: 1px solid $table-border-color;
+    border-bottom: 1px solid $table-border-color;
     margin-bottom: 5px;
 
     /* if you want the table to have a fixed layout */
@@ -35,6 +37,9 @@
         background: $table-striped-background-color;
     }
 
+    >thead>tr>th {
+        border-bottom: 1px solid $table-border-color;
+    }
 
     >thead>tr>th,
     >tbody>tr>th,

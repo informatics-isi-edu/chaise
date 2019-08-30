@@ -21,10 +21,6 @@ h2.guide-section-header {
     padding-bottom: 10px;
 }
 
-.text-tags {
-    margin-left: 20px;
-}
-
 .icon-table {
     // margin: 0 -10px 20px;
     overflow: hidden;
@@ -61,6 +57,7 @@ h2.guide-section-header {
 
     .class-info {
         display: none;
+        color: darken($white-color, 10%);
     }
 
     li:hover {
