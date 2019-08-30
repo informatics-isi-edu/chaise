@@ -211,6 +211,8 @@ MDEDIT_JS_DEPS=$(COMMON)/vendor/MarkdownEditor/bootstrap-markdown.js \
 # CSS source
 CSS=styles
 
+SASS=$(COMMON)/styles/app.css
+
 CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/vendor/ng-grid.css \
 	$(CSS)/vendor/rzslider.css \
@@ -508,10 +510,10 @@ MIN=$(DIST)/$(PROJ).min.js
 
 .PHONY: all
 # all should just do the minimal needed to deploy chaise
-all: $(HTML)
+all: $(SASS) $(HTML)
 
 .PHONY: build
-build: $(PKG) $(MIN) $(HTML) $(gitversion)
+build: $(PKG) $(MIN) $(SASS) $(HTML) $(gitversion)
 
 # Rule to build the full library
 $(PKG): $(JS_SOURCE) $(BIN)
@@ -542,6 +544,7 @@ updeps:
 .PHONY: clean
 clean:
 	rm $(HTML) || true
+	rm $(COMMON)/styles/app.css
 	rm -rf $(DIST)
 	rm -f .make-*
 
@@ -554,6 +557,10 @@ distclean: clean
 # Rule to make html
 .PHONY: html
 html: $(HTML)
+
+# Rule to compile sass/scss files to css
+$(COMMON)/styles/app.css: $(COMMON)/styles/scss/app.scss
+	sass --style=compressed $(COMMON)/styles/scss/app.scss $(COMMON)/styles/app.css
 
 # Rules to attach JavaScript and CSS assets to the head
 search/index.html: search/index.html.in .make-asset-block .make-template-block
@@ -747,11 +754,11 @@ $(JS_CONFIG): chaise-config-sample.js
 
 # Rule for installing for normal deployment
 .PHONY: install dont_install_in_root
-install: $(HTML) dont_install_in_root gitversion
+install: $(SASS) $(HTML) dont_install_in_root gitversion
 	rsync -avz --exclude='.*' --exclude='$(MODULES)' --exclude='wiki-images' --exclude=/chaise-config.js . $(CHAISEDIR)
 
 .PHONY: install-w-config dont_install_in_root
-install-w-config: $(HTML) dont_install_in_root gitversion
+install-w-config: $(SASS) $(HTML) dont_install_in_root gitversion
 	rsync -avz --exclude='.*' --exclude='$(MODULES)' --exclude='wiki-images' . $(CHAISEDIR)
 
 .PHONY: gitversion

@@ -18,7 +18,7 @@
         </script>
     <![endif]-->
 </head>
-<body>
+<body class="chaise-body">
     <div class="configure-container" ng-app="chaise.configure-viewer">
         <loading-spinner></loading-spinner>
     </div>

@@ -1,0 +1,241 @@
+@import "../../common/styles/scss/variables";
+
+* {
+    font-size: 14px;
+}
+
+.chaise-body {
+    overflow: auto;
+
+    .container {
+        margin-bottom: 100px;
+    }
+}
+
+pre code {
+    white-space: pre;
+}
+
+h2.guide-section-header {
+    border-bottom: 1px solid $border-color;
+    padding-bottom: 10px;
+}
+
+.text-tags {
+    margin-left: 20px;
+}
+
+.icon-table {
+    // margin: 0 -10px 20px;
+    overflow: hidden;
+
+    ul {
+        padding-left: 0;
+        list-style: none;
+    }
+
+    li {
+        float: left;
+        width: 25%;
+        height: 110px;
+        padding: 10px;
+        font-size: 10px;
+        line-height: 1.4;
+        text-align: center;
+        background-color: $table-striped-background-color;
+        border: 1px solid $white-color;
+    }
+
+    span {
+        margin-top: 5px;
+        margin-bottom: 10px;
+        font-size: 24px;
+    }
+
+    div:not(.class-info) {
+        display: block;
+        text-align: center;
+        word-wrap: break-word;
+        /* Help out IE10+ with class names */
+    }
+
+    .class-info {
+        display: none;
+    }
+
+    li:hover {
+        color: $white-color;
+        background-color: $primary-color;
+        div:not(.class-info) {
+            display: none;
+        }
+        .class-info {
+            display: block;
+        }
+    }
+    @media (min-width: 768px) {
+        & li {
+            width: 12.5%;
+            font-size: 12px;
+        }
+    }
+
+    // TODO doesn't work everywhere
+    .fa-arrows-alt-v {
+        -webkit-text-fill-color: white;
+        /* Will override color (regardless of order) */
+        -webkit-text-stroke-width: 1px;
+        -webkit-text-stroke-color: black;
+    }
+
+    //TODO should be based on font-size
+    .fas.fa-info {
+        display: inline-block;
+        padding: 0.5em 0.6em;
+        position: relative;
+        border: 2px solid;
+        border-radius: 50%;
+        font-size: 1.2em;
+        width: 30px;
+        height: 30px !important;
+
+        &:before {
+            position: absolute;
+            top: 4px;
+            left: 10.7px;
+        }
+    }
+}
+
+.color-palette-table {
+    td {
+        padding: 5px;
+        width: 150px;
+
+        table {
+            height: 60px;
+            width: 100%;
+
+            th {
+                height: 60px;
+            }
+
+            .color {
+                height: 40px;
+            }
+        }
+    }
+
+    #link-color {
+        .color {
+            background-color: $link-color;
+        }
+
+        .content:after {
+            content: "" + $link-color;
+        }
+    }
+
+    #primary-color {
+        .color {
+            background-color: $primary-color;
+        }
+
+        .content:after {
+            content: "" + $primary-color;
+        }
+    }
+
+    #table-header-background-color {
+        .color {
+            background-color: $table-header-background-color;
+        }
+
+        .content:after {
+            content: "" + $table-header-background-color;
+        }
+    }
+
+    #table-striped-background-color {
+        .color {
+            background-color: $table-striped-background-color;
+        }
+
+        .content:after {
+            content: "" + $table-striped-background-color;
+        }
+    }
+
+    #disabled-background-color {
+        .color {
+            background-color: $disabled-background-color;
+        }
+
+        .content:after {
+            content: "" + $disabled-background-color;
+        }
+    }
+
+    #border-color {
+        .color {
+            background-color: $border-color;
+        }
+
+        .content:after {
+            content: "" + $border-color;
+        }
+    }
+
+    #table-border-color {
+        .color {
+            background-color: $table-border-color;
+        }
+
+        .content:after {
+            content: "" + $table-border-color;
+        }
+    }
+
+    #disabled-color {
+        .color {
+            background-color: $disabled-color;
+        }
+
+        .content:after {
+            content: "" + $disabled-color;
+        }
+    }
+
+    #section-background-color {
+        .color {
+            background-color: $section-background-color;
+        }
+
+        .content:after {
+            content: "" + $section-background-color;
+        }
+    }
+
+    #black-color {
+        .color {
+            background-color: $black-color;
+        }
+
+        .content:after {
+            content: "" + $black-color;
+        }
+    }
+}
+
+.layout-container img {
+    width: 100%;
+}
+
+.actions-header {
+    width: 150px;
+    text-align: center;
+}
+
+.actions-cell {
+    text-align: center;
+}

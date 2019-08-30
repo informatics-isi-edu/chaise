@@ -1,0 +1,709 @@
+<html>
+
+<head>
+    <title>Chaise Style Guide</title>
+
+    <link rel='stylesheet' type='text/css' href='../../styles/vendor/bootstrap.min.css'>
+
+    <link rel='stylesheet' type='text/css' href='../../styles/vendor/fontawesome.min.css'>
+
+    <link rel='stylesheet' type='text/css' href='../../common/styles/app.css'>
+
+    <link rel='stylesheet' type='text/css' href='style-guide.css'>
+
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+</head>
+
+<body class="chaise-body">
+    <div class="container">
+
+        <div class="row">
+            <div class="col-md-9">
+                <h1>Deriva UI Style Guide</h1>
+                <p>
+                    This style guide communicates the meaning of every component in the Chaise application.
+                </p>
+
+                <div class="guide-section">
+                    <h2 class="guide-section-header" id="typography">Typography</h2>
+
+                    <p>
+                        Typography is the concept of having highly legible headers and body paragraphs, and clear labels.
+                    </p>
+
+                    <p>
+                        The Chaise application uses Helvetica Neue as the primary font for all text. The following is the default CSS styles for all text:
+                    </p>
+
+                    <pre class="prettyprint lang-css">
+body {
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+}</pre>
+
+                    <div class="text-tags">
+                        <h1>H1 - 35px</h1>
+                        <h2>H2 - 24.5px</h2>
+                        <h3>H3 - 21px</h3>
+                        <h4>H4 - 17.5px</h4>
+                        <p>Paragraph - 14px</p>
+                    </div>
+                </div>
+                <div class="guide-section">
+                    <h2 class="guide-section-header" id="iconography">Iconography</h2>
+                    <div class="icon-table">
+                        <ul>
+                            <li>
+                                <span class="chaise-icon chaise-sidebar-open"></span>
+                                <div>Open side bar</div>
+                                <div class="class-info">.chaise-icon .chaise-sidebar-open</div>
+                            </li>
+                            <li>
+                                <span class="chaise-icon chaise-sidebar-close"></span>
+                                <div>Close side bar</div>
+                            </li>
+                            <li>
+                                <span class="fas fa-chevron-down"></span>
+                                <div>Opened Accordion</div>
+                            </li>
+                            <li>
+                                <span class="fas fa-chevron-right"></span>
+                                <div>
+                                    Closed Accordion
+                                </div>
+                            </li>
+                            <li>
+                                <span class="glyphicon glyphicon-search"></span>
+                                <div>
+                                    Search
+                                </div>
+                            </li>
+                            <li>
+                                <span class="fas fa-long-arrow-alt-up"></span>
+                                <div>
+                                    Ascending sort
+                                </div>
+                            </li>
+                            <li>
+                                <span class="fas fa-long-arrow-alt-down"></span>
+                                <div>
+                                    Descending sort
+                                </div>
+                            </li>
+                            <li>
+                                <span class="fas fa-arrows-alt-v"></span>
+                                <div>
+                                    Not sorted
+                                </div>
+                            </li>
+                            <li>
+                                <span class="chaise-icon chaise-view-details"></span>
+                                <div>
+                                    View details
+                                </div>
+                            </li>
+                            <li>
+                                <span class="chaise-icon chaise-zoom-in"></span>
+                                <div>
+                                    Zoom in
+                                </div>
+                            </li>
+                            <li>
+                                <span class="chaise-icon chaise-zoom-out"></span>
+                                <div>
+                                    Zoom out
+                                </div>
+                            </li>
+                            <li>
+                                <span class="fas fa-sync-alt"></span>
+                                <div>
+                                    Refresh
+                                </div>
+                            </li>
+                            <li>
+                                <span class="glyphicon glyphicon-th-list"></span>
+                                <div>
+                                    Show all sections
+                                </div>
+                            </li>
+                            <li>
+                                <span class="fas fa-info"></span>
+                                <div>
+                                    Tooltip information
+                                </div>
+                            </li>
+                            <li>
+                                <span class="glyphicon glyphicon-share"></span>
+                                <div>
+                                    Share and Cite
+                                </div>
+                            </li>
+                            <li>
+                                <span class="glyphicon glyphicon-new-window"></span>
+                                <div>
+                                    External link
+                                </div>
+                            </li>
+
+                            <li>
+                                <span class="glyphicon glyphicon-download-alt"></span>
+                                <div>
+                                    Download link
+                                </div>
+                            </li>
+
+                            <li>
+                                <span class="glyphicon glyphicon-export"></span>
+                                <div>
+                                    Export
+                                </div>
+                            </li>
+                            <li>
+                                <span class="glyphicon glyphicon-plus"></span>
+                                <div>
+                                    Create
+                                </div>
+                            </li>
+
+                            <li>
+                                <span class="glyphicon glyphicon-copy"></span>
+                                <div>
+                                    Copy
+                                </div>
+                            </li>
+
+                            <li>
+                                <span class="glyphicon glyphicon-pencil"></span>
+                                <div>
+                                    Edit
+                                </div>
+
+                            </li>
+
+                            <li>
+                                <span class="glyphicon glyphicon-trash"></span>
+                                <div>
+                                    Delete
+                                </div>
+                            </li>
+
+                            <li>
+                                <span class="glyphicon glyphicon-remove"></span>
+                                <div>
+                                    Clear
+                                </div>
+                            </li>
+
+                            <li>
+                                <span class="far fa-window-restore"></span>
+                                <div>
+                                    Open modal
+                                </div>
+                            </li>
+
+                            <li>
+                                <span class="fas fa-table"></span>
+                                <div>
+                                    Table display mode
+                                </div>
+                            </li>
+
+                            <li>
+                                <span class="glyphicon glyphicon-th"></span>
+                                <div>
+                                    Custom display mode
+                                </div>
+                            </li>
+
+                            <li>
+                                <span class="glyphicon glyphicon-fullscreen"></span>
+                                <div>
+                                    Full screen (View more)
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="guide-section">
+                    <h2 class="guide-section-header" id="color-palette">Color Palette</h2>
+                    <table class="color-palette-table" style="margin: 10px;">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <table id="link-color">
+                                        <thead>
+                                            <tr>
+                                                <th>link-color</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="color"></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="content"></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                                <td>
+                                    <table id="primary-color">
+                                        <thead>
+                                            <tr>
+                                                <th>primary-color</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="color"></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="content"></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                                <td>
+                                    <table id="table-header-background-color">
+                                        <thead>
+                                            <tr>
+                                                <th>table-header-background-color</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="color"></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="content"></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                                <td>
+                                    <table id="table-striped-background-color">
+                                        <thead>
+                                            <tr>
+                                                <th>table-striped-background-color</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="color"></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="content"></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                                <td>
+                                    <table id="disabled-background-color">
+                                        <thead>
+                                            <tr>
+                                                <th>disabled-background-color</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="color"></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="content"></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <table id="border-color">
+                                        <thead>
+                                            <tr>
+                                                <th>border-color</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="color"></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="content"></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                                <td>
+                                    <table id="table-border-color">
+                                        <thead>
+                                            <tr>
+                                                <th>table-border-color</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="color"></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="content"></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                                <td>
+                                    <table id="disabled-color">
+                                        <thead>
+                                            <tr>
+                                                <th>disabled-color</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="color"></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="content"></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                                <td>
+                                    <table id="section-background-color">
+                                        <thead>
+                                            <tr>
+                                                <th>section-background-color</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="color"></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="content"></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                                <td>
+                                    <table id="black-color">
+                                        <thead>
+                                            <tr>
+                                                <th>black-color</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="color"></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="content"></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="guide-section">
+                    <h2 class="guide-section-header" id="layout">Layout</h2>
+                    <div class="layout-container" class="container-fluid">
+                        <h3>Recordset</h3>
+                        <div class="row">
+                            <div class="col-sm-6 red-grid">
+                                <img src="https://i.imgur.com/VxrNNXO.png">
+                            </div>
+                            <div class="col-sm-6 grey-boxes">
+                                <img src="https://i.imgur.com/lsr0bRF.png">
+                            </div>
+                        </div>
+                        <h3>Record</h3>
+                        <div class="row">
+                            <div class="col-sm-6 red-grid">
+                                <img src="https://i.imgur.com/gmuDGVe.png">
+                            </div>
+                            <div class="col-sm-6 grey-boxes">
+                                <img src="https://i.imgur.com/PubSZK8.png">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="guide-section">
+                    <h2 class="guide-section-header" id="components">Components</h2>
+
+                    <div>
+                        <h3 id="controls">Controls</h3>
+
+                        <div>
+                            <div class="links-container">
+                                <h4 id="links">Links</h4>
+                                <div>
+                                    <a>This is a link</a>
+                                </div>
+                                <div>
+                                    <a>This is an external link <span class="glyphicon glyphicon-new-window"></span></a>
+                                </div>
+                            </div>
+
+                            <div class="primary-buttons">
+                                <h4 id="primary-buttons">Primary Button</h4>
+                                <button class="chaise-btn chaise-btn-primary">
+                                    <span class="chaise-btn-icon fas fa-sync-alt"></span>
+                                    <span>Primary</span>
+                                </button>
+
+                                <button class="chaise-btn chaise-btn-primary text-btn">
+                                    <span>Primary</span>
+                                </button>
+
+                                <button class="chaise-btn chaise-btn-primary icon-btn">
+                                    <span class="chaise-btn-icon fas fa-sync-alt"></span>
+                                </button>
+
+                                <div class="chaise-btn-group">
+                                    <button class="chaise-btn chaise-btn-primary icon-btn">
+                                        <span class="chaise-icon chaise-zoom-in"></span>
+                                    </button>
+                                    <button class="chaise-btn chaise-btn-primary icon-btn" disabled>
+                                        <span class="chaise-icon chaise-zoom-out"></span>
+                                    </button>
+                                    <button class="chaise-btn chaise-btn-primary icon-btn">
+                                        <span class="fas fa-sync-alt"></span>
+                                    </button>
+                                </div>
+
+                                <button class="chaise-btn chaise-btn-primary" disabled>
+                                    <span class="chaise-btn-icon fas fa-sync-alt"></span>
+                                    <span>Primary</span>
+                                </button>
+
+                                <button class="chaise-btn chaise-btn-primary text-btn" disabled>
+                                    <span>Primary</span>
+                                </button>
+
+                                <button class="chaise-btn chaise-btn-primary icon-btn" disabled>
+                                    <span class="chaise-btn-icon fas fa-sync-alt"></span>
+                                </button>
+                            </div>
+
+                            <div class="secondary-buttons">
+                                <h4 id="secondary-buttons">Secondary Button</h4>
+                                <button class="chaise-btn chaise-btn-secondary">
+                                    <span class="chaise-btn-icon fas fa-sync-alt"></span>
+                                    <span>Secondary</span>
+                                </button>
+
+                                <button class="chaise-btn chaise-btn-secondary text-btn">
+                                    <span>Secondary</span>
+                                </button>
+
+                                <button class="chaise-btn chaise-btn-secondary icon-btn">
+                                    <span class="chaise-btn-icon fas fa-sync-alt"></span>
+                                </button>
+
+                                <div class="chaise-btn-group">
+                                    <button class="chaise-btn chaise-btn-secondary icon-btn">
+                                        <span class="chaise-icon chaise-zoom-in"></span>
+                                    </button>
+                                    <button class="chaise-btn chaise-btn-secondary icon-btn" disabled>
+                                        <span class="chaise-icon chaise-zoom-out"></span>
+                                    </button>
+                                    <button class="chaise-btn chaise-btn-secondary icon-btn">
+                                        <span class="fas fa-sync-alt"></span>
+                                    </button>
+                                </div>
+
+                                <button class="chaise-btn chaise-btn-secondary" disabled>
+                                    <span class="chaise-btn-icon fas fa-sync-alt"></span>
+                                    <span>Secondary</span>
+                                </button>
+
+                                <button class="chaise-btn chaise-btn-secondary text-btn" disabled>
+                                    <span>Secondary</span>
+                                </button>
+
+                                <button class="chaise-btn chaise-btn-secondary icon-btn" disabled>
+                                    <span class="chaise-btn-icon fas fa-sync-alt"></span>
+                                </button>
+                            </div>
+
+                            <div class="tertiary-buttons">
+                                <h4 id="tertiary-buttons">Tertiary Button</h4>
+
+                                <button class="chaise-btn chaise-btn-tertiary">
+                                    <span class="chaise-btn-icon fas fa-sync-alt"></span>
+                                    <span>Tertiary</span>
+                                </button>
+
+                                <button class="chaise-btn chaise-btn-tertiary">
+                                    <span>Tertiary</span>
+                                </button>
+
+                                <button class="chaise-btn chaise-btn-tertiary">
+                                    <span class="chaise-btn-icon fas fa-sync-alt"></span>
+                                </button>
+
+                                <div class="chaise-btn-group">
+                                    <button class="chaise-btn chaise-btn-tertiary icon-btn">
+                                        <span class="chaise-icon chaise-zoom-in"></span>
+                                    </button>
+                                    <button class="chaise-btn chaise-btn-tertiary icon-btn">
+                                        <span class="chaise-icon chaise-zoom-out"></span>
+                                    </button>
+                                    <button class="chaise-btn chaise-btn-tertiary icon-btn">
+                                        <span class="fas fa-sync-alt"></span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3 id="tables">Tables</h3>
+                        <div class="outer-table">
+                            <table class="table chaise-table table-striped table-hover">
+                                <!-- sortable column header -->
+                                <thead class="table-heading">
+                                    <tr>
+                                        <th class="actions-header">
+                                            <span>Actions</span>
+                                        </th>
+                                        <th>
+                                            <span class="table-column-displayname"></span>
+                                        </th>
+                                        <th>
+                                            <span class="table-column-displayname"></span>
+                                        </th>
+                                        <th>
+                                            <span class="table-column-displayname"></span>
+                                        </th>
+                                    </tr>
+                                </thead>
+
+                                <!-- rows -->
+                                <tbody>
+                                    <tr>
+                                        <td class="actions-cell">
+                                            <div class="chaise-btn-group">
+                                                <button class="chaise-btn chaise-btn-tertiary icon-btn">
+                                                    <span class="chaise-btn-icon chaise-icon chaise-view-details"></span>
+                                                </button>
+                                                <button class="chaise-btn chaise-btn-tertiary icon-btn">
+                                                    <span class="chaise-btn-icon glyphicon glyphicon-pencil"></span>
+                                                </button>
+                                                <button class="chaise-btn chaise-btn-tertiary icon-btn">
+                                                    <span class="chaise-btn-icon glyphicon glyphicon-trash"></span>
+                                                </button>
+                                            </div>
+                                        </td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="actions-cell">
+                                            <div class="chaise-btn-group">
+                                                <button class="chaise-btn chaise-btn-tertiary icon-btn">
+                                                    <span class="chaise-btn-icon chaise-icon chaise-view-details"></span>
+                                                </button>
+                                                <button class="chaise-btn chaise-btn-tertiary icon-btn">
+                                                    <span class="chaise-btn-icon glyphicon glyphicon-pencil"></span>
+                                                </button>
+                                                <button class="chaise-btn chaise-btn-tertiary icon-btn">
+                                                    <span class="chaise-btn-icon glyphicon glyphicon-trash"></span>
+                                                </button>
+                                            </div>
+                                        </td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="actions-cell">
+                                            <div class="chaise-btn-group">
+                                                <button class="chaise-btn chaise-btn-tertiary icon-btn">
+                                                    <span class="chaise-btn-icon chaise-icon chaise-view-details"></span>
+                                                </button>
+                                                <button class="chaise-btn chaise-btn-tertiary icon-btn">
+                                                    <span class="chaise-btn-icon glyphicon glyphicon-pencil"></span>
+                                                </button>
+                                                <button class="chaise-btn chaise-btn-tertiary icon-btn">
+                                                    <span class="chaise-btn-icon glyphicon glyphicon-trash"></span>
+                                                </button>
+                                            </div>
+                                        </td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="actions-cell">
+                                            <div class="chaise-btn-group">
+                                                <button class="chaise-btn chaise-btn-tertiary icon-btn">
+                                                    <span class="chaise-btn-icon chaise-icon chaise-view-details"></span>
+                                                </button>
+                                                <button class="chaise-btn chaise-btn-tertiary icon-btn">
+                                                    <span class="chaise-btn-icon glyphicon glyphicon-pencil"></span>
+                                                </button>
+                                                <button class="chaise-btn chaise-btn-tertiary icon-btn">
+                                                    <span class="chaise-btn-icon glyphicon glyphicon-trash"></span>
+                                                </button>
+                                            </div>
+                                        </td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <h3 id="section-headers">Section Headers</h3>
+
+                    </div>
+                </div>
+
+                <div class="guide-section">
+                    <h2 class="guide-section-header" id="coding-guidelines">Basic Coding Guidelines</h2>
+
+                    <p>
+                        This is where I would put the basic coding guidelines if we actually had any...
+
+                        But we do have a link to a chase dev guide [insert link here]
+                    </p>
+                </div>
+
+            </div>
+            <div class="col-md-3">
+                <nav class="hidden-sm">
+                    <ul class="nav">
+                        <li>
+                            <a href="#typography">Typography</a>
+                        </li>
+                        <li>
+                            <a href="#iconography">Iconography</a>
+                        </li>
+                        <li>
+                            <a href="#color-palette">Color Palette</a>
+                        </li>
+                        <li>
+                            <a href="#layout">Layout</a>
+                        </li>
+                        <li>
+                            <a href="#components">Components</a>
+                            <ul class="nav">
+                                <li>
+                                    <a href="#controls">Controls</a>
+                                </li>
+                                <li>
+                                    <a href="#tables">Tables</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
