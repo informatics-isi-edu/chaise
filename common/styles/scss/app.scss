@@ -109,6 +109,18 @@ html.ng-scope {
         color: $link-color;
     }
 
+    a.external-link {
+        position: relative;
+        padding-right: 1.1em;
+        &::before {
+            position: absolute;
+            right: -0.2em;
+            top: 0.5px;
+            font-family: 'Glyphicons Halflings';
+            content: "\e164";
+        }
+    }
+
     /* table hover */
     record-table tbody > tr:hover {
         background-color: #f7f0cf !important;

@@ -1,4 +1,4 @@
-<html>
+<html ng-app="style-guide">
 
 <head>
     <title>Chaise Style Guide</title>
@@ -11,6 +11,11 @@
 
     <link rel='stylesheet' type='text/css' href='style-guide.css'>
 
+
+    <script src='../../scripts/vendor/angular.js'></script>
+    <script src='../../scripts/vendor/ui-bootstrap-tpls-2.5.0.min.js'></script>
+
+
     <link rel="stylesheet"
       href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/default.min.css">
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js"></script>
@@ -19,7 +24,6 @@
 
 <body class="chaise-body">
     <div class="container">
-
         <div class="row">
             <div class="col-md-9">
                 <h1>Deriva UI Style Guide</h1>
@@ -69,34 +73,43 @@
                         </p>
 
                         <div class="example">
-                            <table class="table">
-                                <tbody>
-                                    <tr>
-                                        <td><h1>h1. Chaise heading</h1></td>
-                                        <td class="heading-info">35px</td>
-                                        <td class="heading-info">2.5em</td>
-                                    </tr>
-                                    <tr>
-                                        <td><h2>h2. Chaise heading</h2></td>
-                                        <td class="heading-info">24.5px</td>
-                                        <td class="heading-info">1.75em</td>
-                                    </tr>
-                                    <tr>
-                                        <td><h3>h3. Chaise heading</h3></td>
-                                        <td class="heading-info">21px</td>
-                                        <td class="heading-info">1.em</td>
-                                    </tr>
-                                    <tr>
-                                        <td><h4>h4. Chaise heading</h4></td>
+                            <div class="example-content">
+                                <table class="table">
+                                    <tbody>
+                                        <tr>
+                                            <td><h1>h1. Chaise heading <small>secondary text</small></h1></td>
+                                            <td class="heading-info">35px</td>
+                                            <td class="heading-info">2.5em</td>
+                                        </tr>
+                                        <tr>
+                                            <td><h2>h2. Chaise heading <small>secondary text</small></h2></td>
+                                            <td class="heading-info">24.5px</td>
+                                            <td class="heading-info">1.75em</td>
+                                        </tr>
+                                        <tr>
+                                            <td><h3>h3. Chaise heading <small>secondary text</small></h3></td>
+                                            <td class="heading-info">21px</td>
+                                            <td class="heading-info">1.em</td>
+                                        </tr>
+                                        <tr>
+                                        <td><h4>h4. Chaise heading <small>secondary text</small></h4></td>
                                         <td class="heading-info">17.5px</td>
                                         <td class="heading-info">1.2em</td>
                                     </tr>
-                                </tbody>
-                            </table>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="code-content html">
+                                <h1>h1. Chaise heading <small>secondary text</small></h1>
+                                <h2>h1. Chaise heading <small>secondary text</small></h2>
+                                <h3>h1. Chaise heading <small>secondary text</small></h3>
+                                <h4>h1. Chaise heading <small>secondary text</small></h4>
+                            </div>
                         </div>
                     </div>
 
                 </div>
+
                 <div class="guide-section">
                     <h2 class="guide-section-header" id="iconography">Iconography</h2>
                     <div class="icon-table">
@@ -299,6 +312,7 @@
                         </ul>
                     </div>
                 </div>
+
                 <div class="guide-section">
                     <h2 class="guide-section-header" id="color-palette">Color Palette</h2>
                     <table class="color-palette-table" style="margin: 10px;">
@@ -480,6 +494,7 @@
                         </tbody>
                     </table>
                 </div>
+
                 <div class="guide-section">
                     <h2 class="guide-section-header" id="layout">Layout</h2>
                     <div class="layout-container" class="container-fluid">
@@ -503,131 +518,156 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="guide-section">
                     <h2 class="guide-section-header" id="components">Components</h2>
-
                     <div>
                         <h3 id="controls">Controls</h3>
 
                         <div>
                             <div class="links-container">
                                 <h4 id="links">Links</h4>
-                                <div>
-                                    <a>This is a link</a>
-                                </div>
-                                <div>
-                                    <a>This is an external link <span class="glyphicon glyphicon-new-window"></span></a>
+                                <div class="example">
+                                    <div class="example-content">
+                                        <div>
+                                            <a>This is a link</a>
+                                        </div>
+                                        <div>
+                                            <a class="external-link">This is an external link</a>
+                                        </div>
+                                    </div>
+                                    <div class="code-content html">
+                                        <a>This is a link</a>
+                                        <a class="external-link">This is an external link</a>
+                                    </div>
                                 </div>
                             </div>
 
                             <div class="primary-buttons">
                                 <h4 id="primary-buttons">Primary Button</h4>
-                                <button class="chaise-btn chaise-btn-primary">
-                                    <span class="chaise-btn-icon fas fa-sync-alt"></span>
-                                    <span>Primary</span>
-                                </button>
+                                <div class="example">
+                                    <div class="example-content">
+                                        <button class="chaise-btn chaise-btn-primary">
+                                            <span class="chaise-btn-icon fas fa-sync-alt"></span>
+                                            <span>Primary</span>
+                                        </button>
 
-                                <button class="chaise-btn chaise-btn-primary text-btn">
-                                    <span>Primary</span>
-                                </button>
+                                        <button class="chaise-btn chaise-btn-primary text-btn">
+                                            <span>Primary</span>
+                                        </button>
 
-                                <button class="chaise-btn chaise-btn-primary icon-btn">
-                                    <span class="chaise-btn-icon fas fa-sync-alt"></span>
-                                </button>
+                                        <button class="chaise-btn chaise-btn-primary icon-btn">
+                                            <span class="chaise-btn-icon fas fa-sync-alt"></span>
+                                        </button>
 
-                                <div class="chaise-btn-group">
-                                    <button class="chaise-btn chaise-btn-primary icon-btn">
-                                        <span class="chaise-icon chaise-zoom-in"></span>
-                                    </button>
-                                    <button class="chaise-btn chaise-btn-primary icon-btn" disabled>
-                                        <span class="chaise-icon chaise-zoom-out"></span>
-                                    </button>
-                                    <button class="chaise-btn chaise-btn-primary icon-btn">
-                                        <span class="fas fa-sync-alt"></span>
-                                    </button>
+                                        <div class="chaise-btn-group">
+                                            <button class="chaise-btn chaise-btn-primary icon-btn">
+                                                <span class="chaise-icon chaise-zoom-in"></span>
+                                            </button>
+                                            <button class="chaise-btn chaise-btn-primary icon-btn" disabled>
+                                                <span class="chaise-icon chaise-zoom-out"></span>
+                                            </button>
+                                            <button class="chaise-btn chaise-btn-primary icon-btn">
+                                                <span class="fas fa-sync-alt"></span>
+                                            </button>
+                                        </div>
+
+                                        <button class="chaise-btn chaise-btn-primary" disabled>
+                                            <span class="chaise-btn-icon fas fa-sync-alt"></span>
+                                            <span>Primary</span>
+                                        </button>
+
+                                        <button class="chaise-btn chaise-btn-primary text-btn" disabled>
+                                            <span>Primary</span>
+                                        </button>
+
+                                        <button class="chaise-btn chaise-btn-primary icon-btn" disabled>
+                                            <span class="chaise-btn-icon fas fa-sync-alt"></span>
+                                        </button>
+                                    </div>
+                                    <div class="code-content html use-same-content-as-sibling">
+                                    </div>
                                 </div>
-
-                                <button class="chaise-btn chaise-btn-primary" disabled>
-                                    <span class="chaise-btn-icon fas fa-sync-alt"></span>
-                                    <span>Primary</span>
-                                </button>
-
-                                <button class="chaise-btn chaise-btn-primary text-btn" disabled>
-                                    <span>Primary</span>
-                                </button>
-
-                                <button class="chaise-btn chaise-btn-primary icon-btn" disabled>
-                                    <span class="chaise-btn-icon fas fa-sync-alt"></span>
-                                </button>
                             </div>
 
                             <div class="secondary-buttons">
                                 <h4 id="secondary-buttons">Secondary Button</h4>
-                                <button class="chaise-btn chaise-btn-secondary">
-                                    <span class="chaise-btn-icon fas fa-sync-alt"></span>
-                                    <span>Secondary</span>
-                                </button>
+                                <div class="example">
+                                    <div class="example-content">
+                                        <button class="chaise-btn chaise-btn-secondary">
+                                            <span class="chaise-btn-icon fas fa-sync-alt"></span>
+                                            <span>Secondary</span>
+                                        </button>
 
-                                <button class="chaise-btn chaise-btn-secondary text-btn">
-                                    <span>Secondary</span>
-                                </button>
+                                        <button class="chaise-btn chaise-btn-secondary text-btn">
+                                            <span>Secondary</span>
+                                        </button>
 
-                                <button class="chaise-btn chaise-btn-secondary icon-btn">
-                                    <span class="chaise-btn-icon fas fa-sync-alt"></span>
-                                </button>
+                                        <button class="chaise-btn chaise-btn-secondary icon-btn">
+                                            <span class="chaise-btn-icon fas fa-sync-alt"></span>
+                                        </button>
 
-                                <div class="chaise-btn-group">
-                                    <button class="chaise-btn chaise-btn-secondary icon-btn">
-                                        <span class="chaise-icon chaise-zoom-in"></span>
-                                    </button>
-                                    <button class="chaise-btn chaise-btn-secondary icon-btn" disabled>
-                                        <span class="chaise-icon chaise-zoom-out"></span>
-                                    </button>
-                                    <button class="chaise-btn chaise-btn-secondary icon-btn">
-                                        <span class="fas fa-sync-alt"></span>
-                                    </button>
+                                        <div class="chaise-btn-group">
+                                            <button class="chaise-btn chaise-btn-secondary icon-btn">
+                                                <span class="chaise-icon chaise-zoom-in"></span>
+                                            </button>
+                                            <button class="chaise-btn chaise-btn-secondary icon-btn" disabled>
+                                                <span class="chaise-icon chaise-zoom-out"></span>
+                                            </button>
+                                            <button class="chaise-btn chaise-btn-secondary icon-btn">
+                                                <span class="fas fa-sync-alt"></span>
+                                            </button>
+                                        </div>
+
+                                        <button class="chaise-btn chaise-btn-secondary" disabled>
+                                            <span class="chaise-btn-icon fas fa-sync-alt"></span>
+                                            <span>Secondary</span>
+                                        </button>
+
+                                        <button class="chaise-btn chaise-btn-secondary text-btn" disabled>
+                                            <span>Secondary</span>
+                                        </button>
+
+                                        <button class="chaise-btn chaise-btn-secondary icon-btn" disabled>
+                                            <span class="chaise-btn-icon fas fa-sync-alt"></span>
+                                        </button>
+                                    </div>
+                                    <div class="code-content html use-same-content-as-sibling">
+                                    </div>
                                 </div>
-
-                                <button class="chaise-btn chaise-btn-secondary" disabled>
-                                    <span class="chaise-btn-icon fas fa-sync-alt"></span>
-                                    <span>Secondary</span>
-                                </button>
-
-                                <button class="chaise-btn chaise-btn-secondary text-btn" disabled>
-                                    <span>Secondary</span>
-                                </button>
-
-                                <button class="chaise-btn chaise-btn-secondary icon-btn" disabled>
-                                    <span class="chaise-btn-icon fas fa-sync-alt"></span>
-                                </button>
                             </div>
 
                             <div class="tertiary-buttons">
                                 <h4 id="tertiary-buttons">Tertiary Button</h4>
 
-                                <button class="chaise-btn chaise-btn-tertiary">
-                                    <span class="chaise-btn-icon fas fa-sync-alt"></span>
-                                    <span>Tertiary</span>
-                                </button>
+                                <div class="example">
+                                    <div class="example-content">
+                                        <button class="chaise-btn chaise-btn-tertiary">
+                                            <span class="chaise-btn-icon fas fa-sync-alt"></span>
+                                            <span>Tertiary</span>
+                                        </button>
 
-                                <button class="chaise-btn chaise-btn-tertiary">
-                                    <span>Tertiary</span>
-                                </button>
+                                        <button class="chaise-btn chaise-btn-tertiary">
+                                            <span>Tertiary</span>
+                                        </button>
 
-                                <button class="chaise-btn chaise-btn-tertiary">
-                                    <span class="chaise-btn-icon fas fa-sync-alt"></span>
-                                </button>
+                                        <button class="chaise-btn chaise-btn-tertiary">
+                                            <span class="chaise-btn-icon fas fa-sync-alt"></span>
+                                        </button>
 
-                                <div class="chaise-btn-group">
-                                    <button class="chaise-btn chaise-btn-tertiary icon-btn">
-                                        <span class="chaise-icon chaise-zoom-in"></span>
-                                    </button>
-                                    <button class="chaise-btn chaise-btn-tertiary icon-btn">
-                                        <span class="chaise-icon chaise-zoom-out"></span>
-                                    </button>
-                                    <button class="chaise-btn chaise-btn-tertiary icon-btn">
-                                        <span class="fas fa-sync-alt"></span>
-                                    </button>
+                                        <div class="chaise-btn-group">
+                                            <button class="chaise-btn chaise-btn-tertiary icon-btn">
+                                                <span class="chaise-icon chaise-zoom-in"></span>
+                                            </button>
+                                            <button class="chaise-btn chaise-btn-tertiary icon-btn">
+                                                <span class="chaise-icon chaise-zoom-out"></span>
+                                            </button>
+                                            <button class="chaise-btn chaise-btn-tertiary icon-btn">
+                                                <span class="fas fa-sync-alt"></span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="code-content html use-same-content-as-sibling"></div>
                                 </div>
                             </div>
                         </div>
@@ -751,7 +791,7 @@
                                         </button>
                                         <button class="chaise-btn chaise-btn-secondary">
                                             <span class="chaise-btn-icon glyphicon glyphicon-fullscreen"></span>
-                                            <span>Full Screen</span>
+                                            <span>Explore</span>
                                         </button>
                                     </div>
                                 </div>
@@ -805,14 +845,40 @@
 </body>
 
 <script>
-    hljs.configure({useBR: true});
+    (function() {
 
-    var divContent = document.querySelectorAll('div.code-content');
+        document.querySelectorAll('.use-same-content-as-sibling').forEach(function (element) {
+            element.innerHTML = element.previousElementSibling.innerHTML;
+        });
 
-    divContent.forEach(function(element) {
-        element.innerHTML = element.innerHTML.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-        hljs.highlightBlock(element);
-    });
+        var divContent = document.querySelectorAll('.code-content');
+
+        divContent.forEach(function(element) {
+            var inn = element.innerHTML;
+
+            // html encode the code elements
+            inn = inn.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+
+            // remove the first newline
+            if (inn.substring(0, 1) == '\n') {
+                inn = inn.replace("\n","");
+            }
+
+            // count the indentation that should be ignored
+            var noStartingSpaces = inn.length - inn.trimLeft().length;
+
+            element.innerHTML = inn.split("\n").map(function (line) {
+                //TODO this is replacing all the whitespaces, we should do only the beginning ones
+                return line.substring(noStartingSpaces).replace(/\s/g, "&nbsp;");
+            }).join("<br>\n");
+
+            // highlight the blocks
+            hljs.highlightBlock(element);
+        });
+
+        hljs.configure({tabReplace: '    ', useBR: true});
+        angular.module("style-guide", ['ui.bootstrap']);
+    })();
 </script>
 
 </html>
