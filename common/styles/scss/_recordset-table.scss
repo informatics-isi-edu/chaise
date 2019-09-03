@@ -21,6 +21,35 @@
     tbody {
         display: table-row-group;
         vertical-align: middle;
+
+        > tr > td.disabled-cell {
+            background-color: #f4f4f4;
+        }
+
+        /* table hover */
+        > tr:hover {
+            background-color: #f7f0cf !important;
+
+            /* match color from row highlight for disabled cells */
+            > td.disabled-cell {
+                background-color: #f7f0cf !important;
+            }
+        }
+
+        /* odd disabled cells need to be darker */
+        > tr:nth-child(odd) > td.disabled-cell {
+            background-color: #ebebeb;
+        }
+
+        /* odd row hover for striped table */
+        > tr:nth-child(odd):hover {
+            background-color: #efebda !important;
+
+            /* odd disabled cells need to match odd row hover for striped table above */
+            > td.disabled-cell {
+                background-color: #efebda !important;
+            }
+        }
     }
 
     tr {

@@ -7,26 +7,29 @@
 
     <link rel='stylesheet' type='text/css' href='../../styles/vendor/fontawesome.min.css'>
 
+    <!-- TOC -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script>
+
+    <!-- highlightjs -->
+    <link rel="stylesheet"
+      href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/default.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js"></script>
+
     <link rel='stylesheet' type='text/css' href='../../common/styles/app.css'>
 
     <link rel='stylesheet' type='text/css' href='style-guide.css'>
 
-
     <script src='../../scripts/vendor/angular.js'></script>
     <script src='../../scripts/vendor/ui-bootstrap-tpls-2.5.0.min.js'></script>
-
-
-    <link rel="stylesheet"
-      href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/default.min.css">
-    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js"></script>
 
 </head>
 
 <body class="chaise-body">
     <div class="container">
         <div class="row">
-            <div class="col-md-9">
-                <h1>Deriva UI Style Guide</h1>
+            <div class="col-md-9 style-guide-content">
+                <h1>Chaise Style Guide</h1>
                 <p>
                     This style guide communicates the meaning of every component in the Chaise application.
                 </p>
@@ -39,14 +42,14 @@
                     </p>
 
                     <div class="font-text">
-                        <h3>Font</h3>
+                        <h3 id="font-text">Font</h3>
                         <p>
                             The Chaise application uses Helvetica Neue as the primary font for all text.
                         </p>
                     </div>
 
                     <div class="body-text">
-                        <h3>Body</h3>
+                        <h3 id="body-text">Body</h3>
 
                         <p>
                             Chaise's global default <code>font-size</code> is <em>14px</em>, with a <code>line-height</code> of <em>1.428</em>. This is applied to the <code>&lt;body&gt;</code> and all paragraphs
@@ -77,22 +80,22 @@
                                 <table class="table">
                                     <tbody>
                                         <tr>
-                                            <td><h1>h1. Chaise heading <small>secondary text</small></h1></td>
+                                            <td><h1 class="heading-example">h1. Chaise heading <small>secondary text</small></h1></td>
                                             <td class="heading-info">35px</td>
                                             <td class="heading-info">2.5em</td>
                                         </tr>
                                         <tr>
-                                            <td><h2>h2. Chaise heading <small>secondary text</small></h2></td>
+                                            <td><h2 class="heading-example">h2. Chaise heading <small>secondary text</small></h2></td>
                                             <td class="heading-info">24.5px</td>
                                             <td class="heading-info">1.75em</td>
                                         </tr>
                                         <tr>
-                                            <td><h3>h3. Chaise heading <small>secondary text</small></h3></td>
+                                            <td><h3 class="heading-example">h3. Chaise heading <small>secondary text</small></h3></td>
                                             <td class="heading-info">21px</td>
                                             <td class="heading-info">1.em</td>
                                         </tr>
                                         <tr>
-                                        <td><h4>h4. Chaise heading <small>secondary text</small></h4></td>
+                                        <td><h4 class="heading-example">h4. Chaise heading <small>secondary text</small></h4></td>
                                         <td class="heading-info">17.5px</td>
                                         <td class="heading-info">1.2em</td>
                                     </tr>
@@ -498,7 +501,7 @@
                 <div class="guide-section">
                     <h2 class="guide-section-header" id="layout">Layout</h2>
                     <div class="layout-container" class="container-fluid">
-                        <h3>Recordset</h3>
+                        <h3 id="recordset-layout">Recordset</h3>
                         <div class="row">
                             <div class="col-sm-6 red-grid">
                                 <img src="https://i.imgur.com/VxrNNXO.png">
@@ -507,7 +510,7 @@
                                 <img src="https://i.imgur.com/lsr0bRF.png">
                             </div>
                         </div>
-                        <h3>Record</h3>
+                        <h3 id="record-layout">Record</h3>
                         <div class="row">
                             <div class="col-sm-6 red-grid">
                                 <img src="https://i.imgur.com/gmuDGVe.png">
@@ -585,7 +588,7 @@
                                             <span class="chaise-btn-icon fas fa-sync-alt"></span>
                                         </button>
                                     </div>
-                                    <div class="code-content html use-same-content-as-sibling">
+                                    <div class="code-content html use-same-code-as-example">
                                     </div>
                                 </div>
                             </div>
@@ -632,7 +635,7 @@
                                             <span class="chaise-btn-icon fas fa-sync-alt"></span>
                                         </button>
                                     </div>
-                                    <div class="code-content html use-same-content-as-sibling">
+                                    <div class="code-content html use-same-code-as-example">
                                     </div>
                                 </div>
                             </div>
@@ -667,7 +670,7 @@
                                             </button>
                                         </div>
                                     </div>
-                                    <div class="code-content html use-same-content-as-sibling"></div>
+                                    <div class="code-content html use-same-code-as-example"></div>
                                 </div>
                             </div>
                         </div>
@@ -776,24 +779,24 @@
                             <uib-accordion close-others="false">
                                 <div uib-accordion-group class="related-table-heading" is-open="true">
                                     <uib-accordion-heading>
-                                        <i class="pull-left glyphicon glyphicon-chevron-down" style="margin-right: 5px;" ></i>
+                                        <i class="pull-left glyphicon" style="margin-right: 5px;" ng-class="{'glyphicon-chevron-down': open, 'glyphicon-chevron-right': !open}" ng-click="!open"></i>
                                         <span>Related Table Header</span> <span>(showing first 5 results)</span>
-                                    </uib-accordion-heading>
 
-                                    <div class="record-action-bar pull-right">
-                                        <button class="chaise-btn chaise-btn-secondary">
-                                            <span class="chaise-btn-icon glyphicon glyphicon-plus"></span>
-                                            <span>Add Record</span>
-                                        </button>
-                                        <button class="chaise-btn chaise-btn-secondary">
-                                            <span class="chaise-btn-icon glyphicon glyphicon-th"></span>
-                                            <span>Custom Mode</span>
-                                        </button>
-                                        <button class="chaise-btn chaise-btn-secondary">
-                                            <span class="chaise-btn-icon glyphicon glyphicon-fullscreen"></span>
-                                            <span>Explore</span>
-                                        </button>
-                                    </div>
+                                        <div class="record-action-bar pull-right">
+                                            <button class="chaise-btn chaise-btn-secondary">
+                                                <span class="chaise-btn-icon glyphicon glyphicon-plus"></span>
+                                                <span>Add Record</span>
+                                            </button>
+                                            <button class="chaise-btn chaise-btn-secondary">
+                                                <span class="chaise-btn-icon glyphicon glyphicon-th"></span>
+                                                <span>Custom Mode</span>
+                                            </button>
+                                            <button class="chaise-btn chaise-btn-secondary">
+                                                <span class="chaise-btn-icon glyphicon glyphicon-fullscreen"></span>
+                                                <span>Explore</span>
+                                            </button>
+                                        </div>
+                                    </uib-accordion-heading>
                                 </div>
                             </uib-accordion>
                         </div>
@@ -812,32 +815,7 @@
 
             </div>
             <div class="col-md-3">
-                <nav class="hidden-sm">
-                    <ul class="nav">
-                        <li>
-                            <a href="#typography">Typography</a>
-                        </li>
-                        <li>
-                            <a href="#iconography">Iconography</a>
-                        </li>
-                        <li>
-                            <a href="#color-palette">Color Palette</a>
-                        </li>
-                        <li>
-                            <a href="#layout">Layout</a>
-                        </li>
-                        <li>
-                            <a href="#components">Components</a>
-                            <ul class="nav">
-                                <li>
-                                    <a href="#controls">Controls</a>
-                                </li>
-                                <li>
-                                    <a href="#tables">Tables</a>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
+                <nav class="hidden-sm toc" id="toc-container">
                 </nav>
             </div>
         </div>
@@ -846,13 +824,13 @@
 
 <script>
     (function() {
-
-        document.querySelectorAll('.use-same-content-as-sibling').forEach(function (element) {
+        //use the same content as the example in the code block
+        document.querySelectorAll('.use-same-code-as-example').forEach(function (element) {
             element.innerHTML = element.previousElementSibling.innerHTML;
         });
 
+        // modify the code-content
         var divContent = document.querySelectorAll('.code-content');
-
         divContent.forEach(function(element) {
             var inn = element.innerHTML;
 
@@ -867,6 +845,7 @@
             // count the indentation that should be ignored
             var noStartingSpaces = inn.length - inn.trimLeft().length;
 
+            // remove the indentations that should not be displayed in code block
             element.innerHTML = inn.split("\n").map(function (line) {
                 //TODO this is replacing all the whitespaces, we should do only the beginning ones
                 return line.substring(noStartingSpaces).replace(/\s/g, "&nbsp;");
@@ -876,7 +855,24 @@
             hljs.highlightBlock(element);
         });
 
+        // configure the highlightjs
         hljs.configure({tabReplace: '    ', useBR: true});
+
+
+        // generate toc
+        tocbot.init({
+          // Where to render the table of contents.
+          tocSelector: '#toc-container',
+          // // Where to grab the headings to build the table of contents.
+          contentSelector: '.style-guide-content',
+          // Which headings to grab inside of the contentSelector element.
+          headingSelector: 'h1, h2, h3',
+          ignoreSelector: '.heading-example',
+          // For headings inside relative or absolute positioned containers within content.
+          hasInnerContainers: false
+        });
+
+        // create angular module
         angular.module("style-guide", ['ui.bootstrap']);
     })();
 </script>

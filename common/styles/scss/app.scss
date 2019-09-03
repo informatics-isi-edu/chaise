@@ -121,31 +121,6 @@ html.ng-scope {
         }
     }
 
-    /* table hover */
-    record-table tbody > tr:hover {
-        background-color: #f7f0cf !important;
-    }
-    /* odd row hover for striped table */
-    record-table tbody > tr:nth-child(odd):hover {
-        background-color: #efebda !important;
-    }
-
-    record-table tbody > tr > td.disabled-cell {
-        background-color: #f4f4f4;
-    }
-    /* odd disabled cells need to be darker */
-    record-table tbody > tr:nth-child(odd) > td.disabled-cell {
-        background-color: #ebebeb;
-    }
-    /* match color from row highlight for disabled cells */
-    record-table tbody > tr:hover > td.disabled-cell {
-        background-color: #f7f0cf !important;
-    }
-    /* odd disabled cells need to match odd row hover for striped table above */
-    record-table tbody > tr:nth-child(odd):hover > td.disabled-cell {
-        background-color: #efebda !important;
-    }
-
     .btn-sm[data-handler="bootstrap-markdown-cmdRidLink"] {
         padding: 5px 3px;
     }
@@ -345,17 +320,6 @@ html.ng-scope {
     .panel-title > a:hover {
         text-decoration: none;
         color: rgb(63, 124, 184);
-    }
-
-    .related-table-heading > .panel-heading {
-        background: #fff;
-        text-transform: uppercase;
-        border-bottom: 1px solid #ddd;
-    }
-
-    .related-table-heading > .panel-heading+.panel-collapse > .panel-body {
-        border-top: none;
-        padding: 0 0 10px 25px;
     }
 
     .reference-views {

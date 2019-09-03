@@ -13,11 +13,17 @@
     }
 }
 
+.guide-section {
+    margin-bottom: 20px;
+}
+
+
 pre code {
     white-space: pre;
 }
 
 h2.guide-section-header {
+    margin-top: 40px;
     border-bottom: 1px solid $border-color;
     padding-bottom: 10px;
 }
@@ -274,9 +280,7 @@ h2.guide-section-header {
 // highlightjs
 /*
 
-Colorbrewer theme
-Original: https://github.com/mbostock/colorbrewer-theme (c) Mike Bostock <mike@ocks.org>
-Ported by Fabrício Tavares de Oliveira
+github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 
 */
 
@@ -284,62 +288,125 @@ Ported by Fabrício Tavares de Oliveira
   display: block;
   overflow-x: auto;
   padding: 0.5em;
-  background: #fff;
-}
-
-.hljs,
-.hljs-subst {
-  color: #000;
-}
-
-.hljs-string,
-.hljs-meta,
-.hljs-symbol,
-.hljs-template-tag,
-.hljs-template-variable,
-.hljs-addition {
-  color: #756bb1;
+  color: #333;
+  background: #f8f8f8;
 }
 
 .hljs-comment,
 .hljs-quote {
-  color: #636363;
+  color: #998;
+  font-style: italic;
 }
-
-.hljs-number,
-.hljs-regexp,
-.hljs-literal,
-.hljs-bullet,
-.hljs-link {
-  color: #31a354;
-}
-
-.hljs-deletion,
-.hljs-variable {
-  color: #88f;
-}
-
-
 
 .hljs-keyword,
 .hljs-selector-tag,
+.hljs-subst {
+  color: #333;
+  font-weight: bold;
+}
+
+.hljs-number,
+.hljs-literal,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag .hljs-attr {
+  color: #008080;
+}
+
+.hljs-string,
+.hljs-doctag {
+  color: #d14;
+}
+
 .hljs-title,
 .hljs-section,
-.hljs-built_in,
-.hljs-doctag,
+.hljs-selector-id {
+  color: #900;
+  font-weight: bold;
+}
+
+.hljs-subst {
+  font-weight: normal;
+}
+
 .hljs-type,
+.hljs-class .hljs-title {
+  color: #458;
+  font-weight: bold;
+}
+
 .hljs-tag,
 .hljs-name,
-.hljs-selector-id,
-.hljs-selector-class,
-.hljs-strong {
-  color: #3182bd;
+.hljs-attribute {
+  color: #000080;
+  font-weight: normal;
+}
+
+.hljs-regexp,
+.hljs-link {
+  color: #009926;
+}
+
+.hljs-symbol,
+.hljs-bullet {
+  color: #990073;
+}
+
+.hljs-built_in,
+.hljs-builtin-name {
+  color: #0086b3;
+}
+
+.hljs-meta {
+  color: #999;
+  font-weight: bold;
+}
+
+.hljs-deletion {
+  background: #fdd;
+}
+
+.hljs-addition {
+  background: #dfd;
 }
 
 .hljs-emphasis {
   font-style: italic;
 }
 
-.hljs-attribute {
-  color: #e6550d;
+.hljs-strong {
+  font-weight: bold;
+}
+
+// TOC
+h1, h2, h3, h4 {
+    &:not(.heading-example) {
+        padding-top: 0.5em;
+    }
+    &:focus {
+        outline: none !important;
+        box-shadow: none !important;
+    }
+}
+
+nav.toc {
+    position: fixed;
+    top: 25px;
+
+    .toc-list {
+        a {
+            color: #333;
+        }
+
+        li {
+            margin: 5px 0;
+            a {
+                font-size: 1.2em;
+            }
+        }
+
+        .is-active-link::before {
+            background-color: $primary-color;
+        }
+    }
 }

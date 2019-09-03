@@ -54,7 +54,7 @@
     "request": "x",
     "request-q": "x",
     "set-cookie-parser": "x",
-    "sass": "x"
+    "node-sass": "x"
   },
   "dependencies": {
     "markdown-it-editor": "^1.1.4"

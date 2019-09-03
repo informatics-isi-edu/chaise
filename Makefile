@@ -560,7 +560,7 @@ html: $(HTML)
 
 # Rule to compile sass/scss files to css
 $(COMMON)/styles/app.css: $(COMMON)/styles/scss/app.scss
-	sass --style=compressed $(COMMON)/styles/scss/app.scss $(COMMON)/styles/app.css
+	$(BIN)/node-sass --style=compressed $(COMMON)/styles/scss/app.scss $(COMMON)/styles/app.css
 
 # Rules to attach JavaScript and CSS assets to the head
 search/index.html: search/index.html.in .make-asset-block .make-template-block

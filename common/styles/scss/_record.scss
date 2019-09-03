@@ -48,12 +48,18 @@
     .related-table-heading>.panel-heading{
         text-transform: inherit;
         padding: 8px 8px 8px 0px;
-        color: inherit;
+        color: $white-color;
         border: none;
-    }
+        background: $section-background-color;
 
-    .related-table-heading>.panel-heading+.panel-collapse>.panel-body{
-        padding-left: 0px;
+        .record-action-bar {
+            top: -10px;
+            position: relative;
+        }
+
+        &+.panel-collapse > .panel-body {
+            border-top: none;
+            padding: 0px 0px 10px 0px;
     }
 
     .reference-views {
@@ -78,12 +84,10 @@
         padding: 1px 17px;
         border-radius: 3px;
         cursor: pointer;
-        background: $section-background-color;
         width: 81px;
     }
 
-    // TODO: do we want to do colors?
     .transpose-toggle:hover, .transpose-toggle:focus, .transpose-toggle:active{
-        color: #2364AB;
+        color: $table-striped-background-color;
     }
 }
