@@ -214,6 +214,7 @@ CSS=styles
 SASS=$(COMMON)/styles/app.css
 
 CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
+	$(CSS)/vendor/fontawesome.min.css \
 	$(CSS)/vendor/ng-grid.css \
 	$(CSS)/vendor/rzslider.css \
 	$(CSS)/vendor/select.css \
@@ -333,6 +334,7 @@ RECORD_JS_SOURCE=$(RECORD_ASSETS)/record.app.js \
 	$(RECORD_ASSETS)/record.controller.js
 
 RECORD_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
+	$(CSS)/vendor/fontawesome.min.css \
 	$(COMMON)/styles/app.css \
 	$(COMMON)/vendor/MarkdownEditor/styles/github-markdown.css \
 
@@ -378,6 +380,7 @@ VIEWER_JS_SOURCE=$(VIEWER_ASSETS)/viewer.app.js \
 	$(VIEWER_ASSETS)/alerts/alerts.controller.js
 
 VIEWER_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
+	$(CSS)/vendor/fontawesome.min.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css \
 	$(CSS)/vendor/select.css \
 	$(CSS)/vendor/select2.css \
@@ -436,6 +439,7 @@ RE_JS_MDHELP=$(RE_ASSETS)/mdHelp.app.js
 
 
 RE_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
+	$(CSS)/vendor/fontawesome.min.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css \
 	$(CSS)/vendor/select.css \
 	$(CSS)/vendor/select2.css \
@@ -482,7 +486,7 @@ RECSET_JS_SOURCE=$(RECSET_ASSETS)/recordset.app.js \
     $(RECSET_ASSETS)/recordset.controller.js
 
 RECSET_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
-	$(CSS)/material-design/css/material-design-iconic-font.min.css
+	$(CSS)/vendor/fontawesome.min.css
 
 RECSET_CSS_SOURCE=$(COMMON)/styles/app.css \
 	$(COMMON)/vendor/MarkdownEditor/styles/github-markdown.css
