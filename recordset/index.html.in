@@ -23,20 +23,23 @@
                     </div>
                     <div class="pull-right">
                         <a id="create-link" ng-if="vm.reference.canCreate && vm.config.editable" ng-href="{{create()}}" uib-tooltip="Click here to create a record." tooltip-placement="bottom">
-                            <span class="glyphicon glyphicon-plus"></span> <strong>Create</strong>
+                            <span class="chaise-btn-icon glyphicon glyphicon-plus"></span>
+                            <span>Create</span>
                         </a>&nbsp;&nbsp;
                         <!-- edit -->
                         <!-- TODO: this edit link isn't being disabled. To disable an <a> tag with an href, remove the href attribute -->
                         <a id="edit-link" ng-if="vm.page && vm.reference.canUpdate && vm.config.editable" ng-disabled="{{vm.pageLimit > vm.RECORDEDIT_MAX_ROWS}}"
                             ng-href="{{ edit() }}" tooltip-placement="bottom" uib-tooltip="{{ ((vm.pageLimit > vm.RECORDEDIT_MAX_ROWS) ? 'Editing disabled when items per page > ' + vm.RECORDEDIT_MAX_ROWS : 'Click here to edit this page of records.' ) }}">
-                            <span class="glyphicon glyphicon-pencil"></span> <strong>Edit</strong>
+                            <span class="chaise-btn-icon glyphicon glyphicon-pencil"></span>
+                            <span>Edit</span>
                         </a>&nbsp;&nbsp;
                         <!-- download CSV included by default -->
-                        <export allow-export="vm.rowValues.length>0" reference="vm.reference" style="position:relative;" disabled="!vm.hasLoaded || !vm.initialized"></export>
+                        <export allow-export="vm.rowValues.length>0" reference="vm.reference" disabled="!vm.hasLoaded || !vm.initialized"></export>
                         &nbsp;&nbsp;
                         <!-- permalink -->
-                        <a id="permalink" ng-href="{{ permalink() }}" tooltip-placement="bottom-right" uib-tooltip={{::tooltip.permalink}}>
-                            <span class="glyphicon glyphicon-bookmark"></span> <strong>Permalink</strong>
+                        <a id="permalink" ng-href="{{ permalink() }}" tooltip-placement="bottom-right" uib-tooltip={{::tooltip.permalink}} class="chaise-btn chaise-btn-primary">
+                            <span class="chaise-btn-icon glyphicon glyphicon-bookmark"></span>
+                            <span>Permalink</span>
                         </a>
                     </div>
                 </div>

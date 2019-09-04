@@ -135,22 +135,7 @@
 
             <!-- record table -->
             <div id="recordset-table-container" ng-show="vm.initialized">
-                <h3 ng-if="!vm.config.hideTotalCount" id="rs-total-count" class="replace-margin">Displaying {{vm.rowValues.length}}{{(vm.totalRowsCnt && !vm.tableError) ? " of " + (vm.totalRowsCnt > vm.rowValues.length ? vm.totalRowsCnt : vm.rowValues.length) : ''}} Records
-                    <img id="push-rows-spinner" ng-show="vm.pushRowsSpinner" src="../common/styles/images/loader.gif" class="spinner spinner-sm"/>
-                    <span ng-if="vm.countError" class="glyphicon glyphicon-alert" uib-tooltip="Request timeout: total count cannot be retrieved. Refresh the page later to try again." tooltip-placement="bottom"></span>
-                </h3>
                 <record-table id="rs-{{vm.makeSafeIdAttr(vm.tableDisplayName.value)}}" vm="vm" on-selected-rows-changed-bind="onSelectedRowsChanged"></record-table>
-                <span id="push-rows-loading" ng-show="vm.pushRowsSpinner">Loading...</span>
-            </div>
-
-            <!-- bottom pagination -->
-            <div id="pager-container" class="pager" ng-if="vm.initialized">
-                <button id="rs-previous-btn" type="button" class="btn btn-primary btn-xs btn-inverted" ng-click="before()" ng-disabled="!vm.hasLoaded || !vm.page.hasPrevious">
-                    <span class="glyphicon glyphicon-chevron-left"></span>
-                </button>
-                <button id="rs-next-btn" type="button" class="btn btn-primary btn-xs btn-inverted" ng-click="after()" ng-disabled="!vm.hasLoaded || !vm.page.hasNext">
-                    <span class="glyphicon glyphicon-chevron-right"></span>
-                </button>
             </div>
         </div>
         <footer ng-show="vm.initialized"></footer>
