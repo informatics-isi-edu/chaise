@@ -1,10 +1,15 @@
+<div ng-if="!vm.config.hideTotalCount" id="rs-total-count" class="chaise-table-title">
+    <span>Displaying {{vm.rowValues.length}}{{(vm.totalRowsCnt && !vm.tableError) ? " of " + (vm.totalRowsCnt > vm.rowValues.length ? vm.totalRowsCnt : vm.rowValues.length) : ''}} Records</span>
+    <img id="push-rows-spinner" ng-show="vm.pushRowsSpinner" src="../common/styles/images/loader.gif" class="spinner spinner-sm"/>
+    <span ng-if="vm.countError" class="glyphicon glyphicon-alert" uib-tooltip="Request timeout: total count cannot be retrieved. Refresh the page later to try again." tooltip-placement="bottom"></span>
+</div>
 <div class="outer-table recordset-table s_{{makeSafeIdAttr(vm.reference.table.schema.name)}} t_{{makeSafeIdAttr(vm.reference.table.name)}}" id="divRecordSet">
-    <table class="table table-striped table-bordered table-hover">
+    <table class="table chaise-table table-striped table-hover">
         <!-- sortable column header -->
         <thead class="table-heading">
             <tr>
-                <th ng-switch="vm.config.selectMode" ng-if="(vm.config.viewable || vm.config.editable || vm.config.deletable || vm.config.selectMode != noSelect)" ng-class="{'multi-select-width': vm.config.selectMode == 'multi-select'}">
-                    <span ng-switch-when="no-select" ng-attr-uib-tooltip="{{ (vm.reference.canUpdate || vm.reference.canDelete) ? tooltip.actionCol : tooltip.viewCol}}" ng-attr-tooltip-placement='auto top' class="actions-header">{{(vm.reference.canUpdate || vm.reference.canDelete) ? "Actions" : "View"}}</span>
+                <th ng-switch="vm.config.selectMode" ng-if="(vm.config.viewable || vm.config.editable || vm.config.deletable || vm.config.selectMode != noSelect)" class="actions-header" ng-class="{'multi-select-width': vm.config.selectMode == 'multi-select'}">
+                    <span ng-switch-when="no-select" ng-attr-uib-tooltip="{{ (vm.reference.canUpdate || vm.reference.canDelete) ? tooltip.actionCol : tooltip.viewCol}}" ng-attr-tooltip-placement='auto top'>{{(vm.reference.canUpdate || vm.reference.canDelete) ? "Actions" : "View"}}</span>
                     <span ng-switch-when="single-select">Select</span>
                     <div ng-switch-when="multi-select">
                         <button id="table-select-all-rows" type="button" ng-click="::selectAll($event)" class="btn btn-sm btn-primary btn-inverted btn-condensed" tooltip-placement="bottom" uib-tooltip="Select all rows on this page" ng-disabled="vm.matchNotNull">
@@ -15,16 +20,24 @@
                         </button>
                     </div>
                 </th>
-                <th nowrap ng-repeat="col in vm.columnModels track by $index" class="c_{{makeSafeIdAttr(col.column.name)}}">
-                    <span class="table-column-displayname" ng-attr-uib-tooltip="{{::(col.column.comment) ? col.column.comment : undefined}}" ng-attr-tooltip-placement="{{::(col.column.comment) ? 'auto top' : undefined}}" ng-click="col.column.sortable && vm.enableSort && sortby(col.column.name)">
+                <th nowrap ng-repeat="col in vm.columnModels track by $index" class="c_{{makeSafeIdAttr(col.column.name)}}" ng-class="{'clickable': col.column.sortable && vm.enableSort}" ng-click="col.column.sortable && vm.enableSort && sortby(col.column.name)">
+                    <span class="table-column-displayname" ng-attr-uib-tooltip="{{::(col.column.comment) ? col.column.comment : undefined}}" ng-attr-tooltip-placement="{{::(col.column.comment) ? 'auto top' : undefined}}">
                         <span ng-if="::col.column.displayname.isHTML" ng-bind-html="::col.column.displayname.value"></span>
                         <span ng-if="::!col.column.displayname.isHTML" ng-bind="::col.column.displayname.value"></span>
                     </span>
-                    <span ng-show="col.column.sortable && vm.enableSort && !col.columnError && vm.sortby==col.column.name && vm.sortOrder=='asc'" ng-click="::toggleSortOrder()" class="glyphicon glyphicon-sort-by-attributes" ng-style="{'cursor': 'pointer'}"></span>
-                    <span ng-show="col.column.sortable && vm.enableSort && !col.columnError && vm.sortby==col.column.name && vm.sortOrder=='desc'" ng-click="::toggleSortOrder()" class="glyphicon glyphicon-sort-by-attributes-alt" ng-style="{'cursor': 'pointer'}"></span>
-                    <span ng-show="col.column.sortable && vm.enableSort && !col.columnError && vm.sortby!==col.column.name" class="glyphicon glyphicon-sort" ng-click="::sortby(col.column.name)" ng-style="{'cursor': 'pointer'}"></span>
-                    <span ng-show="col.isLoading && !col.columnError" class="glyphicon glyphicon-refresh glyphicon-refresh-animate aggregate-col-loader"></span>
-                    <span ng-if="vm.columnModels[$index].columnError" class="glyphicon glyphicon-alert" uib-tooltip="{{vm.queryTimeoutTooltip}}" tooltip-placement="bottom-left"></span>
+                    <span class="table-heading-icons">
+                        <span class="table-sort-icon" ng-show="col.column.sortable && vm.enableSort && !col.columnError && !col.isLoading">
+                            <span ng-show="vm.sortby==col.column.name" ng-switch="vm.sortOrder">
+                                <span ng-switch-when="asc" class="fas fa-long-arrow-alt-up"></span>
+                                <span ng-switch-default class="fas fa-long-arrow-alt-down"></span>
+                            </span>
+                            <span ng-show="vm.sortby!==col.column.name">
+                                <span class="fas fa-arrows-alt-v"></span>
+                            </span>
+                        </span>
+                        <span ng-show="!col.columnError && col.isLoading" class="glyphicon glyphicon-refresh glyphicon-refresh-animate aggregate-col-loader"></span>
+                        <span ng-if="vm.columnModels[$index].columnError" class="glyphicon glyphicon-alert" uib-tooltip="{{vm.queryTimeoutTooltip}}" tooltip-placement="bottom-left"></span>
+                    </span>
                 </th>
             </tr>
         </thead>
@@ -45,4 +58,15 @@
             </tr>
         </tbody>
     </table>
+</div>
+<span id="push-rows-loading" ng-show="vm.pushRowsSpinner">Loading...</span>
+
+
+<div class="chaise-table-pagination" ng-if="vm.initialized">
+    <button id="rs-previous-btn" type="button" class="chaise-btn chaise-btn-primary" ng-click="before()" ng-disabled="!vm.hasLoaded || !vm.page.hasPrevious">
+        <span>Previous</span>
+    </button>
+    <button id="rs-next-btn" type="button" class="chaise-btn chaise-btn-primary" ng-click="after()" ng-disabled="!vm.hasLoaded || !vm.page.hasNext">
+        <span>Next</span>
+    </button>
 </div>

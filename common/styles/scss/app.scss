@@ -62,6 +62,7 @@ html.ng-scope {
 
     h1, h2, h3, h4, body {
         font-weight: 400;
+
     }
 
     li {
@@ -71,6 +72,10 @@ html.ng-scope {
     // show list style
     ul.show-list-style li {
         list-style-type: inherit;
+    }
+
+    .clickable {
+        cursor: pointer;
     }
 
     a {
@@ -104,12 +109,6 @@ html.ng-scope {
         text-align: left;
         max-width: none;
         white-space: pre-wrap;
-    }
-
-    .btn.btn-no-boundry {
-        border: none;
-        background: transparent !important;
-        padding: 0;
     }
 
 /*

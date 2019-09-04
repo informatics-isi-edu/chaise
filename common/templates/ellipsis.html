@@ -1,19 +1,19 @@
-<td ng-if="config.viewable || config.editable || config.deletable || config.selectMode != noSelect" class="block actions-layout">
-    <div class="btn-group" style="display: flex">
-        <a ng-if="config.viewable" type="button" class="view-action-button btn btn-xs btn-primary btn-inverted " ng-href="{{viewLink}}" tooltip-placement="bottom" uib-tooltip="View Details">
-            <span class="glyphicon glyphicon-eye-open"></span>
+<td ng-if="config.viewable || config.editable || config.deletable || config.selectMode != noSelect" class="block action-btns">
+    <div class="chaise-btn-group">
+        <a ng-if="config.viewable" type="button" class="view-action-button chaise-btn chaise-btn-tertiary icon-btn" ng-href="{{viewLink}}" tooltip-placement="bottom" uib-tooltip="View Details">
+            <span class="chaise-btn-icon chaise-icon chaise-view-details"></span>
         </a>
-        <button ng-if="config.editable && tuple.reference.canUpdate" type="button" class="edit-action-button btn btn-xs btn-primary btn-inverted " ng-click="edit()" target="_blank" tooltip-placement="bottom" uib-tooltip="Edit">
-            <span class="glyphicon glyphicon-pencil"></span>
+        <button ng-if="config.editable && tuple.reference.canUpdate" type="button" class="edit-action-button chaise-btn chaise-btn-tertiary icon-btn" ng-click="edit()" target="_blank" tooltip-placement="bottom" uib-tooltip="Edit">
+            <span class="chaise-btn-icon glyphicon glyphicon-pencil"></span>
         </button>
-        <button ng-if="config.deletable && unlink && associationRef.canDelete" type="button" class="delete-action-button btn btn-xs btn-primary btn-inverted " ng-click="unlink()" tooltip-placement="bottom" uib-tooltip="Unlink">
-            <span class="glyphicon glyphicon-remove-circle"></span>
+        <button ng-if="config.deletable && unlink && associationRef.canDelete" type="button" class="delete-action-button chaise-btn chaise-btn-tertiary icon-btn" ng-click="unlink()" tooltip-placement="bottom" uib-tooltip="Unlink">
+            <span class="chaise-btn-icon glyphicon glyphicon-remove-circle"></span>
         </button>
-        <button ng-if="config.deletable && delete && tuple.reference.canDelete" type="button" class="delete-action-button btn btn-xs btn-primary btn-inverted " ng-click="delete()" tooltip-placement="bottom" uib-tooltip="Delete">
-            <span class="glyphicon glyphicon-trash"></span>
+        <button ng-if="config.deletable && delete && tuple.reference.canDelete" type="button" class="delete-action-button chaise-btn chaise-btn-tertiary icon-btn" ng-click="delete()" tooltip-placement="bottom" uib-tooltip="Delete">
+            <span class="chaise-btn-icon glyphicon glyphicon-trash""></span>
         </button>
-        <button ng-if="config.selectMode == singleSelect" type="button" class="select-action-button btn btn-xs btn-primary btn-inverted " ng-click="onSelect($event)" tooltip-placement="bottom" uib-tooltip="Select" >
-            <span class="glyphicon glyphicon-check"></span>
+        <button ng-if="config.selectMode == singleSelect" type="button" class="select-action-button chaise-btn chaise-btn-tertiary icon-btn" ng-click="onSelect($event)" tooltip-placement="bottom" uib-tooltip="Select" >
+            <span class="chaise-btn-icon glyphicon glyphicon-check"></span>
         </button>
     </div>
     <div ng-if="config.selectMode == multiSelect" class="chaise-checkbox">

@@ -43,3 +43,11 @@
 .chaise-icon.chaise-view-details::before {
     content: '\00A8';
 }
+
+// TODO should be changed to chaise-icon
+.fa-arrows-alt-v {
+    -webkit-text-fill-color: transparent;
+    /* Will override color (regardless of order) */
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: black;
+}

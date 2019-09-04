@@ -820,11 +820,54 @@
             scope.sortby = function(column) {
                 if (scope.vm.sortby !== column) {
                     changeSort("asc", column);
+                } else {
+                    scope.toggleSortOrder();
                 }
             };
 
             scope.toggleSortOrder = function () {
                 changeSort((scope.vm.sortOrder === 'asc' ? scope.vm.sortOrder = 'desc' : scope.vm.sortOrder = 'asc'));
+            };
+
+            scope.pageLimits = [10, 25, 50, 75, 100, 200];
+            scope.setPageLimit = function(limit) {
+                scope.vm.pageLimit = limit;
+
+                scope.vm.logObject = {action: logActions.recordsetLimit};
+                update(scope.vm, true, false, false);
+            };
+
+            scope.before = function() {
+                var previous = scope.vm.page.previous;
+                if (previous && scope.$root.checkReferenceURL(previous)) {
+                    scope.vm.reference = previous;
+                    $log.debug('counter', scope.vm.flowControlObject.counter ,': request for previous page');
+
+                    scope.vm.logObject = {
+                        action: logActions.recordsetPage,
+                        sort: previous.location.sortObject,
+                        page: previous.location.beforeObject,
+                        type: "before"
+                    };
+                    update(scope.vm, true, false, false);
+                }
+            };
+
+            scope.after = function() {
+                var next = scope.vm.page.next;
+                if (next && scope.$root.checkReferenceURL(next)) {
+                    scope.vm.reference = next;
+                    $log.debug('counter', scope.vm.flowControlObject.counter ,': request for next page');
+
+                    scope.vm.logObject = {
+                        action: logActions.recordsetPage,
+                        sort: next.location.sortObject,
+                        page: next.location.afterObject,
+                        type: "after"
+                    };
+                    update(scope.vm, true, false, false);
+                }
+
             };
 
             scope.isDisabled = function (tuple) {
@@ -926,7 +969,6 @@
             var addRecordRequests = {}; // table refresh used by add record implementation with cookie (old method)
             var updated = false; // table refresh used by ellipsis' edit action (new method)
 
-            scope.pageLimits = [10, 25, 50, 75, 100, 200];
             scope.$root.alerts = AlertsService.alerts;
             scope.$root.showSpinner = false; // this property is set from common modules for controlling the spinner at a global level that is out of the scope of the app
             scope.vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
@@ -938,46 +980,6 @@
             scope.vm.facetModels = [];
             scope.vm.facetsToPreProcess = [];
             scope.vm.flowControlObject = new FlowControlObject();
-
-            scope.setPageLimit = function(limit) {
-                scope.vm.pageLimit = limit;
-
-                scope.vm.logObject = {action: logActions.recordsetLimit};
-                update(scope.vm, true, false, false);
-            };
-
-            scope.before = function() {
-                var previous = scope.vm.page.previous;
-                if (previous && scope.$root.checkReferenceURL(previous)) {
-                    scope.vm.reference = previous;
-                    $log.debug('counter', scope.vm.flowControlObject.counter ,': request for previous page');
-
-                    scope.vm.logObject = {
-                        action: logActions.recordsetPage,
-                        sort: previous.location.sortObject,
-                        page: previous.location.beforeObject,
-                        type: "before"
-                    };
-                    update(scope.vm, true, false, false);
-                }
-            };
-
-            scope.after = function() {
-                var next = scope.vm.page.next;
-                if (next && scope.$root.checkReferenceURL(next)) {
-                    scope.vm.reference = next;
-                    $log.debug('counter', scope.vm.flowControlObject.counter ,': request for next page');
-
-                    scope.vm.logObject = {
-                        action: logActions.recordsetPage,
-                        sort: next.location.sortObject,
-                        page: next.location.afterObject,
-                        type: "after"
-                    };
-                    update(scope.vm, true, false, false);
-                }
-
-            };
 
             scope.focusOnSearchInput = function () {
                 angular.element("#search-input.main-search-input").focus();

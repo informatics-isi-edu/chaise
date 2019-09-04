@@ -1,5 +1,11 @@
 .markdown-container {
 
+    // NOTE related PR: https://github.com/informatics-isi-edu/chaise/pull/882
+    // might not be needed anymore
+    .recordset-table td & img {
+        overflow-x: hidden;
+    }
+
     & > p:last-child {
         margin-bottom: 0;
     }
