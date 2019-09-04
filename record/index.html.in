@@ -12,7 +12,7 @@
     </div>
     <div class="app-container r_s_{{ctrl.makeSafeIdAttr(reference.table.schema.name)}} r_t_{{ctrl.makeSafeIdAttr(reference.table.name)}}" ng-controller="RecordController as ctrl">
         <navbar></navbar>
-        <div class="top-panel-container">
+        <div id="top-panel-container">
             <div id="page-action-btns" class="row">
                 <div class="pull-right">
                     <button id="show-all-related-tables" class="chaise-btn chaise-btn-primary" ng-click="::ctrl.toggleRelatedTables();" uib-tooltip="{{'Click here to ' + ((showEmptyRelatedTables) ? 'hide empty related sections.' : 'show empty related sections too.')}}" tooltip-placement="bottom">
