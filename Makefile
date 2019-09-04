@@ -384,8 +384,6 @@ VIEWER_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(COMMON)/styles/app.css \
 	$(COMMON)/vendor/MarkdownEditor/styles/github-markdown.css
 
-VIEWER_CSS_SOURCE=$(VIEWER_ASSETS)/viewer.css
-
 # JavaScript and CSS source for RecordEdit app
 RE_ASSETS=recordedit
 
@@ -620,13 +618,9 @@ $(JS_CONFIG): chaise-config-sample.js
 		$(CAT) $$file >> .make-template-block ; \
 	done
 
-.make-viewer-asset-block: $(VIEWER_SHARED_CSS_DEPS) $(VIEWER_CSS_SOURCE) $(VIEWER_SHARED_JS_DEPS) $(VIEWER_JS_SOURCE) $(JS_CONFIG)
+.make-viewer-asset-block: $(VIEWER_SHARED_CSS_DEPS) $(VIEWER_SHARED_JS_DEPS) $(VIEWER_JS_SOURCE) $(JS_CONFIG)
 	> .make-viewer-asset-block
 	for file in $(VIEWER_SHARED_CSS_DEPS); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-viewer-asset-block ; \
-	done
-	for file in $(VIEWER_CSS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-viewer-asset-block ; \
 	done
