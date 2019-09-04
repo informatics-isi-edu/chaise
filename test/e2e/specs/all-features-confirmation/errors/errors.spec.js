@@ -330,7 +330,7 @@ describe('Error related test cases,', function() {
         });
     });
 
-    // delete from ellipses
+    // delete from ellipsis
     describe("Dismissible Error Modal when using Ellipses delete button", function(){
 
       beforeAll(function() {
@@ -340,7 +340,7 @@ describe('Error related test cases,', function() {
           deleteBtnEllipses  = chaisePage.recordsetPage.getDeleteActionButtons().first();
           chaisePage.waitForElement(deleteBtnEllipses);
       });
-        it('Error modal is dismissible in case of conflict/forbidden error while deleting from ellipses', function(done){
+        it('Error modal is dismissible in case of conflict/forbidden error while deleting from ellipsis', function(done){
             deleteBtnEllipses.click().then(function(){;
               return chaisePage.recordsetPage.getConfirmDeleteButton().click();
             }).then (function() {

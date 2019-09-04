@@ -20,11 +20,6 @@
                             <span ng-if="::!vm.tableDisplayname.isHTML" ng-bind="vm.tableDisplayName.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::vm.tableComment ? vm.tableComment : undefined}}"></span>
                             <span ng-if="vm.reference && vm.reference.location.version" class="h3-class" tooltip-placement="bottom-left" uib-tooltip="{{::tooltip.versionTime}} {{versionDate()}}">({{versionDisplay()}})</span>
                         </h1>
-                        <h3 ng-if="::vm.subTitle" class="page-filters">
-                            <span id="page-subtitle" class="sub-title" ng-bind="vm.subTitle"></span>
-                            <a ng-if="::vm.reference" class="btn btn-sm btn-primary btn-inverted" ng-href="{{ unfiltered() }}" tooltip-placement="bottom"
-                                uib-tooltip="Show unfiltered list" id="show-unfiltered">Show Unfiltered</a>
-                        </h3>
                     </div>
                     <div class="pull-right">
                         <a id="create-link" ng-if="vm.reference.canCreate && vm.config.editable" ng-href="{{create()}}" uib-tooltip="Click here to create a record." tooltip-placement="bottom">

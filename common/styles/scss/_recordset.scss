@@ -1,0 +1,460 @@
+.outer-table {
+    overflow-x: auto;
+}
+
+.recordset-table td .markdown-container img {
+    overflow-x: hidden;
+}
+
+.chaise-table.table {
+    border-top: 1px solid $table-border-color;
+    border-bottom: 1px solid $table-border-color;
+    margin-bottom: 5px;
+
+    /* if you want the table to have a fixed layout */
+    &.table-fixed-layout {
+        table-layout: fixed;
+        width: 100%;
+    }
+
+    // TODO: verify this still works as expected
+    tbody {
+        display: table-row-group;
+        vertical-align: middle;
+
+        > tr > td.disabled-cell {
+            background-color: #f4f4f4;
+        }
+
+        /* table hover */
+        > tr:hover {
+            background-color: #f7f0cf !important;
+
+            /* match color from row highlight for disabled cells */
+            > td.disabled-cell {
+                background-color: #f7f0cf !important;
+            }
+        }
+
+        /* odd disabled cells need to be darker */
+        > tr:nth-child(odd) > td.disabled-cell {
+            background-color: #ebebeb;
+        }
+
+        /* odd row hover for striped table */
+        > tr:nth-child(odd):hover {
+            background-color: #efebda !important;
+
+            /* odd disabled cells need to match odd row hover for striped table above */
+            > td.disabled-cell {
+                background-color: #efebda !important;
+            }
+        }
+    }
+
+    tr {
+        border-left: 1px solid $table-border-color;
+        border-bottom: none;
+    }
+
+    .table-heading {
+        background-color: $table-header-background-color;
+        color: $black-color;
+    }
+
+    &.table-striped > tbody > tr:nth-child(odd) {
+        background: $table-striped-background-color;
+    }
+
+    >thead>tr>th {
+        border-bottom: 1px solid $table-border-color;
+    }
+
+    >thead>tr>th,
+    >tbody>tr>th,
+    >tfoot>tr>th,
+    >thead>tr>td,
+    >tbody>tr>td,
+    >tfoot>tr>td {
+        border-top: none;
+        border-right: 1px solid $table-border-color;
+        word-wrap: break-word;
+    }
+
+    >tbody>tr>td {
+        padding: 5px;
+    }
+
+    td.actions-layout {
+        width: 1px;
+        white-space: nowrap;
+        text-align: center;
+    }
+
+    th {
+        font-weight: 400;
+        border-top: 1px solid $table-border-color;
+
+        &.multi-select-width {
+            width: 140px;
+            text-align: center;
+        }
+    }
+}
+
+
+.filters-tooltip {
+    margin-right: 2%;
+}
+
+.filters-tooltip .tooltip-inner {
+    white-space: normal;
+}
+
+.filters-tooltip .tooltip-inner {
+    max-width: inherit;
+}
+
+
+/************* search loader ***************/
+input.search-progress {
+    background: url("images/loader.gif") no-repeat right center;
+    background-size: 25px 25px;
+    background-position-x: 99%;
+}
+
+/************* search input ****************/
+.form-control-feedback > span.search-remove {
+    border-bottom: none;
+}
+
+.total-filters {
+    margin-bottom: 10px;
+    margin-left: 0;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    max-width: 100%;
+    /*background-color: #f5f5f5;*/
+    overflow-x: hidden;
+    /*max-height: 140px;*/
+    /*overflow-y: auto;*/
+}
+
+.filter-label {
+    padding: 0.2em 0.3em 0.3em;
+}
+
+.total-filters .filter-label {
+    font-size: 1em;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    display: inline-block;
+    position: relative;
+    border: 1px solid #ccc;
+    overflow: hidden;
+    max-width: 350px;
+    text-overflow: ellipsis;
+    height: 26px;
+}
+
+.total-filters .filter-label .filter-label-colon,
+.total-filters .filter-label .filter-label-title,
+.total-filters .filter-label .filter-label-value,
+.total-filters .filter-label .remove-link {
+    vertical-align: middle;
+}
+
+.total-filters .filter-label .remove-link i {
+    top: 0.1em;
+}
+
+.total-filters .filter-label span {
+    border: none;
+}
+
+.total-filters .filter-label .filter-label-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    max-width: 150px;
+    margin-right: -2px;
+    padding: 0.1em 0;
+}
+
+.total-filters .remove-link .filter-label {
+    background-color: #337ab7;
+    color: white;
+    padding: 0.34em 0.4em 0.33em;
+}
+
+.total-filters .remove-link:hover {
+    color: #2c6392;
+}
+
+.label-default {
+    background-color: #f1f1f1;
+    color: #333;
+    font-weight: 500;
+}
+
+
+.recordset-container.without-faceting .main-container {
+    padding-top: 20px;
+}
+
+.recordset-container.without-faceting .main-body {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.recordset-container.with-faceting {
+    -webkit-box-flex: 1;
+    display: flex;
+    flex: 1;
+    margin-top: 5px;
+}
+
+/** recordset with faceting side panel **/
+.recordset-container.with-faceting > .faceting-resizable {
+    padding-top: 5px;
+    position: relative;
+    max-width: 50vw;
+    z-index: 2;
+}
+
+.recordset-container.with-faceting > .faceting-resizable.initializing > .rg-right > span {
+    display: none;
+}
+
+.recordset-container.with-faceting > .faceting-resizable.open-panel {
+    flex: 0 0 21vw;
+    min-width: 170px;
+    padding-left: 5px;
+}
+
+.recordset-container.with-faceting > .faceting-resizable.close-panel {
+    width: 0;
+    flex-basis: 0 !important;
+}
+
+.recordset-container.with-faceting > .faceting-resizable.close-panel .faceting-container {
+    width: 0;
+}
+.modal-body .recordset-container footer {
+    display: none !important;
+}
+
+.modal-body .recordset-container alerts:not(.enforce-alert) {
+    display: none !important;
+}
+
+.recordset-container.with-faceting {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.recordset-container.with-faceting > .main-container {
+    flex: 1;
+    position: relative;
+    z-index: 1;
+    overflow-y: auto;
+    padding-top: 15px;
+}
+
+.recordset-container.with-faceting .main-body {
+    border-left: 25px solid white;
+    padding-right: 10px;
+}
+
+.recordset-container.with-faceting .pager {
+    margin-bottom: 50px;
+}
+
+.recordset-container > .main-container {
+    overflow-x: hidden;
+}
+
+.faceting-container .toggle-icon {
+    margin-right: 5px;
+}
+
+.faceting-container .panel .panel-title {
+    color: #333333;
+    line-height: 1.35;
+    font-size: 14px;
+    font-weight: 600;
+    position: relative;
+}
+
+.faceting-container .panel .panel-body {
+    padding: 0 10px 10px !important;
+    border-top: none !important;
+    border: none;
+}
+
+.faceting-container .panel-group {
+    margin-right: 5px;
+    margin-top: 5px;
+    margin-bottom: 20px;
+}
+
+.faceting-container .applied-filters {
+    margin-top: 5px;
+    max-height: 100px;
+    overflow-y: auto;
+}
+
+.faceting-container .applied-filters .filter-label {
+    margin-right: 5px;
+    margin-bottom: 5px;
+    border: 0.1px solid #ccc;
+    display: inline-block;
+    font-size: 0.8em;
+}
+
+.faceting-container .applied-filters .filter-label:before {
+    margin-right: 0;
+}
+
+.faceting-container .facet-panel > .panel-heading div.active:before,
+.faceting-container .facet-panel > .panel-heading div:before {
+    content: "";
+}
+
+.faceting-container .applied-filters .remove-link {
+    color: #337ab7;
+    font-weight: 600;
+}
+
+.faceting-container .applied-filters .remove-link:hover {
+    color: #2c6392;
+}
+
+.remove-link .filter-label {
+    background-color: #337ab7;
+    color: white;
+}
+
+.filter-label.label-primary.label-inverted {
+    color: #337ab7;
+    background-color: white;
+    border-color: #337ab7;
+}
+
+.filter-label {
+    background-color: white;
+    color: #333;
+    font-weight: 500;
+    border: 0.1px solid #ccc;
+}
+/* INTEGER SEARCH */
+.faceting-container .choice-picker .search-box {
+    margin-bottom: 10px;
+}
+
+.faceting-container .range-picker hr {
+    color: #f5f5f5;
+    width: 1px;
+}
+
+.faceting-container .range-picker .form-inline input {
+    width: 100%;
+    padding: 6px 20px 6px 6px;
+    height: 100%;
+    border: none;
+    border-radius: 4px;
+}
+/* STRING SEARCH */
+.faceting-container .string-picker .tab-content {
+    margin-top: 10px;
+}
+
+.faceting-container .string-picker .pager {
+    margin: 0;
+}
+
+.faceting-container .string-picker a.nav-link {
+    padding: 5px 15px;
+}
+
+.plotly-how-to {
+    border-color: white !important;
+    cursor: default;
+}
+
+.plotly-how-to:hover {
+    z-index: auto !important;
+}
+
+
+/************************* list **********************/
+
+.chaise-list-container {
+    padding-left: 0;
+    margin-bottom: 5px;
+}
+
+.chaise-checkbox.with-tooltip label {
+    border-bottom: 1px dotted black;
+}
+
+.chaise-checkbox {
+    position: relative;
+    /*margin: 10px 0;*/
+}
+
+li.chaise-checkbox:hover {
+    background-color: rgb(241, 241, 241);
+}
+
+.ellipsis-text label {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.chaise-checkbox input {
+    position: absolute;
+    z-index: 1;
+    cursor: pointer;
+    width: 17px;
+    height: 17px;
+    top: 0;
+    margin-top: 2px;
+}
+
+.chaise-checkbox label {
+    display: inline-block;
+    margin-left: 25px;
+    font-weight: 400;
+    position: relative;
+    vertical-align: middle;
+    min-height: 20px;
+}
+
+.chaise-checkbox input[type="checkbox"]:after {
+    content: "";
+    display: inline-block;
+    position: absolute;
+    width: 17px;
+    height: 17px;
+    left: 0;
+    top: 0;
+    border: 1px solid #337ab7;
+    border-radius: 3px;
+    color: #337ab7;
+    background-color: #fff;
+    -webkit-transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
+    -o-transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
+    transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
+}
+
+.chaise-checkbox input[type="checkbox"]:checked:after {
+    font-family: 'Glyphicons Halflings';
+    content: "\e013";
+}
+
+/* selected rows in the modal */
+.selected-rows {
+    min-height: 45px;
+}

@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    angular.module('chaise.ellipses', ['chaise.utils'])
+    angular.module('chaise.ellipsis', ['chaise.utils'])
 
     .filter('trustedHTML', ['$sce', function($sce){
         return function(text) {
@@ -9,7 +9,7 @@
         };
     }])
 
-    .directive('ellipses', ['AlertsService', 'ConfigUtils', 'defaultDisplayname', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$window',
+    .directive('ellipsis', ['AlertsService', 'ConfigUtils', 'defaultDisplayname', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$window',
         function(AlertsService, ConfigUtils, defaultDisplayname, ErrorService, logActions, MathUtils, messageMap, modalBox, modalUtils, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $window) {
         var chaiseConfig = ConfigUtils.getConfigJSON();
 
@@ -62,7 +62,7 @@
 
         return {
             restrict: 'AE',
-            templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/ellipses.html',
+            templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/ellipsis.html',
             scope: {
                 tuple: '=',
                 rowValues: '=', // tuple's values

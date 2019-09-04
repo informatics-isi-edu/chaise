@@ -1,0 +1,97 @@
+.markdown-container {
+
+    & > p:last-child {
+        margin-bottom: 0;
+    }
+
+    li {
+        list-style-type: inherit;
+        &:only-child {
+            list-style-type: none;
+        }
+    }
+
+    ul {
+        list-style-type: disc;
+    }
+
+    ol {
+        list-style-type: decimal;
+    }
+
+    code {
+        padding-left: 0;
+        padding-right: 0;
+        color: #333;
+        background-color: #F5F5F5;
+    }
+
+    img {
+        margin: 5px 5px 5px 0;
+    }
+
+    .vocab {
+        color: darkblue;
+        background-color: rgba(220, 220, 220, 0.68);
+        padding: 7px;
+        border-radius: 10px;
+        display: inline-block;
+        margin: 2px;
+    }
+
+    .download {
+        color: #fff;
+        background-color: #337ab7;
+        border-color: #2e6da4;
+        display: inline-block;
+        padding: 6px 12px;
+        margin-bottom: 0;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 1.42857143;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        -ms-touch-action: manipulation;
+        touch-action: manipulation;
+        cursor: pointer;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        background-image: none;
+        border: 1px solid transparent;
+        border-radius: 4px;
+    }
+
+    .asset-source-description {
+        margin: 0 5px;
+        vertical-align: -9px;
+        font-size: 13px;
+    }
+}
+
+
+record-display .markdown-container ol > li:only-child,
+record-display .markdown-container ul > li:only-child {
+    list-style: none;
+    padding: 0;
+    margin-left: 0;
+}
+
+record-display .markdown-container ol,
+record-display .markdown-container ul {
+    padding: 0 !important;
+    /*existing rule is padding=2, which should be changed for the other changes*/
+}
+
+record-display .markdown-container ol > li,
+record-display .markdown-container ul > li {
+    margin-left: 1em;
+    padding-left: 0;
+}
+
+record-table .markdown-container ol,
+record-table .markdown-container ul {
+    padding-left: 1em;
+}

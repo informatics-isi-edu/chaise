@@ -4,7 +4,7 @@
     var isIE = /*@cc_on!@*/false || !!document.documentMode, // Internet Explorer 6-11
         isEdge = !isIE && !!window.StyleMedia; // Edge
 
-    angular.module('chaise.record.table', ['chaise.ellipses', 'chaise.inputs', 'chaise.utils'])
+    angular.module('chaise.record.table', ['chaise.ellipsis', 'chaise.inputs', 'chaise.utils'])
 
     .constant('tableConstants', {
         MAX_CONCURENT_REQUEST: 4,
@@ -86,7 +86,7 @@
      * event that facets will send to the parents. recordset directive uses this
      * event to call read on this new reference.
      * 4. `record-modified`: one of the records in the recordset table has been
-     * modified. ellipses will fire this event and recordset directive will use it.
+     * modified. ellipsis will fire this event and recordset directive will use it.
      */
     .factory('recordTableUtils',
             ['AlertsService', 'DataUtils', 'defaultDisplayname', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'Session', 'tableConstants', 'UriUtils', '$cookies', '$document', '$log', '$q', '$rootScope', '$timeout', '$window',
@@ -924,7 +924,7 @@
          */
         function registerRecordsetCallbacks(scope) {
             var addRecordRequests = {}; // table refresh used by add record implementation with cookie (old method)
-            var updated = false; // table refresh used by ellipses' edit action (new method)
+            var updated = false; // table refresh used by ellipsis' edit action (new method)
 
             scope.pageLimits = [10, 25, 50, 75, 100, 200];
             scope.$root.alerts = AlertsService.alerts;
@@ -1129,7 +1129,7 @@
             });
 
             // This is not used now, but we should change the record-deleted to this.
-            // row data has been modified (from ellipses) do read
+            // row data has been modified (from ellipsis) do read
             scope.$on('record-modified', function($event) {
                 $log.debug("-----------------------------");
                 $log.debug('counter', scope.vm.flowControlObject.counter, ': record-modified in recordset directive');

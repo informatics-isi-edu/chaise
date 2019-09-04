@@ -1,0 +1,223 @@
+#record {
+    /** record side panel **/
+    .record-container > .faceting-resizable {
+        position: relative;
+        z-index: 2;
+        font-weight: bold;
+        max-width: 50vw;
+    }
+
+    .record-container > .faceting-resizable.open-panel {
+        flex: 0 0 15vw;
+        min-width: 170px;
+        padding-left: 5px;
+    }
+
+    .record-container > .faceting-resizable.close-panel {
+        width: 0;
+        flex-basis: 0 !important;
+    }
+
+    .record-container > .faceting-resizable.close-panel .faceting-container {
+        width: 0;
+    }
+
+    .record-container > .faceting-resizable .sidePanelHeading {
+        font-weight: bold;
+        padding: 9px 10px 10px !important;
+        margin: 5px 0 0 -5px;
+    }
+
+    .record-toc .columns-container ul {
+        padding-left: 10px;
+    }
+
+    .record-toc .toc-heading {
+        padding: 5px;
+        cursor: pointer;
+    }
+
+    .record-toc .toc-heading:hover {
+        background-color: rgb(241, 241, 241);
+    }
+
+    .record-toc #rt-toc-loading {
+        padding: 10px 5px 5px;
+    }
+
+    .loading-text {
+        color: #446c73;
+        font-weight: 600;
+    }
+
+    .loading-sticky {
+        float: left;
+        position: fixed;
+        z-index: 1;
+        bottom: 0;
+        background: #d9edf7;
+        margin: 5px;
+        padding: 5px 20px;
+        border: solid #446c73 1.5px;
+    }
+
+    tr.rowFocus {
+        border: 2px solid rgb(51, 122, 183);
+    }
+
+    .record-container .rowFocus {
+        border-color: rgb(51, 122, 183) !important;
+    }
+
+    .record-container .panel-group .panel.rowFocus + .panel {
+        border-top: 2px solid #ddd;
+    }
+
+    .record-container {
+        padding-right: 0;
+        -webkit-box-flex: 1;
+        display: flex;
+        flex: 1;
+        margin-top: 0px;
+
+        > .main-container {
+            flex:1;
+            position: relative;
+            z-index: 1;
+            overflow-x: hidden;
+            overflow-y: auto;
+            padding-top: 10px;
+        }
+
+        &.smaller-margin {
+            margin-left: -50px;
+            margin-right: -50px;
+        }
+
+        /******Related Entities in record **************/
+
+        .panel-group .panel {
+            border-color: $white-color;
+            border-bottom: 1px solid $disabled-background-color;
+            border-width: 2px;
+            border-radius: 2px;
+            padding: 0 10px;
+            box-shadow: none;
+
+            a.accordion-toggle span {
+                color: #333333;
+                font-weight: normal;
+                font-size: 17px;
+            }
+        }
+
+        .panel-title {
+            font-size: inherit;
+
+            &>a:hover, &>a:focus{
+                text-decoration: none;
+                color: rgb(63, 124, 184);
+            }
+        }
+
+        .related-table-heading>.panel-heading {
+            text-transform: inherit;
+            padding: 8px 8px 8px 0px;
+            color: $white-color;
+            border: none;
+            background: $section-background-color;
+
+            .record-action-bar {
+                top: -10px;
+                position: relative;
+            }
+
+            & + .panel-collapse > .panel-body {
+                border-top: none;
+                padding: 0px 0px 10px 0px;
+            }
+        }
+    }
+
+    // TODO most probably is not needed and should be rewritten
+    .hide-border > td {
+        border-bottom: none !important;
+    }
+
+    // TODO might be removed because style changed drastically
+    .actionBarRTStyle {
+        margin-top: -25px;
+    }
+
+    .actionBarEntityStyle {
+        padding-left: 5px;
+        padding-bottom: 5px;
+        float: right;
+    }
+
+    .actionBarEntityStyleWithMargin {
+        padding-bottom: 5px;
+        text-align: right;
+    }
+
+    #back-to-top {
+        position: absolute;
+        left: -66px;
+        bottom: 2em;
+        padding: 1px 4px;
+        font-size: 25px;
+        border-radius: 2px 0 0 2px;
+        height: 35px;
+        width: 35px;
+        cursor: pointer;
+        overflow: hidden;
+    }
+
+
+    /********* print ********/
+
+    @media print {
+        #main-content {
+            height: auto !important;
+            display: block;
+        }
+
+        #record-side-pan {
+            display: none;
+        }
+
+        .container-fluid {
+            padding-left: 0px;
+        }
+
+        .record-container .row {
+            margin-left: 0px;
+        }
+
+        .record-container #bookmark-container {
+            padding-left: 0px;
+        }
+
+        #footer {
+            display: none;
+        }
+
+        a[href]:after {
+            content: none !important;
+        }
+
+        .record-container .entity-key {
+            width: 15%;
+            max-width: 120px;
+        }
+
+        .record-container .entity-value {
+            width: 85%;
+        }
+    }
+
+    @page {
+        size: auto;
+        margin: 5% 4% 5% 3%;
+    }
+}

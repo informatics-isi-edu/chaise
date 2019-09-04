@@ -229,38 +229,6 @@ function resultContent() {
     }
 };
 
-function detailedPage() {
-    var that = this;
-    this.entityTitle = $('#entity-title');
-    this.getEntityTitle = function() {
-        return $('#entity-title');
-    };
-    this.findEntityKeyByName = function (entityName) {
-        //return element(by.css('.entity-key.ng-binding:contains("' + entityName + '")'));
-        //return element(by.xpath('//span[.=\'' + entityName + '\']'));
-        return element(by.cssContainingText('span.entity-key', entityName));
-    };
-    this.findEntityValueByName = function (entityName) {
-        var entityKey = that.findEntityKeyByName(entityName);
-        var parentEl = entityKey.element(by.xpath('..'));
-        return toolkit.getSiblingByCss(parentEl, 'td');
-    };
-    this.findAssociationKeyByName = function (associateName) {
-        return element(by.xpath('//td[.=\'' + associateName + '\']'));
-    };
-    this.findAssociationValueByName = function (associateName) {
-        var associationKeyElement = that.findAssociationKeyByName(associateName);
-        return toolkit.getSiblingByCss(associationKeyElement, 'td');
-    };
-    this.findToggleWrapperByName = function (keyName) {
-        return element(by.cssContainingText('.panel-group div.panel.panel-default', keyName))
-    };
-    this.clickToggleWrapperByName = function (keyName) {
-        that.findToggleWrapperByName(keyName).click();
-    };
-};
-
-
 var recordEditPage = function() {
     var that = this;
     this.getEntityTitle = function() {
@@ -582,10 +550,6 @@ var recordEditPage = function() {
         min = (min == undefined || min == null) ? -32768 : min;
         max = (max == undefined || max == null) ? 32767 : max;
         return Math.floor(Math.random() * (max - min + 1)) + min;
-    };
-
-    this.recordBookmark = function() {
-        return element(by.id('detailed-bookmark-container'));
     };
 
     this.getAlertError = function() {
@@ -1392,7 +1356,6 @@ function chaisePage() {
     this.moreFilter = new moreFilter();
     this.editFilter = new editFilter();
     this.resultContent = new resultContent();
-    this.detailedPage = new detailedPage();
     this.recordEditPage = new recordEditPage();
     this.recordPage = new recordPage();
     this.recordsetPage = new recordsetPage();

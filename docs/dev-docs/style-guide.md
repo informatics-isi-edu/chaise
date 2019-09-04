@@ -369,7 +369,7 @@ Also use:
 
 For the default ("vanilla") application, we keep colors as neutral as possible. The default colors for the current chaise application are:
 
-- The navbar is very dark gray (#4D4D4D), as set in chaise's custom css file, appheader.css:
+- The navbar is very dark gray (#4D4D4D), as set in chaise's custom css file, navbar.css:
 
    ~~~~
    .navbar-inverse .navbar-collapse, .navbar-inverse .navbar-form {
@@ -377,7 +377,7 @@ For the default ("vanilla") application, we keep colors as neutral as possible. 
    }
    ~~~~
 
-- Branding text (Chaise) is white, also set in appheader.css:
+- Branding text (Chaise) is white, also set in navbar.css:
 
    ~~~~
    .navbar-inverse .navbar-brand {

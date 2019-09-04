@@ -226,7 +226,7 @@ CSS_SOURCE=$(CSS)/swoop-sidebar.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css \
 	$(CSS)/ermrest.css \
 	$(CSS)/app.css \
-	$(COMMON)/styles/appheader.css \
+	$(COMMON)/styles/navbar.css \
 	$(CSS)/tour.css
 
 # JavaScript source and test specs
@@ -276,7 +276,7 @@ JS_SOURCE=$(JS)/respond.js \
 	$(COMMON)/navbar.js \
 	$(COMMON)/login.js \
 	$(COMMON)/record.js \
-	$(COMMON)/ellipses.js \
+	$(COMMON)/ellipsis.js \
 	$(COMMON)/storage.js \
 	$(COMMON)/table.js \
 	$(COMMON)/utils.js \
@@ -315,7 +315,7 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
 	$(COMMON)/navbar.js \
 	$(COMMON)/login.js \
 	$(COMMON)/record.js \
-	$(COMMON)/ellipses.js \
+	$(COMMON)/ellipsis.js \
 	$(COMMON)/storage.js \
 	$(COMMON)/table.js \
 	$(COMMON)/utils.js \
@@ -335,10 +335,6 @@ RECORD_JS_SOURCE=$(RECORD_ASSETS)/record.app.js \
 RECORD_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(COMMON)/styles/app.css \
 	$(COMMON)/vendor/MarkdownEditor/styles/github-markdown.css \
-	$(COMMON)/styles/appheader.css
-
-
-RECORD_CSS_SOURCE=$(RECORD_ASSETS)/record.css
 
 # JavaScript and CSS source for Viewer app
 VIEWER_ASSETS=viewer
@@ -386,7 +382,6 @@ VIEWER_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/vendor/select.css \
 	$(CSS)/vendor/select2.css \
 	$(COMMON)/styles/app.css \
-	$(COMMON)/styles/appheader.css \
 	$(COMMON)/vendor/MarkdownEditor/styles/github-markdown.css
 
 VIEWER_CSS_SOURCE=$(VIEWER_ASSETS)/viewer.css
@@ -411,7 +406,7 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
 	$(COMMON)/errors.js \
 	$(COMMON)/faceting.js \
 	$(COMMON)/filters.js \
-	$(COMMON)/ellipses.js \
+	$(COMMON)/ellipsis.js \
 	$(COMMON)/inputs.js \
 	$(COMMON)/resizable.js \
 	$(COMMON)/storage.js \
@@ -448,10 +443,7 @@ RE_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/vendor/select2.css \
 	$(CSS)/vendor/angular-datepicker.css \
 	$(CSS)/vendor/rzslider.css \
-	$(COMMON)/styles/app.css \
-	$(COMMON)/styles/appheader.css
-
-RE_CSS_SOURCE=$(RE_ASSETS)/recordEdit.css
+	$(COMMON)/styles/app.css
 
 RE_CSS_MDHELP=$(RE_ASSETS)/mdHelpStyle.min.css
 
@@ -471,7 +463,7 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
 	$(COMMON)/authen.js \
 	$(COMMON)/bindHtmlUnsafe.js \
 	$(COMMON)/config.js \
-	$(COMMON)/ellipses.js \
+	$(COMMON)/ellipsis.js \
 	$(COMMON)/export.js \
 	$(COMMON)/errors.js \
 	$(COMMON)/faceting.js \
@@ -495,7 +487,6 @@ RECSET_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css
 
 RECSET_CSS_SOURCE=$(COMMON)/styles/app.css \
-	$(COMMON)/styles/appheader.css \
 	$(COMMON)/vendor/MarkdownEditor/styles/github-markdown.css
 
 # Config file
@@ -545,6 +536,7 @@ updeps:
 clean:
 	rm $(HTML) || true
 	rm $(COMMON)/styles/app.css
+	rm $(COMMON)/styles/navbar.css
 	rm -rf $(DIST)
 	rm -f .make-*
 
@@ -559,8 +551,9 @@ distclean: clean
 html: $(HTML)
 
 # Rule to compile sass/scss files to css
-$(COMMON)/styles/app.css: $(COMMON)/styles/scss/app.scss
-	$(BIN)/node-sass --style=compressed $(COMMON)/styles/scss/app.scss $(COMMON)/styles/app.css
+$(COMMON)/styles/app.css: $(COMMON)/styles/scss/*
+	$(BIN)/node-sass --style=compressed --source-map-embed $(COMMON)/styles/scss/app.scss $(COMMON)/styles/app.css
+	$(BIN)/node-sass --style=compressed --source-map-embed $(COMMON)/styles/scss/_navbar.scss $(COMMON)/styles/navbar.css
 
 # Rules to attach JavaScript and CSS assets to the head
 search/index.html: search/index.html.in .make-asset-block .make-template-block
@@ -652,13 +645,13 @@ $(JS_CONFIG): chaise-config-sample.js
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-viewer-asset-block ; \
 	done
 
-.make-de-asset-block: $(RE_SHARED_CSS_DEPS) $(RE_CSS_SOURCE) $(RE_SHARED_JS_DEPS) $(RE_JS_SOURCE) $(JS_CONFIG) $(MDEDIT_JS_DEPS) $(MDEDIT_CSS_DEPS)
+.make-de-asset-block: $(RE_SHARED_CSS_DEPS) $(RE_SHARED_JS_DEPS) $(RE_JS_SOURCE) $(JS_CONFIG) $(MDEDIT_JS_DEPS) $(MDEDIT_CSS_DEPS)
 	> .make-de-asset-block
 	for file in $(RE_SHARED_CSS_DEPS); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-de-asset-block ; \
 	done
-	for file in $(RE_CSS_SOURCE) $(MDEDIT_CSS_DEPS); do \
+	for file in $(MDEDIT_CSS_DEPS); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-de-asset-block ; \
 	done

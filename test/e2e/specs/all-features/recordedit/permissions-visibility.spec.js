@@ -22,7 +22,6 @@ describe('When viewing RecordEdit app', function() {
 
         browser.get(url);
         chaisePage.waitForElement(modalBody).then(function() {
-            expect(element(by.id('entity-title')).isPresent()).toBe(false);
             expect(modalBody.isDisplayed()).toBe(true);
         });
     });
@@ -33,7 +32,6 @@ describe('When viewing RecordEdit app', function() {
 
         browser.get(url);
         chaisePage.waitForElement(modalBody).then(function() {
-            expect(element(by.id('entity-title')).isPresent()).toBe(false);
             expect(modalBody.isDisplayed()).toBe(true);
         });
     });
@@ -44,7 +42,6 @@ describe('When viewing RecordEdit app', function() {
 
         browser.get(url);
         chaisePage.waitForElement(modalBody).then(function() {
-            expect(element(by.id('entity-title')).isPresent()).toBe(false);
             expect(modalBody.isDisplayed()).toBe(true);
         });
     });

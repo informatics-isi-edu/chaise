@@ -2,57 +2,21 @@
 @import "variables";
 @import "mixin";
 
-// Rely on above requireddocuments
-@import "buttons";
+// components
+@import "navbar";
+@import "chaise-icon";
+@import "markdown-container";
+@import "resizable";
 @import "button-group";
-@import "recordset-table";
+@import "buttons";
+@import "recordset";
+@import "modal";
 
-@font-face {
-    font-family: 'chaise-icons';
-    src: url("fonts/chaise-icons.eot");
-    src: url("fonts/chaise-icons.eot?#iefix") format('embedded-opentype'), url("fonts/chaise-icons.woff2") format('woff2'), url("fonts/chaise-icons.woff") format('woff'), url("fonts/chaise-icons.ttf") format('truetype'), url("fonts/chaise-icons.svg#chaise-icons") format('svg');
-}
-
-.chaise-icon {
-    position: relative;
-    top: 1px;
-    display: inline-block;
-    font-family: 'chaise-icons';
-    font-style: normal;
-    font-weight: normal;
-    line-height: 1;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-.chaise-icon.chaise-zoom-in::before {
-    content: '\00A3';
-}
-
-.chaise-icon.chaise-zoom-out::before {
-    content: '\00A2';
-}
-
-.chaise-icon.chaise-RID::before {
-    content: 'RID';
-}
-
-.chaise-icon.chaise-RID {
-    font-size: 16px;
-}
-
-.chaise-icon.chaise-sidebar-open::before {
-    content: '\00A4';
-}
-
-.chaise-icon.chaise-sidebar-close::before {
-    content: '\00A5';
-}
-
-.chaise-icon.chaise-view-details::before {
-    content: '\00A8';
-}
-
+// app specific
+@import "recordset-app";
+@import "record-app";
+@import "recordedit-app";
+@import "viewer-app";
 
 // configure app rules
 .chaise-body .app-container {
@@ -104,6 +68,11 @@ html.ng-scope {
         list-style-type: none;
     }
 
+    // show list style
+    ul.show-list-style li {
+        list-style-type: inherit;
+    }
+
     a {
         cursor: pointer;
         color: $link-color;
@@ -121,10 +90,7 @@ html.ng-scope {
         }
     }
 
-    .btn-sm[data-handler="bootstrap-markdown-cmdRidLink"] {
-        padding: 5px 3px;
-    }
-
+// tooltip
     .show-tooltip-border[uib-tooltip],
     span[uib-tooltip] {
         border-bottom: 1px dotted black;
@@ -140,24 +106,13 @@ html.ng-scope {
         white-space: pre-wrap;
     }
 
-    .filters-tooltip {
-        margin-right: 2%;
-    }
-
-    .filters-tooltip .tooltip-inner {
-        white-space: normal;
-    }
-
-    .filters-tooltip .tooltip-inner {
-        max-width: inherit;
-    }
-
     .btn.btn-no-boundry {
         border: none;
         background: transparent !important;
         padding: 0;
     }
 
+/*
     .btn.btn-primary.btn-inverted,
     .btn.btn-primary.btn-inverted:focus,
     .btn.btn-primary.btn-inverted:hover {
@@ -169,17 +124,9 @@ html.ng-scope {
         color: #d43f3a;
         background-color: white;
     }
+*/
 
-    .btn.btn-primary.btn-inverted[disabled],
-    .chaise-checkbox input[disabled][type="checkbox"] + label:before {
-        color: #ccc !important;
-        border-color: #ccc !important;
-    }
-
-    .chaise-checkbox input[disabled][type="checkbox"]:checked + label:after {
-        color: #ccc !important;
-    }
-
+// disabled row and form
     .disabled-form,
     .disabled-row {
         color: #ccc;
@@ -200,11 +147,7 @@ html.ng-scope {
         border-color: #ccc !important;
     }
 
-    .remove-form-btn {
-        font-size: 18px;
-        padding: 0 7px;
-    }
-    /**************** SPINNER **************/
+// spinner
     #spinner {
         background: #fff;
         width: 130px;
@@ -253,33 +196,12 @@ html.ng-scope {
         height: 17px;
         opacity: 0.8;
     }
+
     /****************** HEADER ******************/
-    #mainnav {
-        border-radius: 0;
-    }
 
-    .navbar {
-        margin-bottom: 0;
-    }
-
-    #header {
-        width: 100%;
-        background: #4D4D4D;
-        position: relative;
-    }
-
-    #brand {
-        color: #fff;
-    }
-
+// bookmark container start
     #page-title {
         margin: -7px 0 0;
-    }
-
-    #entity-title,
-    .entity-title {
-        clear: both;
-        /*padding-top: 10px;*/
     }
 
     #page-subtitle {
@@ -305,375 +227,29 @@ html.ng-scope {
     #bookmark-container .pull-right {
         text-align: right;
     }
-    /* used to replace the margin with padding on h1-4 elements */
+// bookmark container end
+
+/* used to replace the margin with padding on h1-4 elements */
     .replace-margin {
         margin: 0;
         padding-top: 10px;
         padding-bottom: 10px;
     }
-    /****************** ACCORDION ******************/
-    .panel {
-        box-shadow: none;
-    }
 
-    .panel-title > a:focus,
-    .panel-title > a:hover {
-        text-decoration: none;
-        color: rgb(63, 124, 184);
-    }
-
-    .reference-views {
-        padding-left: 0;
-    }
-
-    .reference-views li {
-        float: left;
-    }
-
-    .reference-views > li:nth-child(2) {
-        border-right: 1px solid black;
-    }
-
-    .reference-views .reference-view-title {
-        padding: 3px 1px 5px 0;
-        text-transform: uppercase;
-    }
-
-    .transpose-toggle {
-        display: inline-block;
-        padding: 1px 17px;
-        border-radius: 3px;
-        cursor: pointer;
-        background: #fff;
-        width: 81px;
-    }
-
-    .transpose-toggle:active,
-    .transpose-toggle:focus,
-    .transpose-toggle:hover {
-        color: #2364AB;
-    }
-
-    #detailed-bookmark-container {
-        text-align: right;
-        position: absolute;
-        top: 20px;
-    }
-    /*** NESTED TABLES ***/
-
-    .btn-condensed {
-        padding: 0 5px;
-    }
-
-    /*** IMAGES ***/
-    .sy-slide > a > img {
-        width: 100%;
-    }
-
-    .slippry_box {
-        height: 100%;
-        margin-right: 1%;
-        padding-right: 1%;
-        border-right: 1px solid #868686;
-        width: 50%;
-    }
-
-    .slippry_box.previews {
-        height: 600px;
-    }
-
-    #thumbnail-box,
-    .slippry_box {
-        float: left;
-        margin: 10px 30px 30px 0;
-    }
-
-    #thumbnail-box {
-        max-height: 500px;
-        overflow: auto;
-    }
-
-    #thumbnail-box ul.thumbs {
-        padding-left: 0;
-    }
-
-    .sy-pager li {
-        width: 10px;
-        height: 10px;
-    }
-
-    .sy-pager li.sy-active a {
-        background: #8DD7FA;
-    }
-
-    .thumbs li {
-        float: left;
-        width: 80px;
-        height: 110px;
-        margin-right: 19px;
-    }
-
-    .thumbs img {
-        width: 100%;
-        border: 1px solid #C1C1C1;
-        padding: 5px;
-        border-radius: 5px;
-    }
-    /*** FILES ***/
-    .file {
-        text-align: center;
-        width: 140px;
-    }
-
-    .file-preview-icon {
-        width: 90px;
-        display: inline-block;
-        margin-bottom: -10px;
-    }
-
-    .file-size {
-        color: #9E9E9E;
-        letter-spacing: 0.5px;
-        font-size: 13px;
-    }
-    /*** PREVIEWS ***/
-    .preview {
-        margin: 20px 0;
-    }
-
-    .preview-filename {
-        display: block;
-        margin-top: 15px;
-    }
-
-    .preview-content {
-        width: 100%;
-        height: 390px;
-    }
-
-    .enlarge {
-        background: #7CBAD8;
-        color: #fff;
-        padding: 9px 11px;
-        position: absolute;
-        font-size: 12px;
-        text-transform: uppercase;
-        -webkit-transition: 0.2s ease-in-out all;
-        transition: 0.2s ease-in-out all;
-    }
-
-    .enlarge:hover {
-        color: #fff;
-        background: #8DD7FA;
-    }
-    /** ASSOCIATIONS **/
-    .entity-terms {
-        padding: 0;
-    }
-
-    .entity-term {
-        margin-right: 10px;
-        margin-top: 10px;
-        display: inline-block;
-        background-color: #406C90;
-        color: #fff;
-        padding: 7px 16px;
-        border-radius: 5px;
-        font-size: 11px;
-        cursor: default;
-        -moz-box-shadow: 3px 3px 3px #666;
-        -webkit-box-shadow: 3px 3px 3px #666;
-        box-shadow: 3px 3px 3px #666;
-        position: relative;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        -webkit-transition: all 300ms;
-        -moz-transition: all 300ms;
-        transition: all 300ms;
-    }
-
-    .entity-term a {
-        color: #fff;
-    }
-    /****************** NOT FOUND ******************/
-    #not-found {
-        text-align: center;
-        color: #868686;
-    }
-
-    #not-found div {
-        display: inline-block;
-    }
-
-    #not-found-title {
-        font-size: 33px;
-        margin-top: 41px;
-    }
-
-    #not-found-subtitle {
-        font-size: 16px;
-        width: 510px;
-        font-weight: 300;
-        margin-top: 10px;
-    }
-
-    #not-found .glyphicon {
-        font-size: 230px;
-        color: #78B8D6;
-        margin-top: 70px;
-    }
-
-    #back-btn {
-        color: rgb(123, 123, 123);
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-    /* Bringing styles more in line with rest of Chaise */
-    #entity-title,
-    .entity-title {
-        font-size: 1.7em;
-        font-weight: 500;
-        color: #333;
-    }
-
+// record and recordedit column headers
     .entity-key {
         color: #333333;
         font-weight: normal;
         font-size: 1em;
     }
 
+// record and recordedit column values
     .entity-value {
         font-size: 1em;
         color: #333;
     }
 
-    .hide-border > td {
-        border-bottom: none !important;
-    }
-
-    .entity-term {
-        background-color: #428bca;
-        font-size: 0.8em;
-    }
-
-    .panel-title {
-        color: inherit;
-    }
-
-    .reference-views .reference-view-title {
-        color: #999;
-    }
-
-    .transpose-toggle {
-        color: #999;
-    }
-
-    .transpose-toggle.active {
-        color: #428bca;
-    }
-
-    .detailGrid {
-        min-width: 600px;
-    }
-
-    .ui-grid-viewport .ui-grid-cell-contents {
-        word-wrap: break-word;
-        white-space: normal !important;
-    }
-
-    .ui-grid-row div[role=row] {
-        display: flex;
-        align-content: stretch;
-    }
-
-    .fixed-font {
-        font-family: "Lucida Console", Courier, monospace;
-    }
-    /************ Error Notification **************/
-    #notification {
-        position: absolute;
-        z-index: 10000;
-        top: 0;
-        left: 0;
-        right: 0;
-        background: #fde073;
-        text-align: center;
-        line-height: 2.5;
-        overflow: hidden;
-        -webkit-box-shadow: 0 0 5px black;
-        -moz-box-shadow: 0 0 5px black;
-        box-shadow: 0 0 5px black;
-    }
-    /************ Markdown **************/
-    .markdown-container li {
-        list-style-type: inherit;
-    }
-
-    .markdown-container li:only-child {
-        list-style-type: none;
-    }
-
-    .markdown-container ul {
-        list-style-type: disc;
-    }
-
-    .markdown-container ol {
-        list-style-type: decimal;
-    }
-
-    .markdown-container code {
-        padding-left: 0;
-        padding-right: 0;
-        color: #333;
-        background-color: #F5F5F5;
-    }
-
-    .markdown-container img {
-        margin: 5px 5px 5px 0;
-    }
-
-    .markdown-container .vocab {
-        color: darkblue;
-        background-color: rgba(220, 220, 220, 0.68);
-        padding: 7px;
-        border-radius: 10px;
-        display: inline-block;
-        margin: 2px;
-    }
-
-    .markdown-container .download {
-        color: #fff;
-        background-color: #337ab7;
-        border-color: #2e6da4;
-        display: inline-block;
-        padding: 6px 12px;
-        margin-bottom: 0;
-        font-size: 14px;
-        font-weight: 400;
-        line-height: 1.42857143;
-        text-align: center;
-        white-space: nowrap;
-        vertical-align: middle;
-        -ms-touch-action: manipulation;
-        touch-action: manipulation;
-        cursor: pointer;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-        background-image: none;
-        border: 1px solid transparent;
-        border-radius: 4px;
-    }
-
-    .markdown-container .asset-source-description {
-        margin: 0 5px;
-        vertical-align: -9px;
-        font-size: 13px;
-    }
-    /***************** ellipses ***************/
+// show more/show less ellipsis
     .hideContent {
         overflow: hidden;
         line-height: 20px;
@@ -685,26 +261,8 @@ html.ng-scope {
         display: inline;
     }
 
-    .markdown-container > p:last-child {
-        margin-bottom: 0;
-    }
-
-    .page-filters .sub-title {
-        font-size: 1.2em;
-        color: #747474;
-        margin-left: 15px;
-    }
-    /************* custom buttons **************/
-    .btn-no-focus:focus {
-        outline: none;
-    }
-
-    .progress {
-        margin-bottom: 0;
-        height: 30px;
-        border: 1px solid #ccc9c9;
-    }
-
+// ellipsis for the texts
+    // TODO we might want to rename this
     .ellipsis {
         text-overflow: ellipsis;
         overflow: hidden;
@@ -712,652 +270,51 @@ html.ng-scope {
         vertical-align: middle;
     }
 
-    .no-row-margin {
-        margin-left: 0;
-        margin-right: 0;
-    }
-
-    .pad0-left {
-        padding-left: 0;
-    }
-
-    .pad0-right {
-        padding-right: 0;
-    }
-    /************* search loader ***************/
-    input.search-progress {
-        background: url("images/loader.gif") no-repeat right center;
-        background-size: 25px 25px;
-        background-position-x: 99%;
-    }
-    /************* search input ****************/
-    .form-control-feedback > span.search-remove {
-        border-bottom: none;
-    }
-    /******** Popup modal for login instructions ********/
-    .modal-login .modal-backdrop {
-        opacity: 0.7 !important;
-    }
-    /* .window-class first */
-    .modal-login-instruction .modal-dialog {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        margin-left: -300px;
-        margin-top: -100px;
-    }
-
-    .modal-login-instruction .modal-dialog .modal-content {
-        width: 600px;
-    }
-
-    .modal-login-instruction .modal-dialog ol li {
-        list-style-type: decimal;
-    }
-
-    .modal-login-instruction .modal-dialog pre {
-        white-space: pre-line;
-        word-break: inherit;
-        text-align: justify;
-    }
-
-    .modal-login .modal-title {
-        font-size: 22px !important;
-    }
-    /******* Popup modal for previous login ********/
-    body.previous-login > .modal-login-instruction {
-        z-index: 99999 !important;
-    }
-
-    body.previous-login > *:not(.modal-login-instruction):not(navbar):not(.modal-backdrop) {
-        display: none !important;
-    }
-    /******* Popup modal for error ********/
-    /* hide the loading spinner if we have the error dialog open */
-    body.error-open loading-spinner {
-        display: none !important;
-    }
-    /******* Popup modal for share ********/
-    .chaise-share-citation ul {
-        padding-left: 10px;
-    }
-
-    .chaise-share-citation #share-link h2 {
-        margin-top: 5px;
-    }
-
-    .chaise-share-citation span.glyphicon-copy {
-        cursor: pointer;
-    }
-    /******** Alerts styles ********/
-    ul.show-list-style li {
-        list-style-type: inherit;
-    }
-    /*******Bootstrap  Modal styling *********/
-    /*When the modal fills the screen it has an even 2.5% on top and bottom*/
-    /*Centers the modal*/
-    .modal-xl {
-        margin: 2.5vh auto;
-        width: auto !important;
-        max-width: 95vw;
-    }
-
-    .modal-lg {
-        margin: 2.5vh auto;
-        width: auto !important;
-        max-width: 80vw;
-    }
-
-    .modal-md {
-        margin: 2.5vh auto;
-        width: auto !important;
-        max-width: 60vw;
-    }
-
-    .modal-close {
-        padding: 3px 8px;
-    }
-    /*Sets the maximum height of the entire modal to 95% of the screen height*/
-    .modal-content {
-        max-height: 95vh;
-        overflow: hidden;
-        max-width: 95vw;
-    }
-    /*Sets the maximum height of the modal body to 85% of the screen height*/
-    .modal-xl .modal-body {
-        max-height: 90vh;
-        min-height: 40vh;
-    }
-
-    .modal-lg .modal-body {
-        max-height: 90vh;
-        min-height: 40vh;
-    }
-    /* Sets the table's maximum height to 70% of the screen height and adds a border at the bottom */
-    .modal-body .outer-table {
-        max-height: 70vh;
-        border: 1px solid lightgrey;
-    }
-    /* Sets the margin-bottom for the table inside modal to 0px*/
-    .modal-body .outer-table .table {
-        margin-bottom: 0;
-        overflow: scroll;
-    }
-    @media (max-width: 800px) {
-        .modal-body .outer-table {
-            max-height: 67vh;
-        }
-    }
-    @media (max-width: 600px) {
-        .modal-body .outer-table {
-            max-height: 60vh;
-        }
-    }
-    @media (max-width: 500px) {
-        .modal-body .outer-table {
-            max-height: 55vh;
-        }
-    }
-
-    .modal-body #spinner {
-        width: 100%;
-        text-align: center;
-        padding: 14px 0;
-        position: absolute;
-        height: 100%;
-        top: 75px;
-        left: 75px;
-        z-index: 10;
-        border: none;
-        border-radius: 0;
-        background: rgba(128, 128, 128, 0.25);
-    }
-
-    .modal-body img.spinner {
-        display: block;
-        margin: 0 auto;
-        width: 32px;
-        height: 32px;
-        opacity: 0.8;
-        position: absolute;
-        top: 40%;
-        left: 49%;
-    }
-
-    .popup-select-value {
-        height: auto !important;
-        max-height: 5.35em !important;
-        z-index: 0;
-        border-radius: 5px !important;
-        padding-right: 0;
-    }
-
-    .modal-popup .input-group-addon {
-        padding: 0;
-        background-color: transparent;
-        border: none;
-        vertical-align: top;
-    }
-
-    // TODO: replace with inline styles as sttribute on elements
-    .pls {
-        padding-left: 5px;
-    }
-
-    .prs {
-        padding-right: 5px;
-    }
-
-    .pts {
-        padding-top: 5px;
-    }
-
-    .pbs {
-        padding-bottom: 5px;
-    }
-
-    .pads {
-        padding: 5px;
-    }
-
-    .plm {
-        padding-left: 10px;
-    }
-
-    .prm {
-        padding-right: 10px;
-    }
-
-    .ptm {
-        padding-top: 10px;
-    }
-
-    .pbm {
-        padding-bottom: 10px;
-    }
-
-    .padm {
-        padding: 10px;
-    }
-
-    .pll {
-        padding-left: 20px;
-    }
-
-    .prl {
-        padding-right: 20px;
-    }
-
-    .ptl {
-        padding-top: 20px;
-    }
-
-    .pbl {
-        padding-bottom: 20px;
-    }
-
-    .padl {
-        padding: 20px;
-    }
-
-    .mls {
-        margin-left: 5px;
-    }
-
-    .mrs {
-        margin-right: 5px;
-    }
-
-    .mts {
-        margin-top: 5px;
-    }
-
-    .mbs {
-        margin-bottom: 5px;
-    }
-
-    .mars {
-        margin: 5px;
-    }
-
-    .mlm {
-        margin-left: 10px;
-    }
-
-    .mrm {
-        margin-right: 10px;
-    }
-
-    .mtm {
-        margin-top: 10px;
-    }
-
-    .mbm {
-        margin-bottom: 10px;
-    }
-
-    .marm {
-        margin: 10px;
-    }
-
-    .mll {
-        margin-left: 20px;
-    }
-
-    .mrl {
-        margin-right: 20px;
-    }
-
-    .mtl {
-        margin-top: 20px;
-    }
-
-    .mbl {
-        margin-bottom: 20px;
-    }
-
-    .marl {
-        margin: 20px;
-    }
-    /******** footer **********/
+// footer
     footer {
         height: 30px;
         position: absolute;
         bottom: 0;
         right: 0;
         left: 0;
+        .footer-container {
+            height: inherit;
+            background-color: #ededed;
+            padding-right: 5px;
+            padding-left: 5px;
+            padding-top: 5px;
+            color: #595757;
+            font-size: 11px;
+
+            li {
+                list-style-type: inherit;
+            }
+
+            ul {
+                list-style-type: disc;
+            }
+
+            ol {
+                list-style-type: decimal;
+            }
+
+            code {
+                padding-left: 0;
+                padding-right: 0;
+                color: #333;
+                background-color: #F5F5F5;
+            }
+        }
     }
 
-    footer .container1 {
-        height: inherit;
-        background-color: #ededed;
-        padding-right: 5px;
-        padding-left: 5px;
-        padding-top: 5px;
-        color: #595757;
-        font-size: 11px;
-    }
 
-    .container1 li {
-        list-style-type: inherit;
-    }
-
-    .container1 ul {
-        list-style-type: disc;
-    }
-
-    .container1 ol {
-        list-style-type: decimal;
-    }
-
-    .container1 code {
-        padding-left: 0;
-        padding-right: 0;
-        color: #333;
-        background-color: #F5F5F5;
-    }
-    /************* resizable ***************/
-    .resizable {
-        position: relative;
-    }
-
-    .resizable.no-transition {
-        transition: none !important;
-    }
-
-    .rg-bottom,
-    .rg-left,
-    .rg-right,
-    .rg-top {
-        display: block;
-        width: 15px;
-        height: 14px;
-        line-height: 14px;
-        position: absolute;
-        z-index: 1;
-        -moz-user-select: -moz-none;
-        -ms-user-select: none;
-        -webkit-user-select: none;
-        user-select: none;
-        background: transparent;
-        border: solid 1px #2e6da4;
-        border-top: none;
-        border-bottom: none;
-    }
-
-    .rg-bottom span,
-    .rg-left span,
-    .rg-right span,
-    .rg-top span {
-        position: absolute;
-        box-sizing: border-box;
-        display: block;
-    }
-
-    .rg-left span,
-    .rg-right span {
-        font-family: 'Glyphicons Halflings';
-        top: 50vh;
-        margin: -10px 0 0 0.8px;
-        top: 50%;
-        color: #337ab7;
-        font-weight: 400;
-    }
-
-    .rg-bottom span,
-    .rg-top span {
-        border-width: 1px 0;
-        left: 50%;
-        margin: 3.5px 0 0 -10px;
-        width: 20px;
-        height: 7px;
-    }
-
-    .rg-top {
-        cursor: row-resize;
-        width: 100%;
-        top: 0;
-        left: 0;
-        margin-top: -14px;
-    }
-
-    .rg-right {
-        cursor: col-resize;
-        height: 100%;
-        right: 0;
-        top: 0;
-        margin-right: -14px;
-        border-right: none;
-    }
-
-    .rg-bottom {
-        cursor: row-resize;
-        width: 100%;
-        bottom: 0;
-        left: 0;
-        margin-bottom: -14px;
-    }
-
-    .rg-left {
-        cursor: col-resize;
-        height: 100%;
-        left: 14px;
-        top: 0;
-        margin-left: -14px;
-        border-right: none;
-    }
-    /************* ACTION BAR ***********/
-    .actionBarRTStyle {
-        margin-top: -25px;
-    }
-
-    .actionBarEntityStyle {
-        padding-left: 5px;
-        padding-bottom: 5px;
-        float: right;
-    }
-
-    .actionBarEntityStyleWithMargin {
-        padding-bottom: 5px;
-        text-align: right;
-    }
-    /************* Profile Card ****************/
-    #profile-modal li {
-        list-style-type: disc;
-    }
-
-    .modal-dialog .profileValue {
-        padding-left: 32px;
-    }
-    /********** faceting ************/
-    .total-filters {
-        margin-bottom: 10px;
-        margin-left: 0;
-        padding-top: 5px;
-        padding-bottom: 5px;
-        max-width: 100%;
-        /*background-color: #f5f5f5;*/
-        overflow-x: hidden;
-        /*max-height: 140px;*/
-        /*overflow-y: auto;*/
-    }
-
-    .filter-label {
-        padding: 0.2em 0.3em 0.3em;
-    }
-
-    .total-filters .filter-label {
-        font-size: 1em;
-        margin-right: 5px;
-        margin-bottom: 5px;
-        display: inline-block;
-        position: relative;
-        border: 1px solid #ccc;
-        overflow: hidden;
-        max-width: 350px;
-        text-overflow: ellipsis;
-        height: 26px;
-    }
-
-    .total-filters .filter-label .filter-label-colon,
-    .total-filters .filter-label .filter-label-title,
-    .total-filters .filter-label .filter-label-value,
-    .total-filters .filter-label .remove-link {
-        vertical-align: middle;
-    }
-
-    .total-filters .filter-label .remove-link i {
-        top: 0.1em;
-    }
-
-    .total-filters .filter-label span {
-        border: none;
-    }
-
-    .total-filters .filter-label .filter-label-title {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        display: inline-block;
-        max-width: 150px;
-        margin-right: -2px;
-        padding: 0.1em 0;
-    }
-
-    .total-filters .remove-link .filter-label {
-        background-color: #337ab7;
-        color: white;
-        padding: 0.34em 0.4em 0.33em;
-    }
-
-    .total-filters .remove-link:hover {
-        color: #2c6392;
-    }
-
-    .label-default {
-        background-color: #f1f1f1;
-        color: #333;
-        font-weight: 500;
-    }
-
-    .recordset-container.without-faceting .main-container {
-        padding-top: 20px;
-    }
-
-    .recordset-container.without-faceting .main-body {
-        padding-left: 15px;
-        padding-right: 15px;
-    }
-
-    .recordset-container.with-faceting {
-        -webkit-box-flex: 1;
-        display: flex;
-        flex: 1;
-        margin-top: 5px;
-    }
-    /****** faceting resizeable ******/
+// NOTE general rule that applies to record and recordset
+// TODO duplicate or simplify
     .faceting-resizable.close-panel .rg-left,
     .faceting-resizable.close-panel .rg-right {
         display: none;
     }
-    /** record side panel **/
-    .record-container > .faceting-resizable {
-        position: relative;
-        z-index: 2;
-        font-weight: bold;
-        max-width: 50vw;
-    }
 
-    .record-container > .faceting-resizable.open-panel {
-        flex: 0 0 15vw;
-        min-width: 170px;
-        padding-left: 5px;
-    }
-
-    .record-container > .faceting-resizable.close-panel {
-        width: 0;
-        flex-basis: 0 !important;
-    }
-
-    .record-container > .faceting-resizable.close-panel .faceting-container {
-        width: 0;
-    }
-
-    .record-container > .faceting-resizable .sidePanelHeading {
-        font-weight: bold;
-        padding: 9px 10px 10px !important;
-        margin: 5px 0 0 -5px;
-    }
-
-    .record-toc .columns-container ul {
-        padding-left: 10px;
-    }
-
-    .record-toc .toc-heading {
-        padding: 5px;
-        cursor: pointer;
-    }
-
-    .record-toc .toc-heading:hover {
-        background-color: rgb(241, 241, 241);
-    }
-
-    .record-toc #rt-toc-loading {
-        padding: 10px 5px 5px;
-    }
-
-    .loading-text {
-        color: #446c73;
-        font-weight: 600;
-    }
-
-    .loading-sticky {
-        float: left;
-        position: fixed;
-        z-index: 1;
-        bottom: 0;
-        background: #d9edf7;
-        margin: 5px;
-        padding: 5px 20px;
-        border: solid #446c73 1.5px;
-    }
-
-    tr.rowFocus {
-        border: 2px solid rgb(51, 122, 183);
-    }
-
-    .record-container .rowFocus {
-        border-color: rgb(51, 122, 183) !important;
-    }
-
-    .record-container .panel-group .panel.rowFocus + .panel {
-        border-top: 2px solid #ddd;
-    }
-    /** recordset with faceting side panel **/
-    .recordset-container.with-faceting > .faceting-resizable {
-        padding-top: 5px;
-        position: relative;
-        max-width: 50vw;
-        z-index: 2;
-    }
-
-    .recordset-container.with-faceting > .faceting-resizable.initializing > .rg-right > span {
-        display: none;
-    }
-
-    .recordset-container.with-faceting > .faceting-resizable.open-panel {
-        flex: 0 0 21vw;
-        min-width: 170px;
-        padding-left: 5px;
-    }
-
-    .recordset-container.with-faceting > .faceting-resizable.close-panel {
-        width: 0;
-        flex-basis: 0 !important;
-    }
-
-    .recordset-container.with-faceting > .faceting-resizable.close-panel .faceting-container {
-        width: 0;
-    }
     /**** side panel buttons ****/
     .facet-btn {
         position: absolute;
@@ -1365,29 +322,18 @@ html.ng-scope {
         z-index: 2;
     }
 
-    #back-to-top,
-    .sidePanFiddler {
-        cursor: pointer;
-        overflow: hidden;
-    }
-
-    #back-to-top {
-        position: absolute;
-        left: -66px;
-        bottom: 2em;
-        padding: 1px 4px;
-        font-size: 25px;
-        border-radius: 2px 0 0 2px;
-        height: 35px;
-        width: 35px;
-    }
-
+// NOTE this applies to boolean search
+// TODO move to boolean search CSS
     .sidePanFiddler {
         height: 40px;
         width: 21px;
         font-size: 20px;
         padding: 4px 4px 0 0;
+        cursor: pointer;
+        overflow: hidden;
     }
+
+// TODO remove when facet/toc collapse is reworked
     /** record side panel collapse button **/
     .record-container .facet-btn {
         left: -20px;
@@ -1410,41 +356,12 @@ html.ng-scope {
         border-left: none;
         border-radius: 0 15px 15px 0;
     }
-    /****** RSwF main container *******/
-    .modal-body .recordset-container footer {
-        display: none !important;
-    }
+// END remove
 
-    .modal-body .recordset-container alerts:not(.enforce-alert) {
-        display: none !important;
-    }
 
-    .recordset-container.with-faceting {
-        padding-left: 15px;
-        padding-right: 15px;
-    }
+/****** RSwF main container *******/
 
-    .recordset-container.with-faceting > .main-container {
-        flex: 1;
-        position: relative;
-        z-index: 1;
-        overflow-y: auto;
-        padding-top: 15px;
-    }
-
-    .recordset-container.with-faceting .main-body {
-        border-left: 25px solid white;
-        padding-right: 10px;
-    }
-
-    .recordset-container.with-faceting .pager {
-        margin-bottom: 50px;
-    }
-
-    .recordset-container > .main-container {
-        overflow-x: hidden;
-    }
-
+// TODO used in both recordset (faceting) and record (toc), should be cleaned up
     .faceting-container {
         overflow-y: auto;
     }
@@ -1494,21 +411,31 @@ html.ng-scope {
         cursor: pointer;
     }
 
+    .faceting-container .glyphicon-refresh {
+        border: none;
+    }
+
+    .faceting-container {
+        -webkit-transition: all 1s;
+        transition: all 1s;
+    }
+//END
+
+// changes the color of alert glyphicon (used for timeout error)
     .glyphicon-alert {
         color: #f0ad4e !important;
         border: none;
     }
 
-    .faceting-container .glyphicon-refresh {
-        border: none;
-    }
 
+// spinner animation
     .glyphicon-refresh-animate {
         -animation: spin 0.7s infinite linear;
         -ms-animation: spin 0.7s infinite linear;
         -webkit-animation: spinw 0.7s infinite linear;
         -moz-animation: spinm 0.7s infinite linear;
     }
+
     @keyframes spin {
         from {
             transform: scale(1) rotate(0deg);
@@ -1537,192 +464,7 @@ html.ng-scope {
         }
     }
 
-    .faceting-container .toggle-icon {
-        margin-right: 5px;
-    }
-
-    .faceting-container .panel .panel-title {
-        color: #333333;
-        line-height: 1.35;
-        font-size: 14px;
-        font-weight: 600;
-        position: relative;
-    }
-
-    .faceting-container {
-        -webkit-transition: all 1s;
-        transition: all 1s;
-    }
-
-    .faceting-container .panel .panel-body {
-        padding: 0 10px 10px !important;
-        border-top: none !important;
-        border: none;
-    }
-
-    .faceting-container .panel-group {
-        margin-right: 5px;
-        margin-top: 5px;
-        margin-bottom: 20px;
-    }
-
-    .faceting-container .applied-filters {
-        margin-top: 5px;
-        max-height: 100px;
-        overflow-y: auto;
-    }
-
-    .faceting-container .applied-filters .filter-label {
-        margin-right: 5px;
-        margin-bottom: 5px;
-        border: 0.1px solid #ccc;
-        display: inline-block;
-        font-size: 0.8em;
-    }
-
-    .faceting-container .applied-filters .filter-label:before {
-        margin-right: 0;
-    }
-
-    .faceting-container .facet-panel > .panel-heading div.active:before,
-    .faceting-container .facet-panel > .panel-heading div:before {
-        content: "";
-    }
-
-    .faceting-container .applied-filters .filter-icon {
-        /*color: white;*/
-    }
-
-    .faceting-container .applied-filters .remove-link {
-        color: #337ab7;
-        font-weight: 600;
-    }
-
-    .faceting-container .applied-filters .remove-link:hover {
-        color: #2c6392;
-    }
-
-    .remove-link .filter-label {
-        background-color: #337ab7;
-        color: white;
-    }
-
-    .filter-label.label-primary.label-inverted {
-        color: #337ab7;
-        background-color: white;
-        border-color: #337ab7;
-    }
-
-    .filter-label {
-        background-color: white;
-        color: #333;
-        font-weight: 500;
-        border: 0.1px solid #ccc;
-    }
-    /* INTEGER SEARCH */
-    .faceting-container .choice-picker .search-box {
-        margin-bottom: 10px;
-    }
-
-    .faceting-container .range-picker hr {
-        color: #f5f5f5;
-        width: 1px;
-    }
-
-    .faceting-container .range-picker .form-inline input {
-        width: 100%;
-        padding: 6px 20px 6px 6px;
-        height: 100%;
-        border: none;
-        border-radius: 4px;
-    }
-    /* STRING SEARCH */
-    .faceting-container .string-picker .tab-content {
-        margin-top: 10px;
-    }
-
-    .faceting-container .string-picker .pager {
-        margin: 0;
-    }
-
-    .faceting-container .string-picker a.nav-link {
-        padding: 5px 15px;
-    }
-
-    .plotly-how-to {
-        border-color: white !important;
-        cursor: default;
-    }
-
-    .plotly-how-to:hover {
-        z-index: auto !important;
-    }
-    /*************** LIST ***************************/
-    .chaise-list-container {
-        padding-left: 0;
-        margin-bottom: 5px;
-    }
-
-    .chaise-checkbox.with-tooltip label {
-        border-bottom: 1px dotted black;
-    }
-
-    .chaise-checkbox {
-        position: relative;
-        /*margin: 10px 0;*/
-    }
-
-    li.chaise-checkbox:hover {
-        background-color: rgb(241, 241, 241);
-    }
-
-    .ellipsis-text label {
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        overflow: hidden;
-    }
-
-    .chaise-checkbox input {
-        position: absolute;
-        z-index: 1;
-        cursor: pointer;
-        width: 17px;
-        height: 17px;
-        top: 0;
-        margin-top: 2px;
-    }
-
-    .chaise-checkbox label {
-        display: inline-block;
-        margin-left: 25px;
-        font-weight: 400;
-        position: relative;
-        vertical-align: middle;
-        min-height: 20px;
-    }
-
-    .chaise-checkbox input[type="checkbox"]:after {
-        content: "";
-        display: inline-block;
-        position: absolute;
-        width: 17px;
-        height: 17px;
-        left: 0;
-        top: 0;
-        border: 1px solid #337ab7;
-        border-radius: 3px;
-        color: #337ab7;
-        background-color: #fff;
-        -webkit-transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
-        -o-transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
-        transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
-    }
-
-    .chaise-checkbox input[type="checkbox"]:checked:after {
-        font-family: 'Glyphicons Halflings';
-        content: "\e013";
-    }
-    /******* range inputs ***********/
+/******* range inputs ***********/
     range-inputs .input-clearbtn {
         cursor: pointer;
         right: 0;
@@ -1772,40 +514,5 @@ html.ng-scope {
 
     input[type=number]::-moz-placeholder {
         line-height: 1.2;
-    }
-    /************** search popup **************/
-    #multi-select-submit-btn {
-        position: absolute;
-        right: 10px;
-        top: 10px;
-        z-index: 2;
-    }
-
-    .selected-rows {
-        min-height: 45px;
-    }
-
-    record-display .markdown-container ol > li:only-child,
-    record-display .markdown-container ul > li:only-child {
-        list-style: none;
-        padding: 0;
-        margin-left: 0;
-    }
-
-    record-display .markdown-container ol,
-    record-display .markdown-container ul {
-        padding: 0 !important;
-        /*existing rule is padding=2, which should be changed for the other changes*/
-    }
-
-    record-display .markdown-container ol > li,
-    record-display .markdown-container ul > li {
-        margin-left: 1em;
-        padding-left: 0;
-    }
-
-    record-table .markdown-container ol,
-    record-table .markdown-container ul {
-        padding-left: 1em;
     }
 }

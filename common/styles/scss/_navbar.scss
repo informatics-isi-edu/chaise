@@ -101,3 +101,21 @@ body > .container {
     -moz-border-radius: 6px 0 6px 6px;
     border-radius: 6px 0 6px 6px;
 }
+
+#mainnav {
+    border-radius: 0;
+}
+
+.navbar {
+    margin-bottom: 0;
+}
+
+#header {
+    width: 100%;
+    background: #4D4D4D;
+    position: relative;
+}
+
+#brand {
+    color: #fff;
+}

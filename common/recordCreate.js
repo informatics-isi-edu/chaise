@@ -103,6 +103,7 @@
             if (areFilesValid(submissionRowsCopy, rsReference)) {
                 modalUtils.showModal({
                     templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/uploadProgress.modal.html",
+                    windowClass:"modal-upload-progress",
                     controller: "UploadModalDialogController",
                     controllerAs: "ctrl",
                     size: "md",
