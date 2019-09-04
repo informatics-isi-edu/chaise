@@ -1,33 +1,4 @@
 #record {
-    /** record side panel **/
-    .record-container > .faceting-resizable {
-        position: relative;
-        z-index: 2;
-        font-weight: bold;
-        max-width: 50vw;
-    }
-
-    .record-container > .faceting-resizable.open-panel {
-        flex: 0 0 15vw;
-        min-width: 170px;
-        padding-left: 5px;
-    }
-
-    .record-container > .faceting-resizable.close-panel {
-        width: 0;
-        flex-basis: 0 !important;
-    }
-
-    .record-container > .faceting-resizable.close-panel .faceting-container {
-        width: 0;
-    }
-
-    .record-container > .faceting-resizable .sidePanelHeading {
-        font-weight: bold;
-        padding: 9px 10px 10px !important;
-        margin: 5px 0 0 -5px;
-    }
-
     .record-toc .columns-container ul {
         padding-left: 10px;
     }
@@ -62,15 +33,25 @@
     }
 
     tr.rowFocus {
-        border: 2px solid rgb(51, 122, 183);
+        border: 2px solid $primary-color;
     }
 
-    .record-container .rowFocus {
-        border-color: rgb(51, 122, 183) !important;
-    }
+    .top-panel-container {
+        #page-action-btns {
+            margin: 20px 20px 4px 20px;
+        }
 
-    .record-container .panel-group .panel.rowFocus + .panel {
-        border-top: 2px solid #ddd;
+        #title {
+            margin: 4px 20px 20px 20px;
+
+            #page-subtitle {
+                margin: 5px 0px;
+            }
+
+            #page-title {
+                margin: 0px;
+            }
+        }
     }
 
     .record-container {
@@ -94,20 +75,23 @@
             margin-right: -50px;
         }
 
+        .rowFocus {
+            border-color: $primary-color !important;
+        }
+
         /******Related Entities in record **************/
 
-        .panel-group .panel {
-            border-color: $white-color;
-            border-bottom: 1px solid $disabled-background-color;
-            border-width: 2px;
-            border-radius: 2px;
-            padding: 0 10px;
-            box-shadow: none;
+        .related-table-heading>.panel-heading {
+            height: 44px;
+            text-transform: inherit;
+            padding: 8px 8px 8px 0px;
+            color: $white-color;
+            border: none;
+            background: $section-background-color;
 
-            a.accordion-toggle span {
-                color: #333333;
-                font-weight: normal;
-                font-size: 17px;
+            & + .panel-collapse > .panel-body {
+                border-top: none;
+                padding: 0px 0px 10px 0px;
             }
         }
 
@@ -116,46 +100,57 @@
 
             &>a:hover, &>a:focus{
                 text-decoration: none;
-                color: rgb(63, 124, 184);
+            }
+
+            a.accordion-toggle {
+                color: inherit;
+
+                .rt-section-header {
+                    font-size: $h2-font-size;
+                }
             }
         }
 
-        .related-table-heading>.panel-heading {
-            text-transform: inherit;
-            padding: 8px 8px 8px 0px;
-            color: $white-color;
-            border: none;
-            background: $section-background-color;
+        /** record side panel **/
+        > .faceting-resizable {
+            position: relative;
+            z-index: 2;
+            font-weight: bold;
+            max-width: 50vw;
 
-            .record-action-bar {
-                top: -10px;
-                position: relative;
+            &.open-panel {
+                flex: 0 0 15vw;
+                min-width: 170px;
+                padding-left: 5px;
             }
 
-            & + .panel-collapse > .panel-body {
-                border-top: none;
-                padding: 0px 0px 10px 0px;
+            &.close-panel {
+                width: 0;
+                flex-basis: 0 !important;
+
+                .faceting-container {
+                    width: 0;
+                }
+            }
+
+            .side-panel-heading {
+                font-weight: bold;
+                padding: 9px 10px 10px !important;
+                margin: 5px 0 0 -5px;
             }
         }
-    }
-
-    // TODO most probably is not needed and should be rewritten
-    .hide-border > td {
-        border-bottom: none !important;
     }
 
     // TODO might be removed because style changed drastically
-    .actionBarRTStyle {
-        margin-top: -25px;
+    .action-bar-RT-heading {
+        margin-top: -28px;
     }
 
-    .actionBarEntityStyle {
-        padding-left: 5px;
-        padding-bottom: 5px;
+    .action-bar-entity-display-mode {
         float: right;
     }
 
-    .actionBarEntityStyleWithMargin {
+    .action-bar-entity-table-mode {
         padding-bottom: 5px;
         text-align: right;
     }
@@ -190,12 +185,23 @@
             padding-left: 0px;
         }
 
-        .record-container .row {
-            margin-left: 0px;
-        }
+        .record-container {
+            .row {
+                margin-left: 0px;
+            }
 
-        .record-container #bookmark-container {
-            padding-left: 0px;
+            #bookmark-container {
+                padding-left: 0px;
+            }
+
+            .entity-key {
+                width: 15%;
+                max-width: 120px;
+            }
+
+            .entity-value {
+                width: 85%;
+            }
         }
 
         #footer {
@@ -204,15 +210,6 @@
 
         a[href]:after {
             content: none !important;
-        }
-
-        .record-container .entity-key {
-            width: 15%;
-            max-width: 120px;
-        }
-
-        .record-container .entity-value {
-            width: 85%;
         }
     }
 

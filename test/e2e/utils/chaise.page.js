@@ -888,7 +888,7 @@ var recordPage = function() {
     };
 
     this.getSidePanelHeading = function () {
-        return browser.executeScript('return $(".sidePanelHeading").text()');
+        return browser.executeScript('return $(".side-panel-heading").text()');
     }
 
     this.getSidePanelTableTitles = function() {

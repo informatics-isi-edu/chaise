@@ -45,19 +45,19 @@ html.ng-scope {
     line-height: 1.428;
 
     h1, .h1-class {
-        font-size: 2.5em;
+        font-size: $h1-font-size;
     }
 
     h2, .h2-class {
-        font-size: 1.75em;
+        font-size: $h2-font-size;
     }
 
     h3, .h3-class {
-        font-size: 1.5em;
+        font-size: $h3-font-size;
     }
 
     h4, .h4-class {
-        font-size: 1.2em;
+        font-size: $h4-font-size;
     }
 
     h1, h2, h3, h4, body {
