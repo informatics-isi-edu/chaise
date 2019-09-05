@@ -1,9 +1,109 @@
 .chaise-body {
+
+    .recordset-container {
+        padding: 20px;
+        padding-right: 0;
+
+        .top-panel-container {
+            padding-right: 20px;
+
+            .top-left-panel {
+                .faceting-header {
+                    width: 100%;
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+
+                    h3 {
+                        margin: 0;
+                    }
+                    button {
+                        padding: 0;
+                        padding-bottom: 7px;
+                    }
+                }
+            }
+
+            .top-right-panel {
+                h1#page-title {
+                    margin: 0;
+                    margin-bottom: 10px;
+                }
+            }
+        }
+
+        .top-right-panel, .bottom-panel-container .main-container {
+            padding-left: 30px;
+        }
+
+        .bottom-panel-container {
+            .side-panel-container {
+                overflow-y: auto;
+                border-right: solid 1px $border-color;
+
+                .panel-group {
+                    margin-right: 5px;
+                    margin-bottom: 20px;
+
+                    // each facet panel
+                    .panel.facet-panel {
+                        border-radius: 0;
+                        border: 1px solid $border-color;
+
+                        // active style
+                        &.active,
+                        &:hover {
+                            border-color: rgb(51, 122, 183) !important;
+                            animation-duration: 4s;
+                        }
+
+                        // override bootstrap default
+                        + .facet-panel {
+                            margin-top: 0;
+                            border-top: 0;
+                        }
+
+                        .panel-heading {
+                            // override bootstrap default
+                            text-transform: none;
+                            border: 0;
+                            border-radius: 0;
+
+                            background-color: $table-header-background-color;
+                            .panel-title {
+                                a {
+                                    color: $black-color;
+                                    text-decoration: none;
+                                }
+
+                                position: relative;
+                                .toggle-icon {
+                                    position: absolute;
+                                    top: 0;
+                                    left: 5px;
+                                }
+                                .show-tooltip-border {
+                                    margin-left: 25px;
+                                }
+                            }
+                        }
+
+                        .panel-body {
+                            padding: 10px;
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
+// chaise table
     .outer-table {
         overflow-x: auto;
     }
 
-    .chaise-table-title {
+    .chaise-table-header {
         margin-bottom: 10px;
     }
 
@@ -141,114 +241,7 @@
             width: 75px;
         }
     }
-
-
-    .recordset-container {
-        padding: 20px;
-        padding-right: 0;
-
-        .top-panel-container {
-            -webkit-box-flex: 1;
-            display: flex;
-            flex: 1;
-            position: relative;
-            padding-right: 20px;
-
-            .top-left-panel {
-                .faceting-header {
-                    width: 100%;
-                    position: absolute;
-                    bottom: 0;
-                    left: 0;
-
-                    h3 {
-                        margin: 0;
-                    }
-                    button {
-                        padding: 0;
-                        padding-bottom: 7px;
-                    }
-                }
-            }
-
-            .top-right-panel {
-                flex: 1;
-                position: relative;
-                z-index: 1;
-            }
-        }
-
-        .top-right-panel, .main-content .main-container {
-            padding-left: 30px;
-        }
-
-        .main-content {
-            .side-panel-resizable {
-                .side-panel-container {
-
-                    .faceting-columns-container {
-                        overflow-y: auto;
-                        border-right: solid 1px $border-color;
-                    }
-
-                    .panel-group {
-                        margin-right: 5px;
-                        margin-top: 5px;
-                        margin-bottom: 20px;
-
-                        // each facet panel
-                        .panel.facet-panel {
-                            border-radius: 0;
-                            border: 1px solid $border-color;
-
-                            // active style
-                            &.active,
-                            &:hover {
-                                border-color: rgb(51, 122, 183) !important;
-                                animation-duration: 4s;
-                            }
-
-                            // override bootstrap default
-                            + .facet-panel {
-                                margin-top: 0;
-                                border-top: 0;
-                            }
-
-                            .panel-heading {
-                                // override bootstrap default
-                                text-transform: none;
-                                border: 0;
-                                border-radius: 0;
-
-                                background-color: $table-header-background-color;
-                                .panel-title {
-                                    a {
-                                        color: $black-color;
-                                        text-decoration: none;
-                                    }
-
-                                    position: relative;
-                                    .toggle-icon {
-                                        position: absolute;
-                                        top: 0;
-                                        left: 5px;
-                                    }
-                                    .show-tooltip-border {
-                                        margin-left: 25px;
-                                    }
-                                }
-                            }
-
-                            .panel-body {
-                                padding: 10px;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-    }
+// END chaise table
 
 
     //TODO should be valuated

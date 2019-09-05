@@ -85,7 +85,7 @@
                 // get bookmark container height
                 elements.bookmarkHeight = $document[0].getElementsByClassName('top-panel-container')[0].offsetHeight;
                 // get recordset main container
-                elements.container = $document[0].getElementsByClassName("main-content")[0];
+                elements.container = $document[0].getElementsByClassName("bottom-panel-container")[0];
             } catch (error) {
                 $log.warn(error);
             }

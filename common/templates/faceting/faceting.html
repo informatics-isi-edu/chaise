@@ -5,7 +5,7 @@
             <div uib-accordion-group ng-repeat="fc in vm.reference.facetColumns track by $index" is-open="vm.facetModels[$index].isOpen" id="fc-{{$index}}" ng-class="{'focused': lastActiveFacet == $index }" class="facet-panel">
                     <uib-accordion-heading>
                         <div class="accordion-toggle ellipsis" id="fc-heading-{{$index}}" ng-click="toggleFacet($index)">
-                            <i class="pull-left fas toggle-icon" ng-class="{'fa-chevron-down': vm.facetModels[$index].isOpen, 'fa-chevron-right': !vm.facetModels[$index].isOpen}"></i>
+                            <i class="toggle-icon fas" ng-class="{'fa-chevron-down': vm.facetModels[$index].isOpen, 'fa-chevron-right': !vm.facetModels[$index].isOpen}"></i>
 
                             <span class="show-tooltip-border" tooltip-class="facet-header-tooltip" ng-attr-uib-tooltip="{{::(fc.comment) ? fc.comment : undefined}}" ng-attr-tooltip-placement="{{::(fc.comment) ? 'right' : undefined}}">
                                 <span ng-if="::fc.displayname.isHTML" ng-bind-html="::fc.displayname.value"></span>
