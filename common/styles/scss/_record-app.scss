@@ -50,15 +50,21 @@
 
             .entity-display-header {
                 display: flex;
-                justify-content: space-between;
+                position: relative;
 
                 #page-title {
                     margin: 0px;
                 }
 
-                .record-action-btns {
+                .record-action-btns-container {
                     min-width: 350px;
-                    text-align: right;
+
+                    // make sure record-action-btns stay at the bottom right corner
+                    .record-action-btns {
+                        position: absolute;
+                        bottom: 0;
+                        right: 0;
+                    }
                 }
             }
         }
