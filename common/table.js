@@ -1227,6 +1227,17 @@
         };
     }])
 
+
+    .directive('tableHeader', ['recordTableUtils', 'UriUtils', function(recordTableUtils, UriUtils) {
+        return {
+            restrict: 'E',
+            templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/tableHeader.html',
+            scope: {
+                vm: '='
+            }
+        }
+    }])
+
     .directive('recordTable', ['recordTableUtils', 'UriUtils', function(recordTableUtils, UriUtils) {
 
         return {

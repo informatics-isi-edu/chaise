@@ -18,6 +18,7 @@
             <div class="row">
                 <div class="col-xs-12">
                     <div class="pull-left">
+                        <!-- TODO UX-M should change to class -->
                         <h1 id="page-title">
                             <span ng-if="::vm.tableDisplayname.isHTML" ng-bind-html="vm.tableDisplayName.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::vm.tableComment ? vm.tableComment : undefined}}"></span>
                             <span ng-if="::!vm.tableDisplayname.isHTML" ng-bind="vm.tableDisplayName.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::vm.tableComment ? vm.tableComment : undefined}}"></span>
@@ -79,9 +80,61 @@
                     </div>
                 </div>
             </div>
+            <div id="facet-filters-container" ng-if="vm.initialized">
+                <div class="total-filters facet-filters" ng-if="vm.reference.location.isConstrained">
+                    <a id="clear-all-filters" class="remove-link" ng-click="vm.removeFilter()" ng-if="vm.hasFilter() || vm.reference.location.searchTerm || vm.reference.location.filter || vm.reference.location.customFacets">
+                        <span class="filter-label label label-primary label-inverted" uib-tooltip="Clear all filters applied" tooltip-placement="bottom">
+                            Clear all filters
+                        </span>
+                    </a>
+                    <div class="filter-label label label-default" ng-if="vm.reference.location.searchTerm">
+                        <a class="remove-link" ng-click="::clearSearch()" tooltip-placement="bottom" uib-tooltip="Clear search term applied"><i class="glyphicon glyphicon-remove"></i></a>
+                        <span class="filter-label-title">Search</span>
+                        <span class="filter-label-colon">:</span>
+                        <span class="filter-label-value" ng-bind="vm.reference.location.searchTerm"></span>
+                    </div>
+                    <div class="filter-label label label-default" ng-if="vm.reference.location.filter">
+                        <a id="clear-custom-filters" class="remove-link" ng-click="vm.removeFilter('filters')" tooltip-placement="bottom" uib-tooltip="Clear custom filter applied"><i class="glyphicon glyphicon-remove"></i></a>
+                        <span class="filter-label-title">Custom Filter</span>
+                        <span class="filter-label-colon">:</span>
+                        <span class="filter-label-value" ng-bind="transformCustomFilter(vm.reference.location.filtersString)" tooltip-placement="bottom-left" uib-tooltip="{{transformCustomFilter(vm.reference.location.filtersString)}}" tooltip-class="custom-filter-tooltip"></span>
+                    </div>
+                    <div class="filter-label label label-default" ng-if="vm.reference.location.customFacets">
+                        <a id="clear-custom-facets" class="remove-link" ng-click="vm.removeFilter('cfacets')" tooltip-placement="bottom" uib-tooltip="Clear custom filter applied"><i class="glyphicon glyphicon-remove"></i></a>
+                        <span class="filter-label-title">Custom Filter</span>
+                        <span class="filter-label-colon">:</span>
+                        <span class="filter-label-value" ng-bind="vm.reference.location.customFacets.displayname" tooltip-placement="bottom-left" uib-tooltip="{{vm.reference.location.customFacets.displayname}}" tooltip-class="custom-filter-tooltip"></span>
+                    </div>
+                    <div class="filter-label label label-default" ng-repeat="fc in vm.reference.facetColumns track by $index" ng-if="vm.hasFilter($index)">
+                        <a class="remove-link" ng-click="vm.removeFilter($index)" tooltip-placement="bottom" uib-tooltip="Clear filter applied"><i class="glyphicon glyphicon-remove"></i></a>
+                        <a class="filter-label-title" tooltip-placement="bottom" ng-click="vm.focusOnFacet($index)" ng-if="::fc.displayname.isHTML"  ng-attr-uib-tooltip="{{'Go to ' + fc.displayname.value + ' filter'}}" ng-bind-html="::fc.displayname.value"></a>
+                        <a class="filter-label-title" tooltip-placement="bottom" ng-click="vm.focusOnFacet($index)" ng-if="::!fc.displayname.isHTML" ng-attr-uib-tooltip="{{'Go to ' + fc.displayname.value+ ' filter'}}" ng-bind="::fc.displayname.value"></a>
+                        <span class="filter-label-colon">:</span>
+                        <span class="filter-label-value" uib-tooltip-template="'filtersTooltipTemplate.html'" tooltip-placement="bottom-left" tooltip-class="filters-tooltip">
+                            <span ng-repeat="filter in vm.facetModels[$index].appliedFilters">
+                                <span ng-if="::filter.displayname.value && filter.displayname.isHTML" ng-bind-html="::filter.displayname.value"></span>
+                                <span ng-if="::filter.displayname.value && !filter.displayname.isHTML" ng-bind="::filter.displayname.value"></span>
+                                <span ng-if="::filter.displayname.value == ''" ng-bind-html="defaultDisplayname.empty"></span>
+                                <span ng-if="::filter.displayname.value == null" ng-bind-html="defaultDisplayname.null"></span>
+                                <span ng-if="!$last" style="margin-left:-4px">, </span>
+                            </span>
+                        </span>
+                        <script type="text/ng-template" id="filtersTooltipTemplate.html">
+                            <span ng-repeat="filter in vm.facetModels[$index].appliedFilters">
+                                <span>&bull;</span>
+                                <span ng-if="::filter.displayname.value && filter.displayname.isHTML" ng-bind-html="::filter.displayname.value"></span>
+                                <span ng-if="::filter.displayname.value && !filter.displayname.isHTML" ng-bind="::filter.displayname.value"></span>
+                                <span ng-if="::filter.displayname.value == ''" ng-bind-html="defaultDisplayname.empty"></span>
+                                <span ng-if="::filter.displayname.value == null" ng-bind-html="defaultDisplayname.null"></span>
+                            </span>
+                        </script>
+                    </div>
+                </div>
+            </div>
+            <table-header vm="vm"></table-header>
         </div>
     </div>
-    <div class="main-content">
+    <div class="bottom-panel-container">
         <div class="side-panel-resizable" resizable r-directions=["right"] r-flex="true" r-other-e="top-left-panel" ng-show="vm.config.showFaceting && vm.reference" ng-class="{'open-panel': vm.config.facetPanelOpen, 'close-panel': !vm.config.facetPanelOpen, 'initializing': !vm.initialized}">
             <faceting vm="vm"></faceting>
         </div>
@@ -90,60 +143,8 @@
             <div class="main-body">
                 <alerts alerts="$root.alerts"></alerts>
 
-                <div id="facet-filters-container" ng-if="vm.initialized">
-                    <div class="total-filters facet-filters" ng-if="vm.reference.location.isConstrained">
-                        <a id="clear-all-filters" class="remove-link" ng-click="vm.removeFilter()" ng-if="vm.hasFilter() || vm.reference.location.searchTerm || vm.reference.location.filter || vm.reference.location.customFacets">
-                            <span class="filter-label label label-primary label-inverted" uib-tooltip="Clear all filters applied" tooltip-placement="bottom">
-                                Clear all filters
-                            </span>
-                        </a>
-                        <div class="filter-label label label-default" ng-if="vm.reference.location.searchTerm">
-                            <a class="remove-link" ng-click="::clearSearch()" tooltip-placement="bottom" uib-tooltip="Clear search term applied"><i class="glyphicon glyphicon-remove"></i></a>
-                            <span class="filter-label-title">Search</span>
-                            <span class="filter-label-colon">:</span>
-                            <span class="filter-label-value" ng-bind="vm.reference.location.searchTerm"></span>
-                        </div>
-                        <div class="filter-label label label-default" ng-if="vm.reference.location.filter">
-                            <a id="clear-custom-filters" class="remove-link" ng-click="vm.removeFilter('filters')" tooltip-placement="bottom" uib-tooltip="Clear custom filter applied"><i class="glyphicon glyphicon-remove"></i></a>
-                            <span class="filter-label-title">Custom Filter</span>
-                            <span class="filter-label-colon">:</span>
-                            <span class="filter-label-value" ng-bind="transformCustomFilter(vm.reference.location.filtersString)" tooltip-placement="bottom-left" uib-tooltip="{{transformCustomFilter(vm.reference.location.filtersString)}}" tooltip-class="custom-filter-tooltip"></span>
-                        </div>
-                        <div class="filter-label label label-default" ng-if="vm.reference.location.customFacets">
-                            <a id="clear-custom-facets" class="remove-link" ng-click="vm.removeFilter('cfacets')" tooltip-placement="bottom" uib-tooltip="Clear custom filter applied"><i class="glyphicon glyphicon-remove"></i></a>
-                            <span class="filter-label-title">Custom Filter</span>
-                            <span class="filter-label-colon">:</span>
-                            <span class="filter-label-value" ng-bind="vm.reference.location.customFacets.displayname" tooltip-placement="bottom-left" uib-tooltip="{{vm.reference.location.customFacets.displayname}}" tooltip-class="custom-filter-tooltip"></span>
-                        </div>
-                        <div class="filter-label label label-default" ng-repeat="fc in vm.reference.facetColumns track by $index" ng-if="vm.hasFilter($index)">
-                            <a class="remove-link" ng-click="vm.removeFilter($index)" tooltip-placement="bottom" uib-tooltip="Clear filter applied"><i class="glyphicon glyphicon-remove"></i></a>
-                            <a class="filter-label-title" tooltip-placement="bottom" ng-click="vm.focusOnFacet($index)" ng-if="::fc.displayname.isHTML"  ng-attr-uib-tooltip="{{'Go to ' + fc.displayname.value + ' filter'}}" ng-bind-html="::fc.displayname.value"></a>
-                            <a class="filter-label-title" tooltip-placement="bottom" ng-click="vm.focusOnFacet($index)" ng-if="::!fc.displayname.isHTML" ng-attr-uib-tooltip="{{'Go to ' + fc.displayname.value+ ' filter'}}" ng-bind="::fc.displayname.value"></a>
-                            <span class="filter-label-colon">:</span>
-                            <span class="filter-label-value" uib-tooltip-template="'filtersTooltipTemplate.html'" tooltip-placement="bottom-left" tooltip-class="filters-tooltip">
-                                <span ng-repeat="filter in vm.facetModels[$index].appliedFilters">
-                                    <span ng-if="::filter.displayname.value && filter.displayname.isHTML" ng-bind-html="::filter.displayname.value"></span>
-                                    <span ng-if="::filter.displayname.value && !filter.displayname.isHTML" ng-bind="::filter.displayname.value"></span>
-                                    <span ng-if="::filter.displayname.value == ''" ng-bind-html="defaultDisplayname.empty"></span>
-                                    <span ng-if="::filter.displayname.value == null" ng-bind-html="defaultDisplayname.null"></span>
-                                    <span ng-if="!$last" style="margin-left:-4px">, </span>
-                                </span>
-                            </span>
-                            <script type="text/ng-template" id="filtersTooltipTemplate.html">
-                                <span ng-repeat="filter in vm.facetModels[$index].appliedFilters">
-                                    <span>&bull;</span>
-                                    <span ng-if="::filter.displayname.value && filter.displayname.isHTML" ng-bind-html="::filter.displayname.value"></span>
-                                    <span ng-if="::filter.displayname.value && !filter.displayname.isHTML" ng-bind="::filter.displayname.value"></span>
-                                    <span ng-if="::filter.displayname.value == ''" ng-bind-html="defaultDisplayname.empty"></span>
-                                    <span ng-if="::filter.displayname.value == null" ng-bind-html="defaultDisplayname.null"></span>
-                                </span>
-                            </script>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- record table -->
-                <div id="recordset-table-container" ng-show="vm.initialized">
+                <div class="recordset-table-container" ng-show="vm.initialized">
                     <record-table id="rs-{{vm.makeSafeIdAttr(vm.tableDisplayName.value)}}" vm="vm" on-selected-rows-changed-bind="onSelectedRowsChanged"></record-table>
                 </div>
             </div>
