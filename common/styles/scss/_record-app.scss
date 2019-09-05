@@ -48,8 +48,18 @@
                 margin: 5px 0px;
             }
 
-            #page-title {
-                margin: 0px;
+            .entity-display-header {
+                display: flex;
+                justify-content: space-between;
+
+                #page-title {
+                    margin: 0px;
+                }
+
+                .record-action-btns {
+                    min-width: 350px;
+                    text-align: right;
+                }
             }
         }
     }
