@@ -115,6 +115,10 @@
                 bottom: 7px;
                 right: 10px;
                 font-size: $h4-font-size;
+
+                .aggregate-col-loader {
+                    right: -5px
+                }
             }
         }
 
@@ -137,6 +141,97 @@
             width: 75px;
         }
     }
+
+
+    .recordset-container {
+        padding: 20px;
+
+        .faceting-container {
+            .faceting-header {
+                h3 {
+                    margin: 0;
+                }
+                button {
+                    padding: 0;
+                    padding-bottom: 7px;
+                }
+            }
+
+            .faceting-columns-container {
+                overflow-y: auto;
+                border-right: solid 1px $border-color;
+            }
+
+            .panel-group {
+                margin-right: 5px;
+                margin-top: 5px;
+                margin-bottom: 20px;
+
+                // each facet panel
+                .panel.facet-panel {
+                    border-radius: 0;
+                    border: 1px solid $border-color;
+
+                    // active style
+                    &.active,
+                    &:hover {
+                        border-color: rgb(51, 122, 183) !important;
+                        animation-duration: 4s;
+                    }
+
+                    // override bootstrap default
+                    + .facet-panel {
+                        margin-top: 0;
+                        border-top: 0;
+                    }
+
+                    .panel-heading {
+                        // override bootstrap default
+                        text-transform: none;
+                        border: 0;
+                        border-radius: 0;
+
+                        background-color: $table-header-background-color;
+                        .panel-title {
+                            a {
+                                color: $black-color;
+                                text-decoration: none;
+                            }
+
+                            position: relative;
+                            .toggle-icon {
+                                position: absolute;
+                                top: 0;
+                                left: 5px;
+                            }
+                            .show-tooltip-border {
+                                margin-left: 25px;
+                            }
+                        }
+                    }
+
+                    .panel-body {
+                        padding: 10px;
+                    }
+                }
+            }
+        }
+
+        &.with-faceting {
+            > .main-container {
+                flex: 1;
+                position: relative;
+                z-index: 1;
+                overflow-y: auto;
+                padding-top: 15px;
+                border-left: 25px solid white;
+                padding-left: 5px;
+            }
+        }
+    }
+
+
+    //TODO should be valuated
 
     .filters-tooltip {
         margin-right: 2%;
@@ -237,11 +332,6 @@
         padding-top: 20px;
     }
 
-    .recordset-container.without-faceting .main-body {
-        padding-left: 15px;
-        padding-right: 15px;
-    }
-
     .recordset-container.with-faceting {
         -webkit-box-flex: 1;
         display: flex;
@@ -283,23 +373,18 @@
         display: none !important;
     }
 
-    .recordset-container.with-faceting {
-        padding-left: 15px;
-        padding-right: 15px;
-    }
+    // .recordset-container.with-faceting > .main-container {
+    //     flex: 1;
+    //     position: relative;
+    //     z-index: 1;
+    //     overflow-y: auto;
+    //     padding-top: 15px;
+    // }
 
-    .recordset-container.with-faceting > .main-container {
-        flex: 1;
-        position: relative;
-        z-index: 1;
-        overflow-y: auto;
-        padding-top: 15px;
-    }
-
-    .recordset-container.with-faceting .main-body {
-        border-left: 25px solid white;
-        padding-right: 10px;
-    }
+    // .recordset-container.with-faceting .main-body {
+    //     border-left: 25px solid white;
+    //     padding-right: 10px;
+    // }
 
     .recordset-container.with-faceting .pager {
         margin-bottom: 50px;
@@ -309,29 +394,23 @@
         overflow-x: hidden;
     }
 
-    .faceting-container .toggle-icon {
-        margin-right: 5px;
-    }
+    // .faceting-container .toggle-icon {
+    //     margin-right: 5px;
+    // }
 
-    .faceting-container .panel .panel-title {
-        color: #333333;
-        line-height: 1.35;
-        font-size: 14px;
-        font-weight: 600;
-        position: relative;
-    }
+    // .faceting-container .panel .panel-title {
+    //     color: #333333;
+    //     line-height: 1.35;
+    //     font-size: 14px;
+    //     font-weight: 600;
+    //     position: relative;
+    // }
 
-    .faceting-container .panel .panel-body {
-        padding: 0 10px 10px !important;
-        border-top: none !important;
-        border: none;
-    }
-
-    .faceting-container .panel-group {
-        margin-right: 5px;
-        margin-top: 5px;
-        margin-bottom: 20px;
-    }
+    // .faceting-container .panel .panel-body {
+    //     padding: 0 10px 10px !important;
+    //     border-top: none !important;
+    //     border: none;
+    // }
 
     .faceting-container .applied-filters {
         margin-top: 5px;

@@ -361,11 +361,11 @@ html.ng-scope {
 /****** RSwF main container *******/
 
 // TODO used in both recordset (faceting) and record (toc), should be cleaned up
-    .faceting-container {
-        overflow-y: auto;
-    }
+    // .faceting-container {
+    //     overflow-y: auto;
+    // }
 
-    .faceting-container .columns-container {
+    .faceting-container .faceting-columns-container {
         margin-bottom: 50px;
     }
 
@@ -386,21 +386,15 @@ html.ng-scope {
         border-bottom: 1px solid rgba(255,255,255,.1);
     }
 
-    .faceting-container .facet-panel > .panel-heading {
-        text-transform: none;
-        border: 0;
-        margin: 1px 0;
-    }
+    // .faceting-container .facet-panel > .panel-heading {
+    //     text-transform: none;
+    //     border: 0;
+    //     margin: 1px 0;
+    // }
 
-    .faceting-container .panel {
-        border: 1px solid #ddd !important;
-    }
-
-    .faceting-container .facet-panel.active,
-    .faceting-container .panel:hover {
-        border-color: rgb(51, 122, 183) !important;
-        animation-duration: 4s;
-    }
+    // .faceting-container .panel {
+    //     border: 1px solid #ddd !important;
+    // }
 
     .faceting-container .update-btn {
         float: right;

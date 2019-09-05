@@ -21,9 +21,9 @@
     -webkit-user-select: none;
     user-select: none;
     background: transparent;
-    border: solid 1px #2e6da4;
-    border-top: none;
-    border-bottom: none;
+    // border: solid 1px $border-color;
+    // border-top: none;
+    // border-bottom: none;
 }
 
 .rg-bottom span,
@@ -37,11 +37,9 @@
 
 .rg-left span,
 .rg-right span {
-    font-family: 'Glyphicons Halflings';
     top: 50vh;
-    margin: -10px 0 0 0.8px;
     top: 50%;
-    color: #337ab7;
+    color: $border-color;
     font-weight: 400;
 }
 

@@ -64,29 +64,6 @@
             return url;
         };
 
-        $scope.edit = function() {
-            var link = recordsetModel.page.reference.contextualize.entryEdit.appLink;
-            // TODO ermrestJS needs to handle the case when no limit is defined in the URL
-            if (link.indexOf("?limit=") === -1 || link.indexOf("&limit=") === -1)
-                link = link + (link.indexOf('?') === -1 ? "?limit=" : "&limit=" ) + recordsetModel.pageLimit;
-
-            return link;
-        };
-
-        $scope.create = function() {
-            // TODO: Generate a unique id for this request
-            // append it to the URL
-            // var referrer_id = 'recordset-' + MathUtils.getRandomInt(0, Number.MAX_SAFE_INTEGER);
-            // addRecordRequests[referrer_id] = 0;
-
-            // open a new tab
-            var newRef = recordsetModel.reference.unfilteredReference.contextualize.entryCreate;
-            var appLink = newRef.appLink;
-            // appLink = appLink + (appLink.indexOf("?") === -1 ? "?" : "&") + 'invalidate=' + UriUtils.fixedEncodeURIComponent(referrer_id);
-
-            return appLink;
-        };
-
         $scope.versionDisplay = function () {
             return UiUtils.humanizeTimestamp(recordsetModel.reference.location.versionAsMillis);
         }
@@ -106,7 +83,7 @@
                 // get navbar height
                 elements.navbarHeight = $document[0].getElementById('mainnav').offsetHeight;
                 // get bookmark container height
-                elements.bookmarkHeight = $document[0].getElementById('bookmark-container').offsetHeight;
+                elements.bookmarkHeight = $document[0].getElementById('recordset-top-panel-container').offsetHeight;
                 // get recordset main container
                 elements.container = $document[0].getElementsByClassName("recordset-container")[0].getElementsByClassName('main-container')[0];
             } catch (error) {
@@ -125,9 +102,9 @@
                 // get navbar height
                 elements.navbarHeight = $document[0].getElementById('mainnav').offsetHeight;
                 // get bookmark container height
-                elements.bookmarkHeight = $document[0].getElementById('bookmark-container').offsetHeight;
+                elements.bookmarkHeight = $document[0].getElementById('recordset-top-panel-container').offsetHeight;
                 // get recordset main container
-                elements.container = $document[0].getElementsByClassName('faceting-container')[0];
+                elements.container = $document[0].getElementsByClassName('faceting-columns-container')[0];
             } catch (error) {
                 $log.warn(error);
             }
@@ -140,7 +117,11 @@
             if (elements.navbarHeight !== undefined && elements.bookmarkHeight) {
                 UiUtils.setDisplayContainerHeight(elements);
                 // no need to fetch and verify the faceting elements (navbar and bookmark are the same container as the ones used in main elements function)
-                if (chaiseConfig.showFaceting) UiUtils.setDisplayContainerHeight(fetchFacetingElements());
+                if (chaiseConfig.showFaceting) {
+                    UiUtils.setDisplayContainerHeight(fetchFacetingElements());
+
+                    // TODO set the margin-top to be aligned
+                }
             }
         }
 

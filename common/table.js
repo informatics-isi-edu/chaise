@@ -931,6 +931,33 @@
                 }
             };
 
+            scope.addRecord = function() {
+                // Generate a unique id for this request
+                // append it to the URL
+                var referrer_id = 'recordset-' + MathUtils.getRandomInt(0, Number.MAX_SAFE_INTEGER);
+                addRecordRequests[referrer_id] = 0;
+
+                // open a new tab
+                var newRef = scope.vm.reference.table.reference.contextualize.entryCreate;
+                var appLink = newRef.appLink;
+                appLink = appLink + (appLink.indexOf("?") === -1 ? "?" : "&") +
+                    'invalidate=' + UriUtils.fixedEncodeURIComponent(referrer_id);
+
+                // open url in a new tab
+                $window.open(appLink, '_blank');
+            };
+
+            scope.editRecord = function() {
+                var link = recordsetModel.page.reference.contextualize.entryEdit.appLink;
+                // TODO ermrestJS needs to handle the case when no limit is defined in the URL
+                if (link.indexOf("?limit=") === -1 || link.indexOf("&limit=") === -1)
+                    link = link + (link.indexOf('?') === -1 ? "?limit=" : "&limit=" ) + recordsetModel.pageLimit;
+
+                // TODO UX-M we should add invalidate stuff to this function too
+                // open url in a new tab
+                $window.open(appLink, '_blank');
+            };
+
             // Facilitates the multi select functionality for multi edit by storing the tuple in the selectedRows array
             scope.onSelect = function(args, $event) {
                 var tuple = args.tuple;
@@ -1036,23 +1063,6 @@
                     scope.search();
 
                 scope.vm.search = null;
-            };
-
-            scope.addRecord = function() {
-
-                // Generate a unique id for this request
-                // append it to the URL
-                var referrer_id = 'recordset-' + MathUtils.getRandomInt(0, Number.MAX_SAFE_INTEGER);
-                addRecordRequests[referrer_id] = 0;
-
-                // open a new tab
-                var newRef = scope.vm.reference.table.reference.contextualize.entryCreate;
-                var appLink = newRef.appLink;
-                appLink = appLink + (appLink.indexOf("?") === -1 ? "?" : "&") +
-                    'invalidate=' + UriUtils.fixedEncodeURIComponent(referrer_id);
-
-                // open url in a new tab
-                $window.open(appLink, '_blank');
             };
 
             // function for removing a single pill and it's corresponding selected row

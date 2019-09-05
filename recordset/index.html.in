@@ -12,38 +12,6 @@
         </div>
         <div class="app-container rs_s_{{makeSafeIdAttr(vm.schemaName)}} rs_t_{{makeSafeIdAttr(vm.tableName)}}" ng-controller="recordsetController as ctrl">
             <navbar></navbar>
-            <div class="row">
-                <div id="bookmark-container" class="col-xs-12 meta-icons">
-                    <div class="pull-left">
-                        <h1 id="page-title">
-                            <span ng-if="::vm.tableDisplayname.isHTML" ng-bind-html="vm.tableDisplayName.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::vm.tableComment ? vm.tableComment : undefined}}"></span>
-                            <span ng-if="::!vm.tableDisplayname.isHTML" ng-bind="vm.tableDisplayName.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::vm.tableComment ? vm.tableComment : undefined}}"></span>
-                            <span ng-if="vm.reference && vm.reference.location.version" class="h3-class" tooltip-placement="bottom-left" uib-tooltip="{{::tooltip.versionTime}} {{versionDate()}}">({{versionDisplay()}})</span>
-                        </h1>
-                    </div>
-                    <div class="pull-right">
-                        <a id="create-link" ng-if="vm.reference.canCreate && vm.config.editable" ng-href="{{create()}}" uib-tooltip="Click here to create a record." tooltip-placement="bottom">
-                            <span class="chaise-btn-icon glyphicon glyphicon-plus"></span>
-                            <span>Create</span>
-                        </a>&nbsp;&nbsp;
-                        <!-- edit -->
-                        <!-- TODO: this edit link isn't being disabled. To disable an <a> tag with an href, remove the href attribute -->
-                        <a id="edit-link" ng-if="vm.page && vm.reference.canUpdate && vm.config.editable" ng-disabled="{{vm.pageLimit > vm.RECORDEDIT_MAX_ROWS}}"
-                            ng-href="{{ edit() }}" tooltip-placement="bottom" uib-tooltip="{{ ((vm.pageLimit > vm.RECORDEDIT_MAX_ROWS) ? 'Editing disabled when items per page > ' + vm.RECORDEDIT_MAX_ROWS : 'Click here to edit this page of records.' ) }}">
-                            <span class="chaise-btn-icon glyphicon glyphicon-pencil"></span>
-                            <span>Edit</span>
-                        </a>&nbsp;&nbsp;
-                        <!-- download CSV included by default -->
-                        <export allow-export="vm.rowValues.length>0" reference="vm.reference" disabled="!vm.hasLoaded || !vm.initialized"></export>
-                        &nbsp;&nbsp;
-                        <!-- permalink -->
-                        <a id="permalink" ng-href="{{ permalink() }}" tooltip-placement="bottom-right" uib-tooltip={{::tooltip.permalink}} class="chaise-btn chaise-btn-primary">
-                            <span class="chaise-btn-icon glyphicon glyphicon-bookmark"></span>
-                            <span>Permalink</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
             <div id="main-content">
                 <recordset vm="vm" allow-create="false"></recordset>
             </div>
