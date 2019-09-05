@@ -36,31 +36,60 @@
         border: 2px solid $primary-color;
     }
 
-    #top-panel-container {
-        #page-action-btns {
-            margin: 20px 20px 4px 20px;
+    #top-left-panel {
+        &.also-resizeable {
+            position: relative;
+            z-index: 2;
+            max-width: 50vw;
+
+            &.open-panel {
+                flex: 0 0 15vw;
+                min-width: 170px;
+            }
+
+            &.close-panel {
+                width: 0;
+                flex-basis: 0 !important;
+            }
+
         }
+    }
 
-        #title {
-            margin: 4px 20px 20px 20px;
+    #top-panel-container {
+        -webkit-box-flex: 1;
+        display: flex;
+        flex: 1;
 
-            #page-subtitle {
-                margin: 5px 0px;
+        #top-right-panel {
+            flex: 1;
+            position: relative;
+            z-index: 1;
+
+            #page-action-btns {
+                margin: 20px 20px 4px 20px;
             }
 
-            .entity-display-header {
-                display: flex;
-                justify-content: space-between;
+            #title {
+                margin: 4px 20px 20px 20px;
 
-                #page-title {
-                    margin: 0px;
+                #page-subtitle {
+                    margin: 5px 0px;
                 }
 
-                .record-action-btns {
-                    min-width: 350px;
-                    text-align: right;
-                }
-            }
+                .entity-display-header {
+                    display: flex;
+                    justify-content: space-between;
+
+                    #page-title {
+                        margin: 0px;
+                    }
+
+                    .record-action-btns {
+                        min-width: 350px;
+                        text-align: right;
+                    }
+                } // end .entity-display-header
+            } // end #title
         }
     }
 
@@ -125,7 +154,6 @@
         > .faceting-resizable {
             position: relative;
             z-index: 2;
-            font-weight: bold;
             max-width: 50vw;
 
             &.open-panel {

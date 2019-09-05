@@ -4,7 +4,7 @@
 
     angular.module('chaise.resizable', [])
 
-        .directive('resizable', ['$document', function ($document) {
+        .directive('resizable', ['$document', '$timeout', function ($document, $timeout) {
             return {
                 restrict: 'AE',
                 scope: {
@@ -16,7 +16,8 @@
                     rFlex: '=',
                     rGrabber: '@',
                     rDisabled: '@',
-                    rNoThrottle: '='
+                    rNoThrottle: '=',
+                    rOtherE: '@'
                 },
 
                 link: function (scope, element, attr) {
@@ -24,12 +25,24 @@
                         'webkitFlexBasis' in document.documentElement.style ? 'webkitFlexBasis' :
                         'msFlexPreferredSize' in document.documentElement.style ? 'msFlexPreferredSize' : 'flexBasis';
 
+                    var resizePartner;
+                    scope.$watch(function () {
+                            return element[0].clientWidth;
+                    }, function (value) {
+                        if (value > 0) {
+                            resizePartner = angular.element(document.getElementById(scope.rOtherE));
+                            resizePartner.addClass('resizable');
+                        }
+                    });
+
                     // register watchers on width and height attributes if they are set
                     scope.$watch('rWidth', function (value) {
                         element[0].style[scope.rFlex ? flexBasis : 'width'] = scope.rWidth + 'px';
+                        if (resizePartner) resizePartner[0].style[scope.rFlex ? flexBasis : 'width'] = scope.rWidth + 'px';
                     });
                     scope.$watch('rHeight', function (value) {
                         element[0].style[scope.rFlex ? flexBasis : 'height'] = scope.rHeight + 'px';
+                        if (resizePartner) resizePartner[0].style[scope.rFlex ? flexBasis : 'height'] = scope.rHeight + 'px';
                     });
 
                     element.addClass('resizable');
@@ -49,10 +62,13 @@
                     var updateInfo = function (e) {
                         info.width = false;
                         info.height = false;
-                        if (axis === 'x')
+                        if (axis === 'x') {
                             info.width = parseInt(element[0].style[scope.rFlex ? flexBasis : 'width']);
-                        else
+                            info.width = parseInt(resizePartner[0].style[scope.rFlex ? flexBasis : 'width']);
+                        } else {
                             info.height = parseInt(element[0].style[scope.rFlex ? flexBasis : 'height']);
+                            info.height = parseInt(resizePartner[0].style[scope.rFlex ? flexBasis : 'height']);
+                        }
                         info.id = element[0].id;
                         info.evt = e;
                     };
@@ -71,18 +87,22 @@
                             case 'top':
                                 prop = scope.rFlex ? flexBasis : 'height';
                                 element[0].style[prop] = h + (offset * vy) + 'px';
+                                resizePartner[0].style[prop] = h + (offset * vy) + 'px';
                                 break;
                             case 'bottom':
                                 prop = scope.rFlex ? flexBasis : 'height';
                                 element[0].style[prop] = h - (offset * vy) + 'px';
+                                resizePartner[0].style[prop] = h - (offset * vy) + 'px';
                                 break;
                             case 'right':
                                 prop = scope.rFlex ? flexBasis : 'width';
                                 element[0].style[prop] = w - (offset * vx) + 'px';
+                                resizePartner[0].style[prop] = w - (offset * vx) + 'px';
                                 break;
                             case 'left':
                                 prop = scope.rFlex ? flexBasis : 'width';
                                 element[0].style[prop] = w + (offset * vx) + 'px';
+                                resizePartner[0].style[prop] = w + (offset * vx) + 'px';
                                 break;
                         }
                         updateInfo(e);
