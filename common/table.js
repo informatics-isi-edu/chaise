@@ -66,7 +66,6 @@
      *                  multi-select    // allow the user to select as many rows as they want. {modalBox.multiSelectMode}
      *          - hideSelectedRows
      *          - hideTotalCount
-     *          - hidePageSettings
      *          - showFaceting: defines if the facet panel should be available
      *          - openFacetPanel: defines if the facet panel is open by default
      *          - showNull: if this is available and equal to `true`, we will differentiate between `null` and empty string.

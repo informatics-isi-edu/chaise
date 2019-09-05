@@ -81,7 +81,7 @@ More often than not, you will want to apply styling for each of the columns rath
 - Hide everything except the result table in recordset:
 
 ```css
-.rs_s_schema.rs_t_table .faceting-resizable, 
+.rs_s_schema.rs_t_table .side-panel-resizable, 
 .rs_s_schema.rs_t_table faceting-collapse-btn,
 .rs_s_schema.rs_t_table #recordset-controls-container,
 .rs_s_schema.rs_t_table #facet-filters-container {

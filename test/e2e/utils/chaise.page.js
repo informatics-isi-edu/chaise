@@ -876,7 +876,7 @@ var recordPage = function() {
     }
 
     this.getSidePanel = function() {
-      return element(by.css('.faceting-resizable'));
+      return element(by.css('.side-panel-resizable'));
     }
 
     this.getSidePanelItemById = function (idx) {
@@ -904,7 +904,7 @@ var recordPage = function() {
     }
 
     this.getModalSidePanel = function() {
-        return element(by.css(".modal-body")).element(by.css('.faceting-resizable'));
+        return element(by.css(".modal-body")).element(by.css('.side-panel-resizable'));
     }
 
     this.getMarkdownContainer = function (el) {

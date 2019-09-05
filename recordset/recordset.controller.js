@@ -83,9 +83,9 @@
                 // get navbar height
                 elements.navbarHeight = $document[0].getElementById('mainnav').offsetHeight;
                 // get bookmark container height
-                elements.bookmarkHeight = $document[0].getElementById('recordset-top-panel-container').offsetHeight;
+                elements.bookmarkHeight = $document[0].getElementsByClassName('top-panel-container')[0].offsetHeight;
                 // get recordset main container
-                elements.container = $document[0].getElementsByClassName("recordset-container")[0].getElementsByClassName('main-container')[0];
+                elements.container = $document[0].getElementsByClassName("main-content")[0];
             } catch (error) {
                 $log.warn(error);
             }
@@ -102,9 +102,9 @@
                 // get navbar height
                 elements.navbarHeight = $document[0].getElementById('mainnav').offsetHeight;
                 // get bookmark container height
-                elements.bookmarkHeight = $document[0].getElementById('recordset-top-panel-container').offsetHeight;
+                elements.bookmarkHeight = $document[0].getElementsByClassName('top-panel-container')[0].offsetHeight;
                 // get recordset main container
-                elements.container = $document[0].getElementsByClassName('faceting-columns-container')[0];
+                elements.container = $document[0].getElementsByClassName('side-panel-container')[0];
             } catch (error) {
                 $log.warn(error);
             }

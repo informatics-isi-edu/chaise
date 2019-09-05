@@ -65,12 +65,12 @@
         <loading-spinner ng-show="(!displayReady || showSpinner) && !error"></loading-spinner>
 
         <div id="main-content" class="record-container">
-            <div class="faceting-resizable record-toc" resizable r-directions=["right"] r-flex="true" r-other-e="top-left-panel" id="record-side-pan" ng-hide="ctrl.noVisibleRelatedTables()" ng-class="{'open-panel': recordSidePanOpen, 'close-panel': !recordSidePanOpen}">
+            <div class="side-panel-resizable record-toc" resizable r-directions=["right"] r-flex="true" r-other-e="top-left-panel" id="record-side-pan" ng-hide="ctrl.noVisibleRelatedTables()" ng-class="{'open-panel': recordSidePanOpen, 'close-panel': !recordSidePanOpen}">
                 <div class="btn btn-primary btn-inverted" id="back-to-top" ng-click="scrollToTop()" ng-show="showTopBtn">
                     <i uib-tooltip="Scroll To Top" tooltip-placement="left" class="glyphicon glyphicon-triangle-top"></i>
                 </div>
 
-                <div class="faceting-container" style="height: 100%;" >
+                <div class="side-panel-container" style="height: 100%;" >
                     <h2 class="side-panel-heading">Contents</h2>
                     <div class="columns-container">
                         <ul>

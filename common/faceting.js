@@ -200,7 +200,7 @@
                     };
 
                     scope.scrollToFacet = function (index) {
-                        var container = angular.element(document.getElementsByClassName('faceting-container')[0]);
+                        var container = angular.element(document.getElementsByClassName('side-panel-container')[0]);
                         var el = angular.element(document.getElementById('fc-'+index));
                         // the elements might not be available
                         if (el.length === 0 || container.length === 0) return;

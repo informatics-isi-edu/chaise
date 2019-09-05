@@ -151,7 +151,7 @@
         }
 
         /** record side panel **/
-        > .faceting-resizable {
+        > .side-panel-resizable {
             position: relative;
             z-index: 2;
             max-width: 50vw;
@@ -166,7 +166,7 @@
                 width: 0;
                 flex-basis: 0 !important;
 
-                .faceting-container {
+                .side-panel-container {
                     width: 0;
                 }
             }
