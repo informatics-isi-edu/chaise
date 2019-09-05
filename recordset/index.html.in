@@ -12,9 +12,7 @@
         </div>
         <div class="app-container rs_s_{{makeSafeIdAttr(vm.schemaName)}} rs_t_{{makeSafeIdAttr(vm.tableName)}}" ng-controller="recordsetController as ctrl">
             <navbar></navbar>
-            <div id="main-content">
-                <recordset vm="vm" allow-create="false"></recordset>
-            </div>
+            <recordset vm="vm" allow-create="false"></recordset>
         </div>
     </body>
 </html>

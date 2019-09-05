@@ -145,89 +145,109 @@
 
     .recordset-container {
         padding: 20px;
+        padding-right: 0;
 
-        .side-panel-container {
-            .faceting-header {
-                h3 {
-                    margin: 0;
-                }
-                button {
-                    padding: 0;
-                    padding-bottom: 7px;
-                }
-            }
+        .top-panel-container {
+            -webkit-box-flex: 1;
+            display: flex;
+            flex: 1;
+            position: relative;
+            padding-right: 20px;
 
-            .faceting-columns-container {
-                overflow-y: auto;
-                border-right: solid 1px $border-color;
-            }
+            .top-left-panel {
+                .faceting-header {
+                    width: 100%;
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
 
-            .panel-group {
-                margin-right: 5px;
-                margin-top: 5px;
-                margin-bottom: 20px;
-
-                // each facet panel
-                .panel.facet-panel {
-                    border-radius: 0;
-                    border: 1px solid $border-color;
-
-                    // active style
-                    &.active,
-                    &:hover {
-                        border-color: rgb(51, 122, 183) !important;
-                        animation-duration: 4s;
+                    h3 {
+                        margin: 0;
                     }
-
-                    // override bootstrap default
-                    + .facet-panel {
-                        margin-top: 0;
-                        border-top: 0;
-                    }
-
-                    .panel-heading {
-                        // override bootstrap default
-                        text-transform: none;
-                        border: 0;
-                        border-radius: 0;
-
-                        background-color: $table-header-background-color;
-                        .panel-title {
-                            a {
-                                color: $black-color;
-                                text-decoration: none;
-                            }
-
-                            position: relative;
-                            .toggle-icon {
-                                position: absolute;
-                                top: 0;
-                                left: 5px;
-                            }
-                            .show-tooltip-border {
-                                margin-left: 25px;
-                            }
-                        }
-                    }
-
-                    .panel-body {
-                        padding: 10px;
+                    button {
+                        padding: 0;
+                        padding-bottom: 7px;
                     }
                 }
             }
-        }
 
-        &.with-faceting {
-            > .main-container {
+            .top-right-panel {
                 flex: 1;
                 position: relative;
                 z-index: 1;
-                overflow-y: auto;
-                padding-top: 15px;
-                border-left: 25px solid white;
-                padding-left: 5px;
             }
         }
+
+        .top-right-panel, .main-content .main-container {
+            padding-left: 30px;
+        }
+
+        .main-content {
+            .side-panel-resizable {
+                .side-panel-container {
+
+                    .faceting-columns-container {
+                        overflow-y: auto;
+                        border-right: solid 1px $border-color;
+                    }
+
+                    .panel-group {
+                        margin-right: 5px;
+                        margin-top: 5px;
+                        margin-bottom: 20px;
+
+                        // each facet panel
+                        .panel.facet-panel {
+                            border-radius: 0;
+                            border: 1px solid $border-color;
+
+                            // active style
+                            &.active,
+                            &:hover {
+                                border-color: rgb(51, 122, 183) !important;
+                                animation-duration: 4s;
+                            }
+
+                            // override bootstrap default
+                            + .facet-panel {
+                                margin-top: 0;
+                                border-top: 0;
+                            }
+
+                            .panel-heading {
+                                // override bootstrap default
+                                text-transform: none;
+                                border: 0;
+                                border-radius: 0;
+
+                                background-color: $table-header-background-color;
+                                .panel-title {
+                                    a {
+                                        color: $black-color;
+                                        text-decoration: none;
+                                    }
+
+                                    position: relative;
+                                    .toggle-icon {
+                                        position: absolute;
+                                        top: 0;
+                                        left: 5px;
+                                    }
+                                    .show-tooltip-border {
+                                        margin-left: 25px;
+                                    }
+                                }
+                            }
+
+                            .panel-body {
+                                padding: 10px;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
     }
 
 
@@ -328,43 +348,53 @@
     }
 
 
-    .recordset-container.without-faceting .main-container {
-        padding-top: 20px;
-    }
+    // .recordset-container.without-faceting .main-container {
+    //     padding-top: 20px;
+    // }
 
-    .recordset-container.with-faceting {
-        -webkit-box-flex: 1;
-        display: flex;
-        flex: 1;
-        margin-top: 5px;
-    }
+    // .recordset-container.with-faceting > .main-container {
+    //     flex: 1;
+    //     position: relative;
+    //     z-index: 1;
+    //     overflow-y: auto;
+    //     padding-top: 15px;
+    //     border-left: 25px solid white;
+    //     padding-left: 5px;
+    // }
 
-    /** recordset with faceting side panel **/
-    .recordset-container.with-faceting > .side-panel-resizable {
-        padding-top: 5px;
-        position: relative;
-        max-width: 50vw;
-        z-index: 2;
-    }
-
-    .recordset-container.with-faceting > .side-panel-resizable.initializing > .rg-right > span {
-        display: none;
-    }
-
-    .recordset-container.with-faceting > .side-panel-resizable.open-panel {
-        flex: 0 0 21vw;
-        min-width: 170px;
-        padding-left: 5px;
-    }
-
-    .recordset-container.with-faceting > .side-panel-resizable.close-panel {
-        width: 0;
-        flex-basis: 0 !important;
-    }
-
-    .recordset-container.with-faceting > .side-panel-resizable.close-panel .side-panel-container {
-        width: 0;
-    }
+    // .recordset-container.with-faceting #main-content{
+    //     -webkit-box-flex: 1;
+    //     display: flex;
+    //     flex: 1;
+    //     margin-top: 5px;
+    // }
+    //
+    // /** recordset with faceting side panel **/
+    // .recordset-container.with-faceting > .side-panel-resizable {
+    //     padding-top: 5px;
+    //     position: relative;
+    //     max-width: 50vw;
+    //     z-index: 2;
+    // }
+    //
+    // .recordset-container.with-faceting > .side-panel-resizable.initializing > .rg-right > span {
+    //     display: none;
+    // }
+    //
+    // .recordset-container.with-faceting > .side-panel-resizable.open-panel {
+    //     flex: 0 0 21vw;
+    //     min-width: 170px;
+    //     padding-left: 5px;
+    // }
+    //
+    // .recordset-container.with-faceting > .side-panel-resizable.close-panel {
+    //     width: 0;
+    //     flex-basis: 0 !important;
+    // }
+    //
+    // .recordset-container.with-faceting > .side-panel-resizable.close-panel .side-panel-container {
+    //     width: 0;
+    // }
     .modal-body .recordset-container footer {
         display: none !important;
     }
@@ -412,38 +442,6 @@
     //     border: none;
     // }
 
-    .side-panel-container .applied-filters {
-        margin-top: 5px;
-        max-height: 100px;
-        overflow-y: auto;
-    }
-
-    .side-panel-container .applied-filters .filter-label {
-        margin-right: 5px;
-        margin-bottom: 5px;
-        border: 0.1px solid #ccc;
-        display: inline-block;
-        font-size: 0.8em;
-    }
-
-    .side-panel-container .applied-filters .filter-label:before {
-        margin-right: 0;
-    }
-
-    .side-panel-container .facet-panel > .panel-heading div.active:before,
-    .side-panel-container .facet-panel > .panel-heading div:before {
-        content: "";
-    }
-
-    .side-panel-container .applied-filters .remove-link {
-        color: #337ab7;
-        font-weight: 600;
-    }
-
-    .side-panel-container .applied-filters .remove-link:hover {
-        color: #2c6392;
-    }
-
     .remove-link .filter-label {
         background-color: #337ab7;
         color: white;
@@ -461,6 +459,7 @@
         font-weight: 500;
         border: 0.1px solid #ccc;
     }
+
     /* INTEGER SEARCH */
     .side-panel-container .choice-picker .search-box {
         margin-bottom: 10px;

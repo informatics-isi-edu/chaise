@@ -306,6 +306,65 @@ html.ng-scope {
         }
     }
 
+// main content
+.main-content {
+    padding-right: 0;
+    -webkit-box-flex: 1;
+    display: flex;
+    flex: 1;
+    margin-top: 0px;
+
+    .side-panel-resizable {
+        position: relative;
+        z-index: 2;
+        max-width: 50vw;
+
+        &.open-panel {
+            flex: 0;
+            flex-basis: $left-panel-width-lg;
+            min-width: 170px;
+        }
+
+        &.close-panel {
+            width: 0;
+            flex-basis: 0 !important;
+
+            .side-panel-container {
+                width: 0;
+            }
+        }
+    }
+
+    .main-container {
+        flex: 1;
+        position: relative;
+        z-index: 1;
+        overflow-x: hidden;
+        overflow-y: auto;
+        padding-top: 10px;
+    }
+}
+
+// top left panel for record and recordset
+    .top-left-panel {
+        position: relative;
+        z-index: 2;
+        max-width: 50vw;
+
+        &.open-panel {
+            flex: 0;
+            flex-basis: $left-panel-width-lg;
+            min-width: 170px;
+        }
+
+        &.close-panel {
+            width: 0;
+            flex-basis: 0 !important;
+        }
+
+    }
+
+
 
 // NOTE general rule that applies to record and recordset
 // TODO duplicate or simplify
