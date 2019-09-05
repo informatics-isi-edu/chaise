@@ -32,10 +32,10 @@
             var el = angular.element(document.getElementById(pageSection)).parent();
             mainContainerEl.scrollToElementAnimated(el, 40).then(function () {
                 $timeout(function () {
-                    el.addClass("rowFocus");
+                    el.addClass("row-focus");
                 }, 100);
                 $timeout(function () {
-                    el.removeClass('rowFocus');
+                    el.removeClass('row-focus');
                 }, 1600);
             });
         };
@@ -48,10 +48,10 @@
             var el = angular.element(document.getElementById(pageSection));
             mainContainerEl.scrollToElementAnimated(el, 40).then(function () {
                 $timeout(function () {
-                    el.addClass("rowFocus");
+                    el.addClass("row-focus");
                 }, 100);
                 $timeout(function () {
-                    el.removeClass('rowFocus');
+                    el.removeClass('row-focus');
                 }, 1600);
             });
         };

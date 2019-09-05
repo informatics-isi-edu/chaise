@@ -309,8 +309,8 @@ html.ng-scope {
 
 // NOTE general rule that applies to record and recordset
 // TODO duplicate or simplify
-    .faceting-resizable.close-panel .rg-left,
-    .faceting-resizable.close-panel .rg-right {
+    .side-panel-resizable.close-panel .rg-left,
+    .side-panel-resizable.close-panel .rg-right {
         display: none;
     }
 
@@ -361,15 +361,15 @@ html.ng-scope {
 /****** RSwF main container *******/
 
 // TODO used in both recordset (faceting) and record (toc), should be cleaned up
-    // .faceting-container {
+    // .side-panel-container {
     //     overflow-y: auto;
     // }
 
-    .faceting-container .faceting-columns-container {
+    .side-panel-container .faceting-columns-container {
         margin-bottom: 50px;
     }
 
-    .faceting-container .divider {
+    .side-panel-container .divider {
         margin: 1rem 0;
         line-height: 1;
         height: 0;
@@ -386,29 +386,29 @@ html.ng-scope {
         border-bottom: 1px solid rgba(255,255,255,.1);
     }
 
-    // .faceting-container .facet-panel > .panel-heading {
+    // .side-panel-container .facet-panel > .panel-heading {
     //     text-transform: none;
     //     border: 0;
     //     margin: 1px 0;
     // }
 
-    // .faceting-container .panel {
+    // .side-panel-container .panel {
     //     border: 1px solid #ddd !important;
     // }
 
-    .faceting-container .update-btn {
+    .side-panel-container .update-btn {
         float: right;
     }
 
-    .faceting-container .refresh-btn {
+    .side-panel-container .refresh-btn {
         cursor: pointer;
     }
 
-    .faceting-container .glyphicon-refresh {
+    .side-panel-container .glyphicon-refresh {
         border: none;
     }
 
-    .faceting-container {
+    .side-panel-container {
         -webkit-transition: all 1s;
         transition: all 1s;
     }

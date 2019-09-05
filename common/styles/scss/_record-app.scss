@@ -32,27 +32,8 @@
         border: solid #446c73 1.5px;
     }
 
-    tr.rowFocus {
+    tr.row-focus {
         border: 2px solid $primary-color;
-    }
-
-    #top-left-panel {
-        &.also-resizeable {
-            position: relative;
-            z-index: 2;
-            max-width: 50vw;
-
-            &.open-panel {
-                flex: 0 0 15vw;
-                min-width: 170px;
-            }
-
-            &.close-panel {
-                width: 0;
-                flex-basis: 0 !important;
-            }
-
-        }
     }
 
     #top-panel-container {
@@ -60,7 +41,12 @@
         display: flex;
         flex: 1;
 
-        #top-right-panel {
+        .top-left-panel.open-panel {
+            flex: 0 0 15vw;
+            min-width: 170px;
+        }
+
+        .top-right-panel {
             flex: 1;
             position: relative;
             z-index: 1;
@@ -93,28 +79,8 @@
         }
     }
 
-    .record-container {
-        padding-right: 0;
-        -webkit-box-flex: 1;
-        display: flex;
-        flex: 1;
-        margin-top: 0px;
-
-        > .main-container {
-            flex:1;
-            position: relative;
-            z-index: 1;
-            overflow-x: hidden;
-            overflow-y: auto;
-            padding-top: 10px;
-        }
-
-        &.smaller-margin {
-            margin-left: -50px;
-            margin-right: -50px;
-        }
-
-        .rowFocus {
+    .main-content {
+        .row-focus {
             border-color: $primary-color !important;
         }
 
@@ -151,24 +117,11 @@
         }
 
         /** record side panel **/
-        > .faceting-resizable {
-            position: relative;
-            z-index: 2;
-            max-width: 50vw;
-
+        > .side-panel-resizable {
             &.open-panel {
                 flex: 0 0 15vw;
                 min-width: 170px;
                 padding-left: 5px;
-            }
-
-            &.close-panel {
-                width: 0;
-                flex-basis: 0 !important;
-
-                .faceting-container {
-                    width: 0;
-                }
             }
 
             .side-panel-heading {

@@ -30,7 +30,7 @@
                             return element[0].clientWidth;
                     }, function (value) {
                         if (value > 0) {
-                            resizePartner = angular.element(document.getElementById(scope.rOtherE));
+                            resizePartner = angular.element(document.getElementsByClassName(scope.rOtherE)[0]);
                             resizePartner.addClass('resizable');
                         }
                     });
