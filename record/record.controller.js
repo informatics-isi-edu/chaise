@@ -471,9 +471,9 @@
                 // get navbar height
                 elements.navbarHeight = $document[0].getElementById('mainnav').offsetHeight;
                 // get bookmark container height
-                elements.bookmarkHeight = $document[0].getElementById('top-panel-container').offsetHeight;
+                elements.bookmarkHeight = $document[0].getElementsByClassName('top-panel-container')[0].offsetHeight;
                 // get record main container
-                elements.container = $document[0].getElementById('main-content');
+                elements.container = $document[0].getElementsByClassName('bottom-panel-container')[0];
             } catch (error) {
                 $log.warn(error);
             }

@@ -13,10 +13,10 @@
     <div class="app-container r_s_{{ctrl.makeSafeIdAttr(reference.table.schema.name)}} r_t_{{ctrl.makeSafeIdAttr(reference.table.name)}}" ng-controller="RecordController as ctrl">
         <navbar></navbar>
         <div class="record-container">
-            <div id="top-panel-container">
+            <div class="top-panel-container">
                 <div class="top-left-panel" ng-hide="ctrl.noVisibleRelatedTables()" ng-class="{'open-panel': recordSidePanOpen, 'close-panel': !recordSidePanOpen}"></div>
                 <div class="top-right-panel">
-                    <div id="page-action-btns" class="row">
+                    <div class="page-action-btns row">
                         <div class="pull-right">
                             <button id="show-all-related-tables" class="chaise-btn chaise-btn-primary" ng-click="::ctrl.toggleRelatedTables();" uib-tooltip="{{'Click here to ' + ((showEmptyRelatedTables) ? 'hide empty related sections.' : 'show empty related sections too.')}}" tooltip-placement="bottom">
                                 <span class="chaise-btn-icon glyphicon glyphicon-th-list"></span>
@@ -30,7 +30,7 @@
                             </button>
                         </div>
                     </div>
-                    <div ng-if="recordDisplayname" id="title" class="row">
+                    <div ng-if="recordDisplayname" class="title row">
                         <h1 id="page-subtitle">
                             <a ng-href="{{::ctrl.referenceTableApplink()}}">
                                 <span ng-if="::reference.displayname.isHTML" ng-bind-html="reference.displayname.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::reference.table.comment ? reference.table.comment : undefined}}"></span>
@@ -43,20 +43,22 @@
                                 <span ng-if="::recordDisplayname.isHTML" ng-bind-html="::recordDisplayname.value"></span>
                                 <span ng-if="::!recordDisplayname.isHTML" ng-bind="::recordDisplayname.value"></span>
                             </h1>
-                            <span ng-if="ctrl.canCreate() || ctrl.canEdit() || ctrl.canDelete()" class="record-action-btns">
-                                <button id="create-record" class="chaise-btn chaise-btn-primary" ng-click="::ctrl.createRecord()" ng-disabled="::!ctrl.canCreate()" uib-tooltip="Click here to create a record." tooltip-placement="bottom">
-                                    <span class="chaise-btn-icon glyphicon glyphicon-plus"></span>
-                                    <span>Create</span>
-                                </button>
-                                <button id="copy-record" class="chaise-btn chaise-btn-primary" ng-click="::ctrl.copyRecord()" ng-disabled="::!ctrl.canEdit()" uib-tooltip="Click here to create a copy of this record." tooltip-placement="bottom">
-                                    <span class="chaise-btn-icon glyphicon glyphicon-copy"></span>
-                                    <span>Copy</span>
-                                </button>
-                                <button id="edit-record" class="chaise-btn chaise-btn-primary" ng-click="::ctrl.editRecord()" ng-disabled="::!ctrl.canEdit()" uib-tooltip="Click here to edit this record." tooltip-placement="bottom">
-                                    <span class="chaise-btn-icon glyphicon glyphicon-pencil"></span>
-                                    <span>Edit</span>
-                                </button>
-                                <delete-link id="delete-record" callback="::ctrl.deleteRecord()" display="button" icon="true" label="Delete" ng-disabled="::ctrl.canDelete()" uib-tooltip="Click here to delete this record." tooltip-placement="bottom"></delete-link>
+                            <span ng-if="ctrl.canCreate() || ctrl.canEdit() || ctrl.canDelete()" class="record-action-btns-container">
+                                <div class="record-action-btns">
+                                    <button id="create-record" class="chaise-btn chaise-btn-primary" ng-click="::ctrl.createRecord()" ng-disabled="::!ctrl.canCreate()" uib-tooltip="Click here to create a record." tooltip-placement="bottom">
+                                        <span class="chaise-btn-icon glyphicon glyphicon-plus"></span>
+                                        <span>Create</span>
+                                    </button>
+                                    <button id="copy-record" class="chaise-btn chaise-btn-primary" ng-click="::ctrl.copyRecord()" ng-disabled="::!ctrl.canEdit()" uib-tooltip="Click here to create a copy of this record." tooltip-placement="bottom">
+                                        <span class="chaise-btn-icon glyphicon glyphicon-copy"></span>
+                                        <span>Copy</span>
+                                    </button>
+                                    <button id="edit-record" class="chaise-btn chaise-btn-primary" ng-click="::ctrl.editRecord()" ng-disabled="::!ctrl.canEdit()" uib-tooltip="Click here to edit this record." tooltip-placement="bottom">
+                                        <span class="chaise-btn-icon glyphicon glyphicon-pencil"></span>
+                                        <span>Edit</span>
+                                    </button>
+                                    <delete-link id="delete-record" callback="::ctrl.deleteRecord()" display="button" icon="true" label="Delete" ng-disabled="::ctrl.canDelete()" uib-tooltip="Click here to delete this record." tooltip-placement="bottom"></delete-link>
+                                </div>
                             </span>
                         </div>
                     </div>
@@ -64,12 +66,8 @@
             </div>
             <loading-spinner ng-show="(!displayReady || showSpinner) && !error"></loading-spinner>
 
-            <div class="main-content">
+            <div class="bottom-panel-container">
                 <div class="side-panel-resizable record-toc" resizable r-directions=["right"] r-flex="true" r-other-e="top-left-panel" id="record-side-pan" ng-hide="ctrl.noVisibleRelatedTables()" ng-class="{'open-panel': recordSidePanOpen, 'close-panel': !recordSidePanOpen}">
-                    <div class="btn btn-primary btn-inverted" id="back-to-top" ng-click="scrollToTop()" ng-show="showTopBtn">
-                        <i uib-tooltip="Scroll To Top" tooltip-placement="left" class="glyphicon glyphicon-triangle-top"></i>
-                    </div>
-
                     <div class="side-panel-container" style="height: 100%;" >
                         <h2 class="side-panel-heading">Contents</h2>
                         <div class="columns-container">
@@ -148,6 +146,9 @@
                                     </div>
                                 </div>
                             </uib-accordion>
+                        </div>
+                        <div class="chaise-btn chaise-btn-primary" id="back-to-top" ng-click="scrollToTop()" ng-show="showTopBtn">
+                            <i uib-tooltip="Scroll To Top" tooltip-placement="left" class="glyphicon glyphicon-triangle-top"></i>
                         </div>
                         <span id="rt-loading" ng-show="loading" class="loading-text" ng-class="{'loading-sticky': ctrl.stickLoading}">
                             <img class="spinner spinner-sm" src="../common/styles/images/loader.gif"/>

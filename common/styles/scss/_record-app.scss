@@ -1,21 +1,4 @@
 #record {
-    .record-toc .columns-container ul {
-        padding-left: 10px;
-    }
-
-    .record-toc .toc-heading {
-        padding: 5px;
-        cursor: pointer;
-    }
-
-    .record-toc .toc-heading:hover {
-        background-color: rgb(241, 241, 241);
-    }
-
-    .record-toc #rt-toc-loading {
-        padding: 10px 5px 5px;
-    }
-
     .loading-text {
         color: #446c73;
         font-weight: 600;
@@ -36,26 +19,18 @@
         border: 2px solid $primary-color;
     }
 
-    #top-panel-container {
-        -webkit-box-flex: 1;
-        display: flex;
-        flex: 1;
-
+    .top-panel-container {
         .top-left-panel.open-panel {
-            flex: 0 0 15vw;
+            flex: 0 0 $left-panel-width-sm;
             min-width: 170px;
         }
 
         .top-right-panel {
-            flex: 1;
-            position: relative;
-            z-index: 1;
-
-            #page-action-btns {
+            .page-action-btns {
                 margin: 20px 20px 4px 20px;
             }
 
-            #title {
+            .title {
                 margin: 4px 20px 20px 20px;
 
                 #page-subtitle {
@@ -65,61 +40,48 @@
                 .entity-display-header {
                     display: flex;
                     justify-content: space-between;
+                    position: relative;
 
                     #page-title {
                         margin: 0px;
                     }
 
-                    .record-action-btns {
+                    .record-action-btns-container {
                         min-width: 350px;
-                        text-align: right;
+
+                        .record-action-btns {
+                            position: absolute;
+                            bottom: 0;
+                            right: 0;
+                        }
                     }
                 } // end .entity-display-header
             } // end #title
         }
     }
 
-    .main-content {
-        .row-focus {
-            border-color: $primary-color !important;
+    .bottom-panel-container {
+        /** bottom left panel **/
+        .record-toc .columns-container ul {
+            padding-left: 10px;
         }
 
-        /******Related Entities in record **************/
-
-        .related-table-heading>.panel-heading {
-            height: 44px;
-            text-transform: inherit;
-            padding: 8px 8px 8px 0px;
-            color: $white-color;
-            border: none;
-            background: $section-background-color;
-
-            & + .panel-collapse > .panel-body {
-                border-top: none;
-                padding: 0px 0px 10px 0px;
-            }
+        .record-toc .toc-heading {
+            padding: 5px;
+            cursor: pointer;
         }
 
-        .panel-title {
-            font-size: inherit;
-
-            &>a:hover, &>a:focus{
-                text-decoration: none;
-            }
-
-            a.accordion-toggle {
-                color: inherit;
-
-                .rt-section-header {
-                    font-size: $h2-font-size;
-                }
-            }
+        .record-toc .toc-heading:hover {
+            background-color: rgb(241, 241, 241);
         }
 
-        /** record side panel **/
+        .record-toc #rt-toc-loading {
+            padding: 10px 5px 5px;
+        }
+
         > .side-panel-resizable {
             &.open-panel {
-                flex: 0 0 15vw;
+                flex: 0 0 $left-panel-width-sm;
                 min-width: 170px;
                 padding-left: 5px;
             }
@@ -130,29 +92,67 @@
                 margin: 5px 0 0 -5px;
             }
         }
+
+        .row-focus {
+            border-color: $primary-color !important;
+        }
+
+        /******Related Entities in record **************/
+        #rt-container {
+            .related-table-heading > .panel-heading {
+                height: 44px;
+                text-transform: inherit;
+                padding: 8px 8px 8px 0px;
+                color: $white-color;
+                border: none;
+                background: $section-background-color;
+
+                & + .panel-collapse > .panel-body {
+                    border-top: none;
+                    padding: 0px 0px 10px 0px;
+                }
+            }
+
+            .action-bar-RT-heading {
+                margin-top: -28px;
+            }
+
+            .action-bar-entity-display-mode {
+                float: right;
+            }
+
+            .action-bar-entity-table-mode {
+                padding-bottom: 5px;
+                text-align: right;
+            }
+
+            .panel-title {
+                font-size: inherit;
+
+                & > a:hover, & > a:focus{
+                    text-decoration: none;
+                }
+
+                a.accordion-toggle {
+                    color: inherit;
+
+                    .rt-section-header {
+                        font-size: $h2-font-size;
+                    }
+                }
+            }
+        } // end rt-container
     }
 
-    // TODO might be removed because style changed drastically
-    .action-bar-RT-heading {
-        margin-top: -28px;
-    }
 
-    .action-bar-entity-display-mode {
-        float: right;
-    }
-
-    .action-bar-entity-table-mode {
-        padding-bottom: 5px;
-        text-align: right;
-    }
 
     #back-to-top {
-        position: absolute;
-        left: -66px;
-        bottom: 2em;
+        position: fixed;
+        right: 66px;
+        bottom: 66px;
         padding: 1px 4px;
         font-size: 25px;
-        border-radius: 2px 0 0 2px;
+        border-radius: 4px;
         height: 35px;
         width: 35px;
         cursor: pointer;
