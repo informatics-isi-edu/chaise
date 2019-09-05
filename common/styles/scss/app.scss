@@ -239,12 +239,12 @@ html.ng-scope {
     .entity-key {
         color: #333333;
         font-weight: normal;
-        font-size: 1em;
+        font-size: 1rem;
     }
 
 // record and recordedit column values
     .entity-value {
-        font-size: 1em;
+        font-size: 1rem;
         color: #333;
     }
 
@@ -443,7 +443,7 @@ html.ng-scope {
         height: 0;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.05rem;
         color: rgba(0,0,0,.85);
         -webkit-user-select: none;
         -moz-user-select: none;
