@@ -18,12 +18,14 @@
         }
 
         .top-right-panel {
+            padding-left: 30px;
+
             .page-action-btns {
                 margin: 20px 20px 4px 20px;
             }
 
             .title {
-                margin: 4px 20px 20px 20px;
+                margin: 4px 20px 20px 0px;
 
                 #page-subtitle {
                     margin: 5px 0px;
@@ -105,7 +107,7 @@
 
         /* action bar styles apply to inline RT and bottom of page RT */
         .action-bar-RT-heading {
-            margin-top: -20px;
+            margin-top: -28px;
         }
 
         .action-bar-entity-display-mode {
@@ -133,6 +135,7 @@
                 padding: 8px 8px 8px 0px;
                 color: $white-color;
                 border: none;
+                border-radius: 0px;
                 background: $section-background-color;
 
                 & + .panel-collapse > .panel-body {
@@ -153,6 +156,19 @@
 
                     .rt-section-header {
                         font-size: $h2-font-size;
+
+                        .toggle-icon {
+                            &.fa-chevron-right {
+                                margin-right: 5px;
+                                margin-left: 15px
+                            }
+
+                            &.fa-chevron-down {
+                                margin-right: 4px;
+                                margin-left: 10px
+                            }
+
+                        }
                     }
                 }
             }
@@ -213,13 +229,13 @@
                 margin-left: 0px;
             }
 
-            #bookmark-container {
-                padding-left: 0px;
-            }
-
             .entity-key {
                 width: 15%;
                 max-width: 120px;
+
+                .column-displayname {
+                    margin-left: 30px;
+                }
             }
 
             .entity-value {

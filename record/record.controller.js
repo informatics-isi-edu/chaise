@@ -19,6 +19,8 @@
 
         vm.rowFocus = {};
         vm.sidePanToggleBtnIndicator = "Show";
+        $rootScope.recordSidePanOpen = false;
+        console.log($rootScope);
 
         var chaiseConfig = ConfigUtils.getConfigJSON();
 
@@ -64,9 +66,9 @@
             return UiUtils.versionDate($rootScope.reference.location.versionAsMillis);
         }
 
-        vm.togglePan = function() {
-            $scope.recordSidePanOpen = !$scope.recordSidePanOpen;
-        };
+        // vm.togglePan = function() {
+        //     $scope.recordSidePanOpen = !$scope.recordSidePanOpen;
+        // };
 
         vm.canCreate = function() {
             return ($rootScope.reference && $rootScope.reference.canCreate && $rootScope.modifyRecord);

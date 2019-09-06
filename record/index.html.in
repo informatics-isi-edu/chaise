@@ -14,15 +14,16 @@
         <navbar></navbar>
         <div class="record-container">
             <div class="top-panel-container">
-                <div class="top-left-panel" ng-hide="ctrl.noVisibleRelatedTables()" ng-class="{'open-panel': recordSidePanOpen, 'close-panel': !recordSidePanOpen}">
+                <alerts id="alerts-container" alerts="ctrl.alerts"></alerts>
+                <div class="top-left-panel" ng-hide="ctrl.noVisibleRelatedTables()" ng-class="{'open-panel': $root.recordSidePanOpen, 'close-panel': !$root.recordSidePanOpen}">
                     <div class="bottom-right">
-                        <button class="chaise-btn chaise-btn-tertiary" ng-click="recordSidePanOpen = false" uib-tooltip="Click to hide table of contents.">
+                        <button ng-hide="!$root.recordSidePanOpen" class="chaise-btn chaise-btn-tertiary" ng-click="$root.recordSidePanOpen = false" uib-tooltip="Click to hide table of contents.">
                             <span class="chaise-icon chaise-sidebar-close"></span>
-                            <span>Hide fitler panel
+                            <span>Hide filter panel</span>
                         </button>
                     </div>
                 </div>
-                <div class="top-right-panel">
+                <div ng-if="recordDisplayname" class="top-right-panel">
                     <div class="page-action-btns row">
                         <div class="pull-right">
                             <button id="show-all-related-tables" class="chaise-btn chaise-btn-primary" ng-click="::ctrl.toggleRelatedTables();" uib-tooltip="{{'Click here to ' + ((showEmptyRelatedTables) ? 'hide empty related sections.' : 'show empty related sections too.')}}" tooltip-placement="bottom">
@@ -37,7 +38,7 @@
                             </button>
                         </div>
                     </div>
-                    <div ng-if="recordDisplayname" class="title row">
+                    <div class="title row">
                         <h1 id="page-subtitle">
                             <a ng-href="{{::ctrl.referenceTableApplink()}}">
                                 <span ng-if="::reference.displayname.isHTML" ng-bind-html="reference.displayname.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::reference.table.comment ? reference.table.comment : undefined}}"></span>
@@ -69,12 +70,16 @@
                             </span>
                         </div>
                     </div>
+                    <button ng-show="!$root.recordSidePanOpen" class="chaise-btn chaise-btn-tertiary" ng-click="$root.recordSidePanOpen = true" uib-tooltip="Click to show table of contents.">
+                        <span class="chaise-icon chaise-sidebar-open"></span>
+                        <span>Show filter panel</span>
+                    </button>
                 </div> <!-- end top right panel -->
             </div>
             <loading-spinner ng-show="(!displayReady || showSpinner) && !error"></loading-spinner>
 
             <div class="bottom-panel-container">
-                <div class="side-panel-resizable record-toc" resizable r-directions=["right"] r-flex="true" r-other-e="top-left-panel" id="record-side-pan" ng-hide="ctrl.noVisibleRelatedTables()" ng-class="{'open-panel': recordSidePanOpen, 'close-panel': !recordSidePanOpen}">
+                <div class="side-panel-resizable record-toc" resizable r-directions=["right"] r-flex="true" r-other-e="top-left-panel" id="record-side-pan" ng-hide="ctrl.noVisibleRelatedTables()" ng-class="{'open-panel': $root.recordSidePanOpen, 'close-panel': !$root.recordSidePanOpen}">
                     <div class="side-panel-container">
                         <h3 class="side-panel-heading">Table of contents</h3>
                         <div class="columns-container">
@@ -109,12 +114,10 @@
                             </ul>
                         </div>
                     </div>
-                    <!-- <faceting-collapse-btn class="facet-btn" panel-open="recordSidePanOpen" toggle-panel="ctrl.togglePan" position="right" ng-class="{'open-panel': recordSidePanOpen, 'close-panel': !recordSidePanOpen}"></faceting-collapse-btn> -->
                 </div>
 
                 <div class="main-container" ng-class="{'initializing': !displayReady}">
-                    <div class="main-body" style="padding-right:10px; padding-left:15px;">
-                        <alerts id="alerts-container" alerts="ctrl.alerts"></alerts>
+                    <div class="main-body" style="padding-right:20px; padding-left:30px;">
 
                         <!-- defined on $rootScope in run function -->
                         <record-display class="entity-container" column-models="columnModels" values="recordValues"
@@ -128,7 +131,7 @@
                                 <div uib-accordion-group class="related-table-heading" id="rt-heading-{{::ctrl.makeSafeIdAttr(rtm.tableModel.reference.displayname.value)}}"  ng-repeat="rtm in relatedTableModels track by $index"  ng-show="ctrl.showRelatedTable($index)" is-open="rtm.open">
                                     <uib-accordion-heading>
                                         <div class="rt-section-header">
-                                            <i class="pull-left fas" style="margin-right: 5px;" ng-class="{'fa-chevron-down': rtm.open, 'fa-chevron-right': !m.open}"></i>
+                                            <i class="toggle-icon fas" ng-class="{'fa-chevron-down': rtm.open, 'fa-chevron-right': !rtm.open}"></i>
                                             <span ng-if="::rtm.displayname.isHTML" ng-bind-html="::rtm.displayname.value"></span>
                                             <span ng-if="::!rtm.displayname.isHTML" ng-bind="::rtm.displayname.value"></span>
                                             <span ng-if="rtm.tableModel.tableError" class="glyphicon glyphicon-alert" uib-tooltip="{{ctrl.queryTimeoutTooltip}}" tooltip-placement="right"></span>
