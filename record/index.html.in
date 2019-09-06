@@ -16,7 +16,7 @@
             <div class="top-panel-container">
                 <div class="top-left-panel" ng-hide="ctrl.noVisibleRelatedTables()" ng-class="{'open-panel': recordSidePanOpen, 'close-panel': !recordSidePanOpen}">
                     <div class="bottom-right">
-                        <button class="chaise-btn chaise-btn-tertiary" ng-click="!recordSidePanOpen" uib-tooltip="Click to hide table of contents.">
+                        <button class="chaise-btn chaise-btn-tertiary" ng-click="recordSidePanOpen = false" uib-tooltip="Click to hide table of contents.">
                             <span class="chaise-icon chaise-sidebar-close"></span>
                             <span>Hide fitler panel
                         </button>
