@@ -1,5 +1,7 @@
 #record {
     .top-panel-container {
+        margin-bottom: 10px;
+
         .top-left-panel.open-panel {
             flex: 0 0 $left-panel-width-sm;
             min-width: 170px;
@@ -25,7 +27,7 @@
             }
 
             .title {
-                margin: 4px 20px 20px 0px;
+                margin: 4px 20px 0px 0px;
 
                 #page-subtitle {
                     margin: 5px 0px;
@@ -50,7 +52,13 @@
                         }
                     }
                 } // end .entity-display-header
-            } // end #title
+            } // end .title
+
+            .open-sidebar-btn {
+                margin-top: 10px;
+                padding-left: 2px;
+                padding-bottom: 0px;
+            }
         }
     }
 
@@ -105,6 +113,20 @@
             }
         }
 
+        record-display {
+            table {
+                margin-bottom: 10px;
+
+                tr:nth-child(1) > td {
+                    border-top: none;
+                }
+
+                .column-displayname {
+                    margin-left: 35px;
+                }
+            }
+        }
+
         /* action bar styles apply to inline RT and bottom of page RT */
         .action-bar-RT-heading {
             margin-top: -28px;
@@ -127,51 +149,68 @@
             border-color: $primary-color !important;
         }
 
+        .chaise-table-pagination {
+            margin-top: 10px;
+            margin-bottom: 0px;
+        }
+
         /******Related Entities in record **************/
         #rt-container {
-            .related-table-heading > .panel-heading {
-                height: 44px;
-                text-transform: inherit;
-                padding: 8px 8px 8px 0px;
-                color: $white-color;
-                border: none;
-                border-radius: 0px;
-                background: $section-background-color;
-
-                & + .panel-collapse > .panel-body {
-                    border-top: none;
-                    padding: 0px 0px 10px 0px;
-                }
-            }
-
-            .panel-title {
-                font-size: inherit;
-
-                & > a:hover, & > a:focus{
-                    text-decoration: none;
+            .related-table-accordion {
+                &.panel {
+                    box-shadow: none;
+                    border-radius: 0px;
+                    border: none;
                 }
 
-                a.accordion-toggle {
-                    color: inherit;
+                > .panel-heading {
+                    height: 44px;
+                    text-transform: inherit;
+                    padding: 8px 8px 8px 0px;
+                    color: $white-color;
+                    border: none;
+                    border-radius: inherit;
+                    background: $section-background-color;
 
-                    .rt-section-header {
-                        font-size: $h2-font-size;
+                    .panel-title {
+                        font-size: inherit;
 
-                        .toggle-icon {
-                            &.fa-chevron-right {
-                                margin-right: 5px;
-                                margin-left: 15px
-                            }
-
-                            &.fa-chevron-down {
-                                margin-right: 4px;
-                                margin-left: 10px
-                            }
-
+                        & > a:hover, & > a:focus{
+                            text-decoration: none;
                         }
-                    }
-                }
-            }
+
+                        a.accordion-toggle {
+                            color: inherit;
+
+                            .rt-section-header {
+                                font-size: $h2-font-size;
+
+                                .toggle-icon {
+                                    &.fa-chevron-right {
+                                        margin-right: 5px;
+                                        margin-left: 15px
+                                    }
+
+                                    &.fa-chevron-down {
+                                        margin-right: 4px;
+                                        margin-left: 10px
+                                    }
+
+                                }
+                            }
+                        }
+                    } // end .panel-title
+
+                    & + .panel-collapse > .panel-body {
+                        border-top: none;
+                        padding: 10px 0px 10px 0px;
+
+                        .markdown-switch-case {
+                            margin-left: 40px;
+                        }
+                    } // end .panel-body
+                } // end .panel-heading
+            } // end .related-table-accordion
         } // end rt-container
 
         #back-to-top {
@@ -232,10 +271,6 @@
             .entity-key {
                 width: 15%;
                 max-width: 120px;
-
-                .column-displayname {
-                    margin-left: 30px;
-                }
             }
 
             .entity-value {

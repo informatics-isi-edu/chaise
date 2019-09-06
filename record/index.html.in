@@ -70,7 +70,7 @@
                             </span>
                         </div>
                     </div>
-                    <button ng-show="!$root.recordSidePanOpen" class="chaise-btn chaise-btn-tertiary" ng-click="$root.recordSidePanOpen = true" uib-tooltip="Click to show table of contents.">
+                    <button ng-show="!$root.recordSidePanOpen" class="chaise-btn chaise-btn-tertiary open-sidebar-btn" ng-click="$root.recordSidePanOpen = true" uib-tooltip="Click to show table of contents.">
                         <span class="chaise-icon chaise-sidebar-open"></span>
                         <span>Show filter panel</span>
                     </button>
@@ -128,7 +128,7 @@
                         <!-- used to delay empty accordions from displaying before simple record display -->
                         <div ng-if="displayReady" id="rt-container">
                             <uib-accordion close-others="false">
-                                <div uib-accordion-group class="related-table-heading" id="rt-heading-{{::ctrl.makeSafeIdAttr(rtm.tableModel.reference.displayname.value)}}"  ng-repeat="rtm in relatedTableModels track by $index"  ng-show="ctrl.showRelatedTable($index)" is-open="rtm.open">
+                                <div uib-accordion-group class="related-table-accordion" id="rt-heading-{{::ctrl.makeSafeIdAttr(rtm.tableModel.reference.displayname.value)}}"  ng-repeat="rtm in relatedTableModels track by $index"  ng-show="ctrl.showRelatedTable($index)" is-open="rtm.open">
                                     <uib-accordion-heading>
                                         <div class="rt-section-header">
                                             <i class="toggle-icon fas" ng-class="{'fa-chevron-down': rtm.open, 'fa-chevron-right': !rtm.open}"></i>
@@ -146,7 +146,7 @@
                                     <!-- for different elements inside the accordion -->
                                     <div class="row">
                                         <div class="col-xs-12" ng-if="rtm.open" ng-switch="rtm.displayType == 'markdown' && ctrl.allowRelatedTableMarkdown($index)">
-                                            <div ng-switch-when="true">
+                                            <div ng-switch-when="true" class="markdown-switch-case">
                                                 <span class="markdown-container" ng-bind-html="rtm.tableModel.page.content | trustedHTML"></span>
                                             </div>
                                             <div ng-switch-default>

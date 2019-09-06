@@ -15,7 +15,7 @@
     height: 14px;
     line-height: 14px;
     position: absolute;
-    z-index: 1;
+    z-index: 100;
     -moz-user-select: -moz-none;
     -ms-user-select: none;
     -webkit-user-select: none;
@@ -37,7 +37,6 @@
 
 .rg-left span,
 .rg-right span {
-    top: 50vh;
     top: 50%;
     color: $border-color;
     font-weight: 400;

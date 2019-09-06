@@ -683,7 +683,7 @@ var recordPage = function() {
         return element.all(by.css(".panel"));
     };
     this.getRelatedTablesWithPanelandHeading = function () {
-        return element.all(by.css(".related-table-heading.panel:not(.ng-hide)"));
+        return element.all(by.css(".related-table-accordion.panel:not(.ng-hide)"));
     };
 
     this.getRelatedTable = function(displayName) {
@@ -702,11 +702,11 @@ var recordPage = function() {
     };
 
     this.getRelatedTableHeadings = function() {
-        return element.all(by.css(".related-table-heading"));
+        return element.all(by.css(".related-table-accordion"));
     };
 
     this.getRelatedTableTitles = function() {
-        return browser.executeScript("return $('.related-table-heading .panel-title').map(function(i, a) { return a.textContent.trim(); });");
+        return browser.executeScript("return $('.related-table-accordion .panel-title').map(function(i, a) { return a.textContent.trim(); });");
     }
 
     this.getRelatedTableHeading = function(displayName) {
