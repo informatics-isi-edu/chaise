@@ -11,7 +11,7 @@
                 .faceting-header {
                     width: 100%;
                     position: absolute;
-                    bottom: 0;
+                    bottom: 9px;
                     left: 0;
 
                     h3 {
@@ -29,10 +29,15 @@
                     margin: 0;
                     margin-bottom: 10px;
                 }
+
+                .open-filter-panel-btn {
+                    padding: 0;
+                    margin-bottom: 10px;
+                }
             }
         }
 
-        .top-right-panel, .bottom-panel-container .main-container {
+        .top-left-panel.open-panel + .top-right-panel, .side-panel-resizable.open-panel + .main-container {
             padding-left: 30px;
         }
 
@@ -224,7 +229,7 @@
 
         .action-btns {
             text-align: center;
-            font-size: 1.14em;
+            font-size: 1.14rem;
             .chaise-btn {
                 padding: 0;
                 margin: -3px;
@@ -281,23 +286,20 @@
         overflow-x: hidden;
         /*max-height: 140px;*/
         /*overflow-y: auto;*/
-    }
+        .filter-label {
+            padding: 0.2rem 0.3rem 0.3rem;
+            font-size: 1rem;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            display: inline-block;
+            position: relative;
+            border: 1px solid #ccc;
+            overflow: hidden;
+            max-width: 350px;
+            text-overflow: ellipsis;
+            height: 26px;
+        }
 
-    .filter-label {
-        padding: 0.2em 0.3em 0.3em;
-    }
-
-    .total-filters .filter-label {
-        font-size: 1em;
-        margin-right: 5px;
-        margin-bottom: 5px;
-        display: inline-block;
-        position: relative;
-        border: 1px solid #ccc;
-        overflow: hidden;
-        max-width: 350px;
-        text-overflow: ellipsis;
-        height: 26px;
     }
 
     .total-filters .filter-label .filter-label-colon,
@@ -308,7 +310,7 @@
     }
 
     .total-filters .filter-label .remove-link i {
-        top: 0.1em;
+        top: 0.1rem;
     }
 
     .total-filters .filter-label span {
@@ -321,13 +323,13 @@
         display: inline-block;
         max-width: 150px;
         margin-right: -2px;
-        padding: 0.1em 0;
+        padding: 0.1 0;
     }
 
     .total-filters .remove-link .filter-label {
         background-color: #337ab7;
         color: white;
-        padding: 0.34em 0.4em 0.33em;
+        padding: 0.34rem 0.4rem 0.33rem;
     }
 
     .total-filters .remove-link:hover {

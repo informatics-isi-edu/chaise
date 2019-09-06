@@ -1,13 +1,13 @@
 <div class="recordset-container" ng-class="vm.config.showFaceting ? 'with-faceting':'without-faceting'" >
     <loading-spinner ng-show="(!vm.initialized || $root.showSpinner) && !$root.error"></loading-spinner>
-    <div class="top-panel-container">
+    <div class="top-panel-container" ng-show="vm.reference">
         <div id="top-left-panel" class="top-left-panel also-resizeable" ng-class="{'open-panel': vm.config.facetPanelOpen, 'close-panel': !vm.config.facetPanelOpen}">
             <div class="faceting-header">
                 <div class="pull-left">
                     <h3>Refine search</h3>
                 </div>
                 <div class="pull-right">
-                    <button class="chaise-btn chaise-btn-tertiary pull-right">
+                    <button class="chaise-btn chaise-btn-tertiary pull-right" ng-click="vm.config.facetPanelOpen = false">
                         <span class="chaise-icon chaise-sidebar-close"></span>
                         <span>Hide fitler panel
                     </button>
@@ -131,7 +131,11 @@
                     </div>
                 </div>
             </div>
-            <table-header vm="vm"></table-header>
+            <button class="open-filter-panel-btn chaise-btn chaise-btn-tertiary" ng-show="vm.config.showFaceting && !vm.config.facetPanelOpen" ng-click="vm.config.facetPanelOpen = true">
+                <span class="chaise-icon-btn chaise-icon chaise-sidebar-open"></span>
+                <span>Show fitler panel
+            </button>
+            <table-header ng-show="vm.initialized" vm="vm"></table-header>
         </div>
     </div>
     <div class="bottom-panel-container">

@@ -32,6 +32,10 @@ html.ng-scope {
     }
 }
 
+html {
+    font-size: $font-size;
+}
+
 .chaise-body {
 
     // TODO this might be problematic, we might want to be more specific to each app
@@ -40,7 +44,7 @@ html.ng-scope {
     height: 100%;
     font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
     background-color: #FFF;
-    font-size: 14px;
+    font-size: $font-size;
     font-weight: 400;
     line-height: 1.428;
 
@@ -239,12 +243,12 @@ html.ng-scope {
     .entity-key {
         color: #333333;
         font-weight: normal;
-        font-size: 1em;
+        font-size: 1rem;
     }
 
 // record and recordedit column values
     .entity-value {
-        font-size: 1em;
+        font-size: 1rem;
         color: #333;
     }
 
@@ -328,6 +332,7 @@ html.ng-scope {
         &.close-panel {
             width: 0;
             flex-basis: 0 !important;
+            display: none;
 
             .side-panel-container {
                 width: 0;
@@ -365,6 +370,7 @@ html.ng-scope {
             &.close-panel {
                 width: 0;
                 flex-basis: 0 !important;
+                display: none;
             }
         }
 
@@ -443,7 +449,7 @@ html.ng-scope {
         height: 0;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.05rem;
         color: rgba(0,0,0,.85);
         -webkit-user-select: none;
         -moz-user-select: none;
