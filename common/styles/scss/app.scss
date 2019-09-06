@@ -332,6 +332,7 @@ html {
         &.close-panel {
             width: 0;
             flex-basis: 0 !important;
+            display: none;
 
             .side-panel-container {
                 width: 0;
@@ -369,6 +370,7 @@ html {
             &.close-panel {
                 width: 0;
                 flex-basis: 0 !important;
+                display: none;
             }
         }
 

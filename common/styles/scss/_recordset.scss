@@ -11,7 +11,7 @@
                 .faceting-header {
                     width: 100%;
                     position: absolute;
-                    bottom: 0;
+                    bottom: 9px;
                     left: 0;
 
                     h3 {
@@ -29,10 +29,15 @@
                     margin: 0;
                     margin-bottom: 10px;
                 }
+
+                .open-filter-panel-btn {
+                    padding: 0;
+                    margin-bottom: 10px;
+                }
             }
         }
 
-        .top-right-panel, .bottom-panel-container .main-container {
+        .top-left-panel.open-panel + .top-right-panel, .side-panel-resizable.open-panel + .main-container {
             padding-left: 30px;
         }
 
@@ -224,7 +229,7 @@
 
         .action-btns {
             text-align: center;
-            font-size: 1.8rem;
+            font-size: 1.14rem;
             .chaise-btn {
                 padding: 0;
                 margin: -3px;
@@ -281,23 +286,20 @@
         overflow-x: hidden;
         /*max-height: 140px;*/
         /*overflow-y: auto;*/
-    }
+        .filter-label {
+            padding: 0.2rem 0.3rem 0.3rem;
+            font-size: 1rem;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            display: inline-block;
+            position: relative;
+            border: 1px solid #ccc;
+            overflow: hidden;
+            max-width: 350px;
+            text-overflow: ellipsis;
+            height: 26px;
+        }
 
-    .filter-label {
-        padding: 0.2rem 0.3rem 0.3rem;
-    }
-
-    .total-filters .filter-label {
-        font-size: 1rem;
-        margin-right: 5px;
-        margin-bottom: 5px;
-        display: inline-block;
-        position: relative;
-        border: 1px solid #ccc;
-        overflow: hidden;
-        max-width: 350px;
-        text-overflow: ellipsis;
-        height: 26px;
     }
 
     .total-filters .filter-label .filter-label-colon,
