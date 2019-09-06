@@ -14,7 +14,14 @@
         <navbar></navbar>
         <div class="record-container">
             <div class="top-panel-container">
-                <div class="top-left-panel" ng-hide="ctrl.noVisibleRelatedTables()" ng-class="{'open-panel': recordSidePanOpen, 'close-panel': !recordSidePanOpen}"></div>
+                <div class="top-left-panel" ng-hide="ctrl.noVisibleRelatedTables()" ng-class="{'open-panel': recordSidePanOpen, 'close-panel': !recordSidePanOpen}">
+                    <div class="bottom-right">
+                        <button class="chaise-btn chaise-btn-tertiary" ng-click="!recordSidePanOpen" uib-tooltip="Click to hide table of contents.">
+                            <span class="chaise-icon chaise-sidebar-close"></span>
+                            <span>Hide fitler panel
+                        </button>
+                    </div>
+                </div>
                 <div class="top-right-panel">
                     <div class="page-action-btns row">
                         <div class="pull-right">
@@ -68,8 +75,8 @@
 
             <div class="bottom-panel-container">
                 <div class="side-panel-resizable record-toc" resizable r-directions=["right"] r-flex="true" r-other-e="top-left-panel" id="record-side-pan" ng-hide="ctrl.noVisibleRelatedTables()" ng-class="{'open-panel': recordSidePanOpen, 'close-panel': !recordSidePanOpen}">
-                    <div class="side-panel-container" style="height: 100%;" >
-                        <h2 class="side-panel-heading">Contents</h2>
+                    <div class="side-panel-container">
+                        <h3 class="side-panel-heading">Table of contents</h3>
                         <div class="columns-container">
                             <ul>
                                 <li id="main-to-top" class="toc-heading" ng-click="scrollToTop()">
@@ -77,7 +84,7 @@
                                 </li>
                                 <div ng-repeat="cm in columnModels track by $index" id="recordSidePan-{{$index}}" ng-if="ctrl.showInlineTable($index)" class="{{lastActiveFacet == $index ? 'focused': ''}}" ng-click="ctrl.gotoInlineTable(cm.displayname.value, $index)">
 
-                                    <li id="recordSidePan-heading-{{$index}}" class="toc-heading">
+                                    <li id="recordSidePan-heading-{{$index}}" class="toc-heading toc-inline-heading">
                                         <a uib-tooltip="{{cm.displayname.value}}" tooltip-placement="bottom" chaise-enable-tooltip-width>
                                             <span ng-if="::cm.displayname.isHTML" ng-bind-html="::cm.displayname.value"></span>
                                             <span ng-if="::!cm.displayname.isHTML" ng-bind="::cm.displayname.value"></span>
@@ -102,7 +109,7 @@
                             </ul>
                         </div>
                     </div>
-                    <faceting-collapse-btn class="facet-btn" panel-open="recordSidePanOpen" toggle-panel="ctrl.togglePan" position="right" tooltip-message="{{'Click to ' + ((recordSidePanOpen) ? 'hide' : 'show') + ' table of contents.'}}" ng-class="{'open-panel': recordSidePanOpen, 'close-panel': !recordSidePanOpen}"></faceting-collapse-btn>
+                    <!-- <faceting-collapse-btn class="facet-btn" panel-open="recordSidePanOpen" toggle-panel="ctrl.togglePan" position="right" ng-class="{'open-panel': recordSidePanOpen, 'close-panel': !recordSidePanOpen}"></faceting-collapse-btn> -->
                 </div>
 
                 <div class="main-container" ng-class="{'initializing': !displayReady}">

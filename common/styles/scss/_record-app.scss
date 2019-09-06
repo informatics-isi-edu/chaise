@@ -1,28 +1,20 @@
 #record {
-    .loading-text {
-        color: #446c73;
-        font-weight: 600;
-    }
-
-    .loading-sticky {
-        float: left;
-        position: fixed;
-        z-index: 1;
-        bottom: 0;
-        background: #d9edf7;
-        margin: 5px;
-        padding: 5px 20px;
-        border: solid #446c73 1.5px;
-    }
-
-    tr.row-focus {
-        border: 2px solid $primary-color;
-    }
-
     .top-panel-container {
         .top-left-panel.open-panel {
             flex: 0 0 $left-panel-width-sm;
             min-width: 170px;
+            margin-left: 20px;
+            position: relative;
+
+            .bottom-right {
+                position: absolute;
+                bottom: 0;
+                right: 0;
+
+                button {
+                    padding-right: 0px;
+                }
+            }
         }
 
         .top-right-panel {
@@ -62,35 +54,71 @@
 
     .bottom-panel-container {
         /** bottom left panel **/
-        .record-toc .columns-container ul {
-            padding-left: 10px;
-        }
-
-        .record-toc .toc-heading {
-            padding: 5px;
-            cursor: pointer;
-        }
-
-        .record-toc .toc-heading:hover {
-            background-color: rgb(241, 241, 241);
-        }
-
-        .record-toc #rt-toc-loading {
-            padding: 10px 5px 5px;
-        }
-
         > .side-panel-resizable {
+            margin-left: 20px;
+
             &.open-panel {
                 flex: 0 0 $left-panel-width-sm;
                 min-width: 170px;
-                padding-left: 5px;
+                overflow-y: auto;
+                overflow-x: hidden;
             }
 
-            .side-panel-heading {
-                font-weight: bold;
-                padding: 9px 10px 10px !important;
-                margin: 5px 0 0 -5px;
+            .side-panel-container {
+                height: 100%;
+
+                .side-panel-heading {
+                    margin: 0px;
+
+                    // padding: 9px 10px 10px !important;
+                    // margin: 5px 0 0 -5px;
+                }
             }
+
+            .columns-container {
+                margin-left: 10px;
+
+                ul {
+                    padding-left: 0px;
+                }
+
+                .toc-heading {
+                    padding: 4px 10px 4px 0px;
+                    cursor: pointer;
+                    font-size: $h4-font-size;
+
+                    &:hover {
+                        background-color: rgb(241, 241, 241);
+                    }
+                }
+
+                .toc-inline-heading {
+                    font-size: 1rem;
+                    padding-left: 20px;
+                }
+
+                #rt-toc-loading {
+                    padding: 10px 5px 5px;
+                }
+            }
+        }
+
+        /* action bar styles apply to inline RT and bottom of page RT */
+        .action-bar-RT-heading {
+            margin-top: -20px;
+        }
+
+        .action-bar-entity-display-mode {
+            float: right;
+        }
+
+        .action-bar-entity-table-mode {
+            padding-bottom: 5px;
+            text-align: right;
+        }
+
+        tr.row-focus {
+            border: 2px solid $primary-color;
         }
 
         .row-focus {
@@ -113,19 +141,6 @@
                 }
             }
 
-            .action-bar-RT-heading {
-                margin-top: -28px;
-            }
-
-            .action-bar-entity-display-mode {
-                float: right;
-            }
-
-            .action-bar-entity-table-mode {
-                padding-bottom: 5px;
-                text-align: right;
-            }
-
             .panel-title {
                 font-size: inherit;
 
@@ -142,22 +157,39 @@
                 }
             }
         } // end rt-container
+
+        #back-to-top {
+            position: fixed;
+            right: 40px;
+            bottom: 40px;
+            padding: 1px 4px;
+            font-size: 25px;
+            border-radius: 4px;
+            height: 35px;
+            width: 35px;
+            cursor: pointer;
+            overflow: hidden;
+            z-index: 100;
+        }
+
+        .loading-text {
+            color: #446c73;
+            font-weight: 600;
+        }
+
+        .loading-sticky {
+            float: left;
+            position: fixed;
+            z-index: 1;
+            bottom: 0;
+            background: #d9edf7;
+            margin: 5px;
+            padding: 5px 20px;
+            border: solid #446c73 1.5px;
+        }
     }
 
 
-
-    #back-to-top {
-        position: fixed;
-        right: 66px;
-        bottom: 66px;
-        padding: 1px 4px;
-        font-size: 25px;
-        border-radius: 4px;
-        height: 35px;
-        width: 35px;
-        cursor: pointer;
-        overflow: hidden;
-    }
 
 
     /********* print ********/
