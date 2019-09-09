@@ -30,12 +30,12 @@
     </div>
     <div class="col-xs-12 col-sm-6" ng-if="!parentReference">
         <div class="pull-right">
-            <button id="create-link" class="chaise-btn chaise-btn-primary" ng-if="vm.reference.canCreate && vm.config.editable" ng-click="create()" uib-tooltip="Click here to create a record." tooltip-placement="bottom">
+            <button id="create-link" class="chaise-btn chaise-btn-primary" ng-if="vm.reference.canCreate && vm.config.editable" ng-click="addRecord()" uib-tooltip="Click here to create a record." tooltip-placement="bottom">
                 <span class="chaise-btn-icon glyphicon glyphicon-plus"></span>
                 <span>Create</span>
             </button>
             <button id="edit-link" class="chaise-btn chaise-btn-primary" ng-if="vm.page && vm.reference.canUpdate && vm.config.editable" ng-disabled="{{vm.pageLimit > vm.RECORDEDIT_MAX_ROWS}}"
-                ng-click="edit()" tooltip-placement="bottom" uib-tooltip="{{ ((vm.pageLimit > vm.RECORDEDIT_MAX_ROWS) ? 'Editing disabled when items per page > ' + vm.RECORDEDIT_MAX_ROWS : 'Click here to edit this page of records.' ) }}">
+                ng-click="editRecord()" tooltip-placement="bottom" uib-tooltip="{{ ((vm.pageLimit > vm.RECORDEDIT_MAX_ROWS) ? 'Editing disabled when items per page > ' + vm.RECORDEDIT_MAX_ROWS : 'Click here to edit this page of records.' ) }}">
                 <span class="chaise-btn-icon glyphicon glyphicon-pencil"></span>
                 <span>Edit</span>
             </button>

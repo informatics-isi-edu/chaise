@@ -4,6 +4,8 @@
     var isIE = /*@cc_on!@*/false || !!document.documentMode, // Internet Explorer 6-11
         isEdge = !isIE && !!window.StyleMedia; // Edge
 
+    var addRecordRequests = {}; // table refresh used by add record implementation with cookie (old method)
+
     angular.module('chaise.record.table', ['chaise.ellipsis', 'chaise.inputs', 'chaise.utils'])
 
     .constant('tableConstants', {
@@ -828,14 +830,6 @@
                 changeSort((scope.vm.sortOrder === 'asc' ? scope.vm.sortOrder = 'desc' : scope.vm.sortOrder = 'asc'));
             };
 
-            scope.pageLimits = [10, 25, 50, 75, 100, 200];
-            scope.setPageLimit = function(limit) {
-                scope.vm.pageLimit = limit;
-
-                scope.vm.logObject = {action: logActions.recordsetLimit};
-                update(scope.vm, true, false, false);
-            };
-
             scope.before = function() {
                 var previous = scope.vm.page.previous;
                 if (previous && scope.$root.checkReferenceURL(previous)) {
@@ -930,33 +924,6 @@
                 }
             };
 
-            scope.addRecord = function() {
-                // Generate a unique id for this request
-                // append it to the URL
-                var referrer_id = 'recordset-' + MathUtils.getRandomInt(0, Number.MAX_SAFE_INTEGER);
-                addRecordRequests[referrer_id] = 0;
-
-                // open a new tab
-                var newRef = scope.vm.reference.table.reference.contextualize.entryCreate;
-                var appLink = newRef.appLink;
-                appLink = appLink + (appLink.indexOf("?") === -1 ? "?" : "&") +
-                    'invalidate=' + UriUtils.fixedEncodeURIComponent(referrer_id);
-
-                // open url in a new tab
-                $window.open(appLink, '_blank');
-            };
-
-            scope.editRecord = function() {
-                var link = recordsetModel.page.reference.contextualize.entryEdit.appLink;
-                // TODO ermrestJS needs to handle the case when no limit is defined in the URL
-                if (link.indexOf("?limit=") === -1 || link.indexOf("&limit=") === -1)
-                    link = link + (link.indexOf('?') === -1 ? "?limit=" : "&limit=" ) + recordsetModel.pageLimit;
-
-                // TODO UX-M we should add invalidate stuff to this function too
-                // open url in a new tab
-                $window.open(appLink, '_blank');
-            };
-
             // Facilitates the multi select functionality for multi edit by storing the tuple in the selectedRows array
             scope.onSelect = function(args, $event) {
                 var tuple = args.tuple;
@@ -992,7 +959,6 @@
          * @param  {object} scope the scope object
          */
         function registerRecordsetCallbacks(scope) {
-            var addRecordRequests = {}; // table refresh used by add record implementation with cookie (old method)
             var updated = false; // table refresh used by ellipsis' edit action (new method)
 
             scope.$root.alerts = AlertsService.alerts;
@@ -1228,12 +1194,50 @@
     }])
 
 
-    .directive('tableHeader', ['recordTableUtils', 'UriUtils', function(recordTableUtils, UriUtils) {
+    .directive('tableHeader', ['logActions', 'recordTableUtils', 'UriUtils', function(logActions, recordTableUtils, UriUtils) {
         return {
             restrict: 'E',
             templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/tableHeader.html',
             scope: {
                 vm: '='
+            },
+            link: function (scope, elem, attr) {
+                scope.pageLimits = [10, 25, 50, 75, 100, 200];
+                scope.setPageLimit = function(limit) {
+                    scope.vm.pageLimit = limit;
+
+                    scope.vm.logObject = {action: logActions.recordsetLimit};
+                    recordTableUtils.update(scope.vm, true, false, false);
+                };
+
+
+                scope.addRecord = function() {
+                    // Generate a unique id for this request
+                    // append it to the URL
+                    var referrer_id = 'recordset-' + MathUtils.getRandomInt(0, Number.MAX_SAFE_INTEGER);
+                    addRecordRequests[referrer_id] = 0;
+
+                    // open a new tab
+                    var newRef = scope.vm.reference.table.reference.contextualize.entryCreate;
+                    var appLink = newRef.appLink;
+                    appLink = appLink + (appLink.indexOf("?") === -1 ? "?" : "&") +
+                        'invalidate=' + UriUtils.fixedEncodeURIComponent(referrer_id);
+
+                    // open url in a new tab
+                    $window.open(appLink, '_blank');
+                };
+
+                scope.editRecord = function() {
+                    var link = recordsetModel.page.reference.contextualize.entryEdit.appLink;
+                    // TODO ermrestJS needs to handle the case when no limit is defined in the URL
+                    if (link.indexOf("?limit=") === -1 || link.indexOf("&limit=") === -1)
+                        link = link + (link.indexOf('?') === -1 ? "?limit=" : "&limit=" ) + recordsetModel.pageLimit;
+
+                    // TODO UX-M we should add invalidate stuff to this function too
+                    // open url in a new tab
+                    $window.open(appLink, '_blank');
+                };
+
             }
         }
     }])
