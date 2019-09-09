@@ -171,10 +171,6 @@
                         scope.updateReference(newRef, -1);
                     };
 
-                    scope.togglePanel = function () {
-                        scope.vm.config.facetPanelOpen = !scope.vm.config.facetPanelOpen;
-                    };
-
                     /**
                      * open or close the facet given its index
                      * @param  {int} index index of facet
@@ -1603,6 +1599,7 @@
 
         }])
 
+// TODO should be removed
         .directive('facetingCollapseBtn', ['UriUtils', function (UriUtils) {
             return {
                 restrict: 'E',

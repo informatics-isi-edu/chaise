@@ -320,7 +320,6 @@ html {
 
     .side-panel-resizable {
         position: relative;
-        z-index: 2;
         max-width: 50vw;
 
         &.open-panel {
@@ -343,7 +342,6 @@ html {
     .main-container {
         flex: 1;
         position: relative;
-        z-index: 1;
         overflow-x: hidden;
         overflow-y: auto;
     }
@@ -358,7 +356,6 @@ html {
 
         .top-left-panel {
             position: relative;
-            z-index: 2;
             max-width: 50vw;
 
             &.open-panel {
@@ -377,7 +374,6 @@ html {
         .top-right-panel {
             flex: 1;
             position: relative;
-            z-index: 1;
         }
     }
 
