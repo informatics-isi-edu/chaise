@@ -468,7 +468,6 @@
             var elements = {};
             try {
                 // get document height
-                console.log($document[0]);
                 elements.docHeight = $document[0].documentElement.offsetHeight
                 // get navbar height
                 elements.navbarHeight = $document[0].getElementById('mainnav').offsetHeight;
@@ -485,7 +484,7 @@
         function setMainContainerHeight() {
             var elements = fetchContainerElements();
             // if these values are not set yet, don't set the height
-            if(elements.navbarHeight !== undefined && elements.bookmarkHeight) {
+            if(elements.navbarHeight !== undefined) {
                 UiUtils.setDisplayContainerHeight(elements);
             }
         };
@@ -497,7 +496,6 @@
             if (newValue) {
                 $rootScope.recordSidePanOpen = (chaiseConfig.hideTableOfContents === true || $rootScope.reference.display.collapseToc === true) ? false : true;
                 $rootScope.hideColumnHeaders = $rootScope.reference.display.hideColumnHeaders;
-                $timeout(setMainContainerHeight, 0);
             }
         });
 
@@ -509,14 +507,23 @@
             }
         };
 
+        $timeout(function () {
+            mainBodyEl = $document[0].getElementsByClassName('main-body');
+        }, 0);
+
         // watch for the main body size to change
         $scope.$watch(function() {
-            return mainBodyEl && mainBodyEl[0].offsetHeight;
+            if (mainBodyEl) {
+                return mainBodyEl[0].offsetHeight;
+            } else {
+                return -1;
+            }
         }, function (newValue, oldValue) {
-            if (newValue) {
+            if (newValue != oldValue) {
                 $timeout(function () {
                     UiUtils.setFooterStyle(0);
                     setLoadingTextStyle();
+                    setMainContainerHeight();
                 }, 0);
             }
         });
@@ -529,10 +536,6 @@
                 $scope.$digest();
             }
         });
-
-        $timeout(function () {
-            mainBodyEl = $document[0].getElementsByClassName('main-body');
-        }, 0);
 
         /*** scroll to events ***/
         // scroll to top button
