@@ -528,6 +528,22 @@
             }
         });
 
+        // $scope.$watch(function() {
+        //     if (mainContainerEl) {
+        //         return mainContainerEl[0].offsetHeight;
+        //     } else {
+        //         return -1;
+        //     }
+        // }, function (newValue, oldValue) {
+        //     if (newValue != oldValue) {
+        //         $timeout(function () {
+        //             UiUtils.setFooterStyle(0);
+        //             setLoadingTextStyle();
+        //             // setMainContainerHeight();
+        //         }, 0);
+        //     }
+        // });
+
         // change the main container height whenever the DOM resizes
         angular.element($window).bind('resize', function(){
             if ($rootScope.displayReady) {

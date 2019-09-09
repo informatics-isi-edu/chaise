@@ -14,7 +14,6 @@
 
 // app specific
 @import "recordset-app";
-@import "record-app";
 @import "recordedit-app";
 @import "viewer-app";
 
@@ -37,6 +36,7 @@ html {
 }
 
 .chaise-body {
+    @import "record-app";
 
     // TODO this might be problematic, we might want to be more specific to each app
     /****************** GLOBAL ******************/
@@ -348,7 +348,7 @@ html {
 }
 
 // top panel for record and recordset
-    .top-panel-container {
+    .top-flex-panel {
         -webkit-box-flex: 1;
         display: flex;
         flex: 1;

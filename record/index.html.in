@@ -13,40 +13,41 @@
     <div class="app-container r_s_{{ctrl.makeSafeIdAttr(reference.table.schema.name)}} r_t_{{ctrl.makeSafeIdAttr(reference.table.name)}}" ng-controller="RecordController as ctrl">
         <navbar></navbar>
         <div class="record-container">
-            <alerts id="alerts-container" alerts="ctrl.alerts"></alerts>
             <div class="top-panel-container">
-                <div class="top-left-panel" ng-hide="ctrl.noVisibleRelatedTables()" ng-class="{'open-panel': $root.recordSidePanOpen, 'close-panel': !$root.recordSidePanOpen}">
-                    <div class="bottom-right">
-                        <button ng-hide="!$root.recordSidePanOpen" class="chaise-btn chaise-btn-tertiary" ng-click="$root.recordSidePanOpen = false" uib-tooltip="Click to hide table of contents.">
-                            <span class="chaise-icon chaise-sidebar-close"></span>
-                            <span>Hide filter panel</span>
-                        </button>
-                    </div>
-                </div>
-                <div ng-if="recordDisplayname" class="top-right-panel">
-                    <div class="page-action-btns row">
-                        <div class="pull-right">
-                            <button id="show-all-related-tables" class="chaise-btn chaise-btn-primary" ng-click="::ctrl.toggleRelatedTables();" uib-tooltip="{{'Click here to ' + ((showEmptyRelatedTables) ? 'hide empty related sections.' : 'show empty related sections too.')}}" tooltip-placement="bottom">
-                                <span class="chaise-btn-icon glyphicon glyphicon-th-list"></span>
-                                <span>{{!showEmptyRelatedTables ? 'Show' : 'Hide'}} empty sections</span>
-                            </button>
-                            <!-- download CSV included by default -->
-                            <export allow-export="displayReady" reference="reference" style="position:relative;" disabled="!displayReady"></export>
-                            <button ng-show="displayReady" id="share" class="chaise-btn chaise-btn-primary" ng-click="::ctrl.sharePopup()" uib-tooltip="Click here to show the share dialog." tooltip-placement="bottom">
-                                <span class="chaise-btn-icon glyphicon glyphicon-share"></span>
-                                <span>Share and cite</span>
+                <alerts id="alerts-container" alerts="ctrl.alerts"></alerts>
+                <div class="top-flex-panel">
+                    <div class="top-left-panel" ng-hide="ctrl.noVisibleRelatedTables()" ng-class="{'open-panel': $root.recordSidePanOpen, 'close-panel': !$root.recordSidePanOpen}">
+                        <div class="bottom-right">
+                            <button ng-hide="!$root.recordSidePanOpen" class="chaise-btn chaise-btn-tertiary" ng-click="$root.recordSidePanOpen = false" uib-tooltip="Click to hide table of contents.">
+                                <span class="chaise-icon chaise-sidebar-close"></span>
+                                <span>Hide filter panel</span>
                             </button>
                         </div>
                     </div>
-                    <div class="title row">
-                        <h1 id="page-subtitle">
-                            <a ng-href="{{::ctrl.referenceTableApplink()}}">
-                                <span ng-if="::reference.displayname.isHTML" ng-bind-html="reference.displayname.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::reference.table.comment ? reference.table.comment : undefined}}"></span>
-                                <span ng-if="::!reference.displayname.isHTML" ng-bind="reference.displayname.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::reference.table.comment ? reference.table.comment : undefined}}"></span>:
-                            </a>
-                            <small ng-if="reference && reference.location.version" tooltip-placement="bottom-left" uib-tooltip="{{::ctrl.tooltip.versionTime}} {{ctrl.versionDate()}}">({{ctrl.versionDisplay()}})</small>
-                        </h1>
-                        <div class="entity-display-header">
+                    <div ng-if="recordDisplayname" class="top-right-panel">
+                        <div class="page-action-btns row">
+                            <div class="pull-right">
+                                <button id="show-all-related-tables" class="chaise-btn chaise-btn-primary" ng-click="::ctrl.toggleRelatedTables();" uib-tooltip="{{'Click here to ' + ((showEmptyRelatedTables) ? 'hide empty related sections.' : 'show empty related sections too.')}}" tooltip-placement="bottom">
+                                    <span class="chaise-btn-icon glyphicon glyphicon-th-list"></span>
+                                    <span>{{!showEmptyRelatedTables ? 'Show' : 'Hide'}} empty sections</span>
+                                </button>
+                                <!-- download CSV included by default -->
+                                <export allow-export="displayReady" reference="reference" style="position:relative;" disabled="!displayReady"></export>
+                                <button ng-show="displayReady" id="share" class="chaise-btn chaise-btn-primary" ng-click="::ctrl.sharePopup()" uib-tooltip="Click here to show the share dialog." tooltip-placement="bottom">
+                                    <span class="chaise-btn-icon glyphicon glyphicon-share"></span>
+                                    <span>Share and cite</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="title row">
+                            <h1 id="page-subtitle">
+                                <a ng-href="{{::ctrl.referenceTableApplink()}}">
+                                    <span ng-if="::reference.displayname.isHTML" ng-bind-html="reference.displayname.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::reference.table.comment ? reference.table.comment : undefined}}"></span>
+                                    <span ng-if="::!reference.displayname.isHTML" ng-bind="reference.displayname.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::reference.table.comment ? reference.table.comment : undefined}}"></span>:
+                                </a>
+                                <small ng-if="reference && reference.location.version" tooltip-placement="bottom-left" uib-tooltip="{{::ctrl.tooltip.versionTime}} {{ctrl.versionDate()}}">({{ctrl.versionDisplay()}})</small>
+                            </h1>
+                            <div class="entity-display-header">
                             <h1 id="page-title">
                                 <span ng-if="::recordDisplayname.isHTML" ng-bind-html="::recordDisplayname.value"></span>
                                 <span ng-if="::!recordDisplayname.isHTML" ng-bind="::recordDisplayname.value"></span>
@@ -69,12 +70,13 @@
                                 </div>
                             </span>
                         </div>
-                    </div>
-                    <button ng-show="!$root.recordSidePanOpen" class="chaise-btn chaise-btn-tertiary open-sidebar-btn" ng-click="$root.recordSidePanOpen = true" uib-tooltip="Click to show table of contents.">
-                        <span class="chaise-icon chaise-sidebar-open"></span>
-                        <span>Show filter panel</span>
-                    </button>
-                </div> <!-- end top right panel -->
+                        </div>
+                        <button ng-show="!$root.recordSidePanOpen" class="chaise-btn chaise-btn-tertiary open-sidebar-btn" ng-click="$root.recordSidePanOpen = true" uib-tooltip="Click to show table of contents.">
+                            <span class="chaise-icon chaise-sidebar-open"></span>
+                            <span>Show filter panel</span>
+                        </button>
+                    </div> <!-- end top right panel -->
+                </div>
             </div>
             <loading-spinner ng-show="(!displayReady || showSpinner) && !error"></loading-spinner>
 
@@ -165,7 +167,7 @@
                     <footer ng-show="!loading && displayReady"></footer>
                 </div> <!-- end main-container -->
                 <div class="chaise-btn chaise-btn-primary" id="back-to-top" ng-click="scrollToTop()" ng-show="showTopBtn">
-                    <!-- defined here because it hides the scrollbar when in the same containe the scrollbar shows up in -->
+                    <!-- defined here because it hides the scrollbar when in the same container the scrollbar shows up in -->
                     <i uib-tooltip="Scroll To Top" tooltip-placement="left" class="glyphicon glyphicon-triangle-top"></i>
                 </div>
             </div>
