@@ -20,7 +20,6 @@
         vm.rowFocus = {};
         vm.sidePanToggleBtnIndicator = "Show";
         $rootScope.recordSidePanOpen = false;
-        console.log($rootScope);
 
         var chaiseConfig = ConfigUtils.getConfigJSON();
 
@@ -469,6 +468,7 @@
             var elements = {};
             try {
                 // get document height
+                console.log($document[0]);
                 elements.docHeight = $document[0].documentElement.offsetHeight
                 // get navbar height
                 elements.navbarHeight = $document[0].getElementById('mainnav').offsetHeight;

@@ -1,11 +1,15 @@
-#record {
+.record-container {
+    margin-top: 20px;
+    margin-left: 20px;
+
     .top-panel-container {
+        margin-right: 20px;
         margin-bottom: 10px;
 
         .top-left-panel.open-panel {
             flex: 0 0 $left-panel-width-sm;
             min-width: 170px;
-            margin-left: 20px;
+            // margin-left: 20px;
             position: relative;
 
             .bottom-right {
@@ -23,7 +27,7 @@
             padding-left: 30px;
 
             .page-action-btns {
-                margin: 20px 20px 4px 20px;
+                margin: 0px 0px 4px 0px;
             }
 
             .title {
@@ -65,7 +69,6 @@
     .bottom-panel-container {
         /** bottom left panel **/
         > .side-panel-resizable {
-            margin-left: 20px;
 
             &.open-panel {
                 flex: 0 0 $left-panel-width-sm;
@@ -113,16 +116,21 @@
             }
         }
 
-        record-display {
-            table {
-                margin-bottom: 10px;
+        .main-body {
+            padding-left:30px;
+            padding-right:20px;
 
-                tr:nth-child(1) > td {
-                    border-top: none;
-                }
+            record-display {
+                table {
+                    margin-bottom: 10px;
 
-                .column-displayname {
-                    margin-left: 35px;
+                    tr:nth-child(1) > td {
+                        border-top: none;
+                    }
+
+                    .column-displayname {
+                        margin-left: 35px;
+                    }
                 }
             }
         }

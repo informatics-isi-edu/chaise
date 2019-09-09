@@ -13,8 +13,8 @@
     <div class="app-container r_s_{{ctrl.makeSafeIdAttr(reference.table.schema.name)}} r_t_{{ctrl.makeSafeIdAttr(reference.table.name)}}" ng-controller="RecordController as ctrl">
         <navbar></navbar>
         <div class="record-container">
+            <alerts id="alerts-container" alerts="ctrl.alerts"></alerts>
             <div class="top-panel-container">
-                <alerts id="alerts-container" alerts="ctrl.alerts"></alerts>
                 <div class="top-left-panel" ng-hide="ctrl.noVisibleRelatedTables()" ng-class="{'open-panel': $root.recordSidePanOpen, 'close-panel': !$root.recordSidePanOpen}">
                     <div class="bottom-right">
                         <button ng-hide="!$root.recordSidePanOpen" class="chaise-btn chaise-btn-tertiary" ng-click="$root.recordSidePanOpen = false" uib-tooltip="Click to hide table of contents.">
@@ -117,7 +117,7 @@
                 </div>
 
                 <div class="main-container" ng-class="{'initializing': !displayReady}">
-                    <div class="main-body" style="padding-right:20px; padding-left:30px;">
+                    <div class="main-body">
 
                         <!-- defined on $rootScope in run function -->
                         <record-display class="entity-container" column-models="columnModels" values="recordValues"
@@ -157,15 +157,16 @@
                                 </div>
                             </uib-accordion>
                         </div>
-                        <div class="chaise-btn chaise-btn-primary" id="back-to-top" ng-click="scrollToTop()" ng-show="showTopBtn">
-                            <i uib-tooltip="Scroll To Top" tooltip-placement="left" class="glyphicon glyphicon-triangle-top"></i>
-                        </div>
                         <span id="rt-loading" ng-show="loading" class="loading-text" ng-class="{'loading-sticky': ctrl.stickLoading}">
                             <img class="spinner spinner-sm" src="../common/styles/images/loader.gif"/>
                             Loading...
                         </span>
                     </div>
                     <footer ng-show="!loading && displayReady"></footer>
+                </div> <!-- end main-container -->
+                <div class="chaise-btn chaise-btn-primary" id="back-to-top" ng-click="scrollToTop()" ng-show="showTopBtn">
+                    <!-- defined here because it hides the scrollbar when in the same containe the scrollbar shows up in -->
+                    <i uib-tooltip="Scroll To Top" tooltip-placement="left" class="glyphicon glyphicon-triangle-top"></i>
                 </div>
             </div>
         </div>
