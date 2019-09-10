@@ -25,7 +25,7 @@
                         </div>
                     </div>
                     <div ng-if="recordDisplayname" class="top-right-panel">
-                        <div class="page-action-btns row">
+                        <div class="page-action-btns">
                             <div class="pull-right">
                                 <button id="show-all-related-tables" class="chaise-btn chaise-btn-primary" ng-click="::ctrl.toggleRelatedTables();" uib-tooltip="{{'Click here to ' + ((showEmptyRelatedTables) ? 'hide empty related sections.' : 'show empty related sections too.')}}" tooltip-placement="bottom">
                                     <span class="chaise-btn-icon glyphicon glyphicon-th-list"></span>
@@ -39,7 +39,7 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="title row">
+                        <div class="title">
                             <h1 id="page-subtitle">
                                 <a ng-href="{{::ctrl.referenceTableApplink()}}">
                                     <span ng-if="::reference.displayname.isHTML" ng-bind-html="reference.displayname.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::reference.table.comment ? reference.table.comment : undefined}}"></span>

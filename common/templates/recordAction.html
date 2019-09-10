@@ -7,15 +7,15 @@
             </button>
         </span>
         <span ng-if="showToggleDisplayBtn">
-            <button class="chaise-btn chaise-btn-secondary toggle-display-link" ng-click="toggleRelatedTableDisplayType({dataModel:dataModel},{$event:$event})">
+            <button class="chaise-btn chaise-btn-secondary toggle-display-link" ng-click="toggleRelatedTableDisplayType({dataModel:dataModel})">
                 <span ng-show="tabModelDisplay == 'markdown'">
                     <span class="fas fa-table"></span>
-                    <span class="hide-tooltip-border" ng-if="canEditRelated({ref:ref})" ng-attr-uib-tooltip-html="'Edit {{tooltip.entityName}} related to this {{tooltip.baseTableName}}'" tooltip-placement="auto top">Edit mode</span>
-                    <span class="hide-tooltip-border" ng-if="!canEditRelated({ref:ref})" ng-attr-uib-tooltip-html="'Display related {{tooltip.entityName}} in tabular mode'" tooltip-placement="auto top">Table mode</span>
+                    <span class="hide-tooltip-border" ng-if="canEditRelated({ref:ref})" ng-attr-uib-tooltip-html="'Edit {{tooltip.entityName}} related to this {{tooltip.baseTableName}}'" tooltip-placement="top">Edit mode</span>
+                    <span class="hide-tooltip-border" ng-if="!canEditRelated({ref:ref})" ng-attr-uib-tooltip-html="'Display related {{tooltip.entityName}} in tabular mode'" tooltip-placement="top">Table mode</span>
                 </span>
                 <span ng-show="tabModelDisplay != 'markdown'">
                     <span class="chaise-btn-icon glyphicon glyphicon-th"></span>
-                    <span class="hide-tooltip-border" ng-attr-uib-tooltip="Switch back to the custom display mode" tooltip-placement="auto top">Custom mode</span>
+                    <span class="hide-tooltip-border" ng-attr-uib-tooltip="Switch back to the custom display mode" tooltip-placement="top">Custom mode</span>
                 </span>
             </button>
         </span>
