@@ -14,7 +14,7 @@
         <span ng-if="::!ctrl.tableModel.tableDisplayName.isHTML" ng-bind="::ctrl.tableModel.tableDisplayName.value" ng-attr-tooltip-placement="bottom" ng-attr-uib-tooltip="{{::ctrl.tableModel.tableComment ? ctrl.tableModel.tableComment : undefined}}"></span>
     </h2>
 </div>
-<div class="modal-body" style="overflow: auto;">
+<div class="modal-body">
     <loading-spinner ng-show="!ctrl.tableModel.hasLoaded && !ctrl.tableModel.backgroundSearch"></loading-spinner>
     <div ng-switch="ctrl.mode">
         <!-- switch when 'selectFaceting' -->
