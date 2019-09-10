@@ -467,7 +467,7 @@ describe("Viewing Recordset with Faceting,", function() {
 
                     return chaisePage.recordsetPage.getFacetFilters();
                 }).then(function (filters) {
-                    return filters[0].element(by.css(".remove-link")).click();
+                    return filters[0].element(by.css(".filter-chiclet-remove")).click();
                 }).then(function () {
                     browser.wait(function () {
                         return chaisePage.recordsetPage.getRows().count().then(function(ct) {

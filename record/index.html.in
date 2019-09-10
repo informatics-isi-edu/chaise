@@ -154,7 +154,7 @@
                                             </div>
                                             <div ng-switch-default>
                                                 <table-header vm="rtm.tableModel"></table-header>
-                                                <record-table class="related-table" id="rt-{{::ctrl.makeSafeIdAttr(rtm.displayname.value)}}" vm="rtm.tableModel" parent-reference="reference"></record-table>
+                                                <record-table class="related-table" id="rt-{{::ctrl.makeSafeIdAttr(rtm.displayname.value)}}" vm="rtm.tableModel"></record-table>
                                             </div>
                                         </div>
                                     </div>

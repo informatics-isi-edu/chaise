@@ -428,6 +428,66 @@ html {
 // END remove
 
 
+// chaise checkbox
+    .chaise-checkbox {
+        position: relative;
+        &.with-tooltip label {
+            border-bottom: 1px dotted black;
+        }
+
+        label {
+            display: inline-block;
+            margin-left: 25px;
+            font-weight: 400;
+            position: relative;
+            vertical-align: middle;
+            min-height: 20px;
+            margin-bottom: 0;
+        }
+
+        input {
+            position: absolute;
+            z-index: 1;
+            cursor: pointer;
+            width: 20px;
+            height: 20px;
+            top: 0;
+            margin-top: 2px;
+        }
+
+        input[type="checkbox"]:after {
+            content: "";
+            display: inline-block;
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            left: 0;
+            top: 0;
+            border: 1px solid #337ab7;
+            border-radius: 3px;
+            color: #337ab7;
+            background-color: #fff;
+            -webkit-transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
+            -o-transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
+            transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
+        }
+
+        input[type="checkbox"]:checked:after {
+            font-family: 'Glyphicons Halflings';
+            content: "\e013";
+            font-size: 1.21rem;
+        }
+    }
+
+// ellipsis-text
+    .ellipsis-text label {
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+
+
+
 /****** RSwF main container *******/
 
 // TODO used in both recordset (faceting) and record (toc), should be cleaned up

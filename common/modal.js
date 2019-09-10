@@ -167,8 +167,8 @@
      *  - context {String} - the current context that the directive fetches data for
      *  - selectMode {String} - the select mode the modal uses
      */
-    .controller('SearchPopupController', ['ConfigUtils', 'DataUtils', 'params', 'Session', 'modalBox', 'logActions', '$rootScope', '$timeout', '$uibModalInstance',
-        function SearchPopupController(ConfigUtils, DataUtils, params, Session, modalBox, logActions, $rootScope, $timeout, $uibModalInstance) {
+    .controller('SearchPopupController', ['ConfigUtils', 'DataUtils', 'params', 'Session', 'modalBox', 'logActions', 'recordsetDisplayModes', '$rootScope', '$timeout', '$uibModalInstance',
+        function SearchPopupController(ConfigUtils, DataUtils, params, Session, modalBox, logActions, recordsetDisplayModes, $rootScope, $timeout, $uibModalInstance) {
         var vm = this;
 
         vm.params = params;
@@ -201,10 +201,15 @@
             selectedRows:       params.selectedRows,
             matchNotNull:       params.matchNotNull,
             matchNull:          params.matchNull,
-            hideNotNullChoice:  params.hideNotNullChoice,
-            hideNullChoice:     params.hideNullChoice,
             search:             reference.location.searchTerm,
-            config:             {viewable: false, editable: false, deletable: false, selectMode: params.selectMode, showFaceting: showFaceting, facetPanelOpen: params.facetPanelOpen, showNull: params.showNull === true},
+            config:             {
+                viewable: false, editable: false, deletable: false, selectMode: params.selectMode,
+                showFaceting: showFaceting, facetPanelOpen: params.facetPanelOpen,
+                showNull: params.showNull === true,
+                hideNotNullChoice:  params.hideNotNullChoice,
+                hideNullChoice:     params.hideNullChoice,
+                displayMode: recordsetDisplayModes.popup
+            },
             context:            params.context,
             getDisabledTuples:  params.getDisabledTuples,
             logObject:          params.logObject ? params.logObject: {}

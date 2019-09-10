@@ -11,8 +11,8 @@
     }])
 
     .factory('recordAppUtils',
-             ['constants', 'DataUtils', 'Errors', 'ErrorService', '$log', 'logActions', 'messageMap', 'modalBox', '$q', 'recordTableUtils', '$rootScope',
-             function (constants, DataUtils, Errors, ErrorService, $log, logActions, messageMap, modalBox, $q, recordTableUtils, $rootScope) {
+             ['constants', 'DataUtils', 'Errors', 'ErrorService', '$log', 'logActions', 'messageMap', 'modalBox', '$q', 'recordsetDisplayModes', 'recordTableUtils', '$rootScope',
+             function (constants, DataUtils, Errors, ErrorService, $log, logActions, messageMap, modalBox, $q, recordsetDisplayModes, recordTableUtils, $rootScope) {
 
         /**
          * returns true if we have free slots for requests.
@@ -290,7 +290,8 @@
                     viewable: true,
                     editable: $rootScope.modifyRecord,
                     deletable: $rootScope.modifyRecord && $rootScope.showDeleteButton,
-                    selectMode: modalBox.noSelect
+                    selectMode: modalBox.noSelect,
+                    displayMode: recordsetDisplayModes.related
                 },
                 flowControlObject: $rootScope.recordFlowControl,
                 queryTimeoutTooltip: messageMap.queryTimeoutTooltip

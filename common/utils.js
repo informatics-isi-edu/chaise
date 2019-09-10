@@ -174,6 +174,12 @@
         multiSelectMode:"multi-select"
     })
 
+    .constant("recordsetDisplayModes", {
+        fullscreen: "fullscreen",
+        related: "related",
+        popup: "popup"
+    })
+
     .constant("defaultDisplayname", {
         null: "<i>No Value</i>",
         empty: "<i>Empty</i>",
