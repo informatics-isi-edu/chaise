@@ -272,9 +272,10 @@
          * @param  {string} context   the context string
          * @param  {ERMrest.tuple} fromTuple the main tuple
          */
-        function getTableModel (reference, context, fromTuple) {
+        function getTableModel (reference, context, fromTuple, parentReference) {
             return {
                 reference: reference,
+                parentReference: parentReference,
                 pageLimit: getPageSize(reference),
                 displayType: reference.display.type,
                 fromTuple: fromTuple,

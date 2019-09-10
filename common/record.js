@@ -133,15 +133,7 @@
         }])
         .controller('RecordActionController', ['DataUtils', '$scope', function RecordActionController(DataUtils, $scope) {
             $scope.tooltip = {};
-            if (!$scope.displayname.isHTML) {
-                $scope.tooltip.entityName = DataUtils.makeSafeHTML($scope.displayname.value);
-            } else {
-                $scope.tooltip.entityName = $scope.displayname.value;
-            }
-            if (!$scope.baseTableName.isHTML) {
-                $scope.tooltip.baseTableName = DataUtils.makeSafeHTML($scope.baseTableName.value);
-            } else {
-                $scope.tooltip.baseTableName = $scope.baseTableName.value;
-            }
+            $scope.tooltip.entityName = $scope.displayname.isHTML ? $scope.displayname.value : DataUtils.makeSafeHTML($scope.displayname.value);
+            $scope.tooltip.baseTableName = $scope.baseTableName.isHTML ? $scope.baseTableName.value : DataUtils.makeSafeHTML($scope.baseTableName.value);
         }]);
 })();

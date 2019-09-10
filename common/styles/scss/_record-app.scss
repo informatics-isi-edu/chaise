@@ -29,7 +29,7 @@
             }
 
             .title {
-                margin: 4px 20px 0px 0px;
+                margin-top: 4px;
 
                 #page-subtitle {
                     margin: 5px 0px;
@@ -114,21 +114,25 @@
             }
         }
 
-        .main-body {
-            padding-left:30px;
-            padding-right:20px;
+        .main-container {
+            padding-left: 30px;
+            padding-right: 20px;
+        }
 
-            record-display {
-                table {
-                    margin-bottom: 10px;
+        record-display {
+            .inline-table-display {
+                margin-top: -25px;
+            }
 
-                    tr:nth-child(1) > td {
-                        border-top: none;
-                    }
+            table {
+                margin-bottom: 10px;
 
-                    .column-displayname {
-                        margin-left: 35px;
-                    }
+                tr:nth-child(1) > td {
+                    border-top: none;
+                }
+
+                .column-displayname {
+                    margin-left: 35px;
                 }
             }
         }
@@ -155,8 +159,12 @@
             border-color: $primary-color !important;
         }
 
+        .chaise-table-header {
+            margin-bottom: 5px;
+        }
+
         .chaise-table-pagination {
-            margin-top: 10px;
+            margin-top: 0px;
             margin-bottom: 0px;
         }
 
@@ -172,7 +180,7 @@
                 > .panel-heading {
                     height: 44px;
                     text-transform: inherit;
-                    padding: 8px 8px 8px 0px;
+                    padding: 8px 8px 8px 8px;
                     color: $white-color;
                     border: none;
                     border-radius: inherit;
@@ -194,12 +202,11 @@
                                 .toggle-icon {
                                     &.fa-chevron-right {
                                         margin-right: 5px;
-                                        margin-left: 15px
+                                        margin-left: 5px;
                                     }
 
                                     &.fa-chevron-down {
                                         margin-right: 4px;
-                                        margin-left: 10px
                                     }
 
                                 }
@@ -211,8 +218,9 @@
                         border-top: none;
                         padding: 10px 0px 10px 0px;
 
-                        .markdown-switch-case {
-                            margin-left: 40px;
+                        .accordion-content {
+                            padding-left: 40px;
+                            padding-right: 8px;
                         }
                     } // end .panel-body
                 } // end .panel-heading
