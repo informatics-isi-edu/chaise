@@ -167,8 +167,8 @@
      *  - context {String} - the current context that the directive fetches data for
      *  - selectMode {String} - the select mode the modal uses
      */
-    .controller('SearchPopupController', ['ConfigUtils', 'DataUtils', 'params', 'Session', 'modalBox', 'logActions', '$rootScope', '$timeout', '$uibModalInstance',
-        function SearchPopupController(ConfigUtils, DataUtils, params, Session, modalBox, logActions, $rootScope, $timeout, $uibModalInstance) {
+    .controller('SearchPopupController', ['ConfigUtils', 'DataUtils', 'params', 'Session', 'modalBox', 'logActions', 'recordsetDisplayModes', '$rootScope', '$timeout', '$uibModalInstance',
+        function SearchPopupController(ConfigUtils, DataUtils, params, Session, modalBox, logActions, recordsetDisplayModes, $rootScope, $timeout, $uibModalInstance) {
         var vm = this;
 
         vm.params = params;
@@ -208,7 +208,7 @@
                 showNull: params.showNull === true,
                 hideNotNullChoice:  params.hideNotNullChoice,
                 hideNullChoice:     params.hideNullChoice,
-                hideTitle:          true,
+                displayMode: recordsetDisplayModes.popup
             },
             context:            params.context,
             getDisabledTuples:  params.getDisabledTuples,

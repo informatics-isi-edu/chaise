@@ -17,7 +17,7 @@
                 </div>
             </div>
             <div class="top-right-panel">
-                <div class="row recordset-title-container" ng-show="!vm.config.hideTitle">
+                <div class="row recordset-title-container" ng-show="vm.config.hideTitle === recordsetDisplayModes.fullscreen">
                     <div class="col-xs-12">
                         <div class="pull-left">
                             <!-- TODO UX-M should change to class -->
@@ -39,13 +39,15 @@
                     </div>
                 </div>
                 <div class="recordset-controls-container" ng-show="vm.initialized">
-                    <div ng-if="vm.selectedRows.length > 0 && vm.config.selectMode == 'multi-select' && !vm.config.hideSelectedRows" class="recordset-selected-rows recordset-chiclets-container">
-                        <div class="filter-chiclet label label-default" ng-repeat="row in vm.selectedRows track by $index">
-                            <a class="remove-link" ng-click="removePill(row.uniqueId, $event)"><i class="glyphicon glyphicon-remove"></i></a>
-                            <span ng-if="row.displayname.isHTML" ng-bind-html="row.displayname.value"></span>
-                            <span ng-if="!row.displayname.isHTML" ng-bind="row.displayname.value"></span>
-                            <span ng-if="row.displayname.value == ''" ng-bind-html="defaultDisplayname.empty"></span>
-                            <span ng-if="row.displayname.value == null" ng-bind-html="defaultDisplayname.null"></span>
+                    <div ng-if="vm.selectedRows.length > 0 && vm.config.selectMode == 'multi-select'" class="recordset-selected-rows recordset-chiclets-container">
+                        <div class="filter-chiclet chaise-btn-group" ng-repeat="row in vm.selectedRows track by $index">
+                            <button class="filter-chiclet-remove chaise-btn chaise-btn-secondary" ng-click="removePill(row.uniqueId, $event)">
+                                <i class="glyphicon glyphicon-remove"></i>
+                            </button>
+                            <span class="chaise-btn chaise-btn-secondary" ng-if="row.displayname.isHTML" ng-bind-html="row.displayname.value"></span>
+                            <span class="chaise-btn chaise-btn-secondary" ng-if="!row.displayname.isHTML" ng-bind="row.displayname.value"></span>
+                            <span class="chaise-btn chaise-btn-secondary" ng-if="row.displayname.value == ''" ng-bind-html="defaultDisplayname.empty"></span>
+                            <span class="chaise-btn chaise-btn-secondary" ng-if="row.displayname.value == null" ng-bind-html="defaultDisplayname.null"></span>
                         </div>
                         <button ng-click="removeAllPills($event)" class="chaise-btn chaise-btn-tertiary clear-all-btn" uib-tooltip="Clear all filters applied" tooltip-placement="bottom">
                             <span>Clear all selections</span>

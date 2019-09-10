@@ -66,12 +66,13 @@
      *                  no-select       // do not allow selection of the rows. {modalBox.noSelect}
      *                  single-select   // only allow one row to be selected. {modalBox.singleSelectMode}
      *                  multi-select    // allow the user to select as many rows as they want. {modalBox.multiSelectMode}
-     *          - hideSelectedRows
-     *          - hideTotalCount
      *          - showFaceting: defines if the facet panel should be available
      *          - openFacetPanel: defines if the facet panel is open by default
      *          - showNull: if this is available and equal to `true`, we will differentiate between `null` and empty string.
-     *          - hideTitle
+     *          - displayMode:
+     *             fullscreen
+     *             related
+     *             popup
      *
      * The events that are being used by directives in this file and their children:
      * 1. `reference-modified`: data model has been updated.
@@ -91,8 +92,8 @@
      * modified. ellipsis will fire this event and recordset directive will use it.
      */
     .factory('recordTableUtils',
-            ['AlertsService', 'DataUtils', 'defaultDisplayname', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'Session', 'tableConstants', 'UriUtils', '$cookies', '$document', '$log', '$q', '$rootScope', '$timeout', '$window',
-            function(AlertsService, DataUtils, defaultDisplayname, ErrorService, logActions, MathUtils, messageMap, modalBox, Session, tableConstants, UriUtils, $cookies, $document, $log, $q, $rootScope, $timeout, $window) {
+            ['AlertsService', 'DataUtils', 'defaultDisplayname', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'recordsetDisplayModes', 'Session', 'tableConstants', 'UriUtils', '$cookies', '$document', '$log', '$q', '$rootScope', '$timeout', '$window',
+            function(AlertsService, DataUtils, defaultDisplayname, ErrorService, logActions, MathUtils, messageMap, modalBox, recordsetDisplayModes, Session, tableConstants, UriUtils, $cookies, $document, $log, $q, $rootScope, $timeout, $window) {
 
         function FlowControlObject(maxRequests) {
             this.maxRequests = maxRequests || tableConstants.MAX_CONCURENT_REQUEST;
@@ -652,11 +653,7 @@
             updateColumnAggregates(vm, _updatePage);
 
             // update the count
-            if (vm.config.hideTotalCount) {
-                vm.totalRowsCnt = null;
-            } else {
-                _updateMainCount(vm, _updatePage);
-            }
+            _updateMainCount(vm, _updatePage);
 
             // update the facets
             if (vm.facetModels) {
@@ -969,6 +966,8 @@
 
             scope.defaultDisplayname = defaultDisplayname;
 
+            scope.recordsetDisplayModes = recordsetDisplayModes;
+
             scope.vm.isIdle = true;
             scope.vm.facetModels = [];
             scope.vm.facetsToPreProcess = [];
@@ -1195,7 +1194,7 @@
     }])
 
 
-    .directive('tableHeader', ['logActions', 'MathUtils', 'recordTableUtils', 'UriUtils', '$window', function(logActions, MathUtils, recordTableUtils, UriUtils, $window) {
+    .directive('tableHeader', ['logActions', 'MathUtils', 'recordsetDisplayModes', 'recordTableUtils', 'UriUtils', '$window', function(logActions, MathUtils, recordsetDisplayModes, recordTableUtils, UriUtils, $window) {
         return {
             restrict: 'E',
             templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/tableHeader.html',
@@ -1203,6 +1202,8 @@
                 vm: '='
             },
             link: function (scope, elem, attr) {
+                scope.recordsetDisplayModes = recordsetDisplayModes;
+
                 scope.pageLimits = [10, 25, 50, 75, 100, 200];
                 scope.setPageLimit = function(limit) {
                     scope.vm.pageLimit = limit;
