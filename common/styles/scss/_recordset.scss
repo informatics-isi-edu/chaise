@@ -126,12 +126,6 @@
     border-bottom: 1px solid $table-border-color;
     margin: 0;
 
-    /* if you want the table to have a fixed layout */
-    &.table-fixed-layout {
-        table-layout: fixed;
-        width: 100%;
-    }
-
     // TODO: verify this still works as expected
     tbody {
         display: table-row-group;
