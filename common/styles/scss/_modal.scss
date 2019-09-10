@@ -118,31 +118,6 @@ body.error-open loading-spinner {
     max-height: 90vh;
     min-height: 40vh;
 }
-/* Sets the table's maximum height to 70% of the screen height and adds a border at the bottom */
-.modal-body .outer-table {
-    max-height: 70vh;
-    border: 1px solid lightgrey;
-}
-/* Sets the margin-bottom for the table inside modal to 0px*/
-.modal-body .outer-table .table {
-    margin-bottom: 0;
-    overflow: scroll;
-}
-@media (max-width: 800px) {
-    .modal-body .outer-table {
-        max-height: 67vh;
-    }
-}
-@media (max-width: 600px) {
-    .modal-body .outer-table {
-        max-height: 60vh;
-    }
-}
-@media (max-width: 500px) {
-    .modal-body .outer-table {
-        max-height: 55vh;
-    }
-}
 
 .modal-body #spinner {
     width: 100%;
@@ -317,9 +292,20 @@ body.error-open loading-spinner {
 
 
 /************** search popup **************/
-#multi-select-submit-btn {
-    position: absolute;
-    right: 10px;
-    top: 10px;
-    z-index: 2;
+.search-popup {
+    #multi-select-submit-btn {
+        margin-right: 10px;
+    }
+
+    .modal-body {
+        padding: 0;
+    }
+}
+
+.modal-body .recordset-container footer {
+    display: none !important;
+}
+
+.modal-body .recordset-container alerts:not(.enforce-alert) {
+    display: none !important;
 }

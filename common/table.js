@@ -71,6 +71,7 @@
      *          - showFaceting: defines if the facet panel should be available
      *          - openFacetPanel: defines if the facet panel is open by default
      *          - showNull: if this is available and equal to `true`, we will differentiate between `null` and empty string.
+     *          - hideTitle
      *
      * The events that are being used by directives in this file and their children:
      * 1. `reference-modified`: data model has been updated.
@@ -1074,7 +1075,7 @@
                     $log.debug('counter', scope.vm.flowControlObject.counter ,': focused on page after update');
                     updated = false;
                     scope.vm.lastActiveFacet = -1;
-                    if (scope.parentReference) {
+                    if (scope.vm.parentReference) {
                         scope.vm.logObject = {action: logActions.recordRelatedUpdate};
                     } else {
                         scope.vm.logObject = {action: logActions.recordsetUpdate};
@@ -1194,7 +1195,7 @@
     }])
 
 
-    .directive('tableHeader', ['logActions', 'recordTableUtils', 'UriUtils', function(logActions, recordTableUtils, UriUtils) {
+    .directive('tableHeader', ['logActions', 'MathUtils', 'recordTableUtils', 'UriUtils', '$window', function(logActions, MathUtils, recordTableUtils, UriUtils, $window) {
         return {
             restrict: 'E',
             templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/tableHeader.html',
@@ -1228,10 +1229,10 @@
                 };
 
                 scope.editRecord = function() {
-                    var link = recordsetModel.page.reference.contextualize.entryEdit.appLink;
+                    var link = scope.vm.page.reference.contextualize.entryEdit.appLink;
                     // TODO ermrestJS needs to handle the case when no limit is defined in the URL
                     if (link.indexOf("?limit=") === -1 || link.indexOf("&limit=") === -1)
-                        link = link + (link.indexOf('?') === -1 ? "?limit=" : "&limit=" ) + recordsetModel.pageLimit;
+                        link = link + (link.indexOf('?') === -1 ? "?limit=" : "&limit=" ) + scope.vm.pageLimit;
 
                     // TODO UX-M we should add invalidate stuff to this function too
                     // open url in a new tab
@@ -1255,7 +1256,6 @@
                  */
                 onSelectedRowsChangedBind: '=?',
                 onSelectedRowsChanged: '&?',      // set row click function TODO not used anywhere
-                parentReference: "=?" // if this is used for related references, this will be the main reference
             },
             link: function (scope, elem, attr) {
                 recordTableUtils.registerTableCallbacks(scope, elem, attr);

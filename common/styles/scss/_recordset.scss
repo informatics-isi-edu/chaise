@@ -27,12 +27,76 @@
             .top-right-panel {
                 h1#page-title {
                     margin: 0;
-                    margin-bottom: 10px;
+                    margin-bottom: 20px;
                 }
 
                 .open-filter-panel-btn {
                     padding: 0;
                     margin-bottom: 10px;
+                }
+
+                .recordset-controls-container {
+                    margin-bottom: 10px;
+                }
+
+                $filter-chiclet-margin: 5px;
+                .filter-chiclet {
+                    max-width: 350px;
+                    margin-right: $filter-chiclet-margin;
+                    margin-bottom: $filter-chiclet-margin;
+
+                    .chaise-btn:focus {
+                        background-color: $white-color;
+                    }
+
+                    .chaise-btn.chaise-btn-secondary {
+                        border-color: $border-color;
+                        height: 25px;
+                        min-width: 25px;
+                        padding: 2px 5px;
+                    }
+
+                    .chaise-btn.filter-chiclet-remove {
+                        padding: 3px;
+                    }
+
+                    .chaise-btn.filter-chiclet-title {
+                        border-right: 0;
+                        max-width: 150px;
+                        text-overflow: ellipsis;
+                        overflow: hidden;
+                        padding-right: 2px;
+                    }
+                    .chaise-btn.filter-chiclet-value {
+                        text-overflow: ellipsis;
+                        overflow: hidden;
+                        white-space: nowrap;
+                        max-width: 200px;
+
+                        position: relative;
+                        &:before {
+                            content: ":";
+                            position: absolute;
+                            left: 0;
+                        }
+                        border-left: 0;
+                        padding-left: 7px;
+                    }
+
+                    span {
+                        color: $black-color;
+                        cursor: default;
+                    }
+                }
+
+                .clear-all-btn {
+                    padding-left: 0;
+                    margin-bottom: $filter-chiclet-margin;
+                }
+
+                .recordset-chiclets-container {
+                    margin-bottom: 10px;
+                    padding-right: 250px;
                 }
             }
         }
@@ -42,64 +106,6 @@
         }
 
         .bottom-panel-container {
-            .side-panel-container {
-                overflow-y: auto;
-                border-right: solid 1px $border-color;
-
-                .panel-group {
-                    margin-right: 5px;
-                    margin-bottom: 20px;
-
-                    // each facet panel
-                    .panel.facet-panel {
-                        border-radius: 0;
-                        border: 1px solid $border-color;
-
-                        // active style
-                        &.active,
-                        &:hover {
-                            border-color: rgb(51, 122, 183) !important;
-                            animation-duration: 4s;
-                        }
-
-                        // override bootstrap default
-                        + .facet-panel {
-                            margin-top: 0;
-                            border-top: 0;
-                        }
-
-                        .panel-heading {
-                            // override bootstrap default
-                            text-transform: none;
-                            border: 0;
-                            border-radius: 0;
-
-                            background-color: $table-header-background-color;
-                            .panel-title {
-                                a {
-                                    color: $black-color;
-                                    text-decoration: none;
-                                }
-
-                                position: relative;
-                                .toggle-icon {
-                                    position: absolute;
-                                    top: 0;
-                                    left: 5px;
-                                }
-                                .show-tooltip-border {
-                                    margin-left: 25px;
-                                }
-                            }
-                        }
-
-                        .panel-body {
-                            padding: 10px;
-                        }
-                    }
-                }
-            }
-
             .main-container {
                 padding-right: 20px;
             }
@@ -253,20 +259,6 @@
 // END chaise table
 
 
-    //TODO should be valuated
-
-    .filters-tooltip {
-        margin-right: 2%;
-    }
-
-    .filters-tooltip .tooltip-inner {
-        white-space: normal;
-    }
-
-    .filters-tooltip .tooltip-inner {
-        max-width: inherit;
-    }
-
 
     /************* search loader ***************/
     input.search-progress {
@@ -280,140 +272,77 @@
         border-bottom: none;
     }
 
-    .total-filters {
-        margin-bottom: 10px;
-        margin-left: 0;
-        padding-top: 5px;
-        padding-bottom: 5px;
-        max-width: 100%;
-        /*background-color: #f5f5f5;*/
-        overflow-x: hidden;
-        /*max-height: 140px;*/
-        /*overflow-y: auto;*/
-        .filter-label {
-            padding: 0.2rem 0.3rem 0.3rem;
-            font-size: 1rem;
-            margin-right: 5px;
-            margin-bottom: 5px;
-            display: inline-block;
-            position: relative;
-            border: 1px solid #ccc;
-            overflow: hidden;
-            max-width: 350px;
-            text-overflow: ellipsis;
-            height: 26px;
+
+// faceting directive
+    .side-panel-container {
+        overflow-y: auto;
+        border-right: solid 1px $border-color;
+
+        .faceting-columns-container {
+            .panel-group {
+                margin-right: 5px;
+                margin-bottom: 20px;
+
+                // each facet panel
+                .panel.facet-panel {
+                    border-radius: 0;
+                    border: 1px solid $border-color;
+
+                    // active style
+                    &.active,
+                    &:hover {
+                        border-color: rgb(51, 122, 183) !important;
+                        animation-duration: 4s;
+                    }
+
+                    // override bootstrap default
+                    + .facet-panel {
+                        margin-top: 0;
+                        border-top: 0;
+                    }
+
+                    .panel-heading {
+                        // override bootstrap default
+                        text-transform: none;
+                        border: 0;
+                        border-radius: 0;
+
+                        background-color: $table-header-background-color;
+                        .panel-title {
+                            a {
+                                color: $black-color;
+                                text-decoration: none;
+                            }
+
+                            position: relative;
+                            .toggle-icon {
+                                position: absolute;
+                                top: 0;
+                                left: 5px;
+                            }
+                            .show-tooltip-border {
+                                margin-left: 25px;
+                            }
+                        }
+                    }
+
+                    .panel-body {
+                        padding: 10px;
+                    }
+                }
+            }
         }
-
-    }
-
-    .total-filters .filter-label .filter-label-colon,
-    .total-filters .filter-label .filter-label-title,
-    .total-filters .filter-label .filter-label-value,
-    .total-filters .filter-label .remove-link {
-        vertical-align: middle;
-    }
-
-    .total-filters .filter-label .remove-link i {
-        top: 0.1rem;
-    }
-
-    .total-filters .filter-label span {
-        border: none;
-    }
-
-    .total-filters .filter-label .filter-label-title {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        display: inline-block;
-        max-width: 150px;
-        margin-right: -2px;
-        padding: 0.1 0;
-    }
-
-    .total-filters .remove-link .filter-label {
-        background-color: #337ab7;
-        color: white;
-        padding: 0.34rem 0.4rem 0.33rem;
-    }
-
-    .total-filters .remove-link:hover {
-        color: #2c6392;
-    }
-
-    .label-default {
-        background-color: #f1f1f1;
-        color: #333;
-        font-weight: 500;
     }
 
 
-    // .recordset-container.without-faceting .main-container {
-    //     padding-top: 20px;
-    // }
-
-    // .recordset-container.with-faceting > .main-container {
-    //     flex: 1;
-    //     position: relative;
-    //     z-index: 1;
-    //     overflow-y: auto;
-    //     padding-top: 15px;
-    //     border-left: 25px solid white;
-    //     padding-left: 5px;
-    // }
-
-    // .recordset-container.with-faceting #main-content{
-    //     -webkit-box-flex: 1;
-    //     display: flex;
-    //     flex: 1;
-    //     margin-top: 5px;
-    // }
-    //
-    // /** recordset with faceting side panel **/
-    // .recordset-container.with-faceting > .side-panel-resizable {
-    //     padding-top: 5px;
-    //     position: relative;
-    //     max-width: 50vw;
-    //     z-index: 2;
-    // }
-    //
-    // .recordset-container.with-faceting > .side-panel-resizable.initializing > .rg-right > span {
-    //     display: none;
-    // }
-    //
-    // .recordset-container.with-faceting > .side-panel-resizable.open-panel {
-    //     flex: 0 0 21vw;
-    //     min-width: 170px;
-    //     padding-left: 5px;
-    // }
-    //
-    // .recordset-container.with-faceting > .side-panel-resizable.close-panel {
-    //     width: 0;
-    //     flex-basis: 0 !important;
-    // }
-    //
-    // .recordset-container.with-faceting > .side-panel-resizable.close-panel .side-panel-container {
-    //     width: 0;
-    // }
-    .modal-body .recordset-container footer {
-        display: none !important;
+// the tooltip that is displayed for the filter chiclets
+    .filters-tooltip {
+        margin-right: 2%;
+        .tooltip-inner {
+            white-space: normal;
+            max-width: inherit;
+        }
     }
-
-    .modal-body .recordset-container alerts:not(.enforce-alert) {
-        display: none !important;
-    }
-
-    // .recordset-container.with-faceting > .main-container {
-    //     flex: 1;
-    //     position: relative;
-    //     z-index: 1;
-    //     overflow-y: auto;
-    //     padding-top: 15px;
-    // }
-
-    // .recordset-container.with-faceting .main-body {
-    //     border-left: 25px solid white;
-    //     padding-right: 10px;
-    // }
 
     .recordset-container.with-faceting .pager {
         margin-bottom: 50px;
@@ -423,138 +352,57 @@
         overflow-x: hidden;
     }
 
-    // .side-panel-container .toggle-icon {
-    //     margin-right: 5px;
-    // }
 
-    // .side-panel-container .panel .panel-title {
-    //     color: #333333;
-    //     line-height: 1.35;
-    //     font-size: 14px;
-    //     font-weight: 600;
-    //     position: relative;
-    // }
-
-    // .side-panel-container .panel .panel-body {
-    //     padding: 0 10px 10px !important;
-    //     border-top: none !important;
-    //     border: none;
-    // }
-
-    .remove-link .filter-label {
-        background-color: #337ab7;
-        color: white;
+// choice picker directive
+    .choice-picker {
+        .search-box {
+            margin-bottom: 10px;
+            .show-more-btn {
+                padding-right: 0;
+            }
+        }
     }
 
-    .filter-label.label-primary.label-inverted {
-        color: #337ab7;
-        background-color: white;
-        border-color: #337ab7;
-    }
+// range picker directive
+    .range-picker {
+        hr {
+            color: $border-color;
+            width: 1px;
+        }
+        .form-inline input {
+            width: 100%;
+            padding: 6px 20px 6px 6px;
+            height: 100%;
+            border: none;
+            border-radius: 4px;
+        }
+        .plotly-how-to {
+            border-color: white !important;
+            cursor: default;
+        }
 
-    .filter-label {
-        background-color: white;
-        color: #333;
-        font-weight: 500;
-        border: 0.1px solid #ccc;
-    }
-
-    /* INTEGER SEARCH */
-    .side-panel-container .choice-picker .search-box {
-        margin-bottom: 10px;
-    }
-
-    .side-panel-container .range-picker hr {
-        color: #f5f5f5;
-        width: 1px;
-    }
-
-    .side-panel-container .range-picker .form-inline input {
-        width: 100%;
-        padding: 6px 20px 6px 6px;
-        height: 100%;
-        border: none;
-        border-radius: 4px;
-    }
-
-    .plotly-how-to {
-        border-color: white !important;
-        cursor: default;
-    }
-
-    .plotly-how-to:hover {
-        z-index: auto !important;
+        .plotly-how-to:hover {
+            z-index: auto !important;
+        }
     }
 
 
-    /************************* list **********************/
-
+// list directive
     .chaise-list-container {
         padding-left: 0;
         margin-bottom: 5px;
+
+        .chaise-checkbox {
+            margin-bottom: 7px;
+            margin-left: 5px;
+        }
+        li:hover {
+            background-color: rgb(241, 241, 241);
+        }
     }
 
-    .chaise-checkbox.with-tooltip label {
-        border-bottom: 1px dotted black;
-    }
 
-    .chaise-checkbox {
-        position: relative;
-        /*margin: 10px 0;*/
-    }
-
-    li.chaise-checkbox:hover {
-        background-color: rgb(241, 241, 241);
-    }
-
-    .ellipsis-text label {
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        overflow: hidden;
-    }
-
-    .chaise-checkbox input {
-        position: absolute;
-        z-index: 1;
-        cursor: pointer;
-        width: 17px;
-        height: 17px;
-        top: 0;
-        margin-top: 2px;
-    }
-
-    .chaise-checkbox label {
-        display: inline-block;
-        margin-left: 25px;
-        font-weight: 400;
-        position: relative;
-        vertical-align: middle;
-        min-height: 20px;
-    }
-
-    .chaise-checkbox input[type="checkbox"]:after {
-        content: "";
-        display: inline-block;
-        position: absolute;
-        width: 17px;
-        height: 17px;
-        left: 0;
-        top: 0;
-        border: 1px solid #337ab7;
-        border-radius: 3px;
-        color: #337ab7;
-        background-color: #fff;
-        -webkit-transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
-        -o-transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
-        transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
-    }
-
-    .chaise-checkbox input[type="checkbox"]:checked:after {
-        font-family: 'Glyphicons Halflings';
-        content: "\e013";
-    }
-
-    /* selected rows in the modal */
+// selected rows
     .selected-rows {
         min-height: 45px;
     }

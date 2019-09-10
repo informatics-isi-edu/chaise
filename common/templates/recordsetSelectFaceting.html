@@ -3,17 +3,17 @@
     <div class="main-container">
         <alerts alerts="$root.alerts" class="enforce-alert"></alerts>
         <div ng-show="vm.initialized" class="row" style="margin-bottom: 10px;">
-            <div ng-if="vm.config.selectMode == 'multi-select' && !vm.config.hideSelectedRows" class="row total-filters selected-rows">
+            <div ng-if="vm.config.selectMode == 'multi-select' && !vm.config.hideSelectedRows" class="row filter-chiclets-container selected-rows">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                     <a class="remove-link" ng-click="removeAllPills($event)" ng-disabled="vm.selectedRows.length < 1">
-                        <span class="filter-label label label-primary label-inverted" ng-if="vm.selectedRows.length < 1">
+                        <span class="filter-chiclet label label-primary label-inverted" ng-if="vm.selectedRows.length < 1">
                             No Item Selected
                         </span>
-                        <span class="filter-label label label-primary label-inverted" ng-if="vm.selectedRows.length > 0">
-                            Clear All
+                        <span class="filter-chiclet label label-primary label-inverted" ng-if="vm.selectedRows.length > 0">
+                            Clear all selections
                         </span>
                     </a>
-                    <div ng-if="vm.selectedRows.length > 0" class="filter-label label label-default" ng-repeat="row in vm.selectedRows track by $index" tooltip-enable="tooltipEnabled" uib-tooltip="{{row.displayname.value}}" tooltip-placement="bottom" chaise-enable-tooltip-width>
+                    <div ng-if="vm.selectedRows.length > 0" class="filter-chiclet label label-default" ng-repeat="row in vm.selectedRows track by $index" tooltip-enable="tooltipEnabled" uib-tooltip="{{row.displayname.value}}" tooltip-placement="bottom" chaise-enable-tooltip-width>
                         <a class="remove-link" ng-click="removePill(row.uniqueId, $event)"><i class="glyphicon glyphicon-remove"></i></a>
                         <span ng-if="row.displayname.value && row.displayname.isHTML" ng-bind-html="row.displayname.value"></span>
                         <span ng-if="row.displayname.value && !row.displayname.isHTML" ng-bind="row.displayname.value"></span>
@@ -71,10 +71,10 @@
         <div ng-if="vm.hasLoaded" class="row">
             <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12" ng-if="!vm.config.hideTotalCount" id="rs-total-count">Displaying {{vm.rowValues.length}}{{vm.totalRowsCnt ? " of " + (vm.totalRowsCnt > vm.rowValues.length ? vm.totalRowsCnt : vm.rowValues.length) : ''}} Records</div>
             <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                <span class="chaise-checkbox with-tooltip" ng-hide="vm.hideNotNullChoice" uib-tooltip-html="tooltip.notNull" tooltip-placement="bottom">
+                <span class="chaise-checkbox with-tooltip" ng-hide="vm.config.hideNotNullChoice" uib-tooltip-html="tooltip.notNull" tooltip-placement="bottom">
                     <input type="checkbox" id="rs-match-not-null" ng-click="toggleMatchNotNull()" ng-checked="vm.matchNotNull"><label>Records With Values</label>
                 </span>
-                <span class="chaise-checkbox with-tooltip" ng-hide="vm.hideNullChoice" uib-tooltip-html="tooltip.null" tooltip-placement="bottom" ng-class="{'disabled-row': vm.matchNotNull}">
+                <span class="chaise-checkbox with-tooltip" ng-hide="vm.config.hideNullChoice" uib-tooltip-html="tooltip.null" tooltip-placement="bottom" ng-class="{'disabled-row': vm.matchNotNull}">
                     <input type="checkbox" id="rs-match-null" ng-click="toggleMatchNull()" ng-checked="vm.matchNull" ng-disabled="vm.matchNotNull"><label>No Value</label>
                 </span>
             </div>

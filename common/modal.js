@@ -201,10 +201,15 @@
             selectedRows:       params.selectedRows,
             matchNotNull:       params.matchNotNull,
             matchNull:          params.matchNull,
-            hideNotNullChoice:  params.hideNotNullChoice,
-            hideNullChoice:     params.hideNullChoice,
             search:             reference.location.searchTerm,
-            config:             {viewable: false, editable: false, deletable: false, selectMode: params.selectMode, showFaceting: showFaceting, facetPanelOpen: params.facetPanelOpen, showNull: params.showNull === true},
+            config:             {
+                viewable: false, editable: false, deletable: false, selectMode: params.selectMode,
+                showFaceting: showFaceting, facetPanelOpen: params.facetPanelOpen,
+                showNull: params.showNull === true,
+                hideNotNullChoice:  params.hideNotNullChoice,
+                hideNullChoice:     params.hideNullChoice,
+                hideTitle:          true,
+            },
             context:            params.context,
             getDisabledTuples:  params.getDisabledTuples,
             logObject:          params.logObject ? params.logObject: {}

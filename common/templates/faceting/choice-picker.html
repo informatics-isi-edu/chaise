@@ -20,7 +20,10 @@
             </span>
         </div>
         <record-list rows='checkboxRows' on-row-click='onRowClick' initialized='facetModel.initialized && facetModel.isOpen && facetPanelOpen'></record-list>
-        <a id="show-more" ng-click="openSearchPopup()"><b ng-bind="hasMore || showFindMore ? 'Show More' : 'Show Details'"></b></a>
+        <button id="show-more" ng-click="openSearchPopup()" class="chaise-btn chaise-btn-tertiary pull-right show-more-btn">
+            <span class="chaise-btn-icon far fa-window-restore"></span>
+            <span ng-bind="hasMore || showFindMore ? 'Show More' : 'Show Details'"></span>
+        </button>
         <a id="reset-facet" ng-if="facetModel.noConstraints" class="pull-right" ng-click="::retryQuery(false)" tooltip-placement="bottom" uib-tooltip="Retry updating the facet values with constraints."><b>Retry</b></a>
     </div>
     <div ng-show="facetModel.facetError">

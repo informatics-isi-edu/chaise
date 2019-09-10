@@ -1154,11 +1154,11 @@ var recordsetPage = function() {
     };
 
     this.getSelectedRowsFilters = function () {
-        return element(by.css(".selected-rows-filters")).all(by.css(".filter-label.label-default"));
+        return element(by.css(".recordset-selected-rows")).all(by.css(".filter-chiclet.label-default"));
     }
 
     this.getFacetFilters = function () {
-        return element(by.css(".facet-filters")).all(by.css(".filter-label.label-default"));
+        return element(by.css(".recordset-chiclets")).all(by.css(".filter-chiclet.label-default"));
     }
 
     this.getClearAllFilters = function () {

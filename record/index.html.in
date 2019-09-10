@@ -152,7 +152,7 @@
                                                 <span class="markdown-container" ng-bind-html="rtm.tableModel.page.content | trustedHTML"></span>
                                             </div>
                                             <div ng-switch-default>
-                                                <record-table class="related-table" id="rt-{{::ctrl.makeSafeIdAttr(rtm.displayname.value)}}" vm="rtm.tableModel" parent-reference="reference"></record-table>
+                                                <record-table class="related-table" id="rt-{{::ctrl.makeSafeIdAttr(rtm.displayname.value)}}" vm="rtm.tableModel"></record-table>
                                             </div>
                                         </div>
                                     </div>

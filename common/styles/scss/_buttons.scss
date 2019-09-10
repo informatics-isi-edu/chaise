@@ -17,6 +17,8 @@
         &.chaise-btn-sm {
             height: 24px;
             min-width: 24px;
+            font-size: 1rem;
+            padding: 2px 5px;
         }
 
         > .chaise-btn-icon {
@@ -94,10 +96,4 @@
 //TODO
 .chaise-checkbox input[disabled][type="checkbox"]:checked + label:after {
     color: #ccc !important;
-}
-
-
-// TODO used for "all on page"/"none on page"
-.btn-condensed {
-    padding: 0 5px;
 }

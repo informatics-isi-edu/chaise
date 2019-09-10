@@ -400,6 +400,7 @@
                     modalUtils.showModal({
                         animation: false,
                         controller: "SearchPopupController",
+                        windowClass: "search-popup",
                         controllerAs: "ctrl",
                         resolve: {
                             params: params

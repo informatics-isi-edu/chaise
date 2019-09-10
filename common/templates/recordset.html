@@ -1,124 +1,104 @@
 <div class="recordset-container" ng-class="vm.config.showFaceting ? 'with-faceting':'without-faceting'" >
     <loading-spinner ng-show="(!vm.initialized || $root.showSpinner) && !$root.error"></loading-spinner>
     <div class="top-panel-container" ng-show="vm.reference">
-        <div id="top-left-panel" class="top-left-panel also-resizeable" ng-class="{'open-panel': vm.config.facetPanelOpen, 'close-panel': !vm.config.facetPanelOpen}">
-            <div class="faceting-header">
-                <div class="pull-left">
-                    <h3>Refine search</h3>
-                </div>
-                <div class="pull-right">
-                    <button class="chaise-btn chaise-btn-tertiary pull-right" ng-click="vm.config.facetPanelOpen = false">
-                        <span class="chaise-icon chaise-sidebar-close"></span>
-                        <span>Hide fitler panel
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="top-right-panel">
-            <div class="row">
-                <div class="col-xs-12">
+        <alerts alerts="$root.alerts"></alerts>
+        <div class="top-flex-panel">
+            <div id="top-left-panel" class="top-left-panel also-resizeable" ng-class="{'open-panel': vm.config.facetPanelOpen, 'close-panel': !vm.config.facetPanelOpen}">
+                <div class="faceting-header">
                     <div class="pull-left">
-                        <!-- TODO UX-M should change to class -->
-                        <h1 id="page-title">
-                            <span ng-if="::vm.tableDisplayname.isHTML" ng-bind-html="vm.tableDisplayName.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::vm.tableComment ? vm.tableComment : undefined}}"></span>
-                            <span ng-if="::!vm.tableDisplayname.isHTML" ng-bind="vm.tableDisplayName.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::vm.tableComment ? vm.tableComment : undefined}}"></span>
-                            <span ng-if="vm.reference && vm.reference.location.version" class="h3-class" tooltip-placement="bottom-left" uib-tooltip="{{::tooltip.versionTime}} {{versionDate()}}">({{versionDisplay()}})</span>
-                        </h1>
+                        <h3>Refine search</h3>
                     </div>
                     <div class="pull-right">
-                        <!-- download CSV included by default -->
-                        <export allow-export="vm.rowValues.length>0" reference="vm.reference" disabled="!vm.hasLoaded || !vm.initialized"></export>
-                        <!-- permalink -->
-                        <a id="permalink" ng-href="{{ permalink() }}" tooltip-placement="bottom-right" uib-tooltip={{::tooltip.permalink}} class="chaise-btn chaise-btn-primary">
-                            <span class="chaise-btn-icon glyphicon glyphicon-bookmark"></span>
-                            <span>Permalink</span>
-                        </a>
+                        <button class="chaise-btn chaise-btn-tertiary pull-right" ng-click="vm.config.facetPanelOpen = false">
+                            <span class="chaise-icon chaise-sidebar-close"></span>
+                            <span>Hide fitler panel
+                        </button>
                     </div>
                 </div>
             </div>
-            <div id="recordset-controls-container" style="padding-bottom: 10px;" ng-show="vm.initialized">
-                <div ng-if="vm.selectedRows.length > 0 && vm.config.selectMode == 'multi-select' && !vm.config.hideSelectedRows" class="row total-filters selected-rows-filters">
-                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <a class="remove-link" ng-click="removeAllPills($event)">
-                            <span class="filter-label label label-primary">
-                                clear all
-                            </span>
-                        </a>
-                        <div class="filter-label label label-default" ng-repeat="row in vm.selectedRows track by $index">
+            <div class="top-right-panel">
+                <div class="row recordset-title-container" ng-show="!vm.config.hideTitle">
+                    <div class="col-xs-12">
+                        <div class="pull-left">
+                            <!-- TODO UX-M should change to class -->
+                            <h1 id="page-title">
+                                <span ng-if="::vm.tableDisplayname.isHTML" ng-bind-html="vm.tableDisplayName.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::vm.tableComment ? vm.tableComment : undefined}}"></span>
+                                <span ng-if="::!vm.tableDisplayname.isHTML" ng-bind="vm.tableDisplayName.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::vm.tableComment ? vm.tableComment : undefined}}"></span>
+                                <span ng-if="vm.reference && vm.reference.location.version" class="h3-class" tooltip-placement="bottom-left" uib-tooltip="{{::tooltip.versionTime}} {{versionDate()}}">({{versionDisplay()}})</span>
+                            </h1>
+                        </div>
+                        <div class="pull-right">
+                            <!-- download CSV included by default -->
+                            <export allow-export="vm.rowValues.length>0" reference="vm.reference" disabled="!vm.hasLoaded || !vm.initialized"></export>
+                            <!-- permalink -->
+                            <a id="permalink" ng-href="{{ permalink() }}" tooltip-placement="bottom-right" uib-tooltip={{::tooltip.permalink}} class="chaise-btn chaise-btn-primary">
+                                <span class="chaise-btn-icon glyphicon glyphicon-bookmark"></span>
+                                <span>Permalink</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="recordset-controls-container" ng-show="vm.initialized">
+                    <div ng-if="vm.selectedRows.length > 0 && vm.config.selectMode == 'multi-select' && !vm.config.hideSelectedRows" class="recordset-selected-rows recordset-chiclets-container">
+                        <div class="filter-chiclet label label-default" ng-repeat="row in vm.selectedRows track by $index">
                             <a class="remove-link" ng-click="removePill(row.uniqueId, $event)"><i class="glyphicon glyphicon-remove"></i></a>
                             <span ng-if="row.displayname.isHTML" ng-bind-html="row.displayname.value"></span>
                             <span ng-if="!row.displayname.isHTML" ng-bind="row.displayname.value"></span>
                             <span ng-if="row.displayname.value == ''" ng-bind-html="defaultDisplayname.empty"></span>
                             <span ng-if="row.displayname.value == null" ng-bind-html="defaultDisplayname.null"></span>
                         </div>
+                        <button ng-click="removeAllPills($event)" class="chaise-btn chaise-btn-tertiary clear-all-btn" uib-tooltip="Clear all filters applied" tooltip-placement="bottom">
+                            <span>Clear all selections</span>
+                        </button>
                     </div>
-                </div>
 
-                <div class="row">
-                    <div class="col-lg-4 col-md-5 col-sm-6 col-xs-6">
-                        <!-- search box -->
-                        <div class="input-group has-feedback">
-                            <input type="text"
-                                id="search-input"
-                                ng-model="vm.search"
-                                class="form-control main-search-input"
-                                ng-class="{'search-progress': inputChangedPromise }"
-                                on-enter="enterPressed()"
-                                ng-change="inputChanged()"
-                                placeholder="Search"
-                                autofocus>
-                                <div class="form-control-feedback coltooltip" ng-show="vm.search && !inputChangedPromise" ng-style="{'cursor': 'pointer', 'right': (onPlusButtonClick ? '85px': '50px'), 'pointer-events': 'all', 'z-index': '5'}"><!-- form-control:focus changes the z-index of the form control from 2 to 3. form-control-feedback has z-index of 2. Overriding that z index to 5 so it isn't hidden when focused-->
-                                    <span id="search-clear" class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="::clearSearch()" tooltip-placement="bottom" uib-tooltip="Clear Search"></span>
-                                </div>
-                            <span class="input-group-btn">
-                                <button id="search-submit" class="btn btn-primary btn-inverted" ng-click="enterPressed(vm.search)" role="button" tooltip-placement="bottom"
-                                    uib-tooltip-html="'<p>Use space to separate between conjunctive terms, | (no spaces) to separate disjunctive terms and quotations for exact phrases.</p><p>For example, <i><b>usc 1234</b></i> returns all records containing &ldquo;usc&rdquo; and &ldquo;1234&rdquo;.</p><p><i><b>usc|1234</b></i> returns all records containing &ldquo;usc&rdquo; or &ldquo;1234&rdquo;.</b></i></p><p><i><b>&ldquo;usc 1234&rdquo;</b></i> returns all records containing &ldquo;usc 1234&rdquo;.</p>'">
-                                    &nbsp;<span class="glyphicon glyphicon-search"></span>&nbsp;<!-- Added 2 non-breaking spaces to prevent btn's margins from collapsing and to center the icon-->
-                                </button>
-                            </span>
+                    <div class="row">
+                        <div class="col-lg-4 col-md-5 col-sm-6 col-xs-6">
+                            <!-- search box -->
+                            <div class="input-group has-feedback">
+                                <input type="text"
+                                    id="search-input"
+                                    ng-model="vm.search"
+                                    class="form-control main-search-input"
+                                    ng-class="{'search-progress': inputChangedPromise }"
+                                    on-enter="enterPressed()"
+                                    ng-change="inputChanged()"
+                                    placeholder="Search"
+                                    autofocus>
+                                    <div class="form-control-feedback coltooltip" ng-show="vm.search && !inputChangedPromise" ng-style="{'cursor': 'pointer', 'right': (onPlusButtonClick ? '85px': '50px'), 'pointer-events': 'all', 'z-index': '5'}"><!-- form-control:focus changes the z-index of the form control from 2 to 3. form-control-feedback has z-index of 2. Overriding that z index to 5 so it isn't hidden when focused-->
+                                        <span id="search-clear" class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="::clearSearch()" tooltip-placement="bottom" uib-tooltip="Clear Search"></span>
+                                    </div>
+                                <span class="input-group-btn">
+                                    <button id="search-submit" class="btn btn-primary btn-inverted" ng-click="enterPressed(vm.search)" role="button" tooltip-placement="bottom"
+                                        uib-tooltip-html="'<p>Use space to separate between conjunctive terms, | (no spaces) to separate disjunctive terms and quotations for exact phrases.</p><p>For example, <i><b>usc 1234</b></i> returns all records containing &ldquo;usc&rdquo; and &ldquo;1234&rdquo;.</p><p><i><b>usc|1234</b></i> returns all records containing &ldquo;usc&rdquo; or &ldquo;1234&rdquo;.</b></i></p><p><i><b>&ldquo;usc 1234&rdquo;</b></i> returns all records containing &ldquo;usc 1234&rdquo;.</p>'">
+                                        &nbsp;<span class="glyphicon glyphicon-search"></span>&nbsp;<!-- Added 2 non-breaking spaces to prevent btn's margins from collapsing and to center the icon-->
+                                    </button>
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div id="facet-filters-container" ng-if="vm.initialized">
-                <div class="total-filters facet-filters" ng-if="vm.reference.location.isConstrained">
-                    <a id="clear-all-filters" class="remove-link" ng-click="vm.removeFilter()" ng-if="vm.hasFilter() || vm.reference.location.searchTerm || vm.reference.location.filter || vm.reference.location.customFacets">
-                        <span class="filter-label label label-primary label-inverted" uib-tooltip="Clear all filters applied" tooltip-placement="bottom">
-                            Clear all filters
-                        </span>
-                    </a>
-                    <div class="filter-label label label-default" ng-if="vm.reference.location.searchTerm">
-                        <a class="remove-link" ng-click="::clearSearch()" tooltip-placement="bottom" uib-tooltip="Clear search term applied"><i class="glyphicon glyphicon-remove"></i></a>
-                        <span class="filter-label-title">Search</span>
-                        <span class="filter-label-colon">:</span>
-                        <span class="filter-label-value" ng-bind="vm.reference.location.searchTerm"></span>
+                <div class="recordset-chiclets-container recordset-chiclets" ng-if="vm.reference.location.filter || vm.reference.location.customFacets || vm.hasFilter()">
+                    <div class="filter-chiclet chaise-btn-group" ng-if="vm.reference.location.filter">
+                        <button id="clear-custom-filters" class="filter-chiclet-remove chaise-btn chaise-btn-secondary" ng-click="vm.removeFilter('filters')" tooltip-placement="bottom" uib-tooltip="Clear custom filter applied">
+                            <i class="icon-btn glyphicon glyphicon-remove"></i>
+                        </button>
+                        <span class="filter-chiclet-title chaise-btn chaise-btn-secondary">Custom Filter</span>
+                        <span class="filter-chiclet-value chaise-btn chaise-btn-secondary" ng-bind="transformCustomFilter(vm.reference.location.filtersString)" tooltip-placement="bottom-left" uib-tooltip="{{transformCustomFilter(vm.reference.location.filtersString)}}" tooltip-class="custom-filter-tooltip"></span>
                     </div>
-                    <div class="filter-label label label-default" ng-if="vm.reference.location.filter">
-                        <a id="clear-custom-filters" class="remove-link" ng-click="vm.removeFilter('filters')" tooltip-placement="bottom" uib-tooltip="Clear custom filter applied"><i class="glyphicon glyphicon-remove"></i></a>
-                        <span class="filter-label-title">Custom Filter</span>
-                        <span class="filter-label-colon">:</span>
-                        <span class="filter-label-value" ng-bind="transformCustomFilter(vm.reference.location.filtersString)" tooltip-placement="bottom-left" uib-tooltip="{{transformCustomFilter(vm.reference.location.filtersString)}}" tooltip-class="custom-filter-tooltip"></span>
+                    <div class="filter-chiclet chaise-btn-group" ng-if="vm.reference.location.customFacets">
+                        <button id="clear-custom-facets" class="filter-chiclet-remove chaise-btn chaise-btn-secondary" ng-click="vm.removeFilter('cfacets')" tooltip-placement="bottom" uib-tooltip="Clear custom filter applied">
+                            <i class="glyphicon glyphicon-remove"></i>
+                        </button>
+                        <span class="filter-chiclet-title chaise-btn chaise-btn-secondary">Custom Filter</span>
+                        <span class="filter-chiclet-value chaise-btn chaise-btn-secondary" ng-bind="vm.reference.location.customFacets.displayname" tooltip-placement="bottom-left" uib-tooltip="{{vm.reference.location.customFacets.displayname}}" tooltip-class="custom-filter-tooltip"></span>
                     </div>
-                    <div class="filter-label label label-default" ng-if="vm.reference.location.customFacets">
-                        <a id="clear-custom-facets" class="remove-link" ng-click="vm.removeFilter('cfacets')" tooltip-placement="bottom" uib-tooltip="Clear custom filter applied"><i class="glyphicon glyphicon-remove"></i></a>
-                        <span class="filter-label-title">Custom Filter</span>
-                        <span class="filter-label-colon">:</span>
-                        <span class="filter-label-value" ng-bind="vm.reference.location.customFacets.displayname" tooltip-placement="bottom-left" uib-tooltip="{{vm.reference.location.customFacets.displayname}}" tooltip-class="custom-filter-tooltip"></span>
-                    </div>
-                    <div class="filter-label label label-default" ng-repeat="fc in vm.reference.facetColumns track by $index" ng-if="vm.hasFilter($index)">
-                        <a class="remove-link" ng-click="vm.removeFilter($index)" tooltip-placement="bottom" uib-tooltip="Clear filter applied"><i class="glyphicon glyphicon-remove"></i></a>
-                        <a class="filter-label-title" tooltip-placement="bottom" ng-click="vm.focusOnFacet($index)" ng-if="::fc.displayname.isHTML"  ng-attr-uib-tooltip="{{'Go to ' + fc.displayname.value + ' filter'}}" ng-bind-html="::fc.displayname.value"></a>
-                        <a class="filter-label-title" tooltip-placement="bottom" ng-click="vm.focusOnFacet($index)" ng-if="::!fc.displayname.isHTML" ng-attr-uib-tooltip="{{'Go to ' + fc.displayname.value+ ' filter'}}" ng-bind="::fc.displayname.value"></a>
-                        <span class="filter-label-colon">:</span>
-                        <span class="filter-label-value" uib-tooltip-template="'filtersTooltipTemplate.html'" tooltip-placement="bottom-left" tooltip-class="filters-tooltip">
-                            <span ng-repeat="filter in vm.facetModels[$index].appliedFilters">
-                                <span ng-if="::filter.displayname.value && filter.displayname.isHTML" ng-bind-html="::filter.displayname.value"></span>
-                                <span ng-if="::filter.displayname.value && !filter.displayname.isHTML" ng-bind="::filter.displayname.value"></span>
-                                <span ng-if="::filter.displayname.value == ''" ng-bind-html="defaultDisplayname.empty"></span>
-                                <span ng-if="::filter.displayname.value == null" ng-bind-html="defaultDisplayname.null"></span>
-                                <span ng-if="!$last" style="margin-left:-4px">, </span>
-                            </span>
-                        </span>
+                    <div class="filter-chiclet chaise-btn-group" ng-repeat="fc in vm.reference.facetColumns track by $index" ng-if="vm.hasFilter($index)">
+                        <button class="filter-chiclet-remove chaise-btn chaise-btn-secondary" ng-click="vm.removeFilter($index)" tooltip-placement="bottom" uib-tooltip="Clear filter applied">
+                            <i class="glyphicon glyphicon-remove"></i>
+                        </button>
+                        <button class="filter-chiclet-title chaise-btn chaise-btn-secondary" tooltip-placement="bottom" ng-click="vm.focusOnFacet($index)" ng-if="::fc.displayname.isHTML"  ng-attr-uib-tooltip="{{'Go to ' + fc.displayname.value + ' filter'}}" ng-bind-html="::fc.displayname.value"></button>
+                        <button class="filter-chiclet-title chaise-btn chaise-btn-secondary" tooltip-placement="bottom" ng-click="vm.focusOnFacet($index)" ng-if="::!fc.displayname.isHTML" ng-attr-uib-tooltip="{{'Go to ' + fc.displayname.value+ ' filter'}}" ng-bind="::fc.displayname.value"></button>
                         <script type="text/ng-template" id="filtersTooltipTemplate.html">
                             <span ng-repeat="filter in vm.facetModels[$index].appliedFilters">
                                 <span>&bull;</span>
@@ -128,14 +108,26 @@
                                 <span ng-if="::filter.displayname.value == null" ng-bind-html="defaultDisplayname.null"></span>
                             </span>
                         </script>
+                        <span class="filter-chiclet-value chaise-btn chaise-btn-secondary" uib-tooltip-template="'filtersTooltipTemplate.html'" tooltip-placement="bottom-left" tooltip-class="filters-tooltip">
+                            <span ng-repeat="filter in vm.facetModels[$index].appliedFilters">
+                                <span ng-if="::filter.displayname.value && filter.displayname.isHTML" ng-bind-html="::filter.displayname.value"></span>
+                                <span ng-if="::filter.displayname.value && !filter.displayname.isHTML" ng-bind="::filter.displayname.value"></span>
+                                <span ng-if="::filter.displayname.value == ''" ng-bind-html="defaultDisplayname.empty"></span>
+                                <span ng-if="::filter.displayname.value == null" ng-bind-html="defaultDisplayname.null"></span>
+                                <span ng-if="!$last" style="margin-left:-4px">, </span>
+                            </span>
+                        </span>
                     </div>
+                    <button id="clear-all-filters" ng-click="vm.removeFilter()" class="chaise-btn chaise-btn-tertiary clear-all-btn" uib-tooltip="Clear all filters applied" tooltip-placement="bottom">
+                        <span>Clear all filters</span>
+                    </button>
                 </div>
+                <button class="open-filter-panel-btn chaise-btn chaise-btn-tertiary" ng-show="vm.config.showFaceting && !vm.config.facetPanelOpen" ng-click="vm.config.facetPanelOpen = true">
+                    <span class="chaise-icon-btn chaise-icon chaise-sidebar-open"></span>
+                    <span>Show filter panel</span>
+                </button>
+                <table-header ng-show="vm.initialized" vm="vm"></table-header>
             </div>
-            <button class="open-filter-panel-btn chaise-btn chaise-btn-tertiary" ng-show="vm.config.showFaceting && !vm.config.facetPanelOpen" ng-click="vm.config.facetPanelOpen = true">
-                <span class="chaise-icon-btn chaise-icon chaise-sidebar-open"></span>
-                <span>Show filter panel</span>
-            </button>
-            <table-header ng-show="vm.initialized" vm="vm"></table-header>
         </div>
     </div>
     <div class="bottom-panel-container">
@@ -145,7 +137,6 @@
         <div class="main-container">
             <loading-spinner id="main-spinner" ng-show="!vm.hasLoaded && vm.initialized"></loading-spinner>
             <div class="main-body">
-                <alerts alerts="$root.alerts"></alerts>
 
                 <!-- record table -->
                 <div class="recordset-table-container" ng-show="vm.initialized">
