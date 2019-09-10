@@ -277,7 +277,7 @@
                 reference: reference,
                 parentReference: parentReference,
                 pageLimit: getPageSize(reference),
-                displayType: reference.display.type,
+                isTableDisplay: reference.display.type == 'table',
                 fromTuple: fromTuple,
                 context: context,
                 enableSort: true,

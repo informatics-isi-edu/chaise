@@ -11,7 +11,7 @@
 .rg-right,
 .rg-top {
     display: block;
-    width: 15px;
+    width: 20px;
     height: 14px;
     line-height: 14px;
     position: absolute;
@@ -39,6 +39,7 @@
 .rg-right span {
     top: 50%;
     color: $border-color;
+    font-size: 1.5rem;
     font-weight: 400;
 }
 
@@ -64,7 +65,7 @@
     height: 100%;
     right: 0;
     top: 0;
-    margin-right: -14px;
+    margin-right: -17px;
     border-right: none;
 }
 

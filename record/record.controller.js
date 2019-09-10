@@ -160,13 +160,16 @@
         };
 
         vm.toRecordSet = function(ref) {
-          // Search app might be broken and should not be linked from here.
+            event.preventDefault();
+            event.stopPropagation();
+            // Search app might be broken and should not be linked from here.
             var appUrl = ref.appLink,
                 recordSetUrl;
-            if(appUrl.search("/search/") > 0){
-              recordSetUrl = appUrl.replace("/search/", "/recordset/");
-            } else{
-              recordSetUrl = appUrl;
+
+            if (appUrl.search("/search/") > 0) {
+                recordSetUrl = appUrl.replace("/search/", "/recordset/");
+            } else {
+                recordSetUrl = appUrl;
             }
             return $window.location.href = recordSetUrl;
         };
@@ -240,14 +243,10 @@
             return true;
         };
 
-        vm.toggleRelatedTableDisplayType = function(dataModel) {
+        vm.toggleDisplayMode = function(dataModel) {
             event.preventDefault();
             event.stopPropagation();
-            if (dataModel.displayType == 'markdown') {
-                dataModel.displayType = 'table';
-            } else {
-                dataModel.displayType = 'markdown';
-            }
+            dataModel.isTableDisplay = !dataModel.isTableDisplay;
         };
 
         vm.toggleRelatedTables = function() {
@@ -388,6 +387,8 @@
         }
 
         vm.addRelatedRecord = function(ref) {
+            event.preventDefault();
+            event.stopPropagation();
             var cookie = getPrefillCookieObject(ref);
 
             if(ref.derivedAssociationReference){
@@ -529,22 +530,6 @@
                 }, 0);
             }
         });
-
-        // $scope.$watch(function() {
-        //     if (mainContainerEl) {
-        //         return mainContainerEl[0].offsetHeight;
-        //     } else {
-        //         return -1;
-        //     }
-        // }, function (newValue, oldValue) {
-        //     if (newValue != oldValue) {
-        //         $timeout(function () {
-        //             UiUtils.setFooterStyle(0);
-        //             setLoadingTextStyle();
-        //             // setMainContainerHeight();
-        //         }, 0);
-        //     }
-        // });
 
         // change the main container height whenever the DOM resizes
         angular.element($window).bind('resize', function(){
