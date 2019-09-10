@@ -241,6 +241,8 @@
         };
 
         vm.toggleRelatedTableDisplayType = function(dataModel) {
+            console.log(event);
+            // event.stopPropagation();
             if (dataModel.displayType == 'markdown') {
                 dataModel.displayType = 'table';
             } else {

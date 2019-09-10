@@ -14,13 +14,13 @@
                 <span ng-if="!values[$index].isHTML">{{values[$index].value}}</span>
             </span>
             <span ng-if="showInlineTable($index)" id="entity-{{$index}}-table">
-                <record-action-bar id="actionbar-{{$index}}" tabtype="entity" related-table-ref-display="actionBarDisplayType($index)" tab-model-display="col.tableModel.displayType"
+                <record-action-bar id="actionbar-{{$index}}" tabtype="entity" tab-model-display="col.tableModel.displayType" related-table-ref-display="actionBarDisplayType($index)"
                     toggle-related-table-display-type='toggleRelatedTableDisplayType({dataModel:col.tableModel})' can-edit-related="canEditRelated({ref:col.tableModel.reference}) && !showError($index)"
                     can-create-related="canCreateRelated({ref:col.tableModel.reference})" show-toggle-display-btn="allowInlineTableMarkdown($index)"
                     add-related-record="addRelatedRecord({ref:col.tableModel.reference})" to-record-set="toRecordSet({ref:col.tableModel.reference})"
                     displayname="col.column.displayname" base-table-name="col.baseTableName">
                 </record-action-bar>
-                <div ng-hide="showError($index) || showLoader($index)" ng-switch="col.tableModel.displayType == 'markdown' && allowInlineTableMarkdown($index)">
+                <div ng-hide="showError($index) || showLoader($index)" ng-switch="col.tableModel.displayType == 'markdown' && allowInlineTableMarkdown($index)" ng-class="{'inline-table-display': !(col.tableModel.displayType == 'markdown' && allowInlineTableMarkdown($index))}">
                     <span ng-switch-when="true" id="entity-{{$index}}-markdown">
                         <span ng-if="col.tableModel.page.content == null">
                             <span class="markdown-container"><em><strong>None</strong></em></span>
@@ -30,6 +30,7 @@
                         </span>
                     </span>
                     <span ng-switch-default id="entity-{{$index}}-recTab">
+                        <table-header vm="col.tableModel"></table-header>
                         <record-table class="related-table" id="rt-{{::makeSafeIdAttr(col.column.displayname.value)}}" vm="col.tableModel"></record-table>
                     </span>
                 </div>

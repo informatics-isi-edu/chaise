@@ -7,7 +7,7 @@
             </button>
         </span>
         <span ng-if="showToggleDisplayBtn">
-            <button class="chaise-btn chaise-btn-secondary toggle-display-link" ng-click="toggleRelatedTableDisplayType({dataModel:dataModel})">
+            <button class="chaise-btn chaise-btn-secondary toggle-display-link" ng-click="toggleRelatedTableDisplayType({dataModel:dataModel},{$event:$event})">
                 <span ng-show="tabModelDisplay == 'markdown'">
                     <span class="fas fa-table"></span>
                     <span class="hide-tooltip-border" ng-if="canEditRelated({ref:ref})" ng-attr-uib-tooltip-html="'Edit {{tooltip.entityName}} related to this {{tooltip.baseTableName}}'" tooltip-placement="auto top">Edit mode</span>

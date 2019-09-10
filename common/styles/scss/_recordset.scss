@@ -176,6 +176,14 @@
         .table-heading {
             background-color: $table-header-background-color;
             color: $black-color;
+
+            .actions-header {
+                width: 100px;
+
+                &.view-header {
+                    width: 50px;
+                }
+            }
         }
 
         &.table-striped > tbody > tr:nth-child(odd) {

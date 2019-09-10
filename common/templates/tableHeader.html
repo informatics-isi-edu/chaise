@@ -28,7 +28,7 @@
         <img id="push-rows-spinner" ng-show="vm.pushRowsSpinner" src="../common/styles/images/loader.gif" class="spinner spinner-sm"/>
         <span ng-if="vm.countError" class="glyphicon glyphicon-alert" uib-tooltip="Request timeout: total count cannot be retrieved. Refresh the page later to try again." tooltip-placement="bottom"></span>
     </div>
-    <div class="col-xs-12 col-sm-6" ng-if="!parentReference">
+    <div class="col-xs-12 col-sm-6" ng-if="!vm.parentReference">
         <div class="pull-right">
             <button id="create-link" class="chaise-btn chaise-btn-primary" ng-if="vm.reference.canCreate && vm.config.editable" ng-click="addRecord()" uib-tooltip="Click here to create a record." tooltip-placement="bottom">
                 <span class="chaise-btn-icon glyphicon glyphicon-plus"></span>
