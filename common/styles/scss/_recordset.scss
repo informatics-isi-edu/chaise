@@ -1,290 +1,289 @@
-.chaise-body {
 
-    .recordset-container {
-        padding: 20px;
-        padding-right: 0;
+.recordset-container {
+    padding: 20px;
+    padding-right: 0;
 
-        .top-panel-container {
-            padding-right: 20px;
+    .top-panel-container {
+        padding-right: 20px;
 
-            .top-left-panel {
-                .faceting-header {
-                    width: 100%;
-                    position: absolute;
-                    bottom: 9px;
-                    left: 0;
+        .top-left-panel {
+            .faceting-header {
+                width: 100%;
+                position: absolute;
+                bottom: 9px;
+                left: 0;
 
-                    h3 {
-                        margin: 0;
-                    }
-                    button {
-                        padding: 0;
-                        padding-bottom: 7px;
-                    }
-                }
-            }
-
-            .top-right-panel {
-                h1#page-title {
+                h3 {
                     margin: 0;
-                    margin-bottom: 20px;
                 }
-
-                .open-filter-panel-btn {
+                button {
                     padding: 0;
-                    margin-bottom: 10px;
-                }
-
-                .recordset-controls-container {
-                    margin-bottom: 10px;
-                }
-
-                $filter-chiclet-margin: 5px;
-                .filter-chiclet {
-                    max-width: 350px;
-                    margin-right: $filter-chiclet-margin;
-                    margin-bottom: $filter-chiclet-margin;
-
-                    .chaise-btn:focus {
-                        background-color: $white-color;
-                    }
-
-                    .chaise-btn.chaise-btn-secondary {
-                        border-color: $border-color;
-                        height: 25px;
-                        min-width: 25px;
-                        padding: 2px 5px;
-                    }
-
-                    .chaise-btn.filter-chiclet-remove {
-                        padding: 3px;
-                    }
-
-                    .chaise-btn.filter-chiclet-title {
-                        border-right: 0;
-                        max-width: 150px;
-                        text-overflow: ellipsis;
-                        overflow: hidden;
-                        padding-right: 2px;
-                    }
-                    .chaise-btn.filter-chiclet-value {
-                        text-overflow: ellipsis;
-                        overflow: hidden;
-                        white-space: nowrap;
-                        max-width: 200px;
-
-                        position: relative;
-                        &:before {
-                            content: ":";
-                            position: absolute;
-                            left: 0;
-                        }
-                        border-left: 0;
-                        padding-left: 7px;
-                    }
-
-                    span {
-                        color: $black-color;
-                        cursor: default;
-                    }
-                }
-
-                .clear-all-btn {
-                    padding-left: 0;
-                    margin-bottom: $filter-chiclet-margin;
-                }
-
-                .recordset-chiclets-container {
-                    margin-bottom: 10px;
-                    padding-right: 250px;
+                    padding-bottom: 7px;
                 }
             }
         }
 
-        .top-left-panel.open-panel + .top-right-panel, .side-panel-resizable.open-panel + .main-container {
-            padding-left: 30px;
-        }
+        .top-right-panel {
+            h1#page-title {
+                margin: 0;
+                margin-bottom: 20px;
+            }
 
-        .bottom-panel-container {
-            .main-container {
-                padding-right: 20px;
+            .open-filter-panel-btn {
+                padding: 0;
+                margin-bottom: 10px;
+            }
+
+            .recordset-controls-container {
+                margin-bottom: 10px;
+            }
+
+            $filter-chiclet-margin: 5px;
+            .filter-chiclet {
+                max-width: 350px;
+                margin-right: $filter-chiclet-margin;
+                margin-bottom: $filter-chiclet-margin;
+
+                .chaise-btn:focus {
+                    background-color: $white-color;
+                }
+
+                .chaise-btn.chaise-btn-secondary {
+                    border-color: $border-color;
+                    height: 25px;
+                    min-width: 25px;
+                    padding: 2px 5px;
+                }
+
+                .chaise-btn.filter-chiclet-remove {
+                    padding: 3px;
+                }
+
+                .chaise-btn.filter-chiclet-title {
+                    border-right: 0;
+                    max-width: 150px;
+                    text-overflow: ellipsis;
+                    overflow: hidden;
+                    padding-right: 2px;
+                }
+                .chaise-btn.filter-chiclet-value {
+                    text-overflow: ellipsis;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    max-width: 200px;
+
+                    position: relative;
+                    &:before {
+                        content: ":";
+                        position: absolute;
+                        left: 0;
+                    }
+                    border-left: 0;
+                    padding-left: 7px;
+                }
+
+                span {
+                    color: $black-color;
+                    cursor: default;
+                }
+            }
+
+            .clear-all-btn {
+                padding-left: 0;
+                margin-bottom: $filter-chiclet-margin;
+            }
+
+            .recordset-chiclets-container {
+                margin-bottom: 10px;
+                padding-right: 250px;
             }
         }
-
     }
+
+    .top-left-panel.open-panel + .top-right-panel, .side-panel-resizable.open-panel + .main-container {
+        padding-left: 30px;
+    }
+
+    .bottom-panel-container {
+        .main-container {
+            padding-right: 20px;
+        }
+    }
+
+}
 
 // chaise table
-    .outer-table {
-        overflow-x: auto;
+.outer-table {
+    overflow-x: auto;
+}
+
+.chaise-table-header {
+    margin-bottom: 10px;
+}
+
+.chaise-table.table {
+    border-top: 1px solid $table-border-color;
+    border-bottom: 1px solid $table-border-color;
+    margin: 0;
+
+    /* if you want the table to have a fixed layout */
+    &.table-fixed-layout {
+        table-layout: fixed;
+        width: 100%;
     }
 
-    .chaise-table-header {
-        margin-bottom: 10px;
-    }
+    // TODO: verify this still works as expected
+    tbody {
+        display: table-row-group;
+        vertical-align: middle;
 
-    .chaise-table.table {
-        border-top: 1px solid $table-border-color;
-        border-bottom: 1px solid $table-border-color;
-        margin: 0;
-
-        /* if you want the table to have a fixed layout */
-        &.table-fixed-layout {
-            table-layout: fixed;
-            width: 100%;
+        > tr > td.disabled-cell {
+            background-color: #f4f4f4;
         }
 
-        // TODO: verify this still works as expected
-        tbody {
-            display: table-row-group;
-            vertical-align: middle;
+        /* table hover */
+        > tr:hover {
+            background-color: #f7f0cf !important;
 
-            > tr > td.disabled-cell {
-                background-color: #f4f4f4;
-            }
-
-            /* table hover */
-            > tr:hover {
+            /* match color from row highlight for disabled cells */
+            > td.disabled-cell {
                 background-color: #f7f0cf !important;
-
-                /* match color from row highlight for disabled cells */
-                > td.disabled-cell {
-                    background-color: #f7f0cf !important;
-                }
             }
+        }
 
-            /* odd disabled cells need to be darker */
-            > tr:nth-child(odd) > td.disabled-cell {
-                background-color: #ebebeb;
-            }
+        /* odd disabled cells need to be darker */
+        > tr:nth-child(odd) > td.disabled-cell {
+            background-color: #ebebeb;
+        }
 
-            /* odd row hover for striped table */
-            > tr:nth-child(odd):hover {
+        /* odd row hover for striped table */
+        > tr:nth-child(odd):hover {
+            background-color: #efebda !important;
+
+            /* odd disabled cells need to match odd row hover for striped table above */
+            > td.disabled-cell {
                 background-color: #efebda !important;
-
-                /* odd disabled cells need to match odd row hover for striped table above */
-                > td.disabled-cell {
-                    background-color: #efebda !important;
-                }
             }
         }
+    }
 
-        tr {
-            border-left: 1px solid $table-border-color;
-            border-bottom: none;
-        }
+    tr {
+        border-left: 1px solid $table-border-color;
+        border-bottom: none;
+    }
 
-        .table-heading {
-            background-color: $table-header-background-color;
-            color: $black-color;
+    .table-heading {
+        background-color: $table-header-background-color;
+        color: $black-color;
 
-            .actions-header {
-                width: 100px;
+        .actions-header {
+            width: 100px;
 
-                &.view-header {
-                    width: 50px;
-                }
+            &.view-header {
+                width: 50px;
             }
         }
+    }
 
-        &.table-striped > tbody > tr:nth-child(odd) {
-            background: $table-striped-background-color;
-        }
+    &.table-striped > tbody > tr:nth-child(odd) {
+        background: $table-striped-background-color;
+    }
 
-        >thead>tr>th {
-            border-bottom: 1px solid $table-border-color;
-        }
+    >thead>tr>th {
+        border-bottom: 1px solid $table-border-color;
+    }
 
-        >thead>tr>th,
-        >tbody>tr>th,
-        >tfoot>tr>th,
-        >thead>tr>td,
-        >tbody>tr>td,
-        >tfoot>tr>td {
-            border-top: none;
-            border-right: 1px solid $table-border-color;
-            word-wrap: break-word;
-        }
+    >thead>tr>th,
+    >tbody>tr>th,
+    >tfoot>tr>th,
+    >thead>tr>td,
+    >tbody>tr>td,
+    >tfoot>tr>td {
+        border-top: none;
+        border-right: 1px solid $table-border-color;
+        word-wrap: break-word;
+    }
 
-        >tbody>tr>td {
-            padding: 5px;
-        }
+    >tbody>tr>td {
+        padding: 5px;
+    }
 
-        th {
-            font-weight: 400;
-            border-top: 1px solid $table-border-color;
-            position: relative;
+    th {
+        font-weight: 400;
+        border-top: 1px solid $table-border-color;
+        position: relative;
 
-            // TODO make sure it works
-            &.multi-select-width {
-                width: 140px;
-                text-align: center;
-            }
-
-            &.actions-header {
-                white-space: nowrap;
-                text-align: center;
-                font-size: $h4-font-size;
-                padding: 8px;
-            }
-
-            .table-column-displayname {
-                font-size: $h4-font-size;
-            }
-
-            // preserve space for the icon on the right
-            padding-right: 10px + 15px;
-            .table-heading-icons {
-                position: absolute;
-                bottom: 7px;
-                right: 10px;
-                font-size: $h4-font-size;
-
-                .aggregate-col-loader {
-                    right: -5px
-                }
-            }
-        }
-
-        .action-btns {
+        // TODO make sure it works
+        &.multi-select-width {
+            width: 140px;
             text-align: center;
-            font-size: 1.14rem;
-            .chaise-btn {
-                padding: 0;
-                margin: -3px;
+        }
+
+        &.actions-header {
+            white-space: nowrap;
+            text-align: center;
+            font-size: $h4-font-size;
+            padding: 8px;
+        }
+
+        .table-column-displayname {
+            font-size: $h4-font-size;
+        }
+
+        // preserve space for the icon on the right
+        padding-right: 10px + 15px;
+        .table-heading-icons {
+            position: absolute;
+            bottom: 7px;
+            right: 10px;
+            font-size: $h4-font-size;
+
+            .aggregate-col-loader {
+                right: -5px
             }
         }
-
-
     }
 
-    .chaise-table-pagination {
-        margin: 20px 0;
+    .action-btns {
         text-align: center;
-        button {
-            width: 75px;
+        font-size: 1.14rem;
+        .chaise-btn {
+            padding: 0;
+            margin: -3px;
         }
     }
+
+
+}
+
+.chaise-table-pagination {
+    margin: 20px 0;
+    text-align: center;
+    button {
+        width: 75px;
+    }
+}
 // END chaise table
 
 
 
-    /************* search loader ***************/
-    input.search-progress {
-        background: url("images/loader.gif") no-repeat right center;
-        background-size: 25px 25px;
-        background-position-x: 99%;
-    }
+/************* search loader ***************/
+input.search-progress {
+    background: url("images/loader.gif") no-repeat right center;
+    background-size: 25px 25px;
+    background-position-x: 99%;
+}
 
-    /************* search input ****************/
-    .form-control-feedback > span.search-remove {
-        border-bottom: none;
-    }
+/************* search input ****************/
+.form-control-feedback > span.search-remove {
+    border-bottom: none;
+}
 
 
 // faceting directive
+faceting {
     .side-panel-container {
         overflow-y: auto;
-        border-right: solid 1px $border-color;
 
         .faceting-columns-container {
             .panel-group {
@@ -341,78 +340,76 @@
             }
         }
     }
-
+}
 
 // the tooltip that is displayed for the filter chiclets
-    .filters-tooltip {
-        margin-right: 2%;
-        .tooltip-inner {
-            white-space: normal;
-            max-width: inherit;
-        }
+.filters-tooltip {
+    margin-right: 2%;
+    .tooltip-inner {
+        white-space: normal;
+        max-width: inherit;
     }
+}
 
-    .recordset-container.with-faceting .pager {
-        margin-bottom: 50px;
-    }
+.recordset-container.with-faceting .pager {
+    margin-bottom: 50px;
+}
 
-    .recordset-container > .main-container {
-        overflow-x: hidden;
-    }
+.recordset-container > .main-container {
+    overflow-x: hidden;
+}
 
 
 // choice picker directive
-    .choice-picker {
-        .search-box {
-            margin-bottom: 10px;
-            .show-more-btn {
-                padding-right: 0;
-            }
+.choice-picker {
+    .search-box {
+        margin-bottom: 10px;
+        .show-more-btn {
+            padding-right: 0;
         }
     }
+}
 
 // range picker directive
-    .range-picker {
-        hr {
-            color: $border-color;
-            width: 1px;
-        }
-        .form-inline input {
-            width: 100%;
-            padding: 6px 20px 6px 6px;
-            height: 100%;
-            border: none;
-            border-radius: 4px;
-        }
-        .plotly-how-to {
-            border-color: white !important;
-            cursor: default;
-        }
-
-        .plotly-how-to:hover {
-            z-index: auto !important;
-        }
+.range-picker {
+    hr {
+        color: $border-color;
+        width: 1px;
     }
+    .form-inline input {
+        width: 100%;
+        padding: 6px 20px 6px 6px;
+        height: 100%;
+        border: none;
+        border-radius: 4px;
+    }
+    .plotly-how-to {
+        border-color: white !important;
+        cursor: default;
+    }
+
+    .plotly-how-to:hover {
+        z-index: auto !important;
+    }
+}
 
 
 // list directive
-    .chaise-list-container {
-        padding-left: 0;
-        margin-bottom: 5px;
+.chaise-list-container {
+    padding-left: 0;
+    margin-bottom: 5px;
 
-        .chaise-checkbox {
-            margin-bottom: 7px;
-            margin-left: 5px;
-        }
-        li:hover {
-            background-color: rgb(241, 241, 241);
-        }
+    .chaise-checkbox {
+        margin-bottom: 7px;
+        margin-left: 5px;
     }
+    li:hover {
+        background-color: rgb(241, 241, 241);
+    }
+}
 
 
 // selected rows
-    .selected-rows {
-        min-height: 45px;
-    }
-
+.selected-rows {
+    min-height: 45px;
 }

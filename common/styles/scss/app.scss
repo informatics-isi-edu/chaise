@@ -13,7 +13,6 @@
 @import "modal";
 
 // app specific
-@import "recordset-app";
 @import "recordedit-app";
 @import "viewer-app";
 
@@ -37,6 +36,7 @@ html {
 
 .chaise-body {
     @import "record-app";
+    @import "recordset-app";
 
     // TODO this might be problematic, we might want to be more specific to each app
     /****************** GLOBAL ******************/
