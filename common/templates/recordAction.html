@@ -1,29 +1,28 @@
-<div ng-class="{'pull-right': tabtype == 'related', 'action-bar-RT-heading': tabtype == 'related'}">
-    <div ng-class="{'action-bar-entity-display-mode': tabtype == 'entity' && tabModelDisplay != 'table', 'action-bar-entity-table-mode': tabtype == 'entity' && tabModelDisplay == 'table'}">
-        <span ng-if="canCreateRelated({ref:ref})">
-            <button class="chaise-btn chaise-btn-secondary add-records-link" ng-click="addRelatedRecord({ref:ref})" ng-attr-uib-tooltip-html="'Add more {{tooltip.entityName}} related to this {{tooltip.baseTableName}}'" tooltip-placement="auto top">
+<div ng-class="{'pull-right': !isInline, 'action-bar-RT-heading': !isInline}">
+    <div ng-class="{'action-bar-entity-display-mode': isInline && !isTableDisplay, 'action-bar-entity-table-mode': isInline && isTableDisplay}">
+        <span ng-if="canCreate">
+            <button class="chaise-btn chaise-btn-secondary add-records-link" ng-click="addRelatedRecord({ref:ref})" uib-tooltip-html="tooltip.createButton" tooltip-placement="auto top">
                 <span class="chaise-btn-icon glyphicon glyphicon-plus"></span>
                 <span>Add Record</span>
             </button>
         </span>
         <span ng-if="showToggleDisplayBtn">
-            <button class="chaise-btn chaise-btn-secondary toggle-display-link" ng-click="toggleRelatedTableDisplayType({dataModel:dataModel})">
-                <span ng-show="tabModelDisplay == 'markdown'">
-                    <span class="fas fa-table"></span>
-                    <span class="hide-tooltip-border" ng-if="canEditRelated({ref:ref})" ng-attr-uib-tooltip-html="'Edit {{tooltip.entityName}} related to this {{tooltip.baseTableName}}'" tooltip-placement="top">Edit mode</span>
-                    <span class="hide-tooltip-border" ng-if="!canEditRelated({ref:ref})" ng-attr-uib-tooltip-html="'Display related {{tooltip.entityName}} in tabular mode'" tooltip-placement="top">Table mode</span>
-                </span>
-                <span ng-show="tabModelDisplay != 'markdown'">
+            <span ng-if="!isTableDisplay">
+                <button class="chaise-btn chaise-btn-secondary toggle-display-link" ng-click="toggleDisplayMode({dataModel:dataModel})" uib-tooltip-html="tooltip.tableModeButton" tooltip-placement="auto top">
+                    <span class="chaise-btn-icon fas fa-table"></span>
+                    <span>{{canEdit ? "Edit mode" : "Table mode"}}</span>
+                </button>
+            </span>
+            <span ng-if="isTableDisplay">
+                <button class="chaise-btn chaise-btn-secondary toggle-display-link" ng-click="toggleDisplayMode({dataModel:dataModel})" uib-tooltip="Switch back to the custom display mode" tooltip-placement="auto top">
                     <span class="chaise-btn-icon glyphicon glyphicon-th"></span>
-                    <span class="hide-tooltip-border" ng-attr-uib-tooltip="Switch back to the custom display mode" tooltip-placement="top">Custom mode</span>
-                </span>
-            </button>
+                    <span>Custom mode</span>
+                </button>
+            </span>
         </span>
-        <span>
-            <button class="chaise-btn chaise-btn-secondary">
-                <span class="chaise-btn-icon glyphicon glyphicon-search more-results-link" ng-click="toRecordSet({ref:ref})" ng-attr-uib-tooltip-html="'View more {{tooltip.entityName}} related to this {{tooltip.baseTableName}}'" tooltip-placement="auto top"></span>
-                <span>Explore</span>
-            </button>
-        </span>
+        <button class="chaise-btn chaise-btn-secondary" ng-click="toRecordset({ref:ref})" uib-tooltip-html="tooltip.exploreButton" tooltip-placement="auto top">
+            <span class="chaise-btn-icon glyphicon glyphicon-search more-results-link"></span>
+            <span>Explore</span>
+        </button>
     </div>
 </div>

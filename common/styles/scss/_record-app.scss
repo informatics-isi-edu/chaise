@@ -69,14 +69,12 @@
         > .side-panel-resizable {
 
             &.open-panel {
-                flex: 0 0 $left-panel-width-sm;
-                min-width: 170px;
-                overflow-y: auto;
-                overflow-x: hidden;
+                flex-basis: $left-panel-width-sm;
             }
 
             .side-panel-container {
                 height: 100%;
+                overflow-y: auto;
 
                 .side-panel-heading {
                     margin: 0px;
@@ -124,13 +122,18 @@
                 margin-top: -25px;
             }
 
-            table {
+            > table {
+                /* if you want the table to have a fixed layout */
+                table-layout: fixed;
+                width: 100%;
+
                 tr:nth-child(1) > td {
                     border-top: none;
                 }
 
-                .column-displayname {
-                    margin-left: 35px;
+                .entity-key {
+                    padding-left: 40px;
+                    min-width: 150px;
                 }
             }
         }
@@ -162,8 +165,8 @@
         }
 
         .chaise-table-pagination {
-            margin-top: 10px;
-            margin-bottom: 0px;
+            padding-top: 10px;
+            padding-bottom: 0px;
         }
 
         /******Related Entities in record **************/
@@ -276,18 +279,14 @@
         }
 
         .record-container {
-            .row {
-                margin-left: 0px;
-            }
-
             .entity-key {
-                min-width: 150px;
-                // width: 15%;
+                width: 15%;
+                max-width: 120px;
             }
 
-            // .entity-value {
-            //     width: 85%;
-            // }
+            .entity-value {
+                width: 85%;
+            }
         }
 
         #footer {

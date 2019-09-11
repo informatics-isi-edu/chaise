@@ -123,8 +123,9 @@
 
                         <!-- defined on $rootScope in run function -->
                         <record-display class="entity-container" column-models="columnModels" values="recordValues"
-                            toggle-related-table-display-type='ctrl.toggleRelatedTableDisplayType(dataModel)' can-edit-related="::ctrl.canEditRelated(ref)" can-create-related="::ctrl.canCreateRelated(ref)"
-                            add-related-record="ctrl.addRelatedRecord(ref)" to-record-set="ctrl.toRecordSet(ref)" show-empty-related-tables="showEmptyRelatedTables">
+                            add-related-record="ctrl.addRelatedRecord(ref)" can-create-related="::ctrl.canCreateRelated(ref)"
+                            can-edit-related="::ctrl.canEditRelated(ref)" toggle-inline-display-mode='ctrl.toggleDisplayMode(dataModel)'
+                            to-record-set="ctrl.toRecordSet(ref)" show-empty-related-tables="showEmptyRelatedTables">
                         </record-display>
 
                         <!-- used to delay empty accordions from displaying before simple record display -->
@@ -138,17 +139,16 @@
                                             <span ng-if="::!rtm.displayname.isHTML" ng-bind="::rtm.displayname.value"></span>
                                             <span ng-if="rtm.tableModel.tableError" class="glyphicon glyphicon-alert" uib-tooltip="{{ctrl.queryTimeoutTooltip}}" tooltip-placement="right"></span>
                                         </div>
-                                        <record-action-bar tabtype="related" tab-model-display="rtm.displayType"
-                                            toggle-related-table-display-type='ctrl.toggleRelatedTableDisplayType(rtm)' can-edit-related="ctrl.canEditRelated(rtm.tableModel.reference)"
-                                            can-create-related="ctrl.canCreateRelated(rtm.tableModel.reference)" show-toggle-display-btn="ctrl.allowRelatedTableMarkdown($index)"
-                                            add-related-record="ctrl.addRelatedRecord(rtm.tableModel.reference)" to-record-set="ctrl.toRecordSet(rtm.tableModel.reference)"
-                                            displayname="rtm.displayname" base-table-name="rtm.baseTableName">
+                                        <record-action-bar can-create="ctrl.canCreateRelated(rtm.tableModel.reference)" can-edit="ctrl.canEditRelated(rtm.tableModel.reference)"
+                                            is-inline="false" is-table-display="rtm.isTableDisplay" show-toggle-display-btn="ctrl.allowRelatedTableMarkdown($index)"
+                                            add-related-record="ctrl.addRelatedRecord(rtm.tableModel.reference)" toggle-display-mode='ctrl.toggleDisplayMode(rtm)'
+                                            to-recordset="ctrl.toRecordSet(rtm.tableModel.reference)" base-table-name="rtm.baseTableName" displayname="rtm.displayname">
                                         </record-action-bar>
                                     </uib-accordion-heading>
 
                                     <!-- for different elements inside the accordion -->
                                     <div class="row" style="margin-right: 0px; margin-left: 0px;">
-                                        <div class="col-xs-12 accordion-content" ng-if="rtm.open" ng-switch="rtm.displayType == 'markdown' && ctrl.allowRelatedTableMarkdown($index)">
+                                        <div class="col-xs-12 accordion-content" ng-if="rtm.open" ng-switch="!rtm.isTableDisplay && ctrl.allowRelatedTableMarkdown($index)">
                                             <div ng-switch-when="true">
                                                 <span class="markdown-container" ng-bind-html="rtm.tableModel.page.content | trustedHTML"></span>
                                             </div>
