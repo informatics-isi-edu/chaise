@@ -8,36 +8,28 @@
                 <div ng-switch="type.name">
                     <!-- int2 -->
                     <div ng-switch-when="int2">
-                        <div class="form-control">
-                            <input type="number" class="range-min" min="{{intMin}}" max="{{intMax}}" placeholder="{{absMin}}" ng-model="model.min" integer disable-arrows>
-                        </div>
+                        <input type="number" class="range-min form-control" min="{{intMin}}" max="{{intMax}}" placeholder="{{absMin}}" ng-model="model.min" integer disable-arrows>
                         <div class="form-control-feedback min-clear input-clearbtn" ng-show="model.min || (numericMin.$invalid && numericMin.$dirty)">
                             <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="model.min=''" tooltip-placement="right" uib-tooltip="Clear field"></span>
                         </div>
                     </div>
                     <!-- int4 -->
                     <div ng-switch-when="int4">
-                        <div class="form-control">
-                            <input type="number" class="range-min" min="{{intMin}}" max="{{intMax}}" placeholder="{{absMin}}" ng-model="model.min" integer disable-arrows>
-                        </div>
+                        <input type="number" class="range-min form-control" min="{{intMin}}" max="{{intMax}}" placeholder="{{absMin}}" ng-model="model.min" integer disable-arrows>
                         <div class="form-control-feedback min-clear input-clearbtn" ng-show="model.min || (numericMin.$invalid && numericMin.$dirty)">
                             <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="model.min=''" tooltip-placement="right" uib-tooltip="Clear field"></span>
                         </div>
                     </div>
                     <!-- int8 -->
                     <div ng-switch-when="int8">
-                        <div class="form-control">
-                            <input type="number" class="range-min" min="{{intMin}}" max="{{intMax}}" placeholder="{{absMin}}" ng-model="model.min" integer disable-arrows>
-                        </div>
+                        <input type="number" class="range-min form-control" min="{{intMin}}" max="{{intMax}}" placeholder="{{absMin}}" ng-model="model.min" integer disable-arrows>
                         <div class="form-control-feedback min-clear input-clearbtn" ng-show="model.min || (numericMin.$invalid && numericMin.$dirty)">
                             <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="model.min=''" tooltip-placement="right" uib-tooltip="Clear field"></span>
                         </div>
                     </div>
                     <!-- float4/float8/numeric -->
                     <div ng-switch-default>
-                        <div class="form-control">
-                            <input type="text" class="range-min" placeholder="{{absMin}}" ng-model="model.min" float>
-                        </div>
+                        <input type="text" class="range-min form-control" placeholder="{{absMin}}" ng-model="model.min" float>
                         <div class="form-control-feedback min-clear input-clearbtn" ng-show="model.min || (numericMin.$invalid && numericMin.$dirty)">
                             <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="model.min=''" tooltip-placement="right" uib-tooltip="Clear field"></span>
                         </div>
@@ -48,9 +40,7 @@
         <!-- date -->
         <div ng-switch-when="date" class="numeric-date-width" id="from-val">
             <div class="input-container" ng-form="dateMin">
-                <div class="form-control">
-                    <input type="text" class="range-min" placeholder="{{absMin}}" ng-model="model.min" date />
-                </div>
+                <input type="text" class="range-min form-control" placeholder="{{absMin}}" ng-model="model.min" date />
                 <div class="form-control-feedback min-clear input-clearbtn" ng-show="model.min || (dateMin.$invalid && dateMin.$dirty)">
                     <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="model.min=''" tooltip-placement="right" uib-tooltip="Clear field"></span>
                 </div>
@@ -87,36 +77,28 @@
                 <div ng-switch="type.name">
                     <!-- int2 -->
                     <div ng-switch-when="int2">
-                        <div class="form-control">
-                            <input type="number" class="range-max" min="{{intMin}}" max="{{intMax}}" placeholder="{{absMax}}" ng-model="model.max" integer disable-arrows>
-                        </div>
+                        <input type="number" class="range-max form-control" min="{{intMin}}" max="{{intMax}}" placeholder="{{absMax}}" ng-model="model.max" integer disable-arrows>
                         <div class="form-control-feedback max-clear input-clearbtn" ng-show="model.max || (numericMax.$invalid && numericMax.$dirty)">
                             <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="model.max=''" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
                         </div>
                     </div>
                     <!-- int4 -->
                     <div ng-switch-when="int4">
-                        <div class="form-control">
-                            <input type="number" class="range-max" min="{{intMin}}" max="{{intMax}}" placeholder="{{absMax}}" ng-model="model.max" integer disable-arrows>
-                        </div>
+                        <input type="number" class="range-max form-control" min="{{intMin}}" max="{{intMax}}" placeholder="{{absMax}}" ng-model="model.max" integer disable-arrows>
                         <div class="form-control-feedback max-clear input-clearbtn" ng-show="model.max || (numericMax.$invalid && numericMax.$dirty)">
                             <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="model.max=''" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
                         </div>
                     </div>
                     <!-- int8 -->
                     <div ng-switch-when="int8">
-                        <div class="form-control">
-                            <input type="number" class="range-max" min="{{intMin}}" max="{{intMax}}" placeholder="{{absMax}}" ng-model="model.max" integer disable-arrows>
-                        </div>
+                        <input type="number" class="range-max form-control" min="{{intMin}}" max="{{intMax}}" placeholder="{{absMax}}" ng-model="model.max" integer disable-arrows>
                         <div class="form-control-feedback max-clear input-clearbtn" ng-show="model.max || (numericMax.$invalid && numericMax.$dirty)">
                             <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="model.max=''" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
                         </div>
                     </div>
                     <!-- float4/float8/numeric -->
                     <div ng-switch-default>
-                        <div class="form-control">
-                            <input type="text" class="range-max" placeholder="{{absMax}}" ng-model="model.max" float>
-                        </div>
+                        <input type="text" class="range-max form-control" placeholder="{{absMax}}" ng-model="model.max" float>
                         <div class="form-control-feedback max-clear input-clearbtn" ng-show="model.max || (numericMax.$invalid && numericMax.$dirty)">
                             <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="model.max=''" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
                         </div>
@@ -127,9 +109,7 @@
         <!-- date -->
         <div ng-switch-when="date" class="numeric-date-width" id="to-val">
             <div class="input-container" ng-form="dateMax">
-                <div class="form-control">
-                    <input type="text" class="range-max" placeholder="{{absMax}}" ng-model="model.max" date />
-                </div>
+                <input type="text" class="range-max form-control" placeholder="{{absMax}}" ng-model="model.max" date />
                 <div class="form-control-feedback max-clear input-clearbtn" ng-show="model.max || (dateMax.$invalid && dateMax.$dirty)">
                     <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="model.max=''" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
                 </div>
@@ -157,8 +137,8 @@
             </div>
         </div>
     </div>
-    <button type="submit" class="btn btn-primary btn-inverted" ng-click="addRange()" ng-disabled="disableAdd()" style="vertical-align: bottom;">
-        <span class="glyphicon glyphicon-plus"></span>
+    <button type="submit" class="chaise-btn chaise-btn-primary icon-btn" ng-click="addRange()" ng-disabled="disableAdd()" style="vertical-align: bottom;">
+        <span class="chaise-btn-icon glyphicon glyphicon-plus"></span>
     </button>
     <div ng-messages="minMaxForm.$error" ng-show="minMaxForm.$dirty || minMaxForm.$submitted" class="text-danger validation-error" role="alert">
         <div ng-message="min" ng-show="minMaxForm.numericMin.$error.min || minMaxForm.numericMax.$error.min">This field requires a value greater than {{intMin}}.</div>

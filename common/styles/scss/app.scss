@@ -307,42 +307,42 @@ html {
         }
     }
 
-// main content
-.bottom-panel-container {
-    padding-right: 0;
-    -webkit-box-flex: 1;
-    display: flex;
-    flex: 1;
-    margin-top: 0px;
+    // main content
+    .bottom-panel-container {
+        padding-right: 0;
+        -webkit-box-flex: 1;
+        display: flex;
+        flex: 1;
+        margin-top: 0px;
 
-    .side-panel-resizable {
-        position: relative;
-        max-width: 50vw;
+        .side-panel-resizable {
+            position: relative;
+            max-width: 50vw;
 
-        &.open-panel {
-            flex: 0;
-            flex-basis: $left-panel-width-lg;
-            min-width: 170px;
-        }
+            &.open-panel {
+                flex: 0;
+                flex-basis: $left-panel-width-lg;
+                min-width: 170px;
+            }
 
-        &.close-panel {
-            width: 0;
-            flex-basis: 0 !important;
-            display: none;
-
-            .side-panel-container {
+            &.close-panel {
                 width: 0;
+                flex-basis: 0 !important;
+                display: none;
+
+                .side-panel-container {
+                    width: 0;
+                }
             }
         }
-    }
 
-    .main-container {
-        flex: 1;
-        position: relative;
-        overflow-x: hidden;
-        overflow-y: auto;
+        .main-container {
+            flex: 1;
+            position: relative;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
     }
-}
 
 // top panel for record and recordset
     .top-flex-panel {
@@ -532,56 +532,67 @@ html {
     }
 
 /******* range inputs ***********/
-    range-inputs .input-clearbtn {
-        cursor: pointer;
-        right: 0;
-        pointer-events: all;
-        z-index: 5;
-        width: 22px;
+    range-inputs {
+        .form-inline {
+            padding-left: 5px;
 
-        .search-remove {
-            border-bottom: none;
-        }
-    }
+            .icon-btn {
+                padding: 5px 6px;
+            }
 
-    range-inputs .form-control {
-        // padding: 0;
-    }
+            .range-inputs-width {
+                min-width: 100px;
 
-    range-inputs .input-container {
-        position: relative;
-    }
+                .numeric-date-width {
+                    max-width: 110px;
+                }
 
-    range-inputs .range-inputs-width {
-        min-width: 100px;
-    }
+                .datetime-width {
+                    max-width: 150px;
+                }
 
-    range-inputs .numeric-date-width {
-        max-width: 110px;
-    }
+                .input-group {
+                    width: 100%;
 
-    range-inputs .datetime-width {
-        max-width: 150px;
+                    .input-group-addon {
+                        width: 40px;
+                        padding-left: 4px;
+                        padding-right: 4px;
+                    }
 
-        .input-group-addon {
-            width: 40px;
-        }
+                    .form-control {
+                        border-top-right-radius: 4px;
+                        border-bottom-right-radius: 4px;
+                    }
+                }
 
-        .form-control {
-            border: 1px solid $border-color;
-            border-top-right-radius: 4px;
-            border-bottom-right-radius: 4px;
-        }
-    }
+                .input-container {
+                    position: relative;
 
-    range-inputs .input-group {
-        width: 100%;
-    }
+                    .form-control {
+                        width: 100%;
+                        padding: 6px 20px 6px 6px;
+                        height: 30px; // same height as icon-btn
+                        border: 1px solid $border-color;
+                        border-radius: 4px;
+                    }
 
-    range-inputs .input-group-addon {
-        padding-left: 4px;
-        padding-right: 4px;
-    }
+                    .input-clearbtn {
+                        cursor: pointer;
+                        right: 0;
+                        pointer-events: all;
+                        z-index: 5;
+                        width: 22px;
+
+                        .search-remove {
+                            border-bottom: none;
+                        }
+                    }
+                } // end .input-container
+            } // end .range-inputs-width
+        } // end .form-inline
+    } // end range-inputs
+
     /* Rule for Chrome */
     input[type=number]::-webkit-inner-spin-button,
     input[type=number]::-webkit-outer-spin-button {
