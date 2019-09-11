@@ -177,7 +177,8 @@
     .constant("recordsetDisplayModes", {
         fullscreen: "fullscreen",
         related: "related",
-        popup: "popup"
+        popup: "popup",
+        facetPopup: "facetPopup"
     })
 
     .constant("defaultDisplayname", {
@@ -1361,13 +1362,22 @@
          *      - {integer} docHeight - the height of the viewport
          *      - {DOMElement} container - the main container to fix the height of
          **/
-        function setDisplayContainerHeight(domElements) {
+        function setDisplayContainerHeight(container, fixedContentHeight, parentContainerHeight) {
             try {
-                // calculate remaining dom height (navbar + bookmark)/viewheight
-                // This will be a percentage out of 100
-                var fixedHeightUsed = ((domElements.navbarHeight + domElements.bookmarkHeight)/domElements.docHeight) * 100;
-                // set height to remaining
-                domElements.container.style.height = (100 - fixedHeightUsed) + 'vh';
+                // we're setting the height based on the viewport, so we need the
+                // whole viewport height
+                var docHeight = $document[0].documentElement.offsetHeight;
+
+                // if parentContainerHeight is not passed, then the whole document is the parent
+                if (parentContainerHeight == null) {
+                    parentContainerHeight = docHeight;
+                }
+
+                // find the container's usable height
+                 var containerHeight = ((parentContainerHeight - fixedContentHeight)/docHeight) * 100;
+
+                 // set the container's height
+                 container.style.height = containerHeight + 'vh';
             } catch(err) {
                 $log.warn(err);
             }

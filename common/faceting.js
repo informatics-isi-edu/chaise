@@ -873,8 +873,8 @@
         }])
 
         .directive('choicePicker',
-            ["AlertsService", 'facetingUtils', 'logActions', "$log", 'messageMap', 'modalUtils', '$q', 'tableConstants', '$timeout', 'UriUtils',
-            function (AlertsService, facetingUtils, logActions, $log, messageMap, modalUtils, $q, tableConstants, $timeout, UriUtils) {
+            ["AlertsService", 'facetingUtils', 'logActions', "$log", 'messageMap', 'modalUtils', '$q', 'recordsetDisplayModes', 'tableConstants', '$timeout', 'UriUtils',
+            function (AlertsService, facetingUtils, logActions, $log, messageMap, modalUtils, $q, recordsetDisplayModes, tableConstants, $timeout, UriUtils) {
 
             /**
              * Given tuple and the columnName that should be used, return
@@ -1296,6 +1296,7 @@
 
                         params.hideNotNullChoice = scope.facetColumn.hideNotNullChoice;
                         params.hideNullChoice = scope.facetColumn.hideNullChoice;
+                        params.displayMode = recordsetDisplayModes.facetPopup;
 
                         params.selectedRows = [];
 
@@ -1328,7 +1329,7 @@
                         modalUtils.showModal({
                             animation: false,
                             controller: "SearchPopupController",
-                            windowClass: "search-popup",
+                            windowClass: "search-popup faceting-show-details-popup",
                             controllerAs: "ctrl",
                             resolve: {
                                 params: params

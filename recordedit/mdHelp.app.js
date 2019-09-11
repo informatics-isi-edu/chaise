@@ -64,12 +64,13 @@
             var elements = {};
             try {
                 // get document height
-                elements.docHeight = $document[0].documentElement.offsetHeight
+                elements.fixedContentHeight = $document[0].documentElement.offsetHeight
                 // get navbar height
-                elements.navbarHeight = $document[0].getElementById('mainnav').offsetHeight;
+                elements.fixedContentHeight += $document[0].getElementById('mainnav').offsetHeight;
                 // get md help main container
                 elements.container = $document[0].getElementById('main-content');
             } catch (error) {
+                elements = {};
                 $log.warn(error);
             }
             return elements;
@@ -78,8 +79,8 @@
         function setMainContainerHeight() {
             var elements = fetchContainerElements();
             // if these values are not set yet, don't set the height
-            if(elements.navbarHeight !== undefined && elements.bookmarkHeight) {
-                UiUtils.setDisplayContainerHeight(elements);
+            if(elements.fixedContentHeight !== undefined && !isNaN(elements.fixedContentHeight)) {
+                UiUtils.setDisplayContainerHeight(elements.container, elements.fixedContentHeight);
             }
         };
         // change the main container height whenever the DOM resizes

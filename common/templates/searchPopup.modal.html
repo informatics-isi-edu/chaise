@@ -1,6 +1,6 @@
 <div class="modal-header">
     <span class="pull-right">
-        <button id="multi-select-submit-btn" ng-disabled="ctrl.tableModel.selectedRows.length < 1" class="chaise-btn chaise-btn-primary modal-close" type="button" ng-click="ctrl.submit()" ng-disabled="ctrl.disableSubmit">
+        <button id="multi-select-submit-btn" ng-if="ctrl.tableModel.config.selectMode=='multi-select'" ng-disabled="ctrl.tableModel.selectedRows.length < 1" class="chaise-btn chaise-btn-primary modal-close" type="button" ng-click="ctrl.submit()" ng-disabled="ctrl.disableSubmit">
             <span class="chaise-btn-icon glyphicon glyphicon-saved"></span>
             <span>Submit</span>
         </button>

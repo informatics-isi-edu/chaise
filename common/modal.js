@@ -203,16 +203,19 @@
             matchNull:          params.matchNull,
             search:             reference.location.searchTerm,
             config:             {
-                viewable: false, editable: false, deletable: false, selectMode: params.selectMode,
-                showFaceting: showFaceting, facetPanelOpen: params.facetPanelOpen,
-                showNull: params.showNull === true,
+                viewable: false, editable: false, deletable: false,
+                selectMode:         params.selectMode,
+                showFaceting:       showFaceting, facetPanelOpen: params.facetPanelOpen,
+                showNull:           params.showNull === true,
                 hideNotNullChoice:  params.hideNotNullChoice,
                 hideNullChoice:     params.hideNullChoice,
-                displayMode: recordsetDisplayModes.popup
+                displayMode:        params.displayMode ? params.displayMode : recordsetDisplayModes.popup
             },
-            context:            params.context,
-            getDisabledTuples:  params.getDisabledTuples,
-            logObject:          params.logObject ? params.logObject: {}
+            context:                    params.context,
+            getDisabledTuples:          params.getDisabledTuples,
+            logObject:                  params.logObject ? params.logObject: {},
+            parentContainerSelector:    params.parentContainerSelector,
+            parentStickyAreaSelector:   params.parentStickyAreaSelector
         };
 
         /**
