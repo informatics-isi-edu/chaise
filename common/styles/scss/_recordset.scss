@@ -364,9 +364,9 @@ faceting {
 .choice-picker {
     .search-box {
         margin-bottom: 10px;
-        .show-more-btn {
-            padding-right: 0;
-        }
+    }
+    .show-more-btn {
+        padding: 0;
     }
 }
 
@@ -413,7 +413,7 @@ faceting {
 // list directive
 .chaise-list-container {
     padding-left: 0;
-    margin-bottom: 5px;
+    margin-bottom: 0px;
 
     .chaise-checkbox {
         margin-bottom: 7px;
