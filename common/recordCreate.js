@@ -354,11 +354,13 @@
                 action: logActions.preCreateAssociation,
                 referrer: rsReference.defaultLogInfo
             };
+            params.parentContainerSelector = ".search-popup.add-pure-and-binary-popup .modal-content";
+            params.parentStickyAreaSelector = ".search-popup.add-pure-and-binary-popup .modal-header";
 
             modalUtils.showModal({
                 animation: false,
                 controller: "SearchPopupController",
-                windowClass: "search-popup",
+                windowClass: "search-popup add-pure-and-binary-popup",
                 controllerAs: "ctrl",
                 resolve: {
                     params: params

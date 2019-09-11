@@ -12,7 +12,7 @@
         <button ng-if="config.deletable && delete && tuple.reference.canDelete" type="button" class="delete-action-button chaise-btn chaise-btn-tertiary icon-btn" ng-click="delete()" tooltip-placement="bottom" uib-tooltip="Delete">
             <span class="chaise-btn-icon glyphicon glyphicon-trash""></span>
         </button>
-        <button ng-if="config.selectMode == singleSelect" type="button" class="select-action-button chaise-btn chaise-btn-tertiary icon-btn" ng-click="onSelect($event)" tooltip-placement="bottom" uib-tooltip="Select" >
+        <button ng-if="config.selectMode == singleSelect" type="button" class="select-action-button chaise-btn chaise-btn-secondary chaise-btn-sm icon-btn" ng-click="onSelect($event)" tooltip-placement="bottom" uib-tooltip="Select" >
             <span class="chaise-btn-icon glyphicon glyphicon-check"></span>
         </button>
     </div>

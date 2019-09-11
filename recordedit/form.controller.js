@@ -304,6 +304,7 @@
             modalUtils.showModal({
                 animation: false,
                 controller: "SearchPopupController",
+                windowClass: "search-popup foreignkey-popup",
                 controllerAs: "ctrl",
                 resolve: {
                     params: params
@@ -731,15 +732,14 @@
             var elements = {};
             try {
                 /**** used for main-container height calculation ****/
-                // get document height
-                elements.docHeight = $document[0].documentElement.offsetHeight
                 // get navbar height
-                elements.navbarHeight = $document[0].getElementById('mainnav').offsetHeight;
+                elements.fixedContentHeight = $document[0].getElementById('mainnav').offsetHeight;
                 // get bookmark height
-                elements.bookmarkHeight = $document[0].getElementsByClassName('meta-icons')[containerIndex].offsetHeight;
+                elements.fixedContentHeight += $document[0].getElementsByClassName('meta-icons')[containerIndex].offsetHeight;
                 // get recordedit main container
                 elements.container = $document[0].getElementsByClassName('main-container')[containerIndex];
             } catch(error) {
+                elements = {};
                 $log.warn(error);
             }
             return elements;
@@ -750,8 +750,8 @@
             var elements = fetchContainerElements(idx);
             // if the navbarHeight is not set yet, don't set the height
             // no bookmark container here
-            if(elements.navbarHeight !== undefined) {
-                UiUtils.setDisplayContainerHeight(elements);
+            if(elements.fixedContentHeight !== undefined && !isNaN(elements.fixedContentHeight)) {
+                UiUtils.setDisplayContainerHeight(elements.container, elements.fixedContentHeight);
             }
         }
 

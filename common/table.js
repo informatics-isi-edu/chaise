@@ -92,8 +92,8 @@
      * modified. ellipsis will fire this event and recordset directive will use it.
      */
     .factory('recordTableUtils',
-            ['AlertsService', 'DataUtils', 'defaultDisplayname', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'recordsetDisplayModes', 'Session', 'tableConstants', 'UriUtils', '$cookies', '$document', '$log', '$q', '$rootScope', '$timeout', '$window',
-            function(AlertsService, DataUtils, defaultDisplayname, ErrorService, logActions, MathUtils, messageMap, modalBox, recordsetDisplayModes, Session, tableConstants, UriUtils, $cookies, $document, $log, $q, $rootScope, $timeout, $window) {
+            ['AlertsService', 'DataUtils', 'defaultDisplayname', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'recordsetDisplayModes', 'Session', 'tableConstants', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$q', '$rootScope', '$timeout', '$window',
+            function(AlertsService, DataUtils, defaultDisplayname, ErrorService, logActions, MathUtils, messageMap, modalBox, recordsetDisplayModes, Session, tableConstants, UiUtils, UriUtils, $cookies, $document, $log, $q, $rootScope, $timeout, $window) {
 
         function FlowControlObject(maxRequests) {
             this.maxRequests = maxRequests || tableConstants.MAX_CONCURENT_REQUEST;
@@ -770,7 +770,7 @@
          * Registers the callbacks for recordTable directive and it's children.
          * @param  {object} scope the scope object
          */
-        function registerTableCallbacks(scope, elem, attr) {
+        function registerTableCallbacks(scope, elem, attrs) {
             if (!scope.vm) scope.vm = {};
 
             scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
@@ -956,7 +956,7 @@
          * Registers the callbacks for recordset directive and it's children.
          * @param  {object} scope the scope object
          */
-        function registerRecordsetCallbacks(scope) {
+        function registerRecordsetCallbacks(scope, elem, attrs) {
             var updated = false; // table refresh used by ellipsis' edit action (new method)
 
             scope.$root.alerts = AlertsService.alerts;
@@ -1180,6 +1180,105 @@
             if (recordsetReadyToInitialize(scope)) {
                 initializeRecordset(scope);
             }
+
+
+            // fix the height of facet and container to allow scrolling
+            var parentContainer, parentStickyArea;
+            var mainBodyEl;
+
+            /*** Container Heights and other styling ***/
+            // fetches the height of navbar, bookmark container, and view
+            // also fetches the main container for defining the dynamic height
+            function fetchMainElements() {
+                var elements = {};
+                try {
+                    // get the top-panel-container height
+                    elements.fixedContentHeight = parentContainer.querySelector('.top-panel-container').offsetHeight;
+
+                    // add the parent sticky area
+                    if (parentStickyArea) {
+                        elements.fixedContentHeight += parentStickyArea.offsetHeight;
+                    }
+
+                    // get recordset main container
+                    elements.container = parentContainer.querySelector(".bottom-panel-container");
+
+                    if (chaiseConfig.showFaceting) {
+                        elements.facetContainer = parentContainer.querySelector('.side-panel-container');
+                    }
+
+                } catch (error) {
+                    elements = {};
+                    $log.warn(error);
+                }
+                return elements;
+            }
+
+            function setRecordsetHeight() {
+                var elements = fetchMainElements();
+                // if these 2 values are not set yet, don't set the height
+                if (elements.fixedContentHeight !== undefined && !isNaN(elements.fixedContentHeight)) {
+                    UiUtils.setDisplayContainerHeight(elements.container, elements.fixedContentHeight, parentContainer.offsetHeight);
+                    // no need to fetch and verify the faceting elements (navbar and bookmark are the same container as the ones used in main elements function)
+                    if (chaiseConfig.showFaceting) {
+                        UiUtils.setDisplayContainerHeight(elements.facetContainer, elements.fixedContentHeight, parentContainer.offsetHeight);
+                    }
+                }
+            }
+
+            // set the recordset height when it's loaded or we have the facets
+            scope.$watch(function() {
+                return (scope.vm.hasLoaded && scope.vm.initialized) || (scope.vm.config.showFaceting && scope.vm.reference);
+            }, function (newValue, oldValue) {
+                if (newValue) {
+                    $timeout(setRecordsetHeight, 0);
+                }
+            });
+
+            // watch for the main body size to change
+            if (scope.vm.config.displayMode === recordsetDisplayModes.fullscreen) {
+                scope.$watch(function() {
+                    if (mainBodyEl) {
+                        return mainBodyEl.offsetHeight;
+                    } else {
+                        return -1;
+                    }
+                }, function (newValue, oldValue) {
+                    if (newValue != oldValue) {
+                        $timeout(function () {
+                            UiUtils.setFooterStyle(0);
+                        }, 0);
+                    }
+                });
+            }
+
+
+            angular.element($window).bind('resize', function(){
+                if (scope.vm.hasLoaded && scope.vm.initialized ) {
+                    setRecordsetHeight();
+                    if (scope.vm.config.displayMode === recordsetDisplayModes.fullscreen) {
+                        UiUtils.setFooterStyle(0);
+                    }
+                    scope.$digest();
+                }
+            });
+
+            $timeout(function () {
+                // set the parentContainer element
+                if (scope.vm.parnetContainerSelector) {
+                    parentContainer = $document[0].querySelector(scope.vm.parentContainerSelector);
+                } else {
+                    parentContainer = $document[0].documentElement;
+                }
+
+                // used for footer
+                mainBodyEl = parentContainer.querySelector('.main-body');
+
+                // set the sticky area selector container
+                if (scope.vm.parentStickyAreaSelector) {
+                    parentStickyArea = $document[0].querySelector(scope.vm.parentStickyAreaSelector);
+                }
+            }, 0);
         }
 
         return {
@@ -1194,15 +1293,18 @@
     }])
 
 
-    .directive('tableHeader', ['logActions', 'MathUtils', 'recordsetDisplayModes', 'recordTableUtils', 'UriUtils', '$window', function(logActions, MathUtils, recordsetDisplayModes, recordTableUtils, UriUtils, $window) {
+    .directive('tableHeader', ['logActions', 'MathUtils', 'messageMap', 'recordsetDisplayModes', 'recordTableUtils', 'UriUtils', '$window', function(logActions, MathUtils, messageMap, recordsetDisplayModes, recordTableUtils, UriUtils, $window) {
         return {
             restrict: 'E',
             templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/tableHeader.html',
             scope: {
-                vm: '='
+                vm: '=',
+                toggleMatchNull: "=",
+                toggleMatchNotNull: "="
             },
             link: function (scope, elem, attr) {
                 scope.recordsetDisplayModes = recordsetDisplayModes;
+                scope.tooltip = messageMap.tooltip;
 
                 scope.pageLimits = [10, 25, 50, 75, 100, 200];
                 scope.setPageLimit = function(limit) {
@@ -1258,8 +1360,8 @@
                 onSelectedRowsChangedBind: '=?',
                 onSelectedRowsChanged: '&?',      // set row click function TODO not used anywhere
             },
-            link: function (scope, elem, attr) {
-                recordTableUtils.registerTableCallbacks(scope, elem, attr);
+            link: function (scope, elem, attrs) {
+                recordTableUtils.registerTableCallbacks(scope, elem, attrs);
             }
         };
     }])
@@ -1277,8 +1379,8 @@
                 onSelectedRowsChangedBind: '=?',
                 onSelectedRowsChanged: '&?'      // set row click function
             },
-            link: function (scope, elem, attr) {
-                recordTableUtils.registerTableCallbacks(scope, elem, attr);
+            link: function (scope, elem, attrs) {
+                recordTableUtils.registerTableCallbacks(scope, elem, attrs);
 
                 scope.isSelected = function (tuple) {
                     if (scope.vm.matchNotNull) {
@@ -1356,7 +1458,7 @@
      *   value to the vm.selectedRows
      * NOTE removePill, removeAllPills are also changed to support these two matchNull and matchNotNull options.
      */
-    .directive('recordsetSelectFaceting', ['messageMap', 'recordTableUtils', 'UriUtils', function(messageMap, recordTableUtils, UriUtils) {
+    .directive('recordsetSelectFaceting', ['messageMap', 'recordsetDisplayModes', 'recordTableUtils', 'UriUtils', function(messageMap, recordsetDisplayModes, recordTableUtils, UriUtils) {
 
         return {
             restrict: 'E',
@@ -1369,14 +1471,15 @@
                 getDisabledTuples: "=?", // callback to get the disabled tuples
                 registerSetPageState: "&?"
             },
-            link: function (scope, elem, attr) {
+            link: function (scope, elem, attrs) {
                 // currently faceting is not defined in this mode.
                 // TODO We should eventually add faceting here, and remove these initializations
                 scope.facetsLoaded = true;
                 scope.ignoreFaceting = true; // this is a temporary flag to avoid any faceting logic
                 scope.tooltip = messageMap.tooltip;
+                scope.recordsetDisplayModes = recordsetDisplayModes;
 
-                recordTableUtils.registerRecordsetCallbacks(scope);
+                recordTableUtils.registerRecordsetCallbacks(scope, elem, attrs);
 
                 // function for removing a single pill and it's corresponding selected row
                 scope.removePill = function(key, $event) {
@@ -1479,8 +1582,8 @@
                 allowCreate: '=?',       // if undefined, assume false
                 registerSetPageState: "&?"
             },
-            link: function (scope, elem, attr) {
-                recordTableUtils.registerRecordsetCallbacks(scope);
+            link: function (scope, elem, attrs) {
+                recordTableUtils.registerRecordsetCallbacks(scope, elem, attrs);
             }
         };
     }]);

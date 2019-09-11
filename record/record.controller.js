@@ -470,15 +470,14 @@
         function fetchContainerElements() {
             var elements = {};
             try {
-                // get document height
-                elements.docHeight = $document[0].documentElement.offsetHeight
                 // get navbar height
-                elements.navbarHeight = $document[0].getElementById('mainnav').offsetHeight;
+                elements.fixedContentHeight = $document[0].getElementById('mainnav').offsetHeight;
                 // get bookmark container height
-                elements.bookmarkHeight = $document[0].getElementsByClassName('top-panel-container')[0].offsetHeight;
+                elements.fixedContentHeight += $document[0].querySelector('.record-container .top-panel-container').offsetHeight;
                 // get record main container
-                elements.container = $document[0].getElementsByClassName('bottom-panel-container')[0];
+                elements.container = $document[0].querySelector('.record-container .bottom-panel-container');
             } catch (error) {
+                elements = {};
                 $log.warn(error);
             }
             return elements;
@@ -487,8 +486,8 @@
         function setMainContainerHeight() {
             var elements = fetchContainerElements();
             // if these values are not set yet, don't set the height
-            if(elements.navbarHeight !== undefined) {
-                UiUtils.setDisplayContainerHeight(elements);
+            if(elements.fixedContentHeight !== undefined && !isNaN(elements.fixedContentHeight)) {
+                UiUtils.setDisplayContainerHeight(elements.container, elements.fixedContentHeight);
             }
         };
 

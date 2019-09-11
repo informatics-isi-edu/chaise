@@ -17,7 +17,7 @@
                 </div>
             </div>
             <div class="top-right-panel">
-                <div class="row recordset-title-container" ng-show="vm.config.hideTitle === recordsetDisplayModes.fullscreen">
+                <div class="row recordset-title-container" ng-show="vm.config.displayMode === recordsetDisplayModes.fullscreen">
                     <div class="col-xs-12">
                         <div class="pull-left">
                             <!-- TODO UX-M should change to class -->
@@ -145,7 +145,7 @@
                     <record-table id="rs-{{vm.makeSafeIdAttr(vm.tableDisplayName.value)}}" vm="vm" on-selected-rows-changed-bind="onSelectedRowsChanged"></record-table>
                 </div>
             </div>
-            <footer ng-show="vm.initialized"></footer>
+            <footer ng-show="vm.initialized && vm.config.displayMode === recordsetDisplayModes.fullscreen"></footer>
         </div>
     </div>
 </div>

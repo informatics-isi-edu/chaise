@@ -71,8 +71,8 @@
     })
 
     // Register work to be performed after loading all modules
-    .run(['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'ErrorService', 'FunctionUtils', 'headInjector', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
-        function(AlertsService, ConfigUtils, DataUtils, ERMrest, ErrorService, FunctionUtils, headInjector, logActions, MathUtils, messageMap, modalBox, recordsetModel, Session, UiUtils, UriUtils, $log, $rootScope, $window) {
+    .run(['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'ErrorService', 'FunctionUtils', 'headInjector', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'recordsetDisplayModes', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
+        function(AlertsService, ConfigUtils, DataUtils, ERMrest, ErrorService, FunctionUtils, headInjector, logActions, MathUtils, messageMap, modalBox, recordsetDisplayModes, recordsetModel, Session, UiUtils, UriUtils, $log, $rootScope, $window) {
         try {
             var session;
 
@@ -93,8 +93,11 @@
                 deletable: modifyEnabled && deleteEnabled,
                 selectMode: modalBox.noSelect,
                 showFaceting: showFaceting,
-                facetPanelOpen: showFaceting
+                facetPanelOpen: showFaceting,
+                displayMode: recordsetDisplayModes.fullscreen
             };
+
+            recordsetModel.parentStickyAreaSelector = "#mainnav";
 
             recordsetModel.queryTimeoutTooltip = messageMap.queryTimeoutTooltip;
             $rootScope.alerts = AlertsService.alerts;
@@ -133,6 +136,7 @@
                     }
                     context.catalogID = reference.table.schema.catalog.id;
                     context.tableName = reference.table.name;
+
 
                     recordsetModel.reference = reference.contextualize.compact;
                     recordsetModel.context = context.appContext = "compact";
