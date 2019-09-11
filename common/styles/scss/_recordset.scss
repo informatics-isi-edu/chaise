@@ -363,9 +363,20 @@ faceting {
 }
 
 
+.chaise-search-box {
+    input {
+        height: 30px;
+    }
+    font-size: 1rem;
+
+    .chaise-search-btn {
+        @include border-left-radius(0);
+    }
+}
+
 // choice picker directive
 .choice-picker {
-    .search-box {
+    .chaise-search-box {
         margin-bottom: 10px;
     }
     .show-more-btn {
