@@ -59,29 +59,21 @@
         <!-- timestamp[tz] -->
         <div ng-switch-when="datetime" class="datetime-width" id="from-val">
             <div>
-                <div class="input-group">
+                <div class="input-group" ng-form="tsDateMin">
                     <span class="input-group-addon">Date</span>
-                    <div class="input-container" ng-form="tsDateMin">
-                        <div class="form-control">
-                            <input type="text" class="ts-date-range-min" placeholder="{{absMin.date}}" ng-model="model.min.date" date />
-                        </div>
-                        <div class="form-control-feedback min-date-clear input-clearbtn" ng-show="model.min.date || (tsDateMin.$invalid && tsDateMin.$dirty)">
-                            <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="model.min.date=''" tooltip-placement="right" uib-tooltip="Clear field"></span>
-                        </div>
+                    <div class="form-control-feedback min-date-clear input-clearbtn" ng-show="model.min.date || (tsDateMin.$invalid && tsDateMin.$dirty)">
+                        <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="model.min.date=''" tooltip-placement="right" uib-tooltip="Clear field"></span>
                     </div>
+                    <input type="text" class="ts-date-range-min form-control" placeholder="{{absMin.date}}" ng-model="model.min.date" date />
                 </div>
             </div>
             <div>
-                <div class="input-group">
+                <div class="input-group" ng-form="timeMin">
                     <span class="input-group-addon">Time</span>
-                    <div class="input-container" ng-form="timeMin">
-                        <div class="form-control">
-                            <input type="text" class="ts-time-range-min" placeholder="{{absMin.time}}" ng-model="model.min.time" time />
-                        </div>
-                        <div class="form-control-feedback min-time-clear input-clearbtn" ng-show="model.min.time || (timeMin.$invalid && timeMin.$dirty)">
-                            <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="model.min.time=''" tooltip-placement="right" uib-tooltip="Clear field"></span>
-                        </div>
+                    <div class="form-control-feedback min-time-clear input-clearbtn" ng-show="model.min.time || (timeMin.$invalid && timeMin.$dirty)">
+                        <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="model.min.time=''" tooltip-placement="right" uib-tooltip="Clear field"></span>
                     </div>
+                    <input type="text" class="ts-time-range-min form-control" placeholder="{{absMin.time}}" ng-model="model.min.time" time />
                 </div>
             </div>
         </div>
@@ -146,29 +138,21 @@
         <!-- timestamp[tz] -->
         <div ng-switch-when="datetime" class="datetime-width" id="to-val">
             <div>
-                <div class="input-group">
+                <div class="input-group" ng-form="tsDateMax">
                     <span class="input-group-addon">Date</span>
-                    <div class="input-container" ng-form="tsDateMax">
-                        <div class="form-control">
-                            <input type="text" class="ts-date-range-max" placeholder="{{absMax.date}}" ng-model="model.max.date" date />
-                        </div>
-                        <div class="form-control-feedback max-date-clear input-clearbtn" ng-show="model.max.date || (tsDateMax.$invalid && tsDateMax.$dirty)">
-                            <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="model.max.date=''" tooltip-placement="right" uib-tooltip="Clear field"></span>
-                        </div>
+                    <div class="form-control-feedback max-date-clear input-clearbtn" ng-show="model.max.date || (tsDateMax.$invalid && tsDateMax.$dirty)">
+                        <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="model.max.date=''" tooltip-placement="right" uib-tooltip="Clear field"></span>
                     </div>
+                    <input type="text" class="ts-date-range-max form-control" placeholder="{{absMax.date}}" ng-model="model.max.date" date />
                 </div>
             </div>
             <div>
-                <div class="input-group">
+                <div class="input-group" ng-form="timeMax">
                     <span class="input-group-addon">Time</span>
-                    <div class="input-container" ng-form="timeMax">
-                        <div class="form-control">
-                            <input type="text" class="ts-time-range-max" placeholder="{{absMax.time}}" ng-model="model.max.time" time />
-                        </div>
-                        <div class="form-control-feedback max-time-clear input-clearbtn" ng-show="model.max.time || (timeMax.$invalid && timeMax.$dirty)">
-                            <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="model.max.time=''" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
-                        </div>
+                    <div class="form-control-feedback max-time-clear input-clearbtn" ng-show="model.max.time || (timeMax.$invalid && timeMax.$dirty)">
+                        <span class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="model.max.time=''" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
                     </div>
+                    <input type="text" class="ts-time-range-max form-control" placeholder="{{absMax.time}}" ng-model="model.max.time" time />
                 </div>
             </div>
         </div>

@@ -123,7 +123,7 @@
             }
 
             > table {
-                /* if you want the table to have a fixed layout */
+                // prevents the content in record-table from pushing off the side of page
                 table-layout: fixed;
                 width: 100%;
 
