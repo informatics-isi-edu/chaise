@@ -1,7 +1,6 @@
 <div class="modal-header" class="share-header">
-    <h2 class="modal-title text-center"><strong>Share</strong>
-        <button class="btn btn-default pull-right modal-close" type="button" ng-click="ctrl.cancel()">X</button>
-    </h2>
+    <button class="chaise-btn chaise-btn-secondary pull-right modal-close" type="button" ng-click="ctrl.cancel()">X</button>
+    <h2 class="modal-title text-center">Share</h2>
 </div>
 <div class="modal-body">
     <div ng-if="ctrl.params.showVersionWarning" class="alert alert-dismissible alert-warning" role="alert">
@@ -10,31 +9,30 @@
     </div>
     <ul>
         <li id="share-link">
-            <h2><b>Share Link</b></h2>
+            <h2>Share Link</h2>
             <div>
                 <h3>
-                    <b>Versioned Link
-                        <span tooltip-placement="bottom" ng-attr-uib-tooltip="{{!ctrl.moreThanWeek() ? 'Data snapshotted at ' + ctrl.params.versionDate : undefined}}">({{ctrl.params.versionDateRelative}})</span>
-                    </b>
-                    <span class="glyphicon glyphicon-copy" ng-click="::ctrl.copyToClipboard(ctrl.params.versionLink)" uib-tooltip="Copy link URL to clipboard." tooltip-placement="bottom" style="border-bottom:none;"></span>
+                    Versioned Link
+                    <small tooltip-placement="bottom" ng-attr-uib-tooltip="{{!ctrl.moreThanWeek() ? 'Data snapshotted at ' + ctrl.params.versionDate : undefined}}">({{ctrl.params.versionDateRelative}})</small>
+                    <span class="glyphicon glyphicon-copy chaise-copy-btn" ng-click="::ctrl.copyToClipboard(ctrl.params.versionLink)" uib-tooltip="Copy link URL to clipboard." tooltip-placement="bottom"></span>
                 </h3>
             </div>
             <a id="version" ng-href="{{::ctrl.params.versionLink}}">{{::ctrl.params.versionLink}}</a>
             <h3>
-                <b>Live Link</b>
-                <span class="glyphicon glyphicon-copy" ng-click="::ctrl.copyToClipboard(ctrl.params.permalink)"  uib-tooltip="Copy link URL to clipboard." tooltip-placement="bottom" style="border-bottom:none;"></span>
+                Live Link
+                <span class="glyphicon glyphicon-copy chaise-copy-btn" ng-click="::ctrl.copyToClipboard(ctrl.params.permalink)"  uib-tooltip="Copy link URL to clipboard." tooltip-placement="bottom"></span>
             </h3>
             <a id="permalink" ng-href="{{::ctrl.params.permalink}}">{{::ctrl.params.permalink}}</a>
         </li>
         <li id="citation" ng-if="::ctrl.params.citation">
-            <h2><b>Data Citation</b></h2>
+            <h2>Data Citation</h2>
             <div id="citation-text">
                 <span ng-if="::ctrl.params.citation.author">{{::ctrl.params.citation.author}} </span><span ng-if="::ctrl.params.citation.title">{{::ctrl.params.citation.title}} </span><i>{{::ctrl.params.citation.journal}}</i> <a ng-href="{{::ctrl.params.citation.url}}">{{::ctrl.params.citation.url}}</a> ({{::ctrl.params.citation.year}}).
             </div>
         </li>
         <li id="download-citation" ng-if="::ctrl.params.citation">
-            <h3><b>Download Data Citation:</b></h3>
-            <a id="bibtex-download" download="{{::ctrl.params.displayname}}.bib" ng-href="{{::ctrl.downloadBibtex}}">BibTex</a>
+            <h3>Download Data Citation:</h3>
+            <a id="bibtex-download" class="chaise-btn chaise-download-btn" download="{{::ctrl.params.displayname}}.bib" ng-href="{{::ctrl.downloadBibtex}}">BibTex</a>
         </li>
     </ul>
 </div>

@@ -82,6 +82,18 @@
             }
         }
 
+        &.chaise-btn-danger {
+            color: $white-color;
+            background-color: $danger-color;
+            border-color: darken($danger-color, 10%);
+        }
+
+        &.chaise-download-btn {
+            @include download-btn();
+            border: 0;
+            padding: 0;
+        }
+
     }
 }
 
