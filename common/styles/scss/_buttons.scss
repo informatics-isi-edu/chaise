@@ -1,11 +1,11 @@
 .chaise-body {
     .chaise-btn {
         display: inline-block;
-        height: 30px;
-        min-width: 30px;
-        @include border-radius(4px);
+        height: $btn-height;
+        min-width: $btn-height;
+        @include border-radius($btn-border-radius);
         border: $btn-border-width solid;
-        padding: 5px 10px;
+        padding: $btn-padding-y $btn-padding-x;
         text-align: center;
         vertical-align: middle;
         cursor: pointer;
@@ -15,8 +15,8 @@
         -ms-user-select: none;
 
         &.chaise-btn-sm {
-            height: 24px;
-            min-width: 24px;
+            height: $btn-height-sm;
+            min-width: $btn-height-sm;
             font-size: 1rem;
             padding: 2px 5px;
         }

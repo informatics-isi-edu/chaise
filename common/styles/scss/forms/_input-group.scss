@@ -1,0 +1,191 @@
+// stylelint-disable selector-no-qualifying-type
+
+//
+// Base styles
+//
+
+.chaise-input-group {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap; // For form validation feedback
+  align-items: stretch;
+  width: 100%;
+
+  > .chaise-form-control,
+  > .chaise-form-select,
+  > .chaise-form-file {
+    position: relative; // For focus state's z-index
+    flex: 1 1 0%;
+    min-width: 0; // https://stackoverflow.com/questions/36247140/why-dont-flex-items-shrink-past-content-size
+    margin-bottom: 0;
+
+    + .chaise-form-control,
+    + .chaise-form-select,
+    + .chaise-form-file {
+      margin-left: -$btn-border-width;
+    }
+  }
+
+  // Bring the "active" form control to the top of surrounding elements
+  > .chaise-form-control:focus,
+  > .chaise-form-select:focus,
+  > .chaise-form-file .chaise-form-file-input:focus ~ .chaise-form-file-label {
+    z-index: 3;
+  }
+
+  // Bring the custom file input above the label
+  > .chaise-form-file .chaise-form-file-input:focus {
+    z-index: 4;
+  }
+
+  > .chaise-form-control,
+  > .chaise-form-select {
+    &:not(:last-child) { @include border-right-radius(0); }
+    &:not(:first-child) { @include border-left-radius(0); }
+  }
+
+  // Custom file inputs have more complex markup, thus requiring different
+  // border-radius overrides.
+  > .chaise-form-file {
+    display: flex;
+    align-items: center;
+
+    &:not(:last-child) .chaise-form-file-label { @include border-right-radius(0); }
+    &:not(:first-child) .chaise-form-file-label { @include border-left-radius(0); }
+  }
+}
+
+
+// Prepend and append
+//
+// While it requires one extra layer of HTML for each, dedicated prepend and
+// append elements allow us to 1) be less clever, 2) simplify our selectors, and
+// 3) support HTML5 form validation.
+
+.chaise-input-group-prepend,
+.chaise-input-group-append {
+  display: flex;
+
+  // Ensure buttons are always above inputs for more visually pleasing borders.
+  // This isn't needed for `.chaise-input-group-text` since it shares the same border-color
+  // as our inputs.
+  .chaise-btn {
+    position: relative;
+    z-index: 2;
+
+    &:focus {
+      z-index: 3;
+    }
+  }
+
+  .chaise-btn + .chaise-btn,
+  .chaise-btn + .chaise-input-group-text,
+  .chaise-input-group-text + .chaise-input-group-text,
+  .chaise-input-group-text + .chaise-btn {
+    margin-left: -$btn-border-width;
+  }
+}
+
+.chaise-input-group-prepend { margin-right: -$btn-border-width; }
+.chaise-input-group-append { margin-left: -$btn-border-width; }
+
+
+// Textual addons
+//
+// Serves as a catch-all element for any text or radio/checkbox input you wish
+// to prepend or append to an input.
+
+// .chaise-input-group-text {
+//   display: flex;
+//   align-items: center;
+//   padding: $btn-padding-y $btn-padding-x;
+//   margin-bottom: 0; // Allow use of <label> elements by overriding our default margin-bottom
+//   font-size: 1rem;
+//   color: $chaise-input-group-addon-color;
+//   text-align: center;
+//   white-space: nowrap;
+//   background-color: $chaise-input-group-addon-bg;
+//   border: $btn-border-width solid $chaise-input-group-addon-border-color;
+//   @include border-radius($input-border-radius);
+//
+//   // Nuke default margins from checkboxes and radios to vertically center within.
+//   input[type="radio"],
+//   input[type="checkbox"] {
+//     margin-top: 0;
+//   }
+// }
+
+
+// Sizing
+//
+// Remix the default form control sizing classes into new ones for easier
+// manipulation.
+
+// .chaise-input-group-lg > .chaise-form-control {
+//   min-height: $input-height-lg;
+// }
+//
+// .chaise-input-group-lg > .chaise-form-select {
+//   height: $input-height-lg;
+// }
+//
+// .chaise-input-group-lg > .chaise-form-control,
+// .chaise-input-group-lg > .chaise-form-select,
+// .chaise-input-group-lg > .chaise-input-group-prepend > .chaise-input-group-text,
+// .chaise-input-group-lg > .chaise-input-group-append > .chaise-input-group-text,
+// .chaise-input-group-lg > .chaise-input-group-prepend > .chaise-btn,
+// .chaise-input-group-lg > .chaise-input-group-append > .chaise-btn {
+//   padding: $input-padding-y-lg $input-padding-x-lg;
+//   @include font-size($input-font-size-lg);
+//   @include border-radius($input-border-radius-lg);
+// }
+//
+// .chaise-input-group-sm > .chaise-form-control {
+//   min-height: $input-height-sm;
+// }
+//
+// .chaise-input-group-sm > .chaise-form-select {
+//   height: $input-height-sm;
+// }
+//
+// .chaise-input-group-sm > .chaise-form-control,
+// .chaise-input-group-sm > .chaise-form-select,
+// .chaise-input-group-sm > .chaise-input-group-prepend > .chaise-input-group-text,
+// .chaise-input-group-sm > .chaise-input-group-append > .chaise-input-group-text,
+// .chaise-input-group-sm > .chaise-input-group-prepend > .chaise-btn,
+// .chaise-input-group-sm > .chaise-input-group-append > .chaise-btn {
+//   padding: $input-padding-y-sm $input-padding-x-sm;
+//   @include font-size($input-font-size-sm);
+//   @include border-radius($input-border-radius-sm);
+// }
+//
+// .chaise-input-group-lg > .chaise-form-select,
+// .chaise-input-group-sm > .chaise-form-select {
+//   padding-right: $chaise-form-select-padding-x + $chaise-form-select-indicator-padding;
+// }
+//
+//
+// // Prepend and append rounded corners
+// //
+// // These rulesets must come after the sizing ones to properly override sm and lg
+// // border-radius values when extending. They're more specific than we'd like
+// // with the `.chaise-input-group >` part, but without it, we cannot override the sizing.
+//
+//
+// .chaise-input-group > .chaise-input-group-prepend > .chaise-btn,
+// .chaise-input-group > .chaise-input-group-prepend > .chaise-input-group-text,
+// .chaise-input-group > .chaise-input-group-append:not(:last-child) > .chaise-btn,
+// .chaise-input-group > .chaise-input-group-append:not(:last-child) > .chaise-input-group-text,
+// .chaise-input-group > .chaise-input-group-append:last-child > .chaise-btn:not(:last-child):not(.dropdown-toggle),
+// .chaise-input-group > .chaise-input-group-append:last-child > .chaise-input-group-text:not(:last-child) {
+//   @include border-right-radius(0);
+// }
+//
+// .chaise-input-group > .chaise-input-group-append > .chaise-btn,
+// .chaise-input-group > .chaise-input-group-append > .chaise-input-group-text,
+// .chaise-input-group > .chaise-input-group-prepend:not(:first-child) > .chaise-btn,
+// .chaise-input-group > .chaise-input-group-prepend:not(:first-child) > .chaise-input-group-text,
+// .chaise-input-group > .chaise-input-group-prepend:first-child > .chaise-btn:not(:first-child),
+// .chaise-input-group > .chaise-input-group-prepend:first-child > .chaise-input-group-text:not(:first-child) {
+//   @include border-left-radius(0);
+// }
