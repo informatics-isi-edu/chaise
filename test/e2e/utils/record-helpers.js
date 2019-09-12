@@ -394,17 +394,7 @@ exports.testPresentation = function (tableParams) {
                         return chaisePage.recordPage.getRelatedTableRows(displayName).count();
                     }).then(function(rowCount) {
                         expect(rowCount).toBe(relatedTables[i].data.length);
-
-                        // Because this spec is reused in multiple recordedit tests, this if-else branching just ensures the correct expectation is used depending on which table is encountered
-                        if (displayName == tableParams.related_table_name_with_page_size_annotation) {
-                            // The annotation_image table has more rows than the page_size, so its heading will have a + after the row count
-                            expect(headings[i]).toBe(title + " (showing first " + rowCount + " results)");
-                        } else if (rowCount == 0) {
-                            // All other tables should not have the + at the end its heading
-                            expect(headings[i]).toBe(title + " (no results found)");
-                        } else {
-                            expect(headings[i]).toBe(title + " (showing all " + rowCount + " results)");
-                        }
+                        expect(headings[i]).toBe(title);
                     });
                 })(i, displayName, title);
             }
@@ -413,13 +403,13 @@ exports.testPresentation = function (tableParams) {
 
     it("click event on image_id in inline display should open new tab with file details",function(){
         var allHandle;
-        browser.executeScript("return $('a.toggle-display-link').click()").then(function () {
+        browser.executeScript("return $('.toggle-display-link')[0].click()").then(function () {
             return chaisePage.waitForElement(element(by.id('entity-booking')))
         }).then(function () {
           // This selector captures link of first record under image_id column (5th column) of booking inline entry
-            return browser.executeScript("return $('.t_booking td:nth-child(5) a')");
-        }).then(function(imageLinks){
-            browser.executeScript("return window.open(arguments[0], '_blank')", imageLinks[0]);
+            return browser.executeScript("return $('.t_booking td:nth-child(5) a')[0]");
+        }).then(function(imageLink){
+            browser.executeScript("return window.open(arguments[0], '_blank')", imageLink);
             return browser.getAllWindowHandles();
         }).then(function (handles){
             allHandle = handles;

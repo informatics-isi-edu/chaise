@@ -106,18 +106,21 @@
         }])
 
         .controller('RecordActionController', ['DataUtils', '$scope', function RecordActionController(DataUtils, $scope) {
-            if ($scope.displayname.isHTML) $scope.displayname.value = DataUtils.makeSafeHTML($scope.displayname.value);
-            if ($scope.baseTableName.isHTML)  $scope.baseTableName.value = DataUtils.makeSafeHTML($scope.baseTableName.value);
+            var displayname = $scope.displayname.value,
+                tablename = $scope.baseTableName.value;
+
+            if ($scope.displayname.isHTML) displayname = DataUtils.makeSafeHTML($scope.displayname.value);
+            if ($scope.baseTableName.isHTML)  tablename = DataUtils.makeSafeHTML($scope.baseTableName.value);
 
             $scope.tooltip = {
-                createButton: "Add more " + $scope.displayname.value + " related to this " + $scope.baseTableName.value + ".",
-                exploreButton: "View more " + $scope.displayname.value + " related to this " + $scope.baseTableName.value + "."
+                createButton: "Add more " + displayname + " related to this " + tablename + ".",
+                exploreButton: "View more " + displayname + " related to this " + tablename + "."
             };
 
             if ($scope.canEdit) {
-                $scope.tooltip.tableModeButton = "Display edit controls for " + $scope.displayname.value + " related to this " + $scope.baseTableName.value + ".";
+                $scope.tooltip.tableModeButton = "Display edit controls for " + displayname + " related to this " + tablename + ".";
             } else {
-                $scope.tooltip.tableModeButton = "Display related " + $scope.displayname.value + " in tabular mode.";
+                $scope.tooltip.tableModeButton = "Display related " + displayname + " in tabular mode.";
             }
         }]);
 })();
