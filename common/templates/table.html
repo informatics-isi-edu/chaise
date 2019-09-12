@@ -1,4 +1,4 @@
-<div class="outer-table recordset-table s_{{makeSafeIdAttr(vm.reference.table.schema.name)}} t_{{makeSafeIdAttr(vm.reference.table.name)}}" id="divRecordSet">
+<div class="outer-table recordset-table s_{{makeSafeIdAttr(vm.reference.table.schema.name)}} t_{{makeSafeIdAttr(vm.reference.table.name)}}">
     <table class="table chaise-table table-striped table-hover">
         <!-- sortable column header -->
         <thead class="table-heading">
@@ -24,17 +24,17 @@
                         <span ng-if="::!col.column.displayname.isHTML" ng-bind="::col.column.displayname.value"></span>
                     </span>
                     <span class="table-heading-icons">
-                        <span class="table-sort-icon" ng-show="col.column.sortable && vm.enableSort && !col.columnError && !col.isLoading">
+                        <span ng-if="col.columnError" class="glyphicon glyphicon-alert column-error-icon" uib-tooltip="{{vm.queryTimeoutTooltip}}" tooltip-placement="bottom-left"></span>
+                        <span ng-if="!col.columnError && col.isLoading" class="glyphicon glyphicon-refresh glyphicon-refresh-animate aggregate-col-loader"></span>
+                        <span ng-if="!col.columnError && !col.isLoading && col.column.sortable && vm.enableSort" class="column-sort-icon">
                             <span ng-show="vm.sortby==col.column.name" ng-switch="vm.sortOrder">
-                                <span ng-switch-when="asc" class="fas fa-long-arrow-alt-up"></span>
-                                <span ng-switch-default class="fas fa-long-arrow-alt-down"></span>
+                                <span ng-switch-when="asc" class="asc-sorted-icon fas fa-long-arrow-alt-up"></span>
+                                <span ng-switch-default class="desc-sorted-icon fas fa-long-arrow-alt-down"></span>
                             </span>
                             <span ng-show="vm.sortby!==col.column.name">
-                                <span class="fas fa-arrows-alt-v"></span>
+                                <span class="not-sorted-icon fas fa-arrows-alt-v"></span>
                             </span>
                         </span>
-                        <span ng-show="!col.columnError && col.isLoading" class="glyphicon glyphicon-refresh glyphicon-refresh-animate aggregate-col-loader"></span>
-                        <span ng-if="vm.columnModels[$index].columnError" class="glyphicon glyphicon-alert" uib-tooltip="{{vm.queryTimeoutTooltip}}" tooltip-placement="bottom-left"></span>
                     </span>
                 </th>
             </tr>
@@ -42,7 +42,7 @@
 
         <!-- rows -->
         <tbody>
-            <tr class="table-row" ng-class="{'disabled-row': isDisabled(vm.page.tuples[$index])}"
+            <tr class="chaise-table-row" ng-class="{'disabled-row': isDisabled(vm.page.tuples[$index])}"
                 ellipsis ng-repeat="row in vm.rowValues track by $index" tuple="vm.page.tuples[$index]" from-tuple="vm.fromTuple" row-values="row" column-models="vm.columnModels" parent-reference="vm.parentReference"
                 config="vm.config" context="vm.context" on-row-click-bind="onSelect" selected="isSelected(vm.page.tuples[$index])" select-disabled="isDisabled(vm.page.tuples[$index])">
             </tr>
@@ -61,10 +61,10 @@
 
 
 <div class="chaise-table-pagination" ng-if="vm.initialized">
-    <button id="rs-previous-btn" type="button" class="chaise-btn chaise-btn-primary" ng-click="before()" ng-disabled="!vm.hasLoaded || !vm.page.hasPrevious">
+    <button type="button" class="chaise-table-previous-btn chaise-btn chaise-btn-primary" ng-click="before()" ng-disabled="!vm.hasLoaded || !vm.page.hasPrevious">
         <span>Previous</span>
     </button>
-    <button id="rs-next-btn" type="button" class="chaise-btn chaise-btn-primary" ng-click="after()" ng-disabled="!vm.hasLoaded || !vm.page.hasNext">
+    <button type="button" class="chaise-table-next-btn chaise-btn chaise-btn-primary" ng-click="after()" ng-disabled="!vm.hasLoaded || !vm.page.hasNext">
         <span>Next</span>
     </button>
 </div>

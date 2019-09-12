@@ -5,7 +5,7 @@ describe('View recordset,', function () {
         browser.ignoreSynchronization = true;
         browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:accommodation");
 
-        chaisePage.waitForElement(element(by.id("divRecordSet")));
+        chaisePage.recordsetPageReady()
         chaisePage.recordsetPage.waitForAggregates();
     });
 

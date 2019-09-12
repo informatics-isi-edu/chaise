@@ -930,6 +930,43 @@
             return eleUrl.origin == currentOrigin;
         }
 
+        /**
+         * Given a reference will return the appropriate link to recordset
+         * TODO why not use appLink? the only reason could be that we don't want
+         * ppid and pcid
+         * @param {ERMrest.reference} reference
+         * @returns {string} url to recordset app
+         */
+        function getRecordsetLink(reference) {
+            // before run, use window location
+            if (!reference) {
+                return $window.location.href;
+            }
+
+            var url = chaiseBaseURL() + "/recordset/#" + reference.location.catalog + "/" + reference.location.compactPath;
+
+            // add sort modifier
+            if (reference.location.sort)
+                url = url + reference.location.sort;
+
+            // add paging modifier
+            if (reference.location.paging)
+                url = url + reference.location.paging;
+
+            // add ermrestjs supported queryParams
+            if (reference.location.queryParamsString) {
+                url = url + "?" + reference.location.queryParamsString;
+            }
+
+            // add hideNavbar if present/defined
+            var dcctx = ConfigUtils.getContextJSON();
+            if (dcctx.hideNavbar) {
+                url = url + (reference.location.queryParamsString ? "&" : "?") + "hideNavbar=" + dcctx.hideNavbar;
+            }
+
+            return url;
+        }
+
         return {
             appNamefromUrlPathname: appNamefromUrlPathname,
             appTagToURL: appTagToURL,
@@ -949,7 +986,8 @@
             resolvePermalink: resolvePermalink,
             setLocationChangeHandling: setLocationChangeHandling,
             setOrigin: setOrigin,
-            stripSortAndQueryParams: stripSortAndQueryParams
+            stripSortAndQueryParams: stripSortAndQueryParams,
+            getRecordsetLink: getRecordsetLink
         }
     }])
 

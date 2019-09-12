@@ -183,7 +183,7 @@ describe('When editing a record', function() {
                         // Select a non-null value for fk_null_col b/c fk_null_col needs to be non-null
                         if (name === 'fk_null_col') {
                             element.all(by.css('.modal-popup-btn')).first().click().then(function() {
-                                return chaisePage.waitForElement(element.all(by.id('divRecordSet')).first());
+                                return chaisePage.recordsetPageReady();
                             }).then(function() {
                                 // Get the first row in the modal popup table, find the row's select-action-buttons, and click the 1st one.
                                 return chaisePage.recordsetPage.getRows().first().all(by.css('.select-action-button')).first().click();

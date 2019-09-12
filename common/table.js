@@ -964,6 +964,9 @@
             scope.vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
             scope.transformCustomFilter = DataUtils.addSpaceAfterLogicalOperators;
 
+            scope.getRecordsetLink = UriUtils.getRecordsetLink;
+
+            scope.tooltip = messageMap.tooltip;
             scope.defaultDisplayname = defaultDisplayname;
 
             scope.recordsetDisplayModes = recordsetDisplayModes;
@@ -1337,9 +1340,7 @@
                     if (link.indexOf("?limit=") === -1 || link.indexOf("&limit=") === -1)
                         link = link + (link.indexOf('?') === -1 ? "?limit=" : "&limit=" ) + scope.vm.pageLimit;
 
-                    // TODO UX-M we should add invalidate stuff to this function too
-                    // open url in a new tab
-                    $window.open(appLink, '_blank');
+                    location.href = link;
                 };
 
             }

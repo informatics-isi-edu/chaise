@@ -16,7 +16,7 @@ describe('Recordset edit records,', function() {
         });
 
         it("clicking edit will show forms based on the default page size of " + testParams.default_page_limit + ".", function() {
-            chaisePage.waitForElement(element(by.id("divRecordSet"))).then(function() {
+            chaisePage.recordsetPageReady().then(function() {
                 return chaisePage.recordsetPage.getRows().count();
             }).then(function(ct) {
                 expect(ct).toBe(testParams.default_page_limit);
@@ -43,7 +43,7 @@ describe('Recordset edit records,', function() {
         });
 
         it("clicking edit will show forms based on the limit of " + testParams.limit + " in the uri.", function() {
-            chaisePage.waitForElement(element(by.id("divRecordSet"))).then(function() {
+            chaisePage.recordsetPageReady().then(function() {
                 return chaisePage.recordsetPage.getRows().count();
             }).then(function(ct) {
                 expect(ct).toBe(testParams.limit);
@@ -71,7 +71,7 @@ describe('Recordset edit records,', function() {
         it("without a limit, clicking edit will show all forms with int=23.", function() {
             browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/int=23");
 
-            chaisePage.waitForElement(element(by.id("divRecordSet"))).then(function() {
+            chaisePage.recordsetPageReady().then(function() {
                 return chaisePage.recordsetPage.getRows().count();
             }).then(function(ct) {
                 expect(ct).toBe(testParams.int_23_count);
@@ -93,7 +93,7 @@ describe('Recordset edit records,', function() {
         it("with a limit of " + testParams.limit + ", clicking edit will show all forms with int=23.", function() {
             browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/int=23?limit=" + testParams.limit);
 
-            chaisePage.waitForElement(element(by.id("divRecordSet"))).then(function() {
+            chaisePage.recordsetPageReady().then(function() {
                 return chaisePage.recordsetPage.getRows().count();
             }).then(function(ct) {
                 expect(ct).toBe(testParams.limit);
