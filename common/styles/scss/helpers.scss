@@ -33,3 +33,26 @@
 @mixin border-bottom-left-radius($radius) {
     border-bottom-left-radius: $radius;
 }
+
+@mixin download-btn() {
+    color: $primary-color;
+    white-space: nowrap;
+    // touch action
+    -ms-touch-action: manipulation;
+    touch-action: manipulation;
+    // on user select
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+    &:before {
+        content: "\e025";
+        font-family: 'Glyphicons Halflings';
+        padding-right: 4px;
+    }
+
+    &:hover {
+        text-decoration: none;
+    }
+}

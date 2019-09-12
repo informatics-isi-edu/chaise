@@ -5,7 +5,7 @@
 <div class="modal-body">
     <center>
         <h3 ng-bind-html="ctrl.params.message"></h3>
-        <button class="btn btn-primary btn-inverted" ng-click="::ctrl.openWindow();">Login</button>
+        <button class="chaise-btn chaise-btn-secondary" ng-click="::ctrl.openWindow();">Login</button>
         <div ng-if="ctrl.params.subMessage" class="row">
             <h3>{{ctrl.params.subMessage}} <a ng-click="::ctrl.cancel();">Anonymous Access</a></h3>
         </div>
