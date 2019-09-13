@@ -969,7 +969,7 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
 				chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
 				return chaisePage.recordEditPage.getModalTitle().getText();
 			}).then(function (title) {
-				expect(title).toBe("Choose " + params.tableDisplayname, "title missmatch.");
+				expect(title).toBe("Select " + params.tableDisplayname, "title missmatch.");
 
 				browser.wait(function () {
 					return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {

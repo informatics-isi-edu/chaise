@@ -26,7 +26,7 @@ describe("Domain filter pattern support,", function() {
 
             return modal.getText();
         }).then(function(text) {
-            expect(text.indexOf("Choose")).toBeGreaterThan(-1);
+            expect(text.indexOf("Select")).toBeGreaterThan(-1);
 
             browser.wait(function () {
                 return chaisePage.recordsetPage.getRows().count().then(function (ct) {
@@ -121,7 +121,7 @@ describe("Domain filter pattern support,", function() {
                         browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
                         return modalTitle.getText();
                     }).then(function(text) {
-                        expect(text.indexOf("Choose")).toBeGreaterThan(-1);
+                        expect(text.indexOf("Select")).toBeGreaterThan(-1);
                         rows = chaisePage.recordsetPage.getRows();
                         return rows.get(0).all(by.css(".select-action-button"));
                     }).then(function(selectButtons) {
@@ -137,7 +137,7 @@ describe("Domain filter pattern support,", function() {
 
                         return modalTitle.getText();
                     }).then(function(text) {
-                        expect(text.indexOf("Choose")).toBeGreaterThan(-1);
+                        expect(text.indexOf("Select")).toBeGreaterThan(-1);
 
                         rows = chaisePage.recordsetPage.getRows();
 
@@ -189,7 +189,7 @@ describe("Domain filter pattern support,", function() {
                         browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
                         return modalTitle.getText();
                     }).then(function(text) {
-                        expect(text.indexOf("Choose")).toBeGreaterThan(-1);
+                        expect(text.indexOf("Select")).toBeGreaterThan(-1);
                         browser.wait(function () {
                             return chaisePage.recordsetPage.getRows().count().then(function (ct) {
                                 return (ct > 0);

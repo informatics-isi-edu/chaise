@@ -138,6 +138,11 @@ html {
         color: inherit;
     }
 
+    .disabled-form a,
+    .disabled-row a {
+        color: $disabled-link-color;
+    }
+
     .disabled-form .search-remove {
         /*the button used to clear the input*/
         display: none;
@@ -451,29 +456,37 @@ html {
             height: 20px;
             top: 0;
             margin-top: 2px;
-        }
 
-        input[type="checkbox"]:after {
-            content: "";
-            display: inline-block;
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            left: 0;
-            top: 0;
-            border: 1px solid $primary-color;
-            border-radius: 3px;
-            color: $primary-color;
-            background-color: $white-color;
-            -webkit-transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
-            -o-transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
-            transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
-        }
+            &:disabled {
+                cursor: not-allowed;
+                &:after {
+                    color: $disabled-color;
+                    border-color: $disabled-color;
+                }
+            }
 
-        input[type="checkbox"]:checked:after {
-            font-family: 'Glyphicons Halflings';
-            content: "\e013";
-            font-size: 1.21rem;
+            &:after {
+                content: "";
+                display: inline-block;
+                position: absolute;
+                width: 20px;
+                height: 20px;
+                left: 0;
+                top: 0;
+                border: 1px solid $primary-color;
+                border-radius: 3px;
+                color: $primary-color;
+                background-color: $white-color;
+                -webkit-transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
+                -o-transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
+                transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
+            }
+
+            &:checked:after {
+                font-family: 'Glyphicons Halflings';
+                content: "\e013";
+                font-size: 1.21rem;
+            }
         }
     }
 

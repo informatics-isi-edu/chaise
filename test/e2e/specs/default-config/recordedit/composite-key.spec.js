@@ -40,7 +40,7 @@ describe('Edit a record,', function() {
                     return modalTitle.getText();
                 }).then(function(text) {
                     // make sure modal opened
-                    expect(text.indexOf("Choose")).toBeGreaterThan(-1);
+                    expect(text.indexOf("Select")).toBeGreaterThan(-1);
 
                     rows = chaisePage.recordsetPage.getRows();
                     // count is needed for clicking a random row

@@ -221,7 +221,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
                 chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
                 return chaisePage.recordEditPage.getModalTitle().getText();
             }).then(function (title) {
-                expect(title).toBe("Choose file", "titlte missmatch.");
+                expect(title).toBe("Select file", "titlte missmatch.");
 
                 browser.wait(function () {
                     return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
