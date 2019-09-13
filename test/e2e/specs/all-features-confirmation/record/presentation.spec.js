@@ -364,7 +364,7 @@ describe('View existing record,', function() {
             recPan.allowAnimations(false);
 
             expect(hideTocBtn.element(by.className("chaise-icon")).getAttribute("class")).toContain('chaise-sidebar-close', 'Wrong icon for hide toc button');
-            expect(recPan.getAttribute("class")).toContain('open-panel', 'Side Panel is not visible when it should be');
+            expect(recPan.getAttribute("class")).toContain('open-panel', 'Side Panel is NOT visible when it should be');
 
             hideTocBtn.click().then(function(){
                 var showTocBtn = chaisePage.recordPage.getShowTocBtn();

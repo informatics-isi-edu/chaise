@@ -66,7 +66,7 @@
                                         <span class="chaise-btn-icon glyphicon glyphicon-pencil"></span>
                                         <span>Edit</span>
                                     </button>
-                                    <delete-link id="delete-record" callback="::ctrl.deleteRecord()" display="button" icon="true" label="Delete" ng-disabled="::ctrl.canDelete()" uib-tooltip="Click here to delete this record." tooltip-placement="bottom"></delete-link>
+                                    <delete-link id="delete-record" callback="::ctrl.deleteRecord()" display="button" icon="true" label="Delete" is-disabled="::!ctrl.canDelete()" uib-tooltip="Click here to delete this record." tooltip-placement="bottom"></delete-link>
                                 </div>
                             </span>
                         </div>

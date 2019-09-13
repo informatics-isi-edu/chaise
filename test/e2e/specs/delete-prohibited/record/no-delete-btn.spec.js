@@ -31,23 +31,20 @@ describe('View existing record,', function() {
             });
         });
 
-        it('should not display a delete record button', function() {
+        it('should display a disabled delete record button', function() {
             var deleteBtn = chaisePage.recordPage.getDeleteRecordButton();
-            expect(deleteBtn.isPresent()).toBeFalsy();
+            expect(deleteBtn.isPresent()).toBeTruthy("The delete button does not show on the page.");
+            expect(deleteBtn.getAttribute("disabled")).toBeTruthy("The delete button was not disabled.");
         });
 
         it('Record Table of Contents panel should be hidden by default as chaiseConfig entry hideTableOfContents is true.', function(done){
             var recPan =  chaisePage.recordPage.getSidePanel(),
-            fiddlerBtn = chaisePage.recordPage.getSidePanelFiddler();
+                showTocBtn = chaisePage.recordPage.getShowTocBtn();
 
-            fiddlerBtn.getAttribute("class").then(function(classNameLeft) {
-                expect(classNameLeft).toContain("glyphicon glyphicon-triangle-left", "Side Pan Pull button is not pointing in the left direction.");
-                expect(recPan.getAttribute("class")).toContain('close-panel', 'Side Panel is not hidden when fiddler is poining in left direction');
-                done();
-            }).catch( function(err) {
-                console.log(err);
-                done.fail();
-            });
+            expect(showTocBtn.element(by.className("chaise-icon")).getAttribute("class")).toContain("chaise-sidebar-open", "Wrong icon for show toc button");
+            expect(recPan.getAttribute("class")).toContain('close-panel', 'Side Panel is visible when it should NOT be');
+
+            done();
         });
 
         if (process.env.TRAVIS) {

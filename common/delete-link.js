@@ -34,9 +34,11 @@
                 label: '@',
                 display: '@',
                 callback: '&',
-                buttonSize: '@'
+                buttonSize: '@',
+                isDisabled: '='
             },
             link: function(scope) {
+                console.log(scope);
                 scope.deleteFn = function deleteFn() {
                     if (!CONFIRM_DELETE) {
                         scope.$root.showSpinner = true;

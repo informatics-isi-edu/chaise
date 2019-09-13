@@ -12,15 +12,15 @@ var testParams = {
         operator: "="
     },
     headers: [
-        "booking (showing all 6 results)", // normal
-        "schedule (showing all 2 results)", // has search
-        "media (showing all 1 results)", // has row_markdown_pattern
-        "association_table (showing all 1 results)", // association
-        "accommodation_image (showing first 2 results)", // association with page_size
-        "association_table_markdown (showing all 1 results)", // association with markdown
-        "related_table_2 (showing all 1 results)", // related entity with path length 3
-        "table_w_aggregates (showing all 2 results)", // related entity with aggregate columns
-        "table_w_invalid_row_markdown_pattern (showing all 1 results)" // related entity with invalid row_markdown_pattern
+        "booking", // normal
+        "schedule", // has search
+        "media", // has row_markdown_pattern
+        "association_table", // association
+        "accommodation_image", // association with page_size
+        "association_table_markdown", // association with markdown
+        "related_table_2", // related entity with path length 3
+        "table_w_aggregates", // related entity with aggregate columns
+        "table_w_invalid_row_markdown_pattern" // related entity with invalid row_markdown_pattern
     ],
     tocHeaders: [
         "Main", "booking (6)", "schedule (2)", "media (1)", "association_table (1)",
@@ -76,7 +76,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         canEdit: true,
         viewMore: {
             displayname: "booking",
-            filter: "Accommodations : Super 8 North Hollywood Motel"
+            filter: "Accommodations\nSuper 8 North Hollywood Motel"
         },
         rowValues: [
             ["125.0000","2016-03-12 00:00:00"],
@@ -135,7 +135,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         count: 2,
         viewMore: {
             displayname: "schedule",
-            filter: "Accommodations : Super 8 North Hollywood Motel"
+            filter: "Accommodations\nSuper 8 North Hollywood Motel"
         }
     };
     describe("for a related entity with search applink, ", function () {
@@ -168,7 +168,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         isAssociation: true,
         viewMore: {
             displayname: "related_table",
-            filter: "base table association related : Super 8 North Hollywood Motel"
+            filter: "base table association related\nSuper 8 North Hollywood Motel"
         },
         rowValues: [
             ["Television"]
@@ -217,7 +217,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
 
         it ("Opened modal by `Add` button should honor the page_size.", function () {
             var addRelatedRecordLink = chaisePage.recordPage.getAddRecordLink(association_with_page_size.displayname);
-            chaisePage.clickButton(addRelatedRecordLink).then(function(){
+            addRelatedRecordLink.click().then(function(){
                 chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
                 return chaisePage.recordEditPage.getModalTitle().getText();
             }).then(function (title) {
@@ -264,7 +264,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         baseTable:"Accommodations",
         viewMore: {
             displayname: "related_table_2",
-            filter: "base table association related : Super 8 North Hollywood Motel"
+            filter: "base table association related\nSuper 8 North Hollywood Motel"
         },
         rowValues: [
             ["one"],
@@ -290,7 +290,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         baseTable:"Accommodations",
         viewMore: {
             displayname: "table_w_aggregates",
-            filter: "fk_to_accommodation : Super 8 North Hollywood Motel"
+            filter: "fk_to_accommodation\nSuper 8 North Hollywood Motel"
         },
         rowValues: [
             ["1", "100", "100", "1", "1"],
@@ -317,7 +317,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         viewMore: {
             name: "table_w_invalid_row_markdown_pattern",
             displayname: "table_w_invalid_row_markdown_pattern",
-            filter: "Accommodations : Super 8 North Hollywood Motel"
+            filter: "Accommodations\nSuper 8 North Hollywood Motel"
         },
         rowValues: [
             ["four"]

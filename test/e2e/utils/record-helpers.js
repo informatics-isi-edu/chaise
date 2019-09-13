@@ -253,36 +253,36 @@ exports.testPresentation = function (tableParams) {
         });
     }
 
-	it("should render columns which are specified to be visible and in order", function() {
-		chaisePage.recordPage.getAllColumnCaptions().then(function(pageColumns) {
-			expect(pageColumns.length).toBe(notNullColumns.length);
-			var index = 0;
-			pageColumns.forEach(function(c) {
+    it("should render columns which are specified to be visible and in order", function() {
+        chaisePage.recordPage.getAllColumnCaptions().then(function(pageColumns) {
+            expect(pageColumns.length).toBe(notNullColumns.length);
+            var index = 0;
+            pageColumns.forEach(function(c) {
                 var col = notNullColumns[index++];
                 expect(c.getText()).toEqual(col.title);
-			});
-		});
-	});
+            });
+        });
+    });
 
-	it("should show line under columns which have a comment and inspect the comment value too", function() {
-		var columns = notNullColumns.filter(function(c) {
+    it("should show line under columns which have a comment and inspect the comment value too", function() {
+        var columns = notNullColumns.filter(function(c) {
             return (typeof c.comment == 'string');
         });
-		chaisePage.recordPage.getColumnsWithUnderline().then(function(pageColumns) {
-			expect(pageColumns.length).toBe(columns.length);
-			var index = 0;
-			pageColumns.forEach(function(c) {
-				var comment = columns[index++].comment;
-				chaisePage.recordPage.getColumnComment(c).then(function(actualComment) {
-					var exists = actualComment ? true : undefined;
-					expect(exists).toBeDefined();
+        chaisePage.recordPage.getColumnsWithUnderline().then(function(pageColumns) {
+            expect(pageColumns.length).toBe(columns.length);
+            var index = 0;
+            pageColumns.forEach(function(c) {
+                var comment = columns[index++].comment;
+                chaisePage.recordPage.getColumnComment(c).then(function(actualComment) {
+                    var exists = actualComment ? true : undefined;
+                    expect(exists).toBeDefined();
 
-					// Check comment is same
+                    // Check comment is same
                     expect(actualComment).toBe(comment);
-				});
-			});
-		});
-	});
+                });
+            });
+        });
+    });
 
     it("should render columns based on their markdown pattern.", function(done) {
         var columns = tableParams.columns.filter(function(c) {return c.markdown_title;});
@@ -485,7 +485,7 @@ exports.testPresentation = function (tableParams) {
         var displayName = tableParams.related_tables[0].title;
         var rtAccordion = chaisePage.recordPage.getRelatedTableAccordion(displayName),
             panelHeading = chaisePage.recordPage.getRelatedTableHeading(displayName),
-            panelSectionHeader = chaisePage.recordPage.getRelatedTableSectionHeader(displayName);
+            panelSectionHeader = chaisePage.recordPage.getRelatedTableSectionHeader(displayName).element(by.tagName('i'));
 
         // related table should be open by default
         expect(panelSectionHeader.getAttribute('class')).toContain('fa-chevron-down');
@@ -582,33 +582,14 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
     beforeAll(function() {
         pageReadyCondition();
 
-        if (params.isInline) {
-            currentEl = chaisePage.recordPage.getEntityRelatedTable(params.displayname);
-        } else {
-            currentEl = chaisePage.recordPage.getRelatedTableAccordion(params.displayname);
-        }
+        currentEl = params.inLine ? chaisePage.recordPage.getEntityRelatedTable(params.displayname) : chaisePage.recordPage.getRelatedTableAccordion(params.displayname);
 
         markdownToggleLink = chaisePage.recordPage.getToggleDisplayLink(params.displayname, params.isInline);
     });
 
-    var testHeading = function (count, page_size) {
-        page_size = page_size || 25;
-
-        var heading = chaisePage.recordPage.getRelatedTableHeadingTitle(params.displayname);
-        var title = params.displayname;
-        if (count === 0) {
-            title += " (no results found)";
-        } else if (count < page_size) {
-            title += " (showing all " + count + " results)";
-        } else {
-            title += " (showing first " + page_size + " results)"
-        }
-        expect(heading.getText()).toBe(title, "heading missmatch.");
-    };
-
     if (!params.isInline) {
-        it ("title should be correct.", function () {
-            testHeading(params.count, params.page_size);
+        it("title should be correct.", function () {
+            expect(chaisePage.recordPage.getRelatedTableSectionHeader(params.displayname).getText()).toBe(params.displayname, "heading missmatch.");
         });
     }
 
@@ -622,7 +603,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
                 browser.wait(EC.elementToBeClickable(exploreBtn), browser.params.defaultTimeout);
             });
 
-            it ('should be displayed.', function () {
+            it('should be displayed.', function () {
                 expect(exploreBtn.isDisplayed()).toBeTruthy("view more is not visible.");
             });
 
@@ -837,7 +818,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
                             return chaisePage.recordPage.getRelatedTableRows(params.displayname, params.isInline).count();
                         }).then(function (count) {
                             expect(count).toBe(currentCount-1, "count didn't change.");
-                            testHeading(count, params.page_size);
+                            expect(chaisePage.recordPage.getRelatedTableSectionHeader(params.displayname).getText()).toBe(params.displayname, "heading missmatch.");
                             done();
                         }).catch(function (err) {
                             console.log(err);
@@ -857,6 +838,9 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
     // if it was markdown, we are changing the view, change it back.
     afterAll(function (done) {
         if (toggled) {
+            if (params.name = "media") {
+                browser.pause();
+            }
             markdownToggleLink.click().then(function() {
                 done();
             }).catch(function(error) {
@@ -877,80 +861,80 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
  *  - prefilledValues: {"col-displayname": "col-value", ..}
  *  - columnValue
  */
+
 exports.testAddRelatedTable = function (params, isInline, inputCallback) {
-	describe("Add feature, ", function () {
-		it ("clicking on `Add` button should open recordedit.", function (done) {
-			var addBtn = chaisePage.recordPage.getAddRecordLink(params.relatedDisplayname);
-			var recordeditUrl = browser.params.url + '/recordedit/#' + browser.params.catalogId + "/" +
-								params.schemaName + ":" + params.tableName;
+    describe("Add feature, ", function () {
+        it ("clicking on `Add` button should open recordedit.", function (done) {
+            var addBtn = chaisePage.recordPage.getAddRecordLink(params.relatedDisplayname);
+            var recordeditUrl = browser.params.url + '/recordedit/#' + browser.params.catalogId + "/" + params.schemaName + ":" + params.tableName;
 
-			expect(addBtn.isDisplayed()).toBeTruthy("add button is not displayed");
-			chaisePage.clickButton(addBtn).then(function () {
-				// This Add link opens in a new tab so we have to track the windows in the browser...
-				return browser.getAllWindowHandles();
-			}).then(function(handles) {
-				allWindows = handles;
-				// ... and switch to the new tab here...
-				return browser.switchTo().window(allWindows[1]);
-			}).then(function() {
-				return chaisePage.waitForElement(element(by.id('submit-record-button')));
-			}).then(function() {
+            expect(addBtn.isDisplayed()).toBeTruthy("add button is not displayed");
+            addBtn.click().then(function () {
+                // This Add link opens in a new tab so we have to track the windows in the browser...
+                return browser.getAllWindowHandles();
+            }).then(function(handles) {
+                allWindows = handles;
+                // ... and switch to the new tab here...
+                return browser.switchTo().window(allWindows[1]);
+            }).then(function() {
+                return chaisePage.waitForElement(element(by.id('submit-record-button')));
+            }).then(function() {
 
-				browser.wait(function () {
-					return browser.driver.getCurrentUrl().then(function(url) {
-						return url.startsWith(recordeditUrl);
-					});
-				}, browser.params.defaultTimeout);
+                browser.wait(function () {
+                    return browser.driver.getCurrentUrl().then(function(url) {
+                        return url.startsWith(recordeditUrl);
+                    });
+                }, browser.params.defaultTimeout);
 
-				// ... and then get the url from this new tab...
-				return browser.driver.getCurrentUrl();
-			}).then(function(url) {
-				expect(url.indexOf('prefill=')).toBeGreaterThan(-1, "didn't have prefill");
+                // ... and then get the url from this new tab...
+                return browser.driver.getCurrentUrl();
+            }).then(function(url) {
+                expect(url.indexOf('prefill=')).toBeGreaterThan(-1, "didn't have prefill");
 
-				var title = chaisePage.recordEditPage.getFormTitle().getText();
-				expect(title).toBe("Create Record", "recordedit title missmatch.")
+                var title = chaisePage.recordEditPage.getFormTitle().getText();
+                expect(title).toBe("Create Record", "recordedit title missmatch.")
 
-				done();
-			}).catch(function (err) {
-				console.log(err);
-				done.fail();
-			});
-		});
+                done();
+            }).catch(function (err) {
+                console.log(err);
+                done.fail();
+            });
+        });
 
-		it ("the opened form should have the prefill value for foreignkey.", function () {
+        it ("the opened form should have the prefill value for foreignkey.", function () {
             for (var col in params.prefilledValues) {
                 var fkInput = chaisePage.recordEditPage.getInputById(0, col);
                 expect(fkInput.getAttribute('value')).toBe(params.prefilledValues[col], "value missmatch for " + col);
                 expect(fkInput.getAttribute('disabled')).toBe(params.prefilledValues[col] === "" ? null : 'true', "disabled missmatch for " + col);
             }
-		});
+        });
 
-		it ("submitting the form and coming back to recordset page should update the related table.", function (done) {
-			inputCallback().then(function () {
-				return chaisePage.recordEditPage.submitForm();
-			}).then(function() {
-				// wait until redirected to record page
-				browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
+        it ("submitting the form and coming back to recordset page should update the related table.", function (done) {
+            inputCallback().then(function () {
+                return chaisePage.recordEditPage.submitForm();
+            }).then(function() {
+                // wait until redirected to record page
+                browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
                 browser.close();
-				return browser.switchTo().window(allWindows[0]);
+                return browser.switchTo().window(allWindows[0]);
             }).then(function () {
                 //TODO should remove this, but sometimes it's not working in test cases
                 browser.driver.navigate().refresh();
 
                 // check for the updated value.
-				//there's no loading indocator, so we have to wait for count
+                //there's no loading indocator, so we have to wait for count
                 browser.wait(function () {
                     return chaisePage.recordPage.getRelatedTableRows(params.relatedDisplayname, isInline).count().then(function (cnt) {
                         return cnt === params.rowValuesAfter.length;
                     }, function (err) {throw err;});
                 });
                 checkRelatedRowValues(params.relatedDisplayname, isInline, params.rowValuesAfter, done);
-			}).catch(function(error) {
-				console.log(error);
-				done.fail();
-			});
-		});
-	});
+            }).catch(function(error) {
+                console.log(error);
+                done.fail();
+            });
+        });
+    });
 };
 
 /**
@@ -962,74 +946,73 @@ exports.testAddRelatedTable = function (params, isInline, inputCallback) {
  * - selectIndex
  */
 exports.testAddAssociationTable = function (params, isInline, pageReadyCondition) {
-	describe("Add feature, ", function () {
-		it ("clicking on `Add` button should open up a modal.", function (done) {
-			var addBtn = chaisePage.recordPage.getAddRecordLink(params.relatedDisplayname);
-			chaisePage.clickButton(addBtn).then(function () {
-				chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
-				return chaisePage.recordEditPage.getModalTitle().getText();
-			}).then(function (title) {
-				expect(title).toBe("Choose " + params.tableDisplayname, "title missmatch.");
+    describe("Add feature, ", function () {
+        it ("clicking on `Add` button should open up a modal.", function (done) {
+            var addBtn = chaisePage.recordPage.getAddRecordLink(params.relatedDisplayname);
+            addBtn.click().then(function () {
+                chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
+                return chaisePage.recordEditPage.getModalTitle().getText();
+            }).then(function (title) {
+                expect(title).toBe("Choose " + params.tableDisplayname, "title missmatch.");
 
-				browser.wait(function () {
-					return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
-						return (ct == params.totalCount);
-					});
-				});
-
-				return chaisePage.recordsetPage.getModalRows().count();
-			}).then(function(ct){
-				expect(ct).toBe(params.totalCount, "association count missmatch.");
-				done();
-			}).catch(function(error) {
-				console.log(error);
-				done.fail();
-			});
-		});
-
-		it ("current values must be disabled.", function (done) {
-			chaisePage.recordPage.getModalDisabledRows().then(function (disabledRows) {
-				expect(disabledRows.length).toBe(params.disabledRows.length, "disabled length missmatch.");
-
-
-				// go through the list and check their first column (which is the id)
-				disabledRows.forEach(function (r, index) {
-					r.findElement(by.css("td:not(.actions-layout)")).then(function (el) {
-						expect(el.getText()).toMatch(params.disabledRows[index], "missmatch disabled row index=" + index);
-					});
-				});
-
-				done();
-			}).catch(function(error) {
-				console.log(error);
-				done.fail();
-			});
-		});
-
-		it ("user should be able to select new values and submit.", function (done) {
-			var inp = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(params.selectIndex);
-			chaisePage.clickButton(inp).then(function (){
-				return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
-			}).then(function () {
-				browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
                 browser.wait(function () {
-					return chaisePage.recordPage.getRelatedTableRows(params.relatedDisplayname, isInline).then(function (rows) {
-						return (rows.length == params.existingCount+1);
-					});
-				});
+                    return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
+                        return (ct == params.totalCount);
+                    });
+                });
+
+                return chaisePage.recordsetPage.getModalRows().count();
+            }).then(function(ct){
+                expect(ct).toBe(params.totalCount, "association count missmatch.");
+                done();
+            }).catch(function(error) {
+                console.log(error);
+                done.fail();
+            });
+        });
+
+        it ("current values must be disabled.", function (done) {
+            chaisePage.recordPage.getModalDisabledRows().then(function (disabledRows) {
+                expect(disabledRows.length).toBe(params.disabledRows.length, "disabled length missmatch.");
+
+                // go through the list and check their first column (which is the id)
+                disabledRows.forEach(function (r, index) {
+                    r.findElement(by.css("td:not(.action-btns)")).then(function (el) {
+                        expect(el.getText()).toMatch(params.disabledRows[index], "missmatch disabled row index=" + index);
+                    });
+                });
+
+                done();
+            }).catch(function(error) {
+                console.log(error);
+                done.fail();
+            });
+        });
+
+        it ("user should be able to select new values and submit.", function (done) {
+            var inp = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(params.selectIndex);
+            chaisePage.clickButton(inp).then(function (){
+                return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
+            }).then(function () {
+                browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
+                browser.wait(function () {
+                    return chaisePage.recordPage.getRelatedTableRows(params.relatedDisplayname, isInline).then(function (rows) {
+                        return (rows.length == params.existingCount+1);
+                    });
+                });
                 checkRelatedRowValues(params.relatedDisplayname, isInline, params.rowValuesAfter, done);
 
-				return chaisePage.recordPage.getRelatedTableRows(params.relatedDisplayname).count();
-			}).then(function (count){
-				expect(count).toBe(params.existingCount + 1);
-				done();
-			}).catch(function(error) {
-				console.log(error);
-				done.fail();
-			});
-		});
+                return chaisePage.recordPage.getRelatedTableRows(params.relatedDisplayname).count();
+            }).then(function (count){
+                expect(count).toBe(params.existingCount + 1);
+                done();
+            }).catch(function(error) {
+                console.log(error);
+                done.fail();
+            });
+        });
 
-	});
+    });
 };
 
 
