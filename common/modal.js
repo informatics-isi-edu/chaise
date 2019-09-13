@@ -203,7 +203,8 @@
             matchNull:          params.matchNull,
             search:             reference.location.searchTerm,
             config:             {
-                viewable: false, editable: false, deletable: false,
+                viewable: false, deletable: false,
+                editable:           (typeof params.editable === "boolean") ? params.editable : true,
                 selectMode:         params.selectMode,
                 showFaceting:       showFaceting, facetPanelOpen: params.facetPanelOpen,
                 showNull:           params.showNull === true,
@@ -217,6 +218,8 @@
             parentContainerSelector:    params.parentContainerSelector,
             parentStickyAreaSelector:   params.parentStickyAreaSelector
         };
+
+        console.log("we're here", vm.tableModel.config.displayMode);
 
         /**
          * In case of single-select, this will be called just once.

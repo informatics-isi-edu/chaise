@@ -1,5 +1,12 @@
-<td ng-if="config.viewable || config.editable || config.deletable || config.selectMode != noSelect" class="block action-btns">
-    <div class="chaise-btn-group">
+<td ng-if="config.viewable || config.editable || config.deletable || config.selectMode != noSelect" class="block action-btns" ng-switch="config.selectMode">
+    <button ng-switch-when="single-select" type="button" class="select-action-button chaise-btn chaise-btn-secondary chaise-btn-sm icon-btn" ng-click="onSelect($event)" tooltip-placement="bottom" uib-tooltip="Select" >
+        <span class="chaise-btn-icon glyphicon glyphicon-check"></span>
+    </button>
+    <div ng-switch-when="multi-select" class="chaise-checkbox">
+        <input type="checkbox" ng-checked="selected || selectDisabled" ng-click="onSelect($event)" ng-disabled="selectDisabled">
+        <label />
+    </div>
+    <div class="chaise-btn-group" ng-switch-default>
         <a ng-if="config.viewable" type="button" class="view-action-button chaise-btn chaise-btn-tertiary icon-btn" ng-href="{{viewLink}}" tooltip-placement="bottom" uib-tooltip="View Details">
             <span class="chaise-btn-icon chaise-icon chaise-view-details"></span>
         </a>
@@ -12,13 +19,6 @@
         <button ng-if="config.deletable && delete && tuple.reference.canDelete" type="button" class="delete-action-button chaise-btn chaise-btn-tertiary icon-btn" ng-click="delete()" tooltip-placement="bottom" uib-tooltip="Delete">
             <span class="chaise-btn-icon glyphicon glyphicon-trash""></span>
         </button>
-        <button ng-if="config.selectMode == singleSelect" type="button" class="select-action-button chaise-btn chaise-btn-secondary chaise-btn-sm icon-btn" ng-click="onSelect($event)" tooltip-placement="bottom" uib-tooltip="Select" >
-            <span class="chaise-btn-icon glyphicon glyphicon-check"></span>
-        </button>
-    </div>
-    <div ng-if="config.selectMode == multiSelect" class="chaise-checkbox">
-        <input type="checkbox" ng-checked="selected || selectDisabled" ng-click="onSelect($event)" ng-disabled="selectDisabled">
-        <label />
     </div>
 </td>
 <td ng-if="config.showNull || tuple.uniqueId" ng-repeat="val in rowValues track by $index" ng-class="{'disabled-cell': columnModels[$index].columnError}">

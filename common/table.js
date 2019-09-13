@@ -1468,7 +1468,6 @@
                 mode: "=?",
                 vm: '=',
                 onSelectedRowsChanged: '&?',       // set row click function
-                allowCreate: '=?',      // if undefined, assume false
                 getDisabledTuples: "=?", // callback to get the disabled tuples
                 registerSetPageState: "&?"
             },
@@ -1580,7 +1579,6 @@
             scope: {
                 vm: '=',
                 onSelectedRowsChanged: '&?',       // set row click function
-                allowCreate: '=?',       // if undefined, assume false
                 registerSetPageState: "&?"
             },
             link: function (scope, elem, attrs) {

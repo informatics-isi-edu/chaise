@@ -40,6 +40,12 @@
                 margin-bottom: 10px;
             }
 
+            .recordset-selected-rows {
+                .filter-chiclet {
+                    max-width: none;
+                }
+            }
+
             $filter-chiclet-margin: 5px;
             .filter-chiclet {
                 max-width: 350px;

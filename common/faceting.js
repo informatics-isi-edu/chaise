@@ -1297,6 +1297,7 @@
                         params.hideNotNullChoice = scope.facetColumn.hideNotNullChoice;
                         params.hideNullChoice = scope.facetColumn.hideNullChoice;
                         params.displayMode = recordsetDisplayModes.facetPopup;
+                        params.editable = false;
 
                         params.selectedRows = [];
 
