@@ -43,7 +43,7 @@ describe('When viewing Recordset app', function() {
             });
 
             it("should have the correct tooltip", function(){
-                var viewCol = element(by.css('.actions-header'));
+                var viewCol = element(by.css('.actions-header')).element(by.tagName("span"));
                 recordsetPage.getColumnComment(viewCol).then(function(comment){
                     expect(comment).toBe(testParams.tooltip.viewCol);
                 });
