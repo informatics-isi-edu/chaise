@@ -60,7 +60,7 @@ describe('When viewing RecordEdit app', function() {
             // The inverse of this case is tested in RecordEdit presentation spec.
         });
 
-        describe('the FK search popup modal should have the select button in the action column button and', function() {
+        describe('the FK search popup modal should have the select button in the action column and', function() {
             var rows;
             afterEach(function() {
                 // The select button in the action column should be displayed
@@ -70,11 +70,12 @@ describe('When viewing RecordEdit app', function() {
                 selectBtn.click();
             });
 
-            it('should show the add create button in the modal for a FK-related table that allows creation', function() {
+            it('should show the create button in the modal for a FK-related table that allows creation', function() {
                 var input = recordEditPage.getForeignKeyInputs().first();
                 var modalTitle = recordEditPage.getModalTitle();
-                input.click();
-                chaisePage.waitForElement(modalTitle).then(function() {
+                input.click().then(function () {
+                    return chaisePage.waitForElement(modalTitle);
+                }).then(function() {
                     chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
                     var addBtn = chaisePage.recordsetPage.getAddRecordLink(element(by.css('.modal-body')));
                     expect(addBtn.isDisplayed()).toBe(true);
