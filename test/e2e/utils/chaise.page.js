@@ -719,7 +719,7 @@ var recordPage = function() {
     };
 
     this.getRelatedTableSectionHeader = function(displayName) {
-        return this.getRelatedTableHeading(displayName).element(by.css('.rt-section-header')).element(by.tagName('i'));
+        return this.getRelatedTableHeading(displayName).element(by.css('.rt-section-header'));
     };
 
     this.getRelatedTableHeadingTitle = function(displayname) {
@@ -792,7 +792,7 @@ var recordPage = function() {
     };
 
     this.getDeleteRecordButton = function () {
-        return element(by.id("delete-record"));
+        return element(by.id("delete-record")).element(by.tagName("button"));
     };
 
     this.getConfirmDeleteTitle = function() {
@@ -1246,7 +1246,7 @@ var recordsetPage = function() {
     };
 
     this.getModalSubmit = function () {
-        return element(by.css(".modal-body")).element(by.id("multi-select-submit-btn"));
+        return element(by.id("multi-select-submit-btn"));
     }
 
     this.getRangeFacetForm = function (idx) {

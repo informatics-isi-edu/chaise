@@ -94,7 +94,7 @@ describe('View existing record,', function() {
                 shareDialog.allowAnimations(false);
 
                 // verify modal dialog contents
-                expect(chaisePage.recordEditPage.getModalTitle().element(by.tagName("strong")).getText()).toBe("Share", "Share citation modal title is incorrect");
+                expect(chaisePage.recordEditPage.getModalTitle().getText()).toBe("Share", "Share citation modal title is incorrect");
                 expect(chaisePage.recordPage.getModalListElements().count()).toBe(1, "Number of list elements in share citation modal is incorrect");
 
                 return browser.getCurrentUrl();
@@ -104,7 +104,7 @@ describe('View existing record,', function() {
                 expect(chaisePage.recordPage.getPermalinkText().getText()).toContain(url, "permalink url is incorrect");
 
                 // close dialog
-                return chaisePage.recordEditPage.getModalTitle().element(by.tagName("button")).click();
+                return chaisePage.recordsetPage.getModalCloseBtn().click();
             }).then(function () {
                 done();
             }).catch(function(err){
@@ -151,7 +151,7 @@ describe('View existing record,', function() {
                 expect(alert.isDisplayed()).toBeTruthy("Alert warning the user that they may be seeing stale data is not present");
 
                 // close dialog
-                return chaisePage.recordEditPage.getModalTitle().element(by.tagName("button")).click();
+                return chaisePage.recordsetPage.getModalCloseBtn().click();
             }).then(function () {
                 done();
             }).catch(function(err){
