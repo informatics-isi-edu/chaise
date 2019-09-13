@@ -110,7 +110,7 @@
                 tablename = $scope.baseTableName.value;
 
             if ($scope.displayname.isHTML) displayname = DataUtils.makeSafeHTML($scope.displayname.value);
-            if ($scope.baseTableName.isHTML)  tablename = DataUtils.makeSafeHTML($scope.baseTableName.value);
+            if ($scope.baseTableName.isHTML) tablename = DataUtils.makeSafeHTML($scope.baseTableName.value);
 
             $scope.tooltip = {
                 createButton: "Add more " + displayname + " related to this " + tablename + ".",

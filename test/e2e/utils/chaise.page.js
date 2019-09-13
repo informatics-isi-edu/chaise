@@ -399,7 +399,7 @@ var recordEditPage = function() {
     };
 
     this.getModalCloseBtn = function() {
-            return element(by.css(".modal-close"));
+        return element(by.css(".modal-close"));
     };
 
     this.getForms = function() {
@@ -709,9 +709,17 @@ var recordPage = function() {
         return browser.executeScript("return $('.related-table-accordion .panel-title .rt-section-header span').map(function(i, a) { return a.textContent.trim(); });");
     }
 
-    this.getRelatedTableHeading = function(displayName) {
+    this.getRelatedTableAccordion = function(displayName) {
         displayName = makeSafeIdAttr(displayName);
         return element(by.id("rt-heading-" + displayName));
+    };
+
+    this.getRelatedTableHeading = function(displayName) {
+        return this.getRelatedTableAccordion(displayName).element(by.css('.panel-heading'));
+    };
+
+    this.getRelatedTableSectionHeader = function(displayName) {
+        return this.getRelatedTableHeading(displayName).element(by.css('.rt-section-header')).element(by.tagName('i'));
     };
 
     this.getRelatedTableHeadingTitle = function(displayname) {
@@ -745,19 +753,19 @@ var recordPage = function() {
     };
 
     this.getMoreResultsLink = function(displayName, isInline) {
-        var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTableHeading(displayName);
+        var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTableAccordion(displayName);
         // the link is not a child of the table, rather one of the accordion group
         return el.element(by.css(".more-results-link"));
     };
 
     this.getAddRecordLink = function(displayName, isInline) {
-        var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTableHeading(displayName);
+        var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTableAccordion(displayName);
         // the link is not a child of the table, rather one of the accordion group
         return el.element(by.css(".add-records-link"));
     };
 
     this.getToggleDisplayLink = function(displayName, isInline) {
-        var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTableHeading(displayName);
+        var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTableAccordion(displayName);
         // the link is not a child of the table, rather one of the accordion group
         return el.element(by.css(".toggle-display-link"));
     };
@@ -895,8 +903,12 @@ var recordPage = function() {
         return browser.executeScript("return $('.columns-container li.toc-heading').map(function(i, a) { return a.innerText.trim(); });");
     }
 
-    this.getSidePanelFiddler = function() {
-        return element(by.className('sidePanFiddler')).element(by.className('facet-glyph-icon'));
+    this.getHideTocBtn = function() {
+        return element(by.className('hide-toc-btn'));
+    }
+
+    this.getShowTocBtn = function() {
+        return element(by.className('show-toc-btn'));
     }
 
     this.getModalSidePanelFiddler = function() {
@@ -1154,11 +1166,11 @@ var recordsetPage = function() {
     };
 
     this.getSelectedRowsFilters = function () {
-        return element(by.css(".recordset-selected-rows")).all(by.css(".filter-chiclet.label-default"));
+        return element(by.css(".recordset-selected-rows")).all(by.css(".filter-chiclet"));
     }
 
     this.getFacetFilters = function () {
-        return element(by.css(".recordset-chiclets")).all(by.css(".filter-chiclet.label-default"));
+        return element(by.css(".recordset-chiclets")).all(by.css(".filter-chiclet"));
     }
 
     this.getClearAllFilters = function () {

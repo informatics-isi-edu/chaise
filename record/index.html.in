@@ -18,9 +18,9 @@
                 <div class="top-flex-panel">
                     <div class="top-left-panel" ng-hide="ctrl.noVisibleRelatedTables()" ng-class="{'open-panel': $root.recordSidePanOpen, 'close-panel': !$root.recordSidePanOpen}">
                         <div class="bottom-right">
-                            <button ng-hide="!$root.recordSidePanOpen" class="chaise-btn chaise-btn-tertiary" ng-click="$root.recordSidePanOpen = false" uib-tooltip="Click to hide table of contents.">
+                            <button ng-hide="!$root.recordSidePanOpen" class="chaise-btn chaise-btn-tertiary hide-toc-btn" ng-click="$root.recordSidePanOpen = false" uib-tooltip="Click to hide table of contents.">
                                 <span class="chaise-icon chaise-sidebar-close"></span>
-                                <span>Hide filter panel</span>
+                                <span>Hide side panel</span>
                             </button>
                         </div>
                     </div>
@@ -71,9 +71,9 @@
                             </span>
                         </div>
                         </div>
-                        <button ng-show="!$root.recordSidePanOpen" class="chaise-btn chaise-btn-tertiary open-sidebar-btn" ng-click="$root.recordSidePanOpen = true" uib-tooltip="Click to show table of contents.">
+                        <button ng-show="!$root.recordSidePanOpen" class="chaise-btn chaise-btn-tertiary show-toc-btn" ng-click="$root.recordSidePanOpen = true" uib-tooltip="Click to show table of contents.">
                             <span class="chaise-icon chaise-sidebar-open"></span>
-                            <span>Show filter panel</span>
+                            <span>Show side panel</span>
                         </button>
                     </div> <!-- end top right panel -->
                 </div>
