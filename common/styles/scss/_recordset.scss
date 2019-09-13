@@ -67,12 +67,17 @@
                     text-overflow: ellipsis;
                     overflow: hidden;
                     padding-right: 2px;
+                    text-align: left;
+                    white-space: nowrap;
                 }
                 .chaise-btn.filter-chiclet-value {
                     text-overflow: ellipsis;
                     overflow: hidden;
                     white-space: nowrap;
                     max-width: 200px;
+                    border-left: 0;
+                    padding-left: 7px;
+                    padding-right: 4px;
 
                     position: relative;
                     &:before {
@@ -80,8 +85,6 @@
                         position: absolute;
                         left: 0;
                     }
-                    border-left: 0;
-                    padding-left: 7px;
                 }
 
                 span {

@@ -1206,7 +1206,7 @@
                     // get recordset main container
                     elements.container = parentContainer.querySelector(".bottom-panel-container");
 
-                    if (chaiseConfig.showFaceting) {
+                    if (scope.vm.config.showFaceting) {
                         elements.facetContainer = parentContainer.querySelector('.side-panel-container');
                     }
 
@@ -1223,7 +1223,7 @@
                 if (elements.fixedContentHeight !== undefined && !isNaN(elements.fixedContentHeight)) {
                     UiUtils.setDisplayContainerHeight(elements.container, elements.fixedContentHeight, parentContainer.offsetHeight);
                     // no need to fetch and verify the faceting elements (navbar and bookmark are the same container as the ones used in main elements function)
-                    if (chaiseConfig.showFaceting) {
+                    if (scope.vm.config.showFaceting) {
                         UiUtils.setDisplayContainerHeight(elements.facetContainer, elements.fixedContentHeight, parentContainer.offsetHeight);
                     }
                 }
