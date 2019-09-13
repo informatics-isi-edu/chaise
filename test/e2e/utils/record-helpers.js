@@ -638,7 +638,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
                         return browser.driver.getCurrentUrl();
                     }).then(function(url) {
                         expect(url.indexOf('recordset')).toBeGreaterThan(-1, "didn't go to recordset app");
-                        return chaisePage.waitForElement(element(by.id("divRecordSet")));
+                        return chaisePage.recordsetPageReady()
                     }).then(function() {
                         expect(chaisePage.recordsetPage.getPageTitleElement().getText()).toBe(params.viewMore.displayname, "title missmatch.");
                         expect(chaisePage.recordsetPage.getFacetFilters().isPresent()).toBe(true, "filter was not present");

@@ -9,9 +9,9 @@
                         <h3>Refine search</h3>
                     </div>
                     <div class="pull-right">
-                        <button class="chaise-btn chaise-btn-tertiary pull-right" ng-click="vm.config.facetPanelOpen = false">
+                        <button class="hide-filter-panel-btn chaise-btn chaise-btn-tertiary pull-right" ng-click="vm.config.facetPanelOpen = false">
                             <span class="chaise-icon chaise-sidebar-close"></span>
-                            <span>Hide fitler panel
+                            <span>Hide filter panel</span>
                         </button>
                     </div>
                 </div>
@@ -31,14 +31,14 @@
                             <!-- download CSV included by default -->
                             <export allow-export="vm.rowValues.length>0" reference="vm.reference" disabled="!vm.hasLoaded || !vm.initialized"></export>
                             <!-- permalink -->
-                            <a id="permalink" ng-href="{{ permalink() }}" tooltip-placement="bottom-right" uib-tooltip={{::tooltip.permalink}} class="chaise-btn chaise-btn-primary">
+                            <a id="permalink" ng-href="{{ getRecordsetLink() }}" tooltip-placement="bottom-right" uib-tooltip={{tooltip.permalink}} class="chaise-btn chaise-btn-primary">
                                 <span class="chaise-btn-icon glyphicon glyphicon-bookmark"></span>
                                 <span>Permalink</span>
                             </a>
                         </div>
                     </div>
                 </div>
-                <div class="recordset-controls-container" ng-show="vm.initialized">
+                <div class="recordset-controls-container">
                     <div ng-if="vm.selectedRows.length > 0 && vm.config.selectMode == 'multi-select'" class="recordset-selected-rows recordset-chiclets-container">
                         <div class="filter-chiclet chaise-btn-group" ng-repeat="row in vm.selectedRows track by $index">
                             <button class="filter-chiclet-remove chaise-btn chaise-btn-secondary" ng-click="removePill(row.uniqueId, $event)">
@@ -124,7 +124,7 @@
                         <span>Clear all filters</span>
                     </button>
                 </div>
-                <button class="open-filter-panel-btn chaise-btn chaise-btn-tertiary" ng-show="vm.config.showFaceting && !vm.config.facetPanelOpen" ng-click="vm.config.facetPanelOpen = true">
+                <button class="show-filter-panel-btn chaise-btn chaise-btn-tertiary" ng-show="vm.config.showFaceting && !vm.config.facetPanelOpen" ng-click="vm.config.facetPanelOpen = true">
                     <span class="chaise-icon-btn chaise-icon chaise-sidebar-open"></span>
                     <span>Show filter panel</span>
                 </button>

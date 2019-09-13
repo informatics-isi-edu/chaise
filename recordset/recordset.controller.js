@@ -9,7 +9,6 @@
 
         var ctrl = this;
         var chaiseConfig = ConfigUtils.getConfigJSON();
-        var dcctx = ConfigUtils.getContextJSON();
         $scope.vm = recordsetModel;
 
         $scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
@@ -23,45 +22,13 @@
 
         function updateLocation() {
             $window.scrollTo(0, 0);
-            $window.location.replace($scope.permalink());
+            $window.location.replace(UriUtils.getRecordsetLink(recordsetModel.reference));
             $rootScope.location = $window.location.href;
         }
 
         $rootScope.$on('reference-modified', function() {
             updateLocation();
         });
-
-        $scope.permalink = function() {
-
-            // before run, use window location
-            if (!recordsetModel.reference) {
-                return $window.location.href;
-            }
-
-            //TODO we could use the reference.appLink instead of this
-            var url = UriUtils.chaiseBaseURL() + "/recordset/#" + recordsetModel.reference.location.catalog + "/" +
-                recordsetModel.reference.location.compactPath;
-
-            // add sort modifier
-            if (recordsetModel.reference.location.sort)
-                url = url + recordsetModel.reference.location.sort;
-
-            // add paging modifier
-            if (recordsetModel.reference.location.paging)
-                url = url + recordsetModel.reference.location.paging;
-
-            // add ermrestjs supported queryParams
-            if (recordsetModel.reference.location.queryParamsString) {
-                url = url + "?" + recordsetModel.reference.location.queryParamsString;
-            }
-
-            // add hideNavbar if present/defined
-            if (dcctx.hideNavbar) {
-                url = url + (recordsetModel.reference.location.queryParamsString ? "&" : "?") + "hideNavbar=" + dcctx.hideNavbar;
-            }
-
-            return url;
-        };
 
         $scope.versionDisplay = function () {
             return UiUtils.humanizeTimestamp(recordsetModel.reference.location.versionAsMillis);

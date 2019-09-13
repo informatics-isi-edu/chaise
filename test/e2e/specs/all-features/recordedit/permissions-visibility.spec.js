@@ -70,49 +70,49 @@ describe('When viewing RecordEdit app', function() {
                 selectBtn.click();
             });
 
-            it('should show the add [+] button in the modal for a FK-related table that allows creation', function() {
+            it('should show the add create button in the modal for a FK-related table that allows creation', function() {
                 var input = recordEditPage.getForeignKeyInputs().first();
                 var modalTitle = recordEditPage.getModalTitle();
                 input.click();
                 chaisePage.waitForElement(modalTitle).then(function() {
                     chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
-                    var addBtn = chaisePage.recordsetPage.getAddRecordButton();
+                    var addBtn = chaisePage.recordsetPage.getAddRecordLink(element(by.css('.modal-body')));
                     expect(addBtn.isDisplayed()).toBe(true);
                 });
             });
 
-            it('should not show the add [+] button in the modal for a read-only table', function() {
+            it('should not show the create button in the modal for a read-only table', function() {
                 // index is 2 because of show all
                 var input = recordEditPage.getForeignKeyInputs().get(2);
                 var modalTitle = recordEditPage.getModalTitle();
                 input.click();
                 chaisePage.waitForElement(modalTitle).then(function() {
                     chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
-                    var addBtn = chaisePage.recordsetPage.getAddRecordButton();
+                    var addBtn = chaisePage.recordsetPage.getAddRecordLink(element(by.css('.modal-body')));
                     expect(addBtn.isPresent()).toBe(false);
                 });
             });
 
-            it('should show the add [+] button in the modal for a table that allows update and create', function() {
+            it('should show the create button in the modal for a table that allows update and create', function() {
                 // index is 4 because of show all
                 var input = recordEditPage.getForeignKeyInputs().get(4);
                 var modalTitle = recordEditPage.getModalTitle();
                 input.click();
                 chaisePage.waitForElement(modalTitle).then(function() {
                     chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
-                    var addBtn = chaisePage.recordsetPage.getAddRecordButton();
+                    var addBtn = chaisePage.recordsetPage.getAddRecordLink(element(by.css('.modal-body')));
                     expect(addBtn.isDisplayed()).toBe(true);
                 });
             });
 
-            it('should not show the add [+] button in the modal for a table that only allows delete', function() {
+            it('should not show the create button in the modal for a table that only allows delete', function() {
                 // index is 6 because of show all
                 var input = recordEditPage.getForeignKeyInputs().get(6);
                 var modalTitle = recordEditPage.getModalTitle();
                 input.click();
                 chaisePage.waitForElement(modalTitle).then(function() {
                     chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));
-                    var addBtn = chaisePage.recordsetPage.getAddRecordButton();
+                    var addBtn = chaisePage.recordsetPage.getAddRecordLink(element(by.css('.modal-body')));
                     expect(addBtn.isPresent()).toBe(false);
                 });
             });

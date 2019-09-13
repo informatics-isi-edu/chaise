@@ -31,7 +31,7 @@
                 margin-bottom: 20px;
             }
 
-            .open-filter-panel-btn {
+            .show-filter-panel-btn {
                 padding: 0;
                 margin-bottom: 10px;
             }
@@ -237,6 +237,15 @@
             bottom: 7px;
             right: 10px;
             font-size: $h4-font-size;
+
+            // NOTE even though the conditions dictate that we should show one
+            // of these elements under table-heading-icons at a time, but becuase of
+            // the way angularjs is compiling the template sometimes both of the buttons
+            // show up. So this css change will make sure only one of the buttons are
+            // visible at a time.
+            .column-error-icon ~ span, .aggregate-col-loader ~ span {
+                display: none;
+            }
 
             .aggregate-col-loader {
                 right: -5px

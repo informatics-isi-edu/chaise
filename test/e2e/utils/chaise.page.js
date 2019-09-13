@@ -734,7 +734,7 @@ var recordPage = function() {
 
     this.getRelatedTableRows = function(displayName, isInline) {
         var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTable(displayName);
-        return el.all(by.css(".table-row"));
+        return el.all(by.css(".chaise-table-row"));
     };
 
     this.getRelatedTableRowLink = function (displayName, rowIndex, isInline) {
@@ -956,12 +956,8 @@ var recordsetPage = function() {
         return element(by.id('show-unfiltered'));
     };
 
-    this.getCustomPageSize = function() {
-        return browser.executeScript("return $('#custom-page-size').text().trim();");
-    };
-
     this.getTotalCount = function() {
-        return element(by.id('rs-total-count'));
+        return element(by.css('.chaise-table-header-total-count'));
     };
 
     this.getColumnNames = function() {
@@ -969,19 +965,19 @@ var recordsetPage = function() {
     };
 
     this.getColumnSortButton = function(rawColumnName){
-        return element(by.css('.c_' + rawColumnName)).element(by.css('.glyphicon-sort'));
+        return element(by.css('.c_' + rawColumnName)).element(by.css('.not-sorted-icon'));
     };
 
     this.getColumnSortAscButton = function(rawColumnName){
-        return element(by.css('.c_' + rawColumnName)).element(by.css('.glyphicon-sort-by-attributes-alt'));
+        return element(by.css('.c_' + rawColumnName)).element(by.css('.desc-sorted-icon'));
     };
 
     this.getColumnSortDescButton = function(rawColumnName){
-        return element(by.css('.c_' + rawColumnName)).element(by.css('.glyphicon-sort-by-attributes'));
+        return element(by.css('.c_' + rawColumnName)).element(by.css('.asc-sorted-icon'));
     };
 
     this.getRows = function() {
-        return element.all(by.css('.table-row'));
+        return element.all(by.css('.chaise-table-row'));
     };
 
     this.getRowCells = function (el) {
@@ -989,7 +985,7 @@ var recordsetPage = function() {
     };
 
     this.getModalRows = function () {
-        return element.all(by.css('.modal-body .table-row'));
+        return element.all(by.css('.modal-body .chaise-table-row'));
     };
 
     this.getModalColumnNames = function() {
@@ -1002,7 +998,7 @@ var recordsetPage = function() {
     };
 
     this.getModalFirstColumnValues = function () {
-        return browser.executeScript('return $(".modal-body .table-row td:nth-child(2)").map(function (i, a) { return a.textContent.trim(); });');
+        return browser.executeScript('return $(".modal-body .chaise-table-row td:nth-child(2)").map(function (i, a) { return a.textContent.trim(); });');
     };
 
     this.getModalCloseBtn = function() {
@@ -1026,27 +1022,25 @@ var recordsetPage = function() {
     };
 
     this.getMainSearchBox = function() {
-        return element(by.css(".main-container")).element(by.id("search-input"));
+        return element(by.css(".top-right-panel")).element(by.id("search-input"));
     };
 
     this.getSearchSubmitButton = function() {
-        return element(by.css(".main-container")).element(by.id("search-submit"));
+        return element(by.css(".top-right-panel")).element(by.id("search-submit"));
     };
 
     this.getSearchClearButton = function() {
-        return element(by.css(".main-container")).element(by.id("search-clear"));
+        return element(by.css(".top-right-panel")).element(by.id("search-clear"));
     };
 
-    this.getAddRecordLink = function() {
-        return element(by.id("create-link"));
+    this.getAddRecordLink = function(el) {
+        var locator = by.css(".chaise-table-header-create-link");
+        return el ? el.element(locator) : element(locator);
     };
 
-    this.getAddRecordButton = function() {
-        return element(by.id("add-record-btn"));
-    };
-
-    this.getEditRecordLink = function() {
-        return element(by.id("edit-link"));
+    this.getEditRecordLink = function(el) {
+        var locator = by.css(".chaise-table-header-edit-link");
+        return el ? el.element(locator) : element(locator);
     };
 
     this.getInputForAColumn = function(name, index) {
@@ -1058,6 +1052,10 @@ var recordsetPage = function() {
         index = index || 0;
         return browser.executeScript("return $('.modal-popup-btn')[" + index + "];");
     };
+
+    this.getActionHeaderSpan = function () {
+        return element(by.css('.actions-header span'));
+    }
 
     this.getViewActionButtons = function() {
         return element.all(by.css('.view-action-button'));
@@ -1080,19 +1078,23 @@ var recordsetPage = function() {
     };
 
     this.getNextButton = function () {
-        return element(by.id("rs-next-btn"));
+        return element(by.css(".chaise-table-next-btn"));
     };
 
     this.getPreviousButton = function () {
-        return element(by.id("rs-previous-btn"));
+        return element(by.css(".chaise-table-previous-btn"));
     };
 
     this.getPageLimitDropdown = function () {
-        return element(by.id("page-size-dropdown"));
+        return element(by.css(".page-size-dropdown"));
+    };
+
+    this.getCustomPageSize = function() {
+        return element(by.css(".page-size-limit-custom"));
     };
 
     this.getPageLimitSelector = function (limit) {
-        return element(by.id("page-size-" + limit));
+        return element(by.css(".page-size-limit-" + limit));
     };
 
     this.getExportDropdown = function () {
@@ -1321,7 +1323,9 @@ var recordsetPage = function() {
         return browser.wait(function () {
             return locator.isDisplayed().then(function (arr) {
                 return arr.includes(true) === false;
-            })
+            }).catch(function () {
+                return true;
+            });
         }, timeout || browser.params.defaultTimeout);
     };
 
@@ -1405,7 +1409,7 @@ function chaisePage() {
         return browser.executeScript("return window.dcctx.pid");
     };
     this.recordsetPageReady = function() {
-        this.waitForElement(element(by.id("divRecordSet")));
+        return this.waitForElement(element(by.css(".recordset-table")));
     }
     this.recordPageReady = function() {
         this.waitForElement(element(by.id('tblRecord')));
@@ -1497,6 +1501,11 @@ function chaisePage() {
         return browser.wait(condition, timeout || browser.params.defaultTimeout);
     };
 
+    /**
+     * Given a text wait for it to be available in the element.
+     * It waits for the result of locator.getText() to be the given `text`
+     * NOTE it will ignore all the newlines, so you should not inlcude any in the `text`
+     */
     this.waitForTextInElement = function(locator, text, timeout) {
         return browser.wait(protractor.ExpectedConditions.textToBePresentInElement(locator, text), timeout || browser.params.defaultTimeout);
     }
