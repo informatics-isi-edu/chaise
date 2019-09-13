@@ -1840,16 +1840,27 @@
       }
      }])
 
-    .service('headInjector', ['ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', 'MathUtils', 'modalUtils', 'UriUtils', '$rootScope', '$window', function(ConfigUtils, ERMrest, Errors, ErrorService, MathUtils, modalUtils, UriUtils, $rootScope, $window) {
+    .service('headInjector', ['ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', 'MathUtils', 'modalUtils', '$q', '$rootScope', 'UriUtils', '$window', function(ConfigUtils, ERMrest, Errors, ErrorService, MathUtils, modalUtils, $q, $rootScope, UriUtils, $window) {
+
+        /**
+         * adds a link tag to head with the custom css. It will be resolved when
+         * the file is loaded (or if the customCSS property is not defined)
+         */
         function addCustomCSS() {
+            var defer = $q.defer();
             var chaiseConfig = ConfigUtils.getConfigJSON();
             if (chaiseConfig['customCSS'] !== undefined) {
-                var fileref = document.createElement("link");
-                fileref.setAttribute("rel", "stylesheet");
-                fileref.setAttribute("type", "text/css");
-                fileref.setAttribute("href", chaiseConfig['customCSS']);
-                document.getElementsByTagName("head")[0].appendChild(fileref);
+                var customCSSElement = document.createElement("link");
+                customCSSElement.setAttribute("rel", "stylesheet");
+                customCSSElement.setAttribute("type", "text/css");
+                customCSSElement.setAttribute("href", chaiseConfig['customCSS']);
+                // resolve the promise when the css is loaded
+                customCSSElement.onload = defer.resolve;
+                document.getElementsByTagName("head")[0].appendChild(customCSSElement);
+            } else {
+                defer.resolve();
             }
+            return defer.promise;
         }
 
         function addTitle() {
@@ -1955,13 +1966,16 @@
             });
         }
 
+        /**
+         * Will return a promise that when resolved we can be sure that the setup is done.
+         */
         function setupHead() {
             addCanonicalTag();
-            addCustomCSS();
             addTitle();
             setWindowName();
             overrideDownloadClickBehavior();
             overrideExternalLinkBehavior();
+            return addCustomCSS();
         }
 
         return {
