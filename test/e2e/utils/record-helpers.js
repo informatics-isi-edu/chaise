@@ -578,7 +578,7 @@ exports.testPresentation = function (tableParams) {
  */
 
 exports.testRelatedTable = function (params, pageReadyCondition) {
-    var currentEl, markdownToggleLink, toggled = false;
+    var currentEl, markdownToggleLink, toggled = false, noRows = false;
     beforeAll(function() {
         pageReadyCondition();
 
@@ -818,7 +818,8 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
                             return chaisePage.recordPage.getRelatedTableRows(params.displayname, params.isInline).count();
                         }).then(function (count) {
                             expect(count).toBe(currentCount-1, "count didn't change.");
-                            expect(chaisePage.recordPage.getRelatedTableSectionHeader(params.displayname).getText()).toBe(params.displayname, "heading missmatch.");
+
+                            noRows = count == 0;
                             done();
                         }).catch(function (err) {
                             console.log(err);
@@ -837,10 +838,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 
     // if it was markdown, we are changing the view, change it back.
     afterAll(function (done) {
-        if (toggled) {
-            if (params.name = "media") {
-                browser.pause();
-            }
+        if (toggled && !noRows) {
             markdownToggleLink.click().then(function() {
                 done();
             }).catch(function(error) {

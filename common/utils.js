@@ -1856,6 +1856,7 @@
                 customCSSElement.setAttribute("href", chaiseConfig['customCSS']);
                 // resolve the promise when the css is loaded
                 customCSSElement.onload = defer.resolve;
+                customCSSElement.onerror = defer.resolve;
                 document.getElementsByTagName("head")[0].appendChild(customCSSElement);
             } else {
                 defer.resolve();
