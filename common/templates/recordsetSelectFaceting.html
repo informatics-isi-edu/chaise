@@ -10,13 +10,13 @@
                             <button class="filter-chiclet-remove chaise-btn chaise-btn-secondary" ng-click="removePill(row.uniqueId, $event)">
                                 <i class="glyphicon glyphicon-remove"></i>
                             </button>
-                            <span class="chaise-btn chaise-btn-secondary" ng-if="row.displayname.isHTML" ng-bind-html="row.displayname.value"></span>
-                            <span class="chaise-btn chaise-btn-secondary" ng-if="!row.displayname.isHTML" ng-bind="row.displayname.value"></span>
+                            <span class="chaise-btn chaise-btn-secondary" ng-if="row.displayname.value && row.displayname.isHTML" ng-bind-html="row.displayname.value"></span>
+                            <span class="chaise-btn chaise-btn-secondary" ng-if="row.displayname.value && !row.displayname.isHTML" ng-bind="row.displayname.value"></span>
                             <span class="chaise-btn chaise-btn-secondary" ng-if="row.displayname.value == ''" ng-bind-html="defaultDisplayname.empty"></span>
                             <span class="chaise-btn chaise-btn-secondary" ng-if="row.displayname.value == null" ng-bind-html="defaultDisplayname.null"></span>
                         </div>
                         <button ng-click="removeAllPills($event)" class="chaise-btn chaise-btn-tertiary clear-all-btn" uib-tooltip="Clear all filters applied" tooltip-placement="bottom">
-                            <span>Clear all selections</span>
+                            <span>Clear all selected rows</span>
                         </button>
                     </div>
 
@@ -46,10 +46,6 @@
                         </div>
                     </div>
                 </div>
-                <button class="open-filter-panel-btn chaise-btn chaise-btn-tertiary" ng-show="vm.config.showFaceting && !vm.config.facetPanelOpen" ng-click="vm.config.facetPanelOpen = true">
-                    <span class="chaise-icon-btn chaise-icon chaise-sidebar-open"></span>
-                    <span>Show filter panel</span>
-                </button>
                 <table-header ng-show="vm.initialized" vm="vm" toggle-match-not-null="toggleMatchNotNull" toggle-match-null="toggleMatchNull"></table-header>
             </div>
         </div>

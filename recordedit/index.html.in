@@ -156,7 +156,7 @@
                                                                 <span class="glyphicon glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
                                                             </div>
                                                             <span class="input-group-addon">
-                                                                <button ng-focus="::form.blurElement($event);" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-button" class="btn btn-primary btn-inverted modal-popup-btn" type="button" ng-click="::form.searchPopup(rowIndex, column)" tooltip-placement="bottom" uib-tooltip="Choose from an existing value.">
+                                                                <button ng-focus="::form.blurElement($event);" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-button" class="btn btn-primary btn-inverted modal-popup-btn" type="button" ng-click="::form.searchPopup(rowIndex, column)" tooltip-placement="bottom" uib-tooltip="Select from an existing value.">
                                                                     <span class="glyphicon glyphicon-chevron-down"></span>
                                                                 </button>
                                                             </span>

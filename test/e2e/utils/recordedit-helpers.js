@@ -796,7 +796,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                         return modalTitle.getText();
                                     }).then(function(text) {
                                         // make sure modal opened
-                                        expect(text).toEqual("Choose " + col.table_title, colError(col.name, "foreign key modal selector title is not what was expected."));
+                                        expect(text).toEqual("Select " + col.table_title, colError(col.name, "foreign key modal selector title is not what was expected."));
                                         browser.wait(function () {
                                             return chaisePage.recordsetPage.getRows().count().then(function (ct) {
                                                 return (ct > 0);
