@@ -215,8 +215,9 @@
             context:                    params.context,
             getDisabledTuples:          params.getDisabledTuples,
             logObject:                  params.logObject ? params.logObject: {},
-            parentContainerSelector:    params.parentContainerSelector,
-            parentStickyAreaSelector:   params.parentStickyAreaSelector
+            // TODO different modals should pass different strings (ultimatly it should be the element and not selector)
+            parentContainerSelector:    ".search-popup .modal-content",
+            parentStickyAreaSelector:   ".search-popup .modal-header"
         };
 
         console.log("we're here", vm.tableModel.config.displayMode);

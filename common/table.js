@@ -1186,47 +1186,75 @@
 
 
             // fix the height of facet and container to allow scrolling
-            var parentContainer, parentStickyArea;
-            var mainBodyEl;
+            // var parentContainer, parentStickyArea, facetContainer, scrollableContainer, fixedContentHeight;
+            // var mainBodyEl;
 
             /*** Container Heights and other styling ***/
             // fetches the height of navbar, bookmark container, and view
             // also fetches the main container for defining the dynamic height
-            function fetchMainElements() {
-                var elements = {};
-                try {
-                    // get the top-panel-container height
-                    elements.fixedContentHeight = parentContainer.querySelector('.top-panel-container').offsetHeight;
-
-                    // add the parent sticky area
-                    if (parentStickyArea) {
-                        elements.fixedContentHeight += parentStickyArea.offsetHeight;
-                    }
-
-                    // get recordset main container
-                    elements.container = parentContainer.querySelector(".bottom-panel-container");
-
-                    if (scope.vm.config.showFaceting) {
-                        elements.facetContainer = parentContainer.querySelector('.side-panel-container');
-                    }
-
-                } catch (error) {
-                    elements = {};
-                    $log.warn(error);
-                }
-                return elements;
-            }
+            // function fetchMainElements() {
+            //     var elements = {};
+            //     try {
+            //         // get the top-panel-container height
+            //         elements.fixedContentHeight = parentContainer.querySelector('.top-panel-container').offsetHeight;
+            //
+            //         // add the parent sticky area
+            //         if (parentStickyArea) {
+            //             elements.fixedContentHeight += parentStickyArea.offsetHeight;
+            //         }
+            //
+            //         // get recordset main container
+            //         elements.container = parentContainer.querySelector(".bottom-panel-container");
+            //
+            //         if (scope.vm.config.showFaceting) {
+            //             elements.facetContainer = parentContainer.querySelector('.side-panel-container');
+            //         }
+            //
+            //     } catch (error) {
+            //         elements = {};
+            //         $log.warn(error);
+            //     }
+            //     return elements;
+            // }
 
             function setRecordsetHeight() {
-                var elements = fetchMainElements();
                 // if these 2 values are not set yet, don't set the height
-                if (elements.fixedContentHeight !== undefined && !isNaN(elements.fixedContentHeight)) {
-                    UiUtils.setDisplayContainerHeight(elements.container, elements.fixedContentHeight, parentContainer.offsetHeight);
+                if (scope.fixedContentHeight !== undefined && !isNaN(scope.fixedContentHeight)) {
+                    UiUtils.setDisplayContainerHeight(scope.scrollableContainer, scope.fixedContentHeight, scope.parentContainer.offsetHeight);
                     // no need to fetch and verify the faceting elements (navbar and bookmark are the same container as the ones used in main elements function)
                     if (scope.vm.config.showFaceting) {
-                        UiUtils.setDisplayContainerHeight(elements.facetContainer, elements.fixedContentHeight, parentContainer.offsetHeight);
+                        UiUtils.setDisplayContainerHeight(scope.facetContainer, scope.fixedContentHeight, scope.parentContainer.offsetHeight);
                     }
                 }
+            }
+
+            function computeFixedContentHeight () {
+                scope.fixedContentHeight = scope.parentContainer.querySelector('.top-panel-container').offsetHeight;
+
+                if (scope.parentStickyArea) {
+                    scope.fixedContentHeight += scope.parentStickyArea.offsetHeight;
+                }
+
+                return scope.fixedContentHeight;
+            }
+
+            function initializeRecordsetHeight () {
+                scope.scrollableContainer = scope.parentContainer.querySelector(".bottom-panel-container");
+
+                if (scope.vm.config.showFaceting) {
+                    scope.facetContainer = scope.parentContainer.querySelector('.side-panel-container');
+                }
+
+                computeFixedContentHeight();
+                setRecordsetHeight();
+
+                scope.$watch(function () {
+                    return computeFixedContentHeight();
+                }, function (newValue, oldValue) {
+                    if (newValue != oldValue) {
+                        setRecordsetHeight();
+                    }
+                });
             }
 
             // set the recordset height when it's loaded or we have the facets
@@ -1234,15 +1262,15 @@
                 return (scope.vm.hasLoaded && scope.vm.initialized) || (scope.vm.config.showFaceting && scope.vm.reference);
             }, function (newValue, oldValue) {
                 if (newValue) {
-                    $timeout(setRecordsetHeight, 0);
+                    $timeout(initializeRecordsetHeight, 0);
                 }
             });
 
             // watch for the main body size to change
             if (scope.vm.config.displayMode === recordsetDisplayModes.fullscreen) {
                 scope.$watch(function() {
-                    if (mainBodyEl) {
-                        return mainBodyEl.offsetHeight;
+                    if (scope.mainBodyEl) {
+                        return scope.mainBodyEl.offsetHeight;
                     } else {
                         return -1;
                     }
@@ -1268,18 +1296,18 @@
 
             $timeout(function () {
                 // set the parentContainer element
-                if (scope.vm.parnetContainerSelector) {
-                    parentContainer = $document[0].querySelector(scope.vm.parentContainerSelector);
+                if (scope.vm.parentContainerSelector) {
+                    scope.parentContainer = $document[0].querySelector(scope.vm.parentContainerSelector);
                 } else {
-                    parentContainer = $document[0].documentElement;
+                    scope.parentContainer = $document[0].documentElement;
                 }
 
                 // used for footer
-                mainBodyEl = parentContainer.querySelector('.main-body');
+                scope.mainBodyEl = scope.parentContainer.querySelector('.main-body');
 
                 // set the sticky area selector container
                 if (scope.vm.parentStickyAreaSelector) {
-                    parentStickyArea = $document[0].querySelector(scope.vm.parentStickyAreaSelector);
+                    scope.parentStickyArea = $document[0].querySelector(scope.vm.parentStickyAreaSelector);
                 }
             }, 0);
         }

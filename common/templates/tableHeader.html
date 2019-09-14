@@ -26,10 +26,10 @@
     </div>
     <div class="col-xs-12 col-sm-4" ng-if="vm.config.displayMode === recordsetDisplayModes.facetPopup">
         <span class="chaise-checkbox with-tooltip" ng-hide="vm.config.hideNotNullChoice" uib-tooltip-html="tooltip.notNull" tooltip-placement="bottom">
-            <input type="checkbox" id="rs-match-not-null" ng-click="toggleMatchNotNull()" ng-checked="vm.matchNotNull"><label>Records With Values</label>
+            <input type="checkbox" class="chaise-table-header-match-not-null" ng-click="toggleMatchNotNull()" ng-checked="vm.matchNotNull"><label>Records With Values</label>
         </span>
         <span class="chaise-checkbox with-tooltip" ng-hide="vm.config.hideNullChoice" uib-tooltip-html="tooltip.null" tooltip-placement="bottom" ng-class="{'disabled-row': vm.matchNotNull}">
-            <input type="checkbox" id="rs-match-null" ng-click="toggleMatchNull()" ng-checked="vm.matchNull" ng-disabled="vm.matchNotNull"><label>No Value</label>
+            <input type="checkbox" class="chaise-table-header-match-null" ng-click="toggleMatchNull()" ng-checked="vm.matchNull" ng-disabled="vm.matchNotNull"><label>No Value</label>
         </span>
     </div>
     <div class="col-xs-12" ng-class="vm.config.displayMode === recordsetDisplayModes.facetPopup ? 'col-sm-4' : 'col-sm-6' ">

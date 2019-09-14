@@ -911,8 +911,8 @@ var recordPage = function() {
         return element(by.className('show-toc-btn'));
     }
 
-    this.getModalSidePanelFiddler = function() {
-        return element(by.css(".modal-body")).element(by.className('sidePanFiddler')).element(by.className('facet-glyph-icon'));
+    this.getModalHideFilterPanelBtn = function() {
+        return element(by.css(".modal-body")).element(by.className('hide-filter-panel-btn'));
     }
 
     this.getModalSidePanel = function() {
@@ -1127,6 +1127,20 @@ var recordsetPage = function() {
     };
 
     /******* Facet selectors for recordset with faceting ********/
+    this.getHideFilterPanelBtn = function(el) {
+        var locator = by.className('hide-filter-panel-btn');
+        return el ? el.element(locator) : element(locator);
+    }
+
+    this.getShowFilterPanelBtn = function(el) {
+        var locator = by.className('show-filter-panel-btn');
+        return el ? el.element(locator) : element(locator);
+    }
+
+    this.getSidePanel = function() {
+      return element(by.css('.side-panel-resizable'));
+    }
+
     this.getAllFacets = function (){
         return element.all(by.css(".panel-group")).all(by.repeater("fc in vm.reference.facetColumns"));
     }
@@ -1275,11 +1289,11 @@ var recordsetPage = function() {
     }
 
     this.getModalMatchNotNullInput = function () {
-        return element(by.id("rs-match-not-null"));
+        return element(by.className("chaise-table-header-match-not-null"));
     };
 
     this.getModalMatchNullInput = function () {
-        return element(by.id("rs-match-null"));
+        return element(by.className("chaise-table-header-match-null"));
     };
 
     this.getModalDisabledRows = function () {
