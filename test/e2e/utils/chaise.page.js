@@ -1156,7 +1156,7 @@ var recordsetPage = function() {
     }
 
     this.getFacetTitles = function () {
-        return browser.executeScript("return $('.panel-title h3 a').map(function(i, a) { return a.textContent.trim(); });");
+        return browser.executeScript("return $('.panel-title .facet-header-text').map(function(i, a) { return a.textContent.trim(); });");
     }
 
     this.getOpenFacetTitles = function () {
