@@ -196,16 +196,14 @@ describe('When editing a record', function() {
                     case 'timestamp':
                     case 'timestamptz':
                         var inputs = recordEditPage.getTimestampInputsForAColumn(name, 0);
-                        var dateInput = inputs.date, timeInput = inputs.time, meridiemBtn = inputs.meridiem;
+                        var dateInput = inputs.date, timeInput = inputs.time, meridiemBtn = inputs.meridiem, clearBtn = inputs.clearBtn;
 
-                        dateInput.clear().then(function() {
-                            if (newValue) dateInput.sendKeys(newValue.date);
-
-                            return timeInput.clear();
-                        }).then(function() {
-                            if (newValue) timeInput.sendKeys(newValue.time);
-
-                            if (newValue) return meridiemBtn.click();
+                        chaisePage.clickButton(clearBtn).then(function() {
+                            if (newValue) {
+                                dateInput.sendKeys(newValue.date);
+                                timeInput.sendKeys(newValue.time);
+                                return meridiemBtn.click();
+                            }
                         }).catch(function(error) {
                             console.log(error);
                             expect('Something went wrong in this promise chain.').toBe('Please see error message.');
