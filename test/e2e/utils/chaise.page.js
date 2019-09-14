@@ -1170,7 +1170,7 @@ var recordsetPage = function() {
     }
 
     this.getFacetTitles = function () {
-        return browser.executeScript("return $('.panel-title h3 a').map(function(i, a) { return a.textContent.trim(); });");
+        return browser.executeScript("return $('.panel-title .facet-header-text').map(function(i, a) { return a.textContent.trim(); });");
     }
 
     this.getOpenFacetTitles = function () {
@@ -1520,8 +1520,8 @@ function chaisePage() {
      * It waits for the result of locator.getText() to be the given `text`
      * NOTE it will ignore all the newlines, so you should not inlcude any in the `text`
      */
-    this.waitForTextInElement = function(locator, text, timeout) {
-        return browser.wait(protractor.ExpectedConditions.textToBePresentInElement(locator, text), timeout || browser.params.defaultTimeout);
+    this.waitForTextInElement = function(locator, text, timeout, message) {
+        return browser.wait(protractor.ExpectedConditions.textToBePresentInElement(locator, text), timeout || browser.params.defaultTimeout, message);
     }
 
     this.waitForTextInUrl = function(text, errMsg, timeout){

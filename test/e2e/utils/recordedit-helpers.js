@@ -808,16 +808,10 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                     }).then(function(ct) {
                                         expect(ct).toBe(col.count, colError(col.name, "number of foreign key rows are not as expected."));
 
-                                        // wait for the text to display before verifying it
-                                        browser.wait(function() {
-                                            return chaisePage.recordsetPage.getTotalCount().getText().then(function(text) {
-                                                return (text=="Displaying " + col.count + " of " + col.totalCount + " Records");
-                                            });
-                                        }, browser.params.defaultTimeout);
+                                        var displayingText = "Displaying all " + col.count + "of " + col.totalCount + " records";
+                                            displayingTextError = "The total count display in the foreign key popup is incorrect";
 
-                                        return chaisePage.recordsetPage.getTotalCount().getText();
-                                    }).then(function(text) {
-                                        expect(text).toBe("Displaying " + col.count + " of " + col.totalCount + " Records", colError(col.name, "The total count display in the foreign key popup is incorrect"));
+                                        chaisePage.waitForTextInElement(chaisePage.recordsetPage.getTotalCount(), displayingText, null, displayingTextError);
 
                                         return rows.get(fkSelectedValue.index).all(by.css(".select-action-button"));
                                     }).then(function(selectButtons) {
