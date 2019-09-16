@@ -1185,52 +1185,30 @@
             }
 
 
-            // fix the height of facet and container to allow scrolling
-            // var parentContainer, parentStickyArea, facetContainer, scrollableContainer, fixedContentHeight;
-            // var mainBodyEl;
-
-            /*** Container Heights and other styling ***/
-            // fetches the height of navbar, bookmark container, and view
-            // also fetches the main container for defining the dynamic height
-            // function fetchMainElements() {
-            //     var elements = {};
-            //     try {
-            //         // get the top-panel-container height
-            //         elements.fixedContentHeight = parentContainer.querySelector('.top-panel-container').offsetHeight;
-            //
-            //         // add the parent sticky area
-            //         if (parentStickyArea) {
-            //             elements.fixedContentHeight += parentStickyArea.offsetHeight;
-            //         }
-            //
-            //         // get recordset main container
-            //         elements.container = parentContainer.querySelector(".bottom-panel-container");
-            //
-            //         if (scope.vm.config.showFaceting) {
-            //             elements.facetContainer = parentContainer.querySelector('.side-panel-container');
-            //         }
-            //
-            //     } catch (error) {
-            //         elements = {};
-            //         $log.warn(error);
-            //     }
-            //     return elements;
-            // }
-
+            /**
+             * Set the height of recordset and facet panel
+             * This is called if the height of the fixed content is changed
+             */
             function setRecordsetHeight() {
-                // if these 2 values are not set yet, don't set the height
+                // make sure the value is set and is integer
                 if (scope.fixedContentHeight !== undefined && !isNaN(scope.fixedContentHeight)) {
-                    UiUtils.setDisplayContainerHeight(scope.scrollableContainer, scope.fixedContentHeight, scope.parentContainer.offsetHeight);
+
+                    UiUtils.setDisplayContainerHeight(scope.scrollableContainer, scope.fixedContentHeight, scope.parentContainer);
                     // no need to fetch and verify the faceting elements (navbar and bookmark are the same container as the ones used in main elements function)
                     if (scope.vm.config.showFaceting) {
-                        UiUtils.setDisplayContainerHeight(scope.facetContainer, scope.fixedContentHeight, scope.parentContainer.offsetHeight);
+                        UiUtils.setDisplayContainerHeight(scope.facetContainer, scope.fixedContentHeight, scope.parentContainer);
                     }
                 }
             }
 
+            /**
+             * Compute the value of fixed content (navbar/modal header + top-panel-container)
+             * @return {int}
+             */
             function computeFixedContentHeight () {
                 scope.fixedContentHeight = scope.parentContainer.querySelector('.top-panel-container').offsetHeight;
 
+                // if the sticky area of the parent is defined (navbar or header in modal)
                 if (scope.parentStickyArea) {
                     scope.fixedContentHeight += scope.parentStickyArea.offsetHeight;
                 }
@@ -1238,31 +1216,42 @@
                 return scope.fixedContentHeight;
             }
 
+            /**
+             * Attach the container elements to the scope, and create the watch
+             * event for the fixedContentHeight.
+             */
             function initializeRecordsetHeight () {
+                // get the scrollable container of this recordset
                 scope.scrollableContainer = scope.parentContainer.querySelector(".bottom-panel-container");
 
+                // get the scrollable container for facet
                 if (scope.vm.config.showFaceting) {
                     scope.facetContainer = scope.parentContainer.querySelector('.side-panel-container');
                 }
 
+                // just setting the watch event is not enough, we have to run it once too.
                 computeFixedContentHeight();
                 setRecordsetHeight();
 
-                scope.$watch(function () {
-                    return computeFixedContentHeight();
-                }, function (newValue, oldValue) {
+                // watch the height of the fixed content and set the height on change.
+                scope.$watch(computeFixedContentHeight, function (newValue, oldValue) {
                     if (newValue != oldValue) {
                         setRecordsetHeight();
                     }
                 });
             }
 
-            // set the recordset height when it's loaded or we have the facets
-            scope.$watch(function() {
+            // initialize the height of main-container and facet container
+            var unbindWatchForRecordsetInitializeHeight = scope.$watch(function() {
                 return (scope.vm.hasLoaded && scope.vm.initialized) || (scope.vm.config.showFaceting && scope.vm.reference);
             }, function (newValue, oldValue) {
                 if (newValue) {
-                    $timeout(initializeRecordsetHeight, 0);
+                    $timeout(function () {
+                        initializeRecordsetHeight();
+
+                        //make sure we're calling this watcher once
+                        unbindWatchForRecordsetInitializeHeight();
+                    }, 0);
                 }
             });
 
@@ -1282,7 +1271,6 @@
                     }
                 });
             }
-
 
             angular.element($window).bind('resize', function(){
                 if (scope.vm.hasLoaded && scope.vm.initialized ) {

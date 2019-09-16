@@ -1221,7 +1221,7 @@
         };
     }])
 
-    .factory("UiUtils", ['$document', '$log', 'dataFormats', function($document, $log, dataFormats) {
+    .factory("UiUtils", ['dataFormats', '$document', '$log', '$window', function(dataFormats, $document, $log, $window) {
 
         /**
          * Takes a timestamp in the form of milliseconds since epoch and converts it into a relative string if
@@ -1393,29 +1393,34 @@
         }
 
         /**
-         * sets the height of domElements.container
-         * @param {Object} domElements - an object with the following properties:
-         *      - {integer} navbarHeight - the height of the navbar element
-         *      - {integer} bookmarkHeight - the height of the bookmark container
-         *      - {integer} docHeight - the height of the viewport
-         *      - {DOMElement} container - the main container to fix the height of
+         * sets the height of container based on the given parameters
+         * @param {DOMElement} container - the main container to fix the height of
+         * @param {int} fixedContentHeight - the height of fixed content
+         * @param {DOCElement=} parentContainer - the parent container (used to calculate the available height)
          **/
-        function setDisplayContainerHeight(container, fixedContentHeight, parentContainerHeight) {
+        function setDisplayContainerHeight(container, fixedContentHeight, parentContainer) {
             try {
                 // we're setting the height based on the viewport, so we need the
                 // whole viewport height
-                var docHeight = $document[0].documentElement.offsetHeight;
+                var docHeight = $window.innerHeight;
 
-                // if parentContainerHeight is not passed, then the whole document is the parent
-                if (parentContainerHeight == null) {
+                // if parentContainerHeight is not passed,
+                //   then the whole document is the parent
+                // if parentContainer is passed and is document,
+                //   we should use the window.innerHeight instead because doc.offsetHeight is based on content height
+                //   while the window.innerHeight is the actual available viewport height
+                var parentContainerHeight;
+                if (parentContainer == null || parentContainer == $document[0].documentElement) {
                     parentContainerHeight = docHeight;
+                } else {
+                    parentContainerHeight = parentContainer.offsetHeight;
                 }
 
                 // find the container's usable height
-                 var containerHeight = ((parentContainerHeight - fixedContentHeight)/docHeight) * 100;
+                var containerHeight = ((parentContainerHeight - fixedContentHeight)/docHeight) * 100;
 
-                 // set the container's height
-                 container.style.height = containerHeight + 'vh';
+                // set the container's height
+                container.style.height = containerHeight + 'vh';
             } catch(err) {
                 $log.warn(err);
             }
