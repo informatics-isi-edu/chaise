@@ -1221,7 +1221,7 @@
         };
     }])
 
-    .factory("UiUtils", ['$document', '$log', 'dataFormats', function($document, $log, dataFormats) {
+    .factory("UiUtils", ['$document', '$log', '$window', 'dataFormats', function($document, $log, $window, dataFormats) {
 
         /**
          * Takes a timestamp in the form of milliseconds since epoch and converts it into a relative string if
@@ -1404,7 +1404,7 @@
             try {
                 // we're setting the height based on the viewport, so we need the
                 // whole viewport height
-                var docHeight = $document[0].documentElement.offsetHeight;
+                var docHeight = $window.innerHeight;
 
                 // if parentContainerHeight is not passed, then the whole document is the parent
                 if (parentContainerHeight == null) {
@@ -1412,10 +1412,10 @@
                 }
 
                 // find the container's usable height
-                 var containerHeight = ((parentContainerHeight - fixedContentHeight)/docHeight) * 100;
+                var containerHeight = ((parentContainerHeight - fixedContentHeight)/docHeight) * 100;
 
-                 // set the container's height
-                 container.style.height = containerHeight + 'vh';
+                // set the container's height
+                container.style.height = containerHeight + 'vh';
             } catch(err) {
                 $log.warn(err);
             }

@@ -458,6 +458,7 @@
             }
 
         };
+
         // function called from form.controller.js to notify record that an entity was just updated
         window.updated = function(id) {
             updated[editRecordRequests[id].schema + ":" + editRecordRequests[id].table] = true;
@@ -465,31 +466,21 @@
         }
 
         /*** Container Heights and other styling ***/
-        // fetches the height of navbar, bookmark container, and view
-        // also fetches the main container for defining the dynamic height
-        function fetchContainerElements() {
-            var elements = {};
-            try {
-                // get navbar height
-                elements.fixedContentHeight = $document[0].getElementById('mainnav').offsetHeight;
-                // get bookmark container height
-                elements.fixedContentHeight += $document[0].querySelector('.record-container .top-panel-container').offsetHeight;
-                // get record main container
-                elements.container = $document[0].querySelector('.record-container .bottom-panel-container');
-            } catch (error) {
-                elements = {};
-                $log.warn(error);
+        function setMainContainerHeight() {
+            // if these values are not set yet, don't set the height
+            if ($scope.fixedContentHeight !== undefined && !isNaN($scope.fixedContentHeight)) {
+                UiUtils.setDisplayContainerHeight($scope.container, $scope.fixedContentHeight);
             }
-            return elements;
         };
 
-        function setMainContainerHeight() {
-            var elements = fetchContainerElements();
-            // if these values are not set yet, don't set the height
-            if(elements.fixedContentHeight !== undefined && !isNaN(elements.fixedContentHeight)) {
-                UiUtils.setDisplayContainerHeight(elements.container, elements.fixedContentHeight);
-            }
-        };
+        function topPanelHeight () {
+            // get navbar height
+            $scope.fixedContentHeight = $document[0].getElementById('mainnav').offsetHeight;
+            // get top panel container height
+            $scope.fixedContentHeight += $document[0].querySelector('.record-container .top-panel-container').offsetHeight;
+
+            return $scope.fixedContentHeight;
+        }
 
         // watch for the display to be ready before setting the main container height
         $scope.$watch(function() {
@@ -498,6 +489,14 @@
             if (newValue) {
                 $rootScope.recordSidePanOpen = (chaiseConfig.hideTableOfContents === true || $rootScope.reference.display.collapseToc === true) ? false : true;
                 $rootScope.hideColumnHeaders = $rootScope.reference.display.hideColumnHeaders;
+
+                // get record main container
+                $scope.container = $document[0].querySelector('.record-container .bottom-panel-container');
+                $scope.$watch(topPanelHeight, function (newValue, oldValue) {
+                    if (newValue && newValue != oldValue) {
+                        setMainContainerHeight();
+                    }
+                });
             }
         });
 
@@ -521,11 +520,10 @@
                 return -1;
             }
         }, function (newValue, oldValue) {
-            if (newValue != oldValue) {
+            if (newValue && newValue != oldValue) {
                 $timeout(function () {
                     UiUtils.setFooterStyle(0);
                     setLoadingTextStyle();
-                    setMainContainerHeight();
                 }, 0);
             }
         });
