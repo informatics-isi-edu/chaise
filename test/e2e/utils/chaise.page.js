@@ -1162,7 +1162,7 @@ var recordsetPage = function() {
     }
 
     this.getFacetHeaderById = function (idx) {
-        return element(by.id("fc-heading-" + idx)).element(by.css('a'));
+        return element(by.id("fc-heading-" + idx)).element(by.css('.facet-header-text'));
     };
 
     this.getFacetCollapse = function (idx) {
@@ -1174,12 +1174,8 @@ var recordsetPage = function() {
     }
 
     this.getOpenFacetTitles = function () {
-        return browser.executeScript("return $('.panel-open h3 a').map(function(i, a) { return a.textContent.trim(); });");
+        return browser.executeScript("return $('.panel-open .facet-header-text').map(function(i, a) { return a.textContent.trim(); });");
     }
-
-    this.getFilterString = function () {
-        return element(by.id("recordset-filter-str"));
-    };
 
     this.getSelectedRowsFilters = function () {
         return element(by.css(".recordset-selected-rows")).all(by.css(".filter-chiclet"));
@@ -1190,15 +1186,15 @@ var recordsetPage = function() {
     }
 
     this.getClearAllFilters = function () {
-        return element(by.id("clear-all-filters"));
+        return element(by.className("clear-all-filters"));
     }
 
     this.getClearCustomFilters = function () {
-        return element(by.id("clear-custom-filters"));
+        return element(by.className("clear-custom-filters"));
     }
 
     this.getClearCustomFacets = function () {
-        return element(by.id("clear-custom-facets"));
+        return element(by.className("clear-custom-facets"));
     };
 
     this.getFacetOptions = function (idx) {
