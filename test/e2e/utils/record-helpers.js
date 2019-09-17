@@ -6,35 +6,35 @@ var EC = protractor.ExpectedConditions;
 exports.testPresentation = function (tableParams) {
     var notNullColumns = tableParams.columns.filter(function (c) { return !c.hasOwnProperty("value") || c.value != null; });
     var pageReadyCondition = function () {
-	    chaisePage.waitForElementInverse(element(by.id("spinner")));
+        chaisePage.waitForElementInverse(element(by.id("spinner")));
 
-	    // make sure the last related entity is visible
-	    chaisePage.waitForElementInverse(element(by.id('rt-loading')));
-	};
+        // make sure the last related entity is visible
+        chaisePage.waitForElementInverse(element(by.id('rt-loading')));
+    };
 
     beforeAll(function () {
         pageReadyCondition();
     });
 
-	it("should have '" + tableParams.title +  "' as title", function() {
+    it("should have '" + tableParams.title +  "' as title", function() {
         var title = chaisePage.recordPage.getEntityTitleElement();
-		chaisePage.waitForElement(title);
+        chaisePage.waitForElement(title);
         expect(title.getText()).toEqual(tableParams.title);
-	});
+    });
 
-	it("should have '" + tableParams.subTitle +"' as subTitle", function() {
+    it("should have '" + tableParams.subTitle +"' as subTitle", function() {
         var subtitle = chaisePage.recordPage.getEntitySubTitleElement();
-		chaisePage.waitForElement(subtitle);
+        chaisePage.waitForElement(subtitle);
         expect(subtitle.getText()).toEqual(tableParams.subTitle + ":");
-	});
+    });
 
     it ("should have the correct table tooltip.", function () {
         expect(chaisePage.recordPage.getEntitySubTitleTooltip()).toBe(tableParams.tableComment);
     });
 
-	it("should show " +notNullColumns.length + " columns only", function() {
-		expect(chaisePage.recordPage.getColumns().count()).toBe(notNullColumns.length);
-	});
+    it("should show " +notNullColumns.length + " columns only", function() {
+        expect(chaisePage.recordPage.getColumns().count()).toBe(notNullColumns.length);
+    });
 
     it("should show the action buttons properly", function() {
         var editButton = chaisePage.recordPage.getEditRecordButton(),
