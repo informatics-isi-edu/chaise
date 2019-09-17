@@ -1445,18 +1445,37 @@
                 var footerHeight = elements.footer.offsetHeight + 10;
                 // calculate the inner height of the app content (height of children in main-body + footer)
                 if ( (elements.initialInnerHeight + footerHeight) < elements.mainContainerHeight) {
-                    elements.footer.style.position = "absolute";
-                    elements.footer.style.bottom = 0;
-                    elements.footer.style.left = 0;
-                    elements.footer.style.right = 0;
+                    removeClass(elements.footer, "position-relative");
                 } else {
-                    elements.footer.style.position = "relative";
-                    elements.footer.style.bottom = "unset";
-                    elements.footer.style.left = "unset";
-                    elements.footer.style.right = "unset";
+                    addClass(elements.footer, "position-relative");
                 }
             } catch(err) {
                 $log.warn(err);
+            }
+        }
+
+
+        /**
+         * Given an element and class name, will remove the class name from element.
+         * NOTE added because element.classList.remove is not supported by IE
+         * @param  {DOMElement} element
+         * @param  {string} className
+         */
+        function removeClass(element, className) {
+            element.className = element.className.split(" ").filter(function (c) {
+                return c !== className;
+            }).join(" ");
+        }
+
+        /**
+         * Given an element and class name, will add the class name to element.
+         * NOTE added because element.classList.add is not supported by IE
+         * @param  {DOMElement} element
+         * @param  {string} className
+         */
+        function addClass(element, className) {
+            if (element.className.split(" ").indexOf(className) == -1) {
+                element.className += " " + className;
             }
         }
 
