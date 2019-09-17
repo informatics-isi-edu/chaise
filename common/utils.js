@@ -1406,11 +1406,11 @@
 
                 // if parentContainerHeight is not passed,
                 //   then the whole document is the parent
-                // if parentContainer is passed and is document,
-                //   we should use the window.innerHeight instead because doc.offsetHeight is based on content height
+                // if parentContainer is passed and is body element (the whole page),
+                //   we should use the window.innerHeight instead because parentContainer.offsetHeight is based on content height
                 //   while the window.innerHeight is the actual available viewport height
                 var parentContainerHeight;
-                if (parentContainer == null || parentContainer == $document[0].documentElement) {
+                if (parentContainer == null || parentContainer == $document[0].querySelector("body")) {
                     parentContainerHeight = docHeight;
                 } else {
                     parentContainerHeight = parentContainer.offsetHeight;
@@ -1419,8 +1419,14 @@
                 // find the container's usable height
                 var containerHeight = ((parentContainerHeight - fixedContentHeight)/docHeight) * 100;
 
-                // set the container's height
-                container.style.height = containerHeight + 'vh';
+                if (containerHeight < 15 && parentContainer != null) {
+                    parentContainer.style.overflowY = "auto";
+                    container.style.height = "unset";
+                } else {
+                    // set the container's height
+                    container.style.height = containerHeight + 'vh';
+                }
+
             } catch(err) {
                 $log.warn(err);
             }
@@ -1488,7 +1494,9 @@
             getInputType: getInputType,
             getSimpleColumnType: getSimpleColumnType,
             setFooterStyle: setFooterStyle,
-            setDisplayContainerHeight: setDisplayContainerHeight
+            setDisplayContainerHeight: setDisplayContainerHeight,
+            addClass: addClass,
+            removeClass: removeClass
         }
     }])
 

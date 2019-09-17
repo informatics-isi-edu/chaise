@@ -1287,7 +1287,7 @@
                 if (scope.vm.parentContainerSelector) {
                     scope.parentContainer = $document[0].querySelector(scope.vm.parentContainerSelector);
                 } else {
-                    scope.parentContainer = $document[0].documentElement;
+                    scope.parentContainer = $document[0].querySelector("body");
                 }
 
                 // used for footer
