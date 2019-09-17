@@ -41,6 +41,16 @@
                             <td id="oStrike" class="markdown-container"><strike>strikethrough text</strike></td>
                         </tr>
                         <tr>
+                            <td class="rawInput" id="rSuperscript1">^superscript^ text</td>
+                            <td class="rawInput" id="rSuperscript2"></td>
+                            <td id="oStrike" class="markdown-container"><sup>superscript</sup> text</td>
+                        </tr>
+                        <tr>
+                            <td class="rawInput" id="rSubscript1">~subscript~ text</td>
+                            <td class="rawInput" id="rSubscript2"></td>
+                            <td id="oStrike" class="markdown-container"><sub>subscript</sub> text</td>
+                        </tr>
+                        <tr>
                             <td class="rawInput" id="rLargeHdr1">
                                 # Large Heading
                             </td>

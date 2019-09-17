@@ -76,7 +76,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         canEdit: true,
         viewMore: {
             displayname: "booking",
-            filter: "Accommodations: Super 8 North Hollywood Motel"
+            filter: "Accommodations : Super 8 North Hollywood Motel"
         },
         rowValues: [
             ["125.0000","2016-03-12 00:00:00"],
@@ -135,7 +135,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         count: 2,
         viewMore: {
             displayname: "schedule",
-            filter: "Accommodations: Super 8 North Hollywood Motel"
+            filter: "Accommodations : Super 8 North Hollywood Motel"
         }
     };
     describe("for a related entity with search applink, ", function () {
@@ -264,7 +264,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         baseTable:"Accommodations",
         viewMore: {
             displayname: "related_table_2",
-            filter: "base table association related: Super 8 North Hollywood Motel"
+            filter: "base table association related : Super 8 North Hollywood Motel"
         },
         rowValues: [
             ["one"],
@@ -317,7 +317,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         viewMore: {
             name: "table_w_invalid_row_markdown_pattern",
             displayname: "table_w_invalid_row_markdown_pattern",
-            filter: "Accommodations: Super 8 North Hollywood Motel"
+            filter: "Accommodations : Super 8 North Hollywood Motel"
         },
         rowValues: [
             ["four"]
