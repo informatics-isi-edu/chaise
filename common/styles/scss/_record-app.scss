@@ -1,66 +1,62 @@
 .record-container {
-    margin-left: 20px;
-
     .top-panel-container {
-        padding-top: 20px;
         padding-bottom: 10px;
-        margin-right: 20px;
 
-        .top-left-panel.open-panel {
-            flex: 0 0 $left-panel-width-sm;
-            position: relative;
+        .top-flex-panel {
+            .top-left-panel.open-panel {
+                flex: 0 0 $left-panel-width-sm;
+                position: relative;
 
-            .bottom-right {
-                position: absolute;
-                bottom: 0;
-                right: 0;
+                .bottom-right {
+                    position: absolute;
+                    bottom: 0;
+                    right: 0;
 
-                button {
-                    padding-right: 0px;
+                    button {
+                        padding-right: 0px;
+                    }
                 }
-            }
-        }
+            } // end .top-left-panel
 
-        .top-right-panel {
-            padding-left: 30px;
-
-            .page-action-btns {
-                margin: 0px 0px 4px 0px;
-            }
-
-            .title {
-                margin-top: 4px;
-
-                #page-subtitle {
-                    margin: 5px 0px;
+            .top-right-panel {
+                .page-action-btns {
+                    margin: 0px 0px 4px 0px;
                 }
 
-                .entity-display-header {
-                    display: flex;
-                    justify-content: space-between;
-                    position: relative;
+                .title {
+                    margin-top: 4px;
 
-                    #page-title {
-                        margin: 0px;
+                    #page-subtitle {
+                        margin: 5px 0px;
                     }
 
-                    .record-action-btns-container {
-                        min-width: 350px;
+                    .entity-display-header {
+                        display: flex;
+                        justify-content: space-between;
+                        position: relative;
 
-                        .record-action-btns {
-                            position: absolute;
-                            bottom: 0;
-                            right: 0;
+                        #page-title {
+                            margin: 0px;
                         }
-                    }
-                } // end .entity-display-header
-            } // end .title
 
-            .show-toc-btn {
-                margin-top: 10px;
-                padding-left: 2px;
-                padding-bottom: 0px;
-            }
+                        .record-action-btns-container {
+                            min-width: 350px;
+
+                            .record-action-btns {
+                                position: absolute;
+                                bottom: 0;
+                                right: 0;
+                            }
+                        }
+                    } // end .entity-display-header
+                } // end .title
+
+                .show-toc-btn {
+                    margin-top: 10px;
+                    padding-left: 2px;
+                    padding-bottom: 0px;
+                }
+            } // end .top-right-panel
         }
     }
 
@@ -78,9 +74,6 @@
 
                 .side-panel-heading {
                     margin: 0px;
-
-                    // padding: 9px 10px 10px !important;
-                    // margin: 5px 0 0 -5px;
                 }
             }
 
@@ -113,7 +106,6 @@
         }
 
         .main-container {
-            padding-left: 30px;
             padding-right: 20px;
         }
 
