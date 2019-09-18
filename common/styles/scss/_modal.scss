@@ -278,6 +278,6 @@ body.error-open loading-spinner {
 }
 
 
-.modal-body .recordset-container alerts:not(.enforce-alert) {
+.modal:not(.faceting-show-details-popup) .recordset-container alerts {
     display: none !important;
 }

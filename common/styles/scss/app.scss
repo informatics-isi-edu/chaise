@@ -282,8 +282,15 @@ html {
         bottom: 0;
         right: 0;
         left: 0;
-        margin-left: -20px;
-        margin-right: -20px;
+        &.position-relative {
+            position: relative;
+            bottom: unset;
+            right: unset;
+            left: unset;
+        }
+
+        margin-right: -$viewport-margin;
+
         .footer-container {
             height: 30px;
             background-color: #ededed;
@@ -314,22 +321,69 @@ html {
         }
     }
 
-    // main content
+    // top panel container for record and recordset
+    .top-panel-container {
+        padding-top: $viewport-margin;
+        padding-right: $viewport-margin;
+        margin-left: $viewport-margin;
+
+        .top-flex-panel {
+            -webkit-box-flex: 1;
+            display: flex;
+            flex: 1;
+            position: relative;
+
+            .top-left-panel {
+                position: relative;
+                max-width: 50vw;
+
+                &.open-panel {
+                    flex: 0;
+                    flex-basis: $left-panel-width-lg;
+                    min-width: 170px;
+
+                    & + .top-right-panel {
+                        padding-left: $main-alley;
+                    }
+                }
+
+                &.close-panel {
+                    width: 0;
+                    flex-basis: 0 !important;
+                    display: none;
+                }
+            }
+
+            .top-right-panel {
+                flex: 1;
+                position: relative;
+            }
+        }
+    }
+
+    // bottom panel container for record and recordset
     .bottom-panel-container {
-        padding-right: 0;
-        -webkit-box-flex: 1;
         display: flex;
         flex: 1;
+        -webkit-box-flex: 1;
         margin-top: 0px;
 
         .side-panel-resizable {
             position: relative;
             max-width: 50vw;
+            margin-left: $viewport-margin;
 
             &.open-panel {
                 flex: 0;
                 flex-basis: $left-panel-width-lg;
                 min-width: 170px;
+
+                & + .main-container {
+                    padding-left: $main-alley;
+                    footer.position-relative {
+                        margin-left: -$main-alley;
+                    }
+                }
             }
 
             &.close-panel {
@@ -340,7 +394,12 @@ html {
                 .side-panel-container {
                     width: 0;
                 }
+
+                & + .main-container .main-body {
+                    padding-left: $viewport-margin;
+                }
             }
+
         }
 
         .main-container {
@@ -348,36 +407,8 @@ html {
             position: relative;
             overflow-x: hidden;
             overflow-y: auto;
-        }
-    }
 
-    // top panel for record and recordset
-    .top-flex-panel {
-        -webkit-box-flex: 1;
-        display: flex;
-        flex: 1;
-        position: relative;
-
-        .top-left-panel {
-            position: relative;
-            max-width: 50vw;
-
-            &.open-panel {
-                flex: 0;
-                flex-basis: $left-panel-width-lg;
-                min-width: 170px;
-            }
-
-            &.close-panel {
-                width: 0;
-                flex-basis: 0 !important;
-                display: none;
-            }
-        }
-
-        .top-right-panel {
-            flex: 1;
-            position: relative;
+            padding-right: $viewport-margin;
         }
     }
 
@@ -560,7 +591,8 @@ html {
                     max-width: 150px;
                 }
 
-                .input-group {
+                // timestamp range inputs
+                .input-container.input-group {
                     width: 100%;
 
                     .input-group-addon {
@@ -570,8 +602,8 @@ html {
                     }
 
                     .form-control {
-                        border-top-right-radius: 4px;
-                        border-bottom-right-radius: 4px;
+                        border-top-left-radius: 0;
+                        border-bottom-left-radius: 0;
                     }
                 }
 

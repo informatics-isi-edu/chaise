@@ -21,12 +21,10 @@ var testParams = {
     },
     searchBox: {
         term: "one",
-        filter: "Search : one",
         numRows: 6,
         term2: "eve",
         term2Rows: 4,
         term3: "ns",
-        term3Filter: "Search : evens",
         term3Rows: 1
     },
     minInputClass: "range-min",
@@ -47,7 +45,7 @@ var testParams = {
             type: "choice",
             totalNumOptions: 10,
             option: 2,
-            filter: "id : 3",
+            filter: "id\n3",
             numRows: 1,
             options: [ '1', '2', '3', '4', '5', '6', '7', '8', '9', '10' ],
             comment: "ID comment"
@@ -62,17 +60,17 @@ var testParams = {
             range: {
                 min: 5,
                 max: 10,
-                filter: "int_col : 5 to 10",
+                filter: "int_col\n5 to 10",
                 numRows: 6
             },
             justMin: {
                 min: 6,
-                filter: "int_col : ≥ 6",
+                filter: "int_col\n≥ 6",
                 numRows: 17
             },
             justMax: {
                 max: 12,
-                filter: "int_col : ≤ 12",
+                filter: "int_col\n≤ 12",
                 numRows: 15
             },
             comment: "int comment"
@@ -86,17 +84,17 @@ var testParams = {
             range: {
                 min: 6.5,
                 max: 12.2,
-                filter: "float_col : 6.5000 to 12.2000",
+                filter: "float_col\n6.5000 to 12.2000",
                 numRows: 12
             },
             justMin: {
                 min: 8.9,
-                filter: "float_col : ≥ 8.9000",
+                filter: "float_col\n≥ 8.9000",
                 numRows: 14
             },
             justMax: {
                 max: 7.45,
-                filter: "float_col : ≤ 7.4500",
+                filter: "float_col\n≤ 7.4500",
                 numRows: 4
             }
         },
@@ -109,17 +107,17 @@ var testParams = {
             range: {
                 min: "2002-06-14",
                 max: "2007-12-12",
-                filter: "date_col : 2002-06-14 to 2007-12-12",
+                filter: "date_col\n2002-06-14 to 2007-12-12",
                 numRows: 5
             },
             justMin: {
                 min: "2009-12-14",
-                filter: "date_col : ≥ 2009-12-14",
+                filter: "date_col\n≥ 2009-12-14",
                 numRows: 3
             },
             justMax: {
                 max: "2007-04-18",
-                filter: "date_col : ≤ 2007-04-18",
+                filter: "date_col\n≤ 2007-04-18",
                 numRows: 14
             }
         },
@@ -139,19 +137,19 @@ var testParams = {
                 minTime: "10:08:00",
                 maxDate: "2007-12-06",
                 maxTime: "17:26:12",
-                filter: "timestamp_col : 2004-05-20 10:08:00 to 2007-12-06 17:26:12",
+                filter: "timestamp_col\n2004-05-20 10:08:00 to 2007-12-06 17:26:12",
                 numRows: 3
             },
             justMin: {
                 date: "2004-05-20",
                 time: "10:08:00",
-                filter: "timestamp_col : ≥ 2004-05-20 10:08:00",
+                filter: "timestamp_col\n≥ 2004-05-20 10:08:00",
                 numRows: 8
             },
             justMax: {
                 date: "2007-12-06",
                 time: "17:26:12",
-                filter: "timestamp_col : ≤ 2007-12-06 17:26:12",
+                filter: "timestamp_col\n≤ 2007-12-06 17:26:12",
                 numRows: 15
             },
             comment: "timestamp column"
@@ -161,7 +159,7 @@ var testParams = {
             type: "choice",
             totalNumOptions: 12,
             option: 1,
-            filter: "text_col : No Value",
+            filter: "text_col\nNo Value",
             numRows: 5,
             options: [ 'All Records With Value', 'No Value', 'one', 'Empty', 'two', 'seven', 'eight', 'elevens', 'four', 'six', 'ten', 'three' ]
         },
@@ -170,7 +168,7 @@ var testParams = {
             type: "choice",
             totalNumOptions: 10,
             option: 2,
-            filter: "longtext_col : two",
+            filter: "longtext_col\ntwo",
             numRows: 5,
             options: [ 'Empty', 'one', 'two', 'eight', 'eleven', 'five', 'four', 'nine', 'seven', 'six' ],
             comment: "A lengthy comment for the facet of the longtext_col. This should be displyed properly in the facet."
@@ -180,7 +178,7 @@ var testParams = {
             type: "choice",
             totalNumOptions: 10,
             option: 3,
-            filter: "markdown_col : eight",
+            filter: "markdown_col\neight",
             numRows: 1,
             options: [ 'Empty', 'one', 'two', 'eight', 'eleven', 'five', 'four', 'nine', 'seven' , 'six']
         },
@@ -189,7 +187,7 @@ var testParams = {
             type: "choice",
             totalNumOptions: 3,
             option: 2,
-            filter: "boolean_col : Yes",
+            filter: "boolean_col\nYes",
             numRows: 10,
             options: [ 'All Records With Value', 'No', 'Yes' ]
         },
@@ -198,7 +196,7 @@ var testParams = {
             type: "choice",
             totalNumOptions: 11,
             option: 4,
-            filter: 'jsonb_col : { "key": "four" }',
+            filter: 'jsonb_col\n{ "key": "four" }',
             numRows: 1,
             options: [ 'All Records With Value', '{"key":"one"}', '{"key":"two"}', '{"key":"three"}', '{"key":"four"}', '{"key":"five"}', '{"key":"six"}', '{"key":"seven"}', '{"key":"eight"}', '{"key":"nine"}', '{"key":"ten"}' ]
         },
@@ -207,7 +205,7 @@ var testParams = {
             type: "choice",
             totalNumOptions: 11,
             option: 2,
-            filter: "F1 : two",
+            filter: "F1\ntwo",
             numRows: 10,
             options: [ 'No Value', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten' ]
         },
@@ -216,7 +214,7 @@ var testParams = {
             type: "choice",
             totalNumOptions: 10,
             option: 0,
-            filter: "to_name : one",
+            filter: "to_name\none",
             numRows: 10,
             options: [ 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten' ],
             comment: "open facet"
@@ -226,7 +224,7 @@ var testParams = {
             type: "choice",
             totalNumOptions: 3,
             option: 1,
-            filter: "f3 (term) : one",
+            filter: "f3 (term)\none",
             numRows: 6,
             options: [ 'All Records With Value', 'one', 'two' ]
         },
@@ -235,7 +233,7 @@ var testParams = {
             type: "choice",
             totalNumOptions: 11,
             option: 5,
-            filter: "from_name : 5",
+            filter: "from_name\n5",
             numRows: 1,
             options: [ 'All Records With Value', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
         },
@@ -244,7 +242,7 @@ var testParams = {
             type: "choice",
             totalNumOptions: 11,
             option: 2,
-            filter: "F1 with Term : two",
+            filter: "F1 with Term\ntwo",
             numRows: 10,
             options: [ 'All Records With Value', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten' ],
             comment: "F1 with Term comment"
@@ -253,16 +251,16 @@ var testParams = {
             name: "Check Presence Text",
             type: "check_presence",
             notNullNumRows: 9,
-            notNullFilter: "Check Presence Text : All Records With Value",
+            notNullFilter: "Check Presence Text\nAll Records With Value",
             nullNumRows: 21,
-            nullFilter: "Check Presence Text : No Value"
+            nullFilter: "Check Presence Text\nNo Value"
         },
         {
             name: "F3 Entity",
             type: "choice",
             totalNumOptions: 4,
             option: 1,
-            filter: "F3 Entity : No Value",
+            filter: "F3 Entity\nNo Value",
             numRows: 23,
             options: [ 'All Records With Value', 'No Value', 'one', 'two']
         },
@@ -271,7 +269,7 @@ var testParams = {
             type: "choice",
             totalNumOptions: 4,
             option: 2,
-            filter: "F5 : one",
+            filter: "F5\none",
             numRows: 1,
             options: ["All Records With Value", "No Value", "one", "two"]
 
@@ -281,7 +279,7 @@ var testParams = {
             type: "choice",
             totalNumOptions: 8,
             option: 1,
-            filter: "col_w_column_order_false : 01",
+            filter: "col_w_column_order_false\n01",
             numRows: 9,
             options: [ 'All Records With Value', '01', '02', '03', '04', '05', '06', '07']
         }
@@ -417,7 +415,7 @@ describe("Viewing Recordset with Faceting,", function() {
                 });
             });
 
-            it("search using the global search box should search automatically, show the search phrase as a filter, and show the set of results", function () {
+            it("search using the global search box should search automatically, show the search phrase as a filter, and show the set of results", function (done) {
                 var mainSearch = chaisePage.recordsetPage.getSearchBox();
 
                 chaisePage.recordsetPage.getClearAllFilters().click().then(function () {
@@ -425,21 +423,39 @@ describe("Viewing Recordset with Faceting,", function() {
                 }).then(function () {
                     mainSearch.sendKeys(testParams.searchBox.term);
 
+                    // make sure the number of rows is correct
                     browser.wait(function () {
                         return chaisePage.recordsetPage.getRows().count().then(function(ct) {
                             return ct == testParams.searchBox.numRows;
                         });
-                    }, browser.params.defaultTimeout);
+                    }, browser.params.defaultTimeout, "Number of rows for search input is incorrect");
 
-                    return chaisePage.recordsetPage.getFacetFilters();
-                }).then(function (filters) {
-                    return filters[0].getText();
+                    return chaisePage.recordsetPage.getSearchClearButton().click();
+                }).then(function () {
+                    // make sure the number of rows is correct
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                            return ct == testParams.defaults.pageSize;
+                        });
+                    }, browser.params.defaultTimeout, "Number of rows after clearing search input via search clear button");
+
+                    return mainSearch.getText();
                 }).then(function (text) {
-                    expect(text).toBe(testParams.searchBox.filter, "Filter for global search input is incorrect");
+                    expect(text).toBe("", "Main search did not clear properly after clicking the remove search button in the search input");
 
-                    return chaisePage.recordsetPage.getRows().count();
-                }).then(function (ct) {
-                    expect(ct).toBe(testParams.searchBox.numRows, "Number of rows for search input is incorrect");
+                    mainSearch.sendKeys(testParams.searchBox.term2);
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                            return ct == testParams.searchBox.term2Rows;
+                        });
+                    }, browser.params.defaultTimeout, "number of rows for search term 2 missmatch.");
+
+                    mainSearch.sendKeys(testParams.searchBox.term3);
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                            return ct == testParams.searchBox.term3Rows;
+                        });
+                    }, browser.params.defaultTimeout, "number of rows for search term 3 missmatch.");
 
                     return chaisePage.recordsetPage.getSearchClearButton().click();
                 }).then(function () {
@@ -447,80 +463,10 @@ describe("Viewing Recordset with Faceting,", function() {
                         return chaisePage.recordsetPage.getRows().count().then(function(ct) {
                             return ct == testParams.defaults.pageSize;
                         });
-                    }, browser.params.defaultTimeout);
+                    }, browser.params.defaultTimeout, "Number of rows after clearing search input via search clear button (the last wait in test)");
 
-                    return chaisePage.recordsetPage.getRows().count();
-                }).then(function (ct) {
-                    expect(ct).toBe(testParams.defaults.pageSize, "Number of rows after clearing search input via search clear button");
-
-                    return mainSearch.getText();
-                }).then(function (text) {
-                    expect(text).toBe("", "Main search did not clear properly after clicking the remove search button in the search input");
-
-                    mainSearch.sendKeys(testParams.searchBox.term);
-
-                    browser.wait(function () {
-                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
-                            return ct == testParams.searchBox.numRows;
-                        });
-                    }, browser.params.defaultTimeout);
-
-                    return chaisePage.recordsetPage.getFacetFilters();
-                }).then(function (filters) {
-                    return filters[0].element(by.css(".filter-chiclet-remove")).click();
-                }).then(function () {
-                    browser.wait(function () {
-                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
-                            return ct == testParams.defaults.pageSize;
-                        });
-                    }, browser.params.defaultTimeout);
-
-                    return chaisePage.recordsetPage.getRows().count();
-                }).then(function (ct) {
-                    expect(ct).toBe(testParams.defaults.pageSize, "Number of rows after clearing search input via search clear button");
-
-                    return mainSearch.getText();
-                }).then(function (text) {
-                    expect(text).toBe("", "Main search did not clear properly after clicking the 'x' in the filter");
-
-                    mainSearch.sendKeys(testParams.searchBox.term2);
-                    browser.wait(function () {
-                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
-                            return ct == testParams.searchBox.term2Rows;
-                        });
-                    }, browser.params.defaultTimeout);
-
-                    mainSearch.sendKeys(testParams.searchBox.term3);
-                    browser.wait(function () {
-                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
-                            return ct == testParams.searchBox.term3Rows;
-                        });
-                    }, browser.params.defaultTimeout);
-
-                    return chaisePage.recordsetPage.getFacetFilters();
-                }).then(function (filters) {
-                    return filters[0].getText();
-                }).then(function (text) {
-                    expect(text).toBe(testParams.searchBox.term3Filter, "adding another character to an existing search did not update the filter properly");
-                });
-            });
-
-            it("should show 25 rows and 0 filters after clicking 'clear all'", function () {
-                chaisePage.clickButton(chaisePage.recordsetPage.getClearAllFilters()).then(function () {
-                    chaisePage.recordsetPage.waitForInverseMainSpinner();
-                    //verify there's no facet string in url
-                    return browser.getCurrentUrl();
-                }).then(function (url) {
-                    expect(url).toBe(uri, "uri after clear all is incorrect");
-
-                    return chaisePage.recordsetPage.getRows().count();
-                }).then(function (ct) {
-                    expect(ct).toBe(testParams.defaults.pageSize, "Number of visible rows is incorrect");
-
-                    return chaisePage.recordsetPage.getFacetFilters().count();
-                }).then(function (ct) {
-                    expect(ct).toBe(0, "Number of visible filters is incorrect");
-                });
+                    done();
+                }).catch(chaisePage.catchTestError(done));
             });
 
             it("should have 1 row selected in show more popup for entity.", function (done) {
@@ -1246,6 +1192,9 @@ describe("Viewing Recordset with Faceting,", function() {
                             return ct == numFacets;
                         });
                     }, browser.params.defaultTimeout);
+
+                    //make sure facet is loaded first
+                    browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(testParams.multipleFacets[0].facetIdx)), browser.params.defaultTimeout);
 
                     return chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(testParams.multipleFacets[0].facetIdx, testParams.multipleFacets[0].option));
                 }).then(function () {

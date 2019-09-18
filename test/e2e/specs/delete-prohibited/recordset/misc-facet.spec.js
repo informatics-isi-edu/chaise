@@ -127,7 +127,7 @@ var testParams = {
 
 
 describe("Other facet features, ", function() {
-    /*
+
     describe("selecting entity facet that is not on the shortest key.", function () {
         var facet, idx, clearAll;
         beforeAll(function (done) {
@@ -324,7 +324,7 @@ describe("Other facet features, ", function() {
         });
 
     });
-*/
+
     describe("Records With Value (not-null) filter, ", function () {
         var notNullBtn, showMore, facet;
 
@@ -759,7 +759,6 @@ describe("Other facet features, ", function() {
 
             it ("alert should be displayed upon reaching the URL limit and submit button should be disabled.", function (done) {
                 chaisePage.clickButton(chaisePage.recordsetPage.getSelectAllBtn()).then(function () {
-                    browser.pause();
                     checkAlert();
                     expect(submitBtn.getAttribute('disabled')).toBe('true', "submit is not disabled.");
                     done();
@@ -980,7 +979,7 @@ describe("Other facet features, ", function() {
             });
 
             it("should click the add button for an association table and have the facet collapse button visible", function (done) {
-                chaisePage.clickButton(chaisePage.recordPage.getAddRecordLink(testParams.associationRTName)).then(function () {
+                chaisePage.recordPage.getAddRecordLink(testParams.associationRTName).click().then(function () {
                     browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getModalTitle()), browser.params.defaultTimeout);
 
                     browser.wait(function () {
@@ -990,7 +989,7 @@ describe("Other facet features, ", function() {
                     });
 
                     // get show filter panel
-                    showPanelBtn = chaisePage.recordPage.getShowFilterPanelBtn(element(by.css('.modal-body')));
+                    showPanelBtn = chaisePage.recordsetPage.getShowFilterPanelBtn(element(by.css('.modal-body')));
                     chaisePage.waitForElement(showPanelBtn);
 
                     done();

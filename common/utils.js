@@ -1221,7 +1221,7 @@
         };
     }])
 
-    .factory("UiUtils", ['$document', '$log', '$window', 'dataFormats', function($document, $log, $window, dataFormats) {
+    .factory("UiUtils", ['dataFormats', '$document', '$log', '$window', function(dataFormats, $document, $log, $window) {
 
         /**
          * Takes a timestamp in the form of milliseconds since epoch and converts it into a relative string if
@@ -1393,29 +1393,40 @@
         }
 
         /**
-         * sets the height of domElements.container
-         * @param {Object} domElements - an object with the following properties:
-         *      - {integer} navbarHeight - the height of the navbar element
-         *      - {integer} bookmarkHeight - the height of the bookmark container
-         *      - {integer} docHeight - the height of the viewport
-         *      - {DOMElement} container - the main container to fix the height of
+         * sets the height of container based on the given parameters
+         * @param {DOMElement} container - the main container to fix the height of
+         * @param {int} fixedContentHeight - the height of fixed content
+         * @param {DOCElement=} parentContainer - the parent container (used to calculate the available height)
          **/
-        function setDisplayContainerHeight(container, fixedContentHeight, parentContainerHeight) {
+        function setDisplayContainerHeight(container, fixedContentHeight, parentContainer) {
             try {
                 // we're setting the height based on the viewport, so we need the
                 // whole viewport height
                 var docHeight = $window.innerHeight;
 
-                // if parentContainerHeight is not passed, then the whole document is the parent
-                if (parentContainerHeight == null) {
+                // if parentContainerHeight is not passed,
+                //   then the whole document is the parent
+                // if parentContainer is passed and is body element (the whole page),
+                //   we should use the window.innerHeight instead because parentContainer.offsetHeight is based on content height
+                //   while the window.innerHeight is the actual available viewport height
+                var parentContainerHeight;
+                if (parentContainer == null || parentContainer == $document[0].querySelector("body")) {
                     parentContainerHeight = docHeight;
+                } else {
+                    parentContainerHeight = parentContainer.offsetHeight;
                 }
 
                 // find the container's usable height
                 var containerHeight = ((parentContainerHeight - fixedContentHeight)/docHeight) * 100;
 
-                // set the container's height
-                container.style.height = containerHeight + 'vh';
+                if (containerHeight < 15 && parentContainer != null) {
+                    parentContainer.style.overflowY = "auto";
+                    container.style.height = "unset";
+                } else {
+                    // set the container's height
+                    container.style.height = containerHeight + 'vh';
+                }
+
             } catch(err) {
                 $log.warn(err);
             }
@@ -1440,18 +1451,37 @@
                 var footerHeight = elements.footer.offsetHeight + 10;
                 // calculate the inner height of the app content (height of children in main-body + footer)
                 if ( (elements.initialInnerHeight + footerHeight) < elements.mainContainerHeight) {
-                    elements.footer.style.position = "absolute";
-                    elements.footer.style.bottom = 0;
-                    elements.footer.style.left = 0;
-                    elements.footer.style.right = 0;
+                    removeClass(elements.footer, "position-relative");
                 } else {
-                    elements.footer.style.position = "relative";
-                    elements.footer.style.bottom = "unset";
-                    elements.footer.style.left = "unset";
-                    elements.footer.style.right = "unset";
+                    addClass(elements.footer, "position-relative");
                 }
             } catch(err) {
                 $log.warn(err);
+            }
+        }
+
+
+        /**
+         * Given an element and class name, will remove the class name from element.
+         * NOTE added because element.classList.remove is not supported by IE
+         * @param  {DOMElement} element
+         * @param  {string} className
+         */
+        function removeClass(element, className) {
+            element.className = element.className.split(" ").filter(function (c) {
+                return c !== className;
+            }).join(" ");
+        }
+
+        /**
+         * Given an element and class name, will add the class name to element.
+         * NOTE added because element.classList.add is not supported by IE
+         * @param  {DOMElement} element
+         * @param  {string} className
+         */
+        function addClass(element, className) {
+            if (element.className.split(" ").indexOf(className) == -1) {
+                element.className += " " + className;
             }
         }
 
@@ -1464,7 +1494,9 @@
             getInputType: getInputType,
             getSimpleColumnType: getSimpleColumnType,
             setFooterStyle: setFooterStyle,
-            setDisplayContainerHeight: setDisplayContainerHeight
+            setDisplayContainerHeight: setDisplayContainerHeight,
+            addClass: addClass,
+            removeClass: removeClass
         }
     }])
 

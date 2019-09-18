@@ -1,5 +1,5 @@
 <div class="recordset-container" ng-class="vm.config.showFaceting ? 'with-faceting':'without-faceting'" >
-    <loading-spinner ng-show="(!vm.initialized || $root.showSpinner) && !$root.error"></loading-spinner>
+    <loading-spinner id="main-spinner" ng-show="(!vm.initialized || $root.showSpinner || !vm.hasLoaded) && !$root.error"></loading-spinner>
     <div class="top-panel-container" ng-show="vm.reference">
         <alerts alerts="$root.alerts"></alerts>
         <div class="top-flex-panel">
@@ -82,14 +82,14 @@
                 </div>
                 <div class="recordset-chiclets-container recordset-chiclets" ng-if="vm.reference.location.filter || vm.reference.location.customFacets || vm.hasFilter()">
                     <div class="filter-chiclet chaise-btn-group" ng-if="vm.reference.location.filter">
-                        <button id="clear-custom-filters" class="filter-chiclet-remove chaise-btn chaise-btn-secondary" ng-click="vm.removeFilter('filters')" tooltip-placement="bottom" uib-tooltip="Clear custom filter applied">
+                        <button class="clear-custom-filters filter-chiclet-remove chaise-btn chaise-btn-secondary" ng-click="vm.removeFilter('filters')" tooltip-placement="bottom" uib-tooltip="Clear custom filter applied">
                             <i class="icon-btn glyphicon glyphicon-remove"></i>
                         </button>
                         <span class="filter-chiclet-title chaise-btn chaise-btn-secondary">Custom Filter</span>
                         <span class="filter-chiclet-value chaise-btn chaise-btn-secondary" ng-bind="transformCustomFilter(vm.reference.location.filtersString)" tooltip-placement="bottom-left" uib-tooltip="{{transformCustomFilter(vm.reference.location.filtersString)}}" tooltip-class="custom-filter-tooltip"></span>
                     </div>
                     <div class="filter-chiclet chaise-btn-group" ng-if="vm.reference.location.customFacets">
-                        <button id="clear-custom-facets" class="filter-chiclet-remove chaise-btn chaise-btn-secondary" ng-click="vm.removeFilter('cfacets')" tooltip-placement="bottom" uib-tooltip="Clear custom filter applied">
+                        <button class="clear-custom-facets filter-chiclet-remove chaise-btn chaise-btn-secondary" ng-click="vm.removeFilter('cfacets')" tooltip-placement="bottom" uib-tooltip="Clear custom filter applied">
                             <i class="glyphicon glyphicon-remove"></i>
                         </button>
                         <span class="filter-chiclet-title chaise-btn chaise-btn-secondary">Custom Filter</span>
@@ -120,7 +120,7 @@
                             </span>
                         </span>
                     </div>
-                    <button id="clear-all-filters" ng-click="vm.removeFilter()" class="chaise-btn chaise-btn-tertiary clear-all-btn" uib-tooltip="Clear all filters applied" tooltip-placement="bottom">
+                    <button ng-click="vm.removeFilter()" class="clear-all-filters chaise-btn chaise-btn-tertiary clear-all-btn" uib-tooltip="Clear all filters applied" tooltip-placement="bottom">
                         <span>Clear all filters</span>
                     </button>
                 </div>
@@ -137,7 +137,6 @@
             <faceting vm="vm"></faceting>
         </div>
         <div class="main-container">
-            <loading-spinner id="main-spinner" ng-show="!vm.hasLoaded && vm.initialized"></loading-spinner>
             <div class="main-body">
 
                 <!-- record table -->
