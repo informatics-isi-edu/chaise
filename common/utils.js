@@ -1873,7 +1873,7 @@
         }
 
         function overrideDownloadClickBehavior() {
-            angular.element('body').on('click', "a.asset-permission", function (e) {
+            addClickListener("a.asset-permission", function (e) {
 
                 function hideSpinner() {
                     e.target.innerHTML = e.target.innerHTML.slice(0, e.target.innerHTML.indexOf(spinnerHTML));
@@ -1915,7 +1915,7 @@
         }
 
         function overrideExternalLinkBehavior() {
-            angular.element('body').on('click', "a.external-link", function (e) {
+            addClickListener('a.external-link', function (e) {
                 e.preventDefault();
 
                 // asset-permission will be appended via display annotation or by heuristic if no annotation
@@ -1935,7 +1935,43 @@
             });
         }
 
+        /**
+         * Will call the handler function upon clicking on the elements represented by selector
+         * @param {string} selector the selector string
+         * @param {function} handler  the handler callback function
+         */
+        function addClickListener(selector, handler) {
+            document.querySelector("body").addEventListener("click", function (e) {
+                if (e.target.closest(selector)) {
+                    handler(e);
+                }
+            });
+        }
+
+        /**
+         * Add add pollyfills for the functions that are not supported by all browsers.
+         */
+        function addPolyfills() {
+            if (!Element.prototype.matches) {
+              Element.prototype.matches = Element.prototype.msMatchesSelector ||
+                                          Element.prototype.webkitMatchesSelector;
+            }
+
+            if (!Element.prototype.closest) {
+              Element.prototype.closest = function(s) {
+                var el = this;
+
+                do {
+                  if (el.matches(s)) return el;
+                  el = el.parentElement || el.parentNode;
+                } while (el !== null && el.nodeType === 1);
+                return null;
+              };
+            }
+        }
+
         function setupHead() {
+            addPolyfills();
             addCanonicalTag();
             addCustomCSS();
             addTitle();
