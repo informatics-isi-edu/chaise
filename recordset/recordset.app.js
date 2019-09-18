@@ -35,20 +35,15 @@
         'ngSanitize',
         'ngAnimate',
         'duScroll',
-        'ui.bootstrap'])
+        'ui.bootstrap'
+    ])
 
-    .config(['$compileProvider', '$cookiesProvider', '$logProvider', '$uibTooltipProvider', 'ConfigUtilsProvider', function($compileProvider, $cookiesProvider, $logProvider, $uibTooltipProvider, ConfigUtilsProvider) {
-        // angular configurations
-        // allows unsafe prefixes to be downloaded
-        // full regex: "/^\s*(https?|ftp|mailto|tel|file|blob):/"
-        $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|blob):/);
-        $cookiesProvider.defaults.path = '/';
-        // Configure all tooltips to be attached to the body by default. To attach a
-        // tooltip on the element instead, set the `tooltip-append-to-body` attribute
-        // to `false` on the element.
-        $uibTooltipProvider.options({appendToBody: true});
-        //  Enable log system, if in debug mode
-        $logProvider.debugEnabled(ConfigUtilsProvider.$get().getConfigJSON().debug === true);
+    .config(['$compileProvider', '$cookiesProvider', '$logProvider', '$provide', '$uibTooltipProvider', 'ConfigUtilsProvider', function($compileProvider, $cookiesProvider, $logProvider, $provide, $uibTooltipProvider, ConfigUtilsProvider) {
+        ConfigUtilsProvider.$get().configureAngular($compileProvider, $cookiesProvider, $logProvider, $uibTooltipProvider);
+
+        $provide.decorator('$templateRequest', ['ConfigUtils', 'UriUtils', '$delegate', function (ConfigUtils, UriUtils, $delegate) {
+            return ConfigUtils.decorateTemplateRequest($delegate, UriUtils.chaiseDeploymentPath());
+        }]);
     }])
 
     // Register the 'recordsetModel' object, which can be accessed by other

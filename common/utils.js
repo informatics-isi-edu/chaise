@@ -1626,6 +1626,30 @@
             return getContextJSON().server ? getContextJSON().server.http : $http;
         };
 
+        function configureAngular(compileProvider, cookiesProvider, logProvider, uibTooltipProvider) {
+            // angular configurations
+            // allows unsafe prefixes to be downloaded
+            // full regex: "/^\s*(https?|ftp|mailto|tel|file|blob):/"
+            compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|blob):/);
+            cookiesProvider.defaults.path = '/';
+            logProvider.debugEnabled(getConfigJSON().debug === true);
+            // Configure all tooltips to be attached to the body by default. To attach a
+            // tooltip on the element instead, set the `tooltip-append-to-body` attribute
+            // to `false` on the element.
+            uibTooltipProvider.options({appendToBody: true});
+        }
+
+        function decorateTemplateRequest(delegate, chaiseDeploymentPath) {
+            // return a function that will be called when a template needs t be fetched
+            return function(templateUrl) {
+                var dcctx = getContextJSON();
+                console.log(templateUrl);
+                var versionedTemplateUrl = templateUrl + (templateUrl.indexOf(chaiseDeploymentPath) !== -1 ? "?v=" + dcctx.version : "");
+
+                return delegate(versionedTemplateUrl);
+            }
+        }
+
         /**
          * Given the context, returns the value of the chaise config property for system column heuristics
          * @params {String} context - the current app context
@@ -1647,6 +1671,8 @@
         }
 
         return {
+            configureAngular: configureAngular,
+            decorateTemplateRequest: decorateTemplateRequest,
             getContextJSON: getContextJSON,
             getConfigJSON: getConfigJSON,
             setConfigJSON: setConfigJSON,
@@ -1866,7 +1892,15 @@
 
         function addTitle() {
             var chaiseConfig = ConfigUtils.getConfigJSON();
-            document.getElementsByTagName('head')[0].getElementsByTagName('title')[0].innerHTML = chaiseConfig.headTitle;
+
+            var titleTag = document.head.getElementsByTagName('title')[0];
+            if (titleTag) {
+                titleTag.innerHTML = chaiseConfig.headTitle;
+            } else {
+                var title = document.createElement("title");
+                title.innerHTML = chaiseConfig.headTitle;
+                document.head.appendChild(title);
+            }
         }
 
         // sets the WID if it doesn't already exist

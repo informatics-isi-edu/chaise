@@ -48,13 +48,16 @@
          *      - doesn't matter if in an iframe or not, if true, hide it
          */
         var hideNavbar = (inIframe && hideNavbarParam !== false) || hideNavbarParam === true;
+        var metatag = document.head.querySelector("[name~=version][content]");
+        var version = metatag ? metatag.content : null;
 
         // initialize dcctx object
         $window.dcctx = {
             cid: appName,
             pid: MathUtils.uuid(),
             wid: $window.name,
-            hideNavbar: hideNavbar
+            hideNavbar: hideNavbar,
+            version: version
         }
         // set chaise configuration based on what is in `chaise-config.js` first
         ConfigUtils.setConfigJSON();

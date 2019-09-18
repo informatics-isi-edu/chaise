@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en" id="recordset">
     <head>
-        <meta charset="UTF-8">
         <title>Record Set App</title>
+        <meta charset="UTF-8">
+        %VERSION%
         <script src="/gtm-id.js"></script>
         %ASSETS%
     </head>
