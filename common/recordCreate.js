@@ -2,8 +2,8 @@
     'use strict';
     angular.module('chaise.recordcreate', ['chaise.errors','chaise.utils'])
 
-    .factory("recordCreate", ['$cookies', '$log', '$q', '$rootScope', '$window', 'AlertsService', 'DataUtils', 'logActions', 'messageMap', 'modalBox', 'modalUtils', 'Session', 'UriUtils',
-        function($cookies, $log, $q, $rootScope, $window, AlertsService, DataUtils, logActions, messageMap, modalBox, modalUtils, Session, UriUtils) {
+    .factory("recordCreate", ['$cookies', '$log', '$q', '$rootScope', '$window', 'AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'messageMap', 'modalBox', 'modalUtils', 'Session', 'UriUtils',
+        function($cookies, $log, $q, $rootScope, $window, AlertsService, DataUtils, ErrorService, logActions, messageMap, modalBox, modalUtils, Session, UriUtils) {
 
         var viewModel = {};
         var GV_recordEditModel = {},
@@ -245,7 +245,11 @@
                         // append link to end of alert.
                         if (exception instanceof ERMrest.DuplicateConflictError) {
                             exception.message += ' Click <a href="' + exception.duplicateReference.contextualize.detailed.appLink + '" target="_blank">here</a> to see the conflicting record that already exists.';
-                            AlertsService.addAlert(exception.message, 'error');
+                        }
+
+                        if (isModalUpdate) {
+                            // pure and binary add on record page, we want a popup error
+                            ErrorService.handleException(exception, true);
                         } else {
                             AlertsService.addAlert(exception.message, (exception instanceof ERMrest.NoDataChangedError ? 'warning' : 'error') );
                         }
