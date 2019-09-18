@@ -1827,13 +1827,13 @@
         function addTitle() {
             var chaiseConfig = ConfigUtils.getConfigJSON();
 
-            var titleTag = document.getElementsByTagName('head')[0].getElementsByTagName('title')[0];
+            var titleTag = document.head.getElementsByTagName('title')[0];
             if (titleTag) {
                 titleTag.innerHTML = chaiseConfig.headTitle;
             } else {
                 var title = document.createElement("title");
                 title.innerHTML = chaiseConfig.headTitle;
-                document.getElementsByTagName('head')[0].appendChild(title);
+                document.head.appendChild(title);
             }
         }
 
