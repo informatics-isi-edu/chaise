@@ -465,11 +465,25 @@
             delete editRecordRequests[id];
         }
 
+        // to make sure we're adding the watcher just once
+        var hasTheMainContainerPaddingWatcher = false;
+
         /*** Container Heights and other styling ***/
         function setMainContainerHeight() {
             // if these values are not set yet, don't set the height
             if ($scope.fixedContentHeight !== undefined && !isNaN($scope.fixedContentHeight)) {
                 UiUtils.setDisplayContainerHeight($scope.container, $scope.fixedContentHeight);
+
+                // NOTE this function is being called here because this is the
+                // first place that we can be sure that the record-container elements
+                // are available and visible. This is because of the ng-if that we have
+                // on the top-panel container. If we call this function in the watch below,
+                // it will throw an error.
+                if (!hasTheMainContainerPaddingWatcher) {
+                    // make sure the padding of main-container is correctly set
+                    UiUtils.watchForMainContainerPadding($scope, $document[0].querySelector(".record-container"));
+                    hasTheMainContainerPaddingWatcher = true;
+                }
             }
         };
 

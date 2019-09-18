@@ -1221,7 +1221,7 @@
         };
     }])
 
-    .factory("UiUtils", ['dataFormats', '$document', '$log', '$window', function(dataFormats, $document, $log, $window) {
+    .factory("UiUtils", ['dataFormats', '$document', '$log', '$timeout', '$window', function(dataFormats, $document, $log, $timeout, $window) {
 
         /**
          * Takes a timestamp in the form of milliseconds since epoch and converts it into a relative string if
@@ -1397,20 +1397,22 @@
          * @param {DOMElement} container - the main container to fix the height of
          * @param {int} fixedContentHeight - the height of fixed content
          * @param {DOCElement=} parentContainer - the parent container (used to calculate the available height)
-         **/
+         */
         function setDisplayContainerHeight(container, fixedContentHeight, parentContainer) {
             try {
                 // we're setting the height based on the viewport, so we need the
                 // whole viewport height
                 var docHeight = $window.innerHeight;
 
-                // if parentContainerHeight is not passed,
-                //   then the whole document is the parent
-                // if parentContainer is passed and is body element (the whole page),
+                if (parentContainer == null) {
+                    parentContainer = $document[0].querySelector("body");
+                }
+
+                // if parentContainer is body element (the whole page),
                 //   we should use the window.innerHeight instead because parentContainer.offsetHeight is based on content height
                 //   while the window.innerHeight is the actual available viewport height
                 var parentContainerHeight;
-                if (parentContainer == null || parentContainer == $document[0].querySelector("body")) {
+                if (parentContainer == $document[0].querySelector("body")) {
                     parentContainerHeight = docHeight;
                 } else {
                     parentContainerHeight = parentContainer.offsetHeight;
@@ -1419,7 +1421,8 @@
                 // find the container's usable height
                 var containerHeight = ((parentContainerHeight - fixedContentHeight)/docHeight) * 100;
 
-                if (containerHeight < 15 && parentContainer != null) {
+                // TODO this should be changed to use pixel base size instead
+                if (containerHeight < 15) {
                     parentContainer.style.overflowY = "auto";
                     container.style.height = "unset";
                 } else {
@@ -1460,6 +1463,21 @@
             }
         }
 
+        /**
+         * Make sure the top right panel and main container are aligned.
+         * They can be missaligned if the scrollbar is visible and takes space.
+         * TODO we might want to improve the performance of this.
+         * Currently it's running on every digest cycle.
+         */
+        function watchForMainContainerPadding(scope, parentContainer) {
+            var mainContainer = parentContainer.querySelector(".main-container");
+            var topRightPanel = parentContainer.querySelector(".top-right-panel");
+            scope.$watch(function () {
+                return mainContainer.clientWidth - topRightPanel.clientWidth;
+            }, function (padding) {
+                mainContainer.style.paddingRight = padding + "px";
+            });
+        }
 
         /**
          * Given an element and class name, will remove the class name from element.
@@ -1496,7 +1514,8 @@
             setFooterStyle: setFooterStyle,
             setDisplayContainerHeight: setDisplayContainerHeight,
             addClass: addClass,
-            removeClass: removeClass
+            removeClass: removeClass,
+            watchForMainContainerPadding: watchForMainContainerPadding
         }
     }])
 
@@ -1675,7 +1694,6 @@
             // return a function that will be called when a template needs t be fetched
             return function(templateUrl) {
                 var dcctx = getContextJSON();
-                console.log(templateUrl);
                 var versionedTemplateUrl = templateUrl + (templateUrl.indexOf(chaiseDeploymentPath) !== -1 ? "?v=" + dcctx.version : "");
 
                 return delegate(versionedTemplateUrl);
