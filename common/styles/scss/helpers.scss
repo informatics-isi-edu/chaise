@@ -46,6 +46,9 @@
     -ms-user-select: none;
     user-select: none;
 
+    // allow the caption to wrap
+    white-space: normal;
+
     &:before {
         content: "\e025";
         font-family: 'Glyphicons Halflings';
@@ -54,5 +57,32 @@
 
     &:hover {
         text-decoration: none;
+    }
+}
+
+@mixin chaise-btn() {
+    @include border-radius($btn-border-radius);
+    cursor: pointer;
+    display: inline-block;
+    height: $btn-height;
+    min-width: $btn-height;
+    border: $btn-border-width solid;
+    padding: $btn-padding-y $btn-padding-x;
+    text-align: center;
+    vertical-align: middle;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    white-space: nowrap;
+}
+
+@mixin chaise-btn-primary() {
+    color: $white-color;
+    background-color: $primary-color;
+    border-color: $black-color;
+
+    &:focus {
+        background-color: darken($primary-color, 10%);
     }
 }

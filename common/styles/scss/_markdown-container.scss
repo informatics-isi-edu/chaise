@@ -46,6 +46,11 @@
     }
 
     .download {
+        @include chaise-btn();
+        @include chaise-btn-primary();
+    }
+
+    .download-alt {
         @include download-btn();
     }
 
