@@ -39,26 +39,10 @@
     ])
 
     .config(['$compileProvider', '$cookiesProvider', '$logProvider', '$provide', '$uibTooltipProvider', 'ConfigUtilsProvider', function($compileProvider, $cookiesProvider, $logProvider, $provide, $uibTooltipProvider, ConfigUtilsProvider) {
-        // angular configurations
-        // allows unsafe prefixes to be downloaded
-        // full regex: "/^\s*(https?|ftp|mailto|tel|file|blob):/"
-        $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|blob):/);
-        $cookiesProvider.defaults.path = '/';
-        // Configure all tooltips to be attached to the body by default. To attach a
-        // tooltip on the element instead, set the `tooltip-append-to-body` attribute
-        // to `false` on the element.
-        $uibTooltipProvider.options({appendToBody: true});
-        //  Enable log system, if in debug mode
-        $logProvider.debugEnabled(ConfigUtilsProvider.$get().getConfigJSON().debug === true);
-        // decorate the template request service to add version info the the request url for invalidating cache
-        $provide.decorator('$templateRequest', ['ConfigUtils', '$delegate', function (ConfigUtils, $delegate) {
-            // return a function that will be called when a template needs t be fetched
-            return function(templateUrl) {
-                var dcctx = ConfigUtils.getContextJSON();
-                var versionedTemplateUrl = templateUrl + (templateUrl.indexOf('chaise') !== -1 ? "?v=" + dcctx.version : "");
+        ConfigUtilsProvider.$get().configureAngular($compileProvider, $cookiesProvider, $logProvider, $uibTooltipProvider);
 
-                return $delegate(versionedTemplateUrl);
-            }
+        $provide.decorator('$templateRequest', ['ConfigUtils', 'UriUtils', '$delegate', function (ConfigUtils, UriUtils, $delegate) {
+            return ConfigUtils.decorateTemplateRequest($delegate, UriUtils.chaiseDeploymentPath());
         }]);
     }])
 

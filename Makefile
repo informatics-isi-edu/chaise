@@ -508,7 +508,7 @@ MIN=$(DIST)/$(PROJ).min.js
 
 .PHONY: all
 # all should just do the minimal needed to deploy chaise
-all: $(HTML)
+all: cleanversion $(HTML)
 
 .PHONY: build
 build: $(PKG) $(MIN) $(HTML) $(gitversion)
@@ -545,6 +545,11 @@ clean:
 	rm -rf $(DIST)
 	rm -f .make-*
 
+# Rule to clean project directory
+.PHONY: cleanversion
+cleanversion:
+	rm -f .make-add-version-tag
+
 # Rule to clean the dependencies too
 .PHONY: distclean
 distclean: clean
@@ -561,33 +566,33 @@ search/index.html: search/index.html.in .make-asset-block .make-template-block
 		-e '/%TEMPLATES%/ {' -e 'r .make-template-block' -e 'd' -e '}' \
 		search/index.html.in common/templates/noscript.html > search/index.html
 
-login/index.html: login/index.html.in .add-version-tag .make-asset-block
-	sed -e '/%VERSION%/ {' -e 'r .make-version' -e 'd' -e '}' \
+login/index.html: login/index.html.in .make-add-version-tag .make-asset-block
+	sed -e '/%VERSION%/ {' -e 'r .make-add-version-tag' -e 'd' -e '}' \
 		-e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
 		login/index.html.in common/templates/noscript.html > login/index.html
 
-record/index.html: record/index.html.in .add-version-tag .make-record-asset-block
-	sed -e '/%VERSION%/ {' -e 'r .make-version' -e 'd' -e '}' \
+record/index.html: record/index.html.in .make-add-version-tag .make-record-asset-block
+	sed -e '/%VERSION%/ {' -e 'r .make-add-version-tag' -e 'd' -e '}' \
 		-e '/%ASSETS%/ {' -e 'r .make-record-asset-block' -e 'd' -e '}' \
 		record/index.html.in common/templates/noscript.html > record/index.html
 
-recordset/index.html: recordset/index.html.in .add-version-tag .make-rs-asset-block
-	sed -e '/%VERSION%/ {' -e 'r .make-version' -e 'd' -e '}' \
+recordset/index.html: recordset/index.html.in .make-add-version-tag .make-rs-asset-block
+	sed -e '/%VERSION%/ {' -e 'r .make-add-version-tag' -e 'd' -e '}' \
 		-e '/%ASSETS%/ {' -e 'r .make-rs-asset-block' -e 'd' -e '}' \
 		recordset/index.html.in common/templates/noscript.html > recordset/index.html
 
-viewer/index.html: viewer/index.html.in .add-version-tag .make-viewer-asset-block
-	sed -e '/%VERSION%/ {' -e 'r .make-version' -e 'd' -e '}' \
+viewer/index.html: viewer/index.html.in .make-add-version-tag .make-viewer-asset-block
+	sed -e '/%VERSION%/ {' -e 'r .make-add-version-tag' -e 'd' -e '}' \
 		-e '/%ASSETS%/ {' -e 'r .make-viewer-asset-block' -e 'd' -e '}' \
 		viewer/index.html.in common/templates/noscript.html > viewer/index.html
 
-recordedit/index.html: recordedit/index.html.in .add-version-tag .make-de-asset-block
-	sed -e '/%VERSION%/ {' -e 'r .make-version' -e 'd' -e '}' \
+recordedit/index.html: recordedit/index.html.in .make-add-version-tag .make-de-asset-block
+	sed -e '/%VERSION%/ {' -e 'r .make-add-version-tag' -e 'd' -e '}' \
 		-e '/%ASSETS%/ {' -e 'r .make-de-asset-block' -e 'd' -e '}' \
 		recordedit/index.html.in common/templates/noscript.html > recordedit/index.html
 
-recordedit/mdHelp.html: recordedit/mdHelp.html.in .add-version-tag .make-md-asset-block
-	sed -e '/%VERSION%/ {' -e 'r .make-version' -e 'd' -e '}' \
+recordedit/mdHelp.html: recordedit/mdHelp.html.in .make-add-version-tag .make-md-asset-block
+	sed -e '/%VERSION%/ {' -e 'r .make-add-version-tag' -e 'd' -e '}' \
 		-e '/%ASSETS%/ {' -e 'r .make-md-asset-block' -e 'd' -e '}' \
 		recordedit/mdHelp.html.in common/templates/noscript.html > recordedit/mdHelp.html
 
@@ -757,7 +762,7 @@ $(JS_CONFIG): chaise-config-sample.js
 
 # Rule for installing for normal deployment
 .PHONY: install dont_install_in_root
-install: $(HTML) dont_install_in_root gitversion
+install: cleanversion $(HTML) dont_install_in_root gitversion
 	rsync -avz --exclude='.*' --exclude='$(MODULES)' --exclude='wiki-images' --exclude=/chaise-config.js . $(CHAISEDIR)
 
 .PHONY: install-w-config dont_install_in_root

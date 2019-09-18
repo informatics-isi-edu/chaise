@@ -25,18 +25,6 @@
         'ui.bootstrap'
     ])
 
-    .config(['$provide', function($provide) {
-        $provide.decorator('$templateRequest', ['ConfigUtils', '$delegate', function (ConfigUtils, $delegate) {
-            // return a function that will be called when a template needs to be fetched
-            return function(templateUrl) {
-                var dcctx = ConfigUtils.getContextJSON();
-                var versionedTemplateUrl = templateUrl + (templateUrl.indexOf('chaise') !== -1 ? "?v=" + dcctx.version : "");
-
-                return $delegate(versionedTemplateUrl);
-            }
-        }])
-    }])
-
     .run(['appName', 'ConfigUtils', 'ERMrest', 'headInjector', 'MathUtils', 'UriUtils', '$rootScope', '$window', function(appName, ConfigUtils, ERMrest, headInjector, MathUtils, UriUtils, $rootScope, $window) {
         headInjector.setWindowName();
 
