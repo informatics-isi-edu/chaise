@@ -32,6 +32,12 @@
         'chaise.footer'
     ])
 
+    .config(['$provide', function($provide) {
+        $provide.decorator('$templateRequest', ['ConfigUtils', 'UriUtils', '$delegate', function (ConfigUtils, UriUtils, $delegate) {
+            return ConfigUtils.decorateTemplateRequest($delegate, UriUtils.chaiseDeploymentPath());
+        }]);
+    }])
+
     .run(['headInjector', 'UiUtils', 'UriUtils', function (headInjector, UiUtils, UriUtils) {
         UriUtils.setOrigin();
         // This is to allow the dropdown button to open at the top/bottom depending on the space available
