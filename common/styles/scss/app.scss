@@ -247,6 +247,7 @@ html {
         color: #333333;
         font-weight: normal;
         font-size: 1rem;
+        word-wrap: break-word;
     }
 
     // record and recordedit column values
@@ -325,17 +326,17 @@ html {
     .top-panel-container {
         padding-top: $viewport-margin;
         padding-right: $viewport-margin;
-        margin-left: $viewport-margin;
 
         .top-flex-panel {
-            -webkit-box-flex: 1;
+            position: relative;
             display: flex;
             flex: 1;
-            position: relative;
+            -webkit-box-flex: 1;
 
             .top-left-panel {
                 position: relative;
                 max-width: 50vw;
+                margin-left: $viewport-margin;
 
                 &.open-panel {
                     flex: 0;
@@ -351,6 +352,14 @@ html {
                     width: 0;
                     flex-basis: 0 !important;
                     display: none;
+
+                    & + .top-right-panel {
+                        // NOTE this is done this way to make sure we're implementing
+                        // spacing the same way in top and bottom panels.
+                        // This is becuase we have js code that will look at the
+                        // clientWidth and the width of these two panels should be the same.
+                        padding-left: $viewport-margin;
+                    }
                 }
             }
 
@@ -366,7 +375,6 @@ html {
         display: flex;
         flex: 1;
         -webkit-box-flex: 1;
-        margin-top: 0px;
 
         .side-panel-resizable {
             position: relative;
@@ -395,8 +403,15 @@ html {
                     width: 0;
                 }
 
-                & + .main-container .main-body {
+                & + .main-container {
+                    // NOTE the padding is here and not on the parent because
+                    // of the footer behaviour that we want.
+                    // If we move it up, then the footer won't be displayed properly
+                    // when the side-panel is closed
                     padding-left: $viewport-margin;
+                    footer.position-relative {
+                        margin-left: -$viewport-margin;
+                    }
                 }
             }
 

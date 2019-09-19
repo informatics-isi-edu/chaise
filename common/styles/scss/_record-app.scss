@@ -31,23 +31,32 @@
                     }
 
                     .entity-display-header {
-                        display: flex;
-                        justify-content: space-between;
+
                         position: relative;
 
                         #page-title {
                             margin: 0px;
                         }
 
-                        .record-action-btns-container {
-                            min-width: 350px;
+                        @include for-predefined-size(sm) {
+                            display: flex;
+                            .record-action-btns-container {
+                                min-width: 350px;
 
-                            .record-action-btns {
-                                position: absolute;
-                                bottom: 0;
-                                right: 0;
+                                .record-action-btns {
+                                    position: absolute;
+                                    bottom: 0;
+                                    right: 0;
+                                }
                             }
                         }
+
+                        @include for-predefined-size(xs) {
+                            .record-action-btns-container {
+                                float: right;
+                            }
+                        }
+
                     } // end .entity-display-header
                 } // end .title
 

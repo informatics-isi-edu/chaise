@@ -1239,6 +1239,9 @@
                         setRecordsetHeight();
                     }
                 });
+
+                // make sur the padding of main-container is correctly set
+                UiUtils.watchForMainContainerPadding(scope, scope.parentContainer);
             }
 
             // initialize the height of main-container and facet container

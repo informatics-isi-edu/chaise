@@ -1221,7 +1221,7 @@
         };
     }])
 
-    .factory("UiUtils", ['dataFormats', '$document', '$log', '$window', function(dataFormats, $document, $log, $window) {
+    .factory("UiUtils", ['dataFormats', '$document', '$log', '$timeout', '$window', function(dataFormats, $document, $log, $timeout, $window) {
 
         /**
          * Takes a timestamp in the form of milliseconds since epoch and converts it into a relative string if
@@ -1397,20 +1397,22 @@
          * @param {DOMElement} container - the main container to fix the height of
          * @param {int} fixedContentHeight - the height of fixed content
          * @param {DOCElement=} parentContainer - the parent container (used to calculate the available height)
-         **/
+         */
         function setDisplayContainerHeight(container, fixedContentHeight, parentContainer) {
             try {
                 // we're setting the height based on the viewport, so we need the
                 // whole viewport height
                 var docHeight = $window.innerHeight;
 
-                // if parentContainerHeight is not passed,
-                //   then the whole document is the parent
-                // if parentContainer is passed and is body element (the whole page),
+                if (parentContainer == null) {
+                    parentContainer = $document[0].querySelector("body");
+                }
+
+                // if parentContainer is body element (the whole page),
                 //   we should use the window.innerHeight instead because parentContainer.offsetHeight is based on content height
                 //   while the window.innerHeight is the actual available viewport height
                 var parentContainerHeight;
-                if (parentContainer == null || parentContainer == $document[0].querySelector("body")) {
+                if (parentContainer == $document[0].querySelector("body")) {
                     parentContainerHeight = docHeight;
                 } else {
                     parentContainerHeight = parentContainer.offsetHeight;
@@ -1419,7 +1421,8 @@
                 // find the container's usable height
                 var containerHeight = ((parentContainerHeight - fixedContentHeight)/docHeight) * 100;
 
-                if (containerHeight < 15 && parentContainer != null) {
+                // TODO this should be changed to use pixel base size instead
+                if (containerHeight < 15) {
                     parentContainer.style.overflowY = "auto";
                     container.style.height = "unset";
                 } else {
@@ -1460,6 +1463,21 @@
             }
         }
 
+        /**
+         * Make sure the top right panel and main container are aligned.
+         * They can be missaligned if the scrollbar is visible and takes space.
+         * TODO we might want to improve the performance of this.
+         * Currently it's running on every digest cycle.
+         */
+        function watchForMainContainerPadding(scope, parentContainer) {
+            var mainContainer = parentContainer.querySelector(".main-container");
+            var topRightPanel = parentContainer.querySelector(".top-right-panel");
+            scope.$watch(function () {
+                return mainContainer.clientWidth - topRightPanel.clientWidth;
+            }, function (padding) {
+                mainContainer.style.paddingRight = padding + "px";
+            });
+        }
 
         /**
          * Given an element and class name, will remove the class name from element.
@@ -1496,7 +1514,8 @@
             setFooterStyle: setFooterStyle,
             setDisplayContainerHeight: setDisplayContainerHeight,
             addClass: addClass,
-            removeClass: removeClass
+            removeClass: removeClass,
+            watchForMainContainerPadding: watchForMainContainerPadding
         }
     }])
 
@@ -1970,7 +1989,7 @@
         }
 
         function overrideDownloadClickBehavior() {
-            angular.element('body').on('click', "a.asset-permission", function (e) {
+            addClickListener("a.asset-permission", function (e) {
 
                 function hideSpinner() {
                     e.target.innerHTML = e.target.innerHTML.slice(0, e.target.innerHTML.indexOf(spinnerHTML));
@@ -2012,7 +2031,7 @@
         }
 
         function overrideExternalLinkBehavior() {
-            angular.element('body').on('click', "a.external-link", function (e) {
+            addClickListener('a.external-link', function (e) {
                 e.preventDefault();
 
                 // asset-permission will be appended via display annotation or by heuristic if no annotation
@@ -2033,9 +2052,45 @@
         }
 
         /**
-         * Will return a promise that when resolved we can be sure that the setup is done.
+         * Will call the handler function upon clicking on the elements represented by selector
+         * @param {string} selector the selector string
+         * @param {function} handler  the handler callback function
+         */
+        function addClickListener(selector, handler) {
+            document.querySelector("body").addEventListener("click", function (e) {
+                if (e.target.closest(selector)) {
+                    handler(e);
+                }
+            });
+        }
+
+        /**
+         * Add add pollyfills for the functions that are not supported by all browsers.
+         */
+        function addPolyfills() {
+            if (!Element.prototype.matches) {
+              Element.prototype.matches = Element.prototype.msMatchesSelector ||
+                                          Element.prototype.webkitMatchesSelector;
+            }
+
+            if (!Element.prototype.closest) {
+              Element.prototype.closest = function(s) {
+                var el = this;
+
+                do {
+                  if (el.matches(s)) return el;
+                  el = el.parentElement || el.parentNode;
+                } while (el !== null && el.nodeType === 1);
+                return null;
+              };
+            }
+        }
+
+        /**
+         * Will return a promise that is resolved when the setup is done
          */
         function setupHead() {
+            addPolyfills();
             addCanonicalTag();
             addTitle();
             setWindowName();
