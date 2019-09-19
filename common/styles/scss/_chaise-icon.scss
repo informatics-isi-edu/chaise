@@ -40,6 +40,10 @@
     content: '\00A5';
 }
 
+.chaise-icon.chaise-info::before {
+    content: '\00A6';
+}
+
 .chaise-icon.chaise-view-details::before {
     content: '\00A8';
 }

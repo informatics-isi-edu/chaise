@@ -81,7 +81,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
         // because of pcid and ppid we cannot test the whole url
         expect(subtitleEl.getAttribute("href")).toContain(expectedLink, "Title of result page doesn't have the expected link.");
-        expect(chaisePage.recordEditPage.getEntitySubtitleTooltip()).toBe(tableParams.table_comment, "Entity subtitle tooltip is incorrect.");
+        expect(subtitleEl.getAttribute('uib-tooltip')).toBe(tableParams.table_comment, "Entity subtitle tooltip is incorrect.");
     });
 
     it("should render columns which are inside the visible columns annotation if defined; Default all are visible", function() {

@@ -1,7 +1,7 @@
 <table class="table table-fixed-layout" id="tblRecord">
     <tr ng-repeat="col in columnModels" ng-if="showColumn($index) || showInlineTable($index)" id="{{'row-' + col.column.name}}" ng-class="{'hide-border': $root.hideColumnHeaders}" class="row">
         <td ng-hide="$root.hideColumnHeaders" class="entity-key col-xs-2">
-            <span class="column-displayname" ng-attr-uib-tooltip="{{::(col.column.comment) ? col.column.comment : undefined}}" ng-attr-tooltip-placement="{{::(col.column.comment) ? 'right' : undefined}}">
+            <span class="column-displayname" ng-class="{'chaise-icon-for-tooltip': col.column.comment}" ng-attr-uib-tooltip="{{::(col.column.comment) ? col.column.comment : undefined}}" tooltip-placement="right">
                 <span ng-if="::col.column.displayname.isHTML" ng-bind-html="::col.column.displayname.value"></span>
                 <span ng-if="::!col.column.displayname.isHTML" ng-bind="::col.column.displayname.value"></span>
             </span>

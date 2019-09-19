@@ -10,9 +10,9 @@
             <span>Cancel</span>
         </button>
     </span>
-    <h2 class="modal-title">Select
-        <span ng-if="::ctrl.tableModel.tableDisplayName.isHTML" ng-bind-html="::ctrl.tableModel.tableDisplayName.value" ng-attr-tooltip-placement="bottom" ng-attr-uib-tooltip="{{::ctrl.tableModel.tableComment ? ctrl.tableModel.tableComment : undefined}}"></span>
-        <span ng-if="::!ctrl.tableModel.tableDisplayName.isHTML" ng-bind="::ctrl.tableModel.tableDisplayName.value" ng-attr-tooltip-placement="bottom" ng-attr-uib-tooltip="{{::ctrl.tableModel.tableComment ? ctrl.tableModel.tableComment : undefined}}"></span>
+    <h2 class="modal-title" ng-class="{'chaise-icon-for-tooltip': ctrl.tableModel.tableComment}" ng-attr-uib-tooltip="{{::ctrl.tableModel.tableComment ? ctrl.tableModel.tableComment : undefined}}" tooltip-placement="bottom-right" style="width: fit-content;">Select
+        <span ng-if="::ctrl.tableModel.tableDisplayName.isHTML" ng-bind-html="::ctrl.tableModel.tableDisplayName.value"></span>
+        <span ng-if="::!ctrl.tableModel.tableDisplayName.isHTML" ng-bind="::ctrl.tableModel.tableDisplayName.value"></span>
     </h2>
 </div>
 <div class="modal-body">

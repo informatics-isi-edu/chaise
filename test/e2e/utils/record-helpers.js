@@ -541,9 +541,12 @@ exports.testPresentation = function (tableParams) {
         for (var i = 0; i < tableParams.inline_columns.length; i++) {
             var p = tableParams.inline_columns[i];
             p.baseTable = tableParams.subTitle;
-            describe ("for " + p.title + ", ", function (){
-                exports.testRelatedTable(p, pageReadyCondition);
-            });
+
+            // (function (params) {
+                describe ("for " + p.title + ", ", function () {
+                    exports.testRelatedTable(p, pageReadyCondition);
+                });
+            // })(p);
         }
     });
 };
@@ -582,7 +585,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
     beforeAll(function() {
         pageReadyCondition();
 
-        currentEl = params.inLine ? chaisePage.recordPage.getEntityRelatedTable(params.displayname) : chaisePage.recordPage.getRelatedTableAccordion(params.displayname);
+        currentEl = params.isInline ? chaisePage.recordPage.getEntityRelatedTable(params.displayname) : chaisePage.recordPage.getRelatedTableAccordion(params.displayname);
 
         markdownToggleLink = chaisePage.recordPage.getToggleDisplayLink(params.displayname, params.isInline);
     });

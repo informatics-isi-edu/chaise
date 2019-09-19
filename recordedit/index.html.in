@@ -28,9 +28,9 @@
                                         <span>{{ (form.recordEditModel.rows.length > 1) ? " Records" : " Record" }}</span>
                                 </h1>
                                 <h3 id="page-subtitle">
-                                    <a ng-href="{{::form.referenceTableApplink()}}">
-                                        <span class="re-subtitle" ng-if="tableDisplayName.isHTML" ng-bind-html="tableDisplayName.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}"></span>
-                                        <span class="re-subtitle" ng-if="!tableDisplayName.isHTML" ng-bind="tableDisplayName.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}"></span>
+                                    <a ng-href="{{::form.referenceTableApplink()}}" ng-class="{'chaise-icon-for-tooltip': tableComment}" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}" tooltip-placement="right">
+                                        <span class="re-subtitle" ng-if="tableDisplayName.isHTML" ng-bind-html="tableDisplayName.value" ></span>
+                                        <span class="re-subtitle" ng-if="!tableDisplayName.isHTML" ng-bind="tableDisplayName.value"></span>
                                     </a>
                                 </h3>
                             </div>
@@ -96,7 +96,7 @@
                                                 <tr class="shift-form">
                                                     <td ng-style="form.captionColumnWidth" class="entity-key">
                                                         <span ng-if="::form.isRequired(columnIndex);" class="text-danger"><b>*</b></span>
-                                                        <span class="column-displayname" ng-attr-tooltip-placement="{{::(column.comment) ? 'right' : undefined}}" ng-attr-uib-tooltip="{{::(column.comment) ? column.comment : undefined}}">
+                                                        <span class="column-displayname" ng-class="{'chaise-icon-for-tooltip': column.comment}" ng-attr-uib-tooltip="{{::(column.comment) ? column.comment : undefined}}" tooltip-placement="right">
                                                             <span ng-if="::column.displayname.isHTML" ng-bind-html="::column.displayname.value"></span>
                                                             <span ng-if="::!column.displayname.isHTML" ng-bind="::column.displayname.value"></span>
                                                         </span>
@@ -282,9 +282,9 @@
                                     <span>{{ form.resultsetModel.rowValues.length }}/{{ form.resultsetModel.pageLimit }} Records <span ng-if="::!form.editMode">Created</span><span ng-if="::form.editMode">Updated</span> Successfully</span>
                                 </h1>
                                 <h3 id="page-subtitle">
-                                    <a ng-href="{{::form.resultsetRecordsetLink}}">
-                                        <span class="re-subtitle" ng-if="tableDisplayName.isHTML" ng-bind-html="tableDisplayName.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}"></span>
-                                        <span class="re-subtitle" ng-if="!tableDisplayName.isHTML" ng-bind="tableDisplayName.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}"></span>
+                                    <a ng-href="{{::form.resultsetRecordsetLink}}" ng-class="{'chaise-icon-for-tooltip': tableComment}" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}" tooltip-placement="right">
+                                        <span class="re-subtitle" ng-if="tableDisplayName.isHTML" ng-bind-html="tableDisplayName.value"></span>
+                                        <span class="re-subtitle" ng-if="!tableDisplayName.isHTML" ng-bind="tableDisplayName.value"></span>
                                     </a>
                                 </h3>
                             </div>

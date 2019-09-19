@@ -164,8 +164,9 @@ describe('Edit multiple existing record,', function() {
                 it("should have the table displayname as part of the entity subtitle witht eh proper tooltip.", function() {
                     // if submit button is visible, this means the recordedit page has loaded
                     chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
-                        expect(chaisePage.recordEditPage.getEntitySubtitleElement().getText()).toBe(tableParams.table_name, "Entity subtitle is incorrect.");
-                        expect(chaisePage.recordEditPage.getEntitySubtitleTooltip()).toBe(tableParams.tableComment, "Subtitle comment is incorrect.");
+                        var subtitleEl = chaisePage.recordEditPage.getEntitySubtitleElement();
+                        expect(subtitleEl.getText()).toBe(tableParams.table_name, "Entity subtitle is incorrect.");
+                        expect(subtitleEl.getAttribute('uib-tooltip')).toBe(tableParams.tableComment, "Subtitle comment is incorrect.");
                     });
                 });
 

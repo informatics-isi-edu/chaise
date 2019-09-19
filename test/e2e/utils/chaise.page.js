@@ -243,11 +243,6 @@ var recordEditPage = function() {
         return element(by.css('.recordedit-bookmark-container #page-subtitle > a'));
     };
 
-    this.getEntitySubtitleTooltip = function () {
-        // the .re-subtitle element might not exist, that's why it's different from other tooltips
-        return element(by.css('.recordedit-bookmark-container #page-subtitle .re-subtitle')).getAttribute('uib-tooltip');
-    };
-
     this.getResultsetTitleElement = function() {
         return element(by.css('.resultset-bookmark-container #page-title'));
     };
@@ -629,7 +624,7 @@ var recordPage = function() {
     };
 
     this.getEntitySubTitleTooltip = function () {
-        return this.getEntitySubTitleElement().all(by.css("span")).first().getAttribute('uib-tooltip');
+        return this.getEntitySubTitleElement().element(by.css(".chaise-icon-for-tooltip")).getAttribute('uib-tooltip');
     };
 
     this.getEntitySubTitleLink = function () {

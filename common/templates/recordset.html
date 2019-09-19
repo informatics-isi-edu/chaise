@@ -22,9 +22,9 @@
                         <div class="pull-left">
                             <!-- TODO UX-M should change to class -->
                             <h1 id="page-title">
-                                <span ng-if="::vm.tableDisplayName.isHTML" ng-bind-html="vm.tableDisplayName.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::vm.tableComment ? vm.tableComment : undefined}}"></span>
-                                <span ng-if="::!vm.tableDisplayName.isHTML" ng-bind="vm.tableDisplayName.value" ng-attr-tooltip-placement="right" ng-attr-uib-tooltip="{{::vm.tableComment ? vm.tableComment : undefined}}"></span>
-                                <span ng-if="vm.reference && vm.reference.location.version" class="h3-class" tooltip-placement="bottom-left" uib-tooltip="{{::tooltip.versionTime}} {{versionDate()}}">({{versionDisplay()}})</span>
+                                <span ng-if="::vm.tableDisplayName.isHTML" ng-bind-html="vm.tableDisplayName.value" ng-class="{'chaise-icon-for-tooltip': vm.tableComment}" ng-attr-uib-tooltip="{{::vm.tableComment ? vm.tableComment : undefined}}" tooltip-placement="right"></span>
+                                <span ng-if="::!vm.tableDisplayName.isHTML" ng-bind="vm.tableDisplayName.value" ng-class="{'chaise-icon-for-tooltip': vm.tableComment}" ng-attr-uib-tooltip="{{::vm.tableComment ? vm.tableComment : undefined}}" tooltip-placement="right"></span>
+                                <small ng-if="vm.reference && vm.reference.location.version" class="h3-class" tooltip-placement="bottom-left" uib-tooltip="{{::tooltip.versionTime}} {{versionDate()}}">({{versionDisplay()}})</small>
                             </h1>
                         </div>
                         <div class="pull-right">

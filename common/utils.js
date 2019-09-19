@@ -1675,7 +1675,6 @@
             // return a function that will be called when a template needs t be fetched
             return function(templateUrl) {
                 var dcctx = getContextJSON();
-                console.log(templateUrl);
                 var versionedTemplateUrl = templateUrl + (templateUrl.indexOf(chaiseDeploymentPath) !== -1 ? "?v=" + dcctx.version : "");
 
                 return delegate(versionedTemplateUrl);

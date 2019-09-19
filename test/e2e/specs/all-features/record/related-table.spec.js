@@ -23,7 +23,7 @@ var testParams = {
         "table_w_invalid_row_markdown_pattern" // related entity with invalid row_markdown_pattern
     ],
     tocHeaders: [
-        "Main", "booking (6)", "schedule (2)", "media (1)", "association_table (1)",
+        "Summary", "booking (6)", "schedule (2)", "media (1)", "association_table (1)",
         "accommodation_image (2+)", "association_table_markdown (1)", "related_table_2 (1)",
         "table_w_aggregates (2)", "table_w_invalid_row_markdown_pattern (1)"
     ],
