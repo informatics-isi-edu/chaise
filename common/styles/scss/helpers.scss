@@ -86,3 +86,17 @@
         background-color: darken($primary-color, 10%);
     }
 }
+
+
+// can be used to write media-queries
+@mixin for-predefined-size($size) {
+    @if $size == xs {
+        @media (max-width: 768px) { @content; }
+    } @else if $size == sm {
+        @media (min-width: 768px) { @content; }
+    } @else if $size == md {
+        @media (min-width: 992px) { @content; }
+    } @else if $size == lg {
+        @media (min-width: 1200px) { @content; }
+    }
+}
