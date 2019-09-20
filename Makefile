@@ -17,8 +17,6 @@ BIN=$(MODULES)/.bin
 
 ### Protractor scripts
 ## Sequential protractor scripts
-# Legacy apps tests
-E2Esearch=test/e2e/specs/default-config/search/presentation.conf.js
 # Recordedit tests
 E2EDIrecordAdd=test/e2e/specs/all-features-confirmation/recordedit/add.conf.js
 E2EDIrecordEditMultiColTypes=test/e2e/specs/default-config/recordedit/multi-col-types.conf.js
@@ -64,7 +62,6 @@ Manualrecordset=test/manual/specs/recordset.conf.js
 
 
 NAVBAR_TESTS=$(E2Enavbar) $(E2EnavbarHeadTitle) $(E2EnavbarCatalogConfig)
-SEARCH_TESTS=$(E2Esearch)
 RECORDSET_TESTS=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit) $(E2EDrecordsetIndFacet) $(E2EDrecordsetHistFacet)
 RECORD_TESTS=$(E2EDrecord) $(E2ErecordNoDeleteBtn) $(E2EDrecordRelatedTable) $(E2EDrecordCopy) $(E2EDrecordLinks)
 RECORDADD_TESTS=$(E2EDIrecordAdd) $(E2EDIrecordMultiAdd) $(E2EDIrecordImmutable)
@@ -98,10 +95,6 @@ test-%: deps
 #Rule to run navbar tests
 .PHONY: testnavbar
 testnavbar: test-NAVBAR_TESTS
-
-#Rule to run search app tests
-.PHONY: testsearch
-testsearch: test-SEARCH_TESTS
 
 #Rule to run record app tests
 .PHONY: testrecord
@@ -182,8 +175,7 @@ endif
 CAT=cat
 
 # HTML
-HTML=search/index.html \
-	 login/index.html \
+HTML=login/index.html \
 	 recordset/index.html \
 	 viewer/index.html \
 	 recordedit/index.html \
@@ -249,48 +241,6 @@ JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
 	$(JS)/vendor/select.js \
 	$(JS)/vendor/bootstrap-tour.min.js \
 	$(JS)/vendor/plotly-latest.min.js
-
-
-JS_SOURCE=$(JS)/respond.js \
-	$(JS)/variables.js \
-	$(JS)/utils.js \
-	$(JS)/ermrest.js \
-	$(JS)/app.js \
-	$(JS)/facetsModel.js \
-	$(JS)/facetsService.js \
-	$(JS)/controller/ermrestDetailController.js \
-	$(JS)/controller/ermrestFilterController.js \
-	$(JS)/controller/ermrestInitController.js \
-	$(JS)/controller/ermrestLoginController.js \
-	$(JS)/controller/ermrestResultsController.js \
-	$(JS)/controller/ermrestSideBarController.js \
-	$(JS)/controller/ermrestTourController.js \
-	$(JS)/tour.js \
-	$(COMMON)/alerts.js \
-	$(COMMON)/storage.js \
-	$(COMMON)/authen.js \
-	$(COMMON)/config.js \
-	$(COMMON)/delete-link.js \
-	$(COMMON)/errors.js \
-	$(COMMON)/filters.js \
-	$(COMMON)/inputs.js \
-	$(COMMON)/modal.js \
-	$(COMMON)/navbar.js \
-	$(COMMON)/login.js \
-	$(COMMON)/record.js \
-	$(COMMON)/ellipsis.js \
-	$(COMMON)/storage.js \
-	$(COMMON)/table.js \
-	$(COMMON)/utils.js \
-	$(COMMON)/bindHtmlUnsafe.js
-
-# HTML templates
-TEMPLATES=views
-
-TEMPLATES_DEPS=$(TEMPLATES)/erminit.html \
-	$(TEMPLATES)/ermsidebar.html \
-	$(TEMPLATES)/ermretrievefilters.html \
-	$(TEMPLATES)/ermretrieveresults.html
 
 # JavaScript and CSS source for Record(2) app
 RECORD_ASSETS=record
@@ -564,11 +514,6 @@ $(COMMON)/styles/app.css: $(COMMON)/styles/scss/*
 	$(BIN)/node-sass --style=compressed --source-map-embed $(COMMON)/styles/scss/_navbar.scss $(COMMON)/styles/navbar.css
 
 # Rules to attach JavaScript and CSS assets to the head
-search/index.html: search/index.html.in .make-asset-block .make-template-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
-		-e '/%TEMPLATES%/ {' -e 'r .make-template-block' -e 'd' -e '}' \
-		search/index.html.in common/templates/noscript.html > search/index.html
-
 login/index.html: login/index.html.in .make-add-version-tag .make-asset-block
 	sed -e '/%VERSION%/ {' -e 'r .make-add-version-tag' -e 'd' -e '}' \
 		-e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
@@ -606,37 +551,6 @@ $(JS_CONFIG): chaise-config-sample.js
 .make-add-version-tag:
 	version=`date +%Y%m%d%H%M%S` ; \
 	echo "<meta name='version' content='$$version'/>" >> .make-add-version-tag ; \
-
-.make-asset-block: $(CSS_DEPS) $(CSS_SOURCE) $(JS_DEPS) $(JS_SOURCE) $(JS_CONFIG)
-	> .make-asset-block
-	for file in $(CSS_DEPS); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-asset-block ; \
-	done
-	for file in $(CSS_SOURCE); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-asset-block ; \
-	done
-	for file in $(JS_CONFIG) $(JS_DEPS); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-asset-block ; \
-	done
-	for script in $(ERMRESTJS_DEPS); do \
-		buildpath=$(ERMRESTJS_BLD_DIR)/$$script ; \
-		runtimepath=$(ERMRESTJS_RT_DIR)/$$script ; \
-		checksum=$$($(MD5) $$buildpath | awk '{ print $$1 }') ; \
-		echo "<script src='$$runtimepath?v=$$checksum'></script>" >> .make-asset-block ; \
-	done
-	for file in $(JS_SOURCE); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-asset-block ; \
-	done
-
-.make-template-block: $(TEMPLATES_DEPS)
-	> .make-template-block
-	for file in $(TEMPLATES_DEPS); do \
-		$(CAT) $$file >> .make-template-block ; \
-	done
 
 .make-viewer-asset-block: $(VIEWER_SHARED_CSS_DEPS) $(VIEWER_SHARED_JS_DEPS) $(VIEWER_JS_SOURCE) $(JS_CONFIG)
 	> .make-viewer-asset-block
@@ -791,7 +705,6 @@ usage:
 	@echo "    testall   		- runs e2e and Karma tests"
 	@echo "    clean     		- cleans the dist dir"
 	@echo "    distclean 		- cleans the dist dir and the dependencies"
-	@echo "    testsearch 		- runs search app e2e tests"
 	@echo "    testrecordadd 	- runs data entry app add e2e tests"
 	@echo "    testrecordedit 	- runs data entry app edit e2e tests"
 	@echo "    testrecord 		- runs record app e2e tests"

@@ -299,9 +299,6 @@
                             displayModeBar: false
                         },
                         layout: {
-                            autosize: true,
-                            // width: 280,
-                            height: 150,
                             margin: {
                                 l: 40,
                                 r: 0,

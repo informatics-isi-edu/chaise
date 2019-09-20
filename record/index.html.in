@@ -18,11 +18,16 @@
                 <alerts id="alerts-container" alerts="ctrl.alerts"></alerts>
                 <div class="top-flex-panel">
                     <div class="top-left-panel" ng-class="$root.recordSidePanOpen && !ctrl.noVisibleRelatedTables() ? 'open-panel' : 'close-panel'">
-                        <div class="bottom-right">
-                            <button ng-hide="!$root.recordSidePanOpen" class="chaise-btn chaise-btn-tertiary hide-toc-btn" ng-click="$root.recordSidePanOpen = false" uib-tooltip="Click to hide table of contents.">
-                                <span class="chaise-icon chaise-sidebar-close"></span>
-                                <span>Hide side panel</span>
-                            </button>
+                        <div class="panel-header">
+                            <div class="pull-left">
+                                <h3 class="side-panel-heading">Sections</h3>
+                            </div>
+                            <div class="pull-right">
+                                <button ng-hide="!$root.recordSidePanOpen" class="chaise-btn chaise-btn-tertiary hide-toc-btn" ng-click="$root.recordSidePanOpen = false" uib-tooltip="Click to hide table of contents.">
+                                    <span class="chaise-icon chaise-sidebar-close"></span>
+                                    <span>Hide panel</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <div ng-if="recordDisplayname" class="top-right-panel">
@@ -42,9 +47,9 @@
                         </div>
                         <div class="title">
                             <h1 id="page-subtitle">
-                                <a ng-class="{'chaise-icon-for-tooltip': reference.table.comment}" ng-href="{{::ctrl.referenceTableApplink()}}" ng-attr-uib-tooltip="{{::reference.table.comment ? reference.table.comment : undefined}}" tooltip-placement="right">
-                                    <span ng-if="::reference.displayname.isHTML" ng-bind-html="reference.displayname.value"></span>
-                                    <span ng-if="::!reference.displayname.isHTML" ng-bind="reference.displayname.value"></span>:
+                                <a ng-href="{{::ctrl.referenceTableApplink()}}" ng-attr-uib-tooltip="{{::reference.table.comment ? reference.table.comment : undefined}}" tooltip-placement="right">
+                                    <span ng-if="::reference.displayname.isHTML" ng-class="{'chaise-icon-for-tooltip': reference.table.comment}" ng-bind-html="reference.displayname.value"></span>
+                                    <span ng-if="::!reference.displayname.isHTML" ng-class="{'chaise-icon-for-tooltip': reference.table.comment}" ng-bind="reference.displayname.value"></span><span class="no-decoration">:</span>
                                 </a>
                                 <small ng-if="reference && reference.location.version" tooltip-placement="bottom-left" uib-tooltip="{{::ctrl.tooltip.versionTime}} {{ctrl.versionDate()}}">({{ctrl.versionDisplay()}})</small>
                             </h1>
@@ -84,16 +89,15 @@
             <div class="bottom-panel-container">
                 <div id="record-side-pan" class="side-panel-resizable record-toc" ng-class="$root.recordSidePanOpen && !ctrl.noVisibleRelatedTables() ? 'open-panel' : 'close-panel'" resizable r-directions=["right"] r-flex="true" r-other-e="top-left-panel">
                     <div class="side-panel-container">
-                        <h3 class="side-panel-heading">Table of contents</h3>
                         <div class="columns-container">
                             <ul>
                                 <li id="main-to-top" class="toc-heading" ng-click="scrollToTop()">
-                                    <a uib-tooltip="Click to go to top of page" tooltip-placement="bottom" chaise-enable-tooltip-width>Summary</a>
+                                    <a uib-tooltip="Click to go to top of page" tooltip-placement="right">Summary</a>
                                 </li>
                                 <div ng-repeat="cm in columnModels track by $index" id="recordSidePan-{{$index}}" ng-if="ctrl.showInlineTable($index)" class="{{lastActiveFacet == $index ? 'focused': ''}}" ng-click="ctrl.gotoInlineTable(cm.displayname.value, $index)">
 
                                     <li id="recordSidePan-heading-{{$index}}" class="toc-heading toc-inline-heading">
-                                        <a uib-tooltip="{{cm.displayname.value}}" tooltip-placement="bottom" chaise-enable-tooltip-width>
+                                        <a>
                                             <span ng-if="::cm.displayname.isHTML" ng-bind-html="::cm.displayname.value"></span>
                                             <span ng-if="::!cm.displayname.isHTML" ng-bind="::cm.displayname.value"></span>
                                             <span>({{cm.tableModel.rowValues.length}}{{cm.tableModel.page.hasNext ? '+' : ''}})</span>
@@ -103,7 +107,7 @@
                                 <div ng-repeat="rtm in relatedTableModels track by $index" id="recordSidePan-{{$index}}" ng-if="ctrl.showRelatedTable($index)" class="{{lastActiveFacet == $index ? 'focused': ''}}" ng-click="ctrl.gotoRelatedTable(rtm.displayname.value, $index)">
 
                                     <li id="recordSidePan-heading-{{$index}}" class="toc-heading">
-                                        <a uib-tooltip="{{rtm.displayname.value}}" tooltip-placement="bottom" chaise-enable-tooltip-width>
+                                        <a>
                                             <span ng-if="::rtm.displayname.isHTML" ng-bind-html="::rtm.displayname.value"></span>
                                             <span ng-if="::!rtm.displayname.isHTML" ng-bind="::rtm.displayname.value"></span>
                                             <span>({{rtm.tableModel.rowValues.length}}{{rtm.tableModel.page.hasNext ? '+' : ''}})</span>

@@ -1,13 +1,13 @@
 <table class="table table-fixed-layout" id="tblRecord">
     <tr ng-repeat="col in columnModels" ng-if="showColumn($index) || showInlineTable($index)" id="{{'row-' + col.column.name}}" ng-class="{'hide-border': $root.hideColumnHeaders}" class="row">
-        <td ng-hide="$root.hideColumnHeaders" class="entity-key col-xs-2">
+        <td ng-hide="$root.hideColumnHeaders" class="entity-key col-xs-4 col-sm-4 col-md-3 col-lg-2">
             <span class="column-displayname" ng-class="{'chaise-icon-for-tooltip': col.column.comment}" ng-attr-uib-tooltip="{{::(col.column.comment) ? col.column.comment : undefined}}" tooltip-placement="right">
                 <span ng-if="::col.column.displayname.isHTML" ng-bind-html="::col.column.displayname.value"></span>
                 <span ng-if="::!col.column.displayname.isHTML" ng-bind="::col.column.displayname.value"></span>
             </span>
             <span ng-show="showLoader($index)" class="glyphicon glyphicon-refresh glyphicon-refresh-animate aggregate-col-loader pull-right"></span>
         </td>
-        <td class="entity-value col-xs-10" id="entity-{{makeSafeIdAttr(col.column.displayname.value)}}">
+        <td class="entity-value col-xs-8 col-sm-8 col-md-9 col-lg-10" id="entity-{{makeSafeIdAttr(col.column.displayname.value)}}">
 
             <span ng-if="showColumn($index)" ng-hide="showError($index) || showLoader($index)">
                 <span ng-if="values[$index].isHTML" class="markdown-container" ng-bind-html="values[$index].value | trustedHTML"></span>
