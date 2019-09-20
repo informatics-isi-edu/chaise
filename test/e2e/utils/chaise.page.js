@@ -624,7 +624,7 @@ var recordPage = function() {
     };
 
     this.getEntitySubTitleTooltip = function () {
-        return this.getEntitySubTitleElement().element(by.css(".chaise-icon-for-tooltip")).getAttribute('uib-tooltip');
+        return this.getEntitySubTitleLink().getAttribute('uib-tooltip');
     };
 
     this.getEntitySubTitleLink = function () {

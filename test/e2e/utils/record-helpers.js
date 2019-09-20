@@ -99,7 +99,9 @@ exports.testPresentation = function (tableParams) {
 
         it("should show the share dialog when clicking the share button with 3 list elements.", function () {
             // verify modal dialog contents
-            expect(chaisePage.recordEditPage.getModalTitle().getText()).toBe("Share", "Share citation modal title is incorrect");
+            var modalTitle = chaisePage.recordEditPage.getModalTitle();
+            chaisePage.waitForElement(modalTitle);
+            expect(modalTitle.getText()).toBe("Share", "Share citation modal title is incorrect");
             expect(chaisePage.recordPage.getModalListElements().count()).toBe(tableParams.citationParams.numListElements, "Number of list elements in share citation modal is incorrect");
         });
 
