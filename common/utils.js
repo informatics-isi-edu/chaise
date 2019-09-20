@@ -182,9 +182,9 @@
     })
 
     .constant("defaultDisplayname", {
-        null: "<i>No Value</i>",
+        null: "<i>No Value </i>",
         empty: "<i>Empty</i>",
-        notNull: "<i>All Records With Value</i>"
+        notNull: "<i>All Records With Value </i>"
     })
 
     .factory('UriUtils', ['appContextMapping', 'appTagMapping', 'ConfigUtils', 'ContextUtils', 'defaultChaiseConfig', 'Errors', 'messageMap', 'parsedFilter', '$injector', '$rootScope', '$window',

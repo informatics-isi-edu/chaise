@@ -349,9 +349,7 @@ describe('View existing record,', function() {
                 }
                 expect(tableNames.length).toEqual(testParams.sidePanelTest.tocCount, "Count mismatch for number of related tables in the side panel");
                 expect(tableNames).toEqual(testParams.sidePanelTest.sidePanelTableOrder, "Order is not maintained for related tables in the side panel");
-                return chaisePage.recordPage.getSidePanelHeading();
-            }).then(function(sidePanelHeading){
-                expect(sidePanelHeading).toBe("Table of contents", "Side Panel heading did not match.");
+
                 done();
             }).catch( function(err) {
                 console.log(err);

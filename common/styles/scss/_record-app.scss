@@ -6,16 +6,6 @@
             .top-left-panel.open-panel {
                 flex: 0 0 $left-panel-width-sm;
                 position: relative;
-
-                .bottom-right {
-                    position: absolute;
-                    bottom: 0;
-                    right: 0;
-
-                    button {
-                        padding-right: 0px;
-                    }
-                }
             } // end .top-left-panel
 
             .top-right-panel {

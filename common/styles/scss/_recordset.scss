@@ -1,22 +1,8 @@
 
 .recordset-container {
     .top-panel-container {
-
-        .top-left-panel {
-            .faceting-header {
-                width: 100%;
-                position: absolute;
-                bottom: 9px;
-                left: 0;
-
-                h3 {
-                    margin: 0;
-                }
-                button {
-                    padding: 0;
-                    padding-bottom: 7px;
-                }
-            }
+        .top-flex-panel .top-left-panel div.panel-header {
+            bottom: 9px;
         }
 
         .top-right-panel {
@@ -277,12 +263,15 @@
     .action-btns {
         text-align: center;
         font-size: 1.14rem;
+
         .chaise-btn {
             padding: 0;
             margin: -3px;
-        }
-        .select-action-button {
 
+            .chaise-view-details {
+                position: relative;
+                top: 2px;
+            }
         }
     }
 
@@ -421,6 +410,16 @@ faceting {
     .plotly-actions {
         padding-top: 15px;
         text-align: right;
+        line-height: 1;
+
+        .chaise-info {
+            bottom: 1px;
+        }
+
+        .chaise-zoom-in, .chaise-zoom-out {
+            left: 1px;
+            bottom: 1px;
+        }
     }
 
     .zoom-plotly-button {
