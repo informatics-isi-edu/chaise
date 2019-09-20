@@ -88,15 +88,13 @@ html {
         color: $link-color;
     }
 
-    a.external-link {
+    a.external-link-icon:not(.external-link-no-icon) {
         &::after {
+            display: inline-block;
             font-size: .85rem;
             font-family: 'Glyphicons Halflings';
-            // NOTE: when there's a newline character, there is a space added to the
-            // end of string text before the icon is added. when there is no newline,
-            // the icon is directly next to the text. The space before the content
-            // below ensures there is consistent spacing between these 2 cases
-            content: " \e164";
+            content: "\e164"; // glyphicon-new-window
+            padding-left: 2px;
         }
     }
 

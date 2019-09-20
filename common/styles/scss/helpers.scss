@@ -50,9 +50,18 @@
     white-space: normal;
 
     &:before {
-        content: "\e025";
+        content: "\e025"; // glyphicon-download-alt
         font-family: 'Glyphicons Halflings';
         padding-right: 4px;
+    }
+
+    &.external-link-icon:not(.external-link-no-icon):before {
+        content: "\e197"; // glyphicon-cloud-download
+    }
+
+    //remove the external link icon on after
+    &.external-link-icon:not(.external-link-no-icon):after {
+        content: "";
     }
 
     &:hover {

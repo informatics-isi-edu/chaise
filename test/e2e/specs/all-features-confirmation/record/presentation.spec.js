@@ -45,7 +45,7 @@ var testParams = {
     columns: [
         { title: "Id", value: "2002", type: "serial4"},
         { title: "Name of Accommodation", value: "Sherathon Hotel", type: "text"},
-        { title: "Website", value: "<p><a href=\"http://www.starwoodhotels.com/sheraton/index.html\">Link to Website</a></p>\n", type: "text", comment: "A valid url of the accommodation", match:"html" },
+        { title: "Website", value: "<p><a href=\"http://www.starwoodhotels.com/sheraton/index.html\" class=\"external-link-icon\">Link to Website</a></p>\n", type: "text", comment: "A valid url of the accommodation", match:"html" },
         { title: "Category", value: "Hotel", type: "text", comment: "Type of accommodation ('Resort/Hotel/Motel')", presentation: { type:"url", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-record:category/", table_name: "category", key_value: [{column: "id", value: "10003"}]} },
         { title: "booking", value:'<p><strong class="vocab">2</strong> <strong class="vocab">350.0000</strong> <strong class="vocab">2016-04-18 00:00:00</strong> <strong class="vocab">4</strong> <strong class="vocab">200.0000</strong> <strong class="vocab">2016-05-31 00:00:00</strong></p>\n', type: "inline" },
         { title: "User Rating", value: "4.3000", type: "float4", markdown_title: "<strong>User Rating</strong>" },

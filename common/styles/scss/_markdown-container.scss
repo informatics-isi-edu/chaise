@@ -45,19 +45,17 @@
         margin: 2px;
     }
 
-    .download {
+    a.download {
         @include chaise-btn();
         @include chaise-btn-primary();
     }
 
-    .download-alt {
+    a.download-alt {
         @include download-btn();
     }
 
     .asset-source-description {
-        margin: 0 5px;
-        vertical-align: -9px;
-        font-size: 13px;
+        font-size: 85%;
     }
 }
 

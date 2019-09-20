@@ -4,6 +4,7 @@
     angular.module('chaise.utils', ['chaise.errors'])
 
     .constant("defaultChaiseConfig", {
+          "hostAliases": [window.location.host],
           "ermrestLocation": window.location.origin + "/ermrest",
           "headTitle": "Chaise",
           "navbarBrandText": "Chaise",
@@ -20,7 +21,8 @@
           "navbarMenu": {},
           "navbarBrand": "",
           "disableDefaultExport": false,
-          "exportServicePath": "/deriva/export"
+          "exportServicePath": "/deriva/export",
+          "disableExternalLinkModal": false
     })
 
     .constant("appTagMapping", {
@@ -996,6 +998,12 @@
             ERMrest.appLinkFn(UriUtils.appTagToURL);
             ERMrest.onHTTPSuccess(Session.extendPromptExpirationToken);
             ERMrest.systemColumnsHeuristicsMode(ConfigUtils.systemColumnsMode);
+
+            var chaiseConfig = ConfigUtils.getConfigJSON();
+            ERMrest.setClientConfig({
+                hostAliases: chaiseConfig.hostAliases,
+                disableExternalLinkModal: chaiseConfig.disableExternalLinkModal
+            });
         }
 
         return {
