@@ -215,13 +215,9 @@ CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/vendor/angular-datepicker.css \
 	$(CSS)/vendor/bootstrap-tour.min.css
 
-CSS_SOURCE=$(CSS)/swoop-sidebar.css \
-	$(CSS)/jquery.nouislider.min.css \
+CSS_SOURCE=$(CSS)/jquery.nouislider.min.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css \
-	$(CSS)/ermrest.css \
-	$(CSS)/app.css \
 	$(COMMON)/styles/navbar.css \
-	$(CSS)/tour.css
 
 # JavaScript source and test specs
 JS=scripts
@@ -241,6 +237,39 @@ JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
 	$(JS)/vendor/select.js \
 	$(JS)/vendor/bootstrap-tour.min.js \
 	$(JS)/vendor/plotly-latest.min.js
+
+JS_SOURCE=$(JS)/respond.js \
+	$(JS)/variables.js \
+	$(JS)/utils.js \
+	$(JS)/ermrest.js \
+	$(JS)/app.js \
+	$(JS)/facetsModel.js \
+	$(JS)/facetsService.js \
+	$(JS)/controller/ermrestDetailController.js \
+	$(JS)/controller/ermrestFilterController.js \
+	$(JS)/controller/ermrestInitController.js \
+	$(JS)/controller/ermrestLoginController.js \
+	$(JS)/controller/ermrestResultsController.js \
+	$(JS)/controller/ermrestSideBarController.js \
+	$(JS)/controller/ermrestTourController.js \
+	$(JS)/tour.js \
+	$(COMMON)/alerts.js \
+	$(COMMON)/storage.js \
+	$(COMMON)/authen.js \
+	$(COMMON)/config.js \
+	$(COMMON)/delete-link.js \
+	$(COMMON)/errors.js \
+	$(COMMON)/filters.js \
+	$(COMMON)/inputs.js \
+	$(COMMON)/modal.js \
+	$(COMMON)/navbar.js \
+	$(COMMON)/login.js \
+	$(COMMON)/record.js \
+	$(COMMON)/ellipsis.js \
+	$(COMMON)/storage.js \
+	$(COMMON)/table.js \
+	$(COMMON)/utils.js \
+	$(COMMON)/bindHtmlUnsafe.js
 
 # JavaScript and CSS source for Record(2) app
 RECORD_ASSETS=record
@@ -551,6 +580,31 @@ $(JS_CONFIG): chaise-config-sample.js
 .make-add-version-tag:
 	version=`date +%Y%m%d%H%M%S` ; \
 	echo "<meta name='version' content='$$version'/>" >> .make-add-version-tag ; \
+
+.make-asset-block: $(CSS_DEPS) $(CSS_SOURCE) $(JS_DEPS) $(JS_SOURCE) $(JS_CONFIG)
+	> .make-asset-block
+	for file in $(CSS_DEPS); do \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-asset-block ; \
+	done
+	for file in $(CSS_SOURCE); do \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-asset-block ; \
+	done
+	for file in $(JS_CONFIG) $(JS_DEPS); do \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-asset-block ; \
+	done
+	for script in $(ERMRESTJS_DEPS); do \
+		buildpath=$(ERMRESTJS_BLD_DIR)/$$script ; \
+		runtimepath=$(ERMRESTJS_RT_DIR)/$$script ; \
+		checksum=$$($(MD5) $$buildpath | awk '{ print $$1 }') ; \
+		echo "<script src='$$runtimepath?v=$$checksum'></script>" >> .make-asset-block ; \
+	done
+	for file in $(JS_SOURCE); do \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-asset-block ; \
+	done
 
 .make-viewer-asset-block: $(VIEWER_SHARED_CSS_DEPS) $(VIEWER_SHARED_JS_DEPS) $(VIEWER_JS_SOURCE) $(JS_CONFIG)
 	> .make-viewer-asset-block

@@ -53,41 +53,41 @@
     &:not(:last-child) .chaise-form-file-label { @include border-right-radius(0); }
     &:not(:first-child) .chaise-form-file-label { @include border-left-radius(0); }
   }
-}
 
+  // Prepend and append
+  //
+  // While it requires one extra layer of HTML for each, dedicated prepend and
+  // append elements allow us to 1) be less clever, 2) simplify our selectors, and
+  // 3) support HTML5 form validation.
 
-// Prepend and append
-//
-// While it requires one extra layer of HTML for each, dedicated prepend and
-// append elements allow us to 1) be less clever, 2) simplify our selectors, and
-// 3) support HTML5 form validation.
+  .chaise-input-group-prepend,
+  .chaise-input-group-append {
+    display: flex;
 
-.chaise-input-group-prepend,
-.chaise-input-group-append {
-  display: flex;
+    // Ensure buttons are always above inputs for more visually pleasing borders.
+    // This isn't needed for `.chaise-input-group-text` since it shares the same border-color
+    // as our inputs.
+    .chaise-btn {
+      position: relative;
+      z-index: 2;
+      @include border-left-radius(0);
 
-  // Ensure buttons are always above inputs for more visually pleasing borders.
-  // This isn't needed for `.chaise-input-group-text` since it shares the same border-color
-  // as our inputs.
-  .chaise-btn {
-    position: relative;
-    z-index: 2;
+      &:focus {
+        z-index: 3;
+      }
+    }
 
-    &:focus {
-      z-index: 3;
+    .chaise-btn + .chaise-btn,
+    .chaise-btn + .chaise-input-group-text,
+    .chaise-input-group-text + .chaise-input-group-text,
+    .chaise-input-group-text + .chaise-btn {
+      margin-left: -$btn-border-width;
     }
   }
 
-  .chaise-btn + .chaise-btn,
-  .chaise-btn + .chaise-input-group-text,
-  .chaise-input-group-text + .chaise-input-group-text,
-  .chaise-input-group-text + .chaise-btn {
-    margin-left: -$btn-border-width;
-  }
+  .chaise-input-group-prepend { margin-right: -$btn-border-width; }
+  .chaise-input-group-append { margin-left: -$btn-border-width; }
 }
-
-.chaise-input-group-prepend { margin-right: -$btn-border-width; }
-.chaise-input-group-append { margin-left: -$btn-border-width; }
 
 
 // Textual addons
@@ -140,13 +140,13 @@
 //   @include border-radius($input-border-radius-lg);
 // }
 //
-// .chaise-input-group-sm > .chaise-form-control {
-//   min-height: $input-height-sm;
-// }
-//
-// .chaise-input-group-sm > .chaise-form-select {
-//   height: $input-height-sm;
-// }
+.chaise-input-group-sm > .chaise-form-control {
+  min-height: $btn-height-sm;
+}
+
+.chaise-input-group-sm > .chaise-form-select {
+  height: $btn-height-sm;
+}
 //
 // .chaise-input-group-sm > .chaise-form-control,
 // .chaise-input-group-sm > .chaise-form-select,
@@ -155,8 +155,8 @@
 // .chaise-input-group-sm > .chaise-input-group-prepend > .chaise-btn,
 // .chaise-input-group-sm > .chaise-input-group-append > .chaise-btn {
 //   padding: $input-padding-y-sm $input-padding-x-sm;
-//   @include font-size($input-font-size-sm);
-//   @include border-radius($input-border-radius-sm);
+//
+//   @include border-radius($btn-border-radius);
 // }
 //
 // .chaise-input-group-lg > .chaise-form-select,

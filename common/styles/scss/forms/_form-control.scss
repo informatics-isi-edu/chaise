@@ -90,13 +90,14 @@
 //
 // Repeated in `_input_group.scss` to avoid Sass extend issues.
 
-// .chaise-form-control-sm {
-//   min-height: $input-height-sm;
-//   padding: $input-padding-y-sm $input-padding-x-sm;
-//   @include font-size($input-font-size-sm);
-//   @include border-radius($input-border-radius-sm);
-// }
-//
+.chaise-form-control-sm {
+  height: $btn-height-sm;
+  min-height: $btn-height-sm;
+  padding: $btn-padding-y $btn-padding-x;
+
+  @include border-radius($btn-border-radius);
+}
+
 // .chaise-form-control-lg {
 //   min-height: $input-height-lg;
 //   padding: $input-padding-y-lg $input-padding-x-lg;

@@ -35,7 +35,7 @@
                                 </h3>
                             </div>
                             <div class="pull-right">
-                                <button id="submit-record-button" class="btn btn-primary btn-inverted" type="submit" ng-disabled="form.submissionButtonDisabled" ng-click="::form.submit()" ng-attr-tooltip-placement="bottom-right" ng-attr-uib-tooltip="Submit data">Submit</button>
+                                <button id="submit-record-button" class="chaise-btn chaise-btn-primary" type="submit" ng-disabled="form.submissionButtonDisabled" ng-click="::form.submit()" ng-attr-tooltip-placement="bottom-right" ng-attr-uib-tooltip="Submit data">Submit</button>
                             </div>
                         </div>
                     </div>
@@ -50,21 +50,21 @@
                             <div id="form-section">
                                 <span class="pull-left"><span class="text-danger"><b>*</b></span> indicates required field</span>
                                 <div class="row padding-right-15" ng-show="::!form.editMode">
-                                    <div class="btn-group pull-right">
-                                        <button id="copy-record-btn" class="btn btn-primary btn-inverted center-block" ng-click="::form.copyFormRow();" ng-if="::!form.editMode" type="button" ng-disabled="!form.canAddMore" tooltip-placement="top" uib-tooltip="Add 1 record.">
+                                    <div class="chaise-btn-group pull-right">
+                                        <button id="copy-record-btn" class="chaise-btn chaise-btn-primary center-block" ng-click="::form.copyFormRow();" ng-if="::!form.editMode" type="button" ng-disabled="!form.canAddMore" tooltip-placement="top" uib-tooltip="Add 1 record.">
                                             <span class="glyphicon glyphicon-plus"></span>
                                         </button>
-                                        <button id="copy-x-rows-btn" class="btn btn-primary btn-inverted center-block" ng-click="::(form.showMultiInsert = !form.showMultiInsert)" type="button" ng-disabled="!form.canAddMore" tooltip-placement="top-right" uib-tooltip="Add a maximum of {{::form.MAX_ROWS_TO_ADD-1}} records.">
+                                        <button id="copy-x-rows-btn" class="chaise-btn chaise-btn-primary center-block" ng-click="::(form.showMultiInsert = !form.showMultiInsert)" type="button" ng-disabled="!form.canAddMore" tooltip-placement="top-right" uib-tooltip="Add a maximum of {{::form.MAX_ROWS_TO_ADD-1}} records.">
                                             <span class="glyphicon glyphicon-chevron-down"></span>
                                         </button>
                                     </div>
                                 </div>
                                 <div class="row padding-right-15"  style="position: absolute; right: 15px;">
                                     <div class="pull-right add-rows-input" ng-class="form.showMultiInsert ? 'chaise-visible' : 'chaise-hidden'">
-                                        <div class="input-group">
-                                            <input id="copy-rows-input" type="number" class="form-control " ng-model="form.numberRowsToAdd">
-                                            <span class="input-group-btn">
-                                                <button id="copy-rows-submit" class="btn btn-sm btn-primary btn-inverted center-block" ng-click="::form.copyFormRow()" type="button" tooltip-placement="bottom" uib-tooltip="Apply">
+                                        <div class="chaise-input-group">
+                                            <input id="copy-rows-input" type="number" class="chaise-form-control chaise-form-control-sm" ng-model="form.numberRowsToAdd">
+                                            <span class="chaise-input-group-append">
+                                                <button id="copy-rows-submit" class="chaise-btn chaise-btn-sm chaise-btn-primary center-block" ng-click="::form.copyFormRow()" type="button" tooltip-placement="bottom" uib-tooltip="Apply">
                                                     <span class="glyphicon glyphicon-ok"></span>
                                                 </button>
                                             </span>
