@@ -76,7 +76,7 @@ Chaise is suite of the following applications:
 
 ## Installation
 
-See [Chaise installation](user-docs/installation.md).
+See [Chaise installation](docs/user-docs/installation.md).
 
 ## Help and Contact
 

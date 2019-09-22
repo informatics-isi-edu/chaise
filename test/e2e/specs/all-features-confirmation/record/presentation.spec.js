@@ -105,7 +105,7 @@ var testParams = {
           viewMore: {
               name: "accommodation_collection",
               displayname: "accommodation_collections",
-              filter: "Accommodations: Sherathon Hotel"
+              filter: "Accommodations : Sherathon Hotel"
           },
           rowValues: [
               ["2000", "Sherathon Hotel"]
@@ -127,7 +127,7 @@ var testParams = {
           viewMore: {
               name: "table_w_aggregates",
               displayname: "table_w_aggregates",
-              filter: "Accommodations: Sherathon Hotel"
+              filter: "Accommodations : Sherathon Hotel"
           },
           rowValues: [
               ["3", "102", "102", "1", "1"]
@@ -176,7 +176,7 @@ var testParams = {
           viewMore: {
               name: "table_w_invalid_row_markdown_pattern",
               displayname: "table_w_invalid_row_markdown_pattern",
-              filter: "Accommodations: Sherathon Hotel"
+              filter: "Accommodations : Sherathon Hotel"
           },
           rowValues: [
               ["two"]

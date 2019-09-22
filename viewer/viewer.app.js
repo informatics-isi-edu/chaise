@@ -34,6 +34,12 @@
         'ng.deviceDetector'
     ])
 
+    .config(['$provide', function($provide) {
+        $provide.decorator('$templateRequest', ['ConfigUtils', 'UriUtils', '$delegate', function (ConfigUtils, UriUtils, $delegate) {
+            return ConfigUtils.decorateTemplateRequest($delegate, UriUtils.chaiseDeploymentPath());
+        }]);
+    }])
+
     // Configure the context info from the URI
     .config(['context', 'UriUtilsProvider', function configureContext(context, UriUtilsProvider) {
         var utils = UriUtilsProvider.$get();

@@ -77,6 +77,7 @@
         "clickActionMessage": {
             "messageWReplace": "Click <b>OK</b> to reload this page without @errorStatus.",
             "loginOrDismissDialog": "Click <a ng-click='ctrl.login()'>Login</a> to log in to the system, or click <b>OK</b> to dismiss this dialog.",
+            "dismissDialog": "Click <b>OK</b> to dismiss this dialog.",
             "multipleRecords": "Click <b>OK</b> to show all the matched records.",
             "noRecordsFound": "Click <b>OK</b> to show the list of all records.",
             "okBtnMessage": "Click <b>OK</b> to go to the Recordset.",
@@ -90,6 +91,8 @@
         "unauthorizedMessage" : "You are not authorized to perform this action.",
         "reportErrorToAdmin" : " Please report this problem to your system administrators.",
         "noRecordForFilter" : "No matching record found for the given filter or facet.",
+        "loginRequired": "Login Required",
+        "permissionDenied": "Permission Denied",
         "unauthorizedErrorCode" : "Unauthorized Access",
         "showErrDetails" : "Show Error Details",
         "hideErrDetails" : "Hide Error Details",
@@ -904,6 +907,22 @@
             return params[key];
         }
 
+        /**
+         * converts the supplied url into a window.location object and compares it with current window.location
+         * @param {String} url - the url to be checked if same origin
+         * @returns {boolean} true if same origin (or relative path)
+         *
+         */
+        function isSameOrigin(url) {
+            var currentOrigin = $window.location.origin;
+
+            // parses the url into a location object
+            var eleUrl = document.createElement('a');
+            eleUrl.href = url;
+
+            return eleUrl.origin == currentOrigin;
+        }
+
         return {
             appNamefromUrlPathname: appNamefromUrlPathname,
             appTagToURL: appTagToURL,
@@ -916,6 +935,7 @@
             getHash: getHash,
             getQueryParam: getQueryParam,
             isBrowserIE: isBrowserIE,
+            isSameOrigin: isSameOrigin,
             parsedFilterToERMrestFilter: parsedFilterToERMrestFilter,
             parseURLFragment: parseURLFragment,
             queryStringToJSON: queryStringToJSON,
@@ -1552,6 +1572,30 @@
             return getContextJSON().server ? getContextJSON().server.http : $http;
         };
 
+        function configureAngular(compileProvider, cookiesProvider, logProvider, uibTooltipProvider) {
+            // angular configurations
+            // allows unsafe prefixes to be downloaded
+            // full regex: "/^\s*(https?|ftp|mailto|tel|file|blob):/"
+            compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|blob):/);
+            cookiesProvider.defaults.path = '/';
+            logProvider.debugEnabled(getConfigJSON().debug === true);
+            // Configure all tooltips to be attached to the body by default. To attach a
+            // tooltip on the element instead, set the `tooltip-append-to-body` attribute
+            // to `false` on the element.
+            uibTooltipProvider.options({appendToBody: true});
+        }
+
+        function decorateTemplateRequest(delegate, chaiseDeploymentPath) {
+            // return a function that will be called when a template needs t be fetched
+            return function(templateUrl) {
+                var dcctx = getContextJSON();
+                console.log(templateUrl);
+                var versionedTemplateUrl = templateUrl + (templateUrl.indexOf(chaiseDeploymentPath) !== -1 ? "?v=" + dcctx.version : "");
+
+                return delegate(versionedTemplateUrl);
+            }
+        }
+
         /**
          * Given the context, returns the value of the chaise config property for system column heuristics
          * @params {String} context - the current app context
@@ -1573,6 +1617,8 @@
         }
 
         return {
+            configureAngular: configureAngular,
+            decorateTemplateRequest: decorateTemplateRequest,
             getContextJSON: getContextJSON,
             getConfigJSON: getConfigJSON,
             setConfigJSON: setConfigJSON,
@@ -1766,7 +1812,7 @@
       }
      }])
 
-    .service('headInjector', ['ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', 'MathUtils', 'UriUtils', '$rootScope', '$window', function(ConfigUtils, ERMrest, Errors, ErrorService, MathUtils, UriUtils, $rootScope, $window) {
+    .service('headInjector', ['ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', 'MathUtils', 'modalUtils', 'UriUtils', '$rootScope', '$window', function(ConfigUtils, ERMrest, Errors, ErrorService, MathUtils, modalUtils, UriUtils, $rootScope, $window) {
         function addCustomCSS() {
             var chaiseConfig = ConfigUtils.getConfigJSON();
             if (chaiseConfig['customCSS'] !== undefined) {
@@ -1780,7 +1826,15 @@
 
         function addTitle() {
             var chaiseConfig = ConfigUtils.getConfigJSON();
-            document.getElementsByTagName('head')[0].getElementsByTagName('title')[0].innerHTML = chaiseConfig.headTitle;
+
+            var titleTag = document.head.getElementsByTagName('title')[0];
+            if (titleTag) {
+                titleTag.innerHTML = chaiseConfig.headTitle;
+            } else {
+                var title = document.createElement("title");
+                title.innerHTML = chaiseConfig.headTitle;
+                document.head.appendChild(title);
+            }
         }
 
         // sets the WID if it doesn't already exist
@@ -1804,52 +1858,126 @@
             }
         }
 
+        function clickHref(href) {
+            // fetch the file for the user
+            var downloadLink = angular.element('<a></a>');
+            downloadLink.attr('href', href);
+            downloadLink.attr('download', '');
+            downloadLink.attr('visibility', 'hidden');
+            downloadLink.attr('display', 'none');
+            downloadLink.attr('target', '_blank');
+            // Append to page
+            document.body.appendChild(downloadLink[0]);
+            downloadLink[0].click();
+            document.body.removeChild(downloadLink[0]);
+        }
+
         function overrideDownloadClickBehavior() {
-            angular.element('body').on('click', "a.deriva-url-validate", function (e) {
+            addClickListener("a.asset-permission", function (e) {
+
+                function hideSpinner() {
+                    e.target.innerHTML = e.target.innerHTML.slice(0, e.target.innerHTML.indexOf(spinnerHTML));
+                }
+
                 e.preventDefault();
 
                 var spinnerHTML = ' <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>';
                 //show spinner
                 e.target.innerHTML += spinnerHTML;
 
-                var dcctx = ConfigUtils.getContextJSON();
-                // make a HEAD request to check if the user can fetch the file
+                // if same origin, verify authorization
+                if (UriUtils.isSameOrigin(e.target.href)) {
 
-                dcctx.server.http.head(e.target.href, {skipHTTP401Handling: true}).then(function (response) {
-                    // fetch the file for the user
-                    var downloadLink = angular.element('<a></a>');
-                    downloadLink.attr('href', e.target.href);
-                    downloadLink.attr('download', '');
-                    downloadLink.attr('visibility', 'hidden');
-                    downloadLink.attr('display', 'none');
-                    // Append to page
-                    document.body.appendChild(downloadLink[0]);
-                    downloadLink[0].click();
-                    document.body.removeChild(downloadLink[0]);
-                }).catch(function (exception) {
-                    // error/login modal was closed
-                    if (typeof exception == 'string') return;
-                    var ermrestError = ERMrest.responseToError(exception);
+                    var dcctx = ConfigUtils.getContextJSON();
+                    // make a HEAD request to check if the user can fetch the file
 
-                    if (ermrestError instanceof ERMrest.UnauthorizedError) {
-                        ermrestError = new Errors.UnauthorizedAssetAccess();
-                    }
+                    dcctx.server.http.head(e.target.href, {skipRetryBrowserError: true, skipHTTP401Handling: true}).then(function (response) {
+                        clickHref(e.target.href);
+                    }).catch(function (exception) {
+                        // error/login modal was closed
+                        if (typeof exception == 'string') return;
+                        var ermrestError = ERMrest.responseToError(exception);
 
-                    // If an error occurs while a user is trying to download the file, allow them to dismiss the dialog
-                    ErrorService.handleException(ermrestError, true);
-                }).finally(function () {
-                    // remove the spinner
-                    e.target.innerHTML = e.target.innerHTML.slice(0, e.target.innerHTML.indexOf(spinnerHTML));
-                });
+                        if (ermrestError instanceof ERMrest.UnauthorizedError) {
+                            ermrestError = new Errors.UnauthorizedAssetAccess();
+                        } else if (ermrestError instanceof ERMrest.ForbiddenError) {
+                            ermrestError = new Errors.ForbiddenAssetAccess();
+                        }
+
+                        // If an error occurs while a user is trying to download the file, allow them to dismiss the dialog
+                        ErrorService.handleException(ermrestError, true);
+                    }).finally(function () {
+                        // remove the spinner
+                        hideSpinner();
+                    });
+                }
             });
         }
 
+        function overrideExternalLinkBehavior() {
+            addClickListener('a.external-link', function (e) {
+                e.preventDefault();
+
+                // asset-permission will be appended via display annotation or by heuristic if no annotation
+                // this else case should only occur if display annotation contains asset-permission and asset is not the same host
+                var modalProperties = {
+                    windowClass: "modal-redirect",
+                    templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/externalLink.modal.html",
+                    controller: 'RedirectController',
+                    controllerAs: 'ctrl',
+                    animation: false,
+                    size: "sm",
+                }
+                // show modal dialog with countdown before redirecting to "asset"
+                modalUtils.showModal(modalProperties, function () {
+                    clickHref(e.target.href);
+                }, false);
+            });
+        }
+
+        /**
+         * Will call the handler function upon clicking on the elements represented by selector
+         * @param {string} selector the selector string
+         * @param {function} handler  the handler callback function
+         */
+        function addClickListener(selector, handler) {
+            document.querySelector("body").addEventListener("click", function (e) {
+                if (e.target.closest(selector)) {
+                    handler(e);
+                }
+            });
+        }
+
+        /**
+         * Add add pollyfills for the functions that are not supported by all browsers.
+         */
+        function addPolyfills() {
+            if (!Element.prototype.matches) {
+              Element.prototype.matches = Element.prototype.msMatchesSelector ||
+                                          Element.prototype.webkitMatchesSelector;
+            }
+
+            if (!Element.prototype.closest) {
+              Element.prototype.closest = function(s) {
+                var el = this;
+
+                do {
+                  if (el.matches(s)) return el;
+                  el = el.parentElement || el.parentNode;
+                } while (el !== null && el.nodeType === 1);
+                return null;
+              };
+            }
+        }
+
         function setupHead() {
+            addPolyfills();
             addCanonicalTag();
             addCustomCSS();
             addTitle();
             setWindowName();
             overrideDownloadClickBehavior();
+            overrideExternalLinkBehavior();
         }
 
         return {

@@ -230,7 +230,7 @@ CSS_SOURCE=$(CSS)/swoop-sidebar.css \
 # JavaScript source and test specs
 JS=scripts
 
-JS_DEPS=$(JS)/vendor/jquery-1.11.1.min.js \
+JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
 	$(JS)/vendor/jquery-ui-tooltip.min.js \
 	$(JS)/vendor/jquery.nouislider.all.min.js \
 	$(JS)/vendor/bootstrap-3.3.7.min.js \
@@ -291,7 +291,7 @@ TEMPLATES_DEPS=$(TEMPLATES)/erminit.html \
 # JavaScript and CSS source for Record(2) app
 RECORD_ASSETS=record
 
-RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-1.11.1.min.js \
+RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
 	$(JS)/vendor/plotly-latest.min.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-plotly.js \
@@ -341,7 +341,7 @@ RECORD_CSS_SOURCE=$(RECORD_ASSETS)/record.css
 # JavaScript and CSS source for Viewer app
 VIEWER_ASSETS=viewer
 
-VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-1.11.1.min.js \
+VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-sanitize.js \
 	$(COMMON)/alerts.js \
@@ -392,7 +392,7 @@ VIEWER_CSS_SOURCE=$(VIEWER_ASSETS)/viewer.css
 # JavaScript and CSS source for RecordEdit app
 RE_ASSETS=recordedit
 
-RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-1.11.1.min.js \
+RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
 	$(JS)/vendor/plotly-latest.min.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-plotly.js \
@@ -456,7 +456,7 @@ RE_CSS_MDHELP=$(RE_ASSETS)/mdHelpStyle.min.css
 # JavaScript and CSS source for RecordSet app
 RECSET_ASSETS=recordset
 
-RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-1.11.1.min.js \
+RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
 	$(JS)/vendor/plotly-latest.min.js \
 	$(JS)/vendor/angular.js \
 	$(JS)/vendor/angular-plotly.js \
@@ -508,7 +508,7 @@ MIN=$(DIST)/$(PROJ).min.js
 
 .PHONY: all
 # all should just do the minimal needed to deploy chaise
-all: $(HTML)
+all: cleanversion $(HTML)
 
 .PHONY: build
 build: $(PKG) $(MIN) $(HTML) $(gitversion)
@@ -545,6 +545,11 @@ clean:
 	rm -rf $(DIST)
 	rm -f .make-*
 
+# Rule to clean project directory
+.PHONY: cleanversion
+cleanversion:
+	rm -f .make-add-version-tag
+
 # Rule to clean the dependencies too
 .PHONY: distclean
 distclean: clean
@@ -559,35 +564,45 @@ html: $(HTML)
 search/index.html: search/index.html.in .make-asset-block .make-template-block
 	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
 		-e '/%TEMPLATES%/ {' -e 'r .make-template-block' -e 'd' -e '}' \
-		search/index.html.in > search/index.html
+		search/index.html.in common/templates/noscript.html > search/index.html
 
-login/index.html: login/index.html.in .make-asset-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
-		login/index.html.in > login/index.html
+login/index.html: login/index.html.in .make-add-version-tag .make-asset-block
+	sed -e '/%VERSION%/ {' -e 'r .make-add-version-tag' -e 'd' -e '}' \
+		-e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
+		login/index.html.in common/templates/noscript.html > login/index.html
 
-record/index.html: record/index.html.in .make-record-asset-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-record-asset-block' -e 'd' -e '}' \
-		record/index.html.in > record/index.html
+record/index.html: record/index.html.in .make-add-version-tag .make-record-asset-block
+	sed -e '/%VERSION%/ {' -e 'r .make-add-version-tag' -e 'd' -e '}' \
+		-e '/%ASSETS%/ {' -e 'r .make-record-asset-block' -e 'd' -e '}' \
+		record/index.html.in common/templates/noscript.html > record/index.html
 
-recordset/index.html: recordset/index.html.in .make-rs-asset-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-rs-asset-block' -e 'd' -e '}' \
-		recordset/index.html.in > recordset/index.html
+recordset/index.html: recordset/index.html.in .make-add-version-tag .make-rs-asset-block
+	sed -e '/%VERSION%/ {' -e 'r .make-add-version-tag' -e 'd' -e '}' \
+		-e '/%ASSETS%/ {' -e 'r .make-rs-asset-block' -e 'd' -e '}' \
+		recordset/index.html.in common/templates/noscript.html > recordset/index.html
 
-viewer/index.html: viewer/index.html.in .make-viewer-asset-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-viewer-asset-block' -e 'd' -e '}' \
-		viewer/index.html.in > viewer/index.html
+viewer/index.html: viewer/index.html.in .make-add-version-tag .make-viewer-asset-block
+	sed -e '/%VERSION%/ {' -e 'r .make-add-version-tag' -e 'd' -e '}' \
+		-e '/%ASSETS%/ {' -e 'r .make-viewer-asset-block' -e 'd' -e '}' \
+		viewer/index.html.in common/templates/noscript.html > viewer/index.html
 
-recordedit/index.html: recordedit/index.html.in .make-de-asset-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-de-asset-block' -e 'd' -e '}' \
-		recordedit/index.html.in > recordedit/index.html
+recordedit/index.html: recordedit/index.html.in .make-add-version-tag .make-de-asset-block
+	sed -e '/%VERSION%/ {' -e 'r .make-add-version-tag' -e 'd' -e '}' \
+		-e '/%ASSETS%/ {' -e 'r .make-de-asset-block' -e 'd' -e '}' \
+		recordedit/index.html.in common/templates/noscript.html > recordedit/index.html
 
-recordedit/mdHelp.html: recordedit/mdHelp.html.in .make-md-asset-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-md-asset-block' -e 'd' -e '}' \
-	recordedit/mdHelp.html.in > recordedit/mdHelp.html
+recordedit/mdHelp.html: recordedit/mdHelp.html.in .make-add-version-tag .make-md-asset-block
+	sed -e '/%VERSION%/ {' -e 'r .make-add-version-tag' -e 'd' -e '}' \
+		-e '/%ASSETS%/ {' -e 'r .make-md-asset-block' -e 'd' -e '}' \
+		recordedit/mdHelp.html.in common/templates/noscript.html > recordedit/mdHelp.html
 
 $(JS_CONFIG): chaise-config-sample.js
 	cp -n chaise-config-sample.js $(JS_CONFIG) || true
 	touch $(JS_CONFIG)
+
+.make-add-version-tag:
+	version=`date +%Y%m%d%H%M%S` ; \
+	echo "<meta name='version' content='$$version'/>" >> .make-add-version-tag ; \
 
 .make-asset-block: $(CSS_DEPS) $(CSS_SOURCE) $(JS_DEPS) $(JS_SOURCE) $(JS_CONFIG)
 	> .make-asset-block
@@ -747,7 +762,7 @@ $(JS_CONFIG): chaise-config-sample.js
 
 # Rule for installing for normal deployment
 .PHONY: install dont_install_in_root
-install: $(HTML) dont_install_in_root gitversion
+install: cleanversion $(HTML) dont_install_in_root gitversion
 	rsync -avz --exclude='.*' --exclude='$(MODULES)' --exclude='wiki-images' --exclude=/chaise-config.js . $(CHAISEDIR)
 
 .PHONY: install-w-config dont_install_in_root

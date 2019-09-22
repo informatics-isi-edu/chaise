@@ -8,6 +8,7 @@
     ])
         .directive('login', ['ConfigUtils', 'modalUtils', 'Session', 'UriUtils', '$rootScope', function (ConfigUtils, modalUtils, Session, UriUtils, $rootScope) {
             var chaiseConfig = ConfigUtils.getConfigJSON();
+            var dcctx = ConfigUtils.getContextJSON();
             return {
                 restrict: 'E',
                 scope: {},
@@ -17,13 +18,13 @@
                     scope.profileURL = chaiseConfig.profileURL;
 
                     Session.subscribeOnChange(function () {
-                        $rootScope.session = Session.getSessionValue();
+                        $rootScope.session = dcctx.session = Session.getSessionValue();
 
                         if ($rootScope.session == null) {
                             scope.user = null;
                         } else {
                             var user = $rootScope.session.client;
-                            scope.user = user.display_name || user.full_name || user.email || user;
+                            scope.user = dcctx.user = user.display_name || user.full_name || user.email || user.id || user;
                         }
 
                     });

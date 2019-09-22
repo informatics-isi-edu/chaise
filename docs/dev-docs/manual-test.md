@@ -154,3 +154,11 @@ What should appear is a page of results with multiple tables. The first table sh
 
 ## Share dialog stale warning 
 The share dialog has an alert warning that shows when the user is viewing stale data. This can happen if the current record's values are updated after you laoded the record page or the model itself has changed. The data changed event is test in the e2e tests. The model change event requires manual testing. This can be tested on any table on `dev.isrd` as long as you can modify that table's model. [Here](https://github.com/informatics-isi-edu/chaise/wiki/Ermrest-Howto-(set-ACL,-cookies)#add-column-to-existing-table) is a template for the curl command.
+
+# Testing assets
+
+## asset hosted on www (different origin)
+When an asset is hosted on a differet origin, a modal dialog stating you will be redirected will be shown. Follow [this link](https://dev.gudmap.org/chaise/record/#2/Common:Publication/RID=17-EZ6C) to see an asset on a different origin to test this functionality.
+
+## asset with permission to access required
+When an asset requires login, it should have the proper class attached to it. This is done automatically for the default asset presentation in ermrestJS. The class is called `asset-permission`. Follow [this link](https://dev.rebuildingakidney.org/chaise/record/#2/RNASeq:File/RID=16-1YDJ) and try to download the asset without being logged in. You should see a modal dialog that looks like an error that suggests you should login. After logging in, try downloading the asset again with a user with the proper permission to view it. Then try the same with a user who can't view the asset and verify the proper 403 modal is shown instead.
