@@ -13,7 +13,7 @@
         vm.zoomOutView = zoomOutView;
         vm.homeView = homeView;
 
-        vm.filterChannelsAreHidden = true;
+        vm.filterChannelsAreHidden = false;
         vm.filterChannels = filterChannels;
 
         vm.annotationsAreHidden = false;
@@ -66,20 +66,21 @@
         }
 
         function openAnnotations() {
-            var btnptr = $('#edit-btn');
-            btnptr.blur();
-            var panelptr=$('#annotations-panel');
-            var sidebarptr=$('#sidebar');
-            if(vm.annotationsSidebarAreHidden) {
-              if(!vm.filterChannelsAreHidden) { // close channels
-                filterChannels();
-              }
-              sidebarptr.css("display","");
-              panelptr.removeClass('fade-out').addClass('fade-in');
-              } else {
-                panelptr.removeClass('fade-in').addClass('fade-out');
-            }
-            vm.annotationsSidebarAreHidden = !vm.annotationsSidebarAreHidden;
+            // var btnptr = $('#edit-btn');
+            // btnptr.blur();
+            // var panelptr=$('#annotations-panel');
+            // var sidebarptr=$('#sidebar');
+            // if(vm.annotationsSidebarAreHidden) {
+            //   if(!vm.filterChannelsAreHidden) { // close channels
+            //     filterChannels();
+            //   }
+            //   sidebarptr.css("display","");
+            //   panelptr.removeClass('fade-out').addClass('fade-in');
+            //   } else {
+            //     panelptr.removeClass('fade-in').addClass('fade-out');
+            // }
+            iframe.postMessage({messageType: 'openAnnotations'}, origin);
+            // vm.annotationsSidebarAreHidden = !vm.annotationsSidebarAreHidden;
         }
 
         function covered() {
@@ -96,13 +97,13 @@
             btnptr.blur();
             var sidebarptr=$('#sidebar');
   
-            if(vm.filterChannelsAreHidden) {
-              if(!vm.annotationsSidebarAreHidden) { // annotation is up
-                openAnnotations(); // close it
-              }
-              if(covered())
-                  sidebarptr.css("display","none");
-            }
+            // if(vm.filterChannelsAreHidden) {
+            //   if(!vm.annotationsSidebarAreHidden) { // annotation is up
+                // openAnnotations(); // close it
+            //   }
+            //   if(covered())
+                //   sidebarptr.css("display","none");
+            // }
             iframe.postMessage({messageType: 'filterChannels'}, origin);
             vm.filterChannelsAreHidden = !vm.filterChannelsAreHidden;
         }
