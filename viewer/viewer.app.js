@@ -27,6 +27,7 @@
         'chaise.errors',
         'chaise.delete',
         'chaise.modal',
+        'chaise.resizable',
         'chaise.utils',
         'ui.select',
         'ui.bootstrap',
@@ -161,6 +162,15 @@
                     	waterMark = '&waterMark=' + waterMark;
                     }
                     console.log('uri='+image.entity.uri + waterMark);
+                    // Test scene 3
+                    var params = window.location.href.split("?");
+                    if(params.length > 1){
+                        // image.entity.uri = image.entity.uri.replace("/openseadragon-viewer/mview.html", "https://dev.rebuildingakidney.org/~mingyi/openseadragon-viewer/index.html");
+                        image.entity.uri = "https://dev.rebuildingakidney.org/~mingyi/openseadragon-viewer/index.html?" + params[1];
+                    }
+                    
+                    // image.entity.uri = image.entity.uri + "&url=data/Q-296R_all_contours_cw_named.svg";
+                    console.log('replace uri = '+image.entity.uri + waterMark)
                     iframe.location.replace(image.entity.uri + waterMark);
                     console.log('Image: ', image);
 

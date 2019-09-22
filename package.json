@@ -50,7 +50,7 @@
     "moment-timezone": "x",
     "phantomjs-prebuilt": "x",
     "protractor": "5.4.2",
-    "q": "^1.4.1",
+    "q": "^1.5.1",
     "request": "x",
     "request-q": "x",
     "set-cookie-parser": "x"

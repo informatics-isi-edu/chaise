@@ -7,6 +7,14 @@
         function AnnotationsController(AlertsService, anatomies, annotations, AnnotationsService, AuthService, comments, CommentsService, ConfigUtils, UriUtils, $rootScope, $scope, $timeout, $uibModal, $window) {
         var chaiseConfig = Object.assign({}, ConfigUtils.getConfigJSON());
         var vm = this;
+
+   
+        vm.isDisplayAll = true; // whether to show all annotations
+        vm.collection = []; // annotation list 
+        vm.searchKeyword = "";
+        vm.totalCount = 0; // total number of annotation list
+        vm.selectedItem = null; // current selected annotation item
+
         vm.annotations = annotations;
         vm.anatomies = anatomies;
         vm.colors = ['red', 'orange', 'gold', 'green', 'blue', 'purple'];
@@ -48,6 +56,15 @@
         vm.allowEdit = AuthService.editAnnotation;
         vm.allowDelete = AuthService.deleteAnnotation;
 
+
+        vm.changeAllAnnotationsVisibility = changeAllAnnotationsVisibility;
+        vm.addAnnotation = addAnnotation;
+        vm.searchInputChanged = searchInputChanged;
+        vm.clearSearch = clearSearch;
+        vm.toggleDisplay = toggleDisplay;
+        vm.highlightGroup = highlightGroup;
+        vm.changeSelectingAnnotation = changeSelectingAnnotation;
+
         // Listen to events of type 'message' (from Annotorious)
         $window.addEventListener('message', function annotationControllerListener(event) {
             // TODO: Check if origin is valid first; if not, return and exit.
@@ -75,6 +92,23 @@
                             });
                             vm.scrollIntoView(annotationId);
                         }
+                        break;
+                    case "onClickChangeSelectingAnnotation":
+                        $scope.$apply(function(){
+                            var svgID = data.content.svgID,
+                                groupID = data.content.groupID;
+
+                            item = vm.collection.find(function(item){
+                                return item.svgID == svgID && item.groupID == groupID;
+                            })
+                            vm.changeSelectingAnnotation(item);
+                        })
+                        break;
+                    case "updateAnnotationList":
+                        $scope.$apply(function(){
+                            vm.addAnnotation(data.content);
+                            vm.totalCount = vm.collection.length;
+                        })
                         break;
                     // The following cases are already handled elsewhere or are
                     // no longer needed but the case is repeated here to avoid
@@ -309,5 +343,90 @@
             $rootScope.$emit("dismissEvent");
         }
 
+        // Click to toggle overlay visibility in Openseadragon
+        function changeAllAnnotationsVisibility(){
+            vm.isDisplayAll = !vm.isDisplayAll;
+            vm.collection.forEach(function(item){
+                item.isDisplay = vm.isDisplayAll;
+            });
+            AnnotationsService.changeAllAnnotationVisibility({
+                isDisplay : vm.isDisplayAll
+            })
+        }
+
+        // Change the selecting annotation item
+        function changeSelectingAnnotation(item){
+            
+            if(!item){ return; }
+
+            if(vm.selectedItem == item){
+                vm.selectedItem.isSelected = false;
+                vm.selectedItem = null;
+            }
+            else{
+                if(vm.selectedItem){
+                    vm.selectedItem.isSelected = false;
+                }
+                item.isSelected = !item.isSelected;
+                vm.selectedItem = item;
+            }
+        }
+
+        // Add new annotation items
+        function addAnnotation(items){
+            var groupID,
+                i,
+                svgID;
+                
+            for(i = 0; i < items.length; i++){
+                groupID = items[i].groupID;
+                svgID = items[i].svgID;
+
+                vm.collection.push({
+                    groupID : groupID,
+                    svgID : svgID,
+                    anatomy : items[i].anatomy,
+                    description : items[i].description,
+                    isSelected : false,
+                    isDisplay: true
+                });
+            }
+
+            // console.log(vm.collection);
+        }
+        
+        function searchInputChanged(){
+            vm.totalCount = vm.collection.filter(function(item){
+                var anatomy = item.anatomy.toLowerCase() || "",
+                    keyword = vm.searchKeyword.toLowerCase();
+                return anatomy.indexOf(keyword) >= 0
+            }).length;
+        }
+
+        function clearSearch(){
+            vm.searchKeyword = "";
+            vm.totalCount = vm.collection.length;
+        }
+
+        function toggleDisplay(item){
+            item.isDisplay = !item.isDisplay;
+            AnnotationsService.changeAnnotationVisibility({
+                svgID : item.svgID,
+                groupID : item.groupID,
+                isDisplay : item.isDisplay
+            });
+        }
+
+        function highlightGroup(item){
+            vm.changeSelectingAnnotation(item);
+            // Unhide the annotation if it's hidden
+            if(!item.isDisplay){
+                vm.toggleDisplay(item);
+            }
+            AnnotationsService.highlightAnnotation({
+                svgID : item.svgID,
+                groupID : item.groupID
+            });
+        }
     }]);
 })();
