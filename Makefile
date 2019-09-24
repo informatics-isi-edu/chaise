@@ -483,7 +483,7 @@ MIN=$(DIST)/$(PROJ).min.js
 
 .PHONY: all
 # all should just do the minimal needed to deploy chaise
-all: cleanversion $(SASS) $(HTML)
+all: clean $(SASS) $(HTML)
 
 .PHONY: build
 build: $(PKG) $(MIN) $(SASS) $(HTML) $(gitversion)
@@ -729,7 +729,7 @@ $(JS_CONFIG): chaise-config-sample.js
 
 # Rule for installing for normal deployment
 .PHONY: install dont_install_in_root
-install: cleanversion $(SASS) $(HTML) dont_install_in_root gitversion
+install: $(SASS) $(HTML) dont_install_in_root gitversion
 	rsync -avz --exclude='.*' --exclude='$(MODULES)' --exclude='wiki-images' --exclude=/chaise-config.js . $(CHAISEDIR)
 
 .PHONY: install-w-config dont_install_in_root

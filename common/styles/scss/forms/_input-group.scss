@@ -89,28 +89,63 @@
   .chaise-input-group-append { margin-left: -$btn-border-width; }
 }
 
+// Prepend and append rounded corners
+//
+// These rulesets must come after the sizing ones to properly override sm and lg
+// border-radius values when extending. They're more specific than we'd like
+// with the `.chaise-input-group >` part, but without it, we cannot override the sizing.
+
+
+.chaise-input-group > .chaise-input-group-prepend > .chaise-btn,
+.chaise-input-group > .chaise-input-group-prepend > .chaise-input-group-text,
+.chaise-input-group > .chaise-input-group-append:not(:last-child) > .chaise-btn,
+.chaise-input-group > .chaise-input-group-append:not(:last-child) > .chaise-input-group-text,
+.chaise-input-group > .chaise-input-group-append:last-child > .chaise-btn:not(:last-child):not(.dropdown-toggle),
+.chaise-input-group > .chaise-input-group-append:last-child > .chaise-input-group-text:not(:last-child) {
+  @include border-right-radius(0);
+}
+
+.chaise-input-group > .chaise-input-group-append > .chaise-btn,
+.chaise-input-group > .chaise-input-group-append > .chaise-input-group-text,
+.chaise-input-group > .chaise-input-group-prepend:not(:first-child) > .chaise-btn,
+.chaise-input-group > .chaise-input-group-prepend:not(:first-child) > .chaise-input-group-text,
+.chaise-input-group > .chaise-input-group-prepend:first-child > .chaise-btn:not(:first-child),
+.chaise-input-group > .chaise-input-group-prepend:first-child > .chaise-input-group-text:not(:first-child) {
+  @include border-left-radius(0);
+}
+
 
 // Textual addons
 //
 // Serves as a catch-all element for any text or radio/checkbox input you wish
 // to prepend or append to an input.
+.chaise-input-group-text {
+  display: flex;
+  align-items: center;
+  padding: $btn-padding-y $btn-padding-x;
+  margin-bottom: 0; // Allow use of <label> elements by overriding our default margin-bottom
+  font-size: 1rem;
+  color: $chaise-input-group-text-color;
+  text-align: center;
+  white-space: nowrap;
+  background-color: $chaise-input-group-text-bg;
+  border: $btn-border-width solid $chaise-input-group-text-border-color;
+  @include border-radius($btn-border-radius);
 
-// .chaise-input-group-text {
-//   display: flex;
-//   align-items: center;
-//   padding: $btn-padding-y $btn-padding-x;
-//   margin-bottom: 0; // Allow use of <label> elements by overriding our default margin-bottom
-//   font-size: 1rem;
-//   color: $chaise-input-group-addon-color;
-//   text-align: center;
-//   white-space: nowrap;
-//   background-color: $chaise-input-group-addon-bg;
-//   border: $btn-border-width solid $chaise-input-group-addon-border-color;
-//   @include border-radius($input-border-radius);
-//
-//   // Nuke default margins from checkboxes and radios to vertically center within.
-//   input[type="radio"],
-//   input[type="checkbox"] {
-//     margin-top: 0;
-//   }
-// }
+  // dt meaning "datetime"
+  &.dt-width {
+      width: 50px;
+  }
+
+  // Nuke default margins from checkboxes and radios to vertically center within.
+  input[type="radio"],
+  input[type="checkbox"] {
+    margin-top: 0;
+  }
+}
+
+.chaise-btn-toolbar > .chaise-btn,
+.chaise-btn-toolbar > .chaise-btn-group,
+.chaise-btn-toolbar > .chaise-input-group {
+    margin-left: 10px;
+}

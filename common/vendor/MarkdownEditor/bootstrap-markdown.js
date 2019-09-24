@@ -100,7 +100,7 @@
           var z,
               buttons = btnGroups[y].data,
               btnGroupContainer = $('<div/>', {
-                                    'class': 'btn-group'
+                                    'class': 'chaise-btn-group'
                                   });
 
           for (z=0;z<buttons.length;z++) {
@@ -109,13 +109,13 @@
                 buttonHandler = ns+'-'+button.name,
                 buttonIcon = this.__getIcon(button.icon),
                 btnText = button.btnText ? button.btnText : '',
-                btnClass = button.btnClass ? button.btnClass : 'btn',
+                btnClass = button.btnClass ? button.btnClass : 'chaise-btn',
                 tabIndex = button.tabIndex ? button.tabIndex : '-1',
                 hotkey = typeof button.hotkey !== 'undefined' ? button.hotkey : '',
                 hotkeyCaption = typeof jQuery.hotkeys !== 'undefined' && hotkey !== '' ? ' ('+hotkey+')' : '';
             // Construct the button object
             buttonContainer = $('<button></button>');
-            buttonContainer.text(' ' + this.__localize(btnText)).addClass('btn-default btn-sm').addClass(btnClass);
+            buttonContainer.text(' ' + this.__localize(btnText)).addClass('chaise-btn-secondary').addClass(btnClass);
             if(btnClass.match(/btn\-(primary|success|info|warning|danger|link)/)){
                 buttonContainer.removeClass('btn-default');
             }
@@ -263,7 +263,7 @@
       if (this.$editor === null) {
         // Create the panel
         var editorHeader = $('<div/>', {
-                            'class': 'md-header btn-toolbar'
+                            'class': 'md-header chaise-btn-toolbar'
                             });
 
         // Merge the main & additional button groups together
@@ -1304,7 +1304,7 @@
           toggle: true,
           hotkey: 'Ctrl+P',
           title: 'Preview',
-          btnClass: 'btn btn-primary btn-inverted btn-sm',
+          btnClass: 'chaise-btn chaise-btn-secondary',
           icon: { glyph: 'glyphicon glyphicon-eye-open', fa: 'fa fa-eye', 'fa-3': 'icon-eye-open' },
           callback: function(e){
             // Check the preview mode and toggle based on this flag
