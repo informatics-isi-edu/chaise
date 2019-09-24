@@ -98,12 +98,13 @@
   @include border-radius($btn-border-radius);
 }
 
-// .chaise-form-control-lg {
-//   min-height: $input-height-lg;
-//   padding: $input-padding-y-lg $input-padding-x-lg;
-//   @include font-size($input-font-size-lg);
-//   @include border-radius($input-border-radius-lg);
-// }
+.chaise-form-control-lg {
+    height: $btn-height;
+    min-height: $btn-height;
+    padding: $btn-padding-y $btn-padding-x;
+
+    @include border-radius($btn-border-radius);
+}
 //
 // .chaise-form-control-color {
 //   max-width: 3rem;
@@ -117,3 +118,46 @@
 // .chaise-form-control-color::-webkit-color-swatch {
 //   @include border-radius($input-border-radius);
 // }
+
+
+.chaise-form-control-w-placeholder {
+    position: relative;
+    input {
+        outline: 0; padding: 0; margin: 0; border: 0;
+        height: 100%;
+        width: 100%;
+    }
+
+    .chaise-input-placeholder{
+        position: absolute;
+        top: $btn-padding-y;
+        left: $btn-padding-x;
+        color: $placeholder-color;
+    }
+}
+
+// form-control:focus changes the z-index of the form control from 2 to 3.
+// use z index 5 so it isn't hidden when focused
+.chaise-form-control-feedback {
+    z-index: 5;
+    color: $black-color;
+    position: absolute;
+    right: 0;
+    top: -1px;
+    width: $btn-height;
+    height: $btn-height;
+    line-height: $btn-height;
+    text-align: center;
+    .remove-input-btn {
+        cursor: pointer;
+        pointer-events: all;
+    }
+    .glyphicon-refresh {
+        color: $placeholder-color;
+    }
+
+}
+
+.chaise-form-control.has-feedback {
+    padding-right: $btn-height;
+}

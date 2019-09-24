@@ -21,28 +21,9 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-lg-4 col-md-5 col-sm-6 col-xs-6">
-                            <!-- search box -->
-                            <div class="input-group has-feedback">
-                                <input type="text"
-                                    id="search-input"
-                                    ng-model="vm.search"
-                                    class="form-control main-search-input"
-                                    ng-class="{'search-progress': inputChangedPromise }"
-                                    on-enter="enterPressed()"
-                                    ng-change="inputChanged()"
-                                    placeholder="Search"
-                                    autofocus>
-                                    <div class="form-control-feedback coltooltip" ng-show="vm.search && !inputChangedPromise" ng-style="{'cursor': 'pointer', 'right': (onPlusButtonClick ? '85px': '50px'), 'pointer-events': 'all', 'z-index': '5'}"><!-- form-control:focus changes the z-index of the form control from 2 to 3. form-control-feedback has z-index of 2. Overriding that z index to 5 so it isn't hidden when focused-->
-                                        <span id="search-clear" class="glyphicon glyphicon-remove coltooltiptext search-remove" ng-click="::clearSearch()" tooltip-placement="bottom" uib-tooltip="Clear Search"></span>
-                                    </div>
-                                <span class="input-group-btn">
-                                    <button id="search-submit" class="btn btn-primary btn-inverted" ng-click="enterPressed(vm.search)" role="button" tooltip-placement="bottom"
-                                        uib-tooltip-html="'<p>Use space to separate between conjunctive terms, | (no spaces) to separate disjunctive terms and quotations for exact phrases.</p><p>For example, <i><b>usc 1234</b></i> returns all records containing &ldquo;usc&rdquo; and &ldquo;1234&rdquo;.</p><p><i><b>usc|1234</b></i> returns all records containing &ldquo;usc&rdquo; or &ldquo;1234&rdquo;.</b></i></p><p><i><b>&ldquo;usc 1234&rdquo;</b></i> returns all records containing &ldquo;usc 1234&rdquo;.</p>'">
-                                        &nbsp;<span class="glyphicon glyphicon-search"></span>&nbsp;<!-- Added 2 non-breaking spaces to prevent btn's margins from collapsing and to center the icon-->
-                                    </button>
-                                </span>
-                            </div>
+                        <div class="col-lg-4 col-md-5 col-sm-6 col-xs-6" ng-if="vm.tableDisplayName">
+                            <chaise-search-input input-class="main-search-input" placeholder="vm.tableDisplayName"
+                                search-term="vm.search" search-callback="search" focus="true"></chaise-search-input>
                         </div>
                     </div>
                 </div>

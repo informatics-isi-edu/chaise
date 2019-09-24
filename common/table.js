@@ -976,41 +976,6 @@
             scope.vm.facetsToPreProcess = [];
             scope.vm.flowControlObject = new FlowControlObject();
 
-            scope.focusOnSearchInput = function () {
-                angular.element("#search-input.main-search-input").focus();
-            };
-
-            scope.inputChangedPromise = undefined;
-
-            /*
-                The search fires at most one active "background"
-                search at a time and, i.e. for opportunistic type-ahead search. It should never send
-                another before the previous terminates. The delay for firing the search is
-                1 second, when the user has stopeed typing.
-            */
-            // On change in user input
-            scope.inputChanged = function() {
-                if (scope.vm.enableAutoSearch) {
-
-                    // Cancel previous promise for background search that was queued to be called
-                    if (scope.inputChangedPromise) {
-                        $timeout.cancel(scope.inputChangedPromise);
-                    }
-
-                    // Wait for the user to stop typing for a second and then fire the search
-                    scope.inputChangedPromise = $timeout(function() {
-                        scope.inputChangedPromise = null;
-                        scope.search(scope.vm.search);
-                    }, tableConstants.AUTO_SEARCH_TIMEOUT);
-                }
-            };
-
-            scope.enterPressed = function() {
-                scope.inputChangedPromise = null;
-                // Trigger search
-                scope.search(scope.vm.search);
-            };
-
             scope.search = function(term) {
 
                 if (term) term = term.trim();
@@ -1024,13 +989,6 @@
                      $log.debug('counter', scope.vm.flowControlObject.counter ,': new search term=' + term);
                      update(scope.vm, true, true, true);
                  }
-            };
-
-            scope.clearSearch = function() {
-                if (scope.vm.reference.location.searchTerm)
-                    scope.search();
-
-                scope.vm.search = null;
             };
 
             // function for removing a single pill and it's corresponding selected row
