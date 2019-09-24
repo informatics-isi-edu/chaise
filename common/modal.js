@@ -195,7 +195,6 @@
             sortby:             reference.location.sortObject ? reference.location.sortObject[0].column: null,
             sortOrder:          reference.location.sortObject ? (reference.location.sortObject[0].descending ? "desc" : "asc") : null,
             enableSort:         true,
-            enableAutoSearch:   true,
             pageLimit:          limit,
             rowValues:          [],
             selectedRows:       params.selectedRows,

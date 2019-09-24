@@ -792,19 +792,19 @@ var recordsetPage = function() {
     };
 
     this.getSearchBox = function() {
-        return element(by.id("search-input"));
+        return element(by.className("main-search-input"));
     };
 
     this.getMainSearchBox = function() {
-        return element(by.css(".top-right-panel")).element(by.id("search-input"));
+        return element(by.css(".top-right-panel")).element(by.className("main-search-input"));
     };
 
     this.getSearchSubmitButton = function() {
-        return element(by.css(".top-right-panel")).element(by.id("search-submit"));
+        return element(by.css(".top-right-panel")).element(by.className("chaise-search-btn"));
     };
 
     this.getSearchClearButton = function() {
-        return element(by.css(".top-right-panel")).element(by.id("search-clear"));
+        return element(by.css(".top-right-panel")).element(by.className("remove-search-btn"));
     };
 
     this.getAddRecordLink = function(el) {
@@ -998,7 +998,7 @@ var recordsetPage = function() {
     }
 
     this.getFacetSearchBoxClear = function (idx) {
-        return element(by.id("fc-" + idx)).element(by.css(".facet-search-clear"));
+        return element(by.id("fc-" + idx)).element(by.css(".remove-search-btn"));
     }
 
     this.getHistogram = function (idx) {

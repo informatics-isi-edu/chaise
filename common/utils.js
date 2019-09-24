@@ -4,7 +4,7 @@
     angular.module('chaise.utils', ['chaise.errors'])
 
     .constant("defaultChaiseConfig", {
-          "hostAliases": [window.location.host],
+          "internalHosts": [window.location.host],
           "ermrestLocation": window.location.origin + "/ermrest",
           "headTitle": "Chaise",
           "navbarBrandText": "Chaise",
@@ -1001,7 +1001,7 @@
 
             var chaiseConfig = ConfigUtils.getConfigJSON();
             ERMrest.setClientConfig({
-                hostAliases: chaiseConfig.hostAliases,
+                internalHosts: chaiseConfig.internalHosts,
                 disableExternalLinkModal: chaiseConfig.disableExternalLinkModal
             });
         }
@@ -1796,6 +1796,62 @@
                 }, function (value) {
                     toggleTooltipHeight(scope, elem);
                 });
+            }
+        }
+    }])
+
+    .directive('chaiseSearchInput', ['UriUtils', '$timeout', function (UriUtils, $timeout) {
+
+        return {
+            restrict: 'E',
+            templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/searchInput.html',
+            scope: {
+                searchTerm: "=",
+                searchCallback: "&",
+                inputClass: "@",
+                placeholder: "=",
+                focus: "="
+            },
+            link: function (scope, elem, attrs) {
+                var AUTO_SEARCH_TIMEOUT = 2000;
+                scope.inputChangedPromise = undefined;
+                scope.inputElement = elem[0].querySelector("input");
+
+                // unrwap the callback function
+                scope.searchCallback = scope.searchCallback();
+
+                scope.changeFocus = function () {
+                    scope.inputElement.focus();
+                }
+
+                // will be called when users click on enter or submit button
+                scope.enterPressed = function() {
+                    scope.inputChangedPromise = null;
+                    scope.searchCallback(scope.searchTerm);
+                };
+
+                // will be called everytime users change the input
+                scope.inputChanged = function() {
+                    // Cancel previous promise for background search that was queued to be called
+                    if (scope.inputChangedPromise) {
+                        $timeout.cancel(scope.inputChangedPromise);
+                    }
+
+                    // Wait for the user to stop typing for a second and then fire the search
+                    scope.inputChangedPromise = $timeout(function() {
+                        scope.inputChangedPromise = null;
+                        scope.searchCallback(scope.searchTerm);
+                    }, AUTO_SEARCH_TIMEOUT);
+                };
+
+                // clear the search, if we already had a searchTerm, then fire the search
+                scope.clearSearch = function() {
+                    if (scope.searchTerm) {
+                        scope.searchCallback(null);
+                    }
+                    scope.searchTerm = null;
+                };
+
             }
         }
     }])

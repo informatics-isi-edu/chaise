@@ -1409,43 +1409,13 @@
                         parentCtrl.updateFacetColumn(scope.index);
                     }
 
-                    // TODO all these search functions can be refactored to have just one point of sending request.
-                    // change the searchTerm and fire the updateFacetColumn
-                    scope.enterPressed = function() {
-                        var term = null;
-                        if (scope.searchTerm) {
-                            term = scope.searchTerm.trim();
-                        }
+                    scope.search = function (term) {
+                        if (term) term = term.trim();
                         var ref = scope.reference.search(term);
                         if (scope.$root.checkReferenceURL(ref)) {
                             scope.searchTerm = term;
 
                             $log.debug("faceting: request for facet (index=" + scope.facetColumn.index + ") update. new search=" + term);
-                            scope.parentCtrl.updateFacetColumn(scope.index);
-                        }
-                    };
-
-                    scope.inputChangedPromise = undefined;
-
-                    scope.inputChanged = function() {
-                        // Cancel previous promise for background search that was queued to be called
-                        if (scope.inputChangedPromise) {
-                            $timeout.cancel(scope.inputChangedPromise);
-                        }
-
-                        // Wait for the user to stop typing for a second and then fire the search
-                        scope.inputChangedPromise = $timeout(function() {
-                            scope.inputChangedPromise = null;
-                            $log.debug("faceting: request for facet (index=" + scope.facetColumn.index + ") update. new search=" + scope.searchTerm);
-                            scope.parentCtrl.updateFacetColumn(scope.index);
-                        }, tableConstants.AUTO_SEARCH_TIMEOUT);
-                    };
-
-                    // clear the search, if reference has search then fire update
-                    scope.clearSearch = function() {
-                        scope.searchTerm = null;
-                        if (scope.reference.location.searchTerm) {
-                            $log.debug("faceting: request for facet (index=" + scope.facetColumn.index + ") update. new search=null");
                             scope.parentCtrl.updateFacetColumn(scope.index);
                         }
                     };

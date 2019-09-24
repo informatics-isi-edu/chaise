@@ -121,13 +121,13 @@
 // Remix the default form control sizing classes into new ones for easier
 // manipulation.
 
-// .chaise-input-group-lg > .chaise-form-control {
-//   min-height: $input-height-lg;
-// }
-//
-// .chaise-input-group-lg > .chaise-form-select {
-//   height: $input-height-lg;
-// }
+.chaise-input-group-lg > .chaise-form-control {
+  min-height: $btn-height;
+}
+
+.chaise-input-group-lg > .chaise-form-select {
+  height: $btn-height;
+}
 //
 // .chaise-input-group-lg > .chaise-form-control,
 // .chaise-input-group-lg > .chaise-form-select,
