@@ -1,5 +1,5 @@
 <div class="chaise-search-box chaise-input-group">
-    <div class="chaise-form-control chaise-form-control-lg chaise-form-control-w-placeholder" ng-class="{'has-feedback': (searchTerm && !inputChangedPromise) || inputChangedPromise}">
+    <div class="chaise-form-control chaise-form-control-w-placeholder" ng-class="{'has-feedback': (searchTerm && !inputChangedPromise) || inputChangedPromise}">
         <input type="text" ng-model="searchTerm" ng-class="inputClass" on-enter="enterPressed()" ng-change="inputChanged()" ng-attr-autofocus="{{focus === true}}">
         <div class="chaise-form-control-feedback" ng-if="(searchTerm && !inputChangedPromise) || inputChangedPromise">
             <span ng-if="searchTerm && !inputChangedPromise" class="remove-search-btn remove-input-btn glyphicon glyphicon-remove" ng-click="::clearSearch()" tooltip-placement="bottom" uib-tooltip="Clear Search"></span>

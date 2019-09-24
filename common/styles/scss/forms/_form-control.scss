@@ -7,9 +7,9 @@
 .chaise-form-control {
   display: block;
   width: 100%;
+  height: $btn-height;
   min-height: $btn-height;
   padding: $btn-padding-y $btn-padding-x;
-  // color: $input-color;
   background-color: $white-color;
   background-clip: padding-box;
   border: $btn-border-width solid $border-color;
