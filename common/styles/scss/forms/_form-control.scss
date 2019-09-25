@@ -58,6 +58,14 @@
     // iOS fix for unreadable disabled content; see https://github.com/twbs/bootstrap/issues/11655.
     opacity: 1;
   }
+
+  &.has-feedback {
+      padding-right: $btn-height;
+  }
+}
+
+textarea.chaise-form-control {
+    height: auto;
 }
 
 // Readonly controls as plain text
@@ -156,8 +164,4 @@
         color: $placeholder-color;
     }
 
-}
-
-.chaise-form-control.has-feedback {
-    padding-right: $btn-height;
 }

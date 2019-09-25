@@ -22,16 +22,16 @@
                         <div id="bookmark-container" class="col-xs-12 meta-icons recordedit-bookmark-container">
                             <div id="title" class="pull-left">
                                 <h1 id="page-title">
-                                        <span>{{ form.editMode ? "Edit " : "Create " }}</span>
-                                        <span class="re-displayname" ng-if="displayname.isHTML" ng-bind-html="displayname.value"></span>
-                                        <span class="re-displayname" ng-if="!displayname.isHTML" ng-bind="displayname.value"></span>
-                                        <span>{{ (form.recordEditModel.rows.length > 1) ? " Records" : " Record" }}</span>
+                                    <span>{{ form.editMode ? "Edit " : "Create " }}</span>
+                                    <a ng-if="tableDisplayName.isHTML" ng-href="{{::form.referenceTableApplink()}}" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}" tooltip-placement="bottom">
+                                        <span class="re-subtitle" ng-bind-html="tableDisplayName.value" ng-class="{'chaise-icon-for-tooltip': tableComment}"></span><!-- ::after for tooltip icon --></a>
+                                    <a ng-if="!tableDisplayName.isHTML" ng-href="{{::form.referenceTableApplink()}}" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}" tooltip-placement="bottom">
+                                        <span class="re-subtitle" ng-bind="tableDisplayName.value" ng-class="{'chaise-icon-for-tooltip': tableComment}"></span><!-- ::after for tooltip icon --></a>
+                                    <span>{{ (form.recordEditModel.rows.length > 1) ? " Records" : " Record" }}</span>
                                 </h1>
                                 <h3 id="page-subtitle">
-                                    <a ng-href="{{::form.referenceTableApplink()}}" ng-class="{'chaise-icon-for-tooltip': tableComment}" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}" tooltip-placement="right">
-                                        <span class="re-subtitle" ng-if="tableDisplayName.isHTML" ng-bind-html="tableDisplayName.value" ></span>
-                                        <span class="re-subtitle" ng-if="!tableDisplayName.isHTML" ng-bind="tableDisplayName.value"></span>
-                                    </a>
+                                    <span class="re-displayname" ng-if="displayname.isHTML" ng-bind-html="displayname.value"></span>
+                                    <span class="re-displayname" ng-if="!displayname.isHTML" ng-bind="displayname.value"></span>
                                 </h3>
                             </div>
                             <div class="pull-right">
@@ -174,30 +174,27 @@
 
                                                         <!-- int2 input -->
                                                         <input ng-switch-when="integer2" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="number" class="chaise-form-control" ng-required="::form.isRequired(columnIndex);" min="{{::form.int2min}}" max="{{::form.int2max}}" integer>
-                                                            <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty  || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int2'">
-                                                                <div ng-message="min">This field requires a value greater than {{form.int2min}}.</div>
-                                                                <div ng-message="max">This field requires a value smaller than {{form.int2max}}.</div>
-                                                            </div>
-                                                        </input>
+                                                        <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty  || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int2'">
+                                                            <div ng-message="min">This field requires a value greater than {{form.int2min}}.</div>
+                                                            <div ng-message="max">This field requires a value smaller than {{form.int2max}}.</div>
+                                                        </div>
 
                                                         <!-- int4 input -->
                                                         <input ng-switch-when="integer4" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="number" class="chaise-form-control" ng-required="::form.isRequired(columnIndex);" min="{{::form.int4min}}" max="{{::form.int4max}}" integer>
-                                                            <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty  || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int4'">
-                                                                <div ng-message="min">This field requires a value greater than {{form.int4min}}.</div>
-                                                                <div ng-message="max">This field requires a value smaller than {{form.int4max}}.</div>
-                                                            </div>
-                                                        </input>
+                                                        <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty  || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int4'">
+                                                            <div ng-message="min">This field requires a value greater than {{form.int4min}}.</div>
+                                                            <div ng-message="max">This field requires a value smaller than {{form.int4max}}.</div>
+                                                        </div>
 
                                                         <!-- int8 input -->
                                                         <input ng-switch-when="integer8" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="number" class="chaise-form-control" ng-required="::form.isRequired(columnIndex);" min="{{::form.int8min}}" max="{{::form.int8max}}" integer>
-                                                            <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int8'">
-                                                                <div ng-message="min">This field requires a value greater than {{form.int8min}}.</div>
-                                                                <div ng-message="max">This field requires a value smaller than {{form.int8max}}.</div>
-                                                            </div>
-                                                        </input>
+                                                        <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int8'">
+                                                            <div ng-message="min">This field requires a value greater than {{form.int8min}}.</div>
+                                                            <div ng-message="max">This field requires a value smaller than {{form.int8max}}.</div>
+                                                        </div>
 
                                                         <!-- float/decimal/numeric -->
-                                                        <input ng-switch-when="number" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="number" class="chaise-form-control" ng-required="::form.isRequired(columnIndex);" float></input>
+                                                        <input ng-switch-when="number" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="number" class="chaise-form-control" ng-required="::form.isRequired(columnIndex);" float>
 
 
                                                         <!-- boolean input -->
@@ -233,10 +230,10 @@
                                                         </div>
 
                                                         <!-- disabled -->
-                                                        <input ng-switch-when="disabled" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="text" class="chaise-form-control" disabled="true" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" empty-to-null></input>
+                                                        <input ng-switch-when="disabled" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="text" class="chaise-form-control" disabled="true" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" empty-to-null>
 
                                                         <!-- shorttext/default text input -->
-                                                        <input ng-switch-default id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="text" class="chaise-form-control" ng-required="::form.isRequired(columnIndex);" empty-to-null></input>
+                                                        <input ng-switch-default id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="text" class="chaise-form-control" ng-required="::form.isRequired(columnIndex);" empty-to-null>
 
                                                         <!-- Validation error messages to show when the form field is touched -->
                                                         <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.$error || form.formContainer.$submitted" class="text-danger" role="alert">
@@ -286,13 +283,17 @@
                         <div id="bookmark-container" class="col-xs-12 meta-icons resultset-bookmark-container">
                             <div id="title" class="pull-left">
                                 <h1 id="page-title">
-                                    <span>{{ form.resultsetModel.rowValues.length }}/{{ form.resultsetModel.pageLimit }} Records <span ng-if="::!form.editMode">Created</span><span ng-if="::form.editMode">Updated</span> Successfully</span>
+                                    <span>{{ form.resultsetModel.rowValues.length }}/{{ form.resultsetModel.pageLimit }}</span>
+                                    <a ng-show="tableDisplayName.isHTML" ng-href="{{::form.resultsetRecordsetLink()}}" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}" tooltip-placement="bottom">
+                                        <span class="re-subtitle" ng-bind-html="tableDisplayName.value" ng-class="{'chaise-icon-for-tooltip': tableComment}"></span></a>
+                                    <a ng-show="!tableDisplayName.isHTML" ng-href="{{::form.resultsetRecordsetLink()}}" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}" tooltip-placement="bottom">
+                                        <span class="re-subtitle" ng-bind="tableDisplayName.value" ng-class="{'chaise-icon-for-tooltip': tableComment}"></span></a>
+                                    <span> Records </span>
+                                    <span ng-if="::!form.editMode">Created</span><span ng-if="::form.editMode">Updated</span>
+                                    <span> Successfully</span>
                                 </h1>
                                 <h3 id="page-subtitle">
-                                    <a ng-href="{{::form.resultsetRecordsetLink}}" ng-class="{'chaise-icon-for-tooltip': tableComment}" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}" tooltip-placement="right">
-                                        <span class="re-subtitle" ng-if="tableDisplayName.isHTML" ng-bind-html="tableDisplayName.value"></span>
-                                        <span class="re-subtitle" ng-if="!tableDisplayName.isHTML" ng-bind="tableDisplayName.value"></span>
-                                    </a>
+
                                 </h3>
                             </div>
                         </div>
