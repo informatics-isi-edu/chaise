@@ -3,7 +3,7 @@
     <!-- date input-->
     <div ng-switch-when="date">
         <div class="chaise-input-group">
-            <input class="chaise-form-control" type="text" ng-model="model.value" placeholder="{{dataFormats.date}}" name="{{::column.name}}" ui-mask="{{maskOptions.date.mask}}" ui-options="maskOptions.date.options" model-view-value="true" date>
+            <input class="chaise-input-control" type="text" ng-model="model.value" placeholder="{{dataFormats.date}}" name="{{::column.name}}" ui-mask="{{maskOptions.date.mask}}" ui-options="maskOptions.date.options" model-view-value="true" date>
             <span class="chaise-input-group-append">
                 <button type="button" name="{{::column.name}}-today" class="chaise-btn chaise-btn-secondary" ng-click="::applyCurrentDatetime();">Today</button>
                 <button type="button" name="{{::column.name}}-clear" class="chaise-btn chaise-btn-secondary" ng-click="::clearDatetime()">Clear</button>
@@ -19,7 +19,7 @@
                     <span class="chaise-input-group-prepend">
                         <div class="chaise-input-group-text dt-width">Date</div>
                     </span>
-                    <input class="chaise-form-control input-timestamptz" type="text" ng-model="model.value.date" placeholder="{{dataFormats.date}}" name="{{::column.name}}" ui-mask="{{maskOptions.date.mask}}" ui-options="maskOptions.date.options" model-view-value="true" date timestamp validate-values="model.value">
+                    <input class="chaise-input-control input-timestamptz" type="text" ng-model="model.value.date" placeholder="{{dataFormats.date}}" name="{{::column.name}}" ui-mask="{{maskOptions.date.mask}}" ui-options="maskOptions.date.options" model-view-value="true" date timestamp validate-values="model.value">
                 </div>
             </div>
             <div class="col-xs-12">
@@ -27,7 +27,7 @@
                     <span class="chaise-input-group-prepend">
                         <div class="chaise-input-group-text dt-width">Time</div>
                     </span>
-                    <input class="chaise-form-control" type="text" ng-model="model.value.time" placeholder="{{dataFormats.time24}}" name="{{::column.name}}" ui-mask="{{maskOptions.time.mask}}" ui-options="maskOptions.time.options" model-view-value="true" time timestamp validate-values="model.value">
+                    <input class="chaise-input-control" type="text" ng-model="model.value.time" placeholder="{{dataFormats.time24}}" name="{{::column.name}}" ui-mask="{{maskOptions.time.mask}}" ui-options="maskOptions.time.options" model-view-value="true" time timestamp validate-values="model.value">
                     <span class="chaise-input-group-append">
                         <button class="chaise-btn chaise-btn-secondary" name="{{::column.name}}" type="button" ng-click="::toggleMeridiem();" ng-bind="model.value.meridiem || 'AM'">AM</button>
                     </span>
@@ -44,7 +44,7 @@
 
     <!-- modal popup input -->
     <div ng-switch-when="popup-select" class="form-group has-feedback chaise-input-group modal-popup">
-        <div contenteditable="false" class="chaise-form-control popup-select-value" ng-style="{'cursor': 'pointer'}" ng-click="::searchPopup()" ng-bind-html="(columnModel.fkDisplayName.value ? columnModel.fkDisplayName.value : getDisabledInputValue())"></div>
+        <div contenteditable="false" class="chaise-input-control popup-select-value" ng-style="{'cursor': 'pointer'}" ng-click="::searchPopup()" ng-bind-html="(columnModel.fkDisplayName.value ? columnModel.fkDisplayName.value : getDisabledInputValue())"></div>
         <label class="sr-only"></label>
         <div class="form-control-feedback coltooltip" ng-hide="!columnModel.fkDisplayName.value" ng-style="{'cursor': 'pointer', 'right': '40px', 'pointer-events': 'all'}">
             <span class="glyphicon glyphicon-remove coltooltiptext foreignkey-remove" ng-click="::clearForeignKey()" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
@@ -62,34 +62,34 @@
     </div>
 
     <!-- int2 input -->
-    <input ng-switch-when="integer2" ng-model="model.value" name="{{::column.name}}" type="number" class="chaise-form-control" min="{{::int2min}}" max="{{::int2max}}" integer>
+    <input ng-switch-when="integer2" ng-model="model.value" name="{{::column.name}}" type="number" class="chaise-input-control" min="{{::int2min}}" max="{{::int2max}}" integer>
     <div ng-messages="inputContainer.$error" ng-show="inputContainer.$dirty  || inputContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int2'">
         <div ng-message="min">This field requires a value greater than {{int2min}}.</div>
         <div ng-message="max">This field requires a value smaller than {{int2max}}.</div>
     </div>
 
     <!-- int4 input -->
-    <input ng-switch-when="integer4" ng-model="model.value" name="{{::column.name}}" type="number" class="chaise-form-control" min="{{::int4min}}" max="{{::int4max}}" integer>
+    <input ng-switch-when="integer4" ng-model="model.value" name="{{::column.name}}" type="number" class="chaise-input-control" min="{{::int4min}}" max="{{::int4max}}" integer>
     <div ng-messages="inputContainer.$error" ng-show="inputContainer.$dirty  || inputContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int4'">
         <div ng-message="min">This field requires a value greater than {{int4min}}.</div>
         <div ng-message="max">This field requires a value smaller than {{int4max}}.</div>
     </div>
 
     <!-- int8 input -->
-    <input ng-switch-when="integer8" ng-model="model.value" name="{{::column.name}}" type="number" class="chaise-form-control" min="{{::int8min}}" max="{{::int8max}}" integer>
+    <input ng-switch-when="integer8" ng-model="model.value" name="{{::column.name}}" type="number" class="chaise-input-control" min="{{::int8min}}" max="{{::int8max}}" integer>
     <div ng-messages="inputContainer.$error" ng-show="inputContainer.$dirty || inputContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int8'">
         <div ng-message="min">This field requires a value greater than {{int8min}}.</div>
         <div ng-message="max">This field requires a value smaller than {{int8max}}.</div>
     </div>
 
     <!-- float/decimal/numeric -->
-    <input ng-switch-when="number" ng-model="model.value" name="{{::column.name}}" type="number" class="chaise-form-control" float></input>
+    <input ng-switch-when="number" ng-model="model.value" name="{{::column.name}}" type="number" class="chaise-input-control" float></input>
 
 
     <!-- boolean input -->
     <div ng-switch-when="boolean">
         <ui-select ng-model="model.value" append-to-body="true" theme="select2">
-            <ui-select-match class="chaise-form-control" name="{{::column.name}}">{{$select.selected}}</ui-select-match>
+            <ui-select-match class="chaise-input-control" name="{{::column.name}}">{{$select.selected}}</ui-select-match>
             <ui-select-choices repeat="domainValue in ::booleanValues | filter: $select.search" >
                 <div ng-bind-html="domainValue | highlight: $select.search"></div>
             </ui-select-choices>
@@ -98,7 +98,7 @@
 
     <!-- longtext/textarea input -->
     <div ng-switch-when="longtext">
-        <textarea ng-model="model.value" rows="5" name="{{::column.name}}" class="chaise-form-control content-box" empty-to-null markdown-editor="{'iconlibrary': 'glyph', addExtraButtons:true ,fullscreen:{ enable: false, icons: {}}, resize: 'vertical'}"></textarea>
+        <textarea ng-model="model.value" rows="5" name="{{::column.name}}" class="chaise-input-control content-box" empty-to-null markdown-editor="{'iconlibrary': 'glyph', addExtraButtons:true ,fullscreen:{ enable: false, icons: {}}, resize: 'vertical'}"></textarea>
         <a href class="live-preview" markdown-preview textinput="model.value"></a>
     </div>
 
@@ -110,19 +110,19 @@
 
     <!--JSON input -->
     <div ng-switch-when="json">
-        <textarea json ng-model="model.value" rows="5" name="{{::column.name}}" class="chaise-form-control" empty-to-null></textarea>
+        <textarea json ng-model="model.value" rows="5" name="{{::column.name}}" class="chaise-input-control" empty-to-null></textarea>
     </div>
 
     <!--array input -->
     <div ng-switch-when="array">
-        <textarea array column-type="{{column.type.rootName}}" custom-error-message="model.customErrorMessage" ng-model="model.value"  rows="5" name="{{::column.name}}" class="chaise-form-control" empty-to-null></textarea>
+        <textarea array column-type="{{column.type.rootName}}" custom-error-message="model.customErrorMessage" ng-model="model.value"  rows="5" name="{{::column.name}}" class="chaise-input-control" empty-to-null></textarea>
     </div>
 
     <!-- disabled -->
-    <input ng-switch-when="disabled" ng-model="model.value" name="{{::column.name}}" type="text" class="chaise-form-control" disabled="true" placeholder="getDisabledInputValue()" empty-to-null>
+    <input ng-switch-when="disabled" ng-model="model.value" name="{{::column.name}}" type="text" class="chaise-input-control" disabled="true" placeholder="getDisabledInputValue()" empty-to-null>
 
     <!-- shorttext/default text input -->
-    <input ng-switch-default ng-model="model.value" name="{{::column.name}}" type="text" class="chaise-form-control" empty-to-null>
+    <input ng-switch-default ng-model="model.value" name="{{::column.name}}" type="text" class="chaise-input-control" empty-to-null>
 
     <!-- Validation error messages to show when the form field is touched -->
     <div ng-messages="inputContainer.$error" ng-show="inputContainer.$error || inputContainer.$submitted" class="text-danger" role="alert">
