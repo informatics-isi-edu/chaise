@@ -1278,13 +1278,10 @@
             restrict: 'E',
             templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/tableHeader.html',
             scope: {
-                vm: '=',
-                toggleMatchNull: "=",
-                toggleMatchNotNull: "="
+                vm: '='
             },
             link: function (scope, elem, attr) {
                 scope.recordsetDisplayModes = recordsetDisplayModes;
-                scope.tooltip = messageMap.tooltip;
 
                 scope.pageLimits = [10, 25, 50, 75, 100, 200];
                 scope.setPageLimit = function(limit) {

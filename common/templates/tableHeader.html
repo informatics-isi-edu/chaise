@@ -1,12 +1,12 @@
 <div class="chaise-table-header row">
-    <div class="col-xs-12 chaise-table-header-total-count" ng-class="vm.config.displayMode === recordsetDisplayModes.facetPopup ? 'col-sm-4' : 'col-sm-6' ">
+    <div class="chaise-table-header-total-count col-xs-12 col-sm-6">
         <span>Displaying</span>
         <span ng-if="vm.page.tuples.length > 0 && vm.page.hasNext && !vm.page.hasPrevious">first</span>
         <span ng-if="vm.page.tuples.length > 0 && !vm.page.hasNext && vm.page.hasPrevious">last</span>
         <span ng-if="vm.page.tuples.length > 0 && !vm.page.hasNext && !vm.page.hasPrevious">all</span>
-        <span class="dropdown" ng-if="vm.page.tuples.length > 0">
-            <button class="page-size-dropdown chaise-btn chaise-btn-secondary dropdown-toggle" type="button" data-toggle="dropdown">
-                <span>{{vm.page ? vm.page.tuples.length : vm.pageLimit}}</span>
+        <span class="dropdown" ng-if="vm.rowValues.length > 0">
+            <button class="page-size-dropdown chaise-btn chaise-btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" ng-disabled="!vm.hasLoaded || !vm.initialized">
+                <span>{{vm.page ? vm.rowValues.length : vm.pageLimit}}</span>
                 <span class="caret"></span>
             </button>
             <ul class="dropdown-menu dropdown-menu-left">
@@ -24,15 +24,7 @@
         <img id="push-rows-spinner" ng-show="vm.pushRowsSpinner" src="../common/styles/images/loader.gif" class="spinner spinner-sm"/>
         <span ng-if="vm.countError" class="glyphicon glyphicon-alert" uib-tooltip="Request timeout: total count cannot be retrieved. Refresh the page later to try again." tooltip-placement="bottom"></span>
     </div>
-    <div class="col-xs-12 col-sm-4" ng-if="vm.config.displayMode === recordsetDisplayModes.facetPopup">
-        <span class="chaise-checkbox with-tooltip" ng-hide="vm.config.hideNotNullChoice" uib-tooltip-html="tooltip.notNull" tooltip-placement="bottom">
-            <input type="checkbox" class="chaise-table-header-match-not-null" ng-click="toggleMatchNotNull()" ng-checked="vm.matchNotNull"><label>Records With Values</label>
-        </span>
-        <span class="chaise-checkbox with-tooltip" ng-hide="vm.config.hideNullChoice" uib-tooltip-html="tooltip.null" tooltip-placement="bottom" ng-class="{'disabled-row': vm.matchNotNull}">
-            <input type="checkbox" class="chaise-table-header-match-null" ng-click="toggleMatchNull()" ng-checked="vm.matchNull" ng-disabled="vm.matchNotNull"><label>No Value</label>
-        </span>
-    </div>
-    <div class="col-xs-12" ng-class="vm.config.displayMode === recordsetDisplayModes.facetPopup ? 'col-sm-4' : 'col-sm-6' ">
+    <div class="col-xs-12 col-sm-6">
         <div class="pull-right">
             <button class="chaise-table-header-create-link chaise-btn chaise-btn-primary"
                 ng-if="vm.config.displayMode !== recordsetDisplayModes.related && vm.reference.canCreate && vm.config.editable"

@@ -29,7 +29,7 @@
                         </div>
                         <div class="pull-right">
                             <!-- download CSV included by default -->
-                            <export allow-export="vm.rowValues.length>0" reference="vm.reference" disabled="!vm.hasLoaded || !vm.initialized"></export>
+                            <export reference="vm.reference" disabled="!vm.hasLoaded || !vm.initialized || vm.rowValues.length == 0"></export>
                             <!-- permalink -->
                             <a id="permalink" ng-href="{{ getRecordsetLink() }}" tooltip-placement="bottom-right" uib-tooltip={{tooltip.permalink}} class="chaise-btn chaise-btn-primary">
                                 <span class="chaise-btn-icon glyphicon glyphicon-bookmark"></span>

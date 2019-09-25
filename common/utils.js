@@ -106,10 +106,12 @@
             viewCol: "Click on the eye button to view the detailed page associated with each record",
             null: "Search for any record with no value assigned",
             empty: "Search for any record with the empty string value",
-            notNull: "Search for any record that has a value"
+            notNull: "Search for any record that has a value",
+            showMore: "Click to show more available fitlers",
+            showDetails: "Click to show more details about the filters"
         },
         "URLLimitMessage": "Maximum URL length reached. Cannot perform the requested action.",
-        "queryTimeoutList": "<ul class='show-list-style'><li>Reduce the number of facet constraints.</li><li>Minimize the use of 'No Value' and 'All Records with Value' filters.</li></ul>",
+        "queryTimeoutList": "<ul class='show-list-style'><li>Reduce the number of facet constraints.</li><li>Minimize the use of 'No value' and 'All Records with Value' filters.</li></ul>",
         "queryTimeoutTooltip": "Request timeout: data cannot be retrieved. Refresh the page later to try again."
     })
 
@@ -184,9 +186,9 @@
     })
 
     .constant("defaultDisplayname", {
-        null: "<i>No Value </i>",
+        null: "<i>No value </i>",
         empty: "<i>Empty</i>",
-        notNull: "<i>All Records With Value </i>"
+        notNull: "<i>All records with value </i>"
     })
 
     .factory('UriUtils', ['appContextMapping', 'appTagMapping', 'ConfigUtils', 'ContextUtils', 'defaultChaiseConfig', 'Errors', 'messageMap', 'parsedFilter', '$injector', '$rootScope', '$window',
@@ -1810,7 +1812,8 @@
                 searchCallback: "&",
                 inputClass: "@",
                 placeholder: "=",
-                focus: "="
+                focus: "=",
+                disabled: "="
             },
             link: function (scope, elem, attrs) {
                 var AUTO_SEARCH_TIMEOUT = 2000;
@@ -1821,17 +1824,20 @@
                 scope.searchCallback = scope.searchCallback();
 
                 scope.changeFocus = function () {
+                    if (scope.disabled) return;
                     scope.inputElement.focus();
                 }
 
                 // will be called when users click on enter or submit button
                 scope.enterPressed = function() {
+                    if (scope.disabled) return;
                     scope.inputChangedPromise = null;
                     scope.searchCallback(scope.searchTerm);
                 };
 
                 // will be called everytime users change the input
                 scope.inputChanged = function() {
+                    if (scope.disabled) return;
                     // Cancel previous promise for background search that was queued to be called
                     if (scope.inputChangedPromise) {
                         $timeout.cancel(scope.inputChangedPromise);
@@ -1846,12 +1852,27 @@
 
                 // clear the search, if we already had a searchTerm, then fire the search
                 scope.clearSearch = function() {
+                    if (scope.disabled) return;
                     if (scope.searchTerm) {
                         scope.searchCallback(null);
                     }
                     scope.searchTerm = null;
                 };
 
+            }
+        }
+    }])
+
+    .directive('chaiseClearInput', [function () {
+        return {
+            restrict: 'E',
+            template: '<div class="chaise-input-control-feedback" ng-if="show">' +
+                       '<span class="{{btnClass}} remove-input-btn glyphicon glyphicon-remove" ng-click="clickCallback()" tooltip-placement="bottom" uib-tooltip="Clear input"></span>' +
+                      '</div>',
+            scope: {
+                btnClass: "@",
+                clickCallback: "&",
+                show: "="
             }
         }
     }])

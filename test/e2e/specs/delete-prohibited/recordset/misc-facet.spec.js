@@ -40,7 +40,7 @@ var testParams = {
         modal_available_options: 10,
         disabled_rows_w_not_null: 11,
         options_w_not_null: [
-            'All Records With Value', 'No Value', 'one', 'Empty', 'two', 'seven', 'eight', 'elevens', 'four', 'six', 'ten', 'three'
+            'All records with value', 'No value', 'one', 'Empty', 'two', 'seven', 'eight', 'elevens', 'four', 'six', 'ten', 'three'
         ]
     },
     null_filter: {
@@ -49,11 +49,6 @@ var testParams = {
             totalNumOptions: 12,
             option: 1,
             numRows: 5
-        },
-        modal: {
-            facetIdx: 10,
-            totalNumOptions: 6,
-            numRows: 0
         },
         right_join: {
             firstFacet: {
@@ -66,7 +61,7 @@ var testParams = {
             secondFacet: {
                 name: "F5",
                 idx:17,
-                options: ["All Records With Value", "one"]
+                options: ["All records with value", "one"]
             }
         }
     },
@@ -91,8 +86,8 @@ var testParams = {
         numRows: 8,
         numRowsWFacet: 3,
         numRowsWOCustomFacet: 10,
-        options: ['No Value', 'one', 'two'],
-        optionsWOCustomFacet: ['No Value', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten']
+        options: ['No value', 'one', 'two'],
+        optionsWOCustomFacet: ['No value', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten']
     },
     maximumLength: {
         facetIdx: 20,
@@ -324,7 +319,7 @@ describe("Other facet features, ", function() {
         });
 
     });
-
+/*
     describe("Records With Value (not-null) filter, ", function () {
         var notNullBtn, showMore, facet;
 
@@ -346,45 +341,31 @@ describe("Other facet features, ", function() {
                 return chaisePage.clickButton(facet);
             }).then(function () {
                 showMore = chaisePage.recordsetPage.getShowMore(testParams.not_null.option);
+                notNullBtn = chaisePage.recordsetPage.getFacetOption(testParams.not_null.option, 0);
                 done();
             }).catch(chaisePage.catchTestError(done));
         });
 
-        it ("`All Records With Value` option must be available in modal picker.", function (done) {
+        it ("`All Records with value` option must be available in facet panel.", function (done) {
+            // make sure facet is loaded
             browser.wait(EC.elementToBeClickable(showMore));
-            chaisePage.clickButton(showMore).then(function () {
-                notNullBtn = chaisePage.recordsetPage.getModalMatchNotNullInput();
-                chaisePage.waitForElement(notNullBtn);
+            chaisePage.recordsetPage.getFacetOptionsText(testParams.not_null.option).then(function (text) {
+                expect(text).toEqual(testParams.not_null.options_w_not_null, "the options are not the same.");
                 done();
             }).catch(chaisePage.catchTestError(done));
-
         });
 
-        it ("Selecting `All Records With Value` should disable all the rows.", function (done) {
+        it ("After clicking on `All records with value`, the rest of options must be disabled", function (done) {
+
             chaisePage.clickButton(notNullBtn).then(function () {
                 browser.wait(function () {
-                    return chaisePage.recordsetPage.getModalDisabledRows().count().then(function (ct) {
-                        return ct === testParams.not_null.modal_available_options;
+                    return chaisePage.recordsetPage.getCheckedFacetOptions(testParams.not_null.option).count().then(function(ct) {
+                        return ct == 1;
                     });
-                });
-                // TODO uncomment this line when `null-filter` should show up in RS select with faceting
-                // expect(chaisePage.recordsetPage.getModalMatchNullInput().getAttribute('disabled')).toBe('true', "null option was not disabled.");
-                expect(chaisePage.recordsetPage.getCheckedModalOptions().count()).toBe(testParams.not_null.modal_available_options, "number of checked rows missmatch.");
-                return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
-            }).then(function () {
-                done();
-            }).catch(chaisePage.catchTestError(done));
-        });
+                }, browser.params.defaultTimeout);
 
-        it ("After submitting the filters, `All Records With Value` should be on top of the list with the rest of options being disabled", function (done) {
-            chaisePage.waitForElementInverse(chaisePage.recordsetPage.getFacetSpinner(testParams.not_null.option));
-            browser.wait(function () {
-                return chaisePage.recordsetPage.getCheckedFacetOptions(testParams.not_null.option).count().then(function(ct) {
-                    return ct == 1;
-                });
-            }, browser.params.defaultTimeout);
-
-            chaisePage.recordsetPage.getCheckedFacetOptions(testParams.not_null.option).count().then(function (count) {
+                return chaisePage.recordsetPage.getCheckedFacetOptions(testParams.not_null.option).count()
+            }).then(function (count) {
                 expect(count).toBe(1, "number of selected filters missmatch.");
 
                 return chaisePage.recordsetPage.getFacetOptionsText(testParams.not_null.option);
@@ -397,8 +378,8 @@ describe("Other facet features, ", function() {
             }).catch(chaisePage.catchTestError(done));
         });
 
-        it ("Deselecting `All Records With Value` should enable all the values on the list.", function (done) {
-            chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(testParams.not_null.option, 0)).then(function () {
+        it ("Deselecting `All records with value` should enable all the values on the list.", function (done) {
+            chaisePage.clickButton(notNullBtn).then(function () {
                 return chaisePage.recordsetPage.getFacetOptionsText(testParams.not_null.option);
             }).then(function (text) {
                 // make sure the options havn't changed
@@ -427,8 +408,8 @@ describe("Other facet features, ", function() {
             }).catch(chaisePage.catchTestError(done));
         });
 
-        it ("Selecting `All Records With Value` in the list, should remove all the checked filters on facet.", function (done) {
-            chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(testParams.not_null.option, 0)).then(function () {
+        it ("Selecting `All records with value` in the list, should remove all the checked filters on facet.", function (done) {
+            chaisePage.clickButton(notNullBtn).then(function () {
                 return chaisePage.recordsetPage.getFacetOptionsText(testParams.not_null.option);
             }).then(function (text) {
                 // make sure the options haven't changed
@@ -440,28 +421,9 @@ describe("Other facet features, ", function() {
                 done();
             }).catch(chaisePage.catchTestError(done));
         });
-
-        it ("going to modal picker with `All Records With Value`, the checkmark for `All Records With Value` must be checked.", function (done) {
-            browser.wait(EC.elementToBeClickable(showMore));
-            showMore.click().then(function () {
-                browser.wait(function () {
-                    return chaisePage.recordsetPage.getModalDisabledRows().count().then(function (ct) {
-                        return ct === testParams.not_null.modal_available_options;
-                    });
-                });
-
-                notNullBtn = chaisePage.recordsetPage.getModalMatchNotNullInput();
-                expect(notNullBtn.isPresent()).toBeTruthy("not-null is not present");
-                expect(notNullBtn.isSelected()).toBeTruthy("not-null not checked.");
-                expect(chaisePage.recordsetPage.getCheckedModalOptions().count()).toBe(testParams.not_null.modal_available_options, "number of checked rows missmatch.");
-
-                // NOTE after this test case the modal is still open, the next test cases should just start a new url.
-                done();
-            }).catch(chaisePage.catchTestError(done));
-        });
     });
 
-    describe("No Value (null) filter, ", function () {
+    describe("No value (null) filter, ", function () {
         var uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
         var clearAll, showMore, nullBtn;
 
@@ -478,92 +440,32 @@ describe("Other facet features, ", function() {
 
                 done();
             }).catch(chaisePage.catchTestError(done));
-
-            nullBtn = chaisePage.recordsetPage.getModalMatchNullInput();
         });
 
-        describe("when it's already selected, ", function () {
+        it ("null should be provided as an option and user should be able to select it.", function () {
             var params = testParams.null_filter.panel;
-            var idx = params.facetIdx;
-            it ('opening the modal should show the No value as selected.', function (done) {
-                chaisePage.clickButton(chaisePage.recordsetPage.getFacetById(idx)).then(function () {
-                    // wait for facet to open
-                    browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
+            chaisePage.recordsetPage.getFacetById(params.facetIdx).click().then(function () {
+                browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(params.facetIdx)), browser.params.defaultTimeout);
 
-                    // wait for facet checkboxes to load
-                    browser.wait(function () {
-                        return chaisePage.recordsetPage.getFacetOptions(idx).count().then(function(ct) {
-                            return ct == params.totalNumOptions;
-                        });
-                    }, browser.params.defaultTimeout);
+                // wait for facet checkboxes to load
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getFacetOptions(params.facetIdx).count().then(function(ct) {
+                        return ct == params.totalNumOptions;
+                    });
+                }, browser.params.defaultTimeout);
 
-                    return chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(idx, params.option));
-                }).then(function () {
-                    // wait for table rows to load
-                    browser.wait(function () {
-                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
-                            return ct == params.numRows;
-                        });
-                    }, browser.params.defaultTimeout);
+                // wait for list to be fully visible
+                browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(params.facetIdx)), browser.params.defaultTimeout);
 
-                    showMore = chaisePage.recordsetPage.getShowMore(idx);
-                    browser.wait(EC.elementToBeClickable(showMore));
-                    return chaisePage.clickButton(showMore);
-                }).then(function () {
-                    chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
-
-                    expect(nullBtn.isSelected()).toBeTruthy("checkbox is not selected");
-                    return chaisePage.recordsetPage.getModalCloseBtn().click();
-                }).then(function () {
-                    done();
-                }).catch(chaisePage.catchTestError(done));
-            });
-        });
-
-        describe("when it's not selected,", function () {
-            var params = testParams.null_filter.modal;
-            var idx = params.facetIdx;
-
-            it ("opening the modal should not have the no value selected.", function (done) {
-                chaisePage.clickButton(chaisePage.recordsetPage.getFacetById(idx)).then(function () {
-                    // wait for facet to open
-                    browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
-
-                    // wait for facet checkboxes to load
-                    browser.wait(function () {
-                        return chaisePage.recordsetPage.getFacetOptions(idx).count().then(function(ct) {
-                            return ct == params.totalNumOptions;
-                        });
-                    }, browser.params.defaultTimeout);
-
-                    showMore = chaisePage.recordsetPage.getShowMore(idx);
-                    browser.wait(EC.elementToBeClickable(showMore));
-                    return chaisePage.clickButton(showMore);
-                }).then(function () {
-                    chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
-
-                    expect(nullBtn.isSelected()).toBeFalsy("checkbox is selected");
-                    done();
-                }).catch(chaisePage.catchTestError(done));
-            });
-
-            it ("selecting `No Value` and submitting should change the result.", function (done) {
-                chaisePage.clickButton(nullBtn).then(function () {
-                    expect(nullBtn.isSelected()).toBeTruthy("didn't select.");
-                    return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
-                }).then(function () {
-                    browser.wait(function () {
-                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
-                            return ct == params.numRows;
-                        });
-                    }, browser.params.defaultTimeout);
-                }).then(function () {
-                    return clearAll.click();
-                }).then(function () {
-                    chaisePage.recordsetPage.waitForInverseMainSpinner();
-                    done();
-                }).catch(chaisePage.catchTestError(done));
-            });
+                return chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(params.facetIdx, params.option));
+            }).then(function () {
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                        return ct == params.numRows;
+                    });
+                }, browser.params.defaultTimeout);
+                done();
+            }).catch(chaisePage.catchTestError(done));
         });
 
         describe("regarding facets that require right join, ", function () {
@@ -601,7 +503,7 @@ describe("Other facet features, ", function() {
             });
         });
     });
-
+*/
     /***********************************************************  local test cases ***********************************************************/
     if (process.env.TRAVIS) return;
     // NOTE the following test cases will only run locally.
