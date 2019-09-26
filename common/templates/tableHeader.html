@@ -19,10 +19,10 @@
             </ul>
         </span>
         <span ng-if="vm.page.tuples.length === 0">0</span>
-        <span>{{(vm.totalRowsCnt && !vm.tableError) ? "of " + (vm.totalRowsCnt > vm.rowValues.length ? vm.totalRowsCnt : vm.rowValues.length) : ''}}</span>
+        <span>{{(vm.totalRowsCnt && !vm.tableError) ? "of " + (vm.totalRowsCnt > vm.rowValues.length ? vm.totalRowsCnt.toLocaleString() : vm.rowValues.length) : ''}}</span>
         <span>{{vm.reference.location.isConstrained && vm.config.displayMode !== recordsetDisplayModes.related ? "matching results" : "records" }}</span>
-        <img id="push-rows-spinner" ng-show="vm.pushRowsSpinner" src="../common/styles/images/loader.gif" class="spinner spinner-sm"/>
         <span ng-if="vm.countError" class="glyphicon glyphicon-alert" uib-tooltip="Request timeout: total count cannot be retrieved. Refresh the page later to try again." tooltip-placement="bottom"></span>
+        <span ng-show="vm.pushRowsSpinner || (vm.config.displayMode === recordsetDisplayModes.related && !vm.hasLoaded)" class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
     </div>
     <div class="col-xs-12 col-sm-6">
         <div class="pull-right">

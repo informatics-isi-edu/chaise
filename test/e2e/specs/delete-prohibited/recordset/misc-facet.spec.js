@@ -319,7 +319,7 @@ describe("Other facet features, ", function() {
         });
 
     });
-/*
+/*TODO should be added back
     describe("Records With Value (not-null) filter, ", function () {
         var notNullBtn, showMore, facet;
 

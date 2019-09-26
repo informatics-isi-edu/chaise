@@ -146,7 +146,7 @@ html {
 
     .disabled-form a,
     .disabled-row a {
-        color: $disabled-link-color;
+        color: $disabled-color;
     }
 
     .disabled-form .remove-input-btn {
@@ -583,6 +583,11 @@ html {
     .glyphicon-alert {
         color: $warning-color !important;
         border: none;
+    }
+
+    // spinner
+    .glyphicon-refresh {
+        color: $spinner-color;
     }
 
     // spinner animation

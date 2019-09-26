@@ -1248,9 +1248,10 @@
 
                     scope.tooltip = messageMap.tooltip;
 
-                    scope.searchPlaceholder = {};
-                    if (!scope.facetColumn.isEntityMode) {
-                        scope.searchPlaceholder = scope.facetColumn.displayname;
+                    scope.searchPlaceholder = {value: "", isHTML: false};
+                    // TODO requires ermrestjs change to update this placeholder
+                    if (scope.facetColumn.isEntityMode) {
+                        scope.searchPlaceholder.value = "all columns";
                     }
 
                     scope.checkboxRows = [];
@@ -1325,19 +1326,28 @@
                             params.selectedRows.push(newRow);
                         });
 
+                        // show null or not
                         if (!scope.facetColumn.isEntityMode) {
                             params.showNull = true;
+                        }
+
+                        // modal properties
+                        var windowClass = "search-popup faceting-show-details-popup";
+                        var modalSize = "xl";
+                        if (!scope.facetColumn.isEntityMode) {
+                            windowClass += " scalar-show-details-popup";
+                            modalSize = "md";
                         }
 
                         modalUtils.showModal({
                             animation: false,
                             controller: "SearchPopupController",
-                            windowClass: "search-popup faceting-show-details-popup",
+                            windowClass: windowClass,
                             controllerAs: "ctrl",
                             resolve: {
                                 params: params
                             },
-                            size: "xl",
+                            size: modalSize,
                             templateUrl:  UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
                         }, modalDataChanged(scope, true), false, false);
                     };

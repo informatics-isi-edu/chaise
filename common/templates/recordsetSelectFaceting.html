@@ -1,8 +1,9 @@
 <div class="recordset-container without-faceting" >
-    <loading-spinner ng-show="(!vm.initialized || $root.showSpinner) && !$root.error"></loading-spinner>
+    <loading-spinner id="main-spinner" ng-show="(!vm.initialized || $root.showSpinner || !vm.hasLoaded) && !$root.error"></loading-spinner>
     <div class="top-panel-container" ng-show="vm.reference">
         <alerts alerts="$root.alerts"></alerts>
         <div class="top-flex-panel">
+            <div class="top-left-panel close-panel"></div>
             <div class="top-right-panel">
                 <div class="recordset-controls-container" ng-show="vm.initialized">
                     <div ng-if="vm.selectedRows.length > 0 && vm.config.selectMode == 'multi-select'" class="recordset-selected-rows recordset-chiclets-container">
@@ -21,8 +22,8 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-lg-4 col-md-5 col-sm-6 col-xs-6" ng-if="vm.tableDisplayName">
-                            <chaise-search-input input-class="main-search-input" placeholder="vm.tableDisplayName"
+                        <div class="col-lg-4 col-md-5 col-sm-6 col-xs-6">
+                            <chaise-search-input input-class="main-search-input" placeholder="searchPlaceholder"
                                 search-term="vm.search" search-callback="search" focus="true"></chaise-search-input>
                         </div>
                     </div>
@@ -34,7 +35,6 @@
     <div class="bottom-panel-container">
         <div class="side-panel-resizable close-panel"></div>
         <div class="main-container">
-            <loading-spinner id="main-spinner" ng-show="!vm.hasLoaded && vm.initialized"></loading-spinner>
             <div class="main-body">
                 <!-- record table -->
                 <div class="recordset-table-container" ng-show="vm.initialized">

@@ -1123,6 +1123,9 @@
                         scope.vm.focusOnFacet(firstOpen, true);
                     }
 
+                    // TODO should be based on the reference columns in search context
+                    scope.searchPlaceholder = {isHTML: false, value: "all columns"};
+
                     initialize(scope.vm);
                 });
             };
