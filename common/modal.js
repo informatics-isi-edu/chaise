@@ -219,8 +219,6 @@
             parentStickyAreaSelector:   ".search-popup .modal-header"
         };
 
-        console.log("we're here", vm.tableModel.config.displayMode);
-
         /**
          * In case of single-select, this will be called just once.
          * In case of multi-select, this will be called anytime the list has changed

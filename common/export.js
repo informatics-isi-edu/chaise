@@ -109,7 +109,6 @@
             templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/export.html',
             scope: {
                 reference: "=",
-                allowExport: "=",
                 disabled: "="
             },
             link: function (scope, element, attributes) {
@@ -133,7 +132,7 @@
                     _doExport(scope, template);
                 };
 
-                scope.$watch('allowExport', function (newValue, oldValue) {
+                scope.$watch('reference', function (newValue, oldValue) {
                     if (newValue && scope.exportOptions.supportedFormats.length === 1) {
                         _updateExportFormats(scope);
                     }

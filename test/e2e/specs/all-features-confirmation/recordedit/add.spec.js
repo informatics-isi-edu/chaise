@@ -67,13 +67,13 @@ var testParams = {
                 "new title 1",  {"link":"https://example1.com/", "value":"Link to Website"}, {"link":"{{{chaise_url}}}/record/#{{catalog_id}}/product-add:category/term=Hotel", "value":"Hotel"},
                 "1.0000", "This is the summary of this column 1.", "Description 1", JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2),
                 "1", "2017-01-01 01:01:01", "2017-01-01", "false",
-                "v1, v2", "true", "1, 2", "1.0000, 2.2000", "2001-01-01, 2002-02-02", "No Value, 2001-01-01T01:01:01", "No Value, 2001-01-01 01:01:01",
+                "v1, v2", "true", "1, 2", "1.0000, 2.2000", "2001-01-01, 2002-02-02", "No value, 2001-01-01T01:01:01", "No value, 2001-01-01 01:01:01",
             ],
             [
                 "new title 2",  {"link":"https://example2.com/", "value":"Link to Website"}, {"link":"{{{chaise_url}}}/record/#{{catalog_id}}/product-add:category/term=Ranch", "value":"Ranch"},
                 "2.0000", "This is the summary of this column 2.", "Description 2", JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2),
                 "2", "2017-02-02 02:02:02", "2017-02-02", "true",
-                "v2, v3", "false", "1, 2", "2.0000, 3.3000", "2002-02-02, No Value", "2002-02-02T02:02:02", "2002-02-02 02:02:02",
+                "v2, v3", "false", "1, 2", "2.0000, 3.3000", "2002-02-02, No value", "2002-02-02T02:02:02", "2002-02-02 02:02:02",
             ]
         ],
         files: []

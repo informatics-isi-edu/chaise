@@ -20,23 +20,16 @@
             }
         }
 
-        &.text-btn {
-
-        }
-
+        // don't show the default blue outline on focus
         &:focus {
             outline: none;
         }
 
-        &.chaise-btn.chaise-btn-primary[disabled], &.chaise-btn.chaise-btn-secondary[disabled] {
-            color: $disabled-color;
-            background-color: $disabled-background-color;
-            border-color: $disabled-background-color;
+        // show not-allowed cursor and not allow click
+        &[disabled] {
             cursor: not-allowed;
-            pointer-events: none;
-
-            &:focus {
-                background-color: $disabled-background-color;
+            &:active {
+                pointer-events: none;
             }
         }
 
@@ -54,14 +47,25 @@
             }
         }
 
+        &.chaise-btn.chaise-btn-primary[disabled], &.chaise-btn.chaise-btn-secondary[disabled] {
+            color: $disabled-color;
+            background-color: $disabled-background-color;
+            border-color: $disabled-background-color;
+        }
+
         &.chaise-btn-tertiary {
             color: $primary-color;
             border: none;
             background: transparent;
 
-            &:focus {
-                outline: none;
+            &[disabled] {
+                color: $disabled-color;
             }
+        }
+
+        &.chaise-btn-default {
+            color: $black-color;
+            border-color: $border-color;
         }
 
         &.chaise-btn-danger {

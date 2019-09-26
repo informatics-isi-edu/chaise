@@ -159,9 +159,9 @@ var testParams = {
             type: "choice",
             totalNumOptions: 12,
             option: 1,
-            filter: "text_col\nNo Value",
+            filter: "text_col\nNo value",
             numRows: 5,
-            options: [ 'All Records With Value', 'No Value', 'one', 'Empty', 'two', 'seven', 'eight', 'elevens', 'four', 'six', 'ten', 'three' ]
+            options: [ 'All records with value', 'No value', 'one', 'Empty', 'two', 'seven', 'eight', 'elevens', 'four', 'six', 'ten', 'three' ]
         },
         {
             name: "longtext_col",
@@ -189,7 +189,7 @@ var testParams = {
             option: 2,
             filter: "boolean_col\nYes",
             numRows: 10,
-            options: [ 'All Records With Value', 'No', 'Yes' ]
+            options: [ 'All records with value', 'No', 'Yes' ]
         },
         {
             name: "jsonb_col",
@@ -198,7 +198,7 @@ var testParams = {
             option: 4,
             filter: 'jsonb_col\n{ "key": "four" }',
             numRows: 1,
-            options: [ 'All Records With Value', '{"key":"one"}', '{"key":"two"}', '{"key":"three"}', '{"key":"four"}', '{"key":"five"}', '{"key":"six"}', '{"key":"seven"}', '{"key":"eight"}', '{"key":"nine"}', '{"key":"ten"}' ]
+            options: [ 'All records with value', '{"key":"one"}', '{"key":"two"}', '{"key":"three"}', '{"key":"four"}', '{"key":"five"}', '{"key":"six"}', '{"key":"seven"}', '{"key":"eight"}', '{"key":"nine"}', '{"key":"ten"}' ]
         },
         {
             name: "F1",
@@ -207,7 +207,7 @@ var testParams = {
             option: 2,
             filter: "F1\ntwo",
             numRows: 10,
-            options: [ 'No Value', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten' ]
+            options: [ 'No value', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten' ]
         },
         {
             name: "to_name",
@@ -226,7 +226,7 @@ var testParams = {
             option: 1,
             filter: "f3 (term)\none",
             numRows: 6,
-            options: [ 'All Records With Value', 'one', 'two' ]
+            options: [ 'All records with value', 'one', 'two' ]
         },
         {
             name: "from_name",
@@ -235,7 +235,7 @@ var testParams = {
             option: 5,
             filter: "from_name\n5",
             numRows: 1,
-            options: [ 'All Records With Value', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+            options: [ 'All records with value', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
         },
         {
             name: "F1 with Term",
@@ -244,25 +244,25 @@ var testParams = {
             option: 2,
             filter: "F1 with Term\ntwo",
             numRows: 10,
-            options: [ 'All Records With Value', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten' ],
+            options: [ 'All records with value', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten' ],
             comment: "F1 with Term comment"
         },
         {
             name: "Check Presence Text",
             type: "check_presence",
             notNullNumRows: 9,
-            notNullFilter: "Check Presence Text\nAll Records With Value",
+            notNullFilter: "Check Presence Text\nAll records with value",
             nullNumRows: 21,
-            nullFilter: "Check Presence Text\nNo Value"
+            nullFilter: "Check Presence Text\nNo value"
         },
         {
             name: "F3 Entity",
             type: "choice",
             totalNumOptions: 4,
             option: 1,
-            filter: "F3 Entity\nNo Value",
+            filter: "F3 Entity\nNo value",
             numRows: 23,
-            options: [ 'All Records With Value', 'No Value', 'one', 'two']
+            options: [ 'All records with value', 'No value', 'one', 'two']
         },
         {
             name: "F5",
@@ -271,7 +271,7 @@ var testParams = {
             option: 2,
             filter: "F5\none",
             numRows: 1,
-            options: ["All Records With Value", "No Value", "one", "two"]
+            options: ["All records with value", "No value", "one", "two"]
 
         },
         {
@@ -281,7 +281,7 @@ var testParams = {
             option: 1,
             filter: "col_w_column_order_false\n01",
             numRows: 9,
-            options: [ 'All Records With Value', '01', '02', '03', '04', '05', '06', '07']
+            options: [ 'All records with value', '01', '02', '03', '04', '05', '06', '07']
         }
     ],
     multipleFacets: [
@@ -1075,7 +1075,7 @@ describe("Viewing Recordset with Faceting,", function() {
                                 }, browser.params.defaultTimeout);
 
                                 recordSetHelpers.openFacetAndTestFilterOptions(
-                                    testParams.name, idx, ['All Records With Value', 'No Value'], done
+                                    testParams.name, idx, ['All records with value', 'No value'], done
                                 );
                             });
 

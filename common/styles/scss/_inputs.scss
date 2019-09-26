@@ -236,17 +236,31 @@
       height: $btn-height;
       line-height: $btn-height;
       text-align: center;
+
       .remove-input-btn {
           cursor: pointer;
           pointer-events: all;
       }
-      .glyphicon-refresh {
-          color: $placeholder-color;
-      }
   }
 
   .upload-input {
-      cursor: pointer;
+    cursor: pointer;
+  }
+
+  .chaise-input-placeholder{
+      position: absolute;
+      top: $btn-padding-y;
+      left: $btn-padding-x;
+      color: $placeholder-color;
+
+      // to make sure it doesn't go to the next line
+      white-space: nowrap;
+
+      // users should not be able to select the tooltip
+      user-select: none;
+      -moz-user-select: none;
+      -webkit-user-select: none;
+      -ms-user-select: none;
   }
 
   label {
@@ -317,14 +331,3 @@
 // .chaise-input-control-color::-webkit-color-swatch {
 //   @include border-radius($input-border-radius);
 // }
-
-
-.chaise-input-control-w-placeholder {
-
-    .chaise-input-placeholder{
-        position: absolute;
-        top: $btn-padding-y;
-        left: $btn-padding-x;
-        color: $placeholder-color;
-    }
-}

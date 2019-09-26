@@ -1246,6 +1246,13 @@
                     // This can eventually be in the annotation, that's why I created this attribute
                     scope.showSearch = (scope.facetColumn.column.type.name !== "boolean");
 
+                    scope.tooltip = messageMap.tooltip;
+
+                    scope.searchPlaceholder = {};
+                    if (!scope.facetColumn.isEntityMode) {
+                        scope.searchPlaceholder = scope.facetColumn.displayname;
+                    }
+
                     scope.checkboxRows = [];
 
                     // for the search popup selector
@@ -1291,8 +1298,6 @@
                             params.matchNull = true;
                         }
 
-                        params.hideNotNullChoice = scope.facetColumn.hideNotNullChoice;
-                        params.hideNullChoice = scope.facetColumn.hideNullChoice;
                         params.displayMode = recordsetDisplayModes.facetPopup;
                         params.editable = false;
 

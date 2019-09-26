@@ -159,6 +159,13 @@ html {
         border-color: $border-color !important;
     }
 
+    .disabled-element {
+        cursor: not-allowed;
+        &:active {
+            pointer-events: none;
+        }
+    }
+
     // spinner
     #spinner {
         background: $white-color;
