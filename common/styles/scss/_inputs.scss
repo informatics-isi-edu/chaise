@@ -243,6 +243,10 @@
       }
   }
 
+  .upload-input {
+    cursor: pointer;
+  }
+
   .chaise-input-placeholder{
       position: absolute;
       top: $btn-padding-y;
@@ -258,11 +262,16 @@
       -webkit-user-select: none;
       -ms-user-select: none;
   }
+
+  label {
+      margin-bottom: 0px;
+
+      .button-text {
+          padding-left: 10px;
+      }
+  }
 }
 
-textarea.chaise-input-control {
-    height: auto;
-}
 
 // Readonly controls as plain text
 //

@@ -1,25 +1,17 @@
-<table class="table" style="margin-bottom: 0px;">
-    <tbody>
-        <tr>
-            <td style="padding: 0px; border-bottom:none;">
-                <div class="form-group" style="margin-bottom: 0px;">
-                    <input name="{{::column.name}}" type="file" accept="{{fileExtensions}}" tabindex="-1" id="{{fileElId}}" style="position: absolute; clip: rect(0px 0px 0px 0px);" ng-disabled="isDisabled">
-                    <div class="input-group input-group-sm" style="width: 100%;">
-                        <div tooltip-placement="bottom-left" uib-tooltip-html="fileTooltip()" style="height: 34px;">
-                            <input name="txt{{::column.name}}" type="text" class="form-control" ng-required="isRequired" ng-disabled="isDisabled" placeholder="{{placeholder}}" readonly="" ng-model="setFilename" ng-model-options="{getterSetter: true}" ng-click="select()" ng-style="column.getInputDisabled($root.context.appContext) ? {'cursor': 'default'} : {'cursor': 'pointer'}" style="padding-right: 25px; font-size: 14px; pointer-events: all;"/>
-                        </div>
-                        <div class="form-control-feedback coltooltip" ng-click="clear()" ng-hide="!value.url || value.url == '' || isDisabled" style="cursor: pointer;right: 105px;top: 2px;pointer-events: all; height: 34px; z-index: 4;">
-                            <span class="glyphicon glyphicon-remove coltooltiptext foreignkey-remove" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
-                        </div>
-                        <span ng-hide="isDisabled" class="input-group-btn" tabindex="0" tooltip-placement="bottom" uib-tooltip="Select file" style="border: none;">
-                            <label for="{{fileElId}}" class="btn btn-primary btn-inverted" style="height: 34px;font-size: 14px;">
-                                <span class="icon-span-filestyle glyphicon glyphicon-folder-open"></span>
-                                <span class="buttonText plm">Select  file</span>
-                            </label>
-                        </span>
-                    </div>
-                </div>
-            </td>
-        </tr>
-    </tbody>
-</table>
+<div>
+    <input class="hidden" name="{{::column.name}}" type="file" accept="{{fileExtensions}}" tabindex="-1" id="{{fileElId}}">
+    <div class="chaise-input-group">
+        <div class="chaise-input-control" tooltip-placement="bottom-left" uib-tooltip-html="fileTooltip()">
+            <input class="upload-input" name="txt{{::column.name}}" type="text" ng-required="isRequired" placeholder="{{placeholder}}" readonly="" ng-model="setFilename" ng-model-options="{getterSetter: true}" ng-click="select()" />
+        </div>
+        <!-- <div class="form-control-feedback coltooltip" ng-click="clear()" ng-hide="!value.url || value.url == '' || isDisabled" style="cursor: pointer;right: 105px;top: 2px;pointer-events: all; height: 34px; z-index: 4;">
+            <span class="glyphicon glyphicon-remove coltooltiptext foreignkey-remove" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
+        </div> -->
+        <span class="chaise-input-group-append" tabindex="0" tooltip-placement="bottom" uib-tooltip="Select file">
+            <label for="{{fileElId}}" class="chaise-btn chaise-btn-secondary">
+                <span class="glyphicon glyphicon-folder-open"></span>
+                <span class="button-text">Select file</span>
+            </label>
+        </span>
+    </div>
+</div>
