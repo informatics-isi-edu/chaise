@@ -17,13 +17,12 @@
                 </div>
             </div>
             <div class="top-right-panel">
-                <div class="row recordset-title-container" ng-show="vm.config.displayMode === recordsetDisplayModes.fullscreen">
-                    <div class="col-xs-12">
+                <div class="row recordset-title-container">
+                    <div class="col-xs-12" ng-show="vm.config.displayMode === recordsetDisplayModes.fullscreen">
                         <div class="pull-left">
                             <!-- TODO UX-M should change to class -->
                             <h1 id="page-title">
-                                <span ng-if="::vm.tableDisplayName.isHTML" ng-bind-html="vm.tableDisplayName.value" ng-class="{'chaise-icon-for-tooltip': vm.tableComment}" ng-attr-uib-tooltip="{{::vm.tableComment ? vm.tableComment : undefined}}" tooltip-placement="right"></span>
-                                <span ng-if="::!vm.tableDisplayName.isHTML" ng-bind="vm.tableDisplayName.value" ng-class="{'chaise-icon-for-tooltip': vm.tableComment}" ng-attr-uib-tooltip="{{::vm.tableComment ? vm.tableComment : undefined}}" tooltip-placement="right"></span>
+                                <chaise-title ng-if="vm.reference" add-link="false" reference="vm.reference"></chaise-title>
                                 <small ng-if="vm.reference && vm.reference.location.version" class="h3-class" tooltip-placement="bottom-left" uib-tooltip="{{::tooltip.versionTime}} {{versionDate()}}">({{versionDisplay()}})</small>
                             </h1>
                         </div>
@@ -49,8 +48,8 @@
                             <span class="chaise-btn chaise-btn-secondary" ng-if="row.displayname.value == ''" ng-bind-html="defaultDisplayname.empty"></span>
                             <span class="chaise-btn chaise-btn-secondary" ng-if="row.displayname.value == null" ng-bind-html="defaultDisplayname.null"></span>
                         </div>
-                        <button ng-click="removeAllPills($event)" class="chaise-btn chaise-btn-tertiary clear-all-btn" uib-tooltip="Clear all selected rows" tooltip-placement="bottom">
-                            <span>Clear all selected rows</span>
+                        <button ng-click="removeAllPills($event)" class="chaise-btn chaise-btn-tertiary clear-all-btn">
+                            <span>Reset selection</span>
                         </button>
                     </div>
 

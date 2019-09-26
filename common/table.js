@@ -1201,7 +1201,7 @@
                     }
                 });
 
-                // make sur the padding of main-container is correctly set
+                // make sure the padding of main-container is correctly set
                 UiUtils.watchForMainContainerPadding(scope, scope.parentContainer);
             }
 

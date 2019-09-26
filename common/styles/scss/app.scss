@@ -226,10 +226,8 @@ html {
     #page-subtitle {
         margin: 0;
 
-        a:hover .no-decoration {
-            // removes the underline for text-decoration
-            // "text-decoration: none;" does NOT work here
-            display: inline-block;
+        .link-decoration {
+            color: $link-color;
         }
     }
 

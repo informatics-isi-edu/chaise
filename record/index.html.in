@@ -47,10 +47,7 @@
                         </div>
                         <div class="title">
                             <h1 id="page-subtitle">
-                                <a ng-href="{{::ctrl.referenceTableApplink()}}" ng-attr-uib-tooltip="{{::reference.table.comment ? reference.table.comment : undefined}}" tooltip-placement="right">
-                                    <span ng-if="::reference.displayname.isHTML" ng-class="{'chaise-icon-for-tooltip': reference.table.comment}" ng-bind-html="reference.displayname.value"></span>
-                                    <span ng-if="::!reference.displayname.isHTML" ng-class="{'chaise-icon-for-tooltip': reference.table.comment}" ng-bind="reference.displayname.value"></span><span class="no-decoration">:</span>
-                                </a>
+                                <chaise-title ng-if="reference" add-link="true" reference="reference"></chaise-title><span class="link-decoration">:</span>
                                 <small ng-if="reference && reference.location.version" tooltip-placement="bottom-left" uib-tooltip="{{::ctrl.tooltip.versionTime}} {{ctrl.versionDate()}}">({{ctrl.versionDisplay()}})</small>
                             </h1>
                             <div class="entity-display-header">

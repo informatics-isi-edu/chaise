@@ -1,3 +1,8 @@
+// don't add border to the modal header
+.modal-header {
+    border-bottom: none;
+}
+
 // uploader
 .modal-upload-progress {
     .progress {

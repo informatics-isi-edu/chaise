@@ -1860,7 +1860,7 @@
                 };
 
             }
-        }
+        };
     }])
 
     .directive('chaiseClearInput', [function () {
@@ -1874,7 +1874,39 @@
                 clickCallback: "&",
                 show: "="
             }
-        }
+        };
+    }])
+
+    // TODO currently it has four different modes,we might want to consider
+    // rewriting this so we avoid duplicating all these four differnt variations
+    .directive('chaiseTitle', [function () {
+        return {
+            restrict: 'E',
+            template: '<a ng-if="addLink && !displayname.isHTML" ng-href="{{::recordset()}}" ng-attr-uib-tooltip="{{::comment}}" tooltip-placement="bottom-left">' +
+                        '<span ng-bind="displayname.value" ng-class="{\'chaise-icon-for-tooltip\': comment}"></span>' +
+                      '</a>' +
+                      '<a ng-if="addLink && displayname.isHTML" ng-href="{{::recordset()}}" ng-attr-uib-tooltip="{{::comment}}" tooltip-placement="bottom-left">' +
+                        '<span ng-bind-html="displayname.value" ng-class="{\'chaise-icon-for-tooltip\': comment}"></span>' +
+                      '</a>' +
+                      '<span ng-if="!addLink && !displayname.isHTML" ng-attr-uib-tooltip="{{::comment}}" tooltip-placement="bottom-left">' +
+                        '<span ng-bind="displayname.value" ng-class="{\'chaise-icon-for-tooltip\': comment}"></span>' +
+                      '</span>' +
+                      '<span ng-if="!addLink && displayname.isHTML" ng-attr-uib-tooltip="{{::comment}}" tooltip-placement="bottom-left">' +
+                        '<span ng-bind-html="displayname.value" ng-class="{\'chaise-icon-for-tooltip\': comment}"></span>' +
+                      '</span>',
+            scope: {
+                reference: "=",
+                addLink: "="
+            },
+            link: function (scope, elem, attrs) {
+                scope.recordset = function () {
+                    return scope.reference.unfilteredReference.contextualize.compact.appLink;
+                }
+
+                scope.displayname = scope.reference.displayname;
+                scope.comment = scope.reference.table.comment ? scope.reference.table.comment : undefined;
+            }
+        };
     }])
 
     // if a view value is empty string (''), change it to null before submitting to the database
