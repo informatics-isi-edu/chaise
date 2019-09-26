@@ -154,14 +154,11 @@
                                                         </div>
 
                                                         <!-- modal popup input -->
-                                                        <div ng-switch-when="popup-select" class="form-group has-feedback chaise-input-group modal-popup">
+                                                        <div ng-switch-when="popup-select" class="has-feedback chaise-input-group modal-popup">
                                                             <div id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-display" contenteditable="false" class="chaise-input-control popup-select-value" style="cursor: pointer" ng-click="::form.searchPopup(rowIndex, column)" ng-bind-html="(form.recordEditModel.rows[rowIndex][column.name] ? form.recordEditModel.rows[rowIndex][column.name] : form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]))"></div>
                                                             <label class="sr-only"></label>
                                                             <div class="form-control-feedback coltooltip" ng-hide="(!form.recordEditModel.rows[rowIndex][column.name])" ng-style="{'cursor': 'pointer', 'right': '40px', 'pointer-events': 'all'}">
                                                                 <span class="glyphicon glyphicon-remove coltooltiptext foreignkey-remove" ng-click="::form.clearForeignKey(rowIndex, column)" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
-                                                            </div>
-                                                            <div class="form-control-feedback" ng-show="showColumnSpinner[rowIndex][column.name]" ng-style="{'right': '60px', 'pointer-events': 'all', 'color': '#C3C3C3'}">
-                                                                <span class="glyphicon glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
                                                             </div>
                                                             <span class="chaise-input-group-append">
                                                                 <button ng-focus="::form.blurElement($event);" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-button" class="chaise-btn chaise-btn-primary modal-popup-btn" type="button" ng-click="::form.searchPopup(rowIndex, column)" tooltip-placement="bottom" uib-tooltip="Select from an existing value.">
@@ -209,7 +206,7 @@
 
                                                         <!-- longtext/textarea input -->
                                                         <div ng-switch-when="longtext">
-                                                            <textarea id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" rows="5" name="{{::column.name}}" class="chaise-input-control content-box" ng-required="::form.isRequired(columnIndex);" empty-to-null markdown-editor="{'iconlibrary': 'glyph', addExtraButtons:true, fullscreen: {enable: false, icons: {}}, resize: 'vertical'}"></textarea>
+                                                            <textarea id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" rows="5" name="{{::column.name}}" class="content-box" ng-required="::form.isRequired(columnIndex);" empty-to-null markdown-editor="{'iconlibrary': 'glyph', addExtraButtons:true, fullscreen: {enable: false, icons: {}}, resize: 'vertical'}"></textarea>
                                                             <a href id="previewLinkId-form-{{rowIndex}}-{{::column.name}}" class="live-preview" markdown-preview textinput="form.recordEditModel.rows[rowIndex][column.name]"></a>
                                                         </div>
 

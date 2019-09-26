@@ -43,15 +43,12 @@
     </div>
 
     <!-- modal popup input -->
-    <div ng-switch-when="popup-select" class="form-group has-feedback chaise-input-group modal-popup">
+    <div ng-switch-when="popup-select" class="has-feedback chaise-input-group modal-popup">
         <div contenteditable="false" class="chaise-input-control popup-select-value" ng-style="{'cursor': 'pointer'}" ng-click="::searchPopup()" ng-bind-html="(columnModel.fkDisplayName.value ? columnModel.fkDisplayName.value : getDisabledInputValue())"></div>
         <label class="sr-only"></label>
         <div class="form-control-feedback coltooltip" ng-hide="!columnModel.fkDisplayName.value" ng-style="{'cursor': 'pointer', 'right': '40px', 'pointer-events': 'all'}">
             <span class="glyphicon glyphicon-remove coltooltiptext foreignkey-remove" ng-click="::clearForeignKey()" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
         </div>
-        <!-- <div class="form-control-feedback" ng-show="showColumnSpinner[rowIndex][column.name]" ng-style="{'right': '60px', 'pointer-events': 'all', 'color': '#C3C3C3'}">
-            <span class="glyphicon glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
-        </div> -->
         <span class="chaise-input-group-append">
             <button ng-focus="::blurElement($event);" class="chaise-btn chaise-btn-secondary modal-popup-btn" type="button" ng-click="searchPopup()" tooltip-placement="bottom" uib-tooltip="Select from an existing value.">
                 <span class="glyphicon glyphicon-chevron-down"></span>
@@ -98,7 +95,7 @@
 
     <!-- longtext/textarea input -->
     <div ng-switch-when="longtext">
-        <textarea ng-model="model.value" rows="5" name="{{::column.name}}" class="chaise-input-control content-box" empty-to-null markdown-editor="{'iconlibrary': 'glyph', addExtraButtons:true ,fullscreen:{ enable: false, icons: {}}, resize: 'vertical'}"></textarea>
+        <textarea ng-model="model.value" rows="5" name="{{::column.name}}" class="content-box" empty-to-null markdown-editor="{'iconlibrary': 'glyph', addExtraButtons:true ,fullscreen:{ enable: false, icons: {}}, resize: 'vertical'}"></textarea>
         <a href class="live-preview" markdown-preview textinput="model.value"></a>
     </div>
 

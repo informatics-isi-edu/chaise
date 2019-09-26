@@ -243,13 +243,21 @@
       .glyphicon-refresh {
           color: $placeholder-color;
       }
+  }
 
+  .upload-input {
+      cursor: pointer;
+  }
+
+  label {
+      margin-bottom: 0px;
+
+      .button-text {
+          padding-left: 10px;
+      }
   }
 }
 
-textarea.chaise-input-control {
-    height: auto;
-}
 
 // Readonly controls as plain text
 //
