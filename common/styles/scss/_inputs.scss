@@ -214,12 +214,18 @@
   // don't honor that edge case; we style them as disabled anyway.
   &:disabled,
   &[readonly],
-  &.input-disabled,
-  input:disabled {
+  &.input-disabled {
     background-color: $disabled-background-color;
     border-color: $disabled-background-color;
     // iOS fix for unreadable disabled content; see https://github.com/twbs/bootstrap/issues/11655.
     opacity: 1;
+    cursor: not-allowed;
+
+    // for the upload input case that combines with input-disabled
+    input:disabled {
+        background-color: inherit;
+        cursor: inherit;
+    }
   }
 
   &.has-feedback {
