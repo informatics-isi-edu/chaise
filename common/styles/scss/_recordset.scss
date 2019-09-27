@@ -20,12 +20,6 @@
                 margin-bottom: 10px;
             }
 
-            .recordset-selected-rows {
-                .filter-chiclet {
-                    max-width: none;
-                }
-            }
-
             $filter-chiclet-margin: 5px;
             .filter-chiclet {
                 max-width: 350px;
@@ -76,6 +70,25 @@
                 span {
                     color: $black-color;
                     cursor: default;
+                }
+            }
+
+            .selected-chiclet {
+                border: none;
+                margin-right: 5px;
+                margin-bottom: 5px;
+                padding-right: 0;
+
+                .selected-chiclet-name {
+                    cursor: default;
+                    user-select: text;
+                    -webkit-user-select: text;
+                    -moz-user-select: text;
+                    -ms-user-select: text;
+                }
+
+                .selected-chiclet-remove i {
+                    top: 3px;
                 }
             }
 
@@ -280,6 +293,7 @@ input.search-progress {
 faceting {
     .side-panel-container {
         overflow-y: auto;
+        height: 100%;
         -webkit-transition: all 1s;
         transition: all 1s;
 
