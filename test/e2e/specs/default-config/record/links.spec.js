@@ -32,7 +32,7 @@ describe('View existing record,', function() {
         });
 
         if (!process.env.TRAVIS) {
-            describe("regadring the export button, ", function () {
+            describe("regarding the export button, ", function () {
                 var exportBtn;
                 beforeAll(function () {
                     exportBtn = chaisePage.recordsetPage.getExportDropdown();

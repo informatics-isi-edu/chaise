@@ -895,7 +895,7 @@ exports.testAddRelatedTable = function (params, isInline, inputCallback) {
                 expect(url.indexOf('prefill=')).toBeGreaterThan(-1, "didn't have prefill");
 
                 var title = chaisePage.recordEditPage.getFormTitle().getText();
-                expect(title).toBe("Create Record", "recordedit title missmatch.")
+                expect(title).toBe("Create " + params.tableDisplayname + " Record", "recordedit title missmatch.");
 
                 done();
             }).catch(function (err) {
@@ -912,7 +912,7 @@ exports.testAddRelatedTable = function (params, isInline, inputCallback) {
             }
         });
 
-        it ("submitting the form and coming back to recordset page should update the related table.", function (done) {
+        it ("submitting the form and coming back to record page should update the related table.", function (done) {
             inputCallback().then(function () {
                 return chaisePage.recordEditPage.submitForm();
             }).then(function() {

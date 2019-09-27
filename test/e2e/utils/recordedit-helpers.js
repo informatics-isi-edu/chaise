@@ -49,7 +49,12 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
     if (isEditMode) {
         it("should have edit record title", function() {
             var title = chaisePage.recordEditPage.getEntityTitleElement();
-            expect(title.getText()).toEqual("Edit " + tableParams.record_displayname + " Record", "Edit mode title is incorrect.");
+            expect(title.getText()).toEqual("Edit " + tableParams.table_displayname + " Record", "Edit mode title is incorrect.");
+        });
+
+        it("should have edit record subtitle", function() {
+            var subtitle = chaisePage.recordEditPage.getEntitySubtitleElement();
+            expect(subtitle.getText()).toEqual(tableParams.record_displayname, "Edit mode title is incorrect.");
         });
 
         it("should not allow to add new rows/columns", function() {
@@ -61,7 +66,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
     } else {
         it("should have create record title", function() {
-            expect(chaisePage.recordEditPage.getEntityTitleElement().getText()).toBe("Create Record", "Create mode title is incorrect.");
+            expect(chaisePage.recordEditPage.getEntityTitleElement().getText()).toBe("Create " + tableParams.table_displayname + " Record", "Create mode title is incorrect.");
         });
 
         it("should allow to add new rows/columns", function() {
@@ -72,16 +77,14 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
         });
     }
 
-    it ("should have the table subtitle.", function () {
+    it ("should have the tablename in the title as a link.", function () {
         var expectedLink = process.env.CHAISE_BASE_URL + "/recordset/#" +  browser.params.catalogId + "/" + tableParams.schema_name + ":" + tableParams.table_name;
         expectedLink += "?pcid=";
-        var subtitleEl = chaisePage.recordEditPage.getEntitySubtitleElement();
-
-        expect(subtitleEl.getText()).toBe(tableParams.table_displayname, "Entity subtitle is incorrect.");
+        var linkEl = chaisePage.recordEditPage.getEntityTitleLinkElement();
 
         // because of pcid and ppid we cannot test the whole url
-        expect(subtitleEl.getAttribute("href")).toContain(expectedLink, "Title of result page doesn't have the expected link.");
-        expect(subtitleEl.getAttribute('uib-tooltip')).toBe(tableParams.table_comment, "Entity subtitle tooltip is incorrect.");
+        expect(linkEl.getAttribute("href")).toContain(expectedLink, "Title of result page doesn't have the expected link.");
+        expect(linkEl.getAttribute('uib-tooltip')).toBe(tableParams.table_comment, "Entity subtitle tooltip is incorrect.");
     });
 
     it("should render columns which are inside the visible columns annotation if defined; Default all are visible", function() {
@@ -1532,7 +1535,7 @@ exports.testSubmission = function (tableParams, isEditMode) {
 
         describe('result page, ', function () {
             it("should have the correct title.", function() {
-                var title = tableParams.results.length + "/" + tableParams.results.length + " Records " + (isEditMode ? "Updated" : "Created") + " Successfully";
+                var title = tableParams.results.length + "/" + tableParams.results.length + " " + tableParams.table_displayname + " Records " + (isEditMode ? "Updated" : "Created") + " Successfully";
                 expect(chaisePage.recordEditPage.getResultsetTitleElement().getText()).toBe(title, "Resultset page title is incorrect.");
             });
 
@@ -1547,7 +1550,7 @@ exports.testSubmission = function (tableParams, isEditMode) {
                 }
 
                 var expectedLink = process.env.CHAISE_BASE_URL + "/recordset/#" +  browser.params.catalogId + "/" + tableParams.schema_name + ":" + tableParams.table_name + linkModifier;
-                var titleLink = chaisePage.recordEditPage.getResultsetSubtitleLink();
+                var titleLink = chaisePage.recordEditPage.getResultsetTitleLinkElement();
 
                 expect(titleLink.getText()).toBe(tableParams.table_displayname, "Title of result page doesn't have the expected caption.");
                 expect(titleLink.getAttribute("href")).toContain(expectedLink , "Title of result page doesn't have the expected link.");
@@ -1709,8 +1712,9 @@ exports.selectFile = function(file, fileInput, txtInput) {
 
     // test the tooltip on hover
     // move the mouse first to force any other tooltips to hide
-    browser.actions().mouseMove(chaisePage.recordEditPage.getEntityTitleElement()).perform();
+    browser.actions().mouseMove(element(by.css(".text-danger"))).perform();
     var tooltip = chaisePage.getTooltipDiv();
+
     chaisePage.waitForElementInverse(tooltip).then(function () {
         browser.actions().mouseMove(txtInput).perform();
 

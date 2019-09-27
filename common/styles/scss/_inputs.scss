@@ -213,7 +213,9 @@
   // disabled if the fieldset is disabled. Due to implementation difficulty, we
   // don't honor that edge case; we style them as disabled anyway.
   &:disabled,
-  &[readonly] {
+  &[readonly],
+  &.input-disabled,
+  input:disabled {
     background-color: $disabled-background-color;
     border-color: $disabled-background-color;
     // iOS fix for unreadable disabled content; see https://github.com/twbs/bootstrap/issues/11655.
@@ -221,7 +223,7 @@
   }
 
   &.has-feedback {
-      padding-right: $btn-height;
+      padding-right: $input-remove-width;
   }
 
   // form-control:focus changes the z-index of the form control from 2 to 3.
@@ -231,20 +233,14 @@
       color: $black-color;
       position: absolute;
       right: 0;
-      top: -1px;
-      width: $btn-height;
-      height: $btn-height;
-      line-height: $btn-height;
+      top: 5px;
+      width: $input-remove-width;
       text-align: center;
 
       .remove-input-btn {
           cursor: pointer;
           pointer-events: all;
       }
-  }
-
-  .upload-input {
-    cursor: pointer;
   }
 
   .chaise-input-placeholder{
@@ -263,7 +259,7 @@
       -ms-user-select: none;
   }
 
-  label {
+  & + .chaise-input-group-append > label {
       margin-bottom: 0px;
 
       .button-text {

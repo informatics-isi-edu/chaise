@@ -14,20 +14,26 @@ var recordEditPage = function() {
         return browser.executeScript("return $('#entity-title').text();");
     };
 
+    // recordedit form view
     this.getEntityTitleElement = function() {
-        return element(by.id('page-title'));
+        return element(by.css('.recordedit-bookmark-container #page-title'));
+    };
+
+    this.getEntityTitleLinkElement = function() {
+        return this.getEntityTitleElement().element(by.tagName('a'));
     };
 
     this.getEntitySubtitleElement = function() {
-        return element(by.css('.recordedit-bookmark-container #page-subtitle > a'));
+        return element(by.css('.recordedit-bookmark-container #page-subtitle'));
     };
 
+    // resultset view
     this.getResultsetTitleElement = function() {
         return element(by.css('.resultset-bookmark-container #page-title'));
     };
 
-    this.getResultsetSubtitleLink = function () {
-        return element(by.css('.resultset-bookmark-container #page-subtitle > a'));
+    this.getResultsetTitleLinkElement = function () {
+        return this.getResultsetTitleElement().element(by.tagName('a'));
     };
 
     this.getAllColumnCaptions = function() {
@@ -225,8 +231,9 @@ var recordEditPage = function() {
         index = index || 0;
         var inputs = {};
         inputs.date = element.all(by.css('input[name="' + name + '"][date]')).get(index);
-        inputs.todayBtn = inputs.date.element(by.xpath('..')).all(by.css(".input-group-btn > button")).get(0);
-        inputs.clearBtn = inputs.date.element(by.xpath('..')).all(by.css(".input-group-btn > button")).get(1);
+        var input = inputs.date.element(by.xpath('..')).all(by.css(".chaise-input-group-append > button"));
+        inputs.todayBtn = input.get(0);
+        inputs.clearBtn = input.get(1);
         return inputs;
     };
 

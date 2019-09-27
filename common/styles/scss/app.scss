@@ -233,25 +233,26 @@ html {
         }
     }
 
-    #bookmark-container {
+    .recordedit-bookmark-container,
+    .resultset-bookmark-container {
         padding: 15px 40px 10px;
         /* padding-left and padding-right sides are to equal the left and right paddings of .container-fluid */
         // background-color: #f1f1f1;
         // box-shadow: 0 4px 2px -2px rgba(0,0,0,0.4);
-        z-index: 100;
+
+        > * {
+            display: inline-block;
+        }
+
+        .pull-left {
+            text-align: left;
+        }
+
+        .pull-right {
+            text-align: right;
+        }
     }
 
-    #bookmark-container > * {
-        display: inline-block;
-    }
-
-    #bookmark-container .pull-left {
-        text-align: left;
-    }
-
-    #bookmark-container .pull-right {
-        text-align: right;
-    }
     // bookmark container end
 
     /* used to replace the margin with padding on h1-4 elements */
@@ -631,6 +632,7 @@ html {
             }
 
             .range-inputs-width {
+                display: inline-block;
                 min-width: 100px;
 
                 .numeric-date-width {
@@ -638,25 +640,13 @@ html {
                 }
 
                 .datetime-width {
-                    max-width: 150px;
+                    max-width: 160px;
                 }
 
                 // timestamp range inputs
-                .input-container.input-group {
+                .input-container.chaise-input-group {
                     width: 100%;
                 }
-
-                .input-container {
-                    position: relative;
-
-                    .input-clearbtn {
-                        cursor: pointer;
-                        right: 0;
-                        pointer-events: all;
-                        z-index: 5;
-                        width: 22px;
-                    }
-                } // end .input-container
             } // end .range-inputs-width
         } // end .form-inline
     } // end range-inputs

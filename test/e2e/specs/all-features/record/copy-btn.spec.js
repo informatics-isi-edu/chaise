@@ -3,7 +3,7 @@ var recordHelpers = require('../../../utils/record-helpers.js');
 var recordSetHelpers = require('../../../utils/recordset-helpers.js');
 var testParams = {
     table_name: "editable-id-table",
-    table_displayname: "Editable Id Table:",
+    table_displayname: "Editable Id Table",
     table_inner_html_display: "<strong>Editable Id Table</strong>",
     entity_title: "1",
     entity_inner_html_title: "<strong>1</strong>",
@@ -195,7 +195,7 @@ describe('View existing record,', function() {
 
                 subtitleElement.getAttribute("innerHTML").then(function(html) {
                     expect(html).toBe(testParams.table_inner_html_display);
-                    expect(chaisePage.recordPage.getEntitySubTitle()).toBe(testParams.table_displayname);
+                    expect(chaisePage.recordPage.getEntitySubTitle()).toBe(testParams.table_displayname + ":");
 
                     return titleElement.getAttribute("innerHTML");
                 }).then(function(html) {
@@ -230,9 +230,9 @@ describe('View existing record,', function() {
 
                     return titleElement.getText();
                 }).then(function(txt) {
-                    expect(txt).toBe("Create Record", "Recordedit title is incorrect.");
+                    expect(txt).toBe("Create " + testParams.table_displayname + " Record", "Recordedit title is incorrect.");
 
-                    return chaisePage.recordEditPage.getEntitySubtitleElement().element(by.css('span[ng-bind-html]')).getAttribute("innerHTML");
+                    return titleElement.element(by.css('span[ng-bind-html]')).getAttribute("innerHTML");
                 }).then(function(html) {
                     expect(html).toBe(testParams.table_inner_html_display);
 

@@ -157,17 +157,15 @@ describe('Edit multiple existing record,', function() {
                 it("should have the title displayed properly.", function() {
                     // if submit button is visible, this means the recordedit page has loaded
                     chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
-                        expect(chaisePage.recordEditPage.getEntityTitleElement().getText()).toBe("Edit Records", "Multi-edit title is incorrect.");
+                        expect(chaisePage.recordEditPage.getEntityTitleElement().getText()).toBe("Edit " + tableParams.table_name + " Records", "Multi-edit title is incorrect.");
                     });
                 });
 
-                it("should have the table displayname as part of the entity subtitle witht eh proper tooltip.", function() {
+                it("should have the table displayname as part of the entity title with the proper tooltip.", function() {
                     // if submit button is visible, this means the recordedit page has loaded
-                    chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
-                        var subtitleEl = chaisePage.recordEditPage.getEntitySubtitleElement();
-                        expect(subtitleEl.getText()).toBe(tableParams.table_name, "Entity subtitle is incorrect.");
-                        expect(subtitleEl.getAttribute('uib-tooltip')).toBe(tableParams.tableComment, "Subtitle comment is incorrect.");
-                    });
+                    var titleLink = chaisePage.recordEditPage.getEntityTitleLinkElement();
+                    expect(titleLink.getText()).toBe(tableParams.table_name, "table name link is incorrect.");
+                    expect(titleLink.getAttribute('uib-tooltip')).toBe(tableParams.tableComment, "table name comment is incorrect.");
                 });
 
                 it("columns should have correct value, and selectable.", function() {
@@ -225,12 +223,12 @@ describe('Edit multiple existing record,', function() {
 
                     describe("result page", function () {
                         it("should have the correct title.", function() {
-                            expect(chaisePage.recordEditPage.getResultsetTitleElement().getText()).toBe(tableParams.results.length + "/" + tableParams.results.length + " Records Updated Successfully", "Resultset title is incorrect.");
+                            expect(chaisePage.recordEditPage.getResultsetTitleElement().getText()).toBe(tableParams.results.length + "/" + tableParams.results.length +  " " + tableParams.table_name + " Records Updated Successfully", "Resultset title is incorrect.");
                         });
 
                         it('should point to the correct link with caption.', function () {
                             var expectedLink = process.env.CHAISE_BASE_URL + "/recordset/#" +  browser.params.catalogId + "/" + schemaName + ":" + tableParams.table_name + "/" + keyPairs.join(";") + "@sort(" + tableParams.sortColumns + ")";
-                            var titleLink = chaisePage.recordEditPage.getResultsetSubtitleLink();
+                            var titleLink = chaisePage.recordEditPage.getResultsetTitleLinkElement();
 
                             expect(titleLink.getText()).toBe(tableParams.table_name, "Title of result page doesn't have the expected caption.");
                             expect(titleLink.getAttribute("href")).toContain(expectedLink , "Title of result page doesn't have the expected link.");

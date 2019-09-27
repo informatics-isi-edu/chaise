@@ -1,5 +1,5 @@
 <div class="chaise-search-box chaise-input-group" ng-class="{'disabled-element': disabled}">
-    <div class="chaise-input-control">
+    <div class="chaise-input-control has-feedback">
         <input type="text" ng-model="searchTerm" ng-class="inputClass" ng-disabled="disabled" on-enter="enterPressed()" ng-change="inputChanged()" ng-attr-autofocus="{{focus === true}}">
         <span ng-hide="searchTerm" class="chaise-input-placeholder" ng-click="changeFocus()" ng-if="::placeholder.isHTML === true" ng-bind-html="'Search within ' + placeholder.value"></span>
         <span ng-hide="searchTerm" class="chaise-input-placeholder" ng-click="changeFocus()" ng-if="::placeholder.isHTML === false" ng-bind="'Search within '  + placeholder.value"></span>
