@@ -1,3 +1,8 @@
+// don't add border to the modal header
+.modal-header {
+    border-bottom: none;
+}
+
 // uploader
 .modal-upload-progress {
     .progress {
@@ -146,7 +151,16 @@ body.error-open loading-spinner {
     }
 }
 
-
+// don't show alerts on modals
+// except facet since it has to show the url length error
 .modal:not(.faceting-show-details-popup) .recordset-container alerts {
     display: none !important;
+}
+
+.scalar-show-details-popup {
+    // change width of number of Occurrences
+    // we cannot use the class name because the scalar column might be using the same name
+    .recordset-table th:nth-child(3){
+        width: 150px;
+    }
 }

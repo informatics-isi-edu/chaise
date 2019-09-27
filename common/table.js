@@ -1123,6 +1123,9 @@
                         scope.vm.focusOnFacet(firstOpen, true);
                     }
 
+                    // TODO should be based on the reference columns in search context
+                    scope.searchPlaceholder = {isHTML: false, value: "all columns"};
+
                     initialize(scope.vm);
                 });
             };
@@ -1152,10 +1155,6 @@
                 if (scope.fixedContentHeight !== undefined && !isNaN(scope.fixedContentHeight)) {
 
                     UiUtils.setDisplayContainerHeight(scope.scrollableContainer, scope.fixedContentHeight, scope.parentContainer);
-                    // no need to fetch and verify the faceting elements (navbar and bookmark are the same container as the ones used in main elements function)
-                    if (scope.vm.config.showFaceting) {
-                        UiUtils.setDisplayContainerHeight(scope.facetContainer, scope.fixedContentHeight, scope.parentContainer);
-                    }
                 }
             }
 
@@ -1182,11 +1181,6 @@
                 // get the scrollable container of this recordset
                 scope.scrollableContainer = scope.parentContainer.querySelector(".bottom-panel-container");
 
-                // get the scrollable container for facet
-                if (scope.vm.config.showFaceting) {
-                    scope.facetContainer = scope.parentContainer.querySelector('.side-panel-container');
-                }
-
                 // just setting the watch event is not enough, we have to run it once too.
                 computeFixedContentHeight();
                 setRecordsetHeight();
@@ -1198,7 +1192,7 @@
                     }
                 });
 
-                // make sur the padding of main-container is correctly set
+                // make sure the padding of main-container is correctly set
                 UiUtils.watchForMainContainerPadding(scope, scope.parentContainer);
             }
 

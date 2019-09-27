@@ -146,7 +146,7 @@ html {
 
     .disabled-form a,
     .disabled-row a {
-        color: $disabled-link-color;
+        color: $disabled-color;
     }
 
     .disabled-form .remove-input-btn {
@@ -226,10 +226,8 @@ html {
     #page-subtitle {
         margin: 0;
 
-        a:hover .no-decoration {
-            // removes the underline for text-decoration
-            // "text-decoration: none;" does NOT work here
-            display: inline-block;
+        .link-decoration {
+            color: $link-color;
         }
     }
 
@@ -584,6 +582,11 @@ html {
     .glyphicon-alert {
         color: $warning-color !important;
         border: none;
+    }
+
+    // spinner
+    .glyphicon-refresh {
+        color: $spinner-color;
     }
 
     // spinner animation

@@ -1,12 +1,12 @@
 <div class="chaise-search-box chaise-input-group" ng-class="{'disabled-element': disabled}">
     <div class="chaise-input-control has-feedback">
         <input type="text" ng-model="searchTerm" ng-class="inputClass" ng-disabled="disabled" on-enter="enterPressed()" ng-change="inputChanged()" ng-attr-autofocus="{{focus === true}}">
-        <span ng-hide="searchTerm" class="chaise-input-placeholder" ng-click="changeFocus()" ng-if="::placeholder.isHTML === true" ng-bind-html="'Search within ' + placeholder.value"></span>
-        <span ng-hide="searchTerm" class="chaise-input-placeholder" ng-click="changeFocus()" ng-if="::placeholder.isHTML === false" ng-bind="'Search within '  + placeholder.value"></span>
+        <span ng-hide="searchTerm" class="chaise-input-placeholder" ng-click="changeFocus()" ng-if="placeholder.isHTML === true" ng-bind-html="'Search ' + placeholder.value"></span>
+        <span ng-hide="searchTerm" class="chaise-input-placeholder" ng-click="changeFocus()" ng-if="placeholder.isHTML === false" ng-bind="'Search '  + placeholder.value"></span>
         <chaise-clear-input btn-class="remove-search-btn" click-callback="::clearSearch()" show="searchTerm && !disabled"></chaise-clear-input>
     </div>
     <div class="chaise-input-group-append">
-        <button class="chaise-search-btn chaise-btn chaise-btn-primary" ng-disabled="disabled" ng-click="enterPressed()" role="button" tooltip-placement="bottom" uib-tooltip-html="'<p>Use space to separate between conjunctive terms, | (no spaces) to separate disjunctive terms and quotations for exact phrases.</p><p>For example, <i><b>usc 1234</b></i> returns all records containing &ldquo;usc&rdquo; and &ldquo;1234&rdquo;.</p><p><i><b>usc|1234</b></i> returns all records containing &ldquo;usc&rdquo; or &ldquo;1234&rdquo;.</b></i></p><p><i><b>&ldquo;usc 1234&rdquo;</b></i> returns all records containing &ldquo;usc 1234&rdquo;.</p>'">
+        <button class="chaise-search-btn chaise-btn chaise-btn-primary" ng-disabled="disabled" ng-click="enterPressed()" role="button" tooltip-placement="bottom-left" uib-tooltip-html="'<p>Use space to separate between conjunctive terms, | (no spaces) to separate disjunctive terms and quotations for exact phrases.</p><p>For example, <i><b>usc 1234</b></i> returns all records containing &ldquo;usc&rdquo; and &ldquo;1234&rdquo;.</p><p><i><b>usc|1234</b></i> returns all records containing &ldquo;usc&rdquo; or &ldquo;1234&rdquo;.</b></i></p><p><i><b>&ldquo;usc 1234&rdquo;</b></i> returns all records containing &ldquo;usc 1234&rdquo;.</p>'">
             <span class="glyphicon glyphicon-search"></span>
         </button>
     </div>

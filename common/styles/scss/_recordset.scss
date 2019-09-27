@@ -20,12 +20,6 @@
                 margin-bottom: 10px;
             }
 
-            .recordset-selected-rows {
-                .filter-chiclet {
-                    max-width: none;
-                }
-            }
-
             $filter-chiclet-margin: 5px;
             .filter-chiclet {
                 max-width: 350px;
@@ -79,6 +73,25 @@
                 }
             }
 
+            .selected-chiclet {
+                border: none;
+                margin-right: 5px;
+                margin-bottom: 5px;
+                padding-right: 0;
+
+                .selected-chiclet-name {
+                    cursor: default;
+                    user-select: text;
+                    -webkit-user-select: text;
+                    -moz-user-select: text;
+                    -ms-user-select: text;
+                }
+
+                .selected-chiclet-remove i {
+                    top: 3px;
+                }
+            }
+
             .clear-all-btn {
                 padding-left: 0;
                 margin-bottom: $filter-chiclet-margin;
@@ -94,33 +107,6 @@
 
 }
 
-
-/*
-    .recordset-container {
-        padding-left: 20px;
-        padding-top: 20px;
-
-        .top-panel-container, .main-container {
-            padding-right: 20px;
-        }
-
-        .top-left-panel.open-panel + .top-right-panel, .side-panel-resizable.open-panel + .main-container {
-            padding-left: 30px;
-        }
-
-        // this will fix the footer position (make sure it goes all the way to the left edge)
-        .side-panel-resizable.open-panel + .main-container footer {
-            margin-left: -30px;
-        }
-        .side-panel-resizable.close-panel + .main-container {
-            margin-left: -20px;
-            .main-body {
-                margin-left: 20px;
-            }
-        }
-    }
-*/
-
 // chaise table
 .outer-table {
     overflow-x: auto;
@@ -131,9 +117,6 @@
     .page-size-dropdown {
         padding: 0 5px;
         padding-bottom: 2px;
-        span:not(.caret) {
-            margin-right: -3px;
-        }
     }
 }
 
@@ -194,6 +177,16 @@
 
             &.single-select-header {
                 width: 65px;
+            }
+
+            &.multi-select-header {
+                button {
+                    display: block;
+                    width: 120px;
+                    &:first-child {
+                        margin-bottom: 5px;
+                    }
+                }
             }
         }
     }
@@ -300,6 +293,7 @@ input.search-progress {
 faceting {
     .side-panel-container {
         overflow-y: auto;
+        height: 100%;
         -webkit-transition: all 1s;
         transition: all 1s;
 
@@ -336,6 +330,7 @@ faceting {
                         border-radius: 0;
                         padding: 10px 5px;
                         text-transform: none;
+                        position: relative;
 
                         background-color: $table-header-background-color;
                         .panel-title {
@@ -352,6 +347,11 @@ faceting {
                                     &.fa-chevron-down {
                                         margin-right: 3px;
                                     }
+                                }
+
+                                .facet-header-icon {
+                                    position: absolute;
+                                    right: 5px;
                                 }
                             }
                         }

@@ -1,7 +1,7 @@
 <div class="modal-header">
     <span class="pull-right">
         <button id="multi-select-submit-btn" ng-if="ctrl.tableModel.config.selectMode=='multi-select'"
-                tooltip-placement="bottom" uib-tooltip="Apply the selected rows" class="chaise-btn chaise-btn-primary" type="button" ng-click="ctrl.submit()" ng-disabled="ctrl.disableSubmit">
+                tooltip-placement="bottom" uib-tooltip="Apply the selected rows" class="chaise-btn chaise-btn-primary" type="button" ng-click="ctrl.submit()" ng-disabled="ctrl.tableModel.selectedRows.length < 1 || ctrl.disableSubmit">
             <span class="chaise-btn-icon glyphicon glyphicon-saved"></span>
             <span>Submit</span>
         </button>

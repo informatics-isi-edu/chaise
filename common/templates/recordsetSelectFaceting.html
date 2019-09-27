@@ -1,28 +1,29 @@
 <div class="recordset-container without-faceting" >
-    <loading-spinner ng-show="(!vm.initialized || $root.showSpinner) && !$root.error"></loading-spinner>
+    <loading-spinner id="main-spinner" ng-show="(!vm.initialized || $root.showSpinner || !vm.hasLoaded) && !$root.error"></loading-spinner>
     <div class="top-panel-container" ng-show="vm.reference">
         <alerts alerts="$root.alerts"></alerts>
         <div class="top-flex-panel">
+            <div class="top-left-panel close-panel"></div>
             <div class="top-right-panel">
                 <div class="recordset-controls-container" ng-show="vm.initialized">
                     <div ng-if="vm.selectedRows.length > 0 && vm.config.selectMode == 'multi-select'" class="recordset-selected-rows recordset-chiclets-container">
-                        <div class="filter-chiclet chaise-btn-group" ng-repeat="row in vm.selectedRows track by $index">
-                            <button class="filter-chiclet-remove chaise-btn chaise-btn-secondary" ng-click="removePill(row.uniqueId, $event)">
+                        <div class="selected-chiclet chaise-btn" ng-repeat="row in vm.selectedRows track by $index">
+                            <span class="selected-chiclet-remove" ng-click="removePill(row.uniqueId, $event)" uib-tooltip="Clear selected row" tooltip-placement="bottom-left">
                                 <i class="glyphicon glyphicon-remove"></i>
-                            </button>
-                            <span class="chaise-btn chaise-btn-secondary" ng-if="row.displayname.value && row.displayname.isHTML" ng-bind-html="row.displayname.value"></span>
-                            <span class="chaise-btn chaise-btn-secondary" ng-if="row.displayname.value && !row.displayname.isHTML" ng-bind="row.displayname.value"></span>
-                            <span class="chaise-btn chaise-btn-secondary" ng-if="row.displayname.value == ''" ng-bind-html="defaultDisplayname.empty"></span>
-                            <span class="chaise-btn chaise-btn-secondary" ng-if="row.displayname.value == null" ng-bind-html="defaultDisplayname.null"></span>
+                            </span>
+                            <span class="selected-chiclet-name" ng-if="row.displayname.isHTML" ng-bind-html="row.displayname.value"></span>
+                            <span class="selected-chiclet-name" ng-if="!row.displayname.isHTML" ng-bind="row.displayname.value"></span>
+                            <span class="selected-chiclet-name" ng-if="row.displayname.value == ''" ng-bind-html="defaultDisplayname.empty"></span>
+                            <span class="selected-chiclet-name" ng-if="row.displayname.value == null" ng-bind-html="defaultDisplayname.null"></span>
                         </div>
-                        <button ng-click="removeAllPills($event)" class="chaise-btn chaise-btn-tertiary clear-all-btn" uib-tooltip="Clear all filters applied" tooltip-placement="bottom">
-                            <span>Clear all selected rows</span>
+                        <button ng-click="removeAllPills($event)" class="chaise-btn chaise-btn-tertiary clear-all-btn">
+                            <span>Reset selection</span>
                         </button>
                     </div>
 
                     <div class="row">
-                        <div class="col-lg-4 col-md-5 col-sm-6 col-xs-6" ng-if="vm.tableDisplayName">
-                            <chaise-search-input input-class="main-search-input" placeholder="vm.tableDisplayName"
+                        <div class="col-lg-4 col-md-5 col-sm-6 col-xs-6">
+                            <chaise-search-input input-class="main-search-input" placeholder="searchPlaceholder"
                                 search-term="vm.search" search-callback="search" focus="true"></chaise-search-input>
                         </div>
                     </div>
@@ -34,7 +35,6 @@
     <div class="bottom-panel-container">
         <div class="side-panel-resizable close-panel"></div>
         <div class="main-container">
-            <loading-spinner id="main-spinner" ng-show="!vm.hasLoaded && vm.initialized"></loading-spinner>
             <div class="main-body">
                 <!-- record table -->
                 <div class="recordset-table-container" ng-show="vm.initialized">

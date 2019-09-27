@@ -6,6 +6,11 @@
 <div id="profile-modal" class="modal-body">
     <table class="table ">
         <tbody>
+            <tr ng-repeat="(key, value) in ctrl.client" ng-if="key != 'identities'">
+                <td class="text-left"><strong>{{key | underscoreToSpace | toTitleCase}} </strong></td>
+                <td class="text-left profileValue">{{value}}</td>
+
+            </tr>
             <tr ng-if="ctrl.identities">
                 <td rowspan="{{ctrl.identities.lengths}}" class="text-left"><strong> Identities </strong> </td>
                 <td>
@@ -13,12 +18,6 @@
                         <li ng-repeat="identities in ctrl.identities">{{identities}}</li>
                     </ul>
                 </td>
-            </tr>
-
-            <tr ng-repeat="(key, value) in ctrl.client" ng-if="key != 'identities'">
-                <td class="text-left"><strong>{{key | underscoreToSpace | toTitleCase}} </strong></td>
-                <td class="text-left profileValue">{{value}}</td>
-
             </tr>
             <tr ng-if="ctrl.groupList">
                 <td rowspan="{{ctrl.groupList.length}}" class="text-left">
