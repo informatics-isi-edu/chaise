@@ -912,64 +912,11 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                             if (dp.column.generated || dp.column.immutable) return;
 
-                            dp.clearBtn.click();
-                            expect(dp.date.getAttribute('value')).toBeFalsy(colError(dp.column.name, "Couldn't clear the input."));
+                            chaisePage.recordEditPage.getRemoveButton(dp.column.name, recordIndex, "date-remove").click().then(function () {
+                                expect(dp.date.getAttribute('value')).toBeFalsy(colError(dp.column.name, "Couldn't clear the input."));
+                            });
                         });
                     });
-
-                    it("should have a datepicker element", function() {
-                        dateCols.forEach(function(column) {
-                            chaisePage.recordEditPage.getInputValue(column.name, recordIndex).then(function(dateInput) {
-                                    expect(dateInput.isDisplayed()).toBeTruthy();
-
-                                    dateInput.column = column;
-                                    datePickerFields.push(dateInput);
-
-                                    var value = getRecordValue(column.name);
-                                    if (value != undefined) {
-                                        expect(dateInput.getAttribute('value')).toBe(value);
-                                    }
-                            });
-                        });
-                    }).pend('Postpone test until a datepicker is re-implemented');
-                    it("should render open datepicker on click", function() {
-                        datePickerFields.forEach(function(dp) {
-
-                            if (isEditMode && (dp.column.generated || dp.column.immutable)) return;
-
-                            chaisePage.clickButton(dp);
-                            browser.sleep(10);
-                            chaisePage.recordEditPage.getDatePickerForAnInput(dp).then(function(datePicker) {
-                                expect(datePicker.isDisplayed()).toBeTruthy();
-
-                                dp.datePicker = datePicker;
-                            });
-                        });
-                    }).pend('Postpone test until a datepicker is re-implemented');
-                    it("should select a date , and check the value", function() {
-                        datePickerFields.forEach(function(dateInput) {
-                            if (isEditMode && (dateInput.column.generated || dateInput.column.immutable)) return;
-
-                            chaisePage.clickButton(dateInput);
-                            browser.sleep(10);
-                            chaisePage.recordEditPage.getDayButtonsForDatePicker(dateInput.datePicker).then(function(dayBtns) {
-                                var day = chaisePage.recordEditPage.getRandomInt(1, dayBtns.length);
-                                dayBtns[day-1].click();
-
-                                var month = ((new Date()).getMonth() + 1);
-                                month = (month < 10) ? "0" + month : month;
-                                day = (day < 10) ? "0" + day : day;
-
-                                var date = (new Date()).getFullYear() + "-" + month + "-"  + day;
-                                expect(dateInput.getAttribute('value')).toBe(date);
-
-                                // Required error message should disappear
-                                chaisePage.recordEditPage.getDateInputErrorMessage(dateInput, 'required').then(function(err) {
-                                    expect(err).toBeNull(colError("Date input " + dateInput.column.name + " Required Error message to be hidden"));
-                                });
-                            });
-                        });
-                    }).pend('Postpone test until a datepicker is re-implemented');
 
                     // this should be the last test case
                     it('should select a valid value.', function () {

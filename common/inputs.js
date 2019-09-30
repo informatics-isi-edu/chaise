@@ -23,14 +23,16 @@
             mask: "2999-19-39",
             options: {
                 maskDefinitions: {'1': /[0-1]/, '2': /[0-2]/, '3': /[0-3]/},
-                clearOnBlur: true
+                clearOnBlur: true,
+                allowInvalidValue: true
             }
         },
         time: {
             mask: "19:59:59",
             options: {
                 maskDefinitions: {'1': /[0-1]/, '2': /[0-2]/, '5': /[0-5]/},
-                clearOnBlur: true
+                clearOnBlur: true,
+                allowInvalidValue: true
             }
         }
     })

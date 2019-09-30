@@ -129,7 +129,7 @@ describe('Record Add with defaults', function() {
             expect(floatInput.getAttribute("value")).toBe(values.float_value, "Float input default is incorrect");
             expect(chaisePage.recordEditPage.getDropdownText(booleanTrueInput)).toBe(values.boolean_true_value, "Boolean input is not set to true");
             expect(chaisePage.recordEditPage.getDropdownText(booleanFalseInput)).toBe(values.boolean_false_value, "Boolean input is not set to false");
-            expect(dateInput.getAttribute("value")).toBe(values.date_value, "Date input default is incorrect");
+            expect(dateInput.element(by.tagName("input")).getAttribute("value")).toBe(values.date_value, "Date input default is incorrect");
             expect(jsonInput.getAttribute("value")).toBe(values.json_value, "JSON input default is incorrect");
         });
 

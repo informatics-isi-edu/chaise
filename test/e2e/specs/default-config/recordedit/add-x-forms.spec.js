@@ -374,7 +374,8 @@ describe('Record Add', function() {
                 chaisePage.recordEditPage.clearInput(dateInput3.date);
                 dateInput3.date.sendKeys(testParams.values.date.modified);
 
-                dateInput1.clearBtn.click().then(function () {
+                // get clear btn for dateinput1
+                chaisePage.recordEditPage.getRemoveButton(testParams.date_col_name, 0, "date-remove").click().then(function () {
                     expect(dateInput1.date.getAttribute("value")).toBe("");
                     expect(dateInput2.date.getAttribute("value")).toBe(testParams.values.date.initial);
                     expect(dateInput3.date.getAttribute("value")).toBe(testParams.values.date.modified);

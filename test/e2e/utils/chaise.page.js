@@ -230,12 +230,16 @@ var recordEditPage = function() {
     this.getDateInputsForAColumn = function(name, index) {
         index = index || 0;
         var inputs = {};
-        inputs.date = element.all(by.css('input[name="' + name + '"][date]')).get(index);
-        var input = inputs.date.element(by.xpath('..')).all(by.css(".chaise-input-group-append > button"));
-        inputs.todayBtn = input.get(0);
-        inputs.clearBtn = input.get(1);
+        var inputControl = element(by.id("form-" + index + '-' + name + "-input"));
+        inputs.date = inputControl.element(by.tagName("input"));
+        inputs.todayBtn = inputControl.element(by.xpath('..')).element(by.css(".chaise-input-group-append > button"));
         return inputs;
     };
+
+    // NOTE: currently only works for Date
+    this.getRemoveButton = function (name, index, removeClass) {
+        return element(by.id("form-" + index + '-' + name + "-input")).element(by.css("." + removeClass));
+    }
 
     this.getTimestampInputsForAColumn = function(name, index) {
         index = index || 0;
@@ -263,7 +267,7 @@ var recordEditPage = function() {
     };
 
     this.getInputErrorMessage = function(el, type) {
-        return browser.executeScript("return $(arguments[0]).siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
+        return browser.executeScript("return $(arguments[0]).parents('.chaise-input-control').siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
     };
 
     this.getTimestampInputErrorMessage = function(el, type) {

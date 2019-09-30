@@ -31,6 +31,8 @@
         vm.redirectAfterSubmission = redirectAfterSubmission;
         vm.searchPopup = searchPopup;
         vm.createRecord = createRecord;
+        vm.showRemove = showRemove;
+        vm.clearInput = clearInput;
         vm.clearForeignKey = clearForeignKey;
 
         vm.MAX_ROWS_TO_ADD = context.MAX_ROWS_TO_ADD;
@@ -50,6 +52,9 @@
         vm.applyCurrentDatetime = applyCurrentDatetime;
         vm.toggleMeridiem = toggleMeridiem;
         vm.clearDatetime = clearDatetime;
+        vm.clearDate = clearDate;
+        vm.clearTime = clearTime;
+
         vm.fileExtensionTypes = InputUtils.fileExtensionTypes;
         vm.blurElement = InputUtils.blurElement;
         vm.maskOptions = maskOptions;
@@ -335,6 +340,31 @@
             }, false, false);
         }
 
+        // idx - the index of the form
+        // name - the name of the column
+        // typename - column type
+        // input - used for timestamp inputs to distinguish date from time
+        function showRemove(idx, name, typename, input) {
+            if (!vm.recordEditModel.rows[idx][name]) return false;
+
+            var value = null,
+                valueHiddenByValidator = false;
+
+            if (typename == "timestamp" || typename == "timestamptz") {
+                value = vm.recordEditModel.rows[idx][name][input];
+                valueHiddenByValidator = vm.formContainer.row[idx][name].$error[input];
+            } else {
+                value = vm.recordEditModel.rows[idx][name];
+                valueHiddenByValidator = vm.formContainer.row[idx][name].$invalid && !vm.formContainer.row[idx][name].$error.required;
+            }
+
+            return value || valueHiddenByValidator;
+        }
+
+        function clearInput(idx, name) {
+            vm.recordEditModel.rows[idx][name] = null;
+        }
+
         // NOTE: If changes are made to this function, changes should also be made to the similar function in the inputSwitch directive
         // TODO: remove when RE has been refactored to use the inputSwitch directive for all form inputs
         function clearForeignKey(rowIndex, column) {
@@ -482,6 +512,16 @@
         // resets timestamp[tz] values and sets the rest to null
         function clearDatetime(modelIndex, columnName, columnType) {
             vm.recordEditModel.rows[modelIndex][columnName] = InputUtils.clearDatetime(columnType);
+        }
+
+        // clears the date for timestamp[tz] inputs
+        function clearDate(modelIndex, columnName) {
+            vm.recordEditModel.rows[modelIndex][columnName].date = null;
+        }
+
+        // clears the time for timestamp[tz] inputs
+        function clearTime(modelIndex, columnName) {
+            vm.recordEditModel.rows[modelIndex][columnName].time = null;
         }
 
         function isRequired(columnIndex) {
