@@ -391,7 +391,12 @@
 
                     var params = {};
 
-                    params.reference = scope.column.filteredRef(null, null).contextualize.compactSelect;
+                    // TODO: domain-filter pattern support does not work for set all input
+                    // the set will not be filtered based on other column values the user has selected
+                    // filteredRef taked 2 params:
+                    //   - first parameter is the data for the current main entity, but converted into submission format
+                    //   - second parameter is data for the linked table to complete the row name that is currently displayed in input
+                    params.reference = scope.column.filteredRef({}, {}).contextualize.compactSelect;
                     params.reference.session = $rootScope.session;
                     params.context = "compact/select";
                     params.selectedRows = [];
@@ -417,14 +422,43 @@
                     }, false, false);
                 }
 
+                scope.showRemove = function () {
+                    return scope.model.value || scope.inputContainer.$invalid;
+                }
+
+                // used for timestamp[tz] inputs only
+                scope.showDateRemove = function () {
+                    return (scope.model.value && scope.model.value.date) || scope.inputContainer.$error.date;
+                }
+
+                // used for timestamp[tz] inputs only
+                scope.showTimeRemove = function () {
+                    return (scope.model.value && scope.model.value.time) || scope.inputContainer.$error.time;
+                }
+
+                scope.clearInput = function (model) {
+                    scope.model.value = null;
+                }
+
+                // used for foriegn key inputs only
                 scope.clearForeignKey = function() {
-                    scope.model = null;
+                    scope.model.value = null;
                     scope.columnModel.fkDisplayName = null;
                 }
 
-                // Used to remove the value in date and timestamp inputs when the "Clear" button is clicked
+                // Used to remove the value in timestamp inputs when the "Clear" button is clicked
                 scope.clearDatetime = function () {
                     scope.model.value = InputUtils.clearDatetime(scope.columnModel.inputType);
+                }
+
+                // used for timestamp[tz] inputs only
+                scope.clearDate = function () {
+                    scope.model.value.date = null;
+                }
+
+                // used for timestamp[tz] inputs only
+                scope.clearTime = function () {
+                    scope.model.value.time = null;
                 }
             }
         }

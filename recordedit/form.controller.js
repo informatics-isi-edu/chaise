@@ -361,6 +361,8 @@
             return value || valueHiddenByValidator;
         }
 
+        // idx - the index of the form
+        // name - the name of the column
         function clearInput(idx, name) {
             vm.recordEditModel.rows[idx][name] = null;
         }

@@ -928,6 +928,7 @@ describe("Other facet features, ", function() {
                     return chaisePage.clickButton(rowCheckbox);
                 }).then(function () {
                     //verify selected row filter
+                    browser.pause();
                     return chaisePage.recordsetPage.getSelectedRowsFilters();
                 }).then(function (filters) {
                     expect(filters[0].getText()).toBe(testParams.associationPopupSelectedRowsFilter, "Filter for facet is incorrect");
