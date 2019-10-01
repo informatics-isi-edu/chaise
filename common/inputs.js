@@ -28,7 +28,7 @@
             }
         },
         time: {
-            mask: "19:59:59",
+            mask: "19:59:69",
             options: {
                 maskDefinitions: {'1': /[0-1]/, '2': /[0-2]/, '5': /[0-5]/},
                 clearOnBlur: true,
