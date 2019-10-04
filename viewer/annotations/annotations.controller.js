@@ -369,6 +369,7 @@
                 }
                 item.isSelected = !item.isSelected;
                 vm.selectedItem = item;
+                vm.scrollIntoView(item.svgID + item.groupID);
             }
         }
 

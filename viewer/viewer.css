@@ -362,6 +362,7 @@ a.cardlink.delete {
     overflow: hidden;
     background: #fff;
     flex-shrink: 0;
+    min-height: 40px;
 }
 
 #viewer-content .annotation-list .annotationItem:hover{
@@ -372,6 +373,8 @@ a.cardlink.delete {
     display: flex;
     flex-direction: column;
     flex: 1;
+    justify-content: center;
+    cursor: pointer;
 }
 
 #viewer-content .annotation-list .annotationItem:first-child{
@@ -410,7 +413,7 @@ a.cardlink.delete {
 #viewer-content .annotation-list .annotationItem .anatomy{
     color: #5a93de;
     font-size: 12px;
-    /* padding: 5px 0 0 2px; */
+    padding: 0 0 0 3px;
 }
 
 #viewer-content .annotation-list .annotationItem input.edit:hover,
