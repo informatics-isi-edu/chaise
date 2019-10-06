@@ -14,6 +14,7 @@
         vm.searchKeyword = "";
         vm.totalCount = 0; // total number of annotation list
         vm.selectedItem = null; // current selected annotation item
+        vm.strokeScale = 1;
 
         vm.annotations = annotations;
         vm.anatomies = anatomies;
@@ -64,6 +65,7 @@
         vm.toggleDisplay = toggleDisplay;
         vm.highlightGroup = highlightGroup;
         vm.changeSelectingAnnotation = changeSelectingAnnotation;
+        vm.changeStrokeScale = changeStrokeScale;
 
         // Listen to events of type 'message' (from Annotorious)
         $window.addEventListener('message', function annotationControllerListener(event) {
@@ -101,7 +103,9 @@
                             item = vm.collection.find(function(item){
                                 return item.svgID == svgID && item.groupID == groupID;
                             })
+                            vm.scrollIntoView(item.svgID + item.groupID);
                             vm.changeSelectingAnnotation(item);
+
                         })
                         break;
                     case "updateAnnotationList":
@@ -369,7 +373,6 @@
                 }
                 item.isSelected = !item.isSelected;
                 vm.selectedItem = item;
-                vm.scrollIntoView(item.svgID + item.groupID);
             }
         }
 
@@ -428,6 +431,11 @@
                 svgID : item.svgID,
                 groupID : item.groupID
             });
+        }
+
+        function changeStrokeScale(){
+            console.log(vm.strokeScale);
+            AnnotationsService.changeStrokeScale(vm.strokeScale);
         }
     }]);
 })();
