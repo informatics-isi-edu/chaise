@@ -110,6 +110,9 @@
             iframe.postMessage({messageType: 'changeAllAnnotationVisibility', content: data}, origin);
         }
 
+        function changeStrokeScale(scale){
+            iframe.postMessage({messageType: 'changeStrokeScale', content: scale}, origin);
+        }
         return {
             drawAnnotation: drawAnnotation,
             createAnnotation: createAnnotation,
@@ -120,7 +123,8 @@
             syncVisibility: syncVisibility,
             highlightAnnotation : highlightAnnotation,
             changeAnnotationVisibility : changeAnnotationVisibility,
-            changeAllAnnotationVisibility : changeAllAnnotationVisibility
+            changeAllAnnotationVisibility : changeAllAnnotationVisibility,
+            changeStrokeScale : changeStrokeScale
         };
 
     }]);

@@ -230,8 +230,8 @@ a.cardlink.delete {
 
 #viewer-content .sidebar{
     padding: 0;
-    margin: 0 5px 0 0;
-    width: 220px;
+    /* margin: 0 5px 0 0; */
+    width: 250px;
     height: 100%;
     min-width: 220px;
     max-width: 50vw;
@@ -328,11 +328,66 @@ a.cardlink.delete {
 
 #viewer-content .annotation-list .searchAnnotationBar{
     display: flex;
-    padding: 0 5px 5px 5px;
+    margin: 0 5px 5px 5px;
+    height: 30px;
+    position: relative;
+    border-radius: 3px;
+}
+
+#viewer-content .annotation-list .searchAnnotationBar .search-input{
+    flex: 1;
+    padding: 3px 25px 3px 3px;
+    border-radius: 3px 0 0 3px;
+    border: 1px solid #cccccc;
+    outline: none;
+    border-right: none;
+}
+
+#viewer-content .annotation-list .searchAnnotationBar .search-remove{
+    border: none;
+}
+
+#viewer-content .annotation-list .searchAnnotationBar .search-button{
+    color: #FFFFFF;
+    background-color: #4674A7;
+    border-color: #333333;
+    border-radius: 0 3px 3px 0;
+}
+
+#viewer-content .annotation-list .searchAnnotationBar .clear-search{
+    cursor: pointer;
+    right: 45px;
+    top: 8px;
+    pointer-events: all;
+    z-index: 5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
 }
 
 #viewer-content .annotation-list .searchAnnotationBar .input-group{
     flex: 1;
+}
+
+#viewer-content .annotation-list .strokeScale{
+    display: flex;
+    padding: 5px 8px;
+}
+
+#viewer-content .annotation-list .strokeScale .name{
+    margin-right : 10px;
+}
+
+#viewer-content .annotation-list .strokeScale input{
+    flex: 1;
+}
+
+#viewer-content .annotation-list .strokeScale .currentScale{
+    padding: 0 5px;
+    display: flex;
+    text-align: center;
+    justify-content: center;
 }
 
 #viewer-content .annotation-list .resultCount{
@@ -365,16 +420,20 @@ a.cardlink.delete {
     min-height: 40px;
 }
 
-#viewer-content .annotation-list .annotationItem:hover{
-    background: #efefef;
+#viewer-content .annotation-list .annotationItem:nth-child(odd){
+    background: #F1F1F1
 }
+
+/* #viewer-content .annotation-list .annotationItem:hover{
+    background: #efefef;
+} */
 
 #viewer-content .annotation-list .annotationItem .itemContent{
     display: flex;
     flex-direction: column;
     flex: 1;
     justify-content: center;
-    cursor: pointer;
+    /* cursor: pointer; */
 }
 
 #viewer-content .annotation-list .annotationItem:first-child{
@@ -411,7 +470,7 @@ a.cardlink.delete {
 }
 
 #viewer-content .annotation-list .annotationItem .anatomy{
-    color: #5a93de;
+    /* color: 333; */
     font-size: 12px;
     padding: 0 0 0 3px;
 }
