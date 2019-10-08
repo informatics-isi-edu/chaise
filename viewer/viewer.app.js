@@ -166,8 +166,14 @@
                     } else {
                     	waterMark = '&waterMark=' + waterMark;
                     }
-                    console.log('uri='+image.entity.uri + waterMark);
-                    iframe.location.replace(image.entity.uri + waterMark);
+                    var meterScaleInPixels = context.queryParams.meterScaleInPixels;
+                    if (meterScaleInPixels === undefined) {
+                    	meterScaleInPixels = '';
+                    } else {
+                    	meterScaleInPixels = '&meterScaleInPixels=' + meterScaleInPixels;
+                    }
+                    console.log('uri='+image.entity.uri + waterMark + meterScaleInPixels);
+                    iframe.location.replace(image.entity.uri + waterMark + meterScaleInPixels);
                     console.log('Image: ', image);
 
                     var annotationTable = schema.tables.get('annotation');
