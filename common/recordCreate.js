@@ -2,8 +2,8 @@
     'use strict';
     angular.module('chaise.recordcreate', ['chaise.errors','chaise.utils'])
 
-    .factory("recordCreate", ['$cookies', '$log', '$q', '$rootScope', '$window', 'AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'messageMap', 'modalBox', 'modalUtils', 'Session', 'UriUtils',
-        function($cookies, $log, $q, $rootScope, $window, AlertsService, DataUtils, ErrorService, logActions, messageMap, modalBox, modalUtils, Session, UriUtils) {
+    .factory("recordCreate", ['$cookies', '$log', '$q', '$rootScope', '$window', 'AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'messageMap', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'Session', 'UriUtils',
+        function($cookies, $log, $q, $rootScope, $window, AlertsService, DataUtils, ErrorService, logActions, messageMap, modalBox, modalUtils, recordsetDisplayModes, Session, UriUtils) {
 
         var viewModel = {};
         var GV_recordEditModel = {},
@@ -345,6 +345,11 @@
 
                 return defer.promise;
             };
+
+            // assumption is that this function is only called for p&b
+            params.parentTuple = rsTuples[rowIndex];
+            params.parentReference = rsReference;
+            params.displayMode = recordsetDisplayModes.addPureBinaryPopup;
 
             params.reference = domainRef.unfilteredReference.contextualize.compactSelect;
             params.reference.session = rsSession;

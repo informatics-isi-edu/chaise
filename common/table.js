@@ -40,7 +40,6 @@
      *
      *      { hasLoaded,    // data is ready, loading icon should not be visible
      *        reference,    // reference object
-     *        tableDisplayName,
      *        columns,      // array of Column objects
      *        enableSort,   // boolean whether sorting should be enabled
      *        sortby,       // column name, user selected or null
@@ -1035,7 +1034,7 @@
                     $log.debug('counter', scope.vm.flowControlObject.counter ,': focused on page after update');
                     updated = false;
                     scope.vm.lastActiveFacet = -1;
-                    if (scope.vm.parentReference) {
+                    if (scope.vm.config.displayMode === scope.recordsetDisplayModes.related) {
                         scope.vm.logObject = {action: logActions.recordRelatedUpdate};
                     } else {
                         scope.vm.logObject = {action: logActions.recordsetUpdate};

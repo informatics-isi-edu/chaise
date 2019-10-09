@@ -3,8 +3,8 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'ConfigUtils', 'dataFormats', 'DataUtils', 'ErrorService', 'InputUtils', 'integerLimits', 'logActions', 'maskOptions', 'messageMap', 'modalBox', 'modalUtils', 'recordCreate', 'recordEditAppUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
-        function FormController(AlertsService, ConfigUtils, dataFormats, DataUtils, ErrorService, InputUtils, integerLimits, logActions, maskOptions, messageMap, modalBox, modalUtils, recordCreate, recordEditAppUtils, recordEditModel, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
+    .controller('FormController', ['AlertsService', 'ConfigUtils', 'dataFormats', 'DataUtils', 'ErrorService', 'InputUtils', 'integerLimits', 'logActions', 'maskOptions', 'messageMap', 'modalBox', 'modalUtils', 'recordCreate', 'recordEditAppUtils', 'recordEditModel', 'recordsetDisplayModes', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
+        function FormController(AlertsService, ConfigUtils, dataFormats, DataUtils, ErrorService, InputUtils, integerLimits, logActions, maskOptions, messageMap, modalBox, modalUtils, recordCreate, recordEditAppUtils, recordEditModel, recordsetDisplayModes, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
         var context = ConfigUtils.getContextJSON();
         var mainBodyEl;
@@ -89,10 +89,6 @@
             $window.location = redirectUrl;
         }
 
-        vm.referenceTableApplink = function() {
-            return $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
-        };
-
         /*
          * Allows to tranform some form values depending on their types
          * Boolean: If the value is empty ('') then set it as null
@@ -175,7 +171,6 @@
                 vm.resultsetModel = {
                     hasLoaded: true,
                     reference: resultsReference,
-                    tableDisplayName: resultsReference.displayname,
                     columns: resultsReference.columns,
                     enableSort: false,
                     sortby: null,
@@ -199,7 +194,6 @@
                     vm.omittedResultsetModel = {
                         hasLoaded: true,
                         reference: resultsReference,
-                        tableDisplayName: resultsReference.displayname,
                         columns: resultsReference.columns,
                         enableSort: false,
                         sortby: null,
@@ -298,6 +292,14 @@
             }
 
             var submissionRow = populateSubmissionRow(vm.recordEditModel.rows[rowIndex], vm.recordEditModel.submissionRows[rowIndex], originalTuple, $rootScope.reference.columns, editOrCopy);
+
+            // used for title
+            params.parentReference = $rootScope.reference;
+            params.parentTuple = originalTuple;
+            params.displayname = column.displayname;
+
+            params.displayMode = vm.editMode ? recordsetDisplayModes.foreignKeyPopupEdit : recordsetDisplayModes.foreignKeyPopupCreate;
+
 
             params.reference = column.filteredRef(submissionRow, vm.recordEditModel.foreignKeyData[rowIndex]).contextualize.compactSelect;
             params.reference.session = $rootScope.session;

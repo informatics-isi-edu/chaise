@@ -67,7 +67,9 @@ html {
 
     h1, h2, h3, h4, body {
         font-weight: 400;
-
+    }
+    h1, h2, h3, h4, .h1-class, .h2-class, .h3-class, .h4-class {
+        line-height: 1.2;
     }
 
     li {
@@ -410,6 +412,8 @@ html {
             .top-right-panel {
                 flex: 1;
                 position: relative;
+                // added for the ellipsis logic for the title in case of modals
+                min-width: 0;
             }
         }
     }

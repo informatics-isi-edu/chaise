@@ -1,6 +1,9 @@
 <div class="modal-header" class="share-header">
-    <button class="chaise-btn chaise-btn-secondary pull-right modal-close" type="button" ng-click="ctrl.cancel()">X</button>
     <h2 class="modal-title text-center">Share</h2>
+    <button class="chaise-btn chaise-btn-secondary pull-right modal-close modal-close-absolute" type="button" ng-click="ctrl.cancel()">
+        <strong class="chaise-btn-icon">X</strong>
+        <span>Close</span>
+    </button>
 </div>
 <div class="modal-body">
     <div ng-if="ctrl.params.showVersionWarning" class="alert alert-dismissible alert-warning" role="alert">

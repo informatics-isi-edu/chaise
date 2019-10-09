@@ -337,7 +337,8 @@
         }
     }])
 
-    .directive('inputSwitch', ['dataFormats', 'InputUtils', 'integerLimits', 'maskOptions', 'modalBox', 'modalUtils', 'UriUtils', '$log', '$rootScope', function(dataFormats, InputUtils, integerLimits, maskOptions, modalBox, modalUtils, UriUtils, $log, $rootScope) {
+    .directive('inputSwitch', ['ConfigUtils', 'dataFormats', 'InputUtils', 'integerLimits', 'maskOptions', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'UriUtils', '$log', '$rootScope',
+                function(ConfigUtils, dataFormats, InputUtils, integerLimits, maskOptions, modalBox, modalUtils, recordsetDisplayModes, UriUtils, $log, $rootScope) {
         return {
             restrict: 'E',
             templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/inputs/inputSwitch.html',
@@ -390,6 +391,23 @@
                 scope.searchPopup = function() {
 
                     var params = {};
+                    // used for title
+                    if ($rootScope.reference) {
+                        params.parentReference = $rootScope.reference;
+                    }
+                    if ($rootScope.tuple) {
+                        params.parentTuple = $rootScope.tuple;
+                    }
+
+                    params.displayname = scope.column.displayname;
+
+                    var context = ConfigUtils.getContextJSON();
+                    if (context.mode == context.modes.EDIT) {
+                        params.displayMode = recordsetDisplayModes.foreignKeyPopupEdit;
+                    } else {
+                        params.displayMode = recordsetDisplayModes.foreignKeyPopupCreate;
+                    }
+
 
                     // TODO: domain-filter pattern support does not work for set all input
                     // the set will not be filtered based on other column values the user has selected

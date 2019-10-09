@@ -10,21 +10,6 @@
         margin-bottom: 0;
     }
 
-    .chaise-body & li {
-        list-style-type: inherit;
-        &:only-child {
-            list-style-type: none;
-        }
-    }
-
-    ul {
-        list-style-type: disc;
-    }
-
-    ol {
-        list-style-type: decimal;
-    }
-
     code {
         padding-left: 0;
         padding-right: 0;
@@ -57,29 +42,34 @@
     .asset-source-description {
         font-size: 85%;
     }
-}
 
+    ul {
+        list-style-type: disc;
+    }
 
-record-display .markdown-container ol > li:only-child,
-record-display .markdown-container ul > li:only-child {
-    list-style: none;
-    padding: 0;
-    margin-left: 0;
-}
+    ol {
+        list-style-type: decimal;
+    }
 
-record-display .markdown-container ol,
-record-display .markdown-container ul {
-    padding: 0 !important;
-    /*existing rule is padding=2, which should be changed for the other changes*/
-}
+    ol, ul {
+        padding: 0 !important;
+        /*existing rule is padding=2, which should be changed for the other changes*/
 
-record-display .markdown-container ol > li,
-record-display .markdown-container ul > li {
-    margin-left: 1rem;
-    padding-left: 0;
-}
+        > li {
+            margin-left: 1em;
+            padding-left: 0;
 
-record-table .markdown-container ol,
-record-table .markdown-container ul {
-    padding-left: 1rem;
+            list-style: none;
+
+            &:before {
+
+            }
+
+            // list-style-type: inherit;
+            &:only-child {
+                margin-left: 0;
+                // list-style: none;
+            }
+        }
+    }
 }

@@ -9,14 +9,14 @@
         };
     }])
 
-    .directive('ellipsis', ['AlertsService', 'ConfigUtils', 'defaultDisplayname', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$window',
-        function(AlertsService, ConfigUtils, defaultDisplayname, ErrorService, logActions, MathUtils, messageMap, modalBox, modalUtils, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $window) {
+    .directive('ellipsis', ['AlertsService', 'ConfigUtils', 'defaultDisplayname', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$window',
+        function(AlertsService, ConfigUtils, defaultDisplayname, ErrorService, logActions, MathUtils, messageMap, modalBox, modalUtils, recordsetDisplayModes, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $window) {
         var chaiseConfig = ConfigUtils.getConfigJSON();
 
         function deleteReference(scope, reference) {
             var logObject = {action: logActions.recordsetDelete};
-            // if parentReference exists then it's in the related entities section
-            if (scope.parentReference) {
+            // if it's related mode, change the logObject
+            if (scope.displayMode === recordsetDisplayModes.related) {
                 logObject = {
                     action: logActions.recordRelatedDelete,
                     referrer: scope.parentReference.defaultLogInfo
@@ -69,9 +69,12 @@
                 context: '=',
                 config: '=',    // {viewable, editable, deletable, selectMode}
                 onRowClickBind: '=?',
-                fromTuple: '=?',
+                // the tuple of the parent reference (not the reference that this ellipsis is based on)
+                // in popups and related: the main page tuple, otherwise: it will be empty
+                parentTuple: '=?',
                 selected: '=',
                 selectDisabled: "=?",
+                displayMode: "@",
                 parentReference: "=?",
                 columnModels: "="
             },
@@ -90,8 +93,9 @@
 
                     var editLink = null;
 
-                    if (scope.fromTuple) {
-                        scope.associationRef = scope.tuple.getAssociationRef(scope.fromTuple.data);
+                    // unlink button should only show up in related mode
+                    if (scope.displayMode == recordsetDisplayModes.related && scope.parentTuple) {
+                        scope.associationRef = scope.tuple.getAssociationRef(scope.parentTuple.data);
                     }
 
                     if (scope.config.viewable)

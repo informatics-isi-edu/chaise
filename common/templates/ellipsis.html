@@ -1,5 +1,5 @@
 <td ng-if="config.viewable || config.editable || config.deletable || config.selectMode != noSelect" class="block action-btns" ng-switch="config.selectMode">
-    <button ng-switch-when="single-select" type="button" class="select-action-button chaise-btn chaise-btn-secondary chaise-btn-sm icon-btn" ng-click="onSelect($event)" tooltip-placement="bottom" uib-tooltip="Select" >
+    <button ng-switch-when="single-select" type="button" class="select-action-button chaise-btn chaise-btn-primary chaise-btn-sm icon-btn" ng-click="onSelect($event)" tooltip-placement="bottom" uib-tooltip="Select" >
         <span class="chaise-btn-icon glyphicon glyphicon-check"></span>
     </button>
     <div ng-switch-when="multi-select" class="chaise-checkbox">

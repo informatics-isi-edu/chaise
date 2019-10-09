@@ -82,10 +82,8 @@
             if(type.indexOf('modal')!== -1){
                 if (_session) {
                     params.title = messageMap.sessionExpired.title;
-                    params.message = $sce.trustAsHtml(messageMap.sessionExpired.message);
                 } else {
                     params.title = messageMap.noSession.title;
-                    params.message = $sce.trustAsHtml(messageMap.noSession.message);
                 }
                 var closed = false;
                 var onModalCloseSuccess = function () {

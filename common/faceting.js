@@ -1264,11 +1264,14 @@
                         params.logObject = getDefaultLogInfo(scope);
                         params.logObject.action = logActions.recordsetFacetDetails;
 
-                        params.reference = scope.reference;
-                        params.reference.session = scope.$root.session;
+                        // for the title
+                        params.parentReference = scope.facetColumn.reference;
                         params.displayname = scope.facetColumn.displayname;
                         // disable comment for facet, since it might be confusing
-                        params.comment = "";
+                        params.comment = scope.facetColumn.comment;
+
+                        params.reference = scope.reference;
+                        params.reference.session = scope.$root.session;
                         params.context = "compact/select";
                         params.selectMode = "multi-select";
                         params.faceting = false;

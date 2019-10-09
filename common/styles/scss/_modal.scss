@@ -30,7 +30,7 @@
 .modal-login .modal-backdrop {
     opacity: 0.7 !important;
 }
-/* .window-class first */
+
 .modal-login-instruction .modal-dialog {
     position: absolute;
     top: 50%;
@@ -56,19 +56,20 @@
 .modal-login .modal-title {
     font-size: 22px !important;
 }
-/******* Popup modal for previous login ********/
-body.previous-login > .modal-login-instruction {
-    z-index: 99999 !important;
-}
 
-body.previous-login > *:not(.modal-login-instruction):not(navbar):not(.modal-backdrop) {
-    display: none !important;
-}
 /******* Popup modal for error ********/
 /* hide the loading spinner if we have the error dialog open */
 body.error-open loading-spinner {
     display: none !important;
 }
+
+.modal-error {
+    .modal-footer .chaise-btn {
+        width: 60px;
+    }
+}
+
+
 /******* Popup modal for share ********/
 .chaise-share-citation ul {
     padding-left: 10px;
@@ -99,8 +100,10 @@ body.error-open loading-spinner {
     max-width: 60vw;
 }
 
-.modal-close {
-    padding: 3px 8px;
+.modal-close-absolute {
+    position: absolute;
+    right: 15px;
+    top: 15px;
 }
 /*Sets the maximum height of the entire modal to 95% of the screen height*/
 .modal-content {
@@ -131,18 +134,33 @@ body.error-open loading-spinner {
 }
 
 /************* Profile Card ****************/
-#profile-modal li {
-    list-style-type: disc;
+.profile-popup {
+    ul li {
+        list-style-type: disc;
+    }
+
+    table tr:nth-child(1) > td {
+        border-top: none;
+    }
+
+    .profileValue {
+        padding-left: 32px;
+    }
 }
 
-.modal-dialog .profileValue {
-    padding-left: 32px;
-}
+
+
 
 /************** search popup **************/
 .search-popup {
-    #multi-select-submit-btn {
-        margin-right: 10px;
+    .search-popup-controls {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+
+        #multi-select-submit-btn {
+            margin-right: 10px;
+        }
     }
 
     .modal-body {

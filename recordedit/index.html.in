@@ -24,22 +24,25 @@
                     </div>
                     <div class="row">
                         <div class="col-xs-12 meta-icons recordedit-bookmark-container">
+                            <!-- TODO fix the subtitle and title test cases -->
                             <div id="title" class="pull-left">
                                 <h1 id="page-title">
-                                    <span>{{ form.editMode ? "Edit " : "Create " }}</span>
-                                    <a ng-if="tableDisplayName.isHTML" ng-href="{{::form.referenceTableApplink()}}" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}" tooltip-placement="bottom">
-                                        <span class="re-subtitle" ng-bind-html="tableDisplayName.value" ng-class="{'chaise-icon-for-tooltip': tableComment}"></span><!-- ::after for tooltip icon --></a>
-                                    <a ng-if="!tableDisplayName.isHTML" ng-href="{{::form.referenceTableApplink()}}" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}" tooltip-placement="bottom">
-                                        <span class="re-subtitle" ng-bind="tableDisplayName.value" ng-class="{'chaise-icon-for-tooltip': tableComment}"></span><!-- ::after for tooltip icon --></a>
-                                    <span>{{ (form.recordEditModel.rows.length > 1) ? " Records" : " Record" }}</span>
+                                    <span>{{ form.editMode ? "Edit " : "Create new " }}</span>
+                                    <chaise-title add-link="true" reference="reference"></chaise-title>
+                                    <span ng-if="displayname">:
+                                        <chaise-title displayname="displayname"></chaise-title>
+                                    </span>
                                 </h1>
-                                <h3 id="page-subtitle">
+                                <!-- <h3 id="page-subtitle">
                                     <span class="re-displayname" ng-if="displayname.isHTML" ng-bind-html="displayname.value"></span>
                                     <span class="re-displayname" ng-if="!displayname.isHTML" ng-bind="displayname.value"></span>
-                                </h3>
+                                </h3> -->
                             </div>
                             <div class="pull-right">
-                                <button id="submit-record-button" class="chaise-btn chaise-btn-primary" type="submit" ng-disabled="form.submissionButtonDisabled" ng-click="::form.submit()" ng-attr-tooltip-placement="bottom-right" ng-attr-uib-tooltip="Save this data on the server">Submit</button>
+                                <button id="submit-record-button" class="chaise-btn chaise-btn-primary" type="submit" ng-disabled="form.submissionButtonDisabled" ng-click="::form.submit()" ng-attr-tooltip-placement="bottom-right" ng-attr-uib-tooltip="Save this data on the server">
+                                    <span class="chaise-btn-icon glyphicon glyphicon-saved"></span>
+                                    <span>Submit</span>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -292,10 +295,7 @@
                             <div id="title" class="pull-left">
                                 <h1 id="page-title">
                                     <span>{{ form.resultsetModel.rowValues.length }}/{{ form.resultsetModel.pageLimit }}</span>
-                                    <a ng-if="tableDisplayName.isHTML" ng-href="{{::form.resultsetRecordsetLink}}" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}" tooltip-placement="bottom">
-                                        <span class="re-subtitle" ng-bind-html="tableDisplayName.value" ng-class="{'chaise-icon-for-tooltip': tableComment}"></span></a>
-                                    <a ng-if="!tableDisplayName.isHTML" ng-href="{{::form.resultsetRecordsetLink}}" ng-attr-uib-tooltip="{{::tableComment ? tableComment : undefined}}" tooltip-placement="bottom">
-                                        <span class="re-subtitle" ng-bind="tableDisplayName.value" ng-class="{'chaise-icon-for-tooltip': tableComment}"></span></a>
+                                    <chaise-title link="form.resultsetRecordsetLink" reference="reference"></chaise-title>
                                     <span> Records </span>
                                     <span ng-if="::!form.editMode">Created</span><span ng-if="::form.editMode">Updated</span>
                                     <span> Successfully</span>

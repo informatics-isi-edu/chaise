@@ -1,18 +1,19 @@
 <div class="modal-header" class="profileCard">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
-    <button class="chaise-btn chaise-btn-secondary pull-right modal-close" type="button" ng-click="ctrl.cancel()">X</button>
-    <h2 class="modal-title text-center" id="myModalLabel">{{ctrl.user}}</h2>
+    <h2 class="modal-title text-center">{{ctrl.user}}</h2>
+    <button class="chaise-btn chaise-btn-secondary pull-right modal-close modal-close-absolute" type="button" ng-click="ctrl.cancel()">
+        <strong class="chaise-btn-icon">X</strong>
+        <span>Close</span>
+    </button>
 </div>
-<div id="profile-modal" class="modal-body">
-    <table class="table ">
+<div class="modal-body">
+    <table class="table">
         <tbody>
             <tr ng-repeat="(key, value) in ctrl.client" ng-if="key != 'identities'">
-                <td class="text-left"><strong>{{key | underscoreToSpace | toTitleCase}} </strong></td>
+                <td class="text-left">{{key | underscoreToSpace | toTitleCase}}</td>
                 <td class="text-left profileValue">{{value}}</td>
-
             </tr>
             <tr ng-if="ctrl.identities">
-                <td rowspan="{{ctrl.identities.lengths}}" class="text-left"><strong> Identities </strong> </td>
+                <td rowspan="{{ctrl.identities.lengths}}" class="text-left">Identities</td>
                 <td>
                     <ul>
                         <li ng-repeat="identities in ctrl.identities">{{identities}}</li>
@@ -20,10 +21,7 @@
                 </td>
             </tr>
             <tr ng-if="ctrl.groupList">
-                <td rowspan="{{ctrl.groupList.length}}" class="text-left">
-                    <strong>Groups </strong>
-                </td>
-
+                <td rowspan="{{ctrl.groupList.length}}" class="text-left">Groups</td>
                 <td rowspan="2">
                     <ul>
                         <li ng-repeat="group in ctrl.groupList"><a href="https://www.globus.org/app/groups/{{group.id}}/about" target="_blank">{{group.display_name}}</a></li>

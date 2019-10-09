@@ -11,41 +11,31 @@
             .top-right-panel {
                 .page-action-btns {
                     height: $btn-height;
-                    margin: 0px 0px 4px 0px;
+                    margin: 0;
                 }
 
                 .title {
-                    margin-top: 4px;
+                    padding-top: 20px;
 
                     #page-subtitle {
                         margin: 5px 0px;
                     }
 
                     .entity-display-header {
-
                         position: relative;
 
-                        #page-title {
-                            margin: 0px;
-                        }
-
-                        @include for-predefined-size(sm) {
-                            display: flex;
-                            .record-action-btns-container {
-                                min-width: 350px;
-
-                                .record-action-btns {
-                                    position: absolute;
-                                    bottom: 0;
-                                    right: 0;
-                                }
+                        .page-title-container {
+                            display: inline-block;
+                            #page-title {
+                                margin: 0px;
                             }
                         }
 
-                        @include for-predefined-size(xs) {
-                            .record-action-btns-container {
-                                float: right;
-                            }
+                        .record-action-btns-container {
+                            float: right;
+                            text-align: right;
+                            padding-top: 9px;
+                            width: 330px;
                         }
 
                     } // end .entity-display-header
@@ -89,6 +79,10 @@
                     cursor: pointer;
                     font-size: $h4-font-size;
 
+                    & > a.empty-toc-heading {
+                        opacity: 0.7;
+                    }
+
                     &:hover {
                         background-color: rgb(241, 241, 241);
                     }
@@ -118,6 +112,11 @@
                 // prevents the content in record-table from pushing off the side of page
                 table-layout: fixed;
                 width: 100%;
+
+                // reduce the spacing of table cells (overrides bootstrap default)
+                > tbody > tr > td {
+                    padding: 5px;
+                }
 
                 tr:nth-child(1) > td {
                     border-top: none;

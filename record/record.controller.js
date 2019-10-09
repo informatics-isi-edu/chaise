@@ -78,10 +78,6 @@
             $window.location.href = $rootScope.reference.table.reference.contextualize.entryCreate.appLink;
         };
 
-        vm.referenceTableApplink = function() {
-            return $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
-        };
-
         vm.canEdit = function() {
             var canEdit = ($rootScope.reference && $rootScope.reference.canUpdate && $rootScope.modifyRecord);
             // If user can edit this record (canEdit === true), then change showEmptyRelatedTables.
@@ -393,7 +389,7 @@
 
             if(ref.derivedAssociationReference){
                 recordAppUtils.pauseUpdateRecordPage();
-                recordCreate.addRelatedRecordFact(true, ref, 0, cookie, vm.editMode, vm.formContainer, vm.readyToSubmit, vm.recordsetLink, vm.submissionButtonDisabled, $rootScope.reference, $rootScope.tuples, $rootScope.session, ConfigUtils.getContextJSON().queryParams, onSuccess, onModalClose);
+                recordCreate.addRelatedRecordFact(true, ref, 0, cookie, vm.editMode, vm.formContainer, vm.readyToSubmit, vm.recordsetLink, vm.submissionButtonDisabled, $rootScope.reference, [$rootScope.tuple], $rootScope.session, ConfigUtils.getContextJSON().queryParams, onSuccess, onModalClose);
                 return;
             }
 
