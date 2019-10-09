@@ -33,7 +33,7 @@
                         <div class="chaise-input-group-text dt-width">Time</div>
                     </span>
                     <div class="chaise-input-control has-feedback">
-                        <input type="text" ng-model="model.value.time" placeholder="{{dataFormats.time24}}" name="{{::column.name}}" ui-mask="{{maskOptions.time.mask}}" ui-options="maskOptions.time.options" model-view-value="true" time timestamp validate-values="model.value">
+                        <input type="text" ng-model="model.value.time" placeholder="{{dataFormats.time24}}" name="{{::column.name}}" model-view-value="true" time timestamp validate-values="model.value">
                         <chaise-clear-input btn-class="ts-time-remove" click-callback="::clearTime()" show="showTimeRemove()"></chaise-clear-input>
                     </div>
                     <span class="chaise-input-group-append">

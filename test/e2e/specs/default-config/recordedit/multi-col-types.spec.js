@@ -28,7 +28,7 @@ var testParams = {
             {name: "markdown_col", displayType: "markdown"},
             {name: "bool_null_col", displayType: "boolean", value: true},
             {name: "bool_true_col", displayType: "boolean", value: false},
-            {name: "bool_false_col", displayType: "boolean", value: ""},
+            {name: "bool_false_col", displayType: "boolean", value: null},
             {name: "timestamp_null_col", displayType: "timestamp", value: {date: "2016-01-18", time: "01:00:00"}},
             {name: "timestamp_col", displayType: "timestamp"},
             {name: "timestamptz_null_col", displayType: "timestamptz", value: {date: "2016-01-18", time: "01:00:00"}},
@@ -217,8 +217,12 @@ describe('When editing a record', function() {
                         });
                         break;
                     case 'boolean':
-                        var dropdown = recordEditPage.getInputById(0, name);
-                        recordEditPage.selectDropdownValue(dropdown, newValue);
+                        var dropdown = recordEditPage.getBooleanInputDisplay(name, 0);
+                        if (newValue !== null) {
+                            recordEditPage.selectDropdownValue(dropdown, newValue);
+                        } else {
+                            recordEditPage.getDropdownClear(dropdown).click();
+                        }
                         break;
                     default:
                         var input = recordEditPage.getInputById(0, name);

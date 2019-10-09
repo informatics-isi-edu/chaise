@@ -42,7 +42,7 @@ describe('Navbar ', function() {
 
 
     it('should open the profile card on click of My Profile link', function(done) {
-        var link = element(by.css('.dropdown-toggle'));
+        var link = element(by.css('login .dropdown-toggle'));
 
         browser.wait(EC.elementToBeClickable(link), browser.params.defaultTimeout);
         chaisePage.clickButton(link).then(function() {

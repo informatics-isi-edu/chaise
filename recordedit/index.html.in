@@ -35,7 +35,7 @@
                                 </h3>
                             </div>
                             <div class="pull-right">
-                                <button id="submit-record-button" class="chaise-btn chaise-btn-primary" type="submit" ng-disabled="form.submissionButtonDisabled" ng-click="::form.submit()" ng-attr-tooltip-placement="bottom-right" ng-attr-uib-tooltip="Submit data">Submit</button>
+                                <button id="submit-record-button" class="chaise-btn chaise-btn-primary" type="submit" ng-disabled="form.submissionButtonDisabled" ng-click="::form.submit()" ng-attr-tooltip-placement="bottom-right" ng-attr-uib-tooltip="Save this data on the server">Submit</button>
                             </div>
                         </div>
                     </div>
@@ -161,7 +161,7 @@
                                                         <!-- modal popup input -->
                                                         <div ng-switch-when="popup-select" class="chaise-input-group modal-popup">
                                                             <div class="chaise-input-control has-feedback">
-                                                                <div id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-display" contenteditable="false" class="popup-select-value" style="cursor: pointer" ng-click="::form.searchPopup(rowIndex, column)" ng-bind-html="(form.recordEditModel.rows[rowIndex][column.name] ? form.recordEditModel.rows[rowIndex][column.name] : form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]))"></div>
+                                                                <div id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-display" contenteditable="false" class="popup-select-value" style="cursor: pointer" ng-click="::form.searchPopup(rowIndex, column)" data-placeholder="Select a value" ng-bind-html="form.recordEditModel.rows[rowIndex][column.name]"></div>
                                                                 <chaise-clear-input btn-class="foreignkey-remove" click-callback="::form.clearForeignKey(rowIndex, column)" show="form.showRemove(rowIndex, column.name)"></chaise-clear-input>
                                                             </div>
                                                             <label class="sr-only"></label>
@@ -211,13 +211,21 @@
                                                         </div>
 
                                                         <!-- boolean input -->
-                                                        <div ng-switch-when="boolean">
-                                                            <ui-select id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" append-to-body="true" theme="select2">
-                                                                <ui-select-match class="chaise-input-control" name="{{::column.name}}">{{$select.selected}}</ui-select-match>
-                                                                <ui-select-choices repeat="domainValue in ::form.booleanValues | filter: $select.search" >
-                                                                    <div ng-bind-html="domainValue | highlight: $select.search" style="min-height: 20px;"></div>
-                                                                </ui-select-choices>
-                                                            </ui-select>
+                                                        <div ng-switch-when="boolean" class="chaise-boolean-dropdown" uib-dropdown>
+                                                            <div class="chaise-input-control has-feedback" uib-dropdown-toggle>
+                                                                <div id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-display" contenteditable="false" style="cursor: pointer" data-placeholder="Select a value" ng-bind-html="form.recordEditModel.rows[rowIndex][column.name]"></div>
+                                                                <chaise-clear-input btn-class="boolean-remove" click-callback="form.clearInput(rowIndex, column.name)" show="form.showRemove(rowIndex, column.name, 'boolean')"></chaise-clear-input>
+                                                                <button ng-focus="::form.blurElement($event);" class="chaise-btn chaise-btn-primary" type="button">
+                                                                    <span class="glyphicon glyphicon-chevron-down"></span>
+                                                                </button>
+                                                            </div>
+                                                            <!-- So that the boolean input can be validated -->
+                                                            <input type="hidden" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" ng-required="::form.isRequired(columnIndex);" />
+                                                            <ul uib-dropdown-menu role="menu">
+                                                                <li ng-repeat="option in ::form.booleanValues" ng-click="form.recordEditModel.rows[rowIndex][column.name] = option">
+                                                                    <a ng-bind-html="option" style="min-height: 20px;"></a>
+                                                                </li>
+                                                            </ul>
                                                         </div>
 
                                                         <!-- longtext/textarea input -->

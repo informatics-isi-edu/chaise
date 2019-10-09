@@ -46,8 +46,8 @@
         INT_8_MAX: 9223372036854775807
     })
 
-    .factory('InputUtils', ['dataFormats', '$rootScope', function(dataFormats, $rootScope) {
-        var booleanValues = ['', true, false];
+    .factory('InputUtils', ['dataFormats', 'defaultDisplayname', '$rootScope', function(dataFormats, defaultDisplayname, $rootScope) {
+        var booleanValues = [true, false];
 
         /* Functions for all input types */
         // determines if input should be disabled based on ermrestJS API

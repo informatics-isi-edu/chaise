@@ -12,7 +12,6 @@
         vm.recordEditModel = recordEditModel;
         vm.dataFormats = dataFormats;
         vm.editMode = (context.mode == context.modes.EDIT ? true : false);
-        vm.booleanValues = InputUtils.booleanValues;
         vm.mdHelpLinks = { // Links to Markdown references to be used in help text
             editor: "https://jbt.github.io/markdown-editor/#RZDLTsMwEEX3/opBXQCRmqjlsYBVi5CKxGOBWFWocuOpM6pjR54Jbfl6nKY08mbO1dwj2yN4pR+ENx23Juw8PBuSEJU6B3zwovdgAzIED1IhONwINNqjezxyRG6dkLcQWmlaAWIwxI3TBzT/pUi2klypLJsHZ0BwL1kGSq1eRDsq6Rf7cKXUCBaoTeebJBho2tGAN0cc+LbnIbg7BUNyr9SnrhuH6dUsCjKYNYm4m+bap3McP6L2NqX/y+9tvcaYLti3Jvm5Ns2H3k0+FBdpvfsGDUvuHY789vuqEmn4oShsCNZhXob6Ou+3LxmqsAMJQL50rUHQHqjWFpW6WM7gpPn6fAIXbBhUUe9yS1K1605XkN+EWGuhksfENEbTFmWlibGoNQvG4ijlouVy3MQE8cAVoTO7EE2ibd54e/0H",
             cheatsheet: "http://commonmark.org/help/"
@@ -48,6 +47,8 @@
         vm.int4max = integerLimits.INT_4_MAX;
         vm.int8min = integerLimits.INT_8_MIN;
         vm.int8max = integerLimits.INT_8_MAX;
+
+        vm.booleanValues = InputUtils.booleanValues;
 
         vm.applyCurrentDatetime = applyCurrentDatetime;
         vm.toggleMeridiem = toggleMeridiem;
@@ -345,14 +346,15 @@
         // typename - column type
         // input - used for timestamp inputs to distinguish date from time
         function showRemove(idx, name, typename, input) {
-            if (!vm.recordEditModel.rows[idx][name]) return false;
-
             var value = null,
                 valueHiddenByValidator = false;
 
             if (typename == "timestamp" || typename == "timestamptz") {
-                value = vm.recordEditModel.rows[idx][name][input];
+                value = vm.recordEditModel.rows[idx][name] && vm.recordEditModel.rows[idx][name][input];
                 valueHiddenByValidator = vm.formContainer.row[idx][name].$error[input];
+            } else if (typename == "boolean") {
+                value = vm.recordEditModel.rows[idx][name] !== null;
+                valueHiddenByValidator = vm.formContainer.row[idx][name].$invalid && !vm.formContainer.row[idx][name].$error.required;
             } else {
                 value = vm.recordEditModel.rows[idx][name];
                 valueHiddenByValidator = vm.formContainer.row[idx][name].$invalid && !vm.formContainer.row[idx][name].$error.required;
