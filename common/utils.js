@@ -1440,14 +1440,24 @@
                 // find the container's usable height
                 var containerHeight = ((parentContainerHeight - fixedContentHeight)/docHeight) * 100;
 
-                // TODO this should be changed to use pixel base size instead
-                if (containerHeight < 15) {
+                var resetHeight = function () {
                     parentContainer.style.overflowY = "auto";
                     container.style.height = "unset";
+                }
+
+                // make sure the percentage makes sense first
+                if (containerHeight < 15) {
+                    resetHeight();
                 } else {
                     // set the container's height
                     container.style.height = containerHeight + 'vh';
+
+                    // now check based on actual pixel size
+                    if (container.offsetHeight < 300) {
+                        resetHeight();
+                    }
                 }
+
 
             } catch(err) {
                 $log.warn(err);

@@ -96,7 +96,7 @@
                                 <div ng-repeat="cm in columnModels track by $index" id="recordSidePan-{{$index}}" ng-if="ctrl.showInlineTable($index)" class="{{lastActiveFacet == $index ? 'focused': ''}}" ng-click="ctrl.gotoInlineTable(cm.displayname.value, $index)">
 
                                     <li id="recordSidePan-heading-{{$index}}" class="toc-heading toc-inline-heading">
-                                        <a>
+                                        <a ng-class="{'empty-toc-heading': cm.tableModel.rowValues.length === 0}">
                                             <span ng-if="::cm.displayname.isHTML" ng-bind-html="::cm.displayname.value"></span>
                                             <span ng-if="::!cm.displayname.isHTML" ng-bind="::cm.displayname.value"></span>
                                             <span>({{cm.tableModel.rowValues.length}}{{cm.tableModel.page.hasNext ? '+' : ''}})</span>
@@ -106,7 +106,7 @@
                                 <div ng-repeat="rtm in relatedTableModels track by $index" id="recordSidePan-{{$index}}" ng-if="ctrl.showRelatedTable($index)" class="{{lastActiveFacet == $index ? 'focused': ''}}" ng-click="ctrl.gotoRelatedTable(rtm.displayname.value, $index)">
 
                                     <li id="recordSidePan-heading-{{$index}}" class="toc-heading">
-                                        <a>
+                                        <a ng-class="{'empty-toc-heading': rtm.tableModel.rowValues.length === 0}">
                                             <span ng-if="::rtm.displayname.isHTML" ng-bind-html="::rtm.displayname.value"></span>
                                             <span ng-if="::!rtm.displayname.isHTML" ng-bind="::rtm.displayname.value"></span>
                                             <span>({{rtm.tableModel.rowValues.length}}{{rtm.tableModel.page.hasNext ? '+' : ''}})</span>

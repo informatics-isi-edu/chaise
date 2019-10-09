@@ -26,15 +26,16 @@
     </div>
     <div class="col-xs-12 col-sm-6">
         <div class="pull-right">
-            <button class="chaise-table-header-create-link chaise-btn chaise-btn-primary"
-                ng-if="vm.config.displayMode !== recordsetDisplayModes.related && vm.reference.canCreate && vm.config.editable"
-                ng-click="addRecord()" tooltip-placement="bottom" uib-tooltip="Click here to create a record.">
+            <button ng-if="vm.config.displayMode !== recordsetDisplayModes.related && vm.reference.canCreate && vm.config.editable"
+                class="chaise-table-header-create-link chaise-btn"
+                ng-class="vm.config.displayMode === recordsetDisplayModes.fullscreen ? 'chaise-btn-primary': 'chaise-btn-secondary'"
+                ng-click="addRecord()" tooltip-placement="bottom-right" uib-tooltip="Click here to create new record(s).">
                 <span class="chaise-btn-icon glyphicon glyphicon-plus"></span>
-                <span>Create</span>
+                <span>{{vm.config.displayMode === recordsetDisplayModes.fullscreen ? "Create" : "Creat new"}}</span>
             </button>
-            <button class="chaise-table-header-edit-link chaise-btn chaise-btn-primary"
-                ng-if="vm.config.displayMode === recordsetDisplayModes.fullscreen && vm.page && vm.reference.canUpdate && vm.config.editable"
-                ng-click="editRecord()" ng-disabled="{{vm.pageLimit > vm.RECORDEDIT_MAX_ROWS}}" tooltip-placement="bottom"
+            <button ng-if="vm.config.displayMode === recordsetDisplayModes.fullscreen && vm.page && vm.reference.canUpdate && vm.config.editable"
+                class="chaise-table-header-edit-link chaise-btn chaise-btn-primary"
+                ng-click="editRecord()" ng-disabled="{{vm.pageLimit > vm.RECORDEDIT_MAX_ROWS}}" tooltip-placement="bottom-right"
                 uib-tooltip="{{ ((vm.pageLimit > vm.RECORDEDIT_MAX_ROWS) ? 'Editing disabled when items per page > ' + vm.RECORDEDIT_MAX_ROWS : 'Click here to edit this page of records.' ) }}">
                 <span class="chaise-btn-icon glyphicon glyphicon-pencil"></span>
                 <span>Edit</span>
