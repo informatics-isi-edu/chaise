@@ -50,7 +50,8 @@
                         modalUtils.showModal({
                             templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/profile.modal.html",
                             controller: "profileModalDialogController",
-                            controllerAs: "ctrl"
+                            controllerAs: "ctrl",
+                            windowClass: "profile-popup"
                         }, false, false, false);
                     };
 
