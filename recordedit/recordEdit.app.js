@@ -242,9 +242,7 @@
                             if (page.tuples.length < 1) {
                                 // TODO: understand the filter that was used and relate that information to the user (it oucld be a facet filter now)
                                 var recordSetLink = page.reference.unfilteredReference.contextualize.compact.appLink;
-                                var tableDisplayName = page.reference.displayname.value;
-
-                                throw new Errors.noRecordError({}, tableDisplayName, recordSetLink);
+                                throw new Errors.noRecordError({}, page.reference.displayname.value, recordSetLink);
                             }
 
                             var column, value;
@@ -252,13 +250,9 @@
 
                             // $rootScope.tuples is used for keeping track of changes in the tuple data before it is submitted for update
                             $rootScope.tuples = [];
-                            if ((context.mode != context.modes.EDIT || page.tuples.length > 1)) {
-                                $rootScope.tableComment = $rootScope.reference.table.comment;
-                            } else {
+                            if (context.mode == context.modes.EDIT && page.tuples.length == 1) {
                                 $rootScope.displayname = page.tuples[0].displayname;
-                                $rootScope.tableComment = $rootScope.reference.table.comment;
                             }
-                            $rootScope.tableDisplayName = $rootScope.reference.displayname;
                             $rootScope.idSafeTableName = DataUtils.makeSafeIdAttr($rootScope.reference.table.name);
                             $rootScope.idSafeSchemaName = DataUtils.makeSafeIdAttr($rootScope.reference.table.schema.name);
 
@@ -381,8 +375,6 @@
                     }
                 } else if (context.mode == context.modes.CREATE) {
                     if ($rootScope.reference.canCreate) {
-                        $rootScope.tableDisplayName = $rootScope.reference.displayname;
-                        $rootScope.tableComment = $rootScope.reference.table.comment;
                         $rootScope.idSafeTableName = DataUtils.makeSafeIdAttr($rootScope.reference.table.name);
                         $rootScope.idSafeSchemaName = DataUtils.makeSafeIdAttr($rootScope.reference.table.schema.name);
 

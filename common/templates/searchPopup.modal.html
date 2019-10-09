@@ -1,5 +1,17 @@
-<div class="modal-header">
-    <span class="pull-right">
+<!-- <div class="modal-header">
+    <div class="top-panel-container">
+        <div class="top-flex-panel">
+            <div class="top-left-panel also-resizable">
+
+
+TODO title should go here
+
+            </div>
+        </div>
+    </div>
+</div> -->
+<div class="modal-body">
+    <span class="search-popup-controls">
         <button id="multi-select-submit-btn" ng-if="ctrl.tableModel.config.selectMode=='multi-select'"
                 tooltip-placement="bottom" uib-tooltip="Apply the selected rows" class="chaise-btn chaise-btn-primary" type="button" ng-click="ctrl.submit()" ng-disabled="ctrl.tableModel.selectedRows.length < 1 || ctrl.disableSubmit">
             <span class="chaise-btn-icon glyphicon glyphicon-saved"></span>
@@ -10,13 +22,6 @@
             <span>Cancel</span>
         </button>
     </span>
-    <h2 class="modal-title" ng-class="{'chaise-icon-for-tooltip': ctrl.tableModel.tableComment}" ng-attr-uib-tooltip="{{::ctrl.tableModel.tableComment ? ctrl.tableModel.tableComment : undefined}}" tooltip-placement="bottom-right" style="width: fit-content;">Select
-        <span ng-if="::ctrl.tableModel.tableDisplayName.isHTML" ng-bind-html="::ctrl.tableModel.tableDisplayName.value"></span>
-        <span ng-if="::!ctrl.tableModel.tableDisplayName.isHTML" ng-bind="::ctrl.tableModel.tableDisplayName.value"></span>
-    </h2>
-</div>
-<div class="modal-body">
-    <loading-spinner ng-show="!ctrl.tableModel.hasLoaded && !ctrl.tableModel.backgroundSearch"></loading-spinner>
     <div ng-switch="ctrl.mode">
         <!-- switch when 'selectFaceting' -->
         <recordset-select-faceting ng-switch-when="selectFaceting" vm="ctrl.tableModel" on-selected-rows-changed="ctrl.onSelectedRowsChanged"></recordset-select-faceting>

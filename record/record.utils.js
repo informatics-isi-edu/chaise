@@ -270,15 +270,15 @@
          * Given reference of related or inline, will create appropriate table model.
          * @param  {ERMrest.Reference} reference Reference object.
          * @param  {string} context   the context string
-         * @param  {ERMrest.tuple} fromTuple the main tuple
+         * @param  {ERMrest.tuple} parentTuple the main tuple
          */
-        function getTableModel (reference, context, fromTuple, parentReference) {
+        function getTableModel (reference, context, parentTuple, parentReference) {
             return {
                 reference: reference,
                 parentReference: parentReference,
                 pageLimit: getPageSize(reference),
                 isTableDisplay: reference.display.type == 'table',
-                fromTuple: fromTuple,
+                parentTuple: parentTuple,
                 context: context,
                 enableSort: true,
                 rowValues: [],

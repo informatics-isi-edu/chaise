@@ -335,7 +335,8 @@
         }
     }])
 
-    .directive('inputSwitch', ['dataFormats', 'InputUtils', 'integerLimits', 'maskOptions', 'modalBox', 'modalUtils', 'UriUtils', '$log', '$rootScope', function(dataFormats, InputUtils, integerLimits, maskOptions, modalBox, modalUtils, UriUtils, $log, $rootScope) {
+    .directive('inputSwitch', ['ConfigUtils', 'dataFormats', 'InputUtils', 'integerLimits', 'maskOptions', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'UriUtils', '$log', '$rootScope',
+                function(ConfigUtils, dataFormats, InputUtils, integerLimits, maskOptions, modalBox, modalUtils, recordsetDisplayModes, UriUtils, $log, $rootScope) {
         return {
             restrict: 'E',
             templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/inputs/inputSwitch.html',
@@ -388,6 +389,24 @@
                 scope.searchPopup = function() {
 
                     var params = {};
+
+                    // used for title
+                    if ($rootScope.reference) {
+                        params.parentReference = $rootScope.refernece;
+                    }
+                    if ($rootScope.tuple) {
+                        params.parentTuple = $rootScope.tuple;
+                    }
+
+                    params.displayname = scope.column.displayname;
+
+                    var context = ConfigUtils.getContextJSON();
+                    if (context.mode == context.modes.EDIT) {
+                        params.displayMode = recordsetDisplayModes.foreignKeyPopupEdit;
+                    } else {
+                        params.displayMode = recordsetDisplayModes.foreignKeyPopupCreate;
+                    }
+
 
                     params.reference = scope.column.filteredRef(null, null).contextualize.compactSelect;
                     params.reference.session = $rootScope.session;

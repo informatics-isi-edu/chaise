@@ -172,17 +172,26 @@
 
     })
 
+    // NOTE since this has been used with ng-switch in the code, and we cannot
+    // have expressions in ng-switch-when, if you want to update the values,
+    // make sure to update the templates that are using this: table.html, ellipsis.html
     .constant("modalBox", {
         noSelect: "no-select",
         singleSelectMode:"single-select",
         multiSelectMode:"multi-select"
     })
 
+    // NOTE since this has been used with ng-switch in the code, and we cannot
+    // have expressions in ng-switch-when, if you want to update the values,
+    // make sure to update the templates that are using this: recordset.html, recordsetSelectFaceting.html
     .constant("recordsetDisplayModes", {
         fullscreen: "fullscreen",
         related: "related",
         popup: "popup",
-        facetPopup: "facetPopup"
+        foreignKeyPopupCreate: "popup/foreignkey/create",
+        foreignKeyPopupEdit: "popup/foreignkey/edit",
+        addPureBinaryPopup: "popup/purebinary/add",
+        facetPopup: "popup/facet"
     })
 
     .constant("defaultDisplayname", {
@@ -1882,6 +1891,8 @@
     .directive('chaiseTitle', [function () {
         return {
             restrict: 'E',
+            // there shouldn't be any extra between closing span tag and a
+            // if added, it will show an extra underline for the space
             template: '<a ng-if="addLink && !displayname.isHTML" ng-href="{{::recordset()}}" ng-attr-uib-tooltip="{{::comment}}" tooltip-placement="bottom-left">' +
                         '<span ng-bind="displayname.value" ng-class="{\'chaise-icon-for-tooltip\': comment}"></span>' +
                       '</a>' +
@@ -1895,16 +1906,30 @@
                         '<span ng-bind-html="displayname.value" ng-class="{\'chaise-icon-for-tooltip\': comment}"></span>' +
                       '</span>',
             scope: {
-                reference: "=",
-                addLink: "="
+                reference: "=?",
+                displayname: "=?",
+                addLink: "=?",
+                link: "=?"
             },
             link: function (scope, elem, attrs) {
+                if (typeof scope.link === "string") {
+                    scope.addLink = true;
+                }
+
                 scope.recordset = function () {
+                    if (typeof scope.link === "string") {
+                        return scope.link;
+                    }
                     return scope.reference.unfilteredReference.contextualize.compact.appLink;
                 }
 
-                scope.displayname = scope.reference.displayname;
-                scope.comment = scope.reference.table.comment ? scope.reference.table.comment : undefined;
+                if (typeof scope.displayname !== "object") {
+                    scope.displayname = scope.reference.displayname;
+                }
+
+                if (scope.reference && scope.reference.table.comment) {
+                    scope.comment = scope.reference.table.comment;
+                }
             }
         };
     }])

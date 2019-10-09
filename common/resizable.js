@@ -17,7 +17,7 @@
                     rGrabber: '@',
                     rDisabled: '@',
                     rNoThrottle: '=',
-                    rOtherE: '@'
+                    rOtherE: '@' // selector for the elements that need to be moved by resizable
                 },
 
                 link: function (scope, element, attr) {
@@ -25,24 +25,32 @@
                         'webkitFlexBasis' in document.documentElement.style ? 'webkitFlexBasis' :
                         'msFlexPreferredSize' in document.documentElement.style ? 'msFlexPreferredSize' : 'flexBasis';
 
-                    var resizePartner;
+                    var resizePartners;
                     scope.$watch(function () {
                             return element[0].clientWidth;
                     }, function (value) {
                         if (value > 0) {
-                            resizePartner = angular.element(document.getElementsByClassName(scope.rOtherE)[0]);
-                            resizePartner.addClass('resizable');
+                            resizePartners = document.querySelectorAll(scope.rOtherE);
+                            angular.element(resizePartners).addClass('resizable');
                         }
                     });
 
                     // register watchers on width and height attributes if they are set
                     scope.$watch('rWidth', function (value) {
                         element[0].style[scope.rFlex ? flexBasis : 'width'] = scope.rWidth + 'px';
-                        if (resizePartner) resizePartner[0].style[scope.rFlex ? flexBasis : 'width'] = scope.rWidth + 'px';
+                        if (resizePartners) {
+                            resizePartners.forEach(function (el) {
+                                el.style[scope.rFlex ? flexBasis : 'width'] = scope.rWidth + 'px';
+                            });
+                        }
                     });
                     scope.$watch('rHeight', function (value) {
                         element[0].style[scope.rFlex ? flexBasis : 'height'] = scope.rHeight + 'px';
-                        if (resizePartner) resizePartner[0].style[scope.rFlex ? flexBasis : 'height'] = scope.rHeight + 'px';
+                        if (resizePartners) {
+                            resizePartners.forEach(function (el) {
+                                el.style[scope.rFlex ? flexBasis : 'height'] = scope.rHeight + 'px';
+                            });
+                        }
                     });
 
                     element.addClass('resizable');

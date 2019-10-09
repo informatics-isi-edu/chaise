@@ -3,7 +3,7 @@
     <div class="top-panel-container" ng-show="vm.reference">
         <alerts alerts="$root.alerts"></alerts>
         <div class="top-flex-panel">
-            <div id="top-left-panel" class="top-left-panel also-resizeable" ng-class="{'open-panel': vm.config.facetPanelOpen, 'close-panel': !vm.config.facetPanelOpen}">
+            <div class="top-left-panel also-resizeable" ng-class="{'open-panel': vm.config.facetPanelOpen, 'close-panel': !vm.config.facetPanelOpen}">
                 <div class="panel-header">
                     <div class="pull-left">
                         <h3>Refine search</h3>
@@ -18,15 +18,8 @@
             </div>
             <div class="top-right-panel">
                 <div class="row recordset-title-container">
-                    <div class="col-xs-12" ng-show="vm.config.displayMode === recordsetDisplayModes.fullscreen">
-                        <div class="pull-left">
-                            <!-- TODO UX-M should change to class -->
-                            <h1 id="page-title">
-                                <chaise-title ng-if="vm.reference" add-link="false" reference="vm.reference"></chaise-title>
-                                <small ng-if="vm.reference && vm.reference.location.version" class="h3-class" tooltip-placement="bottom-left" uib-tooltip="{{::tooltip.versionTime}} {{versionDate()}}">({{versionDisplay()}})</small>
-                            </h1>
-                        </div>
-                        <div class="pull-right">
+                    <div class="recordset-title-buttons-container">
+                        <div class="recordset-title-buttons" ng-show="vm.config.displayMode === recordsetDisplayModes.fullscreen">
                             <!-- download CSV included by default -->
                             <export reference="vm.reference" disabled="!vm.hasLoaded || !vm.initialized || vm.rowValues.length == 0"></export>
                             <!-- permalink -->
@@ -35,6 +28,40 @@
                                 <span>Permalink</span>
                             </a>
                         </div>
+                    </div>
+                    <div class="recordset-title-text">
+                        <!-- TODO UX-M should change to class -->
+                        <h1 id="page-title" ng-if="vm.reference" ng-switch="vm.config.displayMode" ng-class="{'h2-class': vm.config.displayMode.indexOf(recordsetDisplayModes.popup) === 0}">
+                            <div ng-switch-when="popup/foreignkey/create">
+                                <span>Select </span>
+                                <chaise-title displayname="vm.displayname"></chaise-title>
+                                <span> for new </span>
+                                <chaise-title reference="vm.parentReference"></chaise-title>
+                            </div>
+                            <div ng-switch-when="popup/foreignkey/edit">
+                                <span>Select </span>
+                                <chaise-title displayname="vm.displayname"></chaise-title>
+                                <span> for </span>
+                                <chaise-title reference="vm.parentReference"></chaise-title>
+                                <span>:</span>
+                                <chaise-title displayname="vm.parentTuple.displayname"></chaise-title>
+                            </div>
+                            <div ng-switch-when="popup/purebinary/add">
+                                <span>Add </span>
+                                <chaise-title reference="vm.reference"></chaise-title>
+                                <span> to </span>
+                                <chaise-title reference="vm.parentReference"></chaise-title>
+                                <span>:</span>
+                                <chaise-title displayname="vm.parentTuple.displayname"></chaise-title>
+                            </div>
+                            <div ng-switch-when="popup/facet">
+                                <!-- look at recordsetSelectFaceting -->
+                            </div>
+                            <div ng-switch-default>
+                                <chaise-title add-link="false" reference="vm.reference"></chaise-title>
+                                <small ng-if="vm.reference && vm.reference.location.version" class="h3-class" tooltip-placement="bottom-left" uib-tooltip="{{::tooltip.versionTime}} {{versionDate()}}">({{versionDisplay()}})</small>
+                            </div>
+                        </h1>
                     </div>
                 </div>
                 <div class="recordset-controls-container">
@@ -113,7 +140,7 @@
         </div>
     </div>
     <div class="bottom-panel-container">
-        <div class="side-panel-resizable" resizable r-directions=["right"] r-flex="true" r-other-e="top-left-panel" ng-show="vm.config.showFaceting && vm.reference" ng-class="{'open-panel': vm.config.facetPanelOpen, 'close-panel': !vm.config.facetPanelOpen, 'initializing': !vm.initialized}">
+        <div class="side-panel-resizable" resizable r-directions=["right"] r-flex="true" r-other-e=".top-left-panel" ng-show="vm.config.showFaceting && vm.reference" ng-class="{'open-panel': vm.config.facetPanelOpen, 'close-panel': !vm.config.facetPanelOpen, 'initializing': !vm.initialized}">
             <faceting vm="vm"></faceting>
         </div>
         <div class="main-container">
@@ -121,7 +148,7 @@
 
                 <!-- record table -->
                 <div class="recordset-table-container" ng-show="vm.initialized">
-                    <record-table id="rs-{{vm.makeSafeIdAttr(vm.tableDisplayName.value)}}" vm="vm" on-selected-rows-changed-bind="onSelectedRowsChanged"></record-table>
+                    <record-table vm="vm" on-selected-rows-changed-bind="onSelectedRowsChanged"></record-table>
                 </div>
             </div>
             <footer ng-show="vm.initialized && vm.config.displayMode === recordsetDisplayModes.fullscreen"></footer>

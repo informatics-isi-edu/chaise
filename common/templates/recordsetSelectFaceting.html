@@ -5,6 +5,24 @@
         <div class="top-flex-panel">
             <div class="top-left-panel close-panel"></div>
             <div class="top-right-panel">
+                <div class="row recordset-title-container">
+                    <div class="recordset-title-text">
+                        <!-- TODO UX-M should change to class -->
+                        <h1 id="page-title" class="h2-class" ng-if="vm.displayname">
+                            <span>Search by </span>
+                            <span ng-if="::vm.displayname.isHTML" ng-bind-html="::vm.displayname.value"
+                                ng-attr-uib-tooltip="{{::vm.comment}}" tooltip-placement="bottom-left"
+                                 ng-class="{'chaise-icon-for-tooltip': vm.comment}"></span>
+                            <span ng-if="::!vm.displayname.isHTML" ng-bind="::vm.displayname.value"
+                                ng-attr-uib-tooltip="{{::vm.comment}}" tooltip-placement="bottom-left"
+                                 ng-class="{'chaise-icon-for-tooltip': vm.comment}"></span>
+                            <!-- <span> for </span>
+                            <chaise-title add-link="false" reference="vm.parentReference"></chaise-title> -->
+                            <!-- TODO UX-M remove parent reference from facet -->
+                        </h1>
+                    </div>
+                    <div class="recordset-title-buttons"></div>
+                </div>
                 <div class="recordset-controls-container" ng-show="vm.initialized">
                     <div ng-if="vm.selectedRows.length > 0 && vm.config.selectMode == 'multi-select'" class="recordset-selected-rows recordset-chiclets-container">
                         <div class="selected-chiclet chaise-btn" ng-repeat="row in vm.selectedRows track by $index">
@@ -38,7 +56,7 @@
             <div class="main-body">
                 <!-- record table -->
                 <div class="recordset-table-container" ng-show="vm.initialized">
-                    <record-table-select-faceting  id="rs-{{vm.makeSafeIdAttr(vm.tableDisplayName.value)}}" vm="vm" on-selected-rows-changed-bind="onSelectedRowsChanged"></record-table-select-faceting>
+                    <record-table-select-faceting vm="vm" on-selected-rows-changed-bind="onSelectedRowsChanged"></record-table-select-faceting>
                 </div>
             </div>
             <footer ng-show="vm.initialized && vm.config.displayMode === recordsetDisplayModes.fullscreen"></footer>

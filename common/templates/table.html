@@ -43,8 +43,8 @@
         <!-- rows -->
         <tbody>
             <tr class="chaise-table-row" ng-class="{'disabled-row': isDisabled(vm.page.tuples[$index])}"
-                ellipsis ng-repeat="row in vm.rowValues track by $index" tuple="vm.page.tuples[$index]" from-tuple="vm.fromTuple" row-values="row" column-models="vm.columnModels" parent-reference="vm.parentReference"
-                config="vm.config" context="vm.context" on-row-click-bind="onSelect" selected="isSelected(vm.page.tuples[$index])" select-disabled="isDisabled(vm.page.tuples[$index])">
+                ellipsis ng-repeat="row in vm.rowValues track by $index" tuple="vm.page.tuples[$index]" parent-tuple="vm.parentTuple" row-values="row" column-models="vm.columnModels" parent-reference="vm.parentReference"
+                config="vm.config" context="vm.context" on-row-click-bind="onSelect" selected="isSelected(vm.page.tuples[$index])" select-disabled="isDisabled(vm.page.tuples[$index])" display-mode="{{::vm.config.displayMode}}">
             </tr>
             <tr ng-if="vm.rowValues.length < 1 || vm.tableError">
                 <td id="no-results-row" colspan="{{vm.columnModels.length + 1}}" style="text-align: center;">

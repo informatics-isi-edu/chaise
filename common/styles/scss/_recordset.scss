@@ -6,9 +6,31 @@
         }
 
         .top-right-panel {
-            h1#page-title {
+
+            .recordset-title-container {
                 margin: 0;
                 margin-bottom: 20px;
+
+                h1 {
+                    margin: 0;
+                }
+
+                .recordset-title-buttons-container {
+                    .recordset-title-buttons {
+                        float: right;
+                        padding-left: 20px;
+                        // height: 40px;
+
+                        .modal-body & {
+                            min-width: 190px;
+                        }
+                        .foreignkey-popup & {
+                            min-width: 95px;
+                        }
+
+                        min-width: 220px;
+                    }
+                }
             }
 
             .show-filter-panel-btn {
@@ -78,6 +100,7 @@
                 margin-right: 5px;
                 margin-bottom: 5px;
                 padding-right: 0;
+                padding-left: 5px;
 
                 .selected-chiclet-name {
                     cursor: default;

@@ -182,15 +182,14 @@
         var chaiseConfig = ConfigUtils.getConfigJSON();
         var reference = vm.reference = params.reference;
         var limit = (!angular.isUndefined(reference) && !angular.isUndefined(reference.display) && reference.display.defaultPageSize) ? reference.display.defaultPageSize : 25;
-        var comment = (typeof params.comment === "string") ? params.comment: reference.table.comment;
         var showFaceting = chaiseConfig.showFaceting ? params.showFaceting : false;
 
         vm.tableModel = {
             readyToInitialize:  true,
             hasLoaded:          false,
             reference:          reference,
-            tableDisplayName:   params.displayname ? params.displayname : reference.displayname,
-            tableComment:            comment,
+            displayname:   params.displayname ? params.displayname : null,
+            comment:       (typeof params.comment === "string") ? params.comment: null,
             columns:            reference.columns,
             sortby:             reference.location.sortObject ? reference.location.sortObject[0].column: null,
             sortOrder:          reference.location.sortObject ? (reference.location.sortObject[0].descending ? "desc" : "asc") : null,
@@ -216,7 +215,11 @@
             logObject:                  params.logObject ? params.logObject: {},
             // TODO different modals should pass different strings (ultimatly it should be the element and not selector)
             parentContainerSelector:    ".search-popup .modal-content",
-            parentStickyAreaSelector:   ".search-popup .modal-header"
+            parentStickyAreaSelector:   ".search-popup .modal-header",
+
+            // used for displayname logic
+            parentReference:    params.parentReference ? params.parentReference : null,
+            parentTuple:        params.parentTuple ? params.parentTuple : null
         };
 
         /**

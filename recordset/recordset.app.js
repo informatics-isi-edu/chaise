@@ -51,7 +51,6 @@
     .value('recordsetModel', {
         hasLoaded: false,
         reference: null,
-        tableDisplayName: null,
         columns: [],
         sortby: null,       // column name, user selected or null
         sortOrder: null,    // asc (default) or desc
@@ -135,7 +134,6 @@
                     recordsetModel.reference = reference.contextualize.compact;
                     recordsetModel.context = context.appContext = "compact";
                     recordsetModel.reference.session = session;
-                    recordsetModel.tableComment = recordsetModel.reference.table.comment;
 
                     // if there's something wrong with the facet or filters in the url,
                     // this getter will complain. We want to catch these errors here,
@@ -153,7 +151,6 @@
                     } else {
                         recordsetModel.pageLimit = 25;
                     }
-                    recordsetModel.tableDisplayName = recordsetModel.reference.displayname;
                     recordsetModel.tableName = recordsetModel.reference.table.name;
                     recordsetModel.schemaName = recordsetModel.reference.table.schema.name;
 
