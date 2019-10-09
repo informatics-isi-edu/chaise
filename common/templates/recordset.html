@@ -43,8 +43,9 @@
                                 <chaise-title displayname="vm.displayname"></chaise-title>
                                 <span> for </span>
                                 <chaise-title reference="vm.parentReference"></chaise-title>
-                                <span>:</span>
-                                <chaise-title displayname="vm.parentTuple.displayname"></chaise-title>
+                                <span ng-if="vm.parentTuple">:
+                                    <chaise-title displayname="vm.parentTuple.displayname"></chaise-title>
+                                </span>
                             </div>
                             <div ng-switch-when="popup/purebinary/add">
                                 <span>Add </span>

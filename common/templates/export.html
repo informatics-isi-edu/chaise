@@ -1,6 +1,5 @@
-<div class="chaise-btn-group">
-    <button class="dropdown-toggle chaise-btn chaise-btn-primary" data-toggle="dropdown" ng-disabled="disabled"
-       tooltip-placement="left" uib-tooltip= "Click to choose an export format.">
+<div class="chaise-btn-group" uib-dropdown>
+    <button class="dropdown-toggle chaise-btn chaise-btn-primary" uib-dropdown-toggle ng-disabled="disabled" tooltip-placement="left" uib-tooltip= "Click to choose an export format.">
         <span class="glyphicon chaise-btn-icon" ng-class="{'glyphicon-export': !isLoading, 'glyphicon-refresh glyphicon-refresh-animate': isLoading}"></span>
         <span>Export </span>
         <span class="caret "></span>

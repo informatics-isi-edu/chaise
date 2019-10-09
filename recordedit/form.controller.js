@@ -12,7 +12,6 @@
         vm.recordEditModel = recordEditModel;
         vm.dataFormats = dataFormats;
         vm.editMode = (context.mode == context.modes.EDIT ? true : false);
-        vm.booleanValues = InputUtils.booleanValues;
         vm.mdHelpLinks = { // Links to Markdown references to be used in help text
             editor: "https://jbt.github.io/markdown-editor/#RZDLTsMwEEX3/opBXQCRmqjlsYBVi5CKxGOBWFWocuOpM6pjR54Jbfl6nKY08mbO1dwj2yN4pR+ENx23Juw8PBuSEJU6B3zwovdgAzIED1IhONwINNqjezxyRG6dkLcQWmlaAWIwxI3TBzT/pUi2klypLJsHZ0BwL1kGSq1eRDsq6Rf7cKXUCBaoTeebJBho2tGAN0cc+LbnIbg7BUNyr9SnrhuH6dUsCjKYNYm4m+bap3McP6L2NqX/y+9tvcaYLti3Jvm5Ns2H3k0+FBdpvfsGDUvuHY789vuqEmn4oShsCNZhXob6Ou+3LxmqsAMJQL50rUHQHqjWFpW6WM7gpPn6fAIXbBhUUe9yS1K1605XkN+EWGuhksfENEbTFmWlibGoNQvG4ijlouVy3MQE8cAVoTO7EE2ibd54e/0H",
             cheatsheet: "http://commonmark.org/help/"
@@ -31,6 +30,8 @@
         vm.redirectAfterSubmission = redirectAfterSubmission;
         vm.searchPopup = searchPopup;
         vm.createRecord = createRecord;
+        vm.showRemove = showRemove;
+        vm.clearInput = clearInput;
         vm.clearForeignKey = clearForeignKey;
 
         vm.MAX_ROWS_TO_ADD = context.MAX_ROWS_TO_ADD;
@@ -47,9 +48,14 @@
         vm.int8min = integerLimits.INT_8_MIN;
         vm.int8max = integerLimits.INT_8_MAX;
 
+        vm.booleanValues = InputUtils.booleanValues;
+
         vm.applyCurrentDatetime = applyCurrentDatetime;
         vm.toggleMeridiem = toggleMeridiem;
         vm.clearDatetime = clearDatetime;
+        vm.clearDate = clearDate;
+        vm.clearTime = clearTime;
+
         vm.fileExtensionTypes = InputUtils.fileExtensionTypes;
         vm.blurElement = InputUtils.blurElement;
         vm.maskOptions = maskOptions;
@@ -337,6 +343,34 @@
             }, false, false);
         }
 
+        // idx - the index of the form
+        // name - the name of the column
+        // typename - column type
+        // input - used for timestamp inputs to distinguish date from time
+        function showRemove(idx, name, typename, input) {
+            var value = null,
+                valueHiddenByValidator = false;
+
+            if (typename == "timestamp" || typename == "timestamptz") {
+                value = vm.recordEditModel.rows[idx][name] && vm.recordEditModel.rows[idx][name][input];
+                valueHiddenByValidator = vm.formContainer.row[idx][name].$error[input];
+            } else if (typename == "boolean") {
+                value = vm.recordEditModel.rows[idx][name] !== null;
+                valueHiddenByValidator = vm.formContainer.row[idx][name].$invalid && !vm.formContainer.row[idx][name].$error.required;
+            } else {
+                value = vm.recordEditModel.rows[idx][name];
+                valueHiddenByValidator = vm.formContainer.row[idx][name].$invalid && !vm.formContainer.row[idx][name].$error.required;
+            }
+
+            return value || valueHiddenByValidator;
+        }
+
+        // idx - the index of the form
+        // name - the name of the column
+        function clearInput(idx, name) {
+            vm.recordEditModel.rows[idx][name] = null;
+        }
+
         // NOTE: If changes are made to this function, changes should also be made to the similar function in the inputSwitch directive
         // TODO: remove when RE has been refactored to use the inputSwitch directive for all form inputs
         function clearForeignKey(rowIndex, column) {
@@ -484,6 +518,16 @@
         // resets timestamp[tz] values and sets the rest to null
         function clearDatetime(modelIndex, columnName, columnType) {
             vm.recordEditModel.rows[modelIndex][columnName] = InputUtils.clearDatetime(columnType);
+        }
+
+        // clears the date for timestamp[tz] inputs
+        function clearDate(modelIndex, columnName) {
+            vm.recordEditModel.rows[modelIndex][columnName].date = null;
+        }
+
+        // clears the time for timestamp[tz] inputs
+        function clearTime(modelIndex, columnName) {
+            vm.recordEditModel.rows[modelIndex][columnName].time = null;
         }
 
         function isRequired(columnIndex) {

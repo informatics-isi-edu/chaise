@@ -643,17 +643,31 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
             if (booleanCols.length > 0) {
                 describe("Boolean fields,", function() {
-                    var pageColumns = [], dropdowns = [];
+                    /**
+                     * contains objects in the form of:
+                     * {
+                     *  column:         the column object from the params object
+                     *  columnTitle:    the column title element
+                     *  dropdownInput:       the dropdown element
+                     * }
+                     */
+                    var dropdowns = [];
 
                     beforeAll(function() {
-                        chaisePage.recordEditPage.getAllColumnCaptions().then(function(pcs) {
-                            pcs.forEach(function(pc) {
-                                pc.getAttribute('innerHTML').then(function(txt) {
+                        // gets all columns on page and cross references their inner html value with
+                        // the column names in booleanCols to create new column set to test with
+                        // TODO: add ID to column title TD in the RE form and select boolean columns based on the id list
+                        chaisePage.recordEditPage.getAllColumnNames().then(function(nameElements) {
+                            nameElements.forEach(function(nameEl) {
+                                nameEl.getAttribute('innerHTML').then(function(txt) {
                                     txt = txt.trim();
                                     var col = booleanCols.find(function(cl) { return txt == cl.title });
                                     if (col) {
-                                        pc.column = col;
-                                        pageColumns.push(pc);
+                                        var columnObj = {
+                                            column: col,
+                                            columnTitle: nameEl
+                                        }
+                                        dropdowns.push(columnObj);
                                     }
                                 });
                             });
@@ -661,44 +675,42 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     });
 
                     it("should show a dropdown", function() {
-                        pageColumns.forEach(function(pc) {
-                            chaisePage.recordEditPage.getDropdown(pc, recordIndex).then(function(dropdown) {
-                                expect(dropdown.isDisplayed()).toBeTruthy();
-                                dropdown.column = pc.column;
+                        dropdowns.forEach(function(dropdown) {
+                            chaisePage.recordEditPage.getDropdownElements(dropdown.columnTitle).then(function(elements) {
+                                return elements[recordIndex];
+                            }).then(function (el) {
+                                expect(el.isDisplayed()).toBeTruthy();
 
                                 var value = getRecordValue(dropdown.column.name);
                                 if (value != undefined) {
-                                    expect(chaisePage.recordEditPage.getDropdownText(dropdown)).toBe(value.length == 0 ? 'Select a value' : (value + ""), colError(dropdown.column.name, "Doesn't have the expected value."));
+                                    expect(chaisePage.recordEditPage.getDropdownText(el).getText()).toBe(value.length == 0 ? 'Select a value' : (value + ""), colError(dropdown.column.name, "Doesn't have the expected value."));
                                 }
 
-                                dropdowns.push(dropdown);
-                                booleanDataTypeFields.push(dropdown);
+                                dropdown.dropdownInput = el;
                             });
                         });
                     });
 
-                    it("should render 3 options for a boolean field if nullok is true else 2", function() {
+                    it("should render options for a boolean field", function() {
                         dropdowns.forEach(function(dropdown) {
-                            browser.executeScript("return $(arguments[0]).data().$scope.$select.items", dropdown).then(function(items) {
-                                if (dropdown.column.nullok == false) {
-                                    expect(items.length).toBe(2, colError(dropdown.column.name, "Number of available options is not as expected."));
-                                } else {
-                                    expect(items.length).toBe(3, colError(dropdown.column.name, "Number of available options is not as expected."));
-                                }
+                            chaisePage.recordEditPage.getDropdownOptions(dropdown.dropdownInput).then(function(items) {
+                                expect(items.length).toBe(2, colError(dropdown.column.name, "Number of available options is not as expected."));
                             });
                         });
                     });
 
-                    it("should select an option (true, false, none)", function() {
+                    it("should select an option (true, false)", function() {
                         dropdowns.forEach(function(dropdown) {
 
                             if (isEditMode && (dropdown.column.generated || dropdown.column.immutable)) return;
 
                             var value = getRecordInput(dropdown.column.name, chance.bool());
 
-                            chaisePage.recordEditPage.selectDropdownValue(dropdown, value).then(function() {
-                                browser.sleep(10);
-                                expect(chaisePage.recordEditPage.getDropdownText(dropdown)).toBe(value.length == 0 ? 'Select a value' : (value + ""), colError(dropdown.column.name, "Couldn't select a value."));
+                            chaisePage.recordEditPage.selectDropdownValue(dropdown.dropdownInput, value).then(function(option) {
+                                expect(chaisePage.recordEditPage.getDropdownText(dropdown.dropdownInput).getText()).toBe(value + "", colError(dropdown.column.name, "Couldn't select a value."));
+                            }).catch(function (error) {
+                                console.dir(error);
+                                expect('Something went wrong in this promise chain').toBe('Please see error message.', colError(dropdown.column.name, "While selecting the boolean value from dropdown."));
                             });
                         });
                     });
@@ -912,64 +924,11 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                             if (dp.column.generated || dp.column.immutable) return;
 
-                            dp.clearBtn.click();
-                            expect(dp.date.getAttribute('value')).toBeFalsy(colError(dp.column.name, "Couldn't clear the input."));
+                            chaisePage.recordEditPage.getRemoveButton(dp.column.name, recordIndex, "date-remove").click().then(function () {
+                                expect(dp.date.getAttribute('value')).toBeFalsy(colError(dp.column.name, "Couldn't clear the input."));
+                            });
                         });
                     });
-
-                    it("should have a datepicker element", function() {
-                        dateCols.forEach(function(column) {
-                            chaisePage.recordEditPage.getInputValue(column.name, recordIndex).then(function(dateInput) {
-                                    expect(dateInput.isDisplayed()).toBeTruthy();
-
-                                    dateInput.column = column;
-                                    datePickerFields.push(dateInput);
-
-                                    var value = getRecordValue(column.name);
-                                    if (value != undefined) {
-                                        expect(dateInput.getAttribute('value')).toBe(value);
-                                    }
-                            });
-                        });
-                    }).pend('Postpone test until a datepicker is re-implemented');
-                    it("should render open datepicker on click", function() {
-                        datePickerFields.forEach(function(dp) {
-
-                            if (isEditMode && (dp.column.generated || dp.column.immutable)) return;
-
-                            chaisePage.clickButton(dp);
-                            browser.sleep(10);
-                            chaisePage.recordEditPage.getDatePickerForAnInput(dp).then(function(datePicker) {
-                                expect(datePicker.isDisplayed()).toBeTruthy();
-
-                                dp.datePicker = datePicker;
-                            });
-                        });
-                    }).pend('Postpone test until a datepicker is re-implemented');
-                    it("should select a date , and check the value", function() {
-                        datePickerFields.forEach(function(dateInput) {
-                            if (isEditMode && (dateInput.column.generated || dateInput.column.immutable)) return;
-
-                            chaisePage.clickButton(dateInput);
-                            browser.sleep(10);
-                            chaisePage.recordEditPage.getDayButtonsForDatePicker(dateInput.datePicker).then(function(dayBtns) {
-                                var day = chaisePage.recordEditPage.getRandomInt(1, dayBtns.length);
-                                dayBtns[day-1].click();
-
-                                var month = ((new Date()).getMonth() + 1);
-                                month = (month < 10) ? "0" + month : month;
-                                day = (day < 10) ? "0" + day : day;
-
-                                var date = (new Date()).getFullYear() + "-" + month + "-"  + day;
-                                expect(dateInput.getAttribute('value')).toBe(date);
-
-                                // Required error message should disappear
-                                chaisePage.recordEditPage.getDateInputErrorMessage(dateInput, 'required').then(function(err) {
-                                    expect(err).toBeNull(colError("Date input " + dateInput.column.name + " Required Error message to be hidden"));
-                                });
-                            });
-                        });
-                    }).pend('Postpone test until a datepicker is re-implemented');
 
                     // this should be the last test case
                     it('should select a valid value.', function () {
@@ -1384,7 +1343,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         });
                     });
 
-                    it("should validate invalid text input", function() {
+                    it("should validate invalid float input", function() {
                         floatDataTypeFields.forEach(function(floatInput) {
                             var c = floatInput.column;
 
@@ -1408,12 +1367,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             }
 
                             // Invalid text value
-                            var text = "1j2yu.5", actualValue = "12.5";
-                            floatInput.sendKeys(text).then(function() {
-                                return floatInput.getAttribute('value');
-                            }).then(function(value) {
-                                expect(value).toBe(actualValue);
-                            }).catch(function(error) {
+                            floatInput.sendKeys("12.5").catch(function(error) {
                                 console.log('ERROR:', error);
                                 expect('Something went wrong in this promise chain to check the value of an input field.').toBe('See error msg for more info.')
                             });
@@ -1430,7 +1384,6 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             //Restore the value to the original one or a valid input
                             floatInput.sendKeys(validNo);
                             expect(floatInput.getAttribute('value')).toBe(validNo, colError(c.name, "Couldn't change the value."));
-
                         });
                     });
 

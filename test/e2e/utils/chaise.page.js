@@ -40,6 +40,10 @@ var recordEditPage = function() {
         return browser.executeScript("return $('td.entity-key > span.column-displayname > span')");
     };
 
+    this.getAllColumnNames = function() {
+        return element.all(by.css("td.entity-key > span.column-displayname > span"));
+    };
+
     this.getColumnCaptionsWithHtml = function() {
         return element.all(by.css('td.entity-key > span.column-displayname > span[ng-bind-html]'));
     };
@@ -115,43 +119,66 @@ var recordEditPage = function() {
         return element(by.id("select-all-cancel-"+columnDisplayName));
     }
 
-    this.getDropdown = function(el, index) {
-        index = index || 0;
-        return browser.executeScript("return $(arguments[0]).parents('tr').find('.select2-container:visible')[" + index + "];", el);
+    this.getDropdownElements = function(el) {
+        return el.element(by.xpath('ancestor::tr')).all(by.css(".chaise-input-control.dropdown-toggle"));
     };
 
-    this.selectDropdownValue = function(el, value) {
-        return this.getDropdownText(el).then(function(txt) {
+    this.getDropdownText = function(el) {
+        return el.element(by.css(".ng-binding"));
+    };
+
+    this.getBooleanInputDisplay = function(columnDisplayName, index) {
+        columnDisplayName = makeSafeIdAttr(columnDisplayName);
+        return element(by.id("form-" + index + '-' + columnDisplayName + "-display"));
+    };
+
+    this.getBooleanInputValue = function(columnDisplayName, index) {
+        columnDisplayName = makeSafeIdAttr(columnDisplayName);
+        return element(by.id("form-" + index + '-' + columnDisplayName + "-input"));
+    };
+
+    this.getDropdownOptions = function(el) {
+        // el is "form-x-colname-display"
+        return el.element(by.xpath('ancestor::td')).all(by.tagName('li'));
+    }
+
+    this.getDropdownClear = function (el) {
+        // el is "form-x-colname-display"
+        return el.element(by.xpath('ancestor::td')).element(by.css(".boolean-remove"));
+    }
+
+    this.selectDropdownValue = function(dropdownEl, value) {
+        var self = this;
+        return dropdownEl.getText().then(function(txt) {
             var defer = Q.defer();
             // if the existing selection isn't the desired value,
             if (txt.trim() !== value) {
                 // Click open the dropdown
-                browser.executeScript(" $(arguments[0]).find('.select2-choice').click();", el);
-                browser.sleep(100);
-                // Get all the possible choices in the dropdown
-                browser.executeScript("return $(arguments[0]).find('.select2-result-single li');", el).then(function(items) {
-                    // If a value is specified
-                    if (value !== undefined) {
-                        browser.executeScript("$(arguments[0]).data().$uiSelectController.select('" + value + "');", el);
-                        defer.resolve(value);
-                    } else {
-                        // else if a value is unspecified, pick a random choice
-                        var index = that.getRandomInt(0, items.length - 1);
-                        try {
-                             items[index].click();
-                        } catch(e) {}
-                        defer.resolve();
-                    }
+                dropdownEl.click().then(function () {
+                    // Get all the possible choices in the dropdown
+                    return self.getDropdownOptions(dropdownEl)
+                }).then(function (options) {
+                    // loop through options and check for one that matches our value we want to click
+                    options.forEach(function (option, index) {
+                        option.element(by.tagName('a')).getAttribute("innerHTML").then(function (optionTxt) {
+                            if (optionTxt.trim() == value + "") {
+                                try {
+                                    option.click()
+                                } catch (e) {}
+                                defer.resolve();
+                            } else if (index == options.length-1) {
+                                // we didn't match any and this is the last one
+                                defer.reject();
+                            }
+                        });
+                    });
                 });
+
             } else {
                 defer.resolve(txt);
             }
             return defer.promise;
         });
-    };
-
-    this.getDropdownText = function(el) {
-        return browser.executeScript("return $(arguments[0]).find('.select2-chosen:not(\".ng-hide\")').text().trim();", el);
     };
 
     this.getCreateBtns = function() {
@@ -230,12 +257,16 @@ var recordEditPage = function() {
     this.getDateInputsForAColumn = function(name, index) {
         index = index || 0;
         var inputs = {};
-        inputs.date = element.all(by.css('input[name="' + name + '"][date]')).get(index);
-        var input = inputs.date.element(by.xpath('..')).all(by.css(".chaise-input-group-append > button"));
-        inputs.todayBtn = input.get(0);
-        inputs.clearBtn = input.get(1);
+        var inputControl = element(by.id("form-" + index + '-' + name + "-input"));
+        inputs.date = inputControl.element(by.tagName("input"));
+        inputs.todayBtn = inputControl.element(by.xpath('..')).element(by.css(".chaise-input-group-append > button"));
         return inputs;
     };
+
+    // NOTE: currently only works for Date
+    this.getRemoveButton = function (name, index, removeClass) {
+        return element(by.id("form-" + index + '-' + name + "-input")).element(by.css("." + removeClass));
+    }
 
     this.getTimestampInputsForAColumn = function(name, index) {
         index = index || 0;
@@ -263,7 +294,7 @@ var recordEditPage = function() {
     };
 
     this.getInputErrorMessage = function(el, type) {
-        return browser.executeScript("return $(arguments[0]).siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
+        return browser.executeScript("return $(arguments[0]).parents('.chaise-input-control').siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
     };
 
     this.getTimestampInputErrorMessage = function(el, type) {

@@ -150,7 +150,24 @@
     margin-left: 10px;
 }
 
+.chaise-boolean-dropdown {
+    .chaise-input-control.has-feedback {
+        padding-right: $input-remove-width + $btn-height;
 
+        .chaise-input-control-feedback {
+            cursor: pointer;
+            right: 35px;
+        }
+
+        .chaise-btn {
+            position: absolute;
+            top: -1px;
+            right: -1px;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+    }
+}
 
 
 //
@@ -249,6 +266,15 @@
       }
   }
 
+  // adds a grey placeholder into text fields (divs) that aren't editable
+  // NOTE: cannot be used for `input` tags or placeholders with HTML
+  div[contenteditable=false]:empty:not(:focus):before {
+      content: attr(data-placeholder); // required data-placeholder being present
+      color: $placeholder-color;
+  }
+
+  // adds a grey placeholder into input fields (inputs) that are also editable
+  // NOTE: should be prefered for placeholders with HTML
   .chaise-input-placeholder{
       position: absolute;
       top: $btn-padding-y;

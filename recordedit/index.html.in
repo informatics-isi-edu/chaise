@@ -18,6 +18,10 @@
             <div ng-controller="FormController as form" class="row">
                 <div ng-hide="form.resultset">
                     <loading-spinner ng-show="form.submissionButtonDisabled || showSpinner"></loading-spinner>
+                    <!-- Alerts section -->
+                    <div class="alerts-container" style="margin-left:15px; margin-right:20px;">
+                        <alerts alerts="form.alerts"></alerts>
+                    </div>
                     <div class="row">
                         <div class="col-xs-12 meta-icons recordedit-bookmark-container">
                             <!-- TODO fix the subtitle and title test cases -->
@@ -35,45 +39,31 @@
                                 </h3> -->
                             </div>
                             <div class="pull-right">
-                                <button id="submit-record-button" class="chaise-btn chaise-btn-primary" type="submit" ng-disabled="form.submissionButtonDisabled" ng-click="::form.submit()" ng-attr-tooltip-placement="bottom-right" ng-attr-uib-tooltip="Submit data">
+                                <button id="submit-record-button" class="chaise-btn chaise-btn-primary" type="submit" ng-disabled="form.submissionButtonDisabled" ng-click="::form.submit()" ng-attr-tooltip-placement="bottom-right" ng-attr-uib-tooltip="Save this data on the server">
                                     <span class="chaise-btn-icon glyphicon glyphicon-saved"></span>
                                     <span>Submit</span>
                                 </button>
                             </div>
                         </div>
                     </div>
+                    <div class="form-controls">
+                        <span><span class="text-danger"><b>*</b></span> indicates required field</span>
+                        <div class="add-forms" ng-show="::!form.editMode" >
+                            <span>Add more forms:</span>
+                            <div class="chaise-input-group add-rows-input">
+                                <input id="copy-rows-input" type="number" class="chaise-input-control chaise-input-control-sm" ng-model="form.numberRowsToAdd">
+                                <span class="chaise-input-group-append">
+                                    <button id="copy-rows-submit" class="chaise-btn chaise-btn-sm chaise-btn-secondary center-block" ng-click="::form.copyFormRow()" type="button" tooltip-placement="bottom" uib-tooltip="Add more forms">
+                                        <span class="glyphicon glyphicon-ok"></span>
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
                     <div class="main-container" class="recordedit-container">
                         <div class="main-body" style="padding-right:15px; padding-left:15px;">
-                            <!-- Alerts section -->
-                            <div class="alerts-container" style="margin-left:15px; margin-right:20px;">
-                                <alerts alerts="form.alerts"></alerts>
-                            </div>
-
                             <!-- Form section -->
                             <div id="form-section">
-                                <span class="pull-left"><span class="text-danger"><b>*</b></span> indicates required field</span>
-                                <div class="row padding-right-15" ng-show="::!form.editMode">
-                                    <div class="chaise-btn-group pull-right">
-                                        <button id="copy-record-btn" class="chaise-btn chaise-btn-primary center-block" ng-click="::form.copyFormRow();" ng-if="::!form.editMode" type="button" ng-disabled="!form.canAddMore" tooltip-placement="top" uib-tooltip="Add 1 record.">
-                                            <span class="glyphicon glyphicon-plus"></span>
-                                        </button>
-                                        <button id="copy-x-rows-btn" class="chaise-btn chaise-btn-primary center-block" ng-click="::(form.showMultiInsert = !form.showMultiInsert)" type="button" ng-disabled="!form.canAddMore" tooltip-placement="top-right" uib-tooltip="Add a maximum of {{::form.MAX_ROWS_TO_ADD-1}} records.">
-                                            <span class="glyphicon glyphicon-chevron-down"></span>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="row padding-right-15"  style="position: absolute; right: 15px;">
-                                    <div class="pull-right add-rows-input" ng-class="form.showMultiInsert ? 'chaise-visible' : 'chaise-hidden'">
-                                        <div class="chaise-input-group">
-                                            <input id="copy-rows-input" type="number" class="chaise-input-control chaise-input-control-sm" ng-model="form.numberRowsToAdd">
-                                            <span class="chaise-input-group-append">
-                                                <button id="copy-rows-submit" class="chaise-btn chaise-btn-sm chaise-btn-primary center-block" ng-click="::form.copyFormRow()" type="button" tooltip-placement="bottom" uib-tooltip="Apply">
-                                                    <span class="glyphicon glyphicon-ok"></span>
-                                                </button>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
                                 <div class="row form-container">
                                     <div ng-show="displayReady" class="col-xs-12" id="formEditScroll" ng-class="{'editMode': form.editMode, 'createMode': !form.editMode}" ng-style="form.formEditDivMarginLeft">
                                         <div ng-style="form.tableWidth"></div>
@@ -114,14 +104,13 @@
                                                         <!-- date input-->
                                                         <div ng-switch-when="date">
                                                             <div class="chaise-input-group">
-                                                                <input id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" class="chaise-input-control" type="text" ng-model="form.recordEditModel.rows[rowIndex][column.name]" placeholder="{{form.dataFormats.date}}" name="{{::column.name}}" ui-mask="9999-19-39" ui-options="form.maskOptions.date.options" model-view-value="true" ng-required="::form.isRequired(columnIndex);" date></input>
+                                                                <div id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" class="chaise-input-control has-feedback">
+                                                                    <input type="text" ng-model="form.recordEditModel.rows[rowIndex][column.name]" placeholder="{{form.dataFormats.date}}" name="{{::column.name}}" ui-mask="{{form.maskOptions.date.mask}}" ui-options="form.maskOptions.date.options" model-view-value="true" ng-required="::form.isRequired(columnIndex);" date></input>
+                                                                    <chaise-clear-input btn-class="date-remove" click-callback="::form.clearInput(rowIndex, column.name)" show="form.showRemove(rowIndex, column.name)"></chaise-clear-input>
+                                                                </div>
                                                                 <span class="chaise-input-group-append">
                                                                     <button type="button" class="chaise-btn chaise-btn-secondary" ng-click="::form.applyCurrentDatetime(rowIndex, column.name, column.type.name);">Today</button>
-                                                                    <button type="button" class="chaise-btn chaise-btn-secondary" ng-click="::form.clearDatetime(rowIndex, column.name, column.type.name);">Clear</button>
                                                                 </span>
-                                                                <!-- <span class="chaise-input-group-append">
-
-                                                                </span> -->
                                                             </div>
                                                         </div>
 
@@ -133,7 +122,10 @@
                                                                         <span class="chaise-input-group-prepend">
                                                                             <div class="chaise-input-group-text dt-width">Date</div>
                                                                         </span>
-                                                                        <input class="chaise-input-control input-timestamptz" type="text" ng-model="form.recordEditModel.rows[rowIndex][column.name].date" placeholder="{{form.dataFormats.date}}" name="{{::column.name}}" ui-mask="9999-99-99" ui-options="form.maskOptions.date.options" model-view-value="true" ng-required="::form.isRequired(columnIndex);" date timestamp validate-values="form.recordEditModel.rows[rowIndex][column.name]"></input>
+                                                                        <div class="chaise-input-control has-feedback">
+                                                                            <input class="input-timestamptz" type="text" ng-model="form.recordEditModel.rows[rowIndex][column.name].date" placeholder="{{form.dataFormats.date}}" name="{{::column.name}}" ui-mask="{{form.maskOptions.date.mask}}" ui-options="form.maskOptions.date.options" model-view-value="true" ng-required="::form.isRequired(columnIndex);" date timestamp validate-values="form.recordEditModel.rows[rowIndex][column.name]"></input>
+                                                                            <chaise-clear-input btn-class="ts-date-remove" click-callback="::form.clearDate(rowIndex, column.name)" show="form.showRemove(rowIndex, column.name, column.type.name, 'date')"></chaise-clear-input>
+                                                                        </div>
                                                                     </div>
                                                                 </div>
                                                                 <div class="col-xs-12">
@@ -141,7 +133,10 @@
                                                                         <span class="chaise-input-group-prepend">
                                                                             <div class="chaise-input-group-text dt-width">Time</div>
                                                                         </span>
-                                                                        <input class="chaise-input-control" type="text" ng-model="form.recordEditModel.rows[rowIndex][column.name].time" placeholder="{{form.dataFormats.time24}}" name="{{::column.name}}" model-view-value="true" time timestamp validate-values="form.recordEditModel.rows[rowIndex][column.name]"></input>
+                                                                        <div class="chaise-input-control has-feedback">
+                                                                            <input type="text" ng-model="form.recordEditModel.rows[rowIndex][column.name].time" placeholder="{{form.dataFormats.time24}}" name="{{::column.name}}" model-view-value="true" time timestamp validate-values="form.recordEditModel.rows[rowIndex][column.name]"></input>
+                                                                            <chaise-clear-input btn-class="ts-time-remove" click-callback="::form.clearTime(rowIndex, column.name)" show="form.showRemove(rowIndex, column.name, column.type.name, 'time')"></chaise-clear-input>
+                                                                        </div>
                                                                         <span class="chaise-input-group-append">
                                                                             <button class="chaise-btn chaise-btn-secondary" name="{{::column.name}}" type="button" ng-click="::form.toggleMeridiem(rowIndex, column.name);" ng-bind="form.recordEditModel.rows[rowIndex][column.name].meridiem || 'AM'">AM</button>
                                                                         </span>
@@ -159,8 +154,8 @@
                                                         <!-- modal popup input -->
                                                         <div ng-switch-when="popup-select" class="chaise-input-group modal-popup">
                                                             <div class="chaise-input-control has-feedback">
-                                                                <div id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-display" contenteditable="false" class="popup-select-value" style="cursor: pointer" ng-click="::form.searchPopup(rowIndex, column)" ng-bind-html="(form.recordEditModel.rows[rowIndex][column.name] ? form.recordEditModel.rows[rowIndex][column.name] : form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]))"></div>
-                                                                <chaise-clear-input btn-class="foreignkey-remove" click-callback="::form.clearForeignKey(rowIndex, column)" show="form.recordEditModel.rows[rowIndex][column.name]"></chaise-clear-input>
+                                                                <div id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-display" contenteditable="false" class="popup-select-value" style="cursor: pointer" ng-click="::form.searchPopup(rowIndex, column)" data-placeholder="Select a value" ng-bind-html="form.recordEditModel.rows[rowIndex][column.name]"></div>
+                                                                <chaise-clear-input btn-class="foreignkey-remove" click-callback="::form.clearForeignKey(rowIndex, column)" show="form.showRemove(rowIndex, column.name)"></chaise-clear-input>
                                                             </div>
                                                             <label class="sr-only"></label>
                                                             <!-- So that the foreign key input can be validated -->
@@ -173,43 +168,62 @@
                                                         </div>
 
                                                         <!-- int2 input -->
-                                                        <input ng-switch-when="integer2" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="number" class="chaise-input-control" ng-required="::form.isRequired(columnIndex);" min="{{::form.int2min}}" max="{{::form.int2max}}" integer>
-                                                        <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty  || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int2'">
+                                                        <div ng-switch-when="integer2" class="chaise-input-control has-feedback">
+                                                            <input id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="number" ng-required="::form.isRequired(columnIndex);" min="{{::form.int2min}}" max="{{::form.int2max}}" integer>
+                                                            <chaise-clear-input btn-class="int2-remove" click-callback="form.clearInput(rowIndex, column.name)" show="form.showRemove(rowIndex, column.name)"></chaise-clear-input>
+                                                        </div>
+                                                        <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int2'">
                                                             <div ng-message="min">This field requires a value greater than {{form.int2min}}.</div>
                                                             <div ng-message="max">This field requires a value smaller than {{form.int2max}}.</div>
                                                         </div>
 
                                                         <!-- int4 input -->
-                                                        <input ng-switch-when="integer4" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="number" class="chaise-input-control" ng-required="::form.isRequired(columnIndex);" min="{{::form.int4min}}" max="{{::form.int4max}}" integer>
-                                                        <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty  || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int4'">
+                                                        <div ng-switch-when="integer4" class="chaise-input-control has-feedback">
+                                                            <input id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="number" ng-required="::form.isRequired(columnIndex);" min="{{::form.int4min}}" max="{{::form.int4max}}" integer>
+                                                            <chaise-clear-input btn-class="int4-remove" click-callback="form.clearInput(rowIndex, column.name)" show="form.showRemove(rowIndex, column.name)"></chaise-clear-input>
+                                                        </div>
+                                                        <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int4'">
                                                             <div ng-message="min">This field requires a value greater than {{form.int4min}}.</div>
                                                             <div ng-message="max">This field requires a value smaller than {{form.int4max}}.</div>
                                                         </div>
 
                                                         <!-- int8 input -->
-                                                        <input ng-switch-when="integer8" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="number" class="chaise-input-control" ng-required="::form.isRequired(columnIndex);" min="{{::form.int8min}}" max="{{::form.int8max}}" integer>
+                                                        <div ng-switch-when="integer8" class="chaise-input-control has-feedback">
+                                                            <input id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="number" ng-required="::form.isRequired(columnIndex);" min="{{::form.int8min}}" max="{{::form.int8max}}" integer>
+                                                            <chaise-clear-input btn-class="int8-remove" click-callback="form.clearInput(rowIndex, column.name)" show="form.showRemove(rowIndex, column.name)"></chaise-clear-input>
+                                                        </div>
                                                         <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int8'">
                                                             <div ng-message="min">This field requires a value greater than {{form.int8min}}.</div>
                                                             <div ng-message="max">This field requires a value smaller than {{form.int8max}}.</div>
                                                         </div>
 
                                                         <!-- float/decimal/numeric -->
-                                                        <input ng-switch-when="number" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="number" class="chaise-input-control" ng-required="::form.isRequired(columnIndex);" float>
-
+                                                        <div ng-switch-when="number" class="chaise-input-control has-feedback">
+                                                            <input id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="number" ng-required="::form.isRequired(columnIndex);" float>
+                                                            <chaise-clear-input btn-class="float-remove" click-callback="form.clearInput(rowIndex, column.name)" show="form.showRemove(rowIndex, column.name)"></chaise-clear-input>
+                                                        </div>
 
                                                         <!-- boolean input -->
-                                                        <div ng-switch-when="boolean">
-                                                            <ui-select id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" append-to-body="true" theme="select2">
-                                                                <ui-select-match class="chaise-input-control" name="{{::column.name}}">{{$select.selected}}</ui-select-match>
-                                                                <ui-select-choices repeat="domainValue in ::form.booleanValues | filter: $select.search" >
-                                                                    <div ng-bind-html="domainValue | highlight: $select.search" style="min-height: 20px;"></div>
-                                                                </ui-select-choices>
-                                                            </ui-select>
+                                                        <div ng-switch-when="boolean" class="chaise-boolean-dropdown" uib-dropdown>
+                                                            <div class="chaise-input-control has-feedback" uib-dropdown-toggle>
+                                                                <div id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-display" contenteditable="false" style="cursor: pointer" data-placeholder="Select a value" ng-bind-html="form.recordEditModel.rows[rowIndex][column.name]"></div>
+                                                                <chaise-clear-input btn-class="boolean-remove" click-callback="form.clearInput(rowIndex, column.name)" show="form.showRemove(rowIndex, column.name, 'boolean')"></chaise-clear-input>
+                                                                <button ng-focus="::form.blurElement($event);" class="chaise-btn chaise-btn-primary" type="button">
+                                                                    <span class="glyphicon glyphicon-chevron-down"></span>
+                                                                </button>
+                                                            </div>
+                                                            <!-- So that the boolean input can be validated -->
+                                                            <input type="hidden" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" ng-required="::form.isRequired(columnIndex);" />
+                                                            <ul uib-dropdown-menu role="menu">
+                                                                <li ng-repeat="option in ::form.booleanValues" ng-click="form.recordEditModel.rows[rowIndex][column.name] = option">
+                                                                    <a ng-bind-html="option" style="min-height: 20px;"></a>
+                                                                </li>
+                                                            </ul>
                                                         </div>
 
                                                         <!-- longtext/textarea input -->
                                                         <div ng-switch-when="longtext">
-                                                            <textarea id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" rows="5" name="{{::column.name}}" class="content-box" ng-required="::form.isRequired(columnIndex);" empty-to-null markdown-editor="{'iconlibrary': 'glyph', addExtraButtons:true, fullscreen: {enable: false, icons: {}}, resize: 'vertical'}"></textarea>
+                                                            <textarea id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" rows="5" name="{{::column.name}}" class="content-box chaise-input-control" ng-required="::form.isRequired(columnIndex);" empty-to-null markdown-editor="{'iconlibrary': 'glyph', addExtraButtons:true, fullscreen: {enable: false, icons: {}}, resize: 'vertical'}"></textarea>
                                                             <a href id="previewLinkId-form-{{rowIndex}}-{{::column.name}}" class="live-preview" markdown-preview textinput="form.recordEditModel.rows[rowIndex][column.name]"></a>
                                                         </div>
 
@@ -233,7 +247,10 @@
                                                         <input ng-switch-when="disabled" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="text" class="chaise-input-control" disabled="true" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" empty-to-null>
 
                                                         <!-- shorttext/default text input -->
-                                                        <input ng-switch-default id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="text" class="chaise-input-control" ng-required="::form.isRequired(columnIndex);" empty-to-null>
+                                                        <div ng-switch-default class="chaise-input-control has-feedback">
+                                                            <input id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="text" ng-required="::form.isRequired(columnIndex);" empty-to-null>
+                                                            <chaise-clear-input btn-class="text-remove" click-callback="form.clearInput(rowIndex, column.name)" show="form.showRemove(rowIndex, column.name)"></chaise-clear-input>
+                                                        </div>
 
                                                         <!-- Validation error messages to show when the form field is touched -->
                                                         <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.$error || form.formContainer.$submitted" class="text-danger" role="alert">

@@ -84,43 +84,23 @@ describe('Record Add', function() {
         beforeAll(function () {
             browser.ignoreSynchronization=true;
             browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/multi-add:" + testParams.table_name);
+            chaisePage.recordeditPageReady();
         });
 
-        it("should click the button and show an input box.", function() {
-            browser.wait(EC.elementToBeClickable(multiFormOpenButton), browser.params.defaultTimeout);
-
-            chaisePage.recordEditPage.getMultiFormInputOpenButtonScript().then(function(openBtn) {
-                return chaisePage.clickButton(openBtn);
-            }).then(function() {
-                return multiFormInput.isDisplayed();
-            }).then(function(bool) {
-                expect(bool).toBeTruthy();
-            });
-        });
-
-        it("should click the button a second time to hide the input.", function() {
-            chaisePage.recordEditPage.getMultiFormInputOpenButtonScript().then(function(openBtn) {
-                return chaisePage.clickButton(openBtn);
-            }).then(function() {
-                return multiFormInput.isDisplayed();
-            }).then(function(bool) {
-                expect(bool).toBeFalsy();
-            });
+        it("should be displayed", function() {
+            expect(multiFormInput.isDisplayed()).toBeTruthy();
         });
 
         it("should alert the user when they try to add more forms than the limit of " + testParams.max_input_rows + " allows.", function() {
             var numberGreaterThanMax = 300,
                 errorMessage = "Cannot add " + numberGreaterThanMax + " records. Please input a value between 1 and 200, inclusive.";
 
-            chaisePage.recordEditPage.getMultiFormInputOpenButtonScript().then(function(openBtn) {
-                return chaisePage.clickButton(openBtn)
-            }).then(function() {
-                chaisePage.recordEditPage.clearInput(multiFormInput);
-                browser.sleep(10);
-                multiFormInput.sendKeys(numberGreaterThanMax);
 
-                return chaisePage.recordEditPage.getMultiFormInputSubmitButtonScript();
-            }).then(function(submitBtn) {
+            chaisePage.recordEditPage.clearInput(multiFormInput);
+            browser.sleep(10);
+            multiFormInput.sendKeys(numberGreaterThanMax);
+
+            chaisePage.recordEditPage.getMultiFormInputSubmitButtonScript().then(function(submitBtn) {
                 return chaisePage.clickButton(submitBtn);
             }).then(function() {
                 return chaisePage.recordEditPage.getAlertError();
@@ -374,7 +354,8 @@ describe('Record Add', function() {
                 chaisePage.recordEditPage.clearInput(dateInput3.date);
                 dateInput3.date.sendKeys(testParams.values.date.modified);
 
-                dateInput1.clearBtn.click().then(function () {
+                // get clear btn for dateinput1
+                chaisePage.recordEditPage.getRemoveButton(testParams.date_col_name, 0, "date-remove").click().then(function () {
                     expect(dateInput1.date.getAttribute("value")).toBe("");
                     expect(dateInput2.date.getAttribute("value")).toBe(testParams.values.date.initial);
                     expect(dateInput3.date.getAttribute("value")).toBe(testParams.values.date.modified);
@@ -481,23 +462,19 @@ describe('Record Add', function() {
             beforeAll(function () {
                 browser.ignoreSynchronization=true;
                 browser.refresh();
+                chaisePage.recordeditPageReady();
             });
 
             it("should show a resultset table with " + (testParams.max_input_rows+1) + " entities.", function() {
-                browser.wait(EC.elementToBeClickable(multiFormOpenButton), browser.params.defaultTimeout);
 
                 var intInput = chaisePage.recordEditPage.getInputById(0, "int");
                 intInput.sendKeys("1");
 
-                chaisePage.recordEditPage.getMultiFormInputOpenButtonScript().then(function(openBtn) {
-                    return chaisePage.clickButton(openBtn);
-                }).then(function() {
-                    chaisePage.recordEditPage.clearInput(multiFormInput);
-                    browser.sleep(10);
-                    multiFormInput.sendKeys(testParams.max_input_rows);
+                chaisePage.recordEditPage.clearInput(multiFormInput);
+                browser.sleep(10);
+                multiFormInput.sendKeys(testParams.max_input_rows);
 
-                    return chaisePage.recordEditPage.getMultiFormInputSubmitButtonScript();
-                }).then(function(submitBtn) {
+                chaisePage.recordEditPage.getMultiFormInputSubmitButtonScript().then(function(submitBtn) {
                     return chaisePage.clickButton(submitBtn);
                 }).then(function() {
                     // wait for dom to finish rendering the forms

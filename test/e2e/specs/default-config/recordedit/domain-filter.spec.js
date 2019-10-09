@@ -182,8 +182,8 @@ describe("Domain filter pattern support,", function() {
                 it ("after clearing the foreignkey, it should not limit the set.", function (done) {
                     chaisePage.recordEditPage.getForeignKeyInputRemoveBtns().then(function(btns) {
                         // NOTE this is not the best way to find the button, it's by index
-                        // clears the col_w_fkeys_default input
-                        return chaisePage.clickButton(btns[btns.length-3]);
+                        // clears the col_w_fkeys_default input (should be the last visible "x")
+                        return chaisePage.clickButton(btns[btns.length-1]);
                     }).then(function() {
                         return chaisePage.recordEditPage.getForeignKeyInputButton(colWFkeys, 0).click();
                     }).then(function () {

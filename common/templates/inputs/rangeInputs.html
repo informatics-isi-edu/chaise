@@ -102,7 +102,7 @@
                     <!-- float4/float8/numeric -->
                     <div ng-switch-default>
                         <div class="chaise-input-control">
-                            <input type="text" class="range-max chaise-input-control" placeholder="{{absMax}}" ng-model="model.max" float>
+                            <input type="text" class="range-max" placeholder="{{absMax}}" ng-model="model.max" float>
                             <chaise-clear-input btn-class="max-clear" click-callback="model.max=''" show="model.max || (numericMax.$invalid && numericMax.$dirty)"></chaise-clear-input>
                         </div>
                     </div>

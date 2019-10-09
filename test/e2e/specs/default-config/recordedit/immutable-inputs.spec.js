@@ -118,8 +118,8 @@ describe('Record Add with defaults', function() {
             markdownInput = chaisePage.recordEditPage.getInputById(0, "markdown");
             intInput = chaisePage.recordEditPage.getInputById(0, "int");
             floatInput = chaisePage.recordEditPage.getInputById(0, "float");
-            booleanTrueInput = chaisePage.recordEditPage.getInputById(0, "boolean_true");
-            booleanFalseInput = chaisePage.recordEditPage.getInputById(0, "boolean_false");
+            booleanTrueInput = chaisePage.recordEditPage.getBooleanInputDisplay("boolean_true", 0);
+            booleanFalseInput = chaisePage.recordEditPage.getBooleanInputDisplay("boolean_false", 0);
             dateInput = chaisePage.recordEditPage.getInputById(0, "date");
             jsonInput = chaisePage.recordEditPage.getInputById(0, "json");
 
@@ -127,9 +127,9 @@ describe('Record Add with defaults', function() {
             expect(markdownInput.getAttribute("value")).toBe(values.markdown_value, "Markdown input default is incorrect");
             expect(intInput.getAttribute("value")).toBe(values.int_value, "Int input default is incorrect");
             expect(floatInput.getAttribute("value")).toBe(values.float_value, "Float input default is incorrect");
-            expect(chaisePage.recordEditPage.getDropdownText(booleanTrueInput)).toBe(values.boolean_true_value, "Boolean input is not set to true");
-            expect(chaisePage.recordEditPage.getDropdownText(booleanFalseInput)).toBe(values.boolean_false_value, "Boolean input is not set to false");
-            expect(dateInput.getAttribute("value")).toBe(values.date_value, "Date input default is incorrect");
+            expect(booleanTrueInput.getText()).toBe(values.boolean_true_value, "Boolean input is not set to true");
+            expect(booleanFalseInput.getText()).toBe(values.boolean_false_value, "Boolean input is not set to false");
+            expect(dateInput.element(by.tagName("input")).getAttribute("value")).toBe(values.date_value, "Date input default is incorrect");
             expect(jsonInput.getAttribute("value")).toBe(values.json_value, "JSON input default is incorrect");
         });
 
