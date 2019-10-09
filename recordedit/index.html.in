@@ -18,6 +18,10 @@
             <div ng-controller="FormController as form" class="row">
                 <div ng-hide="form.resultset">
                     <loading-spinner ng-show="form.submissionButtonDisabled || showSpinner"></loading-spinner>
+                    <!-- Alerts section -->
+                    <div class="alerts-container" style="margin-left:15px; margin-right:20px;">
+                        <alerts alerts="form.alerts"></alerts>
+                    </div>
                     <div class="row">
                         <div class="col-xs-12 meta-icons recordedit-bookmark-container">
                             <div id="title" class="pull-left">
@@ -39,38 +43,24 @@
                             </div>
                         </div>
                     </div>
+                    <div class="form-controls">
+                        <span><span class="text-danger"><b>*</b></span> indicates required field</span>
+                        <div class="add-forms" ng-show="::!form.editMode" >
+                            <span>Add more forms:</span>
+                            <div class="chaise-input-group add-rows-input">
+                                <input id="copy-rows-input" type="number" class="chaise-input-control chaise-input-control-sm" ng-model="form.numberRowsToAdd">
+                                <span class="chaise-input-group-append">
+                                    <button id="copy-rows-submit" class="chaise-btn chaise-btn-sm chaise-btn-secondary center-block" ng-click="::form.copyFormRow()" type="button" tooltip-placement="bottom" uib-tooltip="Add more forms">
+                                        <span class="glyphicon glyphicon-ok"></span>
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
                     <div class="main-container" class="recordedit-container">
                         <div class="main-body" style="padding-right:15px; padding-left:15px;">
-                            <!-- Alerts section -->
-                            <div class="alerts-container" style="margin-left:15px; margin-right:20px;">
-                                <alerts alerts="form.alerts"></alerts>
-                            </div>
-
                             <!-- Form section -->
                             <div id="form-section">
-                                <span class="pull-left"><span class="text-danger"><b>*</b></span> indicates required field</span>
-                                <div class="row padding-right-15" ng-show="::!form.editMode">
-                                    <div class="chaise-btn-group pull-right">
-                                        <button id="copy-record-btn" class="chaise-btn chaise-btn-primary center-block" ng-click="::form.copyFormRow();" ng-if="::!form.editMode" type="button" ng-disabled="!form.canAddMore" tooltip-placement="top" uib-tooltip="Add 1 record.">
-                                            <span class="glyphicon glyphicon-plus"></span>
-                                        </button>
-                                        <button id="copy-x-rows-btn" class="chaise-btn chaise-btn-primary center-block" ng-click="::(form.showMultiInsert = !form.showMultiInsert)" type="button" ng-disabled="!form.canAddMore" tooltip-placement="top-right" uib-tooltip="Add a maximum of {{::form.MAX_ROWS_TO_ADD-1}} records.">
-                                            <span class="glyphicon glyphicon-chevron-down"></span>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="row padding-right-15"  style="position: absolute; right: 15px;">
-                                    <div class="pull-right add-rows-input" ng-class="form.showMultiInsert ? 'chaise-visible' : 'chaise-hidden'">
-                                        <div class="chaise-input-group">
-                                            <input id="copy-rows-input" type="number" class="chaise-input-control chaise-input-control-sm" ng-model="form.numberRowsToAdd">
-                                            <span class="chaise-input-group-append">
-                                                <button id="copy-rows-submit" class="chaise-btn chaise-btn-sm chaise-btn-primary center-block" ng-click="::form.copyFormRow()" type="button" tooltip-placement="bottom" uib-tooltip="Apply">
-                                                    <span class="glyphicon glyphicon-ok"></span>
-                                                </button>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
                                 <div class="row form-container">
                                     <div ng-show="displayReady" class="col-xs-12" id="formEditScroll" ng-class="{'editMode': form.editMode, 'createMode': !form.editMode}" ng-style="form.formEditDivMarginLeft">
                                         <div ng-style="form.tableWidth"></div>
