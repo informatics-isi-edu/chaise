@@ -58,33 +58,29 @@
                         </div>
                     </div>
                     <div class="main-container" class="recordedit-container">
-                        <div class="main-body" style="padding-right:15px; padding-left:15px;">
+                        <div class="main-body">
                             <!-- Form section -->
                             <div id="form-section">
-                                <div class="row form-container">
-                                    <div ng-show="displayReady" class="col-xs-12" id="formEditScroll" ng-class="{'editMode': form.editMode, 'createMode': !form.editMode}" ng-style="form.formEditDivMarginLeft">
-                                        <div ng-style="form.tableWidth"></div>
+                                <div class="form-container">
+                                    <div ng-show="displayReady" id="form-edit-scroll" ng-class="{'editMode': form.editMode, 'createMode': !form.editMode}" ng-style="form.formEditDynamicStyle">
+                                        <div ng-style="form.topScroll"></div>
                                     </div>
-                                    <div ng-show="displayReady" class="col-xs-12" id="formEdit" ng-class="{'editMode': form.editMode, 'createMode': !form.editMode}" ng-style="form.formEditDivMarginLeft"><!-- no match -->
+                                    <div ng-show="displayReady" id="form-edit" ng-class="{'editMode': form.editMode, 'createMode': !form.editMode}" ng-style="form.formEditDynamicStyle"><!-- no match -->
                                         <table ng-form="form.formContainer" class="table">
                                             <tbody>
                                                 <tr class="shift-form">
-                                                    <td ng-style="form.firstHeaderStyle">Record Number</td>
-                                                    <td ng-style="form.headerHeight" class="form-header" ng-repeat="(rowIndex, row) in form.recordEditModel.rows track by $index">
-                                                        <div class="row">
-                                                            <div class="col-xs-12">
-                                                                <div class="pull-left" ng-bind="rowIndex + 1"></div>
-                                                                <button ng-show="form.recordEditModel.rows.length > 1" class="chaise-btn chaise-btn-secondary pull-right remove-form-btn" ng-click="::form.removeFormRow(rowIndex);" tooltip-placement="bottom" uib-tooltip="Click to remove this record from the form.">
-                                                                    <span class="glyphicon glyphicon-remove-circle"></span>
-                                                                </button>
-                                                            </div>
-                                                        </div>
+                                                    <td class="entity-key">Record Number</td>
+                                                    <td class="form-header entity-value" ng-repeat="(rowIndex, row) in form.recordEditModel.rows track by $index">
+                                                        <div class="pull-left" ng-bind="rowIndex + 1"></div>
+                                                        <button ng-show="form.recordEditModel.rows.length > 1" class="chaise-btn chaise-btn-secondary pull-right remove-form-btn" ng-click="::form.removeFormRow(rowIndex);" tooltip-placement="bottom" uib-tooltip="Click to remove this record from the form.">
+                                                            <span class="glyphicon glyphicon-remove-circle"></span>
+                                                        </button>
                                                     </td>
                                                 </tr>
                                             </tbody>
                                             <tbody ng-form="form.formContainer.row[rowIndex]" ng-repeat="(columnIndex, column) in reference.columns track by $index" ng-style="{'background-color': form.recordEditModel.columnModels[columnIndex].highlightRow ? '#f7f0cf' : '#FFF'}">
                                                 <tr class="shift-form">
-                                                    <td ng-style="form.captionColumnWidth" class="entity-key">
+                                                    <td class="entity-key">
                                                         <span ng-if="::form.isRequired(columnIndex);" class="text-danger"><b>*</b></span>
                                                         <span class="column-displayname" ng-class="{'chaise-icon-for-tooltip': column.comment}" ng-attr-uib-tooltip="{{::(column.comment) ? column.comment : undefined}}" tooltip-placement="right">
                                                             <span ng-if="::column.displayname.isHTML" ng-bind-html="::column.displayname.value"></span>
@@ -269,18 +265,16 @@
                                                     </td>
                                                 </tr>
                                                 <tr class="select-all-row" ng-show="form.recordEditModel.columnModels[columnIndex].showSelectAll">
-                                                    <td class="match-entity-key" style="width: 190px;"></td>
-                                                    <td colspan="{{form.recordEditModel.rows.length}}">
+                                                    <td class="match-entity-key"></td>
+                                                    <td class="match-entity-value" colspan="{{form.recordEditModel.rows.length}}">
                                                         <!-- "The is a row of text" -->
-                                                        <div style="position: absolute;">
-                                                            <span class="pull-left">Set value for all records: </span>
-                                                            <input-switch id="select-all-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" class="pull-left" column="column" column-model="form.recordEditModel.columnModels[columnIndex]" model="form.recordEditModel.columnModels[columnIndex].allInput" style="width: 250px; margin: 0px 5px;"></input-switch>
-                                                            <span class="chaise-btn-group">
-                                                                <button id="select-all-apply-{{::form.makeSafeIdAttr(column.displayname.value)}}" class="chaise-btn chaise-btn-secondary pull-left" type="button" ng-disabled="form.disableApply(columnIndex)" ng-click="form.applySelectAll(columnIndex)" tooltip-placement="bottom" uib-tooltip="Click to apply the value to all records.">Apply All</button>
-                                                                <button id="select-all-clear-{{::form.makeSafeIdAttr(column.displayname.value)}}" class="chaise-btn chaise-btn-secondary pull-left" type="button" ng-click="form.clearSelectAll(columnIndex)" tooltip-placement="bottom" uib-tooltip="Click to clear all values for all records.">Clear All</button>
-                                                                <button id="select-all-cancel-{{::form.makeSafeIdAttr(column.displayname.value)}}" class="chaise-btn chaise-btn-secondary pull-left" type="button" ng-click="form.cancelSelectAll(columnIndex)" tooltip-placement="bottom" uib-tooltip="Click to close the set all input.">Cancel</button>
-                                                            </span>
-                                                        </div>
+                                                        <span class="pull-left">Set value for all records: </span>
+                                                        <input-switch id="select-all-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" class="pull-left" column="column" column-model="form.recordEditModel.columnModels[columnIndex]" model="form.recordEditModel.columnModels[columnIndex].allInput" style="width: 250px; margin: 0px 5px;"></input-switch>
+                                                        <span class="chaise-btn-group">
+                                                            <button id="select-all-apply-{{::form.makeSafeIdAttr(column.displayname.value)}}" class="chaise-btn chaise-btn-secondary pull-left" type="button" ng-disabled="form.disableApply(columnIndex)" ng-click="form.applySelectAll(columnIndex)" tooltip-placement="bottom" uib-tooltip="Click to apply the value to all records.">Apply All</button>
+                                                            <button id="select-all-clear-{{::form.makeSafeIdAttr(column.displayname.value)}}" class="chaise-btn chaise-btn-secondary pull-left" type="button" ng-click="form.clearSelectAll(columnIndex)" tooltip-placement="bottom" uib-tooltip="Click to clear all values for all records.">Clear All</button>
+                                                            <button id="select-all-cancel-{{::form.makeSafeIdAttr(column.displayname.value)}}" class="chaise-btn chaise-btn-secondary pull-left" type="button" ng-click="form.cancelSelectAll(columnIndex)" tooltip-placement="bottom" uib-tooltip="Click to close the set all input.">Cancel</button>
+                                                        </span>
                                                     </td>
                                                 </tr>
                                             </tbody>

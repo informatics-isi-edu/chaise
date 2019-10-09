@@ -832,27 +832,13 @@
 
         /*------------------------code below is for fixing the column names when scrolling -----------*/
 
-        var captionColumnWidth = 190;
-        var marginLeft = captionColumnWidth + 10;
+        // NOTE: keep consistent with $chaise-caption-column-width in _variables.scss
+        var ENTITY_KEY_WIDTH = 200;
 
-        // Sets a fixed width for the columns, as they're positioned absolute
-        vm.captionColumnWidth = { 'width' : captionColumnWidth + "px" };
-
-        // Sets margin-left for the formedit div as the first columns are positioned absolute
-        // to avoid overlap between them
-        vm.formEditDivMarginLeft = { 'margin-left': marginLeft + "px", 'padding-right': '0px', 'padding-left': '0px' };
-
-        // Sets a fixed header height to match the border for the columns
-        var headerHeight = 47;
-        vm.headerHeight = { 'height' : headerHeight + "px" };
-
-        // Adds height and width to the first empty heading of the first row
-        // to make it uniform
-        vm.firstHeaderStyle = {
-            'width' : captionColumnWidth + "px",
-            'height' : (headerHeight + 1) + "px"
+        vm.formEditDynamicStyle = {};
+        vm.topScroll = {
+            width: '0px'
         };
-        vm.tableWidth = { width: '0px' };
 
         // Get root element
         var element = document.querySelector('.ng-scope');
@@ -860,11 +846,13 @@
 
         var formContainerEl = $rootElement.find('.form-container');
 
-        // Get the formedit div
-        var elem = $rootElement.find('#formEdit');
+        var elem = $rootElement.find('#form-section');
+
+        // Get the form-edit div
+        var elem = $rootElement.find('#form-edit');
 
         var tableEl = elem.find('table');
-        var scrollContainer = formContainerEl.find('#formEditScroll');
+        var scrollContainer = formContainerEl.find('#form-edit-scroll');
 
         var elemHeight;
         var trs, selectAllTrs;
@@ -875,17 +863,15 @@
         // so that it doesn't scrolls due to the margin-left applied before extra padding
         function onResize(doNotInvokeEvent) {
             var elemWidth = formContainerEl.outerWidth();
-            vm.formEditDivMarginLeft.width = elemWidth - captionColumnWidth - 30;
+            vm.formEditDynamicStyle.width = elemWidth - ENTITY_KEY_WIDTH - 25; // account for left margin as well
 
             if (vm.recordEditModel.rows.length > 1) {
-                vm.tableWidth.width =  (tableEl.outerWidth()) + "px";
+                vm.topScroll.width =  (tableEl.outerWidth()) + "px";
             } else {
-                vm.tableWidth.width =  (tableEl.outerWidth() - captionColumnWidth - 50) + "px";
+                // make scroll bar container smaller than form container so it doesn't show scrollbar when 1 record
+                vm.topScroll.width =  (tableEl.outerWidth() - ENTITY_KEY_WIDTH - 50) + "px";
             }
 
-            if (!editMode) {
-                vm.formEditDivMarginLeft.width = vm.formEditDivMarginLeft.width -30 -5;
-            }
             if (!doNotInvokeEvent) scope.$digest();
         }
         onResize(true);
@@ -904,14 +890,14 @@
             }, 10);
         });
 
-        // Listen to window resize event to change the width of div formEdit
+        // Listen to window resize event to change the width of div form-edit
         angular.element($window).bind('resize', function() {
             onResize();
         });
 
         var editMode = vm.editMode;
 
-        // This function is called whenever the height of formEdit div changes
+        // This function is called whenever the height of form-edit div changes
         // This might be because of selecting/clearing something from the popup for foreighn keys
         // It is called initially once, to adjust heights of fixed columns according to their next td element
         function resizeColumns() {
@@ -919,13 +905,13 @@
             // Set timer null to reset settimeout
             timer = null;
 
-            // get current height of div formEdit
+            // get current height of div form-edit
             var h = elem.height();
 
-            // If current height of div formEdit has changed than the previous one
+            // If current height of div form-edit has changed than the previous one
             if (elemHeight !== h) {
 
-                // Get height of formEdit div to use for resizing the fixed columns height
+                // Get height of form-edit div to use for resizing the fixed columns height
                 // This should be done once only
                 if (!elemHeight) elemHeight = elem.outerHeight();
 
@@ -940,23 +926,21 @@
                     // Get the height of the first column and  second column of the row
                     // Which are the key and value for the row
 
-                    var keytdHeight = trs[i].children[0].getAttribute('data-height');
+                    var keytdHeight = trs[i].children[0].height;
                     if (keytdHeight == null || keytdHeight == 0) {
                         keytdHeight = trs[i].children[0].offsetHeight;
-                        trs[i].children[0].setAttribute('data-height', keytdHeight);
+                        trs[i].children[0].height = keytdHeight;
                     }
 
                     var valuetdHeight = trs[i].children[1].offsetHeight;
 
-                    //if (editMode && i==0) valuetdHeight++;
 
                     // If keytdHeight is greater than valuetdHeight
                     // then set valuetdHeight
                     // else change coltdHeight for viceversa condition
                     if (keytdHeight > valuetdHeight) {
                         trs[i].children[1].height = keytdHeight;
-
-                    } else if (valuetdHeight > keytdHeight)  {
+                    } else if (valuetdHeight > keytdHeight) {
                         trs[i].children[0].height = valuetdHeight;
                     }
 
@@ -964,12 +948,15 @@
                         // use -1 because there is no extra <tr> for the header row
                         var idx = i-1;
 
-                        // get the height of the input div abd buttons (Apply/Cancel) div
-                        var inputHeight = selectAllTrs[idx].children[1].children[0].children[1].offsetHeight;
-                        var buttonsHeight = selectAllTrs[idx].children[1].children[0].children[2].offsetHeight;
+                        // get the height of the input div and buttons (Apply/Cancel) div
                         // HTML structure:
-                        //    tr > td(entity-value) > div > span/input-switch/button
-                        var allValueTdHeight = (inputHeight > buttonsHeight ? inputHeight : buttonsHeight) + 10;
+                        //    tr > td(entity-value) > span/input-switch/button
+                        var inputHeight = selectAllTrs[idx].children[1].children[1].offsetHeight;
+                        var buttonsHeight = selectAllTrs[idx].children[1].children[2].offsetHeight;
+
+                        // + (8*2) for 8 padding on top and bottom
+                        // + 1 for border width
+                        var allValueTdHeight = (inputHeight > buttonsHeight ? inputHeight : buttonsHeight) + (8*2) + 1;
 
                         // set key height to the height of the input div
                         selectAllTrs[idx].children[0].height = allValueTdHeight;
@@ -985,10 +972,11 @@
         var timer;
 
         // Watch for height changes on the rootscope
+        // TODO: this doesn't make much sense
         $rootScope.$watch(function() {
             timer = timer ||
             $timeout(function() {
-                  resizeColumns();
+                resizeColumns();
             }, TIMER_INTERVAL, false);
         });
 

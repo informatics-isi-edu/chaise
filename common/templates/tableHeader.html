@@ -11,10 +11,10 @@
             </button>
             <ul class="dropdown-menu dropdown-menu-left">
                 <li ng-if="pageLimits.indexOf(vm.pageLimit) === -1">
-                    <a class="page-size-limit-custom" href ng-click="setPageLimit(vm.pageLimit)"><span class="glyphicon glyphicon-ok"></span>{{ vm.pageLimit }} (Custom)</a>
+                    <a class="page-size-limit-custom" href ng-click="setPageLimit(vm.pageLimit)">{{ vm.pageLimit }} (Custom)<span class="glyphicon glyphicon-ok pull-right"></span></a>
                 </li>
                 <li ng-repeat="limit in pageLimits">
-                    <a class="page-size-limit-{{limit}}" href ng-click="setPageLimit(limit)"><span class="glyphicon" ng-class="vm.pageLimit === limit ? 'glyphicon-ok' : 'glyphicon-invisible'"></span>{{ limit }}</a>
+                    <a class="page-size-limit-{{limit}}" href ng-click="setPageLimit(limit)">{{ limit }}<span class="glyphicon pull-right" ng-class="vm.pageLimit === limit ? 'glyphicon-ok' : 'glyphicon-invisible'"></span></a>
                 </li>
             </ul>
         </span>

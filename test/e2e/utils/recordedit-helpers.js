@@ -58,10 +58,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
         });
 
         it("should not allow to add new rows/columns", function() {
-            chaisePage.recordEditPage.getAddRowButton().then(function(button) {
-                if (button) expect("Add button visible").toBe("Add Button should not be visible");
-                else expect(true).toBeDefined();
-            });
+            expect(chaisePage.recordEditPage.getAddRowButton().isDisplayed()).toBeFalsy("Add x rows is visible in edit mode");
         });
 
     } else {
@@ -70,10 +67,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
         });
 
         it("should allow to add new rows/columns", function() {
-            chaisePage.recordEditPage.getAddRowButton().then(function(button) {
-                if (!button) expect("Add button invisible").toBe("Add Button should be visible");
-                else expect(true).toBeDefined();
-            });
+            expect(chaisePage.recordEditPage.getAddRowButton().isDisplayed()).toBeFalsy("Add x rows is not visible in create mode");
         });
     }
 
