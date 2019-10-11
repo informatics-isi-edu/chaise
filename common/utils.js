@@ -188,6 +188,7 @@
         fullscreen: "fullscreen",
         related: "related",
         popup: "popup",
+        foreignKeyPopup: "popup/foreignkey",
         foreignKeyPopupCreate: "popup/foreignkey/create",
         foreignKeyPopupEdit: "popup/foreignkey/edit",
         addPureBinaryPopup: "popup/purebinary/add",

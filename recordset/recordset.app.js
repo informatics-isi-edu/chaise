@@ -51,6 +51,7 @@
     .value('recordsetModel', {
         hasLoaded: false,
         reference: null,
+        displayname: null,
         columns: [],
         sortby: null,       // column name, user selected or null
         sortOrder: null,    // asc (default) or desc

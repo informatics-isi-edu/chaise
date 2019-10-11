@@ -25,6 +25,7 @@
                         position: relative;
 
                         .page-title-container {
+                            width: 100%;
                             display: inline-block;
                             #page-title {
                                 margin: 0px;
@@ -32,9 +33,10 @@
                         }
 
                         .record-action-btns-container {
+                            font-size: 1rem;
                             float: right;
                             text-align: right;
-                            padding-top: 9px;
+                            padding-top: 7px;
                             width: 330px;
                         }
 
@@ -166,7 +168,8 @@
                 &.panel {
                     box-shadow: none;
                     border-radius: 0px;
-                    border: none;
+                    // for row-focus
+                    border-width: 2px;
                 }
 
                 > .panel-heading {
