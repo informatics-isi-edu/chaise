@@ -1153,7 +1153,15 @@
                 // make sure the value is set and is integer
                 if (scope.fixedContentHeight !== undefined && !isNaN(scope.fixedContentHeight)) {
 
-                    UiUtils.setDisplayContainerHeight(scope.scrollableContainer, scope.fixedContentHeight, scope.parentContainer);
+                    var pc, pcs;
+                    if (scope.vm.parentContainerSelector) {
+                        pc = scope.parentContainer;
+                    }
+                    if (scope.vm.parentStickyAreaSelector) {
+                        pcs = scope.parentStickyArea;
+                    }
+
+                    UiUtils.setDisplayContainerHeight(pc, pcs);
                 }
             }
 

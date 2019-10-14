@@ -8,11 +8,11 @@
     %ASSETS%
 </head>
 
-<body>
+<body class="chaise-body">
     <div class="configure-container" ng-app="chaise.configure-mdHelp">
         <loading-spinner></loading-spinner>
     </div>
-    <div class="app-container container-fluid row" ng-controller="mdHelpController as ctrl">
+    <div class="app-container container-fluid row">
         <navbar></navbar>
         <div class="main-container" id="main-content">
             <div class="twelve columns center main-body">

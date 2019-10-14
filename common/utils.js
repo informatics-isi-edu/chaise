@@ -798,12 +798,20 @@
             return /*@cc_on!@*/false || !!document.documentMode;
         }
 
-        // takes pathname attribute of window.location object and returns app name
-        // path should be a string literal which appears before #catalog id in URL (/chaise/recordset/)
+        /**
+         * Takes pathname attribute of window.location object and returns app name
+         * path should be a string literal which appears before #catalog id in URL (/chaise/recordset/)
+         * if the path ends with /folder/file.html it will return the folder.
+         * (any other pattern will just return anything after last `/`)
+        */
         function appNamefromUrlPathname(path){
           var newPath = path.slice(0, -1);
           var lastSlash = newPath.lastIndexOf('/');
-          return newPath.substring(lastSlash + 1, newPath.length);
+          var name = newPath.substring(lastSlash + 1, newPath.length);
+          if (name.endsWith(".htm")) {
+              return appNamefromUrlPathname(newPath.substring(0, lastSlash) + "/");
+          }
+          return name;
         }
 
         // Takes path and creates full redirect links with catalogId
@@ -1413,12 +1421,86 @@
         }
 
         /**
+         * Set the height of bottom-panel-container
+         * If you don't pass any parentContainer, it will use the body
+         * It will assume the following structure in the given parentContainer:
+         *  - .app-content-container
+         *    - .top-panel-container
+         *    - .bottom-panel-container
+         */
+        function setDisplayContainerHeight(parentContainer, parentContainerSticky) {
+            try {
+                var docHeight = $window.innerHeight,
+                    parentUsableHeight,
+                    appContent, // the container that we might set height for if container height is too small
+                    container, // the container that we want to set the height for
+                    containerSticky; // the sticky part of the container (top-panel-container)
+
+                // if the size of content is way too small, make the whole app-content-container scrollable
+                var resetHeight = function () {
+                    appContent.style.overflowY = "auto";
+                    appContent.style.height = ((parentUsableHeight/docHeight) * 100) + "vh";
+                    container.style.height = "unset";
+                }
+
+                // get the parentContainer and its usable height
+                if (parentContainer == null || parentContainer == $document[0].querySelector("body")) {
+                    parentUsableHeight = docHeight;
+                    parentContainer = $document[0];
+                } else {
+                    parentUsableHeight = parentContainer.offsetHeight;
+                }
+
+                // get the parent sticky
+                if (parentContainerSticky == null) {
+                    parentContainerSticky = $document[0].querySelector("#mainnav");
+                }
+                // subtract the parent sticky from usable height
+                parentUsableHeight -= parentContainerSticky.offsetHeight;
+
+                // the content that we should make scrollable if the content height is too small
+                appContent = parentContainer.querySelector(".app-content-container");
+
+                // the sticky part of the container
+                var stickyHeight = 0;
+                containerSticky = parentContainer.querySelector(".top-panel-container");
+                if (containerSticky) {
+                    stickyHeight = containerSticky.offsetHeight;
+                }
+
+                container = parentContainer.querySelector(".bottom-panel-container");
+
+                var containerHeight = ((parentUsableHeight - stickyHeight) / docHeight) * 100;
+                if (containerHeight < 15) {
+                    resetHeight();
+                } else {
+                    //remove the styles that might have been added to appContent
+                    appContent.style.overflowY = "unset";
+                    appContent.style.height = "unset";
+
+                    // set the container's height
+                    container.style.height = containerHeight + 'vh';
+                    console.log("did the containerheight");
+
+                    // now check based on actual pixel size
+                    if (container.offsetHeight < 300) {
+                        resetHeight();
+                    }
+                }
+
+            } catch (err) {
+                $log.warn(err);
+            }
+        }
+
+        /**
+         * TODO should be removed and replaced with the other function
          * sets the height of container based on the given parameters
          * @param {DOMElement} container - the main container to fix the height of
          * @param {int} fixedContentHeight - the height of fixed content
          * @param {DOCElement=} parentContainer - the parent container (used to calculate the available height)
          */
-        function setDisplayContainerHeight(container, fixedContentHeight, parentContainer) {
+        function setDisplayContainerHeightOld(container, fixedContentHeight, parentContainer) {
             try {
                 // we're setting the height based on the viewport, so we need the
                 // whole viewport height
@@ -1451,6 +1533,7 @@
                     resetHeight();
                 } else {
                     // set the container's height
+                    parentContainer.style.overflowY = "hidden";
                     container.style.height = containerHeight + 'vh';
 
                     // now check based on actual pixel size
@@ -1543,6 +1626,7 @@
             getSimpleColumnType: getSimpleColumnType,
             setFooterStyle: setFooterStyle,
             setDisplayContainerHeight: setDisplayContainerHeight,
+            setDisplayContainerHeightOld: setDisplayContainerHeightOld,
             addClass: addClass,
             removeClass: removeClass,
             watchForMainContainerPadding: watchForMainContainerPadding
@@ -1919,6 +2003,7 @@
             scope: {
                 reference: "=?",
                 displayname: "=?",
+                comment: "=?",
                 addLink: "=?",
                 link: "=?"
             },
@@ -1938,7 +2023,7 @@
                     scope.displayname = scope.reference.displayname;
                 }
 
-                if (scope.reference && scope.reference.table.comment) {
+                if (!scope.comment && scope.reference && scope.reference.table.comment) {
                     scope.comment = scope.reference.table.comment;
                 }
             }

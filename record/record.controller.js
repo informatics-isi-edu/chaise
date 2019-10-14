@@ -476,7 +476,7 @@
         function setMainContainerHeight() {
             // if these values are not set yet, don't set the height
             if ($scope.fixedContentHeight !== undefined && !isNaN($scope.fixedContentHeight)) {
-                UiUtils.setDisplayContainerHeight($scope.container, $scope.fixedContentHeight);
+                UiUtils.setDisplayContainerHeight();
 
                 // NOTE this function is being called here because this is the
                 // first place that we can be sure that the record-container elements
@@ -509,7 +509,6 @@
                 $rootScope.hideColumnHeaders = $rootScope.reference.display.hideColumnHeaders;
 
                 // get record main container
-                $scope.container = $document[0].querySelector('.record-container .bottom-panel-container');
                 $scope.$watch(topPanelHeight, function (newValue, oldValue) {
                     if (newValue && newValue != oldValue) {
                         setMainContainerHeight();

@@ -1,31 +1,13 @@
-<div class="recordset-container without-faceting" >
+<div class="recordset-container without-faceting app-content-container" >
     <loading-spinner id="main-spinner" ng-show="(!vm.initialized || $root.showSpinner || !vm.hasLoaded) && !$root.error"></loading-spinner>
     <div class="top-panel-container" ng-show="vm.reference">
         <alerts alerts="$root.alerts"></alerts>
         <div class="top-flex-panel">
             <div class="top-left-panel close-panel"></div>
             <div class="top-right-panel">
-                <div class="row recordset-title-container">
-                    <div class="recordset-title-text">
-                        <!-- TODO UX-M should change to class -->
-                        <h1 id="page-title" class="h2-class" ng-if="vm.displayname">
-                            <span>Search by </span>
-                            <span ng-if="::vm.displayname.isHTML" ng-bind-html="::vm.displayname.value"
-                                ng-attr-uib-tooltip="{{::vm.comment}}" tooltip-placement="bottom-left"
-                                 ng-class="{'chaise-icon-for-tooltip': vm.comment}"></span>
-                            <span ng-if="::!vm.displayname.isHTML" ng-bind="::vm.displayname.value"
-                                ng-attr-uib-tooltip="{{::vm.comment}}" tooltip-placement="bottom-left"
-                                 ng-class="{'chaise-icon-for-tooltip': vm.comment}"></span>
-                            <!-- <span> for </span>
-                            <chaise-title add-link="false" reference="vm.parentReference"></chaise-title> -->
-                            <!-- TODO UX-M remove parent reference from facet -->
-                        </h1>
-                    </div>
-                    <div class="recordset-title-buttons"></div>
-                </div>
                 <div class="recordset-controls-container" ng-show="vm.initialized">
                     <div ng-if="vm.selectedRows.length > 0 && vm.config.selectMode == 'multi-select'" class="recordset-selected-rows recordset-chiclets-container">
-                        <div class="selected-chiclet chaise-btn" ng-repeat="row in vm.selectedRows track by $index">
+                        <div class="selected-chiclet" ng-repeat="row in vm.selectedRows track by $index">
                             <span class="selected-chiclet-remove" ng-click="removePill(row.uniqueId, $event)" uib-tooltip="Clear selected row" tooltip-placement="bottom-left">
                                 <i class="glyphicon glyphicon-remove"></i>
                             </span>
@@ -34,7 +16,7 @@
                             <span class="selected-chiclet-name" ng-if="row.displayname.value == ''" ng-bind-html="defaultDisplayname.empty"></span>
                             <span class="selected-chiclet-name" ng-if="row.displayname.value == null" ng-bind-html="defaultDisplayname.null"></span>
                         </div>
-                        <button ng-click="removeAllPills($event)" class="chaise-btn chaise-btn-tertiary clear-all-btn">
+                        <button ng-click="removeAllPills($event)" class="chaise-btn chaise-btn-tertiary clear-all-btn"  tooltip-placement="bottom-left" uib-tooltip="Clear all selected rows">
                             <span>Reset selection</span>
                         </button>
                     </div>

@@ -14,7 +14,7 @@
     <div class="app-container container-fluid re_s_{{idSafeSchemaName}} re_t_{{idSafeTableName}}">
         <navbar></navbar>
         <loading-spinner ng-show="!displayReady && !error"></loading-spinner>
-        <div ng-if="reference && (reference.canCreate || reference.canUpdate)">
+        <div class="recordedit-container app-content-container" ng-if="reference && (reference.canCreate || reference.canUpdate)">
             <div ng-controller="FormController as form" class="row">
                 <div ng-hide="form.resultset">
                     <loading-spinner ng-show="form.submissionButtonDisabled || showSpinner"></loading-spinner>
@@ -23,27 +23,22 @@
                         <alerts alerts="form.alerts"></alerts>
                     </div>
                     <div class="row">
-                        <div class="col-xs-12 meta-icons recordedit-bookmark-container">
+                        <div class="col-xs-12 meta-icons recordedit-bookmark-container title-container">
                             <!-- TODO fix the subtitle and title test cases -->
-                            <div id="title" class="pull-left">
-                                <h1 id="page-title">
-                                    <span>{{ form.editMode ? "Edit " : "Create new " }}</span>
-                                    <chaise-title add-link="true" reference="reference"></chaise-title>
-                                    <span ng-if="displayname">:
-                                        <chaise-title displayname="displayname"></chaise-title>
-                                    </span>
-                                </h1>
-                                <!-- <h3 id="page-subtitle">
-                                    <span class="re-displayname" ng-if="displayname.isHTML" ng-bind-html="displayname.value"></span>
-                                    <span class="re-displayname" ng-if="!displayname.isHTML" ng-bind="displayname.value"></span>
-                                </h3> -->
-                            </div>
-                            <div class="pull-right">
+                            <div class="title-buttons">
                                 <button id="submit-record-button" class="chaise-btn chaise-btn-primary" type="submit" ng-disabled="form.submissionButtonDisabled" ng-click="::form.submit()" ng-attr-tooltip-placement="bottom-right" ng-attr-uib-tooltip="Save this data on the server">
                                     <span class="chaise-btn-icon glyphicon glyphicon-saved"></span>
                                     <span>Submit</span>
                                 </button>
                             </div>
+                            <!-- TODO there was a wrapper with id="title" -->
+                            <h1 id="page-title">
+                                <span>{{ form.editMode ? "Edit " : "Create new " }}</span>
+                                <chaise-title add-link="true" reference="reference"></chaise-title>
+                                <span ng-if="displayname">:
+                                    <chaise-title displayname="displayname"></chaise-title>
+                                </span>
+                            </h1>
                         </div>
                     </div>
                     <div class="form-controls">
@@ -60,7 +55,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="main-container" class="recordedit-container">
+                    <div class="main-container">
                         <div class="main-body">
                             <!-- Form section -->
                             <div id="form-section">

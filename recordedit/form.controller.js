@@ -797,7 +797,7 @@
             // if the navbarHeight is not set yet, don't set the height
             // no bookmark container here
             if(elements.fixedContentHeight !== undefined && !isNaN(elements.fixedContentHeight)) {
-                UiUtils.setDisplayContainerHeight(elements.container, elements.fixedContentHeight);
+                UiUtils.setDisplayContainerHeightOld(elements.container, elements.fixedContentHeight);
             }
         }
 
