@@ -147,7 +147,7 @@
 .chaise-btn-toolbar > .chaise-btn,
 .chaise-btn-toolbar > .chaise-btn-group,
 .chaise-btn-toolbar > .chaise-input-group {
-    margin-left: 10px;
+    margin-left: 5px;
 }
 
 .chaise-boolean-dropdown {
@@ -218,7 +218,8 @@
   }
 
   // Placeholder
-  &::placeholder {
+  &::placeholder,
+  input::placeholder {
     color: $placeholder-color;
     // Override Firefox's unusual default opacity; see https://github.com/twbs/bootstrap/pull/11526.
     opacity: 1;
@@ -230,10 +231,13 @@
   // disabled if the fieldset is disabled. Due to implementation difficulty, we
   // don't honor that edge case; we style them as disabled anyway.
   &:disabled,
+  &[disabled],
   &[readonly],
+  &[readonly][disabled],
   &.input-disabled {
     background-color: $disabled-background-color;
     border-color: $disabled-background-color;
+    color: $disabled-color;
     // iOS fix for unreadable disabled content; see https://github.com/twbs/bootstrap/issues/11655.
     opacity: 1;
     cursor: not-allowed;
@@ -330,13 +334,18 @@
 // height and font-size of form controls.
 //
 // Repeated in `_input_group.scss` to avoid Sass extend issues.
+.chaise-input-group-text-sm {
+    height: $btn-height-sm;
+    min-height: $btn-height-sm;
+    padding: $btn-padding-y $btn-padding-x;
+}
 
 .chaise-input-control-sm {
-  height: $btn-height-sm;
-  min-height: $btn-height-sm;
-  padding: $btn-padding-y $btn-padding-x;
+    height: $btn-height-sm;
+    min-height: $btn-height-sm;
+    padding: $btn-padding-y $btn-padding-x;
 
-  @include border-radius($btn-border-radius);
+    @include border-radius($btn-border-radius);
 }
 
 .chaise-input-control-lg {

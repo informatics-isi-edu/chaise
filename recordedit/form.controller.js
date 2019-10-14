@@ -397,7 +397,8 @@
         }
 
         function copyFormRow() {
-            if ((vm.numberRowsToAdd + vm.recordEditModel.rows.length) > vm.MAX_ROWS_TO_ADD || vm.numberRowsToAdd < 1) {
+            if (!vm.numberRowsToAdd) vm.numberRowsToAdd = 1;
+            if ((vm.numberRowsToAdd + vm.recordEditModel.rows.length) > vm.MAX_ROWS_TO_ADD) {
                 AlertsService.addAlert("Cannot add " + vm.numberRowsToAdd + " records. Please input a value between 1 and " + (vm.MAX_ROWS_TO_ADD - vm.recordEditModel.rows.length) + ', inclusive.', 'error');
                 return true;
             }
@@ -603,6 +604,8 @@
                     row[cm.column.name] = value;
                 });
             });
+
+            resizeColumns(true);
         }
 
         // closes the select all
@@ -848,8 +851,6 @@
 
         var formContainerEl = $rootElement.find('.form-container');
 
-        var elem = $rootElement.find('#form-section');
-
         // Get the form-edit div
         var elem = $rootElement.find('#form-edit');
 
@@ -902,67 +903,60 @@
         // This function is called whenever the height of form-edit div changes
         // This might be because of selecting/clearing something from the popup for foreighn keys
         // It is called initially once, to adjust heights of fixed columns according to their next td element
-        function resizeColumns() {
-
+        function resizeColumns(resize) {
             // Set timer null to reset settimeout
             timer = null;
 
             // get current height of div form-edit
             var h = elem.height();
 
-            // If current height of div form-edit has changed than the previous one
-            if (elemHeight !== h) {
+            if (resize === false) return;
 
-                // Get height of form-edit div to use for resizing the fixed columns height
-                // This should be done once only
-                if (!elemHeight) elemHeight = elem.outerHeight();
+            // Get all rows of the table
+            if (!trs) {
+                trs = elem.find('tr.shift-form');
+                selectAllTrs = elem.find('tr.select-all-row');
+            }
 
-                // Get all rows of the table
-                if (!trs) {
-                    trs = elem.find('tr.shift-form');
-                    selectAllTrs = elem.find('tr.select-all-row');
+            // iterate over each row
+            for(var i=0;i<trs.length;i++) {
+                // Get the height of the first column and  second column of the row
+                // Which are the key and value for the row
+                var keytdHeight = trs[i].children[0].getAttribute('data-height');
+                if (keytdHeight == null || keytdHeight == 0) {
+                    keytdHeight = trs[i].children[0].offsetHeight;
+                    // set first TD height
+                    trs[i].children[0].setAttribute('data-height', keytdHeight);
                 }
 
-                // iterate over each row
-                for(var i=0;i<trs.length;i++) {
-                    // Get the height of the first column and  second column of the row
-                    // Which are the key and value for the row
-                    var keytdHeight = trs[i].children[0].getAttribute('data-height');
-                    if (keytdHeight == null || keytdHeight == 0) {
-                        keytdHeight = trs[i].children[0].offsetHeight;
-                        // set first TD height
-                        trs[i].children[0].setAttribute('data-height', keytdHeight);
-                    }
+                var valuetdHeight = trs[i].children[1].offsetHeight;
 
-                    var valuetdHeight = trs[i].children[1].offsetHeight;
+                // If keytdHeight is greater than valuetdHeight
+                // then set valuetdHeight
+                // else change coltdHeight for viceversa condition
+                if (keytdHeight > valuetdHeight) {
+                    trs[i].children[1].height = keytdHeight;
+                } else if (valuetdHeight > keytdHeight) {
+                    trs[i].children[0].height = valuetdHeight;
+                }
 
-                    // If keytdHeight is greater than valuetdHeight
-                    // then set valuetdHeight
-                    // else change coltdHeight for viceversa condition
-                    if (keytdHeight > valuetdHeight) {
-                        trs[i].children[1].height = keytdHeight;
-                    } else if (valuetdHeight > keytdHeight) {
-                        trs[i].children[0].height = valuetdHeight;
-                    }
+                if (i !== 0) {
+                    // use -1 because there is no extra <tr> for the header row
+                    var idx = i-1;
 
-                    if (i !== 0) {
-                        // use -1 because there is no extra <tr> for the header row
-                        var idx = i-1;
+                    // get the height of the input div and buttons (Apply/Cancel) div
+                    // HTML structure:
+                    //    tr > td(entity-value) > span/input-switch/button
+                    var inputHeight = selectAllTrs[idx].children[1].children[1].offsetHeight;
+                    var buttonsHeight = selectAllTrs[idx].children[1].children[2].offsetHeight;
 
-                        // get the height of the input div and buttons (Apply/Cancel) div
-                        // HTML structure:
-                        //    tr > td(entity-value) > span/input-switch/button
-                        var inputHeight = selectAllTrs[idx].children[1].children[1].offsetHeight;
-                        var buttonsHeight = selectAllTrs[idx].children[1].children[2].offsetHeight;
+                    // + (8*2) for 8 padding on top and bottom
+                    // + 1 for border width
+                    var allValueTdHeight = (inputHeight > buttonsHeight ? inputHeight : buttonsHeight) + (8*2) + 1;
 
-                        // + (8*2) for 8 padding on top and bottom
-                        // + 1 for border width
-                        var allValueTdHeight = (inputHeight > buttonsHeight ? inputHeight : buttonsHeight) + (8*2) + 1;
-
-                        // set key height to the height of the input div
-                        selectAllTrs[idx].children[0].height = allValueTdHeight;
-                        selectAllTrs[idx].children[1].height = allValueTdHeight;
-                    }
+                    // set key height to the height of the input div
+                    selectAllTrs[idx].children[0].height = allValueTdHeight;
+                    selectAllTrs[idx].children[1].height = allValueTdHeight;
                 }
             }
         }

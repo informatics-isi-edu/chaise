@@ -4,6 +4,10 @@
     angular.module('chaise.inputs', ['chaise.validators', 'chaise.utils'])
 
     .constant("dataFormats", {
+        placeholder: {
+            date: "YYYY-MM-DD",
+            time: "HH:MM:SS"
+        },
         date: "YYYY-MM-DD",
         time12: "hh:mm:ss", // used for displaying values in recordedit properly
         time24: "HH:mm:ss",
@@ -442,6 +446,10 @@
 
                 scope.showRemove = function () {
                     return scope.model.value || scope.inputContainer.$invalid;
+                }
+
+                scope.showBooleanRemove = function () {
+                    return scope.model.value !== null
                 }
 
                 // used for timestamp[tz] inputs only

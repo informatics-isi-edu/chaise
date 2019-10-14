@@ -1,6 +1,8 @@
 #recordedit {
     .alerts-container {
         padding-top: 10px;
+        margin-left: 15px;
+        margin-right: 20px;
     }
 
     .btn-sm[data-handler="bootstrap-markdown-cmdRidLink"] {
@@ -8,14 +10,12 @@
     }
 
     .remove-form-btn {
-        font-size: 18px;
-        padding: 0 7px;
+        padding: 1px 7px 0px 7px;
     }
 
     .main-container {
         overflow-y: auto;
         overflow-x: hidden;
-        padding-top: 10px;
     }
 
     .side-padding-15 {
@@ -31,20 +31,14 @@
         margin-left: 25px;
 
         .add-forms {
+            width: auto;
             margin-left: auto;
-            display: flex;
-            align-items: flex-end;
 
             .add-rows-input {
-                width: 80px;
+                width: 50px;
                 padding-left: 5px;
             }
         }
-    }
-
-    textarea {
-        resize: vertical;
-        height: auto;
     }
 
     .main-body {
@@ -58,25 +52,25 @@
         margin-right: -15px;
     }
 
-    .input-timestamptz {
-        min-width: 112px;
+    #form-edit-scroll {
+        overflow-x: auto;
+        overflow-y: hidden;
+        height: 15px;
+        position: fixed;
+        z-index: 5;
+        margin-top: -15px;
+        margin-left: $chaise-caption-column-width + 25px; // entity-key is position absolute and shifted left, add margin based on that shift
+
+        > div {
+            height: inherit;
+        }
     }
 
     #form-section {
         width: 100%;
         position: relative;
         padding-right: 15px; // so table is padded properly on load
-
-        #form-edit-scroll {
-            overflow-x: auto;
-            overflow-y:hidden;
-            height: 20px;
-            margin-left: $chaise-caption-column-width + 25px; // entity-key is position absolute and shifted left, add margin based on that shift
-
-            > div {
-                height: 20px;
-            }
-        }
+        padding-top: 15px;
 
         #form-edit {
             position: static;
@@ -101,8 +95,14 @@
                     &:last-child {
                         border-bottom: 1px solid $border-color;
 
-                        > tr > td:first-child {
-                            border-bottom: 1px solid $border-color;
+                        > tr > td {
+                            &:first-child {
+                                border-bottom: 1px solid $border-color;
+                            }
+
+                            &.entity-key.select-all-opened {
+                                border-bottom: 0;
+                            }
                         }
                     }
 
@@ -130,6 +130,10 @@
                                 border-right: 1px solid $border-color;
                                 margin-left: 10px;
                                 background: white;
+                            }
+
+                            &.match-entity-key.select-all-opened {
+                                border-top: none;
                             }
 
                             &.entity-value,
@@ -164,20 +168,29 @@
       background-color: #f7f0cf !important;
     }
 
-
-    .chaise-input-control[disabled] {
-      color: $disabled-color;
-      cursor: not-allowed !important;
-    }
-
     .chaise-input-control[readonly] {
         background-color: $white-color;
         opacity: 1;
     }
 
-    .chaise-input-control[readonly][disabled] {
-        background-color: #eee;
-        opacity: 1;
+    textarea {
+        resize: vertical;
+        height: auto;
+    }
+
+    .input-timestamptz {
+        min-width: 112px;
+    }
+
+    .adjust-boolean-dropdown {
+        margin-top: 0;
+        border-top: 0;
+        width: 100%;
+    }
+
+    .select-all-text {
+        padding: 4px;
+        border: 1px solid transparent;
     }
 
     @-moz-document url-prefix() {
