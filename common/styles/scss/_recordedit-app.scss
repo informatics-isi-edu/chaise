@@ -180,26 +180,10 @@
         opacity: 1;
     }
 
-    /* Chrome only: */
-    @media all and (-webkit-min-device-pixel-ratio:0) and (min-resolution: .001dpcm) {
-        // #form-edit {
-        //     border-bottom: 1px solid $border-color;
-        //     >  table {
-        //         margin-bottom: -1px !important;
-        //     }
-        // }
-    }
-
     @-moz-document url-prefix() {
-      #form-edit >  table > tbody >  tr {
-          &:first-child >  td:first-child {
-            // margin-top: -1px;
-          }
-
-          > td:first-child {
-            // margin-top: 0px;
-          }
-      }
+        #form-edit > table > tbody > tr > td:first-child {
+            margin-top: -1px;
+        }
     }
 
     /****************** Upload modal css *****************/
