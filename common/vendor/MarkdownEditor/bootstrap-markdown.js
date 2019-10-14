@@ -1284,22 +1284,19 @@
           }
         }]
       },{
-              name: "groupHelp",
-              data: [{
-                name: "cmdHelp",
-                title: "Help",
-                // btnClass: 'live-preview',
-                icon: {
-                  fa: "fa fa-question",
-                  glyph: "glyphicon glyphicon-question-sign"
-                },
-                callback: function(e) {
-                    window.open('./mdHelp.html');
-                }
-              }]
-        },{
         name: 'groupUtil',
         data: [{
+          name: "cmdHelp",
+          title: "Help",
+          // btnClass: 'live-preview',
+          icon: {
+            fa: "fa fa-question",
+            glyph: "glyphicon glyphicon-question-sign"
+          },
+          callback: function(e) {
+              window.open('./mdHelp.html');
+          }
+        },{
           name: 'cmdPreview',
           toggle: true,
           hotkey: 'Ctrl+P',

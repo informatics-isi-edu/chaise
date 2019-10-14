@@ -4,7 +4,7 @@
     <div ng-switch-when="date">
         <div class="chaise-input-group">
             <div class="chaise-input-control has-feedback">
-                <input type="text" ng-model="model.value" placeholder="{{dataFormats.date}}" name="{{::column.name}}" ui-mask="{{maskOptions.date.mask}}" ui-options="maskOptions.date.options" model-view-value="true" date>
+                <input type="text" ng-model="model.value" placeholder="{{dataFormats.placeholder.date}}" name="{{::column.name}}" ui-mask="{{maskOptions.date.mask}}" ui-options="maskOptions.date.options" model-view-value="true" date>
                 <chaise-clear-input btn-class="date-remove" click-callback="::clearInput()" show="showRemove()"></chaise-clear-input>
             </div>
             <span class="chaise-input-group-append">
@@ -22,7 +22,7 @@
                         <div class="chaise-input-group-text dt-width">Date</div>
                     </span>
                     <div class="chaise-input-control has-feedback">
-                        <input class="input-timestamptz" type="text" ng-model="model.value.date" placeholder="{{dataFormats.date}}" name="{{::column.name}}" ui-mask="{{maskOptions.date.mask}}" ui-options="maskOptions.date.options" model-view-value="true" date timestamp validate-values="model.value">
+                        <input class="input-timestamptz" type="text" ng-model="model.value.date" placeholder="{{dataFormats.placeholder.date}}" name="{{::column.name}}" ui-mask="{{maskOptions.date.mask}}" ui-options="maskOptions.date.options" model-view-value="true" date timestamp validate-values="model.value">
                         <chaise-clear-input btn-class="ts-date-remove" click-callback="::clearDate()" show="showDateRemove()"></chaise-clear-input>
                     </div>
                 </div>
@@ -33,7 +33,7 @@
                         <div class="chaise-input-group-text dt-width">Time</div>
                     </span>
                     <div class="chaise-input-control has-feedback">
-                        <input type="text" ng-model="model.value.time" placeholder="{{dataFormats.time24}}" name="{{::column.name}}" model-view-value="true" time timestamp validate-values="model.value">
+                        <input type="text" ng-model="model.value.time" placeholder="{{dataFormats.placeholder.time}}" name="{{::column.name}}" model-view-value="true" time timestamp validate-values="model.value">
                         <chaise-clear-input btn-class="ts-time-remove" click-callback="::clearTime()" show="showTimeRemove()"></chaise-clear-input>
                     </div>
                     <span class="chaise-input-group-append">
@@ -104,13 +104,21 @@
 
 
     <!-- boolean input -->
-    <div ng-switch-when="boolean">
-        <ui-select ng-model="model.value" append-to-body="true" theme="select2">
-            <ui-select-match class="chaise-input-control" name="{{::column.name}}">{{$select.selected}}</ui-select-match>
-            <ui-select-choices repeat="domainValue in ::booleanValues | filter: $select.search" >
-                <div ng-bind-html="domainValue | highlight: $select.search"></div>
-            </ui-select-choices>
-        </ui-select>
+    <div ng-switch-when="boolean" class="chaise-boolean-dropdown" uib-dropdown>
+        <div class="chaise-input-control has-feedback" uib-dropdown-toggle>
+            <div contenteditable="false" style="cursor: pointer" data-placeholder="Select a value" ng-bind-html="model.value"></div>
+            <chaise-clear-input btn-class="boolean-remove" click-callback="::clearInput()" show="showBooleanRemove()"></chaise-clear-input>
+            <button class="chaise-btn chaise-btn-primary" type="button">
+                <span class="glyphicon glyphicon-chevron-down"></span>
+            </button>
+        </div>
+        <!-- So that the boolean input can be validated -->
+        <input type="hidden" ng-model="model.value" />
+        <ul class="adjust-boolean-dropdown" uib-dropdown-menu role="menu">
+            <li ng-repeat="option in ::booleanValues" ng-click="model.value = option">
+                <a ng-bind-html="option" style="min-height: 20px;"></a>
+            </li>
+        </ul>
     </div>
 
     <!-- longtext/textarea input -->
@@ -146,10 +154,10 @@
 
     <!-- Validation error messages to show when the form field is touched -->
     <div ng-messages="inputContainer.$error" ng-show="inputContainer.$error || inputContainer.$submitted" class="text-danger" role="alert">
-        <div ng-message="date">Please enter a date value in {{dataFormats.date}} format.</div>
-        <div ng-message="time">Please enter a time value in 12-hr {{dataFormats.time24}} format.</div>
-        <div ng-message="timestampDate">Please enter a date value in {{dataFormats.date}} format.</div>
-        <div ng-message="timestampTime">Please enter a time value in 12-hr {{dataFormats.time24}} format.</div>
+        <div ng-message="date">Please enter a date value in {{dataFormats.placeholder.date}} format.</div>
+        <div ng-message="time">Please enter a time value in 12-hr {{dataFormats.placeholder.time}} format.</div>
+        <div ng-message="timestampDate">Please enter a date value in {{dataFormats.placeholder.date}} format.</div>
+        <div ng-message="timestampTime">Please enter a time value in 12-hr {{dataFormats.placeholder.time}} format.</div>
         <div ng-message="integer">Please enter an integer value.</div>
         <div ng-message="float">Please enter a decimal value.</div>
         <div ng-message="json">Please enter a valid JSON value.</div>

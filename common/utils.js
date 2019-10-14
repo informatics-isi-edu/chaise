@@ -96,6 +96,7 @@
         "loginRequired": "Login Required",
         "permissionDenied": "Permission Denied",
         "unauthorizedErrorCode" : "Unauthorized Access",
+        "localStorageDisabled": "localStorage is disabled by the browser settings. Some features might not work as expected",
         "showErrDetails" : "Show Error Details",
         "hideErrDetails" : "Hide Error Details",
         "tooltip": {
