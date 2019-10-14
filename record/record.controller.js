@@ -38,6 +38,10 @@
                 $timeout(function () {
                     el.removeClass('row-focus');
                 }, 1600);
+            }).catch(function (err) {
+                // the scroll promise might be rejected, but we should just fail silently
+                // we saw this happening when you double click on the element.
+                // in this case, the second promise will be rejected.
             });
         };
         vm.gotoRelatedTable = function(sectionId, index) {
@@ -54,6 +58,10 @@
                 $timeout(function () {
                     el.removeClass('row-focus');
                 }, 1600);
+            }).catch(function (err) {
+                // the scroll promise might be rejected, but we should just fail silently
+                // we saw this happening when you double click on the element.
+                // in this case, the second promise will be rejected.
             });
         };
 
