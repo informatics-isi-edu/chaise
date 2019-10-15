@@ -117,6 +117,10 @@
     })
 
     .constant("logActions", {
+        // action namespace
+        "buttonAction": "button_action", // path to log button click events
+
+        // actions
         "recordRead": "record/main", // read the main entity (record)
         "recordUpdate": "record/main/update", // read the main entity (record)
         "recordRelatedRead": "record/related", // secondary
@@ -129,7 +133,6 @@
         "recordInlineAggregateUpdate": "record/inline/aggregate/update",
         "recordAggregate": "record/aggregate", // secondary
         "recordAggregateUpdate": "record/aggregate/update", // secondary
-
 
         "createPrefill": "create/prefill", // create with inbound related prefilled (recordedit) -> does it need referrer? (the pre should have it)
         "createAssociation": "create/prefill/association", // batch create association (record) -> does itneed referrer? (the pre should have it)
@@ -169,8 +172,30 @@
         "viewerMain": "main",
         "viewerAnnotation": "annotation",
         "viewerComment": "comment",
-        "viewerAnatomy": "anatomy"
+        "viewerAnatomy": "anatomy",
 
+        // button actions
+        "recordDeletePending": "record/delete-pending", // delete clicked -> confirm delete dialog opened
+        "recordDeleteCancelled": "record/delete-cancelled", // cancel clicked when confirm delete dialog open
+        "recordHideRelated": "record/hide-related", // "hide empty sections" button clicked
+        "recordShowRelated": "record/show-related", // "show empty sections" button clicked
+        "recordExport": "record/export", // export dropdown was opened
+        "recordShare": "record/share", // share dialog opened
+        "recordLiveCopy": "record/share-live-copy", // live link copied to clipboard
+        "recordVersionCopy": "record/share-version-copy", // versioned link copied to clipboard
+        "recordTocToggle": "record/toc-panel", // the toc panel toggled open/close
+        "recordTocHeading": "record/toc-heading", // one of the toc headings clicked
+
+        // related table modes
+        "recordTableDisplay": "record/table-display", // toggle display mode to table display
+        "recordMkdnDisplay": "record/mkdn-display", // toggle display mode to custom display
+        "recordEditDisplay": "record/edit-display", // toggle display mode to edit display
+        "recordInlineTableDisplay": "record/inline/table-display", // toggle display mode to table display
+        "recordInlineMkdnDisplay": "record/inline/mkdn-display", // toggle display mode to custom display
+        "recordInlineEditDisplay": "record/inline/edit-display", // toggle display mode to edit display
+
+        "recordsetExport": "recordset/export", // export dropdown was opened
+        "recordsetPermalink": "recordset/permalink", // permalink clicked
     })
 
     // NOTE since this has been used with ng-switch in the code, and we cannot

@@ -3,8 +3,9 @@
 
     angular.module('chaise.export', ['chaise.utils'])
 
-    .directive('export', ['AlertsService', 'ConfigUtils', 'DataUtils', 'ErrorService', 'logActions', 'modalUtils', '$rootScope', '$timeout', 'UriUtils', '$window', function (AlertsService, ConfigUtils, DataUtils, ErrorService, logActions, modalUtils, $rootScope, $timeout, UriUtils, $window) {
+    .directive('export', ['AlertsService', 'ConfigUtils', 'DataUtils', 'ErrorService', 'logActions', 'logService', 'modalUtils', '$rootScope', '$timeout', 'UriUtils', '$window', function (AlertsService, ConfigUtils, DataUtils, ErrorService, logActions, logService, modalUtils, $rootScope, $timeout, UriUtils, $window) {
         var chaiseConfig = ConfigUtils.getConfigJSON();
+        var context = ConfigUtils.getContextJSON();
         /**
          * Cancel the current export request
          */
@@ -115,6 +116,11 @@
                 scope.isLoading = false;
                 scope.exporter = null;
                 scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
+
+                scope.logDropdownOpened = function () {
+                    var action = (context.cid == "record" ? logActions.recordExport : logActions.recordsetExport);
+                    logService.logAction(action, logActions.buttonAction);
+                };
 
                 scope.exportOptions = {
                     supportedFormats: [

@@ -90,7 +90,7 @@
                                                             </span>
                                                             <span ng-if="(!form.recordEditModel.columnModels[columnIndex].isDisabled || form.recordEditModel.columnModels[columnIndex].showSelectAll) && form.recordEditModel.rows.length > 1" class="pull-right">
                                                                 <button id="select-all-{{::form.makeSafeIdAttr(column.displayname.value)}}" type="button" class="chaise-btn chaise-btn-secondary" ng-click="::form.toggleSelectAll(columnIndex)" tooltip-placement="bottom" uib-tooltip="{{form.recordEditModel.columnModels[columnIndex].showSelectAll ? 'Click to close the set all input.' : 'Click to set a value for all records.'}}">
-                                                                    <span class="glyphicon" ng-class="form.recordEditModel.columnModels[columnIndex].showSelectAll ? 'glyphicon-ban-circle' : 'glyphicon-pencil'"></span>
+                                                                    <span class="glyphicon" ng-class="form.recordEditModel.columnModels[columnIndex].showSelectAll ? 'glyphicon-chevron-up' : 'glyphicon-pencil'"></span>
                                                                 </button>
                                                             </span>
                                                         </td>
