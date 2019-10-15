@@ -117,6 +117,8 @@
     })
 
     .constant("logActions", {
+        "buttonAction": "button_action", // path to log button click events
+
         "recordRead": "record/main", // read the main entity (record)
         "recordUpdate": "record/main/update", // read the main entity (record)
         "recordRelatedRead": "record/related", // secondary
@@ -130,6 +132,11 @@
         "recordAggregate": "record/aggregate", // secondary
         "recordAggregateUpdate": "record/aggregate/update", // secondary
 
+        // button actions
+        "recordDeletePending": "record/delete-pending", // delete clicked -> confirm delete dialog opened
+        "recordDeleteCancelled": "record/delete-cancelled", // cancel clicked when confirm delete dialog open
+        "recordHideRelated": "record/hide-related", // "hide empty sections" button clicked
+        "recordShowRelated": "record/show-related", // "show empty sections" button clicked
 
         "createPrefill": "create/prefill", // create with inbound related prefilled (recordedit) -> does it need referrer? (the pre should have it)
         "createAssociation": "create/prefill/association", // batch create association (record) -> does itneed referrer? (the pre should have it)

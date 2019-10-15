@@ -173,6 +173,21 @@
         opacity: 1;
     }
 
+    .md-editor {
+        border-radius: $btn-border-radius;
+
+        .md-header {
+            border-top-left-radius: $btn-border-radius;
+            border-top-right-radius: $btn-border-radius;
+        }
+
+        .content-box {
+            border-bottom-left-radius: $btn-border-radius;
+            border-bottom-right-radius: $btn-border-radius;
+            border-bottom: 0;
+        }
+    }
+
     textarea {
         resize: vertical;
         height: auto;

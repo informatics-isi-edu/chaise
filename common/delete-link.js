@@ -22,8 +22,9 @@
 (function() {
     'use strict';
     angular.module('chaise.delete', ['chaise.utils'])
-    .directive('deleteLink', ['ConfigUtils', 'modalUtils', 'UriUtils', '$rootScope', function(ConfigUtils, modalUtils, UriUtils, $rootScope) {
+    .directive('deleteLink', ['ConfigUtils', 'logActions', 'logService', 'modalUtils', 'UriUtils', '$rootScope', function(ConfigUtils, logActions, logService, modalUtils, UriUtils, $rootScope) {
         var chaiseConfig = ConfigUtils.getConfigJSON();
+        var context = ConfigUtils.getContextJSON();
         var TEMPLATES_PATH = UriUtils.chaiseDeploymentPath() + 'common/templates/delete-link/';
         var CONFIRM_DELETE =  (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) ? true : false;
 
@@ -44,6 +45,8 @@
                         return scope.callback();
                     }
 
+                    logService.logAction(logActions.recordDeletePending, logActions.buttonAction);
+
                     modalUtils.showModal({
                         templateUrl: TEMPLATES_PATH + 'confirm_delete.modal.html',
                         controller: 'ConfirmDeleteController',
@@ -52,7 +55,9 @@
                     }, function onSuccess() {
                         scope.$root.showSpinner = true;
                         return scope.callback();
-                    }, false, false);
+                    }, function onError() {
+                        logService.logAction(logActions.recordDeleteCancelled, logActions.buttonAction);
+                    }, false);
                 }
             },
             templateUrl: function(elem, attrs) {
