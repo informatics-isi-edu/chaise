@@ -17,7 +17,7 @@
                 </div>
             </div>
             <div class="top-right-panel">
-                <div class="row recordset-title-container title-container" ng-if="vm.reference && vm.config.displayMode === recordsetDisplayModes.fullscreen">
+                <div class="recordset-title-container title-container" ng-if="vm.reference && vm.config.displayMode === recordsetDisplayModes.fullscreen">
                     <div class="recordset-title-buttons title-buttons" ng-show="vm.config.displayMode === recordsetDisplayModes.fullscreen">
                         <!-- download CSV included by default -->
                         <export reference="vm.reference" disabled="!vm.hasLoaded || !vm.initialized || vm.rowValues.length == 0"></export>
