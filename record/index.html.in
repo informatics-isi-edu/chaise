@@ -46,14 +46,11 @@
                             </div>
                         </div>
                         <div class="title">
-                            <!-- TODO update testcases that rely on this -->
-                            <!-- <h1 id="page-subtitle"></h1> -->
                             <div class="entity-display-header">
                                 <div class="title-container">
                                     <h1 id="page-title">
-                                        <chaise-title ng-if="reference" add-link="true" reference="reference"></chaise-title><span class="link-decoration">:</span>
-                                        <span ng-if="::recordDisplayname.isHTML" ng-bind-html="::recordDisplayname.value"></span>
-                                        <span ng-if="::!recordDisplayname.isHTML" ng-bind="::recordDisplayname.value"></span>
+                                        <chaise-title id="entity-subtitle" ng-if="reference" add-link="true" reference="reference"></chaise-title><span class="link-decoration">:</span>
+                                        <chaise-title id="entity-title" displayname="recordDisplayname"></chaise-title>
                                         <small ng-if="reference && reference.location.version" tooltip-placement="bottom-left" uib-tooltip="{{::ctrl.tooltip.versionTime}} {{ctrl.versionDate()}}">({{ctrl.versionDisplay()}})</small>
 
                                         <div class="title-buttons record-action-btns-container" ng-if="ctrl.canCreate() || ctrl.canEdit() || ctrl.canDelete()">

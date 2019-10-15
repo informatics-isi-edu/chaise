@@ -10,26 +10,19 @@ var Q = require('q');
 
 var recordEditPage = function() {
     var that = this;
-    this.getEntityTitle = function() {
-        return browser.executeScript("return $('#entity-title').text();");
-    };
 
     // recordedit form view
     this.getEntityTitleElement = function() {
-        return element(by.css('.recordedit-bookmark-container #page-title'));
+        return element(by.css('.form-container #page-title'));
     };
 
     this.getEntityTitleLinkElement = function() {
         return this.getEntityTitleElement().element(by.tagName('a'));
     };
 
-    this.getEntitySubtitleElement = function() {
-        return element(by.css('.recordedit-bookmark-container #page-subtitle'));
-    };
-
     // resultset view
     this.getResultsetTitleElement = function() {
-        return element(by.css('.resultset-bookmark-container #page-title'));
+        return element(by.css('.resultset-container #page-title'));
     };
 
     this.getResultsetTitleLinkElement = function () {
@@ -213,10 +206,6 @@ var recordEditPage = function() {
         return element.all(by.css(".form-header"));
     };
 
-    this.getFormTitle = function() {
-        return element(by.id("page-title"));
-    };
-
     this.getForeignKeyInputDisplay = function(columnDisplayName, index) {
         columnDisplayName = makeSafeIdAttr(columnDisplayName);
         return element(by.id("form-" + index + '-' + columnDisplayName + "-display"));
@@ -324,10 +313,6 @@ var recordEditPage = function() {
         });
     };
 
-    this.getAddRowButton = function() {
-        return browser.executeScript("return $('#copy-record-btn')[0];");
-    };
-
     this.getDeleteRowButton = function(index) {
         index = index || 0;
         return browser.executeScript("return $('button.remove-form-btn')[" + index  + "];");
@@ -392,24 +377,12 @@ var recordEditPage = function() {
         return element(by.id("submit-record-button"));
     };
 
-    this.getMultiFormInputOpenButton = function () {
-        return element(by.id("copy-x-rows-btn"));
-    };
-
-    this.getMultiFormInputOpenButtonScript = function () {
-        return browser.executeScript("return $('#copy-x-rows-btn')");
-    };
-
     this.getMultiFormInput = function () {
         return element(by.id("copy-rows-input"));
     };
 
     this.getMultiFormInputSubmitButton = function () {
         return element(by.id("copy-rows-submit"));
-    };
-
-    this.getMultiFormInputSubmitButtonScript = function () {
-        return browser.executeScript("return $('#copy-rows-submit')");
     };
 
     this.getInputById = function (index, displayName) {
@@ -424,20 +397,12 @@ var recordEditPage = function() {
 
 var recordPage = function() {
     var that = this;
-    this.getEntityTitle = function() {
-        return browser.executeScript("return $('#page-title > span').text();");
-    };
-
     this.getEntityTitleElement = function() {
-        return element(by.id('page-title'));
-    };
-
-    this.getEntitySubTitle = function() {
-        return browser.executeScript("return $('#page-subtitle span').text();");
+        return element(by.id('entity-title'));
     };
 
     this.getEntitySubTitleElement = function() {
-        return element(by.id("page-subtitle"));
+        return element(by.id("entity-subtitle"));
     };
 
     this.getEntitySubTitleTooltip = function () {
@@ -672,11 +637,11 @@ var recordPage = function() {
     };
 
     this.getErrorModalReloadButton = function(){
-        return browser.executeScript("return $('button')[1]");
+        return element(by.id('error-reload-button'));
     };
 
     this.getErrorModalOkButton = function(){
-        return browser.executeScript("return $('button')[2]");  //changed to second index as "Reload" btn was added
+        return element(by.id('error-ok-button'));
     };
 
     this.getModalDisabledRows = function () {

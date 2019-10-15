@@ -19,7 +19,7 @@ var testParams = {
             { name: "id", generated: true, immutable: true, title: "Id", type: "serial4", nullok: false},
             { name: "title", title: "Name of Accommodation", type: "text", nullok: false},
             { name: "website", title: "Website", type: "text", comment: "A valid url of the accommodation"},
-            { name: "category", title: "Category", type: "text", nullok: false, isForeignKey: true,  count: 5, totalCount: 5, table_title: "Categories", comment: "Type of accommodation ('Resort/Hotel/Motel')"}, // the total count is the total number of rows in the category.json data file
+            { name: "category", title: "Category", type: "text", nullok: false, isForeignKey: true,  count: 5, totalCount: 5, comment: "Type of accommodation ('Resort/Hotel/Motel')"}, // the total count is the total number of rows in the category.json data file
             { name: "rating", title: "User Rating", type: "float4", nullok: false},
             { name: "summary", title: "Summary", type: "longtext", nullok: false},
             { name: "description", title: "Description", type: "markdown"},
@@ -67,13 +67,13 @@ var testParams = {
                 "new title 1",  {"link":"https://example1.com/", "value":"Link to Website"}, {"link":"{{{chaise_url}}}/record/#{{catalog_id}}/product-add:category/term=Hotel", "value":"Hotel"},
                 "1.0000", "This is the summary of this column 1.", "Description 1", JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2),
                 "1", "2017-01-01 01:01:01", "2017-01-01", "false",
-                "v1, v2", "true", "1, 2", "1.0000, 2.2000", "2001-01-01, 2002-02-02", "No value, 2001-01-01T01:01:01", "No value, 2001-01-01 01:01:01",
+                "v1, v2", "true", "1, 2", "1.0000, 2.2000", "2001-01-01, 2002-02-02", "No value, 2001-01-01 01:01:01", "No value, 2001-01-01 01:01:01",
             ],
             [
                 "new title 2",  {"link":"https://example2.com/", "value":"Link to Website"}, {"link":"{{{chaise_url}}}/record/#{{catalog_id}}/product-add:category/term=Ranch", "value":"Ranch"},
                 "2.0000", "This is the summary of this column 2.", "Description 2", JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2),
                 "2", "2017-02-02 02:02:02", "2017-02-02", "true",
-                "v2, v3", "false", "1, 2", "2.0000, 3.3000", "2002-02-02, No value", "2002-02-02T02:02:02", "2002-02-02 02:02:02",
+                "v2, v3", "false", "1, 2", "2.0000, 3.3000", "2002-02-02, No value", "2002-02-02 02:02:02", "2002-02-02 02:02:02",
             ]
         ],
         files: []
@@ -252,10 +252,10 @@ describe('Record Add', function() {
                     if (tableParams.inputs.length > 1) {
 
                         if (tableParams.files.length == 0) {
-                            it("should click and add an extra record.", function() {
-                                chaisePage.recordEditPage.getAddRowButton().then(function(button) {
-                                    chaisePage.clickButton(button);
-                                });
+                            it("should click and add an extra record.", function(done) {
+                                chaisePage.clickButton(chaisePage.recordEditPage.getMultiFormInputSubmitButton()).then(function () {
+                                    done();
+                                }).catch(chaisePage.catchTestError(done));
                             });
                         }
 

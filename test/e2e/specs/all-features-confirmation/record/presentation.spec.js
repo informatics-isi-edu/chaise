@@ -296,9 +296,7 @@ describe('View existing record,', function() {
         });
 
         it('On click of OK button the page should redirect to recordset page', function(){
-            chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
-                return btn.click();
-            }).then(function() {
+            chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton()).then(function(btn){
                 return chaisePage.recordsetPageReady();
             }).then(function() {
                 return browser.driver.getCurrentUrl();

@@ -53,7 +53,7 @@ var testParams = {
             markdown_col: "<strong>Sample</strong>",
             bool_true_col: "true",
             bool_false_col: "false",
-            timestamp_col: "2016-01-18T13:00:00",
+            timestamp_col: "2016-01-18 13:00:00",
             timestamptz_col: "2016-01-18 00:00:00",
             date_col: "2016-08-15",
             // Value of foreign (fk_col) related entity
@@ -72,7 +72,7 @@ var testParams = {
             markdown_null_col: "<strong>Sample</strong>",
             bool_null_col: "true",
             bool_true_col: "false",
-            timestamp_null_col: "2016-01-18T13:00:00",
+            timestamp_null_col: "2016-01-18 13:00:00",
             timestamptz_null_col: "2016-01-18 13:00:00",
             date_null_col: "2016-08-15",
             // Value of foreign (fk_null_col) related entity

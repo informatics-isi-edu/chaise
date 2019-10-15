@@ -157,7 +157,7 @@ describe('Edit multiple existing record,', function() {
                 it("should have the title displayed properly.", function() {
                     // if submit button is visible, this means the recordedit page has loaded
                     chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
-                        expect(chaisePage.recordEditPage.getEntityTitleElement().getText()).toBe("Edit " + tableParams.table_name + " Records", "Multi-edit title is incorrect.");
+                        expect(chaisePage.recordEditPage.getEntityTitleElement().getText()).toBe("Edit " + tableParams.table_name, "Multi-edit title is incorrect.");
                     });
                 });
 

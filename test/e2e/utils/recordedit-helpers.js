@@ -7,7 +7,7 @@ var EC = protractor.ExpectedConditions;
 
 /**
  * Test presentation, validation, and inputting a value for different column types in recordedit app.
- *
+ * NOTE: The title is assuming that this function is only called for create or single edit (not multi edit)
  * NOTE: tableParams structure:
  * It includes the following:
  *  schema_name
@@ -21,7 +21,6 @@ var EC = protractor.ExpectedConditions;
  *      - it can have `generated` (bool), `immutable` (bool), `nullok` (bool), `comment`.
  *      - if column is is a foreign key use `isForeignKey:true`, then you must provide the following:
  *          - `count`: number of fks available to select.
- *          - `table_title`: displayname of fk's reference.
  *  values (optional): if you want to test the current value of inputs. (it must be a key-value of visible column title-values)
  *      - for timestamp/tz the value must be a moment object.
  *      - for date it must be in `YYYY-MM-DD` format.
@@ -49,25 +48,20 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
     if (isEditMode) {
         it("should have edit record title", function() {
             var title = chaisePage.recordEditPage.getEntityTitleElement();
-            expect(title.getText()).toEqual("Edit " + tableParams.table_displayname + " Record", "Edit mode title is incorrect.");
-        });
-
-        it("should have edit record subtitle", function() {
-            var subtitle = chaisePage.recordEditPage.getEntitySubtitleElement();
-            expect(subtitle.getText()).toEqual(tableParams.record_displayname, "Edit mode title is incorrect.");
+            expect(title.getText()).toEqual("Edit " + tableParams.table_displayname + " : " + tableParams.record_displayname, "Edit mode title is incorrect.");
         });
 
         it("should not allow to add new rows/columns", function() {
-            expect(chaisePage.recordEditPage.getAddRowButton().isDisplayed()).toBeFalsy("Add x rows is visible in edit mode");
+            expect(chaisePage.recordEditPage.getMultiFormInputSubmitButton().isDisplayed()).toBeFalsy("Add x rows is visible in edit mode");
         });
 
     } else {
         it("should have create record title", function() {
-            expect(chaisePage.recordEditPage.getEntityTitleElement().getText()).toBe("Create " + tableParams.table_displayname + " Record", "Create mode title is incorrect.");
+            expect(chaisePage.recordEditPage.getEntityTitleElement().getText()).toBe("Create new " + tableParams.table_displayname, "Create mode title is incorrect.");
         });
 
         it("should allow to add new rows/columns", function() {
-            expect(chaisePage.recordEditPage.getAddRowButton().isDisplayed()).toBeFalsy("Add x rows is not visible in create mode");
+            expect(chaisePage.recordEditPage.getMultiFormInputSubmitButton().isDisplayed()).toBeTruthy("Add x rows is not visible in create mode");
         });
     }
 
@@ -201,15 +195,15 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
         // test cases:
         describe(title + ",",function() {
             if (recordIndex > 0) {
-                it("should click add record button", function() {
-                    chaisePage.recordEditPage.getAddRowButton().then(function(button) {
-                        chaisePage.clickButton(button);
+                it("should click add record button", function(done) {
+                    chaisePage.clickButton(chaisePage.recordEditPage.getMultiFormInputSubmitButton()).then(function(button) {
                         browser.wait(function() {
                             return chaisePage.recordEditPage.getForms().count().then(function(ct) {
                                 return (ct == recordIndex + 1);
                             });
                         }, browser.params.defaultTimeout);
-                    });
+                        done();
+                    }).catch(chaisePage.catchTestError(done));
                 });
             };
 
@@ -804,8 +798,16 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                                         return modalTitle.getText();
                                     }).then(function(text) {
+                                        var expectedTitle = "Select " + col.title + " for ";
+                                        if (isEditMode) {
+                                            expectedTitle += tableParams.table_displayname + " : " + tableParams.record_displayname;
+                                        } else {
+                                            expectedTitle += "new " + tableParams.table_displayname;
+                                        }
+
                                         // make sure modal opened
-                                        expect(text).toEqual("Select " + col.table_title, colError(col.name, "foreign key modal selector title is not what was expected."));
+                                        expect(text).toEqual(expectedTitle, colError(col.name, "foreign key modal selector title is not what was expected."));
+
                                         browser.wait(function () {
                                             return chaisePage.recordsetPage.getRows().count().then(function (ct) {
                                                 return (ct > 0);
@@ -826,7 +828,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                     }).then(function(selectButtons) {
                                         return selectButtons[0].click();
                                     }).then(function() {
-                                        browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), browser.params.defaultTimeout);
+                                        browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getEntityTitleElement()), browser.params.defaultTimeout);
 
                                         var foreignKeyInputDisplay = chaisePage.recordEditPage.getForeignKeyInputDisplay(col.title, recordIndex);
                                         expect(foreignKeyInputDisplay.getText()).toEqual(fkSelectedValue.value, colError(col.name, "Didn't select the expected foreign key."));
