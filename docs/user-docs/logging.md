@@ -67,7 +67,7 @@ The table below summarizes all the requests that we currently are logging in cha
 
 | App                                                 | Description                                           | Action                                       | Extra                        | Notes                                                                                                                                                 | Change                        |
 |-----------------------------------------------------|-------------------------------------------------------|----------------------------------------------|------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------|
-| chaise-wide (record, recordset, recordedit, viewer) | get catalog information                               | model/catalog                                |                              |                                                                                                                                                       | [added (4/18/19)](#041819)    |
+| chaise-wide (record, recordset, recordedit, viewer) | get catalog snapshot  information                               | model/snaptime                                |                              |                                                                                                                                                       | [added (4/18/19)](#041819) [updated (10/??/19)](#10??19)    |
 |                                                     | get catalog schemas information                       | model/schema                                 |                              |                                                                                                                                                       | [added (4/18/19)](#041819)    |
 |                                                     |                                                       |                                              |                              |                                                                                                                                                       |                               |
 | record                                              | load main entity                                      | record/main                                  | ppid, pcid                   |                                                                                                                                                       | [bug fix (4/18/19)](#041819)  |
@@ -129,16 +129,20 @@ The following table will include the actions that are triggered when the user cl
 |------------------------------------|----------------------------|-----------------------------|---------|--------------------------------------------------------------------------------------------------------------------------------|-------------------------------|
 | record                             | delete clicked             | record/delete-pending       |         | Delete was clicked from submenu bar and confirm delete was shown.                                                              |                               |
 | record                             | confirm delete clicked     | record/delete-cancelled     |         | Delete was clicked and confirm delete was shown. User then clicked cancel or X to close the modal without deleting             |                               |
-| record                             | hide empty related tables  | record/hide-related         |         | "Hide empty sections" clicked in submenu bar                                                                            |                               |
-| record                             | show empty related tables  | record/show-related         |         | "Show empty sections" clicked in submenu bar                                                                            |                               |
+| record                             | hide empty related tables  | record/hide-related         |         | "Hide empty sections" clicked in submenu bar                                                                                   |                               |
+| record                             | show empty related tables  | record/show-related         |         | "Show empty sections" clicked in submenu bar                                                                                   |                               |
 | record                             | export dropdown            | record/export               |         | Dropdown was opened. Selecting an export option will trigger a request so need to capture that event                           |                               |
-| record                             | share popup                | record/share                |         | Share dialog was opened up. NOTE: We send a request to fetch the catalog information to verify if the current "version" is the most recent. Maybe update that request instead (action currently is "model/catalog") |                               |
+| record                             | share popup                | record/share                |         | Share dialog was opened up.                                                                                                    |                               |
 | record                             | copy live link             | record/share-live-copy      |         | Live link was copied to clipboard                                                                                              |                               |
 | record                             | copy version link          | record/share-version-copy   |         | Versioned link was copied to clipboard                                                                                         |                               |
-| record                             | Table Display              | record/inline/table-display |         | User changed display format to show table display (user does not have permission to edit)                                      |                               |
-| record                             | Revert Display             | record/inline/mkdn-display  |         | User changed display format to show markdown display (user does not have permission to edit)                                   |                               |
-| record                             | Edit Display               | record/inline/edit-display  |         | User changed display format to show table display (user has permission to edit)                                                |                               |
-| record                             | Display                    | record/inline/display       |         | User changed display format to show markdown display (user has permission to edit)                                             |                               |
+|                                    |                            |                             |         |                                                                                                                                |                               |
+| record                             | Table mode                 | record/inline/table-display |         | User changed display format to show table display (user does not have permission to edit)                                      |                               |
+| record                             | Custom mode                | record/inline/mkdn-display  |         | User changed display format to show markdown display (edit and !edit permission)                                               |                               |
+| record                             | Edit mode                  | record/inline/edit-display  |         | User changed display format to show table display (user has permission to edit)                                                |                               |
+| record                             | Table mode                 | record/table-display        |         | User changed display format to show table display (user does not have permission to edit)                                      |                               |
+| record                             | Custom mode                | record/mkdn-display         |         | User changed display format to show markdown display (edit and !edit permission)                                               |                               |
+| record                             | Edit mode                  | record/edit-display         |         | User changed display format to show table display (user has permission to edit)                                                |                               |
+|                                    |                            |                             |         |                                                                                                                                |                               |
 | record                             | ToC panel open/collapse    | record/toc-panel            |         |                                                                                                                                |                               |
 | record                             | ToC panel options selected | record/toc-heading          |         |                                                                                                                                |                               |
 |                                    |                            |                             |         |                                                                                                                                |                               |
@@ -245,6 +249,17 @@ If the user clicked on a link in the navbar, the `PCID` will properly denote wha
 
 
 ## Change Log
+
+### 10/??/19
+
+#### Commit Links
+ - (pending, changes in branch)
+
+##### Changed
+ - changed model/catalog -> model/snaptime
+
+##### Added
+ - [Button Action List](#button-action-list)
 
 ### 07/16/19
 

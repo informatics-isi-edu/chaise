@@ -319,9 +319,10 @@
      *   - {Object} citation - citation object returned from ERMrest.tuple.citation
      *
      */
-    .controller('ShareCitationController', ['$uibModalInstance', '$window', 'params', function ($uibModalInstance, $window, params) {
+    .controller('ShareCitationController', ['logActions', 'logService', 'params', '$uibModalInstance', '$window', function (logActions, logService, params, $uibModalInstance, $window) {
         var vm = this;
         vm.params = params;
+        vm.logActions = logActions;
         vm.warningMessage = "The displayed content may be stale due to recent changes made by other users. You may wish to review the changes prior to sharing the <a ng-href='{{ctrl.params.permalink}}'>live link</a> below. Or, you may share the older content using the <a ng-href='{{ctrl.params.versionLink}}'>versioned link</a>.";
 
         vm.moreThanWeek = function () {
@@ -347,7 +348,8 @@
             vm.downloadBibtex = $window.URL.createObjectURL( bibtexBlob );
         }
 
-        vm.copyToClipboard = function (text) {
+        vm.copyToClipboard = function (text, action) {
+            logService.logAction(action, logActions.buttonAction);
             // Create a dummy input to put the text string into it, select it, then copy it
             // this has to be done because of HTML security and not letting scripts just copy stuff to the clipboard
             // it has to be a user initiated action that is done through the DOM object

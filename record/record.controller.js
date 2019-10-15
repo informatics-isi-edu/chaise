@@ -25,32 +25,20 @@
 
         vm.tooltip = messageMap.tooltip;
         vm.queryTimeoutTooltip = messageMap.queryTimeoutTooltip;
-        vm.gotoInlineTable = function(sectionId, index) {
-            var safeSectionId = vm.makeSafeIdAttr(sectionId);
-            var pageSection = "entity-" + safeSectionId;
 
-            vm.rowFocus[index] = false;
-            var el = angular.element(document.getElementById(pageSection)).parent();
-            mainContainerEl.scrollToElementAnimated(el, 40).then(function () {
-                $timeout(function () {
-                    el.addClass("row-focus");
-                }, 100);
-                $timeout(function () {
-                    el.removeClass('row-focus');
-                }, 1600);
-            }).catch(function (err) {
-                // the scroll promise might be rejected, but we should just fail silently
-                // we saw this happening when you double click on the element.
-                // in this case, the second promise will be rejected.
-            });
-        };
-        vm.gotoRelatedTable = function(sectionId, index) {
-            var safeSectionId = vm.makeSafeIdAttr(sectionId);
-            var pageSection = "rt-heading-" + safeSectionId;
+        vm.scrollToRelatedTable = function (sectionId, index, isInline) {
+            logService.logAction(logActions.recordTocHeading, logActions.buttonAction);
 
-            $rootScope.relatedTableModels[index].open = true;
+            var safeSectionId = vm.makeSafeIdAttr(sectionId);
+            var pageSection = (isInline ? "entity-" : "rt-heading-") + safeSectionId;
+
             vm.rowFocus[index] = false;
             var el = angular.element(document.getElementById(pageSection));
+            if (!isInline) {
+                $rootScope.relatedTableModels[index].open = true;
+            } else {
+                var el = el.parent();
+            }
             mainContainerEl.scrollToElementAnimated(el, 40).then(function () {
                 $timeout(function () {
                     el.addClass("row-focus");
@@ -63,7 +51,7 @@
                 // we saw this happening when you double click on the element.
                 // in this case, the second promise will be rejected.
             });
-        };
+        }
 
         vm.versionDisplay = function () {
             return UiUtils.humanizeTimestamp($rootScope.reference.location.versionAsMillis);
@@ -73,9 +61,10 @@
             return UiUtils.versionDate($rootScope.reference.location.versionAsMillis);
         }
 
-        // vm.togglePan = function() {
-        //     $scope.recordSidePanOpen = !$scope.recordSidePanOpen;
-        // };
+        vm.toggleSidebar = function() {
+            logService.logAction(logActions.recordTocToggle, logActions.buttonAction);
+            $rootScope.recordSidePanOpen = !$rootScope.recordSidePanOpen;
+        };
 
         vm.canCreate = function() {
             return ($rootScope.reference && $rootScope.reference.canCreate && $rootScope.modifyRecord);
@@ -147,7 +136,7 @@
             params.versionDateRelative = UiUtils.humanizeTimestamp(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
             params.versionDate = UiUtils.versionDate(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
 
-            refTable.schema.catalog.currentSnaptime().then(function (snaptime) {
+            refTable.schema.catalog.currentSnaptime(logActions.recordShare).then(function (snaptime) {
                 // if current fetched snpatime doesn't match old snaptime, show a warning
                 params.showVersionWarning = (snaptime !== refTable.schema.catalog.snaptime);
             }).finally(function() {
@@ -250,6 +239,35 @@
         vm.toggleDisplayMode = function(dataModel) {
             event.preventDefault();
             event.stopPropagation();
+
+            // if tableModel, table context is nested inside model
+            var tableModel = dataModel;
+            if (dataModel.tableModel) tableModel = dataModel.tableModel;
+
+            var isInline = tableModel.context.indexOf("inline") > -1;
+            var canEdit = vm.canEditRelated(tableModel.reference);
+
+            // action has 3 states for each positional mode:
+            // if seeing table mode, flip to custom (mkdn-display)
+            // else custom mode
+            //    if no edit allowed, flip to table (table-display)
+            //    else edit mode, flip to edit (edit-display)
+            //
+            // then check for 2 positional modes: inline or !inline
+            var action = null;
+            if (dataModel.isTableDisplay) {
+                action = (isInline ? logActions.recordInlineMkdnDisplay : logActions.recordMkdnDisplay);
+            } else {
+                // we see custom mode (mkdn display)
+                if (canEdit) {
+                    action = (isInline ? logActions.recordInlineEditDisplay : logActions.recordEditDisplay);
+                } else {
+                    action = (isInline ? logActions.recordInlineTableDisplay : logActions.recordTableDisplay);
+                }
+            }
+
+            logService.logAction(action, logActions.buttonAction);
+
             dataModel.isTableDisplay = !dataModel.isTableDisplay;
         };
 
