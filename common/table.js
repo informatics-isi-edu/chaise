@@ -91,8 +91,8 @@
      * modified. ellipsis will fire this event and recordset directive will use it.
      */
     .factory('recordTableUtils',
-            ['AlertsService', 'DataUtils', 'defaultDisplayname', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'recordsetDisplayModes', 'Session', 'tableConstants', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$q', '$rootScope', '$timeout', '$window',
-            function(AlertsService, DataUtils, defaultDisplayname, ErrorService, logActions, MathUtils, messageMap, modalBox, recordsetDisplayModes, Session, tableConstants, UiUtils, UriUtils, $cookies, $document, $log, $q, $rootScope, $timeout, $window) {
+            ['AlertsService', 'DataUtils', 'defaultDisplayname', 'ErrorService', 'logActions', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'recordsetDisplayModes', 'Session', 'tableConstants', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$q', '$rootScope', '$timeout', '$window',
+            function(AlertsService, DataUtils, defaultDisplayname, ErrorService, logActions, logService, MathUtils, messageMap, modalBox, recordsetDisplayModes, Session, tableConstants, UiUtils, UriUtils, $cookies, $document, $log, $q, $rootScope, $timeout, $window) {
 
         function FlowControlObject(maxRequests) {
             this.maxRequests = maxRequests || tableConstants.MAX_CONCURENT_REQUEST;
@@ -975,6 +975,14 @@
             scope.vm.facetsToPreProcess = [];
             scope.vm.flowControlObject = new FlowControlObject();
 
+            scope.versionDisplay = function () {
+                return UiUtils.humanizeTimestamp(scope.vm.reference.location.versionAsMillis);
+            }
+
+            scope.versionDate = function () {
+                return UiUtils.versionDate(scope.vm.reference.location.versionAsMillis);
+            }
+
             scope.search = function(term) {
 
                 if (term) term = term.trim();
@@ -1213,6 +1221,12 @@
 
                         //make sure we're calling this watcher once
                         unbindWatchForRecordsetInitializeHeight();
+
+                        // capture and log the right click event on the permalink button
+                        var permalink = document.getElementById('permalink');
+                        permalink.addEventListener('contextmenu', function (e) {
+                            logService.logAction(logActions.recordsetPermalink, logActions.buttonAction);
+                        });
                     }, 0);
                 }
             });
@@ -1553,7 +1567,7 @@
             templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/recordset.html',
             scope: {
                 vm: '=',
-                onSelectedRowsChanged: '&?',       // set row click function
+                onSelectedRowsChanged: '&?', // set row click function
                 registerSetPageState: "&?"
             },
             link: function (scope, elem, attrs) {
