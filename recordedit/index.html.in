@@ -25,14 +25,12 @@
                             <div class="top-left-panel close-panel"></div>
                             <div class="top-right-panel">
                                 <div class="title-container meta-icons">
-                                    <!-- TODO fix the subtitle and title test cases -->
                                     <div class="title-buttons">
                                         <button id="submit-record-button" class="chaise-btn chaise-btn-primary" type="submit" ng-disabled="form.submissionButtonDisabled" ng-click="::form.submit()" ng-attr-tooltip-placement="bottom-right" ng-attr-uib-tooltip="Save this data on the server">
                                             <span class="chaise-btn-icon glyphicon glyphicon-saved"></span>
                                             <span>Submit</span>
                                         </button>
                                     </div>
-                                    <!-- TODO there was a wrapper with id="title" -->
                                     <h1 id="page-title">
                                         <span>{{ form.editMode ? "Edit " : "Create new " }}</span>
                                         <chaise-title add-link="true" reference="reference"></chaise-title>
@@ -49,7 +47,7 @@
                                         </span>
                                         <input id="copy-rows-input" type="number" class="chaise-input-control chaise-input-control-sm add-rows-input" ng-model="form.numberRowsToAdd" placeholder="1" min="1">
                                         <span class="chaise-input-group-append">
-                                            <button id="copy-rows-submit" class="chaise-btn chaise-btn-sm chaise-btn-secondary center-block" ng-click="::form.copyFormRow()" type="button" tooltip-placement="bottom-right" uib-tooltip="Duplicate rightmost form the specified number of times.">
+                                            <button id="copy-rows-submit" class="chaise-btn chaise-btn-sm chaise-btn-secondary center-block" ng-click="::form.copyFormRow()" ng-disabled="!form.canAddMore" type="button" tooltip-placement="bottom-right" uib-tooltip="Duplicate rightmost form the specified number of times.">
                                                 <span>Clone</span>
                                             </button>
                                         </span>
@@ -300,7 +298,6 @@
                             <div class="top-left-panel close-panel"></div>
                             <div class="top-right-panel">
                                 <div class="title-container">
-                                    <!-- TODO had id="title" -->
                                     <h1 id="page-title">
                                         <span>{{ form.resultsetModel.rowValues.length }}/{{ form.resultsetModel.pageLimit }}</span>
                                         <chaise-title link="form.resultsetRecordsetLink" reference="reference"></chaise-title>

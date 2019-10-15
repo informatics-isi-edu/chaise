@@ -15,7 +15,7 @@
                             <span>Cancel</span>
                         </button>
                     </div>
-                    <h2 id="page-title" ng-if="ctrl.tableModel.reference" ng-switch="ctrl.tableModel.config.displayMode">
+                    <h2 ng-if="ctrl.tableModel.reference" ng-switch="ctrl.tableModel.config.displayMode" class="modal-title">
                         <div ng-switch-when="popup/foreignkey/create">
                             <span>Select </span>
                             <chaise-title displayname="ctrl.tableModel.displayname"></chaise-title>
@@ -27,7 +27,7 @@
                             <chaise-title displayname="ctrl.tableModel.displayname"></chaise-title>
                             <span> for </span>
                             <chaise-title reference="ctrl.tableModel.parentReference"></chaise-title>
-                            <span ng-if="vm.parentTuple">:
+                            <span ng-if="ctrl.tableModel.parentTuple">:
                                 <chaise-title displayname="ctrl.tableModel.parentTuple.displayname"></chaise-title>
                             </span>
                         </div>
@@ -41,7 +41,7 @@
                         </div>
                         <div ng-switch-when="popup/facet">
                             <span>Search by </span>
-                            <chaise-title displayname="ctrl.tableModel.displayname" comment="vm.comment"></chaise-title>
+                            <chaise-title displayname="ctrl.tableModel.displayname" comment="ctrl.tableModel.comment"></chaise-title>
                         </div>
                         <div ng-switch-default>
                             <chaise-title add-link="false" reference="ctrl.tableModel.reference"></chaise-title>

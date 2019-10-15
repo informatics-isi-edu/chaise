@@ -25,7 +25,7 @@ exports.testPresentation = function (tableParams) {
     it("should have '" + tableParams.subTitle +"' as subTitle", function() {
         var subtitle = chaisePage.recordPage.getEntitySubTitleElement();
         chaisePage.waitForElement(subtitle);
-        expect(subtitle.getText()).toEqual(tableParams.subTitle + ":");
+        expect(subtitle.getText()).toEqual(tableParams.subTitle);
     });
 
     it ("should have the correct table tooltip.", function () {
@@ -894,8 +894,8 @@ exports.testAddRelatedTable = function (params, isInline, inputCallback) {
             }).then(function(url) {
                 expect(url.indexOf('prefill=')).toBeGreaterThan(-1, "didn't have prefill");
 
-                var title = chaisePage.recordEditPage.getFormTitle().getText();
-                expect(title).toBe("Create " + params.tableDisplayname + " Record", "recordedit title missmatch.");
+                var title = chaisePage.recordEditPage.getEntityTitleElement().getText();
+                expect(title).toBe("Create new " + params.tableDisplayname, "recordedit title missmatch.");
 
                 done();
             }).catch(function (err) {
@@ -942,7 +942,7 @@ exports.testAddRelatedTable = function (params, isInline, inputCallback) {
 
 /**
  * - relatedDisplayname
- * - tableDisplayname
+ * - modalTitle
  * - totalCount
  * - existingCount
  * - disabledRows
@@ -956,7 +956,7 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
                 chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
                 return chaisePage.recordEditPage.getModalTitle().getText();
             }).then(function (title) {
-                expect(title).toBe("Select " + params.tableDisplayname, "title missmatch.");
+                expect(title).toBe(params.modalTitle, "title missmatch.");
 
                 browser.wait(function () {
                     return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {

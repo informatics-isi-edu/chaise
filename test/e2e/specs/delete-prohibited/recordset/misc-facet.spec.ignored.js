@@ -848,7 +848,7 @@ describe("Other facet features, ", function() {
 
                     return selectButtons[0].click();
                 }).then(function () {
-                    browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), browser.params.defaultTimeout);
+                    browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getEntityTitleElement()), browser.params.defaultTimeout);
 
                     var foreignKeyInputDisplay = chaisePage.recordEditPage.getForeignKeyInputDisplay("fk_to_f1", 0);
                     expect(foreignKeyInputDisplay.getText()).toEqual("eight", "Didn't select the expected foreign key.");

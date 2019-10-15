@@ -8,7 +8,7 @@ var testParams = {
     entity_title: "1",
     entity_inner_html_title: "<strong>1</strong>",
     html_table_name: "html-name-table",
-    html_table_display: "<strong>Html Name</strong>:",
+    html_table_display: "<strong>Html Name</strong>",
     keys: [{"name": "id", "value": 1, "operator": "="}],
     html_keys: [{"name": "id", "value": 1, "operator": "="}]
 };
@@ -69,7 +69,7 @@ describe('View existing record,', function() {
         });
 
         it("should display the entity subtitle name with html in it.", function() {
-            expect(chaisePage.recordPage.getEntitySubTitle()).toBe(testParams.html_table_display);
+            expect(chaisePage.recordPage.getEntitySubTitleElement().getText()).toBe(testParams.html_table_display);
         });
 
         it("should load chaise-config.js and have resolverImplicitCatalog=false,", function() {
@@ -190,17 +190,20 @@ describe('View existing record,', function() {
                 copyButton = chaisePage.recordPage.getCopyRecordButton();
 
             it("should display the entity title and subtitle based on their markdown patterns.", function() {
-                var subtitleElement = chaisePage.recordPage.getEntitySubTitleElement().element(by.tagName("span")),
-                    titleElement = chaisePage.recordPage.getEntityTitleElement().element(by.tagName("span"));
+                // page-title and page-subtitle are attached to chaise-title,
+                // subtitle structure is: chaise-title -> a -> span (therefore finding span works)
+                // title structure is: chaise-title -> span -> span (therefore we need to be more specific)
+                var subtitleElement = chaisePage.recordPage.getEntitySubTitleElement().element(by.css("span")),
+                    titleElement = chaisePage.recordPage.getEntityTitleElement().element(by.css("span span"));
 
                 subtitleElement.getAttribute("innerHTML").then(function(html) {
                     expect(html).toBe(testParams.table_inner_html_display);
-                    expect(chaisePage.recordPage.getEntitySubTitle()).toBe(testParams.table_displayname + ":");
+                    expect(subtitleElement.getText()).toBe(testParams.table_displayname);
 
                     return titleElement.getAttribute("innerHTML");
                 }).then(function(html) {
                     expect(html).toBe(testParams.entity_inner_html_title);
-                    expect(chaisePage.recordPage.getEntityTitle()).toBe(testParams.entity_title);
+                    expect(titleElement.getText()).toBe(testParams.entity_title);
                 });
             });
 
@@ -230,7 +233,7 @@ describe('View existing record,', function() {
 
                     return titleElement.getText();
                 }).then(function(txt) {
-                    expect(txt).toBe("Create " + testParams.table_displayname + " Record", "Recordedit title is incorrect.");
+                    expect(txt).toBe("Create new " + testParams.table_displayname, "Recordedit title is incorrect.");
 
                     return titleElement.element(by.css('span[ng-bind-html]')).getAttribute("innerHTML");
                 }).then(function(html) {

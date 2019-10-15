@@ -130,7 +130,7 @@ var testParams = {
                 date: "2001-14-04",
                 dateError: "Please enter a date value in YYYY-MM-DD format.",
                 time: "25:64:12",
-                timeError: "Please enter a time value in 24-hr HH:mm:ss format."
+                timeError: "Please enter a time value in 24-hr HH:MM:SS format."
             },
             range: {
                 minDate: "2004-05-20",
@@ -511,6 +511,7 @@ describe("Viewing Recordset with Faceting,", function() {
                 });
             });
 
+            // TODO fix this
             it("should show correct tooltip for the facets.", function () {
                 testParams.facets.forEach(function (facetParams, idx) {
                     var facetHeader = chaisePage.recordsetPage.getFacetHeaderById(idx);
@@ -900,7 +901,7 @@ describe("Viewing Recordset with Faceting,", function() {
 
                                     return chaisePage.recordsetPage.getValidationError(idx).getText();
                                 }).then(function (text) {
-                                    expect(text).toBe(facetParams.invalid.timeError, "The time validation message did not show up or is incorrect");
+                                    expect(text).toEqual(facetParams.invalid.timeError, "The time validation message did not show up or is incorrect");
 
                                     return minTimeClear.click();
                                 }).then(function() {

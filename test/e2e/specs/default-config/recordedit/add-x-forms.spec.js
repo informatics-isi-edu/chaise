@@ -51,7 +51,6 @@ describe('Record Add', function() {
 
     describe("for when the user adds multiple forms using the multi form input control, ", function() {
         var EC = protractor.ExpectedConditions,
-            multiFormOpenButton = chaisePage.recordEditPage.getMultiFormInputOpenButton(),
             multiFormInput = chaisePage.recordEditPage.getMultiFormInput(),
             multiFormSubmitButton = chaisePage.recordEditPage.getMultiFormInputSubmitButton(),
             intVal = testParams.initial_int_val,
@@ -100,9 +99,7 @@ describe('Record Add', function() {
             browser.sleep(10);
             multiFormInput.sendKeys(numberGreaterThanMax);
 
-            chaisePage.recordEditPage.getMultiFormInputSubmitButtonScript().then(function(submitBtn) {
-                return chaisePage.clickButton(submitBtn);
-            }).then(function() {
+            chaisePage.clickButton(multiFormSubmitButton).then(function() {
                 return chaisePage.recordEditPage.getAlertError();
             }).then(function(err) {
                 return err.getText();
@@ -123,9 +120,7 @@ describe('Record Add', function() {
             browser.sleep(10);
             multiFormInput.sendKeys(testParams.records-1);
 
-            chaisePage.recordEditPage.getMultiFormInputSubmitButtonScript().then(function(submitBtn) {
-                return chaisePage.clickButton(submitBtn);
-            }).then(function() {
+            chaisePage.clickButton(multiFormSubmitButton).then(function() {
                 return chaisePage.recordEditPage.getViewModelRows();
             }).then(function(rows) {
                 expect(rows.length).toBe(testParams.records);
@@ -455,7 +450,6 @@ describe('Record Add', function() {
 
         describe("for when the user adds the maximum amount of forms, ", function() {
             var EC = protractor.ExpectedConditions,
-                multiFormOpenButton = chaisePage.recordEditPage.getMultiFormInputOpenButton(),
                 multiFormInput = chaisePage.recordEditPage.getMultiFormInput(),
                 multiFormSubmitButton = chaisePage.recordEditPage.getMultiFormInputSubmitButton();
 
@@ -474,9 +468,7 @@ describe('Record Add', function() {
                 browser.sleep(10);
                 multiFormInput.sendKeys(testParams.max_input_rows);
 
-                chaisePage.recordEditPage.getMultiFormInputSubmitButtonScript().then(function(submitBtn) {
-                    return chaisePage.clickButton(submitBtn);
-                }).then(function() {
+                chaisePage.clickButton(multiFormSubmitButton).then(function() {
                     // wait for dom to finish rendering the forms
                     browser.wait(function() {
                         return chaisePage.recordEditPage.getForms().count().then(function(ct) {
