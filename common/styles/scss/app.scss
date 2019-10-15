@@ -348,6 +348,22 @@ html {
         }
     }
 
+    // title
+    .title-container {
+        margin: 0;
+        width: 100%;
+        display: inline-block;
+
+        h1 {
+            margin: 0;
+        }
+
+        .title-buttons {
+            float: right;
+            text-align: right;
+        }
+    }
+
     // top panel container for record and recordset
     .top-panel-container {
         padding-top: $viewport-margin;

@@ -1,4 +1,4 @@
-<div class="recordset-container" ng-class="vm.config.showFaceting ? 'with-faceting':'without-faceting'" >
+<div class="recordset-container app-content-container" ng-class="vm.config.showFaceting ? 'with-faceting':'without-faceting'" >
     <loading-spinner id="main-spinner" ng-show="(!vm.initialized || $root.showSpinner || !vm.hasLoaded) && !$root.error"></loading-spinner>
     <div class="top-panel-container" ng-show="vm.reference">
         <alerts alerts="$root.alerts"></alerts>
@@ -17,57 +17,25 @@
                 </div>
             </div>
             <div class="top-right-panel">
-                <div class="row recordset-title-container">
-                    <div class="recordset-title-buttons-container">
-                        <div class="recordset-title-buttons" ng-show="vm.config.displayMode === recordsetDisplayModes.fullscreen">
-                            <!-- download CSV included by default -->
-                            <export reference="vm.reference" disabled="!vm.hasLoaded || !vm.initialized || vm.rowValues.length == 0"></export>
-                            <!-- permalink -->
-                            <a id="permalink" ng-href="{{ getRecordsetLink() }}" tooltip-placement="bottom-right" uib-tooltip={{tooltip.permalink}} class="chaise-btn chaise-btn-primary">
-                                <span class="chaise-btn-icon glyphicon glyphicon-bookmark"></span>
-                                <span>Permalink</span>
-                            </a>
-                        </div>
+                <div class="recordset-title-container title-container" ng-if="vm.reference && vm.config.displayMode === recordsetDisplayModes.fullscreen">
+                    <div class="recordset-title-buttons title-buttons" ng-show="vm.config.displayMode === recordsetDisplayModes.fullscreen">
+                        <!-- download CSV included by default -->
+                        <export reference="vm.reference" disabled="!vm.hasLoaded || !vm.initialized || vm.rowValues.length == 0"></export>
+                        <!-- permalink -->
+                        <a id="permalink" ng-href="{{ getRecordsetLink() }}" tooltip-placement="bottom-right" uib-tooltip={{tooltip.permalink}} class="chaise-btn chaise-btn-primary">
+                            <span class="chaise-btn-icon glyphicon glyphicon-bookmark"></span>
+                            <span>Permalink</span>
+                        </a>
                     </div>
-                    <div class="recordset-title-text">
                         <!-- TODO UX-M should change to class -->
-                        <h1 id="page-title" ng-if="vm.reference" ng-switch="vm.config.displayMode" ng-class="{'h2-class': vm.config.displayMode.indexOf(recordsetDisplayModes.popup) === 0}">
-                            <div ng-switch-when="popup/foreignkey/create">
-                                <span>Select </span>
-                                <chaise-title displayname="vm.displayname"></chaise-title>
-                                <span> for new </span>
-                                <chaise-title reference="vm.parentReference"></chaise-title>
-                            </div>
-                            <div ng-switch-when="popup/foreignkey/edit">
-                                <span>Select </span>
-                                <chaise-title displayname="vm.displayname"></chaise-title>
-                                <span> for </span>
-                                <chaise-title reference="vm.parentReference"></chaise-title>
-                                <span ng-if="vm.parentTuple">:
-                                    <chaise-title displayname="vm.parentTuple.displayname"></chaise-title>
-                                </span>
-                            </div>
-                            <div ng-switch-when="popup/purebinary/add">
-                                <span>Add </span>
-                                <chaise-title reference="vm.reference"></chaise-title>
-                                <span> to </span>
-                                <chaise-title reference="vm.parentReference"></chaise-title>
-                                <span>:</span>
-                                <chaise-title displayname="vm.parentTuple.displayname"></chaise-title>
-                            </div>
-                            <div ng-switch-when="popup/facet">
-                                <!-- look at recordsetSelectFaceting -->
-                            </div>
-                            <div ng-switch-default>
-                                <chaise-title add-link="false" reference="vm.reference"></chaise-title>
-                                <small ng-if="vm.reference && vm.reference.location.version" class="h3-class" tooltip-placement="bottom-left" uib-tooltip="{{::tooltip.versionTime}} {{versionDate()}}">({{versionDisplay()}})</small>
-                            </div>
-                        </h1>
-                    </div>
+                    <h1 id="page-title">
+                        <chaise-title add-link="false" reference="vm.reference"></chaise-title>
+                        <small ng-if="vm.reference && vm.reference.location.version" class="h3-class" tooltip-placement="bottom-left" uib-tooltip="{{::tooltip.versionTime}} {{versionDate()}}">({{versionDisplay()}})</small>
+                    </h1>
                 </div>
                 <div class="recordset-controls-container">
                     <div ng-if="vm.selectedRows.length > 0 && vm.config.selectMode == 'multi-select'" class="recordset-selected-rows recordset-chiclets-container">
-                        <div class="selected-chiclet chaise-btn" ng-repeat="row in vm.selectedRows track by $index">
+                        <div class="selected-chiclet" ng-repeat="row in vm.selectedRows track by $index">
                             <span class="selected-chiclet-remove" ng-click="removePill(row.uniqueId, $event)" uib-tooltip="Clear selected row" tooltip-placement="bottom-left">
                                 <i class="glyphicon glyphicon-remove"></i>
                             </span>
@@ -76,7 +44,7 @@
                             <span class="selected-chiclet-name" ng-if="row.displayname.value == ''" ng-bind-html="defaultDisplayname.empty"></span>
                             <span class="selected-chiclet-name" ng-if="row.displayname.value == null" ng-bind-html="defaultDisplayname.null"></span>
                         </div>
-                        <button ng-click="removeAllPills($event)" class="chaise-btn chaise-btn-tertiary clear-all-btn">
+                        <button ng-click="removeAllPills($event)" class="chaise-btn chaise-btn-tertiary clear-all-btn" tooltip-placement="bottom-left" uib-tooltip="Clear all selected rows">
                             <span>Reset selection</span>
                         </button>
                     </div>

@@ -773,42 +773,31 @@
             }
         });
 
-        /*** Container Heights and other styling ***/
-        // fetches the height of navbar, bookmark container, and viewport
-        // also fetches the main container for defining the dynamic height
-        // There are 2 main containers on `recordedit` app
-        function fetchContainerElements(containerIndex) {
-            var elements = {};
-            try {
-                /**** used for main-container height calculation ****/
-                // get navbar height
-                elements.fixedContentHeight = $document[0].getElementById('mainnav').offsetHeight;
-                // get bookmark height
-                elements.fixedContentHeight += $document[0].getElementsByClassName('meta-icons')[containerIndex].offsetHeight;
-                // get recordedit main container
-                elements.container = $document[0].getElementsByClassName('main-container')[containerIndex];
-            } catch(error) {
-                elements = {};
-                $log.warn(error);
-            }
-            return elements;
-        }
-
         function setMainContainerHeight() {
-            var idx = vm.resultset ? 1 : 0;
-            var elements = fetchContainerElements(idx);
-            // if the navbarHeight is not set yet, don't set the height
-            // no bookmark container here
-            if(elements.fixedContentHeight !== undefined && !isNaN(elements.fixedContentHeight)) {
-                UiUtils.setDisplayContainerHeight(elements.container, elements.fixedContentHeight);
-            }
+            $scope.parentContainer = $document[0].querySelector(vm.resultset ? '.resultset-container' : '.form-container');
+            UiUtils.setDisplayContainerHeight($scope.parentContainer, null, true);
         }
 
         $scope.$watch(function() {
             return $rootScope.displayReady;
         }, function (newValue, oldValue) {
             if (newValue) {
-                $timeout(setMainContainerHeight, 0);
+                setMainContainerHeight();
+
+                $scope.$watch(function () {
+                    $scope.parentContainer = $document[0].querySelector(vm.resultset ? '.resultset-container' : '.form-container');
+
+                    var fixedContentHeight = $document[0].querySelector("#mainnav").offsetHeight;
+                    fixedContentHeight += $scope.parentContainer.querySelector('.top-panel-container').offsetHeight;
+
+                    return fixedContentHeight;
+                }, function (newValue, oldValue) {
+                    if (newValue != oldValue) {
+                        setMainContainerHeight();
+                    }
+                })
+
+                UiUtils.watchForMainContainerPadding($scope, $scope.parentContainer, vm.resultset ? null : $scope.parentContainer.querySelector("#form-edit"));
             }
         });
 
@@ -849,13 +838,13 @@
         var element = document.querySelector('.ng-scope');
         var $rootElement = angular.element(element).injector().get('$rootElement');
 
-        var formContainerEl = $rootElement.find('.form-container');
+        var inputContainerEl = $rootElement.find('.input-container');
 
         // Get the form-edit div
         var elem = $rootElement.find('#form-edit');
 
         var tableEl = elem.find('table');
-        var scrollContainer = formContainerEl.find('#form-edit-scroll');
+        var scrollContainer = inputContainerEl.find('#form-edit-scroll');
 
         var elemHeight;
         var trs, selectAllTrs;
@@ -865,7 +854,7 @@
         // Set outer width of element to be less by caption column Width and add buttonWidth,
         // so that it doesn't scrolls due to the margin-left applied before extra padding
         function onResize(doNotInvokeEvent) {
-            var elemWidth = formContainerEl.outerWidth();
+            var elemWidth = inputContainerEl.outerWidth();
             vm.formEditDynamicStyle.width = elemWidth - ENTITY_KEY_WIDTH - 25; // account for left margin as well
 
             if (vm.recordEditModel.rows.length > 1) {

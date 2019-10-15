@@ -153,19 +153,20 @@ body.error-open loading-spinner {
 
 /************** search popup **************/
 .search-popup {
-    .search-popup-controls {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-
-        #multi-select-submit-btn {
-            margin-right: 10px;
-        }
+    #multi-select-submit-btn {
+        margin-right: 5px;
     }
 
+    .modal-header {
+        padding: 0;
+    }
     .modal-body {
         padding: 0;
         height: 90vh;
+
+        .top-panel-container {
+            padding-top: 0;
+        }
     }
 }
 

@@ -806,12 +806,20 @@
             return /*@cc_on!@*/false || !!document.documentMode;
         }
 
-        // takes pathname attribute of window.location object and returns app name
-        // path should be a string literal which appears before #catalog id in URL (/chaise/recordset/)
+        /**
+         * Takes pathname attribute of window.location object and returns app name
+         * path should be a string literal which appears before #catalog id in URL (/chaise/recordset/)
+         * if the path ends with /folder/file.html it will return the folder.
+         * (any other pattern will just return anything after last `/`)
+        */
         function appNamefromUrlPathname(path){
           var newPath = path.slice(0, -1);
           var lastSlash = newPath.lastIndexOf('/');
-          return newPath.substring(lastSlash + 1, newPath.length);
+          var name = newPath.substring(lastSlash + 1, newPath.length);
+          if (name.endsWith(".htm")) {
+              return appNamefromUrlPathname(newPath.substring(0, lastSlash) + "/");
+          }
+          return name;
         }
 
         // Takes path and creates full redirect links with catalogId
@@ -1421,45 +1429,73 @@
         }
 
         /**
-         * sets the height of container based on the given parameters
-         * @param {DOMElement} container - the main container to fix the height of
-         * @param {int} fixedContentHeight - the height of fixed content
-         * @param {DOCElement=} parentContainer - the parent container (used to calculate the available height)
+         * @param   {DOMElement=} parentContainer - the parent container. if undefined `body` will be used.
+         * @param   {DOMElement=} parentContainerSticky - the sticky area of parent. if undefined `#mainnav` will be used.
+         * @param   {boolean} useDocHeight - whether we should use the doc height even if parentContainer is passed.
+         * Set the height of bottom-panel-container
+         * If you don't pass any parentContainer, it will use the body
+         * It will assume the following structure in the given parentContainer:
+         *  - .app-content-container
+         *    - .top-panel-container
+         *    - .bottom-panel-container
          */
-        function setDisplayContainerHeight(container, fixedContentHeight, parentContainer) {
+        function setDisplayContainerHeight(parentContainer, parentContainerSticky, useDocHeight) {
             try {
-                // we're setting the height based on the viewport, so we need the
-                // whole viewport height
-                var docHeight = $window.innerHeight;
+                var docHeight = $window.innerHeight,
+                    parentUsableHeight,
+                    appContent, // the container that we might set height for if container height is too small
+                    container, // the container that we want to set the height for
+                    containerSticky; // the sticky part of the container (top-panel-container)
 
-                if (parentContainer == null) {
-                    parentContainer = $document[0].querySelector("body");
-                }
-
-                // if parentContainer is body element (the whole page),
-                //   we should use the window.innerHeight instead because parentContainer.offsetHeight is based on content height
-                //   while the window.innerHeight is the actual available viewport height
-                var parentContainerHeight;
-                if (parentContainer == $document[0].querySelector("body")) {
-                    parentContainerHeight = docHeight;
-                } else {
-                    parentContainerHeight = parentContainer.offsetHeight;
-                }
-
-                // find the container's usable height
-                var containerHeight = ((parentContainerHeight - fixedContentHeight)/docHeight) * 100;
-
+                // if the size of content is way too small, make the whole app-content-container scrollable
                 var resetHeight = function () {
-                    parentContainer.style.overflowY = "auto";
+                    appContent.style.overflowY = "auto";
+                    appContent.style.height = ((parentUsableHeight/docHeight) * 100) + "vh";
                     container.style.height = "unset";
                 }
 
-                // make sure the percentage makes sense first
+                // get the parentContainer and its usable height
+                if (parentContainer == null || parentContainer == $document[0].querySelector("body")) {
+                    parentUsableHeight = docHeight;
+                    parentContainer = $document[0];
+                } else {
+                    parentUsableHeight = parentContainer.offsetHeight;
+                }
+
+                if (useDocHeight) {
+                    parentUsableHeight = docHeight;
+                }
+
+                // get the parent sticky
+                if (parentContainerSticky == null) {
+                    parentContainerSticky = $document[0].querySelector("#mainnav");
+                }
+                // subtract the parent sticky from usable height
+                parentUsableHeight -= parentContainerSticky.offsetHeight;
+
+                // the content that we should make scrollable if the content height is too small
+                appContent = parentContainer.querySelector(".app-content-container");
+
+                // the sticky part of the container
+                var stickyHeight = 0;
+                containerSticky = appContent.querySelector(".top-panel-container");
+                if (containerSticky) {
+                    stickyHeight = containerSticky.offsetHeight;
+                }
+
+                container = appContent.querySelector(".bottom-panel-container");
+
+                var containerHeight = ((parentUsableHeight - stickyHeight) / docHeight) * 100;
                 if (containerHeight < 15) {
                     resetHeight();
                 } else {
+                    //remove the styles that might have been added to appContent
+                    appContent.style.overflowY = "unset";
+                    appContent.style.height = "unset";
+
                     // set the container's height
                     container.style.height = containerHeight + 'vh';
+                    console.log("did the containerheight");
 
                     // now check based on actual pixel size
                     if (container.offsetHeight < 300) {
@@ -1467,8 +1503,7 @@
                     }
                 }
 
-
-            } catch(err) {
+            } catch (err) {
                 $log.warn(err);
             }
         }
@@ -1502,18 +1537,26 @@
         }
 
         /**
+         * @param   {Object} scope - the scope object
+         * @param   {DOMElement} parentContainer - the container that we want the alignment for
+         * @param   {DOMElement} paddingElement - the element that we should apply the padding to
+         *                            if undefined, we will apply the padding to `.main-container`
+         *
          * Make sure the top right panel and main container are aligned.
          * They can be missaligned if the scrollbar is visible and takes space.
          * TODO we might want to improve the performance of this.
          * Currently it's running on every digest cycle.
          */
-        function watchForMainContainerPadding(scope, parentContainer) {
+        function watchForMainContainerPadding(scope, parentContainer, paddingElement) {
             var mainContainer = parentContainer.querySelector(".main-container");
             var topRightPanel = parentContainer.querySelector(".top-right-panel");
             scope.$watch(function () {
                 return mainContainer.clientWidth - topRightPanel.clientWidth;
             }, function (padding) {
-                mainContainer.style.paddingRight = padding + "px";
+                if (!paddingElement) {
+                    paddingElement = mainContainer;
+                }
+                paddingElement.style.paddingRight = padding + "px";
             });
         }
 
@@ -1927,6 +1970,7 @@
             scope: {
                 reference: "=?",
                 displayname: "=?",
+                comment: "=?",
                 addLink: "=?",
                 link: "=?"
             },
@@ -1946,7 +1990,7 @@
                     scope.displayname = scope.reference.displayname;
                 }
 
-                if (scope.reference && scope.reference.table.comment) {
+                if (!scope.comment && scope.reference && scope.reference.table.comment) {
                     scope.comment = scope.reference.table.comment;
                 }
             }

@@ -6,33 +6,6 @@
         }
 
         .top-right-panel {
-
-            .recordset-title-container {
-                margin: 0;
-                margin-bottom: 20px;
-
-                h1 {
-                    margin: 0;
-                }
-
-                .recordset-title-buttons-container {
-                    .recordset-title-buttons {
-                        float: right;
-                        padding-left: 20px;
-                        // height: 40px;
-
-                        .modal-body & {
-                            min-width: 190px;
-                        }
-                        .foreignkey-popup & {
-                            min-width: 95px;
-                        }
-
-                        min-width: 220px;
-                    }
-                }
-            }
-
             .show-filter-panel-btn {
                 padding: 0;
                 margin-bottom: 10px;
@@ -40,94 +13,138 @@
 
             .recordset-controls-container {
                 margin-bottom: 10px;
-            }
 
-            $filter-chiclet-margin: 5px;
-            .filter-chiclet {
-                max-width: 350px;
-                margin-right: $filter-chiclet-margin;
-                margin-bottom: $filter-chiclet-margin;
-
-                .chaise-btn:focus {
-                    background-color: $white-color;
+                .main-search-container {
+                    max-width: 400px;
                 }
 
-                .chaise-btn.chaise-btn-secondary {
-                    border-color: $border-color;
-                    height: 25px;
-                    min-width: 25px;
-                    padding: 2px 5px;
-                }
-
-                .chaise-btn.filter-chiclet-remove {
-                    padding: 3px;
-                }
-
-                .chaise-btn.filter-chiclet-title {
-                    border-right: 0;
-                    max-width: 150px;
-                    text-overflow: ellipsis;
-                    overflow: hidden;
-                    padding-right: 2px;
-                    text-align: left;
-                    white-space: nowrap;
-                }
-                .chaise-btn.filter-chiclet-value {
-                    text-overflow: ellipsis;
-                    overflow: hidden;
-                    white-space: nowrap;
-                    max-width: 200px;
-                    border-left: 0;
-                    padding-left: 7px;
-                    padding-right: 4px;
-
-                    position: relative;
-                    &:before {
-                        content: ":";
-                        position: absolute;
-                        left: 0;
+                @include for-predefined-size(sm) {
+                    .main-search-container {
+                        min-width: 400px;
                     }
                 }
-
-                span {
-                    color: $black-color;
-                    cursor: default;
-                }
-            }
-
-            .selected-chiclet {
-                border: none;
-                margin-right: 5px;
-                margin-bottom: 5px;
-                padding-right: 0;
-                padding-left: 5px;
-
-                .selected-chiclet-name {
-                    cursor: default;
-                    user-select: text;
-                    -webkit-user-select: text;
-                    -moz-user-select: text;
-                    -ms-user-select: text;
-                }
-
-                .selected-chiclet-remove i {
-                    top: 3px;
-                }
-            }
-
-            .clear-all-btn {
-                padding-left: 0;
-                margin-bottom: $filter-chiclet-margin;
             }
 
             .recordset-chiclets-container {
                 margin-bottom: 10px;
-                padding-right: 250px;
+
+                &.recordset-chiclets {
+                    padding-right: 250px;
+                }
+
+                $filter-chiclet-margin: 5px;
+                .filter-chiclet {
+                    max-width: 350px;
+                    margin-right: $filter-chiclet-margin;
+                    margin-bottom: $filter-chiclet-margin;
+
+                    .chaise-btn:focus {
+                        background-color: $white-color;
+                    }
+
+                    .chaise-btn.chaise-btn-secondary {
+                        border-color: $border-color;
+                        height: 25px;
+                        min-width: 25px;
+                        padding: 2px 5px;
+                    }
+
+                    .chaise-btn.filter-chiclet-remove {
+                        padding: 3px;
+                    }
+
+                    .chaise-btn.filter-chiclet-title {
+                        border-right: 0;
+                        max-width: 150px;
+                        text-overflow: ellipsis;
+                        overflow: hidden;
+                        padding-right: 2px;
+                        text-align: left;
+                        white-space: nowrap;
+                    }
+                    .chaise-btn.filter-chiclet-value {
+                        text-overflow: ellipsis;
+                        overflow: hidden;
+                        white-space: nowrap;
+                        max-width: 200px;
+                        border-left: 0;
+                        padding-left: 7px;
+                        padding-right: 4px;
+
+                        position: relative;
+                        &:before {
+                            content: ":";
+                            position: absolute;
+                            left: 0;
+                        }
+                    }
+
+                    span {
+                        color: $black-color;
+                        cursor: default;
+                    }
+                }
+
+                .selected-chiclet {
+                    border: none;
+                    margin-right: 5px;
+                    margin-bottom: 5px;
+                    padding-right: 0;
+                    display: inline-block;
+
+                    .selected-chiclet-name {
+                        cursor: default;
+                        user-select: text;
+                        -webkit-user-select: text;
+                        -moz-user-select: text;
+                        -ms-user-select: text;
+                    }
+
+                    .selected-chiclet-remove {
+                        margin-right: -3px;
+                        i {
+                            top: 2px;
+                        }
+                    }
+                }
+
+
+                .clear-all-btn {
+                    padding-left: 0;
+                    margin-bottom: $filter-chiclet-margin;
+                }
+
+                // in this case the selected chiclets are not button anymore
+                &.recordset-selected-rows .clear-all-btn {
+                    height: auto;
+                    padding: 0;
+                }
             }
         }
     }
+}
 
+.recordset-title-container.title-container {
+    margin: 0;
+    padding-bottom: 20px;
 
+    h1 {
+        margin: 0;
+    }
+
+    // .recordset-title-buttons-container {
+        .recordset-title-buttons.title-buttons {
+            padding-left: 20px;
+            min-width: 220px;
+
+            .search-popup & {
+                min-width: 190px;
+            }
+            .foreignkey-popup & {
+                min-width: 95px;
+            }
+        }
+    // }
 }
 
 // chaise table
@@ -316,6 +333,7 @@ input.search-progress {
 faceting {
     .side-panel-container {
         overflow-y: auto;
+        overflow-x: hidden;
         height: 100%;
         -webkit-transition: all 1s;
         transition: all 1s;
@@ -441,6 +459,10 @@ faceting {
         .chaise-zoom-in, .chaise-zoom-out {
             left: 1px;
             bottom: 1px;
+        }
+
+        .reset-plotly-button span {
+            color: inherit;
         }
     }
 
