@@ -35,8 +35,6 @@
 
     .input-container {
         margin-top: 0px;
-        margin-left: -15px;
-        margin-right: -15px;
     }
 
     #form-edit-scroll {
@@ -46,7 +44,7 @@
         position: fixed;
         z-index: 5;
         margin-top: -15px;
-        margin-left: $chaise-caption-column-width + 15px; // entity-key is position absolute and shifted left, add margin based on that shift
+        margin-left: $chaise-caption-column-width; // entity-key is position absolute
 
         > div {
             height: inherit;
@@ -63,8 +61,8 @@
             position: static;
             overflow-x: auto;
             overflow-y: auto;
-            padding-right: 15px;
-            margin-left: $chaise-caption-column-width + 15px; // entity-key is position absolute and shifted left, add margin based on that shift
+            // padding-right: 15px;
+            margin-left: $chaise-caption-column-width; // entity-key is position absolute
             margin-bottom: 40px; // margin at bottom of page so edit form isn't touching the bottom of viewport
 
             > table {
@@ -199,6 +197,10 @@
         #form-edit > table > tbody > tr > td:first-child {
             margin-top: -1px;
         }
+    }
+
+    #resultset-tables {
+        padding-bottom: 20px;
     }
 
     /****************** Upload modal css *****************/

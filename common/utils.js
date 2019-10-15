@@ -1554,24 +1554,19 @@
         /**
          * @param   {Object} scope - the scope object
          * @param   {DOMElement} parentContainer - the container that we want the alignment for
-         * @param   {DOMElement} paddingElement - the element that we should apply the padding to
-         *                            if undefined, we will apply the padding to `.main-container`
          *
-         * Make sure the top right panel and main container are aligned.
+         * Make sure the `.top-right-panel` and `.main-container` are aligned.
          * They can be missaligned if the scrollbar is visible and takes space.
          * TODO we might want to improve the performance of this.
          * Currently it's running on every digest cycle.
          */
-        function watchForMainContainerPadding(scope, parentContainer, paddingElement) {
+        function watchForMainContainerPadding(scope, parentContainer) {
             var mainContainer = parentContainer.querySelector(".main-container");
             var topRightPanel = parentContainer.querySelector(".top-right-panel");
             scope.$watch(function () {
                 return mainContainer.clientWidth - topRightPanel.clientWidth;
             }, function (padding) {
-                if (!paddingElement) {
-                    paddingElement = mainContainer;
-                }
-                paddingElement.style.paddingRight = padding + "px";
+                mainContainer.style.paddingRight = padding + "px";
             });
         }
 
