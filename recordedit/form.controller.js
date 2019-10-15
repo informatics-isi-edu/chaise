@@ -795,9 +795,7 @@
                     if (newValue != oldValue) {
                         setMainContainerHeight();
                     }
-                })
-
-                UiUtils.watchForMainContainerPadding($scope, $scope.parentContainer, vm.resultset ? null : $scope.parentContainer.querySelector("#form-edit"));
+                });
             }
         });
 
@@ -838,13 +836,17 @@
         var element = document.querySelector('.ng-scope');
         var $rootElement = angular.element(element).injector().get('$rootElement');
 
-        var inputContainerEl = $rootElement.find('.input-container');
+        // used for setting the width of table and
+        var inputContainerEl = document.querySelector('.input-container');
+        var tableEl = document.querySelector('#form-edit table');
+
+        // used for adjusting the padding of main-container (because of scrollbar)
+        var mainContainerEl = document.querySelector('.form-container .main-container');
+        var topRightPanelEl = document.querySelector('.form-container .top-right-panel');
 
         // Get the form-edit div
         var elem = $rootElement.find('#form-edit');
-
-        var tableEl = elem.find('table');
-        var scrollContainer = inputContainerEl.find('#form-edit-scroll');
+        var scrollContainer = $rootElement.find('#form-edit-scroll');
 
         var elemHeight;
         var trs, selectAllTrs;
@@ -854,16 +856,26 @@
         // Set outer width of element to be less by caption column Width and add buttonWidth,
         // so that it doesn't scrolls due to the margin-left applied before extra padding
         function onResize(doNotInvokeEvent) {
-            var elemWidth = inputContainerEl.outerWidth();
-            vm.formEditDynamicStyle.width = elemWidth - ENTITY_KEY_WIDTH - 25; // account for left margin as well
+
+            //adjust the padding of main-container
+            // if there's a scrollbar, the spacing needs to be adjusted
+            var padding = mainContainerEl.clientWidth - topRightPanelEl.clientWidth;
+            mainContainerEl.style.paddingRight = padding + "px";
+
+            // change the form-edit width to be the same as input-container
+            var elemWidth = inputContainerEl.offsetWidth;
+            vm.formEditDynamicStyle.width = elemWidth - ENTITY_KEY_WIDTH; // account for left margin
 
             if (vm.recordEditModel.rows.length > 1) {
-                vm.topScroll.width =  (tableEl.outerWidth()) + "px";
+                // make sure the width of form-edit-scroll and the table are the same
+                vm.topScroll.width =  (tableEl.offsetWidth) + "px";
             } else {
                 // make scroll bar container smaller than form container so it doesn't show scrollbar when 1 record
-                vm.topScroll.width =  (tableEl.outerWidth() - ENTITY_KEY_WIDTH - 50) + "px";
+                vm.topScroll.width =  (tableEl.offsetWidth - ENTITY_KEY_WIDTH - 50) + "px";
             }
 
+            // don't invoke digest cycle if the caller said so
+            // (currently it's only passed on load. the rest of callers will invoke extra digest cycle)
             if (!doNotInvokeEvent) scope.$digest();
         }
         onResize(true);
