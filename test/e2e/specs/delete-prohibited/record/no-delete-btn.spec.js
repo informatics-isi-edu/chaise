@@ -62,8 +62,7 @@ describe('View existing record,', function() {
 
                     done();
                 }).catch(function(err){
-                    console.log(err);
-                    done.fail();
+                    done.fail(err);
                 });
             });
         }

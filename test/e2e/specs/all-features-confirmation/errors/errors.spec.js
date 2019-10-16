@@ -514,7 +514,8 @@ describe('Error related test cases,', function() {
             });
 
             it('On click of OK button the page should redirect to RecordSet', function(done){
-                chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton()).then(function(){
+                // This has to be .click(), if we use clickButton then it won't show the alert
+                chaisePage.recordPage.getErrorModalOkButton().click().then(function(){
                     return browser.switchTo().alert().accept();
                 }).then(function(){
                     return browser.driver.getCurrentUrl();
