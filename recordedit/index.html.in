@@ -64,8 +64,8 @@
                                 <!-- Form section -->
                                 <div id="form-section">
                                     <div class="input-container">
+                                        <div class="scroll-spacer"></div>
                                         <div ng-show="displayReady" id="form-edit-scroll" ng-class="{'editMode': form.editMode, 'createMode': !form.editMode}" ng-style="form.formEditDynamicStyle">
-                                            <div></div>
                                             <div ng-style="form.topScroll"></div>
                                         </div>
                                         <div ng-show="displayReady" id="form-edit" ng-class="{'editMode': form.editMode, 'createMode': !form.editMode}" ng-style="form.formEditDynamicStyle"><!-- no match -->

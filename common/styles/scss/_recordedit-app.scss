@@ -37,14 +37,26 @@
         margin-top: 0px;
     }
 
-    #form-edit-scroll {
-        overflow-x: auto;
-        overflow-y: hidden;
+
+
+    .scroll-spacer {
+        background-color: $white-color;
+        width: $chaise-caption-column-width; // entity-key is position absolute
         height: 15px;
         position: fixed;
         z-index: 5;
         margin-top: -15px;
+    }
+
+    #form-edit-scroll {
+        overflow-x: auto;
+        overflow-y: hidden;
         margin-left: $chaise-caption-column-width; // entity-key is position absolute
+
+        height: 15px;
+        position: fixed;
+        z-index: 5;
+        margin-top: -15px;
 
         > div {
             height: inherit;
