@@ -395,6 +395,7 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
 	$(COMMON)/storage.js \
 	$(COMMON)/table.js \
 	$(COMMON)/utils.js \
+	$(COMMON)/utils/services.js \
 	$(COMMON)/upload.js \
 	$(COMMON)/validators.js \
 	$(COMMON)/navbar.js \

@@ -319,7 +319,7 @@ describe("Other facet features, ", function() {
         });
 
     });
-/*TODO should be added back
+
     describe("Records With Value (not-null) filter, ", function () {
         var notNullBtn, showMore, facet;
 
@@ -385,7 +385,6 @@ describe("Other facet features, ", function() {
                 // make sure the options havn't changed
                 expect(text).toEqual(testParams.not_null.options_w_not_null, "the text of selected faacet missmatch.");
 
-                // TODO uncomment this line when `null-filter` should show up in RS select with faceting
                 // expect(chaisePage.recordsetPage.getModalMatchNullInput().getAttribute('disabled')).not.toBe('true', "null option is still disabled.");
                 expect(chaisePage.recordsetPage.getCheckedFacetOptions(testParams.not_null.option).count()).toBe(0, "number of selected filters missmatch.");
                 expect(chaisePage.recordsetPage.getDisabledFacetOptions(testParams.not_null.option).count()).toBe(0, "numer of disabled filters missmatch.");
@@ -442,7 +441,7 @@ describe("Other facet features, ", function() {
             }).catch(chaisePage.catchTestError(done));
         });
 
-        it ("null should be provided as an option and user should be able to select it.", function () {
+        it ("null should be provided as an option and user should be able to select it.", function (done) {
             var params = testParams.null_filter.panel;
             chaisePage.recordsetPage.getFacetById(params.facetIdx).click().then(function () {
                 browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(params.facetIdx)), browser.params.defaultTimeout);
@@ -464,6 +463,11 @@ describe("Other facet features, ", function() {
                         return ct == params.numRows;
                     });
                 }, browser.params.defaultTimeout);
+
+                // clear the selected facet
+                return clearAll.click();
+            }).then(function () {
+                chaisePage.recordsetPage.waitForInverseMainSpinner();
                 done();
             }).catch(chaisePage.catchTestError(done));
         });
@@ -481,9 +485,6 @@ describe("Other facet features, ", function() {
                             return ct == params.firstFacet.totalNumOptions;
                         });
                     }, browser.params.defaultTimeout);
-
-                    // wait for list to be fully visible
-                    browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(idx)), browser.params.defaultTimeout);
 
                     return chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(idx, params.firstFacet.option));
                 }).then(function () {
@@ -503,7 +504,7 @@ describe("Other facet features, ", function() {
             });
         });
     });
-*/
+
     /***********************************************************  local test cases ***********************************************************/
     if (process.env.TRAVIS) return;
     // NOTE the following test cases will only run locally.

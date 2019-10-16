@@ -248,6 +248,7 @@
         }
 
         /**
+         * TODO remove matchNotNull from here
          * This will generate the correct object that we need to pass in case of multi-select.
          * It will return an object that,
          * - will have `matchNotNull` attribute if match not-null is selected

@@ -1224,9 +1224,11 @@
 
                         // capture and log the right click event on the permalink button
                         var permalink = document.getElementById('permalink');
-                        permalink.addEventListener('contextmenu', function (e) {
-                            logService.logAction(logActions.recordsetPermalink, logActions.buttonAction);
-                        });
+                        if (permalink) {
+                            permalink.addEventListener('contextmenu', function (e) {
+                                logService.logAction(logActions.recordsetPermalink, logActions.buttonAction);
+                            });
+                        }
                     }, 0);
                 }
             });

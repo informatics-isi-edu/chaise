@@ -7,7 +7,7 @@
                         <div class="accordion-toggle ellipsis" id="fc-heading-{{$index}}" ng-click="toggleFacet($index)">
                             <i class="toggle-icon fas" ng-class="{'fa-chevron-down': vm.facetModels[$index].isOpen, 'fa-chevron-right': !vm.facetModels[$index].isOpen}"></i>
 
-                            <span class="facet-header-text" ng-class="{'chaise-icon-for-tooltip': fc.comment}" ng-attr-uib-tooltip="{{::(fc.comment) ? fc.comment : undefined}}" tooltip-placement="bottom-left">
+                            <span class="facet-header-text" ng-class="{'chaise-icon-for-tooltip': fc.comment}" ng-attr-uib-tooltip="{{::(fc.comment) ? fc.comment : undefined}}" tooltip-placement="right">
                                 <span ng-if="::fc.displayname.isHTML" ng-bind-html="::fc.displayname.value"></span>
                                 <span ng-if="::!fc.displayname.isHTML" ng-bind="::fc.displayname.value"></span>
                             </span>

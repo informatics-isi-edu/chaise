@@ -34,6 +34,7 @@
         'chaise.markdown',
         'chaise.resizable',
         'chaise.utils',
+        'chaise.utils.services',
         'chaise.validators',
         'chaise.html',
         'ermrestjs',

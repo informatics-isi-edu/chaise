@@ -1,7 +1,7 @@
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
 var recordSetHelpers = require('../../../utils/recordset-helpers.js');
-
+var Q = require('q');
 var EC = protractor.ExpectedConditions;
 var testParams = {
     schema_name: "faceting",
@@ -511,27 +511,46 @@ describe("Viewing Recordset with Faceting,", function() {
                 });
             });
 
-            // TODO fix this
-            it("should show correct tooltip for the facets.", function () {
-                testParams.facets.forEach(function (facetParams, idx) {
+            it("should show correct tooltip for the facets.", function (done) {
+                var testFacettooltip = function (idx) {
+
+                    // if we reached the end of the list, then finish the test case
+                    if (idx == testParams.facets.length) {
+                        done();
+                        return;
+                    }
+
+                    var facetParams = testParams.facets[idx];
+
+                    // if the facet doesn't have any comment, go to the next
+                    if (!facetParams.comment) {
+                        testFacettooltip(idx + 1);
+                        return;
+                    }
+
                     var facetHeader = chaisePage.recordsetPage.getFacetHeaderById(idx);
                     var tooltip = chaisePage.getTooltipDiv();
 
-                    // move mouse over the facet header to show the tooltip
+                    // move mouse over the facet header to show the tooltip (it will scroll too)
                     browser.actions().mouseMove(facetHeader).perform();
-                    if (facetParams.comment) {
-                        chaisePage.waitForElement(tooltip).then(function () {
-                            expect(tooltip.getText()).toBe(facetParams.comment, "comment missmatch for facet index=" + idx);
-                        }).catch(function (err) {
-                            console.log("error while waiting for tooltip")
-                            console.log(err);
-                        });
-                    }
 
-                    // move mouse to somewhere that doesn't have tooltip just to clear the tooltip from page
-                    browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
-                    chaisePage.waitForElementInverse(tooltip);
-                });
+                    // wait for the tooltip to show up
+                    chaisePage.waitForElement(tooltip).then(function () {
+                        expect(tooltip.getText()).toBe(facetParams.comment, "comment missmatch for facet index=" + idx);
+
+                        // move mouse to somewhere that doesn't have tooltip just to clear the tooltip from page
+                        browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
+                        chaisePage.waitForElementInverse(tooltip);
+
+                        // test the next facet
+                        testFacettooltip(idx + 1);
+                    }).catch(function (err) {
+                        done.fail(err);
+                    });
+                }
+
+                // go one by one over facets and test their tooltip
+                testFacettooltip(0);
             });
 
             // facets 12 (idx = 11), 2, and 1 are open by default when the page loads
