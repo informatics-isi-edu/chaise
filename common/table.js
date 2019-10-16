@@ -882,6 +882,8 @@
 
             // this is for the button on the table heading that deselects all currently visible rows
             scope.selectNone = function($event) {
+                logService.logAction(logActions.recordsetSelectNone, logActions.buttonAction);
+
                 var tuples = [], tuple;
                 for (var i = 0; i < scope.vm.page.tuples.length; i++) {
                     tuple = scope.vm.page.tuples[i];
@@ -904,6 +906,8 @@
 
             // this is for the button on the table heading that selects all currently visible rows
             scope.selectAll = function($event) {
+                logService.logAction(logActions.recordsetSelectAll, logActions.buttonAction);
+
                 var tuples = [], tuple;
                 for (var i = 0; i < scope.vm.page.tuples.length; i++) {
                     tuple = scope.vm.page.tuples[i];
@@ -983,6 +987,18 @@
                 return UiUtils.versionDate(scope.vm.reference.location.versionAsMillis);
             }
 
+            // used to capture left click events on permalink button
+            scope.permalinkClick = function () {
+                logService.logAction(logActions.recordsetPermalinkLeft, logActions.buttonAction);
+            }
+
+            scope.toggleFacetPanel = function () {
+                var action = (scope.vm.config.facetPanelOpen ? logActions.recordsetFacetClose : logActions.recordsetFacetOpen );
+                logService.logAction(action, logActions.buttonAction);
+
+                scope.vm.config.facetPanelOpen = !scope.vm.config.facetPanelOpen;
+            }
+
             scope.search = function(term) {
 
                 if (term) term = term.trim();
@@ -1017,6 +1033,8 @@
 
             // function for removing all pills regardless of what page they are on, clears the whole selectedRows array
             scope.removeAllPills = function($event) {
+                logService.logAction(logActions.recordsetSelectClear, logActions.buttonAction);
+
                 var pre = scope.vm.selectedRows.slice();
                 scope.vm.selectedRows.clear();
                 scope.vm.currentPageSelected = false;
@@ -1224,9 +1242,11 @@
 
                         // capture and log the right click event on the permalink button
                         var permalink = document.getElementById('permalink');
-                        permalink.addEventListener('contextmenu', function (e) {
-                            logService.logAction(logActions.recordsetPermalink, logActions.buttonAction);
-                        });
+                        if (permalink) {
+                            permalink.addEventListener('contextmenu', function (e) {
+                                logService.logAction(logActions.recordsetPermalinkRight, logActions.buttonAction);
+                            });
+                        }
                     }, 0);
                 }
             });
@@ -1288,7 +1308,7 @@
     }])
 
 
-    .directive('tableHeader', ['logActions', 'MathUtils', 'messageMap', 'recordsetDisplayModes', 'recordTableUtils', 'UriUtils', '$window', function(logActions, MathUtils, messageMap, recordsetDisplayModes, recordTableUtils, UriUtils, $window) {
+    .directive('tableHeader', ['logActions', 'logService', 'MathUtils', 'messageMap', 'recordsetDisplayModes', 'recordTableUtils', 'UriUtils', '$window', function(logActions, logService, MathUtils, messageMap, recordsetDisplayModes, recordTableUtils, UriUtils, $window) {
         return {
             restrict: 'E',
             templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/tableHeader.html',
@@ -1306,6 +1326,9 @@
                     recordTableUtils.update(scope.vm, true, false, false);
                 };
 
+                scope.logPageSizeEvent = function () {
+                    logService.logAction(logActions.recordsetPageSize, logActions.buttonAction);
+                }
 
                 scope.addRecord = function() {
                     // Generate a unique id for this request
@@ -1469,93 +1492,6 @@
                 scope.recordsetDisplayModes = recordsetDisplayModes;
 
                 recordTableUtils.registerRecordsetCallbacks(scope, elem, attrs);
-
-                // function for removing a single pill and it's corresponding selected row
-                scope.removePill = function(key, $event) {
-                    if (scope.vm.matchNotNull) {
-                        scope.vm.matchNotNull = false;
-                        scope.vm.selectedRows.clear();
-                        return;
-                    }
-                    var index = scope.vm.selectedRows.findIndex(function (obj) {
-                        return obj.uniqueId == key;
-                    });
-
-                    if (index === -1) {
-                        $event.preventDefault();
-                        return;
-                    }
-
-                    var tuple = scope.vm.selectedRows.splice(index, 1)[0];
-
-                    if (key == null) {
-                        scope.vm.matchNull = false;
-                    }
-
-                    if (scope.onSelectedRowsChanged) {
-                        scope.onSelectedRowsChanged()(tuple, false);
-                    }
-                };
-
-                // function for removing all pills regardless of what page they are on, clears the whole selectedRows array
-                scope.removeAllPills = function($event) {
-                    var pre = scope.vm.selectedRows.slice();
-                    scope.vm.selectedRows.clear();
-                    scope.vm.matchNull = false;
-                    if (scope.vm.matchNotNull) {
-                        scope.vm.matchNotNull = false;
-                    } else {
-                        scope.vm.currentPageSelected = false;
-                    }
-                    if (scope.onSelectedRowsChanged) {
-                        scope.onSelectedRowsChanged()(pre, false);
-                    }
-                };
-
-                /**
-                 * Toggle the not-null checkbox.
-                 * If it is selected, we're disabling and deselcting all the other options.
-                 */
-                scope.toggleMatchNotNull = function () {
-                    scope.vm.matchNotNull = !scope.vm.matchNotNull;
-                    var tuples = [];
-                    if (scope.vm.matchNotNull) {
-                        scope.vm.matchNull = false;
-                        scope.vm.selectedRows = tuples = [{
-                            isNotNull: true,
-                            displayname: {"value": scope.defaultDisplayname.notNull, "isHTML": true}
-                        }];
-                        scope.vm.matchNull = false;
-                    } else {
-                        tuples = scope.vm.selectedRows.slice();
-                        scope.vm.selectedRows.clear();
-                    }
-
-                    if (scope.onSelectedRowsChanged) {
-                        scope.onSelectedRowsChanged()(tuples, scope.vm.matchNotNull);
-                    }
-                };
-
-                /**
-                 * Toggle the null filter
-                 */
-                scope.toggleMatchNull = function () {
-                    scope.vm.matchNull = !scope.vm.matchNull;
-                    var tuple = {uniqueId: null,  displayname: {value: null, isHTML: false}};
-
-                    if (scope.vm.matchNull) {
-                        scope.vm.selectedRows.push(tuple);
-                    } else {
-                        var rowIndex = scope.vm.selectedRows.findIndex(function (obj) {
-                            return obj.uniqueId == null;
-                        });
-                        scope.vm.selectedRows.splice(rowIndex, 1);
-                    }
-
-                    if (scope.onSelectedRowsChanged) {
-                        scope.onSelectedRowsChanged()(tuple, scope.vm.matchNotNull);
-                    }
-                };
             }
         };
     }])

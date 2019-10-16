@@ -6,7 +6,7 @@
         'chaise.authen',
         'ui.bootstrap'
     ])
-        .directive('login', ['ConfigUtils', 'modalUtils', 'Session', 'UriUtils', '$rootScope', function (ConfigUtils, modalUtils, Session, UriUtils, $rootScope) {
+        .directive('login', ['ConfigUtils', 'logActions', 'logService', 'modalUtils', 'Session', 'UriUtils', '$rootScope', function (ConfigUtils, logActions, logService, modalUtils, Session, UriUtils, $rootScope) {
             var chaiseConfig = ConfigUtils.getConfigJSON();
             var dcctx = ConfigUtils.getContextJSON();
             return {
@@ -47,6 +47,7 @@
                     };
 
                     scope.openProfile = function openProfile() {
+                        logService.logAction(logActions.profile, logActions.buttonAction);
                         modalUtils.showModal({
                             templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/profile.modal.html",
                             controller: "profileModalDialogController",

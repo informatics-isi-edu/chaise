@@ -69,11 +69,11 @@
     // as our inputs.
     .chaise-btn {
       position: relative;
-      z-index: 2;
+      z-index: 4; // should be above input even if input is focused
       @include border-left-radius(0);
 
       &:focus {
-        z-index: 3;
+        z-index: 5;
       }
     }
 

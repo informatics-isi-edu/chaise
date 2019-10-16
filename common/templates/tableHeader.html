@@ -5,7 +5,7 @@
         <span ng-if="vm.page.tuples.length > 0 && !vm.page.hasNext && vm.page.hasPrevious">last</span>
         <span ng-if="vm.page.tuples.length > 0 && !vm.page.hasNext && !vm.page.hasPrevious">all</span>
         <span ng-if="vm.rowValues.length > 0" uib-dropdown>
-            <button class="page-size-dropdown chaise-btn chaise-btn-secondary dropdown-toggle" type="button" uib-dropdown-toggle ng-disabled="!vm.hasLoaded || !vm.initialized">
+            <button class="page-size-dropdown chaise-btn chaise-btn-secondary dropdown-toggle" type="button" uib-dropdown-toggle ng-click="::logPageSizeEvent()" ng-disabled="!vm.hasLoaded || !vm.initialized">
                 <span>{{vm.page ? vm.rowValues.length : vm.pageLimit}}</span>
                 <span class="caret"></span>
             </button>

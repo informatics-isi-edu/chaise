@@ -30,7 +30,6 @@
         'chaise.record.table',
         'chaise.resizable',
         'chaise.utils',
-        'chaise.utils.services',
         'ermrestjs',
         'ngCookies',
         'ngSanitize',

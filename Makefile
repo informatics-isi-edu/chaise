@@ -269,7 +269,6 @@ JS_SOURCE=$(JS)/respond.js \
 	$(COMMON)/storage.js \
 	$(COMMON)/table.js \
 	$(COMMON)/utils.js \
-	$(COMMON)/utils/services.js \
 	$(COMMON)/bindHtmlUnsafe.js
 
 # JavaScript and CSS source for Record(2) app
@@ -301,7 +300,6 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
 	$(COMMON)/storage.js \
 	$(COMMON)/table.js \
 	$(COMMON)/utils.js \
-	$(COMMON)/utils/services.js \
 	$(COMMON)/bindHtmlUnsafe.js \
 	$(COMMON)/footer.js \
 	$(COMMON)/upload.js \
@@ -461,7 +459,6 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
 	$(COMMON)/storage.js \
 	$(COMMON)/table.js \
 	$(COMMON)/utils.js \
-	$(COMMON)/utils/services.js \
 	$(COMMON)/validators.js \
 	$(COMMON)/vendor/angular-cookies.min.js
 

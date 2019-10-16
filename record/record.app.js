@@ -34,7 +34,6 @@
         'chaise.record.table',
         'chaise.html',
         'chaise.utils',
-        'chaise.utils.services',
         'ermrestjs',
         'ui.bootstrap',
         'chaise.footer',

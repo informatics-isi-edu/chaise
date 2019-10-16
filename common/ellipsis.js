@@ -9,8 +9,8 @@
         };
     }])
 
-    .directive('ellipsis', ['AlertsService', 'ConfigUtils', 'defaultDisplayname', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$window',
-        function(AlertsService, ConfigUtils, defaultDisplayname, ErrorService, logActions, MathUtils, messageMap, modalBox, modalUtils, recordsetDisplayModes, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $window) {
+    .directive('ellipsis', ['AlertsService', 'ConfigUtils', 'defaultDisplayname', 'ErrorService', 'logActions', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$window',
+        function(AlertsService, ConfigUtils, defaultDisplayname, ErrorService, logActions, logService, MathUtils, messageMap, modalBox, modalUtils, recordsetDisplayModes, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $window) {
         var chaiseConfig = ConfigUtils.getConfigJSON();
 
         function deleteReference(scope, reference) {
@@ -26,11 +26,17 @@
             if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
                 var onError = function (response) {
                     scope.$root.showSpinner = false;
+
+                    var action = (scope.isUnLink ? logActions.rowUnlinkCancel : logActions.rowDeleteCancel );
+                    logService.logAction(action, logActions.buttonAction);
                     // if response is string, the modal has been dismissed
                     if (typeof response !== "string") {
                         ErrorService.handleException(response, true);  // throw exception for dismissible pop- up (error, isDismissible = true)
                     }
                 }
+
+                var action = (scope.isUnLink ? logActions.rowUnlinkPending : logActions.rowDeletePending );
+                logService.logAction(action, logActions.buttonAction);
                 modalUtils.showModal({
                     animation: false,
                     templateUrl:  UriUtils.chaiseDeploymentPath() + "common/templates/delete-link/confirm_delete.modal.html",
@@ -117,17 +123,19 @@
                         };
                     }
 
-                    // define unlink function
-                    // TODO why do we need to verify the context?
-                    if (scope.config.deletable && scope.context.indexOf("compact/brief") === 0 && scope.associationRef) {
+                    // TODO: why do we need to verify the context?
+                    // NOTE: unlink only makes sense in the context of record app because there is a parent tuple
+                    // there is no concept of an association in other apps (no parent)
+                    scope.isUnLink = (scope.config.deletable && scope.context.indexOf("compact/brief") === 0 && scope.associationRef);
+
+                    if (scope.isUnLink) {
                         var associatedRefTuples = [];
+                        // define unlink function
                         scope.unlink = function() {
                             deleteReference(scope, scope.associationRef);
                         };
-                    }
-
-                    // define delete function
-                    else if (scope.config.deletable) {
+                    } else if (scope.config.deletable) {
+                        // define delete function
                         scope.delete = function() {
                             deleteReference(scope, scope.tuple.reference);
                         };

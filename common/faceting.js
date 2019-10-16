@@ -870,8 +870,8 @@
         }])
 
         .directive('choicePicker',
-            ["AlertsService", 'facetingUtils', 'logActions', "$log", 'messageMap', 'modalUtils', '$q', 'recordsetDisplayModes', 'tableConstants', '$timeout', 'UriUtils',
-            function (AlertsService, facetingUtils, logActions, $log, messageMap, modalUtils, $q, recordsetDisplayModes, tableConstants, $timeout, UriUtils) {
+            ["AlertsService", 'facetingUtils', 'logActions', 'logService', 'messageMap', 'modalUtils', 'recordsetDisplayModes', 'tableConstants', 'UriUtils', "$log", '$q', '$timeout',
+            function (AlertsService, facetingUtils, logActions, logService, messageMap, modalUtils, recordsetDisplayModes, tableConstants, UriUtils, $log, $q, $timeout) {
 
             /**
              * Given tuple and the columnName that should be used, return
@@ -1352,7 +1352,9 @@
                             },
                             size: modalSize,
                             templateUrl:  UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
-                        }, modalDataChanged(scope, true), false, false);
+                        }, modalDataChanged(scope, true), function () {
+                            logService.logAction(logActions.recordsetSelectCancel, logActions.buttonAction);
+                        }, false);
                     };
 
                     // for clicking on each row (will be registerd as a callback for list directive)

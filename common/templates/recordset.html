@@ -9,7 +9,7 @@
                         <h3>Refine search</h3>
                     </div>
                     <div class="pull-right">
-                        <button class="hide-filter-panel-btn chaise-btn chaise-btn-tertiary pull-right" ng-click="vm.config.facetPanelOpen = false">
+                        <button class="hide-filter-panel-btn chaise-btn chaise-btn-tertiary pull-right" ng-click="::toggleFacetPanel()">
                             <span class="chaise-icon chaise-sidebar-close"></span>
                             <span>Hide panel</span>
                         </button>
@@ -22,7 +22,7 @@
                         <!-- download CSV included by default -->
                         <export reference="vm.reference" disabled="!vm.hasLoaded || !vm.initialized || vm.rowValues.length == 0"></export>
                         <!-- permalink -->
-                        <a id="permalink" ng-href="{{ getRecordsetLink() }}" tooltip-placement="bottom-right" uib-tooltip={{tooltip.permalink}} class="chaise-btn chaise-btn-primary">
+                        <a id="permalink" ng-href="{{ getRecordsetLink() }}" ng-click="::permalinkClick()" tooltip-placement="bottom-right" uib-tooltip={{tooltip.permalink}} class="chaise-btn chaise-btn-primary">
                             <span class="chaise-btn-icon glyphicon glyphicon-bookmark"></span>
                             <span>Permalink</span>
                         </a>
@@ -100,7 +100,7 @@
                         <span>Clear all filters</span>
                     </button>
                 </div>
-                <button class="show-filter-panel-btn chaise-btn chaise-btn-tertiary" ng-show="vm.config.showFaceting && !vm.config.facetPanelOpen" ng-click="vm.config.facetPanelOpen = true">
+                <button class="show-filter-panel-btn chaise-btn chaise-btn-tertiary" ng-show="vm.config.showFaceting && !vm.config.facetPanelOpen" ng-click="::toggleFacetPanel()">
                     <span class="chaise-icon-btn chaise-icon chaise-sidebar-open"></span>
                     <span>Show filter panel</span>
                 </button>

@@ -62,7 +62,9 @@
         }
 
         vm.toggleSidebar = function() {
-            logService.logAction(logActions.recordTocToggle, logActions.buttonAction);
+            var action = ($rootScope.recordSidePanOpen ? logActions.recordTocClose : logActions.recordTocOpen )
+            logService.logAction(action, logActions.buttonAction);
+
             $rootScope.recordSidePanOpen = !$rootScope.recordSidePanOpen;
         };
 

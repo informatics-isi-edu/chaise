@@ -175,27 +175,54 @@
         "viewerAnatomy": "anatomy",
 
         // button actions
-        "recordDeletePending": "record/delete-pending", // delete clicked -> confirm delete dialog opened
-        "recordDeleteCancelled": "record/delete-cancelled", // cancel clicked when confirm delete dialog open
-        "recordHideRelated": "record/hide-related", // "hide empty sections" button clicked
-        "recordShowRelated": "record/show-related", // "show empty sections" button clicked
+        "recordDeletePending": "record/delete/pending", // delete clicked -> confirm delete dialog opened
+        "recordDeleteCancelled": "record/delete/cancelled", // cancel clicked when confirm delete dialog open
+        "recordHideRelated": "record/related/hide", // "hide empty sections" button clicked
+        "recordShowRelated": "record/related/show", // "show empty sections" button clicked
         "recordExport": "record/export", // export dropdown was opened
         "recordShare": "record/share", // share dialog opened
-        "recordLiveCopy": "record/share-live-copy", // live link copied to clipboard
-        "recordVersionCopy": "record/share-version-copy", // versioned link copied to clipboard
-        "recordTocToggle": "record/toc-panel", // the toc panel toggled open/close
-        "recordTocHeading": "record/toc-heading", // one of the toc headings clicked
+        "recordLiveCopy": "record/share/live", // live link copied to clipboard
+        "recordVersionCopy": "record/share/version", // versioned link copied to clipboard
+        "recordTocOpen": "record/toc/panel/open", // the toc panel toggled open/close
+        "recordTocClose": "record/toc/panel/close", // the toc panel toggled open/close
+        "recordTocHeading": "record/toc/heading", // one of the toc headings clicked
 
         // related table modes
-        "recordTableDisplay": "record/table-display", // toggle display mode to table display
-        "recordMkdnDisplay": "record/mkdn-display", // toggle display mode to custom display
-        "recordEditDisplay": "record/edit-display", // toggle display mode to edit display
-        "recordInlineTableDisplay": "record/inline/table-display", // toggle display mode to table display
-        "recordInlineMkdnDisplay": "record/inline/mkdn-display", // toggle display mode to custom display
-        "recordInlineEditDisplay": "record/inline/edit-display", // toggle display mode to edit display
+        "recordTableDisplay": "record/display/table", // toggle display mode to table display
+        "recordMkdnDisplay": "record/display/mkdn", // toggle display mode to custom display
+        "recordEditDisplay": "record/display/edit", // toggle display mode to edit display
+        "recordInlineTableDisplay": "record/inline/display/mkdn", // toggle display mode to table display
+        "recordInlineMkdnDisplay": "record/inline/display/table", // toggle display mode to custom display
+        "recordInlineEditDisplay": "record/inline/display/edit", // toggle display mode to edit display
+
+        "add1": "create/add/1", // one form was added to the container
+        "addX": "create/add/x", // multiple forms were added to the container
+        "createRemove": "create/remove", // remove a form during creation
+        "updateRemove": "update/remove", // remove a form during editing
+        "multiOpen": "multi-edit/open", // set all opened
+        "multiCancel": "multi-edit/cancel", // set all closed (cancel button or toggled)
+        "multiApply": "multi-edit/apply", // set all, apply all clicked
+        "multiClear": "multi-edit/clear", // set all, clear all clicked
+
+        "branding": "branding", // top left corner branding text/logo clicked
+        "profile": "profile", // user profile dialog opened
 
         "recordsetExport": "recordset/export", // export dropdown was opened
-        "recordsetPermalink": "recordset/permalink", // permalink clicked
+        "recordsetPermalinkLeft": "recordset/permalink/lclick", // permalink left clicked
+        "recordsetPermalinkRight": "recordset/permalink/rclick", // permalink right clicked
+        "recordsetFacetOpen": "recordset/facet/open", // facet panel opened
+        "recordsetFacetClose": "recordset/facet/close", // facet panel closed
+        "recordsetPageSize": "recordset/page-size", // page size dropdown opened
+
+        "recordsetSelectAll": "recordset/multi/all", // select all was clicked
+        "recordsetSelectNone": "recordset/multi/none", // select all was clicked
+        "recordsetSelectClear": "recordset/multi/clear", // select all was clicked
+        "recordsetSelectCancel": "recordset/select/cancel", // facet popup was closed
+
+        "rowDeletePending": "row/delete/pending", // row delete clicked from delete in action column
+        "rowDeleteCancel": "row/delete/cancel", // row delete cancelled
+        "rowUnlinkPending": "row/unlink/pending", // row unlink clicked from unlink in action column
+        "rowUnlinkCancel": "row/unlink/cancel" // row unlink cancelled
     })
 
     // NOTE since this has been used with ng-switch in the code, and we cannot
@@ -2131,6 +2158,21 @@
           );
         }
       }
+     }])
+
+     .service('logService', ['ConfigUtils', '$log', function (ConfigUtils, $log) {
+         var context = ConfigUtils.getContextJSON();
+
+         function logAction(action, path) {
+             context.server.logHeaders({ action: action }, path).catch(function (err) {
+                 $log.debug("An error may have occured when logging: ", action);
+                 $log.debug(err);
+             });
+         }
+
+         return {
+             logAction: logAction
+         }
      }])
 
     .service('headInjector', ['ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', 'MathUtils', 'modalUtils', '$q', '$rootScope', 'UriUtils', '$window', function(ConfigUtils, ERMrest, Errors, ErrorService, MathUtils, modalUtils, $q, $rootScope, UriUtils, $window) {

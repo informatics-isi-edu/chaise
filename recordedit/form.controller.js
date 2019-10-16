@@ -3,8 +3,8 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'ConfigUtils', 'dataFormats', 'DataUtils', 'ErrorService', 'InputUtils', 'integerLimits', 'logActions', 'maskOptions', 'messageMap', 'modalBox', 'modalUtils', 'recordCreate', 'recordEditAppUtils', 'recordEditModel', 'recordsetDisplayModes', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
-        function FormController(AlertsService, ConfigUtils, dataFormats, DataUtils, ErrorService, InputUtils, integerLimits, logActions, maskOptions, messageMap, modalBox, modalUtils, recordCreate, recordEditAppUtils, recordEditModel, recordsetDisplayModes, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
+    .controller('FormController', ['AlertsService', 'ConfigUtils', 'dataFormats', 'DataUtils', 'ErrorService', 'InputUtils', 'integerLimits', 'logActions', 'logService', 'maskOptions', 'messageMap', 'modalBox', 'modalUtils', 'recordCreate', 'recordEditAppUtils', 'recordEditModel', 'recordsetDisplayModes', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
+        function FormController(AlertsService, ConfigUtils, dataFormats, DataUtils, ErrorService, InputUtils, integerLimits, logActions, logService, maskOptions, messageMap, modalBox, modalUtils, recordCreate, recordEditAppUtils, recordEditModel, recordsetDisplayModes, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
         var context = ConfigUtils.getContextJSON();
         var mainBodyEl;
@@ -398,6 +398,11 @@
 
         function copyFormRow() {
             if (!vm.numberRowsToAdd) vm.numberRowsToAdd = 1;
+
+            // log the button was clicked
+            var action = (vm.numberRowsToAdd > 1 ? logActions.addX : logActions.add1 );
+            logService.logAction(action, logActions.buttonAction);
+
             if ((vm.numberRowsToAdd + vm.recordEditModel.rows.length) > vm.MAX_ROWS_TO_ADD) {
                 AlertsService.addAlert("Cannot add " + vm.numberRowsToAdd + " records. Please input a value between 1 and " + (vm.MAX_ROWS_TO_ADD - vm.recordEditModel.rows.length) + ', inclusive.', 'error');
                 return true;
@@ -488,6 +493,10 @@
 
         function removeFormRow(index) {
             scope.$root.showSpinner = true;
+
+            var action = (vm.editMode ? logActions.updateRemove : logActions.createRemove );
+            logService.logAction(action, logActions.buttonAction);
+
             return spliceRows(index);
         }
 
@@ -549,6 +558,9 @@
         // toggles the state of the select all dialog
         vm.toggleSelectAll = function toggleSelectAll(index) {
             var model = vm.recordEditModel.columnModels[index];
+            var action = (model.showSelectAll ? logActions.multiCancel : logActions.multiOpen);
+            logService.logAction(action, logActions.buttonAction);
+
             if (selectAllOpen) {
                 // close the other select all dialog first
                 vm.recordEditModel.columnModels.forEach(function (cm, idx) {
@@ -610,6 +622,8 @@
 
         // closes the select all
         vm.cancelSelectAll = function cancelSelectAll(index) {
+            logService.logAction(logActions.multiCancel, logActions.buttonAction);
+
             var model = vm.recordEditModel.columnModels[index];
             model.showSelectAll = false;
             model.highlightRow = false;
@@ -711,10 +725,14 @@
         }
 
         vm.applySelectAll = function applySelectAll(index) {
+            logService.logAction(logActions.multiApply, logActions.buttonAction);
+
             setValueAllInputs(index, vm.recordEditModel.columnModels[index].allInput.value);
         }
 
         vm.clearSelectAll = function clearSelectAll(index) {
+            logService.logAction(logActions.multiClear, logActions.buttonAction);
+
             var value = null;
             var inputType = vm.recordEditModel.columnModels[index].inputType;
             if (inputType === "timestamp") {
