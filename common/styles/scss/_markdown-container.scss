@@ -59,16 +59,14 @@
             margin-left: 1em;
             padding-left: 0;
 
-            list-style: inherit;
-
             &:before {
 
             }
 
-            // list-style-type: inherit;
+            list-style: inherit;
             &:only-child {
                 margin-left: 0;
-                // list-style: none;
+                list-style: none;
             }
         }
     }
