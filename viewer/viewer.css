@@ -387,7 +387,7 @@ a.cardlink.delete {
 
 #viewer-content .annotation-list .strokeScale .currentScale{
     padding: 0 5px 0 10px;
-    /* width: 50px; */
+    width: 40px;
     display: flex;
     text-align: right;
     color: #747474;
