@@ -38,43 +38,97 @@
             <!-- CONTROLLER: OSDController -->
             <div ng-controller="OSDController as osd" id="viewer-container" class="col-md-12">
                 <div id="viewer-header" class="row">
-                    <div class="col-md-8 pull-left">
-                        <span class="entity-title">
-                            {{osd.image.entity.slide_id || osd.image.entity.RID || 'No Slide ID'}}
-                        </span>
-                    </div>
-                    <div class="col-md-10 pull-left">
-                        <div class="btn-group btn-group-sm pull-left" role="group">
-                            <button ng-click="osd.filterChannels();" class="btn btn-success" ng-class="{'pick':!osd.filterChannelsAreHidden}" type="button" role="button" title="channel filtering" id="filter-btn">
-                                <span class="glyphicon glyphicon-tasks"></span> Channels
-                            </button>
-                            <button ng-click="osd.openAnnotations();" class="btn btn-success" type="button" ng-class="{'pick':!osd.annotationsSidebarAreHidden}"
-role="button" title="edit annotations" id="edit-btn">
-                                <span class="glyphicon glyphicon-edit"></span> Annotations
-                            </button>
-                            <button ng-click="osd.toggleAnnotations();" class="btn btn-success" ng-class="{'pick': osd.annotationsAreHidden}" type="button" role="button" title="hide or show annotations" id="hide-btn">
-                                <span class="glyphicon glyphicon-eye-close"></span> Hide
-                            </button>
-                            <button ng-click="osd.zoomInView();" class="btn btn-success" type="button" role="button" title="zoom in" id="zoomin-btn">
-                                <span class="glyphicon glyphicon-zoom-in"></span> Zoom In
-                            </button>
-                            <button ng-click="osd.zoomOutView();" class="btn btn-success" type="button" role="button" title="zoom out" id="zoomout-btn">
-                                <span class="glyphicon glyphicon-zoom-out"></span> Zoom Out
-                            </button>
-                            <button ng-click="osd.homeView();" class="btn btn-success" type="button" role="button" title="go home" id="gohome-btn">
-                                <span class="glyphicon glyphicon-home"></span> Reset
-                            </button>
-                            <button ng-click="osd.downloadView();" class="btn btn-success" type="button" role="button" title="take snapshot" id=download-btn">
-                                <span class="glyphicon glyphicon-camera"></span> Take a Screenshot </button>
-                        </div>
+                    <div id="bookmark-container" class="col-xs-12">
+                        <div class="pull-left">
+                            <h1 id="page-title">
+                                <span class="ng-binding ng-scope">
+                                        {{osd.image.entity.slide_id || osd.image.entity.RID || 'No Slide ID'}}
+                                </span>
+                            </h1>
+                        </div> 
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <iframe id="osd" width="100%" src="about:blank" frameBorder="0" style="height:90vh;">
+                <div id="viewer-content">
+                    <div class="sidebar faceting-resizable" resizable r-directions=["right"] r-flex="true">
+                        <div ng-controller="AnnotationsController as anno" class='annotation-list facet-panel panel'>
+                            <span class='title'>Annotations</span>
+                            <span class='row filter' data-type='overlayVisibility'>
+                                <span class='name'> Display : </span>
+                                <span ng-click="anno.changeAllAnnotationsVisibility();" ng-class="anno.isDisplayAll ?'displayAllBtn selected' : 'displayAllBtn'" data-type='all'>
+                                    <i ng-class="anno.isDisplayAll ? 'glyphicon glyphicon-check' : 'glyphicon glyphicon-unchecked'"></i> All
+                                </span>
+                                <span ng-click="anno.changeAllAnnotationsVisibility();" ng-class="!anno.isDisplayAll ?'displayAllBtn selected' : 'displayAllBtn'" data-type='none'>
+                                    <i ng-class="anno.isDisplayAll ? 'glyphicon glyphicon-unchecked' : 'glyphicon glyphicon-check'"></i> None
+                                </span>
+                            </span>
+                            <div class='searchAnnotationBar'>
+                                <input type='text' class='search-input' placeholder='Search' ng-model="anno.searchKeyword" ng-change="anno.searchInputChanged()" />
+                                <div class="clear-search" ng-show="anno.searchKeyword != ''"><!-- form-control:focus changes the z-index of the form control from 2 to 3. form-control-feedback has z-index of 2. Overriding that z index to 5 so it isn't hidden when focused-->
+                                    <span class="glyphicon glyphicon-remove coltooltiptext facet-search-clear search-remove" ng-click="anno.clearSearch()" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
+                                </div>
+                                <button id="search-submit" class="search-button" ng-click="anno.searchInputChanged()" role="button" tooltip-placement="bottom" uib-tooltip="Search any keyword to filter anatomy">
+                                    &nbsp;<span class="glyphicon glyphicon-search"></span>&nbsp;<!-- Added 2 non-breaking spaces to prevent btn's margins from collapsing and to center the icon-->
+                                </button>
+                            </div>
+                            <div class='strokeScale'>
+                                <span class='name'>Scale</span>
+                                <input type="range" id="start" name="strokeScale"
+                                min="1" max="4" step="0.005" ng-model="anno.strokeScale" ng-change="anno.changeStrokeScale()">
+                                <span class='currentScale'>{{ anno.strokeScale }}</span>
+                            </div>
+                            <span class='resultCount'>
+                                <span>Displaying {{ anno.totalCount }} of {{ anno.collection.length }} Annotations</span>
+                            </span>
+                            <div class='groups'>
+                                <div id="{{item.svgID + item.groupID}}" ng-repeat="item in anno.collection | filter: anno.searchKeyword" ng-class="item.isSelected ? 'annotationItem current' : 'annotationItem' ">
+                                        
+                                        <div class='itemContent'>
+                                            <span class='anatomy'>
+                                                {{ item.anatomy }}
+                                            </span>
+                                            <!-- <span class='description'> -->
+                                                <!-- <textarea class='edit' data-type='description'> {{ item.description ? item.description : 'no description'}} </textarea> -->
+                                            <!-- </span> -->
+                                        </div>
+                                        <span class='editRow'>
+                                            <span class='editBtn' ng-click="anno.toggleDisplay(item)" data-type='toggleDisplay' data-toggle='tooltip' tooltip-placement="bottom" uib-tooltip="{{ item.isDisplay ? 'Hide annotation' : 'Show annotation'}}">
+                                                <i ng-class="item.isDisplay ? 'glyphicon glyphicon-eye-open' : 'glyphicon glyphicon-eye-close'"></i>
+                                            </span>
+                                            <span class="editBtn" ng-click="anno.highlightGroup(item)" data-type='highlightGroup' data-toggle='tooltip' tooltip-placement="bottom" uib-tooltip="{{ item.isSelected ? 'Unhighlight' : 'Highlight'}}">
+                                                <i class="glyphicon glyphicon-tag"></i>
+                                            </span>
+                                        </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="osd-container">
+                        <div class="btn-group btn-group-sm pull-left menu-btn-container" role="group">
+                            <button ng-click="osd.filterChannels();" class="menu-btn" ng-class="{'pick':osd.filterChannelsAreHidden}" type="button" role="button" title="channel filtering" id="filter-btn">
+                                <span class="glyphicon glyphicon-tasks"></span> Channels
+                            </button>
+                            <!-- <button ng-click="osd.openAnnotations();" class="btn btn-success" type="button" ng-class="{'pick':!osd.annotationsSidebarAreHidden}" role="button" title="edit annotations" id="edit-btn">
+                                <span class="glyphicon glyphicon-edit"></span> Annotations
+                            </button> -->
+                            <!-- <button ng-click="osd.toggleAnnotations();" class="btn btn-success" ng-class="{'pick': osd.annotationsAreHidden}" type="button" role="button" title="hide or show annotations" id="hide-btn">
+                                <span class="glyphicon glyphicon-eye-close"></span> Hide
+                            </button> -->
+                            <button ng-click="osd.zoomInView();" class="menu-btn" type="button" role="button" title="zoom in" id="zoomin-btn">
+                                <span class="glyphicon glyphicon-zoom-in"></span> Zoom In
+                            </button>
+                            <button ng-click="osd.zoomOutView();" class="menu-btn" type="button" role="button" title="zoom out" id="zoomout-btn">
+                                <span class="glyphicon glyphicon-zoom-out"></span> Zoom Out
+                            </button>
+                            <button ng-click="osd.homeView();" class="menu-btn" type="button" role="button" title="go home" id="gohome-btn">
+                                <span class="glyphicon glyphicon-home"></span> Reset
+                            </button>
+                            <button ng-click="osd.downloadView();" class="menu-btn" type="button" role="button" title="take snapshot" id=download-btn">
+                                <span class="glyphicon glyphicon-camera"></span> Take a Screenshot </button>
+                        </div>
+                        <iframe id="osd" width="100%" src="about:blank" frameBorder="0" style="flex:1">
                             &lt;p&gt;Your browser does not support iframes.&lt;/p&gt;
                         </iframe>
-                    </div>
+                    </div> 
                 </div>
             </div> <!-- CONTROLLER: OSDController -->
             <!-- CONTROLLER: SidebarController -->
