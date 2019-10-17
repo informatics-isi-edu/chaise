@@ -7,11 +7,18 @@
     .factory('modalUtils', ["$log", "$uibModal", "$window", function ($log, $uibModal, $window) {
         function showModal(params, successCB, rejectCB, postRenderCB) {
             var modalInstance = $uibModal.open(params);
-            if (postRenderCB) {
-                modalInstance.rendered.then(postRenderCB).catch(function (error) {
-                    $log.warn(error);
-                });
-            }
+
+            modalInstance.rendered.then(function () {
+                try {
+                    angular.element(document.querySelector(".modal-body")).scrollTop(0);
+                } catch (err) {
+                    $log.warn(err);
+                }
+                if (postRenderCB) postRenderCB();
+            }).catch(function (error) {
+                $log.warn(error);
+            });
+
             modalInstance.result.then(successCB).catch(function (response) {
                 if (rejectCB) {
                     rejectCB(response);

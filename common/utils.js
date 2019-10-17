@@ -94,6 +94,7 @@
         "loginRequired": "Login Required",
         "permissionDenied": "Permission Denied",
         "unauthorizedErrorCode" : "Unauthorized Access",
+        "localStorageDisabled": "localStorage is disabled by the browser settings. Some features might not work as expected",
         "showErrDetails" : "Show Error Details",
         "hideErrDetails" : "Hide Error Details",
         "tooltip": {
@@ -1589,7 +1590,6 @@
             // return a function that will be called when a template needs t be fetched
             return function(templateUrl) {
                 var dcctx = getContextJSON();
-                console.log(templateUrl);
                 var versionedTemplateUrl = templateUrl + (templateUrl.indexOf(chaiseDeploymentPath) !== -1 ? "?v=" + dcctx.version : "");
 
                 return delegate(versionedTemplateUrl);
