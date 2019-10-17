@@ -26,18 +26,6 @@
     }
   }
 
-  // Bring the "active" form control to the top of surrounding elements
-  > .chaise-input-control:focus,
-  > .chaise-form-select:focus,
-  > .chaise-form-file .chaise-form-file-input:focus ~ .chaise-form-file-label {
-    z-index: 3;
-  }
-
-  // Bring the custom file input above the label
-  > .chaise-form-file .chaise-form-file-input:focus {
-    z-index: 4;
-  }
-
   > .chaise-input-control,
   > .chaise-form-select {
     &:not(:last-child) { @include border-right-radius(0); }
@@ -69,11 +57,11 @@
     // as our inputs.
     .chaise-btn {
       position: relative;
-      z-index: 4; // should be above input even if input is focused
+      z-index: 2; // should be above input even if input is focused
       @include border-left-radius(0);
 
       &:focus {
-        z-index: 5;
+        z-index: 3;
       }
     }
 

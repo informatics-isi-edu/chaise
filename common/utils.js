@@ -22,7 +22,8 @@
           "navbarBrand": "",
           "disableDefaultExport": false,
           "exportServicePath": "/deriva/export",
-          "disableExternalLinkModal": false
+          "disableExternalLinkModal": false,
+          "logClientActions": true
     })
 
     .constant("appTagMapping", {
@@ -2138,47 +2139,49 @@
     *  the alert messages e.g. previousSession.message.
     */
     .directive('compile', ['$compile', function ($compile) {
-      return {
-        restrict: 'A',
-        link: function(scope, element, attrs) {
-          var ensureCompileRunsOnce = scope.$watch(
-            function(scope) {
-               // watch the 'compile' expression for changes
-              return scope.$eval(attrs.compile);
-            },
-            function(value) {
-              // when the 'compile' expression changes
-              // assign it into the current DOM
-              element.html(value);
+        return {
+            restrict: 'A',
+            link: function(scope, element, attrs) {
+                var ensureCompileRunsOnce = scope.$watch(
+                    function(scope) {
+                        // watch the 'compile' expression for changes
+                        return scope.$eval(attrs.compile);
+                    },
+                    function(value) {
+                        // when the 'compile' expression changes
+                        // assign it into the current DOM
+                        element.html(value);
 
-              // compile the new DOM and link it to the current
-              // scope.
-              // NOTE: we only compile .childNodes so that
-              // we don't get into infinite loop compiling ourselves
-              $compile(element.contents())(scope);
+                        // compile the new DOM and link it to the current
+                        // scope.
+                        // NOTE: we only compile .childNodes so that
+                        // we don't get into infinite loop compiling ourselves
+                        $compile(element.contents())(scope);
 
-              // Use un-watch feature to ensure compilation happens only once.
-              ensureCompileRunsOnce();
+                        // Use un-watch feature to ensure compilation happens only once.
+                        ensureCompileRunsOnce();
+                    }
+                );
             }
-          );
         }
-      }
-     }])
+    }])
 
-     .service('logService', ['ConfigUtils', '$log', function (ConfigUtils, $log) {
-         var context = ConfigUtils.getContextJSON();
+    .service('logService', ['ConfigUtils', '$log', function (ConfigUtils, $log) {
+        var context = ConfigUtils.getContextJSON(),
+            cc = ConfigUtils.getConfigJSON();
 
-         function logAction(action, path) {
-             context.server.logHeaders({ action: action }, path).catch(function (err) {
-                 $log.debug("An error may have occured when logging: ", action);
-                 $log.debug(err);
-             });
-         }
+        function logAction(action, path) {
+            if (!cc.logClientActions) return;
+            context.server.logHeaders({ action: action }, path).catch(function (err) {
+                $log.debug("An error may have occured when logging: ", action);
+                $log.debug(err);
+            });
+        }
 
-         return {
-             logAction: logAction
-         }
-     }])
+        return {
+            logAction: logAction
+        }
+    }])
 
     .service('headInjector', ['ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', 'MathUtils', 'modalUtils', '$q', '$rootScope', 'UriUtils', '$window', function(ConfigUtils, ERMrest, Errors, ErrorService, MathUtils, modalUtils, $q, $rootScope, UriUtils, $window) {
 

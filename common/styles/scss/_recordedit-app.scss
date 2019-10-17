@@ -38,14 +38,18 @@
     }
 
 
-
-    .scroll-spacer {
-        background-color: $white-color;
-        width: $chaise-caption-column-width; // entity-key is position absolute
+    @mixin shift-above-edit-forms() {
         height: 15px;
         position: fixed;
         z-index: 5;
         margin-top: -15px;
+    }
+
+    .scroll-spacer {
+        background-color: $white-color;
+        width: $chaise-caption-column-width; // entity-key is position absolute
+
+        @include shift-above-edit-forms();
     }
 
     #form-edit-scroll {
@@ -53,10 +57,7 @@
         overflow-y: hidden;
         margin-left: $chaise-caption-column-width; // entity-key is position absolute
 
-        height: 15px;
-        position: fixed;
-        z-index: 5;
-        margin-top: -15px;
+        @include shift-above-edit-forms();
 
         > div {
             height: inherit;
