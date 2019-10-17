@@ -1294,6 +1294,7 @@
 
                         // to choose the correct directive
                         params.mode = "selectFaceting";
+                        params.showFaceting = false;
 
                         if (scope.facetColumn.hasNotNullFilter) {
                             params.matchNotNull = true;
@@ -1336,10 +1337,8 @@
 
                         // modal properties
                         var windowClass = "search-popup faceting-show-details-popup";
-                        var modalSize = "xl";
                         if (!scope.facetColumn.isEntityMode) {
                             windowClass += " scalar-show-details-popup";
-                            modalSize = "md";
                         }
 
                         modalUtils.showModal({
@@ -1350,7 +1349,7 @@
                             resolve: {
                                 params: params
                             },
-                            size: modalSize,
+                            size: modalUtils.getSearchPopupSize(params),
                             templateUrl:  UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
                         }, modalDataChanged(scope, true), function () {
                             logService.logAction(logActions.recordsetSelectCancel, logActions.buttonAction);

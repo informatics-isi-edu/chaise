@@ -333,6 +333,12 @@
             vm.flowControlObject.occupiedSlots--;
             vm.dirtyResult = !res;
             vm.hasLoaded = true;
+
+            // scroll to top of the page so user can see the result
+            if (vm.config.displayMode !== recordsetDisplayModes.related) {
+                scrollToTop();
+            }
+
             $log.debug("counter", counter, ": after result update: " + (res ? "successful." : "unsuccessful."));
         }
 
@@ -1504,7 +1510,8 @@
             scope: {
                 vm: '=',
                 onSelectedRowsChanged: '&?', // set row click function
-                registerSetPageState: "&?"
+                registerSetPageState: "&?",
+                test: "@"
             },
             link: function (scope, elem, attrs) {
                 recordTableUtils.registerRecordsetCallbacks(scope, elem, attrs);
