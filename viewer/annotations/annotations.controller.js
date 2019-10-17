@@ -108,6 +108,12 @@
 
                         })
                         break;
+                    case "onChangeStrokeScale":
+                        // console.log(data)
+                        $scope.$apply(function(){
+                            vm.strokeScale = data.content.strokeScale;
+                        });
+                        break;
                     case "updateAnnotationList":
                         $scope.$apply(function(){
                             vm.addAnnotation(data.content);
@@ -434,7 +440,7 @@
         }
 
         function changeStrokeScale(){
-            console.log(vm.strokeScale);
+            // console.log(vm.strokeScale);
             AnnotationsService.changeStrokeScale(vm.strokeScale);
         }
     }]);

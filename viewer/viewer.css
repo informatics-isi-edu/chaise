@@ -373,10 +373,12 @@ a.cardlink.delete {
 #viewer-content .annotation-list .strokeScale{
     display: flex;
     padding: 5px 8px;
+    margin: 5px 0 5px;
 }
 
 #viewer-content .annotation-list .strokeScale .name{
     margin-right : 10px;
+    color: #747474;
 }
 
 #viewer-content .annotation-list .strokeScale input{
@@ -384,10 +386,11 @@ a.cardlink.delete {
 }
 
 #viewer-content .annotation-list .strokeScale .currentScale{
-    padding: 0 5px;
+    padding: 0 5px 0 10px;
+    /* width: 50px; */
     display: flex;
-    text-align: center;
-    justify-content: center;
+    text-align: right;
+    color: #747474;
 }
 
 #viewer-content .annotation-list .resultCount{
