@@ -317,7 +317,7 @@
                 resolve: {
                     params: params
                 },
-                size: "xl",
+                size: modalUtils.getSearchPopupSize(params),
                 templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
             }, function dataSelected(tuple) {
                 // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)

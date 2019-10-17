@@ -1594,8 +1594,13 @@
             var mainContainer = parentContainer.querySelector(".main-container");
             var topRightPanel = parentContainer.querySelector(".top-right-panel");
             scope.$watch(function () {
-                return mainContainer.clientWidth - topRightPanel.clientWidth;
+                try {
+                    return mainContainer.clientWidth - topRightPanel.clientWidth;
+                } catch (exp) {
+                    return false;
+                }
             }, function (padding) {
+                if (padding === false) return;
                 mainContainer.style.paddingRight = padding + "px";
             });
         }

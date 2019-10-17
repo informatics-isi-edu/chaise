@@ -4,7 +4,38 @@
     angular.module('chaise.modal', ['chaise.utils'])
 
     //TODO
-    .factory('modalUtils', ["$log", "$uibModal", "$window", function ($log, $uibModal, $window) {
+    .factory('modalUtils', ["UriUtils", "$log", "$uibModal", "$window", function (UriUtils, $log, $uibModal, $window) {
+
+        /**
+         * Given the parameters that are used to generate a modal, returns the appropriate size.
+         * If we are going to show faceting, that will be treated as an extra column.
+         * Then the logic is based on number of represented columns:
+         *   - if #columns <= 3 : md
+         *   - if #columns <= 6 : lg
+         *   - else             : xl
+         * TODO eventually anywhere we're creating searchpopup should be factored into a
+         * function and this logic should be in that function.
+         * But when I did that the passed vm was undefined. This needs more investigation.
+         * TODO we should eventually change the behavior of modals to be based on
+         * page size. Currently it will use a predefined percentage of the page size
+         * which means that it will not be responsive.
+         * @param {Object} params - the modal parameters
+         * @return {string} the modal size
+         **/
+        function getSearchPopupSize(params) {
+            var numberOfColumns = params.reference.columns.length;
+            if (params.showFaceting) {
+                ++numberOfColumns;
+            }
+
+            if (numberOfColumns <= 3) {
+                return "md";
+            } else if (numberOfColumns <= 6) {
+                return "lg";
+            }
+            return "xl";
+        }
+
         function showModal(params, successCB, rejectCB, postRenderCB) {
             var modalInstance = $uibModal.open(params);
 
@@ -27,7 +58,8 @@
         }
 
         return {
-            showModal: showModal
+            showModal: showModal,
+            getSearchPopupSize: getSearchPopupSize
         };
     }])
 

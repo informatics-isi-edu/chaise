@@ -372,7 +372,7 @@
                 resolve: {
                     params: params
                 },
-                size: "xl",
+                size: modalUtils.getSearchPopupSize(params),
                 templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
             }, function dataSelected(res) {
                 //TODO this is written only for modal update (multi-select), isModalUpdate is unnecessary
