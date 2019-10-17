@@ -427,7 +427,7 @@
             });
         }
 
-        function highlightGroup(item){
+        function highlightGroup(item, event){
             vm.changeSelectingAnnotation(item);
             // Unhide the annotation if it's hidden
             if(!item.isDisplay){
@@ -437,6 +437,8 @@
                 svgID : item.svgID,
                 groupID : item.groupID
             });
+
+            event.stopPropagation();
         }
 
         function changeStrokeScale(){
