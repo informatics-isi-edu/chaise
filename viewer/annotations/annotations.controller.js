@@ -432,13 +432,14 @@
             vm.totalCount = vm.collection.length;
         }
 
-        function toggleDisplay(item){
+        function toggleDisplay(item, event){
             item.isDisplay = !item.isDisplay;
             AnnotationsService.changeAnnotationVisibility({
                 svgID : item.svgID,
                 groupID : item.groupID,
                 isDisplay : item.isDisplay
             });
+            event.stopPropagation();
         }
 
         function highlightGroup(item, event){
