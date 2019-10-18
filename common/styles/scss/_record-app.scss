@@ -1,4 +1,9 @@
 .record-container {
+    $record-table-cell-padding: 5px;
+    $record-table-cell-border-width: 1px;
+    $space-between-related-sections: 5px;
+    $row-focus-border-width: 2px;
+
     .top-panel-container {
         padding-bottom: 10px;
 
@@ -114,8 +119,40 @@
                 width: 100%;
 
                 // reduce the spacing of table cells (overrides bootstrap default)
-                > tbody > tr > td {
-                    padding: 5px;
+                > tbody > tr {
+                    > td {
+                        border-width: $record-table-cell-border-width;
+                        padding: $record-table-cell-padding;
+                    }
+
+                    &.row-focus{
+                        // row-focus will change the border top and bottom size,
+                        // so we should adjust that and account for the default border
+                        td {
+                            border-top: 0;
+                            padding-top: $record-table-cell-padding - ($row-focus-border-width - $record-table-cell-border-width);
+                            padding-bottom: $record-table-cell-padding - ($row-focus-border-width - $record-table-cell-border-width);
+
+                            // if the size of row-focus is bigger than the current border width,
+                            // we should adjust the content of inline tables so the whole page doesn't shift
+                            @if $row-focus-border-width > $record-table-cell-border-width {
+                                .inline-table-display {
+                                    padding-bottom: $row-focus-border-width;
+                                }
+                            }
+                        }
+
+                        + tr {
+                            td {
+                                border-top: 0;
+                            }
+
+                            // when there are two of them, the bottom should use the default padding
+                            &.row-focus td {
+                                padding-top: $record-table-cell-padding;
+                            }
+                        }
+                    }
                 }
 
                 tr:nth-child(1) > td {
@@ -143,12 +180,8 @@
             text-align: right;
         }
 
-        tr.row-focus {
-            border: 2px solid $primary-color;
-        }
-
         .row-focus {
-            border-color: $primary-color !important;
+            border: $row-focus-border-width solid $primary-color !important;
         }
 
         .chaise-table-header {
@@ -164,11 +197,39 @@
         #rt-container {
             .related-table-accordion {
                 &.panel {
+                    // override the default bootstrap styles
                     box-shadow: none;
-                    border-radius: 0px;
-                    // for row-focus
-                    border-width: 2px;
+                    border-radius: 0;
+                    border: 0;
+                    + .panel {
+                        margin-top: $space-between-related-sections;
+                    }
+
+                    // row-focus will add a border of 2px,
+                    // - adding -2px margin to left and right to avoid shrinkage
+                    // - reducing the margin-top from 5px to 3px to avoid moving
+                    &.row-focus {
+                        margin-left: -$row-focus-border-width;
+                        margin-right: -$row-focus-border-width;
+                        margin-top: $space-between-related-sections - $row-focus-border-width;
+
+                        + .panel:not(.row-focus) {
+                            margin-top: $space-between-related-sections - $row-focus-border-width;
+                        }
+
+                        // if there are two row-focus on top of each other, we should
+                        // change the margin to account for both of their borders.
+                        + .row-focus {
+                            margin-top: $space-between-related-sections - ($row-focus-border-width * 2);
+                        }
+                    }
+
+                    // the first row doesn't have margin top
+                    &:first-child.row-focus {
+                        margin-top: -$row-focus-border-width;
+                    }
                 }
+
 
                 > .panel-heading {
                     height: 44px;

@@ -68,14 +68,12 @@
         },
         "sessionExpired": {
             title: "Your session has expired. Please login to continue.",
-            message: "To open the login window press"
         },
         "previousSession": {
             message: "Your login session has expired. You are now accessing data anonymously. <a ng-click='login()'>Log in</a> to continue your privileged access."
         },
         "noSession": {
-            title: "You need to be logged in to continue.",
-            message: "To open the login window press"
+            title: "You need to be logged in to continue."
         },
         "clickActionMessage": {
             "messageWReplace": "Click <b>OK</b> to reload this page without @errorStatus.",

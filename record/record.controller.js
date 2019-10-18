@@ -17,7 +17,6 @@
         vm.alerts = AlertsService.alerts;
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
-        vm.rowFocus = {};
         vm.sidePanToggleBtnIndicator = "Show";
         $rootScope.recordSidePanOpen = false;
 
@@ -31,8 +30,6 @@
 
             var safeSectionId = vm.makeSafeIdAttr(sectionId);
             var pageSection = (isInline ? "entity-" : "rt-heading-") + safeSectionId;
-
-            vm.rowFocus[index] = false;
             var el = angular.element(document.getElementById(pageSection));
             if (!isInline) {
                 $rootScope.relatedTableModels[index].open = true;
