@@ -94,7 +94,7 @@
                                         <div class='itemContent'>
                                             <span class='anatomy'>
                                                 {{ item.name }}
-                                                <a href="{{item.url}}" target="_blank">
+                                                <a ng-if="item.id"  href="{{item.url}}" target="_blank">
                                                     ({{item.id}})
                                                 </a>
                                             </span>

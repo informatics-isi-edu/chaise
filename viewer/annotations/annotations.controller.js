@@ -382,12 +382,17 @@
             }
         }
 
+        function fixedEncodeURIComponent(id) {
+          var result = encodeURIComponent(id).replace(/[!'()*]/g, function(c) {
+              return '%' + c.charCodeAt(0).toString(16).toUpperCase();
+          });
+          return result;
+        }
+
         // Add new annotation items
         function addAnnotation(items){
             var groupID,
                 i,
-                name,
-                ermrestID,
                 svgID;
 
             for(i = 0; i < items.length; i++){
@@ -397,11 +402,25 @@
                 /* HACK: This is done for the demo, the all ids are not available currently.
                 Also the encodeURI is the same as ERMrest's _fixedEncodeURIComponent_. Since it
                 is still not clear what will be th format of id.*/
-                id = groupID.split(',')[0];
-                encodedId = encodeURIComponent(id).replace(/[!'()*]/g, function(c) {
-                    return '%' + c.charCodeAt(0).toString(16).toUpperCase();
-                });
-                name= groupID.split(',')[1];
+                var metadata = groupID.split(',');
+                var name, ermrestID, id;
+                if (metadata.length == 1) {
+                  if (metadata[0].indexOf(':') !== -1) {
+                    encodedId = fixedEncodeURIComponent(metadata[0]);
+                    id = metadata[0];
+                  } else {
+                    name = metadata[0];
+                  }
+                } else {
+                  for (var j = 0; j < metadata.length ; j++ ){
+                    if (metadata[j].indexOf(':') !== -1) {
+                      encodedId = fixedEncodeURIComponent(metadata[i]);
+                      id = metadata[j];
+                    } else {
+                      name = metadata[j];
+                    }
+                  }
+                }
 
                 vm.collection.push({
                     groupID : groupID,
@@ -439,7 +458,7 @@
                 groupID : item.groupID,
                 isDisplay : item.isDisplay
             });
-            
+
             if(event){
                 event.stopPropagation();
             }
