@@ -421,9 +421,6 @@ RE_JS_MDHELP=$(RE_ASSETS)/mdHelp.app.js
 RE_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/vendor/fontawesome.min.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css \
-	$(CSS)/vendor/select.css \
-	$(CSS)/vendor/select2.css \
-	$(CSS)/vendor/angular-datepicker.css \
 	$(CSS)/vendor/rzslider.css \
 	$(COMMON)/styles/app.css
 

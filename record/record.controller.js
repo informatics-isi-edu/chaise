@@ -577,7 +577,7 @@
         /*** scroll to events ***/
         // scroll to top button
         $scope.scrollToTop = function () {
-            mainContainerEl.scrollTo(0,0, 500);
+            mainContainerEl.scrollTo(0, 0, 500);
         };
 
         mainContainerEl.on('scroll', $scope.$apply.bind($scope, function () {

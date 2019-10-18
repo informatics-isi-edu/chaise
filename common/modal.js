@@ -41,7 +41,7 @@
 
             modalInstance.rendered.then(function () {
                 try {
-                    angular.element(document.querySelector(".modal-body")).scrollTop(0);
+                    // angular.element(document.querySelector(".modal-body")).scrollTop(0);
                 } catch (err) {
                     $log.warn(err);
                 }

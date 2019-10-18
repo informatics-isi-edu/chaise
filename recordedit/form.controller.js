@@ -801,6 +801,9 @@
         }, function (newValue, oldValue) {
             if (newValue) {
                 setMainContainerHeight();
+                $timeout(function () {
+                    onResize(true);
+                }, 0);
 
                 $scope.$watch(function () {
                     $scope.parentContainer = $document[0].querySelector(vm.resultset ? '.resultset-container' : '.form-container');
@@ -896,7 +899,6 @@
             // (currently it's only passed on load. the rest of callers will invoke extra digest cycle)
             if (!doNotInvokeEvent) scope.$digest();
         }
-        onResize(true);
 
         // Listen to scroll event on dummy div for top horizontal bar to update recordedit div position
         scrollContainer.on('scroll', function (e) {
