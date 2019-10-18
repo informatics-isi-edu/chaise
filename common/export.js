@@ -119,7 +119,7 @@
 
                 scope.logDropdownOpened = function () {
                     var action = (context.cid == "record" ? logActions.recordExport : logActions.recordsetExport);
-                    logService.logAction(action, logActions.buttonAction);
+                    logService.logAction(action, logActions.clientAction);
                 };
 
                 scope.exportOptions = {

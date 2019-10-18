@@ -28,7 +28,7 @@
                     scope.$root.showSpinner = false;
 
                     var action = (scope.isUnLink ? logActions.rowUnlinkCancel : logActions.rowDeleteCancel );
-                    logService.logAction(action, logActions.buttonAction);
+                    logService.logAction(action, logActions.clientAction);
                     // if response is string, the modal has been dismissed
                     if (typeof response !== "string") {
                         ErrorService.handleException(response, true);  // throw exception for dismissible pop- up (error, isDismissible = true)
@@ -36,7 +36,7 @@
                 }
 
                 var action = (scope.isUnLink ? logActions.rowUnlinkPending : logActions.rowDeletePending );
-                logService.logAction(action, logActions.buttonAction);
+                logService.logAction(action, logActions.clientAction);
                 modalUtils.showModal({
                     animation: false,
                     templateUrl:  UriUtils.chaiseDeploymentPath() + "common/templates/delete-link/confirm_delete.modal.html",

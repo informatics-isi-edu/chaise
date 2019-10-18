@@ -386,7 +386,7 @@
         }
 
         vm.copyToClipboard = function (text, action) {
-            logService.logAction(action, logActions.buttonAction);
+            logService.logAction(action, logActions.clientAction);
             // Create a dummy input to put the text string into it, select it, then copy it
             // this has to be done because of HTML security and not letting scripts just copy stuff to the clipboard
             // it has to be a user initiated action that is done through the DOM object

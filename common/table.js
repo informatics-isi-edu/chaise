@@ -888,7 +888,7 @@
 
             // this is for the button on the table heading that deselects all currently visible rows
             scope.selectNone = function($event) {
-                logService.logAction(logActions.recordsetSelectNone, logActions.buttonAction);
+                logService.logAction(logActions.recordsetSelectNone, logActions.clientAction);
 
                 var tuples = [], tuple;
                 for (var i = 0; i < scope.vm.page.tuples.length; i++) {
@@ -912,7 +912,7 @@
 
             // this is for the button on the table heading that selects all currently visible rows
             scope.selectAll = function($event) {
-                logService.logAction(logActions.recordsetSelectAll, logActions.buttonAction);
+                logService.logAction(logActions.recordsetSelectAll, logActions.clientAction);
 
                 var tuples = [], tuple;
                 for (var i = 0; i < scope.vm.page.tuples.length; i++) {
@@ -995,7 +995,7 @@
 
             // used to capture left click events on permalink button
             scope.permalinkClick = function () {
-                logService.logAction(logActions.recordsetPermalinkLeft, logActions.buttonAction);
+                logService.logAction(logActions.recordsetPermalinkLeft, logActions.clientAction);
 
                 var text = scope.getRecordsetLink();
 
@@ -1018,7 +1018,7 @@
 
             scope.toggleFacetPanel = function () {
                 var action = (scope.vm.config.facetPanelOpen ? logActions.recordsetFacetClose : logActions.recordsetFacetOpen );
-                logService.logAction(action, logActions.buttonAction);
+                logService.logAction(action, logActions.clientAction);
 
                 scope.vm.config.facetPanelOpen = !scope.vm.config.facetPanelOpen;
             }
@@ -1057,7 +1057,7 @@
 
             // function for removing all pills regardless of what page they are on, clears the whole selectedRows array
             scope.removeAllPills = function($event) {
-                logService.logAction(logActions.recordsetSelectClear, logActions.buttonAction);
+                logService.logAction(logActions.recordsetSelectClear, logActions.clientAction);
 
                 var pre = scope.vm.selectedRows.slice();
                 scope.vm.selectedRows.clear();
@@ -1268,7 +1268,7 @@
                         var permalink = document.getElementById('permalink');
                         if (permalink) {
                             permalink.addEventListener('contextmenu', function (e) {
-                                logService.logAction(logActions.recordsetPermalinkRight, logActions.buttonAction);
+                                logService.logAction(logActions.recordsetPermalinkRight, logActions.clientAction);
                             });
                         }
                     }, 0);
@@ -1351,7 +1351,7 @@
                 };
 
                 scope.logPageSizeEvent = function () {
-                    logService.logAction(logActions.recordsetPageSize, logActions.buttonAction);
+                    logService.logAction(logActions.recordsetPageSize, logActions.clientAction);
                 }
 
                 scope.addRecord = function() {

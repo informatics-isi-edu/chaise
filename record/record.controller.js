@@ -27,7 +27,7 @@
         vm.queryTimeoutTooltip = messageMap.queryTimeoutTooltip;
 
         vm.scrollToRelatedTable = function (sectionId, index, isInline) {
-            logService.logAction(logActions.recordTocHeading, logActions.buttonAction);
+            logService.logAction(logActions.recordTocHeading, logActions.clientAction);
 
             var safeSectionId = vm.makeSafeIdAttr(sectionId);
             var pageSection = (isInline ? "entity-" : "rt-heading-") + safeSectionId;
@@ -63,7 +63,7 @@
 
         vm.toggleSidebar = function() {
             var action = ($rootScope.recordSidePanOpen ? logActions.recordTocClose : logActions.recordTocOpen )
-            logService.logAction(action, logActions.buttonAction);
+            logService.logAction(action, logActions.clientAction);
 
             $rootScope.recordSidePanOpen = !$rootScope.recordSidePanOpen;
         };
@@ -268,14 +268,14 @@
                 }
             }
 
-            logService.logAction(action, logActions.buttonAction);
+            logService.logAction(action, logActions.clientAction);
 
             dataModel.isTableDisplay = !dataModel.isTableDisplay;
         };
 
         vm.toggleRelatedTables = function() {
             var action = ($rootScope.showEmptyRelatedTables ? logActions.recordHideRelated : logActions.recordShowRelated)
-            logService.logAction(action, logActions.buttonAction);
+            logService.logAction(action, logActions.clientAction);
 
             $rootScope.showEmptyRelatedTables = !$rootScope.showEmptyRelatedTables;
             // NOTE: there's a case where clicking the button to toggle this doesn't re-paint the footer until the mouse "moves"

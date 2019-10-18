@@ -401,7 +401,7 @@
 
             // log the button was clicked
             var action = (vm.numberRowsToAdd > 1 ? logActions.addX : logActions.add1 );
-            logService.logAction(action, logActions.buttonAction);
+            logService.logAction(action, logActions.clientAction);
 
             if ((vm.numberRowsToAdd + vm.recordEditModel.rows.length) > vm.MAX_ROWS_TO_ADD) {
                 AlertsService.addAlert("Cannot add " + vm.numberRowsToAdd + " records. Please input a value between 1 and " + (vm.MAX_ROWS_TO_ADD - vm.recordEditModel.rows.length) + ', inclusive.', 'error');
@@ -495,7 +495,7 @@
             scope.$root.showSpinner = true;
 
             var action = (vm.editMode ? logActions.updateRemove : logActions.createRemove );
-            logService.logAction(action, logActions.buttonAction);
+            logService.logAction(action, logActions.clientAction);
 
             return spliceRows(index);
         }
@@ -559,7 +559,7 @@
         vm.toggleSelectAll = function toggleSelectAll(index) {
             var model = vm.recordEditModel.columnModels[index];
             var action = (model.showSelectAll ? logActions.multiCancel : logActions.multiOpen);
-            logService.logAction(action, logActions.buttonAction);
+            logService.logAction(action, logActions.clientAction);
 
             if (selectAllOpen) {
                 // close the other select all dialog first
@@ -622,7 +622,7 @@
 
         // closes the select all
         vm.cancelSelectAll = function cancelSelectAll(index) {
-            logService.logAction(logActions.multiCancel, logActions.buttonAction);
+            logService.logAction(logActions.multiCancel, logActions.clientAction);
 
             var model = vm.recordEditModel.columnModels[index];
             model.showSelectAll = false;
@@ -725,13 +725,13 @@
         }
 
         vm.applySelectAll = function applySelectAll(index) {
-            logService.logAction(logActions.multiApply, logActions.buttonAction);
+            logService.logAction(logActions.multiApply, logActions.clientAction);
 
             setValueAllInputs(index, vm.recordEditModel.columnModels[index].allInput.value);
         }
 
         vm.clearSelectAll = function clearSelectAll(index) {
-            logService.logAction(logActions.multiClear, logActions.buttonAction);
+            logService.logAction(logActions.multiClear, logActions.clientAction);
 
             var value = null;
             var inputType = vm.recordEditModel.columnModels[index].inputType;
@@ -843,6 +843,16 @@
             mainBodyEl = $document[0].getElementsByClassName('main-body')[0];
         }, 0);
 
+        var broadcast;
+        document.addEventListener("DOMSubtreeModified", function (e) {
+            $timeout.cancel(broadcast);
+            broadcast = $timeout(function () {
+               //This will only fire after 500 ms have passed with no changes
+               console.log("dom subtree modified");
+           }, 500)
+
+        });
+
         /*------------------------code below is for fixing the column names when scrolling -----------*/
 
         // NOTE: keep consistent with $chaise-caption-column-width in _variables.scss
@@ -884,12 +894,20 @@
             mainContainerEl.style.paddingRight = padding + "px";
 
             // change the form-edit width to be the same as input-container
-            var elemWidth = inputContainerEl.offsetWidth;
-            vm.formEditDynamicStyle.width = elemWidth - ENTITY_KEY_WIDTH; // account for left margin
+            var reducedWidth = inputContainerEl.offsetWidth - ENTITY_KEY_WIDTH; // account for left margin
+            vm.formEditDynamicStyle.width = reducedWidth;
 
             if (vm.recordEditModel.rows.length > 1) {
                 // make sure the width of form-edit-scroll and the table are the same
                 vm.topScroll.width =  (tableEl.offsetWidth) + "px";
+
+                if (tableEl.offsetWidth > reducedWidth) {
+                    // if the table width is greater than the scrollable container width
+                    // NOTE: this is for an edge case in safari but has no harm on other browsers
+                    vm.showTopScroll = true;
+                } else {
+                    vm.showTopScroll = false;
+                }
             } else {
                 // make scroll bar container smaller than form container so it doesn't show scrollbar when 1 record
                 vm.topScroll.width =  (tableEl.offsetWidth - ENTITY_KEY_WIDTH - 50) + "px";

@@ -119,7 +119,7 @@
 
     .constant("logActions", {
         // action namespace
-        "buttonAction": "button_action", // path to log button click events
+        "clientAction": "client_action", // path to log button click events
 
         // actions
         "recordRead": "record/main", // read the main entity (record)
