@@ -8,9 +8,9 @@
         var chaiseConfig = Object.assign({}, ConfigUtils.getConfigJSON());
         var vm = this;
 
-   
+
         vm.isDisplayAll = true; // whether to show all annotations
-        vm.collection = []; // annotation list 
+        vm.collection = []; // annotation list
         vm.searchKeyword = "";
         vm.totalCount = 0; // total number of annotation list
         vm.selectedItem = null; // current selected annotation item
@@ -366,7 +366,7 @@
 
         // Change the selecting annotation item
         function changeSelectingAnnotation(item){
-            
+
             if(!item){ return; }
 
             if(vm.selectedItem == item){
@@ -386,11 +386,22 @@
         function addAnnotation(items){
             var groupID,
                 i,
+                name,
+                ermrestID,
                 svgID;
-                
+
             for(i = 0; i < items.length; i++){
                 groupID = items[i].groupID;
                 svgID = items[i].svgID;
+
+                /* HACK: This is done for the demo, the all ids are not available currently.
+                Also the encodeURI is the same as ERMrest's _fixedEncodeURIComponent_. Since it
+                is still not clear what will be th format of id.*/
+                id = groupID.split(',')[0];
+                encodedId = encodeURIComponent(id).replace(/[!'()*]/g, function(c) {
+                    return '%' + c.charCodeAt(0).toString(16).toUpperCase();
+                });
+                name= groupID.split(',')[1];
 
                 vm.collection.push({
                     groupID : groupID,
@@ -398,13 +409,16 @@
                     anatomy : items[i].anatomy,
                     description : items[i].description,
                     isSelected : false,
-                    isDisplay: true
+                    isDisplay: true,
+                    name: name,
+                    id: id,
+                    url: "/chaise/record/#2/Vocabulary:Anatomy/ID="+encodedId,
                 });
             }
 
-            // console.log(vm.collection);
+            // console.log("collections", vm.collection);
         }
-        
+
         function searchInputChanged(){
             vm.totalCount = vm.collection.filter(function(item){
                 var anatomy = item.anatomy.toLowerCase() || "",

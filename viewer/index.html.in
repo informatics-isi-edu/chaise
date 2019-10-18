@@ -45,7 +45,7 @@
                                         {{osd.image.entity.slide_id || osd.image.entity.RID || 'No Slide ID'}}
                                 </span>
                             </h1>
-                        </div> 
+                        </div>
                     </div>
                 </div>
                 <div id="viewer-content">
@@ -81,11 +81,15 @@
                             </span>
                             <div class='groups'>
                                 <div id="{{item.svgID + item.groupID}}" ng-repeat="item in anno.collection | filter: anno.searchKeyword" ng-class="item.isSelected ? 'annotationItem current' : 'annotationItem' ">
-                                        
+
                                         <div class='itemContent'>
                                             <span class='anatomy'>
-                                                {{ item.anatomy }}
+                                                {{ item.name }}
+                                                <a href="{{item.url}}" target="_blank">
+                                                    ( {{item.id}} )
+                                                </a>
                                             </span>
+
                                             <!-- <span class='description'> -->
                                                 <!-- <textarea class='edit' data-type='description'> {{ item.description ? item.description : 'no description'}} </textarea> -->
                                             <!-- </span> -->
@@ -128,7 +132,7 @@
                         <iframe id="osd" width="100%" src="about:blank" frameBorder="0" style="flex:1">
                             &lt;p&gt;Your browser does not support iframes.&lt;/p&gt;
                         </iframe>
-                    </div> 
+                    </div>
                 </div>
             </div> <!-- CONTROLLER: OSDController -->
             <!-- CONTROLLER: SidebarController -->

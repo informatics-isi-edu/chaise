@@ -173,7 +173,7 @@
                         // image.entity.uri = image.entity.uri.replace("/openseadragon-viewer/mview.html", "https://dev.rebuildingakidney.org/~mingyi/openseadragon-viewer/index.html");
                         image.entity.uri = "https://dev.rebuildingakidney.org/~mingyi/openseadragon-viewer/index.html?" + params[1];
                     }
-                    
+
                     // image.entity.uri = image.entity.uri + "&url=data/Q-296R_all_contours_cw_named.svg";
                     console.log('replace uri = '+image.entity.uri + waterMark)
                     iframe.location.replace(image.entity.uri + waterMark);
@@ -279,7 +279,7 @@
                         iframe.postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
                     }
                 } else if (event.data.messageType == 'dismissChannels') {
-window.console.log("XXX pull off the channels filtering pullout..");
+                  window.console.log("XXX pull off the channels filtering pullout..");
 /*
 <button ng-click="osd.filterChannels();" class="btn btn-success" ng-class="{'pick':!osd.filterChannelsAreHidden}" type="button" role="button" title="channel filtering" id="filter-btn">
 */
