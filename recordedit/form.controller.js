@@ -843,16 +843,6 @@
             mainBodyEl = $document[0].getElementsByClassName('main-body')[0];
         }, 0);
 
-        var broadcast;
-        document.addEventListener("DOMSubtreeModified", function (e) {
-            $timeout.cancel(broadcast);
-            broadcast = $timeout(function () {
-               //This will only fire after 500 ms have passed with no changes
-               console.log("dom subtree modified");
-           }, 500)
-
-        });
-
         /*------------------------code below is for fixing the column names when scrolling -----------*/
 
         // NOTE: keep consistent with $chaise-caption-column-width in _variables.scss
