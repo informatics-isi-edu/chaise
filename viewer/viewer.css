@@ -386,10 +386,11 @@ a.cardlink.delete {
 }
 
 #viewer-content .annotation-list .strokeScale .currentScale{
-    padding: 0 5px 0 10px;
-    width: 40px;
+    padding: 0;
+    width: 30px;
     display: flex;
     text-align: right;
+    justify-content: flex-end;
     color: #747474;
 }
 

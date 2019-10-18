@@ -111,7 +111,7 @@
                     case "onChangeStrokeScale":
                         // console.log(data)
                         $scope.$apply(function(){
-                            vm.strokeScale = data.content.strokeScale;
+                            vm.strokeScale = +data.content.strokeScale.toFixed(2);
                         });
                         break;
                     case "updateAnnotationList":
@@ -439,7 +439,10 @@
                 groupID : item.groupID,
                 isDisplay : item.isDisplay
             });
-            event.stopPropagation();
+            
+            if(event){
+                event.stopPropagation();
+            }
         }
 
         function highlightGroup(item, event){
