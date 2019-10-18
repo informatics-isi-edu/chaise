@@ -996,6 +996,24 @@
             // used to capture left click events on permalink button
             scope.permalinkClick = function () {
                 logService.logAction(logActions.recordsetPermalinkLeft, logActions.buttonAction);
+
+                var text = scope.getRecordsetLink();
+
+                // Create a dummy input to put the text string into it, select it, then copy it
+                // this has to be done because of HTML security and not letting scripts just copy stuff to the clipboard
+                // it has to be a user initiated action that is done through the DOM object
+                var dummy = angular.element('<input></input>');
+                dummy.attr("visibility", "hidden");
+                dummy.attr("display", "none");
+
+                document.body.appendChild(dummy[0]);
+
+                dummy.attr("id", "permalink_copy");
+                document.getElementById("permalink_copy").value = text;
+                dummy.select();
+                document.execCommand("copy");
+
+                document.body.removeChild(dummy[0]);
             }
 
             scope.toggleFacetPanel = function () {

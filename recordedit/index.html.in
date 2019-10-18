@@ -11,10 +11,10 @@
     <div class="configure-container" ng-app="chaise.configure-recordedit">
         <loading-spinner></loading-spinner>
     </div>
-    <div class="app-container container-fluid re_s_{{idSafeSchemaName}} re_t_{{idSafeTableName}}">
+    <div class="app-container re_s_{{idSafeSchemaName}} re_t_{{idSafeTableName}}">
         <navbar></navbar>
         <loading-spinner ng-show="!displayReady && !error"></loading-spinner>
-        <div class="recordedit-container row" ng-if="reference && (reference.canCreate || reference.canUpdate)" ng-controller="FormController as form">
+        <div class="recordedit-container" ng-if="reference && (reference.canCreate || reference.canUpdate)" ng-controller="FormController as form">
             <div class="form-container">
                 <div class="app-content-container" ng-hide="form.resultset">
                     <loading-spinner ng-show="form.submissionButtonDisabled || showSpinner"></loading-spinner>
@@ -64,7 +64,7 @@
                                 <!-- Form section -->
                                 <div id="form-section">
                                     <div class="input-container">
-                                        <div class="scroll-spacer"></div>
+                                        <div ng-show="displayReady" class="scroll-spacer"></div>
                                         <div ng-show="displayReady" id="form-edit-scroll" ng-class="{'editMode': form.editMode, 'createMode': !form.editMode}" ng-style="form.formEditDynamicStyle">
                                             <div ng-style="form.topScroll"></div>
                                         </div>

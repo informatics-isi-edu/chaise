@@ -81,6 +81,7 @@
             > table {
                 overflow: hidden;
                 margin-bottom: 0;
+                max-width: none;
 
                 > tbody {
                     &:first-child > tr.shift-form:first-child > td {

@@ -125,6 +125,8 @@ The table below summarizes all the requests that we currently are logging in cha
 ## Button Action List
 The following table will include the actions that are triggered when the user clicks on buttons or other elements on the page that don't send a request to the server. We will have to make a head request as part of this click event to store the log info.
 
+namespace = ermrest/client_action
+
 | App                                | Description (button name)  | Action                      | Extra   | Notes                                                                                                                          | Change                        |
 |------------------------------------|----------------------------|-----------------------------|---------|--------------------------------------------------------------------------------------------------------------------------------|-------------------------------|
 | recordset                          | row delete clicked         | cli/delete/intend           | RID     | Delete was clicked from table and confirm delete was shown. (use cid to determine app)                                         |                               |
