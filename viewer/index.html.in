@@ -80,13 +80,13 @@
                                 <span>Displaying {{ anno.totalCount }} of {{ anno.collection.length }} Annotations</span>
                             </span>
                             <div class='groups'>
-                                <div id="{{item.svgID + item.groupID}}" ng-repeat="item in anno.collection | filter: anno.searchKeyword" ng-class="item.isSelected ? 'annotationItem current' : 'annotationItem' ">
+                                <div id="{{item.svgID + item.groupID}}" ng-click="anno.highlightGroup(item, $event)" ng-repeat="item in anno.collection | filter: anno.searchKeyword" ng-class="item.isSelected ? 'annotationItem current' : 'annotationItem' ">
 
                                         <div class='itemContent'>
                                             <span class='anatomy'>
                                                 {{ item.name }}
                                                 <a href="{{item.url}}" target="_blank">
-                                                    ( {{item.id}} )
+                                                    ({{item.id}})
                                                 </a>
                                             </span>
 
@@ -98,7 +98,7 @@
                                             <span class='editBtn' ng-click="anno.toggleDisplay(item)" data-type='toggleDisplay' data-toggle='tooltip' tooltip-placement="bottom" uib-tooltip="{{ item.isDisplay ? 'Hide annotation' : 'Show annotation'}}">
                                                 <i ng-class="item.isDisplay ? 'glyphicon glyphicon-eye-open' : 'glyphicon glyphicon-eye-close'"></i>
                                             </span>
-                                            <span class="editBtn" ng-click="anno.highlightGroup(item)" data-type='highlightGroup' data-toggle='tooltip' tooltip-placement="bottom" uib-tooltip="{{ item.isSelected ? 'Unhighlight' : 'Highlight'}}">
+                                            <span class="editBtn" ng-click="anno.highlightGroup(item, $event)" data-type='highlightGroup' data-toggle='tooltip' tooltip-placement="bottom" uib-tooltip="{{ item.isSelected ? 'Unhighlight annotation' : 'Highlight annotation'}}">
                                                 <i class="glyphicon glyphicon-tag"></i>
                                             </span>
                                         </span>

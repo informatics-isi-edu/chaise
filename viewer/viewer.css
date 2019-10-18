@@ -421,15 +421,16 @@ a.cardlink.delete {
     background: #fff;
     flex-shrink: 0;
     min-height: 40px;
+    cursor: pointer;
 }
 
 #viewer-content .annotation-list .annotationItem:nth-child(odd){
     background: #F1F1F1
 }
 
-/* #viewer-content .annotation-list .annotationItem:hover{
-    background: #efefef;
-} */
+#viewer-content .annotation-list .annotationItem:hover{
+    background: #e4e4e4;
+}
 
 #viewer-content .annotation-list .annotationItem .itemContent{
     display: flex;
@@ -478,6 +479,14 @@ a.cardlink.delete {
     padding: 0 0 0 3px;
 }
 
+#viewer-content .annotation-list .annotationItem .anatomy a{
+  text-decoration: none;
+  color: #337ab7;
+}
+#viewer-content .annotation-list .annotationItem .anatomy a:hover{
+  text-decoration: underline;
+}
+
 #viewer-content .annotation-list .annotationItem input.edit:hover,
 #viewer-content .annotation-list .annotationItem textarea.edit:hover{
     color: #c1c1c1;
@@ -523,6 +532,11 @@ a.cardlink.delete {
 #viewer-content .annotation-list .annotationItem.current .anatomy{
     color : #fff;
 }
+
+#viewer-content .annotation-list .annotationItem.current .anatomy a{
+    color : #fff;
+}
+
 
 #viewer-content .annotation-list .annotationItem.current .editBtn{
     color: #fff;
