@@ -118,8 +118,7 @@
                 scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
                 scope.logDropdownOpened = function () {
-                    var action = (context.cid == "record" ? logActions.recordExport : logActions.recordsetExport);
-                    logService.logAction(action, logActions.clientAction);
+                    logService.logAction(logActions.exportOpen, logActions.clientAction);
                 };
 
                 scope.exportOptions = {

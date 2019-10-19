@@ -27,7 +27,7 @@
                 var onError = function (response) {
                     scope.$root.showSpinner = false;
 
-                    var action = (scope.isUnLink ? logActions.rowUnlinkCancel : logActions.rowDeleteCancel );
+                    var action = (scope.isUnLink ? logActions.relatedUnlinkCancel : logActions.relatedDeleteCancel );
                     logService.logAction(action, logActions.clientAction);
                     // if response is string, the modal has been dismissed
                     if (typeof response !== "string") {
@@ -35,7 +35,7 @@
                     }
                 }
 
-                var action = (scope.isUnLink ? logActions.rowUnlinkPending : logActions.rowDeletePending );
+                var action = (scope.isUnLink ? logActions.relatedUnlinkIntended : logActions.relatedDeleteIntended );
                 logService.logAction(action, logActions.clientAction);
                 modalUtils.showModal({
                     animation: false,

@@ -1352,7 +1352,7 @@
                             size: modalUtils.getSearchPopupSize(params),
                             templateUrl:  UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
                         }, modalDataChanged(scope, true), function () {
-                            logService.logAction(logActions.recordsetSelectCancel, logActions.clientAction);
+                            logService.logAction(logActions.recordsetFacetCancel, logActions.clientAction);
                         }, false);
                     };
 

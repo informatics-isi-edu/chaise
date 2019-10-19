@@ -45,7 +45,7 @@
                         return scope.callback();
                     }
 
-                    logService.logAction(logActions.recordDeletePending, logActions.clientAction);
+                    logService.logAction(logActions.deleteIntended, logActions.clientAction);
 
                     modalUtils.showModal({
                         templateUrl: TEMPLATES_PATH + 'confirm_delete.modal.html',
@@ -56,7 +56,7 @@
                         scope.$root.showSpinner = true;
                         return scope.callback();
                     }, function onError() {
-                        logService.logAction(logActions.recordDeleteCancelled, logActions.clientAction);
+                        logService.logAction(logActions.deleteCancelled, logActions.clientAction);
                     }, false);
                 }
             },

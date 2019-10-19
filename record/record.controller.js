@@ -26,7 +26,7 @@
         vm.queryTimeoutTooltip = messageMap.queryTimeoutTooltip;
 
         vm.scrollToRelatedTable = function (sectionId, index, isInline) {
-            logService.logAction(logActions.recordTocHeading, logActions.clientAction);
+            logService.logAction(logActions.tocScrollTo, logActions.clientAction);
 
             var safeSectionId = vm.makeSafeIdAttr(sectionId);
             var pageSection = (isInline ? "entity-" : "rt-heading-") + safeSectionId;
@@ -59,7 +59,7 @@
         }
 
         vm.toggleSidebar = function() {
-            var action = ($rootScope.recordSidePanOpen ? logActions.recordTocClose : logActions.recordTocOpen )
+            var action = ($rootScope.recordSidePanOpen ? logActions.tocHide : logActions.tocShow )
             logService.logAction(action, logActions.clientAction);
 
             $rootScope.recordSidePanOpen = !$rootScope.recordSidePanOpen;
@@ -135,7 +135,7 @@
             params.versionDateRelative = UiUtils.humanizeTimestamp(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
             params.versionDate = UiUtils.versionDate(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
 
-            refTable.schema.catalog.currentSnaptime(logActions.recordShare).then(function (snaptime) {
+            refTable.schema.catalog.currentSnaptime(logActions.share).then(function (snaptime) {
                 // if current fetched snpatime doesn't match old snaptime, show a warning
                 params.showVersionWarning = (snaptime !== refTable.schema.catalog.snaptime);
             }).finally(function() {
@@ -255,13 +255,13 @@
             // then check for 2 positional modes: inline or !inline
             var action = null;
             if (dataModel.isTableDisplay) {
-                action = (isInline ? logActions.recordInlineMkdnDisplay : logActions.recordMkdnDisplay);
+                action = (isInline ? logActions.inlineMkdnDisplay : logActions.relatedMkdnDisplay);
             } else {
                 // we see custom mode (mkdn display)
                 if (canEdit) {
-                    action = (isInline ? logActions.recordInlineEditDisplay : logActions.recordEditDisplay);
+                    action = (isInline ? logActions.inlineEditDisplay : logActions.relatedEditDisplay);
                 } else {
-                    action = (isInline ? logActions.recordInlineTableDisplay : logActions.recordTableDisplay);
+                    action = (isInline ? logActions.inlineTableDisplay : logActions.relatedTableDisplay);
                 }
             }
 
@@ -271,7 +271,7 @@
         };
 
         vm.toggleRelatedTables = function() {
-            var action = ($rootScope.showEmptyRelatedTables ? logActions.recordHideRelated : logActions.recordShowRelated)
+            var action = ($rootScope.showEmptyRelatedTables ? logActions.hideAllRelated : logActions.showAllRelated)
             logService.logAction(action, logActions.clientAction);
 
             $rootScope.showEmptyRelatedTables = !$rootScope.showEmptyRelatedTables;

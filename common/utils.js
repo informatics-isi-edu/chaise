@@ -173,55 +173,111 @@
         "viewerComment": "comment",
         "viewerAnatomy": "anatomy",
 
-        // button actions
-        "recordDeletePending": "record/delete/pending", // delete clicked -> confirm delete dialog opened
-        "recordDeleteCancelled": "record/delete/cancelled", // cancel clicked when confirm delete dialog open
-        "recordHideRelated": "record/related/hide", // "hide empty sections" button clicked
-        "recordShowRelated": "record/related/show", // "show empty sections" button clicked
-        "recordExport": "record/export", // export dropdown was opened
-        "recordShare": "record/share", // share dialog opened
-        "recordLiveCopy": "record/share/live", // live link copied to clipboard
-        "recordVersionCopy": "record/share/version", // versioned link copied to clipboard
-        "recordTocOpen": "record/toc/panel/open", // the toc panel toggled open/close
-        "recordTocClose": "record/toc/panel/close", // the toc panel toggled open/close
-        "recordTocHeading": "record/toc/heading", // one of the toc headings clicked
+        // # client actions (mostly button click events)
+        "deleteIntended": "delete/intend", // delete clicked -> confirm delete dialog opened (record button and recordset row) TODO
+        "deleteCancelled": "delete/cancel", // cancel clicked when confirm delete dialog open (record button and recordset row) TODO
 
-        // related table modes
-        "recordTableDisplay": "record/display/table", // toggle display mode to table display
-        "recordMkdnDisplay": "record/display/mkdn", // toggle display mode to custom display
-        "recordEditDisplay": "record/display/edit", // toggle display mode to edit display
-        "recordInlineTableDisplay": "record/inline/display/mkdn", // toggle display mode to table display
-        "recordInlineMkdnDisplay": "record/inline/display/table", // toggle display mode to custom display
-        "recordInlineEditDisplay": "record/inline/display/edit", // toggle display mode to edit display
+        // ## recordset actions
+        // ### page level actions
+        "exportOpen": "export/open", // export dropdown was opened
+        "permalinkLeft": "permalink/lclick", // permalink left clicked (copied)
+        "permalinkRight": "permalink/rclick", // permalink right clicked (contextmenu opened)
+        // ### recordset directive for facet popups
+        "recordsetPageSize": "page-size", // page size dropdown opened TODO
+        "recordsetFacetOpen": "panel/show", // facet panel opened TODO
+        "recordsetFacetClose": "panel/hide", // facet panel closed TODO
+        "recordsetFacetPageSize": "facet/page-size", // in "show more" for facet
+        "recordsetFacetAll": "facet/all", // in "show more" for facet
+        "recordsetFacetNone": "facet/none", // in "show more" for facet
+        "recordsetFacetClear": "facet/reset", // in "show more" for facet
+        "recordsetFacetCancel": "facet/cancel", // in "show more" for facet
 
-        "add1": "create/add/1", // one form was added to the container
-        "addX": "create/add/x", // multiple forms were added to the container
+        // ## record actions
+        "showAllRelated": "show-empty/show", // "show empty sections" button clicked
+        "hideAllRelated": "show-empty/hide", // "hide empty sections" button clicked
+        "share": "share", // share dialog opened
+        "liveCopy": "share/live", // live link copied to clipboard
+        "versionCopy": "share/version", // versioned link copied to clipboard
+        "scrollTop": "scroll-top", // bottom right, "scroll to top" button clicked TODO
+        "tocShow": "toc/show", // the toc panel toggled open/close
+        "tocHide": "toc/hide", // the toc panel toggled open/close
+        "tocScrollTop": "toc/scroll-top", // "summary" heading clicked to scroll to top of record TODO
+        "tocScrollTo": "toc/scroll-to", // one of the toc headings clicked
+        // ### related tables in RT section
+        "relatedOpen": "related/open", // RT in RT section toggled open TODO
+        "relatedClose": "related/close", // RT in RT section toggled close TODO
+        "relatedPageSize": "related/page-size", // toggle page size dropdown TODO
+        // #### RT modes
+        "relatedTableDisplay": "related/display/table", // toggle display mode to table display
+        "relatedMkdnDisplay": "related/display/mkdn", // toggle display mode to custom display
+        "relatedEditDisplay": "related/display/edit", // toggle display mode to edit display
+        // #### RT actions
+        "relatedDeleteIntended": "related/delete/intend", // row delete clicked from delete in action column TODO
+        "relatedDeleteCancel": "related/delete/cancel", // row delete cancelled TODO
+        "relatedUnlinkIntended": "related/unlink/intend", // row unlink clicked from unlink in action column TODO
+        "relatedUnlinkCancel": "related/unlink/cancel", // row unlink cancelled TODO
+        // ### inline related tables in record display section
+        "inlinePageSize": "inline/page-size", // toggle page size dropdown for inline RT TODO
+        // #### inline modes
+        "inlineTableDisplay": "inline/display/table", // toggle display mode to table display
+        "inlineMkdnDisplay": "inline/display/mkdn", // toggle display mode to custom display
+        "inlineEditDisplay": "inline/display/edit", // toggle display mode to edit display
+        // #### inline actions
+        "inlineDeleteIntended": "inline/delete/intend", // row delete clicked from delete in action column TODO
+        "inlineDeleteCancel": "inline/delete/cancel", // row delete cancelled TODO
+        "inlineUnlinkIntended": "inline/unlink/intend", // row unlink clicked from unlink in action column TODO
+        "inlineUnlinkCancel": "inline/unlink/cancel", // row unlink cancelled TODO
+        // ### recordset directive for pure and binary popups
+        "recordPBOpen": "pb/panel/show", // facet panel opened TODO
+        "recordPBClose": "pb/panel/hide", // facet panel closed TODO
+        "recordPBPageSize": "pb/page-size", // TODO
+        "recordPBAll": "pb/all", // TODO
+        "recordPBNone": "pb/none", // TODO
+        "recordPBClear": "pb/reset", // TODO
+        "recordPBCancel": "pb/cancel", // TODO
+        // #### recordset directive for facet "show more" in pure and binary popups
+        "recordPBFacetPageSize": "pb/facet/page-size", // TODO
+        "recordPBFacetAll": "pb/facet/all", // TODO
+        "recordPBFacetNone": "pb/facet/none", // TODO
+        "recordPBFacetClear": "pb/facet/reset", // TODO
+        "recordPBFacetCancel": "pb/facet/cancel", // TODO
+
+        // ## recordedit actions
+        // ### create actions
+        "add1": "create/clone", // one form was added to the container
+        "addX": "create/clone-x", // multiple forms were added to the container
         "createRemove": "create/remove", // remove a form during creation
+        "createMultiOpen": "create/set-all/open", // set all opened TODO
+        "createMultiClose": "create/set-all/close", // set all opened TODO
+        "createMultiCancel": "create/set-all/cancel", // set all closed (cancel button) TODO
+        "createMultiApply": "create/set-all/apply", // set all, apply all clicked TODO
+        "createMultiClear": "create/set-all/clear", // set all, clear all clicked TODO
+        // ### update actions
         "updateRemove": "update/remove", // remove a form during editing
-        "multiOpen": "multi-edit/open", // set all opened
-        "multiCancel": "multi-edit/cancel", // set all closed (cancel button or toggled)
-        "multiApply": "multi-edit/apply", // set all, apply all clicked
-        "multiClear": "multi-edit/clear", // set all, clear all clicked
+        "updateMultiOpen": "update/set-all/open", // set all opened TODO
+        "updateMultiClose": "update/set-all/close", // set all opened TODO
+        "updateMultiCancel": "update/set-all/cancel", // set all closed (cancel button) TODO
+        "updateMultiApply": "update/set-all/apply", // set all, apply all clicked TODO
+        "updateMultiClear": "update/set-all/clear", // set all, clear all clicked TODO
+        // ### recordset directive for foreign key picker
+        "recordeditFKOpen": "fk/panel/show", // facet panel opened TODO
+        "recordeditFKClose": "fk/panel/hide", // facet panel closed TODO
+        "recordeditFKPageSize": "fk/page-size", // TODO
+        "recordeditFKCancel": "fk/cancel", // TODO
+        // #### recordset directive for facet "show more" in foriegn key pickers
+        "recordeditFKFacetPageSize": "fk/facet/page-size", // TODO
+        "recordeditFKFacetAll": "fk/facet/all", // TODO
+        "recordeditFKFacetNone": "fk/facet/none", // TODO
+        "recordeditFKFacetClear": "fk/facet/reset", // TODO
+        "recordeditFKFacetCancel": "fk/facet/cancel", // TODO
 
+        // ## navbar actions
         "branding": "branding", // top left corner branding text/logo clicked
-        "profile": "profile", // user profile dialog opened
-
-        "recordsetExport": "recordset/export", // export dropdown was opened
-        "recordsetPermalinkLeft": "recordset/permalink/lclick", // permalink left clicked
-        "recordsetPermalinkRight": "recordset/permalink/rclick", // permalink right clicked
-        "recordsetFacetOpen": "recordset/facet/open", // facet panel opened
-        "recordsetFacetClose": "recordset/facet/close", // facet panel closed
-        "recordsetPageSize": "recordset/page-size", // page size dropdown opened
-
-        "recordsetSelectAll": "recordset/multi/all", // select all was clicked
-        "recordsetSelectNone": "recordset/multi/none", // select all was clicked
-        "recordsetSelectClear": "recordset/multi/clear", // select all was clicked
-        "recordsetSelectCancel": "recordset/select/cancel", // facet popup was closed
-
-        "rowDeletePending": "row/delete/pending", // row delete clicked from delete in action column
-        "rowDeleteCancel": "row/delete/cancel", // row delete cancelled
-        "rowUnlinkPending": "row/unlink/pending", // row unlink clicked from unlink in action column
-        "rowUnlinkCancel": "row/unlink/cancel" // row unlink cancelled
+        "dropdownUser": "dropdown/user", // user dropdown opened TODO
+        "profile": "dropdown/user/profile", // user profile dialog opened
+        "dropdownMenu": "dropdown/menu", // navbar menu dropdown opened TODO
+        "dropdownMenuInternal": "dropdown/menu/internal", // navbar menu internal page TODO
+        "dropdownMenuExternal": "dropdown/menu/external" // navbar menu external page TODO
     })
 
     // NOTE since this has been used with ng-switch in the code, and we cannot

@@ -558,7 +558,7 @@
         // toggles the state of the select all dialog
         vm.toggleSelectAll = function toggleSelectAll(index) {
             var model = vm.recordEditModel.columnModels[index];
-            var action = (model.showSelectAll ? logActions.multiCancel : logActions.multiOpen);
+            var action = (model.showSelectAll ? logActions.createMultiClose : logActions.createMultiOpen);
             logService.logAction(action, logActions.clientAction);
 
             if (selectAllOpen) {
@@ -622,7 +622,7 @@
 
         // closes the select all
         vm.cancelSelectAll = function cancelSelectAll(index) {
-            logService.logAction(logActions.multiCancel, logActions.clientAction);
+            logService.logAction(logActions.createMultiCancel, logActions.clientAction);
 
             var model = vm.recordEditModel.columnModels[index];
             model.showSelectAll = false;
@@ -725,13 +725,13 @@
         }
 
         vm.applySelectAll = function applySelectAll(index) {
-            logService.logAction(logActions.multiApply, logActions.clientAction);
+            logService.logAction(logActions.createMultiApply, logActions.clientAction);
 
             setValueAllInputs(index, vm.recordEditModel.columnModels[index].allInput.value);
         }
 
         vm.clearSelectAll = function clearSelectAll(index) {
-            logService.logAction(logActions.multiClear, logActions.clientAction);
+            logService.logAction(logActions.createMultiClear, logActions.clientAction);
 
             var value = null;
             var inputType = vm.recordEditModel.columnModels[index].inputType;
