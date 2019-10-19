@@ -1,0 +1,111 @@
+@mixin border-radius($radius: $border-radius, $fallback-border-radius: false) {
+    @if $fallback-border-radius != false {
+        border-radius: $fallback-border-radius;
+    } @else {
+        border-radius: $radius;
+    }
+}
+@mixin border-top-radius($radius) {
+    border-top-left-radius: $radius;
+    border-top-right-radius: $radius;
+}
+@mixin border-right-radius($radius) {
+    border-top-right-radius: $radius;
+    border-bottom-right-radius: $radius;
+}
+@mixin border-bottom-radius($radius) {
+    border-bottom-right-radius: $radius;
+    border-bottom-left-radius: $radius;
+}
+@mixin border-left-radius($radius) {
+    border-top-left-radius: $radius;
+    border-bottom-left-radius: $radius;
+}
+@mixin border-top-left-radius($radius) {
+    border-top-left-radius: $radius;
+}
+@mixin border-top-right-radius($radius) {
+    border-top-right-radius: $radius;
+}
+@mixin border-bottom-right-radius($radius) {
+    border-bottom-right-radius: $radius;
+}
+@mixin border-bottom-left-radius($radius) {
+    border-bottom-left-radius: $radius;
+}
+
+@mixin download-btn() {
+    color: $primary-color;
+    white-space: nowrap;
+    // touch action
+    -ms-touch-action: manipulation;
+    touch-action: manipulation;
+    // on user select
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+    // allow the caption to wrap
+    white-space: normal;
+
+    &:before {
+        content: "\e025"; // glyphicon-download-alt
+        font-family: 'Glyphicons Halflings';
+        padding-right: 4px;
+    }
+
+    &.external-link-icon:not(.external-link-no-icon):before {
+        content: "\e197"; // glyphicon-cloud-download
+    }
+
+    //remove the external link icon on after
+    &.external-link-icon:not(.external-link-no-icon):after {
+        content: "";
+    }
+
+    &:hover {
+        text-decoration: none;
+    }
+}
+
+@mixin chaise-btn() {
+    @include border-radius($btn-border-radius);
+    cursor: pointer;
+    display: inline-block;
+    height: $btn-height;
+    min-width: $btn-height;
+    border: $btn-border-width solid;
+    padding: $btn-padding-y $btn-padding-x;
+    text-align: center;
+    vertical-align: middle;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    white-space: nowrap;
+}
+
+@mixin chaise-btn-primary() {
+    color: $white-color;
+    background-color: $primary-color;
+    border-color: $black-color;
+
+    &:focus {
+        background-color: darken($primary-color, 10%);
+    }
+}
+
+
+// can be used to write media-queries
+@mixin for-predefined-size($size) {
+    @if $size == xs {
+        @media (max-width: 768px) { @content; }
+    } @else if $size == sm {
+        @media (min-width: 768px) { @content; }
+    } @else if $size == md {
+        @media (min-width: 992px) { @content; }
+    } @else if $size == lg {
+        @media (min-width: 1200px) { @content; }
+    }
+}

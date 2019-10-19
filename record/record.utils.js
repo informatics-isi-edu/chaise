@@ -11,8 +11,8 @@
     }])
 
     .factory('recordAppUtils',
-             ['constants', 'DataUtils', 'Errors', 'ErrorService', '$log', 'logActions', 'messageMap', 'modalBox', '$q', 'recordTableUtils', '$rootScope',
-             function (constants, DataUtils, Errors, ErrorService, $log, logActions, messageMap, modalBox, $q, recordTableUtils, $rootScope) {
+             ['constants', 'DataUtils', 'Errors', 'ErrorService', '$log', 'logActions', 'messageMap', 'modalBox', '$q', 'recordsetDisplayModes', 'recordTableUtils', '$rootScope',
+             function (constants, DataUtils, Errors, ErrorService, $log, logActions, messageMap, modalBox, $q, recordsetDisplayModes, recordTableUtils, $rootScope) {
 
         /**
          * returns true if we have free slots for requests.
@@ -270,14 +270,15 @@
          * Given reference of related or inline, will create appropriate table model.
          * @param  {ERMrest.Reference} reference Reference object.
          * @param  {string} context   the context string
-         * @param  {ERMrest.tuple} fromTuple the main tuple
+         * @param  {ERMrest.tuple} parentTuple the main tuple
          */
-        function getTableModel (reference, context, fromTuple) {
+        function getTableModel (reference, context, parentTuple, parentReference) {
             return {
                 reference: reference,
+                parentReference: parentReference,
                 pageLimit: getPageSize(reference),
-                displayType: reference.display.type,
-                fromTuple: fromTuple,
+                isTableDisplay: reference.display.type == 'table',
+                parentTuple: parentTuple,
                 context: context,
                 enableSort: true,
                 rowValues: [],
@@ -289,7 +290,8 @@
                     viewable: true,
                     editable: $rootScope.modifyRecord,
                     deletable: $rootScope.modifyRecord && $rootScope.showDeleteButton,
-                    selectMode: modalBox.noSelect
+                    selectMode: modalBox.noSelect,
+                    displayMode: recordsetDisplayModes.related
                 },
                 flowControlObject: $rootScope.recordFlowControl,
                 queryTimeoutTooltip: messageMap.queryTimeoutTooltip

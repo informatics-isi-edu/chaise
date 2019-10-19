@@ -126,6 +126,7 @@
 
                 scope.toggleMenu = toggleMenu;
                 scope.onToggle = onToggle;
+
                 if (isCatalogDefined(catalogId)) {
                     scope.isVersioned = function () {
                         return catalogId.split("@")[1] ? true : false;

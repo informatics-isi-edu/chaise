@@ -151,9 +151,9 @@
                         model = {
                             tableError: false,
                             isInline: true,
-                            displayType: reference.display.type,
+                            isTableDisplay: reference.display.type == 'table',
                             displayname: reference.displayname,
-                            tableModel: recordAppUtils.getTableModel(reference, "compact/brief/inline", $rootScope.tuple)
+                            tableModel: recordAppUtils.getTableModel(reference, "compact/brief/inline", $rootScope.tuple, $rootScope.reference)
                         };
                         $rootScope.hasInline = true;
                     }
@@ -175,9 +175,9 @@
 
                     $rootScope.relatedTableModels.push({
                         open: openByDefault,
-                        displayType: ref.display.type,
+                        isTableDisplay: ref.display.type == 'table',
                         displayname: ref.displayname,
-                        tableModel: recordAppUtils.getTableModel(ref, "compact/brief", $rootScope.tuple),
+                        tableModel: recordAppUtils.getTableModel(ref, "compact/brief", $rootScope.tuple, $rootScope.reference),
                         baseTableName: $rootScope.reference.displayname
                     });
                 });

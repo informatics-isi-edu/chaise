@@ -40,7 +40,7 @@ describe('Edit a record,', function() {
                     return modalTitle.getText();
                 }).then(function(text) {
                     // make sure modal opened
-                    expect(text.indexOf("Choose")).toBeGreaterThan(-1);
+                    expect(text.indexOf("Select")).toBeGreaterThan(-1);
 
                     rows = chaisePage.recordsetPage.getRows();
                     // count is needed for clicking a random row
@@ -52,7 +52,7 @@ describe('Edit a record,', function() {
                 }).then(function(selectButtons) {
                     return selectButtons[0].click();
                 }).then(function() {
-                    browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), browser.params.defaultTimeout);
+                    browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getEntityTitleElement()), browser.params.defaultTimeout);
 
                     var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputDisplay("Person", 0);
                     expect(foreignKeyInput.getText()).toBe(testParams.column_values["0YGNuO_bvxoczJ6ms2k0tQ"], "Foreign Key input display value is incorrect");

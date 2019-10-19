@@ -1,30 +1,29 @@
-<div class="faceting-container">
-    <div class="columns-container">
+<div class="side-panel-container">
+    <div class="faceting-columns-container">
         <uib-accordion close-others="false">
             <!-- TODO test this last active  -->
             <div uib-accordion-group ng-repeat="fc in vm.reference.facetColumns track by $index" is-open="vm.facetModels[$index].isOpen" id="fc-{{$index}}" ng-class="{'focused': lastActiveFacet == $index }" class="facet-panel">
                     <uib-accordion-heading>
-                        <h3 class="panel-title accordion-toggle ellipsis" id="fc-heading-{{$index}}" ng-click="toggleFacet($index)">
-                            <i class="pull-left glyphicon toggle-icon" ng-class="{'glyphicon-chevron-down': vm.facetModels[$index].isOpen, 'glyphicon-chevron-right': !vm.facetModels[$index].isOpen}"></i>
+                        <div class="accordion-toggle ellipsis" id="fc-heading-{{$index}}" ng-click="toggleFacet($index)">
+                            <i class="toggle-icon fas" ng-class="{'fa-chevron-down': vm.facetModels[$index].isOpen, 'fa-chevron-right': !vm.facetModels[$index].isOpen}"></i>
 
-                            <a class="show-tooltip-border" tooltip-class="facet-header-tooltip" ng-attr-uib-tooltip="{{::(fc.comment) ? fc.comment : undefined}}" ng-attr-tooltip-placement="{{::(fc.comment) ? 'right' : undefined}}">
+                            <span class="facet-header-text" ng-class="{'chaise-icon-for-tooltip': fc.comment}" ng-attr-uib-tooltip="{{::(fc.comment) ? fc.comment : undefined}}" tooltip-placement="right">
                                 <span ng-if="::fc.displayname.isHTML" ng-bind-html="::fc.displayname.value"></span>
                                 <span ng-if="::!fc.displayname.isHTML" ng-bind="::fc.displayname.value"></span>
-                            </a>
-                            <span class="pull-right">
-                                <img ng-if="vm.facetModels[$index].isLoading" class="spinner spinner-sm" src="../common/styles/images/loader.gif"/>
+                            </span>
+                            <span class="facet-header-icon">
+                                <span ng-if="vm.facetModels[$index].isLoading && !(vm.facetModels[$index].facetError || vm.facetModels[$index].noConstraints)" class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
                                 <span ng-if="vm.facetModels[$index].facetError || vm.facetModels[$index].noConstraints" class="glyphicon glyphicon-alert" ng-attr-uib-tooltip="{{vm.facetModels[$index].noConstraints ? 'Showing facet values without any constraints applied.' : 'Request timeout: The facet values cannot be retrieved for updates.'}}" tooltip-placement="right"></span>
                             </span>
-                        </h3>
+                        </div>
                     </uib-accordion-heading>
                 <div ng-switch="fc.preferredMode">
                     <range-picker ng-switch-when="ranges" facet-panel-open="vm.config.facetPanelOpen" facet-column="fc" facet-model="vm.facetModels[$index]" index="$index"></range-picker>
                     <check-presence ng-switch-when="check_presence" facet-panel-open="vm.config.facetPanelOpen" facet-column="fc" facet-model="vm.facetModels[$index]" index="$index"></check-presence>
-                    <choice-picker ng-switch-default facet-panel-open="vm.config.facetPanelOpen" facet-column="fc" facet-model="vm.facetModels[$index]" index="$index"></string-picker>
+                    <choice-picker ng-switch-default facet-panel-open="vm.config.facetPanelOpen" facet-column="fc" facet-model="vm.facetModels[$index]" index="$index"></choice-picker>
                 </div>
             </div>
         </uib-accordion>
         <h3 ng-if="vm.reference.facetColumns.length == 0">No Filter Options</h3>
     </div>
 </div>
-<faceting-collapse-btn class="facet-btn" panel-open="vm.config.facetPanelOpen" toggle-panel="togglePanel" position="left" tooltip-message="{{'Click to ' + ((vm.config.facetPanelOpen) ? 'hide' : 'show') + ' facet search panel.'}}"></faceting-collapse-btn>

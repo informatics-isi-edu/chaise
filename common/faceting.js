@@ -171,10 +171,6 @@
                         scope.updateReference(newRef, -1);
                     };
 
-                    scope.togglePanel = function () {
-                        scope.vm.config.facetPanelOpen = !scope.vm.config.facetPanelOpen;
-                    };
-
                     /**
                      * open or close the facet given its index
                      * @param  {int} index index of facet
@@ -200,7 +196,7 @@
                     };
 
                     scope.scrollToFacet = function (index) {
-                        var container = angular.element(document.getElementsByClassName('faceting-container')[0]);
+                        var container = angular.element(document.getElementsByClassName('side-panel-container')[0]);
                         var el = angular.element(document.getElementById('fc-'+index));
                         // the elements might not be available
                         if (el.length === 0 || container.length === 0) return;
@@ -303,9 +299,6 @@
                             displayModeBar: false
                         },
                         layout: {
-                            autosize: true,
-                            // width: 280,
-                            height: 150,
                             margin: {
                                 l: 40,
                                 r: 0,
@@ -877,8 +870,8 @@
         }])
 
         .directive('choicePicker',
-            ["AlertsService", 'facetingUtils', 'logActions', "$log", 'messageMap', 'modalUtils', '$q', 'tableConstants', '$timeout', 'UriUtils',
-            function (AlertsService, facetingUtils, logActions, $log, messageMap, modalUtils, $q, tableConstants, $timeout, UriUtils) {
+            ["AlertsService", 'facetingUtils', 'logActions', 'logService', 'messageMap', 'modalUtils', 'recordsetDisplayModes', 'tableConstants', 'UriUtils', "$log", '$q', '$timeout',
+            function (AlertsService, facetingUtils, logActions, logService, messageMap, modalUtils, recordsetDisplayModes, tableConstants, UriUtils, $log, $q, $timeout) {
 
             /**
              * Given tuple and the columnName that should be used, return
@@ -1253,6 +1246,14 @@
                     // This can eventually be in the annotation, that's why I created this attribute
                     scope.showSearch = (scope.facetColumn.column.type.name !== "boolean");
 
+                    scope.tooltip = messageMap.tooltip;
+
+                    scope.searchPlaceholder = {value: "", isHTML: false};
+                    // TODO requires ermrestjs change to update this placeholder
+                    if (scope.facetColumn.isEntityMode) {
+                        scope.searchPlaceholder.value = "all columns";
+                    }
+
                     scope.checkboxRows = [];
 
                     // for the search popup selector
@@ -1263,11 +1264,14 @@
                         params.logObject = getDefaultLogInfo(scope);
                         params.logObject.action = logActions.recordsetFacetDetails;
 
-                        params.reference = scope.reference;
-                        params.reference.session = scope.$root.session;
+                        // for the title
+                        params.parentReference = scope.facetColumn.reference;
                         params.displayname = scope.facetColumn.displayname;
                         // disable comment for facet, since it might be confusing
-                        params.comment = "";
+                        params.comment = scope.facetColumn.comment;
+
+                        params.reference = scope.reference;
+                        params.reference.session = scope.$root.session;
                         params.context = "compact/select";
                         params.selectMode = "multi-select";
                         params.faceting = false;
@@ -1290,6 +1294,7 @@
 
                         // to choose the correct directive
                         params.mode = "selectFaceting";
+                        params.showFaceting = false;
 
                         if (scope.facetColumn.hasNotNullFilter) {
                             params.matchNotNull = true;
@@ -1298,8 +1303,8 @@
                             params.matchNull = true;
                         }
 
-                        params.hideNotNullChoice = scope.facetColumn.hideNotNullChoice;
-                        params.hideNullChoice = scope.facetColumn.hideNullChoice;
+                        params.displayMode = recordsetDisplayModes.facetPopup;
+                        params.editable = false;
 
                         params.selectedRows = [];
 
@@ -1325,21 +1330,30 @@
                             params.selectedRows.push(newRow);
                         });
 
+                        // show null or not
                         if (!scope.facetColumn.isEntityMode) {
                             params.showNull = true;
+                        }
+
+                        // modal properties
+                        var windowClass = "search-popup faceting-show-details-popup";
+                        if (!scope.facetColumn.isEntityMode) {
+                            windowClass += " scalar-show-details-popup";
                         }
 
                         modalUtils.showModal({
                             animation: false,
                             controller: "SearchPopupController",
-                            windowClass: "search-popup",
+                            windowClass: windowClass,
                             controllerAs: "ctrl",
                             resolve: {
                                 params: params
                             },
-                            size: "xl",
+                            size: modalUtils.getSearchPopupSize(params),
                             templateUrl:  UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
-                        }, modalDataChanged(scope, true), false, false);
+                        }, modalDataChanged(scope, true), function () {
+                            logService.logAction(logActions.recordsetFacetCancel, logActions.clientAction);
+                        }, false);
                     };
 
                     // for clicking on each row (will be registerd as a callback for list directive)
@@ -1414,43 +1428,13 @@
                         parentCtrl.updateFacetColumn(scope.index);
                     }
 
-                    // TODO all these search functions can be refactored to have just one point of sending request.
-                    // change the searchTerm and fire the updateFacetColumn
-                    scope.enterPressed = function() {
-                        var term = null;
-                        if (scope.searchTerm) {
-                            term = scope.searchTerm.trim();
-                        }
+                    scope.search = function (term) {
+                        if (term) term = term.trim();
                         var ref = scope.reference.search(term);
                         if (scope.$root.checkReferenceURL(ref)) {
                             scope.searchTerm = term;
 
                             $log.debug("faceting: request for facet (index=" + scope.facetColumn.index + ") update. new search=" + term);
-                            scope.parentCtrl.updateFacetColumn(scope.index);
-                        }
-                    };
-
-                    scope.inputChangedPromise = undefined;
-
-                    scope.inputChanged = function() {
-                        // Cancel previous promise for background search that was queued to be called
-                        if (scope.inputChangedPromise) {
-                            $timeout.cancel(scope.inputChangedPromise);
-                        }
-
-                        // Wait for the user to stop typing for a second and then fire the search
-                        scope.inputChangedPromise = $timeout(function() {
-                            scope.inputChangedPromise = null;
-                            $log.debug("faceting: request for facet (index=" + scope.facetColumn.index + ") update. new search=" + scope.searchTerm);
-                            scope.parentCtrl.updateFacetColumn(scope.index);
-                        }, tableConstants.AUTO_SEARCH_TIMEOUT);
-                    };
-
-                    // clear the search, if reference has search then fire update
-                    scope.clearSearch = function() {
-                        scope.searchTerm = null;
-                        if (scope.reference.location.searchTerm) {
-                            $log.debug("faceting: request for facet (index=" + scope.facetColumn.index + ") update. new search=null");
                             scope.parentCtrl.updateFacetColumn(scope.index);
                         }
                     };
@@ -1601,38 +1585,5 @@
                 }
             };
 
-        }])
-
-        .directive('facetingCollapseBtn', ['UriUtils', function (UriUtils) {
-            return {
-                restrict: 'E',
-                templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/faceting/collapse-btn.html',
-                scope: {
-                    togglePanel: "=",       // function for toggling the panel open/closed
-                    tooltipMessage: "@",    // tooltip message
-                    panelOpen: "=",         // boolean value to control the panel being open/closed
-                    position: "@"           // can be 'left' or 'right'
-                },
-                link: function (scope, element, attr, ctrls) {
-                    var LEFT = "left",
-                        RIGHT = "right";
-
-                    if (scope.position == LEFT) {
-                        scope.tooltipPosition = RIGHT;
-                    }
-
-                    if (scope.position == RIGHT) {
-                        scope.tooltipPosition = LEFT;
-                    }
-
-                    scope.setClass = function () {
-                        if (scope.position == LEFT) {
-                            return {'glyphicon glyphicon-triangle-left': scope.panelOpen, 'glyphicon glyphicon-triangle-right': !scope.panelOpen}
-                        } else if (scope.position == RIGHT) {
-                            return {'glyphicon glyphicon-triangle-right': scope.panelOpen, 'glyphicon glyphicon-triangle-left': !scope.panelOpen}
-                        }
-                    }
-                }
-            }
         }]);
 })();

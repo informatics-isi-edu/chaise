@@ -4,6 +4,7 @@
     angular.module('chaise.utils', ['chaise.errors'])
 
     .constant("defaultChaiseConfig", {
+          "internalHosts": [window.location.host],
           "ermrestLocation": window.location.origin + "/ermrest",
           "headTitle": "Chaise",
           "navbarBrandText": "Chaise",
@@ -20,7 +21,9 @@
           "navbarMenu": {},
           "navbarBrand": "",
           "disableDefaultExport": false,
-          "exportServicePath": "/deriva/export"
+          "exportServicePath": "/deriva/export",
+          "disableExternalLinkModal": false,
+          "logClientActions": true
     })
 
     .constant("appTagMapping", {
@@ -65,14 +68,12 @@
         },
         "sessionExpired": {
             title: "Your session has expired. Please login to continue.",
-            message: "To open the login window press"
         },
         "previousSession": {
             message: "Your login session has expired. You are now accessing data anonymously. <a ng-click='login()'>Log in</a> to continue your privileged access."
         },
         "noSession": {
-            title: "You need to be logged in to continue.",
-            message: "To open the login window press"
+            title: "You need to be logged in to continue."
         },
         "clickActionMessage": {
             "messageWReplace": "Click <b>OK</b> to reload this page without @errorStatus.",
@@ -105,14 +106,20 @@
             viewCol: "Click on the eye button to view the detailed page associated with each record",
             null: "Search for any record with no value assigned",
             empty: "Search for any record with the empty string value",
-            notNull: "Search for any record that has a value"
+            notNull: "Search for any record that has a value",
+            showMore: "Click to show more available fitlers",
+            showDetails: "Click to show more details about the filters"
         },
         "URLLimitMessage": "Maximum URL length reached. Cannot perform the requested action.",
-        "queryTimeoutList": "<ul class='show-list-style'><li>Reduce the number of facet constraints.</li><li>Minimize the use of 'No Value' and 'All Records with Value' filters.</li></ul>",
+        "queryTimeoutList": "<ul class='show-list-style'><li>Reduce the number of facet constraints.</li><li>Minimize the use of 'No value' and 'All Records with Value' filters.</li></ul>",
         "queryTimeoutTooltip": "Request timeout: data cannot be retrieved. Refresh the page later to try again."
     })
 
     .constant("logActions", {
+        // action namespace
+        "clientAction": "client_action", // path to log button click events
+
+        // actions
         "recordRead": "record/main", // read the main entity (record)
         "recordUpdate": "record/main/update", // read the main entity (record)
         "recordRelatedRead": "record/related", // secondary
@@ -125,7 +132,6 @@
         "recordInlineAggregateUpdate": "record/inline/aggregate/update",
         "recordAggregate": "record/aggregate", // secondary
         "recordAggregateUpdate": "record/aggregate/update", // secondary
-
 
         "createPrefill": "create/prefill", // create with inbound related prefilled (recordedit) -> does it need referrer? (the pre should have it)
         "createAssociation": "create/prefill/association", // batch create association (record) -> does itneed referrer? (the pre should have it)
@@ -165,20 +171,142 @@
         "viewerMain": "main",
         "viewerAnnotation": "annotation",
         "viewerComment": "comment",
-        "viewerAnatomy": "anatomy"
+        "viewerAnatomy": "anatomy",
 
+        // # client actions (mostly button click events)
+        "deleteIntended": "delete/intend", // delete clicked -> confirm delete dialog opened (record button and recordset row) TODO
+        "deleteCancelled": "delete/cancel", // cancel clicked when confirm delete dialog open (record button and recordset row) TODO
+
+        // ## recordset actions
+        // ### page level actions
+        "exportOpen": "export/open", // export dropdown was opened
+        "permalinkLeft": "permalink/lclick", // permalink left clicked (copied)
+        "permalinkRight": "permalink/rclick", // permalink right clicked (contextmenu opened)
+        // ### recordset directive for facet popups
+        "recordsetPageSize": "page-size", // page size dropdown opened TODO
+        "recordsetFacetOpen": "panel/show", // facet panel opened TODO
+        "recordsetFacetClose": "panel/hide", // facet panel closed TODO
+        "recordsetFacetPageSize": "facet/page-size", // in "show more" for facet
+        "recordsetFacetAll": "facet/all", // in "show more" for facet
+        "recordsetFacetNone": "facet/none", // in "show more" for facet
+        "recordsetFacetClear": "facet/reset", // in "show more" for facet
+        "recordsetFacetCancel": "facet/cancel", // in "show more" for facet
+
+        // ## record actions
+        "showAllRelated": "show-empty/show", // "show empty sections" button clicked
+        "hideAllRelated": "show-empty/hide", // "hide empty sections" button clicked
+        "share": "share", // share dialog opened
+        "liveCopy": "share/live", // live link copied to clipboard
+        "versionCopy": "share/version", // versioned link copied to clipboard
+        "scrollTop": "scroll-top", // bottom right, "scroll to top" button clicked TODO
+        "tocShow": "toc/show", // the toc panel toggled open/close
+        "tocHide": "toc/hide", // the toc panel toggled open/close
+        "tocScrollTop": "toc/scroll-top", // "summary" heading clicked to scroll to top of record TODO
+        "tocScrollTo": "toc/scroll-to", // one of the toc headings clicked
+        // ### related tables in RT section
+        "relatedOpen": "related/open", // RT in RT section toggled open TODO
+        "relatedClose": "related/close", // RT in RT section toggled close TODO
+        "relatedPageSize": "related/page-size", // toggle page size dropdown TODO
+        // #### RT modes
+        "relatedTableDisplay": "related/display/table", // toggle display mode to table display
+        "relatedMkdnDisplay": "related/display/mkdn", // toggle display mode to custom display
+        "relatedEditDisplay": "related/display/edit", // toggle display mode to edit display
+        // #### RT actions
+        "relatedDeleteIntended": "related/delete/intend", // row delete clicked from delete in action column TODO
+        "relatedDeleteCancel": "related/delete/cancel", // row delete cancelled TODO
+        "relatedUnlinkIntended": "related/unlink/intend", // row unlink clicked from unlink in action column TODO
+        "relatedUnlinkCancel": "related/unlink/cancel", // row unlink cancelled TODO
+        // ### inline related tables in record display section
+        "inlinePageSize": "inline/page-size", // toggle page size dropdown for inline RT TODO
+        // #### inline modes
+        "inlineTableDisplay": "inline/display/table", // toggle display mode to table display
+        "inlineMkdnDisplay": "inline/display/mkdn", // toggle display mode to custom display
+        "inlineEditDisplay": "inline/display/edit", // toggle display mode to edit display
+        // #### inline actions
+        "inlineDeleteIntended": "inline/delete/intend", // row delete clicked from delete in action column TODO
+        "inlineDeleteCancel": "inline/delete/cancel", // row delete cancelled TODO
+        "inlineUnlinkIntended": "inline/unlink/intend", // row unlink clicked from unlink in action column TODO
+        "inlineUnlinkCancel": "inline/unlink/cancel", // row unlink cancelled TODO
+        // ### recordset directive for pure and binary popups
+        "recordPBOpen": "pb/panel/show", // facet panel opened TODO
+        "recordPBClose": "pb/panel/hide", // facet panel closed TODO
+        "recordPBPageSize": "pb/page-size", // TODO
+        "recordPBAll": "pb/all", // TODO
+        "recordPBNone": "pb/none", // TODO
+        "recordPBClear": "pb/reset", // TODO
+        "recordPBCancel": "pb/cancel", // TODO
+        // #### recordset directive for facet "show more" in pure and binary popups
+        "recordPBFacetPageSize": "pb/facet/page-size", // TODO
+        "recordPBFacetAll": "pb/facet/all", // TODO
+        "recordPBFacetNone": "pb/facet/none", // TODO
+        "recordPBFacetClear": "pb/facet/reset", // TODO
+        "recordPBFacetCancel": "pb/facet/cancel", // TODO
+
+        // ## recordedit actions
+        // ### create actions
+        "add1": "create/clone", // one form was added to the container
+        "addX": "create/clone-x", // multiple forms were added to the container
+        "createRemove": "create/remove", // remove a form during creation
+        "createMultiOpen": "create/set-all/open", // set all opened TODO
+        "createMultiClose": "create/set-all/close", // set all opened TODO
+        "createMultiCancel": "create/set-all/cancel", // set all closed (cancel button) TODO
+        "createMultiApply": "create/set-all/apply", // set all, apply all clicked TODO
+        "createMultiClear": "create/set-all/clear", // set all, clear all clicked TODO
+        // ### update actions
+        "updateRemove": "update/remove", // remove a form during editing
+        "updateMultiOpen": "update/set-all/open", // set all opened TODO
+        "updateMultiClose": "update/set-all/close", // set all opened TODO
+        "updateMultiCancel": "update/set-all/cancel", // set all closed (cancel button) TODO
+        "updateMultiApply": "update/set-all/apply", // set all, apply all clicked TODO
+        "updateMultiClear": "update/set-all/clear", // set all, clear all clicked TODO
+        // ### recordset directive for foreign key picker
+        "recordeditFKOpen": "fk/panel/show", // facet panel opened TODO
+        "recordeditFKClose": "fk/panel/hide", // facet panel closed TODO
+        "recordeditFKPageSize": "fk/page-size", // TODO
+        "recordeditFKCancel": "fk/cancel", // TODO
+        // #### recordset directive for facet "show more" in foriegn key pickers
+        "recordeditFKFacetPageSize": "fk/facet/page-size", // TODO
+        "recordeditFKFacetAll": "fk/facet/all", // TODO
+        "recordeditFKFacetNone": "fk/facet/none", // TODO
+        "recordeditFKFacetClear": "fk/facet/reset", // TODO
+        "recordeditFKFacetCancel": "fk/facet/cancel", // TODO
+
+        // ## navbar actions
+        "branding": "branding", // top left corner branding text/logo clicked
+        "dropdownUser": "dropdown/user", // user dropdown opened TODO
+        "profile": "dropdown/user/profile", // user profile dialog opened
+        "dropdownMenu": "dropdown/menu", // navbar menu dropdown opened TODO
+        "dropdownMenuInternal": "dropdown/menu/internal", // navbar menu internal page TODO
+        "dropdownMenuExternal": "dropdown/menu/external" // navbar menu external page TODO
     })
 
+    // NOTE since this has been used with ng-switch in the code, and we cannot
+    // have expressions in ng-switch-when, if you want to update the values,
+    // make sure to update the templates that are using this: table.html, ellipsis.html
     .constant("modalBox", {
         noSelect: "no-select",
         singleSelectMode:"single-select",
         multiSelectMode:"multi-select"
     })
 
+    // NOTE since this has been used with ng-switch in the code, and we cannot
+    // have expressions in ng-switch-when, if you want to update the values,
+    // make sure to update the templates that are using this: recordset.html, recordsetSelectFaceting.html
+    .constant("recordsetDisplayModes", {
+        fullscreen: "fullscreen",
+        related: "related",
+        popup: "popup",
+        foreignKeyPopup: "popup/foreignkey",
+        foreignKeyPopupCreate: "popup/foreignkey/create",
+        foreignKeyPopupEdit: "popup/foreignkey/edit",
+        addPureBinaryPopup: "popup/purebinary/add",
+        facetPopup: "popup/facet"
+    })
+
     .constant("defaultDisplayname", {
-        null: "<i>No Value</i>",
+        null: "<i>No value </i>",
         empty: "<i>Empty</i>",
-        notNull: "<i>All Records With Value</i>"
+        notNull: "<i>All records with value </i>"
     })
 
     .factory('UriUtils', ['appContextMapping', 'appTagMapping', 'ConfigUtils', 'ContextUtils', 'defaultChaiseConfig', 'Errors', 'messageMap', 'parsedFilter', '$injector', '$rootScope', '$window',
@@ -778,12 +906,20 @@
             return /*@cc_on!@*/false || !!document.documentMode;
         }
 
-        // takes pathname attribute of window.location object and returns app name
-        // path should be a string literal which appears before #catalog id in URL (/chaise/recordset/)
+        /**
+         * Takes pathname attribute of window.location object and returns app name
+         * path should be a string literal which appears before #catalog id in URL (/chaise/recordset/)
+         * if the path ends with /folder/file.html it will return the folder.
+         * (any other pattern will just return anything after last `/`)
+        */
         function appNamefromUrlPathname(path){
           var newPath = path.slice(0, -1);
           var lastSlash = newPath.lastIndexOf('/');
-          return newPath.substring(lastSlash + 1, newPath.length);
+          var name = newPath.substring(lastSlash + 1, newPath.length);
+          if (name.endsWith(".htm")) {
+              return appNamefromUrlPathname(newPath.substring(0, lastSlash) + "/");
+          }
+          return name;
         }
 
         // Takes path and creates full redirect links with catalogId
@@ -924,6 +1060,43 @@
             return eleUrl.origin == currentOrigin;
         }
 
+        /**
+         * Given a reference will return the appropriate link to recordset
+         * TODO why not use appLink? the only reason could be that we don't want
+         * ppid and pcid
+         * @param {ERMrest.reference} reference
+         * @returns {string} url to recordset app
+         */
+        function getRecordsetLink(reference) {
+            // before run, use window location
+            if (!reference) {
+                return $window.location.href;
+            }
+
+            var url = chaiseBaseURL() + "/recordset/#" + reference.location.catalog + "/" + reference.location.compactPath;
+
+            // add sort modifier
+            if (reference.location.sort)
+                url = url + reference.location.sort;
+
+            // add paging modifier
+            if (reference.location.paging)
+                url = url + reference.location.paging;
+
+            // add ermrestjs supported queryParams
+            if (reference.location.queryParamsString) {
+                url = url + "?" + reference.location.queryParamsString;
+            }
+
+            // add hideNavbar if present/defined
+            var dcctx = ConfigUtils.getContextJSON();
+            if (dcctx.hideNavbar) {
+                url = url + (reference.location.queryParamsString ? "&" : "?") + "hideNavbar=" + dcctx.hideNavbar;
+            }
+
+            return url;
+        }
+
         return {
             appNamefromUrlPathname: appNamefromUrlPathname,
             appTagToURL: appTagToURL,
@@ -943,7 +1116,8 @@
             resolvePermalink: resolvePermalink,
             setLocationChangeHandling: setLocationChangeHandling,
             setOrigin: setOrigin,
-            stripSortAndQueryParams: stripSortAndQueryParams
+            stripSortAndQueryParams: stripSortAndQueryParams,
+            getRecordsetLink: getRecordsetLink
         }
     }])
 
@@ -952,6 +1126,12 @@
             ERMrest.appLinkFn(UriUtils.appTagToURL);
             ERMrest.onHTTPSuccess(Session.extendPromptExpirationToken);
             ERMrest.systemColumnsHeuristicsMode(ConfigUtils.systemColumnsMode);
+
+            var chaiseConfig = ConfigUtils.getConfigJSON();
+            ERMrest.setClientConfig({
+                internalHosts: chaiseConfig.internalHosts,
+                disableExternalLinkModal: chaiseConfig.disableExternalLinkModal
+            });
         }
 
         return {
@@ -1177,7 +1357,7 @@
         };
     }])
 
-    .factory("UiUtils", ['$document', '$log', 'dataFormats', function($document, $log, dataFormats) {
+    .factory("UiUtils", ['dataFormats', '$document', '$log', '$timeout', '$window', function(dataFormats, $document, $log, $timeout, $window) {
 
         /**
          * Takes a timestamp in the form of milliseconds since epoch and converts it into a relative string if
@@ -1349,21 +1529,80 @@
         }
 
         /**
-         * sets the height of domElements.container
-         * @param {Object} domElements - an object with the following properties:
-         *      - {integer} navbarHeight - the height of the navbar element
-         *      - {integer} bookmarkHeight - the height of the bookmark container
-         *      - {integer} docHeight - the height of the viewport
-         *      - {DOMElement} container - the main container to fix the height of
-         **/
-        function setDisplayContainerHeight(domElements) {
+         * @param   {DOMElement=} parentContainer - the parent container. if undefined `body` will be used.
+         * @param   {DOMElement=} parentContainerSticky - the sticky area of parent. if undefined `#mainnav` will be used.
+         * @param   {boolean} useDocHeight - whether we should use the doc height even if parentContainer is passed.
+         * Set the height of bottom-panel-container
+         * If you don't pass any parentContainer, it will use the body
+         * It will assume the following structure in the given parentContainer:
+         *  - .app-content-container
+         *    - .top-panel-container
+         *    - .bottom-panel-container
+         */
+        function setDisplayContainerHeight(parentContainer, parentContainerSticky, useDocHeight) {
             try {
-                // calculate remaining dom height (navbar + bookmark)/viewheight
-                // This will be a percentage out of 100
-                var fixedHeightUsed = ((domElements.navbarHeight + domElements.bookmarkHeight)/domElements.docHeight) * 100;
-                // set height to remaining
-                domElements.container.style.height = (100 - fixedHeightUsed) + 'vh';
-            } catch(err) {
+                var docHeight = $window.innerHeight,
+                    parentUsableHeight,
+                    appContent, // the container that we might set height for if container height is too small
+                    container, // the container that we want to set the height for
+                    containerSticky; // the sticky part of the container (top-panel-container)
+
+                // if the size of content is way too small, make the whole app-content-container scrollable
+                var resetHeight = function () {
+                    appContent.style.overflowY = "auto";
+                    appContent.style.height = ((parentUsableHeight/docHeight) * 100) + "vh";
+                    container.style.height = "unset";
+                }
+
+                // get the parentContainer and its usable height
+                if (parentContainer == null || parentContainer == $document[0].querySelector("body")) {
+                    parentUsableHeight = docHeight;
+                    parentContainer = $document[0];
+                } else {
+                    parentUsableHeight = parentContainer.offsetHeight;
+                }
+
+                if (useDocHeight) {
+                    parentUsableHeight = docHeight;
+                }
+
+                // get the parent sticky
+                if (parentContainerSticky == null) {
+                    parentContainerSticky = $document[0].querySelector("#mainnav");
+                }
+                // subtract the parent sticky from usable height
+                parentUsableHeight -= parentContainerSticky.offsetHeight;
+
+                // the content that we should make scrollable if the content height is too small
+                appContent = parentContainer.querySelector(".app-content-container");
+
+                // the sticky part of the container
+                var stickyHeight = 0;
+                containerSticky = appContent.querySelector(".top-panel-container");
+                if (containerSticky) {
+                    stickyHeight = containerSticky.offsetHeight;
+                }
+
+                container = appContent.querySelector(".bottom-panel-container");
+
+                var containerHeight = ((parentUsableHeight - stickyHeight) / docHeight) * 100;
+                if (containerHeight < 15) {
+                    resetHeight();
+                } else {
+                    //remove the styles that might have been added to appContent
+                    appContent.style.overflowY = "unset";
+                    appContent.style.height = "unset";
+
+                    // set the container's height
+                    container.style.height = containerHeight + 'vh';
+
+                    // now check based on actual pixel size
+                    if (container.offsetHeight < 300) {
+                        resetHeight();
+                    }
+                }
+
+            } catch (err) {
                 $log.warn(err);
             }
         }
@@ -1387,18 +1626,60 @@
                 var footerHeight = elements.footer.offsetHeight + 10;
                 // calculate the inner height of the app content (height of children in main-body + footer)
                 if ( (elements.initialInnerHeight + footerHeight) < elements.mainContainerHeight) {
-                    elements.footer.style.position = "absolute";
-                    elements.footer.style.bottom = 0;
-                    elements.footer.style.left = 0;
-                    elements.footer.style.right = 0;
+                    removeClass(elements.footer, "position-relative");
                 } else {
-                    elements.footer.style.position = "relative";
-                    elements.footer.style.bottom = "unset";
-                    elements.footer.style.left = "unset";
-                    elements.footer.style.right = "unset";
+                    addClass(elements.footer, "position-relative");
                 }
             } catch(err) {
                 $log.warn(err);
+            }
+        }
+
+        /**
+         * @param   {Object} scope - the scope object
+         * @param   {DOMElement} parentContainer - the container that we want the alignment for
+         *
+         * Make sure the `.top-right-panel` and `.main-container` are aligned.
+         * They can be missaligned if the scrollbar is visible and takes space.
+         * TODO we might want to improve the performance of this.
+         * Currently it's running on every digest cycle.
+         */
+        function watchForMainContainerPadding(scope, parentContainer) {
+            var mainContainer = parentContainer.querySelector(".main-container");
+            var topRightPanel = parentContainer.querySelector(".top-right-panel");
+            scope.$watch(function () {
+                try {
+                    return mainContainer.clientWidth - topRightPanel.clientWidth;
+                } catch (exp) {
+                    return false;
+                }
+            }, function (padding) {
+                if (padding === false) return;
+                mainContainer.style.paddingRight = padding + "px";
+            });
+        }
+
+        /**
+         * Given an element and class name, will remove the class name from element.
+         * NOTE added because element.classList.remove is not supported by IE
+         * @param  {DOMElement} element
+         * @param  {string} className
+         */
+        function removeClass(element, className) {
+            element.className = element.className.split(" ").filter(function (c) {
+                return c !== className;
+            }).join(" ");
+        }
+
+        /**
+         * Given an element and class name, will add the class name to element.
+         * NOTE added because element.classList.add is not supported by IE
+         * @param  {DOMElement} element
+         * @param  {string} className
+         */
+        function addClass(element, className) {
+            if (element.className.split(" ").indexOf(className) == -1) {
+                element.className += " " + className;
             }
         }
 
@@ -1411,7 +1692,10 @@
             getInputType: getInputType,
             getSimpleColumnType: getSimpleColumnType,
             setFooterStyle: setFooterStyle,
-            setDisplayContainerHeight: setDisplayContainerHeight
+            setDisplayContainerHeight: setDisplayContainerHeight,
+            addClass: addClass,
+            removeClass: removeClass,
+            watchForMainContainerPadding: watchForMainContainerPadding
         }
     }])
 
@@ -1688,6 +1972,130 @@
         }
     }])
 
+    .directive('chaiseSearchInput', ['UriUtils', '$timeout', function (UriUtils, $timeout) {
+
+        return {
+            restrict: 'E',
+            templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/searchInput.html',
+            scope: {
+                searchTerm: "=",
+                searchCallback: "&",
+                inputClass: "@",
+                placeholder: "=",
+                focus: "=",
+                disabled: "="
+            },
+            link: function (scope, elem, attrs) {
+                var AUTO_SEARCH_TIMEOUT = 2000;
+                scope.inputChangedPromise = undefined;
+                scope.inputElement = elem[0].querySelector("input");
+
+                // unrwap the callback function
+                scope.searchCallback = scope.searchCallback();
+
+                scope.changeFocus = function () {
+                    if (scope.disabled) return;
+                    scope.inputElement.focus();
+                }
+
+                // will be called when users click on enter or submit button
+                scope.enterPressed = function() {
+                    if (scope.disabled) return;
+                    scope.inputChangedPromise = null;
+                    scope.searchCallback(scope.searchTerm);
+                };
+
+                // will be called everytime users change the input
+                scope.inputChanged = function() {
+                    if (scope.disabled) return;
+                    // Cancel previous promise for background search that was queued to be called
+                    if (scope.inputChangedPromise) {
+                        $timeout.cancel(scope.inputChangedPromise);
+                    }
+
+                    // Wait for the user to stop typing for a second and then fire the search
+                    scope.inputChangedPromise = $timeout(function() {
+                        scope.inputChangedPromise = null;
+                        scope.searchCallback(scope.searchTerm);
+                    }, AUTO_SEARCH_TIMEOUT);
+                };
+
+                // clear the search, if we already had a searchTerm, then fire the search
+                scope.clearSearch = function() {
+                    if (scope.disabled) return;
+                    if (scope.searchTerm) {
+                        scope.searchCallback(null);
+                    }
+                    scope.searchTerm = null;
+                };
+
+            }
+        };
+    }])
+
+    .directive('chaiseClearInput', [function () {
+        return {
+            restrict: 'E',
+            template: '<div class="chaise-input-control-feedback" ng-if="show">' +
+                       '<span class="{{btnClass}} remove-input-btn glyphicon glyphicon-remove" ng-click="clickCallback()" tooltip-placement="bottom" uib-tooltip="Clear input"></span>' +
+                      '</div>',
+            scope: {
+                btnClass: "@",
+                clickCallback: "&",
+                show: "="
+            }
+        };
+    }])
+
+    // TODO currently it has four different modes,we might want to consider
+    // rewriting this so we avoid duplicating all these four differnt variations
+    .directive('chaiseTitle', [function () {
+        return {
+            restrict: 'E',
+            // there shouldn't be any extra between closing span tag and a
+            // if added, it will show an extra underline for the space
+            template: '<a ng-if="addLink && !displayname.isHTML" ng-href="{{::recordset()}}" ng-attr-uib-tooltip="{{::comment}}" tooltip-placement="bottom-left">' +
+                        '<span ng-bind="displayname.value" ng-class="{\'chaise-icon-for-tooltip\': comment}"></span>' +
+                      '</a>' +
+                      '<a ng-if="addLink && displayname.isHTML" ng-href="{{::recordset()}}" ng-attr-uib-tooltip="{{::comment}}" tooltip-placement="bottom-left">' +
+                        '<span ng-bind-html="displayname.value" ng-class="{\'chaise-icon-for-tooltip\': comment}"></span>' +
+                      '</a>' +
+                      '<span ng-if="!addLink && !displayname.isHTML" ng-attr-uib-tooltip="{{::comment}}" tooltip-placement="bottom-left">' +
+                        '<span ng-bind="displayname.value" ng-class="{\'chaise-icon-for-tooltip\': comment}"></span>' +
+                      '</span>' +
+                      '<span ng-if="!addLink && displayname.isHTML" ng-attr-uib-tooltip="{{::comment}}" tooltip-placement="bottom-left">' +
+                        '<span ng-bind-html="displayname.value" ng-class="{\'chaise-icon-for-tooltip\': comment}"></span>' +
+                      '</span>',
+            scope: {
+                reference: "=?",
+                displayname: "=?",
+                comment: "=?",
+                addLink: "=?",
+                link: "=?"
+            },
+            link: function (scope, elem, attrs) {
+                if (typeof scope.link === "string") {
+                    scope.addLink = true;
+                }
+
+                scope.recordset = function () {
+                    if (typeof scope.link === "string") {
+                        return scope.link;
+                    }
+                    return scope.reference.unfilteredReference.contextualize.compact.appLink;
+                }
+
+                if (typeof scope.displayname !== "object") {
+                    scope.displayname = scope.reference.displayname;
+                }
+
+                if (!scope.comment && scope.reference && scope.reference.table.comment) {
+                    scope.comment = scope.reference.table.comment;
+                }
+            }
+        };
+    }])
+
     // if a view value is empty string (''), change it to null before submitting to the database
     .directive('emptyToNull', function () {
         return {
@@ -1785,43 +2193,72 @@
     *  the alert messages e.g. previousSession.message.
     */
     .directive('compile', ['$compile', function ($compile) {
-      return {
-        restrict: 'A',
-        link: function(scope, element, attrs) {
-          var ensureCompileRunsOnce = scope.$watch(
-            function(scope) {
-               // watch the 'compile' expression for changes
-              return scope.$eval(attrs.compile);
-            },
-            function(value) {
-              // when the 'compile' expression changes
-              // assign it into the current DOM
-              element.html(value);
+        return {
+            restrict: 'A',
+            link: function(scope, element, attrs) {
+                var ensureCompileRunsOnce = scope.$watch(
+                    function(scope) {
+                        // watch the 'compile' expression for changes
+                        return scope.$eval(attrs.compile);
+                    },
+                    function(value) {
+                        // when the 'compile' expression changes
+                        // assign it into the current DOM
+                        element.html(value);
 
-              // compile the new DOM and link it to the current
-              // scope.
-              // NOTE: we only compile .childNodes so that
-              // we don't get into infinite loop compiling ourselves
-              $compile(element.contents())(scope);
+                        // compile the new DOM and link it to the current
+                        // scope.
+                        // NOTE: we only compile .childNodes so that
+                        // we don't get into infinite loop compiling ourselves
+                        $compile(element.contents())(scope);
 
-              // Use un-watch feature to ensure compilation happens only once.
-              ensureCompileRunsOnce();
+                        // Use un-watch feature to ensure compilation happens only once.
+                        ensureCompileRunsOnce();
+                    }
+                );
             }
-          );
         }
-      }
-     }])
+    }])
 
-    .service('headInjector', ['ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', 'MathUtils', 'modalUtils', 'UriUtils', '$rootScope', '$window', function(ConfigUtils, ERMrest, Errors, ErrorService, MathUtils, modalUtils, UriUtils, $rootScope, $window) {
+    .service('logService', ['ConfigUtils', '$log', function (ConfigUtils, $log) {
+        var context = ConfigUtils.getContextJSON(),
+            cc = ConfigUtils.getConfigJSON();
+
+        function logAction(action, path) {
+            if (!cc.logClientActions) return;
+            context.server.logHeaders({ action: action }, path).catch(function (err) {
+                $log.debug("An error may have occured when logging: ", action);
+                $log.debug(err);
+            });
+        }
+
+        return {
+            logAction: logAction
+        }
+    }])
+
+    .service('headInjector', ['ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', 'MathUtils', 'modalUtils', '$q', '$rootScope', 'UriUtils', '$window', function(ConfigUtils, ERMrest, Errors, ErrorService, MathUtils, modalUtils, $q, $rootScope, UriUtils, $window) {
+
+        /**
+         * adds a link tag to head with the custom css. It will be resolved when
+         * the file is loaded (or if the customCSS property is not defined)
+         */
         function addCustomCSS() {
+            var defer = $q.defer();
             var chaiseConfig = ConfigUtils.getConfigJSON();
             if (chaiseConfig['customCSS'] !== undefined) {
-                var fileref = document.createElement("link");
-                fileref.setAttribute("rel", "stylesheet");
-                fileref.setAttribute("type", "text/css");
-                fileref.setAttribute("href", chaiseConfig['customCSS']);
-                document.getElementsByTagName("head")[0].appendChild(fileref);
+                var customCSSElement = document.createElement("link");
+                customCSSElement.setAttribute("rel", "stylesheet");
+                customCSSElement.setAttribute("type", "text/css");
+                customCSSElement.setAttribute("href", chaiseConfig['customCSS']);
+                // resolve the promise when the css is loaded
+                customCSSElement.onload = defer.resolve;
+                customCSSElement.onerror = defer.resolve;
+                document.getElementsByTagName("head")[0].appendChild(customCSSElement);
+            } else {
+                defer.resolve();
             }
+            return defer.promise;
         }
 
         function addTitle() {
@@ -1970,14 +2407,17 @@
             }
         }
 
+        /**
+         * Will return a promise that is resolved when the setup is done
+         */
         function setupHead() {
             addPolyfills();
             addCanonicalTag();
-            addCustomCSS();
             addTitle();
             setWindowName();
             overrideDownloadClickBehavior();
             overrideExternalLinkBehavior();
+            return addCustomCSS();
         }
 
         return {

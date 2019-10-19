@@ -14,6 +14,7 @@ var chaiseConfig = {
     maxRelatedTablesOpen: 9,
     resolverImplicitCatalog: null,
     disableDefaultExport: true,
+    disableExternalLinkModal: true,
     navbarMenu: {
         children: [
             {

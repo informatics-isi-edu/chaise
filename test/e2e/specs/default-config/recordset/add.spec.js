@@ -1,3 +1,5 @@
+// TODO can be combined with recordset/edit.spec.js
+
 var chaisePage = require('../../../utils/chaise.page.js');
 var moment = require('moment');
 var testParams = {
@@ -15,7 +17,7 @@ describe('Recordset add record,', function() {
     beforeAll(function () {
         browser.ignoreSynchronization = true;
         browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name);
-        chaisePage.waitForElement(element(by.id("divRecordSet"))).then(function() {
+        chaisePage.recordsetPageReady().then(function() {
             return chaisePage.recordsetPage.getRows();
         }).then(function(rows) {
             rowCount = rows.length;
@@ -23,30 +25,35 @@ describe('Recordset add record,', function() {
 
     });
 
-    it("click on the add button should open a new tab to recordedit", function() {
+    var allWindows;
+    it("click on the add button should open a new tab to recordedit", function(done) {
 
         var EC = protractor.ExpectedConditions;
         var addRecordLink = chaisePage.recordsetPage.getAddRecordLink();
         browser.wait(EC.presenceOf(addRecordLink), browser.params.defaultTimeout);
 
         addRecordLink.click().then(function() {
-            // get the url from this tab..
+            return browser.getAllWindowHandles();
+        }).then(function (handles) {
+            allWindows = handles;
+            return browser.switchTo().window(allWindows[1]);
+        }).then(function () {
+            chaisePage.waitForElement(element(by.id('submit-record-button')));
             return browser.driver.getCurrentUrl();
-        }).then(function(url) {
+        }).then(function (url) {
 
-            var result = '/recordedit/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name;
-            expect(url.indexOf(result)).toBeGreaterThan(-1);
-            return chaisePage.waitForElement(element(by.id('submit-record-button')));
-        }).then(function() {
+            var recordeditUrl = '/recordedit/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name;
+            expect(url).toContain(recordeditUrl, "url missmatch");
+
             // set the required fields
-            return chaisePage.recordsetPage.getInputForAColumn("title")
+            return chaisePage.recordsetPage.getInputForAColumn("title");
         }).then(function(input) {
             input.sendKeys(testParams.title);
             return chaisePage.recordsetPage.getModalPopupBtn();
         }).then(function(btn) {
             return btn.click();
         }).then(function() {
-            return chaisePage.waitForElement(element(by.id("divRecordSet")))
+            return chaisePage.recordsetPageReady();
         }).then(function() {
             var rows = chaisePage.recordsetPage.getRows();
             return rows.get(0).all(by.css(".select-action-button"));
@@ -66,11 +73,13 @@ describe('Recordset add record,', function() {
         }).then(function() {
             // wait until redirected to record page
             chaisePage.waitForElement(element(by.id("tblRecord")));
-        });
+            done();
+        }).catch(function (err) {
+            done.fail(err);
+        })
     });
 
-    // TODO: this test can be uncommented if we decide to navigate to a new tab for recordset add
-    xit("go back to recordset should refresh the table with the new record", function() {
+    it("go back to recordset should refresh the table with the new record", function() {
         // ... before closing this new tab and switching back to the original Record app's tab so that the next it spec can run properly
         browser.close();
         browser.switchTo().window(allWindows[0]).then(function() {
@@ -80,6 +89,6 @@ describe('Recordset add record,', function() {
         }).then(function(rows) {
             expect(rows.length).toBe(rowCount+1);
         });
-    }).pend("this is no longer the expected functionality. The page is changed in place and finishes at record app");
+    })
 
 });

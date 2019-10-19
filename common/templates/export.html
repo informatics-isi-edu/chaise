@@ -1,11 +1,12 @@
-<button ng-if="allowExport" class="dropdown-toggle btn-primary btn btn-inverted btn-no-boundry" data-toggle="dropdown" ng-disabled="disabled"
-   tooltip-placement="left" uib-tooltip= "Click to choose an export format.">
-    <span class="glyphicon" ng-class="{'glyphicon-export': !isLoading, 'glyphicon-refresh glyphicon-refresh-animate': isLoading}"></span>
-    <strong>Export </strong>
-    <span class="caret"></span>
-</button>
-<ul ng-if="allowExport" class="dropdown-menu dropdown-menu-right" style="min-width:unset; top:20px;">
-    <li ng-repeat="template in exportOptions.supportedFormats">
-        <a class="export-{{::makeSafeIdAttr(template.displayname)}}" ng-click="submit(template)">{{template.displayname}}</a>
-    </li>
-</ul>
+<div class="chaise-btn-group" uib-dropdown>
+    <button class="dropdown-toggle chaise-btn chaise-btn-primary" uib-dropdown-toggle ng-click="logDropdownOpened()" ng-disabled="disabled" tooltip-placement="left" uib-tooltip= "Click to choose an export format.">
+        <span class="glyphicon chaise-btn-icon" ng-class="{'glyphicon-export': !isLoading, 'glyphicon-refresh glyphicon-refresh-animate': isLoading}"></span>
+        <span>Export </span>
+        <span class="caret "></span>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-right" style="min-width:unset; top:20px;">
+        <li ng-repeat="template in exportOptions.supportedFormats">
+            <a class="export-{{::makeSafeIdAttr(template.displayname)}}" ng-click="submit(template)">{{template.displayname}}</a>
+        </li>
+    </ul>
+</div>

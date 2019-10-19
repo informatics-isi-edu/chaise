@@ -67,9 +67,7 @@ describe('Error related test cases,', function() {
         });
 
         it('On click of OK button the page should redirect to recordset page', function(done){
-            chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
-                return btn.click();
-            }).then (function (){
+            chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton()).then (function (){
                 return browser.driver.getCurrentUrl();
             }).then (function(currentUrl) {
               var newapplink = url.replace("record", "recordset"),
@@ -102,9 +100,7 @@ describe('Error related test cases,', function() {
         });
 
         it('On click of OK button the page should redirect Home page', function(done){
-            chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
-                return chaisePage.clickButton(btn);
-            }).then (function (){
+            chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton()).then (function (){
                 return browser.driver.getCurrentUrl();
             }).then (function(currentUrl) {
               var homeAppUrl = browser.params.url,
@@ -151,9 +147,7 @@ describe('Error related test cases,', function() {
         });
 
         it('On click of OK button the page should redirect to recordset page', function(done){
-            chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
-                return btn.click();
-            }).then (function (){
+            chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton()).then (function (){
                 return browser.driver.getCurrentUrl();
             }).then (function(currentUrl) {
                 var newapplink = url.replace("record", "recordset"),
@@ -186,9 +180,7 @@ describe('Error related test cases,', function() {
         });
 
         it('On click of OK button the page should redirect to Home page', function(done){
-            chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
-                return btn.click();
-            }).then (function (){
+            chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton()).then (function (){
                 return browser.driver.getCurrentUrl();
             }).then (function(currentUrl) {
               var homeAppUrl = browser.params.url,
@@ -233,9 +225,7 @@ describe('Error related test cases,', function() {
         });
 
         it('On click of Reload button the page should reload itself in Recordedit app', function(done){
-            chaisePage.recordPage.getErrorModalReloadButton().then(function(btn){
-                return btn.click();
-            }).then (function (){
+            chaisePage.clickButton(chaisePage.recordPage.getErrorModalReloadButton()).then (function (){
                 return browser.driver.getCurrentUrl();
             }).then (function(currentUrl) {
                 expect(currentUrl).toBe(currentUrl, "Reload button could not refresh the recordedit page.");
@@ -289,9 +279,7 @@ describe('Error related test cases,', function() {
         });
 
         it('After clicking back button initial page should appear', function(done){
-            chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
-                return btn.click();
-            }).then (function () {
+            chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton()).then (function () {
                 return chaisePage.recordsetPageReady();
             }).then(function () {
                 return browser.navigate().back();
@@ -330,7 +318,7 @@ describe('Error related test cases,', function() {
         });
     });
 
-    // delete from ellipses
+    // delete from ellipsis
     describe("Dismissible Error Modal when using Ellipses delete button", function(){
 
       beforeAll(function() {
@@ -340,7 +328,7 @@ describe('Error related test cases,', function() {
           deleteBtnEllipses  = chaisePage.recordsetPage.getDeleteActionButtons().first();
           chaisePage.waitForElement(deleteBtnEllipses);
       });
-        it('Error modal is dismissible in case of conflict/forbidden error while deleting from ellipses', function(done){
+        it('Error modal is dismissible in case of conflict/forbidden error while deleting from ellipsis', function(done){
             deleteBtnEllipses.click().then(function(){;
               return chaisePage.recordsetPage.getConfirmDeleteButton().click();
             }).then (function() {
@@ -376,8 +364,7 @@ describe('Error related test cases,', function() {
       });
 
       it('On click of OK button the page should reload the page without paging condition but with invalid filter conditions', function(done){
-          chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
-              btn.click();
+          chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton()).then(function(){
               return chaisePage.waitForElement(modalTitle);
           }).then (function (){
              return modalTitle.getText();
@@ -391,8 +378,7 @@ describe('Error related test cases,', function() {
       });
 
       it('On click of OK button the page should redirect to RecordSet', function(done){
-          chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
-              btn.click();
+          chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton()).then(function(){
               return browser.driver.getCurrentUrl();
           }).then (function(currentUrl) {
              recordsetWithoutFacetUrl = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/";
@@ -430,9 +416,7 @@ describe('Error related test cases,', function() {
       });
 
       it('On click of OK button the page should reload the page without paging conditions', function(done){
-          chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
-              return btn.click();
-          }).then(function () {
+          chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton()).then(function () {
               return browser.driver.getCurrentUrl();
           }).then (function(currentUrl) {
              recordsetPage = pageTestUrl.slice(0, pageTestUrl.search('@'));
@@ -467,9 +451,7 @@ describe('Error related test cases,', function() {
           });
 
           it('On click of OK button the page should reload the page without paging conditions', function(done){
-              chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
-                  return chaisePage.clickButton(btn);
-              }).then(function() {
+              chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton()).then(function() {
                   return browser.driver.getCurrentUrl();
               }).then(function(currentUrl) {
                  recordsetPage = pageTestUrl.slice(0, pageTestUrl.search('@'));
@@ -499,8 +481,7 @@ describe('Error related test cases,', function() {
             });
 
             it('On click of OK button the page should redirect to recordset page', function(done){
-                chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
-                    chaisePage.clickButton(btn);
+                chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton()).then(function(){
                     return browser.driver.getCurrentUrl();
                 }).then (function(currentUrl) {
                     var newapplink = url.replace("recordedit", "recordset"),
@@ -533,9 +514,8 @@ describe('Error related test cases,', function() {
             });
 
             it('On click of OK button the page should redirect to RecordSet', function(done){
-                chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
-                    return btn.click();
-                }).then(function(){
+                // This has to be .click(), if we use clickButton then it won't show the alert
+                chaisePage.recordPage.getErrorModalOkButton().click().then(function(){
                     return browser.switchTo().alert().accept();
                 }).then(function(){
                     return browser.driver.getCurrentUrl();

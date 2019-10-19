@@ -4,7 +4,7 @@
 
     angular.module('chaise.resizable', [])
 
-        .directive('resizable', ['$document', function ($document) {
+        .directive('resizable', ['$document', '$timeout', function ($document, $timeout) {
             return {
                 restrict: 'AE',
                 scope: {
@@ -16,7 +16,8 @@
                     rFlex: '=',
                     rGrabber: '@',
                     rDisabled: '@',
-                    rNoThrottle: '='
+                    rNoThrottle: '=',
+                    rOtherE: '@' // selector for the elements that need to be moved by resizable
                 },
 
                 link: function (scope, element, attr) {
@@ -24,12 +25,32 @@
                         'webkitFlexBasis' in document.documentElement.style ? 'webkitFlexBasis' :
                         'msFlexPreferredSize' in document.documentElement.style ? 'msFlexPreferredSize' : 'flexBasis';
 
+                    var resizePartners;
+                    scope.$watch(function () {
+                            return element[0].clientWidth;
+                    }, function (value) {
+                        if (value > 0) {
+                            resizePartners = document.querySelectorAll(scope.rOtherE);
+                            angular.element(resizePartners).addClass('resizable');
+                        }
+                    });
+
+                    var changeResizeParternsStyle = function (style, value) {
+                        if (resizePartners) {
+                            resizePartners.forEach(function (el) {
+                                el.style[style] = value;
+                            });
+                        }
+                    }
+
                     // register watchers on width and height attributes if they are set
                     scope.$watch('rWidth', function (value) {
                         element[0].style[scope.rFlex ? flexBasis : 'width'] = scope.rWidth + 'px';
+                        changeResizeParternsStyle(scope.rFlex ? flexBasis : 'width', scope.rWidth + 'px')
                     });
                     scope.$watch('rHeight', function (value) {
                         element[0].style[scope.rFlex ? flexBasis : 'height'] = scope.rHeight + 'px';
+                        changeResizeParternsStyle(scope.rFlex ? flexBasis : 'height', scope.rWidth + 'px')
                     });
 
                     element.addClass('resizable');
@@ -40,7 +61,7 @@
                         dir = scope.rDirections || ['right'],
                         vx = scope.rCenteredX ? 2 : 1, // if centered double velocity
                         vy = scope.rCenteredY ? 2 : 1, // if centered double velocity
-                        inner = scope.rGrabber ? scope.rGrabber : '<span class="glyphicon glyphicon-resize-horizontal"></span>',
+                        inner = scope.rGrabber ? scope.rGrabber : '<span class="fas fa-ellipsis-v"></span>',
                         start,
                         dragDir,
                         axis,
@@ -49,10 +70,11 @@
                     var updateInfo = function (e) {
                         info.width = false;
                         info.height = false;
-                        if (axis === 'x')
+                        if (axis === 'x') {
                             info.width = parseInt(element[0].style[scope.rFlex ? flexBasis : 'width']);
-                        else
+                        } else {
                             info.height = parseInt(element[0].style[scope.rFlex ? flexBasis : 'height']);
+                        }
                         info.id = element[0].id;
                         info.evt = e;
                     };
@@ -71,18 +93,22 @@
                             case 'top':
                                 prop = scope.rFlex ? flexBasis : 'height';
                                 element[0].style[prop] = h + (offset * vy) + 'px';
+                                changeResizeParternsStyle(prop, h + (offset * vy) + 'px')
                                 break;
                             case 'bottom':
                                 prop = scope.rFlex ? flexBasis : 'height';
                                 element[0].style[prop] = h - (offset * vy) + 'px';
+                                changeResizeParternsStyle(prop, h - (offset * vy) + 'px')
                                 break;
                             case 'right':
                                 prop = scope.rFlex ? flexBasis : 'width';
                                 element[0].style[prop] = w - (offset * vx) + 'px';
+                                changeResizeParternsStyle(prop, w - (offset * vx) + 'px')
                                 break;
                             case 'left':
                                 prop = scope.rFlex ? flexBasis : 'width';
                                 element[0].style[prop] = w + (offset * vx) + 'px';
+                                changeResizeParternsStyle(prop, w + (offset * vx) + 'px')
                                 break;
                         }
                         updateInfo(e);

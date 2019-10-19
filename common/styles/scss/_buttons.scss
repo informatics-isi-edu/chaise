@@ -1,0 +1,100 @@
+.chaise-body {
+    .chaise-btn {
+        @include chaise-btn();
+
+        &.chaise-btn-sm {
+            height: $btn-height-sm;
+            min-width: $btn-height-sm;
+            font-size: 1rem;
+            padding: 2px 5px;
+        }
+
+        > .chaise-btn-icon {
+            margin-right: 2px;
+        }
+
+        &.icon-btn {
+            padding: 7px 5px;
+            * {
+                margin-right: 0;
+            }
+        }
+
+        // don't show the default blue outline on focus
+        &:focus {
+            outline: none;
+        }
+
+        // show not-allowed cursor and not allow click
+        &[disabled] {
+            cursor: not-allowed;
+            &:active {
+                pointer-events: none;
+            }
+        }
+
+        &.chaise-btn-primary {
+            @include chaise-btn-primary();
+        }
+
+        &.chaise-btn-secondary {
+            color: $primary-color;
+            background-color: $white-color;
+            border: 1px solid $primary-color;
+
+            &:focus {
+                background-color: darken($white-color, 10%);
+            }
+        }
+
+        &.chaise-btn.chaise-btn-primary[disabled], &.chaise-btn.chaise-btn-secondary[disabled] {
+            color: $disabled-color;
+            background-color: $disabled-background-color;
+            border-color: $disabled-background-color;
+        }
+
+        &.chaise-btn-tertiary {
+            color: $primary-color;
+            border: none;
+            background: transparent;
+
+            &[disabled] {
+                color: $disabled-color;
+            }
+        }
+
+        &.chaise-btn-default {
+            color: $black-color;
+            border-color: $border-color;
+        }
+
+        &.chaise-btn-danger {
+            color: $white-color;
+            background-color: $danger-color;
+            border-color: darken($danger-color, 10%);
+        }
+
+        &.chaise-download-btn {
+            @include download-btn();
+            border: 0;
+            padding: 0;
+        }
+
+        &.chaise-btn-no-padding {
+            padding: 0;
+        }
+    }
+}
+
+//TODO
+.btn.btn-primary.btn-inverted[disabled],
+.chaise-checkbox input[disabled][type="checkbox"] + label:before {
+    color: #ccc !important;
+    border-color: #ccc !important;
+}
+
+
+//TODO
+.chaise-checkbox input[disabled][type="checkbox"]:checked + label:after {
+    color: #ccc !important;
+}

@@ -32,7 +32,7 @@ describe('View existing record,', function() {
         });
 
         if (!process.env.TRAVIS) {
-            describe("regadring the export button, ", function () {
+            describe("regarding the export button, ", function () {
                 var exportBtn;
                 beforeAll(function () {
                     exportBtn = chaisePage.recordsetPage.getExportDropdown();
@@ -110,7 +110,7 @@ describe('View existing record,', function() {
                 var permalink = browser.params.origin+"/id/"+browser.params.catalogId+"/"+chaisePage.getEntityRow("links", testParams.table_name, [{column: "id",value: "1"}]).RID;
                 expect(chaisePage.recordPage.getPermalinkText().getText()).toBe(permalink, "permalink url is incorrect");
 
-                return chaisePage.recordEditPage.getModalTitle().element(by.tagName("button")).click();
+                return chaisePage.recordsetPage.getModalCloseBtn().click();
             }).then(function () {
                 done();
             }).catch(function(err){

@@ -1,0 +1,357 @@
+.record-container {
+    $record-table-cell-padding: 5px;
+    $record-table-cell-border-width: 1px;
+    $space-between-related-sections: 5px;
+    $row-focus-border-width: 2px;
+
+    .top-panel-container {
+        padding-bottom: 10px;
+
+        .top-flex-panel {
+            .top-left-panel.open-panel {
+                flex: 0 0 $left-panel-width-sm;
+                position: relative;
+            } // end .top-left-panel
+
+            .top-right-panel {
+                .page-action-btns {
+                    height: $btn-height;
+                    margin: 0;
+                }
+
+                .title {
+                    padding-top: 20px;
+
+                    #page-subtitle {
+                        margin: 5px 0px;
+                    }
+
+                    .entity-display-header {
+                        position: relative;
+
+                        .page-title-container {
+                            width: 100%;
+                            display: inline-block;
+                            #page-title {
+                                margin: 0px;
+                            }
+                        }
+
+                        .record-action-btns-container {
+                            font-size: 1rem;
+                            padding-top: 7px;
+                            width: 330px;
+                        }
+
+                    } // end .entity-display-header
+                } // end .title
+
+                .show-toc-btn {
+                    margin-top: 10px;
+                    padding-left: 2px;
+                    padding-bottom: 0px;
+                }
+            } // end .top-right-panel
+        }
+    }
+
+    .bottom-panel-container {
+        /** bottom left panel **/
+        > .side-panel-resizable {
+
+            &.open-panel {
+                flex-basis: $left-panel-width-sm;
+            }
+
+            .side-panel-container {
+                height: 100%;
+                overflow-y: auto;
+
+                .side-panel-heading {
+                    margin: 0px;
+                }
+            }
+
+            .columns-container {
+                margin-left: 10px;
+
+                ul {
+                    padding-left: 0px;
+                }
+
+                .toc-heading {
+                    padding: 4px 10px 4px 0px;
+                    cursor: pointer;
+                    font-size: $h4-font-size;
+
+                    & > a.empty-toc-heading {
+                        opacity: 0.7;
+                    }
+
+                    &:hover {
+                        background-color: rgb(241, 241, 241);
+                    }
+                }
+
+                .toc-inline-heading {
+                    font-size: 1rem;
+                    padding-left: 20px;
+                }
+
+                #rt-toc-loading {
+                    padding: 10px 5px 5px;
+                }
+            }
+        }
+
+        .main-container {
+            padding-right: 20px;
+        }
+
+        record-display {
+            .inline-table-display {
+                margin-top: -25px;
+            }
+
+            > table {
+                // prevents the content in record-table from pushing off the side of page
+                table-layout: fixed;
+                width: 100%;
+
+                // reduce the spacing of table cells (overrides bootstrap default)
+                > tbody > tr {
+                    > td {
+                        border-width: $record-table-cell-border-width;
+                        padding: $record-table-cell-padding;
+                    }
+
+                    &.row-focus{
+                        // row-focus will change the border top and bottom size,
+                        // so we should adjust that and account for the default border
+                        td {
+                            border-top: 0;
+                            padding-top: $record-table-cell-padding - ($row-focus-border-width - $record-table-cell-border-width);
+                            padding-bottom: $record-table-cell-padding - ($row-focus-border-width - $record-table-cell-border-width);
+
+                            // if the size of row-focus is bigger than the current border width,
+                            // we should adjust the content of inline tables so the whole page doesn't shift
+                            @if $row-focus-border-width > $record-table-cell-border-width {
+                                .inline-table-display {
+                                    padding-bottom: $row-focus-border-width;
+                                }
+                            }
+                        }
+
+                        + tr {
+                            td {
+                                border-top: 0;
+                            }
+
+                            // when there are two of them, the bottom should use the default padding
+                            &.row-focus td {
+                                padding-top: $record-table-cell-padding;
+                            }
+                        }
+                    }
+                }
+
+                tr:nth-child(1) > td {
+                    border-top: none;
+                }
+
+                .entity-key {
+                    padding-left: 40px;
+                    min-width: 150px;
+                }
+            }
+        }
+
+        /* action bar styles apply to inline RT and bottom of page RT */
+        .action-bar-RT-heading {
+            margin-top: -30px;
+        }
+
+        .action-bar-entity-display-mode {
+            float: right;
+        }
+
+        .action-bar-entity-table-mode {
+            padding-bottom: 5px;
+            text-align: right;
+        }
+
+        .row-focus {
+            border: $row-focus-border-width solid $primary-color !important;
+        }
+
+        .chaise-table-header {
+            padding-bottom: 5px;
+        }
+
+        .chaise-table-pagination {
+            padding-top: 10px;
+            padding-bottom: 0px;
+        }
+
+        /******Related Entities in record **************/
+        #rt-container {
+            .related-table-accordion {
+                &.panel {
+                    // override the default bootstrap styles
+                    box-shadow: none;
+                    border-radius: 0;
+                    border: 0;
+                    + .panel {
+                        margin-top: $space-between-related-sections;
+                    }
+
+                    // row-focus will add a border of 2px,
+                    // - adding -2px margin to left and right to avoid shrinkage
+                    // - reducing the margin-top from 5px to 3px to avoid moving
+                    &.row-focus {
+                        margin-left: -$row-focus-border-width;
+                        margin-right: -$row-focus-border-width;
+                        margin-top: $space-between-related-sections - $row-focus-border-width;
+
+                        + .panel:not(.row-focus) {
+                            margin-top: $space-between-related-sections - $row-focus-border-width;
+                        }
+
+                        // if there are two row-focus on top of each other, we should
+                        // change the margin to account for both of their borders.
+                        + .row-focus {
+                            margin-top: $space-between-related-sections - ($row-focus-border-width * 2);
+                        }
+                    }
+
+                    // the first row doesn't have margin top
+                    &:first-child.row-focus {
+                        margin-top: -$row-focus-border-width;
+                    }
+                }
+
+
+                > .panel-heading {
+                    height: 44px;
+                    text-transform: inherit;
+                    padding: 8px 8px 8px 8px;
+                    color: $white-color;
+                    border: none;
+                    border-radius: inherit;
+                    background: $section-background-color;
+
+                    .panel-title {
+                        font-size: inherit;
+
+                        & > a:hover, & > a:focus{
+                            text-decoration: none;
+                        }
+
+                        a.accordion-toggle {
+                            color: inherit;
+
+                            .rt-section-header {
+                                font-size: $h2-font-size;
+
+                                .toggle-icon {
+                                    &.fa-chevron-right {
+                                        margin-right: 5px;
+                                        margin-left: 5px;
+                                    }
+
+                                    &.fa-chevron-down {
+                                        margin-right: 4px;
+                                    }
+                                }
+                            }
+                        }
+                    } // end .panel-title
+
+                    & + .panel-collapse > .panel-body {
+                        border-top: none;
+                        padding: 10px 0px 10px 0px;
+
+                        .accordion-content {
+                            padding-left: 40px;
+                            padding-right: 8px;
+                        }
+                    } // end .panel-body
+                } // end .panel-heading
+            } // end .related-table-accordion
+        } // end rt-container
+
+        #back-to-top {
+            position: fixed;
+            right: 40px;
+            bottom: 40px;
+            padding: 1px 4px;
+            font-size: 25px;
+            border-radius: 4px;
+            height: 35px;
+            width: 35px;
+            cursor: pointer;
+            overflow: hidden;
+            z-index: 100;
+        }
+
+        .loading-text {
+            color: #446c73;
+            font-weight: 600;
+        }
+
+        .loading-sticky {
+            float: left;
+            position: fixed;
+            z-index: 1;
+            bottom: 0;
+            background: #d9edf7;
+            margin: 5px;
+            padding: 5px 20px;
+            border: solid #446c73 1.5px;
+        }
+    }
+
+
+
+
+    /********* print ********/
+
+    @media print {
+        #main-content {
+            height: auto !important;
+            display: block;
+        }
+
+        #record-side-pan {
+            display: none;
+        }
+
+        .container-fluid {
+            padding-left: 0px;
+        }
+
+        .record-container {
+            .entity-key {
+                width: 15%;
+                max-width: 120px;
+            }
+
+            .entity-value {
+                width: 85%;
+            }
+        }
+
+        #footer {
+            display: none;
+        }
+
+        a[href]:after {
+            content: none !important;
+        }
+    }
+
+    @page {
+        size: auto;
+        margin: 5% 4% 5% 3%;
+    }
+}

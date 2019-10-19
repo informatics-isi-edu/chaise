@@ -77,8 +77,10 @@
                     };
 
                     scope.clear = function() {
+                        console.log(scope.value);
                         scope.value.url = "";
                         scope.value.filename = "";
+                        scope.value.filesize = "";
                         delete scope.value.file;
                         delete scope.value.hatracObj;
                         scope.fileEl.val("");

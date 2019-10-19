@@ -4,7 +4,9 @@
     var isIE = /*@cc_on!@*/false || !!document.documentMode, // Internet Explorer 6-11
         isEdge = !isIE && !!window.StyleMedia; // Edge
 
-    angular.module('chaise.record.table', ['chaise.ellipses', 'chaise.inputs', 'chaise.utils'])
+    var addRecordRequests = {}; // table refresh used by add record implementation with cookie (old method)
+
+    angular.module('chaise.record.table', ['chaise.ellipsis', 'chaise.inputs', 'chaise.utils'])
 
     .constant('tableConstants', {
         MAX_CONCURENT_REQUEST: 4,
@@ -38,7 +40,6 @@
      *
      *      { hasLoaded,    // data is ready, loading icon should not be visible
      *        reference,    // reference object
-     *        tableDisplayName,
      *        columns,      // array of Column objects
      *        enableSort,   // boolean whether sorting should be enabled
      *        sortby,       // column name, user selected or null
@@ -64,12 +65,13 @@
      *                  no-select       // do not allow selection of the rows. {modalBox.noSelect}
      *                  single-select   // only allow one row to be selected. {modalBox.singleSelectMode}
      *                  multi-select    // allow the user to select as many rows as they want. {modalBox.multiSelectMode}
-     *          - hideSelectedRows
-     *          - hideTotalCount
-     *          - hidePageSettings
      *          - showFaceting: defines if the facet panel should be available
      *          - openFacetPanel: defines if the facet panel is open by default
      *          - showNull: if this is available and equal to `true`, we will differentiate between `null` and empty string.
+     *          - displayMode:
+     *             fullscreen
+     *             related
+     *             popup
      *
      * The events that are being used by directives in this file and their children:
      * 1. `reference-modified`: data model has been updated.
@@ -86,11 +88,11 @@
      * event that facets will send to the parents. recordset directive uses this
      * event to call read on this new reference.
      * 4. `record-modified`: one of the records in the recordset table has been
-     * modified. ellipses will fire this event and recordset directive will use it.
+     * modified. ellipsis will fire this event and recordset directive will use it.
      */
     .factory('recordTableUtils',
-            ['AlertsService', 'DataUtils', 'defaultDisplayname', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'Session', 'tableConstants', 'UriUtils', '$cookies', '$document', '$log', '$q', '$rootScope', '$timeout', '$window',
-            function(AlertsService, DataUtils, defaultDisplayname, ErrorService, logActions, MathUtils, messageMap, modalBox, Session, tableConstants, UriUtils, $cookies, $document, $log, $q, $rootScope, $timeout, $window) {
+            ['AlertsService', 'DataUtils', 'defaultDisplayname', 'ErrorService', 'logActions', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'recordsetDisplayModes', 'Session', 'tableConstants', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$q', '$rootScope', '$timeout', '$window',
+            function(AlertsService, DataUtils, defaultDisplayname, ErrorService, logActions, logService, MathUtils, messageMap, modalBox, recordsetDisplayModes, Session, tableConstants, UiUtils, UriUtils, $cookies, $document, $log, $q, $rootScope, $timeout, $window) {
 
         function FlowControlObject(maxRequests) {
             this.maxRequests = maxRequests || tableConstants.MAX_CONCURENT_REQUEST;
@@ -331,6 +333,12 @@
             vm.flowControlObject.occupiedSlots--;
             vm.dirtyResult = !res;
             vm.hasLoaded = true;
+
+            // scroll to top of the page so user can see the result
+            if (vm.config.displayMode !== recordsetDisplayModes.related) {
+                scrollToTop();
+            }
+
             $log.debug("counter", counter, ": after result update: " + (res ? "successful." : "unsuccessful."));
         }
 
@@ -650,11 +658,7 @@
             updateColumnAggregates(vm, _updatePage);
 
             // update the count
-            if (vm.config.hideTotalCount) {
-                vm.totalRowsCnt = null;
-            } else {
-                _updateMainCount(vm, _updatePage);
-            }
+            _updateMainCount(vm, _updatePage);
 
             // update the facets
             if (vm.facetModels) {
@@ -771,7 +775,7 @@
          * Registers the callbacks for recordTable directive and it's children.
          * @param  {object} scope the scope object
          */
-        function registerTableCallbacks(scope, elem, attr) {
+        function registerTableCallbacks(scope, elem, attrs) {
             if (!scope.vm) scope.vm = {};
 
             scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
@@ -820,11 +824,46 @@
             scope.sortby = function(column) {
                 if (scope.vm.sortby !== column) {
                     changeSort("asc", column);
+                } else {
+                    scope.toggleSortOrder();
                 }
             };
 
             scope.toggleSortOrder = function () {
                 changeSort((scope.vm.sortOrder === 'asc' ? scope.vm.sortOrder = 'desc' : scope.vm.sortOrder = 'asc'));
+            };
+
+            scope.before = function() {
+                var previous = scope.vm.page.previous;
+                if (previous && scope.$root.checkReferenceURL(previous)) {
+                    scope.vm.reference = previous;
+                    $log.debug('counter', scope.vm.flowControlObject.counter ,': request for previous page');
+
+                    scope.vm.logObject = {
+                        action: logActions.recordsetPage,
+                        sort: previous.location.sortObject,
+                        page: previous.location.beforeObject,
+                        type: "before"
+                    };
+                    update(scope.vm, true, false, false);
+                }
+            };
+
+            scope.after = function() {
+                var next = scope.vm.page.next;
+                if (next && scope.$root.checkReferenceURL(next)) {
+                    scope.vm.reference = next;
+                    $log.debug('counter', scope.vm.flowControlObject.counter ,': request for next page');
+
+                    scope.vm.logObject = {
+                        action: logActions.recordsetPage,
+                        sort: next.location.sortObject,
+                        page: next.location.afterObject,
+                        type: "after"
+                    };
+                    update(scope.vm, true, false, false);
+                }
+
             };
 
             scope.isDisabled = function (tuple) {
@@ -849,6 +888,8 @@
 
             // this is for the button on the table heading that deselects all currently visible rows
             scope.selectNone = function($event) {
+                logService.logAction(logActions.recordsetFacetNone, logActions.clientAction);
+
                 var tuples = [], tuple;
                 for (var i = 0; i < scope.vm.page.tuples.length; i++) {
                     tuple = scope.vm.page.tuples[i];
@@ -871,6 +912,8 @@
 
             // this is for the button on the table heading that selects all currently visible rows
             scope.selectAll = function($event) {
+                logService.logAction(logActions.recordsetFacetAll, logActions.clientAction);
+
                 var tuples = [], tuple;
                 for (var i = 0; i < scope.vm.page.tuples.length; i++) {
                     tuple = scope.vm.page.tuples[i];
@@ -922,97 +965,63 @@
          * Registers the callbacks for recordset directive and it's children.
          * @param  {object} scope the scope object
          */
-        function registerRecordsetCallbacks(scope) {
-            var addRecordRequests = {}; // table refresh used by add record implementation with cookie (old method)
-            var updated = false; // table refresh used by ellipses' edit action (new method)
+        function registerRecordsetCallbacks(scope, elem, attrs) {
+            var updated = false; // table refresh used by ellipsis' edit action (new method)
 
-            scope.pageLimits = [10, 25, 50, 75, 100, 200];
             scope.$root.alerts = AlertsService.alerts;
             scope.$root.showSpinner = false; // this property is set from common modules for controlling the spinner at a global level that is out of the scope of the app
             scope.vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
             scope.transformCustomFilter = DataUtils.addSpaceAfterLogicalOperators;
 
+            scope.getRecordsetLink = UriUtils.getRecordsetLink;
+
+            scope.tooltip = messageMap.tooltip;
             scope.defaultDisplayname = defaultDisplayname;
+
+            scope.recordsetDisplayModes = recordsetDisplayModes;
 
             scope.vm.isIdle = true;
             scope.vm.facetModels = [];
             scope.vm.facetsToPreProcess = [];
             scope.vm.flowControlObject = new FlowControlObject();
 
-            scope.setPageLimit = function(limit) {
-                scope.vm.pageLimit = limit;
+            scope.versionDisplay = function () {
+                return UiUtils.humanizeTimestamp(scope.vm.reference.location.versionAsMillis);
+            }
 
-                scope.vm.logObject = {action: logActions.recordsetLimit};
-                update(scope.vm, true, false, false);
-            };
+            scope.versionDate = function () {
+                return UiUtils.versionDate(scope.vm.reference.location.versionAsMillis);
+            }
 
-            scope.before = function() {
-                var previous = scope.vm.page.previous;
-                if (previous && scope.$root.checkReferenceURL(previous)) {
-                    scope.vm.reference = previous;
-                    $log.debug('counter', scope.vm.flowControlObject.counter ,': request for previous page');
+            // used to capture left click events on permalink button
+            scope.permalinkClick = function () {
+                logService.logAction(logActions.permalinkLeft, logActions.clientAction);
 
-                    scope.vm.logObject = {
-                        action: logActions.recordsetPage,
-                        sort: previous.location.sortObject,
-                        page: previous.location.beforeObject,
-                        type: "before"
-                    };
-                    update(scope.vm, true, false, false);
-                }
-            };
+                var text = scope.getRecordsetLink();
 
-            scope.after = function() {
-                var next = scope.vm.page.next;
-                if (next && scope.$root.checkReferenceURL(next)) {
-                    scope.vm.reference = next;
-                    $log.debug('counter', scope.vm.flowControlObject.counter ,': request for next page');
+                // Create a dummy input to put the text string into it, select it, then copy it
+                // this has to be done because of HTML security and not letting scripts just copy stuff to the clipboard
+                // it has to be a user initiated action that is done through the DOM object
+                var dummy = angular.element('<input></input>');
+                dummy.attr("visibility", "hidden");
+                dummy.attr("display", "none");
 
-                    scope.vm.logObject = {
-                        action: logActions.recordsetPage,
-                        sort: next.location.sortObject,
-                        page: next.location.afterObject,
-                        type: "after"
-                    };
-                    update(scope.vm, true, false, false);
-                }
+                document.body.appendChild(dummy[0]);
 
-            };
+                dummy.attr("id", "permalink_copy");
+                document.getElementById("permalink_copy").value = text;
+                dummy.select();
+                document.execCommand("copy");
 
-            scope.focusOnSearchInput = function () {
-                angular.element("#search-input.main-search-input").focus();
-            };
+                document.body.removeChild(dummy[0]);
+            }
 
-            scope.inputChangedPromise = undefined;
+            scope.toggleFacetPanel = function () {
+                var action = (scope.vm.config.facetPanelOpen ? logActions.recordsetFacetClose : logActions.recordsetFacetOpen );
+                logService.logAction(action, logActions.clientAction);
 
-            /*
-                The search fires at most one active "background"
-                search at a time and, i.e. for opportunistic type-ahead search. It should never send
-                another before the previous terminates. The delay for firing the search is
-                1 second, when the user has stopeed typing.
-            */
-            // On change in user input
-            scope.inputChanged = function() {
-                if (scope.vm.enableAutoSearch) {
-
-                    // Cancel previous promise for background search that was queued to be called
-                    if (scope.inputChangedPromise) {
-                        $timeout.cancel(scope.inputChangedPromise);
-                    }
-
-                    // Wait for the user to stop typing for a second and then fire the search
-                    scope.inputChangedPromise = $timeout(function() {
-                        scope.inputChangedPromise = null;
-                        scope.search(scope.vm.search);
-                    }, tableConstants.AUTO_SEARCH_TIMEOUT);
-                }
-            };
-
-            scope.enterPressed = function() {
-                scope.inputChangedPromise = null;
-                // Trigger search
-                scope.search(scope.vm.search);
-            };
+                scope.vm.config.facetPanelOpen = !scope.vm.config.facetPanelOpen;
+            }
 
             scope.search = function(term) {
 
@@ -1027,30 +1036,6 @@
                      $log.debug('counter', scope.vm.flowControlObject.counter ,': new search term=' + term);
                      update(scope.vm, true, true, true);
                  }
-            };
-
-            scope.clearSearch = function() {
-                if (scope.vm.reference.location.searchTerm)
-                    scope.search();
-
-                scope.vm.search = null;
-            };
-
-            scope.addRecord = function() {
-
-                // Generate a unique id for this request
-                // append it to the URL
-                var referrer_id = 'recordset-' + MathUtils.getRandomInt(0, Number.MAX_SAFE_INTEGER);
-                addRecordRequests[referrer_id] = 0;
-
-                // open a new tab
-                var newRef = scope.vm.reference.table.reference.contextualize.entryCreate;
-                var appLink = newRef.appLink;
-                appLink = appLink + (appLink.indexOf("?") === -1 ? "?" : "&") +
-                    'invalidate=' + UriUtils.fixedEncodeURIComponent(referrer_id);
-
-                // open url in a new tab
-                $window.open(appLink, '_blank');
             };
 
             // function for removing a single pill and it's corresponding selected row
@@ -1072,6 +1057,8 @@
 
             // function for removing all pills regardless of what page they are on, clears the whole selectedRows array
             scope.removeAllPills = function($event) {
+                logService.logAction(logActions.recordsetFacetClear, logActions.clientAction);
+
                 var pre = scope.vm.selectedRows.slice();
                 scope.vm.selectedRows.clear();
                 scope.vm.currentPageSelected = false;
@@ -1097,7 +1084,7 @@
                     $log.debug('counter', scope.vm.flowControlObject.counter ,': focused on page after update');
                     updated = false;
                     scope.vm.lastActiveFacet = -1;
-                    if (scope.parentReference) {
+                    if (scope.vm.config.displayMode === scope.recordsetDisplayModes.related) {
                         scope.vm.logObject = {action: logActions.recordRelatedUpdate};
                     } else {
                         scope.vm.logObject = {action: logActions.recordsetUpdate};
@@ -1129,7 +1116,7 @@
             });
 
             // This is not used now, but we should change the record-deleted to this.
-            // row data has been modified (from ellipses) do read
+            // row data has been modified (from ellipsis) do read
             scope.$on('record-modified', function($event) {
                 $log.debug("-----------------------------");
                 $log.debug('counter', scope.vm.flowControlObject.counter, ': record-modified in recordset directive');
@@ -1185,6 +1172,9 @@
                         scope.vm.focusOnFacet(firstOpen, true);
                     }
 
+                    // TODO should be based on the reference columns in search context
+                    scope.searchPlaceholder = {isHTML: false, value: "all columns"};
+
                     initialize(scope.vm);
                 });
             };
@@ -1203,6 +1193,131 @@
             if (recordsetReadyToInitialize(scope)) {
                 initializeRecordset(scope);
             }
+
+
+            /**
+             * Set the height of recordset and facet panel
+             * This is called if the height of the fixed content is changed
+             */
+            function setRecordsetHeight() {
+                // make sure the value is set and is integer
+                if (scope.fixedContentHeight !== undefined && !isNaN(scope.fixedContentHeight)) {
+
+                    var pc, pcs;
+                    if (scope.vm.parentContainerSelector) {
+                        pc = scope.parentContainer;
+                    }
+                    if (scope.vm.parentStickyAreaSelector) {
+                        pcs = scope.parentStickyArea;
+                    }
+
+                    UiUtils.setDisplayContainerHeight(pc, pcs);
+                }
+            }
+
+            /**
+             * Compute the value of fixed content (navbar/modal header + top-panel-container)
+             * @return {int}
+             */
+            function computeFixedContentHeight () {
+                scope.fixedContentHeight = scope.parentContainer.querySelector('.top-panel-container').offsetHeight;
+
+                // if the sticky area of the parent is defined (navbar or header in modal)
+                if (scope.parentStickyArea) {
+                    scope.fixedContentHeight += scope.parentStickyArea.offsetHeight;
+                }
+
+                return scope.fixedContentHeight;
+            }
+
+            /**
+             * Attach the container elements to the scope, and create the watch
+             * event for the fixedContentHeight.
+             */
+            function initializeRecordsetHeight () {
+                // get the scrollable container of this recordset
+                scope.scrollableContainer = scope.parentContainer.querySelector(".bottom-panel-container");
+
+                // just setting the watch event is not enough, we have to run it once too.
+                computeFixedContentHeight();
+                setRecordsetHeight();
+
+                // watch the height of the fixed content and set the height on change.
+                scope.$watch(computeFixedContentHeight, function (newValue, oldValue) {
+                    if (newValue != oldValue) {
+                        setRecordsetHeight();
+                    }
+                });
+
+                // make sure the padding of main-container is correctly set
+                UiUtils.watchForMainContainerPadding(scope, scope.parentContainer);
+            }
+
+            // initialize the height of main-container and facet container
+            var unbindWatchForRecordsetInitializeHeight = scope.$watch(function() {
+                return (scope.vm.hasLoaded && scope.vm.initialized) || (scope.vm.config.showFaceting && scope.vm.reference);
+            }, function (newValue, oldValue) {
+                if (newValue) {
+                    $timeout(function () {
+                        initializeRecordsetHeight();
+
+                        //make sure we're calling this watcher once
+                        unbindWatchForRecordsetInitializeHeight();
+
+                        // capture and log the right click event on the permalink button
+                        var permalink = document.getElementById('permalink');
+                        if (permalink) {
+                            permalink.addEventListener('contextmenu', function (e) {
+                                logService.logAction(logActions.permalinkRight, logActions.clientAction);
+                            });
+                        }
+                    }, 0);
+                }
+            });
+
+            // watch for the main body size to change
+            if (scope.vm.config.displayMode === recordsetDisplayModes.fullscreen) {
+                scope.$watch(function() {
+                    if (scope.mainBodyEl) {
+                        return scope.mainBodyEl.offsetHeight;
+                    } else {
+                        return -1;
+                    }
+                }, function (newValue, oldValue) {
+                    if (newValue != oldValue) {
+                        $timeout(function () {
+                            UiUtils.setFooterStyle(0);
+                        }, 0);
+                    }
+                });
+            }
+
+            angular.element($window).bind('resize', function(){
+                if (scope.vm.hasLoaded && scope.vm.initialized ) {
+                    setRecordsetHeight();
+                    if (scope.vm.config.displayMode === recordsetDisplayModes.fullscreen) {
+                        UiUtils.setFooterStyle(0);
+                    }
+                    scope.$digest();
+                }
+            });
+
+            $timeout(function () {
+                // set the parentContainer element
+                if (scope.vm.parentContainerSelector) {
+                    scope.parentContainer = $document[0].querySelector(scope.vm.parentContainerSelector);
+                } else {
+                    scope.parentContainer = $document[0].querySelector("body");
+                }
+
+                // used for footer
+                scope.mainBodyEl = scope.parentContainer.querySelector('.main-body');
+
+                // set the sticky area selector container
+                if (scope.vm.parentStickyAreaSelector) {
+                    scope.parentStickyArea = $document[0].querySelector(scope.vm.parentStickyAreaSelector);
+                }
+            }, 0);
         }
 
         return {
@@ -1214,6 +1329,58 @@
             registerRecordsetCallbacks: registerRecordsetCallbacks,
             FlowControlObject: FlowControlObject
         };
+    }])
+
+
+    .directive('tableHeader', ['logActions', 'logService', 'MathUtils', 'messageMap', 'recordsetDisplayModes', 'recordTableUtils', 'UriUtils', '$window', function(logActions, logService, MathUtils, messageMap, recordsetDisplayModes, recordTableUtils, UriUtils, $window) {
+        return {
+            restrict: 'E',
+            templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/tableHeader.html',
+            scope: {
+                vm: '='
+            },
+            link: function (scope, elem, attr) {
+                scope.recordsetDisplayModes = recordsetDisplayModes;
+
+                scope.pageLimits = [10, 25, 50, 75, 100, 200];
+                scope.setPageLimit = function(limit) {
+                    scope.vm.pageLimit = limit;
+
+                    scope.vm.logObject = {action: logActions.recordsetLimit};
+                    recordTableUtils.update(scope.vm, true, false, false);
+                };
+
+                scope.logPageSizeEvent = function () {
+                    logService.logAction(logActions.recordsetPageSize, logActions.clientAction);
+                }
+
+                scope.addRecord = function() {
+                    // Generate a unique id for this request
+                    // append it to the URL
+                    var referrer_id = 'recordset-' + MathUtils.getRandomInt(0, Number.MAX_SAFE_INTEGER);
+                    addRecordRequests[referrer_id] = 0;
+
+                    // open a new tab
+                    var newRef = scope.vm.reference.table.reference.contextualize.entryCreate;
+                    var appLink = newRef.appLink;
+                    appLink = appLink + (appLink.indexOf("?") === -1 ? "?" : "&") +
+                        'invalidate=' + UriUtils.fixedEncodeURIComponent(referrer_id);
+
+                    // open url in a new tab
+                    $window.open(appLink, '_blank');
+                };
+
+                scope.editRecord = function() {
+                    var link = scope.vm.page.reference.contextualize.entryEdit.appLink;
+                    // TODO ermrestJS needs to handle the case when no limit is defined in the URL
+                    if (link.indexOf("?limit=") === -1 || link.indexOf("&limit=") === -1)
+                        link = link + (link.indexOf('?') === -1 ? "?limit=" : "&limit=" ) + scope.vm.pageLimit;
+
+                    location.href = link;
+                };
+
+            }
+        }
     }])
 
     .directive('recordTable', ['recordTableUtils', 'UriUtils', function(recordTableUtils, UriUtils) {
@@ -1229,10 +1396,9 @@
                  */
                 onSelectedRowsChangedBind: '=?',
                 onSelectedRowsChanged: '&?',      // set row click function TODO not used anywhere
-                parentReference: "=?" // if this is used for related references, this will be the main reference
             },
-            link: function (scope, elem, attr) {
-                recordTableUtils.registerTableCallbacks(scope, elem, attr);
+            link: function (scope, elem, attrs) {
+                recordTableUtils.registerTableCallbacks(scope, elem, attrs);
             }
         };
     }])
@@ -1250,8 +1416,8 @@
                 onSelectedRowsChangedBind: '=?',
                 onSelectedRowsChanged: '&?'      // set row click function
             },
-            link: function (scope, elem, attr) {
-                recordTableUtils.registerTableCallbacks(scope, elem, attr);
+            link: function (scope, elem, attrs) {
+                recordTableUtils.registerTableCallbacks(scope, elem, attrs);
 
                 scope.isSelected = function (tuple) {
                     if (scope.vm.matchNotNull) {
@@ -1329,7 +1495,7 @@
      *   value to the vm.selectedRows
      * NOTE removePill, removeAllPills are also changed to support these two matchNull and matchNotNull options.
      */
-    .directive('recordsetSelectFaceting', ['messageMap', 'recordTableUtils', 'UriUtils', function(messageMap, recordTableUtils, UriUtils) {
+    .directive('recordsetSelectFaceting', ['messageMap', 'recordsetDisplayModes', 'recordTableUtils', 'UriUtils', function(messageMap, recordsetDisplayModes, recordTableUtils, UriUtils) {
 
         return {
             restrict: 'E',
@@ -1338,105 +1504,18 @@
                 mode: "=?",
                 vm: '=',
                 onSelectedRowsChanged: '&?',       // set row click function
-                allowCreate: '=?',      // if undefined, assume false
                 getDisabledTuples: "=?", // callback to get the disabled tuples
                 registerSetPageState: "&?"
             },
-            link: function (scope, elem, attr) {
+            link: function (scope, elem, attrs) {
                 // currently faceting is not defined in this mode.
                 // TODO We should eventually add faceting here, and remove these initializations
                 scope.facetsLoaded = true;
                 scope.ignoreFaceting = true; // this is a temporary flag to avoid any faceting logic
                 scope.tooltip = messageMap.tooltip;
+                scope.recordsetDisplayModes = recordsetDisplayModes;
 
-                recordTableUtils.registerRecordsetCallbacks(scope);
-
-                // function for removing a single pill and it's corresponding selected row
-                scope.removePill = function(key, $event) {
-                    if (scope.vm.matchNotNull) {
-                        scope.vm.matchNotNull = false;
-                        scope.vm.selectedRows.clear();
-                        return;
-                    }
-                    var index = scope.vm.selectedRows.findIndex(function (obj) {
-                        return obj.uniqueId == key;
-                    });
-
-                    if (index === -1) {
-                        $event.preventDefault();
-                        return;
-                    }
-
-                    var tuple = scope.vm.selectedRows.splice(index, 1)[0];
-
-                    if (key == null) {
-                        scope.vm.matchNull = false;
-                    }
-
-                    if (scope.onSelectedRowsChanged) {
-                        scope.onSelectedRowsChanged()(tuple, false);
-                    }
-                };
-
-                // function for removing all pills regardless of what page they are on, clears the whole selectedRows array
-                scope.removeAllPills = function($event) {
-                    var pre = scope.vm.selectedRows.slice();
-                    scope.vm.selectedRows.clear();
-                    scope.vm.matchNull = false;
-                    if (scope.vm.matchNotNull) {
-                        scope.vm.matchNotNull = false;
-                    } else {
-                        scope.vm.currentPageSelected = false;
-                    }
-                    if (scope.onSelectedRowsChanged) {
-                        scope.onSelectedRowsChanged()(pre, false);
-                    }
-                };
-
-                /**
-                 * Toggle the not-null checkbox.
-                 * If it is selected, we're disabling and deselcting all the other options.
-                 */
-                scope.toggleMatchNotNull = function () {
-                    scope.vm.matchNotNull = !scope.vm.matchNotNull;
-                    var tuples = [];
-                    if (scope.vm.matchNotNull) {
-                        scope.vm.matchNull = false;
-                        scope.vm.selectedRows = tuples = [{
-                            isNotNull: true,
-                            displayname: {"value": scope.defaultDisplayname.notNull, "isHTML": true}
-                        }];
-                        scope.vm.matchNull = false;
-                    } else {
-                        tuples = scope.vm.selectedRows.slice();
-                        scope.vm.selectedRows.clear();
-                    }
-
-                    if (scope.onSelectedRowsChanged) {
-                        scope.onSelectedRowsChanged()(tuples, scope.vm.matchNotNull);
-                    }
-                };
-
-                /**
-                 * Toggle the null filter
-                 */
-                scope.toggleMatchNull = function () {
-                    scope.vm.matchNull = !scope.vm.matchNull;
-                    var tuple = {uniqueId: null,  displayname: {value: null, isHTML: false}};
-
-                    if (scope.vm.matchNull) {
-                        scope.vm.selectedRows.push(tuple);
-                    } else {
-                        var rowIndex = scope.vm.selectedRows.findIndex(function (obj) {
-                            return obj.uniqueId == null;
-                        });
-                        scope.vm.selectedRows.splice(rowIndex, 1);
-                    }
-
-                    if (scope.onSelectedRowsChanged) {
-                        scope.onSelectedRowsChanged()(tuple, scope.vm.matchNotNull);
-                    }
-                };
+                recordTableUtils.registerRecordsetCallbacks(scope, elem, attrs);
             }
         };
     }])
@@ -1448,12 +1527,12 @@
             templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/recordset.html',
             scope: {
                 vm: '=',
-                onSelectedRowsChanged: '&?',       // set row click function
-                allowCreate: '=?',       // if undefined, assume false
-                registerSetPageState: "&?"
+                onSelectedRowsChanged: '&?', // set row click function
+                registerSetPageState: "&?",
+                test: "@"
             },
-            link: function (scope, elem, attr) {
-                recordTableUtils.registerRecordsetCallbacks(scope);
+            link: function (scope, elem, attrs) {
+                recordTableUtils.registerRecordsetCallbacks(scope, elem, attrs);
             }
         };
     }]);

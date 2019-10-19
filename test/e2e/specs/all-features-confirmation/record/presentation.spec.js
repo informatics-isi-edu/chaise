@@ -14,9 +14,9 @@ var testParams = {
     subTitle: "Accommodations",
     tableComment: "List of different types of accommodations",
     tocHeaders: [
-        "Main", "accommodation_collections (1)", "table_w_aggregates (1)", "accommodation_image_assoc (1)", "table_w_invalid_row_markdown_pattern (1)", "accommodation_image (2+)"
+        "Summary", "accommodation_collections (1)", "table_w_aggregates (1)", "accommodation_image_assoc (1)", "table_w_invalid_row_markdown_pattern (1)", "accommodation_image (2+)"
     ],
-    tables_order: ["accommodation_image (showing first 2 results)", "media (no results found)"],
+    tables_order: ["accommodation_image", "media"],
     file_names: [
         "Accommodations.csv",
         "accommodation_" + chaisePage.getEntityRow("product-record", "accommodation", [{column: "id",value: "2002"}]).RID + ".zip",
@@ -45,7 +45,7 @@ var testParams = {
     columns: [
         { title: "Id", value: "2002", type: "serial4"},
         { title: "Name of Accommodation", value: "Sherathon Hotel", type: "text"},
-        { title: "Website", value: "<p><a href=\"http://www.starwoodhotels.com/sheraton/index.html\">Link to Website</a></p>\n", type: "text", comment: "A valid url of the accommodation", match:"html" },
+        { title: "Website", value: "<p><a href=\"http://www.starwoodhotels.com/sheraton/index.html\" class=\"external-link-icon\">Link to Website</a></p>\n", type: "text", comment: "A valid url of the accommodation", match:"html" },
         { title: "Category", value: "Hotel", type: "text", comment: "Type of accommodation ('Resort/Hotel/Motel')", presentation: { type:"url", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-record:category/", table_name: "category", key_value: [{column: "id", value: "10003"}]} },
         { title: "booking", value:'<p><strong class="vocab">2</strong> <strong class="vocab">350.0000</strong> <strong class="vocab">2016-04-18 00:00:00</strong> <strong class="vocab">4</strong> <strong class="vocab">200.0000</strong> <strong class="vocab">2016-05-31 00:00:00</strong></p>\n', type: "inline" },
         { title: "User Rating", value: "4.3000", type: "float4", markdown_title: "<strong>User Rating</strong>" },
@@ -73,7 +73,7 @@ var testParams = {
             value: "4004",
             operator: "="
         },
-        tables_order: ["accommodation_image (no results found)", "media (no results found)"]
+        tables_order: ["accommodation_image", "media"]
     },
     multipleData: {
         title : "Multiple Records Found"
@@ -84,8 +84,7 @@ var testParams = {
       id: "2003",
       tocCount: 8,
       tableToShow: 'Categories_5',
-      sidePanelTableOrder:[ 'Main', 'Categories_collection (5)',  'media (1)', 'Categories_collection_2 (5)',  'Categories_3 (5)',  'Categories_4 (5)',  'Categories_5 (5)',  'Categories_6 (5)'],
-      panelHeading: "Contents"
+      sidePanelTableOrder:[ 'Summary', 'Categories_collection (5)',  'media (1)', 'Categories_collection_2 (5)',  'Categories_3 (5)',  'Categories_4 (5)',  'Categories_5 (5)',  'Categories_6 (5)']
     },
     citationParams: {
         numListElements: 3,
@@ -105,7 +104,7 @@ var testParams = {
           viewMore: {
               name: "accommodation_collection",
               displayname: "accommodation_collections",
-              filter: "Accommodations : Sherathon Hotel"
+              filter: "Accommodations\nSherathon Hotel"
           },
           rowValues: [
               ["2000", "Sherathon Hotel"]
@@ -127,7 +126,7 @@ var testParams = {
           viewMore: {
               name: "table_w_aggregates",
               displayname: "table_w_aggregates",
-              filter: "Accommodations : Sherathon Hotel"
+              filter: "Accommodations\nSherathon Hotel"
           },
           rowValues: [
               ["3", "102", "102", "1", "1"]
@@ -153,7 +152,7 @@ var testParams = {
           viewMore: {
               name: "file",
               displayname: "file",
-              filter: "accommodation_image_assoc : Sherathon Hotel"
+              filter: "accommodation_image_assoc\nSherathon Hotel"
           },
           rowValues: [
               ["3005","Four Points Sherathon 1","http://images.trvl-media.com/hotels/1000000/30000/28200/28110/28110_190_z.jpg","image/jpeg","0","2016-01-18 00:00:00","","",""]
@@ -176,7 +175,7 @@ var testParams = {
           viewMore: {
               name: "table_w_invalid_row_markdown_pattern",
               displayname: "table_w_invalid_row_markdown_pattern",
-              filter: "Accommodations : Sherathon Hotel"
+              filter: "Accommodations\nSherathon Hotel"
           },
           rowValues: [
               ["two"]
@@ -272,7 +271,7 @@ describe('View existing record,', function() {
             }).then(function(headings) {
                 expect(headings).toEqual(testParams.no_related_data.tables_order, "Related tables in the wrong order or the name is wrong");
 
-                expect(showAllRTButton.getText()).toBe("Hide Empty Related Records", "Sow all Related tables button has wrong text");
+                expect(showAllRTButton.getText()).toBe("Hide empty sections", "Sow all Related tables button has wrong text");
                 return showAllRTButton.click();
             }).then(function() {
                 expect(chaisePage.recordPage.getRelatedTablesWithPanelandHeading().count()).toBe(0, "Not all the related tables were hidden");
@@ -297,9 +296,7 @@ describe('View existing record,', function() {
         });
 
         it('On click of OK button the page should redirect to recordset page', function(){
-            chaisePage.recordPage.getErrorModalOkButton().then(function(btn){
-                return btn.click();
-            }).then(function() {
+            chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton()).then(function(btn){
                 return chaisePage.recordsetPageReady();
             }).then(function() {
                 return browser.driver.getCurrentUrl();
@@ -315,10 +312,11 @@ describe('View existing record,', function() {
 
         beforeAll(function() {
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.sidePanelTest.schemaName + ":" + testParams.sidePanelTest.tableName +  "/id=" + testParams.sidePanelTest.id;
+            browser.ignoreSynchronization=true;
             browser.get(url);
             recSidePanelCat_5 = chaisePage.recordPage.getSidePanelItemById(5);
-            fiddlerBtn = chaisePage.recordPage.getSidePanelFiddler();
-            chaisePage.waitForElement(fiddlerBtn);
+            hideTocBtn = chaisePage.recordPage.getHideTocBtn();
+            chaisePage.waitForElement(hideTocBtn);
         });
 
         it('Table of contents should be displayed by default', function(){
@@ -327,7 +325,7 @@ describe('View existing record,', function() {
         });
 
         it('On click of Related table name in TOC, page should move to the contents and open the table details', function(done){
-            var rtTableHeading = chaisePage.recordPage.getRelatedTableHeading(testParams.sidePanelTest.tableToShow);
+            var rtTableHeading = chaisePage.recordPage.getRelatedTableAccordion(testParams.sidePanelTest.tableToShow);
 
             recSidePanelCat_5.click().then(function(className) {
               // related table should be visible
@@ -349,9 +347,7 @@ describe('View existing record,', function() {
                 }
                 expect(tableNames.length).toEqual(testParams.sidePanelTest.tocCount, "Count mismatch for number of related tables in the side panel");
                 expect(tableNames).toEqual(testParams.sidePanelTest.sidePanelTableOrder, "Order is not maintained for related tables in the side panel");
-                return chaisePage.recordPage.getSidePanelHeading();
-            }).then(function(sidePanelHeading){
-                expect(sidePanelHeading).toBe(testParams.sidePanelTest.panelHeading, "Side Panel heading did not match.");
+
                 done();
             }).catch( function(err) {
                 console.log(err);
@@ -363,13 +359,13 @@ describe('View existing record,', function() {
             var recPan =  chaisePage.recordPage.getSidePanel();
             recPan.allowAnimations(false);
 
-            fiddlerBtn.getAttribute("class").then(function(classNameRight) {
-                expect(classNameRight).toContain('glyphicon glyphicon-triangle-right', 'Side Pan Pull button is not pointing in the right direction');
-                expect(recPan.getAttribute("class")).toContain('open-panel', 'Side Panel is not visible when fiddler is poining in right direction');
-                return fiddlerBtn.click();
-            }).then(function(){
-                expect(fiddlerBtn.getAttribute("class")).toContain("glyphicon glyphicon-triangle-left", "Side Pan Pull button is not pointing in the left direction.");
-                expect(recPan.getAttribute("class")).toContain('close-panel', 'Side Panel is not hidden when fiddler is poining in left direction');
+            expect(hideTocBtn.element(by.className("chaise-icon")).getAttribute("class")).toContain('chaise-sidebar-close', 'Wrong icon for hide toc button');
+            expect(recPan.getAttribute("class")).toContain('open-panel', 'Side Panel is NOT visible when it should be');
+
+            hideTocBtn.click().then(function(){
+                var showTocBtn = chaisePage.recordPage.getShowTocBtn();
+                expect(showTocBtn.element(by.className("chaise-icon")).getAttribute("class")).toContain("chaise-sidebar-open", "Wrong icon for show toc button");
+                expect(recPan.getAttribute("class")).toContain('close-panel', 'Side Panel is visible when it should NOT be');
                 done();
             }).catch( function(err) {
                 console.log(err);

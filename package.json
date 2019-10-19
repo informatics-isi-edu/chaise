@@ -53,7 +53,8 @@
     "q": "^1.4.1",
     "request": "x",
     "request-q": "x",
-    "set-cookie-parser": "x"
+    "set-cookie-parser": "x",
+    "node-sass": "x"
   },
   "dependencies": {
     "markdown-it-editor": "^1.1.4"

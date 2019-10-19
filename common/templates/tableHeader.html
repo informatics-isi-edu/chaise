@@ -1,0 +1,45 @@
+<div class="chaise-table-header row">
+    <div class="chaise-table-header-total-count col-xs-12 col-sm-6">
+        <span>Displaying</span>
+        <span ng-if="vm.page.tuples.length > 0 && vm.page.hasNext && !vm.page.hasPrevious">first</span>
+        <span ng-if="vm.page.tuples.length > 0 && !vm.page.hasNext && vm.page.hasPrevious">last</span>
+        <span ng-if="vm.page.tuples.length > 0 && !vm.page.hasNext && !vm.page.hasPrevious">all</span>
+        <span ng-if="vm.rowValues.length > 0" uib-dropdown>
+            <button class="page-size-dropdown chaise-btn chaise-btn-secondary dropdown-toggle" type="button" uib-dropdown-toggle ng-click="::logPageSizeEvent()" ng-disabled="!vm.hasLoaded || !vm.initialized">
+                <span>{{vm.page ? vm.rowValues.length : vm.pageLimit}}</span>
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-left">
+                <li ng-if="pageLimits.indexOf(vm.pageLimit) === -1">
+                    <a class="page-size-limit-custom" href ng-click="setPageLimit(vm.pageLimit)">{{ vm.pageLimit }} (Custom)<span class="glyphicon glyphicon-ok pull-right"></span></a>
+                </li>
+                <li ng-repeat="limit in pageLimits">
+                    <a class="page-size-limit-{{limit}}" href ng-click="setPageLimit(limit)">{{ limit }}<span class="glyphicon pull-right" ng-class="vm.pageLimit === limit ? 'glyphicon-ok' : 'glyphicon-invisible'"></span></a>
+                </li>
+            </ul>
+        </span>
+        <span ng-if="vm.page.tuples.length === 0">0</span>
+        <span>{{(vm.totalRowsCnt && !vm.tableError) ? "of " + (vm.totalRowsCnt > vm.rowValues.length ? vm.totalRowsCnt.toLocaleString() : vm.rowValues.length) : ''}}</span>
+        <span>{{vm.reference.location.isConstrained && vm.config.displayMode !== recordsetDisplayModes.related ? "matching results" : "records" }}</span>
+        <span ng-if="vm.countError" class="glyphicon glyphicon-alert" uib-tooltip="Request timeout: total count cannot be retrieved. Refresh the page later to try again." tooltip-placement="bottom"></span>
+        <span ng-show="vm.pushRowsSpinner || (vm.config.displayMode === recordsetDisplayModes.related && !vm.hasLoaded)" class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
+    </div>
+    <div class="col-xs-12 col-sm-6">
+        <div class="pull-right">
+            <button ng-if="vm.config.displayMode !== recordsetDisplayModes.related && vm.reference.canCreate && vm.config.editable"
+                class="chaise-table-header-create-link chaise-btn"
+                ng-class="vm.config.displayMode === recordsetDisplayModes.fullscreen ? 'chaise-btn-primary': 'chaise-btn-secondary'"
+                ng-click="addRecord()" tooltip-placement="bottom-right" uib-tooltip="Create new {{vm.displayname ? vm.displayname.value : vm.reference.displayname.value}}">
+                <span class="chaise-btn-icon glyphicon glyphicon-plus"></span>
+                <span>{{vm.config.displayMode === recordsetDisplayModes.fullscreen ? "Create" : "Create new"}}</span>
+            </button>
+            <button ng-if="vm.config.displayMode === recordsetDisplayModes.fullscreen && vm.page && vm.reference.canUpdate && vm.config.editable"
+                class="chaise-table-header-edit-link chaise-btn chaise-btn-primary"
+                ng-click="editRecord()" ng-disabled="{{vm.pageLimit > vm.RECORDEDIT_MAX_ROWS}}" tooltip-placement="bottom-right"
+                uib-tooltip="{{ ((vm.pageLimit > vm.RECORDEDIT_MAX_ROWS) ? 'Editing disabled when items per page > ' + vm.RECORDEDIT_MAX_ROWS : 'Edit this page of records.' ) }}">
+                <span class="chaise-btn-icon glyphicon glyphicon-pencil"></span>
+                <span>Bulk Edit</span>
+            </button>
+        </div>
+    </div>
+</div>

@@ -3,8 +3,8 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordAppUtils', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
-        function RecordController(AlertsService, ConfigUtils, DataUtils, ERMrest, ErrorService, logActions, MathUtils, messageMap, modalBox, modalUtils, recordAppUtils, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
+    .controller('RecordController', ['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'ErrorService', 'logActions', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordAppUtils', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
+        function RecordController(AlertsService, ConfigUtils, DataUtils, ERMrest, ErrorService, logActions, logService, MathUtils, messageMap, modalBox, modalUtils, recordAppUtils, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
 
         var mainContainerEl = angular.element(document.getElementsByClassName('main-container')[0]);
@@ -17,44 +17,38 @@
         vm.alerts = AlertsService.alerts;
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
-        vm.rowFocus = {};
         vm.sidePanToggleBtnIndicator = "Show";
+        $rootScope.recordSidePanOpen = false;
 
         var chaiseConfig = ConfigUtils.getConfigJSON();
 
         vm.tooltip = messageMap.tooltip;
         vm.queryTimeoutTooltip = messageMap.queryTimeoutTooltip;
-        vm.gotoInlineTable = function(sectionId, index) {
-            var safeSectionId = vm.makeSafeIdAttr(sectionId);
-            var pageSection = "entity-" + safeSectionId;
 
-            vm.rowFocus[index] = false;
-            var el = angular.element(document.getElementById(pageSection)).parent();
-            mainContainerEl.scrollToElementAnimated(el, 40).then(function () {
-                $timeout(function () {
-                    el.addClass("rowFocus");
-                }, 100);
-                $timeout(function () {
-                    el.removeClass('rowFocus');
-                }, 1600);
-            });
-        };
-        vm.gotoRelatedTable = function(sectionId, index) {
-            var safeSectionId = vm.makeSafeIdAttr(sectionId);
-            var pageSection = "rt-heading-" + safeSectionId;
+        vm.scrollToRelatedTable = function (sectionId, index, isInline) {
+            logService.logAction(logActions.tocScrollTo, logActions.clientAction);
 
-            $rootScope.relatedTableModels[index].open = true;
-            vm.rowFocus[index] = false;
+            var safeSectionId = vm.makeSafeIdAttr(sectionId);
+            var pageSection = (isInline ? "entity-" : "rt-heading-") + safeSectionId;
             var el = angular.element(document.getElementById(pageSection));
+            if (!isInline) {
+                $rootScope.relatedTableModels[index].open = true;
+            } else {
+                var el = el.parent();
+            }
             mainContainerEl.scrollToElementAnimated(el, 40).then(function () {
                 $timeout(function () {
-                    el.addClass("rowFocus");
+                    el.addClass("row-focus");
                 }, 100);
                 $timeout(function () {
-                    el.removeClass('rowFocus');
+                    el.removeClass('row-focus');
                 }, 1600);
+            }).catch(function (err) {
+                // the scroll promise might be rejected, but we should just fail silently
+                // we saw this happening when you double click on the element.
+                // in this case, the second promise will be rejected.
             });
-        };
+        }
 
         vm.versionDisplay = function () {
             return UiUtils.humanizeTimestamp($rootScope.reference.location.versionAsMillis);
@@ -64,8 +58,11 @@
             return UiUtils.versionDate($rootScope.reference.location.versionAsMillis);
         }
 
-        vm.togglePan = function() {
-            $scope.recordSidePanOpen = !$scope.recordSidePanOpen;
+        vm.toggleSidebar = function() {
+            var action = ($rootScope.recordSidePanOpen ? logActions.tocHide : logActions.tocShow )
+            logService.logAction(action, logActions.clientAction);
+
+            $rootScope.recordSidePanOpen = !$rootScope.recordSidePanOpen;
         };
 
         vm.canCreate = function() {
@@ -75,10 +72,6 @@
         // TODO change this to reference.unfilteredReference.contextualize...
         vm.createRecord = function() {
             $window.location.href = $rootScope.reference.table.reference.contextualize.entryCreate.appLink;
-        };
-
-        vm.referenceTableApplink = function() {
-            return $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
         };
 
         vm.canEdit = function() {
@@ -142,7 +135,7 @@
             params.versionDateRelative = UiUtils.humanizeTimestamp(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
             params.versionDate = UiUtils.versionDate(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
 
-            refTable.schema.catalog.currentSnaptime().then(function (snaptime) {
+            refTable.schema.catalog.currentSnaptime(logActions.share).then(function (snaptime) {
                 // if current fetched snpatime doesn't match old snaptime, show a warning
                 params.showVersionWarning = (snaptime !== refTable.schema.catalog.snaptime);
             }).finally(function() {
@@ -159,13 +152,16 @@
         };
 
         vm.toRecordSet = function(ref) {
-          // Search app might be broken and should not be linked from here.
+            event.preventDefault();
+            event.stopPropagation();
+            // Search app might be broken and should not be linked from here.
             var appUrl = ref.appLink,
                 recordSetUrl;
-            if(appUrl.search("/search/") > 0){
-              recordSetUrl = appUrl.replace("/search/", "/recordset/");
-            } else{
-              recordSetUrl = appUrl;
+
+            if (appUrl.search("/search/") > 0) {
+                recordSetUrl = appUrl.replace("/search/", "/recordset/");
+            } else {
+                recordSetUrl = appUrl;
             }
             return $window.location.href = recordSetUrl;
         };
@@ -239,18 +235,48 @@
             return true;
         };
 
-        vm.toggleRelatedTableDisplayType = function(dataModel) {
-            if (dataModel.displayType == 'markdown') {
-                dataModel.displayType = 'table';
+        vm.toggleDisplayMode = function(dataModel) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            // if tableModel, table context is nested inside model
+            var tableModel = dataModel;
+            if (dataModel.tableModel) tableModel = dataModel.tableModel;
+
+            var isInline = tableModel.context.indexOf("inline") > -1;
+            var canEdit = vm.canEditRelated(tableModel.reference);
+
+            // action has 3 states for each positional mode:
+            // if seeing table mode, flip to custom (mkdn-display)
+            // else custom mode
+            //    if no edit allowed, flip to table (table-display)
+            //    else edit mode, flip to edit (edit-display)
+            //
+            // then check for 2 positional modes: inline or !inline
+            var action = null;
+            if (dataModel.isTableDisplay) {
+                action = (isInline ? logActions.inlineMkdnDisplay : logActions.relatedMkdnDisplay);
             } else {
-                dataModel.displayType = 'markdown';
+                // we see custom mode (mkdn display)
+                if (canEdit) {
+                    action = (isInline ? logActions.inlineEditDisplay : logActions.relatedEditDisplay);
+                } else {
+                    action = (isInline ? logActions.inlineTableDisplay : logActions.relatedTableDisplay);
+                }
             }
+
+            logService.logAction(action, logActions.clientAction);
+
+            dataModel.isTableDisplay = !dataModel.isTableDisplay;
         };
 
         vm.toggleRelatedTables = function() {
+            var action = ($rootScope.showEmptyRelatedTables ? logActions.hideAllRelated : logActions.showAllRelated)
+            logService.logAction(action, logActions.clientAction);
+
             $rootScope.showEmptyRelatedTables = !$rootScope.showEmptyRelatedTables;
             // NOTE: there's a case where clicking the button to toggle this doesn't re-paint the footer until the mouse "moves"
-            // having this $timeout triggers the function after the digest cycle which is after the elements have finished showing/hidingbased on the above flag
+            // having this $timeout triggers the function after the digest cycle which is after the elements have finished showing/hiding based on the above flag
             $timeout(function () {
                 UiUtils.setFooterStyle(0);
             }, 0);
@@ -385,11 +411,13 @@
         }
 
         vm.addRelatedRecord = function(ref) {
+            event.preventDefault();
+            event.stopPropagation();
             var cookie = getPrefillCookieObject(ref);
 
             if(ref.derivedAssociationReference){
                 recordAppUtils.pauseUpdateRecordPage();
-                recordCreate.addRelatedRecordFact(true, ref, 0, cookie, vm.editMode, vm.formContainer, vm.readyToSubmit, vm.recordsetLink, vm.submissionButtonDisabled, $rootScope.reference, $rootScope.tuples, $rootScope.session, ConfigUtils.getContextJSON().queryParams, onSuccess, onModalClose);
+                recordCreate.addRelatedRecordFact(true, ref, 0, cookie, vm.editMode, vm.formContainer, vm.readyToSubmit, vm.recordsetLink, vm.submissionButtonDisabled, $rootScope.reference, [$rootScope.tuple], $rootScope.session, ConfigUtils.getContextJSON().queryParams, onSuccess, onModalClose);
                 return;
             }
 
@@ -454,39 +482,43 @@
             }
 
         };
+
         // function called from form.controller.js to notify record that an entity was just updated
         window.updated = function(id) {
             updated[editRecordRequests[id].schema + ":" + editRecordRequests[id].table] = true;
             delete editRecordRequests[id];
         }
 
+        // to make sure we're adding the watcher just once
+        var hasTheMainContainerPaddingWatcher = false;
+
         /*** Container Heights and other styling ***/
-        // fetches the height of navbar, bookmark container, and view
-        // also fetches the main container for defining the dynamic height
-        function fetchContainerElements() {
-            var elements = {};
-            try {
-                // get document height
-                elements.docHeight = $document[0].documentElement.offsetHeight
-                // get navbar height
-                elements.navbarHeight = $document[0].getElementById('mainnav').offsetHeight;
-                // get bookmark container height
-                elements.bookmarkHeight = $document[0].getElementById('bookmark-container').offsetHeight;
-                // get record main container
-                elements.container = $document[0].getElementById('main-content');
-            } catch (error) {
-                $log.warn(error);
+        function setMainContainerHeight() {
+            // if these values are not set yet, don't set the height
+            if ($scope.fixedContentHeight !== undefined && !isNaN($scope.fixedContentHeight)) {
+                UiUtils.setDisplayContainerHeight();
+
+                // NOTE this function is being called here because this is the
+                // first place that we can be sure that the record-container elements
+                // are available and visible. This is because of the ng-if that we have
+                // on the top-panel container. If we call this function in the watch below,
+                // it will throw an error.
+                if (!hasTheMainContainerPaddingWatcher) {
+                    // make sure the padding of main-container is correctly set
+                    UiUtils.watchForMainContainerPadding($scope, $document[0].querySelector(".record-container"));
+                    hasTheMainContainerPaddingWatcher = true;
+                }
             }
-            return elements;
         };
 
-        function setMainContainerHeight() {
-            var elements = fetchContainerElements();
-            // if these values are not set yet, don't set the height
-            if(elements.navbarHeight !== undefined && elements.bookmarkHeight) {
-                UiUtils.setDisplayContainerHeight(elements);
-            }
-        };
+        function topPanelHeight () {
+            // get navbar height
+            $scope.fixedContentHeight = $document[0].getElementById('mainnav').offsetHeight;
+            // get top panel container height
+            $scope.fixedContentHeight += $document[0].querySelector('.record-container .top-panel-container').offsetHeight;
+
+            return $scope.fixedContentHeight;
+        }
 
         // watch for the display to be ready before setting the main container height
         $scope.$watch(function() {
@@ -495,7 +527,13 @@
             if (newValue) {
                 $rootScope.recordSidePanOpen = (chaiseConfig.hideTableOfContents === true || $rootScope.reference.display.collapseToc === true) ? false : true;
                 $rootScope.hideColumnHeaders = $rootScope.reference.display.hideColumnHeaders;
-                $timeout(setMainContainerHeight, 0);
+
+                // get record main container
+                $scope.$watch(topPanelHeight, function (newValue, oldValue) {
+                    if (newValue && newValue != oldValue) {
+                        setMainContainerHeight();
+                    }
+                });
             }
         });
 
@@ -507,11 +545,19 @@
             }
         };
 
+        $timeout(function () {
+            mainBodyEl = $document[0].getElementsByClassName('main-body');
+        }, 0);
+
         // watch for the main body size to change
         $scope.$watch(function() {
-            return mainBodyEl && mainBodyEl[0].offsetHeight;
+            if (mainBodyEl) {
+                return mainBodyEl[0].offsetHeight;
+            } else {
+                return -1;
+            }
         }, function (newValue, oldValue) {
-            if (newValue) {
+            if (newValue && newValue != oldValue) {
                 $timeout(function () {
                     UiUtils.setFooterStyle(0);
                     setLoadingTextStyle();
@@ -528,14 +574,10 @@
             }
         });
 
-        $timeout(function () {
-            mainBodyEl = $document[0].getElementsByClassName('main-body');
-        }, 0);
-
         /*** scroll to events ***/
         // scroll to top button
         $scope.scrollToTop = function () {
-            mainContainerEl.scrollTo(0,0, 500);
+            mainContainerEl.scrollTo(0, 0, 500);
         };
 
         mainContainerEl.on('scroll', $scope.$apply.bind($scope, function () {

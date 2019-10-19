@@ -3,8 +3,8 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'ConfigUtils', 'dataFormats', 'DataUtils', 'ErrorService', 'InputUtils', 'integerLimits', 'logActions', 'maskOptions', 'messageMap', 'modalBox', 'modalUtils', 'recordCreate', 'recordEditAppUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
-        function FormController(AlertsService, ConfigUtils, dataFormats, DataUtils, ErrorService, InputUtils, integerLimits, logActions, maskOptions, messageMap, modalBox, modalUtils, recordCreate, recordEditAppUtils, recordEditModel, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
+    .controller('FormController', ['AlertsService', 'ConfigUtils', 'dataFormats', 'DataUtils', 'ErrorService', 'InputUtils', 'integerLimits', 'logActions', 'logService', 'maskOptions', 'messageMap', 'modalBox', 'modalUtils', 'recordCreate', 'recordEditAppUtils', 'recordEditModel', 'recordsetDisplayModes', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
+        function FormController(AlertsService, ConfigUtils, dataFormats, DataUtils, ErrorService, InputUtils, integerLimits, logActions, logService, maskOptions, messageMap, modalBox, modalUtils, recordCreate, recordEditAppUtils, recordEditModel, recordsetDisplayModes, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
         var context = ConfigUtils.getContextJSON();
         var mainBodyEl;
@@ -12,7 +12,6 @@
         vm.recordEditModel = recordEditModel;
         vm.dataFormats = dataFormats;
         vm.editMode = (context.mode == context.modes.EDIT ? true : false);
-        vm.booleanValues = InputUtils.booleanValues;
         vm.mdHelpLinks = { // Links to Markdown references to be used in help text
             editor: "https://jbt.github.io/markdown-editor/#RZDLTsMwEEX3/opBXQCRmqjlsYBVi5CKxGOBWFWocuOpM6pjR54Jbfl6nKY08mbO1dwj2yN4pR+ENx23Juw8PBuSEJU6B3zwovdgAzIED1IhONwINNqjezxyRG6dkLcQWmlaAWIwxI3TBzT/pUi2klypLJsHZ0BwL1kGSq1eRDsq6Rf7cKXUCBaoTeebJBho2tGAN0cc+LbnIbg7BUNyr9SnrhuH6dUsCjKYNYm4m+bap3McP6L2NqX/y+9tvcaYLti3Jvm5Ns2H3k0+FBdpvfsGDUvuHY789vuqEmn4oShsCNZhXob6Ou+3LxmqsAMJQL50rUHQHqjWFpW6WM7gpPn6fAIXbBhUUe9yS1K1605XkN+EWGuhksfENEbTFmWlibGoNQvG4ijlouVy3MQE8cAVoTO7EE2ibd54e/0H",
             cheatsheet: "http://commonmark.org/help/"
@@ -31,6 +30,8 @@
         vm.redirectAfterSubmission = redirectAfterSubmission;
         vm.searchPopup = searchPopup;
         vm.createRecord = createRecord;
+        vm.showRemove = showRemove;
+        vm.clearInput = clearInput;
         vm.clearForeignKey = clearForeignKey;
 
         vm.MAX_ROWS_TO_ADD = context.MAX_ROWS_TO_ADD;
@@ -47,9 +48,14 @@
         vm.int8min = integerLimits.INT_8_MIN;
         vm.int8max = integerLimits.INT_8_MAX;
 
+        vm.booleanValues = InputUtils.booleanValues;
+
         vm.applyCurrentDatetime = applyCurrentDatetime;
         vm.toggleMeridiem = toggleMeridiem;
         vm.clearDatetime = clearDatetime;
+        vm.clearDate = clearDate;
+        vm.clearTime = clearTime;
+
         vm.fileExtensionTypes = InputUtils.fileExtensionTypes;
         vm.blurElement = InputUtils.blurElement;
         vm.maskOptions = maskOptions;
@@ -82,10 +88,6 @@
             // Redirect to record or recordset app..
             $window.location = redirectUrl;
         }
-
-        vm.referenceTableApplink = function() {
-            return $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
-        };
 
         /*
          * Allows to tranform some form values depending on their types
@@ -169,7 +171,6 @@
                 vm.resultsetModel = {
                     hasLoaded: true,
                     reference: resultsReference,
-                    tableDisplayName: resultsReference.displayname,
                     columns: resultsReference.columns,
                     enableSort: false,
                     sortby: null,
@@ -193,7 +194,6 @@
                     vm.omittedResultsetModel = {
                         hasLoaded: true,
                         reference: resultsReference,
-                        tableDisplayName: resultsReference.displayname,
                         columns: resultsReference.columns,
                         enableSort: false,
                         sortby: null,
@@ -293,6 +293,14 @@
 
             var submissionRow = populateSubmissionRow(vm.recordEditModel.rows[rowIndex], vm.recordEditModel.submissionRows[rowIndex], originalTuple, $rootScope.reference.columns, editOrCopy);
 
+            // used for title
+            params.parentReference = $rootScope.reference;
+            params.parentTuple = originalTuple;
+            params.displayname = column.displayname;
+
+            params.displayMode = vm.editMode ? recordsetDisplayModes.foreignKeyPopupEdit : recordsetDisplayModes.foreignKeyPopupCreate;
+
+
             params.reference = column.filteredRef(submissionRow, vm.recordEditModel.foreignKeyData[rowIndex]).contextualize.compactSelect;
             params.reference.session = $rootScope.session;
             params.context = "compact/select";
@@ -304,11 +312,12 @@
             modalUtils.showModal({
                 animation: false,
                 controller: "SearchPopupController",
+                windowClass: "search-popup foreignkey-popup",
                 controllerAs: "ctrl",
                 resolve: {
                     params: params
                 },
-                size: "xl",
+                size: modalUtils.getSearchPopupSize(params),
                 templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
             }, function dataSelected(tuple) {
                 // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
@@ -332,6 +341,34 @@
 
                 vm.recordEditModel.rows[rowIndex][column.name] = tuple.displayname.value;
             }, false, false);
+        }
+
+        // idx - the index of the form
+        // name - the name of the column
+        // typename - column type
+        // input - used for timestamp inputs to distinguish date from time
+        function showRemove(idx, name, typename, input) {
+            var value = null,
+                valueHiddenByValidator = false;
+
+            if (typename == "timestamp" || typename == "timestamptz") {
+                value = vm.recordEditModel.rows[idx][name] && vm.recordEditModel.rows[idx][name][input];
+                valueHiddenByValidator = vm.formContainer.row[idx][name].$error[input];
+            } else if (typename == "boolean") {
+                value = vm.recordEditModel.rows[idx][name] !== null;
+                valueHiddenByValidator = vm.formContainer.row[idx][name].$invalid && !vm.formContainer.row[idx][name].$error.required;
+            } else {
+                value = vm.recordEditModel.rows[idx][name];
+                valueHiddenByValidator = vm.formContainer.row[idx][name].$invalid && !vm.formContainer.row[idx][name].$error.required;
+            }
+
+            return value || valueHiddenByValidator;
+        }
+
+        // idx - the index of the form
+        // name - the name of the column
+        function clearInput(idx, name) {
+            vm.recordEditModel.rows[idx][name] = null;
         }
 
         // NOTE: If changes are made to this function, changes should also be made to the similar function in the inputSwitch directive
@@ -360,7 +397,13 @@
         }
 
         function copyFormRow() {
-            if ((vm.numberRowsToAdd + vm.recordEditModel.rows.length) > vm.MAX_ROWS_TO_ADD || vm.numberRowsToAdd < 1) {
+            if (!vm.numberRowsToAdd) vm.numberRowsToAdd = 1;
+
+            // log the button was clicked
+            var action = (vm.numberRowsToAdd > 1 ? logActions.addX : logActions.add1 );
+            logService.logAction(action, logActions.clientAction);
+
+            if ((vm.numberRowsToAdd + vm.recordEditModel.rows.length) > vm.MAX_ROWS_TO_ADD) {
                 AlertsService.addAlert("Cannot add " + vm.numberRowsToAdd + " records. Please input a value between 1 and " + (vm.MAX_ROWS_TO_ADD - vm.recordEditModel.rows.length) + ', inclusive.', 'error');
                 return true;
             }
@@ -450,6 +493,10 @@
 
         function removeFormRow(index) {
             scope.$root.showSpinner = true;
+
+            var action = (vm.editMode ? logActions.updateRemove : logActions.createRemove );
+            logService.logAction(action, logActions.clientAction);
+
             return spliceRows(index);
         }
 
@@ -483,6 +530,16 @@
             vm.recordEditModel.rows[modelIndex][columnName] = InputUtils.clearDatetime(columnType);
         }
 
+        // clears the date for timestamp[tz] inputs
+        function clearDate(modelIndex, columnName) {
+            vm.recordEditModel.rows[modelIndex][columnName].date = null;
+        }
+
+        // clears the time for timestamp[tz] inputs
+        function clearTime(modelIndex, columnName) {
+            vm.recordEditModel.rows[modelIndex][columnName].time = null;
+        }
+
         function isRequired(columnIndex) {
             var cm = vm.recordEditModel.columnModels[columnIndex];
             return cm && cm.column && !cm.column.nullok && !cm.isDisabled;
@@ -501,6 +558,9 @@
         // toggles the state of the select all dialog
         vm.toggleSelectAll = function toggleSelectAll(index) {
             var model = vm.recordEditModel.columnModels[index];
+            var action = (model.showSelectAll ? logActions.createMultiClose : logActions.createMultiOpen);
+            logService.logAction(action, logActions.clientAction);
+
             if (selectAllOpen) {
                 // close the other select all dialog first
                 vm.recordEditModel.columnModels.forEach(function (cm, idx) {
@@ -556,10 +616,14 @@
                     row[cm.column.name] = value;
                 });
             });
+
+            resizeColumns(true);
         }
 
         // closes the select all
         vm.cancelSelectAll = function cancelSelectAll(index) {
+            logService.logAction(logActions.createMultiCancel, logActions.clientAction);
+
             var model = vm.recordEditModel.columnModels[index];
             model.showSelectAll = false;
             model.highlightRow = false;
@@ -661,10 +725,14 @@
         }
 
         vm.applySelectAll = function applySelectAll(index) {
+            logService.logAction(logActions.createMultiApply, logActions.clientAction);
+
             setValueAllInputs(index, vm.recordEditModel.columnModels[index].allInput.value);
         }
 
         vm.clearSelectAll = function clearSelectAll(index) {
+            logService.logAction(logActions.createMultiClear, logActions.clientAction);
+
             var value = null;
             var inputType = vm.recordEditModel.columnModels[index].inputType;
             if (inputType === "timestamp") {
@@ -723,43 +791,32 @@
             }
         });
 
-        /*** Container Heights and other styling ***/
-        // fetches the height of navbar, bookmark container, and viewport
-        // also fetches the main container for defining the dynamic height
-        // There are 2 main containers on `recordedit` app
-        function fetchContainerElements(containerIndex) {
-            var elements = {};
-            try {
-                /**** used for main-container height calculation ****/
-                // get document height
-                elements.docHeight = $document[0].documentElement.offsetHeight
-                // get navbar height
-                elements.navbarHeight = $document[0].getElementById('mainnav').offsetHeight;
-                // get bookmark height
-                elements.bookmarkHeight = $document[0].getElementsByClassName('meta-icons')[containerIndex].offsetHeight;
-                // get recordedit main container
-                elements.container = $document[0].getElementsByClassName('main-container')[containerIndex];
-            } catch(error) {
-                $log.warn(error);
-            }
-            return elements;
-        }
-
         function setMainContainerHeight() {
-            var idx = vm.resultset ? 1 : 0;
-            var elements = fetchContainerElements(idx);
-            // if the navbarHeight is not set yet, don't set the height
-            // no bookmark container here
-            if(elements.navbarHeight !== undefined) {
-                UiUtils.setDisplayContainerHeight(elements);
-            }
+            $scope.parentContainer = $document[0].querySelector(vm.resultset ? '.resultset-container' : '.form-container');
+            UiUtils.setDisplayContainerHeight($scope.parentContainer, null, true);
         }
 
         $scope.$watch(function() {
             return $rootScope.displayReady;
         }, function (newValue, oldValue) {
             if (newValue) {
-                $timeout(setMainContainerHeight, 0);
+                setMainContainerHeight();
+                $timeout(function () {
+                    onResize(true);
+                }, 0);
+
+                $scope.$watch(function () {
+                    $scope.parentContainer = $document[0].querySelector(vm.resultset ? '.resultset-container' : '.form-container');
+
+                    var fixedContentHeight = $document[0].querySelector("#mainnav").offsetHeight;
+                    fixedContentHeight += $scope.parentContainer.querySelector('.top-panel-container').offsetHeight;
+
+                    return fixedContentHeight;
+                }, function (newValue, oldValue) {
+                    if (newValue != oldValue) {
+                        setMainContainerHeight();
+                    }
+                });
             }
         });
 
@@ -788,39 +845,29 @@
 
         /*------------------------code below is for fixing the column names when scrolling -----------*/
 
-        var captionColumnWidth = 190;
-        var marginLeft = captionColumnWidth + 10;
+        // NOTE: keep consistent with $chaise-caption-column-width in _variables.scss
+        var ENTITY_KEY_WIDTH = 200;
 
-        // Sets a fixed width for the columns, as they're positioned absolute
-        vm.captionColumnWidth = { 'width' : captionColumnWidth + "px" };
-
-        // Sets margin-left for the formedit div as the first columns are positioned absolute
-        // to avoid overlap between them
-        vm.formEditDivMarginLeft = { 'margin-left': marginLeft + "px", 'padding-right': '0px', 'padding-left': '0px' };
-
-        // Sets a fixed header height to match the border for the columns
-        var headerHeight = 47;
-        vm.headerHeight = { 'height' : headerHeight + "px" };
-
-        // Adds height and width to the first empty heading of the first row
-        // to make it uniform
-        vm.firstHeaderStyle = {
-            'width' : captionColumnWidth + "px",
-            'height' : (headerHeight + 1) + "px"
+        vm.formEditDynamicStyle = {};
+        vm.topScroll = {
+            width: '0px'
         };
-        vm.tableWidth = { width: '0px' };
 
         // Get root element
         var element = document.querySelector('.ng-scope');
         var $rootElement = angular.element(element).injector().get('$rootElement');
 
-        var formContainerEl = $rootElement.find('.form-container');
+        // used for setting the width of table and
+        var inputContainerEl = document.querySelector('.input-container');
+        var tableEl = document.querySelector('#form-edit table');
 
-        // Get the formedit div
-        var elem = $rootElement.find('#formEdit');
+        // used for adjusting the padding of main-container (because of scrollbar)
+        var mainContainerEl = document.querySelector('.form-container .main-container');
+        var topRightPanelEl = document.querySelector('.form-container .top-right-panel');
 
-        var tableEl = elem.find('table');
-        var scrollContainer = formContainerEl.find('#formEditScroll');
+        // Get the form-edit div
+        var elem = $rootElement.find('#form-edit');
+        var scrollContainer = $rootElement.find('#form-edit-scroll');
 
         var elemHeight;
         var trs, selectAllTrs;
@@ -830,21 +877,36 @@
         // Set outer width of element to be less by caption column Width and add buttonWidth,
         // so that it doesn't scrolls due to the margin-left applied before extra padding
         function onResize(doNotInvokeEvent) {
-            var elemWidth = formContainerEl.outerWidth();
-            vm.formEditDivMarginLeft.width = elemWidth - captionColumnWidth - 30;
+
+            //adjust the padding of main-container
+            // if there's a scrollbar, the spacing needs to be adjusted
+            var padding = mainContainerEl.clientWidth - topRightPanelEl.clientWidth;
+            mainContainerEl.style.paddingRight = padding + "px";
+
+            // change the form-edit width to be the same as input-container
+            var reducedWidth = inputContainerEl.offsetWidth - ENTITY_KEY_WIDTH; // account for left margin
+            vm.formEditDynamicStyle.width = reducedWidth;
 
             if (vm.recordEditModel.rows.length > 1) {
-                vm.tableWidth.width =  (tableEl.outerWidth()) + "px";
+                // make sure the width of form-edit-scroll and the table are the same
+                vm.topScroll.width =  (tableEl.offsetWidth) + "px";
+
+                if (tableEl.offsetWidth > reducedWidth) {
+                    // if the table width is greater than the scrollable container width
+                    // NOTE: this is for an edge case in safari but has no harm on other browsers
+                    vm.showTopScroll = true;
+                } else {
+                    vm.showTopScroll = false;
+                }
             } else {
-                vm.tableWidth.width =  (tableEl.outerWidth() - captionColumnWidth - 50) + "px";
+                // make scroll bar container smaller than form container so it doesn't show scrollbar when 1 record
+                vm.topScroll.width =  (tableEl.offsetWidth - ENTITY_KEY_WIDTH - 50) + "px";
             }
 
-            if (!editMode) {
-                vm.formEditDivMarginLeft.width = vm.formEditDivMarginLeft.width -30 -5;
-            }
+            // don't invoke digest cycle if the caller said so
+            // (currently it's only passed on load. the rest of callers will invoke extra digest cycle)
             if (!doNotInvokeEvent) scope.$digest();
         }
-        onResize(true);
 
         // Listen to scroll event on dummy div for top horizontal bar to update recordedit div position
         scrollContainer.on('scroll', function (e) {
@@ -860,77 +922,70 @@
             }, 10);
         });
 
-        // Listen to window resize event to change the width of div formEdit
+        // Listen to window resize event to change the width of div form-edit
         angular.element($window).bind('resize', function() {
             onResize();
         });
 
         var editMode = vm.editMode;
 
-        // This function is called whenever the height of formEdit div changes
+        // This function is called whenever the height of form-edit div changes
         // This might be because of selecting/clearing something from the popup for foreighn keys
         // It is called initially once, to adjust heights of fixed columns according to their next td element
-        function resizeColumns() {
-
+        function resizeColumns(resize) {
             // Set timer null to reset settimeout
             timer = null;
 
-            // get current height of div formEdit
+            // get current height of div form-edit
             var h = elem.height();
 
-            // If current height of div formEdit has changed than the previous one
-            if (elemHeight !== h) {
+            if (resize === false) return;
 
-                // Get height of formEdit div to use for resizing the fixed columns height
-                // This should be done once only
-                if (!elemHeight) elemHeight = elem.outerHeight();
+            // Get all rows of the table
+            if (!trs) {
+                trs = elem.find('tr.shift-form');
+                selectAllTrs = elem.find('tr.select-all-row');
+            }
 
-                // Get all rows of the table
-                if (!trs) {
-                    trs = elem.find('tr.shift-form');
-                    selectAllTrs = elem.find('tr.select-all-row');
+            // iterate over each row
+            for(var i=0;i<trs.length;i++) {
+                // Get the height of the first column and  second column of the row
+                // Which are the key and value for the row
+                var keytdHeight = trs[i].children[0].getAttribute('data-height');
+                if (keytdHeight == null || keytdHeight == 0) {
+                    keytdHeight = trs[i].children[0].offsetHeight;
+                    // set first TD height
+                    trs[i].children[0].setAttribute('data-height', keytdHeight);
                 }
 
-                // iterate over each row
-                for(var i=0;i<trs.length;i++) {
-                    // Get the height of the first column and  second column of the row
-                    // Which are the key and value for the row
+                var valuetdHeight = trs[i].children[1].offsetHeight;
 
-                    var keytdHeight = trs[i].children[0].getAttribute('data-height');
-                    if (keytdHeight == null || keytdHeight == 0) {
-                        keytdHeight = trs[i].children[0].offsetHeight;
-                        trs[i].children[0].setAttribute('data-height', keytdHeight);
-                    }
+                // If keytdHeight is greater than valuetdHeight
+                // then set valuetdHeight
+                // else change coltdHeight for viceversa condition
+                if (keytdHeight > valuetdHeight) {
+                    trs[i].children[1].height = keytdHeight;
+                } else if (valuetdHeight > keytdHeight) {
+                    trs[i].children[0].height = valuetdHeight;
+                }
 
-                    var valuetdHeight = trs[i].children[1].offsetHeight;
+                if (i !== 0) {
+                    // use -1 because there is no extra <tr> for the header row
+                    var idx = i-1;
 
-                    //if (editMode && i==0) valuetdHeight++;
+                    // get the height of the input div and buttons (Apply/Cancel) div
+                    // HTML structure:
+                    //    tr > td(entity-value) > span/input-switch/button
+                    var inputHeight = selectAllTrs[idx].children[1].children[1].offsetHeight;
+                    var buttonsHeight = selectAllTrs[idx].children[1].children[2].offsetHeight;
 
-                    // If keytdHeight is greater than valuetdHeight
-                    // then set valuetdHeight
-                    // else change coltdHeight for viceversa condition
-                    if (keytdHeight > valuetdHeight) {
-                        trs[i].children[1].height = keytdHeight;
+                    // + (8*2) for 8 padding on top and bottom
+                    // + 1 for border width
+                    var allValueTdHeight = (inputHeight > buttonsHeight ? inputHeight : buttonsHeight) + (8*2) + 1;
 
-                    } else if (valuetdHeight > keytdHeight)  {
-                        trs[i].children[0].height = valuetdHeight;
-                    }
-
-                    if (i !== 0) {
-                        // use -1 because there is no extra <tr> for the header row
-                        var idx = i-1;
-
-                        // get the height of the input div abd buttons (Apply/Cancel) div
-                        var inputHeight = selectAllTrs[idx].children[1].children[0].children[1].offsetHeight;
-                        var buttonsHeight = selectAllTrs[idx].children[1].children[0].children[2].offsetHeight;
-                        // HTML structure:
-                        //    tr > td(entity-value) > div > span/input-switch/button
-                        var allValueTdHeight = (inputHeight > buttonsHeight ? inputHeight : buttonsHeight) + 10;
-
-                        // set key height to the height of the input div
-                        selectAllTrs[idx].children[0].height = allValueTdHeight;
-                        selectAllTrs[idx].children[1].height = allValueTdHeight;
-                    }
+                    // set key height to the height of the input div
+                    selectAllTrs[idx].children[0].height = allValueTdHeight;
+                    selectAllTrs[idx].children[1].height = allValueTdHeight;
                 }
             }
         }
@@ -941,10 +996,11 @@
         var timer;
 
         // Watch for height changes on the rootscope
+        // TODO: this doesn't make much sense
         $rootScope.$watch(function() {
             timer = timer ||
             $timeout(function() {
-                  resizeColumns();
+                resizeColumns();
             }, TIMER_INTERVAL, false);
         });
 

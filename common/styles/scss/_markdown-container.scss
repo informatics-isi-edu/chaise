@@ -1,0 +1,73 @@
+.markdown-container {
+
+    // NOTE related PR: https://github.com/informatics-isi-edu/chaise/pull/882
+    // might not be needed anymore
+    .recordset-table td & img {
+        overflow-x: hidden;
+    }
+
+    & > p:last-child {
+        margin-bottom: 0;
+    }
+
+    code {
+        padding-left: 0;
+        padding-right: 0;
+        color: #333;
+        background-color: #F5F5F5;
+    }
+
+    img {
+        margin: 5px 5px 5px 0;
+    }
+
+    .vocab {
+        color: darkblue;
+        background-color: rgba(220, 220, 220, 0.68);
+        padding: 7px;
+        border-radius: 10px;
+        display: inline-block;
+        margin: 2px;
+    }
+
+    a.download {
+        @include chaise-btn();
+        @include chaise-btn-primary();
+    }
+
+    a.download-alt {
+        @include download-btn();
+    }
+
+    .asset-source-description {
+        font-size: 85%;
+    }
+
+    ul {
+        list-style-type: disc;
+    }
+
+    ol {
+        list-style-type: decimal;
+    }
+
+    ol, ul {
+        padding: 0 !important;
+        /*existing rule is padding=2, which should be changed for the other changes*/
+
+        > li {
+            margin-left: 1em;
+            padding-left: 0;
+
+            &:before {
+
+            }
+
+            list-style: inherit;
+            &:only-child {
+                margin-left: 0;
+                list-style: none;
+            }
+        }
+    }
+}

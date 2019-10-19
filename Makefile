@@ -17,13 +17,12 @@ BIN=$(MODULES)/.bin
 
 ### Protractor scripts
 ## Sequential protractor scripts
-# Legacy apps tests
-E2Esearch=test/e2e/specs/default-config/search/presentation.conf.js
 # Recordedit tests
 E2EDIrecordAdd=test/e2e/specs/all-features-confirmation/recordedit/add.conf.js
 E2EDIrecordEditMultiColTypes=test/e2e/specs/default-config/recordedit/multi-col-types.conf.js
 E2EDIrecordImmutable=test/e2e/specs/default-config/recordedit/immutable-inputs.conf.js
 E2EDIrecordEdit=test/e2e/specs/all-features-confirmation/recordedit/edit-delete.conf.js
+# not part of the make recordedit command anymore
 # E2ErecordEditNoDeleteBtn=test/e2e/specs/delete-prohibited/recordedit/no-delete-btn.conf.js
 E2EDIrecordMultiAdd=test/e2e/specs/default-config/recordedit/add-x-forms.conf.js
 E2EDIrecordMultiEdit=test/e2e/specs/default-config/recordedit/multi-edit.conf.js
@@ -63,11 +62,10 @@ Manualrecordset=test/manual/specs/recordset.conf.js
 
 
 NAVBAR_TESTS=$(E2Enavbar) $(E2EnavbarHeadTitle) $(E2EnavbarCatalogConfig)
-SEARCH_TESTS=$(E2Esearch)
-RECORDSET_TESTS=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit) $(E2EDrecordsetIndFacet) $(E2EDrecordsetHistFacet)
 RECORD_TESTS=$(E2EDrecord) $(E2ErecordNoDeleteBtn) $(E2EDrecordRelatedTable) $(E2EDrecordCopy) $(E2EDrecordLinks)
+RECORDSET_TESTS=$(E2EDrecordset) $(E2ErecordsetAdd) $(E2EDrecordsetEdit) $(E2EDrecordsetIndFacet) $(E2EDrecordsetHistFacet)
 RECORDADD_TESTS=$(E2EDIrecordAdd) $(E2EDIrecordMultiAdd) $(E2EDIrecordImmutable)
-RECORDEDIT_TESTS=$(E2EDIrecordEdit) $(E2EDIrecordMultiEdit) $(E2EDrecordEditCompositeKey) $(E2ErecordEditNoDeleteBtn) $(E2EDrecordEditSubmissionDisabled) $(E2EDIrecordEditMultiColTypes) $(E2EDrecordEditDomainFilter)
+RECORDEDIT_TESTS=$(E2EDIrecordEdit) $(E2EDIrecordMultiEdit) $(E2EDrecordEditCompositeKey) $(E2EDrecordEditSubmissionDisabled) $(E2EDIrecordEditMultiColTypes) $(E2EDrecordEditDomainFilter)
 PERMISSIONS_TESTS=$(E2EmultiPermissionsVisibility)
 FOOTER_TESTS=$(E2Efooter)
 ERRORS_TESTS=$(E2Eerrors)
@@ -97,10 +95,6 @@ test-%: deps
 #Rule to run navbar tests
 .PHONY: testnavbar
 testnavbar: test-NAVBAR_TESTS
-
-#Rule to run search app tests
-.PHONY: testsearch
-testsearch: test-SEARCH_TESTS
 
 #Rule to run record app tests
 .PHONY: testrecord
@@ -181,8 +175,7 @@ endif
 CAT=cat
 
 # HTML
-HTML=search/index.html \
-	 login/index.html \
+HTML=login/index.html \
 	 recordset/index.html \
 	 viewer/index.html \
 	 recordedit/index.html \
@@ -211,7 +204,10 @@ MDEDIT_JS_DEPS=$(COMMON)/vendor/MarkdownEditor/bootstrap-markdown.js \
 # CSS source
 CSS=styles
 
+SASS=$(COMMON)/styles/app.css
+
 CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
+	$(CSS)/vendor/fontawesome.min.css \
 	$(CSS)/vendor/ng-grid.css \
 	$(CSS)/vendor/rzslider.css \
 	$(CSS)/vendor/select.css \
@@ -219,13 +215,9 @@ CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/vendor/angular-datepicker.css \
 	$(CSS)/vendor/bootstrap-tour.min.css
 
-CSS_SOURCE=$(CSS)/swoop-sidebar.css \
-	$(CSS)/jquery.nouislider.min.css \
+CSS_SOURCE=$(CSS)/jquery.nouislider.min.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css \
-	$(CSS)/ermrest.css \
-	$(CSS)/app.css \
-	$(COMMON)/styles/appheader.css \
-	$(CSS)/tour.css
+	$(COMMON)/styles/navbar.css \
 
 # JavaScript source and test specs
 JS=scripts
@@ -245,7 +237,6 @@ JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
 	$(JS)/vendor/select.js \
 	$(JS)/vendor/bootstrap-tour.min.js \
 	$(JS)/vendor/plotly-latest.min.js
-
 
 JS_SOURCE=$(JS)/respond.js \
 	$(JS)/variables.js \
@@ -274,19 +265,11 @@ JS_SOURCE=$(JS)/respond.js \
 	$(COMMON)/navbar.js \
 	$(COMMON)/login.js \
 	$(COMMON)/record.js \
-	$(COMMON)/ellipses.js \
+	$(COMMON)/ellipsis.js \
 	$(COMMON)/storage.js \
 	$(COMMON)/table.js \
 	$(COMMON)/utils.js \
 	$(COMMON)/bindHtmlUnsafe.js
-
-# HTML templates
-TEMPLATES=views
-
-TEMPLATES_DEPS=$(TEMPLATES)/erminit.html \
-	$(TEMPLATES)/ermsidebar.html \
-	$(TEMPLATES)/ermretrievefilters.html \
-	$(TEMPLATES)/ermretrieveresults.html
 
 # JavaScript and CSS source for Record(2) app
 RECORD_ASSETS=record
@@ -313,7 +296,7 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
 	$(COMMON)/navbar.js \
 	$(COMMON)/login.js \
 	$(COMMON)/record.js \
-	$(COMMON)/ellipses.js \
+	$(COMMON)/ellipsis.js \
 	$(COMMON)/storage.js \
 	$(COMMON)/table.js \
 	$(COMMON)/utils.js \
@@ -331,12 +314,9 @@ RECORD_JS_SOURCE=$(RECORD_ASSETS)/record.app.js \
 	$(RECORD_ASSETS)/record.controller.js
 
 RECORD_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
+	$(CSS)/vendor/fontawesome.min.css \
 	$(COMMON)/styles/app.css \
 	$(COMMON)/vendor/MarkdownEditor/styles/github-markdown.css \
-	$(COMMON)/styles/appheader.css
-
-
-RECORD_CSS_SOURCE=$(RECORD_ASSETS)/record.css
 
 # JavaScript and CSS source for Viewer app
 VIEWER_ASSETS=viewer
@@ -380,14 +360,12 @@ VIEWER_JS_SOURCE=$(VIEWER_ASSETS)/viewer.app.js \
 	$(VIEWER_ASSETS)/alerts/alerts.controller.js
 
 VIEWER_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
+	$(CSS)/vendor/fontawesome.min.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css \
 	$(CSS)/vendor/select.css \
 	$(CSS)/vendor/select2.css \
 	$(COMMON)/styles/app.css \
-	$(COMMON)/styles/appheader.css \
 	$(COMMON)/vendor/MarkdownEditor/styles/github-markdown.css
-
-VIEWER_CSS_SOURCE=$(VIEWER_ASSETS)/viewer.css
 
 # JavaScript and CSS source for RecordEdit app
 RE_ASSETS=recordedit
@@ -409,7 +387,7 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
 	$(COMMON)/errors.js \
 	$(COMMON)/faceting.js \
 	$(COMMON)/filters.js \
-	$(COMMON)/ellipses.js \
+	$(COMMON)/ellipsis.js \
 	$(COMMON)/inputs.js \
 	$(COMMON)/resizable.js \
 	$(COMMON)/storage.js \
@@ -441,15 +419,10 @@ RE_JS_MDHELP=$(RE_ASSETS)/mdHelp.app.js
 
 
 RE_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
+	$(CSS)/vendor/fontawesome.min.css \
 	$(CSS)/material-design/css/material-design-iconic-font.min.css \
-	$(CSS)/vendor/select.css \
-	$(CSS)/vendor/select2.css \
-	$(CSS)/vendor/angular-datepicker.css \
 	$(CSS)/vendor/rzslider.css \
-	$(COMMON)/styles/app.css \
-	$(COMMON)/styles/appheader.css
-
-RE_CSS_SOURCE=$(RE_ASSETS)/recordEdit.css
+	$(COMMON)/styles/app.css
 
 RE_CSS_MDHELP=$(RE_ASSETS)/mdHelpStyle.min.css
 
@@ -469,7 +442,7 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
 	$(COMMON)/authen.js \
 	$(COMMON)/bindHtmlUnsafe.js \
 	$(COMMON)/config.js \
-	$(COMMON)/ellipses.js \
+	$(COMMON)/ellipsis.js \
 	$(COMMON)/export.js \
 	$(COMMON)/errors.js \
 	$(COMMON)/faceting.js \
@@ -490,10 +463,9 @@ RECSET_JS_SOURCE=$(RECSET_ASSETS)/recordset.app.js \
     $(RECSET_ASSETS)/recordset.controller.js
 
 RECSET_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
-	$(CSS)/material-design/css/material-design-iconic-font.min.css
+	$(CSS)/vendor/fontawesome.min.css
 
 RECSET_CSS_SOURCE=$(COMMON)/styles/app.css \
-	$(COMMON)/styles/appheader.css \
 	$(COMMON)/vendor/MarkdownEditor/styles/github-markdown.css
 
 # Config file
@@ -508,10 +480,10 @@ MIN=$(DIST)/$(PROJ).min.js
 
 .PHONY: all
 # all should just do the minimal needed to deploy chaise
-all: cleanversion $(HTML)
+all: clean $(SASS) $(HTML)
 
 .PHONY: build
-build: $(PKG) $(MIN) $(HTML) $(gitversion)
+build: $(PKG) $(MIN) $(SASS) $(HTML) $(gitversion)
 
 # Rule to build the full library
 $(PKG): $(JS_SOURCE) $(BIN)
@@ -542,6 +514,8 @@ updeps:
 .PHONY: clean
 clean:
 	rm $(HTML) || true
+	rm $(COMMON)/styles/app.css
+	rm $(COMMON)/styles/navbar.css
 	rm -rf $(DIST)
 	rm -f .make-*
 
@@ -560,12 +534,12 @@ distclean: clean
 .PHONY: html
 html: $(HTML)
 
-# Rules to attach JavaScript and CSS assets to the head
-search/index.html: search/index.html.in .make-asset-block .make-template-block
-	sed -e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
-		-e '/%TEMPLATES%/ {' -e 'r .make-template-block' -e 'd' -e '}' \
-		search/index.html.in common/templates/noscript.html > search/index.html
+# Rule to compile sass/scss files to css
+$(COMMON)/styles/app.css: $(shell find $(COMMON)/styles/scss/)
+	$(BIN)/node-sass --style=compressed --source-map-embed $(COMMON)/styles/scss/app.scss $(COMMON)/styles/app.css
+	$(BIN)/node-sass --style=compressed --source-map-embed $(COMMON)/styles/scss/_navbar.scss $(COMMON)/styles/navbar.css
 
+# Rules to attach JavaScript and CSS assets to the head
 login/index.html: login/index.html.in .make-add-version-tag .make-asset-block
 	sed -e '/%VERSION%/ {' -e 'r .make-add-version-tag' -e 'd' -e '}' \
 		-e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
@@ -629,19 +603,9 @@ $(JS_CONFIG): chaise-config-sample.js
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-asset-block ; \
 	done
 
-.make-template-block: $(TEMPLATES_DEPS)
-	> .make-template-block
-	for file in $(TEMPLATES_DEPS); do \
-		$(CAT) $$file >> .make-template-block ; \
-	done
-
-.make-viewer-asset-block: $(VIEWER_SHARED_CSS_DEPS) $(VIEWER_CSS_SOURCE) $(VIEWER_SHARED_JS_DEPS) $(VIEWER_JS_SOURCE) $(JS_CONFIG)
+.make-viewer-asset-block: $(VIEWER_SHARED_CSS_DEPS) $(VIEWER_SHARED_JS_DEPS) $(VIEWER_JS_SOURCE) $(JS_CONFIG)
 	> .make-viewer-asset-block
 	for file in $(VIEWER_SHARED_CSS_DEPS); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-viewer-asset-block ; \
-	done
-	for file in $(VIEWER_CSS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-viewer-asset-block ; \
 	done
@@ -660,13 +624,13 @@ $(JS_CONFIG): chaise-config-sample.js
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-viewer-asset-block ; \
 	done
 
-.make-de-asset-block: $(RE_SHARED_CSS_DEPS) $(RE_CSS_SOURCE) $(RE_SHARED_JS_DEPS) $(RE_JS_SOURCE) $(JS_CONFIG) $(MDEDIT_JS_DEPS) $(MDEDIT_CSS_DEPS)
+.make-de-asset-block: $(RE_SHARED_CSS_DEPS) $(RE_SHARED_JS_DEPS) $(RE_JS_SOURCE) $(JS_CONFIG) $(MDEDIT_JS_DEPS) $(MDEDIT_CSS_DEPS)
 	> .make-de-asset-block
 	for file in $(RE_SHARED_CSS_DEPS); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-de-asset-block ; \
 	done
-	for file in $(RE_CSS_SOURCE) $(MDEDIT_CSS_DEPS); do \
+	for file in $(MDEDIT_CSS_DEPS); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-de-asset-block ; \
 	done
@@ -762,11 +726,11 @@ $(JS_CONFIG): chaise-config-sample.js
 
 # Rule for installing for normal deployment
 .PHONY: install dont_install_in_root
-install: cleanversion $(HTML) dont_install_in_root gitversion
+install: cleanversion $(SASS) $(HTML) dont_install_in_root gitversion
 	rsync -avz --exclude='.*' --exclude='$(MODULES)' --exclude='wiki-images' --exclude=/chaise-config.js . $(CHAISEDIR)
 
 .PHONY: install-w-config dont_install_in_root
-install-w-config: $(HTML) dont_install_in_root gitversion
+install-w-config: $(SASS) $(HTML) dont_install_in_root gitversion
 	rsync -avz --exclude='.*' --exclude='$(MODULES)' --exclude='wiki-images' . $(CHAISEDIR)
 
 .PHONY: gitversion
@@ -792,7 +756,6 @@ usage:
 	@echo "    testall   		- runs e2e and Karma tests"
 	@echo "    clean     		- cleans the dist dir"
 	@echo "    distclean 		- cleans the dist dir and the dependencies"
-	@echo "    testsearch 		- runs search app e2e tests"
 	@echo "    testrecordadd 	- runs data entry app add e2e tests"
 	@echo "    testrecordedit 	- runs data entry app edit e2e tests"
 	@echo "    testrecord 		- runs record app e2e tests"
