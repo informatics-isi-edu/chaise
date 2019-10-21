@@ -475,7 +475,7 @@ MIN=$(DIST)/$(PROJ).min.js
 
 .PHONY: all
 # all should just do the minimal needed to deploy chaise
-all: clean $(SASS) $(HTML)
+all: clean npm_install_prod_modules $(SASS) $(HTML)
 
 .PHONY: build
 build: $(PKG) $(MIN) $(SASS) $(HTML) $(gitversion)
