@@ -516,7 +516,7 @@ clean:
 	rm $(HTML) || true
 	rm $(COMMON)/styles/app.css || true
 	rm $(COMMON)/styles/navbar.css || true
-	rm -r $(DIST) || true
+	rm -rf $(DIST) || true
 	rm .make-* || true
 
 # Rule to clean project directory
@@ -527,7 +527,7 @@ cleanversion:
 # Rule to clean the dependencies too
 .PHONY: distclean
 distclean: clean
-	rm -r $(MODULES) || true
+	rm -rf $(MODULES) || true
 
 
 # Rule to make html
