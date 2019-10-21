@@ -514,20 +514,20 @@ updeps:
 .PHONY: clean
 clean:
 	rm $(HTML) || true
-	rm $(COMMON)/styles/app.css
-	rm $(COMMON)/styles/navbar.css
-	rm -rf $(DIST)
-	rm -f .make-*
+	rm $(COMMON)/styles/app.css || true
+	rm $(COMMON)/styles/navbar.css || true
+	rm -rf $(DIST) || true
+	rm .make-* || true
 
 # Rule to clean project directory
 .PHONY: cleanversion
 cleanversion:
-	rm -f .make-add-version-tag
+	rm .make-add-version-tag || true
 
 # Rule to clean the dependencies too
 .PHONY: distclean
 distclean: clean
-	rm -rf $(MODULES)
+	rm -rf $(MODULES) || true
 
 
 # Rule to make html
