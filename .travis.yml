@@ -106,9 +106,6 @@ before_install:
   - cd ..
   - git clone https://github.com/informatics-isi-edu/ermrestjs.git
   - cd ermrestjs
-  - sudo npm install
-  - bower install
-  - sudo make build
   - sudo make install
   - cd ../chaise
   - sudo cp test/ermrest_config.json /home/ermrest/
@@ -117,7 +114,6 @@ before_install:
 
 install:
   - sudo mkdir -p /var/www/html/chaise
-  - sudo make build
   - sudo make install
   - sudo cp chaise-config.js /var/www/html/chaise/chaise-config.js
   - sudo service apache2 restart

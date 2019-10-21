@@ -156,10 +156,6 @@ testmanually: test-ALL_MANUAL_TESTS
 .PHONY: test
 test: test-ALL_TESTS
 
-# Rule to run tests
-.PHONY: testall
-testall: test
-
 # Rule to determine MD5 utility
 ifeq ($(shell which md5 2>/dev/null),)
     MD5 = md5sum
@@ -477,6 +473,7 @@ MIN=$(DIST)/$(PROJ).min.js
 # all should just do the minimal needed to deploy chaise
 all: clean npm_install_prod_modules $(SASS) $(HTML)
 
+# TODO not used
 .PHONY: build
 build: $(PKG) $(MIN) $(SASS) $(HTML) $(gitversion)
 
@@ -750,7 +747,6 @@ usage:
 	@echo "    lint      		- lint the source"
 	@echo "    build     		- builds the package"
 	@echo "    test      		- runs e2e tests"
-	@echo "    testall   		- runs e2e and Karma tests"
 	@echo "    clean     		- cleans the dist dir"
 	@echo "    distclean 		- cleans the dist dir and the dependencies"
 	@echo "    testrecordadd 	- runs data entry app add e2e tests"
