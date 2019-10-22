@@ -7,6 +7,7 @@
         function RecordController(AlertsService, ConfigUtils, DataUtils, ERMrest, ErrorService, logActions, logService, MathUtils, messageMap, modalBox, modalUtils, recordAppUtils, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
 
+        var initialHref = $window.location.href;
         var mainContainerEl = angular.element(document.getElementsByClassName('main-container')[0]);
         var mainBodyEl;
         var addRecordRequests = {}; // <generated unique id : reference of related table>
@@ -24,31 +25,6 @@
 
         vm.tooltip = messageMap.tooltip;
         vm.queryTimeoutTooltip = messageMap.queryTimeoutTooltip;
-
-        vm.scrollToRelatedTable = function (sectionId, index, isInline) {
-            logService.logAction(logActions.tocScrollTo, logActions.clientAction);
-
-            var safeSectionId = vm.makeSafeIdAttr(sectionId);
-            var pageSection = (isInline ? "entity-" : "rt-heading-") + safeSectionId;
-            var el = angular.element(document.getElementById(pageSection));
-            if (!isInline) {
-                $rootScope.relatedTableModels[index].open = true;
-            } else {
-                var el = el.parent();
-            }
-            mainContainerEl.scrollToElementAnimated(el, 40).then(function () {
-                $timeout(function () {
-                    el.addClass("row-focus");
-                }, 100);
-                $timeout(function () {
-                    el.removeClass('row-focus');
-                }, 1600);
-            }).catch(function (err) {
-                // the scroll promise might be rejected, but we should just fail silently
-                // we saw this happening when you double click on the element.
-                // in this case, the second promise will be rejected.
-            });
-        }
 
         vm.versionDisplay = function () {
             return UiUtils.humanizeTimestamp($rootScope.reference.location.versionAsMillis);
@@ -186,9 +162,9 @@
 
                     // don't show the loading if it's done
                     if ($rootScope.loading && $rootScope.lastRendered === $rootScope.relatedTableModels.length-1) {
-                        $timeout(function () {
-                            $rootScope.loading = false;
-                        });
+                        $rootScope.loading = false;
+                        // defer autoscroll to next digest cycle to ensure aggregates and images were fetched and loaded for last RT
+                        $timeout(autoScroll, 0);
                     }
 
                     return true;
@@ -579,6 +555,66 @@
         $scope.scrollToTop = function () {
             mainContainerEl.scrollTo(0, 0, 500);
         };
+
+        vm.scrollToRelatedTable = function (sectionId, index, isInline) {
+            logService.logAction(logActions.tocScrollTo, logActions.clientAction);
+
+            var safeSectionId = vm.makeSafeIdAttr(sectionId);
+            var pageSection = (isInline ? "entity-" : "rt-heading-") + safeSectionId;
+            var el = angular.element(document.getElementById(pageSection));
+            if (!isInline) {
+                $rootScope.relatedTableModels[index].open = true;
+            } else {
+                var el = el.parent();
+            }
+            scrollToElement(el);
+        }
+
+        function autoScroll () {
+            // query param is url decoded by this function
+            var queryParam = UriUtils.getQueryParam(initialHref, "scroll_to");
+            // return if no query parameter, nothing to scroll to
+            if (!queryParam) return;
+
+            // id enocde query param
+            var htmlId = vm.makeSafeIdAttr(queryParam);
+            var el = angular.element(document.getElementById("entity-" + htmlId));
+
+            if (el[0]) {
+                // if in entity section, grab parent
+                el = el.parent();
+            } else {
+                el = angular.element(document.getElementById("rt-heading-" + htmlId));
+                // return if no element after checking entity section and RT section
+                if (!el[0]) return;
+
+                // open the table
+                var matchingRtm = $rootScope.relatedTableModels.filter(function (rtm) {
+                    return rtm.displayname.unformatted == queryParam;
+                });
+
+                // matchingRtm should only ever be size 1, unless 2 different RTs have the same displayname
+                // make sure RT is open before scrolling
+                matchingRtm[0].open = true;
+            }
+
+            scrollToElement(el);
+        }
+
+        function scrollToElement (element) {
+            mainContainerEl.scrollToElementAnimated(element, 40).then(function () {
+                $timeout(function () {
+                    element.addClass("row-focus");
+                }, 100);
+                $timeout(function () {
+                    element.removeClass('row-focus');
+                }, 1600);
+            }).catch(function (err) {
+                // the scroll promise might be rejected, but we should just fail silently
+                // we saw this happening when you double click on the element.
+                // in this case, the second promise will be rejected.
+            });
+        }
 
         mainContainerEl.on('scroll', $scope.$apply.bind($scope, function () {
             if (mainContainerEl.scrollTop() > 300) {
