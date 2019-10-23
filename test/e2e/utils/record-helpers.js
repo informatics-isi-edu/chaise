@@ -378,7 +378,7 @@ exports.testPresentation = function (tableParams) {
 
             // rely on the UI data for looping, not expectation data
             for (var i = 0; i < tableCount; i++) {
-                displayName = relatedTables[i].displayname;
+                displayName = relatedTables[i].displayname_unformatted;
                 title = relatedTables[i].title;
 
                 // verify all columns are present
@@ -510,7 +510,7 @@ exports.testPresentation = function (tableParams) {
     // There is a media table linked to accommodations but this accommodation (Sheraton Hotel) doesn't have any media
     it("should show and hide a related table with zero values upon clicking a link to toggle visibility of related entities", function(done) {
         var showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton(),
-            tableDisplayname = "<strong>media</strong>",
+            tableDisplayname = "**media**",
             noResultsMessage = "No Results Found";
          chaisePage.clickButton(showAllRTButton).then(function() {
             expect(chaisePage.recordPage.getRelatedTable(tableDisplayname).isDisplayed()).toBeFalsy("first click: didn't hide.");

@@ -334,3 +334,31 @@ describe ("Viewing exisiting record with related entities, ", function () {
         recordHelpers.testRelatedTable(related_w_invalid_row_markdown_pattern, pageReadyCondition);
     });
 });
+
+describe("For scroll to query parameter", function() {
+    var displayname = "table_w_aggregates";
+
+    beforeAll(function () {
+        var keys = [];
+        keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
+        browser.ignoreSynchronization=true;
+        var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/" + keys.join("&") + "?scrollTo=" + displayname;
+        browser.get(url);
+
+        pageReadyCondition();
+    });
+
+    it("should scroll to the related table.", function () {
+        var heading = chaisePage.recordPage.getRelatedTableAccordion(displayname);
+
+        browser.wait(function () {
+            return heading.isDisplayed().then(function (bool) {
+                return bool;
+            });
+        });
+
+        heading.getAttribute("class").then(function(className) {
+            expect(className).toContain("panel-open", "Related table panel is not open when autoscrolled.");
+        });
+    });
+});

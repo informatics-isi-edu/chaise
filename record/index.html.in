@@ -89,7 +89,7 @@
                                 <li id="main-to-top" class="toc-heading" ng-click="scrollToTop()">
                                     <a uib-tooltip="Click to go to top of page" tooltip-placement="right">Summary</a>
                                 </li>
-                                <div ng-repeat="cm in columnModels track by $index" id="recordSidePan-{{$index}}" ng-if="ctrl.showInlineTable($index)" class="{{lastActiveFacet == $index ? 'focused': ''}}" ng-click="::ctrl.scrollToRelatedTable(cm.displayname.value, $index, true)">
+                                <div ng-repeat="cm in columnModels track by $index" id="recordSidePan-{{$index}}" ng-if="ctrl.showInlineTable($index)" class="{{lastActiveFacet == $index ? 'focused': ''}}" ng-click="::ctrl.scrollToRelatedTable(cm.displayname.unformatted)">
 
                                     <li id="recordSidePan-heading-{{$index}}" class="toc-heading toc-inline-heading">
                                         <a ng-class="{'empty-toc-heading': cm.tableModel.rowValues.length === 0}">
@@ -99,7 +99,7 @@
                                         </a>
                                     </li>
                                 </div>
-                                <div ng-repeat="rtm in relatedTableModels track by $index" id="recordSidePan-{{$index}}" ng-if="ctrl.showRelatedTable($index)" class="{{lastActiveFacet == $index ? 'focused': ''}}" ng-click="::ctrl.scrollToRelatedTable(rtm.displayname.value, $index, false)">
+                                <div ng-repeat="rtm in relatedTableModels track by $index" id="recordSidePan-{{$index}}" ng-if="ctrl.showRelatedTable($index)" class="{{lastActiveFacet == $index ? 'focused': ''}}" ng-click="::ctrl.scrollToRelatedTable(rtm.displayname.unformatted)">
 
                                     <li id="recordSidePan-heading-{{$index}}" class="toc-heading">
                                         <a ng-class="{'empty-toc-heading': rtm.tableModel.rowValues.length === 0}">
@@ -131,7 +131,7 @@
                         <!-- used to delay empty accordions from displaying before simple record display -->
                         <div ng-if="displayReady" id="rt-container">
                             <uib-accordion close-others="false">
-                                <div uib-accordion-group class="related-table-accordion" id="rt-heading-{{::ctrl.makeSafeIdAttr(rtm.tableModel.reference.displayname.value)}}"  ng-repeat="rtm in relatedTableModels track by $index"  ng-show="ctrl.showRelatedTable($index)" is-open="rtm.open">
+                                <div uib-accordion-group class="related-table-accordion" id="rt-heading-{{::ctrl.makeSafeIdAttr(rtm.tableModel.reference.displayname.unformatted)}}"  ng-repeat="rtm in relatedTableModels track by $index"  ng-show="ctrl.showRelatedTable($index)" is-open="rtm.open">
                                     <uib-accordion-heading>
                                         <div class="rt-section-header">
                                             <i class="toggle-icon fas" ng-class="{'fa-chevron-down': rtm.open, 'fa-chevron-right': !rtm.open}"></i>
@@ -154,7 +154,7 @@
                                             </div>
                                             <div ng-switch-default>
                                                 <table-header vm="rtm.tableModel"></table-header>
-                                                <record-table class="related-table" id="rt-{{::ctrl.makeSafeIdAttr(rtm.displayname.value)}}" vm="rtm.tableModel"></record-table>
+                                                <record-table class="related-table" id="rt-{{::ctrl.makeSafeIdAttr(rtm.displayname.unformatted)}}" vm="rtm.tableModel"></record-table>
                                             </div>
                                         </div>
                                     </div>

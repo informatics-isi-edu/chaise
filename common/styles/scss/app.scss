@@ -108,14 +108,15 @@ html {
 
     // tooltip
     .chaise-icon-for-tooltip::after {
+        line-height: 1; // fix
+
         vertical-align: text-top;
         display: inline-block;
         font-size: .85em;
         font-family: 'chaise-icons';
         // NOTE: when there's a newline character, there is a space added to the
         // end of string text before the icon is added. when there is no newline,
-        // the icon is directly next to the text. The space before the content
-        // below ensures there is consistent spacing between these 2 cases
+        // the icon is directly next to the text.
         content: "\00A6";
     }
 

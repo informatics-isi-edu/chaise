@@ -2,6 +2,7 @@ The query parameters appear in the browser url after the filter path and after t
 
 #### Configurable parameters for users
  - `hideNavbar`: This parameter is used to hide the navbar from showing in the application. It will be honored if it is set to `true` or `false`. By default, the navbar will always show if it is the top level app. If the navbar is attached to an app that shows in an iframe, the navbar will be hidden by default. Setting this property to `false` will show the navbar inside of an iframe. When present, this parameter will be propagated to all applinks on the current page (but not propagated to another app that may be nested in an iframe). When navigating away from the current page, the navbar will continue to be behave the same way unless the query parameter is changed.
+ - `scrollTo`: Include this parameter in a link to record app to scroll to a specific section of the page. The value should be the display name of the column or related table (inline or in the related table section). This should be the markdown_pattern defined in the appropriate display annotation for that related table or column. It should also be properly url encoded for the UTF-8 character set. [More info about encoding](https://www.w3schools.com/tags/ref_urlencode.asp).
  - `limit`: This parameter changes the number of rows that are returned by the `ermrest` request. This parameter is consumed by chaise and sent along with the requests to fetch data (`recordset` and `recordedit` only)
 
 #### Set by application

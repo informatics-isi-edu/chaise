@@ -162,9 +162,9 @@
 
                     // don't show the loading if it's done
                     if ($rootScope.loading && $rootScope.lastRendered === $rootScope.relatedTableModels.length-1) {
-                        $rootScope.loading = false;
                         // defer autoscroll to next digest cycle to ensure aggregates and images were fetched and loaded for last RT
                         $timeout(autoScroll, 0);
+                        $rootScope.loading = false;
                     }
 
                     return true;
@@ -556,41 +556,40 @@
             mainContainerEl.scrollTo(0, 0, 500);
         };
 
-        vm.scrollToRelatedTable = function (sectionId, index, isInline) {
+        vm.scrollToRelatedTable = function (sectionId) {
             logService.logAction(logActions.tocScrollTo, logActions.clientAction);
 
-            var safeSectionId = vm.makeSafeIdAttr(sectionId);
-            var pageSection = (isInline ? "entity-" : "rt-heading-") + safeSectionId;
-            var el = angular.element(document.getElementById(pageSection));
-            if (!isInline) {
-                $rootScope.relatedTableModels[index].open = true;
-            } else {
-                var el = el.parent();
-            }
+            var el = determineScrollElement(sectionId);
             scrollToElement(el);
         }
 
         function autoScroll () {
             // query param is url decoded by this function
-            var queryParam = UriUtils.getQueryParam(initialHref, "scroll_to");
+            var queryParam = UriUtils.getQueryParam(initialHref, "scrollTo");
             // return if no query parameter, nothing to scroll to
             if (!queryParam) return;
 
+            var el = determineScrollElement(queryParam);
+            scrollToElement(el);
+        }
+
+        function determineScrollElement (displayname) {
             // id enocde query param
-            var htmlId = vm.makeSafeIdAttr(queryParam);
+            var htmlId = vm.makeSafeIdAttr(displayname);
+            // "entity-" is used for record entity section
             var el = angular.element(document.getElementById("entity-" + htmlId));
 
             if (el[0]) {
                 // if in entity section, grab parent
                 el = el.parent();
             } else {
+                // "rt-heading-" is used for related table section
                 el = angular.element(document.getElementById("rt-heading-" + htmlId));
                 // return if no element after checking entity section and RT section
                 if (!el[0]) return;
 
-                // open the table
                 var matchingRtm = $rootScope.relatedTableModels.filter(function (rtm) {
-                    return rtm.displayname.unformatted == queryParam;
+                    return rtm.displayname.unformatted == displayname;
                 });
 
                 // matchingRtm should only ever be size 1, unless 2 different RTs have the same displayname
@@ -598,7 +597,7 @@
                 matchingRtm[0].open = true;
             }
 
-            scrollToElement(el);
+            return el;
         }
 
         function scrollToElement (element) {
