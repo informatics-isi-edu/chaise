@@ -120,8 +120,10 @@
 
                 // reduce the spacing of table cells (overrides bootstrap default)
                 > tbody > tr {
+                    border-top: $record-table-cell-border-width solid $border-color;
+
                     > td {
-                        border-width: $record-table-cell-border-width;
+                        border-top: 0;
                         padding: $record-table-cell-padding;
                     }
 
@@ -129,7 +131,6 @@
                         // row-focus will change the border top and bottom size,
                         // so we should adjust that and account for the default border
                         td {
-                            border-top: 0;
                             padding-top: $record-table-cell-padding - ($row-focus-border-width - $record-table-cell-border-width);
                             padding-bottom: $record-table-cell-padding - ($row-focus-border-width - $record-table-cell-border-width);
 
@@ -142,21 +143,11 @@
                             }
                         }
 
-                        + tr {
-                            td {
-                                border-top: 0;
-                            }
-
-                            // when there are two of them, the bottom should use the default padding
-                            &.row-focus td {
-                                padding-top: $record-table-cell-padding;
-                            }
+                        // when there are two of them, the bottom should use the default padding
+                        + tr.row-focus td {
+                            padding-top: $record-table-cell-padding;
                         }
                     }
-                }
-
-                tr:nth-child(1) > td {
-                    border-top: none;
                 }
 
                 .entity-key {
