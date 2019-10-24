@@ -19,7 +19,7 @@
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
         vm.sidePanToggleBtnIndicator = "Show";
-        $rootScope.recordSidePanOpen = false;
+        $rootScope.recordSidePanOpen = true;
 
         var chaiseConfig = ConfigUtils.getConfigJSON();
 

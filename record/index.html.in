@@ -17,7 +17,7 @@
             <div class="top-panel-container">
                 <alerts id="alerts-container" alerts="ctrl.alerts"></alerts>
                 <div class="top-flex-panel">
-                    <div class="top-left-panel" ng-class="$root.recordSidePanOpen && !ctrl.noVisibleRelatedTables() ? 'open-panel' : 'close-panel'">
+                    <div class="top-left-panel" ng-class="loading || ($root.recordSidePanOpen && !ctrl.noVisibleRelatedTables()) ? 'open-panel' : 'close-panel'">
                         <div class="panel-header">
                             <div class="pull-left">
                                 <h3 class="side-panel-heading">Sections</h3>
@@ -82,7 +82,7 @@
             <loading-spinner ng-show="(!displayReady || showSpinner) && !error"></loading-spinner>
 
             <div class="bottom-panel-container">
-                <div id="record-side-pan" class="side-panel-resizable record-toc" ng-class="$root.recordSidePanOpen && !ctrl.noVisibleRelatedTables() ? 'open-panel' : 'close-panel'" resizable r-directions=["right"] r-flex="true" r-other-e=".top-left-panel">
+                <div id="record-side-pan" class="side-panel-resizable record-toc" ng-class="loading || ($root.recordSidePanOpen && !ctrl.noVisibleRelatedTables()) ? 'open-panel' : 'close-panel'" resizable r-directions=["right"] r-flex="true" r-other-e=".top-left-panel">
                     <div class="side-panel-container">
                         <div class="columns-container">
                             <ul>
