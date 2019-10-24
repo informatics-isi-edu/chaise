@@ -29,7 +29,6 @@ var testParams = {
         {
             title: "accommodation_image",
             displayname: "accommodation_image",
-            displayname_unformatted: "accommodation_image",
             columns: [ "id", "filename", "uri", "content_type", "bytes", "timestamp", "image_width", "image_height", "preview" ],
             data: [
                 { id: 3005, filename: "Four Points Sherathon 1", uri: "http://images.trvl-media.com/hotels/1000000/30000/28200/28110/28110_190_z.jpg", content_type: "image/jpeg", bytes: 0, timestamp: "2016-01-18T00:00:00-08:00", image_width: null, image_height: null, preview: null },
@@ -39,7 +38,6 @@ var testParams = {
         {
             title: "media",
             displayname: "<strong>media</strong>",
-            displayname_unformatted: "**media**",
             columns: [ "id" ],
             data: []
         }

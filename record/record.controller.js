@@ -556,6 +556,7 @@
             mainContainerEl.scrollTo(0, 0, 500);
         };
 
+        // sectionId should be the displayname.value
         vm.scrollToRelatedTable = function (sectionId) {
             logService.logAction(logActions.tocScrollTo, logActions.clientAction);
 
@@ -570,9 +571,14 @@
             if (!queryParam) return;
 
             var el = determineScrollElement(queryParam);
+            // no element was returned, means there wasn't a matching displayname on the page
+            if (!el) return;
+
             scrollToElement(el);
         }
 
+        // displayname should be the un-encoded displayname.value
+        // this means it _could_ be a value generated from templating then run through the mkdn interpreter
         function determineScrollElement (displayname) {
             // id enocde query param
             var htmlId = vm.makeSafeIdAttr(displayname);
@@ -589,7 +595,7 @@
                 if (!el[0]) return;
 
                 var matchingRtm = $rootScope.relatedTableModels.filter(function (rtm) {
-                    return rtm.displayname.unformatted == displayname;
+                    return rtm.displayname.value == displayname;
                 });
 
                 // matchingRtm should only ever be size 1, unless 2 different RTs have the same displayname
