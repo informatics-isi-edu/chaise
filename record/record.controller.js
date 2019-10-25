@@ -556,14 +556,21 @@
             mainContainerEl.scrollTo(0, 0, 500);
         };
 
-        // sectionId should be the displayname.value
-        vm.scrollToRelatedTable = function (sectionId) {
+        /**
+         * Function for headings in table of contents to scroll to a section of record app
+         * {String} sectionId - the displayname.value for table/column
+         */
+        vm.scrollToSection = function (sectionId) {
             logService.logAction(logActions.tocScrollTo, logActions.clientAction);
 
             var el = determineScrollElement(sectionId);
             scrollToElement(el);
         }
 
+        /**
+         * Function called when all related tables have been loaded
+         * checks if a query parameter is present to scroll to a specific page section
+         */
         function autoScroll () {
             // query param is url decoded by this function
             var queryParam = UriUtils.getQueryParam(initialHref, "scrollTo");
@@ -606,6 +613,7 @@
             return el;
         }
 
+        // given an element, scroll to the top of that element "slowly"
         function scrollToElement (element) {
             mainContainerEl.scrollToElementAnimated(element, 40).then(function () {
                 $timeout(function () {
