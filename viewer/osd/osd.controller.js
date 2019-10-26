@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .controller('OSDController', ['deviceDetector', 'image', '$window', '$rootScope', function OSDController(deviceDetector, image, $window, $rootScope) {
+    .controller('OSDController', ['deviceDetector', 'context', 'image', '$window', '$rootScope', function OSDController(deviceDetector,context, image, $window, $rootScope) {
         var vm = this;
         var iframe = $window.frames[0];
         var origin = $window.location.origin;
@@ -12,6 +12,14 @@
         vm.zoomInView = zoomInView;
         vm.zoomOutView = zoomOutView;
         vm.homeView = homeView;
+        var showTitle = context.queryParams.showTitle;
+        if (showTitle === "true") {
+            vm.showTitle = true;
+        } else if (showTitle === "false") {
+            vm.showTitle = false;
+        } else {
+            vm.showTitle = true;
+        }
 
         vm.filterChannelsAreHidden = false;
         vm.filterChannels = filterChannels;
@@ -96,7 +104,7 @@
             var btnptr = $('#filter-btn');
             btnptr.blur();
             var sidebarptr=$('#sidebar');
-  
+
             // if(vm.filterChannelsAreHidden) {
             //   if(!vm.annotationsSidebarAreHidden) { // annotation is up
                 // openAnnotations(); // close it
@@ -124,7 +132,7 @@
                                (-o-min-device-pixel-ratio: 3/2),\
                                (min-resolution: 1.5dppx)";
 
-            if ((window.devicePixelRatio > 1) || 
+            if ((window.devicePixelRatio > 1) ||
                  (window.matchMedia && window.matchMedia(mediaQuery).matches)) {
                 vm.isRetina=true;
             }

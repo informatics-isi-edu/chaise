@@ -37,7 +37,7 @@
         <div class="row">
             <!-- CONTROLLER: OSDController -->
             <div ng-controller="OSDController as osd" id="viewer-container" class="col-md-12">
-                <div id="viewer-header" class="row">
+                <div ng-if="osd.showTitle" id="viewer-header" class="row">
                     <div id="bookmark-container" class="col-xs-12">
                         <div class="pull-left">
                             <h1 id="page-title">
@@ -94,7 +94,7 @@
                                         <div class='itemContent'>
                                             <span class='anatomy'>
                                                 {{ item.name }}
-                                                <a ng-if="item.id"  href="{{item.url}}" target="_blank">
+                                                <a ng-if="item.id"  href="{{item.url}}" target="_blank" tooltip-placement="auto" uib-tooltip="Click to view details and associated data">
                                                     ({{item.id}})
                                                 </a>
                                             </span>
