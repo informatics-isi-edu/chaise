@@ -395,6 +395,15 @@
                 i,
                 svgID;
 
+            // HACK: For mapping the id of human anatomy 
+            var dict = {
+              "EHDAA2:0028494": "EMAPA:27697",
+              "EHDAA2:0027681": "EMAPA:27681",
+              "EHDAA2:0027605": "EMAPA:27605",
+              "EHDAA2:0027678": "EMAPA:27678",
+              "EHDAA2:0027621": "EMAPA:27621",
+              "EHDAA2:0018679": "EMAPA:18679"
+            };
             for(i = 0; i < items.length; i++){
                 groupID = items[i].groupID;
                 svgID = items[i].svgID;
@@ -402,11 +411,12 @@
                 /* HACK: This is done for the demo, the all ids are not available currently.
                 Also the encodeURI is the same as ERMrest's _fixedEncodeURIComponent_. Since it
                 is still not clear what will be th format of id.*/
+
                 var metadata = groupID.split(',');
                 var name, ermrestID, id;
                 if (metadata.length == 1) {
                   if (metadata[0].indexOf(':') !== -1) {
-                    encodedId = fixedEncodeURIComponent(metadata[0]);
+                    encodedId = fixedEncodeURIComponent(dict[metadata[0]]);
                     id = metadata[0];
                   } else {
                     name = metadata[0];
@@ -414,7 +424,7 @@
                 } else {
                   for (var j = 0; j < metadata.length ; j++ ){
                     if (metadata[j].indexOf(':') !== -1) {
-                      encodedId = fixedEncodeURIComponent(metadata[i]);
+                      encodedId = fixedEncodeURIComponent(dict[metadata[i]]);
                       id = metadata[j];
                     } else {
                       name = metadata[j];
@@ -435,7 +445,7 @@
                 });
             }
 
-            // console.log("collections", vm.collection);
+            console.log("collections", vm.collection);
         }
 
         function searchInputChanged(){
