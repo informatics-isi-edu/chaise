@@ -267,7 +267,16 @@
                     );
 
                     model.isLoading = false;
-                    vm.rowValues[valIndex][obj.index] = displayValue;
+
+                    // if rowValues has not been completely populated yet, use pendingRowValues instead
+                    if (vm.pushMoreRowsPending) {
+                        if (vm.pendingRowValues[valIndex] === undefined) {
+                            vm.pendingRowValues[valIndex] = {};
+                        }
+                        vm.pendingRowValues[valIndex][obj.index] = displayValue;
+                    } else {
+                        vm.rowValues[valIndex][obj.index] = displayValue;
+                    }
                 });
             });
 
@@ -342,6 +351,24 @@
             $log.debug("counter", counter, ": after result update: " + (res ? "successful." : "unsuccessful."));
         }
 
+
+        /**
+         * @private
+         * After the push more row logic is done, merge the pendingRowValues with rowValues
+         * pendingRowValues will be populated by:
+         * - afterReadAggregate function if it's called while push more row logic has not finished
+         */
+        function _mergeRowValuesAfterPushMoreRows(vm) {
+            if (vm.pendingRowValues) {
+                for (var rowIndex in vm.pendingRowValues) {
+                    for (var colIndex in vm.pendingRowValues[rowIndex]) {
+                        vm.rowValues[rowIndex][colIndex] = vm.pendingRowValues[rowIndex][colIndex];
+                    }
+                }
+            }
+            vm.pendingRowValues = {};
+        }
+
         // comment $timeout why
         var pushMore;
         /**
@@ -354,7 +381,7 @@
 
             // cancel timeout loop that may still be running and hide the spinner and "Loading ..."
             $timeout.cancel(pushMore);
-            vm.pushRowsSpinner = false;
+            vm.pushMoreRowsPending = false;
             vm.dirtyResult = false;
             vm.hasLoaded = false;
             var defer = $q.defer();
@@ -369,6 +396,7 @@
                     vm.page = page;
                     vm.templateVariables = page.templateVariables;
                     vm.aggregateResults = new Array(vm.page.tuples.length);
+                    vm.pendingRowValues = {};
 
                     return vm.getDisabledTuples ? vm.getDisabledTuples(page, vm.pageLimit) : '';
                 }).then(function (rows) {
@@ -398,26 +426,28 @@
                                         $log.debug("counter", current, ": break out of timeout inside push more rows");
                                         $log.debug("counter", current, ": with uuid", pushMoreID);
                                         $log.debug("counter", current, ": with global uuid", $rootScope.pushMoreID);
-                                        vm.pushRowsSpinner = false;
+                                        vm.pushMoreRowsPending = false;
                                     }
                                 });
                             } else {
                                 // we reached the end of the data to page in
-                                vm.pushRowsSpinner = false;
+                                vm.pushMoreRowsPending = false;
+                                _mergeRowValuesAfterPushMoreRows(vm);
                             }
                         } else {
                             $log.debug("current global counter: ", vm.flowControlObject.counter);
                             $log.debug("counter", current, ": break out of push more rows");
                             $log.debug("counter", current, ": with uuid", pushMoreID);
                             $log.debug("counter", current, ": with global uuid", $rootScope.pushMoreID);
-                            vm.pushRowsSpinner = false;
+                            vm.pushMoreRowsPending = false;
+                            _mergeRowValuesAfterPushMoreRows(vm);
                         }
                     }
 
                     $log.debug("counter", current, ": row values length ", rowValues.length);
                     vm.rowValues = [];
                     if (rowValues.length > rowLimit) {
-                        vm.pushRowsSpinner = true;
+                        vm.pushMoreRowsPending = true;
                         var uniqueIdentifier = $rootScope.pushMoreID = MathUtils.uuid();
                         $log.debug("counter", current, ": before push more rows with uuid", uniqueIdentifier);
                         _pushMoreRows(0, rowLimit, uniqueIdentifier);

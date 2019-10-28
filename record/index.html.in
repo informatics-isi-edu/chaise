@@ -17,7 +17,7 @@
             <div class="top-panel-container record-test">
                 <alerts id="alerts-container" alerts="ctrl.alerts"></alerts>
                 <div class="top-flex-panel">
-                    <div class="top-left-panel" ng-class="$root.recordSidePanOpen && !ctrl.noVisibleRelatedTables() ? 'open-panel' : 'close-panel'">
+                    <div class="top-left-panel" ng-class="loading || ($root.recordSidePanOpen && !ctrl.noVisibleRelatedTables()) ? 'open-panel' : 'close-panel'">
                         <div class="panel-header">
                             <div class="pull-left">
                                 <h3 class="side-panel-heading">Sections</h3>
@@ -82,14 +82,14 @@
             <loading-spinner ng-show="(!displayReady || showSpinner) && !error"></loading-spinner>
 
             <div class="bottom-panel-container">
-                <div id="record-side-pan" class="side-panel-resizable record-toc" ng-class="$root.recordSidePanOpen && !ctrl.noVisibleRelatedTables() ? 'open-panel' : 'close-panel'" resizable r-directions=["right"] r-flex="true" r-other-e=".top-left-panel">
+                <div id="record-side-pan" class="side-panel-resizable record-toc" ng-class="loading || ($root.recordSidePanOpen && !ctrl.noVisibleRelatedTables()) ? 'open-panel' : 'close-panel'" resizable r-directions=["right"] r-flex="true" r-other-e=".top-left-panel">
                     <div class="side-panel-container">
                         <div class="columns-container">
                             <ul>
                                 <li id="main-to-top" class="toc-heading" ng-click="scrollToTop()">
                                     <a uib-tooltip="Click to go to top of page" tooltip-placement="right">Summary</a>
                                 </li>
-                                <div ng-repeat="cm in columnModels track by $index" id="recordSidePan-{{$index}}" ng-if="ctrl.showInlineTable($index)" class="{{lastActiveFacet == $index ? 'focused': ''}}" ng-click="::ctrl.scrollToRelatedTable(cm.displayname.value, $index, true)">
+                                <div ng-repeat="cm in columnModels track by $index" id="recordSidePan-{{$index}}" ng-if="ctrl.showInlineTable($index)" class="{{lastActiveFacet == $index ? 'focused': ''}}" ng-click="::ctrl.scrollToSection(cm.displayname.value)">
 
                                     <li id="recordSidePan-heading-{{$index}}" class="toc-heading toc-inline-heading">
                                         <a ng-class="{'empty-toc-heading': cm.tableModel.rowValues.length === 0}">
@@ -99,7 +99,7 @@
                                         </a>
                                     </li>
                                 </div>
-                                <div ng-repeat="rtm in relatedTableModels track by $index" id="recordSidePan-{{$index}}" ng-if="ctrl.showRelatedTable($index)" class="{{lastActiveFacet == $index ? 'focused': ''}}" ng-click="::ctrl.scrollToRelatedTable(rtm.displayname.value, $index, false)">
+                                <div ng-repeat="rtm in relatedTableModels track by $index" id="recordSidePan-{{$index}}" ng-if="ctrl.showRelatedTable($index)" class="{{lastActiveFacet == $index ? 'focused': ''}}" ng-click="::ctrl.scrollToSection(rtm.displayname.value)">
 
                                     <li id="recordSidePan-heading-{{$index}}" class="toc-heading">
                                         <a ng-class="{'empty-toc-heading': rtm.tableModel.rowValues.length === 0}">
