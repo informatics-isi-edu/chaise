@@ -268,6 +268,7 @@ JS_SOURCE=$(JS)/respond.js \
 	$(COMMON)/ellipsis.js \
 	$(COMMON)/storage.js \
 	$(COMMON)/table.js \
+	$(COMMON)/vendor/css-element-queries.js \
 	$(COMMON)/utils.js \
 	$(COMMON)/bindHtmlUnsafe.js
 
@@ -299,6 +300,7 @@ RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
 	$(COMMON)/ellipsis.js \
 	$(COMMON)/storage.js \
 	$(COMMON)/table.js \
+	$(COMMON)/vendor/css-element-queries.js \
 	$(COMMON)/utils.js \
 	$(COMMON)/bindHtmlUnsafe.js \
 	$(COMMON)/footer.js \
@@ -327,6 +329,7 @@ VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
 	$(COMMON)/alerts.js \
 	$(COMMON)/config.js \
 	$(COMMON)/filters.js \
+	$(COMMON)/vendor/css-element-queries.js \
 	$(COMMON)/utils.js \
 	$(COMMON)/storage.js \
 	$(COMMON)/authen.js \
@@ -392,6 +395,7 @@ RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
 	$(COMMON)/resizable.js \
 	$(COMMON)/storage.js \
 	$(COMMON)/table.js \
+	$(COMMON)/vendor/css-element-queries.js \
 	$(COMMON)/utils.js \
 	$(COMMON)/upload.js \
 	$(COMMON)/validators.js \
@@ -455,6 +459,7 @@ RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
 	$(COMMON)/resizable.js \
 	$(COMMON)/storage.js \
 	$(COMMON)/table.js \
+	$(COMMON)/vendor/css-element-queries.js \
 	$(COMMON)/utils.js \
 	$(COMMON)/validators.js \
 	$(COMMON)/vendor/angular-cookies.min.js

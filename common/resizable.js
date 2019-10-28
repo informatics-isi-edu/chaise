@@ -17,7 +17,9 @@
                     rGrabber: '@',
                     rDisabled: '@',
                     rNoThrottle: '=',
-                    rOtherE: '@' // selector for the elements that need to be moved by resizable
+                    // if rOtherElements is defined rOtherElementSelector will be ignored.
+                    rOtherElementSelector: '@', // selector for the elements that need to be moved by resizable
+                    rOtherElements: "=" // other elements that need to be moved by resizable
                 },
 
                 link: function (scope, element, attr) {
@@ -25,13 +27,19 @@
                         'webkitFlexBasis' in document.documentElement.style ? 'webkitFlexBasis' :
                         'msFlexPreferredSize' in document.documentElement.style ? 'msFlexPreferredSize' : 'flexBasis';
 
+                    // initialize resizePartners object when the element is displayed
                     var resizePartners;
-                    scope.$watch(function () {
+                    var unbindClientWidthWatch = scope.$watch(function () {
                             return element[0].clientWidth;
                     }, function (value) {
                         if (value > 0) {
-                            resizePartners = document.querySelectorAll(scope.rOtherE);
+                            if (scope.rOtherElements) {
+                                resizePartners = scope.rOtherElements;
+                            } else {
+                                resizePartners = document.querySelectorAll(scope.rOtherE);
+                            }
                             angular.element(resizePartners).addClass('resizable');
+                            unbindClientWidthWatch();
                         }
                     });
 

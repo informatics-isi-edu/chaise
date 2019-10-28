@@ -109,10 +109,10 @@
         </div>
     </div>
     <div class="bottom-panel-container">
-        <div class="side-panel-resizable" resizable r-directions=["right"] r-flex="true" r-other-e=".top-left-panel" ng-show="vm.config.showFaceting && vm.reference" ng-class="{'open-panel': vm.config.facetPanelOpen, 'close-panel': !vm.config.facetPanelOpen, 'initializing': !vm.initialized}">
+        <div class="side-panel-resizable" resizable r-directions=["right"] r-flex="true" r-other-elements="rOtherElements" ng-show="vm.config.showFaceting && vm.reference" ng-class="{'open-panel': vm.config.facetPanelOpen, 'close-panel': !vm.config.facetPanelOpen, 'initializing': !vm.initialized}">
             <faceting vm="vm"></faceting>
         </div>
-        <div class="main-container">
+        <div class="main-container dynamic-padding">
             <div class="main-body">
 
                 <!-- record table -->

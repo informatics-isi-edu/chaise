@@ -8,7 +8,6 @@
         var vm = this;
 
         var mainContainerEl = angular.element(document.getElementsByClassName('main-container')[0]);
-        var mainBodyEl;
         var addRecordRequests = {}; // <generated unique id : reference of related table>
         var editRecordRequests = {}; // generated id: {schemaName, tableName}
         var updated = {};
@@ -492,10 +491,15 @@
         // to make sure we're adding the watcher just once
         var hasTheMainContainerPaddingWatcher = false;
 
-        /*** Container Heights and other styling ***/
-        function setMainContainerHeight() {
-            // if these values are not set yet, don't set the height
-            if ($scope.fixedContentHeight !== undefined && !isNaN($scope.fixedContentHeight)) {
+        // watch for the display to be ready before setting the main container height
+        var unbindDisplayReady = $scope.$watch(function() {
+            return $rootScope.displayReady;
+        }, function (newValue, oldValue) {
+            if (newValue) {
+                $rootScope.recordSidePanOpen = (chaiseConfig.hideTableOfContents === true || $rootScope.reference.display.collapseToc === true) ? false : true;
+                $rootScope.hideColumnHeaders = $rootScope.reference.display.hideColumnHeaders;
+
+                // fix the size of main-container and sticky areas
                 UiUtils.setDisplayContainerHeight();
 
                 // NOTE this function is being called here because this is the
@@ -503,74 +507,14 @@
                 // are available and visible. This is because of the ng-if that we have
                 // on the top-panel container. If we call this function in the watch below,
                 // it will throw an error.
-                if (!hasTheMainContainerPaddingWatcher) {
-                    // make sure the padding of main-container is correctly set
-                    UiUtils.watchForMainContainerPadding($scope, $document[0].querySelector(".record-container"));
-                    hasTheMainContainerPaddingWatcher = true;
-                }
-            }
-        };
 
-        function topPanelHeight () {
-            // get navbar height
-            $scope.fixedContentHeight = $document[0].getElementById('mainnav').offsetHeight;
-            // get top panel container height
-            $scope.fixedContentHeight += $document[0].querySelector('.record-container .top-panel-container').offsetHeight;
+                // make sure the padding of main-container is correctly set
+                UiUtils.watchForMainContainerPadding(document.querySelector(".record-container"));
 
-            return $scope.fixedContentHeight;
-        }
-
-        // watch for the display to be ready before setting the main container height
-        $scope.$watch(function() {
-            return $rootScope.displayReady;
-        }, function (newValue, oldValue) {
-            if (newValue) {
-                $rootScope.recordSidePanOpen = (chaiseConfig.hideTableOfContents === true || $rootScope.reference.display.collapseToc === true) ? false : true;
-                $rootScope.hideColumnHeaders = $rootScope.reference.display.hideColumnHeaders;
-
-                // get record main container
-                $scope.$watch(topPanelHeight, function (newValue, oldValue) {
-                    if (newValue && newValue != oldValue) {
-                        setMainContainerHeight();
-                    }
-                });
-            }
-        });
-
-        vm.stickLoading = false;
-        function setLoadingTextStyle() {
-            var mainContainerHeight = $document[0].getElementsByClassName('main-container')[0].offsetHeight;
-            if (mainBodyEl[0].offsetHeight >= mainContainerHeight) {
-                vm.stickLoading = true;
-            }
-        };
-
-        $timeout(function () {
-            mainBodyEl = $document[0].getElementsByClassName('main-body');
-        }, 0);
-
-        // watch for the main body size to change
-        $scope.$watch(function() {
-            if (mainBodyEl) {
-                return mainBodyEl[0].offsetHeight;
-            } else {
-                return -1;
-            }
-        }, function (newValue, oldValue) {
-            if (newValue && newValue != oldValue) {
-                $timeout(function () {
-                    UiUtils.setFooterStyle(0);
-                    setLoadingTextStyle();
-                }, 0);
-            }
-        });
-
-        // change the main container height whenever the DOM resizes
-        angular.element($window).bind('resize', function(){
-            if ($rootScope.displayReady) {
-                setMainContainerHeight();
+                // make sure footer is always at the bottom of the page
                 UiUtils.setFooterStyle(0);
-                $scope.$digest();
+
+                unbindDisplayReady();
             }
         });
 

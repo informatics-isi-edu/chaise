@@ -1142,8 +1142,13 @@
                 return scope.vm.readyToInitialize && (scope.facetsLoaded || (scope.vm.reference && scope.vm.reference.facetColumns && scope.vm.reference.facetColumns.length === 0));
             };
 
-            // initialize the recordset
-            var initializeRecordset = function (scope) {
+            /**
+             * initialize the recordset. This includes:
+             *  - populating the facetModels value.
+             *  - scrolling to the first open facet.
+             *  - initialize flow-control
+             */
+            var initializeRecordsetData = function (scope) {
                 $timeout(function() {
                     // NOTE
                     // This order is very important, the ref.facetColumns is going to change the
@@ -1179,145 +1184,65 @@
                 });
             };
 
+            /**
+             * This function will be called when the DOM is initialized and vm is present.
+             * So we can do DOM manipulations and attach the resize events
+             * NOTE When this function is called the data has not been load yet
+             */
+            var fixRecordsetStyles = function () {
+                //call the resize sensors for adjusting the container height
+                UiUtils.setDisplayContainerHeight(scope.parentContainer, scope.parentStickyArea);
+
+                // make sure the padding of main-container is correctly set
+                UiUtils.watchForMainContainerPadding(scope.parentContainer);
+
+                // fix footer styles
+                if (scope.vm.config.displayMode === recordsetDisplayModes.fullscreen) {
+                    UiUtils.setFooterStyle(0);
+                }
+
+                // capture and log the right click event on the permalink button
+                var permalink = document.getElementById('permalink');
+                if (permalink) {
+                    permalink.addEventListener('contextmenu', function (e) {
+                        logService.logAction(logActions.permalinkRight, logActions.clientAction);
+                    });
+                }
+            }
+
+            var createDOMElemens = function (scope) {
+                // set the parentContainer element
+                if (scope.vm.parentContainerSelector) {
+                    scope.parentContainer = document.querySelector(scope.vm.parentContainerSelector);
+                } else {
+                    scope.parentContainer = document.querySelector("body");
+                }
+
+                // set the sticky area selector container
+                if (scope.vm.parentStickyAreaSelector) {
+                    scope.parentStickyArea = document.querySelector(scope.vm.parentStickyAreaSelector);
+                }
+
+                scope.rOtherElements = scope.parentContainer.querySelectorAll(".top-left-panel");
+            };
+
             // initialize the recordset when it's ready to be initialized
+            createDOMElemens(scope);
             scope.$watch(function () {
                 return recordsetReadyToInitialize(scope);
             }, function (newValue, oldValue) {
                 if(angular.equals(newValue, oldValue) || !newValue){
                     return;
                 }
-                initializeRecordset(scope);
+                fixRecordsetStyles();
+                initializeRecordsetData(scope);
             });
 
             // we might be able to initialize the recordset when it's loading
             if (recordsetReadyToInitialize(scope)) {
-                initializeRecordset(scope);
+                fixRecordsetStyles();
+                initializeRecordsetData(scope);
             }
-
-
-            /**
-             * Set the height of recordset and facet panel
-             * This is called if the height of the fixed content is changed
-             */
-            function setRecordsetHeight() {
-                // make sure the value is set and is integer
-                if (scope.fixedContentHeight !== undefined && !isNaN(scope.fixedContentHeight)) {
-
-                    var pc, pcs;
-                    if (scope.vm.parentContainerSelector) {
-                        pc = scope.parentContainer;
-                    }
-                    if (scope.vm.parentStickyAreaSelector) {
-                        pcs = scope.parentStickyArea;
-                    }
-
-                    UiUtils.setDisplayContainerHeight(pc, pcs);
-                }
-            }
-
-            /**
-             * Compute the value of fixed content (navbar/modal header + top-panel-container)
-             * @return {int}
-             */
-            function computeFixedContentHeight () {
-                scope.fixedContentHeight = scope.parentContainer.querySelector('.top-panel-container').offsetHeight;
-
-                // if the sticky area of the parent is defined (navbar or header in modal)
-                if (scope.parentStickyArea) {
-                    scope.fixedContentHeight += scope.parentStickyArea.offsetHeight;
-                }
-
-                return scope.fixedContentHeight;
-            }
-
-            /**
-             * Attach the container elements to the scope, and create the watch
-             * event for the fixedContentHeight.
-             */
-            function initializeRecordsetHeight () {
-                // get the scrollable container of this recordset
-                scope.scrollableContainer = scope.parentContainer.querySelector(".bottom-panel-container");
-
-                // just setting the watch event is not enough, we have to run it once too.
-                computeFixedContentHeight();
-                setRecordsetHeight();
-
-                // watch the height of the fixed content and set the height on change.
-                scope.$watch(computeFixedContentHeight, function (newValue, oldValue) {
-                    if (newValue != oldValue) {
-                        setRecordsetHeight();
-                    }
-                });
-
-                // make sure the padding of main-container is correctly set
-                UiUtils.watchForMainContainerPadding(scope, scope.parentContainer);
-            }
-
-            // initialize the height of main-container and facet container
-            var unbindWatchForRecordsetInitializeHeight = scope.$watch(function() {
-                return (scope.vm.hasLoaded && scope.vm.initialized) || (scope.vm.config.showFaceting && scope.vm.reference);
-            }, function (newValue, oldValue) {
-                if (newValue) {
-                    $timeout(function () {
-                        initializeRecordsetHeight();
-
-                        //make sure we're calling this watcher once
-                        unbindWatchForRecordsetInitializeHeight();
-
-                        // capture and log the right click event on the permalink button
-                        var permalink = document.getElementById('permalink');
-                        if (permalink) {
-                            permalink.addEventListener('contextmenu', function (e) {
-                                logService.logAction(logActions.permalinkRight, logActions.clientAction);
-                            });
-                        }
-                    }, 0);
-                }
-            });
-
-            // watch for the main body size to change
-            if (scope.vm.config.displayMode === recordsetDisplayModes.fullscreen) {
-                scope.$watch(function() {
-                    if (scope.mainBodyEl) {
-                        return scope.mainBodyEl.offsetHeight;
-                    } else {
-                        return -1;
-                    }
-                }, function (newValue, oldValue) {
-                    if (newValue != oldValue) {
-                        $timeout(function () {
-                            UiUtils.setFooterStyle(0);
-                        }, 0);
-                    }
-                });
-            }
-
-            angular.element($window).bind('resize', function(){
-                if (scope.vm.hasLoaded && scope.vm.initialized ) {
-                    setRecordsetHeight();
-                    if (scope.vm.config.displayMode === recordsetDisplayModes.fullscreen) {
-                        UiUtils.setFooterStyle(0);
-                    }
-                    scope.$digest();
-                }
-            });
-
-            $timeout(function () {
-                // set the parentContainer element
-                if (scope.vm.parentContainerSelector) {
-                    scope.parentContainer = $document[0].querySelector(scope.vm.parentContainerSelector);
-                } else {
-                    scope.parentContainer = $document[0].querySelector("body");
-                }
-
-                // used for footer
-                scope.mainBodyEl = scope.parentContainer.querySelector('.main-body');
-
-                // set the sticky area selector container
-                if (scope.vm.parentStickyAreaSelector) {
-                    scope.parentStickyArea = $document[0].querySelector(scope.vm.parentStickyAreaSelector);
-                }
-            }, 0);
         }
 
         return {
