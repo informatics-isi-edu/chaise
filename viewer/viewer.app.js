@@ -201,7 +201,7 @@
                         chaiseReady = true;
 
                         if (annotoriousReady && chaiseReady) {
-                            iframe.postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
+                            iframe.contentWindow.postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
                         }
                         console.log('Annotations: ', annotations);
 
@@ -277,7 +277,7 @@
                 if (event.data.messageType == 'annotoriousReady') {
                     annotoriousReady = event.data.content;
                     if (annotoriousReady && chaiseReady) {
-                        iframe.postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
+                        iframe.contentWindow.postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
                     }
                 } else if (event.data.messageType == 'dismissChannels') {
                   window.console.log("XXX pull off the channels filtering pullout..");
