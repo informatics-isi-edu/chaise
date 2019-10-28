@@ -172,7 +172,7 @@
                     var params = window.location.href.split("?");
                     if(params.length > 1){
                         // image.entity.uri = image.entity.uri.replace("/openseadragon-viewer/mview.html", "https://dev.rebuildingakidney.org/~mingyi/openseadragon-viewer/index.html");
-                        image.entity.uri = "https://staging.rebuildingakidney.org/chaise-demo/openseadragon-viewer/index.html?" + params[1];
+                        image.entity.uri = "https://staging.rebuildingakidney.org/chaise-osd/openseadragon-viewer/index.html?" + params[1];
                     }
 
                     // image.entity.uri = image.entity.uri + "&url=data/Q-296R_all_contours_cw_named.svg";
