@@ -35,6 +35,7 @@
             </div>
         </div>
         <div class="row">
+            <navbar></navbar>
             <!-- CONTROLLER: OSDController -->
             <div ng-controller="OSDController as osd" id="viewer-container" class="col-md-12">
                 <div ng-if="osd.showTitle" id="viewer-header" class="row">

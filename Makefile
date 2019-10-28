@@ -352,6 +352,8 @@ VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
 	$(COMMON)/authen.js \
 	$(COMMON)/errors.js \
 	$(COMMON)/modal.js \
+	$(COMMON)/navbar.js \
+	$(COMMON)/login.js \
 	$(COMMON)/delete-link.js \
 	$(COMMON)/vendor/re-tree.js \
 	$(COMMON)/vendor/ng-device-detector.js \

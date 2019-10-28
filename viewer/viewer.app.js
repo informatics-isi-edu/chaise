@@ -27,6 +27,7 @@
         'chaise.errors',
         'chaise.delete',
         'chaise.modal',
+        'chaise.navbar',
         'chaise.utils',
         'ui.select',
         'ui.bootstrap',
