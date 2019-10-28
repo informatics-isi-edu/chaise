@@ -9,7 +9,7 @@
         var table = null;
 
         function drawAnnotation() {
-            iframe.postMessage({messageType: 'drawAnnotation'}, origin);
+            iframe.contentWindow.postMessage({messageType: 'drawAnnotation'}, origin);
         }
 
         function createAnnotation(newAnnotation) {
@@ -39,7 +39,7 @@
                 var _annotation = annotation[0];
                 _annotation.table = table.name;
                 annotations.push(_annotation);
-                iframe.postMessage({messageType: 'createAnnotation', content: _annotation}, origin);
+                iframe.contentWindow.postMessage({messageType: 'createAnnotation', content: _annotation}, origin);
                 return _annotation;
             }, function error(response) {
                 AlertsService.addAlert(response, 'error');
@@ -48,7 +48,7 @@
         }
 
         function cancelNewAnnotation() {
-            iframe.postMessage({messageType: 'cancelAnnotationCreation'}, origin);
+            iframe.contentWindow.postMessage({messageType: 'cancelAnnotationCreation'}, origin);
         }
 
         function updateAnnotation(annotation) {
@@ -66,7 +66,7 @@
                     // Returns an array of objects that were updated
                     var _annotation = response[0]
                     // Update in Annotorious
-                    iframe.postMessage({messageType: 'updateAnnotation', content: _annotation}, origin);
+                    iframe.contentWindow.postMessage({messageType: 'updateAnnotation', content: _annotation}, origin);
                 }
             }, function error(response) {
                 AlertsService.addAlert(response, 'error');
@@ -83,7 +83,7 @@
                 var index = annotations.indexOf(annotation);
                 annotations.splice(index, 1);
 
-                iframe.postMessage({messageType: 'deleteAnnotation', content: annotation}, origin);
+                iframe.contentWindow.postMessage({messageType: 'deleteAnnotation', content: annotation}, origin);
             }, function error(response) {
                 AlertsService.addAlert(response, 'error');
                 console.log(response);
@@ -91,27 +91,27 @@
         }
 
         function centerAnnotation(annotation) {
-            iframe.postMessage({messageType: 'centerAnnotation', content: annotation}, origin);
+            iframe.contentWindow.postMessage({messageType: 'centerAnnotation', content: annotation}, origin);
         }
 
         function syncVisibility() {
-            iframe.postMessage({messageType: 'syncVisibility', content: annotations}, origin);
+            iframe.contentWindow.postMessage({messageType: 'syncVisibility', content: annotations}, origin);
         }
 
         function highlightAnnotation(data){
-            iframe.postMessage({messageType: 'highlightAnnotation', content: data}, origin);
+            iframe.contentWindow.postMessage({messageType: 'highlightAnnotation', content: data}, origin);
         }
 
         function changeAnnotationVisibility(data){
-            iframe.postMessage({messageType: 'changeAnnotationVisibility', content: data}, origin);
+            iframe.contentWindow.postMessage({messageType: 'changeAnnotationVisibility', content: data}, origin);
         }
 
         function changeAllAnnotationVisibility(data){
-            iframe.postMessage({messageType: 'changeAllAnnotationVisibility', content: data}, origin);
+            iframe.contentWindow.postMessage({messageType: 'changeAllAnnotationVisibility', content: data}, origin);
         }
 
         function changeStrokeScale(scale){
-            iframe.postMessage({messageType: 'changeStrokeScale', content: scale}, origin);
+            iframe.contentWindow.postMessage({messageType: 'changeStrokeScale', content: scale}, origin);
         }
         return {
             drawAnnotation: drawAnnotation,
