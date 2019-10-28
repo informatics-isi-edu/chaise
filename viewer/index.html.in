@@ -19,11 +19,12 @@
         </script>
     <![endif]-->
 </head>
-<body>
+<body class="chaise-body">
     <div class="configure-container" ng-app="chaise.configure-viewer">
         <loading-spinner></loading-spinner>
     </div>
     <div class="container-fluid app-container">
+        <navbar></navbar>
         <div ng-controller="AlertsController as alerts" id="alert" class="row">
             <div class="col-md-12">
                 <div ng-repeat="alert in alerts.alerts" class="alert alert-dismissable" ng-class="{'alert-danger': alert.type == 'error'}" role="alert">
@@ -35,7 +36,6 @@
             </div>
         </div>
         <div class="row">
-            <navbar></navbar>
             <!-- CONTROLLER: OSDController -->
             <div ng-controller="OSDController as osd" id="viewer-container" class="col-md-12">
                 <div ng-if="osd.showTitle" id="viewer-header" class="row">
@@ -84,7 +84,7 @@
                                     <span class='currentScale'>5</span>
                                     <span class='currentScale'>6</span>
                                 </div>
-                                
+
                             </div>
                             <span class='resultCount'>
                                 <span>Displaying {{ anno.totalCount }} of {{ anno.collection.length }} Annotations</span>

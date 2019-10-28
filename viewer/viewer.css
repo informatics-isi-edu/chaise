@@ -138,11 +138,6 @@ a.cardlink.delete {
     bottom: 0;
 }
 
-#viewer-header {
-    margin: 0;
-    padding: 0;
-}
-
 #create-annotation-form .ui-select-container,
 #edit-annotation-form .ui-select-container,
 #metadata-panel .ui-select-container {
