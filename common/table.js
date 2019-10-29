@@ -1254,7 +1254,7 @@
                 }
 
                 // all the elements that should be resizable alongside the facet panel
-                scope.rOtherElements = scope.parentContainer.querySelectorAll(".top-left-panel");
+                scope.resizePartners = scope.parentContainer.querySelectorAll(".top-left-panel");
             };
 
             // initialize the recordset when it's ready to be initialized

@@ -20,6 +20,9 @@
         vm.sidePanToggleBtnIndicator = "Show";
         $rootScope.recordSidePanOpen = true;
 
+        // the top-left-panel that needs to be resizable with toc
+        vm.resizePartners = document.querySelector(".top-left-panel");
+
         var chaiseConfig = ConfigUtils.getConfigJSON();
 
         vm.tooltip = messageMap.tooltip;
