@@ -1529,10 +1529,10 @@
         }
 
         /**
-         * @param   {DOMElement=} parentContainer - the parent container. if undefined `body` will be used.
-         * @param   {DOMElement=} parentContainerSticky - the sticky area of parent. if undefined `#mainnav` will be used.
+         * @param   {Node=} parentContainer - the parent container. if undefined `body` will be used.
+         * @param   {Node=} parentContainerSticky - the sticky area of parent. if undefined `#mainnav` will be used.
          * @param   {boolean} useDocHeight - whether we should use the doc height even if parentContainer is passed.
-         * Set the height of bottom-panel-container
+         * Call this function once the DOM elements are loaded to attach resize sensors that will fix the height of bottom-panel-container
          * If you don't pass any parentContainer, it will use the body
          * It will assume the following structure in the given parentContainer:
          *  - .app-content-container
@@ -1540,7 +1540,7 @@
          *    - .bottom-panel-container
          * Three ResizeSensors will be created for app-content, top-panel and bottom-panel to watch their size change.
          */
-        function setDisplayContainerHeight(parentContainer, parentContainerSticky, useDocHeight) {
+        function attachContainerHeightSensors(parentContainer, parentContainerSticky, useDocHeight) {
             try {
                 var parentUsableHeight,
                     appContent, // the container that we might set height for if container height is too small
@@ -1666,7 +1666,7 @@
          * @param {Integer} index - index pertaining to which dom element to select
          * @return {ResizeSensor} ResizeSensor object that can be used to turn it off.
          **/
-        function setFooterStyle(index) {
+        function attachFooterResizeSensor(index) {
             try {
                 var mainContainer = document.getElementsByClassName('main-container')[index];
                 var mainBody = mainContainer.querySelector(".main-body");
@@ -1700,7 +1700,7 @@
          * Make sure the `.top-right-panel` and `.main-container` are aligned.
          * They can be missaligned if the scrollbar is visible and takes space.
          */
-        function watchForMainContainerPadding(parentContainer) {
+        function attachMainContainerPaddingSensor(parentContainer) {
             var mainContainer = parentContainer.querySelector(".main-container"),
                 topRightPanel = parentContainer.querySelector(".top-right-panel"),
                 setPadding, mainContainerPaddingTimeout;
@@ -1753,11 +1753,11 @@
             humanFileSize: humanFileSize,
             getInputType: getInputType,
             getSimpleColumnType: getSimpleColumnType,
-            setFooterStyle: setFooterStyle,
-            setDisplayContainerHeight: setDisplayContainerHeight,
+            attachFooterResizeSensor: attachFooterResizeSensor,
+            attachContainerHeightSensors: attachContainerHeightSensors,
             addClass: addClass,
             removeClass: removeClass,
-            watchForMainContainerPadding: watchForMainContainerPadding
+            attachMainContainerPaddingSensor: attachMainContainerPaddingSensor
         }
     }])
 

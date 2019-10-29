@@ -14,7 +14,7 @@
     <div class="app-container r_s_{{ctrl.makeSafeIdAttr(reference.table.schema.name)}} r_t_{{ctrl.makeSafeIdAttr(reference.table.name)}}" ng-controller="RecordController as ctrl">
         <navbar></navbar>
         <div class="record-container app-content-container">
-            <div class="top-panel-container record-test">
+            <div class="top-panel-container">
                 <alerts id="alerts-container" alerts="ctrl.alerts"></alerts>
                 <div class="top-flex-panel">
                     <div class="top-left-panel" ng-class="loading || ($root.recordSidePanOpen && !ctrl.noVisibleRelatedTables()) ? 'open-panel' : 'close-panel'">

@@ -256,7 +256,7 @@
             // NOTE: there's a case where clicking the button to toggle this doesn't re-paint the footer until the mouse "moves"
             // having this $timeout triggers the function after the digest cycle which is after the elements have finished showing/hiding based on the above flag
             $timeout(function () {
-                UiUtils.setFooterStyle(0);
+                UiUtils.attachFooterResizeSensor(0);
             }, 0);
         };
 
@@ -479,7 +479,7 @@
                 $rootScope.hideColumnHeaders = $rootScope.reference.display.hideColumnHeaders;
 
                 // fix the size of main-container and sticky areas
-                UiUtils.setDisplayContainerHeight();
+                UiUtils.attachContainerHeightSensors();
 
                 // NOTE this function is being called here because this is the
                 // first place that we can be sure that the record-container elements
@@ -488,10 +488,10 @@
                 // it will throw an error.
 
                 // make sure the padding of main-container is correctly set
-                UiUtils.watchForMainContainerPadding(document.querySelector(".record-container"));
+                UiUtils.attachMainContainerPaddingSensor(document.querySelector(".record-container"));
 
                 // make sure footer is always at the bottom of the page
-                UiUtils.setFooterStyle(0);
+                UiUtils.attachFooterResizeSensor(0);
 
                 unbindDisplayReady();
             }

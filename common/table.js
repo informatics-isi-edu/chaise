@@ -1221,14 +1221,14 @@
              */
             var manipulateRecordsetDOMElements = function () {
                 //call the resize sensors for adjusting the container height
-                UiUtils.setDisplayContainerHeight(scope.parentContainer, scope.parentStickyArea);
+                UiUtils.attachContainerHeightSensors(scope.parentContainer, scope.parentStickyArea);
 
                 // make sure the padding of main-container is correctly set
-                UiUtils.watchForMainContainerPadding(scope.parentContainer);
+                UiUtils.attachMainContainerPaddingSensor(scope.parentContainer);
 
                 // fix footer styles
                 if (scope.vm.config.displayMode === recordsetDisplayModes.fullscreen) {
-                    UiUtils.setFooterStyle(0);
+                    UiUtils.attachFooterResizeSensor(0);
                 }
 
                 // capture and log the right click event on the permalink button

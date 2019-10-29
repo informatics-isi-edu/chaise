@@ -213,8 +213,11 @@
                 vm.resultset = true;
                 // delay updating the height of DOM elements so the current digest cycle can complete and "show" the resultset view
                 $timeout(function() {
+                    // remove the old resize sensors since we're switching the display to resultset
                     detachResizeSensors();
-                    setResizeSensors();
+
+                    // create new resize sensors for the resultset view
+                    attachResizeSensors();
                 }, 0);
             }
         }
@@ -794,7 +797,9 @@
             return $rootScope.displayReady;
         }, function (newValue, oldValue) {
             if (newValue) {
-                setResizeSensors();
+
+                // attach the footer and mainContainer sensors
+                attachResizeSensors();
 
                 $timeout(function () {
                     onResize(true);
@@ -810,21 +815,21 @@
         var footerSensor, mainContainerSensor;
 
         /**
-         * detach the resize sensors that have been created to watch the main-container and footer
+         * detach the resize sensors that have been created to improve performance
          */
         function detachResizeSensors() {
             if (footerSensor) footerSensor.detach();
-            if (mainContainerSensor) mainContainerSensor.detach();
         }
 
         /**
          * Create resize sensors to fix the height of the main-container, and fix footer styles
          */
-        function setResizeSensors() {
+        function attachResizeSensors() {
             var parentContainer = $document[0].querySelector(vm.resultset ? '.resultset-container' : '.form-container');
-            mainContainerSensor = UiUtils.setDisplayContainerHeight(parentContainer, null, true);
 
-            footerSensor = UiUtils.setFooterStyle(vm.resultset ? 1 : 0);
+            UiUtils.attachContainerHeightSensors(parentContainer, null, true);
+
+            footerSensor = UiUtils.attachFooterResizeSensor(vm.resultset ? 1 : 0);
         }
 
         /*------------------------code below is for fixing the column names when scrolling -----------*/
