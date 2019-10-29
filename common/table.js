@@ -1219,7 +1219,7 @@
              * So we can do DOM manipulations and attach the resize events
              * NOTE When this function is called the data has not been load yet
              */
-            var fixRecordsetStyles = function () {
+            var manipulateRecordsetDOMElements = function () {
                 //call the resize sensors for adjusting the container height
                 UiUtils.setDisplayContainerHeight(scope.parentContainer, scope.parentStickyArea);
 
@@ -1240,7 +1240,7 @@
                 }
             }
 
-            var createDOMElemens = function (scope) {
+            var attachDOMElementsToScope = function (scope) {
                 // set the parentContainer element
                 if (scope.vm.parentContainerSelector) {
                     scope.parentContainer = document.querySelector(scope.vm.parentContainerSelector);
@@ -1253,24 +1253,25 @@
                     scope.parentStickyArea = document.querySelector(scope.vm.parentStickyAreaSelector);
                 }
 
+                // all the elements that should be resizable alongside the facet panel
                 scope.rOtherElements = scope.parentContainer.querySelectorAll(".top-left-panel");
             };
 
             // initialize the recordset when it's ready to be initialized
-            createDOMElemens(scope);
+            attachDOMElementsToScope(scope);
             scope.$watch(function () {
                 return recordsetReadyToInitialize(scope);
             }, function (newValue, oldValue) {
                 if(angular.equals(newValue, oldValue) || !newValue){
                     return;
                 }
-                fixRecordsetStyles();
+                manipulateRecordsetDOMElements();
                 initializeRecordsetData(scope);
             });
 
             // we might be able to initialize the recordset when it's loading
             if (recordsetReadyToInitialize(scope)) {
-                fixRecordsetStyles();
+                manipulateRecordsetDOMElements();
                 initializeRecordsetData(scope);
             }
         }
