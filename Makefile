@@ -4,7 +4,7 @@
 .SUFFIXES:
 
 # Install directory on dev.isrd
-CHAISEDIR?=/var/www/html/chaise-osd
+CHAISEDIR?=/var/www/html/demo/chaise-osd
 
 # Project name
 PROJ=chaise
