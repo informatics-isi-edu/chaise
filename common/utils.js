@@ -101,7 +101,7 @@
         "tooltip": {
             versionTime: "You are looking at data that was snapshotted ",
             downloadCSV: "Click to download all matched results",
-            permalink: "This link stores your search criteria as a URL. Right click and save.",
+            permalink: "Click to copy the current url to clipboard.",
             actionCol: "Click on the action buttons to view, edit, or delete each record",
             viewCol: "Click on the eye button to view the detailed page associated with each record",
             null: "Search for any record with no value assigned",
