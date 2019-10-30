@@ -382,7 +382,7 @@ html {
 
             .top-left-panel {
                 position: relative;
-                max-width: 50vw;
+                max-width: 40vw;
                 margin-left: $viewport-margin;
 
                 &.open-panel {
@@ -488,7 +488,10 @@ html {
             overflow-x: hidden;
             overflow-y: auto;
 
-            padding-right: $viewport-margin;
+            // we're going to adjust this dynamically for dynamic-padding
+            &:not(.dynamic-padding) {
+                padding-right: $viewport-margin;
+            }
         }
     }
 
