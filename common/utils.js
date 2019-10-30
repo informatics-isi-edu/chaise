@@ -174,8 +174,8 @@
         "viewerAnatomy": "anatomy",
 
         // # client actions (mostly button click events)
-        "deleteIntended": "delete/intend", // delete clicked -> confirm delete dialog opened (record button and recordset row) TODO
-        "deleteCancelled": "delete/cancel", // cancel clicked when confirm delete dialog open (record button and recordset row) TODO
+        "deleteIntend": "delete/intend", // delete clicked -> confirm delete dialog opened (record button and recordset row)
+        "deleteCancel": "delete/cancel", // cancel clicked when confirm delete dialog open (record button and recordset row)
 
         // ## recordset actions
         // ### page level actions
@@ -198,6 +198,7 @@
         "share": "share", // share dialog opened
         "liveCopy": "share/live", // live link copied to clipboard
         "versionCopy": "share/version", // versioned link copied to clipboard
+        "cite": "cite/bibtex", // bibtex citation downloaded
         "scrollTop": "scroll-top", // bottom right, "scroll to top" button clicked TODO
         "tocShow": "toc/show", // the toc panel toggled open/close
         "tocHide": "toc/hide", // the toc panel toggled open/close
@@ -212,10 +213,10 @@
         "relatedMkdnDisplay": "related/display/mkdn", // toggle display mode to custom display
         "relatedEditDisplay": "related/display/edit", // toggle display mode to edit display
         // #### RT actions
-        "relatedDeleteIntended": "related/delete/intend", // row delete clicked from delete in action column TODO
-        "relatedDeleteCancel": "related/delete/cancel", // row delete cancelled TODO
-        "relatedUnlinkIntended": "related/unlink/intend", // row unlink clicked from unlink in action column TODO
-        "relatedUnlinkCancel": "related/unlink/cancel", // row unlink cancelled TODO
+        "relatedDeleteIntend": "related/delete/intend", // row delete clicked from delete in action column
+        "relatedDeleteCancel": "related/delete/cancel", // row delete cancelled
+        "relatedUnlinkIntend": "related/unlink/intend", // row unlink clicked from unlink in action column
+        "relatedUnlinkCancel": "related/unlink/cancel", // row unlink cancelled
         // ### inline related tables in record display section
         "inlinePageSize": "inline/page-size", // toggle page size dropdown for inline RT TODO
         // #### inline modes
@@ -223,10 +224,10 @@
         "inlineMkdnDisplay": "inline/display/mkdn", // toggle display mode to custom display
         "inlineEditDisplay": "inline/display/edit", // toggle display mode to edit display
         // #### inline actions
-        "inlineDeleteIntended": "inline/delete/intend", // row delete clicked from delete in action column TODO
-        "inlineDeleteCancel": "inline/delete/cancel", // row delete cancelled TODO
-        "inlineUnlinkIntended": "inline/unlink/intend", // row unlink clicked from unlink in action column TODO
-        "inlineUnlinkCancel": "inline/unlink/cancel", // row unlink cancelled TODO
+        "inlineDeleteIntend": "inline/delete/intend", // row delete clicked from delete in action column
+        "inlineDeleteCancel": "inline/delete/cancel", // row delete cancelled
+        "inlineUnlinkIntend": "inline/unlink/intend", // row unlink clicked from unlink in action column
+        "inlineUnlinkCancel": "inline/unlink/cancel", // row unlink cancelled
         // ### recordset directive for pure and binary popups
         "recordPBOpen": "pb/panel/show", // facet panel opened TODO
         "recordPBClose": "pb/panel/hide", // facet panel closed TODO
@@ -273,11 +274,11 @@
 
         // ## navbar actions
         "branding": "branding", // top left corner branding text/logo clicked
-        "dropdownUser": "dropdown/user", // user dropdown opened TODO
-        "profile": "dropdown/user/profile", // user profile dialog opened
-        "dropdownMenu": "dropdown/menu", // navbar menu dropdown opened TODO
-        "dropdownMenuInternal": "dropdown/menu/internal", // navbar menu internal page TODO
-        "dropdownMenuExternal": "dropdown/menu/external" // navbar menu external page TODO
+        "dropdownUser": "user", // user dropdown opened TODO
+        "profile": "user/profile", // user profile dialog opened
+        "dropdownMenu": "menu/submenu", // navbar menu dropdown opened TODO
+        "dropdownMenuInternal": "menu/internal", // navbar menu internal page TODO
+        "dropdownMenuExternal": "menu/external" // navbar menu external page TODO
     })
 
     // NOTE since this has been used with ng-switch in the code, and we cannot
@@ -2224,10 +2225,10 @@
         var context = ConfigUtils.getContextJSON(),
             cc = ConfigUtils.getConfigJSON();
 
-        function logAction(action, path) {
+        function logAction(headerObj, path) {
             if (!cc.logClientActions) return;
-            context.server.logHeaders({ action: action }, path).catch(function (err) {
-                $log.debug("An error may have occured when logging: ", action);
+            context.server.logHeaders(headerObj, path).catch(function (err) {
+                $log.debug("An error may have occured when logging: ", headerObj);
                 $log.debug(err);
             });
         }

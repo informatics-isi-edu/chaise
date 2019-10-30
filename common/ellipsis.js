@@ -11,7 +11,8 @@
 
     .directive('ellipsis', ['AlertsService', 'ConfigUtils', 'defaultDisplayname', 'ErrorService', 'logActions', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$window',
         function(AlertsService, ConfigUtils, defaultDisplayname, ErrorService, logActions, logService, MathUtils, messageMap, modalBox, modalUtils, recordsetDisplayModes, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $window) {
-        var chaiseConfig = ConfigUtils.getConfigJSON();
+        var chaiseConfig = ConfigUtils.getConfigJSON(),
+            context = ConfigUtils.getContextJSON();
 
         function deleteReference(scope, reference) {
             var logObject = {action: logActions.recordsetDelete};
@@ -24,19 +25,51 @@
             }
 
             if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
+                var isRecordset = (context.cid === "recordset"),
+                    isInline = (scope.context.indexOf("inline") > -1);
+
                 var onError = function (response) {
                     scope.$root.showSpinner = false;
 
-                    var action = (scope.isUnLink ? logActions.relatedUnlinkCancel : logActions.relatedDeleteCancel );
-                    logService.logAction(action, logActions.clientAction);
+                    var action;
+                    if (isRecordset) {
+                        action = logActions.deleteCancel;
+                    } else {
+                        if (isInline) {
+                            action = (scope.isUnLink ? logActions.inlineUnlinkCancel : logActions.inlineDeleteCancel );
+                        } else {
+                            action = (scope.isUnLink ? logActions.relatedUnlinkCancel : logActions.relatedDeleteCancel );
+                        }
+                    }
+
+                    var cancelHeaderObject = {
+                        action: action,
+                        uid: scope.tuple.uniqueId
+                    }
+
+                    logService.logAction(cancelHeaderObject, logActions.clientAction);
                     // if response is string, the modal has been dismissed
                     if (typeof response !== "string") {
                         ErrorService.handleException(response, true);  // throw exception for dismissible pop- up (error, isDismissible = true)
                     }
                 }
 
-                var action = (scope.isUnLink ? logActions.relatedUnlinkIntended : logActions.relatedDeleteIntended );
-                logService.logAction(action, logActions.clientAction);
+                var action;
+                if (isRecordset) {
+                    action = logActions.deleteIntend;
+                } else {
+                    if (isInline) {
+                        action = (scope.isUnLink ? logActions.inlineUnlinkIntend : logActions.inlineDeleteIntend );
+                    } else {
+                        action = (scope.isUnLink ? logActions.relatedUnlinkIntend : logActions.relatedDeleteIntend );
+                    }
+                }
+
+                var popupHeaderObject = {
+                    action: action,
+                    uid: scope.tuple.uniqueId
+                }
+                logService.logAction(popupHeaderObject, logActions.clientAction);
                 modalUtils.showModal({
                     animation: false,
                     templateUrl:  UriUtils.chaiseDeploymentPath() + "common/templates/delete-link/confirm_delete.modal.html",

@@ -45,7 +45,11 @@
                         return scope.callback();
                     }
 
-                    logService.logAction(logActions.deleteIntended, logActions.clientAction);
+                    var popupHeaderObject = {
+                        action: logActions.deleteIntend
+                    }
+
+                    logService.logAction(popupHeaderObject, logActions.clientAction);
 
                     modalUtils.showModal({
                         templateUrl: TEMPLATES_PATH + 'confirm_delete.modal.html',
@@ -56,7 +60,12 @@
                         scope.$root.showSpinner = true;
                         return scope.callback();
                     }, function onError() {
-                        logService.logAction(logActions.deleteCancelled, logActions.clientAction);
+                        console.log("modal cancelled ")
+                        var cancelHeaderObject = {
+                            action: logActions.deleteCancel
+                        }
+
+                        logService.logAction(cancelHeaderObject, logActions.clientAction);
                     }, false);
                 }
             },
