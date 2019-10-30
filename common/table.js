@@ -1178,7 +1178,7 @@
              *  - scrolling to the first open facet.
              *  - initialize flow-control
              */
-            var initializeRecordsetData = function (scope) {
+            var initializeRecordset = function (scope) {
                 $timeout(function() {
                     // NOTE
                     // This order is very important, the ref.facetColumns is going to change the
@@ -1221,10 +1221,8 @@
              */
             var manipulateRecordsetDOMElements = function () {
                 //call the resize sensors for adjusting the container height
+                // we need to call this here (before data load) so the loading spinner shows in the correct spot
                 UiUtils.attachContainerHeightSensors(scope.parentContainer, scope.parentStickyArea);
-
-                // make sure the padding of main-container is correctly set
-                UiUtils.attachMainContainerPaddingSensor(scope.parentContainer);
 
                 // fix footer styles
                 if (scope.vm.config.displayMode === recordsetDisplayModes.fullscreen) {
@@ -1238,7 +1236,7 @@
                         logService.logAction(logActions.permalinkRight, logActions.clientAction);
                     });
                 }
-            }
+            };
 
             var attachDOMElementsToScope = function (scope) {
                 // set the parentContainer element
@@ -1259,20 +1257,49 @@
 
             // initialize the recordset when it's ready to be initialized
             attachDOMElementsToScope(scope);
-            scope.$watch(function () {
+            var recordsetDOMInitializedWatcher = scope.$watch(function () {
                 return recordsetReadyToInitialize(scope);
             }, function (newValue, oldValue) {
                 if(angular.equals(newValue, oldValue) || !newValue){
                     return;
                 }
+
+                // DOM manipulations
                 manipulateRecordsetDOMElements();
-                initializeRecordsetData(scope);
+
+                // call the flow-control to fetch the data
+                initializeRecordset(scope);
+
+                // unbind the wwatcher
+                recordsetDOMInitializedWatcher();
+            });
+
+            // the recordset data is initialized, so we can do extra manipulations if we need to
+            var recordsetDataInitializedWatcher = scope.$watch(function () {
+                return scope.vm.initialized;
+            }, function (newValue, oldValue) {
+                if (newValue) {
+
+                    /*
+                     * We are attaching the padding sensor here because we don't want to
+                     * change the padding while the container is not still visible to the users.
+                     * If we call this function before data initialization, you could see more
+                     * jittering on the page for the cases that a scrollbar was visible.
+                     * refer to https://github.com/informatics-isi-edu/chaise/pull/1866 for more info
+                     */
+
+                    // make sure the padding of main-container is correctly set
+                    UiUtils.attachMainContainerPaddingSensor(scope.parentContainer);
+
+                    // unbind the watcher
+                    recordsetDataInitializedWatcher();
+                }
             });
 
             // we might be able to initialize the recordset when it's loading
             if (recordsetReadyToInitialize(scope)) {
                 manipulateRecordsetDOMElements();
-                initializeRecordsetData(scope);
+                initializeRecordset(scope);
             }
         }
 

@@ -1615,14 +1615,6 @@
                 // used to capture the old values of height
                 var cache;
 
-                // if we don't set initial height, the modal spinners are displayed out of place
-                // but the jump that you will see on the right side because of padding logic will be less visible.
-                // var cache = {
-                //     appContentHeight: -1,
-                //     parentContainerStickyHeight: -1,
-                //     containerStickyHeight: -1
-                // };
-
                 // make sure the main-container has initial height
                 setContainerHeightFn();
                 cache = {
