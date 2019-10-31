@@ -286,7 +286,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <footer></footer>
+                            <footer class="first-footer"></footer>
                         </div>
                     </div>
                 </div>
@@ -325,7 +325,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <footer></footer>
+                            <footer class="second-footer"></footer>
                         </div>
                     </div>
                 </div>

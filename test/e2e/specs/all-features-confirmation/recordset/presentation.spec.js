@@ -188,7 +188,7 @@ var testParams = {
     },
     tooltip: {
         exportDropdown: "Click to choose an export format.",
-        permalink: "This link stores your search criteria as a URL. Right click and save.",
+        permalink: "Click to copy the current url to clipboard.",
         actionCol: "Click on the action buttons to view, edit, or delete each record"
     },
     activeList: {

@@ -101,7 +101,7 @@
         "tooltip": {
             versionTime: "You are looking at data that was snapshotted ",
             downloadCSV: "Click to download all matched results",
-            permalink: "This link stores your search criteria as a URL. Right click and save.",
+            permalink: "Click to copy the current url to clipboard.",
             actionCol: "Click on the action buttons to view, edit, or delete each record",
             viewCol: "Click on the eye button to view the detailed page associated with each record",
             null: "Search for any record with no value assigned",
@@ -1529,20 +1529,20 @@
         }
 
         /**
-         * @param   {DOMElement=} parentContainer - the parent container. if undefined `body` will be used.
-         * @param   {DOMElement=} parentContainerSticky - the sticky area of parent. if undefined `#mainnav` will be used.
+         * @param   {Node=} parentContainer - the parent container. if undefined `body` will be used.
+         * @param   {Node=} parentContainerSticky - the sticky area of parent. if undefined `#mainnav` will be used.
          * @param   {boolean} useDocHeight - whether we should use the doc height even if parentContainer is passed.
-         * Set the height of bottom-panel-container
+         * Call this function once the DOM elements are loaded to attach resize sensors that will fix the height of bottom-panel-container
          * If you don't pass any parentContainer, it will use the body
          * It will assume the following structure in the given parentContainer:
          *  - .app-content-container
          *    - .top-panel-container
          *    - .bottom-panel-container
+         * Three ResizeSensors will be created for app-content, top-panel and bottom-panel to watch their size change.
          */
-        function setDisplayContainerHeight(parentContainer, parentContainerSticky, useDocHeight) {
+        function attachContainerHeightSensors(parentContainer, parentContainerSticky, useDocHeight) {
             try {
-                var docHeight = $window.innerHeight,
-                    parentUsableHeight,
+                var parentUsableHeight,
                     appContent, // the container that we might set height for if container height is too small
                     container, // the container that we want to set the height for
                     containerSticky; // the sticky part of the container (top-panel-container)
@@ -1550,57 +1550,103 @@
                 // if the size of content is way too small, make the whole app-content-container scrollable
                 var resetHeight = function () {
                     appContent.style.overflowY = "auto";
-                    appContent.style.height = ((parentUsableHeight/docHeight) * 100) + "vh";
+                    appContent.style.height = ((parentUsableHeight/$window.innerHeight) * 100) + "vh";
                     container.style.height = "unset";
                 }
 
-                // get the parentContainer and its usable height
-                if (parentContainer == null || parentContainer == $document[0].querySelector("body")) {
-                    parentUsableHeight = docHeight;
-                    parentContainer = $document[0];
-                } else {
-                    parentUsableHeight = parentContainer.offsetHeight;
+                var tm;
+                // used to ensure we're not calling the setContainerHeightFn multiple times
+                var setContainerHeight = function () {
+                    if (tm) clearTimeout(tm);
+
+                    tm = setTimeout(function () {
+                        setContainerHeightFn();
+                    }, 200);
                 }
 
-                if (useDocHeight) {
-                    parentUsableHeight = docHeight;
+                // the actual function that will change the container height.
+                var setContainerHeightFn = function () {
+                    parentUsableHeight = useDocHeight ? $window.innerHeight : parentContainer.offsetHeight;
+
+                    // subtract the parent sticky from usable height
+                    parentUsableHeight -= parentContainerSticky.offsetHeight;
+
+                    // the sticky part of the container
+                    var stickyHeight = 0;
+                    if (containerSticky) {
+                        stickyHeight = containerSticky.offsetHeight;
+                    }
+
+                    var containerHeight = ((parentUsableHeight - stickyHeight) / $window.innerHeight) * 100;
+                    if (containerHeight < 15) {
+                        resetHeight();
+                    } else {
+                        //remove the styles that might have been added to appContent
+                        appContent.style.overflowY = "unset";
+                        appContent.style.height = "unset";
+
+                        // set the container's height
+                        container.style.height = containerHeight + 'vh';
+
+                        // now check based on actual pixel size
+                        if (container.offsetHeight < 300) {
+                            resetHeight();
+                        }
+                    }
+                }
+
+                // get the parentContainer and its usable height
+                if (parentContainer == null || parentContainer == document.querySelector("body")) {
+                    useDocHeight = true;
+                    parentContainer = document;
                 }
 
                 // get the parent sticky
                 if (parentContainerSticky == null) {
-                    parentContainerSticky = $document[0].querySelector("#mainnav");
+                    parentContainerSticky = document.querySelector("#mainnav");
                 }
-                // subtract the parent sticky from usable height
-                parentUsableHeight -= parentContainerSticky.offsetHeight;
 
                 // the content that we should make scrollable if the content height is too small
                 appContent = parentContainer.querySelector(".app-content-container");
 
-                // the sticky part of the container
-                var stickyHeight = 0;
                 containerSticky = appContent.querySelector(".top-panel-container");
-                if (containerSticky) {
-                    stickyHeight = containerSticky.offsetHeight;
-                }
-
                 container = appContent.querySelector(".bottom-panel-container");
 
-                var containerHeight = ((parentUsableHeight - stickyHeight) / docHeight) * 100;
-                if (containerHeight < 15) {
-                    resetHeight();
-                } else {
-                    //remove the styles that might have been added to appContent
-                    appContent.style.overflowY = "unset";
-                    appContent.style.height = "unset";
+                // used to capture the old values of height
+                var cache;
 
-                    // set the container's height
-                    container.style.height = containerHeight + 'vh';
+                // make sure the main-container has initial height
+                setContainerHeightFn();
+                cache = {
+                    appContentHeight: appContent.offsetHeight,
+                    parentContainerStickyHeight: parentContainerSticky.offsetHeight,
+                    containerStickyHeight: containerSticky.offsetHeight
+                };
 
-                    // now check based on actual pixel size
-                    if (container.offsetHeight < 300) {
-                        resetHeight();
+                //watch for the parent container height (this act as resize event)
+                new ResizeSensor(appContent, function (dimension) {
+                    if (appContent.offsetHeight != cache.appContentHeight) {
+                        cache.appContentHeight = appContent.offsetHeight;
+                        setContainerHeight();
                     }
-                }
+                });
+
+                // watch for size of the parent sticky section
+                new ResizeSensor(parentContainerSticky, function (dimension) {
+                    if (parentContainerSticky.offsetHeight != cache.parentContainerStickyHeight) {
+                        cache.parentContainerStickyHeight = parentContainerSticky.offsetHeight;
+                        setContainerHeight();
+                    }
+                });
+
+                // watch for size of the sticky section
+                new ResizeSensor(containerSticky, function (dimension) {
+                    if (containerSticky.offsetHeight != cache.containerStickyHeight) {
+                        cache.containerStickyHeight = containerSticky.offsetHeight;
+                        setContainerHeight();
+                    }
+                });
+
 
             } catch (err) {
                 $log.warn(err);
@@ -1610,53 +1656,61 @@
         /**
          * sets the style of domElements.footer
          * @param {Integer} index - index pertaining to which dom element to select
+         * @return {ResizeSensor} ResizeSensor object that can be used to turn it off.
          **/
-        function setFooterStyle(index) {
+        function attachFooterResizeSensor(index) {
             try {
-                var elements = {};
-                /**** used for main-body height calculation ****/
-                // get main container height
-                elements.mainContainerHeight = $document[0].getElementsByClassName('main-container')[index].offsetHeight;
-                // get the main body height
-                elements.initialInnerHeight = $document[0].getElementsByClassName('main-body')[index].offsetHeight;
-                // get the footer
-                elements.footer = $document[0].getElementsByTagName('footer')[index];
+                var mainContainer = document.getElementsByClassName('main-container')[index];
+                var mainBody = mainContainer.querySelector(".main-body");
 
+                var setFooterTimeout;
+                return new ResizeSensor(mainBody, function () {
+                    if (setFooterTimeout) clearTimeout(setFooterTimeout);
+                    setFooterTimeout = setTimeout(function () {
+                        // the footer definition has to be here.
+                        // if we move it outside, it will not use the correct footer element
+                        var footer = mainContainer.querySelector("footer");
 
-                var footerHeight = elements.footer.offsetHeight + 10;
-                // calculate the inner height of the app content (height of children in main-body + footer)
-                if ( (elements.initialInnerHeight + footerHeight) < elements.mainContainerHeight) {
-                    removeClass(elements.footer, "position-relative");
-                } else {
-                    addClass(elements.footer, "position-relative");
-                }
+                        // calculate the inner height of the app content (height of children in main-body + footer)
+                        if ((mainBody.offsetHeight + footer.offsetHeight + 10) < mainContainer.offsetHeight) {
+                            removeClass(footer, "position-relative");
+                        } else {
+                            addClass(footer, "position-relative");
+                        }
+                    }, 50);
+                });
+
             } catch(err) {
                 $log.warn(err);
             }
         }
 
         /**
-         * @param   {Object} scope - the scope object
          * @param   {DOMElement} parentContainer - the container that we want the alignment for
+         * @return {ResizeSensor} ResizeSensor object that can be used to turn it off.
          *
          * Make sure the `.top-right-panel` and `.main-container` are aligned.
          * They can be missaligned if the scrollbar is visible and takes space.
-         * TODO we might want to improve the performance of this.
-         * Currently it's running on every digest cycle.
          */
-        function watchForMainContainerPadding(scope, parentContainer) {
-            var mainContainer = parentContainer.querySelector(".main-container");
-            var topRightPanel = parentContainer.querySelector(".top-right-panel");
-            scope.$watch(function () {
-                try {
-                    return mainContainer.clientWidth - topRightPanel.clientWidth;
-                } catch (exp) {
-                    return false;
-                }
-            }, function (padding) {
-                if (padding === false) return;
-                mainContainer.style.paddingRight = padding + "px";
-            });
+        function attachMainContainerPaddingSensor(parentContainer) {
+            var mainContainer = parentContainer.querySelector(".main-container"),
+                topRightPanel = parentContainer.querySelector(".top-right-panel"),
+                setPadding, mainContainerPaddingTimeout;
+
+             // timeout makes sure we're not calling this more than we should
+            setPadding = function () {
+                if (mainContainerPaddingTimeout) clearTimeout(mainContainerPaddingTimeout);
+                mainContainerPaddingTimeout = setTimeout(function () {
+                    try {
+                        var padding = mainContainer.clientWidth - topRightPanel.clientWidth;
+                        mainContainer.style.paddingRight = padding + "px";
+                    } catch(exp) {}
+                }, 10);
+            }
+
+            // watch the size of mainContainer
+            // (if width of topRightPanel changes, the mainContainer changes too, so just watching mainContainer is enough)
+            return new ResizeSensor(mainContainer, setPadding);
         }
 
         /**
@@ -1691,11 +1745,11 @@
             humanFileSize: humanFileSize,
             getInputType: getInputType,
             getSimpleColumnType: getSimpleColumnType,
-            setFooterStyle: setFooterStyle,
-            setDisplayContainerHeight: setDisplayContainerHeight,
+            attachFooterResizeSensor: attachFooterResizeSensor,
+            attachContainerHeightSensors: attachContainerHeightSensors,
             addClass: addClass,
             removeClass: removeClass,
-            watchForMainContainerPadding: watchForMainContainerPadding
+            attachMainContainerPaddingSensor: attachMainContainerPaddingSensor
         }
     }])
 

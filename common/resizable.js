@@ -17,7 +17,7 @@
                     rGrabber: '@',
                     rDisabled: '@',
                     rNoThrottle: '=',
-                    rOtherE: '@' // selector for the elements that need to be moved by resizable
+                    rPartners: "=" // other elements that need to be moved by resizable @type{Node|NodeList}
                 },
 
                 link: function (scope, element, attr) {
@@ -25,21 +25,31 @@
                         'webkitFlexBasis' in document.documentElement.style ? 'webkitFlexBasis' :
                         'msFlexPreferredSize' in document.documentElement.style ? 'msFlexPreferredSize' : 'flexBasis';
 
-                    var resizePartners;
-                    scope.$watch(function () {
+                    // add resizable class to rPartners when the resizable element is displayed
+                    var unbindClientWidthWatch = scope.$watch(function () {
                             return element[0].clientWidth;
                     }, function (value) {
                         if (value > 0) {
-                            resizePartners = document.querySelectorAll(scope.rOtherE);
-                            angular.element(resizePartners).addClass('resizable');
+                            if (scope.rPartners) {
+                                angular.element(scope.rPartners).addClass('resizable');
+                            }
+                            unbindClientWidthWatch();
                         }
                     });
 
+                    // change the style of resize partners
                     var changeResizeParternsStyle = function (style, value) {
-                        if (resizePartners) {
-                            resizePartners.forEach(function (el) {
-                                el.style[style] = value;
-                            });
+                        if (!scope.rPartners) return;
+
+                        // if it's NodeList, we have to change style of all the nodes
+                        if (scope.rPartners.length) {
+                            for (var i = 0; i < scope.rPartners.length; i++) {
+                                scope.rPartners[i].style[style] = value;
+                            }
+                        }
+                        // otherwise we should directly change the style
+                        else if (scope.rPartners.style) {
+                            scope.rPartners.style[style] = value;
                         }
                     }
 

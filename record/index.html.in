@@ -30,7 +30,7 @@
                             </div>
                         </div>
                     </div>
-                    <div ng-if="recordDisplayname" class="top-right-panel">
+                    <div class="top-right-panel">
                         <div class="page-action-btns">
                             <div class="pull-right">
                                 <button id="show-all-related-tables" class="chaise-btn chaise-btn-primary" ng-click="::ctrl.toggleRelatedTables();" uib-tooltip="{{'Click here to ' + ((showEmptyRelatedTables) ? 'hide empty related sections.' : 'show empty related sections too.')}}" tooltip-placement="bottom">
@@ -45,7 +45,7 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="title">
+                        <div class="title" ng-if="recordDisplayname">
                             <div class="entity-display-header">
                                 <div class="title-container">
                                     <h1 id="page-title">
@@ -82,7 +82,7 @@
             <loading-spinner ng-show="(!displayReady || showSpinner) && !error"></loading-spinner>
 
             <div class="bottom-panel-container">
-                <div id="record-side-pan" class="side-panel-resizable record-toc" ng-class="loading || ($root.recordSidePanOpen && !ctrl.noVisibleRelatedTables()) ? 'open-panel' : 'close-panel'" resizable r-directions=["right"] r-flex="true" r-other-e=".top-left-panel">
+                <div id="record-side-pan" class="side-panel-resizable record-toc" ng-class="loading || ($root.recordSidePanOpen && !ctrl.noVisibleRelatedTables()) ? 'open-panel' : 'close-panel'" resizable r-directions=["right"] r-flex="true" r-partners="ctrl.resizePartners">
                     <div class="side-panel-container">
                         <div class="columns-container">
                             <ul>
@@ -118,7 +118,7 @@
                     </div>
                 </div>
 
-                <div class="main-container" ng-class="{'initializing': !displayReady}">
+                <div class="main-container dynamic-padding" ng-class="{'initializing': !displayReady}">
                     <div class="main-body">
 
                         <!-- defined on $rootScope in run function -->
@@ -161,7 +161,7 @@
                                 </div>
                             </uib-accordion>
                         </div>
-                        <span id="rt-loading" ng-show="loading" class="loading-text" ng-class="{'loading-sticky': ctrl.stickLoading}">
+                        <span id="rt-loading" ng-show="loading" class="loading-text loading-sticky">
                             <img class="spinner spinner-sm" src="../common/styles/images/loader.gif"/>
                             Loading...
                         </span>
