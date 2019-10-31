@@ -1409,6 +1409,51 @@
                     location.href = link;
                 };
 
+                // the text that we should display before the page-size-dropdown
+                scope.prependLabel = function () {
+                    if (scope.vm.page && scope.vm.page.tuples.length > 0) {
+                        var page = scope.vm.page;
+                        if (page.hasNext && !page.hasPrevious) {
+                            return "first";
+                        }
+
+                        if (!page.hasNext && page.hasPrevious) {
+                            return "last";
+                        }
+
+                        if (!page.hasNext && !page.hasPrevious) {
+                            return "all";
+                        }
+                        return "";
+                    }
+                };
+
+                // the text that we should display after the page-size-dropdown
+                scope.appendLabel = function () {
+                    var vm = scope.vm;
+                    if (!vm || !vm.page) return "";
+
+                    var records = "records";
+                    if (vm.reference.location.isConstrained && vm.config.displayMode !== recordsetDisplayModes.related) {
+                        records = "matching results";
+                    }
+
+                    if (vm.page.tuples.length === 0) {
+                        return "0 " + records;
+                    }
+
+                    var label = "";
+                    if (vm.totalRowsCnt && !vm.tableError) {
+                        label += "of ";
+                        if (vm.totalRowsCnt > vm.rowValues.length) {
+                            label += vm.totalRowsCnt.toLocaleString() + " ";
+                        } else {
+                            label += vm.rowValues.length.toLocaleString() + " ";
+                        }
+                    }
+                    return label + records;
+                }
+
             }
         }
     }])
