@@ -53,6 +53,20 @@
                     <div class="sidebar faceting-resizable" resizable r-directions=["right"] r-flex="true">
                         <div ng-controller="AnnotationsController as anno" class='annotation-list facet-panel panel'>
                             <span class='title'>Annotations</span>
+                            <div class='strokeScale'>
+                                <span class='name'>Line Thickness <span class='strokeValue'>{{ anno.strokeScale }}</span></span>
+                                <div class='slider'>
+                                    <input type="range" class='strokeSlider' min="1" max="6" step="0.05" ng-model="anno.strokeScale" ng-change="anno.changeStrokeScale()">
+                                </div>
+                                <div class='sliderTicks'>
+                                    <span class='currentScale'>1</span>
+                                    <span class='currentScale'>2</span>
+                                    <span class='currentScale'>3</span>
+                                    <span class='currentScale'>4</span>
+                                    <span class='currentScale'>5</span>
+                                    <span class='currentScale'>6</span>
+                                </div>
+                            </div>
                             <span class='row filter' data-type='overlayVisibility'>
                                 <span class='name'> Display : </span>
                                 <span ng-click="anno.changeAllAnnotationsVisibility();" ng-class="anno.isDisplayAll ?'displayAllBtn selected' : 'displayAllBtn'" data-type='all'>
@@ -71,21 +85,7 @@
                                     &nbsp;<span class="glyphicon glyphicon-search"></span>&nbsp;<!-- Added 2 non-breaking spaces to prevent btn's margins from collapsing and to center the icon-->
                                 </button>
                             </div>
-                            <div class='strokeScale'>
-                                <span class='name'>Line Thickness <span class='strokeValue'>{{ anno.strokeScale }}</span></span>
-                                <div class='slider'>
-                                    <input type="range" class='strokeSlider' min="1" max="6" step="0.05" ng-model="anno.strokeScale" ng-change="anno.changeStrokeScale()">
-                                </div>
-                                <div class='sliderTicks'>
-                                    <span class='currentScale'>1</span>
-                                    <span class='currentScale'>2</span>
-                                    <span class='currentScale'>3</span>
-                                    <span class='currentScale'>4</span>
-                                    <span class='currentScale'>5</span>
-                                    <span class='currentScale'>6</span>
-                                </div>
 
-                            </div>
                             <span class='resultCount'>
                                 <span>Displaying {{ anno.totalCount }} of {{ anno.collection.length }} Annotations</span>
                             </span>
