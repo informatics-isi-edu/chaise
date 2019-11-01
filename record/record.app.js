@@ -119,7 +119,7 @@
                 $window.history.replaceState('', '', url);
 
                 // related references
-                var related = $rootScope.reference.related(tuple);
+                var related = $rootScope.reference.generateRelatedList(tuple);
 
                 var columns = $rootScope.reference.generateColumnsList(tuple), model;
 
