@@ -297,15 +297,20 @@
 
     .action-btns {
         text-align: center;
-        font-size: 1.14rem;
+        font-size: 1.2rem;
+        // since we're increasing the size of icons, we should decrease the padding
+        padding: 5px 0 0 0;
 
         .chaise-btn {
             padding: 0;
             margin: -3px;
+            height: auto; //override the default button height
 
-            .chaise-view-details {
+            // make sure the three icons are shown in the center of the cell.
+            // (the font baseline of these two icons are different and need to be adjusted)
+            .chaise-view-details, .fa-file-alt, .fa-trash-alt {
                 position: relative;
-                top: 2px;
+                top: -2px;
             }
         }
     }
