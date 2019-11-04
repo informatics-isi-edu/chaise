@@ -246,7 +246,6 @@ a.cardlink.delete {
     flex-direction: column;
     overflow: hidden;
     background: #fff;
-    font-size: 12px;
     z-index: 1;
     height: 100%;
     padding: 0;
@@ -255,9 +254,9 @@ a.cardlink.delete {
 #viewer-content .annotation-list .title{
     padding: 5px;
     color: #333333;
-    line-height: 1.35;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 17.5px;
+    line-height: 1.2;
+    font-weight: 400;
 }
 
 #viewer-content .annotation-list .row{
@@ -266,7 +265,7 @@ a.cardlink.delete {
 }
 
 #viewer-content .annotation-list .row.filter{
-    margin: 0 5px 5px 5px;
+    margin: 5px 5px 5px 5px;
     font-size: 14px;
 }
 
@@ -327,7 +326,7 @@ a.cardlink.delete {
 
 #viewer-content .annotation-list .searchAnnotationBar{
     display: flex;
-    margin: 0 5px 5px 5px;
+    margin: 5px;
     height: 30px;
     position: relative;
     border-radius: 3px;
@@ -373,7 +372,6 @@ a.cardlink.delete {
     display: flex;
     flex-direction: column;
     padding: 5px 8px;
-    margin: 5px 0 5px;
 }
 
 #viewer-content .annotation-list .strokeScale .name{
@@ -448,7 +446,6 @@ a.cardlink.delete {
 #viewer-content .annotation-list .resultCount{
     display: flex;
     padding: 0 5px 5px 8px;
-    font-size: 12px;
 }
 
 #viewer-content .annotation-list .groups{
@@ -459,6 +456,7 @@ a.cardlink.delete {
     overflow-y: auto;
     position: relative;
     float: left;
+    margin: 5px;
 }
 
 /* Annotations item  */
@@ -527,8 +525,7 @@ a.cardlink.delete {
 
 #viewer-content .annotation-list .annotationItem .anatomy{
     /* color: 333; */
-    font-size: 12px;
-    padding: 0 0 0 3px;
+#viewer-content .annotation-list .strokeScale    padding: 0 0 0 3px;
 }
 
 #viewer-content .annotation-list .annotationItem .anatomy a{
