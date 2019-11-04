@@ -252,7 +252,7 @@ a.cardlink.delete {
 }
 
 #viewer-content .annotation-list .title{
-    padding: 5px;
+    padding: 8px 5px;
     color: #333333;
     font-size: 17.5px;
     line-height: 1.2;
@@ -265,7 +265,7 @@ a.cardlink.delete {
 }
 
 #viewer-content .annotation-list .row.filter{
-    margin: 5px 5px 5px 5px;
+    margin: 8px 5px 8px 5px;
     font-size: 14px;
 }
 
@@ -326,7 +326,7 @@ a.cardlink.delete {
 
 #viewer-content .annotation-list .searchAnnotationBar{
     display: flex;
-    margin: 5px;
+    margin: 8px 5px 10px;
     height: 30px;
     position: relative;
     border-radius: 3px;
@@ -371,7 +371,7 @@ a.cardlink.delete {
 #viewer-content .annotation-list .strokeScale{
     display: flex;
     flex-direction: column;
-    padding: 5px 8px;
+    padding: 8px 5px;
 }
 
 #viewer-content .annotation-list .strokeScale .name{
@@ -384,6 +384,7 @@ a.cardlink.delete {
     padding: 0 5px;
     background: #f3f2f2;
     border-radius: 3px;
+    font-size: 12px;
 }
 
 #viewer-content .annotation-list .strokeScale input.strokeSlider{
@@ -445,7 +446,7 @@ a.cardlink.delete {
 }
 #viewer-content .annotation-list .resultCount{
     display: flex;
-    padding: 0 5px 5px 8px;
+    padding: 0 5px 0px 5px;
 }
 
 #viewer-content .annotation-list .groups{
@@ -614,7 +615,6 @@ a.cardlink.delete {
     display: flex;
     background: none;
     color: #ffffff;
-    font-size: 12px;
     align-items: center;
     cursor: pointer;
     opacity: 0.6;

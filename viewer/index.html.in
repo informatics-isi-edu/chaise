@@ -53,6 +53,15 @@
                     <div class="sidebar faceting-resizable" resizable r-directions=["right"] r-flex="true">
                         <div ng-controller="AnnotationsController as anno" class='annotation-list facet-panel panel'>
                             <span class='title'>Annotations</span>
+                            <span class='row filter' data-type='overlayVisibility'>
+                                <span class='name'> Display : </span>
+                                <span ng-click="anno.changeAllAnnotationsVisibility();" ng-class="anno.isDisplayAll ?'displayAllBtn selected' : 'displayAllBtn'" data-type='all'>
+                                    <i ng-class="anno.isDisplayAll ? 'glyphicon glyphicon-check' : 'glyphicon glyphicon-unchecked'"></i> All
+                                </span>
+                                <span ng-click="anno.changeAllAnnotationsVisibility();" ng-class="!anno.isDisplayAll ?'displayAllBtn selected' : 'displayAllBtn'" data-type='none'>
+                                    <i ng-class="anno.isDisplayAll ? 'glyphicon glyphicon-unchecked' : 'glyphicon glyphicon-check'"></i> None
+                                </span>
+                            </span>
                             <div class='strokeScale'>
                                 <span class='name'>Line Thickness <span class='strokeValue'>{{ anno.strokeScale }}</span></span>
                                 <div class='slider'>
@@ -67,15 +76,7 @@
                                     <span class='currentScale'>6</span>
                                 </div>
                             </div>
-                            <span class='row filter' data-type='overlayVisibility'>
-                                <span class='name'> Display : </span>
-                                <span ng-click="anno.changeAllAnnotationsVisibility();" ng-class="anno.isDisplayAll ?'displayAllBtn selected' : 'displayAllBtn'" data-type='all'>
-                                    <i ng-class="anno.isDisplayAll ? 'glyphicon glyphicon-check' : 'glyphicon glyphicon-unchecked'"></i> All
-                                </span>
-                                <span ng-click="anno.changeAllAnnotationsVisibility();" ng-class="!anno.isDisplayAll ?'displayAllBtn selected' : 'displayAllBtn'" data-type='none'>
-                                    <i ng-class="anno.isDisplayAll ? 'glyphicon glyphicon-unchecked' : 'glyphicon glyphicon-check'"></i> None
-                                </span>
-                            </span>
+
                             <div class='searchAnnotationBar'>
                                 <input type='text' class='search-input' placeholder='Search' ng-model="anno.searchKeyword" ng-change="anno.searchInputChanged()" />
                                 <div class="clear-search" ng-show="anno.searchKeyword != ''"><!-- form-control:focus changes the z-index of the form control from 2 to 3. form-control-feedback has z-index of 2. Overriding that z index to 5 so it isn't hidden when focused-->
