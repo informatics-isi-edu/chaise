@@ -174,7 +174,7 @@
                         // image.entity.uri = image.entity.uri.replace("/openseadragon-viewer/mview.html", "https://dev.rebuildingakidney.org/~mingyi/openseadragon-viewer/index.html");
                         // HACK: Remove the hardcoded the url
                         console.log("Origin", origin);
-                        // image.entity.uri = origin+"/demo/chaise-osd/openseadragon-viewer/index.html?" + params[1];
+                        image.entity.uri = origin+"/demo/chaise-osd/openseadragon-viewer/index.html?" + params[1];
                     }
 
                     // image.entity.uri = image.entity.uri + "&url=data/Q-296R_all_contours_cw_named.svg";
