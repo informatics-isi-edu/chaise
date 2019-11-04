@@ -247,7 +247,8 @@
                 showNull:           params.showNull === true,
                 hideNotNullChoice:  params.hideNotNullChoice,
                 hideNullChoice:     params.hideNullChoice,
-                displayMode:        params.displayMode ? params.displayMode : recordsetDisplayModes.popup
+                displayMode:        params.displayMode ? params.displayMode : recordsetDisplayModes.popup,
+                parentDisplayMode:  params.parentDisplayMode
             },
             context:                    params.context,
             getDisabledTuples:          params.getDisabledTuples,
@@ -386,7 +387,11 @@
         }
 
         vm.copyToClipboard = function (text, action) {
-            logService.logAction(action, logActions.clientAction);
+            var copyLinkHeader = {
+                action: action
+            }
+
+            logService.logAction(copyLinkHeader, logActions.clientAction);
             // Create a dummy input to put the text string into it, select it, then copy it
             // this has to be done because of HTML security and not letting scripts just copy stuff to the clipboard
             // it has to be a user initiated action that is done through the DOM object

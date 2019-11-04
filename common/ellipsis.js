@@ -42,12 +42,12 @@
                         }
                     }
 
-                    var cancelHeaderObject = {
+                    var cancelHeader = {
                         action: action,
-                        uid: scope.tuple.uniqueId
+                        rid: scope.tuple.uniqueId
                     }
 
-                    logService.logAction(cancelHeaderObject, logActions.clientAction);
+                    logService.logAction(cancelHeader, logActions.clientAction);
                     // if response is string, the modal has been dismissed
                     if (typeof response !== "string") {
                         ErrorService.handleException(response, true);  // throw exception for dismissible pop- up (error, isDismissible = true)
@@ -65,11 +65,11 @@
                     }
                 }
 
-                var popupHeaderObject = {
+                var popupHeader = {
                     action: action,
-                    uid: scope.tuple.uniqueId
+                    rid: scope.tuple.uniqueId
                 }
-                logService.logAction(popupHeaderObject, logActions.clientAction);
+                logService.logAction(popupHeader, logActions.clientAction);
                 modalUtils.showModal({
                     animation: false,
                     templateUrl:  UriUtils.chaiseDeploymentPath() + "common/templates/delete-link/confirm_delete.modal.html",

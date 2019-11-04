@@ -45,11 +45,11 @@
                         return scope.callback();
                     }
 
-                    var popupHeaderObject = {
+                    var popupHeader = {
                         action: logActions.deleteIntend
                     }
 
-                    logService.logAction(popupHeaderObject, logActions.clientAction);
+                    logService.logAction(popupHeader, logActions.clientAction);
 
                     modalUtils.showModal({
                         templateUrl: TEMPLATES_PATH + 'confirm_delete.modal.html',
@@ -61,11 +61,11 @@
                         return scope.callback();
                     }, function onError() {
                         console.log("modal cancelled ")
-                        var cancelHeaderObject = {
+                        var cancelHeader = {
                             action: logActions.deleteCancel
                         }
 
-                        logService.logAction(cancelHeaderObject, logActions.clientAction);
+                        logService.logAction(cancelHeader, logActions.clientAction);
                     }, false);
                 }
             },

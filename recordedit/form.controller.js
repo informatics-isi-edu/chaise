@@ -400,8 +400,16 @@
             if (!vm.numberRowsToAdd) vm.numberRowsToAdd = 1;
 
             // log the button was clicked
-            var action = (vm.numberRowsToAdd > 1 ? logActions.addX : logActions.add1 );
-            logService.logAction(action, logActions.clientAction);
+            var copyFormRowHeader = {}, action;
+            if (vm.numberRowsToAdd > 1) {
+                action = logActions.addX;
+                copyFormRowHeader.x = vm.numberRowsToAdd;
+            } else {
+                action = logActions.add1;
+            }
+
+            copyFormRowHeader.action = action;
+            logService.logAction(copyFormRowHeader, logActions.clientAction);
 
             if ((vm.numberRowsToAdd + vm.recordEditModel.rows.length) > vm.MAX_ROWS_TO_ADD) {
                 AlertsService.addAlert("Cannot add " + vm.numberRowsToAdd + " records. Please input a value between 1 and " + (vm.MAX_ROWS_TO_ADD - vm.recordEditModel.rows.length) + ', inclusive.', 'error');
@@ -494,8 +502,17 @@
         function removeFormRow(index) {
             scope.$root.showSpinner = true;
 
-            var action = (vm.editMode ? logActions.updateRemove : logActions.createRemove );
-            logService.logAction(action, logActions.clientAction);
+            var removeFormRowHeader = {}, action;
+            if (vm.editMode) {
+                action = logActions.updateRemove;
+                removeFormRowHeader.rid = $rootScope.tuples[index].uniqueId;
+            } else {
+                action = logActions.createRemove;
+            }
+
+            removeFormRowHeader.action = action;
+
+            logService.logAction(removeFormRowHeader, logActions.clientAction);
 
             return spliceRows(index);
         }
@@ -558,8 +575,20 @@
         // toggles the state of the select all dialog
         vm.toggleSelectAll = function toggleSelectAll(index) {
             var model = vm.recordEditModel.columnModels[index];
-            var action = (model.showSelectAll ? logActions.createMultiClose : logActions.createMultiOpen);
-            logService.logAction(action, logActions.clientAction);
+
+            var action;
+            if (vm.editMode) {
+                action = (model.showSelectAll ? logActions.updateMultiClose : logActions.updateMultiOpen);
+            } else {
+                action = (model.showSelectAll ? logActions.createMultiClose : logActions.createMultiOpen);
+            }
+
+            var toggleSelectAllHeader = {
+                action: action,
+                column: model.column.name
+            }
+
+            logService.logAction(toggleSelectAllHeader, logActions.clientAction);
 
             if (selectAllOpen) {
                 // close the other select all dialog first
@@ -622,9 +651,17 @@
 
         // closes the select all
         vm.cancelSelectAll = function cancelSelectAll(index) {
-            logService.logAction(logActions.createMultiCancel, logActions.clientAction);
-
             var model = vm.recordEditModel.columnModels[index];
+
+            var action = (vm.editMode ? logActions.updateMultiCancel : logActions.createMultiCancel);
+
+            var cancelSelectAllHeader = {
+                action: action,
+                column: model.column.name
+            }
+
+            logService.logAction(cancelSelectAllHeader, logActions.clientAction);
+
             model.showSelectAll = false;
             model.highlightRow = false;
             selectAllOpen = false;
@@ -725,16 +762,33 @@
         }
 
         vm.applySelectAll = function applySelectAll(index) {
-            logService.logAction(logActions.createMultiApply, logActions.clientAction);
+            var model = vm.recordEditModel.columnModels[index];
 
-            setValueAllInputs(index, vm.recordEditModel.columnModels[index].allInput.value);
+            var action = (vm.editMode ? logActions.updateMultiApply : logActions.createMultiApply);
+
+            var applySelectAllHeader = {
+                action: action,
+                column: model.column.name
+            }
+
+            logService.logAction(applySelectAllHeader, logActions.clientAction);
+
+            setValueAllInputs(index, model.allInput.value);
         }
 
         vm.clearSelectAll = function clearSelectAll(index) {
-            logService.logAction(logActions.createMultiClear, logActions.clientAction);
+            var model = vm.recordEditModel.columnModels[index];
+            var action = (vm.editMode ? logActions.updateMultiClear : logActions.createMultiClear);
+
+            var clearSelectAllHeader = {
+                action: action,
+                column: model.column.name
+            }
+
+            logService.logAction(clearSelectAllHeader, logActions.clientAction);
 
             var value = null;
-            var inputType = vm.recordEditModel.columnModels[index].inputType;
+            var inputType = model.inputType;
             if (inputType === "timestamp") {
                 value = {
                     date: null,

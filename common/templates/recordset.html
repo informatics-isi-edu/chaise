@@ -22,7 +22,7 @@
                         <!-- download CSV included by default -->
                         <export reference="vm.reference" disabled="!vm.hasLoaded || !vm.initialized || vm.rowValues.length == 0"></export>
                         <!-- permalink -->
-                        <a id="permalink" ng-href="{{ getRecordsetLink() }}" ng-click="::permalinkClick()" tooltip-placement="bottom-right" uib-tooltip={{tooltip.permalink}} class="chaise-btn chaise-btn-primary">
+                        <a id="permalink" ng-href="{{ getRecordsetLink() }}" ng-click="::copyPermalink()" tooltip-placement="bottom-right" uib-tooltip={{tooltip.permalink}} class="chaise-btn chaise-btn-primary">
                             <span class="chaise-btn-icon glyphicon glyphicon-bookmark"></span>
                             <span>Permalink</span>
                         </a>

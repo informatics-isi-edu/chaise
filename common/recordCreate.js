@@ -350,6 +350,7 @@
             params.parentTuple = rsTuples[rowIndex];
             params.parentReference = rsReference;
             params.displayMode = recordsetDisplayModes.addPureBinaryPopup;
+            params.parentDisplayMode = dcctx.cid; // should be "record"
 
             params.reference = domainRef.unfilteredReference.contextualize.compactSelect;
             params.reference.session = rsSession;

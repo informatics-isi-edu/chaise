@@ -35,8 +35,13 @@
         }
 
         vm.toggleSidebar = function() {
-            var action = ($rootScope.recordSidePanOpen ? logActions.tocHide : logActions.tocShow )
-            logService.logAction(action, logActions.clientAction);
+            var action = ($rootScope.recordSidePanOpen ? logActions.tocHide : logActions.tocShow );
+
+            var tocToggleHeader = {
+                action: action
+            }
+
+            logService.logAction(tocToggleHeader, logActions.clientAction);
 
             $rootScope.recordSidePanOpen = !$rootScope.recordSidePanOpen;
         };
@@ -229,7 +234,7 @@
             //    else edit mode, flip to edit (edit-display)
             //
             // then check for 2 positional modes: inline or !inline
-            var action = null;
+            var action;
             if (dataModel.isTableDisplay) {
                 action = (isInline ? logActions.inlineMkdnDisplay : logActions.relatedMkdnDisplay);
             } else {
@@ -241,14 +246,23 @@
                 }
             }
 
-            logService.logAction(action, logActions.clientAction);
+            var toggleDisplayHeader = {
+                action: action
+            }
+
+            logService.logAction(toggleDisplayHeader, logActions.clientAction);
 
             dataModel.isTableDisplay = !dataModel.isTableDisplay;
         };
 
         vm.toggleRelatedTables = function() {
             var action = ($rootScope.showEmptyRelatedTables ? logActions.hideAllRelated : logActions.showAllRelated)
-            logService.logAction(action, logActions.clientAction);
+
+            var toggleAllRelatedTablesHeader = {
+                action: action
+            }
+
+            logService.logAction(toggleAllRelatedTablesHeader, logActions.clientAction);
 
             $rootScope.showEmptyRelatedTables = !$rootScope.showEmptyRelatedTables;
             // NOTE: there's a case where clicking the button to toggle this doesn't re-paint the footer until the mouse "moves"
@@ -257,6 +271,17 @@
                 UiUtils.setFooterStyle(0);
             }, 0);
         };
+
+        vm.logAccordionClick = function (rtm) {
+            // console.log(rtm);
+            var action = (rtm.open ? logActions.relatedClose : logActions.relatedOpen);
+
+            var toggleRelatedTableHeader = {
+                action: action
+            }
+
+            logService.logAction(toggleRelatedTableHeader, logActions.clientAction);
+        }
 
         vm.canEditRelated = function(ref) {
            if(angular.isUndefined(ref)) return false;
@@ -285,6 +310,12 @@
         }
 
         function onModalClose () {
+            var pbCancelHeader = {
+                action: logActions.recordPBCancel
+            }
+
+            logService.logAction(pbCancelHeader, logActions.clientAction);
+
             recordAppUtils.resumeUpdateRecordPage();
         }
 
@@ -552,7 +583,13 @@
 
         /*** scroll to events ***/
         // scroll to top button
-        $scope.scrollToTop = function () {
+        $scope.scrollToTop = function (fromToc) {
+            var scrollTopHeader = {
+                action: (fromToc ? logActions.tocScrollTop : logActions.scrollTop)
+            }
+
+            logService.logAction(scrollTopHeader, logActions.clientAction);
+
             mainContainerEl.scrollTo(0, 0, 500);
         };
 
@@ -561,7 +598,11 @@
          * {String} sectionId - the displayname.value for table/column
          */
         vm.scrollToSection = function (sectionId) {
-            logService.logAction(logActions.tocScrollTo, logActions.clientAction);
+            var scrollToHeader = {
+                action: logActions.tocScrollTo
+            }
+
+            logService.logAction(scrollToHeader, logActions.clientAction);
 
             var el = determineScrollElement(sectionId);
             scrollToElement(el);

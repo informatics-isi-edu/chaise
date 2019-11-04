@@ -918,7 +918,37 @@
 
             // this is for the button on the table heading that deselects all currently visible rows
             scope.selectNone = function($event) {
-                logService.logAction(logActions.recordsetFacetNone, logActions.clientAction);
+                var action;
+                // "select none" only appears in P&B and all facet "Show More" links
+                switch (scope.vm.config.displayMode) {
+                    case recordsetDisplayModes.addPureBinaryPopup:
+                        action = logActions.recordPBNone;
+                        break;
+                    case recordsetDisplayModes.facetPopup:
+                        switch (scope.vm.config.parentDisplayMode) {
+                            case recordsetDisplayModes.fullscreen:
+                                action = logActions.recordsetFacetNone;
+                                break;
+                            case recordsetDisplayModes.addPureBinaryPopup:
+                                action = logActions.recordPBFacetNone;
+                                break;
+                            case recordsetDisplayModes.foreignKeyPopupCreate:
+                            case recordsetDisplayModes.foreignKeyPopupEdit:
+                                action = logActions.recordeditFKFacetNone;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+
+                var noneHeader = {
+                    action: action
+                }
+
+                logService.logAction(noneHeader, logActions.clientAction);
 
                 var tuples = [], tuple;
                 for (var i = 0; i < scope.vm.page.tuples.length; i++) {
@@ -942,7 +972,37 @@
 
             // this is for the button on the table heading that selects all currently visible rows
             scope.selectAll = function($event) {
-                logService.logAction(logActions.recordsetFacetAll, logActions.clientAction);
+                var action;
+                // "select all" only appears in P&B and all facet "Show More" links
+                switch (scope.vm.config.displayMode) {
+                    case recordsetDisplayModes.addPureBinaryPopup:
+                        action = logActions.recordPBAll;
+                        break;
+                    case recordsetDisplayModes.facetPopup:
+                        switch (scope.vm.config.parentDisplayMode) {
+                            case recordsetDisplayModes.fullscreen:
+                                action = logActions.recordsetFacetAll;
+                                break;
+                            case recordsetDisplayModes.addPureBinaryPopup:
+                                action = logActions.recordPBFacetAll;
+                                break;
+                            case recordsetDisplayModes.foreignKeyPopupCreate:
+                            case recordsetDisplayModes.foreignKeyPopupEdit:
+                                action = logActions.recordeditFKFacetAll;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+
+                var allHeader = {
+                    action: action
+                }
+
+                logService.logAction(allHeader, logActions.clientAction);
 
                 var tuples = [], tuple;
                 for (var i = 0; i < scope.vm.page.tuples.length; i++) {
@@ -1024,8 +1084,12 @@
             }
 
             // used to capture left click events on permalink button
-            scope.permalinkClick = function () {
-                logService.logAction(logActions.permalinkLeft, logActions.clientAction);
+            scope.copyPermalink = function () {
+                var permalinkHeader = {
+                    action: logActions.permalinkLeft
+                }
+
+                logService.logAction(permalinkHeader, logActions.clientAction);
 
                 var text = scope.getRecordsetLink();
 
@@ -1047,8 +1111,29 @@
             }
 
             scope.toggleFacetPanel = function () {
-                var action = (scope.vm.config.facetPanelOpen ? logActions.recordsetFacetClose : logActions.recordsetFacetOpen );
-                logService.logAction(action, logActions.clientAction);
+                var action;
+                var panelOpen = scope.vm.config.facetPanelOpen;
+                // facet panel can only be toggled in main recordset, p&b add, and fk add/edit
+                switch (scope.vm.config.displayMode) {
+                    case recordsetDisplayModes.fullscreen:
+                        action = (panelOpen ? logActions.recordsetFacetClose : logActions.recordsetFacetOpen );
+                        break;
+                    case recordsetDisplayModes.addPureBinaryPopup:
+                        action = (panelOpen ? logActions.recordPBClose : logActions.recordPBOpen );
+                        break;
+                    case recordsetDisplayModes.foreignKeyPopupCreate:
+                    case recordsetDisplayModes.foreignKeyPopupEdit:
+                        action = (panelOpen ? logActions.recordeditFKClose : logActions.recordeditFKOpen );
+                        break;
+                    default:
+                        break;
+                }
+
+                var toggleFacetPanelHeader = {
+                    action: action
+                }
+
+                logService.logAction(toggleFacetPanelHeader, logActions.clientAction);
 
                 scope.vm.config.facetPanelOpen = !scope.vm.config.facetPanelOpen;
             }
@@ -1087,7 +1172,37 @@
 
             // function for removing all pills regardless of what page they are on, clears the whole selectedRows array
             scope.removeAllPills = function($event) {
-                logService.logAction(logActions.recordsetFacetClear, logActions.clientAction);
+                var action;
+                // "remove all" only appears in P&B and all facet "Show More" links
+                switch (scope.vm.config.displayMode) {
+                    case recordsetDisplayModes.addPureBinaryPopup:
+                        action = logActions.recordPBClear;
+                        break;
+                    case recordsetDisplayModes.facetPopup:
+                        switch (scope.vm.config.parentDisplayMode) {
+                            case recordsetDisplayModes.fullscreen:
+                                action = logActions.recordsetFacetClear;
+                                break;
+                            case recordsetDisplayModes.addPureBinaryPopup:
+                                action = logActions.recordPBFacetClear;
+                                break;
+                            case recordsetDisplayModes.foreignKeyPopupCreate:
+                            case recordsetDisplayModes.foreignKeyPopupEdit:
+                                action = logActions.recordeditFKFacetClear;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+
+                var clearAllHeader = {
+                    action: action
+                }
+
+                logService.logAction(clearAllHeader, logActions.clientAction);
 
                 var pre = scope.vm.selectedRows.slice();
                 scope.vm.selectedRows.clear();
@@ -1298,7 +1413,10 @@
                         var permalink = document.getElementById('permalink');
                         if (permalink) {
                             permalink.addEventListener('contextmenu', function (e) {
-                                logService.logAction(logActions.permalinkRight, logActions.clientAction);
+                                var permalinkHeader = {
+                                    action: logActions.permalinkRight
+                                }
+                                logService.logAction(permalinkHeader, logActions.clientAction);
                             });
                         }
                     }, 0);
@@ -1380,8 +1498,48 @@
                     recordTableUtils.update(scope.vm, true, false, false);
                 };
 
-                scope.logPageSizeEvent = function () {
-                    logService.logAction(logActions.recordsetPageSize, logActions.clientAction);
+                scope.pageSizeDropdownOpened = function () {
+                    console.log();
+                    var action;
+                    switch (scope.vm.config.displayMode) {
+                        case recordsetDisplayModes.fullscreen:
+                            action = logActions.recordsetPageSize;
+                            break;
+                        case recordsetDisplayModes.related:
+                            action = (scope.vm.context.indexOf("inline") > -1 ? logActions.inlinePageSize : logActions.relatedPageSize);
+                            break;
+                        case recordsetDisplayModes.addPureBinaryPopup:
+                            action = logActions.recordPBPageSize;
+                            break;
+                        case recordsetDisplayModes.foreignKeyPopupCreate:
+                        case recordsetDisplayModes.foreignKeyPopupEdit:
+                            action = logActions.recordeditFKPageSize;
+                            break;
+                        case recordsetDisplayModes.facetPopup:
+                            switch (scope.vm.config.parentDisplayMode) {
+                                case recordsetDisplayModes.fullscreen:
+                                    action = logActions.recordsetFacetPageSize;
+                                    break;
+                                case recordsetDisplayModes.addPureBinaryPopup:
+                                    action = logActions.recordPBFacetPageSize;
+                                    break;
+                                case recordsetDisplayModes.foreignKeyPopupCreate:
+                                case recordsetDisplayModes.foreignKeyPopupEdit:
+                                    action = logActions.recordeditFKFacetPageSize;
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+
+                    var pageSizeHeader = {
+                        action: action
+                    }
+
+                    logService.logAction(pageSizeHeader, logActions.clientAction);
                 }
 
                 scope.addRecord = function() {

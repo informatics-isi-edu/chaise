@@ -47,7 +47,11 @@
                     };
 
                     scope.openProfile = function openProfile() {
-                        logService.logAction(logActions.profile, logActions.clientAction);
+                        var profileHeader = {
+                            action: logActions.profile
+                        }
+
+                        logService.logAction(profileHeader, logActions.clientAction);
                         modalUtils.showModal({
                             templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/profile.modal.html",
                             controller: "profileModalDialogController",
