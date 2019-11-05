@@ -44,7 +44,8 @@
 
                     var cancelHeader = {
                         action: action,
-                        rid: scope.tuple.uniqueId
+                        rid: scope.tuple.uniqueId,
+                        schema_table: scope.tableModel.logObject.schema_table
                     }
 
                     logService.logAction(cancelHeader, logActions.clientAction);
@@ -67,9 +68,11 @@
 
                 var popupHeader = {
                     action: action,
-                    rid: scope.tuple.uniqueId
+                    rid: scope.tuple.uniqueId,
+                    schema_table: scope.tableModel.logObject.schema_table
                 }
                 logService.logAction(popupHeader, logActions.clientAction);
+
                 modalUtils.showModal({
                     animation: false,
                     templateUrl:  UriUtils.chaiseDeploymentPath() + "common/templates/delete-link/confirm_delete.modal.html",
@@ -115,7 +118,8 @@
                 selectDisabled: "=?",
                 displayMode: "@",
                 parentReference: "=?",
-                columnModels: "="
+                columnModels: "=",
+                tableModel: "="
             },
             link: function (scope, element) {
 

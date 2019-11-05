@@ -1499,14 +1499,14 @@
                 };
 
                 scope.pageSizeDropdownOpened = function () {
-                    console.log();
-                    var action;
+                    var action, extraOption = false;
                     switch (scope.vm.config.displayMode) {
                         case recordsetDisplayModes.fullscreen:
                             action = logActions.recordsetPageSize;
                             break;
                         case recordsetDisplayModes.related:
                             action = (scope.vm.context.indexOf("inline") > -1 ? logActions.inlinePageSize : logActions.relatedPageSize);
+                            extraOption = true;
                             break;
                         case recordsetDisplayModes.addPureBinaryPopup:
                             action = logActions.recordPBPageSize;
@@ -1538,6 +1538,9 @@
                     var pageSizeHeader = {
                         action: action
                     }
+
+                    // only set for related and inline tables
+                    if (extraOption) pageSizeHeader.schema_table = scope.vm.logObject.schema_table;
 
                     logService.logAction(pageSizeHeader, logActions.clientAction);
                 }

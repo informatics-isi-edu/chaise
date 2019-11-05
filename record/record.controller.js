@@ -247,7 +247,8 @@
             }
 
             var toggleDisplayHeader = {
-                action: action
+                action: action,
+                schema_table: tableModel.logObject.schema_table
             }
 
             logService.logAction(toggleDisplayHeader, logActions.clientAction);
@@ -273,11 +274,11 @@
         };
 
         vm.logAccordionClick = function (rtm) {
-            // console.log(rtm);
             var action = (rtm.open ? logActions.relatedClose : logActions.relatedOpen);
 
             var toggleRelatedTableHeader = {
-                action: action
+                action: action,
+                schema_table: rtm.tableModel.logObject.schema_table
             }
 
             logService.logAction(toggleRelatedTableHeader, logActions.clientAction);
@@ -598,14 +599,16 @@
          * {String} sectionId - the displayname.value for table/column
          */
         vm.scrollToSection = function (sectionId) {
+            var relatedObj = determineScrollElement(sectionId);
+
             var scrollToHeader = {
-                action: logActions.tocScrollTo
+                action: logActions.tocScrollTo,
+                schema_table: relatedObj.rtm.tableModel.logObject.schema_table
             }
 
             logService.logAction(scrollToHeader, logActions.clientAction);
 
-            var el = determineScrollElement(sectionId);
-            scrollToElement(el);
+            scrollToElement(relatedObj.element);
         }
 
         /**
@@ -618,16 +621,24 @@
             // return if no query parameter, nothing to scroll to
             if (!queryParam) return;
 
-            var el = determineScrollElement(queryParam);
+            var elementObj = determineScrollElement(queryParam);
             // no element was returned, means there wasn't a matching displayname on the page
-            if (!el) return;
+            if (!elementObj.element) return;
 
-            scrollToElement(el);
+            scrollToElement(elementObj.element);
         }
 
-        // displayname should be the un-encoded displayname.value
-        // this means it _could_ be a value generated from templating then run through the mkdn interpreter
+        /**
+         * function for finding the related table element to scroll to
+         * @param {String} displayname -  should be the un-encoded displayname.value
+         *      - this means it _could_ be a value generated from templating then run through the mkdn interpreter
+         *
+         * @returns {Object} that contains:
+         *   `.element`     - element to scroll to
+         *   `.rtm`         - related table model for RT to scroll to
+         */
         function determineScrollElement (displayname) {
+            var matchingRtm;
             // id enocde query param
             var htmlId = vm.makeSafeIdAttr(displayname);
             // "entity-" is used for record entity section
@@ -636,22 +647,29 @@
             if (el[0]) {
                 // if in entity section, grab parent
                 el = el.parent();
+
+                matchingRtm = $rootScope.columnModels.filter(function (cm) {
+                    return cm.column.displayname.value == displayname;
+                })[0];
             } else {
                 // "rt-heading-" is used for related table section
                 el = angular.element(document.getElementById("rt-heading-" + htmlId));
                 // return if no element after checking entity section and RT section
                 if (!el[0]) return;
 
-                var matchingRtm = $rootScope.relatedTableModels.filter(function (rtm) {
+                matchingRtm = $rootScope.relatedTableModels.filter(function (rtm) {
                     return rtm.displayname.value == displayname;
-                });
+                })[0];
 
                 // matchingRtm should only ever be size 1, unless 2 different RTs have the same displayname
                 // make sure RT is open before scrolling
-                matchingRtm[0].open = true;
+                matchingRtm.open = true;
             }
 
-            return el;
+            return {
+                element: el,
+                rtm: matchingRtm
+            }
         }
 
         // given an element, scroll to the top of that element "slowly"

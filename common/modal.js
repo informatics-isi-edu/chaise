@@ -409,6 +409,14 @@
             document.body.removeChild(dummy[0]);
         }
 
+        vm.logCitationDownload = function () {
+            var citationDownloadHeader = {
+                action: logActions.cite
+            }
+
+            logService.logAction(citationDownloadHeader, logActions.clientAction);
+        }
+
         vm.closeAlert = function () {
             vm.params.showVersionWarning = false;
         }

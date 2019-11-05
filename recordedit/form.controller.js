@@ -340,7 +340,13 @@
                 }
 
                 vm.recordEditModel.rows[rowIndex][column.name] = tuple.displayname.value;
-            }, false, false);
+            }, function modalCanceled() {
+                var fkCancelHeader = {
+                    action: logActions.recordeditFKCancel
+                }
+
+                logService.logAction(fkCancelHeader, logActions.clientAction);
+            }, false);
         }
 
         // idx - the index of the form

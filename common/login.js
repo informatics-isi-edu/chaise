@@ -42,9 +42,14 @@
                         Session.loginInAPopUp();
                     };
 
-                    scope.logout = function logout() {
-                        Session.logout();
-                    };
+
+                    scope.logDropdownOpen = function () {
+                        var dropdownOpenHeader = {
+                            action: logActions.dropdownUser
+                        }
+
+                        logService.logAction(dropdownOpenHeader, logActions.clientAction);
+                    }
 
                     scope.openProfile = function openProfile() {
                         var profileHeader = {
@@ -52,12 +57,17 @@
                         }
 
                         logService.logAction(profileHeader, logActions.clientAction);
+
                         modalUtils.showModal({
                             templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/profile.modal.html",
                             controller: "profileModalDialogController",
                             controllerAs: "ctrl",
                             windowClass: "profile-popup"
                         }, false, false, false);
+                    };
+
+                    scope.logout = function logout() {
+                        Session.logout();
                     };
 
                 }
