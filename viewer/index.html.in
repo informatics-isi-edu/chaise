@@ -186,7 +186,7 @@ role="button" title="edit annotations" id="edit-btn">
                                                         <a ng-click="annotations.editAnnotation(annotation);" title="Edit this annotation" class="cardlink"><span class="glyphicon glyphicon-pencil"><span></a>
                                                     </span>
                                                     <span ng-if="annotations.allowDelete(annotation);">
-                                                        <a ng-if="annotations.allowDelete(annotation);" ng-click="annotations.deleteAnnotation(annotation);" title="Delete this annotation" class="cardlink"><span class="glyphicon glyphicon-trash"></span></a>
+                                                        <a ng-if="annotations.allowDelete(annotation);" ng-click="annotations.deleteAnnotation(annotation);" title="Delete this annotation" class="cardlink"><span class="far fa-trash-alt"></span></a>
                                                     </span>
                                                 </small>
                                             </div>
@@ -238,7 +238,7 @@ role="button" title="edit annotations" id="edit-btn">
                                                                     <a ng-click="comments.editComment(comment);" class="cardlink edit" title="Edit this comment"><span class="glyphicon glyphicon-pencil"></span></a>
                                                                 </small>
                                                                 <small ng-if="comments.allowDelete(comment);">
-                                                                    <a ng-click="comments.deleteComment(comment);" class="cardlink" title="Delete this comment"><span class="glyphicon glyphicon-trash"></span></a>
+                                                                    <a ng-click="comments.deleteComment(comment);" class="cardlink" title="Delete this comment"><span class="far fa-trash-alt"></span></a>
                                                                 </small>
                                                             </div>
                                                         </div>

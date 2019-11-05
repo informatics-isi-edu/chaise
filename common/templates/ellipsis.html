@@ -8,17 +8,17 @@
     </div>
     <div class="chaise-btn-group" ng-switch-default>
         <!-- NOTE: so users can control how to open the view link -->
-        <a ng-if="config.viewable" type="button" class="view-action-button chaise-btn chaise-btn-tertiary icon-btn" ng-href="{{viewLink}}" tooltip-placement="bottom" uib-tooltip="View Details">
+        <a ng-if="config.viewable" type="button" class="view-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn" ng-href="{{viewLink}}" tooltip-placement="bottom" uib-tooltip="View Details">
             <span class="chaise-btn-icon chaise-icon chaise-view-details"></span>
         </a>
-        <button ng-if="config.editable && tuple.reference.canUpdate" type="button" class="edit-action-button chaise-btn chaise-btn-tertiary icon-btn" ng-click="edit()" target="_blank" tooltip-placement="bottom" uib-tooltip="Edit">
+        <button ng-if="config.editable && tuple.reference.canUpdate" type="button" class="edit-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn" ng-click="edit()" target="_blank" tooltip-placement="bottom" uib-tooltip="Edit">
             <span class="chaise-btn-icon glyphicon glyphicon-pencil"></span>
         </button>
-        <button ng-if="config.deletable && unlink && associationRef.canDelete" type="button" class="delete-action-button chaise-btn chaise-btn-tertiary icon-btn" ng-click="unlink()" tooltip-placement="bottom" uib-tooltip="Unlink">
+        <button ng-if="config.deletable && unlink && associationRef.canDelete" type="button" class="delete-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn" ng-click="unlink()" tooltip-placement="bottom" uib-tooltip="Unlink">
             <span class="chaise-btn-icon glyphicon glyphicon-remove-circle"></span>
         </button>
-        <button ng-if="config.deletable && delete && tuple.reference.canDelete" type="button" class="delete-action-button chaise-btn chaise-btn-tertiary icon-btn" ng-click="delete()" tooltip-placement="bottom" uib-tooltip="Delete">
-            <span class="chaise-btn-icon glyphicon glyphicon-trash""></span>
+        <button ng-if="config.deletable && delete && tuple.reference.canDelete" type="button" class="delete-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn" ng-click="delete()" tooltip-placement="bottom" uib-tooltip="Delete">
+            <span class="chaise-btn-icon far fa-trash-alt""></span>
         </button>
     </div>
 </td>
