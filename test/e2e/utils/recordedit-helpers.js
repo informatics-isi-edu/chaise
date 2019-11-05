@@ -819,7 +819,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                     }).then(function(ct) {
                                         expect(ct).toBe(col.count, colError(col.name, "number of foreign key rows are not as expected."));
 
-                                        var displayingText = "Displaying all " + col.count + "of " + col.totalCount + " records";
+                                        var displayingText = "Displayingall " + col.count + "of " + col.totalCount + " records";
                                             displayingTextError = "The total count display in the foreign key popup is incorrect";
 
                                         chaisePage.waitForTextInElement(chaisePage.recordsetPage.getTotalCount(), displayingText, null, displayingTextError);

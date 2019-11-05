@@ -104,15 +104,15 @@
                     <span class="chaise-icon-btn chaise-icon chaise-sidebar-open"></span>
                     <span>Show filter panel</span>
                 </button>
-                <table-header ng-show="vm.initialized" vm="vm"></table-header>
+                <table-header vm="vm"></table-header>
             </div>
         </div>
     </div>
     <div class="bottom-panel-container">
-        <div class="side-panel-resizable" resizable r-directions=["right"] r-flex="true" r-other-e=".top-left-panel" ng-show="vm.config.showFaceting && vm.reference" ng-class="{'open-panel': vm.config.facetPanelOpen, 'close-panel': !vm.config.facetPanelOpen, 'initializing': !vm.initialized}">
+        <div class="side-panel-resizable" resizable r-directions=["right"] r-flex="true" r-partners="resizePartners" ng-show="vm.config.showFaceting && vm.reference" ng-class="{'open-panel': vm.config.facetPanelOpen, 'close-panel': !vm.config.facetPanelOpen, 'initializing': !vm.initialized}">
             <faceting vm="vm"></faceting>
         </div>
-        <div class="main-container">
+        <div class="main-container dynamic-padding">
             <div class="main-body">
 
                 <!-- record table -->

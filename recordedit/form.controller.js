@@ -7,7 +7,6 @@
         function FormController(AlertsService, ConfigUtils, dataFormats, DataUtils, ErrorService, InputUtils, integerLimits, logActions, logService, maskOptions, messageMap, modalBox, modalUtils, recordCreate, recordEditAppUtils, recordEditModel, recordsetDisplayModes, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
         var context = ConfigUtils.getContextJSON();
-        var mainBodyEl;
         var chaiseConfig = ConfigUtils.getConfigJSON();
         vm.recordEditModel = recordEditModel;
         vm.dataFormats = dataFormats;
@@ -214,9 +213,11 @@
                 vm.resultset = true;
                 // delay updating the height of DOM elements so the current digest cycle can complete and "show" the resultset view
                 $timeout(function() {
-                    mainBodyEl = $document[0].getElementsByClassName('main-body')[1];
-                    setMainContainerHeight();
-                    UiUtils.setFooterStyle(1);
+                    // remove the old resize sensors since we're switching the display to resultset
+                    detachResizeSensors();
+
+                    // create new resize sensors for the resultset view
+                    attachResizeSensors();
                 }, 0);
             }
         }
@@ -851,57 +852,45 @@
             }
         });
 
-        function setMainContainerHeight() {
-            $scope.parentContainer = $document[0].querySelector(vm.resultset ? '.resultset-container' : '.form-container');
-            UiUtils.setDisplayContainerHeight($scope.parentContainer, null, true);
-        }
-
-        $scope.$watch(function() {
+        // call the functions used to fix the style of page after displayReady is set.
+        var unbindDisplayReady = $scope.$watch(function() {
             return $rootScope.displayReady;
         }, function (newValue, oldValue) {
             if (newValue) {
-                setMainContainerHeight();
+
+                // attach the footer and mainContainer sensors
+                attachResizeSensors();
+
                 $timeout(function () {
                     onResize(true);
                 }, 0);
 
-                $scope.$watch(function () {
-                    $scope.parentContainer = $document[0].querySelector(vm.resultset ? '.resultset-container' : '.form-container');
-
-                    var fixedContentHeight = $document[0].querySelector("#mainnav").offsetHeight;
-                    fixedContentHeight += $scope.parentContainer.querySelector('.top-panel-container').offsetHeight;
-
-                    return fixedContentHeight;
-                }, function (newValue, oldValue) {
-                    if (newValue != oldValue) {
-                        setMainContainerHeight();
-                    }
-                });
+                // remove the watch event since it's not needed anymore
+                unbindDisplayReady();
             }
         });
 
-        // watch for the main body size to change
-        $scope.$watch(function() {
-            return mainBodyEl && mainBodyEl.offsetHeight;
-        }, function (newValue, oldValue) {
-            if (newValue) {
-                $timeout(function () {
-                    UiUtils.setFooterStyle(vm.resultset ? 1 : 0);
-                }, 0);
-            }
-        });
+        /*------------------------code below is for fixing the main-container height and footer styles -----------*/
 
-        angular.element($window).bind('resize', function(){
-            if ($rootScope.displayReady) {
-                setMainContainerHeight();
-                UiUtils.setFooterStyle(vm.resultset ? 1 : 0);
-                $scope.$digest();
-            }
-        });
+        var footerSensor, mainContainerSensor;
 
-        $timeout(function () {
-            mainBodyEl = $document[0].getElementsByClassName('main-body')[0];
-        }, 0);
+        /**
+         * detach the resize sensors that have been created to improve performance
+         */
+        function detachResizeSensors() {
+            if (footerSensor) footerSensor.detach();
+        }
+
+        /**
+         * Create resize sensors to fix the height of the main-container, and fix footer styles
+         */
+        function attachResizeSensors() {
+            var parentContainer = $document[0].querySelector(vm.resultset ? '.resultset-container' : '.form-container');
+
+            UiUtils.attachContainerHeightSensors(parentContainer, null, true);
+
+            footerSensor = UiUtils.attachFooterResizeSensor(vm.resultset ? 1 : 0);
+        }
 
         /*------------------------code below is for fixing the column names when scrolling -----------*/
 

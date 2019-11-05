@@ -188,7 +188,7 @@ var testParams = {
     },
     tooltip: {
         exportDropdown: "Click to choose an export format.",
-        permalink: "This link stores your search criteria as a URL. Right click and save.",
+        permalink: "Click to copy the current url to clipboard.",
         actionCol: "Click on the action buttons to view, edit, or delete each record"
     },
     activeList: {
@@ -500,13 +500,13 @@ describe('View recordset,', function() {
                 searchSubmitButton.click().then(function() {
                     chaisePage.recordsetPage.waitForInverseMainSpinner();
                     expect(chaisePage.recordsetPage.getRows().count()).toBe(1, "search 01: row count missmatch");
-                    expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying all 1\nof 1 matching results", "search 01: total count missmatch.");
+                    expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying\nall 1\nof 1 matching results", "search 01: total count missmatch.");
                     // clear search
                     return clearSearchButton.click();
                 }).then(function() {
                     chaisePage.recordsetPage.waitForInverseMainSpinner();
                     expect(chaisePage.recordsetPage.getRows().count()).toBe(4, "search 02: row count missmatch");
-                    expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying all 4\nof 4 matching results", "search 02: total count missmatch.");
+                    expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying\nall 4\nof 4 matching results", "search 02: total count missmatch.");
 
                     // apply conjunctive search words
                     searchBox.sendKeys('"Super 8" motel "North Hollywood"');
@@ -514,7 +514,7 @@ describe('View recordset,', function() {
                 }).then(function() {
                     chaisePage.recordsetPage.waitForInverseMainSpinner();
                     expect(chaisePage.recordsetPage.getRows().count()).toBe(1, "search 03: row count missmatch");
-                    expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying all 1\nof 1 matching results", "search 03: total count missmatch.");
+                    expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying\nall 1\nof 1 matching results", "search 03: total count missmatch.");
                     // clear search
                     return clearSearchButton.click();
                 }).then(function() {
@@ -527,7 +527,7 @@ describe('View recordset,', function() {
 
                     chaisePage.recordsetPage.waitForInverseMainSpinner();
                     expect(chaisePage.recordsetPage.getRows().count()).toBe(0, "search 04: row count missmatch");
-                    expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying 0 matching results", "search 04: total count missmatch.");
+                    expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying\n0 matching results", "search 04: total count missmatch.");
                     expect(chaisePage.recordsetPage.getNoResultsRow().getText()).toBe(noResultsMessage, "search 04: no result message missmatch.");
 
                     // clearing the search here resets the page for the next test case
@@ -732,7 +732,7 @@ describe('View recordset,', function() {
 
                         // Click on sort button
                         chaisePage.recordsetPage.getColumnSortButton(accommodationParams.sortedData[k].rawColumnName).click().then(function () {
-                            chaisePage.waitForTextInElement(rowCount, "Displaying first " + recordsOnPage1 + "of " + totalRecords + " records");
+                            chaisePage.waitForTextInElement(rowCount, "Displayingfirst " + recordsOnPage1 + "of " + totalRecords + " records");
                             chaisePage.recordsetPage.waitForInverseMainSpinner();
 
                             //Check the presence of descending sort button
@@ -757,7 +757,7 @@ describe('View recordset,', function() {
                             return chaisePage.recordsetPage.getNextButton().click();
 
                         }).then(function () {
-                            chaisePage.waitForTextInElement(rowCount, "Displaying last " + recordsOnPage2 + "of " + totalRecords + " records");
+                            chaisePage.waitForTextInElement(rowCount, "Displayinglast " + recordsOnPage2 + "of " + totalRecords + " records");
                             chaisePage.recordsetPage.waitForInverseMainSpinner();
 
                             // Check if the url has @sort by column name
@@ -779,7 +779,7 @@ describe('View recordset,', function() {
                             return chaisePage.recordsetPage.getPreviousButton().click();
 
                         }).then(function () {
-                            chaisePage.waitForTextInElement(rowCount, "Displaying first " + recordsOnPage1 + "of " + totalRecords + " records");
+                            chaisePage.waitForTextInElement(rowCount, "Displayingfirst " + recordsOnPage1 + "of " + totalRecords + " records");
                             chaisePage.recordsetPage.waitForInverseMainSpinner();
 
                             // Sanity check on the previous page
@@ -799,7 +799,7 @@ describe('View recordset,', function() {
 
                         // Click on sort button to sort in descending order
                         chaisePage.recordsetPage.getColumnSortDescButton(accommodationParams.sortedData[k].rawColumnName).click().then(function () {
-                            chaisePage.waitForTextInElement(rowCount, "Displaying first " + recordsOnPage1 + "of " + totalRecords + " records");
+                            chaisePage.waitForTextInElement(rowCount, "Displayingfirst " + recordsOnPage1 + "of " + totalRecords + " records");
                             chaisePage.recordsetPage.waitForInverseMainSpinner();
 
                             // Check the presence of ascending sort button
@@ -824,7 +824,7 @@ describe('View recordset,', function() {
                             return chaisePage.recordsetPage.getNextButton().click();
 
                         }).then(function () {
-                            chaisePage.waitForTextInElement(rowCount, "Displaying last " + recordsOnPage2 + "of " + totalRecords + " records");
+                            chaisePage.waitForTextInElement(rowCount, "Displayinglast " + recordsOnPage2 + "of " + totalRecords + " records");
                             chaisePage.recordsetPage.waitForInverseMainSpinner();
 
                             // Check if the url has @sort by column name
@@ -846,7 +846,7 @@ describe('View recordset,', function() {
                             return chaisePage.recordsetPage.getPreviousButton().click();
 
                         }).then(function () {
-                            chaisePage.waitForTextInElement(rowCount, "Displaying first " + recordsOnPage1 + "of " + totalRecords + " records");
+                            chaisePage.waitForTextInElement(rowCount, "Displayingfirst " + recordsOnPage1 + "of " + totalRecords + " records");
                             chaisePage.recordsetPage.waitForInverseMainSpinner();
 
                             // Sanity check on the previous page
@@ -892,7 +892,7 @@ describe('View recordset,', function() {
 
         it("should display the proper row count and total row count.", function () {
             chaisePage.recordsetPage.getTotalCount().getText().then(function(text) {
-                expect(text).toBe("Displaying first 5\nof 14 records");
+                expect(text).toBe("Displaying\nfirst 5\nof 14 records");
             });
         });
 
