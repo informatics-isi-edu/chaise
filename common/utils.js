@@ -274,11 +274,11 @@
 
         // ## navbar actions
         "branding": "branding", // top left corner branding text/logo clicked
-        "dropdownUser": "user", // user dropdown opened TODO
+        "dropdownUser": "user", // user dropdown opened
         "profile": "user/profile", // user profile dialog opened
-        "dropdownMenu": "menu/submenu", // navbar menu dropdown opened TODO
-        "dropdownMenuInternal": "menu/internal", // navbar menu internal page TODO
-        "dropdownMenuExternal": "menu/external" // navbar menu external page TODO
+        "dropdownMenu": "menu/submenu", // navbar menu dropdown opened
+        "dropdownMenuInternal": "menu/internal", // navbar menu internal page
+        "dropdownMenuExternal": "menu/external" // navbar menu external page
     })
 
     // NOTE since this has been used with ng-switch in the code, and we cannot
