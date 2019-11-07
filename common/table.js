@@ -944,9 +944,9 @@
                         break;
                 }
 
-                var noneHeader = {
-                    action: action
-                }
+                var noneHeader = scope.vm.logObject;
+                noneHeader.action = action;
+                delete noneHeader.page_size;
 
                 logService.logAction(noneHeader, logActions.clientAction);
 
@@ -998,9 +998,9 @@
                         break;
                 }
 
-                var allHeader = {
-                    action: action
-                }
+                var allHeader = scope.vm.logObject;
+                allHeader.action = action;
+                delete allHeader.page_size;
 
                 logService.logAction(allHeader, logActions.clientAction);
 
@@ -1085,9 +1085,8 @@
 
             // used to capture left click events on permalink button
             scope.copyPermalink = function () {
-                var permalinkHeader = {
-                    action: logActions.permalinkLeft
-                }
+                var permalinkHeader = scope.vm.reference.defaultLogInfo;
+                permalinkHeader.action = logActions.permalinkLeft;
 
                 logService.logAction(permalinkHeader, logActions.clientAction);
 
@@ -1129,9 +1128,9 @@
                         break;
                 }
 
-                var toggleFacetPanelHeader = {
-                    action: action
-                }
+                var toggleFacetPanelHeader = scope.vm.logObject;
+                toggleFacetPanelHeader.action = action;
+                delete toggleFacetPanelHeader.page_size;
 
                 logService.logAction(toggleFacetPanelHeader, logActions.clientAction);
 
@@ -1198,9 +1197,9 @@
                         break;
                 }
 
-                var clearAllHeader = {
-                    action: action
-                }
+                var clearAllHeader = scope.vm.logObject;
+                clearAllHeader.action = action;
+                delete clearAllHeader.page_size;
 
                 logService.logAction(clearAllHeader, logActions.clientAction);
 
@@ -1348,9 +1347,9 @@
                 var permalink = document.getElementById('permalink');
                 if (permalink) {
                     permalink.addEventListener('contextmenu', function (e) {
-                        var permalinkHeader = {
-                            action: logActions.permalinkRight
-                        }
+                        var permalinkHeader = scope.vm.reference.defaultLogInfo;
+                        permalinkHeader.action = logActions.permalinkRight;
+
                         logService.logAction(permalinkHeader, logActions.clientAction);
                     });
                 }
@@ -1488,12 +1487,9 @@
                             break;
                     }
 
-                    var pageSizeHeader = {
-                        action: action
-                    }
-
-                    // only set for related and inline tables
-                    if (extraOption) pageSizeHeader.schema_table = scope.vm.logObject.schema_table;
+                    var pageSizeHeader = scope.vm.logObject;
+                    pageSizeHeader.action = action;
+                    delete pageSizeHeader.page_size;
 
                     logService.logAction(pageSizeHeader, logActions.clientAction);
                 }

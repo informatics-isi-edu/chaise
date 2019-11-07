@@ -39,9 +39,8 @@
         vm.toggleSidebar = function() {
             var action = ($rootScope.recordSidePanOpen ? logActions.tocHide : logActions.tocShow );
 
-            var tocToggleHeader = {
-                action: action
-            }
+            var tocToggleHeader = $rootScope.reference.defaultLogInfo;
+            tocToggleHeader.action = action;
 
             logService.logAction(tocToggleHeader, logActions.clientAction);
 
@@ -109,7 +108,8 @@
 
             var params = {
                 citation: tuple.citation,
-                displayname: refTable.name+'_'+tuple.uniqueId
+                displayname: refTable.name+'_'+tuple.uniqueId,
+                reference: ref
             }
 
             var versionString = "@" + (ref.location.version || refTable.schema.catalog.snaptime);
@@ -118,7 +118,9 @@
             params.versionDateRelative = UiUtils.humanizeTimestamp(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
             params.versionDate = UiUtils.versionDate(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
 
-            refTable.schema.catalog.currentSnaptime(logActions.share).then(function (snaptime) {
+            var snaptimeHeader = ref.defaultLogInfo;
+            snaptimeHeader.action = logActions.share;
+            refTable.schema.catalog.currentSnaptime(snaptimeHeader).then(function (snaptime) {
                 // if current fetched snpatime doesn't match old snaptime, show a warning
                 params.showVersionWarning = (snaptime !== refTable.schema.catalog.snaptime);
             }).finally(function() {
@@ -248,10 +250,21 @@
                 }
             }
 
-            var toggleDisplayHeader = {
-                action: action,
-                schema_table: tableModel.logObject.schema_table
-            }
+            /**
+             * tableModel.logObject includes:
+             *  Optional:
+             *      facet - facet path to current table set
+             *      page_size - (removed)
+             *      referrer -  info about the main record
+             *
+             *  Required attributes:
+             *      action - base action for read request (changed)
+             *      schema_table - s:t info for related table
+             *      catalog, cid, pid, wid (unchanged)
+             */
+            var toggleDisplayHeader = tableModel.logObject;
+            toggleDisplayHeader.action = action;
+            delete toggleDisplayHeader.page_size;
 
             logService.logAction(toggleDisplayHeader, logActions.clientAction);
 
@@ -261,9 +274,8 @@
         vm.toggleRelatedTables = function() {
             var action = ($rootScope.showEmptyRelatedTables ? logActions.hideAllRelated : logActions.showAllRelated)
 
-            var toggleAllRelatedTablesHeader = {
-                action: action
-            }
+            var toggleAllRelatedTablesHeader = $rootScope.reference.defaultLogInfo;
+            toggleAllRelatedTablesHeader.action = action;
 
             logService.logAction(toggleAllRelatedTablesHeader, logActions.clientAction);
 
@@ -278,10 +290,21 @@
         vm.logAccordionClick = function (rtm) {
             var action = (rtm.open ? logActions.relatedClose : logActions.relatedOpen);
 
-            var toggleRelatedTableHeader = {
-                action: action,
-                schema_table: rtm.tableModel.logObject.schema_table
-            }
+            /**
+             * tableModel.logObject includes:
+             *  Optional:
+             *      facet - facet path to current table set
+             *      page_size - (removed)
+             *      referrer -  info about the main record
+             *
+             *  Required attributes:
+             *      action - base action for read request (changed)
+             *      schema_table - s:t info for related table
+             *      catalog, cid, pid, wid (unchanged)
+             */
+            var toggleRelatedTableHeader = rtm.tableModel.logObject;
+            toggleRelatedTableHeader.action = action;
+            delete toggleRelatedTableHeader.page_size;
 
             logService.logAction(toggleRelatedTableHeader, logActions.clientAction);
         }
@@ -313,12 +336,6 @@
         }
 
         function onModalClose () {
-            var pbCancelHeader = {
-                action: logActions.recordPBCancel
-            }
-
-            logService.logAction(pbCancelHeader, logActions.clientAction);
-
             recordAppUtils.resumeUpdateRecordPage();
         }
 
@@ -532,9 +549,8 @@
         /*** scroll to events ***/
         // scroll to top button
         $scope.scrollToTop = function (fromToc) {
-            var scrollTopHeader = {
-                action: (fromToc ? logActions.tocScrollTop : logActions.scrollTop)
-            }
+            var scrollTopHeader = $rootScope.reference.defaultLogInfo;
+            scrollTopHeader.action = (fromToc ? logActions.tocScrollTop : logActions.scrollTop);
 
             logService.logAction(scrollTopHeader, logActions.clientAction);
 
@@ -548,10 +564,21 @@
         vm.scrollToSection = function (sectionId) {
             var relatedObj = determineScrollElement(sectionId);
 
-            var scrollToHeader = {
-                action: logActions.tocScrollTo,
-                schema_table: relatedObj.rtm.tableModel.logObject.schema_table
-            }
+            /**
+             * tableModel.logObject includes:
+             *  Optional:
+             *      facet - facet path to current table set
+             *      page_size - (removed)
+             *      referrer -  info about the main record
+             *
+             *  Required attributes:
+             *      action - base action for read request (changed)
+             *      schema_table - s:t info for related table
+             *      catalog, cid, pid, wid (unchanged)
+             */
+            var scrollToHeader = relatedObj.rtm.tableModel.logObject;
+            scrollToHeader.action = logActions.tocScrollTo;
+            delete scrollToHeader.page_size;
 
             logService.logAction(scrollToHeader, logActions.clientAction);
 

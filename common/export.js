@@ -118,9 +118,8 @@
                 scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
                 scope.logDropdownOpened = function () {
-                    var exportHeader = {
-                        action: logActions.exportOpen
-                    }
+                    var exportHeader = scope.reference.defaultLogInfo;
+                    exportHeader.action = logActions.exportOpen;
 
                     logService.logAction(exportHeader, logActions.clientAction);
                 };

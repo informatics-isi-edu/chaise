@@ -31,21 +31,19 @@
                 var onError = function (response) {
                     scope.$root.showSpinner = false;
 
-                    var action;
+                    var action, cancelHeader;
                     if (isRecordset) {
-                        action = logActions.deleteCancel;
+                        cancelHeader = reference.defaultLogInfo;
+                        cancelHeader.action = logActions.deleteCancel;
                     } else {
+                        cancelHeader = scope.tableModel.logObject;
                         if (isInline) {
                             action = (scope.isUnLink ? logActions.inlineUnlinkCancel : logActions.inlineDeleteCancel );
                         } else {
                             action = (scope.isUnLink ? logActions.relatedUnlinkCancel : logActions.relatedDeleteCancel );
                         }
-                    }
-
-                    var cancelHeader = {
-                        action: action,
-                        rid: scope.tuple.uniqueId,
-                        schema_table: scope.tableModel.logObject.schema_table
+                        cancelHeader.action = action;
+                        delete cancelHeader.page_size;
                     }
 
                     logService.logAction(cancelHeader, logActions.clientAction);
@@ -55,22 +53,22 @@
                     }
                 }
 
-                var action;
+                var action, popupHeader;
                 if (isRecordset) {
-                    action = logActions.deleteIntend;
+                    // tableModel.logObject is for the main recordset, we need info for the row's reference here
+                    popupHeader = reference.defaultLogInfo;
+                    popupHeader.action = logActions.deleteIntend;
                 } else {
+                    popupHeader = scope.tableModel.logObject;
                     if (isInline) {
                         action = (scope.isUnLink ? logActions.inlineUnlinkIntend : logActions.inlineDeleteIntend );
                     } else {
                         action = (scope.isUnLink ? logActions.relatedUnlinkIntend : logActions.relatedDeleteIntend );
                     }
+                    popupHeader.action = action;
+                    delete popupHeader.page_size;
                 }
 
-                var popupHeader = {
-                    action: action,
-                    rid: scope.tuple.uniqueId,
-                    schema_table: scope.tableModel.logObject.schema_table
-                }
                 logService.logAction(popupHeader, logActions.clientAction);
 
                 modalUtils.showModal({

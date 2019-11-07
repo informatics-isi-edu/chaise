@@ -45,9 +45,8 @@
                         return scope.callback();
                     }
 
-                    var popupHeader = {
-                        action: logActions.deleteIntend
-                    }
+                    var popupHeader = scope.$root.reference.defaultLogInfo;
+                    popupHeader.action = logActions.deleteIntend;
 
                     logService.logAction(popupHeader, logActions.clientAction);
 
@@ -60,10 +59,8 @@
                         scope.$root.showSpinner = true;
                         return scope.callback();
                     }, function onError() {
-                        console.log("modal cancelled ")
-                        var cancelHeader = {
-                            action: logActions.deleteCancel
-                        }
+                        var cancelHeader = scope.$root.reference.defaultLogInfo;
+                        cancelHeader.action = logActions.deleteCancel;
 
                         logService.logAction(cancelHeader, logActions.clientAction);
                     }, false);

@@ -1368,9 +1368,9 @@
                                     break;
                             }
 
-                            var cancelHeader = {
-                                action: action
-                            }
+                            var cancelHeader = params.logObject;
+                            cancelHeader.action = action;
+                            delete cancelHeader.page_size;
 
                             logService.logAction(cancelHeader, logActions.clientAction);
                         }, false);

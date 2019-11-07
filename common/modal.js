@@ -387,9 +387,8 @@
         }
 
         vm.copyToClipboard = function (text, action) {
-            var copyLinkHeader = {
-                action: action
-            }
+            var copyLinkHeader = params.reference.defaultLogInfo;
+            copyLinkHeader.action = action;
 
             logService.logAction(copyLinkHeader, logActions.clientAction);
             // Create a dummy input to put the text string into it, select it, then copy it
@@ -410,9 +409,8 @@
         }
 
         vm.logCitationDownload = function () {
-            var citationDownloadHeader = {
-                action: logActions.cite
-            }
+            var citationDownloadHeader = params.reference.defaultLogInfo;
+            citationDownloadHeader.action = logActions.cite;
 
             logService.logAction(citationDownloadHeader, logActions.clientAction);
         }
