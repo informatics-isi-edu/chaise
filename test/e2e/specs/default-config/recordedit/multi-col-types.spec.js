@@ -28,7 +28,7 @@ var testParams = {
             {name: "markdown_col", displayType: "markdown"},
             {name: "bool_null_col", displayType: "boolean", value: true},
             {name: "bool_true_col", displayType: "boolean", value: false},
-            {name: "bool_false_col", displayType: "boolean", value: ""},
+            {name: "bool_false_col", displayType: "boolean", value: null},
             {name: "timestamp_null_col", displayType: "timestamp", value: {date: "2016-01-18", time: "01:00:00"}},
             {name: "timestamp_col", displayType: "timestamp"},
             {name: "timestamptz_null_col", displayType: "timestamptz", value: {date: "2016-01-18", time: "01:00:00"}},
@@ -41,7 +41,7 @@ var testParams = {
             {name: "json_col", displayType: "json"}
         ],
         columns: ["int2_col", "int4_col", "int8_col", "float4_col", "float8_col", "text_col", "longtext_col", "markdown_col", "bool_true_col", "bool_false_col", "timestamp_col", "timestamptz_col", "date_col", "vDcNH5rGBzGJObTbqmnH7g", "json_null_col", "json_col"],
-        null_columns: ["int2_null_col", "int4_null_col", "int8_null_col", "float4_null_col", "float8_null_col", "text_null_col", "longtext_null_col", "markdown_null_col", "bool_null_col", "bool_true_col", "timestamp_null_col", "timestamptz_null_col", "date_null_col", "6lhMahZsQfXf_lAs9BSxNA", "vDcNH5rGBzGJObTbqmnH7g", "json_null_col", "json_col"],
+        null_columns: ["int2_null_col", "int4_null_col", "int8_null_col", "float4_null_col", "float8_null_col", "text_null_col", "longtext_null_col", "markdown_null_col", "bool_null_col", "bool_true_col", "timestamp_null_col", "timestamptz_null_col", "date_null_col", "6lhMahZsQfXf_lAs9BSxNA", "json_null_col", "json_col"],
         submitted_values: {
             int2_col: "32,767",
             int4_col: "-2,147,483,648",
@@ -53,7 +53,7 @@ var testParams = {
             markdown_col: "<strong>Sample</strong>",
             bool_true_col: "true",
             bool_false_col: "false",
-            timestamp_col: "2016-01-18T13:00:00",
+            timestamp_col: "2016-01-18 13:00:00",
             timestamptz_col: "2016-01-18 00:00:00",
             date_col: "2016-08-15",
             // Value of foreign (fk_col) related entity
@@ -72,13 +72,11 @@ var testParams = {
             markdown_null_col: "<strong>Sample</strong>",
             bool_null_col: "true",
             bool_true_col: "false",
-            timestamp_null_col: "2016-01-18T13:00:00",
+            timestamp_null_col: "2016-01-18 13:00:00",
             timestamptz_null_col: "2016-01-18 13:00:00",
             date_null_col: "2016-08-15",
             // Value of foreign (fk_null_col) related entity
             "6lhMahZsQfXf_lAs9BSxNA": "Abraham Lincoln",
-            // Value of foreign (fk_col) related entity
-            "vDcNH5rGBzGJObTbqmnH7g": "Abraham Lincoln",
             json_null_col: "89.586",
             json_col: "null"
         }
@@ -183,7 +181,7 @@ describe('When editing a record', function() {
                         // Select a non-null value for fk_null_col b/c fk_null_col needs to be non-null
                         if (name === 'fk_null_col') {
                             element.all(by.css('.modal-popup-btn')).first().click().then(function() {
-                                return chaisePage.waitForElement(element.all(by.id('divRecordSet')).first());
+                                return chaisePage.recordsetPageReady();
                             }).then(function() {
                                 // Get the first row in the modal popup table, find the row's select-action-buttons, and click the 1st one.
                                 return chaisePage.recordsetPage.getRows().first().all(by.css('.select-action-button')).first().click();
@@ -196,16 +194,14 @@ describe('When editing a record', function() {
                     case 'timestamp':
                     case 'timestamptz':
                         var inputs = recordEditPage.getTimestampInputsForAColumn(name, 0);
-                        var dateInput = inputs.date, timeInput = inputs.time, meridiemBtn = inputs.meridiem;
+                        var dateInput = inputs.date, timeInput = inputs.time, meridiemBtn = inputs.meridiem, clearBtn = inputs.clearBtn;
 
-                        dateInput.clear().then(function() {
-                            if (newValue) dateInput.sendKeys(newValue.date);
-
-                            return timeInput.clear();
-                        }).then(function() {
-                            if (newValue) timeInput.sendKeys(newValue.time);
-
-                            if (newValue) return meridiemBtn.click();
+                        chaisePage.clickButton(clearBtn).then(function() {
+                            if (newValue) {
+                                dateInput.sendKeys(newValue.date);
+                                timeInput.sendKeys(newValue.time);
+                                return meridiemBtn.click();
+                            }
                         }).catch(function(error) {
                             console.log(error);
                             expect('Something went wrong in this promise chain.').toBe('Please see error message.');
@@ -221,8 +217,12 @@ describe('When editing a record', function() {
                         });
                         break;
                     case 'boolean':
-                        var dropdown = recordEditPage.getInputById(0, name);
-                        recordEditPage.selectDropdownValue(dropdown, newValue);
+                        var dropdown = recordEditPage.getBooleanInputDisplay(name, 0);
+                        if (newValue !== null) {
+                            recordEditPage.selectDropdownValue(dropdown, newValue);
+                        } else {
+                            recordEditPage.getDropdownClear(dropdown).click();
+                        }
                         break;
                     default:
                         var input = recordEditPage.getInputById(0, name);

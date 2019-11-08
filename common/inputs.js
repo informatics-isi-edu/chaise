@@ -4,6 +4,10 @@
     angular.module('chaise.inputs', ['chaise.validators', 'chaise.utils'])
 
     .constant("dataFormats", {
+        placeholder: {
+            date: "YYYY-MM-DD",
+            time: "HH:MM:SS"
+        },
         date: "YYYY-MM-DD",
         time12: "hh:mm:ss", // used for displaying values in recordedit properly
         time24: "HH:mm:ss",
@@ -23,14 +27,16 @@
             mask: "2999-19-39",
             options: {
                 maskDefinitions: {'1': /[0-1]/, '2': /[0-2]/, '3': /[0-3]/},
-                clearOnBlur: true
+                clearOnBlur: true,
+                allowInvalidValue: true
             }
         },
         time: {
-            mask: "19:59:59",
+            mask: "19:59:69",
             options: {
                 maskDefinitions: {'1': /[0-1]/, '2': /[0-2]/, '5': /[0-5]/},
-                clearOnBlur: true
+                clearOnBlur: true,
+                allowInvalidValue: true
             }
         }
     })
@@ -44,8 +50,8 @@
         INT_8_MAX: 9223372036854775807
     })
 
-    .factory('InputUtils', ['dataFormats', '$rootScope', function(dataFormats, $rootScope) {
-        var booleanValues = ['', true, false];
+    .factory('InputUtils', ['dataFormats', 'defaultDisplayname', '$rootScope', function(dataFormats, defaultDisplayname, $rootScope) {
+        var booleanValues = [true, false];
 
         /* Functions for all input types */
         // determines if input should be disabled based on ermrestJS API
@@ -335,7 +341,8 @@
         }
     }])
 
-    .directive('inputSwitch', ['dataFormats', 'InputUtils', 'integerLimits', 'maskOptions', 'modalBox', 'modalUtils', 'UriUtils', '$log', '$rootScope', function(dataFormats, InputUtils, integerLimits, maskOptions, modalBox, modalUtils, UriUtils, $log, $rootScope) {
+    .directive('inputSwitch', ['ConfigUtils', 'dataFormats', 'InputUtils', 'integerLimits', 'maskOptions', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'UriUtils', '$log', '$rootScope',
+                function(ConfigUtils, dataFormats, InputUtils, integerLimits, maskOptions, modalBox, modalUtils, recordsetDisplayModes, UriUtils, $log, $rootScope) {
         return {
             restrict: 'E',
             templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/inputs/inputSwitch.html',
@@ -388,8 +395,30 @@
                 scope.searchPopup = function() {
 
                     var params = {};
+                    // used for title
+                    if ($rootScope.reference) {
+                        params.parentReference = $rootScope.reference;
+                    }
+                    if ($rootScope.tuple) {
+                        params.parentTuple = $rootScope.tuple;
+                    }
 
-                    params.reference = scope.column.filteredRef(null, null).contextualize.compactSelect;
+                    params.displayname = scope.column.displayname;
+
+                    var context = ConfigUtils.getContextJSON();
+                    if (context.mode == context.modes.EDIT) {
+                        params.displayMode = recordsetDisplayModes.foreignKeyPopupEdit;
+                    } else {
+                        params.displayMode = recordsetDisplayModes.foreignKeyPopupCreate;
+                    }
+
+
+                    // TODO: domain-filter pattern support does not work for set all input
+                    // the set will not be filtered based on other column values the user has selected
+                    // filteredRef taked 2 params:
+                    //   - first parameter is the data for the current main entity, but converted into submission format
+                    //   - second parameter is data for the linked table to complete the row name that is currently displayed in input
+                    params.reference = scope.column.filteredRef({}, {}).contextualize.compactSelect;
                     params.reference.session = $rootScope.session;
                     params.context = "compact/select";
                     params.selectedRows = [];
@@ -400,11 +429,12 @@
                     modalUtils.showModal({
                         animation: false,
                         controller: "SearchPopupController",
+                        windowClass: "search-popup foreignkey-popup",
                         controllerAs: "ctrl",
                         resolve: {
                             params: params
                         },
-                        size: "xl",
+                        size: modalUtils.getSearchPopupSize(params),
                         templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
                     }, function dataSelected(tuple) {
                         // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
@@ -414,14 +444,47 @@
                     }, false, false);
                 }
 
+                scope.showRemove = function () {
+                    return scope.model.value || scope.inputContainer.$invalid;
+                }
+
+                scope.showBooleanRemove = function () {
+                    return scope.model.value !== null
+                }
+
+                // used for timestamp[tz] inputs only
+                scope.showDateRemove = function () {
+                    return (scope.model.value && scope.model.value.date) || scope.inputContainer.$error.date;
+                }
+
+                // used for timestamp[tz] inputs only
+                scope.showTimeRemove = function () {
+                    return (scope.model.value && scope.model.value.time) || scope.inputContainer.$error.time;
+                }
+
+                scope.clearInput = function (model) {
+                    scope.model.value = null;
+                }
+
+                // used for foriegn key inputs only
                 scope.clearForeignKey = function() {
-                    scope.model = null;
+                    scope.model.value = null;
                     scope.columnModel.fkDisplayName = null;
                 }
 
-                // Used to remove the value in date and timestamp inputs when the "Clear" button is clicked
+                // Used to remove the value in timestamp inputs when the "Clear" button is clicked
                 scope.clearDatetime = function () {
                     scope.model.value = InputUtils.clearDatetime(scope.columnModel.inputType);
+                }
+
+                // used for timestamp[tz] inputs only
+                scope.clearDate = function () {
+                    scope.model.value.date = null;
+                }
+
+                // used for timestamp[tz] inputs only
+                scope.clearTime = function () {
+                    scope.model.value.time = null;
                 }
             }
         }

@@ -1,5 +1,4 @@
 <div class="modal-header">
-    <button class="btn btn-default pull-right modal-close" ng-show="ctrl.params.canClose" type="button" ng-click="ctrl.cancel()">X</button>
     <h2 class="modal-title">{{::ctrl.params.errorStatus}}</h2>
 </div>
 <div class="modal-body">
@@ -23,6 +22,15 @@
     </span>
 </div>
 <div class="modal-footer">
-    <button ng-show="ctrl.showReloadBtn" class="btn btn-default" type="button" ng-click="ctrl.reload()">Reload</button>
-    <button class="btn btn-danger" type="button" ng-click="ctrl.clickOkToDismiss ? ctrl.cancel() : ctrl.ok()">OK</button>
+    <button class="chaise-btn chaise-btn-danger" id="error-ok-button" type="button" ng-click="ctrl.clickOkToDismiss ? ctrl.cancel() : ctrl.ok()">
+        <span>OK</span>
+    </button>
+    <button ng-show="ctrl.showReloadBtn" class="chaise-btn chaise-btn-secondary" id="error-reload-button"
+            type="button" ng-click="ctrl.reload()" tooltip-placement="bottom-right" uib-tooltip="Reload the page and try again.">
+        <span>Reload</span>
+    </button>
+    <button class="chaise-btn chaise-btn-secondary modal-close" ng-show="ctrl.params.canClose"
+            type="button" ng-click="ctrl.cancel()" tooltip-placement="bottom-right" uib-tooltip="Dismiss the error.">
+        <span>Close</span>
+    </button>
 </div>

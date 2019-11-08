@@ -3,12 +3,12 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'ErrorService', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordAppUtils', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
-        function RecordController(AlertsService, ConfigUtils, DataUtils, ERMrest, ErrorService, logActions, MathUtils, messageMap, modalBox, modalUtils, recordAppUtils, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
+    .controller('RecordController', ['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'ErrorService', 'logActions', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordAppUtils', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
+        function RecordController(AlertsService, ConfigUtils, DataUtils, ERMrest, ErrorService, logActions, logService, MathUtils, messageMap, modalBox, modalUtils, recordAppUtils, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
 
+        var initialHref = $window.location.href;
         var mainContainerEl = angular.element(document.getElementsByClassName('main-container')[0]);
-        var mainBodyEl;
         var addRecordRequests = {}; // <generated unique id : reference of related table>
         var editRecordRequests = {}; // generated id: {schemaName, tableName}
         var updated = {};
@@ -17,44 +17,16 @@
         vm.alerts = AlertsService.alerts;
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
-        vm.rowFocus = {};
         vm.sidePanToggleBtnIndicator = "Show";
+        $rootScope.recordSidePanOpen = true;
+
+        // the top-left-panel that needs to be resizable with toc
+        vm.resizePartners = document.querySelector(".top-left-panel");
 
         var chaiseConfig = ConfigUtils.getConfigJSON();
 
         vm.tooltip = messageMap.tooltip;
         vm.queryTimeoutTooltip = messageMap.queryTimeoutTooltip;
-        vm.gotoInlineTable = function(sectionId, index) {
-            var safeSectionId = vm.makeSafeIdAttr(sectionId);
-            var pageSection = "entity-" + safeSectionId;
-
-            vm.rowFocus[index] = false;
-            var el = angular.element(document.getElementById(pageSection)).parent();
-            mainContainerEl.scrollToElementAnimated(el, 40).then(function () {
-                $timeout(function () {
-                    el.addClass("rowFocus");
-                }, 100);
-                $timeout(function () {
-                    el.removeClass('rowFocus');
-                }, 1600);
-            });
-        };
-        vm.gotoRelatedTable = function(sectionId, index) {
-            var safeSectionId = vm.makeSafeIdAttr(sectionId);
-            var pageSection = "rt-heading-" + safeSectionId;
-
-            $rootScope.relatedTableModels[index].open = true;
-            vm.rowFocus[index] = false;
-            var el = angular.element(document.getElementById(pageSection));
-            mainContainerEl.scrollToElementAnimated(el, 40).then(function () {
-                $timeout(function () {
-                    el.addClass("rowFocus");
-                }, 100);
-                $timeout(function () {
-                    el.removeClass('rowFocus');
-                }, 1600);
-            });
-        };
 
         vm.versionDisplay = function () {
             return UiUtils.humanizeTimestamp($rootScope.reference.location.versionAsMillis);
@@ -64,8 +36,11 @@
             return UiUtils.versionDate($rootScope.reference.location.versionAsMillis);
         }
 
-        vm.togglePan = function() {
-            $scope.recordSidePanOpen = !$scope.recordSidePanOpen;
+        vm.toggleSidebar = function() {
+            var action = ($rootScope.recordSidePanOpen ? logActions.tocHide : logActions.tocShow )
+            logService.logAction(action, logActions.clientAction);
+
+            $rootScope.recordSidePanOpen = !$rootScope.recordSidePanOpen;
         };
 
         vm.canCreate = function() {
@@ -75,10 +50,6 @@
         // TODO change this to reference.unfilteredReference.contextualize...
         vm.createRecord = function() {
             $window.location.href = $rootScope.reference.table.reference.contextualize.entryCreate.appLink;
-        };
-
-        vm.referenceTableApplink = function() {
-            return $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
         };
 
         vm.canEdit = function() {
@@ -142,7 +113,7 @@
             params.versionDateRelative = UiUtils.humanizeTimestamp(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
             params.versionDate = UiUtils.versionDate(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
 
-            refTable.schema.catalog.currentSnaptime().then(function (snaptime) {
+            refTable.schema.catalog.currentSnaptime(logActions.share).then(function (snaptime) {
                 // if current fetched snpatime doesn't match old snaptime, show a warning
                 params.showVersionWarning = (snaptime !== refTable.schema.catalog.snaptime);
             }).finally(function() {
@@ -159,13 +130,16 @@
         };
 
         vm.toRecordSet = function(ref) {
-          // Search app might be broken and should not be linked from here.
+            event.preventDefault();
+            event.stopPropagation();
+            // Search app might be broken and should not be linked from here.
             var appUrl = ref.appLink,
                 recordSetUrl;
-            if(appUrl.search("/search/") > 0){
-              recordSetUrl = appUrl.replace("/search/", "/recordset/");
-            } else{
-              recordSetUrl = appUrl;
+
+            if (appUrl.search("/search/") > 0) {
+                recordSetUrl = appUrl.replace("/search/", "/recordset/");
+            } else {
+                recordSetUrl = appUrl;
             }
             return $window.location.href = recordSetUrl;
         };
@@ -190,9 +164,9 @@
 
                     // don't show the loading if it's done
                     if ($rootScope.loading && $rootScope.lastRendered === $rootScope.relatedTableModels.length-1) {
-                        $timeout(function () {
-                            $rootScope.loading = false;
-                        });
+                        // defer autoscroll to next digest cycle to ensure aggregates and images were fetched and loaded for last RT
+                        $timeout(autoScroll, 0);
+                        $rootScope.loading = false;
                     }
 
                     return true;
@@ -239,20 +213,50 @@
             return true;
         };
 
-        vm.toggleRelatedTableDisplayType = function(dataModel) {
-            if (dataModel.displayType == 'markdown') {
-                dataModel.displayType = 'table';
+        vm.toggleDisplayMode = function(dataModel) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            // if tableModel, table context is nested inside model
+            var tableModel = dataModel;
+            if (dataModel.tableModel) tableModel = dataModel.tableModel;
+
+            var isInline = tableModel.context.indexOf("inline") > -1;
+            var canEdit = vm.canEditRelated(tableModel.reference);
+
+            // action has 3 states for each positional mode:
+            // if seeing table mode, flip to custom (mkdn-display)
+            // else custom mode
+            //    if no edit allowed, flip to table (table-display)
+            //    else edit mode, flip to edit (edit-display)
+            //
+            // then check for 2 positional modes: inline or !inline
+            var action = null;
+            if (dataModel.isTableDisplay) {
+                action = (isInline ? logActions.inlineMkdnDisplay : logActions.relatedMkdnDisplay);
             } else {
-                dataModel.displayType = 'markdown';
+                // we see custom mode (mkdn display)
+                if (canEdit) {
+                    action = (isInline ? logActions.inlineEditDisplay : logActions.relatedEditDisplay);
+                } else {
+                    action = (isInline ? logActions.inlineTableDisplay : logActions.relatedTableDisplay);
+                }
             }
+
+            logService.logAction(action, logActions.clientAction);
+
+            dataModel.isTableDisplay = !dataModel.isTableDisplay;
         };
 
         vm.toggleRelatedTables = function() {
+            var action = ($rootScope.showEmptyRelatedTables ? logActions.hideAllRelated : logActions.showAllRelated)
+            logService.logAction(action, logActions.clientAction);
+
             $rootScope.showEmptyRelatedTables = !$rootScope.showEmptyRelatedTables;
             // NOTE: there's a case where clicking the button to toggle this doesn't re-paint the footer until the mouse "moves"
-            // having this $timeout triggers the function after the digest cycle which is after the elements have finished showing/hidingbased on the above flag
+            // having this $timeout triggers the function after the digest cycle which is after the elements have finished showing/hiding based on the above flag
             $timeout(function () {
-                UiUtils.setFooterStyle(0);
+                UiUtils.attachFooterResizeSensor(0);
             }, 0);
         };
 
@@ -385,11 +389,13 @@
         }
 
         vm.addRelatedRecord = function(ref) {
+            event.preventDefault();
+            event.stopPropagation();
             var cookie = getPrefillCookieObject(ref);
 
             if(ref.derivedAssociationReference){
                 recordAppUtils.pauseUpdateRecordPage();
-                recordCreate.addRelatedRecordFact(true, ref, 0, cookie, vm.editMode, vm.formContainer, vm.readyToSubmit, vm.recordsetLink, vm.submissionButtonDisabled, $rootScope.reference, $rootScope.tuples, $rootScope.session, ConfigUtils.getContextJSON().queryParams, onSuccess, onModalClose);
+                recordCreate.addRelatedRecordFact(true, ref, 0, cookie, vm.editMode, vm.formContainer, vm.readyToSubmit, vm.recordsetLink, vm.submissionButtonDisabled, $rootScope.reference, [$rootScope.tuple], $rootScope.session, ConfigUtils.getContextJSON().queryParams, onSuccess, onModalClose);
                 return;
             }
 
@@ -454,89 +460,121 @@
             }
 
         };
+
         // function called from form.controller.js to notify record that an entity was just updated
         window.updated = function(id) {
             updated[editRecordRequests[id].schema + ":" + editRecordRequests[id].table] = true;
             delete editRecordRequests[id];
         }
 
-        /*** Container Heights and other styling ***/
-        // fetches the height of navbar, bookmark container, and view
-        // also fetches the main container for defining the dynamic height
-        function fetchContainerElements() {
-            var elements = {};
-            try {
-                // get document height
-                elements.docHeight = $document[0].documentElement.offsetHeight
-                // get navbar height
-                elements.navbarHeight = $document[0].getElementById('mainnav').offsetHeight;
-                // get bookmark container height
-                elements.bookmarkHeight = $document[0].getElementById('bookmark-container').offsetHeight;
-                // get record main container
-                elements.container = $document[0].getElementById('main-content');
-            } catch (error) {
-                $log.warn(error);
-            }
-            return elements;
-        };
-
-        function setMainContainerHeight() {
-            var elements = fetchContainerElements();
-            // if these values are not set yet, don't set the height
-            if(elements.navbarHeight !== undefined && elements.bookmarkHeight) {
-                UiUtils.setDisplayContainerHeight(elements);
-            }
-        };
+        // to make sure we're adding the watcher just once
+        var hasTheMainContainerPaddingWatcher = false;
 
         // watch for the display to be ready before setting the main container height
-        $scope.$watch(function() {
+        var unbindDisplayReady = $scope.$watch(function() {
             return $rootScope.displayReady;
         }, function (newValue, oldValue) {
             if (newValue) {
                 $rootScope.recordSidePanOpen = (chaiseConfig.hideTableOfContents === true || $rootScope.reference.display.collapseToc === true) ? false : true;
                 $rootScope.hideColumnHeaders = $rootScope.reference.display.hideColumnHeaders;
-                $timeout(setMainContainerHeight, 0);
+
+                // fix the size of main-container and sticky areas
+                UiUtils.attachContainerHeightSensors();
+
+                // NOTE this function is being called here because this is the
+                // first place that we can be sure that the record-container elements
+                // are available and visible. This is because of the ng-if that we have
+                // on the top-panel container. If we call this function in the watch below,
+                // it will throw an error.
+
+                // make sure the padding of main-container is correctly set
+                UiUtils.attachMainContainerPaddingSensor(document.querySelector(".record-container"));
+
+                // make sure footer is always at the bottom of the page
+                UiUtils.attachFooterResizeSensor(0);
+
+                unbindDisplayReady();
             }
         });
-
-        vm.stickLoading = false;
-        function setLoadingTextStyle() {
-            var mainContainerHeight = $document[0].getElementsByClassName('main-container')[0].offsetHeight;
-            if (mainBodyEl[0].offsetHeight >= mainContainerHeight) {
-                vm.stickLoading = true;
-            }
-        };
-
-        // watch for the main body size to change
-        $scope.$watch(function() {
-            return mainBodyEl && mainBodyEl[0].offsetHeight;
-        }, function (newValue, oldValue) {
-            if (newValue) {
-                $timeout(function () {
-                    UiUtils.setFooterStyle(0);
-                    setLoadingTextStyle();
-                }, 0);
-            }
-        });
-
-        // change the main container height whenever the DOM resizes
-        angular.element($window).bind('resize', function(){
-            if ($rootScope.displayReady) {
-                setMainContainerHeight();
-                UiUtils.setFooterStyle(0);
-                $scope.$digest();
-            }
-        });
-
-        $timeout(function () {
-            mainBodyEl = $document[0].getElementsByClassName('main-body');
-        }, 0);
 
         /*** scroll to events ***/
         // scroll to top button
         $scope.scrollToTop = function () {
-            mainContainerEl.scrollTo(0,0, 500);
+            mainContainerEl.scrollTo(0, 0, 500);
         };
+
+        /**
+         * Function for headings in table of contents to scroll to a section of record app
+         * {String} sectionId - the displayname.value for table/column
+         */
+        vm.scrollToSection = function (sectionId) {
+            logService.logAction(logActions.tocScrollTo, logActions.clientAction);
+
+            var el = determineScrollElement(sectionId);
+            scrollToElement(el);
+        }
+
+        /**
+         * Function called when all related tables have been loaded
+         * checks if a query parameter is present to scroll to a specific page section
+         */
+        function autoScroll () {
+            // query param is url decoded by this function
+            var queryParam = UriUtils.getQueryParam(initialHref, "scrollTo");
+            // return if no query parameter, nothing to scroll to
+            if (!queryParam) return;
+
+            var el = determineScrollElement(queryParam);
+            // no element was returned, means there wasn't a matching displayname on the page
+            if (!el) return;
+
+            scrollToElement(el);
+        }
+
+        // displayname should be the un-encoded displayname.value
+        // this means it _could_ be a value generated from templating then run through the mkdn interpreter
+        function determineScrollElement (displayname) {
+            // id enocde query param
+            var htmlId = vm.makeSafeIdAttr(displayname);
+            // "entity-" is used for record entity section
+            var el = angular.element(document.getElementById("entity-" + htmlId));
+
+            if (el[0]) {
+                // if in entity section, grab parent
+                el = el.parent();
+            } else {
+                // "rt-heading-" is used for related table section
+                el = angular.element(document.getElementById("rt-heading-" + htmlId));
+                // return if no element after checking entity section and RT section
+                if (!el[0]) return;
+
+                var matchingRtm = $rootScope.relatedTableModels.filter(function (rtm) {
+                    return rtm.displayname.value == displayname;
+                });
+
+                // matchingRtm should only ever be size 1, unless 2 different RTs have the same displayname
+                // make sure RT is open before scrolling
+                matchingRtm[0].open = true;
+            }
+
+            return el;
+        }
+
+        // given an element, scroll to the top of that element "slowly"
+        function scrollToElement (element) {
+            mainContainerEl.scrollToElementAnimated(element, 40).then(function () {
+                $timeout(function () {
+                    element.addClass("row-focus");
+                }, 100);
+                $timeout(function () {
+                    element.removeClass('row-focus');
+                }, 1600);
+            }).catch(function (err) {
+                // the scroll promise might be rejected, but we should just fail silently
+                // we saw this happening when you double click on the element.
+                // in this case, the second promise will be rejected.
+            });
+        }
 
         mainContainerEl.on('scroll', $scope.$apply.bind($scope, function () {
             if (mainContainerEl.scrollTop() > 300) {

@@ -31,6 +31,7 @@
         };
     })
 
+    // TODO: this is not working as expected, 1.1.1 is "valid"
     // Validation directive for testing if an input value is a float
     // Use: <input type="number" required float>
     .directive('float', function() {

@@ -13,7 +13,6 @@
 
             "recordset/add.config.json",
             "recordset/edit.config.json",
-            "search/config.json",
             "viewer/config.json"
         ]
     },

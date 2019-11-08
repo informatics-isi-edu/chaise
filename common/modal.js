@@ -4,13 +4,44 @@
     angular.module('chaise.modal', ['chaise.utils'])
 
     //TODO
-    .factory('modalUtils', ["$log", "$uibModal", "$window", function ($log, $uibModal, $window) {
+    .factory('modalUtils', ["UriUtils", "$log", "$uibModal", "$window", function (UriUtils, $log, $uibModal, $window) {
+
+        /**
+         * Given the parameters that are used to generate a modal, returns the appropriate size.
+         * If we are going to show faceting, that will be treated as an extra column.
+         * Then the logic is based on number of represented columns:
+         *   - if #columns <= 3 : md
+         *   - if #columns <= 6 : lg
+         *   - else             : xl
+         * TODO eventually anywhere we're creating searchpopup should be factored into a
+         * function and this logic should be in that function.
+         * But when I did that the passed vm was undefined. This needs more investigation.
+         * TODO we should eventually change the behavior of modals to be based on
+         * page size. Currently it will use a predefined percentage of the page size
+         * which means that it will not be responsive.
+         * @param {Object} params - the modal parameters
+         * @return {string} the modal size
+         **/
+        function getSearchPopupSize(params) {
+            var numberOfColumns = params.reference.columns.length;
+            if (params.showFaceting) {
+                ++numberOfColumns;
+            }
+
+            if (numberOfColumns <= 3) {
+                return "md";
+            } else if (numberOfColumns <= 6) {
+                return "lg";
+            }
+            return "xl";
+        }
+
         function showModal(params, successCB, rejectCB, postRenderCB) {
             var modalInstance = $uibModal.open(params);
 
             modalInstance.rendered.then(function () {
                 try {
-                    angular.element(document.querySelector(".modal-body")).scrollTop(0);
+                    // angular.element(document.querySelector(".modal-body")).scrollTop(0);
                 } catch (err) {
                     $log.warn(err);
                 }
@@ -31,7 +62,8 @@
         }
 
         return {
-            showModal: showModal
+            showModal: showModal,
+            getSearchPopupSize: getSearchPopupSize
         };
     }])
 
@@ -174,8 +206,8 @@
      *  - context {String} - the current context that the directive fetches data for
      *  - selectMode {String} - the select mode the modal uses
      */
-    .controller('SearchPopupController', ['ConfigUtils', 'DataUtils', 'params', 'Session', 'modalBox', 'logActions', '$rootScope', '$timeout', '$uibModalInstance',
-        function SearchPopupController(ConfigUtils, DataUtils, params, Session, modalBox, logActions, $rootScope, $timeout, $uibModalInstance) {
+    .controller('SearchPopupController', ['ConfigUtils', 'DataUtils', 'params', 'Session', 'modalBox', 'logActions', 'recordsetDisplayModes', '$rootScope', '$timeout', '$uibModalInstance',
+        function SearchPopupController(ConfigUtils, DataUtils, params, Session, modalBox, logActions, recordsetDisplayModes, $rootScope, $timeout, $uibModalInstance) {
         var vm = this;
 
         vm.params = params;
@@ -189,32 +221,44 @@
         var chaiseConfig = ConfigUtils.getConfigJSON();
         var reference = vm.reference = params.reference;
         var limit = (!angular.isUndefined(reference) && !angular.isUndefined(reference.display) && reference.display.defaultPageSize) ? reference.display.defaultPageSize : 25;
-        var comment = (typeof params.comment === "string") ? params.comment: reference.table.comment;
         var showFaceting = chaiseConfig.showFaceting ? params.showFaceting : false;
 
         vm.tableModel = {
             readyToInitialize:  true,
             hasLoaded:          false,
             reference:          reference,
-            tableDisplayName:   params.displayname ? params.displayname : reference.displayname,
-            tableComment:            comment,
+            displayname:   params.displayname ? params.displayname : null,
+            comment:       (typeof params.comment === "string") ? params.comment: null,
             columns:            reference.columns,
             sortby:             reference.location.sortObject ? reference.location.sortObject[0].column: null,
             sortOrder:          reference.location.sortObject ? (reference.location.sortObject[0].descending ? "desc" : "asc") : null,
             enableSort:         true,
-            enableAutoSearch:   true,
             pageLimit:          limit,
             rowValues:          [],
             selectedRows:       params.selectedRows,
             matchNotNull:       params.matchNotNull,
             matchNull:          params.matchNull,
-            hideNotNullChoice:  params.hideNotNullChoice,
-            hideNullChoice:     params.hideNullChoice,
             search:             reference.location.searchTerm,
-            config:             {viewable: false, editable: false, deletable: false, selectMode: params.selectMode, showFaceting: showFaceting, facetPanelOpen: params.facetPanelOpen, showNull: params.showNull === true},
-            context:            params.context,
-            getDisabledTuples:  params.getDisabledTuples,
-            logObject:          params.logObject ? params.logObject: {}
+            config:             {
+                viewable: false, deletable: false,
+                editable:           (typeof params.editable === "boolean") ? params.editable : true,
+                selectMode:         params.selectMode,
+                showFaceting:       showFaceting, facetPanelOpen: params.facetPanelOpen,
+                showNull:           params.showNull === true,
+                hideNotNullChoice:  params.hideNotNullChoice,
+                hideNullChoice:     params.hideNullChoice,
+                displayMode:        params.displayMode ? params.displayMode : recordsetDisplayModes.popup
+            },
+            context:                    params.context,
+            getDisabledTuples:          params.getDisabledTuples,
+            logObject:                  params.logObject ? params.logObject: {},
+            // TODO different modals should pass different strings (ultimatly it should be the element and not selector)
+            parentContainerSelector:    ".search-popup .modal-content",
+            parentStickyAreaSelector:   ".search-popup .modal-header",
+
+            // used for displayname logic
+            parentReference:    params.parentReference ? params.parentReference : null,
+            parentTuple:        params.parentTuple ? params.parentTuple : null
         };
 
         /**
@@ -240,6 +284,7 @@
         }
 
         /**
+         * TODO remove matchNotNull from here
          * This will generate the correct object that we need to pass in case of multi-select.
          * It will return an object that,
          * - will have `matchNotNull` attribute if match not-null is selected
@@ -311,9 +356,10 @@
      *   - {Object} citation - citation object returned from ERMrest.tuple.citation
      *
      */
-    .controller('ShareCitationController', ['$uibModalInstance', '$window', 'params', function ($uibModalInstance, $window, params) {
+    .controller('ShareCitationController', ['logActions', 'logService', 'params', '$uibModalInstance', '$window', function (logActions, logService, params, $uibModalInstance, $window) {
         var vm = this;
         vm.params = params;
+        vm.logActions = logActions;
         vm.warningMessage = "The displayed content may be stale due to recent changes made by other users. You may wish to review the changes prior to sharing the <a ng-href='{{ctrl.params.permalink}}'>live link</a> below. Or, you may share the older content using the <a ng-href='{{ctrl.params.versionLink}}'>versioned link</a>.";
 
         vm.moreThanWeek = function () {
@@ -339,7 +385,8 @@
             vm.downloadBibtex = $window.URL.createObjectURL( bibtexBlob );
         }
 
-        vm.copyToClipboard = function (text) {
+        vm.copyToClipboard = function (text, action) {
+            logService.logAction(action, logActions.clientAction);
             // Create a dummy input to put the text string into it, select it, then copy it
             // this has to be done because of HTML security and not letting scripts just copy stuff to the clipboard
             // it has to be a user initiated action that is done through the DOM object

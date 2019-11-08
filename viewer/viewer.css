@@ -2,9 +2,6 @@ html, body {
     background-color: #f9f9f9;
 }
 
-.app-container {
-    height: 100%;
-}
 #alert {
     position: fixed;
     top: 15;
@@ -127,7 +124,7 @@ a.cardlink.delete {
 #viewer-container{
     display: flex;
     flex-direction: column;
-    height: 100%;
+    height: 92.5%;
     padding: 0;
 }
 
@@ -136,10 +133,6 @@ a.cardlink.delete {
     top: 0;
     right: 0;
     bottom: 0;
-}
-
-#page-title {
-    padding: 0 20px;
 }
 
 #create-annotation-form .ui-select-container,
@@ -223,7 +216,7 @@ a.cardlink.delete {
     display: flex;
     flex-direction: row;
     flex: 1;
-    height: 100%;
+    /* height: 100%; */
     /* padding: 15px 0 15px 0; */
 }
 
@@ -247,7 +240,7 @@ a.cardlink.delete {
     overflow: hidden;
     background: #fff;
     z-index: 1;
-    height: 100%;
+    /* height: 100%; */
     padding: 0;
 }
 

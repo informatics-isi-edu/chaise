@@ -1,31 +1,32 @@
 <header ng-hide="hideNavbar" class="row" style="z-index: -1;">
     <nav id="mainnav" class="navbar navbar-inverse" role="navigation">
-        <div style="padding-right: 30px; padding-left: 30px">
-            <!-- Brand and toggle get grouped for better mobile display -->
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle collapsed" data-target="#fb-navbar-main-collapse">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="md-chevron-down"></span>
-                    MENU
-                </button>
-                <a class="navbar-brand" ng-href="{{brandURL || '/' }}">
-                    <span ng-if="brandImage"><img id="brand-image" ng-src="{{brandImage}}"></span>
-                    <span id="brand-text" ng-bind="brandText"></span>
-                </a>
-            </div>
-
-            <!-- Collect the nav links, forms, and other content for toggling -->
-            <div class="collapse navbar-collapse navbar-inverse" id="fb-navbar-main-collapse">
-                <login></login>
-                <a ng-if="isVersioned()" id="live-btn" class="nav navbar-nav navbar-right" ng-click="::toLive()" uib-tooltip="You are viewing snapshotted data. Click here to return to the live data catalog." tooltip-placement="bottom">View Live Data</a>
-                <ul id="navbar-menu" class="nav navbar-nav">
-                    <li ng-repeat="item in menu" class="dropdown" on-toggle="onToggle(open)" uib-dropdown>
-                        <a ng-if="!item.children" ng-href="{{item.url}}" target="{{item.newTab ? '_blank' : '_self'}}">{{item.name}}</a>
-                        <a ng-if="item.children" class="dropdown-toggle" uib-dropdown-toggle>{{item.name}} <span class="caret"></span></a>
-                        <ul ng-if="item.children" navbar-menu menu="item.children" class="dropdown-menu"></ul>
-                    </li>
-                </ul>
-            </div><!--/.nav-collapse -->
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-target="#fb-navbar-main-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="md-chevron-down"></span>
+                MENU
+            </button>
+            <a class="navbar-brand" ng-href="{{brandURL || '/' }}">
+                <span ng-if="brandImage"><img id="brand-image" ng-src="{{brandImage}}"></span>
+                <span id="brand-text" ng-bind="brandText"></span>
+            </a>
         </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse navbar-inverse" id="fb-navbar-main-collapse">
+            <ul id="navbar-menu" class="nav navbar-nav">
+                <li ng-repeat="item in menu" class="dropdown" on-toggle="onToggle(open)" uib-dropdown>
+                    <a ng-if="!item.children" ng-href="{{item.url}}" target="{{item.newTab ? '_blank' : '_self'}}">{{item.name}}</a>
+                    <a ng-if="item.children" class="dropdown-toggle" uib-dropdown-toggle>{{item.name}} <span class="caret"></span></a>
+                    <ul ng-if="item.children" navbar-menu menu="item.children" class="dropdown-menu"></ul>
+                </li>
+            </ul>
+
+            <!-- navbar-right pulls elements to the right in the order they are defined
+            <login> will be pulled right first, then versioned data pulled right next to it (on the left) -->
+            <login></login>
+            <a ng-if="isVersioned()" id="live-btn" class="nav navbar-nav navbar-right" ng-click="::toLive()" uib-tooltip="You are viewing snapshotted data. Click here to return to the live data catalog." tooltip-placement="bottom">View Live Data</a>
+        </div><!--/.nav-collapse -->
     </nav>
 </header>

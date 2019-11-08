@@ -69,7 +69,7 @@ describe('View existing record,', function() {
         });
 
         it("should display the entity subtitle name with html in it.", function() {
-            expect(chaisePage.recordPage.getEntitySubTitle()).toBe(testParams.html_table_display);
+            expect(chaisePage.recordPage.getEntitySubTitleElement().getText()).toBe(testParams.html_table_display);
         });
 
         it("should load chaise-config.js and have resolverImplicitCatalog=false,", function() {
@@ -94,7 +94,7 @@ describe('View existing record,', function() {
                 shareDialog.allowAnimations(false);
 
                 // verify modal dialog contents
-                expect(chaisePage.recordEditPage.getModalTitle().element(by.tagName("strong")).getText()).toBe("Share", "Share citation modal title is incorrect");
+                expect(chaisePage.recordEditPage.getModalTitle().getText()).toBe("Share", "Share citation modal title is incorrect");
                 expect(chaisePage.recordPage.getModalListElements().count()).toBe(1, "Number of list elements in share citation modal is incorrect");
 
                 return browser.getCurrentUrl();
@@ -104,7 +104,7 @@ describe('View existing record,', function() {
                 expect(chaisePage.recordPage.getPermalinkText().getText()).toContain(url, "permalink url is incorrect");
 
                 // close dialog
-                return chaisePage.recordEditPage.getModalTitle().element(by.tagName("button")).click();
+                return chaisePage.recordsetPage.getModalCloseBtn().click();
             }).then(function () {
                 done();
             }).catch(function(err){
@@ -151,7 +151,7 @@ describe('View existing record,', function() {
                 expect(alert.isDisplayed()).toBeTruthy("Alert warning the user that they may be seeing stale data is not present");
 
                 // close dialog
-                return chaisePage.recordEditPage.getModalTitle().element(by.tagName("button")).click();
+                return chaisePage.recordsetPage.getModalCloseBtn().click();
             }).then(function () {
                 done();
             }).catch(function(err){
@@ -190,17 +190,20 @@ describe('View existing record,', function() {
                 copyButton = chaisePage.recordPage.getCopyRecordButton();
 
             it("should display the entity title and subtitle based on their markdown patterns.", function() {
-                var subtitleElement = chaisePage.recordPage.getEntitySubTitleElement().element(by.tagName("span")),
-                    titleElement = chaisePage.recordPage.getEntityTitleElement().element(by.tagName("span"));
+                // page-title and page-subtitle are attached to chaise-title,
+                // subtitle structure is: chaise-title -> a -> span (therefore finding span works)
+                // title structure is: chaise-title -> span -> span (therefore we need to be more specific)
+                var subtitleElement = chaisePage.recordPage.getEntitySubTitleElement().element(by.css("span")),
+                    titleElement = chaisePage.recordPage.getEntityTitleElement().element(by.css("span span"));
 
                 subtitleElement.getAttribute("innerHTML").then(function(html) {
                     expect(html).toBe(testParams.table_inner_html_display);
-                    expect(chaisePage.recordPage.getEntitySubTitle()).toBe(testParams.table_displayname);
+                    expect(subtitleElement.getText()).toBe(testParams.table_displayname);
 
                     return titleElement.getAttribute("innerHTML");
                 }).then(function(html) {
                     expect(html).toBe(testParams.entity_inner_html_title);
-                    expect(chaisePage.recordPage.getEntityTitle()).toBe(testParams.entity_title);
+                    expect(titleElement.getText()).toBe(testParams.entity_title);
                 });
             });
 
@@ -230,9 +233,9 @@ describe('View existing record,', function() {
 
                     return titleElement.getText();
                 }).then(function(txt) {
-                    expect(txt).toBe("Create Record", "Recordedit title is incorrect.");
+                    expect(txt).toBe("Create new " + testParams.table_displayname, "Recordedit title is incorrect.");
 
-                    return chaisePage.recordEditPage.getEntitySubtitleElement().element(by.css('span[ng-bind-html]')).getAttribute("innerHTML");
+                    return titleElement.element(by.css('span[ng-bind-html]')).getAttribute("innerHTML");
                 }).then(function(html) {
                     expect(html).toBe(testParams.table_inner_html_display);
 

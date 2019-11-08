@@ -51,11 +51,10 @@
     .value('recordsetModel', {
         hasLoaded: false,
         reference: null,
-        tableDisplayName: null,
+        displayname: null,
         columns: [],
         sortby: null,       // column name, user selected or null
         sortOrder: null,    // asc (default) or desc
-        enableAutoSearch: true,
         enableSort: true,   // allow sorting
         page: null,         // current page
         rowValues: [],      // array of rows values, each value has this structure {isHTML:boolean, value:value}
@@ -66,8 +65,8 @@
     })
 
     // Register work to be performed after loading all modules
-    .run(['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'ErrorService', 'FunctionUtils', 'headInjector', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
-        function(AlertsService, ConfigUtils, DataUtils, ERMrest, ErrorService, FunctionUtils, headInjector, logActions, MathUtils, messageMap, modalBox, recordsetModel, Session, UiUtils, UriUtils, $log, $rootScope, $window) {
+    .run(['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'ErrorService', 'FunctionUtils', 'headInjector', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'recordsetDisplayModes', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
+        function(AlertsService, ConfigUtils, DataUtils, ERMrest, ErrorService, FunctionUtils, headInjector, logActions, MathUtils, messageMap, modalBox, recordsetDisplayModes, recordsetModel, Session, UiUtils, UriUtils, $log, $rootScope, $window) {
         try {
             var session;
 
@@ -88,8 +87,11 @@
                 deletable: modifyEnabled && deleteEnabled,
                 selectMode: modalBox.noSelect,
                 showFaceting: showFaceting,
-                facetPanelOpen: showFaceting
+                facetPanelOpen: showFaceting,
+                displayMode: recordsetDisplayModes.fullscreen
             };
+
+            recordsetModel.parentStickyAreaSelector = "#mainnav";
 
             recordsetModel.queryTimeoutTooltip = messageMap.queryTimeoutTooltip;
             $rootScope.alerts = AlertsService.alerts;
@@ -129,10 +131,10 @@
                     context.catalogID = reference.table.schema.catalog.id;
                     context.tableName = reference.table.name;
 
+
                     recordsetModel.reference = reference.contextualize.compact;
                     recordsetModel.context = context.appContext = "compact";
                     recordsetModel.reference.session = session;
-                    recordsetModel.tableComment = recordsetModel.reference.table.comment;
 
                     // if there's something wrong with the facet or filters in the url,
                     // this getter will complain. We want to catch these errors here,
@@ -150,7 +152,6 @@
                     } else {
                         recordsetModel.pageLimit = 25;
                     }
-                    recordsetModel.tableDisplayName = recordsetModel.reference.displayname;
                     recordsetModel.tableName = recordsetModel.reference.table.name;
                     recordsetModel.schemaName = recordsetModel.reference.table.schema.name;
 

@@ -12,18 +12,18 @@ var testParams = {
         operator: "="
     },
     headers: [
-        "booking (showing all 6 results)", // normal
-        "schedule (showing all 2 results)", // has search
-        "media (showing all 1 results)", // has row_markdown_pattern
-        "association_table (showing all 1 results)", // association
-        "accommodation_image (showing first 2 results)", // association with page_size
-        "association_table_markdown (showing all 1 results)", // association with markdown
-        "related_table_2 (showing all 1 results)", // related entity with path length 3
-        "table_w_aggregates (showing all 2 results)", // related entity with aggregate columns
-        "table_w_invalid_row_markdown_pattern (showing all 1 results)" // related entity with invalid row_markdown_pattern
+        "booking", // normal
+        "schedule", // has search
+        "media", // has row_markdown_pattern
+        "association_table", // association
+        "accommodation_image", // association with page_size
+        "association_table_markdown", // association with markdown
+        "related_table_2", // related entity with path length 3
+        "table_w_aggregates", // related entity with aggregate columns
+        "table_w_invalid_row_markdown_pattern" // related entity with invalid row_markdown_pattern
     ],
     tocHeaders: [
-        "Main", "booking (6)", "schedule (2)", "media (1)", "association_table (1)",
+        "Summary", "booking (6)", "schedule (2)", "media (1)", "association_table (1)",
         "accommodation_image (2+)", "association_table_markdown (1)", "related_table_2 (1)",
         "table_w_aggregates (2)", "table_w_invalid_row_markdown_pattern (1)"
     ],
@@ -76,7 +76,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         canEdit: true,
         viewMore: {
             displayname: "booking",
-            filter: "Accommodations : Super 8 North Hollywood Motel"
+            filter: "Accommodations\nSuper 8 North Hollywood Motel"
         },
         rowValues: [
             ["125.0000","2016-03-12 00:00:00"],
@@ -135,7 +135,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         count: 2,
         viewMore: {
             displayname: "schedule",
-            filter: "Accommodations : Super 8 North Hollywood Motel"
+            filter: "Accommodations\nSuper 8 North Hollywood Motel"
         }
     };
     describe("for a related entity with search applink, ", function () {
@@ -168,7 +168,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         isAssociation: true,
         viewMore: {
             displayname: "related_table",
-            filter: "base table association related : Super 8 North Hollywood Motel"
+            filter: "base table association related\nSuper 8 North Hollywood Motel"
         },
         rowValues: [
             ["Television"]
@@ -184,6 +184,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         add: {
             relatedDisplayname: "association_table",
             tableDisplayname: "related_table",
+            modalTitle: "Add related_table to Accommodations : Super 8 North Hollywood Motel",
             totalCount: 4,
             existingCount: 1,
             disabledRows: ["1"],
@@ -217,11 +218,11 @@ describe ("Viewing exisiting record with related entities, ", function () {
 
         it ("Opened modal by `Add` button should honor the page_size.", function () {
             var addRelatedRecordLink = chaisePage.recordPage.getAddRecordLink(association_with_page_size.displayname);
-            chaisePage.clickButton(addRelatedRecordLink).then(function(){
+            addRelatedRecordLink.click().then(function(){
                 chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
                 return chaisePage.recordEditPage.getModalTitle().getText();
             }).then(function (title) {
-                expect(title).toBe("Choose file", "titlte missmatch.");
+                expect(title).toBe("Add file to Accommodations : Super 8 North Hollywood Motel", "titlte missmatch.");
 
                 browser.wait(function () {
                     return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
@@ -264,7 +265,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         baseTable:"Accommodations",
         viewMore: {
             displayname: "related_table_2",
-            filter: "base table association related : Super 8 North Hollywood Motel"
+            filter: "base table association related\nSuper 8 North Hollywood Motel"
         },
         rowValues: [
             ["one"],
@@ -290,7 +291,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         baseTable:"Accommodations",
         viewMore: {
             displayname: "table_w_aggregates",
-            filter: "fk_to_accommodation : Super 8 North Hollywood Motel"
+            filter: "fk_to_accommodation\nSuper 8 North Hollywood Motel"
         },
         rowValues: [
             ["1", "100", "100", "1", "1"],
@@ -317,7 +318,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         viewMore: {
             name: "table_w_invalid_row_markdown_pattern",
             displayname: "table_w_invalid_row_markdown_pattern",
-            filter: "Accommodations : Super 8 North Hollywood Motel"
+            filter: "Accommodations\nSuper 8 North Hollywood Motel"
         },
         rowValues: [
             ["four"]
@@ -331,5 +332,33 @@ describe ("Viewing exisiting record with related entities, ", function () {
 
     describe("for a related table with invalid row_markdown_pattern, ", function () {
         recordHelpers.testRelatedTable(related_w_invalid_row_markdown_pattern, pageReadyCondition);
+    });
+});
+
+describe("For scroll to query parameter", function() {
+    var displayname = "table_w_aggregates";
+
+    beforeAll(function () {
+        var keys = [];
+        keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
+        browser.ignoreSynchronization=true;
+        var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/" + keys.join("&") + "?scrollTo=" + displayname;
+        browser.get(url);
+
+        pageReadyCondition();
+    });
+
+    it("should scroll to the related table.", function () {
+        var heading = chaisePage.recordPage.getRelatedTableAccordion(displayname);
+
+        browser.wait(function () {
+            return heading.isDisplayed().then(function (bool) {
+                return bool;
+            });
+        });
+
+        heading.getAttribute("class").then(function(className) {
+            expect(className).toContain("panel-open", "Related table panel is not open when autoscrolled.");
+        });
     });
 });

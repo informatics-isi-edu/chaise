@@ -183,7 +183,7 @@ function addNewButtons() {
       data: [{
           name: "cmdModalPrev",
           title: "Fullscreen Preview",
-          btnClass: 'btn btn-primary btn-inverted',
+          btnClass: 'chaise-btn chaise-btn-secondary',
           icon: {
               fa: "fa fa-arrows-alt",
               glyph: "glyphicon glyphicon-fullscreen"
@@ -202,7 +202,7 @@ function addNewButtons() {
       data: [{
           name: "cmdRidLink",
           title: "RID link",
-          btnClass: 'btn btn-default',
+          btnClass: 'chaise-btn chaise-btn-secondary chaise-btn-no-padding',
           icon: {
               // fa: "fa fa-arrows-alt",
               glyph: "chaise-icon chaise-RID"

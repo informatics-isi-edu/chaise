@@ -12,7 +12,7 @@ var testParams = {
             absMax: "30",
             zoom1: { min: "7", max: "25" },
             zoom2: { min: "9", max: "21" },
-            allRecords: "Displaying 25 of 195 Records",
+            allRecords: "Displaying first 25\nof 195 matching results",
             zoom3: { min: "11", max: "19" }
         }, {
             name: "float_col",
@@ -20,7 +20,7 @@ var testParams = {
             absMax: "30.3",
             zoom1: { min: "6.94", max: "24.46" },
             zoom2: { min: "10.444", max: "20.956" },
-            allRecords: "Displaying 25 of 155 Records",
+            allRecords: "Displaying first 25\nof 155 matching results",
             zoom3: { min: "12.5464", max: "18.8536" }
         }, {
             name: "date_col",
@@ -28,7 +28,7 @@ var testParams = {
             absMax: "2030-06-30",
             zoom1: { min: "2006-11-27", max: "2024-08-12" },
             zoom2: { min: "2010-06-13", max: "2021-01-28" },
-            allRecords: "Displaying 25 of 165 Records",
+            allRecords: "Displaying first 25\nof 165 matching results",
             zoom3: { min: "2012-07-30", max: "2018-12-20" }
         }, {
             name: "timestamp_col",
@@ -42,7 +42,7 @@ var testParams = {
                 min: {date: "2007-06-01", time: "18:08:02"},
                 max: {date: "2007-08-04", time: "13:23:27"}
             },
-            allRecords: "Displaying 25 of 155 Records",
+            allRecords: "Displaying first 25\nof 155 matching results",
             zoom3: {
                 min: {date: "2007-06-14", time: "12:23:07"},
                 max: {date: "2007-07-22", time: "19:08:22"}

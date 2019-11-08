@@ -14,7 +14,6 @@ Thumbs.db
 bower_components
 node_modules
 dist
-jsdoc
 deployment-config.json
 .make-*
 index.html
@@ -27,3 +26,10 @@ mdHelp.html
 test/e2e/data_setup/uploaded_files/*.*
 package-lock.json
 entities.json
+
+# the compiled css files
+common/styles/app.css
+common/styles/navbar.css
+
+# sass temporary compiled files
+.sass-cache

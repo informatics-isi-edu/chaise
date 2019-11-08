@@ -171,8 +171,10 @@
                     // Test scene 3
                     var params = window.location.href.split("?");
                     if(params.length > 1){
-                        // image.entity.uri = image.entity.uri.replace("/openseadragon-viewer/mview.html", "https://dev.rebuildingakidney.org/~mingyi/openseadragon-viewer/index.html");
-                        // HACK: Remove the hardcoded the url
+                        /* HACK: Remove the hardcoded the url for openseadragon-viewer as currently it is being served from demo/chaise-osd. It should be
+                          changed to /openseadragon-viewer which should be in the same directory as chaise. Reason for this: Currently the master of openseadragon-viewer
+                          is not upto date with the branch svg-on-tif.
+                        */
                         console.log("Origin", origin);
                         image.entity.uri = origin+"/demo/chaise-osd/openseadragon-viewer/index.html?" + params[1];
                     }

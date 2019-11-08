@@ -25,7 +25,7 @@ var testParams = {
             columnName: "col_w_column_order_false"
         },
         {
-            title: "facet without order and hide_num_occurrences : true",
+            title: "facet without order and hide_num_occurrences\ntrue",
             facetIdx: 19,
             modalOptions: ['01', '13', '12', '11', '10', '09', '08', '07', '06', '05', '04', '03', '02'],
             sortable: true,
@@ -35,15 +35,12 @@ var testParams = {
         }
     ],
     not_null: {
-        option: 0,
-        result_num_w_not_null: 20,
-        modal_available_options: 20,
-        disabled_rows_w_not_null: 10,
+        option: 5,
+        result_num_w_not_null: 25,
+        modal_available_options: 10,
+        disabled_rows_w_not_null: 11,
         options_w_not_null: [
-            'All Records With Value', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'
-        ],
-        options_wo_not_null: [
-            'All Records With Value', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'
+            'All records with value', 'No value', 'one', 'Empty', 'two', 'seven', 'eight', 'elevens', 'four', 'six', 'ten', 'three'
         ]
     },
     null_filter: {
@@ -52,11 +49,6 @@ var testParams = {
             totalNumOptions: 12,
             option: 1,
             numRows: 5
-        },
-        modal: {
-            facetIdx: 10,
-            totalNumOptions: 6,
-            numRows: 0
         },
         right_join: {
             firstFacet: {
@@ -69,7 +61,7 @@ var testParams = {
             secondFacet: {
                 name: "F5",
                 idx:17,
-                options: ["All Records With Value", "one"]
+                options: ["All records with value", "one"]
             }
         }
     },
@@ -94,8 +86,8 @@ var testParams = {
         numRows: 8,
         numRowsWFacet: 3,
         numRowsWOCustomFacet: 10,
-        options: ['No Value', 'one', 'two'],
-        optionsWOCustomFacet: ['No Value', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten']
+        options: ['No value', 'one', 'two'],
+        optionsWOCustomFacet: ['No value', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten']
     },
     maximumLength: {
         facetIdx: 20,
@@ -120,16 +112,17 @@ var testParams = {
         "1-o7Ye2EkulrWcCVFNHi3A": "one", // faceting_main_fk1
         "hmZyP_Ufo3E5v_nmdTXyyA": "one" // faceting_main_fk2
     },
-    glyphLeftClass: "glyphicon-triangle-left",
-    glyphRightClass: "glyphicon-triangle-right",
-    foreignKeyPopupFacetFilter: "term : eight",
+    hideFilterPanelClass: "chaise-sidebar-close",
+    showFilterPanelClass: "chaise-sidebar-open",
+    foreignKeyPopupFacetFilter: "term\neight",
     associationRTName: "main_f3_assoc",
-    associationPopupFacetFilter: "term : five",
+    associationPopupFacetFilter: "term\nfive",
     associationPopupSelectedRowsFilter: "five"
 };
 
 
 describe("Other facet features, ", function() {
+
     describe("selecting entity facet that is not on the shortest key.", function () {
         var facet, idx, clearAll;
         beforeAll(function (done) {
@@ -151,17 +144,18 @@ describe("Other facet features, ", function() {
         });
 
         it('Side panel should hide/show by clicking pull button', function(done){
-            var recPan =  chaisePage.recordPage.getSidePanel(),
-                fiddlerBtn = chaisePage.recordPage.getSidePanelFiddler();
+            var recPan =  chaisePage.recordsetPage.getSidePanel(),
+                showPanelBtn = chaisePage.recordsetPage.getShowFilterPanelBtn(),
+                hidePanelBtn = chaisePage.recordsetPage.getHideFilterPanelBtn();
 
-            expect(fiddlerBtn.getAttribute("class")).toContain(testParams.glyphLeftClass, 'Side Pan Pull button is not pointing in the left direction');
-            expect(recPan.getAttribute("class")).toContain('open-panel', 'Side Panel is not visible when fiddler is poining in left direction');
+            expect(hidePanelBtn.isDisplayed()).toBeTruthy('hide filter panel not visible.');
+            expect(recPan.getAttribute("class")).toContain('open-panel', 'Side Panel is not visible');
 
-            fiddlerBtn.click().then(function(){
-                expect(fiddlerBtn.getAttribute("class")).toContain(testParams.glyphRightClass, "Side Pan Pull button is not pointing in the right direction.");
-                expect(recPan.getAttribute("class")).toContain('close-panel', 'Side Panel is not hidden when fiddler is poining in right direction');
+            hidePanelBtn.click().then(function(){
+                expect(showPanelBtn.isDisplayed()).toBeTruthy('show filter panel not visible.');
+                expect(recPan.getAttribute("class")).toContain('close-panel', 'Side Panel is not hidden');
 
-                return fiddlerBtn.click();
+                return showPanelBtn.click();
             }).then(function () {
                 done();
             }).catch(chaisePage.catchTestError(done));
@@ -214,15 +208,17 @@ describe("Other facet features, ", function() {
             }).then(function () {
                 return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
             }).then(function () {
-                chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
+
+                browser.wait(function() {
+                    return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                        return (ct == testParams.filter_secondary_key.numRowsAfterModal);
+                    });
+                }, browser.params.defaultTimeout, "number of visible rows after selecting a second option missmatch.");
 
                 return chaisePage.recordsetPage.getCheckedFacetOptions(idx).count();
             }).then (function (cnt) {
                 expect(cnt).toBe(2, "Number of facet options is incorrect after returning from modal");
 
-                return chaisePage.recordsetPage.getRows().count();
-            }).then(function (ct) {
-                expect(ct).toBe(testParams.filter_secondary_key.numRowsAfterModal, "Number of visible rows after selecting a second option from the modal is incorrect");
                 return chaisePage.clickButton(chaisePage.recordsetPage.getClearAllFilters());
             }).then(function () {
                 done();
@@ -273,7 +269,7 @@ describe("Other facet features, ", function() {
 
                 if (!params.sortable) {
                     it ("the facet column sort option should not be available.", function () {
-                        expect(chaisePage.recordsetPage.getColumnSortButton("0").isDisplayed()).toBe(false);
+                        expect(chaisePage.recordsetPage.getColumnSortButton("0").isPresent()).toBe(false);
                     });
                 } else {
                     it ("users should be able to change the sort to be based on the scalar column.", function (done) {
@@ -325,9 +321,9 @@ describe("Other facet features, ", function() {
     });
 
     describe("Records With Value (not-null) filter, ", function () {
-        var notNullBtn, showMore;
+        var notNullBtn, showMore, facet;
 
-        beforeAll(function () {
+        beforeAll(function (done) {
             var uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
 
             browser.ignoreSynchronization=true;
@@ -335,46 +331,41 @@ describe("Other facet features, ", function() {
             chaisePage.waitForElementInverse(element(by.id("spinner")));
 
             clearAll = chaisePage.recordsetPage.getClearAllFilters();
-            showMore = chaisePage.recordsetPage.getShowMore(testParams.not_null.option);
-        });
+            browser.wait(EC.elementToBeClickable(clearAll));
 
-        it ("`All Records With Value` option must be available in modal picker.", function (done) {
-            browser.wait(EC.elementToBeClickable(showMore));
-            chaisePage.clickButton(showMore).then(function () {
+            clearAll.click().then(function () {
                 chaisePage.waitForElementInverse(element(by.id("spinner")));
-                notNullBtn = chaisePage.recordsetPage.getModalMatchNotNullInput();
-                expect(notNullBtn.isPresent()).toEqual(true);
+
+                facet = chaisePage.recordsetPage.getFacetById(testParams.not_null.option);
+
+                return chaisePage.clickButton(facet);
+            }).then(function () {
+                showMore = chaisePage.recordsetPage.getShowMore(testParams.not_null.option);
+                notNullBtn = chaisePage.recordsetPage.getFacetOption(testParams.not_null.option, 0);
                 done();
             }).catch(chaisePage.catchTestError(done));
-
         });
 
-        it ("Selecting `All Records With Value` should disable all the rows.", function (done) {
+        it ("`All Records with value` option must be available in facet panel.", function (done) {
+            // make sure facet is loaded
+            browser.wait(EC.elementToBeClickable(showMore));
+            chaisePage.recordsetPage.getFacetOptionsText(testParams.not_null.option).then(function (text) {
+                expect(text).toEqual(testParams.not_null.options_w_not_null, "the options are not the same.");
+                done();
+            }).catch(chaisePage.catchTestError(done));
+        });
+
+        it ("After clicking on `All records with value`, the rest of options must be disabled", function (done) {
+
             chaisePage.clickButton(notNullBtn).then(function () {
                 browser.wait(function () {
-                    return chaisePage.recordsetPage.getModalDisabledRows().count().then(function (ct) {
-                        return (ct > 0);
+                    return chaisePage.recordsetPage.getCheckedFacetOptions(testParams.not_null.option).count().then(function(ct) {
+                        return ct == 1;
                     });
-                });
-                // TODO uncomment this line when `null-filter` should show up in RS select with faceting
-                // expect(chaisePage.recordsetPage.getModalMatchNullInput().getAttribute('disabled')).toBe('true', "null option was not disabled.");
-                expect(chaisePage.recordsetPage.getModalDisabledRows().count()).toBe(testParams.not_null.modal_available_options, "number of disabled rows missmatch.");
-                expect(chaisePage.recordsetPage.getCheckedModalOptions().count()).toBe(0, "number of checked rows missmatch.");
-                return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
-            }).then(function () {
-                done();
-            }).catch(chaisePage.catchTestError(done));
-        });
+                }, browser.params.defaultTimeout);
 
-        it ("After submitting the filters, `All Records With Value` should be on top of the list with the rest of options being disabled", function (done) {
-            chaisePage.waitForElementInverse(chaisePage.recordsetPage.getFacetSpinner(testParams.not_null.option));
-            browser.wait(function () {
-                return chaisePage.recordsetPage.getCheckedFacetOptions(testParams.not_null.option).count().then(function(ct) {
-                    return ct == 1;
-                });
-            }, browser.params.defaultTimeout);
-
-            chaisePage.recordsetPage.getCheckedFacetOptions(testParams.not_null.option).count().then(function (count) {
+                return chaisePage.recordsetPage.getCheckedFacetOptions(testParams.not_null.option).count()
+            }).then(function (count) {
                 expect(count).toBe(1, "number of selected filters missmatch.");
 
                 return chaisePage.recordsetPage.getFacetOptionsText(testParams.not_null.option);
@@ -387,14 +378,13 @@ describe("Other facet features, ", function() {
             }).catch(chaisePage.catchTestError(done));
         });
 
-        it ("Deselecting `All Records With Value` should enable all the values on the list.", function (done) {
-            chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(testParams.not_null.option, 0)).then(function () {
+        it ("Deselecting `All records with value` should enable all the values on the list.", function (done) {
+            chaisePage.clickButton(notNullBtn).then(function () {
                 return chaisePage.recordsetPage.getFacetOptionsText(testParams.not_null.option);
             }).then(function (text) {
                 // make sure the options havn't changed
                 expect(text).toEqual(testParams.not_null.options_w_not_null, "the text of selected faacet missmatch.");
 
-                // TODO uncomment this line when `null-filter` should show up in RS select with faceting
                 // expect(chaisePage.recordsetPage.getModalMatchNullInput().getAttribute('disabled')).not.toBe('true', "null option is still disabled.");
                 expect(chaisePage.recordsetPage.getCheckedFacetOptions(testParams.not_null.option).count()).toBe(0, "number of selected filters missmatch.");
                 expect(chaisePage.recordsetPage.getDisabledFacetOptions(testParams.not_null.option).count()).toBe(0, "numer of disabled filters missmatch.");
@@ -417,8 +407,8 @@ describe("Other facet features, ", function() {
             }).catch(chaisePage.catchTestError(done));
         });
 
-        it ("Selecting `All Records With Value` in the list, should remove all the checked filters on facet.", function (done) {
-            chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(testParams.not_null.option, 0)).then(function () {
+        it ("Selecting `All records with value` in the list, should remove all the checked filters on facet.", function (done) {
+            chaisePage.clickButton(notNullBtn).then(function () {
                 return chaisePage.recordsetPage.getFacetOptionsText(testParams.not_null.option);
             }).then(function (text) {
                 // make sure the options haven't changed
@@ -430,24 +420,9 @@ describe("Other facet features, ", function() {
                 done();
             }).catch(chaisePage.catchTestError(done));
         });
-
-        it ("going to modal picker with `All Records With Value`, the checkmark for `All Records With Value` must be checked.", function (done) {
-            browser.wait(EC.elementToBeClickable(showMore));
-            showMore.click().then(function () {
-                chaisePage.waitForElementInverse(element(by.id("spinner")));
-                notNullBtn = chaisePage.recordsetPage.getModalMatchNotNullInput();
-                expect(notNullBtn.isPresent()).toBeTruthy("not-null is not present");
-                expect(notNullBtn.isSelected()).toBeTruthy("not-null not checked.");
-                expect(chaisePage.recordsetPage.getModalDisabledRows().count()).toBe(testParams.not_null.modal_available_options, "number of disabled rows missmatch.");
-                expect(chaisePage.recordsetPage.getCheckedModalOptions().count()).toBe(0, "number of checked rows missmatch.");
-
-                // NOTE after this test case the modal is still open, the next test cases should just start a new url.
-                done();
-            }).catch(chaisePage.catchTestError(done));
-        });
     });
 
-    describe("No Value (null) filter, ", function () {
+    describe("No value (null) filter, ", function () {
         var uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
         var clearAll, showMore, nullBtn;
 
@@ -464,92 +439,37 @@ describe("Other facet features, ", function() {
 
                 done();
             }).catch(chaisePage.catchTestError(done));
-
-            nullBtn = chaisePage.recordsetPage.getModalMatchNullInput();
         });
 
-        describe("when it's already selected, ", function () {
+        it ("null should be provided as an option and user should be able to select it.", function (done) {
             var params = testParams.null_filter.panel;
-            var idx = params.facetIdx;
-            it ('opening the modal should show the No value as selected.', function (done) {
-                chaisePage.clickButton(chaisePage.recordsetPage.getFacetById(idx)).then(function () {
-                    // wait for facet to open
-                    browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
+            chaisePage.recordsetPage.getFacetById(params.facetIdx).click().then(function () {
+                browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(params.facetIdx)), browser.params.defaultTimeout);
 
-                    // wait for facet checkboxes to load
-                    browser.wait(function () {
-                        return chaisePage.recordsetPage.getFacetOptions(idx).count().then(function(ct) {
-                            return ct == params.totalNumOptions;
-                        });
-                    }, browser.params.defaultTimeout);
+                // wait for facet checkboxes to load
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getFacetOptions(params.facetIdx).count().then(function(ct) {
+                        return ct == params.totalNumOptions;
+                    });
+                }, browser.params.defaultTimeout);
 
-                    return chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(idx, params.option));
-                }).then(function () {
-                    // wait for table rows to load
-                    browser.wait(function () {
-                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
-                            return ct == params.numRows;
-                        });
-                    }, browser.params.defaultTimeout);
+                // wait for list to be fully visible
+                browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(params.facetIdx)), browser.params.defaultTimeout);
 
-                    showMore = chaisePage.recordsetPage.getShowMore(idx);
-                    browser.wait(EC.elementToBeClickable(showMore));
-                    return chaisePage.clickButton(showMore);
-                }).then(function () {
-                    chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
+                return chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(params.facetIdx, params.option));
+            }).then(function () {
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                        return ct == params.numRows;
+                    });
+                }, browser.params.defaultTimeout);
 
-                    expect(nullBtn.isSelected()).toBeTruthy("checkbox is not selected");
-                    return chaisePage.recordsetPage.getModalCloseBtn().click();
-                }).then(function () {
-                    done();
-                }).catch(chaisePage.catchTestError(done));
-            });
-        });
-
-        describe("when it's not selected,", function () {
-            var params = testParams.null_filter.modal;
-            var idx = params.facetIdx;
-
-            it ("opening the modal should not have the no value selected.", function (done) {
-                chaisePage.clickButton(chaisePage.recordsetPage.getFacetById(idx)).then(function () {
-                    // wait for facet to open
-                    browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
-
-                    // wait for facet checkboxes to load
-                    browser.wait(function () {
-                        return chaisePage.recordsetPage.getFacetOptions(idx).count().then(function(ct) {
-                            return ct == params.totalNumOptions;
-                        });
-                    }, browser.params.defaultTimeout);
-
-                    showMore = chaisePage.recordsetPage.getShowMore(idx);
-                    browser.wait(EC.elementToBeClickable(showMore));
-                    return chaisePage.clickButton(showMore);
-                }).then(function () {
-                    chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
-
-                    expect(nullBtn.isSelected()).toBeFalsy("checkbox is selected");
-                    done();
-                }).catch(chaisePage.catchTestError(done));
-            });
-
-            it ("selecting `No Value` and submitting should change the result.", function (done) {
-                chaisePage.clickButton(nullBtn).then(function () {
-                    expect(nullBtn.isSelected()).toBeTruthy("didn't select.");
-                    return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
-                }).then(function () {
-                    browser.wait(function () {
-                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
-                            return ct == params.numRows;
-                        });
-                    }, browser.params.defaultTimeout);
-                }).then(function () {
-                    return clearAll.click();
-                }).then(function () {
-                    chaisePage.recordsetPage.waitForInverseMainSpinner();
-                    done();
-                }).catch(chaisePage.catchTestError(done));
-            });
+                // clear the selected facet
+                return clearAll.click();
+            }).then(function () {
+                chaisePage.recordsetPage.waitForInverseMainSpinner();
+                done();
+            }).catch(chaisePage.catchTestError(done));
         });
 
         describe("regarding facets that require right join, ", function () {
@@ -565,9 +485,6 @@ describe("Other facet features, ", function() {
                             return ct == params.firstFacet.totalNumOptions;
                         });
                     }, browser.params.defaultTimeout);
-
-                    // wait for list to be fully visible
-                    browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(idx)), browser.params.defaultTimeout);
 
                     return chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(idx, params.firstFacet.option));
                 }).then(function () {
@@ -616,7 +533,7 @@ describe("Other facet features, ", function() {
             chaisePage.recordsetPage.getFacetFilters().then(function (filters) {
                 expect(filters.length).toEqual(1, "filter is missing");
 
-                expect(filters[0].getText()).toEqual("Custom Filter : " + customFilterParams.ermrestFilterDisplayed, "filter text missmatch.");
+                expect(filters[0].getText()).toEqual("Custom Filter\n" + customFilterParams.ermrestFilterDisplayed, "filter text missmatch.");
 
                 expect(chaisePage.recordsetPage.getClearAllFilters().isDisplayed()).toBeTruthy("`Clear All` is not visible");
 
@@ -860,7 +777,7 @@ describe("Other facet features, ", function() {
 
         describe("in recordedit app, foreign key popup should have facets available,", function() {
 
-            var sidePanelBtn;
+            var hidePanelBtn, showPanelBtn;
 
             beforeAll(function (done) {
                 browser.ignoreSynchronization=true;
@@ -895,21 +812,20 @@ describe("Other facet features, ", function() {
                         });
                     });
 
-                    // get sidePanFiddler
-                    sidePanelBtn = chaisePage.recordPage.getSidePanelFiddler();
-                    chaisePage.waitForElement(sidePanelBtn);
-
-                    expect(sidePanelBtn.getAttribute("class")).toContain(testParams.glyphRightClass, "side panel should be closed by default, button is displayed wrong");
+                    showPanelBtn = chaisePage.recordsetPage.getShowFilterPanelBtn(element(by.css('.modal-body')));
+                    chaisePage.waitForElement(showPanelBtn);
                     done();
                 }).catch(chaisePage.catchTestError(done));
             });
 
             it("clicking the side panel button should open the facet panel", function (done) {
-                sidePanelBtn.click().then(function () {
-                    var sidePanel = chaisePage.recordPage.getSidePanel();
+                showPanelBtn.click().then(function () {
+                    var sidePanel = chaisePage.recordsetPage.getSidePanel();
                     browser.wait(EC.visibilityOf(sidePanel), browser.params.defaultTimeout);
 
-                    expect(sidePanelBtn.getAttribute("class")).toContain(testParams.glyphLeftClass, "side panel should be open, button is displayed wrong");
+                    hidePanelBtn = chaisePage.recordsetPage.getHideFilterPanelBtn(element(by.css('.modal-body')));
+                    chaisePage.waitForElement(hidePanelBtn);
+
                     expect(sidePanel.isDisplayed()).toBeTruthy("Side panel is not visible after opening it");
                     done();
                 }).catch(chaisePage.catchTestError(done));
@@ -933,7 +849,7 @@ describe("Other facet features, ", function() {
 
                     return selectButtons[0].click();
                 }).then(function () {
-                    browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getFormTitle()), browser.params.defaultTimeout);
+                    browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getEntityTitleElement()), browser.params.defaultTimeout);
 
                     var foreignKeyInputDisplay = chaisePage.recordEditPage.getForeignKeyInputDisplay("fk_to_f1", 0);
                     expect(foreignKeyInputDisplay.getText()).toEqual("eight", "Didn't select the expected foreign key.");
@@ -944,7 +860,7 @@ describe("Other facet features, ", function() {
 
         describe("in record app, association add popup should have facets available,", function() {
 
-            var sidePanelBtn;
+            var hidePanelBtn, showPanelBtn;
 
             beforeAll(function (done) {
                 browser.ignoreSynchronization=true;
@@ -966,7 +882,7 @@ describe("Other facet features, ", function() {
             });
 
             it("should click the add button for an association table and have the facet collapse button visible", function (done) {
-                chaisePage.clickButton(chaisePage.recordPage.getAddRecordLink(testParams.associationRTName)).then(function () {
+                chaisePage.recordPage.getAddRecordLink(testParams.associationRTName).click().then(function () {
                     browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getModalTitle()), browser.params.defaultTimeout);
 
                     browser.wait(function () {
@@ -975,21 +891,22 @@ describe("Other facet features, ", function() {
                         });
                     });
 
-                    // get sidePanFiddler
-                    sidePanelBtn = chaisePage.recordPage.getModalSidePanelFiddler();
-                    chaisePage.waitForElement(sidePanelBtn);
+                    // get show filter panel
+                    showPanelBtn = chaisePage.recordsetPage.getShowFilterPanelBtn(element(by.css('.modal-body')));
+                    chaisePage.waitForElement(showPanelBtn);
 
-                    expect(sidePanelBtn.getAttribute("class")).toContain(testParams.glyphRightClass, "side panel should be closed, button is displayed wrong");
                     done();
                 }).catch(chaisePage.catchTestError(done));
             });
 
             it("clicking the side panel button should open the facet panel", function (done) {
-                sidePanelBtn.click().then(function () {
+                showPanelBtn.click().then(function () {
                     var sidePanel = chaisePage.recordPage.getModalSidePanel();
                     browser.wait(EC.visibilityOf(sidePanel), browser.params.defaultTimeout);
 
-                    expect(sidePanelBtn.getAttribute("class")).toContain(testParams.glyphLeftClass, "side panel should be open, button is displayed wrong");
+                    hidePanelBtn = chaisePage.recordsetPage.getHideFilterPanelBtn(element(by.css('.modal-body')));
+                    chaisePage.waitForElement(hidePanelBtn);
+
                     expect(sidePanel.isDisplayed()).toBeTruthy("Side panel is not visible after opening it");
                     done();
                 }).catch(chaisePage.catchTestError(done));
@@ -1045,7 +962,7 @@ describe("Other facet features, ", function() {
             }, browser.params.defaultTimeout);
 
             chaisePage.recordsetPage.getFacetFilters().then(function (filters) {
-                expect(filters[0].getText()).toEqual("Custom Filter : " + customFacetParams.cfacet.displayname, "filter text missmatch.");
+                expect(filters[0].getText()).toEqual("Custom Filter\n" + customFacetParams.cfacet.displayname, "filter text missmatch.");
 
                 expect(chaisePage.recordsetPage.getClearAllFilters().isDisplayed()).toBeTruthy("`Clear All` is not visible");
 

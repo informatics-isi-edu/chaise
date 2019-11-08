@@ -1,8 +1,0 @@
-{
-    "setup": {
-        "schemaConfigurations": [
-            "search/config.json"
-        ]
-    },
-    "cleanup" : true
-}

@@ -3,8 +3,9 @@
 
     angular.module('chaise.export', ['chaise.utils'])
 
-    .directive('export', ['AlertsService', 'ConfigUtils', 'DataUtils', 'ErrorService', 'logActions', 'modalUtils', '$rootScope', '$timeout', 'UriUtils', '$window', function (AlertsService, ConfigUtils, DataUtils, ErrorService, logActions, modalUtils, $rootScope, $timeout, UriUtils, $window) {
+    .directive('export', ['AlertsService', 'ConfigUtils', 'DataUtils', 'ErrorService', 'logActions', 'logService', 'modalUtils', '$rootScope', '$timeout', 'UriUtils', '$window', function (AlertsService, ConfigUtils, DataUtils, ErrorService, logActions, logService, modalUtils, $rootScope, $timeout, UriUtils, $window) {
         var chaiseConfig = ConfigUtils.getConfigJSON();
+        var context = ConfigUtils.getContextJSON();
         /**
          * Cancel the current export request
          */
@@ -109,13 +110,16 @@
             templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/export.html',
             scope: {
                 reference: "=",
-                allowExport: "=",
                 disabled: "="
             },
             link: function (scope, element, attributes) {
                 scope.isLoading = false;
                 scope.exporter = null;
                 scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
+
+                scope.logDropdownOpened = function () {
+                    logService.logAction(logActions.exportOpen, logActions.clientAction);
+                };
 
                 scope.exportOptions = {
                     supportedFormats: [
@@ -133,7 +137,7 @@
                     _doExport(scope, template);
                 };
 
-                scope.$watch('allowExport', function (newValue, oldValue) {
+                scope.$watch('reference', function (newValue, oldValue) {
                     if (newValue && scope.exportOptions.supportedFormats.length === 1) {
                         _updateExportFormats(scope);
                     }

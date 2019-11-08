@@ -2,8 +2,8 @@
     'use strict';
     angular.module('chaise.recordcreate', ['chaise.errors','chaise.utils'])
 
-    .factory("recordCreate", ['$cookies', '$log', '$q', '$rootScope', '$window', 'AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'messageMap', 'modalBox', 'modalUtils', 'Session', 'UriUtils',
-        function($cookies, $log, $q, $rootScope, $window, AlertsService, DataUtils, ErrorService, logActions, messageMap, modalBox, modalUtils, Session, UriUtils) {
+    .factory("recordCreate", ['$cookies', '$log', '$q', '$rootScope', '$window', 'AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'messageMap', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'Session', 'UriUtils',
+        function($cookies, $log, $q, $rootScope, $window, AlertsService, DataUtils, ErrorService, logActions, messageMap, modalBox, modalUtils, recordsetDisplayModes, Session, UriUtils) {
 
         var viewModel = {};
         var GV_recordEditModel = {},
@@ -103,6 +103,7 @@
             if (areFilesValid(submissionRowsCopy, rsReference)) {
                 modalUtils.showModal({
                     templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/uploadProgress.modal.html",
+                    windowClass:"modal-upload-progress",
                     controller: "UploadModalDialogController",
                     controllerAs: "ctrl",
                     size: "md",
@@ -345,6 +346,11 @@
                 return defer.promise;
             };
 
+            // assumption is that this function is only called for p&b
+            params.parentTuple = rsTuples[rowIndex];
+            params.parentReference = rsReference;
+            params.displayMode = recordsetDisplayModes.addPureBinaryPopup;
+
             params.reference = domainRef.unfilteredReference.contextualize.compactSelect;
             params.reference.session = rsSession;
             params.context = "compact/select";
@@ -361,11 +367,12 @@
             modalUtils.showModal({
                 animation: false,
                 controller: "SearchPopupController",
+                windowClass: "search-popup add-pure-and-binary-popup",
                 controllerAs: "ctrl",
                 resolve: {
                     params: params
                 },
-                size: "xl",
+                size: modalUtils.getSearchPopupSize(params),
                 templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
             }, function dataSelected(res) {
                 //TODO this is written only for modal update (multi-select), isModalUpdate is unnecessary

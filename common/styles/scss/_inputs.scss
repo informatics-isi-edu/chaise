@@ -1,0 +1,358 @@
+// stylelint-disable selector-no-qualifying-type
+
+//
+// Base styles
+//
+
+.chaise-input-group {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap; // For form validation feedback
+  align-items: stretch;
+  width: 100%;
+
+  > .chaise-input-control,
+  > .chaise-form-select,
+  > .chaise-form-file {
+    position: relative; // For focus state's z-index
+    flex: 1 1 0%;
+    min-width: 0; // https://stackoverflow.com/questions/36247140/why-dont-flex-items-shrink-past-content-size
+    margin-bottom: 0;
+
+    + .chaise-input-control,
+    + .chaise-form-select,
+    + .chaise-form-file {
+      margin-left: -$btn-border-width;
+    }
+  }
+
+  > .chaise-input-control,
+  > .chaise-form-select {
+    &:not(:last-child) { @include border-right-radius(0); }
+    &:not(:first-child) { @include border-left-radius(0); }
+  }
+
+  // Custom file inputs have more complex markup, thus requiring different
+  // border-radius overrides.
+  > .chaise-form-file {
+    display: flex;
+    align-items: center;
+
+    &:not(:last-child) .chaise-form-file-label { @include border-right-radius(0); }
+    &:not(:first-child) .chaise-form-file-label { @include border-left-radius(0); }
+  }
+
+  // Prepend and append
+  //
+  // While it requires one extra layer of HTML for each, dedicated prepend and
+  // append elements allow us to 1) be less clever, 2) simplify our selectors, and
+  // 3) support HTML5 form validation.
+
+  .chaise-input-group-prepend,
+  .chaise-input-group-append {
+    display: flex;
+
+    // Ensure buttons are always above inputs for more visually pleasing borders.
+    // This isn't needed for `.chaise-input-group-text` since it shares the same border-color
+    // as our inputs.
+    .chaise-btn {
+      position: relative;
+      z-index: 2; // should be above input even if input is focused
+      @include border-left-radius(0);
+
+      &:focus {
+        z-index: 3;
+      }
+    }
+
+    .chaise-btn + .chaise-btn,
+    .chaise-btn + .chaise-input-group-text,
+    .chaise-input-group-text + .chaise-input-group-text,
+    .chaise-input-group-text + .chaise-btn {
+      margin-left: -$btn-border-width;
+    }
+  }
+
+  .chaise-input-group-prepend { margin-right: -$btn-border-width; }
+  .chaise-input-group-append { margin-left: -$btn-border-width; }
+}
+
+// Prepend and append rounded corners
+//
+// These rulesets must come after the sizing ones to properly override sm and lg
+// border-radius values when extending. They're more specific than we'd like
+// with the `.chaise-input-group >` part, but without it, we cannot override the sizing.
+
+
+.chaise-input-group > .chaise-input-group-prepend > .chaise-btn,
+.chaise-input-group > .chaise-input-group-prepend > .chaise-input-group-text,
+.chaise-input-group > .chaise-input-group-append:not(:last-child) > .chaise-btn,
+.chaise-input-group > .chaise-input-group-append:not(:last-child) > .chaise-input-group-text,
+.chaise-input-group > .chaise-input-group-append:last-child > .chaise-btn:not(:last-child):not(.dropdown-toggle),
+.chaise-input-group > .chaise-input-group-append:last-child > .chaise-input-group-text:not(:last-child) {
+  @include border-right-radius(0);
+}
+
+.chaise-input-group > .chaise-input-group-append > .chaise-btn,
+.chaise-input-group > .chaise-input-group-append > .chaise-input-group-text,
+.chaise-input-group > .chaise-input-group-prepend:not(:first-child) > .chaise-btn,
+.chaise-input-group > .chaise-input-group-prepend:not(:first-child) > .chaise-input-group-text,
+.chaise-input-group > .chaise-input-group-prepend:first-child > .chaise-btn:not(:first-child),
+.chaise-input-group > .chaise-input-group-prepend:first-child > .chaise-input-group-text:not(:first-child) {
+  @include border-left-radius(0);
+}
+
+
+// Textual addons
+//
+// Serves as a catch-all element for any text or radio/checkbox input you wish
+// to prepend or append to an input.
+.chaise-input-group-text {
+  display: flex;
+  align-items: center;
+  padding: $btn-padding-y $btn-padding-x;
+  margin-bottom: 0; // Allow use of <label> elements by overriding our default margin-bottom
+  font-size: 1rem;
+  color: $chaise-input-group-text-color;
+  text-align: center;
+  white-space: nowrap;
+  background-color: $chaise-input-group-text-bg;
+  border: $btn-border-width solid $chaise-input-group-text-border-color;
+  @include border-radius($btn-border-radius);
+
+  // dt meaning "datetime"
+  &.dt-width {
+      width: 50px;
+  }
+
+  // Nuke default margins from checkboxes and radios to vertically center within.
+  input[type="radio"],
+  input[type="checkbox"] {
+    margin-top: 0;
+  }
+}
+
+.chaise-btn-toolbar > .chaise-btn,
+.chaise-btn-toolbar > .chaise-btn-group,
+.chaise-btn-toolbar > .chaise-input-group {
+    margin-left: 5px;
+}
+
+.chaise-boolean-dropdown {
+    .chaise-input-control.has-feedback {
+        padding-right: $input-remove-width + $btn-height;
+
+        .chaise-input-control-feedback {
+            cursor: pointer;
+            right: 35px;
+        }
+
+        .chaise-btn {
+            position: absolute;
+            top: -1px;
+            right: -1px;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+    }
+}
+
+
+//
+// Textual form controls
+//
+
+.chaise-input-control {
+  display: block;
+  width: 100%;
+  height: $btn-height;
+  min-height: $btn-height;
+  padding: $btn-padding-y $btn-padding-x;
+  background-color: $white-color;
+  background-clip: padding-box;
+  border: $btn-border-width solid $border-color;
+
+  @include border-radius($btn-border-radius);
+
+  position: relative;
+  input {
+      outline: 0; padding: 0; margin: 0; border: 0;
+      height: 100%;
+      width: 100%;
+  }
+
+  //
+  // @include box-shadow($input-box-shadow);
+  // @include transition($input-transition);
+
+  // Unstyle the caret on `<select>`s in IE10+.
+  &::-ms-expand {
+    background-color: transparent;
+    border: 0;
+  }
+
+  // Customize the `:focus` state to imitate native WebKit styles.
+  &:focus {
+    // color: $input-focus-color;
+    // background-color: $input-focus-bg;
+    // border-color: $input-focus-border-color;
+    outline: 0;
+    // Avoid using mixin so we can pass custom focus shadow properly
+    // @if $enable-shadows {
+    //   box-shadow: $input-box-shadow, $input-focus-box-shadow;
+    // } @else {
+    //   box-shadow: $input-focus-box-shadow;
+    // }
+  }
+
+  // Placeholder
+  &::placeholder,
+  input::placeholder {
+    color: $placeholder-color;
+    // Override Firefox's unusual default opacity; see https://github.com/twbs/bootstrap/pull/11526.
+    opacity: 1;
+  }
+
+  // Disabled and read-only inputs
+  //
+  // HTML5 says that controls under a fieldset > legend:first-child won't be
+  // disabled if the fieldset is disabled. Due to implementation difficulty, we
+  // don't honor that edge case; we style them as disabled anyway.
+  &:disabled,
+  &[disabled],
+  &[readonly],
+  &[readonly][disabled],
+  &.input-disabled {
+    background-color: $disabled-background-color;
+    border-color: $disabled-background-color;
+    color: $disabled-color;
+    // iOS fix for unreadable disabled content; see https://github.com/twbs/bootstrap/issues/11655.
+    opacity: 1;
+    cursor: not-allowed;
+
+    // for the upload input case that combines with input-disabled
+    input:disabled {
+        background-color: inherit;
+        cursor: inherit;
+    }
+  }
+
+  &.has-feedback {
+      padding-right: $input-remove-width;
+  }
+
+  // form-control:focus changes the z-index of the form control from 2 to 3.
+  // use z index 5 so it isn't hidden when focused
+  .chaise-input-control-feedback {
+      z-index: 5;
+      color: $black-color;
+      position: absolute;
+      right: 0;
+      top: 5px;
+      width: $input-remove-width;
+      text-align: center;
+
+      .remove-input-btn {
+          cursor: pointer;
+          pointer-events: all;
+      }
+  }
+
+  // adds a grey placeholder into text fields (divs) that aren't editable
+  // NOTE: cannot be used for `input` tags or placeholders with HTML
+  div[contenteditable=false]:empty:not(:focus):before {
+      content: attr(data-placeholder); // required data-placeholder being present
+      color: $placeholder-color;
+  }
+
+  // adds a grey placeholder into input fields (inputs) that are also editable
+  // NOTE: should be prefered for placeholders with HTML
+  .chaise-input-placeholder{
+      position: absolute;
+      top: $btn-padding-y;
+      left: $btn-padding-x;
+      color: $placeholder-color;
+
+      // to make sure it doesn't go to the next line
+      white-space: nowrap;
+
+      // users should not be able to select the tooltip
+      user-select: none;
+      -moz-user-select: none;
+      -webkit-user-select: none;
+      -ms-user-select: none;
+  }
+
+  & + .chaise-input-group-append > label {
+      margin-bottom: 0px;
+
+      .button-text {
+          padding-left: 10px;
+      }
+  }
+}
+
+
+// Readonly controls as plain text
+//
+// Apply class to a readonly input to make it appear like regular plain
+// text (without any border, background color, focus indicator)
+
+// .chaise-input-control-plaintext {
+//   display: block;
+//   width: 100%;
+//   padding: $input-padding-y 0;
+//   margin-bottom: 0; // match inputs if this class comes on inputs with default margins
+//   line-height: $input-line-height;
+//   color: $input-plaintext-color;
+//   background-color: transparent;
+//   border: solid transparent;
+//   border-width: $input-border-width 0;
+//
+//   &.chaise-input-control-sm,
+//   &.chaise-input-control-lg {
+//     padding-right: 0;
+//     padding-left: 0;
+//   }
+// }
+
+// Form control sizing
+//
+// Build on `.chaise-input-control` with modifier classes to decrease or increase the
+// height and font-size of form controls.
+//
+// Repeated in `_input_group.scss` to avoid Sass extend issues.
+.chaise-input-group-text-sm {
+    height: $btn-height-sm;
+    min-height: $btn-height-sm;
+    padding: $btn-padding-y $btn-padding-x;
+}
+
+.chaise-input-control-sm {
+    height: $btn-height-sm;
+    min-height: $btn-height-sm;
+    padding: $btn-padding-y $btn-padding-x;
+
+    @include border-radius($btn-border-radius);
+}
+
+.chaise-input-control-lg {
+    height: $btn-height;
+    min-height: $btn-height;
+    padding: $btn-padding-y $btn-padding-x;
+
+    @include border-radius($btn-border-radius);
+}
+//
+// .chaise-input-control-color {
+//   max-width: 3rem;
+//   padding: $input-padding-y;
+// }
+//
+// .chaise-input-control-color::-moz-color-swatch {
+//   @include border-radius($input-border-radius);
+// }
+//
+// .chaise-input-control-color::-webkit-color-swatch {
+//   @include border-radius($input-border-radius);
+// }

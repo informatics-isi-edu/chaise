@@ -8,7 +8,7 @@
     'use strict';
 
     angular.module('chaise.footer', ['chaise.utils'])
-        .directive('footer', ['ConfigUtils', 'ERMrest', 'UriUtils', '$rootScope', '$timeout', function(ConfigUtils, ERMrest, UriUtils, $rootScope, $timeout) {
+        .directive('footer', ['ConfigUtils', 'ERMrest', 'UriUtils', '$rootScope', '$timeout', function(ConfigUtils, ERMrest, UriUtils, $rootScope, $timeout, $window) {
             var chaiseConfig = ConfigUtils.getConfigJSON();
             var footerText = chaiseConfig.footerMarkdown;
             return {
@@ -23,7 +23,7 @@
 
                     if (!angular.isUndefinedOrNull(footerText)) {
                         ERMrest.onload().then(function() {
-                            scope.privacyResult = ERMrest.renderMarkdown(footerText);
+                            scope.privacyResult = ERMrest.renderMarkdown(footerText, false);
                         });
                     }
                 }
