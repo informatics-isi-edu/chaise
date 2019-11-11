@@ -158,11 +158,9 @@
                     scope.overflow[i] = false;
                 }
 
-                // If chaiseconfig contains maxRecordSetHeight then only apply more-less styling
+                // If chaiseconfig contains maxRecordSetHeight then apply more-less styling
                 if (chaiseConfig.maxRecordsetRowHeight != false ) {
 
-                    // 1em = 14px
-                    // 7.25em = 101.5px
                     var moreButtonHeight = 20;
                     var maxHeight = chaiseConfig.maxRecordsetRowHeight || 160;
                     var maxHeightStyle = { "max-height": (maxHeight - moreButtonHeight) + "px" }
@@ -195,28 +193,35 @@
                         }
                     }
 
-                    // Resizerow is called whenever there is a change in rowValues model
+                    // Resizerow is called whenever there is a data change in rowValues model
                     // It iterates over all the td elements and extracts image and iframes from it
-                    // After which it binds onload event to adjust height
-                    // It also calls updateHeight for the same td, for any oveflown textual content
+                    // After which it binds onload event to adjust height if more content will load after the initial height is set
+                    // It also calls updateHeight for the same td, for any overflown textual content
                     var resizeRow = function() {
                         if (containsOverflow == false) {
 
-                            //Iterate over table data in the row
+                            // Iterate over each <td> in the <tr>
                             for (var i = 0; i < element[0].children.length; i++) {
+                                var currentTD = element[0].children[i];
 
                                 // Get all images and iframes inside the td
-                                var imagesAndIframes = UiUtils.getImageAndIframes(element[0].children[i]);
+                                var imagesAndIframes = UiUtils.getImageAndIframes(currentTD);
 
                                 // Bind onload event and updateheight for particular td index
                                 imagesAndIframes.forEach(function(el) {
                                     var index = i;
+                                    // race condition with cached images
+                                    //  cached images don't trigger on load because they are fetched (because of src) and returned before onload is attached
                                     el.onload = function() {
-                                        updateHeight(index, el);
+                                        // get the parent <td> then it's first child (<div>)
+                                        // check height for the containing td's div against max allowed height
+                                        updateHeight(index, el.closest("td").children[0]);
                                     };
                                 });
 
-                                updateHeight(i, element[0].children[i].children[0]);
+                                // element is <tr>
+                                // check height for each td's div against max allowed height
+                                updateHeight(i, currentTD.children[0]);
                             }
                         }
                     };
@@ -226,11 +231,9 @@
 
                 // Watch for change in rowValues, this is useful in case of pagination
                 // As Angular just changes the content and doesnot destroys elements
-                scope.$watchCollection('rowValues', function (v) {
-                    init();
-
-                    // add timeout only if maxRecordsetRowHeight is not false in chaiseConfig
-                    if (chaiseConfig.maxRecordsetRowHeight != false ) {
+                scope.$watchCollection('rowValues', function (newValue, oldValue) {
+                    // add timeout only if the row data has changed and maxRecordsetRowHeight is not false in chaiseConfig
+                    if (newValue != oldValue && chaiseConfig.maxRecordsetRowHeight != false) {
                         $timeout(function() {
                             containsOverflow = false;
                             resizeRow();
