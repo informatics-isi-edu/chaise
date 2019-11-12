@@ -147,7 +147,7 @@
                         action: logActions.branding
                     }
 
-                    logService.logAction(brandingHeader, logActions.clientAction);
+                    logService.logClientAction(brandingHeader);
                 }
 
                 // {Boolean} open - denotes the state of current menu
@@ -158,7 +158,7 @@
                         name: menuText
                     }
 
-                    logService.logAction(menuOpenHeader, logActions.clientAction);
+                    logService.logClientAction(menuOpenHeader);
                 }
 
                 scope.logStaticLink = function (menuObject) {
@@ -173,7 +173,7 @@
                         name: menuObject.name
                     }
 
-                    logService.logAction(linkHeader, logActions.clientAction);
+                    logService.logClientAction(linkHeader);
                 }
 
 
@@ -211,7 +211,7 @@
                             name: menuText
                         }
 
-                        logService.logAction(menuOpenHeader, logActions.clientAction);
+                        logService.logClientAction(menuOpenHeader);
 
                         toggleMenu(event);
                     };
@@ -228,7 +228,7 @@
                             name: menuObject.name
                         }
 
-                        logService.logAction(linkHeader, logActions.clientAction);
+                        logService.logClientAction(linkHeader);
                     }
 
                     compiled(scope, function(clone) {

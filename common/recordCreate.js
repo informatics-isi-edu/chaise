@@ -407,11 +407,13 @@
                     addRecords(viewModel.editMode, derivedref, nullArr, isModalUpdate, rsReference, rsTuples, rsQueryParams, viewModel, viewModel.onSuccess, logObject);
                 }
             }, function () {
-                var pbCancelHeader = params.logObject;
-                pbCancelHeader.action = logActions.recordPBCancel;
-                delete pbCancelHeader.page_size;
+                var pbCancelHeader = {
+                    action: logActions.recordPBCancel,
+                    catalog: params.reference.defaultLogInfo.catalog,
+                    schema_table: params.reference.defaultLogInfo.schema_table
+                }
 
-                logService.logAction(pbCancelHeader, logActions.clientAction);
+                logService.logClientAction(pbCancelHeader);
 
                 viewModel.onModalClose();
             }, false);

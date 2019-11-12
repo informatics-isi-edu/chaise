@@ -48,7 +48,7 @@
                             action: logActions.dropdownUser
                         }
 
-                        logService.logAction(dropdownOpenHeader, logActions.clientAction);
+                        logService.logClientAction(dropdownOpenHeader);
                     }
 
                     scope.openProfile = function openProfile() {
@@ -56,7 +56,7 @@
                             action: logActions.profile
                         }
 
-                        logService.logAction(profileHeader, logActions.clientAction);
+                        logService.logClientAction(profileHeader);
 
                         modalUtils.showModal({
                             templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/profile.modal.html",

@@ -387,10 +387,13 @@
         }
 
         vm.copyToClipboard = function (text, action) {
-            var copyLinkHeader = params.reference.defaultLogInfo;
-            copyLinkHeader.action = action;
+            var copyLinkHeader = {
+                action: action,
+                catalog: params.reference.defaultLogInfo.catalog,
+                schema_table: params.reference.defaultLogInfo.schema_table
+            }
 
-            logService.logAction(copyLinkHeader, logActions.clientAction);
+            logService.logClientAction(copyLinkHeader);
             // Create a dummy input to put the text string into it, select it, then copy it
             // this has to be done because of HTML security and not letting scripts just copy stuff to the clipboard
             // it has to be a user initiated action that is done through the DOM object
@@ -409,10 +412,13 @@
         }
 
         vm.logCitationDownload = function () {
-            var citationDownloadHeader = params.reference.defaultLogInfo;
-            citationDownloadHeader.action = logActions.cite;
+            var citationDownloadHeader = {
+                action: logActions.cite,
+                catalog: params.reference.defaultLogInfo.catalog,
+                schema_table: params.reference.defaultLogInfo.schema_table
+            }
 
-            logService.logAction(citationDownloadHeader, logActions.clientAction);
+            logService.logClientAction(citationDownloadHeader);
         }
 
         vm.closeAlert = function () {

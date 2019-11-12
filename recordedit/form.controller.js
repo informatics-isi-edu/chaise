@@ -345,11 +345,13 @@
 
                 vm.recordEditModel.rows[rowIndex][column.name] = tuple.displayname.value;
             }, function modalCanceled() {
-                var fkCancelHeader = params.logObject;
-                fkCancelHeader.action = logActions.recordeditFKCancel;
-                delete fkCancelHeader.page_size;
+                var fkCancelHeader = {
+                    action: logActions.recordeditFKCancel,
+                    catalog: params.reference.defaultLogInfo.catalog,
+                    schema_table: params.reference.defaultLogInfo.schema_table
+                }
 
-                logService.logAction(fkCancelHeader, logActions.clientAction);
+                logService.logClientAction(fkCancelHeader);
             }, false);
         }
 
@@ -410,15 +412,18 @@
             if (!vm.numberRowsToAdd) vm.numberRowsToAdd = 1;
 
             // log the button was clicked
-            var copyFormRowHeader = $rootScope.reference.defaultLogInfo;
-            copyFormRowHeader.action = logActions.add1;
+            var copyFormRowHeader = {
+                action: logActions.add1,
+                catalog: $rootScope.reference.defaultLogInfo.catalog,
+                schema_table: $rootScope.reference.defaultLogInfo.schema_table
+            }
 
             if (vm.numberRowsToAdd > 1) {
                 copyFormRowHeader.action = logActions.addX;
                 copyFormRowHeader.x = vm.numberRowsToAdd;
             }
 
-            logService.logAction(copyFormRowHeader, logActions.clientAction);
+            logService.logClientAction(copyFormRowHeader);
 
             if ((vm.numberRowsToAdd + vm.recordEditModel.rows.length) > vm.MAX_ROWS_TO_ADD) {
                 AlertsService.addAlert("Cannot add " + vm.numberRowsToAdd + " records. Please input a value between 1 and " + (vm.MAX_ROWS_TO_ADD - vm.recordEditModel.rows.length) + ', inclusive.', 'error');
@@ -511,16 +516,18 @@
         function removeFormRow(index) {
             scope.$root.showSpinner = true;
 
-            var removeFormRowHeader;
-            if (vm.editMode) {
-                removeFormRowHeader = $rootScope.tuples[index].reference.defaultLogInfo;
-                removeFormRowHeader.action = logActions.updateRemove;
-            } else {
-                removeFormRowHeader = $rootScope.reference.defaultLogInfo;
-                removeFormRowHeader.action = logActions.createRemove;
+            var defaultLogInfo = (vm.editMode ? $rootScope.tuples[index].reference.defaultLogInfo : $rootScope.reference.defaultLogInfo);
+            var action = (vm.editMode ? logActions.updateRemove : logActions.createRemove);
+
+            var removeFormRowHeader = {
+                action: action,
+                catalog: defaultLogInfo.catalog,
+                schema_table: defaultLogInfo.schema_table
             }
 
-            logService.logAction(removeFormRowHeader, logActions.clientAction);
+            if (vm.editMode) removeFormRowHeader.facet = defaultLogInfo.facet;
+
+            logService.logClientAction(removeFormRowHeader);
 
             return spliceRows(index);
         }
@@ -584,13 +591,7 @@
         vm.toggleSelectAll = function toggleSelectAll(index) {
             var model = vm.recordEditModel.columnModels[index];
 
-            var toggleSelectAllHeader;
-            if (model.column.reference) {
-                toggleSelectAllHeader = model.column.reference.defaultLogInfo;
-                toggleSelectAllHeader.referrer = $rootScope.reference.defaultLogInfo;
-            } else {
-                toggleSelectAllHeader = $rootScope.reference.defaultLogInfo;
-            }
+            var defaultLogInfo = (model.column.reference ? model.column.reference.defaultLogInfo : $rootScope.reference.defaultLogInfo);
 
             var action;
             if (vm.editMode) {
@@ -599,10 +600,14 @@
                 action = (model.showSelectAll ? logActions.createMultiClose : logActions.createMultiOpen);
             }
 
-            toggleSelectAllHeader.action = action;
-            toggleSelectAllHeader.column = model.column.name;
+            var toggleSelectAllHeader = {
+                action: action,
+                catalog: defaultLogInfo.catalog,
+                column: model.column.name,
+                schema_table: defaultLogInfo.schema_table
+            };
 
-            logService.logAction(toggleSelectAllHeader, logActions.clientAction);
+            logService.logClientAction(toggleSelectAllHeader);
 
             if (selectAllOpen) {
                 // close the other select all dialog first
@@ -667,20 +672,17 @@
         vm.cancelSelectAll = function cancelSelectAll(index) {
             var model = vm.recordEditModel.columnModels[index];
 
-            var cancelSelectAllHeader;
-            if (model.column.reference) {
-                cancelSelectAllHeader = model.column.reference.defaultLogInfo;
-                cancelSelectAllHeader.referrer = $rootScope.reference.defaultLogInfo;
-            } else {
-                cancelSelectAllHeader = $rootScope.reference.defaultLogInfo;
-            }
-
+            var defaultLogInfo = (model.column.reference ? model.column.reference.defaultLogInfo : $rootScope.reference.defaultLogInfo);
             var action = (vm.editMode ? logActions.updateMultiCancel : logActions.createMultiCancel);
 
-            cancelSelectAllHeader.action = action;
-            cancelSelectAllHeader.column = model.column.name;
+            var cancelSelectAllHeader = {
+                action: action,
+                catalog: defaultLogInfo.catalog,
+                column: model.column.name,
+                schema_table: defaultLogInfo.schema_table
+            }
 
-            logService.logAction(cancelSelectAllHeader, logActions.clientAction);
+            logService.logClientAction(cancelSelectAllHeader);
 
             model.showSelectAll = false;
             model.highlightRow = false;
@@ -784,20 +786,17 @@
         vm.applySelectAll = function applySelectAll(index) {
             var model = vm.recordEditModel.columnModels[index];
 
-            var applySelectAllHeader;
-            if (model.column.reference) {
-                applySelectAllHeader = model.column.reference.defaultLogInfo;
-                applySelectAllHeader.referrer = $rootScope.reference.defaultLogInfo;
-            } else {
-                applySelectAllHeader = $rootScope.reference.defaultLogInfo;
-            }
-
+            var defaultLogInfo = (model.column.reference ? model.column.reference.defaultLogInfo : $rootScope.reference.defaultLogInfo);
             var action = (vm.editMode ? logActions.updateMultiApply : logActions.createMultiApply);
 
-            applySelectAllHeader.action = action;
-            applySelectAllHeader.column = model.column.name;
+            var applySelectAllHeader = {
+                action: action,
+                catalog: defaultLogInfo.catalog,
+                column: model.column.name,
+                schema_table: defaultLogInfo.schema_table
+            }
 
-            logService.logAction(applySelectAllHeader, logActions.clientAction);
+            logService.logClientAction(applySelectAllHeader);
 
             setValueAllInputs(index, model.allInput.value);
         }
@@ -805,20 +804,17 @@
         vm.clearSelectAll = function clearSelectAll(index) {
             var model = vm.recordEditModel.columnModels[index];
 
-            var clearSelectAllHeader;
-            if (model.column.reference) {
-                clearSelectAllHeader = model.column.reference.defaultLogInfo;
-                clearSelectAllHeader.referrer = $rootScope.reference.defaultLogInfo;
-            } else {
-                clearSelectAllHeader = $rootScope.reference.defaultLogInfo;
-            }
-
+            var defaultLogInfo = (model.column.reference ? model.column.reference.defaultLogInfo : $rootScope.reference.defaultLogInfo);
             var action = (vm.editMode ? logActions.updateMultiClear : logActions.createMultiClear);
 
-            clearSelectAllHeader.action = action;
-            clearSelectAllHeader.column = model.column.name;
+            var clearSelectAllHeader = {
+                action: action,
+                catalog: defaultLogInfo.catalog,
+                column: model.column.name,
+                schema_table: defaultLogInfo.schema_table
+            }
 
-            logService.logAction(clearSelectAllHeader, logActions.clientAction);
+            logService.logClientAction(clearSelectAllHeader);
 
             var value = null;
             var inputType = model.inputType;

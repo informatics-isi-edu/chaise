@@ -31,45 +31,38 @@
                 var onError = function (response) {
                     scope.$root.showSpinner = false;
 
-                    var action, cancelHeader;
+                    var action, cancelHeader = reference.defaultLogInfo;
                     if (isRecordset) {
-                        cancelHeader = reference.defaultLogInfo;
-                        cancelHeader.action = logActions.deleteCancel;
+                        action = logActions.deleteCancel;
                     } else {
-                        cancelHeader = scope.tableModel.logObject;
                         if (isInline) {
                             action = (scope.isUnLink ? logActions.inlineUnlinkCancel : logActions.inlineDeleteCancel );
                         } else {
                             action = (scope.isUnLink ? logActions.relatedUnlinkCancel : logActions.relatedDeleteCancel );
                         }
-                        cancelHeader.action = action;
-                        delete cancelHeader.page_size;
                     }
 
-                    logService.logAction(cancelHeader, logActions.clientAction);
+                    cancelHeader.action = action;
+                    logService.logClientAction(cancelHeader);
                     // if response is string, the modal has been dismissed
                     if (typeof response !== "string") {
                         ErrorService.handleException(response, true);  // throw exception for dismissible pop- up (error, isDismissible = true)
                     }
                 }
 
-                var action, popupHeader;
+                var action, popupHeader = reference.defaultLogInfo;
                 if (isRecordset) {
-                    // tableModel.logObject is for the main recordset, we need info for the row's reference here
-                    popupHeader = reference.defaultLogInfo;
-                    popupHeader.action = logActions.deleteIntend;
+                    action = logActions.deleteIntend;
                 } else {
-                    popupHeader = scope.tableModel.logObject;
                     if (isInline) {
                         action = (scope.isUnLink ? logActions.inlineUnlinkIntend : logActions.inlineDeleteIntend );
                     } else {
                         action = (scope.isUnLink ? logActions.relatedUnlinkIntend : logActions.relatedDeleteIntend );
                     }
-                    popupHeader.action = action;
-                    delete popupHeader.page_size;
                 }
 
-                logService.logAction(popupHeader, logActions.clientAction);
+                popupHeader.action = action;
+                logService.logClientAction(popupHeader);
 
                 modalUtils.showModal({
                     animation: false,

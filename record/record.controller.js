@@ -39,10 +39,13 @@
         vm.toggleSidebar = function() {
             var action = ($rootScope.recordSidePanOpen ? logActions.tocHide : logActions.tocShow );
 
-            var tocToggleHeader = $rootScope.reference.defaultLogInfo;
-            tocToggleHeader.action = action;
+            var tocToggleHeader = {
+                action: action,
+                catalog: $rootScope.reference.defaultLogInfo.catalog,
+                schema_table: $rootScope.reference.defaultLogInfo.schema_table
+            }
 
-            logService.logAction(tocToggleHeader, logActions.clientAction);
+            logService.logClientAction(tocToggleHeader);
 
             $rootScope.recordSidePanOpen = !$rootScope.recordSidePanOpen;
         };
@@ -118,8 +121,11 @@
             params.versionDateRelative = UiUtils.humanizeTimestamp(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
             params.versionDate = UiUtils.versionDate(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
 
-            var snaptimeHeader = ref.defaultLogInfo;
-            snaptimeHeader.action = logActions.share;
+            var snaptimeHeader = {
+                action: logActions.share,
+                catalog: ref.defaultLogInfo.catalog,
+                schema_table: ref.defaultLogInfo.schema_table
+            }
             refTable.schema.catalog.currentSnaptime(snaptimeHeader).then(function (snaptime) {
                 // if current fetched snpatime doesn't match old snaptime, show a warning
                 params.showVersionWarning = (snaptime !== refTable.schema.catalog.snaptime);
@@ -250,34 +256,27 @@
                 }
             }
 
-            /**
-             * tableModel.logObject includes:
-             *  Optional:
-             *      facet - facet path to current table set
-             *      page_size - (removed)
-             *      referrer -  info about the main record
-             *
-             *  Required attributes:
-             *      action - base action for read request (changed)
-             *      schema_table - s:t info for related table
-             *      catalog, cid, pid, wid (unchanged)
-             */
-            var toggleDisplayHeader = tableModel.logObject;
-            toggleDisplayHeader.action = action;
-            delete toggleDisplayHeader.page_size;
+            var toggleDisplayHeader = {
+                action: action,
+                catalog: tableModel.reference.defaultLogInfo.catalog,
+                schema_table: tableModel.reference.defaultLogInfo.schema_table
+            }
 
-            logService.logAction(toggleDisplayHeader, logActions.clientAction);
+            logService.logClientAction(toggleDisplayHeader);
 
             dataModel.isTableDisplay = !dataModel.isTableDisplay;
         };
 
         vm.toggleRelatedTables = function() {
-            var action = ($rootScope.showEmptyRelatedTables ? logActions.hideAllRelated : logActions.showAllRelated)
+            var action = ($rootScope.showEmptyRelatedTables ? logActions.hideAllRelated : logActions.showAllRelated);
 
-            var toggleAllRelatedTablesHeader = $rootScope.reference.defaultLogInfo;
-            toggleAllRelatedTablesHeader.action = action;
+            var toggleAllRelatedTablesHeader = {
+                action: action,
+                catalog: $rootScope.reference.defaultLogInfo.catalog,
+                schema_table: $rootScope.reference.defaultLogInfo.schema_table
+            }
 
-            logService.logAction(toggleAllRelatedTablesHeader, logActions.clientAction);
+            logService.logClientAction(toggleAllRelatedTablesHeader);
 
             $rootScope.showEmptyRelatedTables = !$rootScope.showEmptyRelatedTables;
             // NOTE: there's a case where clicking the button to toggle this doesn't re-paint the footer until the mouse "moves"
@@ -290,23 +289,13 @@
         vm.logAccordionClick = function (rtm) {
             var action = (rtm.open ? logActions.relatedClose : logActions.relatedOpen);
 
-            /**
-             * tableModel.logObject includes:
-             *  Optional:
-             *      facet - facet path to current table set
-             *      page_size - (removed)
-             *      referrer -  info about the main record
-             *
-             *  Required attributes:
-             *      action - base action for read request (changed)
-             *      schema_table - s:t info for related table
-             *      catalog, cid, pid, wid (unchanged)
-             */
-            var toggleRelatedTableHeader = rtm.tableModel.logObject;
-            toggleRelatedTableHeader.action = action;
-            delete toggleRelatedTableHeader.page_size;
+            var toggleRelatedTableHeader = {
+                action: action,
+                catalog: rtm.tableModel.reference.defaultLogInfo.catalog,
+                schema_table: rtm.tableModel.reference.defaultLogInfo.schema_table
+            }
 
-            logService.logAction(toggleRelatedTableHeader, logActions.clientAction);
+            logService.logClientAction(toggleRelatedTableHeader);
         }
 
         vm.canEditRelated = function(ref) {
@@ -549,10 +538,14 @@
         /*** scroll to events ***/
         // scroll to top button
         $scope.scrollToTop = function (fromToc) {
-            var scrollTopHeader = $rootScope.reference.defaultLogInfo;
-            scrollTopHeader.action = (fromToc ? logActions.tocScrollTop : logActions.scrollTop);
+            var action = (fromToc ? logActions.tocScrollTop : logActions.scrollTop);
+            var scrollTopHeader = {
+                action: action,
+                catalog: $rootScope.reference.defaultLogInfo.catalog,
+                schema_table: $rootScope.reference.defaultLogInfo.schema_table
+            }
 
-            logService.logAction(scrollTopHeader, logActions.clientAction);
+            logService.logClientAction(scrollTopHeader);
 
             mainContainerEl.scrollTo(0, 0, 500);
         };
@@ -564,23 +557,13 @@
         vm.scrollToSection = function (sectionId) {
             var relatedObj = determineScrollElement(sectionId);
 
-            /**
-             * tableModel.logObject includes:
-             *  Optional:
-             *      facet - facet path to current table set
-             *      page_size - (removed)
-             *      referrer -  info about the main record
-             *
-             *  Required attributes:
-             *      action - base action for read request (changed)
-             *      schema_table - s:t info for related table
-             *      catalog, cid, pid, wid (unchanged)
-             */
-            var scrollToHeader = relatedObj.rtm.tableModel.logObject;
-            scrollToHeader.action = logActions.tocScrollTo;
-            delete scrollToHeader.page_size;
+            var scrollToHeader = {
+                action: logActions.tocScrollTo,
+                catalog: relatedObj.rtm.tableModel.reference.defaultLogInfo.catalog,
+                schema_table: relatedObj.rtm.tableModel.reference.defaultLogInfo.schema_table
+            }
 
-            logService.logAction(scrollToHeader, logActions.clientAction);
+            logService.logClientAction(scrollToHeader);
 
             scrollToElement(relatedObj.element);
         }

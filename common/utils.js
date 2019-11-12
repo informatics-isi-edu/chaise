@@ -2279,17 +2279,17 @@
         var context = ConfigUtils.getContextJSON(),
             cc = ConfigUtils.getConfigJSON();
 
-        function logAction(headerObj, path) {
+        function logClientAction(headerObj) {
             if (!cc.logClientActions) return;
 
-            context.server.logHeaders(headerObj, path).catch(function (err) {
+            context.server.logClientAction(headerObj).catch(function (err) {
                 $log.debug("An error may have occured when logging: ", headerObj);
                 $log.debug(err);
             });
         }
 
         return {
-            logAction: logAction
+            logClientAction: logClientAction
         }
     }])
 
