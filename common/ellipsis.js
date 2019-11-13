@@ -17,7 +17,7 @@
         function deleteReference(scope, reference) {
             var logObject = {action: logActions.recordsetDelete};
             // if it's related mode, change the logObject
-            if (scope.displayMode === recordsetDisplayModes.related) {
+            if (scope.displayMode.indexOf(recordsetDisplayModes.related) === 0) {
                 logObject = {
                     action: logActions.recordRelatedDelete,
                     referrer: scope.parentReference.defaultLogInfo
@@ -25,44 +25,43 @@
             }
 
             if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
-                var isRecordset = (context.cid === "recordset"),
-                    isInline = (scope.context.indexOf("inline") > -1);
+                var isRecordset = (scope.displayMode == recordsetDisplayModes.fullscreen),
+                    isInline = (scope.displayMode == recordsetDisplayModes.inline);
+
+                var action;
+                if (isRecordset) {
+                    action = logActions.deleteIntend;
+                } else if (isInline) {
+                    action = (scope.isUnLink ? logActions.inlineUnlinkIntend : logActions.inlineDeleteIntend );
+                } else {
+                    action = (scope.isUnLink ? logActions.relatedUnlinkIntend : logActions.relatedDeleteIntend );
+                }
+
+                var actionHeader = {
+                    action: action,
+                    facet: reference.defaultLogInfo.facet
+                }
 
                 var onError = function (response) {
                     scope.$root.showSpinner = false;
 
-                    var action, cancelHeader = reference.defaultLogInfo;
                     if (isRecordset) {
                         action = logActions.deleteCancel;
+                    } else if (isInline) {
+                        action = (scope.isUnLink ? logActions.inlineUnlinkCancel : logActions.inlineDeleteCancel );
                     } else {
-                        if (isInline) {
-                            action = (scope.isUnLink ? logActions.inlineUnlinkCancel : logActions.inlineDeleteCancel );
-                        } else {
-                            action = (scope.isUnLink ? logActions.relatedUnlinkCancel : logActions.relatedDeleteCancel );
-                        }
+                        action = (scope.isUnLink ? logActions.relatedUnlinkCancel : logActions.relatedDeleteCancel );
                     }
 
-                    cancelHeader.action = action;
-                    logService.logClientAction(cancelHeader);
+                    actionHeader.action = action;
+                    logService.logClientAction(actionHeader, reference.defaultLogInfo);
                     // if response is string, the modal has been dismissed
                     if (typeof response !== "string") {
                         ErrorService.handleException(response, true);  // throw exception for dismissible pop- up (error, isDismissible = true)
                     }
                 }
 
-                var action, popupHeader = reference.defaultLogInfo;
-                if (isRecordset) {
-                    action = logActions.deleteIntend;
-                } else {
-                    if (isInline) {
-                        action = (scope.isUnLink ? logActions.inlineUnlinkIntend : logActions.inlineDeleteIntend );
-                    } else {
-                        action = (scope.isUnLink ? logActions.relatedUnlinkIntend : logActions.relatedDeleteIntend );
-                    }
-                }
-
-                popupHeader.action = action;
-                logService.logClientAction(popupHeader);
+                logService.logClientAction(actionHeader, reference.defaultLogInfo);
 
                 modalUtils.showModal({
                     animation: false,
@@ -128,7 +127,7 @@
                     var editLink = null;
 
                     // unlink button should only show up in related mode
-                    if (scope.displayMode == recordsetDisplayModes.related && scope.parentTuple) {
+                    if (scope.displayMode.indexOf(recordsetDisplayModes.related) === 0 && scope.parentTuple) {
                         scope.associationRef = scope.tuple.getAssociationRef(scope.parentTuple.data);
                     }
 

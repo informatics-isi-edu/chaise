@@ -346,12 +346,10 @@
                 vm.recordEditModel.rows[rowIndex][column.name] = tuple.displayname.value;
             }, function modalCanceled() {
                 var fkCancelHeader = {
-                    action: logActions.recordeditFKCancel,
-                    catalog: params.reference.defaultLogInfo.catalog,
-                    schema_table: params.reference.defaultLogInfo.schema_table
+                    action: logActions.recordeditFKCancel
                 }
 
-                logService.logClientAction(fkCancelHeader);
+                logService.logClientAction(fkCancelHeader, params.reference.defaultLogInfo);
             }, false);
         }
 
@@ -413,9 +411,7 @@
 
             // log the button was clicked
             var copyFormRowHeader = {
-                action: logActions.add1,
-                catalog: $rootScope.reference.defaultLogInfo.catalog,
-                schema_table: $rootScope.reference.defaultLogInfo.schema_table
+                action: logActions.add1
             }
 
             if (vm.numberRowsToAdd > 1) {
@@ -423,7 +419,7 @@
                 copyFormRowHeader.x = vm.numberRowsToAdd;
             }
 
-            logService.logClientAction(copyFormRowHeader);
+            logService.logClientAction(copyFormRowHeader, $rootScope.reference.defaultLogInfo);
 
             if ((vm.numberRowsToAdd + vm.recordEditModel.rows.length) > vm.MAX_ROWS_TO_ADD) {
                 AlertsService.addAlert("Cannot add " + vm.numberRowsToAdd + " records. Please input a value between 1 and " + (vm.MAX_ROWS_TO_ADD - vm.recordEditModel.rows.length) + ', inclusive.', 'error');
@@ -520,14 +516,12 @@
             var action = (vm.editMode ? logActions.updateRemove : logActions.createRemove);
 
             var removeFormRowHeader = {
-                action: action,
-                catalog: defaultLogInfo.catalog,
-                schema_table: defaultLogInfo.schema_table
+                action: action
             }
 
             if (vm.editMode) removeFormRowHeader.facet = defaultLogInfo.facet;
 
-            logService.logClientAction(removeFormRowHeader);
+            logService.logClientAction(removeFormRowHeader, defaultLogInfo);
 
             return spliceRows(index);
         }
@@ -602,12 +596,10 @@
 
             var toggleSelectAllHeader = {
                 action: action,
-                catalog: defaultLogInfo.catalog,
-                column: model.column.name,
-                schema_table: defaultLogInfo.schema_table
+                column: model.column.name
             };
 
-            logService.logClientAction(toggleSelectAllHeader);
+            logService.logClientAction(toggleSelectAllHeader, defaultLogInfo);
 
             if (selectAllOpen) {
                 // close the other select all dialog first
@@ -677,12 +669,10 @@
 
             var cancelSelectAllHeader = {
                 action: action,
-                catalog: defaultLogInfo.catalog,
-                column: model.column.name,
-                schema_table: defaultLogInfo.schema_table
+                column: model.column.name
             }
 
-            logService.logClientAction(cancelSelectAllHeader);
+            logService.logClientAction(cancelSelectAllHeader, defaultLogInfo);
 
             model.showSelectAll = false;
             model.highlightRow = false;
@@ -791,12 +781,10 @@
 
             var applySelectAllHeader = {
                 action: action,
-                catalog: defaultLogInfo.catalog,
-                column: model.column.name,
-                schema_table: defaultLogInfo.schema_table
+                column: model.column.name
             }
 
-            logService.logClientAction(applySelectAllHeader);
+            logService.logClientAction(applySelectAllHeader, defaultLogInfo);
 
             setValueAllInputs(index, model.allInput.value);
         }
@@ -809,12 +797,10 @@
 
             var clearSelectAllHeader = {
                 action: action,
-                catalog: defaultLogInfo.catalog,
-                column: model.column.name,
-                schema_table: defaultLogInfo.schema_table
+                column: model.column.name
             }
 
-            logService.logClientAction(clearSelectAllHeader);
+            logService.logClientAction(clearSelectAllHeader, defaultLogInfo);
 
             var value = null;
             var inputType = model.inputType;

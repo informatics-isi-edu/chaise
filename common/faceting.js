@@ -1369,12 +1369,10 @@
                             }
 
                             var cancelHeader = {
-                                action: action,
-                                catalog: params.reference.defaultLogInfo.catalog,
-                                schema_table: params.reference.defaultLogInfo.schema_table
+                                action: action
                             }
 
-                            logService.logClientAction(cancelHeader);
+                            logService.logClientAction(cancelHeader, params.reference.defaultLogInfo);
                         }, false);
                     };
 

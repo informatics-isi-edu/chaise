@@ -19,12 +19,12 @@
             </span>
             <span class="appended-label">{{appendLabel()}}</span>
             <span ng-if="vm.countError" class="glyphicon glyphicon-alert" uib-tooltip="Request timeout: total count cannot be retrieved. Refresh the page later to try again." tooltip-placement="bottom"></span>
-            <span ng-show="vm.pushMoreRowsPending || (vm.config.displayMode === recordsetDisplayModes.related && !vm.hasLoaded)" class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
+            <span ng-show="vm.pushMoreRowsPending || (vm.config.displayMode.indexOf(recordsetDisplayModes.related) === 0 && !vm.hasLoaded)" class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
         </span>
     </div>
     <div class="col-xs-12 col-sm-6">
         <div class="pull-right">
-            <button ng-if="vm.config.displayMode !== recordsetDisplayModes.related && vm.reference.canCreate && vm.config.editable"
+            <button ng-if="vm.config.displayMode.indexOf(recordsetDisplayModes.related) !== 0 && vm.reference.canCreate && vm.config.editable"
                 class="chaise-table-header-create-link chaise-btn"
                 ng-class="vm.config.displayMode === recordsetDisplayModes.fullscreen ? 'chaise-btn-primary': 'chaise-btn-secondary'"
                 ng-click="addRecord()" tooltip-placement="bottom-right" uib-tooltip="Create new {{vm.displayname ? vm.displayname.value : vm.reference.displayname.value}}">

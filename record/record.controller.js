@@ -40,12 +40,10 @@
             var action = ($rootScope.recordSidePanOpen ? logActions.tocHide : logActions.tocShow );
 
             var tocToggleHeader = {
-                action: action,
-                catalog: $rootScope.reference.defaultLogInfo.catalog,
-                schema_table: $rootScope.reference.defaultLogInfo.schema_table
+                action: action
             }
 
-            logService.logClientAction(tocToggleHeader);
+            logService.logClientAction(tocToggleHeader, $rootScope.reference.defaultLogInfo);
 
             $rootScope.recordSidePanOpen = !$rootScope.recordSidePanOpen;
         };
@@ -257,12 +255,10 @@
             }
 
             var toggleDisplayHeader = {
-                action: action,
-                catalog: tableModel.reference.defaultLogInfo.catalog,
-                schema_table: tableModel.reference.defaultLogInfo.schema_table
+                action: action
             }
 
-            logService.logClientAction(toggleDisplayHeader);
+            logService.logClientAction(toggleDisplayHeader, tableModel.reference.defaultLogInfo);
 
             dataModel.isTableDisplay = !dataModel.isTableDisplay;
         };
@@ -271,12 +267,10 @@
             var action = ($rootScope.showEmptyRelatedTables ? logActions.hideAllRelated : logActions.showAllRelated);
 
             var toggleAllRelatedTablesHeader = {
-                action: action,
-                catalog: $rootScope.reference.defaultLogInfo.catalog,
-                schema_table: $rootScope.reference.defaultLogInfo.schema_table
+                action: action
             }
 
-            logService.logClientAction(toggleAllRelatedTablesHeader);
+            logService.logClientAction(toggleAllRelatedTablesHeader, $rootScope.reference.defaultLogInfo);
 
             $rootScope.showEmptyRelatedTables = !$rootScope.showEmptyRelatedTables;
             // NOTE: there's a case where clicking the button to toggle this doesn't re-paint the footer until the mouse "moves"
@@ -290,12 +284,10 @@
             var action = (rtm.open ? logActions.relatedClose : logActions.relatedOpen);
 
             var toggleRelatedTableHeader = {
-                action: action,
-                catalog: rtm.tableModel.reference.defaultLogInfo.catalog,
-                schema_table: rtm.tableModel.reference.defaultLogInfo.schema_table
+                action: action
             }
 
-            logService.logClientAction(toggleRelatedTableHeader);
+            logService.logClientAction(toggleRelatedTableHeader, rtm.tableModel.reference.defaultLogInfo);
         }
 
         vm.canEditRelated = function(ref) {
@@ -540,12 +532,10 @@
         $scope.scrollToTop = function (fromToc) {
             var action = (fromToc ? logActions.tocScrollTop : logActions.scrollTop);
             var scrollTopHeader = {
-                action: action,
-                catalog: $rootScope.reference.defaultLogInfo.catalog,
-                schema_table: $rootScope.reference.defaultLogInfo.schema_table
+                action: action
             }
 
-            logService.logClientAction(scrollTopHeader);
+            logService.logClientAction(scrollTopHeader, $rootScope.reference.defaultLogInfo);
 
             mainContainerEl.scrollTo(0, 0, 500);
         };
@@ -558,12 +548,10 @@
             var relatedObj = determineScrollElement(sectionId);
 
             var scrollToHeader = {
-                action: logActions.tocScrollTo,
-                catalog: relatedObj.rtm.tableModel.reference.defaultLogInfo.catalog,
-                schema_table: relatedObj.rtm.tableModel.reference.defaultLogInfo.schema_table
+                action: logActions.tocScrollTo
             }
 
-            logService.logClientAction(scrollToHeader);
+            logService.logClientAction(scrollToHeader, relatedObj.rtm.tableModel.reference.defaultLogInfo);
 
             scrollToElement(relatedObj.element);
         }

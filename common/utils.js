@@ -296,6 +296,7 @@
     .constant("recordsetDisplayModes", {
         fullscreen: "fullscreen",
         related: "related",
+        inline: "related/inline",
         popup: "popup",
         foreignKeyPopup: "popup/foreignkey",
         foreignKeyPopupCreate: "popup/foreignkey/create",
@@ -2279,8 +2280,13 @@
         var context = ConfigUtils.getContextJSON(),
             cc = ConfigUtils.getConfigJSON();
 
-        function logClientAction(headerObj) {
+        function logClientAction(headerObj, commonLogInfo) {
             if (!cc.logClientActions) return;
+
+            if (commonLogInfo) {
+                headerObj.catalog = commonLogInfo.catalog;
+                headerObj.schema_table = commonLogInfo.schema_table;
+            }
 
             context.server.logClientAction(headerObj).catch(function (err) {
                 $log.debug("An error may have occured when logging: ", headerObj);

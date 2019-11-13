@@ -408,12 +408,10 @@
                 }
             }, function () {
                 var pbCancelHeader = {
-                    action: logActions.recordPBCancel,
-                    catalog: params.reference.defaultLogInfo.catalog,
-                    schema_table: params.reference.defaultLogInfo.schema_table
+                    action: logActions.recordPBCancel
                 }
 
-                logService.logClientAction(pbCancelHeader);
+                logService.logClientAction(pbCancelHeader, params.reference.defaultLogInfo);
 
                 viewModel.onModalClose();
             }, false);

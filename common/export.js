@@ -119,12 +119,10 @@
 
                 scope.logDropdownOpened = function () {
                     var exportHeader = {
-                        action: logActions.exportOpen,
-                        catalog: scope.reference.defaultLogInfo.catalog,
-                        schema_table: scope.reference.defaultLogInfo.schema_table
+                        action: logActions.exportOpen
                     }
 
-                    logService.logClientAction(exportHeader);
+                    logService.logClientAction(exportHeader, scope.reference.defaultLogInfo);
                 };
 
                 scope.exportOptions = {
