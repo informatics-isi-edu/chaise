@@ -2280,6 +2280,11 @@
         var context = ConfigUtils.getContextJSON(),
             cc = ConfigUtils.getConfigJSON();
 
+        /**
+         * Takes a header object, adds default logging info to it, and logs the request with ermrest
+         * @params {Object} headerObj - object of key/value pairs that are specific to this action
+         * @params {Object} commonLogInfo - object of key/value pairs that are common to all action requests
+         */
         function logClientAction(headerObj, commonLogInfo) {
             if (!cc.logClientActions) return;
 
