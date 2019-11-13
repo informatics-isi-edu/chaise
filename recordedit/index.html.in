@@ -195,7 +195,7 @@
 
                                                             <!-- float/decimal/numeric -->
                                                             <div ng-switch-when="number" class="chaise-input-control has-feedback">
-                                                                <input id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="number" ng-required="::form.isRequired(columnIndex);" float>
+                                                                <input id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="number" step="any" ng-required="::form.isRequired(columnIndex);" float>
                                                                 <chaise-clear-input btn-class="float-remove" click-callback="form.clearInput(rowIndex, column.name)" show="form.showRemove(rowIndex, column.name)"></chaise-clear-input>
                                                             </div>
 
