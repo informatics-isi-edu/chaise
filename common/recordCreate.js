@@ -2,8 +2,8 @@
     'use strict';
     angular.module('chaise.recordcreate', ['chaise.errors','chaise.utils'])
 
-    .factory("recordCreate", ['$cookies', '$log', '$q', '$rootScope', '$window', 'AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'messageMap', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'Session', 'UriUtils',
-        function($cookies, $log, $q, $rootScope, $window, AlertsService, DataUtils, ErrorService, logActions, messageMap, modalBox, modalUtils, recordsetDisplayModes, Session, UriUtils) {
+    .factory("recordCreate", ['$cookies', '$log', '$q', '$rootScope', '$window', 'AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'logService', 'messageMap', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'Session', 'UriUtils',
+        function($cookies, $log, $q, $rootScope, $window, AlertsService, DataUtils, ErrorService, logActions, logService, messageMap, modalBox, modalUtils, recordsetDisplayModes, Session, UriUtils) {
 
         var viewModel = {};
         var GV_recordEditModel = {},
@@ -350,6 +350,7 @@
             params.parentTuple = rsTuples[rowIndex];
             params.parentReference = rsReference;
             params.displayMode = recordsetDisplayModes.addPureBinaryPopup;
+            params.parentDisplayMode = dcctx.cid; // should be "record"
 
             params.reference = domainRef.unfilteredReference.contextualize.compactSelect;
             params.reference.session = rsSession;
@@ -405,7 +406,15 @@
                     };
                     addRecords(viewModel.editMode, derivedref, nullArr, isModalUpdate, rsReference, rsTuples, rsQueryParams, viewModel, viewModel.onSuccess, logObject);
                 }
-            }, viewModel.onModalClose, false);
+            }, function () {
+                var pbCancelHeader = {
+                    action: logActions.recordPBCancel
+                }
+
+                logService.logClientAction(pbCancelHeader, params.reference.defaultLogInfo);
+
+                viewModel.onModalClose();
+            }, false);
         }
 
         /**

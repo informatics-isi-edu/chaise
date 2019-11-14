@@ -34,5 +34,6 @@
   },
   "dependencies": {
     "node-sass": "x"
-  }
+  },
+  "postinstall": "cd node_modules/protractor && npm i webdriver-manager@latest"
 }
