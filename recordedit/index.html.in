@@ -165,32 +165,32 @@
 
                                                             <!-- int2 input -->
                                                             <div ng-switch-when="integer2" class="chaise-input-control has-feedback">
-                                                                <input id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="number" ng-required="::form.isRequired(columnIndex);" min="{{::form.int2min}}" max="{{::form.int2max}}" integer>
+                                                                <input id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="text" ng-required="::form.isRequired(columnIndex);" chaise-min="{{::form.int2min}}" chaise-max="{{::form.int2max}}" integer>
                                                                 <chaise-clear-input btn-class="int2-remove" click-callback="form.clearInput(rowIndex, column.name)" show="form.showRemove(rowIndex, column.name)"></chaise-clear-input>
                                                             </div>
                                                             <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int2'">
-                                                                <div ng-message="min">This field requires a value greater than {{form.int2min}}.</div>
-                                                                <div ng-message="max">This field requires a value smaller than {{form.int2max}}.</div>
+                                                                <div ng-message="chaiseMin">This field requires a value greater than {{form.int2min}}.</div>
+                                                                <div ng-message="chaiseMax">This field requires a value smaller than {{form.int2max}}.</div>
                                                             </div>
 
                                                             <!-- int4 input -->
                                                             <div ng-switch-when="integer4" class="chaise-input-control has-feedback">
-                                                                <input id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="number" ng-required="::form.isRequired(columnIndex);" min="{{::form.int4min}}" max="{{::form.int4max}}" integer>
+                                                                <input id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="text" ng-required="::form.isRequired(columnIndex);" chaise-min="{{::form.int4min}}" chaise-max="{{::form.int4max}}" integer>
                                                                 <chaise-clear-input btn-class="int4-remove" click-callback="form.clearInput(rowIndex, column.name)" show="form.showRemove(rowIndex, column.name)"></chaise-clear-input>
                                                             </div>
                                                             <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int4'">
-                                                                <div ng-message="min">This field requires a value greater than {{form.int4min}}.</div>
-                                                                <div ng-message="max">This field requires a value smaller than {{form.int4max}}.</div>
+                                                                <div ng-message="chaiseMin">This field requires a value greater than {{form.int4min}}.</div>
+                                                                <div ng-message="chaiseMax">This field requires a value smaller than {{form.int4max}}.</div>
                                                             </div>
 
                                                             <!-- int8 input -->
                                                             <div ng-switch-when="integer8" class="chaise-input-control has-feedback">
-                                                                <input id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="number" ng-required="::form.isRequired(columnIndex);" min="{{::form.int8min}}" max="{{::form.int8max}}" integer>
+                                                                <input id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="text" ng-required="::form.isRequired(columnIndex);" chaise-min="{{::form.int8min}}" chaise-max="{{::form.int8max}}" integer>
                                                                 <chaise-clear-input btn-class="int8-remove" click-callback="form.clearInput(rowIndex, column.name)" show="form.showRemove(rowIndex, column.name)"></chaise-clear-input>
                                                             </div>
                                                             <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int8'">
-                                                                <div ng-message="min">This field requires a value greater than {{form.int8min}}.</div>
-                                                                <div ng-message="max">This field requires a value smaller than {{form.int8max}}.</div>
+                                                                <div ng-message="chaiseMin">This field requires a value greater than {{form.int8min}}.</div>
+                                                                <div ng-message="chaiseMax">This field requires a value smaller than {{form.int8max}}.</div>
                                                             </div>
 
                                                             <!-- float/decimal/numeric -->

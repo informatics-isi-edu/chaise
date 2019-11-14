@@ -270,12 +270,12 @@ var recordEditPage = function() {
 
     this.getIntegerInputForAColumn = function(name, index) {
         index = index || 0
-        return browser.executeScript("return $('td.entity-value input[type=\"number\"][integer][name=\"" + name + "\"]')[" + index + "];");
+        return browser.executeScript("return $('td.entity-value input[type=\"text\"][integer][name=\"" + name + "\"]')[" + index + "];");
     };
 
     this.getFloatInputForAColumn = function(name, index) {
         index = index || 0;
-        return browser.executeScript("return $('td.entity-value input[type=\"number\"][float][name=\"" + name + "\"]')[" + index + "];");
+        return browser.executeScript("return $('td.entity-value input[type=\"text\"][float][name=\"" + name + "\"]')[" + index + "];");
     };
 
     this.submitForm = function() {
