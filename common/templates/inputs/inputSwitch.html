@@ -98,7 +98,7 @@
 
     <!-- float/decimal/numeric -->
     <div ng-switch-when="number" class="chaise-input-control has-feedback">
-        <input ng-model="model.value" name="{{::column.name}}" type="number" step="any" float>
+        <input ng-model="model.value" name="{{::column.name}}" type="text" float>
         <chaise-clear-input btn-class="float-remove" click-callback="::clearInput()" show="showRemove()"></chaise-clear-input>
     </div>
 
