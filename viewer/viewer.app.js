@@ -176,7 +176,8 @@
                           is not upto date with the branch svg-on-tif.
                         */
                         console.log("Origin", origin);
-                        image.entity.uri = origin+"/demo/chaise-osd/openseadragon-viewer/index.html?" + params[1];
+                        image.entity.uri = origin+"/~vipul/openseadragon-viewer/index.html?" + params[1];
+                        // image.entity.uri = origin+"/demo/chaise-osd/openseadragon-viewer/index.html?" + params[1];
                     }
 
                     // image.entity.uri = image.entity.uri + "&url=data/Q-296R_all_contours_cw_named.svg";

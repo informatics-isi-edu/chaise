@@ -1,6 +1,6 @@
-html, body {
+/* html, body {
     background-color: #f9f9f9;
-}
+} */
 
 #alert {
     position: fixed;
@@ -62,7 +62,7 @@ html, body {
     font-style: italic;
 }
 
-.btn-success {
+/* .btn-success {
     background-color: #407CCA;
     border-color: #1E4E9A;
 }
@@ -70,7 +70,7 @@ html, body {
 .open > .dropdown-toggle.btn-success, .btn-success:hover, .btn-success:focus, .btn-success:active {
     background-color: #002D73;
     border-color: #1E4E9A;
-}
+} */
 
 #entity-title, .entity-title {
     color: #002D73;
@@ -156,10 +156,10 @@ a.cardlink.delete {
     display: none;
 }
 
-#sidebar {
+/* #sidebar {
    position:absolute;
    top:80px;
-}
+} */
 
 #create-annotation-btn {
    margin-top:10px;
@@ -220,19 +220,18 @@ a.cardlink.delete {
     /* padding: 15px 0 15px 0; */
 }
 
-#viewer-content .sidebar{
+/* #viewer-content .sidebar{
     padding: 0;
-    /* margin: 0 5px 0 0; */
     width: 250px;
     height: 100%;
     min-width: 220px;
     max-width: 50vw;
     overflow: hidden;
-}
+} */
 
-#viewer-content .sidebar .rg-right{
+/* #viewer-content .sidebar .rg-right{
     border: none;
-}
+} */
 /* Annotation List */
 #viewer-content .annotation-list{
     display: flex;
@@ -597,10 +596,10 @@ a.cardlink.delete {
 
 #viewer-content .menu-btn-container{
     display: flex;
-    background: #000;
+    /* background: #000; */
     /* border: 1px solid #737171; */
     /* border-radius: 3px; */
-    padding: 5px 5px 0 5px;
+    padding: 5px 0px 5px 0px;
 }
 
 #viewer-content .menu-btn-container .menu-btn{
@@ -629,4 +628,29 @@ a.cardlink.delete {
 
 #viewer-content .menu-btn-container .menu-btn .glyphicon{
     margin-right: 5px;
+}
+
+#viewer-header .top-flex-panel {
+  position: relative;
+  display: flex;
+  flex: 1;
+  -webkit-box-flex: 1;
+}
+
+#viewer-header .top-left-panel.open-panel {
+  flex: 0;
+  flex-basis: 10vw;
+  min-width: 170px;
+  position: relative;
+  max-width: 40vw;
+  margin-left: 20px;
+}
+
+#viewer-header .top-left-panel.close-panel {
+  /* flex: 0; */
+  display: none;
+}
+
+#viewer-content .menu-btn-container.close-panel{
+  padding-left: 15px;
 }

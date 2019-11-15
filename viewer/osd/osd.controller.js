@@ -69,26 +69,30 @@
             btnptr.blur();
 //            event.currentTarget.blur();
             var messageType = vm.annotationsAreHidden ? 'showAllAnnotations' : 'hideAllAnnotations';
-            iframe.postMessage({messageType: messageType}, origin);
+            // iframe.postMessage({messageType: messageType}, origin);
             vm.annotationsAreHidden = !vm.annotationsAreHidden;
         }
 
         function openAnnotations() {
-            // var btnptr = $('#edit-btn');
-            // btnptr.blur();
+            var btnptr = $('#edit-btn');
+            btnptr.blur();
             // var panelptr=$('#annotations-panel');
-            // var sidebarptr=$('#sidebar');
-            // if(vm.annotationsSidebarAreHidden) {
-            //   if(!vm.filterChannelsAreHidden) { // close channels
-            //     filterChannels();
-            //   }
-            //   sidebarptr.css("display","");
-            //   panelptr.removeClass('fade-out').addClass('fade-in');
-            //   } else {
-            //     panelptr.removeClass('fade-in').addClass('fade-out');
-            // }
-            iframe.postMessage({messageType: 'openAnnotations'}, origin);
-            // vm.annotationsSidebarAreHidden = !vm.annotationsSidebarAreHidden;
+            var sidebarptr=$('#sidebar');
+            console.log(sidebarptr, vm.annotationsSidebarAreHidden);
+
+            if(!vm.annotationsSidebarAreHidden) {
+              // if(!vm.filterChannelsAreHidden) { // close channels
+              //   filterChannels();
+              // }
+              sidebarptr.css("display","");
+
+              // panelptr.removeClass('fade-out').addClass('fade-in');
+              } else {
+                sidebarptr.css("display","none");
+            }
+            // iframe.postMessage({messageType: 'openAnnotations'}, origin);
+            console.log("annotation");
+            vm.annotationsSidebarAreHidden = !vm.annotationsSidebarAreHidden;
         }
 
         function covered() {

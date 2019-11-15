@@ -10,7 +10,7 @@
     <div class="configure-container" ng-app="chaise.configure-viewer">
         <loading-spinner></loading-spinner>
     </div>
-    <div class="container-fluid app-container">
+    <div class="app-container">
         <navbar></navbar>
         <div ng-controller="AlertsController as alerts" id="alert" class="row">
             <div class="col-md-12">
@@ -22,23 +22,28 @@
                 </div>
             </div>
         </div>
-        <div class="row">
+        <div>
             <!-- CONTROLLER: OSDController -->
             <div ng-controller="OSDController as osd" id="viewer-container" class="col-md-12">
                 <div ng-if="osd.showTitle" id="viewer-header" class="row">
-                    <div id="bookmark-container" class="col-xs-12">
-                        <div class="pull-left">
+                    <div class="top-flex-panel">
+                      <div class="top-left-panel also-resizeable open-panel resizable" ng-class="{'open-panel': osd.annotationsSidebarAreHidden, 'close-panel': !osd.annotationsSidebarAreHidden}">
+                      </div>
+                      <div id="bookmark-container" class="top-right-panel">
+                          <div class="pull-left">
                             <h1 id="page-title">
                                 <span class="ng-binding ng-scope">
-                                        {{osd.image.entity.slide_id || osd.image.entity.RID || 'No Slide ID'}}
+                                    {{osd.image.entity.slide_id || osd.image.entity.RID || 'No Slide ID'}}
                                 </span>
                             </h1>
                         </div>
+                      </div>
                     </div>
                 </div>
+
                 <div id="viewer-content">
-                    <div class="sidebar faceting-resizable" resizable r-directions=["right"] r-flex="true">
-                        <div ng-controller="AnnotationsController as anno" class='annotation-list facet-panel panel'>
+                    <div id="sidebar" ng-class="sidebar faceting-resizable {'open-panel': osd.annotationsSidebarAreHidden, 'close-panel': !osd.annotationsSidebarAreHidden}" resizable r-directions=["right"] r-flex="true">
+                        <div ng-controller="AnnotationsController as anno" class='annotation-list facet-panel'>
                             <span class='title'>Annotations</span>
                             <span class='row filter' data-type='overlayVisibility'>
                                 <span class='name'> Display : </span>
@@ -105,9 +110,12 @@
                         </div>
                     </div>
                     <div class="osd-container">
-                        <div class="btn-group btn-group-sm pull-left menu-btn-container" role="group">
-                            <button ng-click="osd.filterChannels();" class="menu-btn" ng-class="{'pick':osd.filterChannelsAreHidden}" type="button" role="button" title="channel filtering" id="filter-btn">
-                                <span class="glyphicon glyphicon-tasks"></span> Channels
+                        <div class="btn-group btn-group-sm pull-left menu-btn-container" ng-class="{'open-panel': osd.annotationsSidebarAreHidden, 'close-panel': !osd.annotationsSidebarAreHidden}" role="group">
+                            <button ng-click="osd.openAnnotations();" class="btn btn-success" type="button" ng-class="{'pick':!osd.annotationsSidebarAreHidden}" role="button" title="edit annotations" id="edit-btn">
+                              <span class="glyphicon glyphicon-edit"></span> {{osd.annotationsSidebarAreHidden ? "Hide" : "Show" }} Annotations
+                            </button>
+                            <button ng-click="osd.filterChannels();" class="btn btn-success" ng-class="{'pick':osd.filterChannelsAreHidden}" type="button" role="button" title="channel filtering" id="filter-btn">
+                                <span class="glyphicon glyphicon-tasks"></span> {{osd.filterChannelsAreHidden ? "Hide" : "Show" }} Channels
                             </button>
                             <!-- <button ng-click="osd.openAnnotations();" class="btn btn-success" type="button" ng-class="{'pick':!osd.annotationsSidebarAreHidden}" role="button" title="edit annotations" id="edit-btn">
                                 <span class="glyphicon glyphicon-edit"></span> Annotations
@@ -115,16 +123,16 @@
                             <!-- <button ng-click="osd.toggleAnnotations();" class="btn btn-success" ng-class="{'pick': osd.annotationsAreHidden}" type="button" role="button" title="hide or show annotations" id="hide-btn">
                                 <span class="glyphicon glyphicon-eye-close"></span> Hide
                             </button> -->
-                            <button ng-click="osd.zoomInView();" class="menu-btn" type="button" role="button" title="zoom in" id="zoomin-btn">
+                            <button ng-click="osd.zoomInView();" class="btn btn-success" type="button" role="button" title="zoom in" id="zoomin-btn">
                                 <span class="glyphicon glyphicon-zoom-in"></span> Zoom In
                             </button>
-                            <button ng-click="osd.zoomOutView();" class="menu-btn" type="button" role="button" title="zoom out" id="zoomout-btn">
+                            <button ng-click="osd.zoomOutView();" class="btn btn-success" type="button" role="button" title="zoom out" id="zoomout-btn">
                                 <span class="glyphicon glyphicon-zoom-out"></span> Zoom Out
                             </button>
-                            <button ng-click="osd.homeView();" class="menu-btn" type="button" role="button" title="go home" id="gohome-btn">
+                            <button ng-click="osd.homeView();" class="btn btn-success" type="button" role="button" title="go home" id="gohome-btn">
                                 <span class="glyphicon glyphicon-home"></span> Reset
                             </button>
-                            <button ng-click="osd.downloadView();" class="menu-btn" type="button" role="button" title="take snapshot" id=download-btn">
+                            <button ng-click="osd.downloadView();" class="btn btn-success" type="button" role="button" title="take snapshot" id=download-btn">
                                 <span class="glyphicon glyphicon-camera"></span> Take a Screenshot </button>
                         </div>
                         <iframe id="osd" width="100%" src="about:blank" frameBorder="0" style="flex:1">
