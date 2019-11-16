@@ -124,7 +124,7 @@ a.cardlink.delete {
 #viewer-container{
     display: flex;
     flex-direction: column;
-    height: 92.5%;
+    height: 94.5%;
     padding: 0;
 }
 
@@ -156,10 +156,10 @@ a.cardlink.delete {
     display: none;
 }
 
-/* #sidebar {
-   position:absolute;
-   top:80px;
-} */
+#sidebar {
+   display: none;
+   margin: 0 20px;
+}
 
 #create-annotation-btn {
    margin-top:10px;
@@ -244,9 +244,9 @@ a.cardlink.delete {
 }
 
 #viewer-content .annotation-list .title{
-    padding: 8px 5px;
+    padding: 8px 0;
     color: #333333;
-    font-size: 17.5px;
+    font-size: 24px;
     line-height: 1.2;
     font-weight: 400;
 }
@@ -257,7 +257,7 @@ a.cardlink.delete {
 }
 
 #viewer-content .annotation-list .row.filter{
-    margin: 8px 5px 8px 5px;
+    margin: 8px 0 8px 0;
     font-size: 14px;
 }
 
@@ -318,7 +318,7 @@ a.cardlink.delete {
 
 #viewer-content .annotation-list .searchAnnotationBar{
     display: flex;
-    margin: 8px 5px 10px;
+    margin: 8px 0 10px;
     height: 30px;
     position: relative;
     border-radius: 3px;
@@ -342,6 +342,9 @@ a.cardlink.delete {
     background-color: #4674A7;
     border-color: #333333;
     border-radius: 0 3px 3px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 #viewer-content .annotation-list .searchAnnotationBar .clear-search{
@@ -363,7 +366,7 @@ a.cardlink.delete {
 #viewer-content .annotation-list .strokeScale{
     display: flex;
     flex-direction: column;
-    padding: 8px 5px;
+    padding: 8px 0;
 }
 
 #viewer-content .annotation-list .strokeScale .name{
@@ -438,7 +441,7 @@ a.cardlink.delete {
 }
 #viewer-content .annotation-list .resultCount{
     display: flex;
-    padding: 0 5px 0px 5px;
+    padding: 0;
 }
 
 #viewer-content .annotation-list .groups{
@@ -449,7 +452,7 @@ a.cardlink.delete {
     overflow-y: auto;
     position: relative;
     float: left;
-    margin: 5px;
+    margin: 5px 0;
 }
 
 /* Annotations item  */
@@ -630,17 +633,17 @@ a.cardlink.delete {
     margin-right: 5px;
 }
 
-#viewer-header .top-flex-panel {
+#viewer-header .top-flex-panel, #viewer-content {
   position: relative;
   display: flex;
   flex: 1;
   -webkit-box-flex: 1;
 }
 
-#viewer-header .top-left-panel.open-panel {
+#viewer-header .top-left-panel.open-panel,  #viewer-content #sidebar{
   flex: 0;
   flex-basis: 10vw;
-  min-width: 170px;
+  min-width: 240px;
   position: relative;
   max-width: 40vw;
   margin-left: 20px;

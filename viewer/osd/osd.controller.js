@@ -80,11 +80,11 @@
             var sidebarptr=$('#sidebar');
             console.log(sidebarptr, vm.annotationsSidebarAreHidden);
 
-            if(!vm.annotationsSidebarAreHidden) {
+            if(vm.annotationsSidebarAreHidden) {
               // if(!vm.filterChannelsAreHidden) { // close channels
               //   filterChannels();
               // }
-              sidebarptr.css("display","");
+              sidebarptr.css("display","block");
 
               // panelptr.removeClass('fade-out').addClass('fade-in');
               } else {

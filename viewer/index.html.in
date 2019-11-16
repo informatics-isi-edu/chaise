@@ -27,7 +27,7 @@
             <div ng-controller="OSDController as osd" id="viewer-container" class="col-md-12">
                 <div ng-if="osd.showTitle" id="viewer-header" class="row">
                     <div class="top-flex-panel">
-                      <div class="top-left-panel also-resizeable open-panel resizable" ng-class="{'open-panel': osd.annotationsSidebarAreHidden, 'close-panel': !osd.annotationsSidebarAreHidden}">
+                      <div class="top-left-panel also-resizeable open-panel resizable" ng-class="{'open-panel': !osd.annotationsSidebarAreHidden, 'close-panel': osd.annotationsSidebarAreHidden}">
                       </div>
                       <div id="bookmark-container" class="top-right-panel">
                           <div class="pull-left">
@@ -42,7 +42,7 @@
                 </div>
 
                 <div id="viewer-content">
-                    <div id="sidebar" ng-class="sidebar faceting-resizable {'open-panel': osd.annotationsSidebarAreHidden, 'close-panel': !osd.annotationsSidebarAreHidden}" resizable r-directions=["right"] r-flex="true">
+                    <div id="sidebar" ng-class="sidebar faceting-resizable {'open-panel': !osd.annotationsSidebarAreHidden, 'close-panel': osd.annotationsSidebarAreHidden}" resizable r-directions=["right"] r-flex="true">
                         <div ng-controller="AnnotationsController as anno" class='annotation-list facet-panel'>
                             <span class='title'>Annotations</span>
                             <span class='row filter' data-type='overlayVisibility'>
@@ -69,14 +69,16 @@
                                 </div>
                             </div>
 
-                            <div class='searchAnnotationBar'>
+                            <div class='searchAnnotationBar chaise-search-box chaise-input-group'>
                                 <input type='text' class='search-input' placeholder='Search' ng-model="anno.searchKeyword" ng-change="anno.searchInputChanged()" />
                                 <div class="clear-search" ng-show="anno.searchKeyword != ''"><!-- form-control:focus changes the z-index of the form control from 2 to 3. form-control-feedback has z-index of 2. Overriding that z index to 5 so it isn't hidden when focused-->
                                     <span class="glyphicon glyphicon-remove coltooltiptext facet-search-clear search-remove" ng-click="anno.clearSearch()" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
                                 </div>
-                                <button id="search-submit" class="search-button" ng-click="anno.searchInputChanged()" role="button" tooltip-placement="bottom" uib-tooltip="Search any keyword to filter anatomy">
-                                    &nbsp;<span class="glyphicon glyphicon-search"></span>&nbsp;<!-- Added 2 non-breaking spaces to prevent btn's margins from collapsing and to center the icon-->
-                                </button>
+                                <div class='chaise-input-group-append'>
+                                  <button id="search-submit" class="chaise-search-btn chaise-btn chaise-btn-primary" ng-click="anno.searchInputChanged()" role="button" tooltip-placement="bottom" uib-tooltip="Search any keyword to filter anatomy">
+                                      &nbsp;<span class="glyphicon glyphicon-search"></span>&nbsp;<!-- Added 2 non-breaking spaces to prevent btn's margins from collapsing and to center the icon-->
+                                  </button>
+                                </div>
                             </div>
 
                             <span class='resultCount'>
@@ -110,9 +112,9 @@
                         </div>
                     </div>
                     <div class="osd-container">
-                        <div class="btn-group btn-group-sm pull-left menu-btn-container" ng-class="{'open-panel': osd.annotationsSidebarAreHidden, 'close-panel': !osd.annotationsSidebarAreHidden}" role="group">
+                        <div class="btn-group btn-group-sm pull-left menu-btn-container" ng-class="{'open-panel': !osd.annotationsSidebarAreHidden, 'close-panel': osd.annotationsSidebarAreHidden}" role="group">
                             <button ng-click="osd.openAnnotations();" class="btn btn-success" type="button" ng-class="{'pick':!osd.annotationsSidebarAreHidden}" role="button" title="edit annotations" id="edit-btn">
-                              <span class="glyphicon glyphicon-edit"></span> {{osd.annotationsSidebarAreHidden ? "Hide" : "Show" }} Annotations
+                              <span class="glyphicon glyphicon-edit"></span> {{osd.annotationsSidebarAreHidden ? "Show" : "Hide" }} Annotations
                             </button>
                             <button ng-click="osd.filterChannels();" class="btn btn-success" ng-class="{'pick':osd.filterChannelsAreHidden}" type="button" role="button" title="channel filtering" id="filter-btn">
                                 <span class="glyphicon glyphicon-tasks"></span> {{osd.filterChannelsAreHidden ? "Hide" : "Show" }} Channels
