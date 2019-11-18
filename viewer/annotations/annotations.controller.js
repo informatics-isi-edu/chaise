@@ -120,6 +120,7 @@
                             vm.totalCount = vm.collection.length;
                         })
                         break;
+
                     // The following cases are already handled elsewhere or are
                     // no longer needed but the case is repeated here to avoid
                     // triggering the default case.
@@ -395,7 +396,7 @@
                 i,
                 svgID;
 
-            // HACK: For mapping the id of human anatomy 
+            // HACK: For mapping the id of human anatomy
             var dict = {
               "EHDAA2:0028494": "EMAPA:27697",
               "EHDAA2:0027681": "EMAPA:27681",

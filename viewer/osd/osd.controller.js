@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .controller('OSDController', ['deviceDetector', 'context', 'image', '$window', '$rootScope', function OSDController(deviceDetector,context, image, $window, $rootScope) {
+    .controller('OSDController', ['deviceDetector', 'context', 'image', '$window', '$rootScope','$scope', function OSDController(deviceDetector,context, image, $window, $rootScope, $scope) {
         var vm = this;
         var iframe = $window.frames[0];
         var origin = $window.location.origin;
@@ -21,9 +21,11 @@
             vm.showTitle = true;
         }
 
+        vm.disablefilterChannels = false;
         vm.filterChannelsAreHidden = false;
         vm.filterChannels = filterChannels;
 
+        vm.disablefilterChannels = false;
         vm.annotationsAreHidden = false;
         vm.toggleAnnotations = toggleAnnotations;
 
@@ -38,6 +40,40 @@
 
         $rootScope.$on("dismissEvent", function () {
             openAnnotations();
+        });
+
+        $window.addEventListener('message', function channelControllerListener(event) {
+            if (event.origin === window.location.origin) {
+                var data = event.data;
+                var messageType = data.messageType;
+
+                switch (messageType) {
+                    case 'disableChannelList':
+                        $scope.$apply(function() {
+                            vm.disablefilterChannels = true;
+                        });
+                        break;
+                    case "disableAnnotationList":
+                        console.log(data);
+                        $scope.$apply(function(){
+                            vm.disableAnnotationList = data.content;
+                            vm.annotationsSidebarAreHidden = data.content;
+                            var sidebarptr=$('#sidebar');
+                            if(data.content) {
+                              sidebarptr.css("display","none");
+                              } else {
+                                sidebarptr.css("display","block");
+                            }
+
+                        });
+                        break;
+
+                    default:
+                        console.log('Invalid event message type "' + messageType + '"');
+                }
+            } else {
+                console.log('Invalid event origin. Event origin: ', event.origin, '. Expected origin: ', window.location.origin);
+            }
         });
 
         function downloadView() {
