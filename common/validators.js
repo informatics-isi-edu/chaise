@@ -9,7 +9,7 @@
 
     angular.module('chaise.validators', [])
     // Validation directive for testing if an input value is an integer
-    // Use: <input type="number" required integer>
+    // Use: <input type="text" integer>
     .directive('integer', function() {
         return {
             require: 'ngModel',
@@ -63,9 +63,8 @@
         }
     })
 
-    // TODO: this is not working as expected, 1.1.1 is "valid"
     // Validation directive for testing if an input value is a float
-    // Use: <input type="number" required float>
+    // Use: <input type="text" float>
     .directive('float', function() {
         return {
             require: 'ngModel',
