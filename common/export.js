@@ -116,6 +116,7 @@
                 scope.isLoading = false;
                 scope.exporter = null;
                 scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
+                scope.hideNavbar = context.hideNavbar;
 
                 scope.logDropdownOpened = function () {
                     var exportHeader = {
