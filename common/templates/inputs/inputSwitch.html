@@ -68,37 +68,37 @@
 
     <!-- int2 input -->
     <div ng-switch-when="integer2" class="chaise-input-control has-feedback">
-        <input ng-model="model.value" name="{{::column.name}}" type="number" min="{{::int2min}}" max="{{::int2max}}" integer>
+        <input ng-model="model.value" name="{{::column.name}}" type="text" chaise-min="{{::int2min}}" chaise-max="{{::int2max}}" integer>
         <chaise-clear-input btn-class="int2-remove" click-callback="::clearInput()" show="showRemove()"></chaise-clear-input>
     </div>
     <div ng-messages="inputContainer.$error" ng-show="inputContainer.$dirty  || inputContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int2'">
-        <div ng-message="min">This field requires a value greater than {{int2min}}.</div>
-        <div ng-message="max">This field requires a value smaller than {{int2max}}.</div>
+        <div ng-message="chaiseMin">This field requires a value greater than {{int2min}}.</div>
+        <div ng-message="chaiseMax">This field requires a value smaller than {{int2max}}.</div>
     </div>
 
     <!-- int4 input -->
     <div ng-switch-when="integer4" class="chaise-input-control has-feedback">
-        <input ng-model="model.value" name="{{::column.name}}" type="number" min="{{::int4min}}" max="{{::int4max}}" integer>
+        <input ng-model="model.value" name="{{::column.name}}" type="text" chaise-min="{{::int4min}}" chaise-max="{{::int4max}}" integer>
         <chaise-clear-input btn-class="int4-remove" click-callback="::clearInput()" show="showRemove()"></chaise-clear-input>
     </div>
     <div ng-messages="inputContainer.$error" ng-show="inputContainer.$dirty  || inputContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int4'">
-        <div ng-message="min">This field requires a value greater than {{int4min}}.</div>
-        <div ng-message="max">This field requires a value smaller than {{int4max}}.</div>
+        <div ng-message="chaiseMin">This field requires a value greater than {{int4min}}.</div>
+        <div ng-message="chaiseMax">This field requires a value smaller than {{int4max}}.</div>
     </div>
 
     <!-- int8 input -->
     <div ng-switch-when="integer8" class="chaise-input-control has-feedback">
-        <input ng-model="model.value" name="{{::column.name}}" type="number" min="{{::int8min}}" max="{{::int8max}}" integer>
+        <input ng-model="model.value" name="{{::column.name}}" type="text" chaise-min="{{::int8min}}" chaise-max="{{::int8max}}" integer>
         <chaise-clear-input btn-class="int8-remove" click-callback="::clearInput()" show="showRemove()"></chaise-clear-input>
     </div>
     <div ng-messages="inputContainer.$error" ng-show="inputContainer.$dirty || inputContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int8'">
-        <div ng-message="min">This field requires a value greater than {{int8min}}.</div>
-        <div ng-message="max">This field requires a value smaller than {{int8max}}.</div>
+        <div ng-message="chaiseMin">This field requires a value greater than {{int8min}}.</div>
+        <div ng-message="chaiseMax">This field requires a value smaller than {{int8max}}.</div>
     </div>
 
     <!-- float/decimal/numeric -->
     <div ng-switch-when="number" class="chaise-input-control has-feedback">
-        <input ng-model="model.value" name="{{::column.name}}" type="number" float>
+        <input ng-model="model.value" name="{{::column.name}}" type="text" float>
         <chaise-clear-input btn-class="float-remove" click-callback="::clearInput()" show="showRemove()"></chaise-clear-input>
     </div>
 

@@ -11,12 +11,13 @@
 
     .directive('ellipsis', ['AlertsService', 'ConfigUtils', 'defaultDisplayname', 'ErrorService', 'logActions', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$window',
         function(AlertsService, ConfigUtils, defaultDisplayname, ErrorService, logActions, logService, MathUtils, messageMap, modalBox, modalUtils, recordsetDisplayModes, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $window) {
-        var chaiseConfig = ConfigUtils.getConfigJSON();
+        var chaiseConfig = ConfigUtils.getConfigJSON(),
+            context = ConfigUtils.getContextJSON();
 
         function deleteReference(scope, reference) {
             var logObject = {action: logActions.recordsetDelete};
             // if it's related mode, change the logObject
-            if (scope.displayMode === recordsetDisplayModes.related) {
+            if (scope.displayMode.indexOf(recordsetDisplayModes.related) === 0) {
                 logObject = {
                     action: logActions.recordRelatedDelete,
                     referrer: scope.parentReference.defaultLogInfo
@@ -24,19 +25,44 @@
             }
 
             if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
+                var isRecordset = (scope.displayMode == recordsetDisplayModes.fullscreen),
+                    isInline = (scope.displayMode == recordsetDisplayModes.inline);
+
+                var action;
+                if (isRecordset) {
+                    action = logActions.deleteIntend;
+                } else if (isInline) {
+                    action = (scope.isUnLink ? logActions.inlineUnlinkIntend : logActions.inlineDeleteIntend );
+                } else {
+                    action = (scope.isUnLink ? logActions.relatedUnlinkIntend : logActions.relatedDeleteIntend );
+                }
+
+                var actionHeader = {
+                    action: action,
+                    facet: reference.defaultLogInfo.facet
+                }
+
                 var onError = function (response) {
                     scope.$root.showSpinner = false;
 
-                    var action = (scope.isUnLink ? logActions.relatedUnlinkCancel : logActions.relatedDeleteCancel );
-                    logService.logAction(action, logActions.clientAction);
+                    if (isRecordset) {
+                        action = logActions.deleteCancel;
+                    } else if (isInline) {
+                        action = (scope.isUnLink ? logActions.inlineUnlinkCancel : logActions.inlineDeleteCancel );
+                    } else {
+                        action = (scope.isUnLink ? logActions.relatedUnlinkCancel : logActions.relatedDeleteCancel );
+                    }
+
+                    actionHeader.action = action;
+                    logService.logClientAction(actionHeader, reference.defaultLogInfo);
                     // if response is string, the modal has been dismissed
                     if (typeof response !== "string") {
                         ErrorService.handleException(response, true);  // throw exception for dismissible pop- up (error, isDismissible = true)
                     }
                 }
 
-                var action = (scope.isUnLink ? logActions.relatedUnlinkIntended : logActions.relatedDeleteIntended );
-                logService.logAction(action, logActions.clientAction);
+                logService.logClientAction(actionHeader, reference.defaultLogInfo);
+
                 modalUtils.showModal({
                     animation: false,
                     templateUrl:  UriUtils.chaiseDeploymentPath() + "common/templates/delete-link/confirm_delete.modal.html",
@@ -82,7 +108,8 @@
                 selectDisabled: "=?",
                 displayMode: "@",
                 parentReference: "=?",
-                columnModels: "="
+                columnModels: "=",
+                tableModel: "="
             },
             link: function (scope, element) {
 
@@ -100,7 +127,7 @@
                     var editLink = null;
 
                     // unlink button should only show up in related mode
-                    if (scope.displayMode == recordsetDisplayModes.related && scope.parentTuple) {
+                    if (scope.displayMode.indexOf(recordsetDisplayModes.related) === 0 && scope.parentTuple) {
                         scope.associationRef = scope.tuple.getAssociationRef(scope.parentTuple.data);
                     }
 

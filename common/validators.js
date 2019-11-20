@@ -9,7 +9,7 @@
 
     angular.module('chaise.validators', [])
     // Validation directive for testing if an input value is an integer
-    // Use: <input type="number" required integer>
+    // Use: <input type="text" integer>
     .directive('integer', function() {
         return {
             require: 'ngModel',
@@ -31,9 +31,40 @@
         };
     })
 
-    // TODO: this is not working as expected, 1.1.1 is "valid"
+    .directive('chaiseMin', function() {
+        return {
+            require: 'ngModel',
+            link: function(scope, elm, attrs, ctrl) {
+                ctrl.$validators.chaiseMin = function(modelValue, viewValue) {
+                    if (ctrl.$isEmpty(modelValue)) {
+                        // consider empty models to be valid
+                        // use the `required` attribute in the HTML
+                        return true;
+                    }
+                    return parseInt(viewValue, 10) >= parseInt(attrs.chaiseMin, 10);
+                };
+            }
+        }
+    })
+
+    .directive('chaiseMax', function() {
+        return {
+            require: 'ngModel',
+            link: function(scope, elm, attrs, ctrl) {
+                ctrl.$validators.chaiseMax = function(modelValue, viewValue) {
+                    if (ctrl.$isEmpty(modelValue)) {
+                        // consider empty models to be valid
+                        // use the `required` attribute in the HTML
+                        return true;
+                    }
+                    return parseInt(viewValue, 10) <= parseInt(attrs.chaiseMax, 10);
+                };
+            }
+        }
+    })
+
     // Validation directive for testing if an input value is a float
-    // Use: <input type="number" required float>
+    // Use: <input type="text" float>
     .directive('float', function() {
         return {
             require: 'ngModel',

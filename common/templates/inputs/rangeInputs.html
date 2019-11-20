@@ -9,14 +9,14 @@
                     <!-- int2 -->
                     <div ng-switch-when="int2">
                         <div class="chaise-input-control has-feedback">
-                            <input type="number" class="range-min" min="{{intMin}}" max="{{intMax}}" placeholder="{{absMin}}" ng-model="model.min" integer disable-arrows>
+                            <input type="text" class="range-min" chaise-min="{{intMin}}" chaise-max="{{intMax}}" placeholder="{{absMin}}" ng-model="model.min" integer>
                             <chaise-clear-input btn-class="min-clear" click-callback="model.min=''" show="model.min || (numericMin.$invalid && numericMin.$dirty)"></chaise-clear-input>
                         </div>
                     </div>
                     <!-- int4 -->
                     <div ng-switch-when="int4">
                         <div class="chaise-input-control has-feedback">
-                            <input type="number" class="range-min" min="{{intMin}}" max="{{intMax}}" placeholder="{{absMin}}" ng-model="model.min" integer disable-arrows>
+                            <input type="text" class="range-min" chaise-min="{{intMin}}" chaise-max="{{intMax}}" placeholder="{{absMin}}" ng-model="model.min" integer>
                             <chaise-clear-input btn-class="min-clear" click-callback="model.min=''" show="model.min || (numericMin.$invalid && numericMin.$dirty)"></chaise-clear-input>
                         </div>
 
@@ -24,7 +24,7 @@
                     <!-- int8 -->
                     <div ng-switch-when="int8">
                         <div class="chaise-input-control has-feedback">
-                            <input type="number" class="range-min" min="{{intMin}}" max="{{intMax}}" placeholder="{{absMin}}" ng-model="model.min" integer disable-arrows>
+                            <input type="text" class="range-min" chaise-min="{{intMin}}" chaise-max="{{intMax}}" placeholder="{{absMin}}" ng-model="model.min" integer>
                             <chaise-clear-input btn-class="min-clear" click-callback="model.min=''" show="model.min || (numericMin.$invalid && numericMin.$dirty)"></chaise-clear-input>
                         </div>
                     </div>
@@ -81,21 +81,21 @@
                     <!-- int2 -->
                     <div ng-switch-when="int2">
                         <div class="chaise-input-control">
-                            <input type="number" class="range-max" min="{{intMin}}" max="{{intMax}}" placeholder="{{absMax}}" ng-model="model.max" integer disable-arrows>
+                            <input type="text" class="range-max" chaise-min="{{intMin}}" chaise-max="{{intMax}}" placeholder="{{absMax}}" ng-model="model.max" integer>
                             <chaise-clear-input btn-class="max-clear" click-callback="model.max=''" show="model.max || (numericMax.$invalid && numericMax.$dirty)"></chaise-clear-input>
                         </div>
                     </div>
                     <!-- int4 -->
                     <div ng-switch-when="int4">
                         <div class="chaise-input-control">
-                            <input type="number" class="range-max" min="{{intMin}}" max="{{intMax}}" placeholder="{{absMax}}" ng-model="model.max" integer disable-arrows>
+                            <input type="text" class="range-max" chaise-min="{{intMin}}" chaise-max="{{intMax}}" placeholder="{{absMax}}" ng-model="model.max" integer>
                             <chaise-clear-input btn-class="max-clear" click-callback="model.max=''" show="model.max || (numericMax.$invalid && numericMax.$dirty)"></chaise-clear-input>
                         </div>
                     </div>
                     <!-- int8 -->
                     <div ng-switch-when="int8">
                         <div class="chaise-input-control">
-                            <input type="number" class="range-max" min="{{intMin}}" max="{{intMax}}" placeholder="{{absMax}}" ng-model="model.max" integer disable-arrows>
+                            <input type="text" class="range-max" chaise-min="{{intMin}}" chaise-max="{{intMax}}" placeholder="{{absMax}}" ng-model="model.max" integer>
                             <chaise-clear-input btn-class="max-clear" click-callback="model.max=''" show="model.max || (numericMax.$invalid && numericMax.$dirty)"></chaise-clear-input>
                         </div>
                     </div>
@@ -146,12 +146,12 @@
         <span class="chaise-btn-icon glyphicon glyphicon-ok"></span>
     </button>
     <div ng-messages="minMaxForm.$error" ng-show="minMaxForm.$dirty || minMaxForm.$submitted" class="text-danger validation-error" role="alert">
-        <div ng-message="min" ng-show="minMaxForm.numericMin.$error.min || minMaxForm.numericMax.$error.min">This field requires a value greater than {{intMin}}.</div>
-        <div ng-message="max" ng-show="minMaxForm.numericMin.$error.max || minMaxForm.numericMax.$error.max">This field requires a value smaller than {{intMax}}.</div>
+        <div ng-message="chaiseMin" ng-show="minMaxForm.numericMin.$error.chaiseMin || minMaxForm.numericMax.$error.chaiseMin">This field requires a value greater than {{intMin}}.</div>
+        <div ng-message="chaiseMax" ng-show="minMaxForm.numericMin.$error.chaiseMax || minMaxForm.numericMax.$error.chaiseMax">This field requires a value smaller than {{intMax}}.</div>
         <div ng-message="date" ng-show="minMaxForm.dateMin.$error.date || minMaxForm.dateMax.$error.date || minMaxForm.tsDateMin.$error.date || minMaxForm.tsDateMax.$error.date">Please enter a date value in {{dataFormats.placeholder.date}} format.</div>
         <div ng-message="time" ng-show="minMaxForm.timeMin.$error.time || minMaxForm.timeMax.$error.time">Please enter a time value in 24-hr {{dataFormats.placeholder.time}} format.</div>
-        <div ng-message="integer" ng-show="minMaxForm.numericMin.$error.integer">Please enter an integer value.</div>
-        <div ng-message="float" ng-show="minMaxForm.numericMin.$error.float">Please enter a decimal value.</div>
+        <div ng-message="integer" ng-show="minMaxForm.numericMin.$error.integer || minMaxForm.numericMax.$error.integer">Please enter an integer value.</div>
+        <div ng-message="float" ng-show="minMaxForm.numericMin.$error.float || minMaxForm.numericMax.$error.float">Please enter a decimal value.</div>
         <div ng-message="improperRange" ng-show="minMaxForm.$error.improperRange">'From' value cannot be greater than the 'To' value.</div>
     </div>
 </fieldset>
