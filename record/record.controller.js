@@ -187,14 +187,14 @@
             };
 
             if (canShow()) {
-                return $rootScope.showEmptyRelatedTables || tableModel.rowValues.length > 0;
+                return $rootScope.showEmptyRelatedTables || (tableModel.page && tableModel.page.length > 0);
             }
             return false;
         };
 
         vm.showInlineTable = function (i) {
             var cm = $rootScope.columnModels[i];
-            return cm.isInline && ($rootScope.showEmptyRelatedTables || cm.tableModel.rowValues.length > 0);
+            return cm.isInline && ($rootScope.showEmptyRelatedTables || (cm.tableModel.page && cm.tableModel.page.length > 0));
         };
 
         /**
