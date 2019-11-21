@@ -2035,7 +2035,7 @@
                 searchTerm: "=",
                 searchCallback: "&",
                 inputClass: "@",
-                placeholder: "=",
+                searchColumns: "=",
                 focus: "=",
                 disabled: "="
             },
@@ -2043,6 +2043,7 @@
                 var AUTO_SEARCH_TIMEOUT = 2000;
                 scope.inputChangedPromise = undefined;
                 scope.inputElement = elem[0].querySelector("input");
+                scope.isArray = angular.isArray;
 
                 // unrwap the callback function
                 scope.searchCallback = scope.searchCallback();

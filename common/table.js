@@ -1207,8 +1207,8 @@
                         scope.vm.focusOnFacet(firstOpen, true);
                     }
 
-                    // TODO should be based on the reference columns in search context
-                    scope.searchPlaceholder = {isHTML: false, value: "all columns"};
+                    // show the main search box columns
+                    scope.searchColumns = scope.vm.reference.searchColumns;
 
                     initialize(scope.vm);
                 });
