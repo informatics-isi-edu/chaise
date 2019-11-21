@@ -79,7 +79,8 @@
                             noConstraints: false,
                             appliedFilters: [],
                             updateFacet: childCtrl.updateFacet,
-                            preProcessFacet: childCtrl.preProcessFacet
+                            preProcessFacet: childCtrl.preProcessFacet,
+                            recordsetConfig: $scope.vm.config
                         };
 
                         if (ctrl.facetingCount === $scope.vm.reference.facetColumns.length) {
@@ -1305,6 +1306,7 @@
                         }
 
                         params.displayMode = recordsetDisplayModes.facetPopup;
+                        params.parentDisplayMode = scope.facetModel.recordsetConfig.displayMode;
                         params.editable = false;
 
                         params.selectedRows = [];
@@ -1353,7 +1355,25 @@
                             size: modalUtils.getSearchPopupSize(params),
                             templateUrl:  UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
                         }, modalDataChanged(scope, true), function () {
-                            logService.logAction(logActions.recordsetFacetCancel, logActions.clientAction);
+                            var action;
+                            switch (params.parentDisplayMode) {
+                                case recordsetDisplayModes.fullscreen:
+                                    action = logActions.recordsetFacetCancel;
+                                    break;
+                                case recordsetDisplayModes.addPureBinaryPopup:
+                                    action = logActions.recordPBFacetCancel;
+                                    break;
+                                default:
+                                    // should only be FK case
+                                    action = logActions.recordeditFKFacetCancel;
+                                    break;
+                            }
+
+                            var cancelHeader = {
+                                action: action
+                            }
+
+                            logService.logClientAction(cancelHeader, params.reference.defaultLogInfo);
                         }, false);
                     };
 

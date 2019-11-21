@@ -291,7 +291,7 @@
                     editable: $rootScope.modifyRecord,
                     deletable: $rootScope.modifyRecord && $rootScope.showDeleteButton,
                     selectMode: modalBox.noSelect,
-                    displayMode: recordsetDisplayModes.related
+                    displayMode: (context.indexOf("inline") > -1 ? recordsetDisplayModes.inline : recordsetDisplayModes.related)
                 },
                 flowControlObject: $rootScope.recordFlowControl,
                 queryTimeoutTooltip: messageMap.queryTimeoutTooltip

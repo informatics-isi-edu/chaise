@@ -1211,12 +1211,16 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             // Invalid text value
                             var text = "1j2yu", actualValue = "12";
                             intInput.sendKeys(text);
-                            expect(intInput.getAttribute('value')).toBe(actualValue);
+                            expect(intInput.getAttribute('value')).toBe(text);
 
 
                             // Required Error message should disappear;
                             chaisePage.recordEditPage.getInputErrorMessage(intInput, 'required').then(function(err) {
                                 expect(err).toBeNull(colError(c, "Expected to clear the error message on changing the value."));
+                            });
+
+                            chaisePage.recordEditPage.getInputErrorMessage(intInput, 'integer').then(function(err) {
+                                expect(err.isDisplayed()).toBeTruthy(colError(c, "Expected to show the integer error message on changing the value."));
                             });
 
                             // Clear value
@@ -1260,7 +1264,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                             // Check for invalid maximum number
                             intInput.sendKeys(invalidMaxNo);
-                            chaisePage.recordEditPage.getInputErrorMessage(intInput, 'max').then(function(err) {
+                            chaisePage.recordEditPage.getInputErrorMessage(intInput, 'chaiseMax').then(function(err) {
                                 expect(err.isDisplayed()).toBeTruthy(colError(c.name ,"Expected to show error when using maximum number."));
                             });
 
@@ -1269,13 +1273,13 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             chaisePage.recordEditPage.clearInput(intInput);
                             expect(intInput.getAttribute('value')).toBe("");
 
-                            chaisePage.recordEditPage.getInputErrorMessage(intInput, 'max').then(function(err) {
+                            chaisePage.recordEditPage.getInputErrorMessage(intInput, 'chaiseMax').then(function(err) {
                                 expect(err).toBeNull(colError(c.name , "Expected to clear error message after clearing maximum number."));
                             });
 
                             // Check for invalid minimum number
                             intInput.sendKeys(invalidMinNo);
-                            chaisePage.recordEditPage.getInputErrorMessage(intInput, 'min').then(function(err) {
+                            chaisePage.recordEditPage.getInputErrorMessage(intInput, 'chaiseMin').then(function(err) {
                                 expect(err.isDisplayed()).toBeTruthy(colError(c.name ,"Expected to show error when using minimum number."));
                             });
 
@@ -1283,7 +1287,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             chaisePage.recordEditPage.clearInput(intInput);
                             expect(intInput.getAttribute('value')).toBe("");
 
-                            chaisePage.recordEditPage.getInputErrorMessage(intInput, 'min').then(function(err) {
+                            chaisePage.recordEditPage.getInputErrorMessage(intInput, 'chaiseMin').then(function(err) {
                                 expect(err).toBeNull(colError(c.name , "Expected to clear error message after clearing maximum number."));
                             });
 
@@ -1291,11 +1295,11 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             intInput.sendKeys(validNo);
                             expect(intInput.getAttribute('value')).toBe(validNo);
 
-                            chaisePage.recordEditPage.getInputErrorMessage(intInput, 'max').then(function(err) {
+                            chaisePage.recordEditPage.getInputErrorMessage(intInput, 'chaiseMax').then(function(err) {
                                 expect(err).toBeNull(colError(c.name , "Expected to not show max error on valid number."));
                             });
 
-                            chaisePage.recordEditPage.getInputErrorMessage(intInput, 'min').then(function(err) {
+                            chaisePage.recordEditPage.getInputErrorMessage(intInput, 'chaiseMin').then(function(err) {
                                 expect(err).toBeNull(colError(c.name , "Expected to not show max error on valid number."));
                             });
 

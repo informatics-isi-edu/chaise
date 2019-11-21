@@ -174,8 +174,8 @@
         "viewerAnatomy": "anatomy",
 
         // # client actions (mostly button click events)
-        "deleteIntended": "delete/intend", // delete clicked -> confirm delete dialog opened (record button and recordset row) TODO
-        "deleteCancelled": "delete/cancel", // cancel clicked when confirm delete dialog open (record button and recordset row) TODO
+        "deleteIntend": "delete/intend", // delete clicked -> confirm delete dialog opened (record button and recordset row)
+        "deleteCancel": "delete/cancel", // cancel clicked when confirm delete dialog open (record button and recordset row)
 
         // ## recordset actions
         // ### page level actions
@@ -183,9 +183,9 @@
         "permalinkLeft": "permalink/lclick", // permalink left clicked (copied)
         "permalinkRight": "permalink/rclick", // permalink right clicked (contextmenu opened)
         // ### recordset directive for facet popups
-        "recordsetPageSize": "page-size", // page size dropdown opened TODO
-        "recordsetFacetOpen": "panel/show", // facet panel opened TODO
-        "recordsetFacetClose": "panel/hide", // facet panel closed TODO
+        "recordsetPageSize": "page-size", // page size dropdown opened
+        "recordsetFacetOpen": "panel/show", // facet panel opened
+        "recordsetFacetClose": "panel/hide", // facet panel closed
         "recordsetFacetPageSize": "facet/page-size", // in "show more" for facet
         "recordsetFacetAll": "facet/all", // in "show more" for facet
         "recordsetFacetNone": "facet/none", // in "show more" for facet
@@ -198,86 +198,87 @@
         "share": "share", // share dialog opened
         "liveCopy": "share/live", // live link copied to clipboard
         "versionCopy": "share/version", // versioned link copied to clipboard
-        "scrollTop": "scroll-top", // bottom right, "scroll to top" button clicked TODO
+        "cite": "cite/bibtex", // bibtex citation downloaded
+        "scrollTop": "scroll-top", // bottom right, "scroll to top" button clicked
         "tocShow": "toc/show", // the toc panel toggled open/close
         "tocHide": "toc/hide", // the toc panel toggled open/close
-        "tocScrollTop": "toc/scroll-top", // "summary" heading clicked to scroll to top of record TODO
+        "tocScrollTop": "toc/scroll-top", // "summary" heading clicked to scroll to top of record
         "tocScrollTo": "toc/scroll-to", // one of the toc headings clicked
         // ### related tables in RT section
-        "relatedOpen": "related/open", // RT in RT section toggled open TODO
-        "relatedClose": "related/close", // RT in RT section toggled close TODO
-        "relatedPageSize": "related/page-size", // toggle page size dropdown TODO
+        "relatedOpen": "related/open", // RT in RT section toggled open
+        "relatedClose": "related/close", // RT in RT section toggled close
+        "relatedPageSize": "related/page-size", // toggle page size dropdown
         // #### RT modes
         "relatedTableDisplay": "related/display/table", // toggle display mode to table display
         "relatedMkdnDisplay": "related/display/mkdn", // toggle display mode to custom display
         "relatedEditDisplay": "related/display/edit", // toggle display mode to edit display
         // #### RT actions
-        "relatedDeleteIntended": "related/delete/intend", // row delete clicked from delete in action column TODO
-        "relatedDeleteCancel": "related/delete/cancel", // row delete cancelled TODO
-        "relatedUnlinkIntended": "related/unlink/intend", // row unlink clicked from unlink in action column TODO
-        "relatedUnlinkCancel": "related/unlink/cancel", // row unlink cancelled TODO
+        "relatedDeleteIntend": "related/delete/intend", // row delete clicked from delete in action column
+        "relatedDeleteCancel": "related/delete/cancel", // row delete cancelled
+        "relatedUnlinkIntend": "related/unlink/intend", // row unlink clicked from unlink in action column
+        "relatedUnlinkCancel": "related/unlink/cancel", // row unlink cancelled
         // ### inline related tables in record display section
-        "inlinePageSize": "inline/page-size", // toggle page size dropdown for inline RT TODO
+        "inlinePageSize": "inline/page-size", // toggle page size dropdown for inline RT
         // #### inline modes
         "inlineTableDisplay": "inline/display/table", // toggle display mode to table display
         "inlineMkdnDisplay": "inline/display/mkdn", // toggle display mode to custom display
         "inlineEditDisplay": "inline/display/edit", // toggle display mode to edit display
         // #### inline actions
-        "inlineDeleteIntended": "inline/delete/intend", // row delete clicked from delete in action column TODO
-        "inlineDeleteCancel": "inline/delete/cancel", // row delete cancelled TODO
-        "inlineUnlinkIntended": "inline/unlink/intend", // row unlink clicked from unlink in action column TODO
-        "inlineUnlinkCancel": "inline/unlink/cancel", // row unlink cancelled TODO
+        "inlineDeleteIntend": "inline/delete/intend", // row delete clicked from delete in action column
+        "inlineDeleteCancel": "inline/delete/cancel", // row delete cancelled
+        "inlineUnlinkIntend": "inline/unlink/intend", // row unlink clicked from unlink in action column
+        "inlineUnlinkCancel": "inline/unlink/cancel", // row unlink cancelled
         // ### recordset directive for pure and binary popups
-        "recordPBOpen": "pb/panel/show", // facet panel opened TODO
-        "recordPBClose": "pb/panel/hide", // facet panel closed TODO
-        "recordPBPageSize": "pb/page-size", // TODO
-        "recordPBAll": "pb/all", // TODO
-        "recordPBNone": "pb/none", // TODO
-        "recordPBClear": "pb/reset", // TODO
-        "recordPBCancel": "pb/cancel", // TODO
+        "recordPBOpen": "pb/panel/show", // facet panel opened
+        "recordPBClose": "pb/panel/hide", // facet panel closed
+        "recordPBPageSize": "pb/page-size",
+        "recordPBAll": "pb/all",
+        "recordPBNone": "pb/none",
+        "recordPBClear": "pb/reset",
+        "recordPBCancel": "pb/cancel",
         // #### recordset directive for facet "show more" in pure and binary popups
-        "recordPBFacetPageSize": "pb/facet/page-size", // TODO
-        "recordPBFacetAll": "pb/facet/all", // TODO
-        "recordPBFacetNone": "pb/facet/none", // TODO
-        "recordPBFacetClear": "pb/facet/reset", // TODO
-        "recordPBFacetCancel": "pb/facet/cancel", // TODO
+        "recordPBFacetPageSize": "pb/facet/page-size",
+        "recordPBFacetAll": "pb/facet/all",
+        "recordPBFacetNone": "pb/facet/none",
+        "recordPBFacetClear": "pb/facet/reset",
+        "recordPBFacetCancel": "pb/facet/cancel",
 
         // ## recordedit actions
         // ### create actions
         "add1": "create/clone", // one form was added to the container
         "addX": "create/clone-x", // multiple forms were added to the container
         "createRemove": "create/remove", // remove a form during creation
-        "createMultiOpen": "create/set-all/open", // set all opened TODO
-        "createMultiClose": "create/set-all/close", // set all opened TODO
-        "createMultiCancel": "create/set-all/cancel", // set all closed (cancel button) TODO
-        "createMultiApply": "create/set-all/apply", // set all, apply all clicked TODO
-        "createMultiClear": "create/set-all/clear", // set all, clear all clicked TODO
+        "createMultiOpen": "create/set-all/open", // set all opened
+        "createMultiClose": "create/set-all/close", // set all opened
+        "createMultiCancel": "create/set-all/cancel", // set all closed (cancel button)
+        "createMultiApply": "create/set-all/apply", // set all, apply all clicked
+        "createMultiClear": "create/set-all/clear", // set all, clear all clicked
         // ### update actions
         "updateRemove": "update/remove", // remove a form during editing
-        "updateMultiOpen": "update/set-all/open", // set all opened TODO
-        "updateMultiClose": "update/set-all/close", // set all opened TODO
-        "updateMultiCancel": "update/set-all/cancel", // set all closed (cancel button) TODO
-        "updateMultiApply": "update/set-all/apply", // set all, apply all clicked TODO
-        "updateMultiClear": "update/set-all/clear", // set all, clear all clicked TODO
+        "updateMultiOpen": "update/set-all/open", // set all opened
+        "updateMultiClose": "update/set-all/close", // set all opened
+        "updateMultiCancel": "update/set-all/cancel", // set all closed (cancel button)
+        "updateMultiApply": "update/set-all/apply", // set all, apply all clicked
+        "updateMultiClear": "update/set-all/clear", // set all, clear all clicked
         // ### recordset directive for foreign key picker
-        "recordeditFKOpen": "fk/panel/show", // facet panel opened TODO
-        "recordeditFKClose": "fk/panel/hide", // facet panel closed TODO
-        "recordeditFKPageSize": "fk/page-size", // TODO
-        "recordeditFKCancel": "fk/cancel", // TODO
+        "recordeditFKOpen": "fk/panel/show", // facet panel opened
+        "recordeditFKClose": "fk/panel/hide", // facet panel closed
+        "recordeditFKPageSize": "fk/page-size",
+        "recordeditFKCancel": "fk/cancel",
         // #### recordset directive for facet "show more" in foriegn key pickers
-        "recordeditFKFacetPageSize": "fk/facet/page-size", // TODO
-        "recordeditFKFacetAll": "fk/facet/all", // TODO
-        "recordeditFKFacetNone": "fk/facet/none", // TODO
-        "recordeditFKFacetClear": "fk/facet/reset", // TODO
-        "recordeditFKFacetCancel": "fk/facet/cancel", // TODO
+        "recordeditFKFacetPageSize": "fk/facet/page-size",
+        "recordeditFKFacetAll": "fk/facet/all",
+        "recordeditFKFacetNone": "fk/facet/none",
+        "recordeditFKFacetClear": "fk/facet/reset",
+        "recordeditFKFacetCancel": "fk/facet/cancel",
 
         // ## navbar actions
         "branding": "branding", // top left corner branding text/logo clicked
-        "dropdownUser": "dropdown/user", // user dropdown opened TODO
-        "profile": "dropdown/user/profile", // user profile dialog opened
-        "dropdownMenu": "dropdown/menu", // navbar menu dropdown opened TODO
-        "dropdownMenuInternal": "dropdown/menu/internal", // navbar menu internal page TODO
-        "dropdownMenuExternal": "dropdown/menu/external" // navbar menu external page TODO
+        "dropdownUser": "user", // user dropdown opened
+        "profile": "user/profile", // user profile dialog opened
+        "dropdownMenu": "menu/submenu", // navbar menu dropdown opened
+        "dropdownMenuInternal": "menu/internal", // navbar menu internal page
+        "dropdownMenuExternal": "menu/external" // navbar menu external page
     })
 
     // NOTE since this has been used with ng-switch in the code, and we cannot
@@ -295,6 +296,7 @@
     .constant("recordsetDisplayModes", {
         fullscreen: "fullscreen",
         related: "related",
+        inline: "related/inline",
         popup: "popup",
         foreignKeyPopup: "popup/foreignkey",
         foreignKeyPopupCreate: "popup/foreignkey/create",
@@ -2279,16 +2281,27 @@
         var context = ConfigUtils.getContextJSON(),
             cc = ConfigUtils.getConfigJSON();
 
-        function logAction(action, path) {
+        /**
+         * Takes a header object, adds default logging info to it, and logs the request with ermrest
+         * @params {Object} headerObj - object of key/value pairs that are specific to this action
+         * @params {Object} commonLogInfo - object of key/value pairs that are common to all action requests
+         */
+        function logClientAction(headerObj, commonLogInfo) {
             if (!cc.logClientActions) return;
-            context.server.logHeaders({ action: action }, path).catch(function (err) {
-                $log.debug("An error may have occured when logging: ", action);
+
+            if (commonLogInfo) {
+                headerObj.catalog = commonLogInfo.catalog;
+                headerObj.schema_table = commonLogInfo.schema_table;
+            }
+
+            context.server.logClientAction(headerObj).catch(function (err) {
+                $log.debug("An error may have occured when logging: ", headerObj);
                 $log.debug(err);
             });
         }
 
         return {
-            logAction: logAction
+            logClientAction: logClientAction
         }
     }])
 
