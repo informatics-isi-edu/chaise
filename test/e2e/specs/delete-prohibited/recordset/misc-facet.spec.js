@@ -633,7 +633,7 @@ describe("Other facet features, ", function() {
         });
 
         it ("searching a lenghty string should show the `Maximum URL length reached` warning.", function () {
-            var mainSearch = chaisePage.recordsetPage.getMainSearchBox();
+            var mainSearch = chaisePage.recordsetPage.getMainSearchInput();
             chaisePage.setInputValue(mainSearch, chance.string({length: 4000}));
             chaisePage.recordsetPage.waitForInverseMainSpinner();
             expect(chaisePage.recordsetPage.getRows().count()).toBe(testParams.maximumLength.numRows, "row count missmatch.");
