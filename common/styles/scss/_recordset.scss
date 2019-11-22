@@ -265,7 +265,7 @@
         word-wrap: break-word;
     }
 
-    >thead>tr>th {
+    >thead>tr:first-child {
         border-bottom: 1px solid $table-border-color;
     }
 

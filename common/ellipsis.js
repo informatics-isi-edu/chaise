@@ -181,18 +181,15 @@
                     }
                 };
 
-                for (var i = 0; i < element[0].children.length; i++) {
-                    scope.overflow[i] = false;
-                }
-
                 // If chaiseconfig contains maxRecordSetHeight then apply more-less styling
                 if (chaiseConfig.maxRecordsetRowHeight != false ) {
-
-                    var moreButtonHeight = 20,
+                    var userClicked = false,
+                        moreButtonHeight = 20,
                         maxHeight = chaiseConfig.maxRecordsetRowHeight || 160,
                         maxHeightStyle = { "max-height": (maxHeight - moreButtonHeight) + "px" };
 
                     scope.readmore = function() {
+                        userClicked = true; // avoid triggering resize Sensor logic
                         if (scope.hideContent) {
                             scope.hideContent = false;
                             scope.linkText = "less";
@@ -218,21 +215,34 @@
                     new ResizeSensor(element[0], function (dimensions) {
                         // if TR.offsetHeight > the calculated maxRecordsetRowHeight
                         // +10 to account for padding on TD element
-                        console.log("before condition: ", dimensions);
                         if (dimensions.height > (maxHeight + 10)) {
-                            console.log(element[0].rowIndex);
-                            console.log("Max height: ", maxHeight);
-                            console.log(dimensions)
                             // iterate over each cell (TD), check it's height, and set overflow if necessary
-                            setOverflows();
+                            if (!userClicked) {
+                                setOverflows();
 
-                            scope.hideContent = true;
-                            scope.maxHeightStyle = maxHeightStyle;
+                                scope.hideContent = true;
+                                scope.maxHeightStyle = maxHeightStyle;
 
-                            scope.$digest();
+                                scope.$digest();
+                            }
+                        } else if (dimensions.height < (maxHeight + 10)) {
+                            scope.overflow = [];
                         }
                     });
+
+                    // reset overflows because new rows are available
+                    $rootScope.$on('reference-modified', function() {
+                        scope.overflow = [];
+                        scope.hideContent = false;
+                        scope.maxHeightStyle = null;
+                        userClicked = false;
+
+                        $timeout(function () {
+                            // How to trigger event when it doesn't auto trigger on content change and resize?
+                        });
+                    });
                 }
+
             }
         };
     }])
