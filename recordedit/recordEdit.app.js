@@ -160,7 +160,7 @@
                 // we are using filter to determine app mode, the logic for getting filter
                 // should be in the parser and we should not duplicate it in here
                 // NOTE: we might need to change this line (we're parsing the whole url just for fidinig if there's filter)
-                var location = ERMrest.parse(ermrestUri);
+                var location = reference.location;
 
                 // Mode can be any 3 with a filter
                 if (location.filter || location.facets) {
