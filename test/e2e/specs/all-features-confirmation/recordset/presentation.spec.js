@@ -338,7 +338,7 @@ describe('View recordset,', function() {
             });
 
             it("should autofocus on search box", function() {
-                var searchBox = chaisePage.recordsetPage.getMainSearchBox();
+                var searchBox = chaisePage.recordsetPage.getMainSearchInput();
                 chaisePage.waitForElement(searchBox);
                 expect(searchBox.getAttribute('id')).toEqual(browser.driver.switchTo().activeElement().getAttribute('id'));
             });
@@ -491,7 +491,7 @@ describe('View recordset,', function() {
                 var e = chaisePage.recordsetPage.getCustomPageSize();
                 browser.wait(EC.presenceOf(e), browser.params.defaultTimeout);
 
-                var searchBox = chaisePage.recordsetPage.getMainSearchBox(),
+                var searchBox = chaisePage.recordsetPage.getMainSearchInput(),
                 searchSubmitButton = chaisePage.recordsetPage.getSearchSubmitButton(),
                 clearSearchButton = chaisePage.recordsetPage.getSearchClearButton(),
                 noResultsMessage = "No Results Found";
@@ -542,7 +542,7 @@ describe('View recordset,', function() {
             });
 
             it("JSON Column value should be searchable", function(){
-                var searchBox = chaisePage.recordsetPage.getMainSearchBox(),
+                var searchBox = chaisePage.recordsetPage.getMainSearchInput(),
                 searchSubmitButton = chaisePage.recordsetPage.getSearchSubmitButton(),
                 clearSearchButton = chaisePage.recordsetPage.getSearchClearButton(),
                 noResultsMessage = "No Results Found";

@@ -1,8 +1,15 @@
 <div class="chaise-search-box chaise-input-group" ng-class="{'disabled-element': disabled}">
     <div class="chaise-input-control has-feedback">
         <input type="text" ng-model="searchTerm" ng-class="inputClass" ng-disabled="disabled" on-enter="enterPressed()" ng-change="inputChanged()" ng-attr-autofocus="{{focus === true}}">
-        <span ng-hide="searchTerm" class="chaise-input-placeholder" ng-click="changeFocus()" ng-if="placeholder.isHTML === true" ng-bind-html="'Search ' + placeholder.value"></span>
-        <span ng-hide="searchTerm" class="chaise-input-placeholder" ng-click="changeFocus()" ng-if="placeholder.isHTML === false" ng-bind="'Search '  + placeholder.value"></span>
+        <span ng-hide="searchTerm" class="chaise-input-placeholder" ng-click="changeFocus()" ng-if="!isArray(searchColumns)" ng-bind="'Search' + (searchColumns === false ? ' all columns': '')"></span>
+        <span ng-hide="searchTerm" class="chaise-input-placeholder" ng-click="changeFocus()" ng-if="isArray(searchColumns)">
+            <span>Search</span>
+            <span ng-repeat="sc in searchColumns">
+                <span ng-if="sc.displayname.isHTML" ng-bind-html="sc.displayname.value"></span>
+                <span ng-if="!sc.displayname.isHTML" ng-bind="sc.displayname.value"></span>
+                <span ng-if="!$last" style="margin-left:-4px">, </span>
+            </span>
+        </span>
         <chaise-clear-input btn-class="remove-search-btn" click-callback="::clearSearch()" show="searchTerm && !disabled"></chaise-clear-input>
     </div>
     <div class="chaise-input-group-append">
