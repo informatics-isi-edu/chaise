@@ -37,8 +37,13 @@
         }
 
         vm.toggleSidebar = function() {
-            var action = ($rootScope.recordSidePanOpen ? logActions.tocHide : logActions.tocShow )
-            logService.logAction(action, logActions.clientAction);
+            var action = ($rootScope.recordSidePanOpen ? logActions.tocHide : logActions.tocShow );
+
+            var tocToggleHeader = {
+                action: action
+            }
+
+            logService.logClientAction(tocToggleHeader, $rootScope.reference.defaultLogInfo);
 
             $rootScope.recordSidePanOpen = !$rootScope.recordSidePanOpen;
         };
@@ -104,7 +109,8 @@
 
             var params = {
                 citation: tuple.citation,
-                displayname: refTable.name+'_'+tuple.uniqueId
+                displayname: refTable.name+'_'+tuple.uniqueId,
+                reference: ref
             }
 
             var versionString = "@" + (ref.location.version || refTable.schema.catalog.snaptime);
@@ -113,7 +119,12 @@
             params.versionDateRelative = UiUtils.humanizeTimestamp(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
             params.versionDate = UiUtils.versionDate(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
 
-            refTable.schema.catalog.currentSnaptime(logActions.share).then(function (snaptime) {
+            var snaptimeHeader = {
+                action: logActions.share,
+                catalog: ref.defaultLogInfo.catalog,
+                schema_table: ref.defaultLogInfo.schema_table
+            }
+            refTable.schema.catalog.currentSnaptime(snaptimeHeader).then(function (snaptime) {
                 // if current fetched snpatime doesn't match old snaptime, show a warning
                 params.showVersionWarning = (snaptime !== refTable.schema.catalog.snaptime);
             }).finally(function() {
@@ -176,14 +187,14 @@
             };
 
             if (canShow()) {
-                return $rootScope.showEmptyRelatedTables || tableModel.rowValues.length > 0;
+                return $rootScope.showEmptyRelatedTables || (tableModel.page && tableModel.page.length > 0);
             }
             return false;
         };
 
         vm.showInlineTable = function (i) {
             var cm = $rootScope.columnModels[i];
-            return cm.isInline && ($rootScope.showEmptyRelatedTables || cm.tableModel.rowValues.length > 0);
+            return cm.isInline && ($rootScope.showEmptyRelatedTables || (cm.tableModel.page && cm.tableModel.page.length > 0));
         };
 
         /**
@@ -231,7 +242,7 @@
             //    else edit mode, flip to edit (edit-display)
             //
             // then check for 2 positional modes: inline or !inline
-            var action = null;
+            var action;
             if (dataModel.isTableDisplay) {
                 action = (isInline ? logActions.inlineMkdnDisplay : logActions.relatedMkdnDisplay);
             } else {
@@ -243,14 +254,23 @@
                 }
             }
 
-            logService.logAction(action, logActions.clientAction);
+            var toggleDisplayHeader = {
+                action: action
+            }
+
+            logService.logClientAction(toggleDisplayHeader, tableModel.reference.defaultLogInfo);
 
             dataModel.isTableDisplay = !dataModel.isTableDisplay;
         };
 
         vm.toggleRelatedTables = function() {
-            var action = ($rootScope.showEmptyRelatedTables ? logActions.hideAllRelated : logActions.showAllRelated)
-            logService.logAction(action, logActions.clientAction);
+            var action = ($rootScope.showEmptyRelatedTables ? logActions.hideAllRelated : logActions.showAllRelated);
+
+            var toggleAllRelatedTablesHeader = {
+                action: action
+            }
+
+            logService.logClientAction(toggleAllRelatedTablesHeader, $rootScope.reference.defaultLogInfo);
 
             $rootScope.showEmptyRelatedTables = !$rootScope.showEmptyRelatedTables;
             // NOTE: there's a case where clicking the button to toggle this doesn't re-paint the footer until the mouse "moves"
@@ -259,6 +279,16 @@
                 UiUtils.attachFooterResizeSensor(0);
             }, 0);
         };
+
+        vm.logAccordionClick = function (rtm) {
+            var action = (rtm.open ? logActions.relatedClose : logActions.relatedOpen);
+
+            var toggleRelatedTableHeader = {
+                action: action
+            }
+
+            logService.logClientAction(toggleRelatedTableHeader, rtm.tableModel.reference.defaultLogInfo);
+        }
 
         vm.canEditRelated = function(ref) {
            if(angular.isUndefined(ref)) return false;
@@ -499,7 +529,14 @@
 
         /*** scroll to events ***/
         // scroll to top button
-        $scope.scrollToTop = function () {
+        $scope.scrollToTop = function (fromToc) {
+            var action = (fromToc ? logActions.tocScrollTop : logActions.scrollTop);
+            var scrollTopHeader = {
+                action: action
+            }
+
+            logService.logClientAction(scrollTopHeader, $rootScope.reference.defaultLogInfo);
+
             mainContainerEl.scrollTo(0, 0, 500);
         };
 
@@ -508,10 +545,15 @@
          * {String} sectionId - the displayname.value for table/column
          */
         vm.scrollToSection = function (sectionId) {
-            logService.logAction(logActions.tocScrollTo, logActions.clientAction);
+            var relatedObj = determineScrollElement(sectionId);
 
-            var el = determineScrollElement(sectionId);
-            scrollToElement(el);
+            var scrollToHeader = {
+                action: logActions.tocScrollTo
+            }
+
+            logService.logClientAction(scrollToHeader, relatedObj.rtm.tableModel.reference.defaultLogInfo);
+
+            scrollToElement(relatedObj.element);
         }
 
         /**
@@ -524,16 +566,24 @@
             // return if no query parameter, nothing to scroll to
             if (!queryParam) return;
 
-            var el = determineScrollElement(queryParam);
+            var elementObj = determineScrollElement(queryParam);
             // no element was returned, means there wasn't a matching displayname on the page
-            if (!el) return;
+            if (!elementObj.element) return;
 
-            scrollToElement(el);
+            scrollToElement(elementObj.element);
         }
 
-        // displayname should be the un-encoded displayname.value
-        // this means it _could_ be a value generated from templating then run through the mkdn interpreter
+        /**
+         * function for finding the related table element to scroll to
+         * @param {String} displayname -  should be the un-encoded displayname.value
+         *      - this means it _could_ be a value generated from templating then run through the mkdn interpreter
+         *
+         * @returns {Object} that contains:
+         *   `.element`     - element to scroll to
+         *   `.rtm`         - related table model for RT to scroll to
+         */
         function determineScrollElement (displayname) {
+            var matchingRtm;
             // id enocde query param
             var htmlId = vm.makeSafeIdAttr(displayname);
             // "entity-" is used for record entity section
@@ -542,22 +592,29 @@
             if (el[0]) {
                 // if in entity section, grab parent
                 el = el.parent();
+
+                matchingRtm = $rootScope.columnModels.filter(function (cm) {
+                    return cm.column.displayname.value == displayname;
+                })[0];
             } else {
                 // "rt-heading-" is used for related table section
                 el = angular.element(document.getElementById("rt-heading-" + htmlId));
                 // return if no element after checking entity section and RT section
                 if (!el[0]) return;
 
-                var matchingRtm = $rootScope.relatedTableModels.filter(function (rtm) {
+                matchingRtm = $rootScope.relatedTableModels.filter(function (rtm) {
                     return rtm.displayname.value == displayname;
-                });
+                })[0];
 
                 // matchingRtm should only ever be size 1, unless 2 different RTs have the same displayname
                 // make sure RT is open before scrolling
-                matchingRtm[0].open = true;
+                matchingRtm.open = true;
             }
 
-            return el;
+            return {
+                element: el,
+                rtm: matchingRtm
+            }
         }
 
         // given an element, scroll to the top of that element "slowly"

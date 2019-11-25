@@ -22,7 +22,7 @@
                         <!-- download CSV included by default -->
                         <export reference="vm.reference" disabled="!vm.hasLoaded || !vm.initialized || vm.rowValues.length == 0"></export>
                         <!-- permalink -->
-                        <a id="permalink" ng-href="{{ getRecordsetLink() }}" ng-click="::permalinkClick()" tooltip-placement="bottom-right" uib-tooltip={{tooltip.permalink}} class="chaise-btn chaise-btn-primary">
+                        <a id="permalink" ng-href="{{ getRecordsetLink() }}" ng-click="::copyPermalink()" tooltip-placement="bottom-right" uib-tooltip={{tooltip.permalink}} class="chaise-btn chaise-btn-primary">
                             <span class="chaise-btn-icon glyphicon glyphicon-bookmark"></span>
                             <span>Permalink</span>
                         </a>
@@ -51,7 +51,7 @@
 
                     <div class="row">
                         <div class="recordset-main-search col-lg-4 col-md-5 col-sm-6 col-xs-6">
-                            <chaise-search-input input-class="main-search-input" placeholder="searchPlaceholder"
+                            <chaise-search-input input-class="main-search-input" search-columns="searchColumns"
                                 search-term="vm.search" search-callback="search" focus="true"></chaise-search-input>
                         </div>
                     </div>
@@ -104,7 +104,7 @@
                     <span class="chaise-icon-btn chaise-icon chaise-sidebar-open"></span>
                     <span>Show filter panel</span>
                 </button>
-                <table-header ng-show="vm.initialized" vm="vm"></table-header>
+                <table-header vm="vm"></table-header>
             </div>
         </div>
     </div>

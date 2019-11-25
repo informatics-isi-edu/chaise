@@ -61,6 +61,12 @@
             &[disabled] {
                 color: $disabled-color;
             }
+
+            // the link color is more prominent than our button/control color,
+            // we should use this class if we want to make the button to be as prominent as links
+            &.chaise-btn-link {
+                color: $link-color;
+            }
         }
 
         &.chaise-btn-default {

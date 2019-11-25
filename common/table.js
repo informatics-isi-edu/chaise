@@ -344,7 +344,7 @@
             vm.hasLoaded = true;
 
             // scroll to top of the page so user can see the result
-            if (vm.config.displayMode !== recordsetDisplayModes.related) {
+            if (vm.config.displayMode.indexOf(recordsetDisplayModes.related) !== 0) {
                 scrollToTop();
             }
 
@@ -918,7 +918,37 @@
 
             // this is for the button on the table heading that deselects all currently visible rows
             scope.selectNone = function($event) {
-                logService.logAction(logActions.recordsetFacetNone, logActions.clientAction);
+                var action;
+                // "select none" only appears in P&B and all facet "Show More" links
+                switch (scope.vm.config.displayMode) {
+                    case recordsetDisplayModes.addPureBinaryPopup:
+                        action = logActions.recordPBNone;
+                        break;
+                    case recordsetDisplayModes.facetPopup:
+                        switch (scope.vm.config.parentDisplayMode) {
+                            case recordsetDisplayModes.fullscreen:
+                                action = logActions.recordsetFacetNone;
+                                break;
+                            case recordsetDisplayModes.addPureBinaryPopup:
+                                action = logActions.recordPBFacetNone;
+                                break;
+                            case recordsetDisplayModes.foreignKeyPopupCreate:
+                            case recordsetDisplayModes.foreignKeyPopupEdit:
+                                action = logActions.recordeditFKFacetNone;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+
+                var noneHeader = {
+                    action: action
+                }
+
+                logService.logClientAction(noneHeader, scope.vm.reference.defaultLogInfo);
 
                 var tuples = [], tuple;
                 for (var i = 0; i < scope.vm.page.tuples.length; i++) {
@@ -942,7 +972,37 @@
 
             // this is for the button on the table heading that selects all currently visible rows
             scope.selectAll = function($event) {
-                logService.logAction(logActions.recordsetFacetAll, logActions.clientAction);
+                var action;
+                // "select all" only appears in P&B and all facet "Show More" links
+                switch (scope.vm.config.displayMode) {
+                    case recordsetDisplayModes.addPureBinaryPopup:
+                        action = logActions.recordPBAll;
+                        break;
+                    case recordsetDisplayModes.facetPopup:
+                        switch (scope.vm.config.parentDisplayMode) {
+                            case recordsetDisplayModes.fullscreen:
+                                action = logActions.recordsetFacetAll;
+                                break;
+                            case recordsetDisplayModes.addPureBinaryPopup:
+                                action = logActions.recordPBFacetAll;
+                                break;
+                            case recordsetDisplayModes.foreignKeyPopupCreate:
+                            case recordsetDisplayModes.foreignKeyPopupEdit:
+                                action = logActions.recordeditFKFacetAll;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+
+                var allHeader = {
+                    action: action
+                }
+
+                logService.logClientAction(allHeader, scope.vm.reference.defaultLogInfo);
 
                 var tuples = [], tuple;
                 for (var i = 0; i < scope.vm.page.tuples.length; i++) {
@@ -1024,8 +1084,12 @@
             }
 
             // used to capture left click events on permalink button
-            scope.permalinkClick = function () {
-                logService.logAction(logActions.permalinkLeft, logActions.clientAction);
+            scope.copyPermalink = function () {
+                var permalinkHeader = {
+                    action: logActions.permalinkLeft
+                }
+
+                logService.logClientAction(permalinkHeader, scope.vm.reference.defaultLogInfo);
 
                 var text = scope.getRecordsetLink();
 
@@ -1047,8 +1111,29 @@
             }
 
             scope.toggleFacetPanel = function () {
-                var action = (scope.vm.config.facetPanelOpen ? logActions.recordsetFacetClose : logActions.recordsetFacetOpen );
-                logService.logAction(action, logActions.clientAction);
+                var action;
+                var panelOpen = scope.vm.config.facetPanelOpen;
+                // facet panel can only be toggled in main recordset, p&b add, and fk add/edit
+                switch (scope.vm.config.displayMode) {
+                    case recordsetDisplayModes.fullscreen:
+                        action = (panelOpen ? logActions.recordsetFacetClose : logActions.recordsetFacetOpen );
+                        break;
+                    case recordsetDisplayModes.addPureBinaryPopup:
+                        action = (panelOpen ? logActions.recordPBClose : logActions.recordPBOpen );
+                        break;
+                    case recordsetDisplayModes.foreignKeyPopupCreate:
+                    case recordsetDisplayModes.foreignKeyPopupEdit:
+                        action = (panelOpen ? logActions.recordeditFKClose : logActions.recordeditFKOpen );
+                        break;
+                    default:
+                        break;
+                }
+
+                var toggleFacetPanelHeader = {
+                    action: action
+                }
+
+                logService.logClientAction(toggleFacetPanelHeader, scope.vm.reference.defaultLogInfo);
 
                 scope.vm.config.facetPanelOpen = !scope.vm.config.facetPanelOpen;
             }
@@ -1087,7 +1172,37 @@
 
             // function for removing all pills regardless of what page they are on, clears the whole selectedRows array
             scope.removeAllPills = function($event) {
-                logService.logAction(logActions.recordsetFacetClear, logActions.clientAction);
+                var action;
+                // "remove all" only appears in P&B and all facet "Show More" links
+                switch (scope.vm.config.displayMode) {
+                    case recordsetDisplayModes.addPureBinaryPopup:
+                        action = logActions.recordPBClear;
+                        break;
+                    case recordsetDisplayModes.facetPopup:
+                        switch (scope.vm.config.parentDisplayMode) {
+                            case recordsetDisplayModes.fullscreen:
+                                action = logActions.recordsetFacetClear;
+                                break;
+                            case recordsetDisplayModes.addPureBinaryPopup:
+                                action = logActions.recordPBFacetClear;
+                                break;
+                            case recordsetDisplayModes.foreignKeyPopupCreate:
+                            case recordsetDisplayModes.foreignKeyPopupEdit:
+                                action = logActions.recordeditFKFacetClear;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+
+                var clearAllHeader = {
+                    action: action
+                }
+
+                logService.logClientAction(clearAllHeader, scope.vm.reference.defaultLogInfo);
 
                 var pre = scope.vm.selectedRows.slice();
                 scope.vm.selectedRows.clear();
@@ -1114,7 +1229,7 @@
                     $log.debug('counter', scope.vm.flowControlObject.counter ,': focused on page after update');
                     updated = false;
                     scope.vm.lastActiveFacet = -1;
-                    if (scope.vm.config.displayMode === scope.recordsetDisplayModes.related) {
+                    if (scope.vm.config.displayMode.indexOf(recordsetDisplayModes.related) === 0) {
                         scope.vm.logObject = {action: logActions.recordRelatedUpdate};
                     } else {
                         scope.vm.logObject = {action: logActions.recordsetUpdate};
@@ -1207,8 +1322,8 @@
                         scope.vm.focusOnFacet(firstOpen, true);
                     }
 
-                    // TODO should be based on the reference columns in search context
-                    scope.searchPlaceholder = {isHTML: false, value: "all columns"};
+                    // show the main search box columns
+                    scope.searchColumns = scope.vm.reference.searchColumns;
 
                     initialize(scope.vm);
                 });
@@ -1233,7 +1348,11 @@
                 var permalink = document.getElementById('permalink');
                 if (permalink) {
                     permalink.addEventListener('contextmenu', function (e) {
-                        logService.logAction(logActions.permalinkRight, logActions.clientAction);
+                        var permalinkHeader = {
+                            action: logActions.permalinkRight
+                        }
+
+                        logService.logClientAction(permalinkHeader, scope.vm.reference.defaultLogInfo);
                     });
                 }
             };
@@ -1333,8 +1452,50 @@
                     recordTableUtils.update(scope.vm, true, false, false);
                 };
 
-                scope.logPageSizeEvent = function () {
-                    logService.logAction(logActions.recordsetPageSize, logActions.clientAction);
+                scope.pageSizeDropdownOpened = function () {
+                    var action;
+                    switch (scope.vm.config.displayMode) {
+                        case recordsetDisplayModes.fullscreen:
+                            action = logActions.recordsetPageSize;
+                            break;
+                        case recordsetDisplayModes.inline:
+                            action = logActions.inlinePageSize;
+                            break;
+                        case recordsetDisplayModes.related:
+                            action = logActions.relatedPageSize;
+                            break;
+                        case recordsetDisplayModes.addPureBinaryPopup:
+                            action = logActions.recordPBPageSize;
+                            break;
+                        case recordsetDisplayModes.foreignKeyPopupCreate:
+                        case recordsetDisplayModes.foreignKeyPopupEdit:
+                            action = logActions.recordeditFKPageSize;
+                            break;
+                        case recordsetDisplayModes.facetPopup:
+                            switch (scope.vm.config.parentDisplayMode) {
+                                case recordsetDisplayModes.fullscreen:
+                                    action = logActions.recordsetFacetPageSize;
+                                    break;
+                                case recordsetDisplayModes.addPureBinaryPopup:
+                                    action = logActions.recordPBFacetPageSize;
+                                    break;
+                                case recordsetDisplayModes.foreignKeyPopupCreate:
+                                case recordsetDisplayModes.foreignKeyPopupEdit:
+                                    action = logActions.recordeditFKFacetPageSize;
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+
+                    var pageSizeHeader = {
+                        action: action
+                    }
+
+                    logService.logClientAction(pageSizeHeader, scope.vm.reference.defaultLogInfo);
                 }
 
                 scope.addRecord = function() {
@@ -1361,6 +1522,51 @@
 
                     location.href = link;
                 };
+
+                // the text that we should display before the page-size-dropdown
+                scope.prependLabel = function () {
+                    if (scope.vm.page && scope.vm.page.tuples.length > 0) {
+                        var page = scope.vm.page;
+                        if (page.hasNext && !page.hasPrevious) {
+                            return "first";
+                        }
+
+                        if (!page.hasNext && page.hasPrevious) {
+                            return "last";
+                        }
+
+                        if (!page.hasNext && !page.hasPrevious) {
+                            return "all";
+                        }
+                        return "";
+                    }
+                };
+
+                // the text that we should display after the page-size-dropdown
+                scope.appendLabel = function () {
+                    var vm = scope.vm;
+                    if (!vm || !vm.page) return "";
+
+                    var records = "records";
+                    if (vm.reference.location.isConstrained && vm.config.displayMode.indexOf(recordsetDisplayModes.related) !== 0) {
+                        records = "matching results";
+                    }
+
+                    if (vm.page.tuples.length === 0) {
+                        return "0 " + records;
+                    }
+
+                    var label = "";
+                    if (vm.totalRowsCnt && !vm.tableError) {
+                        label += "of ";
+                        if (vm.totalRowsCnt > vm.rowValues.length) {
+                            label += vm.totalRowsCnt.toLocaleString() + " ";
+                        } else {
+                            label += vm.rowValues.length.toLocaleString() + " ";
+                        }
+                    }
+                    return label + records;
+                }
 
             }
         }

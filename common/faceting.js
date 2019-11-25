@@ -79,7 +79,8 @@
                             noConstraints: false,
                             appliedFilters: [],
                             updateFacet: childCtrl.updateFacet,
-                            preProcessFacet: childCtrl.preProcessFacet
+                            preProcessFacet: childCtrl.preProcessFacet,
+                            recordsetConfig: $scope.vm.config
                         };
 
                         if (ctrl.facetingCount === $scope.vm.reference.facetColumns.length) {
@@ -1248,10 +1249,11 @@
 
                     scope.tooltip = messageMap.tooltip;
 
-                    scope.searchPlaceholder = {value: "", isHTML: false};
-                    // TODO requires ermrestjs change to update this placeholder
+                    // in scalar mode, we don't want to show search columns because it's
+                    // based on the scalar value of the column, in entity however we should
+                    // get the search columns from ermrestjs and display them to the user
                     if (scope.facetColumn.isEntityMode) {
-                        scope.searchPlaceholder.value = "all columns";
+                        scope.searchColumns = scope.facetColumn.sourceReference.searchColumns;
                     }
 
                     scope.checkboxRows = [];
@@ -1304,6 +1306,7 @@
                         }
 
                         params.displayMode = recordsetDisplayModes.facetPopup;
+                        params.parentDisplayMode = scope.facetModel.recordsetConfig.displayMode;
                         params.editable = false;
 
                         params.selectedRows = [];
@@ -1352,7 +1355,25 @@
                             size: modalUtils.getSearchPopupSize(params),
                             templateUrl:  UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
                         }, modalDataChanged(scope, true), function () {
-                            logService.logAction(logActions.recordsetFacetCancel, logActions.clientAction);
+                            var action;
+                            switch (params.parentDisplayMode) {
+                                case recordsetDisplayModes.fullscreen:
+                                    action = logActions.recordsetFacetCancel;
+                                    break;
+                                case recordsetDisplayModes.addPureBinaryPopup:
+                                    action = logActions.recordPBFacetCancel;
+                                    break;
+                                default:
+                                    // should only be FK case
+                                    action = logActions.recordeditFKFacetCancel;
+                                    break;
+                            }
+
+                            var cancelHeader = {
+                                action: action
+                            }
+
+                            logService.logClientAction(cancelHeader, params.reference.defaultLogInfo);
                         }, false);
                     };
 

@@ -42,18 +42,32 @@
                         Session.loginInAPopUp();
                     };
 
-                    scope.logout = function logout() {
-                        Session.logout();
-                    };
+
+                    scope.logDropdownOpen = function () {
+                        var dropdownOpenHeader = {
+                            action: logActions.dropdownUser
+                        }
+
+                        logService.logClientAction(dropdownOpenHeader);
+                    }
 
                     scope.openProfile = function openProfile() {
-                        logService.logAction(logActions.profile, logActions.clientAction);
+                        var profileHeader = {
+                            action: logActions.profile
+                        }
+
+                        logService.logClientAction(profileHeader);
+
                         modalUtils.showModal({
                             templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/profile.modal.html",
                             controller: "profileModalDialogController",
                             controllerAs: "ctrl",
                             windowClass: "profile-popup"
                         }, false, false, false);
+                    };
+
+                    scope.logout = function logout() {
+                        Session.logout();
                     };
 
                 }

@@ -23,12 +23,12 @@
 
                     <div class="row">
                         <div class="recordset-main-search col-lg-4 col-md-5 col-sm-6 col-xs-6">
-                            <chaise-search-input input-class="main-search-input" placeholder="searchPlaceholder"
+                            <chaise-search-input input-class="main-search-input" search-columns="searchColumns"
                                 search-term="vm.search" search-callback="search" focus="true"></chaise-search-input>
                         </div>
                     </div>
                 </div>
-                <table-header ng-show="vm.initialized" vm="vm"></table-header>
+                <table-header vm="vm"></table-header>
             </div>
         </div>
     </div>

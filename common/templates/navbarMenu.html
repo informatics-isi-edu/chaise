@@ -1,5 +1,5 @@
 <li ng-repeat="item in menu" ng-class="{'dropdown-submenu': item.children}">
-    <a ng-if="!item.children" ng-href="{{item.url}}" target="{{item.newTab ? '_blank' : '_self'}}">{{item.name}}</a>
-    <a ng-if="item.children" class="dropdown-toggle" ng-click="toggleSubMenu($event)">{{item.name}}</a>
+    <a ng-if="!item.children" ng-href="{{item.url}}" target="{{item.newTab ? '_blank' : '_self'}}" ng-click="::logStaticLink(item)">{{item.name}}</a>
+    <a ng-if="item.children" class="dropdown-toggle" ng-click="::toggleSubMenu($event, item.name)">{{item.name}}</a>
     <ul ng-if="item.children" navbar-menu menu="item.children" class="dropdown-menu"></ul>
 </li>

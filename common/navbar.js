@@ -1,4 +1,5 @@
 (function() {
+    var _path;
     function hasClass(ele, className) {
       var className = " " + className + " ";
       if ((" " + ele.className + " ").replace(/[\n\t]/g, " ").indexOf(className) > -1) {
@@ -16,7 +17,7 @@
       }
     };
 
-    function onToggle(open) {
+    function onToggle(open, menuText) {
       var elems = document.querySelectorAll(".dropdown-menu.show");
       [].forEach.call(elems, function(el) {
         el.classList.remove("show");
@@ -51,12 +52,43 @@
         return url + paramChar + "pcid=" + pcid + "&ppid=" + dcctx.pid;
     }
 
+    function path() {
+        if (!_path) {
+            var path = "/chaise/";
+            if (chaiseConfig && typeof chaiseConfig.chaiseBasePath === "string") {
+                var path = chaiseConfig.chaiseBasePath;
+                // append "/" if not present
+                if (path[path.length-1] !== "/") path += "/";
+            }
+
+            _path = window.location.host + path;
+        }
+
+        return _path;
+    }
+
+    function isChaise(link) {
+        var appNames = ["record", "recordset", "recordedit", "search", "login"];
+
+        // parses the url into a location object
+        var eleUrl = document.createElement('a');
+        eleUrl.href = link;
+
+        for (var i=0; i<appNames.length; i++) {
+            var name = appNames[i];
+            // path/appName exists in our url
+            if (eleUrl.href.indexOf(path() + name) !== -1) return true;
+        }
+
+        return false;
+    }
+
     'use strict';
     angular.module('chaise.navbar', [
         'chaise.login',
         'chaise.utils'
     ])
-    .directive('navbar', ['ConfigUtils', 'ERMrest', 'UriUtils', '$rootScope', '$window', function(ConfigUtils, ERMrest, UriUtils, $rootScope, $window) {
+    .directive('navbar', ['ConfigUtils', 'ERMrest', 'logActions', 'logService', 'UriUtils', '$rootScope', '$window', function(ConfigUtils, ERMrest, logActions, logService, UriUtils, $rootScope, $window) {
         var chaiseConfig = ConfigUtils.getConfigJSON();
 
         // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
@@ -66,6 +98,7 @@
         if (!root.hasOwnProperty('newTab')) {
             root.newTab = true;
         }
+
         var q = [root];
         while (q.length > 0) {
             var obj = q.shift();
@@ -75,28 +108,8 @@
             if (obj.url && isCatalogDefined(catalogId)) {
                 obj.url = ERMrest.renderHandlebarsTemplate(obj.url, null, {id: catalogId});
 
-                var appNames = ["record", "recordset", "recordedit", "search", "login"];
-                var path = "/chaise/";
-                if (chaiseConfig && typeof chaiseConfig.chaiseBasePath === "string") {
-                    var path = chaiseConfig.chaiseBasePath;
-                    // append "/" if not present
-                    if (path[path.length-1] !== "/") path += "/";
-                }
-                path = $window.location.host + path;
-
-                // parses the url into a location object
-                var eleUrl = document.createElement('a');
-                eleUrl.href = obj.url;
-
-                var isChaise = false;
-                for (var i=0; i<appNames.length; i++) {
-                    var name = appNames[i];
-                    // path/appName exists in our url
-                    if (eleUrl.href.indexOf(path + name) !== -1) isChaise = true;
-                }
-
                 // only append pcid/ppid if link is to a chaise url
-                if (isChaise) {
+                if (isChaise(obj.url)) {
                     var dcctx = ConfigUtils.getContextJSON();
                     obj.url = addLogParams(obj.url, dcctx);
                 }
@@ -127,6 +140,43 @@
                 scope.toggleMenu = toggleMenu;
                 scope.onToggle = onToggle;
 
+                scope.logBranding = function () {
+                    // TODO: not sure if the "name" should be set here
+                    // if name is, it should be `brandText`
+                    var brandingHeader = {
+                        action: logActions.branding
+                    }
+
+                    logService.logClientAction(brandingHeader);
+                }
+
+                // {Boolean} open - denotes the state of current menu
+                // {String} menuText - text that appears in the UI for the menu
+                scope.logMenuToggle = function (menuText) {
+                    var menuOpenHeader = {
+                        action: logActions.dropdownMenu,
+                        name: menuText
+                    }
+
+                    logService.logClientAction(menuOpenHeader);
+                }
+
+                scope.logStaticLink = function (menuObject) {
+                    // NOTE: if link goes to a chaise app, no logging necessary
+                    if (isChaise(menuObject.url)) return;
+
+                    // check if external or internal resource page
+                    var action = UriUtils.isSameOrigin(menuObject.url) ? logActions.dropdownMenuInternal : logActions.dropdownMenuExternal;
+
+                    var linkHeader = {
+                        action: action,
+                        name: menuObject.name
+                    }
+
+                    logService.logClientAction(linkHeader);
+                }
+
+
                 if (isCatalogDefined(catalogId)) {
                     scope.isVersioned = function () {
                         return catalogId.split("@")[1] ? true : false;
@@ -140,7 +190,7 @@
         };
     }])
 
-    .directive('navbarMenu', ['$compile', 'UriUtils', function($compile, UriUtils) {
+    .directive('navbarMenu', ['$compile', 'logActions', 'logService', 'UriUtils', function($compile, logActions, logService, UriUtils) {
         return {
             restrict: 'EA',
             scope: {
@@ -155,7 +205,31 @@
                         compiled = $compile(contents);
                     }
 
-                    scope.toggleSubMenu = toggleMenu;
+                    scope.toggleSubMenu = function (event, menuText) {
+                        var menuOpenHeader = {
+                            action: logActions.dropdownMenu,
+                            name: menuText
+                        }
+
+                        logService.logClientAction(menuOpenHeader);
+
+                        toggleMenu(event);
+                    };
+
+                    scope.logStaticLink = function (menuObject) {
+                        // NOTE: if link goes to a chaise app, no logging necessary
+                        if (isChaise(menuObject.url)) return;
+
+                        // check if external or internal resource page
+                        var action = UriUtils.isSameOrigin(menuObject.url) ? logActions.dropdownMenuInternal : logActions.dropdownMenuExternal;
+
+                        var linkHeader = {
+                            action: action,
+                            name: menuObject.name
+                        }
+
+                        logService.logClientAction(linkHeader);
+                    }
 
                     compiled(scope, function(clone) {
                         el.append(clone);

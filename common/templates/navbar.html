@@ -7,7 +7,7 @@
                 <span class="md-chevron-down"></span>
                 MENU
             </button>
-            <a class="navbar-brand" ng-href="{{brandURL || '/' }}">
+            <a class="navbar-brand" ng-href="{{brandURL || '/' }}" ng-click="::logBranding()">
                 <span ng-if="brandImage"><img id="brand-image" ng-src="{{brandImage}}"></span>
                 <span id="brand-text" ng-bind="brandText"></span>
             </a>
@@ -17,8 +17,8 @@
         <div class="collapse navbar-collapse navbar-inverse" id="fb-navbar-main-collapse">
             <ul id="navbar-menu" class="nav navbar-nav">
                 <li ng-repeat="item in menu" class="dropdown" on-toggle="onToggle(open)" uib-dropdown>
-                    <a ng-if="!item.children" ng-href="{{item.url}}" target="{{item.newTab ? '_blank' : '_self'}}">{{item.name}}</a>
-                    <a ng-if="item.children" class="dropdown-toggle" uib-dropdown-toggle>{{item.name}} <span class="caret"></span></a>
+                    <a ng-if="!item.children" ng-href="{{item.url}}" target="{{item.newTab ? '_blank' : '_self'}}" ng-click=::logStaticLink(item)>{{item.name}}</a>
+                    <a ng-if="item.children" class="dropdown-toggle" uib-dropdown-toggle ng-click="::logMenuToggle(item.name)">{{item.name}} <span class="caret"></span></a>
                     <ul ng-if="item.children" navbar-menu menu="item.children" class="dropdown-menu"></ul>
                 </li>
             </ul>
