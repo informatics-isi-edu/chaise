@@ -490,10 +490,12 @@
 
                 scope.inputContainer = document.querySelector('.input-container');
 
+                // used to increase the width of boolean dropdowns to the size of the input
                 scope.setDropdownWidth = function () {
                     var inputSelector = scope.columnIndex + '-boolean-input',
                         input = document.getElementById(inputSelector);
 
+                    // ng-style attached to dropdown for better repositioning
                     scope.inputWidth = {
                         width: input.offsetWidth + 'px',
                         "margin-top": '14px'

@@ -571,6 +571,18 @@
             return cm && cm.column && !cm.column.nullok && !cm.isDisabled;
         }
 
+        // when a boolean dropdown is opened, resize the dropdown menu to match the width of the input
+        vm.setDropdownWidth = function () {
+            // All boolean are visible and same size so it doesn't matter which is selected
+            var input = document.querySelector('.re-boolean-input');
+
+            // ng-style attached for better repositioning
+            vm.inputWidth = {
+                width: input.offsetWidth + 'px',
+                "margin-top": '14px'
+            };
+        }
+
 // **** Functions for set all input
         var selectAllOpen = false;
 
@@ -579,15 +591,6 @@
             model.showSelectAll = false;
             model.highlightRow = false;
             selectAllOpen = false;
-        }
-
-        vm.setDropdownWidth = function () {
-            var input = document.querySelector('.re-boolean-input');
-
-            vm.inputWidth = {
-                width: input.offsetWidth + 'px',
-                "margin-top": '14px'
-            };
         }
 
         // toggles the state of the select all dialog
@@ -992,6 +995,7 @@
         angular.element($window).bind('resize', function() {
             $timeout(function () {
                 onResize();
+                // resize dropdown menu if open while resizing
                 vm.setDropdownWidth();
             }, 0)
         });
