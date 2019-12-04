@@ -348,6 +348,7 @@
             templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/inputs/inputSwitch.html',
             scope: {
                 column: '=',
+                columnIndex: '=', // index in column models list
                 columnModel: '=',
                 model: '=?'
             },
@@ -485,6 +486,20 @@
                 // used for timestamp[tz] inputs only
                 scope.clearTime = function () {
                     scope.model.value.time = null;
+                }
+
+                scope.inputContainerForDropdowns = document.querySelector('.input-container');
+
+                // used to increase the width of boolean dropdowns to the size of the input
+                scope.setDropdownWidth = function () {
+                    var inputSelector = scope.columnIndex + '-boolean-input',
+                        input = document.getElementById(inputSelector);
+
+                    // ng-style attached to dropdown for better repositioning
+                    scope.inputWidth = {
+                        width: input.offsetWidth + 'px',
+                        "margin-top": '14px'
+                    };
                 }
             }
         }
