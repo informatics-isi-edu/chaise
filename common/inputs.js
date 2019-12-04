@@ -488,7 +488,7 @@
                     scope.model.value.time = null;
                 }
 
-                scope.inputContainer = document.querySelector('.input-container');
+                scope.inputContainerForDropdowns = document.querySelector('.input-container');
 
                 // used to increase the width of boolean dropdowns to the size of the input
                 scope.setDropdownWidth = function () {
