@@ -200,8 +200,8 @@
                                                             </div>
 
                                                             <!-- boolean input -->
-                                                            <div ng-switch-when="boolean" class="chaise-boolean-dropdown" uib-dropdown dropdown-append-to="form.inputContainer">
-                                                                <div class="chaise-input-control re-boolean-input has-feedback" uib-dropdown-toggle ng-click="form.setDropdownWidth()">
+                                                            <div ng-switch-when="boolean" class="chaise-boolean-dropdown" uib-dropdown dropdown-append-to="form.inputContainer" on-toggle="form.setDropdownWidth()">
+                                                                <div class="chaise-input-control re-boolean-input has-feedback" uib-dropdown-toggle>
                                                                     <div id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-display" contenteditable="false" style="cursor: pointer" data-placeholder="Select a value" ng-bind-html="form.recordEditModel.rows[rowIndex][column.name]"></div>
                                                                     <chaise-clear-input btn-class="boolean-remove" click-callback="form.clearInput(rowIndex, column.name)" show="form.showRemove(rowIndex, column.name, 'boolean')"></chaise-clear-input>
                                                                     <button ng-focus="::form.blurElement($event);" class="chaise-btn chaise-btn-primary" type="button">

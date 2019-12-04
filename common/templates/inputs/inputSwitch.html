@@ -104,8 +104,8 @@
 
 
     <!-- boolean input -->
-    <div ng-switch-when="boolean" class="chaise-boolean-dropdown" uib-dropdown dropdown-append-to="inputContainerForDropdowns">
-        <div id="{{columnIndex}}-boolean-input" class="chaise-input-control has-feedback" uib-dropdown-toggle ng-click="setDropdownWidth()">
+    <div ng-switch-when="boolean" class="chaise-boolean-dropdown" uib-dropdown dropdown-append-to="inputContainerForDropdowns" on-toggle="setDropdownWidth()">
+        <div id="{{columnIndex}}-boolean-input" class="chaise-input-control has-feedback" uib-dropdown-toggle>
             <div contenteditable="false" style="cursor: pointer" data-placeholder="Select a value" ng-bind-html="model.value"></div>
             <chaise-clear-input btn-class="boolean-remove" click-callback="::clearInput()" show="showBooleanRemove()"></chaise-clear-input>
             <button class="chaise-btn chaise-btn-primary" type="button">
