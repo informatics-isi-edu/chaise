@@ -780,7 +780,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                         // wait for the modal to open
                                         browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
                                         // Expect search box to have focus
-                                        searchBox = chaisePage.recordsetPage.getSearchBox();
+                                        searchBox = chaisePage.recordsetPage.getMainSearchInput();
                                         browser.wait(EC.visibilityOf(searchBox), browser.params.defaultTimeout);
 
                                         return browser.wait(function() {
@@ -839,7 +839,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                         // Wait for the modal to open
                                         browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
                                         // Expect search box to have focus.
-                                        var searchBox = chaisePage.recordsetPage.getSearchBox();
+                                        var searchBox = chaisePage.recordsetPage.getMainSearchInput();
                                         browser.wait(function() {
                                             var searchBoxId, activeElement;
                                             return searchBox.getAttribute('id').then(function(id) {

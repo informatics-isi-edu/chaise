@@ -571,6 +571,18 @@
             return cm && cm.column && !cm.column.nullok && !cm.isDisabled;
         }
 
+        // when a boolean dropdown is opened, resize the dropdown menu to match the width of the input
+        vm.setDropdownWidth = function () {
+            // All boolean are visible and same size so it doesn't matter which is selected
+            var input = document.querySelector('.re-boolean-input');
+
+            // ng-style attached for better repositioning
+            vm.inputWidth = {
+                width: input.offsetWidth + 'px',
+                "margin-top": '14px'
+            };
+        }
+
 // **** Functions for set all input
         var selectAllOpen = false;
 
@@ -915,7 +927,7 @@
         var $rootElement = angular.element(element).injector().get('$rootElement');
 
         // used for setting the width of table and
-        var inputContainerEl = document.querySelector('.input-container');
+        var inputContainerEl = vm.inputContainer = document.querySelector('.input-container');
         var tableEl = document.querySelector('#form-edit table');
 
         // used for adjusting the padding of main-container (because of scrollbar)
@@ -981,7 +993,11 @@
 
         // Listen to window resize event to change the width of div form-edit
         angular.element($window).bind('resize', function() {
-            onResize();
+            $timeout(function () {
+                onResize();
+                // resize dropdown menu if open while resizing
+                vm.setDropdownWidth();
+            }, 0)
         });
 
         var editMode = vm.editMode;

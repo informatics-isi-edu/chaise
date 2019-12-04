@@ -228,6 +228,18 @@
                             {"source": "col_w_long_values", "hide_null_choice": true}
                         ]
                     }
+                },
+                "tag:isrd.isi.edu,2019:source-definitions": {
+                    "columns": true,
+                    "fkeys": true,
+                    "sources": {
+                        "search-box": {
+                            "or": [
+                                {"source": "text_col", "markdown_name": "**text**"},
+                                {"source": "longtext_col", "markdown_name": "long column"}
+                            ]
+                        }
+                    }
                 }
             }
         },
@@ -268,6 +280,17 @@
                         "and": [
                             {"source": "term", "hide_null_choice": true, "hide_not_null_choice": true}
                         ]
+                    }
+                },
+                "tag:isrd.isi.edu,2019:source-definitions": {
+                    "fkeys": true,
+                    "columns": true,
+                    "sources": {
+                        "search-box": {
+                            "or": [
+                                {"source": "term", "markdown_name": "term column"}
+                            ]
+                        }
                     }
                 }
             }

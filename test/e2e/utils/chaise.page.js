@@ -794,20 +794,24 @@ var recordsetPage = function() {
         return el.getAttribute('uib-tooltip');
     };
 
-    this.getSearchBox = function() {
-        return element(by.className("main-search-input"));
+    this.getMainSearchBox = function() {
+        return element(by.className("recordset-main-search"));
     };
 
-    this.getMainSearchBox = function() {
-        return element(by.css(".top-right-panel")).element(by.className("main-search-input"));
+    this.getMainSearchPlaceholder = function () {
+        return this.getMainSearchBox().element(by.className("chaise-input-placeholder"))
+    }
+
+    this.getMainSearchInput = function() {
+        return this.getMainSearchBox().element(by.className("main-search-input"));
     };
 
     this.getSearchSubmitButton = function() {
-        return element(by.css(".top-right-panel")).element(by.className("chaise-search-btn"));
+        return this.getMainSearchBox().element(by.className("chaise-search-btn"));
     };
 
     this.getSearchClearButton = function() {
-        return element(by.css(".top-right-panel")).element(by.className("remove-search-btn"));
+        return this.getMainSearchBox().element(by.className("remove-search-btn"));
     };
 
     this.getAddRecordLink = function(el) {
@@ -941,6 +945,14 @@ var recordsetPage = function() {
     this.getFacetHeaderById = function (idx) {
         return element(by.id("fc-heading-" + idx)).element(by.css('.facet-header-text'));
     };
+
+    this.getFacetSearchBoxById = function (idx) {
+        return element(by.id("fc-" + idx)).element(by.css("chaise-search-input"));
+    }
+
+    this.getFacetSearchPlaceholderById = function (idx) {
+        return this.getFacetSearchBoxById(idx).element(by.className("chaise-input-placeholder"))
+    }
 
     this.getFacetCollapse = function (idx) {
         return element(by.id("fc-" + idx)).element(by.css("div[aria-expanded=true]"));

@@ -189,7 +189,8 @@ var testParams = {
             option: 2,
             filter: "boolean_col\nYes",
             numRows: 10,
-            options: [ 'All records with value', 'No', 'Yes' ]
+            options: [ 'All records with value', 'No', 'Yes' ],
+            isBoolean: true
         },
         {
             name: "jsonb_col",
@@ -207,7 +208,9 @@ var testParams = {
             option: 2,
             filter: "F1\ntwo",
             numRows: 10,
-            options: [ 'No value', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten' ]
+            options: [ 'No value', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten' ],
+            isEntityMode: true,
+            searchPlaceholder: "term column"
         },
         {
             name: "to_name",
@@ -217,7 +220,8 @@ var testParams = {
             filter: "to_name\none",
             numRows: 10,
             options: [ 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten' ],
-            comment: "open facet"
+            comment: "open facet",
+            isEntityMode: true
         },
         {
             name: "f3 (term)",
@@ -245,7 +249,9 @@ var testParams = {
             filter: "F1 with Term\ntwo",
             numRows: 10,
             options: [ 'All records with value', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten' ],
-            comment: "F1 with Term comment"
+            comment: "F1 with Term comment",
+            isEntityMode: true,
+            searchPlaceholder: "term column"
         },
         {
             name: "Check Presence Text",
@@ -262,7 +268,8 @@ var testParams = {
             option: 1,
             filter: "F3 Entity\nNo value",
             numRows: 23,
-            options: [ 'All records with value', 'No value', 'one', 'two']
+            options: [ 'All records with value', 'No value', 'one', 'two'],
+            isEntityMode: true
         },
         {
             name: "F5",
@@ -271,8 +278,8 @@ var testParams = {
             option: 2,
             filter: "F5\none",
             numRows: 1,
-            options: ["All records with value", "No value", "one", "two"]
-
+            options: ["All records with value", "No value", "one", "two"],
+            isEntityMode: true
         },
         {
             name: "col_w_column_order_false",
@@ -415,8 +422,12 @@ describe("Viewing Recordset with Faceting,", function() {
                 });
             });
 
+            it ("main search box should show the search columns.", function () {
+                expect(chaisePage.recordsetPage.getMainSearchPlaceholder().getText()).toBe("Search text , long column");
+            });
+
             it("search using the global search box should search automatically, show the search phrase as a filter, and show the set of results", function (done) {
-                var mainSearch = chaisePage.recordsetPage.getSearchBox();
+                var mainSearch = chaisePage.recordsetPage.getMainSearchInput();
 
                 chaisePage.recordsetPage.getClearAllFilters().click().then(function () {
                     return chaisePage.waitForElementInverse(element(by.id("spinner")));
@@ -603,6 +614,18 @@ describe("Viewing Recordset with Faceting,", function() {
                                 }).then(function() {
                                     // wait for facet to open
                                     browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
+
+
+                                    if (!facetParams.isBoolean) {
+                                        // make sure search placeholder is correct
+                                        var placeholder = "Search";
+                                        if (facetParams.searchPlaceholder) {
+                                            placeholder += " " + facetParams.searchPlaceholder;
+                                        } else if (facetParams.isEntityMode) {
+                                            placeholder += " all columns";
+                                        }
+                                        expect(chaisePage.recordsetPage.getFacetSearchPlaceholderById(idx).getText()).toBe(placeholder, "invalid placeholder for facet index=" + idx);
+                                    }
 
                                     // wait for facet checkboxes to load
                                     browser.wait(function () {

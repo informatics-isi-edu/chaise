@@ -1249,10 +1249,11 @@
 
                     scope.tooltip = messageMap.tooltip;
 
-                    scope.searchPlaceholder = {value: "", isHTML: false};
-                    // TODO requires ermrestjs change to update this placeholder
+                    // in scalar mode, we don't want to show search columns because it's
+                    // based on the scalar value of the column, in entity however we should
+                    // get the search columns from ermrestjs and display them to the user
                     if (scope.facetColumn.isEntityMode) {
-                        scope.searchPlaceholder.value = "all columns";
+                        scope.searchColumns = scope.facetColumn.sourceReference.searchColumns;
                     }
 
                     scope.checkboxRows = [];
