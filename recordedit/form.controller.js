@@ -581,12 +581,8 @@
             selectAllOpen = false;
         }
 
-        vm.setDropdownWidth = function (rowIndex, columnIndex) {
-            var inputSelector = rowIndex + '-' + columnIndex + '-boolean-input',
-                dropdownSelector = rowIndex + '-' + columnIndex + '-dropdown';
-
-            var input = document.getElementById(inputSelector),
-                dropdown = document.getElementById(dropdownSelector);
+        vm.setDropdownWidth = function () {
+            var input = document.querySelector('.re-boolean-input');
 
             vm.inputWidth = {
                 width: input.offsetWidth + 'px',
@@ -994,7 +990,10 @@
 
         // Listen to window resize event to change the width of div form-edit
         angular.element($window).bind('resize', function() {
-            onResize();
+            $timeout(function () {
+                onResize();
+                vm.setDropdownWidth();
+            }, 0)
         });
 
         var editMode = vm.editMode;

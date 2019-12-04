@@ -492,10 +492,7 @@
 
                 scope.setDropdownWidth = function () {
                     var inputSelector = scope.columnIndex + '-boolean-input',
-                        dropdownSelector = scope.columnIndex + '-dropdown';
-
-                    var input = document.getElementById(inputSelector),
-                        dropdown = document.getElementById(dropdownSelector);
+                        input = document.getElementById(inputSelector);
 
                     scope.inputWidth = {
                         width: input.offsetWidth + 'px',
