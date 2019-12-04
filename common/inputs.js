@@ -348,6 +348,7 @@
             templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/inputs/inputSwitch.html',
             scope: {
                 column: '=',
+                columnIndex: '=', // index in column models list
                 columnModel: '=',
                 model: '=?'
             },
@@ -485,6 +486,21 @@
                 // used for timestamp[tz] inputs only
                 scope.clearTime = function () {
                     scope.model.value.time = null;
+                }
+
+                scope.inputContainer = document.querySelector('.input-container');
+
+                scope.setDropdownWidth = function () {
+                    var inputSelector = scope.columnIndex + '-boolean-input',
+                        dropdownSelector = scope.columnIndex + '-dropdown';
+
+                    var input = document.getElementById(inputSelector),
+                        dropdown = document.getElementById(dropdownSelector);
+
+                    scope.inputWidth = {
+                        width: input.offsetWidth + 'px',
+                        "margin-top": '14px'
+                    };
                 }
             }
         }

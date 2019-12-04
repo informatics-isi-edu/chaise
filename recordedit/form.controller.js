@@ -581,6 +581,19 @@
             selectAllOpen = false;
         }
 
+        vm.setDropdownWidth = function (rowIndex, columnIndex) {
+            var inputSelector = rowIndex + '-' + columnIndex + '-boolean-input',
+                dropdownSelector = rowIndex + '-' + columnIndex + '-dropdown';
+
+            var input = document.getElementById(inputSelector),
+                dropdown = document.getElementById(dropdownSelector);
+
+            vm.inputWidth = {
+                width: input.offsetWidth + 'px',
+                "margin-top": '14px'
+            };
+        }
+
         // toggles the state of the select all dialog
         vm.toggleSelectAll = function toggleSelectAll(index) {
             var model = vm.recordEditModel.columnModels[index];
@@ -915,7 +928,7 @@
         var $rootElement = angular.element(element).injector().get('$rootElement');
 
         // used for setting the width of table and
-        var inputContainerEl = document.querySelector('.input-container');
+        var inputContainerEl = vm.inputContainer = document.querySelector('.input-container');
         var tableEl = document.querySelector('#form-edit table');
 
         // used for adjusting the padding of main-container (because of scrollbar)
