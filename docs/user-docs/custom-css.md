@@ -101,13 +101,16 @@ More often than not, you will want to apply styling for each of the columns rath
 }
 ```
 
-- Change the width of a column in tabular displays:
+- Increase the width of a column in tabular displays:
 
 ```css
 .s_schema.t_table .c_column {
   min-width: 200px;
 }
 ```
+NOTE: The `min-width` property will almost always be honored. If content is shorter than the `min-width`, there will be whitespace after the content. If the content is longer than the `min-width`, the width will be at minimum the value set for `min-width` and get wider to accomodate the content. This may be affected by having many columns with each having a `min-width` property set. 
+
+NOTE: The `max-width` property will also almost always be honored. If the content is shorter than the `max-width` value, then it will shrink down to fit the content. If the content itself has to show on one line and is longer than the `max-width` value, the `max-width` will be ignored.
 
 
 ### More specific examples (using RBK [.../#2/Gene_Expression:Specimen](https://dev.rebuildingakidney.org/chaise/recordset/#2/Gene_Expression:Specimen)):
