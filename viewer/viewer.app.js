@@ -169,14 +169,9 @@
                     }
                     console.log('uri='+image.entity.uri + waterMark);
                     // Test scene 3
-                    var params = window.location.href.split("?");
+                    var params = image.entity.uri.split("?");
                     if(params.length > 1){
-                        /* HACK: Remove the hardcoded the url for openseadragon-viewer as currently it is being served from demo/chaise-osd. It should be
-                          changed to /openseadragon-viewer which should be in the same directory as chaise. Reason for this: Currently the master of openseadragon-viewer
-                          is not upto date with the branch svg-on-tif.
-                        */
-                        console.log("Origin", origin);
-                        image.entity.uri = origin+"/~vipul/openseadragon-viewer/index.html?" + params[1];
+                        image.entity.uri = origin+"/openseadragon-viewer/index.html?" + params[1];
                         // image.entity.uri = origin+"/demo/chaise-osd/openseadragon-viewer/index.html?" + params[1];
                     }
 
@@ -286,9 +281,6 @@
                     }
                 } else if (event.data.messageType == 'dismissChannels') {
                   window.console.log("XXX pull off the channels filtering pullout..");
-/*
-<button ng-click="osd.filterChannels();" class="btn btn-success" ng-class="{'pick':!osd.filterChannelsAreHidden}" type="button" role="button" title="channel filtering" id="filter-btn">
-*/
                   var btnptr = $('#filter-btn');
                   btnptr.click();
                 }
