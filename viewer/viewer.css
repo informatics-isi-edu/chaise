@@ -157,7 +157,7 @@ a.cardlink.delete {
 }
 
 #sidebar {
-   display: none;
+   display: block;
    margin: 0 20px;
 }
 
@@ -656,4 +656,8 @@ a.cardlink.delete {
 
 #viewer-content .menu-btn-container.close-panel{
   padding-left: 15px;
+}
+
+.annotation-error {
+  font-weight: 600;
 }

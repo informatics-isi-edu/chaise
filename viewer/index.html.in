@@ -42,7 +42,9 @@
                 </div>
 
                 <div id="viewer-content">
-                    <div id="sidebar" ng-class="sidebar faceting-resizable {'open-panel': !osd.annotationsSidebarAreHidden, 'close-panel': osd.annotationsSidebarAreHidden}" resizable r-directions=["right"] r-flex="true">
+                    <div id="sidebar" ng-class="sidebar faceting-resizable" resizable r-directions=["right"] r-flex="true">
+
+                    <!-- <div id="sidebar" ng-class="sidebar faceting-resizable {'open-panel': !osd.annotationsSidebarAreHidden, 'close-panel': osd.annotationsSidebarAreHidden}" resizable r-directions=["right"] r-flex="true"> -->
                         <div ng-controller="AnnotationsController as anno" class='annotation-list facet-panel'>
                             <span class='title'>Annotations</span>
                             <span class='row filter' data-type='overlayVisibility'>
@@ -86,6 +88,9 @@
                             <span class='resultCount'>
                                 <span>Displaying {{ anno.totalCount }} of {{ anno.collection.length }} Annotations</span>
                             </span>
+                            <div ng-if="osd.error != ''" class="annotation-error">
+                              {{osd.error}}
+                            </div>
                             <div class='groups'>
                                 <div id="{{item.svgID + item.groupID}}" ng-click="anno.highlightGroup(item, $event)" ng-repeat="item in anno.collection | filter: anno.searchKeyword" ng-class="item.isSelected ? 'annotationItem current' : 'annotationItem' ">
 
@@ -136,7 +141,7 @@
                             <button ng-click="osd.homeView();" class="btn btn-success" type="button" role="button" title="go home" id="gohome-btn">
                                 <span class="glyphicon glyphicon-home"></span> Reset
                             </button>
-                            <button ng-click="osd.downloadView();" class="btn btn-success" type="button" role="button" title="take snapshot" id=download-btn">
+                            <button ng-click="osd.downloadView();" class="btn btn-success" type="button" role="button" title="take snapshot" id="download-btn">
                                 <span class="glyphicon glyphicon-camera"></span> Take a Screenshot </button>
                         </div>
                         <iframe id="osd" width="100%" src="about:blank" frameBorder="0" style="flex:1">

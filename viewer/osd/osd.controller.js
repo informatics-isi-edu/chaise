@@ -20,7 +20,6 @@
         } else {
             vm.showTitle = true;
         }
-
         vm.disablefilterChannels = false;
         vm.filterChannelsAreHidden = false;
         vm.filterChannels = filterChannels;
@@ -30,8 +29,17 @@
         vm.toggleAnnotations = toggleAnnotations;
 
         vm.annotationsSidebarAreHidden = true;
+        var urls = $window.location.hash.split('&');
+        for (var i = 0; i < urls.length; i++) {
+            var url = urls[i];
+            var extension = url.substring(url.lastIndexOf(".") + 1);
+            if (extension == 'svg') {
+                vm.annotationsSidebarAreHidden = false
+              break;
+            }
+        }
         vm.openAnnotations = openAnnotations;
-
+        vm.error = '';
         vm.device = deviceDetector;
         vm.isSafari = false;
         testSafari();
@@ -54,7 +62,6 @@
                         });
                         break;
                     case "disableAnnotationList":
-                        console.log(data);
                         $scope.$apply(function(){
                             vm.disableAnnotationList = data.content;
                             vm.annotationsSidebarAreHidden = data.content;
@@ -67,7 +74,11 @@
 
                         });
                         break;
-
+                    case "errorAnnotation":
+                        $scope.$apply(function(){
+                            vm.error = "No data in svg found.";
+                        });
+                        break;
                     default:
                         console.log('Invalid event message type "' + messageType + '"');
                 }
@@ -114,8 +125,6 @@
             btnptr.blur();
             // var panelptr=$('#annotations-panel');
             var sidebarptr=$('#sidebar');
-            console.log(sidebarptr, vm.annotationsSidebarAreHidden);
-
             if(vm.annotationsSidebarAreHidden) {
               // if(!vm.filterChannelsAreHidden) { // close channels
               //   filterChannels();
@@ -127,7 +136,6 @@
                 sidebarptr.css("display","none");
             }
             // iframe.postMessage({messageType: 'openAnnotations'}, origin);
-            console.log("annotation");
             vm.annotationsSidebarAreHidden = !vm.annotationsSidebarAreHidden;
         }
 
