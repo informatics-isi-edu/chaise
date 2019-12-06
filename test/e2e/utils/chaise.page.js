@@ -130,7 +130,15 @@ var recordEditPage = function() {
         return element(by.id("form-" + index + '-' + columnDisplayName + "-input"));
     };
 
-    this.getDropdownOptions = function(el) {
+    // Gets the boolean dropdown options after the input is opened and attached to input container
+    // NOTE: could be more general because of how `.uib-dropdown-open` works
+    this.getDropdownOptions = function() {
+        return element(by.css(".uib-dropdown-open > .adjust-boolean-dropdown.dropdown-menu")).all(by.tagName('li'));
+    }
+
+    // Gets the boolean dropdown options when the dropdown is closed/hidden
+    // the list is relative to the input when hidden
+    this.getRelataiveDropdownOptions = function(el) {
         // el is "form-x-colname-display"
         return el.element(by.xpath('ancestor::td')).all(by.tagName('li'));
     }
