@@ -200,8 +200,8 @@
                                                             </div>
 
                                                             <!-- boolean input -->
-                                                            <div ng-switch-when="boolean" class="chaise-boolean-dropdown" uib-dropdown>
-                                                                <div class="chaise-input-control has-feedback" uib-dropdown-toggle>
+                                                            <div ng-switch-when="boolean" class="chaise-boolean-dropdown" uib-dropdown dropdown-append-to="form.inputContainer" on-toggle="form.setDropdownWidth()">
+                                                                <div class="chaise-input-control re-boolean-input has-feedback" uib-dropdown-toggle>
                                                                     <div id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-display" contenteditable="false" style="cursor: pointer" data-placeholder="Select a value" ng-bind-html="form.recordEditModel.rows[rowIndex][column.name]"></div>
                                                                     <chaise-clear-input btn-class="boolean-remove" click-callback="form.clearInput(rowIndex, column.name)" show="form.showRemove(rowIndex, column.name, 'boolean')"></chaise-clear-input>
                                                                     <button ng-focus="::form.blurElement($event);" class="chaise-btn chaise-btn-primary" type="button">
@@ -210,7 +210,7 @@
                                                                 </div>
                                                                 <!-- So that the boolean input can be validated -->
                                                                 <input type="hidden" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" ng-required="::form.isRequired(columnIndex);" />
-                                                                <ul class="adjust-boolean-dropdown" uib-dropdown-menu role="menu">
+                                                                <ul class="adjust-boolean-dropdown" uib-dropdown-menu role="menu" ng-style="form.inputWidth">
                                                                     <li ng-repeat="option in ::form.booleanValues" ng-click="form.recordEditModel.rows[rowIndex][column.name] = option">
                                                                         <a ng-bind-html="option" style="min-height: 20px;"></a>
                                                                     </li>
@@ -272,7 +272,7 @@
                                                         <td class="match-entity-value" colspan="{{form.recordEditModel.rows.length}}">
                                                             <!-- "The is a row of text" -->
                                                             <span class="select-all-text pull-left">Set value for all records: </span>
-                                                            <input-switch id="select-all-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" class="pull-left" column="column" column-model="form.recordEditModel.columnModels[columnIndex]" model="form.recordEditModel.columnModels[columnIndex].allInput" style="width: 250px; margin: 0px 5px;"></input-switch>
+                                                            <input-switch id="select-all-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" class="pull-left" column="column" column-model="form.recordEditModel.columnModels[columnIndex]" model="form.recordEditModel.columnModels[columnIndex].allInput" column-index="columnIndex" style="width: 250px; margin: 0px 5px;"></input-switch>
                                                             <span class="chaise-btn-group">
                                                                 <button id="select-all-apply-{{::form.makeSafeIdAttr(column.displayname.value)}}" class="chaise-btn chaise-btn-secondary pull-left" type="button" ng-disabled="form.disableApply(columnIndex)" ng-click="form.applySelectAll(columnIndex)" tooltip-placement="bottom" uib-tooltip="Click to apply the value to all records.">Apply All</button>
                                                                 <button id="select-all-clear-{{::form.makeSafeIdAttr(column.displayname.value)}}" class="chaise-btn chaise-btn-secondary pull-left" type="button" ng-click="form.clearSelectAll(columnIndex)" tooltip-placement="bottom" uib-tooltip="Click to clear all values for all records.">Clear All</button>

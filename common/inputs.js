@@ -3,53 +3,6 @@
 
     angular.module('chaise.inputs', ['chaise.validators', 'chaise.utils'])
 
-    .constant("dataFormats", {
-        placeholder: {
-            date: "YYYY-MM-DD",
-            time: "HH:MM:SS"
-        },
-        date: "YYYY-MM-DD",
-        time12: "hh:mm:ss", // used for displaying values in recordedit properly
-        time24: "HH:mm:ss",
-        datetime:  {
-            display: "YYYY-MM-DD HH:mm:ss",
-            displayZ: "YYYY-MM-DD HH:mm:ssZ",
-            return: "YYYY-MM-DDTHH:mm:ssZ", // the format that the database returns when there are no fractional seconds to show
-            submission: "YYYY-MM-DDTHH:mm:ss.SSSZ"
-        }
-    })
-
-    // Specifies the regexes to be used for a token in a ui-mask input. For example, the '1' key in
-    // in vm.maskOptions.date means that only 0 or 1 is allowed wherever the '1' key is used in a ui-mask template.
-    // See the maskDefinitions section for more info: https://github.com/angular-ui/ui-mask.
-    .constant("maskOptions", {
-        date: {
-            mask: "2999-19-39",
-            options: {
-                maskDefinitions: {'1': /[0-1]/, '2': /[0-2]/, '3': /[0-3]/},
-                clearOnBlur: true,
-                allowInvalidValue: true
-            }
-        },
-        time: {
-            mask: "19:59:69",
-            options: {
-                maskDefinitions: {'1': /[0-1]/, '2': /[0-2]/, '5': /[0-5]/},
-                clearOnBlur: true,
-                allowInvalidValue: true
-            }
-        }
-    })
-
-    .constant("integerLimits", {
-        INT_2_MIN: -32768,
-        INT_2_MAX: 32767,
-        INT_4_MIN: -2147483648,
-        INT_4_MAX: 2147483647,
-        INT_8_MIN: -9223372036854775808,
-        INT_8_MAX: 9223372036854775807
-    })
-
     .factory('InputUtils', ['dataFormats', 'defaultDisplayname', '$rootScope', function(dataFormats, defaultDisplayname, $rootScope) {
         var booleanValues = [true, false];
 
@@ -348,6 +301,7 @@
             templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/inputs/inputSwitch.html',
             scope: {
                 column: '=',
+                columnIndex: '=', // index in column models list
                 columnModel: '=',
                 model: '=?'
             },
@@ -485,6 +439,20 @@
                 // used for timestamp[tz] inputs only
                 scope.clearTime = function () {
                     scope.model.value.time = null;
+                }
+
+                scope.inputContainerForDropdowns = document.querySelector('.input-container');
+
+                // used to increase the width of boolean dropdowns to the size of the input
+                scope.setDropdownWidth = function () {
+                    var inputSelector = scope.columnIndex + '-boolean-input',
+                        input = document.getElementById(inputSelector);
+
+                    // ng-style attached to dropdown for better repositioning
+                    scope.inputWidth = {
+                        width: input.offsetWidth + 'px',
+                        "margin-top": '14px'
+                    };
                 }
             }
         }
