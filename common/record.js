@@ -87,10 +87,12 @@
                 scope: {
                     // functions
                     addRelatedRecord: '&', // add a record with RE app or P&B popup
+                    deleteRelatedRecord: '&', // unlink a record with the P&B popup
                     toggleDisplayMode: '&', // toggles the display mode of the RT
                     toRecordset: '&', // redirects the current page to recordset
                     // booleans
                     canCreate: '=',
+                    canDelete: '=',
                     canEdit: '=',
                     isInline: "=",
                     isTableDisplay: '=', // is the table in table display mode or other custom mode ('markdown' display)

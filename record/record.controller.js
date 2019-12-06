@@ -295,6 +295,12 @@
            return (ref.canUpdate && $rootScope.modifyRecord);
         };
 
+        // NOTE: currently used for unlink case only
+        vm.canDeleteRelated = function (ref) {
+            if(angular.isUndefined(ref)) return false;
+            return (ref.canDelete && ref.derivedAssociationReference && $rootScope.modifyRecord && $rootScope.showDeleteButton)
+        }
+
         vm.canCreateRelated = function(relatedRef) {
             if(angular.isUndefined(relatedRef) || !$rootScope.modifyRecord) {
                 return false;
@@ -449,6 +455,18 @@
             // 4. Redirect to the url in a new tab
             $window.open(appLink, '_blank');
         };
+
+        vm.deleteRelatedRecord = function (ref) {
+            event.preventDefault();
+            event.stopPropagation();
+            console.log(ref);
+            if(ref.derivedAssociationReference){
+                console.log("can batch unlink")
+                // recordAppUtils.pauseUpdateRecordPage();
+                // recordCreate.addRelatedRecordFact(true, ref, 0, cookie, vm.editMode, vm.formContainer, vm.readyToSubmit, vm.recordsetLink, vm.submissionButtonDisabled, $rootScope.reference, [$rootScope.tuple], $rootScope.session, ConfigUtils.getContextJSON().queryParams, onSuccess, onModalClose);
+                // return;
+            }
+        }
 
         $scope.$on("edit-request", function(event, args) {
             editRecordRequests[args.id] = {"schema": args.schema, "table": args.table};

@@ -6,6 +6,12 @@
                 <span>Add record</span>
             </button>
         </span>
+        <span ng-if="canDelete">
+            <button class="chaise-btn chaise-btn-secondary unlink-records-link" ng-click="deleteRelatedRecord({ref:ref})" uib-tooltip-html="'{{}}'" tooltip-placement="auto top">
+                <span class="chaise-btn-icon far fa-trash-alt"></span>
+                <span>Delete record</span>
+            </button>
+        </span>
         <span ng-if="showToggleDisplayBtn">
             <span ng-if="!isTableDisplay">
                 <button class="chaise-btn chaise-btn-secondary toggle-display-link" ng-click="toggleDisplayMode({dataModel:dataModel})" uib-tooltip-html="'{{tooltip.tableModeButton}}'" tooltip-placement="auto top">
