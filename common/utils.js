@@ -142,6 +142,7 @@
         "preCreatePrefill": "pre-create/prefill", // read the foreignkey value for the prefill (recoredit) has referrer -> read is on the fk, .. it's fine. we are not looking at url anyways.
         "preCreateAssociation": "pre-create/prefill/association", // read the association values to add new ones (record) has referrer
         "preCreateAssociationSelected": "pre-create/prefill/association/disabled", // secondary
+        "preUnlinkAssociation": "pre-unlink/prefill/association",
         "preCopy": "pre-create/copy", // read the current data before copy (recordedit)
         "recordeditDefault": "default",
 
@@ -302,6 +303,7 @@
         foreignKeyPopupCreate: "popup/foreignkey/create",
         foreignKeyPopupEdit: "popup/foreignkey/edit",
         addPureBinaryPopup: "popup/purebinary/add",
+        unlinkPureBinaryPopup: "popup/purebinary/unlink",
         facetPopup: "popup/facet"
     })
 

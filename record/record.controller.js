@@ -3,8 +3,8 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'ErrorService', 'logActions', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordAppUtils', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
-        function RecordController(AlertsService, ConfigUtils, DataUtils, ERMrest, ErrorService, logActions, logService, MathUtils, messageMap, modalBox, modalUtils, recordAppUtils, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
+    .controller('RecordController', ['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'ErrorService', 'logActions', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordAppUtils', 'recordCreate', 'recordsetDisplayModes', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
+        function RecordController(AlertsService, ConfigUtils, DataUtils, ERMrest, ErrorService, logActions, logService, MathUtils, messageMap, modalBox, modalUtils, recordAppUtils, recordCreate, recordsetDisplayModes, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
 
         var initialHref = $window.location.href;
@@ -456,16 +456,91 @@
             $window.open(appLink, '_blank');
         };
 
+        // NOTE: Only supported for pure and binary columns
         vm.deleteRelatedRecord = function (ref) {
             event.preventDefault();
             event.stopPropagation();
-            console.log(ref);
-            if(ref.derivedAssociationReference){
-                console.log("can batch unlink")
-                // recordAppUtils.pauseUpdateRecordPage();
-                // recordCreate.addRelatedRecordFact(true, ref, 0, cookie, vm.editMode, vm.formContainer, vm.readyToSubmit, vm.recordsetLink, vm.submissionButtonDisabled, $rootScope.reference, [$rootScope.tuple], $rootScope.session, ConfigUtils.getContextJSON().queryParams, onSuccess, onModalClose);
-                // return;
-            }
+            var params = {};
+            console.log("batch unlink")
+
+            // assumption is that this function is only called for p&b
+            params.parentTuple = $rootScope.tuple
+            params.parentReference = $rootScope.reference;
+            params.displayMode = recordsetDisplayModes.unlinkPureBinaryPopup;
+            params.parentDisplayMode = dcctx.cid; // should be "record"
+
+            params.reference = ref.hideFacets().contextualize.compactSelect; // column reference
+            params.reference.session = $rootScope.session;
+            params.context = "compact/select";
+            params.selectMode = modalBox.multiSelectMode;
+            params.selectedRows = [];
+            params.showFaceting = true;
+            params.facetPanelOpen = false;
+            //NOTE assumption is that this function is only called for unlinking pure and binary association
+            params.logObject = {
+                action: logActions.preUnlinkAssociation,
+                referrer: $rootScope.reference.defaultLogInfo
+            };
+
+            modalUtils.showModal({
+                animation: false,
+                controller: "SearchPopupController",
+                windowClass: "search-popup unlink-pure-and-binary-popup",
+                controllerAs: "ctrl",
+                resolve: {
+                    params: params
+                },
+                size: modalUtils.getSearchPopupSize(params),
+                templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
+            }, function dataSelected(res) {
+                console.log(res);
+
+                // if no rows, nothing to delete
+                if (!res || !res.rows) return;
+                var tuples = res.rows;
+
+                // TODO: reconstruct a reference from the selected rows to be removed.
+                if (tuples.length == 1) {
+                    tuples[0].reference.delete();
+                } else {
+                    // construct a new uri for a new reference based on params.reference
+                    // params.reference.uri + tuple1.uniqueId + tuple2.uniqueId + ...
+                }
+
+                // // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
+                // // set data in view model (model.rows) and submission model (model.submissionRows)
+                // // we assume that the data for the main table has been populated before
+                // var mapping = derivedref._secondFKR.mapping;
+                //
+                // for (i = 0; i < tuples.length; i++) {
+                //     derivedref._secondFKR.key.colset.columns.forEach(function(col) {
+                //         if (angular.isUndefined(GV_recordEditModel.submissionRows[i])) {
+                //             var obj = {};
+                //             angular.copy(GV_recordEditModel.submissionRows[i - 1], obj);
+                //             GV_recordEditModel.submissionRows.push(obj);
+                //         }
+                //         GV_recordEditModel.submissionRows[i][mapping.getFromColumn(col).name] = tuples[i].data[col.name];
+                //     });
+                //
+                // }
+                //
+                // // NOTE this if case is unnecessary, this is always modal update
+                // if (isModalUpdate) {
+                //     var logObject = {
+                //         action: logActions.createAssociation,
+                //         referrer: rsReference.defaultLogInfo
+                //     };
+                //     addRecords(viewModel.editMode, derivedref, nullArr, isModalUpdate, rsReference, rsTuples, rsQueryParams, viewModel, viewModel.onSuccess, logObject);
+                // }
+            }, function () {
+                // var pbCancelHeader = {
+                //     action: logActions.recordPBCancel
+                // }
+                //
+                // logService.logClientAction(pbCancelHeader, params.reference.defaultLogInfo);
+                //
+                // viewModel.onModalClose();
+            }, false);
         }
 
         $scope.$on("edit-request", function(event, args) {
