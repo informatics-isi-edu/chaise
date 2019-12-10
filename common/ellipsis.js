@@ -212,18 +212,22 @@
                         }
                     }
 
+                    var initializeOverflowLogic = function () {
+                        setOverflows();
+
+                        scope.hideContent = true;
+                        scope.maxHeightStyle = maxHeightStyle;
+
+                        scope.$digest();
+                    }
+
                     new ResizeSensor(element[0], function (dimensions) {
                         // if TR.offsetHeight > the calculated maxRecordsetRowHeight
                         // +10 to account for padding on TD element
                         if (dimensions.height > (maxHeight + 10)) {
                             // iterate over each cell (TD), check it's height, and set overflow if necessary
                             if (!userClicked) {
-                                setOverflows();
-
-                                scope.hideContent = true;
-                                scope.maxHeightStyle = maxHeightStyle;
-
-                                scope.$digest();
+                                initializeOverflowLogic();
                             }
                         } else if (dimensions.height < (maxHeight + 10)) {
                             scope.overflow = [];
@@ -238,7 +242,7 @@
                         userClicked = false;
 
                         $timeout(function () {
-                            // How to trigger event when it doesn't auto trigger on content change and resize?
+                            initializeOverflowLogic();
                         });
                     });
                 }
