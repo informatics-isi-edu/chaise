@@ -141,7 +141,7 @@
                                         </div>
                                         <record-action-bar can-create="ctrl.canCreateRelated(rtm.tableModel.reference)" can-delete="ctrl.canDeleteRelated(rtm.tableModel.reference)" can-edit="ctrl.canEditRelated(rtm.tableModel.reference)"
                                             is-inline="false" is-table-display="rtm.isTableDisplay" show-toggle-display-btn="ctrl.allowRelatedTableMarkdown($index)"
-                                            add-related-record="ctrl.addRelatedRecord(rtm.tableModel.reference)" delete-related-record="ctrl.deleteRelatedRecord(rtm.tableModel.reference)" toggle-display-mode='ctrl.toggleDisplayMode(rtm)'
+                                            add-related-record="ctrl.addRelatedRecord(rtm.tableModel.reference)" delete-related-record="ctrl.deleteRelatedRecord(rtm.tableModel)" toggle-display-mode='ctrl.toggleDisplayMode(rtm)'
                                             to-recordset="ctrl.toRecordSet(rtm.tableModel.reference)" base-table-name="rtm.baseTableName" displayname="rtm.displayname">
                                         </record-action-bar>
                                     </uib-accordion-heading>

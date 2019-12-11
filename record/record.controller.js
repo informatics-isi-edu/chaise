@@ -457,15 +457,16 @@
         };
 
         // NOTE: Only supported for pure and binary columns
-        vm.deleteRelatedRecord = function (ref) {
+        vm.deleteRelatedRecord = function (tableModel) {
             event.preventDefault();
             event.stopPropagation();
             var params = {};
-            console.log("batch unlink")
+            console.log(tableModel);
+            var ref = tableModel.reference;
 
             // assumption is that this function is only called for p&b
-            params.parentTuple = $rootScope.tuple
-            params.parentReference = $rootScope.reference;
+            params.parentTuple = tableModel.parentTuple
+            params.parentReference = tableModel.parentReference;
             params.displayMode = recordsetDisplayModes.unlinkPureBinaryPopup;
             params.parentDisplayMode = dcctx.cid; // should be "record"
 
@@ -493,16 +494,20 @@
                 size: modalUtils.getSearchPopupSize(params),
                 templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
             }, function dataSelected(res) {
-                console.log(res);
-
                 // if no rows, nothing to delete
                 if (!res || !res.rows) return;
                 var tuples = res.rows;
 
-                // TODO: reconstruct a reference from the selected rows to be removed.
                 if (tuples.length == 1) {
-                    tuples[0].reference.delete();
+                    var logObject = {};
+
+                    $rootScope.showSpinner = true;
+                    tuples[0].getAssociationRef(params.parentTuple.data).delete().then(function () {
+                        $rootScope.showSpinner = false;
+                        $scope.$emit('record-deleted');
+                    });
                 } else {
+                    // TODO: reconstruct a reference from the selected rows to be removed.
                     // construct a new uri for a new reference based on params.reference
                     // params.reference.uri + tuple1.uniqueId + tuple2.uniqueId + ...
                 }
