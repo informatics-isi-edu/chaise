@@ -33,6 +33,7 @@
                 <span ng-if="val.value == null" ng-bind-html="defaultDisplayname.null"></span>
             </span>
         </div>
+        <!-- index+1 because rowValues pertain to columns in table starting at index 1 (action column is index 0) -->
         <div ng-if="overflow[$index+1]" style="display:inline;">
             ...
             <span style="display:inline-block; text-decoration: underline;cursor: pointer;" class="text-primary readmore" ng-click="readmore($index+1)">{{linkText}}</span>
