@@ -31,7 +31,9 @@
                     // functions
                     addRelatedRecord: '&',
                     canCreateRelated: '&',
+                    canDeleteRelated: '&',
                     canEditRelated: '&',
+                    deleteRelatedRecord: '&',
                     toggleInlineDisplayMode: '&',
                     toRecordSet: '&',
                     // boolean

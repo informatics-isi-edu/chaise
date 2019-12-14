@@ -6,7 +6,7 @@
                 <div class="recordset-title-container title-container">
                     <div class="search-popup-controls recordset-title-buttons title-buttons">
                         <button id="multi-select-submit-btn" ng-if="ctrl.tableModel.config.selectMode=='multi-select'"
-                                tooltip-placement="bottom" uib-tooltip="Apply the selected rows" class="chaise-btn chaise-btn-primary" type="button" ng-click="ctrl.submit()" ng-disabled="ctrl.tableModel.selectedRows.length < 1 || ctrl.disableSubmit">
+                                tooltip-placement="bottom" uib-tooltip="{{ctrl.submitTooltip}}" class="chaise-btn chaise-btn-primary" type="button" ng-click="ctrl.submit()" ng-disabled="ctrl.tableModel.selectedRows.length < 1 || ctrl.disableSubmit">
                             <span class="chaise-btn-icon glyphicon glyphicon-saved"></span>
                             <span>Submit</span>
                         </button>
@@ -57,7 +57,7 @@
         <!-- switch when 'selectFaceting' -->
         <recordset-select-faceting ng-switch-when="selectFaceting" vm="ctrl.tableModel" on-selected-rows-changed="ctrl.onSelectedRowsChanged"></recordset-select-faceting>
         <!-- swtich default -->
-        <recordset test="yeah" ng-switch-default vm="ctrl.tableModel" on-selected-rows-changed="ctrl.onSelectedRowsChanged" get-disabled-tuples="getDisabledTuples"></recordset>
+        <recordset ng-switch-default vm="ctrl.tableModel" on-selected-rows-changed="ctrl.onSelectedRowsChanged" get-disabled-tuples="getDisabledTuples"></recordset>
     </div>
 
 </div>

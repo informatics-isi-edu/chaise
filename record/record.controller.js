@@ -460,8 +460,8 @@
         vm.deleteRelatedRecord = function (tableModel) {
             event.preventDefault();
             event.stopPropagation();
+
             var params = {};
-            console.log(tableModel);
             var ref = tableModel.reference;
 
             // assumption is that this function is only called for p&b
@@ -496,48 +496,21 @@
             }, function dataSelected(res) {
                 // if no rows, nothing to delete
                 if (!res || !res.rows) return;
+                // tuples returned are for leaf table, need to get tuples from assocation table instead
                 var tuples = res.rows;
 
-                if (tuples.length == 1) {
-                    var logObject = {};
-
-                    $rootScope.showSpinner = true;
-                    tuples[0].getAssociationRef(params.parentTuple.data).delete().then(function () {
-                        $rootScope.showSpinner = false;
-                        $scope.$emit('record-deleted');
-                    });
-                } else {
-                    // TODO: reconstruct a reference from the selected rows to be removed.
-                    // construct a new uri for a new reference based on params.reference
-                    // params.reference.uri + tuple1.uniqueId + tuple2.uniqueId + ...
-                }
-
-                // // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
-                // // set data in view model (model.rows) and submission model (model.submissionRows)
-                // // we assume that the data for the main table has been populated before
-                // var mapping = derivedref._secondFKR.mapping;
-                //
-                // for (i = 0; i < tuples.length; i++) {
-                //     derivedref._secondFKR.key.colset.columns.forEach(function(col) {
-                //         if (angular.isUndefined(GV_recordEditModel.submissionRows[i])) {
-                //             var obj = {};
-                //             angular.copy(GV_recordEditModel.submissionRows[i - 1], obj);
-                //             GV_recordEditModel.submissionRows.push(obj);
-                //         }
-                //         GV_recordEditModel.submissionRows[i][mapping.getFromColumn(col).name] = tuples[i].data[col.name];
-                //     });
-                //
-                // }
-                //
-                // // NOTE this if case is unnecessary, this is always modal update
-                // if (isModalUpdate) {
-                //     var logObject = {
-                //         action: logActions.createAssociation,
-                //         referrer: rsReference.defaultLogInfo
-                //     };
-                //     addRecords(viewModel.editMode, derivedref, nullArr, isModalUpdate, rsReference, rsTuples, rsQueryParams, viewModel, viewModel.onSuccess, logObject);
-                // }
+                var logObject = {};
+                $rootScope.showSpinner = true;
+                tuples[0].reference.getBatchAssociationRef(tuples).delete(logObject).then(function () {
+                    $rootScope.showSpinner = false;
+                    $scope.$emit('record-deleted');
+                }, function () {
+                    // // TODO: alert no data unlinked?
+                }).catch(function () {
+                    // TODO: alert no data unlinked?
+                });
             }, function () {
+                // TODO: pbUnlinkCancelHeader
                 // var pbCancelHeader = {
                 //     action: logActions.recordPBCancel
                 // }

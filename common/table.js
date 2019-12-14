@@ -1498,6 +1498,12 @@
                     logService.logClientAction(pageSizeHeader, scope.vm.reference.defaultLogInfo);
                 }
 
+                scope.showAddRecord = function () {
+                    var vm = scope.vm;
+                    var isAddableDisplayMode = vm.config.displayMode.indexOf(recordsetDisplayModes.related) !== 0 && vm.config.displayMode !== recordsetDisplayModes.unlinkPureBinaryPopup;
+                    return isAddableDisplayMode && vm.reference.canCreate && vm.config.editable;
+                }
+
                 scope.addRecord = function() {
                     // Generate a unique id for this request
                     // append it to the URL

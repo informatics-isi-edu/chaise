@@ -218,6 +218,8 @@
 
         vm.hasLoaded = false;
 
+        vm.submitTooltip = (params.displayMode == recordsetDisplayModes.unlinkPureBinaryPopup ? "Unlink" : "Apply") + " the selected rows";
+
         var chaiseConfig = ConfigUtils.getConfigJSON();
         var reference = vm.reference = params.reference;
         var limit = (!angular.isUndefined(reference) && !angular.isUndefined(reference.display) && reference.display.defaultPageSize) ? reference.display.defaultPageSize : 25;

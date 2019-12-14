@@ -124,7 +124,8 @@
                         <!-- defined on $rootScope in run function -->
                         <record-display class="entity-container" column-models="columnModels" values="recordValues"
                             add-related-record="ctrl.addRelatedRecord(ref)" can-create-related="::ctrl.canCreateRelated(ref)"
-                            can-edit-related="::ctrl.canEditRelated(ref)" toggle-inline-display-mode='ctrl.toggleDisplayMode(dataModel)'
+                            can-edit-related="::ctrl.canEditRelated(ref)" can-delete-related="::ctrl.canDeleteRelated(ref)"
+                            delete-related-record="ctrl.deleteRelatedRecord(tableModel)" toggle-inline-display-mode='ctrl.toggleDisplayMode(dataModel)'
                             to-record-set="ctrl.toRecordSet(ref)" show-empty-related-tables="showEmptyRelatedTables">
                         </record-display>
 
