@@ -24,7 +24,6 @@
         vm.filterChannelsAreHidden = false;
         vm.filterChannels = filterChannels;
 
-        vm.disablefilterChannels = false;
         vm.annotationsAreHidden = false;
         vm.toggleAnnotations = toggleAnnotations;
 
@@ -34,7 +33,7 @@
             var url = urls[i];
             var extension = url.substring(url.lastIndexOf(".") + 1);
             if (extension == 'svg') {
-                vm.annotationsSidebarAreHidden = false
+              vm.annotationsSidebarAreHidden = false
               break;
             }
         }
@@ -56,11 +55,6 @@
                 var messageType = data.messageType;
 
                 switch (messageType) {
-                    case 'disableChannelList':
-                        $scope.$apply(function() {
-                            vm.disablefilterChannels = true;
-                        });
-                        break;
                     case "disableAnnotationList":
                         $scope.$apply(function(){
                             vm.disableAnnotationList = data.content;
