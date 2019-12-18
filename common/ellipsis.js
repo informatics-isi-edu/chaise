@@ -236,12 +236,11 @@
 
                     // reset overflows because new rows are available
                     $rootScope.$on('reference-modified', function() {
-                        scope.overflow = [];
-                        scope.hideContent = false;
-                        scope.maxHeightStyle = null;
-                        userClicked = false;
-
                         $timeout(function () {
+                            // resets values and makes sure functions for action columns point to proper reference
+                            init();
+                            userClicked = false;
+
                             initializeOverflowLogic();
                         });
                     });
