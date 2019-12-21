@@ -218,12 +218,18 @@
 
         vm.hasLoaded = false;
 
-        vm.submitTooltip = (params.displayMode == recordsetDisplayModes.unlinkPureBinaryPopup ? "Unlink" : "Apply") + " the selected rows";
-
         var chaiseConfig = ConfigUtils.getConfigJSON();
         var reference = vm.reference = params.reference;
         var limit = (!angular.isUndefined(reference) && !angular.isUndefined(reference.display) && reference.display.defaultPageSize) ? reference.display.defaultPageSize : 25;
         var showFaceting = chaiseConfig.showFaceting ? params.showFaceting : false;
+
+        if (params.displayMode == recordsetDisplayModes.unlinkPureBinaryPopup) {
+            vm.submitTooltip = "Disconnect the selected rows from " + params.parentReference.displayname.value + ": " + params.parentTuple.displayname.value + ".";
+        } else if (params.displayMode == recordsetDisplayModes.addPureBinaryPopup) {
+            vm.submitTooltip = "Connect the selected rows to " + params.parentReference.displayname.value + ": " + params.parentTuple.displayname.value + ".";
+        } else {
+            vm.submitTooltip = "Apply the selected rows";
+        }
 
         vm.tableModel = {
             readyToInitialize:  true,

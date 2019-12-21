@@ -117,8 +117,9 @@
             if ($scope.baseTableName.isHTML) tablename = DataUtils.makeSafeHTML($scope.baseTableName.value);
 
             $scope.tooltip = {
-                createButton: "Add more " + displayname + " related to this " + tablename + ".",
-                exploreButton: "View more " + displayname + " related to this " + tablename + "."
+                createButton: "Connect " + displayname + " records to this " + tablename + ".",
+                deleteButton: "Disconnect " + displayname + " records from this " + tablename + ".",
+                exploreButton: "View more " + displayname + " records related to this " + tablename + "."
             };
 
             if ($scope.canEdit) {

@@ -124,6 +124,9 @@
                     scope.multiSelect = modalBox.multiSelectMode;
                     scope.defaultDisplayname = defaultDisplayname;
 
+                    scope.tooltip = {};
+                    scope.tooltip.unlink = "Disconnect " + scope.tableModel.reference.displayname.value + ': ' + scope.tuple.displayname.value + " from this " + scope.parentReference.displayname.value + '.';
+
                     var editLink = null;
 
                     // unlink button should only show up in related mode

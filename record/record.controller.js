@@ -501,14 +501,26 @@
 
                 var logObject = {};
                 $rootScope.showSpinner = true;
-                tuples[0].reference.getBatchAssociationRef(tuples).delete(logObject).then(function () {
-                    $rootScope.showSpinner = false;
-                    $scope.$emit('record-deleted');
-                }, function () {
-                    // // TODO: alert no data unlinked?
-                }).catch(function () {
-                    // TODO: alert no data unlinked?
-                });
+                var deleteReferences = tuples[0].reference.getBatchAssociationRef(tuples);
+
+                var i = 0;
+                function recursiveDelete(reference) {
+                    reference.delete(logObject).then(function () {
+                        if (i < deleteReferences.length-1) {
+                            i++;
+                            recursiveDelete(deleteReferences[i])
+                        } else {
+                            $rootScope.showSpinner = false;
+                            recordAppUtils.updateRecordPage(true);
+                        }
+                    }, function () {
+                        // TODO: alert something failed?
+                        // keep track of what succeeds?
+                    }).catch(function () {
+                        // TODO: alert something failed?
+                    });
+                }
+                recursiveDelete(deleteReferences[i]);
             }, function () {
                 // TODO: pbUnlinkCancelHeader
                 // var pbCancelHeader = {

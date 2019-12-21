@@ -39,6 +39,14 @@
                             <span>:</span>
                             <chaise-title displayname="ctrl.tableModel.parentTuple.displayname"></chaise-title>
                         </div>
+                        <div ng-switch-when="popup/purebinary/unlink">
+                            <span>Remove </span>
+                            <chaise-title reference="ctrl.tableModel.reference"></chaise-title>
+                            <span> from </span>
+                            <chaise-title reference="ctrl.tableModel.parentReference"></chaise-title>
+                            <span>:</span>
+                            <chaise-title displayname="ctrl.tableModel.parentTuple.displayname"></chaise-title>
+                        </div>
                         <div ng-switch-when="popup/facet">
                             <span>Search by </span>
                             <chaise-title displayname="ctrl.tableModel.displayname" comment="ctrl.tableModel.comment"></chaise-title>
