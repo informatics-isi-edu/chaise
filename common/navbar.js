@@ -139,6 +139,29 @@
 
                 scope.toggleMenu = toggleMenu;
                 scope.onToggle = onToggle;
+                console.log(dcctx);
+
+                scope.canShow = function (item) {
+                    if (!item.acls || !item.acls.show) return true; // if no acls or show acls, show the option/link
+                    if (!dcctx.session) return false; // if no session, but acls, hide the option/link
+
+                    console.log(item.acls.show.length);
+                    for (var i=0; i < item.acls.show.length; i++) {
+                        var attribute = item.acls.show[i];
+                        // WRONG
+                        // var match = dcctx.session.attributes.filter(function (attr) {
+                        //     console.log(attr.id);
+                        //     console.log(attribute);
+                        //     console.log("______________")
+                        //     return attr.id === attribute;
+                        // });
+
+                        console.log(match);
+                        if (match) return true;
+                    };
+
+                    return false;
+                }
 
                 scope.logBranding = function () {
                     // TODO: not sure if the "name" should be set here
