@@ -31,14 +31,33 @@ describe('Navbar ', function() {
         expect(actualLogo.getAttribute('src')).toMatch(expectedLogo);
     });
 
-    it('for the menu, should generate the correct # of list items', function() {
+    it('for the menu, should generate the correct # of list items based on acls to show/hide specific options', function() {
         var nodesInDOM = menu.all(by.tagName('li'));
-        var counter = 7; // counted from chaise config doc rather than having code count
+        var counter = 8; // counted from chaise config doc rather than having code count
 
         nodesInDOM.count().then(function(count) {
             expect(count).toEqual(counter, "number of nodes present does not match what's defined in chaise-config");
         });
     });
+
+    if (!process.env.TRAVIS) {
+        it('should have a disabled "Records" link.', function () {
+            var menuDropdowns = element.all(by.css('#navbar-menu > li.dropdown'));
+
+            expect(menuDropdowns.count()).toBe(4, "number of top level dropdown menus is wrong");
+            // get index 2 (3rd item)
+            expect(menuDropdowns.get(2).element(by.css("a.disable-link")).getText()).toBe("Records", "text is incorrect, may include caret");
+        });
+
+        it('should have a disabled "Edit Existing Record" submenu link.', function () {
+            var menuDropdowns = element.all(by.css('#navbar-menu > li.dropdown'));
+
+            // need to open menu so it renders and has a value
+            menuDropdowns.get(3).click().then(function () {
+                expect(menuDropdowns.get(3).element(by.css("a.disable-link")).getText()).toBe("Edit Existing Record", "the wrong link is disabled or none was selected");
+            });
+        });
+    }
 
 
     it('should open the profile card on click of My Profile link', function(done) {

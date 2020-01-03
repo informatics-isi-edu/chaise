@@ -83,6 +83,40 @@
         return false;
     }
 
+    function canShow (item, session) {
+        if (item.acls.show.indexOf("*") > -1) return true; // if "*" acl, show the option
+        if (!session) return false; // no "*" exists and no session, hide the option
+
+        for (var i=0; i < item.acls.show.length; i++) {
+            var attribute = item.acls.show[i];
+
+            var match = session.attributes.some(function (attr) {
+                return attr.id === attribute;
+            });
+
+            if (match) return true;
+        };
+
+        return false;
+    }
+
+    function canEnable (item, session) {
+        if (item.acls.enable.indexOf("*") > -1) return true; // if "*" acl, enable the option
+        if (!session) return false; // no "*" exists and no session, disable the option
+
+        for (var i=0; i < item.acls.enable.length; i++) {
+            var attribute = item.acls.enable[i];
+
+            var match = session.attributes.some(function (attr) {
+                return attr.id === attribute;
+            });
+
+            if (match) return true;
+        };
+
+        return false;
+    }
+
     'use strict';
     angular.module('chaise.navbar', [
         'chaise.login',
@@ -92,6 +126,7 @@
         var chaiseConfig = ConfigUtils.getConfigJSON();
 
         // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
+        // used to set ACL inheritance as well for each node
         var root = chaiseConfig.navbarMenu || {};
         var catalogId = UriUtils.getCatalogId();
         // Set default newTab property at root node
@@ -99,10 +134,19 @@
             root.newTab = true;
         }
 
+        // Set default ACLs property at root node
+        if (!root.hasOwnProperty('acls')) {
+            root.acls = {
+                "show": ["*"],
+                "enable": ["*"]
+            };
+        }
+
         var q = [root];
         while (q.length > 0) {
             var obj = q.shift();
             var parentNewTab = obj.newTab;
+            var parentAcls = obj.acls;
             // template the url
             // TODO: This is done here to prevent writing a recursive function (again) in `setConfigJSON()`
             if (obj.url && isCatalogDefined(catalogId)) {
@@ -115,9 +159,17 @@
                 }
             }
             // If current node has children, set each child's newTab to its own existing newTab or parent's newTab
+            // used to set ACLs for each child as well
             if (Array.isArray(obj.children)) {
                 obj.children.forEach(function (child) {
                     if (child.newTab === undefined) child.newTab = parentNewTab;
+                    if (child.acls === undefined) {
+                        child.acls = parentAcls;
+                    } else {
+                        // acls could be defined with nothing in it, or with only show or only enable
+                        if (child.acls.show === undefined) child.acls.show = parentAcls.show;
+                        if (child.acls.enable === undefined) child.acls.enable = parentAcls.enable;
+                    }
                     q.push(child);
                 });
             }
@@ -139,28 +191,13 @@
 
                 scope.toggleMenu = toggleMenu;
                 scope.onToggle = onToggle;
-                console.log(dcctx);
 
                 scope.canShow = function (item) {
-                    if (!item.acls || !item.acls.show) return true; // if no acls or show acls, show the option/link
-                    if (!dcctx.session) return false; // if no session, but acls, hide the option/link
+                    return canShow(item, dcctx.session);
+                }
 
-                    console.log(item.acls.show.length);
-                    for (var i=0; i < item.acls.show.length; i++) {
-                        var attribute = item.acls.show[i];
-                        // WRONG
-                        // var match = dcctx.session.attributes.filter(function (attr) {
-                        //     console.log(attr.id);
-                        //     console.log(attribute);
-                        //     console.log("______________")
-                        //     return attr.id === attribute;
-                        // });
-
-                        console.log(match);
-                        if (match) return true;
-                    };
-
-                    return false;
+                scope.canEnable = function (item) {
+                    return canEnable(item, dcctx.session);
                 }
 
                 scope.logBranding = function () {
@@ -213,7 +250,7 @@
         };
     }])
 
-    .directive('navbarMenu', ['$compile', 'logActions', 'logService', 'UriUtils', function($compile, logActions, logService, UriUtils) {
+    .directive('navbarMenu', ['$compile', 'ConfigUtils', 'logActions', 'logService', 'UriUtils', function($compile, ConfigUtils, logActions, logService, UriUtils) {
         return {
             restrict: 'EA',
             scope: {
@@ -223,9 +260,19 @@
             compile: function(el) {
                 var contents = el.contents().remove();
                 var compiled;
+                var dcctx = ConfigUtils.getContextJSON();
+
                 return function(scope, el) {
                     if (!compiled) {
                         compiled = $compile(contents);
+                    }
+
+                    scope.canShow = function (item) {
+                        return canShow(item, dcctx.session);
+                    }
+
+                    scope.canEnable = function (item) {
+                        return canEnable(item, dcctx.session);
                     }
 
                     scope.toggleSubMenu = function (event, menuText) {

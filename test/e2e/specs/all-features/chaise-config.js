@@ -35,18 +35,40 @@ var chaiseConfig = {
                 ]
             },
             {
+                name: "Records",
+                acls: {
+                    show: ["https://auth.globus.org/9d596ac6-22b9-11e6-b519-22000aef184d"],
+                    enable: []
+                }
+            },
+            {
                 name: "RecordEdit",
                 children: [
                     {
                         name: "Add Records",
                         url: "/chaise/recordedit/#1/isa:dataset",
-                        children: [
-                            {
-                                name: "Edit Existing Record",
-                                url: "/chaise/recordedit/#1/isa:dataset/id=5776",
-                                newTab: false
-                            }
-                        ]
+                        acls: {
+                            show: ["https://auth.globus.org/9d596ac6-22b9-11e6-b519-22000aef184d"],
+                            enable: ["https://auth.globus.org/9d596ac6-22b9-11e6-b519-22000aef184d"]
+                        }
+                    },
+                    {
+                        name: "Edit Existing Record",
+                        url: "/chaise/recordedit/#1/isa:dataset/id=5776",
+                        newTab: false,
+                        acls: {
+                            show: ["https://auth.globus.org/9d596ac6-22b9-11e6-b519-22000aef184d"],
+                            enable: []
+                        }
+                    },
+                    {
+                        name: "No Show",
+                        url: "/chaise/record/#1/isa:dataset/id=404",
+                        newTab: false,
+                        acls: {
+                            show: [],
+                            enable: []
+                        }
                     }
                 ]
             }
