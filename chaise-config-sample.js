@@ -63,7 +63,11 @@ var chaiseConfig = {
             //     // Use the "url" key to specify this menu item's url
             //     // URLs can be absolute or relative to the document root.
             //     name: "Create",
-            //     url: "/chaise/recordedit/#1/YOUR_SCHEMA:YOUR_TABLE"
+            //     url: "/chaise/recordedit/#1/YOUR_SCHEMA:YOUR_TABLE",
+            //     acls: {
+            //          show: ["https://auth.globus.org/9d596ac6-22b9-11e6-b519-22000aef184d", ...],  // isrd-testers group
+            //          enable: ["https://auth.globus.org/9d596ac6-22b9-11e6-b519-22000aef184d", ...]
+            //      }
             // },
             // {
             //      // URLs support templating primarily for catalog substition
