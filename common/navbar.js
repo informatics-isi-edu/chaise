@@ -122,7 +122,7 @@
         'chaise.login',
         'chaise.utils'
     ])
-    .directive('navbar', ['ConfigUtils', 'ERMrest', 'logActions', 'logService', 'UriUtils', '$rootScope', '$window', function(ConfigUtils, ERMrest, logActions, logService, UriUtils, $rootScope, $window) {
+    .directive('navbar', ['ConfigUtils', 'ERMrest', 'logActions', 'logService', 'Session', 'UriUtils', '$rootScope', '$window', function(ConfigUtils, ERMrest, logActions, logService, Session, UriUtils, $rootScope, $window) {
         var chaiseConfig = ConfigUtils.getConfigJSON();
 
         // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
@@ -180,77 +180,85 @@
             scope: {},
             templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/navbar.html',
             link: function(scope) {
-                var chaiseConfig = ConfigUtils.getConfigJSON();
-                var dcctx = ConfigUtils.getContextJSON();
+                // Subscribe to on change event for session
+                // navbar doesn't need to have functionality until the session returns, just like app.js blocks
+                var subFunctionId = Session.subscribeOnChange(function() {
 
-                scope.hideNavbar = dcctx.hideNavbar;
-                scope.brandURL = chaiseConfig.navbarBrand;
-                scope.brandText = chaiseConfig.navbarBrandText;
-                scope.brandImage = chaiseConfig.navbarBrandImage;
-                scope.menu = chaiseConfig.navbarMenu ? chaiseConfig.navbarMenu.children : [];
+                    // Unsubscribe onchange event to avoid this function getting called again
+                    Session.unsubscribeOnChange(subFunctionId);
 
-                scope.toggleMenu = toggleMenu;
-                scope.onToggle = onToggle;
+                    var chaiseConfig = ConfigUtils.getConfigJSON();
+                    var dcctx = ConfigUtils.getContextJSON();
 
-                scope.canShow = function (item) {
-                    return canShow(item, dcctx.session);
-                }
+                    scope.hideNavbar = dcctx.hideNavbar;
+                    scope.brandURL = chaiseConfig.navbarBrand;
+                    scope.brandText = chaiseConfig.navbarBrandText;
+                    scope.brandImage = chaiseConfig.navbarBrandImage;
+                    scope.menu = chaiseConfig.navbarMenu ? chaiseConfig.navbarMenu.children : [];
 
-                scope.canEnable = function (item) {
-                    return canEnable(item, dcctx.session);
-                }
+                    scope.toggleMenu = toggleMenu;
+                    scope.onToggle = onToggle;
 
-                scope.logBranding = function () {
-                    // TODO: not sure if the "name" should be set here
-                    // if name is, it should be `brandText`
-                    var brandingHeader = {
-                        action: logActions.branding
+                    scope.canShow = function (item) {
+                        return canShow(item, Session.getSessionValue());
                     }
 
-                    logService.logClientAction(brandingHeader);
-                }
-
-                // {Boolean} open - denotes the state of current menu
-                // {String} menuText - text that appears in the UI for the menu
-                scope.logMenuToggle = function (menuText) {
-                    var menuOpenHeader = {
-                        action: logActions.dropdownMenu,
-                        name: menuText
+                    scope.canEnable = function (item) {
+                        return canEnable(item, Session.getSessionValue());
                     }
 
-                    logService.logClientAction(menuOpenHeader);
-                }
+                    scope.logBranding = function () {
+                        // TODO: not sure if the "name" should be set here
+                        // if name is, it should be `brandText`
+                        var brandingHeader = {
+                            action: logActions.branding
+                        }
 
-                scope.logStaticLink = function (menuObject) {
-                    // NOTE: if link goes to a chaise app, no logging necessary
-                    if (isChaise(menuObject.url)) return;
-
-                    // check if external or internal resource page
-                    var action = UriUtils.isSameOrigin(menuObject.url) ? logActions.dropdownMenuInternal : logActions.dropdownMenuExternal;
-
-                    var linkHeader = {
-                        action: action,
-                        name: menuObject.name
+                        logService.logClientAction(brandingHeader);
                     }
 
-                    logService.logClientAction(linkHeader);
-                }
+                    // {Boolean} open - denotes the state of current menu
+                    // {String} menuText - text that appears in the UI for the menu
+                    scope.logMenuToggle = function (menuText) {
+                        var menuOpenHeader = {
+                            action: logActions.dropdownMenu,
+                            name: menuText
+                        }
 
-
-                if (isCatalogDefined(catalogId)) {
-                    scope.isVersioned = function () {
-                        return catalogId.split("@")[1] ? true : false;
+                        logService.logClientAction(menuOpenHeader);
                     }
 
-                    scope.toLive = function () {
-                        $window.location = addLogParams($window.location.href.replace(catalogId, catalogId.split("@")[0]), dcctx);
+                    scope.logStaticLink = function (menuObject) {
+                        // NOTE: if link goes to a chaise app, no logging necessary
+                        if (isChaise(menuObject.url)) return;
+
+                        // check if external or internal resource page
+                        var action = UriUtils.isSameOrigin(menuObject.url) ? logActions.dropdownMenuInternal : logActions.dropdownMenuExternal;
+
+                        var linkHeader = {
+                            action: action,
+                            name: menuObject.name
+                        }
+
+                        logService.logClientAction(linkHeader);
                     }
-                }
+
+
+                    if (isCatalogDefined(catalogId)) {
+                        scope.isVersioned = function () {
+                            return catalogId.split("@")[1] ? true : false;
+                        }
+
+                        scope.toLive = function () {
+                            $window.location = addLogParams($window.location.href.replace(catalogId, catalogId.split("@")[0]), dcctx);
+                        }
+                    }
+                });
             }
         };
     }])
 
-    .directive('navbarMenu', ['$compile', 'ConfigUtils', 'logActions', 'logService', 'UriUtils', function($compile, ConfigUtils, logActions, logService, UriUtils) {
+    .directive('navbarMenu', ['$compile', 'ConfigUtils', 'logActions', 'logService', 'Session', 'UriUtils', function($compile, ConfigUtils, logActions, logService, Session, UriUtils) {
         return {
             restrict: 'EA',
             scope: {
@@ -258,6 +266,7 @@
             },
             templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/navbarMenu.html',
             compile: function(el) {
+                // don't need to wait for session because this directive will only ever be a child of the above directive, `navbar`
                 var contents = el.contents().remove();
                 var compiled;
                 var dcctx = ConfigUtils.getContextJSON();
@@ -268,11 +277,11 @@
                     }
 
                     scope.canShow = function (item) {
-                        return canShow(item, dcctx.session);
+                        return canShow(item, Session.getSessionValue());
                     }
 
                     scope.canEnable = function (item) {
-                        return canEnable(item, dcctx.session);
+                        return canEnable(item, Session.getSessionValue());
                     }
 
                     scope.toggleSubMenu = function (event, menuText) {
