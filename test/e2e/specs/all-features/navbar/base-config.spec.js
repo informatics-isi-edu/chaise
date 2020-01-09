@@ -33,8 +33,10 @@ describe('Navbar ', function() {
 
     it('for the menu, should generate the correct # of list items based on acls to show/hide specific options', function() {
         var nodesInDOM = menu.all(by.tagName('li'));
-        // Count the number of nodes that are being shown (top level and submenus), config has 12 but 1 is hidden by ACLs
-        var counter = 11; // counted from chaise config doc rather than having code count
+        // Count the number of nodes that are being shown (top level and submenus)
+        //   - Local: config has 12 but 1 is hidden by ACLs
+        //   - Travis: config has 12 but 7 are hidden based on ACLs
+        var counter = (!process.env.TRAVIS ? 11 : 5); // counted from chaise config doc rather than having code count
 
         nodesInDOM.count().then(function(count) {
             expect(count).toEqual(counter, "number of nodes present does not match what's defined in chaise-config");
