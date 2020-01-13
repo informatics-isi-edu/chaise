@@ -52,7 +52,7 @@ var chaiseConfig = {
             //             children: [
             //                 {
             //                     name: "Search 1.1",
-            //                     url: "/chaise/search/#1/YOUR_SCHEMA:YOUR_TABLE"
+            //                     url: "/chaise/recordset/#1/YOUR_SCHEMA:YOUR_TABLE"
             //                 }
             //             ]
             //         }
