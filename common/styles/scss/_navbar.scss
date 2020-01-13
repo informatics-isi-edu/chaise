@@ -1,3 +1,6 @@
+// required here because the output of this file (navbar.css) is used for login.index.html as well still
+@import "variables";
+
 body > .container {
 	min-height: 100%;
 	position: relative;
@@ -56,6 +59,12 @@ body > .container {
 .navbar-inverse .navbar-toggle {
     border-color: #fff;
 		color: #fff;
+}
+
+.navbar .navbar-nav .disable-link {
+    pointer-events: none;
+    cursor: default;
+    color: $disabled-color;
 }
 
 .dropdown-submenu {
