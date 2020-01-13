@@ -353,6 +353,8 @@
             params.parentDisplayMode = dcctx.cid; // should be "record"
 
             params.reference = domainRef.unfilteredReference.contextualize.compactSelect;
+            // should only be the case with adding row(s) to an association table
+            params.referenceWDisplayname = domainRef;
             params.reference.session = rsSession;
             params.context = "compact/select";
             params.selectMode = isModalUpdate ? modalBox.multiSelectMode : modalBox.singleSelectMode;

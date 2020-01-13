@@ -220,6 +220,8 @@
 
         var chaiseConfig = ConfigUtils.getConfigJSON();
         var reference = vm.reference = params.reference;
+        // params.referenceWDisplayname should only be defined when creating association records
+        vm.referenceWDisplayname = params.referenceWDisplayname || params.reference;
         var limit = (!angular.isUndefined(reference) && !angular.isUndefined(reference.display) && reference.display.defaultPageSize) ? reference.display.defaultPageSize : 25;
         var showFaceting = chaiseConfig.showFaceting ? params.showFaceting : false;
 

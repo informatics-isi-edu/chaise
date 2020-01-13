@@ -17,7 +17,7 @@
                 <record-action-bar id="actionbar-{{$index}}" is-inline="true" is-table-display="col.tableModel.isTableDisplay"
                     toggle-display-mode='toggleInlineDisplayMode({dataModel:col.tableModel})' can-edit="canEditRelated({ref:col.tableModel.reference}) && !showError($index)"
                     can-create="canCreateRelated({ref:col.tableModel.reference})" can-delete="canDeleteRelated({ref:col.tableModel.reference})" show-toggle-display-btn="allowInlineTableMarkdown($index)"
-                    add-related-record="addRelatedRecord({ref:col.tableModel.reference})" delete-related-record="deleteRelatedRecord({tableModel:col.tableModel})" to-recordset="toRecordSet({ref:col.tableModel.reference})"
+                    add-related-record="addRelatedRecord({tableModel:col.tableModel})" delete-related-record="deleteRelatedRecord({tableModel:col.tableModel})" to-recordset="toRecordSet({ref:col.tableModel.reference})"
                     displayname="col.column.displayname" base-table-name="col.baseTableName">
                 </record-action-bar>
                 <div ng-hide="showError($index) || showLoader($index)" ng-switch="!col.tableModel.isTableDisplay && allowInlineTableMarkdown($index)" ng-class="{'inline-table-display': col.tableModel.isTableDisplay || !allowInlineTableMarkdown($index)}">

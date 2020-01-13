@@ -125,7 +125,6 @@
                     scope.defaultDisplayname = defaultDisplayname;
 
                     scope.tooltip = {};
-                    scope.tooltip.unlink = "Disconnect " + scope.tableModel.reference.displayname.value + ': ' + scope.tuple.displayname.value + " from this " + scope.parentReference.displayname.value + '.';
 
                     var editLink = null;
 
@@ -159,6 +158,7 @@
                     scope.isUnLink = (scope.config.deletable && scope.context.indexOf("compact/brief") === 0 && scope.associationRef);
 
                     if (scope.isUnLink) {
+                        scope.tooltip.unlink = "Disconnect " + scope.tableModel.reference.displayname.value + ': ' + scope.tuple.displayname.value + " from this " + scope.parentReference.displayname.value + '.';
                         var associatedRefTuples = [];
                         // define unlink function
                         scope.unlink = function() {

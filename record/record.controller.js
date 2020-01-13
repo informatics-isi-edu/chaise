@@ -424,9 +424,10 @@
             };
         }
 
-        vm.addRelatedRecord = function(ref) {
+        vm.addRelatedRecord = function(tableModel) {
             event.preventDefault();
             event.stopPropagation();
+            var ref = tableModel.reference;
             var cookie = getPrefillCookieObject(ref);
 
             if(ref.derivedAssociationReference){

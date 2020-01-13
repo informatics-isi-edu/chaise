@@ -614,7 +614,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 
             it('should have the correct tooltip.', function(){
                 chaisePage.recordPage.getColumnCommentHTML(exploreBtn).then(function(comment){
-                    expect(comment).toBe("'View more " + params.displayname + " related to this " + params.baseTable + ".'", "Incorrect tooltip on View More button");
+                    expect(comment).toBe("'View more " + params.displayname + " records related to this " + params.baseTable + ".'", "Incorrect tooltip on View More button");
                 });
             });
 
@@ -722,7 +722,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
                 expect(addBtn.isPresent()).toBe(params.canCreate);
                 if(params.canCreate){
                     chaisePage.recordPage.getColumnCommentHTML(addBtn).then(function(comment){
-                        expect(comment).toBe("'Add more " + params.displayname + " related to this " + params.baseTable + ".'", "Incorrect tooltip on Add button");
+                        expect(comment).toBe("'Connect " + params.displayname + " records to this " + params.baseTable + ".'", "Incorrect tooltip on Add button");
                     });
                 }
             });
@@ -792,7 +792,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 
                     if (params.isAssociation) {
                         it ("button tooltip should be `Unlink`.", function () {
-                            expect(deleteBtn.getAttribute("uib-tooltip")).toBe("Unlink");
+                            expect(deleteBtn.getAttribute("uib-tooltip")).toBe('Disconnect ' + params.displayname + ': ' + params.entityMarkdownName + ' from this ' + params.baseTable + '.');
                         });
                     } else {
                         it ("button tooltip be `Delete`.", function () {

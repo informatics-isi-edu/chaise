@@ -123,7 +123,7 @@
 
                         <!-- defined on $rootScope in run function -->
                         <record-display class="entity-container" column-models="columnModels" values="recordValues"
-                            add-related-record="ctrl.addRelatedRecord(ref)" can-create-related="::ctrl.canCreateRelated(ref)"
+                            add-related-record="ctrl.addRelatedRecord(tableModel)" can-create-related="::ctrl.canCreateRelated(ref)"
                             can-edit-related="::ctrl.canEditRelated(ref)" can-delete-related="::ctrl.canDeleteRelated(ref)"
                             delete-related-record="ctrl.deleteRelatedRecord(tableModel)" toggle-inline-display-mode='ctrl.toggleDisplayMode(dataModel)'
                             to-record-set="ctrl.toRecordSet(ref)" show-empty-related-tables="showEmptyRelatedTables">
@@ -142,7 +142,7 @@
                                         </div>
                                         <record-action-bar can-create="ctrl.canCreateRelated(rtm.tableModel.reference)" can-delete="ctrl.canDeleteRelated(rtm.tableModel.reference)" can-edit="ctrl.canEditRelated(rtm.tableModel.reference)"
                                             is-inline="false" is-table-display="rtm.isTableDisplay" show-toggle-display-btn="ctrl.allowRelatedTableMarkdown($index)"
-                                            add-related-record="ctrl.addRelatedRecord(rtm.tableModel.reference)" delete-related-record="ctrl.deleteRelatedRecord(rtm.tableModel)" toggle-display-mode='ctrl.toggleDisplayMode(rtm)'
+                                            add-related-record="ctrl.addRelatedRecord(rtm.tableModel)" delete-related-record="ctrl.deleteRelatedRecord(rtm.tableModel)" toggle-display-mode='ctrl.toggleDisplayMode(rtm)'
                                             to-recordset="ctrl.toRecordSet(rtm.tableModel.reference)" base-table-name="rtm.baseTableName" displayname="rtm.displayname">
                                         </record-action-bar>
                                     </uib-accordion-heading>
