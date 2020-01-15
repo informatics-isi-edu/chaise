@@ -1,6 +1,6 @@
 #viewer {
     &, body {
-        background-color: #f9f9f9;
+        // background-color: #f9f9f9;
     }
 
     #alert {
@@ -156,11 +156,11 @@
         opacity: 0;
         left:0px;
     }
-
-    #sidebar {
-       position:absolute;
-       top:80px;
-    }
+    //
+    // #sidebar {
+    //    position:absolute;
+    //    top:80px;
+    // }
 
     #create-annotation-btn {
        margin-top:10px;
