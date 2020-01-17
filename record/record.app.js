@@ -50,8 +50,8 @@
         }]);
     }])
 
-    .run(['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'FunctionUtils', 'headInjector', 'MathUtils', 'messageMap', 'recordAppUtils', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$timeout', '$window',
-        function runApp(AlertsService, ConfigUtils, DataUtils, ERMrest, FunctionUtils, headInjector, MathUtils, messageMap, recordAppUtils, Session, UiUtils, UriUtils, $log, $rootScope, $timeout, $window) {
+    .run(['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'FunctionUtils', 'headInjector', `logService`, 'MathUtils', 'messageMap', 'recordAppUtils', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$timeout', '$window',
+        function runApp(AlertsService, ConfigUtils, DataUtils, ERMrest, FunctionUtils, headInjector, logService, MathUtils, messageMap, recordAppUtils, Session, UiUtils, UriUtils, $log, $rootScope, $timeout, $window) {
 
         var session,
             errorData = {};
@@ -98,12 +98,24 @@
                 // $rootScope.reference != reference after contextualization
                 $rootScope.reference = reference.contextualize.detailed;
                 $rootScope.reference.session = session;
+
                 $log.info("Reference: ", $rootScope.reference);
 
                 var logObj = {};
                 if (pcid) logObj.pcid = pcid;
                 if (ppid) logObj.ppid = ppid;
                 if (isQueryParameter) logObj.cqp = 1;
+
+
+                $rootScope.logStackPath = logService.logStackPaths.entity;
+                $rootScope.logStack = [
+                    logService.getStackElement(
+                        logService.logStackTypes.entity,
+                        $rootScope.reference.table,
+                        $rootScope.reference.filterLogInfo
+                    )
+                ];
+
                 return recordAppUtils.readMainEntity(false, logObj);
             }).then(function (page) {
                 var tuple = page.tuples[0];
@@ -140,7 +152,14 @@
                             columnError: false,
                             isLoading: true,
                             isAggregate: true,
-                            dirtyResult: true
+                            dirtyResult: true,
+                            logObject: {
+                                stack: logService.getStackObject(logService.getStackElement(
+                                    logService.logStackTypes.pseudoColumn,
+                                    col.table,
+                                    { source: col.compressedDataSource, aggregate: col.aggregateFn}
+                                ))
+                            }
                         };
                         $rootScope.hasAggregate = true;
                     }
@@ -153,7 +172,7 @@
                             isInline: true,
                             isTableDisplay: reference.display.type == 'table',
                             displayname: reference.displayname,
-                            tableModel: recordAppUtils.getTableModel(reference, "compact/brief/inline", $rootScope.tuple, $rootScope.reference)
+                            tableModel: recordAppUtils.getTableModel(reference, "compact/brief/inline", true)
                         };
                         $rootScope.hasInline = true;
                     }
@@ -177,7 +196,7 @@
                         open: openByDefault,
                         isTableDisplay: ref.display.type == 'table',
                         displayname: ref.displayname,
-                        tableModel: recordAppUtils.getTableModel(ref, "compact/brief", $rootScope.tuple, $rootScope.reference),
+                        tableModel: recordAppUtils.getTableModel(ref, "compact/brief"),
                         baseTableName: $rootScope.reference.displayname
                     });
                 });

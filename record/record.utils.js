@@ -11,8 +11,8 @@
     }])
 
     .factory('recordAppUtils',
-             ['constants', 'DataUtils', 'Errors', 'ErrorService', '$log', 'logActions', 'messageMap', 'modalBox', '$q', 'recordsetDisplayModes', 'recordTableUtils', '$rootScope',
-             function (constants, DataUtils, Errors, ErrorService, $log, logActions, messageMap, modalBox, $q, recordsetDisplayModes, recordTableUtils, $rootScope) {
+             ['constants', 'DataUtils', 'Errors', 'ErrorService', '$log', 'logService', 'messageMap', 'modalBox', '$q', 'recordsetDisplayModes', 'recordTableUtils', '$rootScope',
+             function (constants, DataUtils, Errors, ErrorService, $log, logService, messageMap, modalBox, $q, recordsetDisplayModes, recordTableUtils, $rootScope) {
 
         /**
          * returns true if we have free slots for requests.
@@ -52,8 +52,8 @@
                 model = $rootScope.columnModels[i];
                 if (!model.isInline || !model.tableModel.dirtyResult) continue;
                 if (!_haveFreeSlot()) return;
-                model.tableModel.logObject = _getTableModelLogObject(model.tableModel, isUpdate ? logActions.recordInlineUpdate : logActions.recordInlineRead);
-                recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate, true);
+                // TODO LOG causes
+                recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate, !isUpdate, true);
             }
 
             // main aggregates
@@ -66,8 +66,8 @@
                 model = $rootScope.relatedTableModels[i];
                 if (!model.tableModel.dirtyResult) continue;
                 if (!_haveFreeSlot()) return;
-                model.tableModel.logObject = _getTableModelLogObject(model.tableModel, isUpdate ? logActions.recordRelatedUpdate : logActions.recordRelatedRead);
-                recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate, true);
+                // TODO LOG causes
+                recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate, !isUpdate, true);
             }
 
             // aggregates in inline
@@ -75,8 +75,7 @@
                 model = $rootScope.columnModels[i];
                 if (!model.isInline || model.tableModel.dirtyResult) continue;
                 if (!_haveFreeSlot()) return;
-                logObject = _getTableModelLogObject(model.tableModel, isUpdate ? logActions.recordInlineAggregateUpdate : logActions.recordInlineAggregate);
-                recordTableUtils.updateColumnAggregates(model.tableModel, _processRequests, logObject, !isUpdate);
+                recordTableUtils.updateColumnAggregates(model.tableModel, _processRequests, !isUpdate, !isUpdate);
             }
 
             // aggregates in related
@@ -84,8 +83,7 @@
                 model = $rootScope.relatedTableModels[i];
                 if (model.tableModel.dirtyResult) continue;
                 if (!_haveFreeSlot()) return;
-                logObject = _getTableModelLogObject(model.tableModel, isUpdate ? logActions.recordRelatedAggregateUpdate : logActions.recordRelatedAggregate);
-                recordTableUtils.updateColumnAggregates(model.tableModel, _processRequests, logObject, !isUpdate);
+                recordTableUtils.updateColumnAggregates(model.tableModel, _processRequests, !isUpdate, !isUpdate);
             }
         }
 
@@ -99,7 +97,10 @@
             var defer = $q.defer();
 
             logObject = logObject || {};
-            logObject.action = isUpdate ? logActions.recordUpdate : logActions.recordRead;
+            // TODO LOG causes
+            var action = isUpdate ? logService.logActions.reload : logService.logActions.load;
+            logObject.action = logService.getActionString("", action);
+            logObject.stack = $rootScope.logStack;
             $rootScope.reference.read(1, logObject).then(function (page) {
                 $log.info("Page: ", page);
 
@@ -151,7 +152,7 @@
                 $rootScope.recordFlowControl.occupiedSlots++;
                 model.dirtyResult = false;
                 model.isLoading = true;
-                _readMainColumnAggregate(model.column, index, $rootScope.recordFlowControl.counter).then(function (res) {
+                _readMainColumnAggregate(model, index, isUpdate, $rootScope.recordFlowControl.counter).then(function (res) {
                     $rootScope.recordFlowControl.occupiedSlots--;
                     model.dirtyResult = !res;
                     model.columnError = false;
@@ -176,14 +177,16 @@
          * Generate request for each individual aggregate columns.
          * Returns a promise. The resolved value denotes the success or failure.
          */
-        function _readMainColumnAggregate(column, index, current) {
+        function _readMainColumnAggregate(columnModel, index, isUpdate, current) {
             var defer = $q.defer();
-            var logObject = column.reference.defaultLogInfo;
-            logObject.action = logActions.recordAggregate;
-            logObject.referrer = $rootScope.reference.defaultLogInfo;
+            var logObj = columnModel.logObject;
 
-            column.getAggregatedValue($rootScope.page, logObject).then(function (values) {
-                $rootScope.columnModels[index].isLoading = false;
+            var action = isUpdate ? logService.logActions.reload : logService.logActions.load;
+            var stackPath = logService.getStackPath("", logService.logStackPaths.pseudoColumn)
+            logObj.action = logService.getActionString(stackPath, action);
+
+            columnModel.column.getAggregatedValue($rootScope.page, logObj).then(function (values) {
+                columnModel.isLoading = false;
                 if ($rootScope.recordFlowControl.counter !== current) {
                     return defer.resolve(false);
                 }
@@ -270,15 +273,23 @@
          * Given reference of related or inline, will create appropriate table model.
          * @param  {ERMrest.Reference} reference Reference object.
          * @param  {string} context   the context string
-         * @param  {ERMrest.tuple} parentTuple the main tuple
+         * @param  {boolean} isInline whether the table is inline or not
          */
-        function getTableModel (reference, context, parentTuple, parentReference) {
+        function getTableModel (reference, context, isInline) {
+            var stackElement = logService.getStackElement(
+                logService.logStackTypes.related,
+                reference.table,
+                {source: reference.compressedDataSource}
+            );
+            var currentStackPath = isInline ? logService.logStackPaths.relatedInline : logService.logStackPaths.related;
+            var logStackPath = logService.getStackPath("", currentStackPath);
+
             return {
                 reference: reference,
-                parentReference: parentReference,
+                parentReference: $rootScope.reference,
                 pageLimit: getPageSize(reference),
                 isTableDisplay: reference.display.type == 'table',
-                parentTuple: parentTuple,
+                parentTuple: $rootScope.tuple,
                 context: context,
                 enableSort: true,
                 rowValues: [],
@@ -293,20 +304,13 @@
                     selectMode: modalBox.noSelect,
                     displayMode: (context.indexOf("inline") > -1 ? recordsetDisplayModes.inline : recordsetDisplayModes.related)
                 },
+                logObject: {
+                    stack: logService.getStackObject(stackElement)
+                },
+                logStackPath: logStackPath,
                 flowControlObject: $rootScope.recordFlowControl,
                 queryTimeoutTooltip: messageMap.queryTimeoutTooltip
             };
-        }
-
-        /**
-         * @private
-         * Returns appropriate log object, for the related or inline table model.
-         */
-        function _getTableModelLogObject(tableModel, action) {
-            var logObject = tableModel.reference.defaultLogInfo;
-            logObject.referrer = $rootScope.reference.defaultLogInfo;
-            logObject.action = action;
-            return logObject;
         }
 
         /**

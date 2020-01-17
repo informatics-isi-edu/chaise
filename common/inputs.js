@@ -294,8 +294,8 @@
         }
     }])
 
-    .directive('inputSwitch', ['ConfigUtils', 'dataFormats', 'InputUtils', 'integerLimits', 'maskOptions', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'UriUtils', '$log', '$rootScope',
-                function(ConfigUtils, dataFormats, InputUtils, integerLimits, maskOptions, modalBox, modalUtils, recordsetDisplayModes, UriUtils, $log, $rootScope) {
+    .directive('inputSwitch', ['ConfigUtils', 'dataFormats', 'InputUtils', 'integerLimits', 'logService', 'maskOptions', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'UriUtils', '$log', '$rootScope',
+                function(ConfigUtils, dataFormats, InputUtils, integerLimits, logService, maskOptions, modalBox, modalUtils, recordsetDisplayModes, UriUtils, $log, $rootScope) {
         return {
             restrict: 'E',
             templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/inputs/inputSwitch.html',
@@ -379,6 +379,10 @@
                     params.selectMode = modalBox.singleSelectMode;
                     params.showFaceting = true;
                     params.facetPanelOpen = false;
+
+                    // log attributes
+                    params.logObject = { stack: scope.columnModel.logStack };
+                    params.logStackPath = logService.getStackPath("", logService.logStackPaths.foreignKeyPopup);
 
                     modalUtils.showModal({
                         animation: false,

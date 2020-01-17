@@ -3,7 +3,7 @@
 
     angular.module('chaise.export', ['chaise.utils'])
 
-    .directive('export', ['AlertsService', 'ConfigUtils', 'DataUtils', 'ErrorService', 'logActions', 'logService', 'modalUtils', '$rootScope', '$timeout', 'UriUtils', '$window', function (AlertsService, ConfigUtils, DataUtils, ErrorService, logActions, logService, modalUtils, $rootScope, $timeout, UriUtils, $window) {
+    .directive('export', ['AlertsService', 'ConfigUtils', 'DataUtils', 'ErrorService', 'logService', 'modalUtils', '$rootScope', '$timeout', 'UriUtils', '$window', function (AlertsService, ConfigUtils, DataUtils, ErrorService, logService, modalUtils, $rootScope, $timeout, UriUtils, $window) {
         var chaiseConfig = ConfigUtils.getConfigJSON();
         var context = ConfigUtils.getContextJSON();
         /**
@@ -82,7 +82,11 @@
                     });
                     scope.isLoading = true;
 
-                    scope.exporter.run({action: logActions.export}).then(function (response) {
+                    var logObj = {
+                        action: logService.getActionString("", logService.logActions.export),
+                        stack: logService.getStackObject()
+                    }
+                    scope.exporter.run(logObj).then(function (response) {
                         // if it was canceled, just ignore the result
                         if (response.canceled) return;
 
@@ -119,11 +123,10 @@
                 scope.hideNavbar = context.hideNavbar;
 
                 scope.logDropdownOpened = function () {
-                    var exportHeader = {
-                        action: logActions.exportOpen
-                    }
-
-                    logService.logClientAction(exportHeader, scope.reference.defaultLogInfo);
+                    logService.logClientAction({
+                        action: logService.getActionString("", logService.logActions.openExport),
+                        stack: logService.getStackObject()
+                    }, scope.reference.defaultLogInfo);
                 };
 
                 scope.exportOptions = {

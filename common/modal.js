@@ -206,8 +206,8 @@
      *  - context {String} - the current context that the directive fetches data for
      *  - selectMode {String} - the select mode the modal uses
      */
-    .controller('SearchPopupController', ['ConfigUtils', 'DataUtils', 'params', 'Session', 'modalBox', 'logActions', 'recordsetDisplayModes', '$rootScope', '$timeout', '$uibModalInstance',
-        function SearchPopupController(ConfigUtils, DataUtils, params, Session, modalBox, logActions, recordsetDisplayModes, $rootScope, $timeout, $uibModalInstance) {
+    .controller('SearchPopupController', ['ConfigUtils', 'DataUtils', 'params', 'Session', 'modalBox', 'recordsetDisplayModes', '$rootScope', '$timeout', '$uibModalInstance',
+        function SearchPopupController(ConfigUtils, DataUtils, params, Session, modalBox, recordsetDisplayModes, $rootScope, $timeout, $uibModalInstance) {
         var vm = this;
 
         vm.params = params;
@@ -222,6 +222,16 @@
         var reference = vm.reference = params.reference;
         var limit = (!angular.isUndefined(reference) && !angular.isUndefined(reference.display) && reference.display.defaultPageSize) ? reference.display.defaultPageSize : 25;
         var showFaceting = chaiseConfig.showFaceting ? params.showFaceting : false;
+
+        // TODO LOG ugly
+        var logObj = {};
+        if (params.logObject) {
+            // hard copy the object
+            logObj = JSON.parse(JSON.stringify(params.logObject));
+            if (Array.isArray(logObj.stack)) {
+                logObj.stack[logObj.stack.length-1].picker = 1;
+            }
+        }
 
         vm.tableModel = {
             readyToInitialize:  true,
@@ -252,7 +262,12 @@
             },
             context:                    params.context,
             getDisabledTuples:          params.getDisabledTuples,
-            logObject:                  params.logObject ? params.logObject: {},
+
+            // log related attributes
+            logObject:                  logObj,
+            logStackPath:               params.logStackPath ? params.logStackPath : null,
+
+            // used for the recordset height and sticky section logic
             // TODO different modals should pass different strings (ultimatly it should be the element and not selector)
             parentContainerSelector:    ".search-popup .modal-content",
             parentStickyAreaSelector:   ".search-popup .modal-header",
@@ -357,10 +372,10 @@
      *   - {Object} citation - citation object returned from ERMrest.tuple.citation
      *
      */
-    .controller('ShareCitationController', ['logActions', 'logService', 'params', '$uibModalInstance', '$window', function (logActions, logService, params, $uibModalInstance, $window) {
+    .controller('ShareCitationController', ['logService', 'params', '$uibModalInstance', '$window', function (logService, params, $uibModalInstance, $window) {
         var vm = this;
         vm.params = params;
-        vm.logActions = logActions;
+        vm.logActions = logService.logActions;
         vm.warningMessage = "The displayed content may be stale due to recent changes made by other users. You may wish to review the changes prior to sharing the <a ng-href='{{ctrl.params.permalink}}'>live link</a> below. Or, you may share the older content using the <a ng-href='{{ctrl.params.versionLink}}'>versioned link</a>.";
 
         vm.moreThanWeek = function () {
@@ -387,11 +402,10 @@
         }
 
         vm.copyToClipboard = function (text, action) {
-            var copyLinkHeader = {
-                action: action
-            }
-
-            logService.logClientAction(copyLinkHeader, params.reference.defaultLogInfo);
+            logService.logClientAction({
+                action: logService.getActionString("", action),
+                stack: logService.getStackObject()
+            }, params.reference.defaultLogInfo);
             // Create a dummy input to put the text string into it, select it, then copy it
             // this has to be done because of HTML security and not letting scripts just copy stuff to the clipboard
             // it has to be a user initiated action that is done through the DOM object
@@ -409,12 +423,11 @@
             document.body.removeChild(dummy[0]);
         }
 
-        vm.logCitationDownload = function () {
-            var citationDownloadHeader = {
-                action: logActions.cite
-            }
-
-            logService.logClientAction(citationDownloadHeader, params.reference.defaultLogInfo);
+        vm.logCitationDownload = function (action) {
+            logService.logClientAction({
+                action: logService.getActionString("", action),
+                stack: logService.getStackObject()
+            }, params.reference.defaultLogInfo);
         }
 
         vm.closeAlert = function () {

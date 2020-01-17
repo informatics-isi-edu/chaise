@@ -65,8 +65,8 @@
     })
 
     // Register work to be performed after loading all modules
-    .run(['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'ErrorService', 'FunctionUtils', 'headInjector', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'recordsetDisplayModes', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
-        function(AlertsService, ConfigUtils, DataUtils, ERMrest, ErrorService, FunctionUtils, headInjector, logActions, MathUtils, messageMap, modalBox, recordsetDisplayModes, recordsetModel, Session, UiUtils, UriUtils, $log, $rootScope, $window) {
+    .run(['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'ErrorService', 'FunctionUtils', 'headInjector', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'recordsetDisplayModes', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
+        function(AlertsService, ConfigUtils, DataUtils, ERMrest, ErrorService, FunctionUtils, headInjector, logService, MathUtils, messageMap, modalBox, recordsetDisplayModes, recordsetModel, Session, UiUtils, UriUtils, $log, $rootScope, $window) {
         try {
             var session;
 
@@ -157,8 +157,19 @@
 
                     recordsetModel.search = recordsetModel.reference.location.searchTerm;
 
+                    $rootScope.logStackPath = logService.logStackPaths.set;
+                    $rootScope.logStack = [
+                        logService.getStackElement(
+                            logService.logStackTypes.set,
+                            recordsetModel.reference.table,
+                            recordsetModel.reference.filterLogInfo
+                        )
+                    ];
+
                     // create log object that will be used for the first request
-                    recordsetModel.logObject = {action: logActions.recordsetLoad};
+                    recordsetModel.logObject = {
+                        stack: $rootScope.logStack
+                    };
                     if (pcid) recordsetModel.logObject.pcid = pcid;
                     if (ppid) recordsetModel.logObject.ppid = ppid;
                     if (isQueryParameter) recordsetModel.logObject.cqp = 1;

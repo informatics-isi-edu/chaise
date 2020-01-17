@@ -9,59 +9,38 @@
         };
     }])
 
-    .directive('ellipsis', ['AlertsService', 'ConfigUtils', 'defaultDisplayname', 'ErrorService', 'logActions', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$window',
-        function(AlertsService, ConfigUtils, defaultDisplayname, ErrorService, logActions, logService, MathUtils, messageMap, modalBox, modalUtils, recordsetDisplayModes, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $window) {
+    .directive('ellipsis', ['AlertsService', 'ConfigUtils', 'defaultDisplayname', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'recordTableUtils', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$window',
+        function(AlertsService, ConfigUtils, defaultDisplayname, ErrorService, logService, MathUtils, messageMap, modalBox, modalUtils, recordsetDisplayModes, recordTableUtils, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $window) {
         var chaiseConfig = ConfigUtils.getConfigJSON(),
             context = ConfigUtils.getContextJSON();
 
-        function deleteReference(scope, reference) {
-            var logObject = {action: logActions.recordsetDelete};
-            // if it's related mode, change the logObject
-            if (scope.displayMode.indexOf(recordsetDisplayModes.related) === 0) {
-                logObject = {
-                    action: logActions.recordRelatedDelete,
-                    referrer: scope.parentReference.defaultLogInfo
-                };
-            }
+        function deleteReference(scope, reference, isUnlink) {
+            var logObject = {
+                action: recordTableUtils.getTableLogAction(scope.tableModel, logService.logStackPaths.entity, isUnLink ? logService.logActions.unlink : logService.logActions.delete),
+                stack: recordTableUtils.getTableLogStack(scope.tableModel, logService.getStackElement(logService.logStackTypes.entity, reference.table, reference.filterLogInfo))
+            };
 
             if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
-                var isRecordset = (scope.displayMode == recordsetDisplayModes.fullscreen),
-                    isInline = (scope.displayMode == recordsetDisplayModes.inline);
-
-                var action;
-                if (isRecordset) {
-                    action = logActions.deleteIntend;
-                } else if (isInline) {
-                    action = (scope.isUnLink ? logActions.inlineUnlinkIntend : logActions.inlineDeleteIntend );
-                } else {
-                    action = (scope.isUnLink ? logActions.relatedUnlinkIntend : logActions.relatedDeleteIntend );
-                }
-
-                var actionHeader = {
-                    action: action,
-                    facet: reference.defaultLogInfo.facet
-                }
-
                 var onError = function (response) {
                     scope.$root.showSpinner = false;
 
-                    if (isRecordset) {
-                        action = logActions.deleteCancel;
-                    } else if (isInline) {
-                        action = (scope.isUnLink ? logActions.inlineUnlinkCancel : logActions.inlineDeleteCancel );
-                    } else {
-                        action = (scope.isUnLink ? logActions.relatedUnlinkCancel : logActions.relatedDeleteCancel );
-                    }
+                    // log the opening of cancelation modal
+                    logService.logClientAction({
+                        action: recordTableUtils.getTableLogAction(scope.tableModel, logService.logStackPaths.entity, isUnlink ? logService.logActions.unlinkCancel : logService.logActions.deleteCancel),
+                        stack: logObject.stack
+                    }, reference.defaultLogInfo);
 
-                    actionHeader.action = action;
-                    logService.logClientAction(actionHeader, reference.defaultLogInfo);
                     // if response is string, the modal has been dismissed
                     if (typeof response !== "string") {
                         ErrorService.handleException(response, true);  // throw exception for dismissible pop- up (error, isDismissible = true)
                     }
                 }
 
-                logService.logClientAction(actionHeader, reference.defaultLogInfo);
+                // log the opening of delete modal
+                logService.logClientAction({
+                    action: recordTableUtils.getTableLogAction(scope.tableModel, logService.logStackPaths.entity, isUnlink ? logService.logActions.unlinkIntend : logService.logActions.deleteIntend),
+                    stack: logObject.stack
+                }, reference.defaultLogInfo);
 
                 modalUtils.showModal({
                     animation: false,
@@ -126,6 +105,8 @@
 
                     var editLink = null;
 
+                    // TODO LOG edit goes to the association table, should it?
+
                     // unlink button should only show up in related mode
                     if (scope.displayMode.indexOf(recordsetDisplayModes.related) === 0 && scope.parentTuple) {
                         scope.associationRef = scope.tuple.getAssociationRef(scope.parentTuple.data);
@@ -159,7 +140,7 @@
                         var associatedRefTuples = [];
                         // define unlink function
                         scope.unlink = function() {
-                            deleteReference(scope, scope.associationRef);
+                            deleteReference(scope, scope.associationRef, true);
                         };
                     } else if (scope.config.deletable) {
                         // define delete function

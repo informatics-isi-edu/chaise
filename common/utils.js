@@ -116,8 +116,6 @@
     })
 
     .constant("logActions", {
-        // action namespace
-        "clientAction": "client_action", // path to log button click events
 
         // actions
         "recordRead": "record/main", // read the main entity (record)
@@ -2324,9 +2322,129 @@
         }
     }])
 
-    .service('logService', ['ConfigUtils', '$log', function (ConfigUtils, $log) {
+    .service('logService', ['ConfigUtils', '$log', '$rootScope', function (ConfigUtils, $log, $rootScope) {
         var context = ConfigUtils.getContextJSON(),
             cc = ConfigUtils.getConfigJSON();
+
+        var appModeStackPathSeparator = ":",
+            stackPathClientPathSeparator = ",",
+            clientPathActionSeparator = ";",
+            separator = "/";
+        var logActions = Object.freeze({
+            // general
+
+            // - server:
+            load: clientPathActionSeparator + "load",
+            reload: clientPathActionSeparator + "reload",
+            autoReload: clientPathActionSeparator + "auto-reload",
+            delete: clientPathActionSeparator + "delete",
+            export: clientPathActionSeparator + "export",
+
+            // - client:
+            permalinkLeft: "permalink" + clientPathActionSeparator + "lclick",
+            permalinkRight: "permalink" + clientPathActionSeparator + "rclick",
+            cancel: clientPathActionSeparator + "cancel",
+            open: clientPathActionSeparator + "open",
+            close: clientPathActionSeparator + "close",
+            openExport: "export" + clientPathActionSeparator + "open",
+            addIntend: "add" + clientPathActionSeparator + "intend",
+            deleteIntend: "delete" + clientPathActionSeparator + "intend",
+            deleteCancel: "delete" + clientPathActionSeparator + "cancel",
+
+            // recordset:
+
+            //   - server:
+            count: clientPathActionSeparator + "count",
+            recount: clientPathActionSeparator + "recount",
+            histogramLoad: "histogram" + clientPathActionSeparator + "load",
+            histogramReload: "histogram" + clientPathActionSeparator + "reload",
+            loadPreselectedFacets: "preselect" + clientPathActionSeparator + "preload", // TODO LOG use load?
+
+            //   - client:
+            pageSizeDropdownOpen: "page-size" + clientPathActionSeparator + "open",
+            facetPanelShow: "panel" + clientPathActionSeparator + "show",
+            facetPanelHide: "panel" + clientPathActionSeparator + "hide",
+            pageSelectAll: "page" + clientPathActionSeparator + "select-all",
+            pageDeSelectAll: "page" + clientPathActionSeparator + "deselect-all",
+            clearAllSelection: "selection" + clientPathActionSeparator + "reset",
+            facetScrollTo: "breadcrumb" + clientPathActionSeparator + "scroll-to",
+
+            // record:
+
+            // - server:
+            openSharePopup: "share" + clientPathActionSeparator + "open",
+            loadDomain: clientPathActionSeparator + "load-domain",
+            reloadDomain: clientPathActionSeparator + "reload-domain",
+            link: clientPathActionSeparator + "link",
+
+            // - client:
+            tocShow: "toc" +  clientPathActionSeparator + "show",
+            tocHide: "toc" +  clientPathActionSeparator + "hide",
+            relatedTableDisplay: "display/table" + clientPathActionSeparator + "show",
+            relatedMkdnDisplay: "display/mkdn" + clientPathActionSeparator + "show",
+            showEmptyRelated: "show-empty" + clientPathActionSeparator + "show",
+            hideEmptyRelated: "show-empty" + clientPathActionSeparator + "hide",
+            unlinkIntend: "delete" + clientPathActionSeparator + "intend",
+            unlinkCancel: "delete" + clientPathActionSeparator + "cancel",
+
+            scrollTop: clientPathActionSeparator + "scroll-top",
+            tocScrollTop: "toc/main" + clientPathActionSeparator + "scroll-to",
+            tocScrollToRelated: "toc/section" + clientPathActionSeparator + "scroll-to",
+
+            shareLiveLinkCopy: "share/live" + clientPathActionSeparator + "copy",
+            shareVersionLinkCopy: "share/version" + clientPathActionSeparator + "copy",
+
+            downloadBibtex: "cite/bibtex" + clientPathActionSeparator + "download",
+
+
+            // recordedit:
+
+            // - server:
+            foreignKeyPreselect: clientPathActionSeparator +  "preselect",
+            foreignKeyDefault: clientPathActionSeparator + "default",
+
+            // - client:
+            cloneForm: clientPathActionSeparator + "clone",
+            cloneXForm: clientPathActionSeparator +  "clone-x",
+            removeForm: clientPathActionSeparator + "remove",
+            setAllOpen: "set-all" + clientPathActionSeparator + "open",
+            setAllClose: "set-all" + clientPathActionSeparator + "close",
+            setAllCancel: "set-all" + clientPathActionSeparator + "cancel",
+            setAllApply: "set-all" + clientPathActionSeparator + "apply",
+            setAllClear: "set-all" + clientPathActionSeparator + "clear"
+
+        });
+
+        var logStackTypes = Object.freeze({
+            entity: "entity",
+            set: "set",
+            related: "related",
+            foreignKey: "fk",
+            column: "col",
+            pseudoColumn: "pcol",
+            facet: "facet"
+        });
+
+        var logStackPaths = Object.freeze({
+            entity: "entity",
+            set: "set",
+            column: "col",
+            pseudoColumn: "pcol",
+            foreignKey: "fk",
+            facet: "facet",
+            related: "related",
+            relatedInline: "related-inline",
+            addPureBinaryPopup: "related-link-picker",
+            foreignKeyPopup: "fk-picker",
+            facetPopup: "facet-picker"
+        });
+
+        var appModes = Object.freeze({
+            edit: "edit",
+            create: "create",
+            createCopy: "create-copy",
+            createPreselect: "create-preselect"
+        })
 
         /**
          * Takes a header object, adds default logging info to it, and logs the request with ermrest
@@ -2337,6 +2455,7 @@
             if (!cc.logClientActions) return;
 
             if (commonLogInfo) {
+                // TODO this could just use all the attribues in the commonLogInfo
                 headerObj.catalog = commonLogInfo.catalog;
                 headerObj.schema_table = commonLogInfo.schema_table;
             }
@@ -2347,8 +2466,67 @@
             });
         }
 
+        function getStackObject(childStackElement) {
+            if (childStackElement) {
+                return $rootScope.logStack.concat(childStackElement);
+            }
+            return $rootScope.logStack;
+        }
+
+        function getStackPath(currentPath, childPath) {
+            if (!currentPath) {
+                currentPath = $rootScope.logStackPath;
+            }
+            return currentPath + separator + childPath;
+        }
+
+        function getStackElement(type, table, extraInfo) {
+            var obj = {
+                type: type,
+                s_t: table.schema.name + ":" + table.name
+            };
+            if (typeof extraInfo === "object" && extraInfo !== null) {
+                for (var k in extraInfo) {
+                    if (!extraInfo.hasOwnProperty(k)) continue;
+                    obj[k] = extraInfo[k];
+                }
+            }
+            return obj;
+        }
+
+        function updateStackFilterInfo(stack, filterLogInfo) {
+            var lastStackElement = stack[stack.length-1];
+            // TODO can be better? remove the existing filter info in stack
+            ['cfacet', 'cfacet_str', 'cfacet_path', 'filters', 'custom_filters'].forEach(function (k) {
+                delete lastStackElement[k];
+            });
+
+            // update the stack to have the latest filter info
+            for (var f in filterLogInfo) {
+                if (!filterLogInfo.hasOwnProperty(f)) continue;
+                lastStackElement[f] = filterLogInfo[f];
+            }
+        }
+
+        function getActionString(logStackPath, logActionPath) {
+            if (!logStackPath) {
+                logStackPath = $rootScope.logStackPath;
+            }
+            var appMode = $rootScope.logAppMode ? $rootScope.logAppMode : "";
+            return  appMode + appModeStackPathSeparator + logStackPath + stackPathClientPathSeparator + logActionPath;
+        }
+
         return {
-            logClientAction: logClientAction
+            appModes: appModes,
+            logStackTypes: logStackTypes,
+            logStackPaths: logStackPaths,
+            logActions: logActions,
+            logClientAction: logClientAction,
+            getActionString: getActionString,
+            getStackElement: getStackElement,
+            updateStackFilterInfo: updateStackFilterInfo,
+            getStackPath: getStackPath,
+            getStackObject: getStackObject
         }
     }])
 

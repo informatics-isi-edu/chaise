@@ -3,8 +3,8 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'ErrorService', 'logActions', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordAppUtils', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
-        function RecordController(AlertsService, ConfigUtils, DataUtils, ERMrest, ErrorService, logActions, logService, MathUtils, messageMap, modalBox, modalUtils, recordAppUtils, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
+    .controller('RecordController', ['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordAppUtils', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
+        function RecordController(AlertsService, ConfigUtils, DataUtils, ERMrest, ErrorService, logService, MathUtils, messageMap, modalBox, modalUtils, recordAppUtils, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
 
         var initialHref = $window.location.href;
@@ -37,13 +37,11 @@
         }
 
         vm.toggleSidebar = function() {
-            var action = ($rootScope.recordSidePanOpen ? logActions.tocHide : logActions.tocShow );
-
-            var tocToggleHeader = {
-                action: action
-            }
-
-            logService.logClientAction(tocToggleHeader, $rootScope.reference.defaultLogInfo);
+            var action = ($rootScope.recordSidePanOpen ? logService.logActions.tocHide : logService.logActions.tocShow );
+            logService.logClientAction({
+                action: logService.getActionString("", action),
+                stack: logService.getStackObject()
+            }, $rootScope.reference.defaultLogInfo);
 
             $rootScope.recordSidePanOpen = !$rootScope.recordSidePanOpen;
         };
@@ -88,7 +86,11 @@
 
         vm.deleteRecord = function() {
             var errorData = {};
-            $rootScope.reference.delete({action: logActions.recordDelete}).then(function deleteSuccess() {
+            var logObj = {
+                action: logService.getActionString("", logService.logActions.delete),
+                stack: logService.getStackObject()
+            };
+            $rootScope.reference.delete(logObj).then(function deleteSuccess() {
                 // Get an appLink from a reference to the table that the existing reference came from
                 var unfilteredRefAppLink = $rootScope.reference.table.reference.contextualize.compact.appLink;
                 $rootScope.showSpinner = false;
@@ -120,7 +122,8 @@
             params.versionDate = UiUtils.versionDate(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
 
             var snaptimeHeader = {
-                action: logActions.share,
+                action: logService.getActionString("", logService.logActions.openSharePopup),
+                stack: logService.getStackObject(),
                 catalog: ref.defaultLogInfo.catalog,
                 schema_table: ref.defaultLogInfo.schema_table
             }
@@ -232,45 +235,21 @@
             var tableModel = dataModel;
             if (dataModel.tableModel) tableModel = dataModel.tableModel;
 
-            var isInline = tableModel.context.indexOf("inline") > -1;
-            var canEdit = vm.canEditRelated(tableModel.reference);
-
-            // action has 3 states for each positional mode:
-            // if seeing table mode, flip to custom (mkdn-display)
-            // else custom mode
-            //    if no edit allowed, flip to table (table-display)
-            //    else edit mode, flip to edit (edit-display)
-            //
-            // then check for 2 positional modes: inline or !inline
-            var action;
-            if (dataModel.isTableDisplay) {
-                action = (isInline ? logActions.inlineMkdnDisplay : logActions.relatedMkdnDisplay);
-            } else {
-                // we see custom mode (mkdn display)
-                if (canEdit) {
-                    action = (isInline ? logActions.inlineEditDisplay : logActions.relatedEditDisplay);
-                } else {
-                    action = (isInline ? logActions.inlineTableDisplay : logActions.relatedTableDisplay);
-                }
-            }
-
-            var toggleDisplayHeader = {
-                action: action
-            }
-
-            logService.logClientAction(toggleDisplayHeader, tableModel.reference.defaultLogInfo);
+            var action = dataModel.isTableDisplay ? logService.logActions.relatedMkdnDisplay : logService.logActions.relatedTableDisplay;
+            logService.logClientAction({
+                action: logService.getActionString(tableModel.logStackPath, action),
+                stack: tableModel.logObject.stack
+            }, tableModel.reference.defaultLogInfo);
 
             dataModel.isTableDisplay = !dataModel.isTableDisplay;
         };
 
         vm.toggleRelatedTables = function() {
-            var action = ($rootScope.showEmptyRelatedTables ? logActions.hideAllRelated : logActions.showAllRelated);
-
-            var toggleAllRelatedTablesHeader = {
-                action: action
-            }
-
-            logService.logClientAction(toggleAllRelatedTablesHeader, $rootScope.reference.defaultLogInfo);
+            var action = ($rootScope.showEmptyRelatedTables ? logService.logActions.hideEmptyRelated : logService.logActions.showEmptyRelated);
+            logService.logClientAction({
+                action: logService.getActionString("", action),
+                stack: logService.getStackObject()
+            }, $rootScope.reference.defaultLogInfo);
 
             $rootScope.showEmptyRelatedTables = !$rootScope.showEmptyRelatedTables;
             // NOTE: there's a case where clicking the button to toggle this doesn't re-paint the footer until the mouse "moves"
@@ -281,13 +260,12 @@
         };
 
         vm.logAccordionClick = function (rtm) {
-            var action = (rtm.open ? logActions.relatedClose : logActions.relatedOpen);
+            var action = (rtm.open ? logService.logActions.close : logService.logActions.open);
 
-            var toggleRelatedTableHeader = {
-                action: action
-            }
-
-            logService.logClientAction(toggleRelatedTableHeader, rtm.tableModel.reference.defaultLogInfo);
+            logService.logClientAction({
+                action: logService.getActionString(rtm.tableModel.logStackPath, action),
+                stack: rtm.tableModel.logObject.stack
+            }, rtm.tableModel.reference.defaultLogInfo);
         }
 
         vm.canEditRelated = function(ref) {
@@ -351,7 +329,7 @@
          * each foreignkeys eventhough they are referring to the same row of data.
          * So instead of multiple reads, we just have to read the parent record once
          * and use that data for all the foreignkeys that can be prefilled.
-         * For this reason, I didn't remove passing of constraintNames for now.
+         * For this reason, I didn't remove passing of fkColumnNames for now.
          *
          * @param  {Object} fk foreignkey object that we want to test
          * @return {boolean} whether it can be prefilled
@@ -413,7 +391,7 @@
             return {
                 rowname: $rootScope.recordDisplayname, // the displayed value in the form
                 origUrl: $rootScope.reference.uri, // used for reading the actual foreign key data
-                constraintNames: prefilledFks, // the foreignkey columns that should be prefileld
+                fkColumnNames: prefilledFks, // the foreignkey columns that should be prefileld
                 keys: keys // raw values of the foreign key columns
             };
         }
@@ -445,6 +423,12 @@
             appLink = appLink + (appLink.indexOf("?") === -1? "?" : "&") +
                 'prefill=' + UriUtils.fixedEncodeURIComponent(COOKIE_NAME) +
                 '&invalidate=' + UriUtils.fixedEncodeURIComponent(referrer_id);
+
+            // TODO LOG
+            // logService.logClientAction({
+            //     action: logService.getActionString(relatedObj.rtm.tableModel.logStackPath, logService.logActions.addIntend),
+            //     stack: relatedObj.rtm.tableModel.logObject.stack
+            // }, relatedObj.rtm.tableModel.reference.defaultLogInfo);
 
             // 4. Redirect to the url in a new tab
             $window.open(appLink, '_blank');
@@ -530,12 +514,11 @@
         /*** scroll to events ***/
         // scroll to top button
         $scope.scrollToTop = function (fromToc) {
-            var action = (fromToc ? logActions.tocScrollTop : logActions.scrollTop);
-            var scrollTopHeader = {
-                action: action
-            }
-
-            logService.logClientAction(scrollTopHeader, $rootScope.reference.defaultLogInfo);
+            var action = (fromToc ? logService.logActions.tocScrollTop : logService.logActions.scrollTop);
+            logService.logClientAction({
+                action: logService.getActionString("", action),
+                stack: logService.getStackObject()
+            }, $rootScope.reference.defaultLogInfo);
 
             mainContainerEl.scrollTo(0, 0, 500);
         };
@@ -547,11 +530,10 @@
         vm.scrollToSection = function (sectionId) {
             var relatedObj = determineScrollElement(sectionId);
 
-            var scrollToHeader = {
-                action: logActions.tocScrollTo
-            }
-
-            logService.logClientAction(scrollToHeader, relatedObj.rtm.tableModel.reference.defaultLogInfo);
+            logService.logClientAction({
+                action: logService.getActionString(relatedObj.rtm.tableModel.logStackPath, logService.logActions.tocScrollToRelated),
+                stack: relatedObj.rtm.tableModel.logObject.stack
+            }, relatedObj.rtm.tableModel.reference.defaultLogInfo);
 
             scrollToElement(relatedObj.element);
         }

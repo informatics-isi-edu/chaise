@@ -2,8 +2,8 @@
     'use strict';
     angular.module('chaise.recordcreate', ['chaise.errors','chaise.utils'])
 
-    .factory("recordCreate", ['$cookies', '$log', '$q', '$rootScope', '$window', 'AlertsService', 'DataUtils', 'ErrorService', 'logActions', 'logService', 'messageMap', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'Session', 'UriUtils',
-        function($cookies, $log, $q, $rootScope, $window, AlertsService, DataUtils, ErrorService, logActions, logService, messageMap, modalBox, modalUtils, recordsetDisplayModes, Session, UriUtils) {
+    .factory("recordCreate", ['$cookies', '$log', '$q', '$rootScope', '$window', 'AlertsService', 'DataUtils', 'ErrorService', 'logService', 'messageMap', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'Session', 'UriUtils',
+        function($cookies, $log, $q, $rootScope, $window, AlertsService, DataUtils, ErrorService, logService, messageMap, modalBox, modalUtils, recordsetDisplayModes, Session, UriUtils) {
 
         var viewModel = {};
         var GV_recordEditModel = {},
@@ -274,7 +274,7 @@
                 submissionRows: [{}] // rows of data
             };
             // Update view model
-            cookie.constraintNames.forEach(function (cn) {
+            cookie.fkColumnNames.forEach(function (cn) {
                 recordEditModel.rows[recordEditModel.rows.length - 1][cn] = cookie.rowname.value;
             })
 
@@ -318,34 +318,6 @@
                 editOrCopy = false;
             }
 
-            /**
-             * Callback to get the list of disabled tuples.
-             * This is only applicable in case of adding related entities.
-             * @param  {ERMrest.Page} page     the page object.
-             * @param  {int} pageSize the page size for read request.
-             * @return {Promise} Promise is resolved with a list of disabled rows (array of tuple objects).
-             */
-            params.getDisabledTuples = function (page, pageSize) {
-                var defer = $q.defer();
-                var disabledRows = [], index;
-
-                // fourth input: preserve the paging (read will remove the before if number of results is less than the limit)
-                domainRef.setSamePaging(page).read(pageSize, {action: logActions.preCreateAssociationSelected}, false, true).then(function (newPage) {
-                    newPage.tuples.forEach(function (newTuple) {
-                        index = page.tuples.findIndex(function (tuple) {
-                            return tuple.uniqueId == newTuple.uniqueId;
-                        });
-                        if (index > -1) disabledRows.push(page.tuples[index]);
-                    });
-
-                    defer.resolve(disabledRows);
-                }).catch(function (err) {
-                    defer.reject(err);
-                });
-
-                return defer.promise;
-            };
-
             // assumption is that this function is only called for p&b
             params.parentTuple = rsTuples[rowIndex];
             params.parentReference = rsReference;
@@ -360,9 +332,52 @@
             params.showFaceting = true;
             params.facetPanelOpen = false;
             //NOTE assumption is that this function is only is called for adding pure and binary association
-            params.logObject = {
-                action: logActions.preCreateAssociation,
-                referrer: rsReference.defaultLogInfo
+
+            // TODO LOG this is already done in recordutil getTableModel (we just don't have access to the tableModel here)
+            var stackElement = logService.getStackElement(
+                logService.logStackTypes.related,
+                params.reference.table,
+                {source: domainRef.compressedDataSource}
+            );
+
+            var logStack = logService.getStackObject(stackElement),
+                logStackPath = logService.getStackPath("", logService.logStackPaths.addPureBinaryPopup);
+
+            params.logObject = { stack: logStack };
+            params.logStackPath = logStackPath;
+
+            /**
+             * Callback to get the list of disabled tuples.
+             * This is only applicable in case of adding related entities.
+             * @param  {ERMrest.Page} page     the page object.
+             * @param  {int} pageSize the page size for read request.
+             * @return {Promise} Promise is resolved with a list of disabled rows (array of tuple objects).
+             */
+            params.getDisabledTuples = function (page, pageSize, isInitialize) {
+                var defer = $q.defer();
+                var disabledRows = [], index;
+
+                var action = isInitialize ? logService.logActions.load : logService.logActions.reload;
+                var logObj = {
+                    action: logService.getActionString("", action),
+                    stack: logStack
+                }
+
+                // fourth input: preserve the paging (read will remove the before if number of results is less than the limit)
+                domainRef.setSamePaging(page).read(pageSize, logObj, false, true).then(function (newPage) {
+                    newPage.tuples.forEach(function (newTuple) {
+                        index = page.tuples.findIndex(function (tuple) {
+                            return tuple.uniqueId == newTuple.uniqueId;
+                        });
+                        if (index > -1) disabledRows.push(page.tuples[index]);
+                    });
+
+                    defer.resolve(disabledRows);
+                }).catch(function (err) {
+                    defer.reject(err);
+                });
+
+                return defer.promise;
             };
 
             modalUtils.showModal({
@@ -401,17 +416,15 @@
                 // NOTE this if case is unnecessary, this is always modal update
                 if (isModalUpdate) {
                     var logObject = {
-                        action: logActions.createAssociation,
-                        referrer: rsReference.defaultLogInfo
+                        action: logService.getActionString(logStackPath, logService.logActions.link),
+                        stack: logStack
                     };
                     addRecords(viewModel.editMode, derivedref, nullArr, isModalUpdate, rsReference, rsTuples, rsQueryParams, viewModel, viewModel.onSuccess, logObject);
                 }
             }, function () {
-                var pbCancelHeader = {
-                    action: logActions.recordPBCancel
-                }
 
-                logService.logClientAction(pbCancelHeader, params.reference.defaultLogInfo);
+                // TODO LOG cancelation (requires the stack)
+                // logService.logClientAction({}, params.reference.defaultLogInfo);
 
                 viewModel.onModalClose();
             }, false);
