@@ -335,7 +335,7 @@
         vm.cancel = function() {
             $uibModalInstance.dismiss("cancel");
         };
-        var session = dcctx.session;
+        var session = Session.getSessionValue();
         vm.client = session.client;
 
         var user = vm.user = dcctx.user;

@@ -27,6 +27,7 @@
         'chaise.errors',
         'chaise.delete',
         'chaise.modal',
+        'chaise.navbar',
         'chaise.utils',
         'ui.select',
         'ui.bootstrap',
@@ -166,14 +167,24 @@
                     } else {
                     	waterMark = '&waterMark=' + waterMark;
                     }
-                    var meterScaleInPixels = context.queryParams.meterScaleInPixels;
-                    if (meterScaleInPixels === undefined) {
-                    	meterScaleInPixels = '';
+                    console.log('uri='+image.entity.uri + waterMark);
+
+                    /* Note: the following has been done so that the viewer app supports both type of formats i.e tiff and czi.
+                      It calls the new OpenSeadragon viewer app with parameters based on the file format. Need to change this, when we
+                      will start getting svg files in the URL itself instead of making a call to ermrest.
+                      Currently it's a HACK
+                    */
+                    var params = window.location.href.split("?");
+                    if(window.location.href.indexOf("url") > -1){
+                      image.entity.uri = origin+"/openseadragon-viewer/index.html?" + params[1];
                     } else {
-                    	meterScaleInPixels = '&meterScaleInPixels=' + meterScaleInPixels;
+                      var old_params = image.entity.uri.split("?");
+                      image.entity.uri = origin+"/openseadragon-viewer/index.html?" + old_params[1];
                     }
-                    console.log('uri='+image.entity.uri + waterMark + meterScaleInPixels);
-                    iframe.location.replace(image.entity.uri + waterMark + meterScaleInPixels);
+
+                    // image.entity.uri = image.entity.uri + "&url=data/Q-296R_all_contours_cw_named.svg";
+                    console.log('replace uri = '+image.entity.uri + waterMark)
+                    iframe.location.replace(image.entity.uri + waterMark);
                     console.log('Image: ', image);
 
                     var annotationTable = schema.tables.get('annotation');
@@ -276,10 +287,7 @@
                         iframe.postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
                     }
                 } else if (event.data.messageType == 'dismissChannels') {
-window.console.log("XXX pull off the channels filtering pullout..");
-/*
-<button ng-click="osd.filterChannels();" class="btn btn-success" ng-class="{'pick':!osd.filterChannelsAreHidden}" type="button" role="button" title="channel filtering" id="filter-btn">
-*/
+                  window.console.log("XXX pull off the channels filtering pullout..");
                   var btnptr = $('#filter-btn');
                   btnptr.click();
                 }
