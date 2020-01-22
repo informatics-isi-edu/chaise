@@ -123,7 +123,7 @@
                             <button ng-click="osd.openAnnotations();" class="btn btn-success" type="button" ng-class="{'pick':!osd.annotationsSidebarAreHidden}" role="button" title="edit annotations" ng-disabled="osd.disableAnnotationList"  id="edit-btn">
                               <span class="glyphicon glyphicon-edit"></span> {{osd.annotationsSidebarAreHidden ? "Show" : "Hide" }} Annotations
                             </button>
-                            <button ng-click="osd.filterChannels();" class="btn btn-success" ng-class="{'pick':osd.filterChannelsAreHidden}" type="button" role="button" title="channel filtering" ng-disabled="osd.filterChannels.length == 0" id="filter-btn">
+                            <button ng-click="osd.filterChannels();" class="btn btn-success" ng-class="{'pick':osd.filterChannelsAreHidden}" type="button" role="button" title="channel filtering" id="filter-btn">
                                 <span class="glyphicon glyphicon-tasks"></span> {{osd.filterChannelsAreHidden ? "Hide" : "Show" }} Channels
                             </button>
                             <!-- <button ng-click="osd.openAnnotations();" class="btn btn-success" type="button" ng-class="{'pick':!osd.annotationsSidebarAreHidden}" role="button" title="edit annotations" id="edit-btn">
