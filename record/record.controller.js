@@ -494,35 +494,11 @@
                 },
                 size: modalUtils.getSearchPopupSize(params),
                 templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
-            }, function dataSelected(res) {
-                // if no rows, nothing to delete
-                if (!res || !res.rows) return;
-                // tuples returned are for leaf table, need to get tuples from assocation table instead
-                var tuples = res.rows;
-
-                var logObject = {};
-                $rootScope.showSpinner = true;
-                var deleteReferences = tuples[0].reference.getBatchAssociationRef(tuples);
-
-                var i = 0;
-                function recursiveDelete(reference) {
-                    reference.delete(logObject).then(function () {
-                        if (i < deleteReferences.length-1) {
-                            i++;
-                            recursiveDelete(deleteReferences[i])
-                        } else {
-                            $rootScope.showSpinner = false;
-                            recordAppUtils.updateRecordPage(true);
-                        }
-                    }, function () {
-                        // TODO: alert something failed?
-                        // keep track of what succeeds?
-                    }).catch(function () {
-                        // TODO: alert something failed?
-                    });
-                }
-                recursiveDelete(deleteReferences[i]);
+            }, function rowsDeleted() {
+                recordAppUtils.updateRecordPage(true);
             }, function () {
+                // no spinner should be showing
+                recordAppUtils.updateRecordPage(true);
                 // TODO: pbUnlinkCancelHeader
                 // var pbCancelHeader = {
                 //     action: logActions.recordPBCancel

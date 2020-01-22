@@ -595,7 +595,8 @@ html {
 
             &:checked:after {
                 font-family: 'Glyphicons Halflings';
-                content: "\e013";
+                // content: "\e013"; // check mark
+                content: "\e014"; // x mark
                 font-size: 1.21rem;
             }
         }

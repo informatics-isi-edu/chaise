@@ -148,7 +148,7 @@
          * @param  {object} onSuccessFunction   callback
          * @param  {object} logObject           The object that we want to log in the create/update request
          */
-        function addRecords(isUpdate, derivedref, recordEditModel, isModalUpdate, rsReference, rsTuples, rsQueryParams, vm, onSuccessFunction, logObject) {
+        function addRecords(isUpdate, derivedref, recordEditModel, isModalUpdate, rsReference, rsTuples, rsQueryParams, vm, onSuccessFunction, logObject, closeModal) {
             var model = isModalUpdate ? GV_recordEditModel : recordEditModel;
             viewModel = vm;
             var form = viewModel.formContainer;
@@ -231,7 +231,10 @@
                     viewModel.readyToSubmit = false; // form data has already been submitted to ERMrest
 
                     if (isModalUpdate) {
-                        onSuccessFunction();
+                        // case only for p&b association update
+                        // modal close needs to be issued in callback because of asynchronous delete call
+                        // onSuccessFunction is called in the callback after closing the modal
+                        closeModal();
                     } else {
                         onSuccessFunction(model, result);
 
@@ -353,6 +356,10 @@
             params.parentDisplayMode = dcctx.cid; // should be "record"
 
             params.reference = domainRef.unfilteredReference.contextualize.compactSelect;
+            params.derivedref = derivedref;
+            params.GV_recordEditModel = GV_recordEditModel;
+            params.viewModel = viewModel;
+            params.queryParams = rsQueryParams;
             // should only be the case with adding row(s) to an association table
             params.referenceWDisplayname = domainRef;
             params.reference.session = rsSession;
@@ -377,37 +384,8 @@
                 },
                 size: modalUtils.getSearchPopupSize(params),
                 templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
-            }, function dataSelected(res) {
-                //TODO this is written only for modal update (multi-select), isModalUpdate is unnecessary
-
-                if (!res || !res.rows) return;
-                var tuples = res.rows;
-
-                // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
-                // set data in view model (model.rows) and submission model (model.submissionRows)
-                // we assume that the data for the main table has been populated before
-                var mapping = derivedref._secondFKR.mapping;
-
-                for (i = 0; i < tuples.length; i++) {
-                    derivedref._secondFKR.key.colset.columns.forEach(function(col) {
-                        if (angular.isUndefined(GV_recordEditModel.submissionRows[i])) {
-                            var obj = {};
-                            angular.copy(GV_recordEditModel.submissionRows[i - 1], obj);
-                            GV_recordEditModel.submissionRows.push(obj);
-                        }
-                        GV_recordEditModel.submissionRows[i][mapping.getFromColumn(col).name] = tuples[i].data[col.name];
-                    });
-
-                }
-
-                // NOTE this if case is unnecessary, this is always modal update
-                if (isModalUpdate) {
-                    var logObject = {
-                        action: logActions.createAssociation,
-                        referrer: rsReference.defaultLogInfo
-                    };
-                    addRecords(viewModel.editMode, derivedref, nullArr, isModalUpdate, rsReference, rsTuples, rsQueryParams, viewModel, viewModel.onSuccess, logObject);
-                }
+            }, function dataSelected() {
+                viewModel.onSuccess();
             }, function () {
                 var pbCancelHeader = {
                     action: logActions.recordPBCancel
