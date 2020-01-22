@@ -576,11 +576,15 @@
             // All boolean are visible and same size so it doesn't matter which is selected
             var input = document.querySelector('.re-boolean-input');
 
-            // ng-style attached for better repositioning
-            vm.inputWidth = {
-                width: input.offsetWidth + 'px',
-                "margin-top": '14px'
-            };
+            // make sure input is present before setting value
+            // NOTE: this triggers on resize (and there may be no boolean inputs)
+            if (input) {
+                // ng-style attached for better repositioning
+                vm.inputWidth = {
+                    width: input.offsetWidth + 'px',
+                    "margin-top": '14px'
+                };
+            }
         }
 
 // **** Functions for set all input
