@@ -787,6 +787,13 @@ describe("Viewing Recordset with Faceting,", function() {
                                         return clearAll.click();
                                     }).then(function () {
                                         browser.wait(EC.not(EC.visibilityOf(clearAll)), browser.params.defaultTimeout);
+
+                                        // make sure all checkboxes are cleared
+                                        browser.wait(
+                                            EC.not(EC.visibilityOf(chaisePage.recordsetPage.getCheckedFacetOptions(idx))),
+                                            browser.params.defaultTimeout,
+                                            "clear-all didn't clear checkboxes"
+                                        );
                                         done();
                                     }).catch(chaisePage.catchTestError(done));
                                 });
@@ -989,6 +996,13 @@ describe("Viewing Recordset with Faceting,", function() {
                                 }).then(function () {
                                     browser.wait(EC.not(EC.visibilityOf(clearAll)), browser.params.defaultTimeout);
 
+                                    // make sure all checkboxes are cleared
+                                    browser.wait(
+                                        EC.not(EC.visibilityOf(chaisePage.recordsetPage.getCheckedFacetOptions(idx))),
+                                        browser.params.defaultTimeout,
+                                        "clear-all didn't clear checkboxes"
+                                    );
+
                                     //clear the inputs
                                     return minDateClear.click();
                                 }).then(function () {
@@ -1059,6 +1073,13 @@ describe("Viewing Recordset with Faceting,", function() {
                                 }).then(function () {
                                     browser.wait(EC.not(EC.visibilityOf(clearAll)), browser.params.defaultTimeout);
 
+                                    // make sure all checkboxes are cleared
+                                    browser.wait(
+                                        EC.not(EC.visibilityOf(chaisePage.recordsetPage.getCheckedFacetOptions(idx))),
+                                        browser.params.defaultTimeout,
+                                        "clear-all didn't clear checkboxes"
+                                    );
+
                                     //clear the min inputs
                                     return minDateClear.click();
                                 }).then(function () {
@@ -1100,6 +1121,13 @@ describe("Viewing Recordset with Faceting,", function() {
                                     return clearAll.click();
                                 }).then(function () {
                                     browser.wait(EC.not(EC.visibilityOf(clearAll)), browser.params.defaultTimeout);
+
+                                    // make sure all checkboxes are cleared
+                                    browser.wait(
+                                        EC.not(EC.visibilityOf(chaisePage.recordsetPage.getCheckedFacetOptions(idx))),
+                                        browser.params.defaultTimeout,
+                                        "clear-all didn't clear checkboxes"
+                                    );
 
                                     // close the facet
                                     return chaisePage.recordsetPage.getFacetById(idx).click();
