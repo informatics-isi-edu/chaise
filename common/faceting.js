@@ -490,18 +490,28 @@
 
                     // some of the facets might have been cleared, this function will unselect those
                     scope.syncSelected = function () {
-                        if (scope.facetColumn.hasNotNullFilter) {
-                            scope.ranges[0].selected = scope.facetColumn.hasNotNullFilter;
-                        }
-
+                        var i;
                         var filterIndex = function (uniqueId) {
                             return scope.facetColumn.rangeFilters.findIndex(function (f) {
                                 return f.uniqueId == uniqueId;
                             });
                         }
 
-                        //scope.ranges[0] is the notnull filter
-                        for (var i = 1; i < scope.ranges.length; i++) {
+                        // see if there's a not-null choice
+                        if (!scope.facetColumn.hideNotNullChoice) {
+                            scope.ranges[0].selected = scope.facetColumn.hasNotNullFilter;
+
+                            // if not-null is unchecked, enable the other options
+                            if (!scope.facetColumn.hasNotNullFilter) {
+                                for (i = 1; i < scope.ranges.length; i++) {
+                                    scope.ranges[i].disabled = false;
+                                }
+                            }
+                        }
+
+
+                        //scope.ranges[0] could be the not-null filter.
+                        for (i = (scope.facetColumn.hideNotNullChoice ? 0 : 1); i < scope.ranges.length; i++) {
                             // if couldn't find the filter, then it should be unselected
                             if (filterIndex(scope.ranges[i].uniqueId) === -1) {
                                 scope.ranges[i].selected = false;
