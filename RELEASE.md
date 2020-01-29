@@ -6,6 +6,15 @@ This document is a summary of code changes in Chaise. This is the vocabulary use
   - `[Changed]`: modifications to existing features.
   - `[Fixed]`: bug fixes.
   - `[No changes]` means that Chaise hasn't been changed in the described duration.
+
+# 1/29/20
+  - [Added] navbar menu options have an `acls` object to control showing and enabling links for specific users or groups
+  - [Improved] viewer app with more filetypes supported and an overlayed annotation list
+  - [Fixed] range picker was not clearing first option if selected in some cases when trying to reset facet state
+  
+# 12/17/19
+  - [Fixed] boolean dropdowns were being clipped at the end of the recordedit form
+  - [Fixed] recordedit would sometimes throw an error on page resize
   
 # 11/25/19
   - [Improved] npm packages to be more concise and only install those that are used for dev.
