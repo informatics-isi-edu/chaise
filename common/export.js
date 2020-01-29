@@ -82,9 +82,16 @@
                     });
                     scope.isLoading = true;
 
+                    // TODO LOG is this enough? needed?
+                    var logStack = logService.addExtraInfoToStack(null, {
+                        template: {
+                            displayname: scope.exporter.template.displayname,
+                            type: scope.exporter.template.type
+                        }
+                    });
                     var logObj = {
-                        action: logService.getActionString("", logService.logActions.export),
-                        stack: logService.getStackObject()
+                        action: logService.getActionString("", logService.logActions.EXPORT),
+                        stack: logStack
                     }
                     scope.exporter.run(logObj).then(function (response) {
                         // if it was canceled, just ignore the result
@@ -124,7 +131,7 @@
 
                 scope.logDropdownOpened = function () {
                     logService.logClientAction({
-                        action: logService.getActionString("", logService.logActions.openExport),
+                        action: logService.getActionString("", logService.logActions.EXPORT_OPEN),
                         stack: logService.getStackObject()
                     }, scope.reference.defaultLogInfo);
                 };

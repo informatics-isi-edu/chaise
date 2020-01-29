@@ -133,7 +133,6 @@
 
 
                     recordsetModel.reference = reference.contextualize.compact;
-                    recordsetModel.context = context.appContext = "compact";
                     recordsetModel.reference.session = session;
 
                     // if there's something wrong with the facet or filters in the url,
@@ -157,19 +156,19 @@
 
                     recordsetModel.search = recordsetModel.reference.location.searchTerm;
 
-                    $rootScope.logStackPath = logService.logStackPaths.set;
+                    $rootScope.logStackPath = logService.logStackPaths.SET;
                     $rootScope.logStack = [
                         logService.getStackElement(
-                            logService.logStackTypes.set,
+                            logService.logStackTypes.SET,
                             recordsetModel.reference.table,
                             recordsetModel.reference.filterLogInfo
                         )
                     ];
+                    recordsetModel.logStack = $rootScope.logStack;
+                    recordsetModel.logStackPath = $rootScope.logStackPath;
 
                     // create log object that will be used for the first request
-                    recordsetModel.logObject = {
-                        stack: $rootScope.logStack
-                    };
+                    recordsetModel.logObject = {};
                     if (pcid) recordsetModel.logObject.pcid = pcid;
                     if (ppid) recordsetModel.logObject.ppid = ppid;
                     if (isQueryParameter) recordsetModel.logObject.cqp = 1;

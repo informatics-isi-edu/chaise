@@ -206,8 +206,8 @@
      *  - context {String} - the current context that the directive fetches data for
      *  - selectMode {String} - the select mode the modal uses
      */
-    .controller('SearchPopupController', ['ConfigUtils', 'DataUtils', 'params', 'Session', 'modalBox', 'recordsetDisplayModes', '$rootScope', '$timeout', '$uibModalInstance',
-        function SearchPopupController(ConfigUtils, DataUtils, params, Session, modalBox, recordsetDisplayModes, $rootScope, $timeout, $uibModalInstance) {
+    .controller('SearchPopupController', ['ConfigUtils', 'DataUtils', 'params', 'Session', 'logService', 'modalBox', 'recordsetDisplayModes', '$rootScope', '$timeout', '$uibModalInstance',
+        function SearchPopupController(ConfigUtils, DataUtils, params, Session, logService, modalBox, recordsetDisplayModes, $rootScope, $timeout, $uibModalInstance) {
         var vm = this;
 
         vm.params = params;
@@ -223,14 +223,9 @@
         var limit = (!angular.isUndefined(reference) && !angular.isUndefined(reference.display) && reference.display.defaultPageSize) ? reference.display.defaultPageSize : 25;
         var showFaceting = chaiseConfig.showFaceting ? params.showFaceting : false;
 
-        // TODO LOG ugly
-        var logObj = {};
-        if (params.logObject) {
-            // hard copy the object
-            logObj = JSON.parse(JSON.stringify(params.logObject));
-            if (Array.isArray(logObj.stack)) {
-                logObj.stack[logObj.stack.length-1].picker = 1;
-            }
+        var logStack = {};
+        if (params.logStack) {
+            logStack = logService.addExtraInfoToStack(params.logStack, {picker: 1});
         }
 
         vm.tableModel = {
@@ -260,11 +255,10 @@
                 displayMode:        params.displayMode ? params.displayMode : recordsetDisplayModes.popup,
                 parentDisplayMode:  params.parentDisplayMode
             },
-            context:                    params.context,
             getDisabledTuples:          params.getDisabledTuples,
 
             // log related attributes
-            logObject:                  logObj,
+            logStack:                  logStack,
             logStackPath:               params.logStackPath ? params.logStackPath : null,
 
             // used for the recordset height and sticky section logic
@@ -322,6 +316,16 @@
         }
 
         function cancel() {
+            if (vm.tableModel.logStackPath && vm.tableModel.logStack) {
+                logService.logClientAction(
+                    {
+                        action: logService.getActionString(vm.tableModel.logStackPath, logService.logActions.CANCEL),
+                        stack: vm.tableModel.logStack
+                    },
+                    vm.tableModel.reference.defaultLogInfo
+                );
+            }
+
             $uibModalInstance.dismiss("cancel");
         }
     }])

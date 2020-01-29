@@ -48,7 +48,7 @@
             };
         }])
 
-        .directive('faceting', ['$log', `logService`, 'recordTableUtils', `reloadCauses`, '$rootScope', '$timeout', 'UriUtils', function ($log, logService, recordTableUtils, reloadCauses, $rootScope, $timeout, UriUtils) {
+        .directive('faceting', ['$log', `logService`, 'recordTableUtils', '$rootScope', '$timeout', 'UriUtils', function ($log, logService, recordTableUtils, $rootScope, $timeout, UriUtils) {
 
             return {
                 restrict: 'AE',
@@ -69,12 +69,12 @@
                         ctrl.facetingCount++;
 
                         var facetLogStackElemenet = logService.getStackElement(
-                            logService.logStackTypes.facet,
+                            logService.logStackTypes.FACET,
                             facetColumn.column.table,
-                            { source: facetColumn.compressedDataSource}
+                            { source: facetColumn.compressedDataSource, entity: facetColumn.isEntityMode}
                         );
 
-                        var parentLogStackPath = $scope.vm.logStackPath ? $scope.vm.logStackPath : logService.logStackPaths.set;
+                        var parentLogStackPath = $scope.vm.logStackPath ? $scope.vm.logStackPath : logService.logStackPaths.SET;
 
                         $scope.vm.facetModels[index] = {
                             facetError: false,
@@ -89,8 +89,10 @@
                             updateFacet: childCtrl.updateFacet,
                             preProcessFacet: childCtrl.preProcessFacet,
                             recordsetConfig: $scope.vm.config,
+                            updateCauses: [],
+                            updateStartTime: -1,
                             logStackElement: facetLogStackElemenet,
-                            parentLogStackPath: $scope.vm.logStackPath ? $scope.vm.logStackPath : logService.logStackPaths.set
+                            parentLogStackPath: $scope.vm.logStackPath ? $scope.vm.logStackPath : logService.logStackPaths.SET
                         };
 
                         if (ctrl.facetingCount === $scope.vm.reference.facetColumns.length) {
@@ -112,11 +114,19 @@
                      * Only update this given facet
                      * @param {int} index index of facetColumn
                      **/
-                    ctrl.updateFacetColumn = function (index) {
+                    ctrl.updateFacetColumn = function (index, cause) {
                         var fm = $scope.vm.facetModels[index];
                         fm.processed = false;
                         fm.isLoading = true;
                         $log.debug("faceting: sending a request to update the facet index=" + index);
+
+                        if (!Number.isInteger(fm.updateStartTime) || fm.updateStartTime === -1) {
+                            fm.updateStartTime = ERMrest.getElapsedTime();
+                            if (cause && fm.updateCauses.indexOf(cause) === -1) {
+                                fm.updateCauses.push(cause);
+                            }
+                        }
+
                         recordTableUtils.update($scope.vm, false, false, false, true);
                     };
 
@@ -130,7 +140,7 @@
                      * @param {string} actionPath the user context + action verb
                      */
                     ctrl.getFacetLogAction = function (index, actionPath) {
-                        return recordTableUtils.getTableLogAction($scope.vm, logService.logStackPaths.facet, actionPath);
+                        return recordTableUtils.getTableLogAction($scope.vm, logService.logStackPaths.FACET, actionPath);
                     };
 
                     /**
@@ -139,8 +149,8 @@
                      * (the filters on the stack elements might change)
                      * @param {integer}
                      */
-                    ctrl.getFacetLogStack = function (index) {
-                        return recordTableUtils.getTableLogStack($scope.vm, $scope.vm.facetModels[index].logStackElement);
+                    ctrl.getFacetLogStack = function (index, extraInfo) {
+                        return recordTableUtils.getTableLogStack($scope.vm, $scope.vm.facetModels[index].logStackElement, extraInfo);
                     };
                 }],
                 require: 'faceting',
@@ -173,16 +183,23 @@
                     };
 
                     scope.removeFilter = function (index) {
-                        var newRef, reason = reloadCauses.FACET_CLEAR;;
+                        var newRef, reason = logService.updateCauses.FACET_CLEAR, action = "";
                         if (index === "filters") {
                             // only remove custom filters on the reference (not the facet)
+                            // TODO LOG should we log this?
                             newRef = scope.vm.reference.removeAllFacetFilters(false, true, true);
+                            action = logService.logActions.BREADCRUMB_CLEAR_CUSTOM;
+                            reason = logService.updateCauses.CLEAR_CUSTOM_FILTER;
                         } else if (index === "cfacets") {
                             // only remove custom facets on the reference
+                            // TODO LOG should we log this?
                             newRef = scope.vm.reference.removeAllFacetFilters(true, false, true);
+                            action = logService.logActions.BREADCRUMB_CLEAR_CFACET;
+                            reason = logService.updateCauses.CLEAR_CFACET;
                         } else if (typeof index === 'undefined') {
                             // // delete all filters and facets
-                            reason = reloadCauses.CLEAR_ALL;
+                            reason = logService.updateCauses.CLEAR_ALL;
+                            action = logService.logActions.BREADCRUMB_CLEAR_ALL;
                             newRef = scope.vm.reference.removeAllFacetFilters();
                             scope.vm.facetModels.forEach(function (fm) {
                                 fm.appliedFilters = [];
@@ -197,6 +214,25 @@
                             // delete all fitler for one column
                             newRef = scope.vm.reference.facetColumns[index].removeAllFilters();
                             scope.vm.facetModels[index].appliedFilters = [];
+
+                            // log the action
+                            var fc = scope.vm.reference.facetColumns[index];
+                            logService.logClientAction({
+                                action: currentCtrl.getFacetLogAction(index, logService.logActions.BREADCRUMB_CLEAR),
+                                stack: currentCtrl.getFacetLogStack(index)
+                            }, fc.sourceReference.defaultLogInfo);
+                        }
+
+                        // whether we should log the action for the whole page or not
+                        if (action) {
+                            // log the action
+                            logService.logClientAction(
+                                {
+                                    action: recordTableUtils.getTableLogAction(scope.vm, "", action),
+                                    stack: recordTableUtils.getTableLogStack(scope.vm)
+                                },
+                                scope.vm.reference.defaultLogInfo
+                            );
                         }
 
                         scope.updateReference(newRef, -1, reason);
@@ -225,7 +261,7 @@
                                 currentCtrl.updateFacetColumn(index);
                             }
 
-                            var action = fm.isOpen ? logService.logActions.open : logService.logActions.close;
+                            var action = fm.isOpen ? logService.logActions.OPEN : logService.logActions.CLOSE;
                             // log the action
                             logService.logClientAction({
                                 action: currentCtrl.getFacetLogAction(index, action),
@@ -243,7 +279,7 @@
                         if (!dontLog) {
                             var fc = scope.vm.reference.facetColumns[index];
                             logService.logClientAction({
-                                action: currentCtrl.getFacetLogAction(index, logService.logActions.facetScrollTo),
+                                action: currentCtrl.getFacetLogAction(index, logService.logActions.BREADCRUMB_SCROLL_TO),
                                 stack: currentCtrl.getFacetLogStack(index)
                             }, fc.sourceReference.defaultLogInfo);
                         }
@@ -289,7 +325,7 @@
             };
         }])
 
-        .directive('rangePicker', ['dataFormats', 'facetingUtils', '$log', 'logService', '$q', 'reloadCauses', '$timeout', 'UriUtils', function (dataFormats, facetingUtils, $log, logService, $q, reloadCauses, $timeout, UriUtils) {
+        .directive('rangePicker', ['dataFormats', 'facetingUtils', '$log', 'logService', '$q', '$timeout', 'UriUtils', function (dataFormats, facetingUtils, $log, logService, $q, $timeout, UriUtils) {
             return {
                 restrict: 'AE',
                 templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/faceting/range-picker.html',
@@ -303,11 +339,11 @@
                     var ctrl = this;
 
                     // register the update facet callback
-                    ctrl.updateFacet = function (isInitialize) {
+                    ctrl.updateFacet = function () {
                         // make sure to sync the selected
                         // when we clear a filter, this function will take care of unchecking it.
                         $scope.syncSelected();
-                        return $scope.updateFacetData(isInitialize);
+                        return $scope.updateFacetData();
                     }
 
                     ctrl.preProcessFacet = function () {
@@ -414,7 +450,7 @@
                     // callback for the list directive
                     scope.onSelect = function (row, $event) {
                         var res, i;
-                        var cause = row.selected ? reloadCauses.FACET_SELECT : reloadCauses.FACET_DESELECT;
+                        var cause = row.selected ? logService.updateCauses.FACET_SELECT : logService.updateCauses.FACET_DESELECT;
 
                         // if the selected row is null
                         if (row.isNotNull) {
@@ -481,7 +517,7 @@
                             return; // duplicate filter
                         }
 
-                        if (!scope.parentCtrl.updateVMReference(res.reference, scope.index, reloadCauses.FACET_SELECT)) {
+                        if (!scope.parentCtrl.updateVMReference(res.reference, scope.index, logService.updateCauses.FACET_SELECT)) {
                             $log.debug("faceting: rejected because of url length limit.");
                             return; // uri limit
                         }
@@ -636,7 +672,7 @@
                         };
                     }
 
-                    function histogramData(isInitialize) {
+                    function histogramData(updateCauses, updateStartTime) {
                         var defer = $q.defer();
 
                         (function (uri) {
@@ -644,7 +680,14 @@
                                 requestMax = isColumnOfType("timestamp") ? dateTimeToTimestamp(scope.rangeOptions.absMax) : scope.rangeOptions.absMax;
 
                             var facetLog = getDefaultLogInfo(scope);
-                            var action = isInitialize ? logService.logActions.histogramLoad : logService.logActions.histogramReload;
+                            var action = logService.logActions.HISTOGRAM_LOAD;
+                            if (updateCauses.length > 0) {
+                                action = logService.logActions.HISTOGRAM_RELOAD;
+
+                                // add causes
+                                facetLog.stack = logService.addCausesToStack(facetLog.stack, updateCauses, updateStartTime);
+                            }
+
                             facetLog.action = scope.parentCtrl.getFacetLogAction(scope.index, action);
                             scope.facetColumn.column.groupAggregate.histogram(numBuckets, requestMin, requestMax).read(facetLog).then(function (response) {
                                 if (scope.facetColumn.sourceReference.uri !== uri) {
@@ -691,10 +734,10 @@
                     }
 
                     // Gets the facet data for min/max
-                    scope.updateFacetData = function (isInitialize) {
+                    scope.updateFacetData = function () {
                         var defer = $q.defer();
 
-                        (function (uri) {
+                        (function (uri, updateCauses, updateStartTime) {
                             if (!scope.relayout) {
                                 // the captured uri is not the same as the initial data uri so we need to refetch the min/max
                                 // this happens when another facet adds a filter that affects the facett object in the uri
@@ -705,7 +748,12 @@
                                 ];
 
                                 var facetLog = getDefaultLogInfo(scope);
-                                var action = isInitialize ? logService.logActions.load : logService.logActions.reload;
+                                var action = logService.logActions.LOAD;
+                                if (scope.facetModel.updateCauses.length > 0) {
+                                    action = logService.logActions.RELOAD;
+                                    // add causes
+                                    facetLog.stack = logService.addCausesToStack(facetLog.stack, scope.facetModel.updateCauses, scope.facetModel.updateStartTime);
+                                }
                                 facetLog.action = scope.parentCtrl.getFacetLogAction(scope.index, action);
                                 scope.facetColumn.sourceReference.getAggregates(aggregateList, facetLog).then(function(response) {
                                     if (scope.facetColumn.sourceReference.uri !== uri) {
@@ -727,8 +775,12 @@
                                     scope.histogramDataStack = [];
 
                                     // get initial histogram data
-                                    return histogramData(isInitialize);
+                                    return histogramData(updateCauses, updateStartTime);
                                 }).then(function (response) {
+
+                                    scope.facetModel.updateCauses = [];
+                                    scope.facetModel.updateStartTime = -1;
+
                                     defer.resolve(response);
                                 }).catch(function (err) {
                                     defer.reject(err);
@@ -740,7 +792,7 @@
                                     defer.reject(err);
                                 });
                             }
-                        })(scope.facetColumn.sourceReference.uri);
+                        })(scope.facetColumn.sourceReference.uri, scope.facetModel.updateCauses, scope.facetModel.updateStartTime);
 
                         // // so we can check if the getAggregates request needs to be remade or we can just call histogramData
                         // scope.initialDataUri = scope.facetColumn.sourceReference.uri;
@@ -772,7 +824,7 @@
                         setRangeMinMax(scope.plot.data[0].x[minBinIndex], scope.plot.data[0].x[maxBinIndex]);
 
                         scope.relayout = true;
-                        scope.parentCtrl.updateFacetColumn(scope.index);
+                        scope.parentCtrl.updateFacetColumn(scope.index, logService.updateCauses.FACET_PLOT_RELAYOUT);
                     };
 
                     // disable zoom in ifhistogram has been zoomed 20+ times or the current range is <= the number of buckets
@@ -893,7 +945,7 @@
                                         }
                                     }
 
-                                    scope.parentCtrl.updateFacetColumn(scope.index);
+                                    scope.parentCtrl.updateFacetColumn(scope.index, logService.updateCauses.FACET_PLOT_RELAYOUT);
                                 });
                             } catch (err) {
                                 setRangeVars();
@@ -912,8 +964,8 @@
         }])
 
         .directive('choicePicker',
-            ["AlertsService", 'facetingUtils', 'logService', 'messageMap', 'modalUtils', 'recordsetDisplayModes', 'reloadCauses', 'tableConstants', 'UriUtils', "$log", '$q', '$timeout',
-            function (AlertsService, facetingUtils, logService, messageMap, modalUtils, recordsetDisplayModes, reloadCauses, tableConstants, UriUtils, $log, $q, $timeout) {
+            ["AlertsService", 'facetingUtils', 'logService', 'messageMap', 'modalUtils', 'recordsetDisplayModes', 'tableConstants', 'UriUtils', "$log", '$q', '$timeout',
+            function (AlertsService, facetingUtils, logService, messageMap, modalUtils, recordsetDisplayModes, tableConstants, UriUtils, $log, $q, $timeout) {
 
             /**
              * Given tuple and the columnName that should be used, return
@@ -956,13 +1008,13 @@
                         scope.facetModel.appliedFilters.push(facetingUtils.getNullFilter(true));
                     }
                     var facetLog = getDefaultLogInfo(scope);
-                    facetLog.action = scope.parentCtrl.getFacetLogAction(scope.index, logService.logActions.loadPreselectedFacets);
+                    facetLog.action = scope.parentCtrl.getFacetLogAction(scope.index, logService.logActions.PRESELECTED_FACETS_LOAD);
                     scope.facetColumn.getChoiceDisplaynames(facetLog).then(function (filters) {
                         filters.forEach(function (f) {
                             scope.facetModel.appliedFilters.push({
                                 uniqueId: f.uniqueId,
                                 displayname: f.displayname,
-                                tuple: f.tuple
+                                tuple: f.tuple // the returned tuple might be null (in case of scalar)
                             });
                         });
 
@@ -1035,7 +1087,7 @@
              * NOTE should not be used directly in this directive.
              * @param  {Object} scope current scope
              */
-            function updateFacetColumn(scope, isInitialize) {
+            function updateFacetColumn(scope) {
                 var defer = $q.defer();
 
                 // facetColumn has changed so create the new reference
@@ -1085,15 +1137,18 @@
                 // read new data if needed
                 (function (uri) {
                     var facetLog = getDefaultLogInfo(scope);
-                    var action = isInitialize ? logService.logActions.load : logService.logActions.reload;
+
+                    // create the action
+                    var action = logService.logActions.LOAD;
+                    if (scope.facetModel.updateCauses.length > 0) {
+                        action = logService.logActions.RELOAD;
+                        // add causes
+                        facetLog.stack = logService.addCausesToStack(facetLog.stack, scope.facetModel.updateCauses, scope.facetModel.updateStartTime);
+                    }
                     facetLog.action = scope.parentCtrl.getFacetLogAction(scope.index, action);
 
-                    // add the filter log info to stack
-                    var filterLogInfo = scope.reference.filterLogInfo;
-                    for (var k in filterLogInfo) {
-                        if (!filterLogInfo.hasOwnProperty(k)) continue;
-                        facetLog.stack[facetLog.stack.length-1][k] = filterLogInfo[k];
-                    }
+                    // update the filter log info to stack
+                    logService.updateStackFilterInfo(facetLog.stack, scope.reference.filterLogInfo);
 
                     scope.reference.read(tableConstants.PAGE_SIZE, facetLog, true).then(function (page) {
                         // if this is not the result of latest facet change
@@ -1143,6 +1198,9 @@
                             });
                         });
 
+                        scope.facetModel.updateCauses = [];
+                        scope.facetModel.updateStartTime = -1;
+
                         defer.resolve(true);
 
                     }).catch(function (err) {
@@ -1186,7 +1244,7 @@
                         ref = scope.facetColumn.addNotNullFilter();
 
                         // update the reference
-                        if (!scope.parentCtrl.updateVMReference(ref, -1, reloadCauses.FACET_MODIFIED, !changeRef)) {
+                        if (!scope.parentCtrl.updateVMReference(ref, -1, logService.updateCauses.FACET_MODIFIED, !changeRef)) {
                             return false;
                         }
 
@@ -1207,7 +1265,7 @@
                         ref = scope.facetColumn.replaceAllChoiceFilters(filters);
 
                         // update the reference
-                        if (!scope.parentCtrl.updateVMReference(ref, -1, reloadCauses.FACET_MODIFIED, !changeRef)) {
+                        if (!scope.parentCtrl.updateVMReference(ref, -1, logService.updateCauses.FACET_MODIFIED, !changeRef)) {
                             return false;
                         }
 
@@ -1264,8 +1322,8 @@
                     var ctrl = this;
 
                     // register the update facet function
-                    ctrl.updateFacet = function (isInitialize) {
-                        return updateFacetColumn($scope, isInitialize);
+                    ctrl.updateFacet = function () {
+                        return updateFacetColumn($scope);
                     };
 
                     // register the initialize facet function
@@ -1303,8 +1361,8 @@
 
                         // the parameters needed for logging
                         var stack = getDefaultLogInfo(scope).stack;
-                        params.logObject = {stack: stack};
-                        params.logStackPath = logService.getStackPath(scope.facetModel.parentLogStackPath, logService.logStackPaths.facetPopup);
+                        params.logStack = stack;
+                        params.logStackPath = logService.getStackPath(scope.facetModel.parentLogStackPath, logService.logStackPaths.FACET_POPUP);
 
                         // for the title
                         params.parentReference = scope.facetColumn.reference;
@@ -1314,7 +1372,6 @@
 
                         params.reference = scope.reference;
                         params.reference.session = scope.$root.session;
-                        params.context = "compact/select";
                         params.selectMode = "multi-select";
                         params.faceting = false;
                         params.facetPanelOpen = false;
@@ -1360,7 +1417,7 @@
                             //    the tuple's. We need tuple's uniqueId in here
                             //    (it will be used in the logic of isSelected in modal).
                             // - data is needed for the post process that we do on the data.
-                            if (row.tuple && scope.facetColumn.isEntityMode) {
+                            if (row.tuple && row.tuple.data && scope.facetColumn.isEntityMode) {
                                 newRow.uniqueId = row.tuple.uniqueId;
                                 newRow.data = row.tuple.data;
                             } else {
@@ -1394,18 +1451,12 @@
                             },
                             size: modalUtils.getSearchPopupSize(params),
                             templateUrl:  UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
-                        }, modalDataChanged(scope, true), function () {
-                            var logInfo = getDefaultLogInfo(scope);
-
-                            // TODO LOG we're canceling the facet popup, so stack and everything should be based on that...
-                            // logInfo.action = scope.parentCtrl.getFacetLogAction(scope.index, logService.logActions.cancel);
-                            // logService.logClientAction(logInfo);
-                        }, false);
+                        }, modalDataChanged(scope, true), null, false);
                     };
 
                     // for clicking on each row (will be registerd as a callback for list directive)
                     scope.onRowClick = function(row, $event) {
-                        var cause = row.selected ? reloadCauses.FACET_SELECT : reloadCauses.FACET_DESELECT;
+                        var cause = row.selected ? logService.updateCauses.FACET_SELECT : logService.updateCauses.FACET_DESELECT;
 
                         // get the new reference based on the operation
                         var ref;
@@ -1473,7 +1524,14 @@
                     // retries the query for the current facet
                     scope.retryQuery = function (noConstraints) {
                         scope.facetModel.noConstraints = noConstraints;
-                        parentCtrl.updateFacetColumn(scope.index);
+
+                        // log in the client
+                        logService.logClientAction({
+                            action: currentCtrl.getFacetLogAction(scope.index, logService.logActions.FACET_RETRY),
+                            stack: currentCtrl.getFacetLogStack(scope.index, extraInfo)
+                        }, scope.facetColumn.sourceReference.defaultLogInfo);
+
+                        parentCtrl.updateFacetColumn(scope.index, logService.updateCauses.FACET_RETRY);
                     }
 
                     scope.search = function (term) {
@@ -1482,10 +1540,15 @@
                         if (scope.$root.checkReferenceURL(ref)) {
                             scope.searchTerm = term;
 
-                            // update the stack object with the latest filter info
+                            // log the client action
+                            var extraInfo = typeof term === "string" ? {"search-str": term} : {};
+                            logService.logClientAction({
+                                action: currentCtrl.getFacetLogAction(scope.index, action),
+                                stack: currentCtrl.getFacetLogStack(scope.index, extraInfo)
+                            }, scope.facetColumn.sourceReference.defaultLogInfo);
 
                             $log.debug("faceting: request for facet (index=" + scope.facetColumn.index + ") update. new search=" + term);
-                            scope.parentCtrl.updateFacetColumn(scope.index);
+                            scope.parentCtrl.updateFacetColumn(scope.index, logService.updateCauses.FACET_SEARCH_BOX);
                         }
                     };
 
@@ -1528,7 +1591,7 @@
             };
         }])
 
-        .directive("checkPresence", ['facetingUtils', '$q', 'reloadCauses', '$log', 'UriUtils', function(facetingUtils, $q, reloadCauses, $log, UriUtils) {
+        .directive("checkPresence", ['facetingUtils', '$q', '$log', 'logService', 'UriUtils', function(facetingUtils, $q, $log, logService, UriUtils) {
             return {
                 restrict: 'AE',
                 templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/faceting/check-presence.html',
@@ -1599,7 +1662,7 @@
                     };
 
                     scope.onRowClick = function (row, $event) {
-                        var cause = row.selected ? reloadCauses.FACET_SELECT : reloadCauses.FACET_DESELECT;
+                        var cause = row.selected ? logService.updateCauses.FACET_SELECT : logService.updateCauses.FACET_DESELECT;
 
                         var ref;
                         if (row.isNotNull) {

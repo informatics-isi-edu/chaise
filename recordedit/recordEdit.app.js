@@ -118,10 +118,10 @@
 
         context.catalogID = res.catalogId;
 
-        // will be used to determine the app mode (edit, create, or copy)
-        // We are not passing the query parameters that are used for app mode,
-        // so we cannot use the queryParams that parser is returning.
-        context.queryParams = res.queryParams;
+        // will be used to determine the app mode (edit, create, or copy) and determine whether we should call updated in the caller.
+        // we cannot use the res.queryParams since that will only return the universally acceptable query params.
+        // and not all the query parameters that might be in the url
+        context.queryParams = UriUtils.getQueryParams($window.location.href);
         context.MAX_ROWS_TO_ADD = 201;
 
         // modes = create, edit, copy
@@ -186,46 +186,48 @@
                 $log.info("Reference: ", $rootScope.reference);
 
                 // log attribues
-                $rootScope.logStackPath = logService.logStackPaths.set;
+                $rootScope.logStackPath = logService.logStackPaths.SET;
                 $rootScope.logStack = [
                     logService.getStackElement(
-                        logService.logStackTypes.set,
+                        logService.logStackTypes.SET,
                         $rootScope.reference.table,
                         $rootScope.reference.filterLogInfo
                     )
                 ];
 
                 var appMode;
-                appMode = logService.appModes.edit;
+                appMode = logService.appModes.EDIT;
                 if (context.mode == context.modes.COPY) {
-                    appMode = logStack.appModes.createCopy;
+                    appMode = logStack.appModes.CREATE_COPY;
                 } else if (context.mode == context.modes.CREATE){
                     if (context.queryParams.invalidate && context.queryParams.prefill) {
-                        appMode = logService.appModes.createPreselect;
+                        appMode = logService.appModes.CREATE_PRESELECT;
                     } else {
-                        appMode = logService.appModes.create;
+                        appMode = logService.appModes.CREATE;
                     }
                 }
                 $rootScope.logAppMode = appMode;
 
 
-                // TOOD LOG could be refactored
                 // The log object that will be used for the submission request
-                var logObj = {};
+                var action = (context.mode == context.modes.CREATE || context.mode == context.modes.COPY) ? logService.logActions.CREATE : logService.logActions.UPDATE;
+                var logObj = {
+                    action: logService.getActionString("", action),
+                    stack: logService.getStackObject()
+                };
                 if (pcid) logObj.pcid = pcid;
                 if (ppid) logObj.ppid = ppid;
                 if (isQueryParameter) logObj.cqp = 1;
-
                 context.logObject = logObj;
 
                 $rootScope.reference.columns.forEach(function (column, index) {
                     var isDisabled = InputUtils.isDisabled(column);
                     var stackElement = logService.getStackElement(
-                        column.isForeignKey ? logService.logStackTypes.foreignKey : logService.logStackTypes.column,
+                        column.isForeignKey ? logService.logStackTypes.FOREIGN_KEY : logService.logStackTypes.COLUMN,
                         column.table,
                         {source: column.compressedDataSource}
                     );
-                    var stackPath = column.isForeignKey ? logService.logStackPaths.foreignKey : logService.logStackPaths.column;
+                    var stackPath = column.isForeignKey ? logService.logStackPaths.FOREIGN_KEY : logService.logStackPaths.COLUMN;
 
                     recordEditModel.columnModels[index] = {
                         allInput: null,
@@ -255,7 +257,7 @@
                         }
 
                         var logObj = {
-                            action: logService.getActionString("", logService.logActions.load),
+                            action: logService.getActionString("", logService.logActions.LOAD),
                             stack: logService.getStackObject()
                         };
                         $rootScope.reference.read(numberRowsToRead, logObj).then(function getPage(page) {
@@ -493,13 +495,13 @@
                                             // initialize foreignKey data
                                             recordEditModel.foreignKeyData[0][column.foreignKey.name] = defaultDisplay.fkValues;
                                             // get the actual foreign key data
-                                            getForeignKeyData(0, [column.name], defaultDisplay.reference, logService.logActions.foreignKeyPreselect);
+                                            getForeignKeyData(0, [column.name], defaultDisplay.reference, logService.logActions.FOREIGN_KEY_PRESELECT);
                                         } else if (defaultValue != null) {
                                             initialModelValue = defaultValue;
                                             // initialize foreignKey data
                                             recordEditModel.foreignKeyData[0][column.foreignKey.name] = column.defaultValues;
                                             // get the actual foreign key data
-                                            getForeignKeyData(0, [column.name], column.defaultReference, logService.logActions.foreignKeyDefault);
+                                            getForeignKeyData(0, [column.name], column.defaultReference, logService.logActions.FOREIGN_KEY_DEFAULT);
                                         }
                                     } else {
                                         // all other column types
@@ -594,7 +596,7 @@
             ERMrest.resolve(origUrl, {cid: context.cid}).then(function (ref) {
 
                 // TODO LOG how to get the fk information?
-                getForeignKeyData(newRow, fkColumnNames, ref, logService.logActions.foreignKeyPreselect);
+                getForeignKeyData(newRow, fkColumnNames, ref, logService.logActions.FOREIGN_KEY_PRESELECT);
             }).catch(function (err) {
                 $rootScope.showColumnSpinner[newRow][constraintName] = false;
                 $log.warn(err);

@@ -146,9 +146,9 @@
          * @param  {object} rsQueryParams       object contains queryparams of context from calling function
          * @param  {object} vm                  recoredit view model
          * @param  {object} onSuccessFunction   callback
-         * @param  {object} logObject           The object that we want to log in the create/update request
+         * @param  {object} logObj           The object that we want to log in the create/update request
          */
-        function addRecords(isUpdate, derivedref, recordEditModel, isModalUpdate, rsReference, rsTuples, rsQueryParams, vm, onSuccessFunction, logObject) {
+        function addRecords(isUpdate, derivedref, recordEditModel, isModalUpdate, rsReference, rsTuples, rsQueryParams, vm, onSuccessFunction, logObj) {
             var model = isModalUpdate ? GV_recordEditModel : recordEditModel;
             viewModel = vm;
             var form = viewModel.formContainer;
@@ -184,14 +184,14 @@
             uploadFiles(submissionRowsCopy, rsReference, function() {
 
                 var fn = "create",
-                    args = [submissionRowsCopy, logObject];
+                    args = [submissionRowsCopy, logObj];
                 var fnScope = isModalUpdate ? derivedref.unfilteredReference.contextualize.entryCreate : rsReference.unfilteredReference.contextualize.entryCreate;
 
                 if (isUpdate) {
                     var data = checkUpdate(submissionRowsCopy, rsTuples);
                     // submit rootScope.tuples because we are changing and
                     // comparing data from the old data set for the tuple with the updated data set from the UI
-                    fn = "update", fnScope = rsReference, args = [rsTuples, logObject];
+                    fn = "update", fnScope = rsReference, args = [rsTuples, logObj];
                 }
 
                 fnScope[fn].apply(fnScope, args).then(function success(result) {
@@ -326,41 +326,46 @@
 
             params.reference = domainRef.unfilteredReference.contextualize.compactSelect;
             params.reference.session = rsSession;
-            params.context = "compact/select";
             params.selectMode = isModalUpdate ? modalBox.multiSelectMode : modalBox.singleSelectMode;
             params.selectedRows = [];
             params.showFaceting = true;
             params.facetPanelOpen = false;
             //NOTE assumption is that this function is only is called for adding pure and binary association
 
-            // TODO LOG this is already done in recordutil getTableModel (we just don't have access to the tableModel here)
+            // TODO (could be optimized) this is already done in recordutil getTableModel (we just don't have access to the tableModel here)
             var stackElement = logService.getStackElement(
-                logService.logStackTypes.related,
+                logService.logStackTypes.RELATED,
                 params.reference.table,
                 {source: domainRef.compressedDataSource}
             );
 
             var logStack = logService.getStackObject(stackElement),
-                logStackPath = logService.getStackPath("", logService.logStackPaths.addPureBinaryPopup);
+                logStackPath = logService.getStackPath("", logService.logStackPaths.ADD_PB_POPUP);
 
-            params.logObject = { stack: logStack };
+            params.logStack = logStack;
             params.logStackPath = logStackPath;
 
             /**
              * Callback to get the list of disabled tuples.
              * This is only applicable in case of adding related entities.
-             * @param  {ERMrest.Page} page     the page object.
-             * @param  {int} pageSize the page size for read request.
+             * @param  {Object} tableModel the table model
+             * @param  {Array} requestCauses array of string that indicates why the request is fired
              * @return {Promise} Promise is resolved with a list of disabled rows (array of tuple objects).
              */
-            params.getDisabledTuples = function (page, pageSize, isInitialize) {
+            params.getDisabledTuples = function (tableModel, requestCauses, updateStartTime) {
                 var defer = $q.defer();
-                var disabledRows = [], index;
+                var page = tableModel.page, pageSize = tableModel.pageLimit;
 
-                var action = isInitialize ? logService.logActions.load : logService.logActions.reload;
+                var disabledRows = [], index, newStack = tableModel.logStack;
+
+                var action = logService.logActions.LOAD;
+                if (Array.isArray(requestCauses) && requestCauses.length > 0) {
+                    action = logService.logActions.RELOAD;
+                    newStack = logService.addCausesToStack(tableModel.logStack, requestCauses, updateStartTime);
+                }
                 var logObj = {
-                    action: logService.getActionString("", action),
-                    stack: logStack
+                    action: logService.getActionString(tableModel.logStackPath, action),
+                    stack: newStack
                 }
 
                 // fourth input: preserve the paging (read will remove the before if number of results is less than the limit)
@@ -415,17 +420,13 @@
 
                 // NOTE this if case is unnecessary, this is always modal update
                 if (isModalUpdate) {
-                    var logObject = {
-                        action: logService.getActionString(logStackPath, logService.logActions.link),
+                    var logObj = {
+                        action: logService.getActionString(logStackPath, logService.logActions.LINK),
                         stack: logStack
                     };
-                    addRecords(viewModel.editMode, derivedref, nullArr, isModalUpdate, rsReference, rsTuples, rsQueryParams, viewModel, viewModel.onSuccess, logObject);
+                    addRecords(viewModel.editMode, derivedref, nullArr, isModalUpdate, rsReference, rsTuples, rsQueryParams, viewModel, viewModel.onSuccess, logObj);
                 }
             }, function () {
-
-                // TODO LOG cancelation (requires the stack)
-                // logService.logClientAction({}, params.reference.defaultLogInfo);
-
                 viewModel.onModalClose();
             }, false);
         }

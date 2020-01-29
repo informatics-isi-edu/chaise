@@ -16,28 +16,14 @@
         CELL_LIMIT: 500
     })
 
-    .constant('reloadCauses', {
-        CLEAR_ALL: "clear-all",
-        ENTITY_UPDATE: "entity-update",
-        ENTITY_DELETE: "entity-delete",
-        ENTITY_CREATE: "entity-create",
-        FACET_MODIFIED: "facet-modified", // facet changed in the modal
-        FACET_SELECT: "facet-select", // a facet selected
-        FACET_DESELECT: "facet-deselect", // a facet deselected
-        FACET_CLEAR: "facet-clear", // a facet cleared
-        PAGE_NEXT: "page-next",
-        PAGE_LIMIT: "page-limit",
-        PAGE_PREV: "page-prev",
-        SORT: "sort",
-        SEARCH_BOX: "search-box"
-    })
-
     /**
      * Ways to use recordTable directive:
      *
      * logObject = {
-     *   pcid, ppid, causes, stack
+     *   pcid, ppid
      * }
+     * logStack
+     * logStackPath
      *
      * 1. Table only
      *    <record-table vm="vm"></record-table>
@@ -110,8 +96,8 @@
      *     event to call read on this new reference.
      */
     .factory('recordTableUtils',
-            ['AlertsService', 'DataUtils', 'defaultDisplayname', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'recordsetDisplayModes','reloadCauses', 'Session', 'tableConstants', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$q', '$rootScope', '$timeout', '$window',
-            function(AlertsService, DataUtils, defaultDisplayname, ErrorService, logService, MathUtils, messageMap, modalBox, recordsetDisplayModes, reloadCauses, Session, tableConstants, UiUtils, UriUtils, $cookies, $document, $log, $q, $rootScope, $timeout, $window) {
+            ['AlertsService', 'DataUtils', 'defaultDisplayname', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'recordsetDisplayModes', 'Session', 'tableConstants', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$q', '$rootScope', '$timeout', '$window',
+            function(AlertsService, DataUtils, defaultDisplayname, ErrorService, logService, MathUtils, messageMap, modalBox, recordsetDisplayModes, Session, tableConstants, UiUtils, UriUtils, $cookies, $document, $log, $q, $rootScope, $timeout, $window) {
 
         function FlowControlObject(maxRequests) {
             this.maxRequests = maxRequests || tableConstants.MAX_CONCURENT_REQUEST;
@@ -134,27 +120,29 @@
         /**
          * Given the tableModel object, will get value for the aggregate columns.
          * The updateMainEntity should be called on the tableModel before this function.
-         * That function will generate `vm.page` and `vm.aggregatesToInitialize` which
-         * are needed for this function.
+         * That function will generate `vm.page` which is needed for this function
          * @param  {object} vm           table model
          * @param  {function} updatePageCB The update page callback which we will call after getting each result.
          * @param  {object} logObject    The object that should be logged with the read request.
          * @param  {boolean} hideSpinner  Indicates whether we should show spinner for columns or not
          */
-        function updateColumnAggregates(vm, updatePageCB, isInitialize, hideSpinner) {
-            if (!vm.hasLoaded || !Array.isArray(vm.aggregatesToInitialize)) return;
-            while (vm.aggregatesToInitialize.length > 0) {
-                if (!_haveFreeSlot(vm)) {
+        function updateColumnAggregates(vm, updatePageCB, hideSpinner) {
+            if (!vm.hasLoaded) return;
+            vm.aggregateModels.forEach(function (agg, index) {
+                if (!_haveFreeSlot(vm) || agg.processed) {
                     return;
                 }
 
                 vm.flowControlObject.occupiedSlots++;
+
+                agg.processed = true;
+
                 (function (i, current) {
                     $log.debug("counter", current, ": getting aggregated values for column (index=" + i + ")");
-                    _updateColumnAggregate(vm, i, current, isInitialize, hideSpinner).then(function (res) {
+                    _updateColumnAggregate(vm, i, current, hideSpinner).then(function (res) {
                         _afterUpdateColumnAggregate(vm, res, i);
                         //TODO does this make sense?
-                        vm.reference.activeList.aggregates[i].objects.forEach(function (obj) {
+                        vm.aggregateModels[i].model.objects.forEach(function (obj) {
                             // this is only called in recordset so it won't be related
                             if (obj.column) {
                                 vm.columnModels[obj.index].columnError = false;
@@ -165,7 +153,7 @@
                         _afterUpdateColumnAggregate(vm, false, i);
                         // show alert if 400 Query Timeout Error
                         if (err instanceof ERMrest.QueryTimeoutError) {
-                            vm.reference.activeList.aggregates[i].objects.forEach(function (obj) {
+                            vm.aggregateModels[i].model.objects.forEach(function (obj) {
                                 // this is only called in recordset so it won't be related
                                 if (obj.column) {
                                     vm.columnModels[obj.index].columnError = true;
@@ -176,8 +164,8 @@
                             throw err;
                         }
                     });
-                })(vm.aggregatesToInitialize.shift(), vm.flowControlObject.counter);
-            }
+                })(index, vm.flowControlObject.counter);
+            });
         }
 
         /**
@@ -185,9 +173,13 @@
          * Generate request for each individual aggregate columns. Will return
          * a promise that is resolved with a boolean value denoting the success or failure.
          */
-        function _updateColumnAggregate(vm, colIndex, current, isInitialize, hideSpinner) {
+        function _updateColumnAggregate(vm, colIndex, current, hideSpinner) {
             var defer = $q.defer();
-            var pcol = vm.reference.activeList.aggregates[colIndex];
+
+            // TODO maybe we could just pass the agg instead of colIndex
+            // I didn't make this change because colIndex might be needed
+            var agg = vm.aggregateModels[colIndex];
+            var pcol = agg.model;
 
             // show spinner for all the dependent columns
             pcol.objects.forEach(function (obj) {
@@ -199,21 +191,31 @@
 
 
             var pcolStackEl = logService.getStackElement(
-                logService.logStackTypes.pseudoColumn,
+                logService.logStackTypes.PSEUDO_COLUMN,
                 pcol.column.table,
                 { source: pcol.column.compressedDataSource, aggregate: pcol.column.aggregateFn}
             );
 
-            var action = isInitialize ? logService.logActions.load : logService.logActions.reload;
-            var logObject = {
-                action: getTableLogAction(vm, logService.logStackPaths.pseudoColumn, action),
-                stack: getTableLogStack(vm, pcolStackEl)
+            var action = logService.logActions.LOAD, stack = getTableLogStack(vm, pcolStackEl);
+            if (Array.isArray(agg.updateCauses) && agg.updateCauses.length > 0) {
+                action = logService.logActions.RELOAD;
+                stack = logService.addCausesToStack(stack, agg.updateCauses, agg.updateStartTime);
             }
-            pcol.column.getAggregatedValue(vm.page, logObject).then(function (values) {
+            var logObj = {
+                action: getTableLogAction(vm, logService.logStackPaths.PSEUDO_COLUMN, action),
+                stack: stack
+            }
+            pcol.column.getAggregatedValue(vm.page, logObj).then(function (values) {
                 if (vm.flowControlObject.counter !== current) {
                     return defer.resolve(false);
                 }
+
                 afterReadAggregate(vm, colIndex, values);
+
+                // clear the causes
+                agg.updateCauses = [];
+                agg.updateStartTime = -1;
+
                 return defer.resolve(true);
             }).catch(function (err) {
                 if (vm.flowControlObject.counter !== current) {
@@ -245,7 +247,7 @@
          * @param  {Object} values   the returned value
          */
         function afterReadAggregate(vm, colIndex, values) {
-            var agg = vm.reference.activeList.aggregates[colIndex];
+            var agg = vm.aggregateModels[colIndex].model;
             var sourceDefinitions = vm.reference.table.sourceDefinitions;
 
             values.forEach(function (val, valIndex) {
@@ -319,7 +321,7 @@
          * @param  {boolean} hideSpinner  Indicates whether we should show spinner for columns or not
          * @param  {object} isTerminal  Indicates whether we should show a terminal error or not for 400 QueryTimeoutError
          */
-        function updateMainEntity(vm, updatePageCB, isInitialize, hideSpinner, notTerminal) {
+        function updateMainEntity(vm, updatePageCB, hideSpinner, notTerminal) {
             if (!vm.dirtyResult || !_haveFreeSlot(vm)) {
                 $log.debug("counter", vm.flowControlObject.counter, ": break out of update main");
                 return;
@@ -330,7 +332,7 @@
 
             (function (currentCounter) {
                 $log.debug("counter", currentCounter, ": updating result");
-                _readMainEntity(vm, isInitialize, hideSpinner, currentCounter).then(function (res) {
+                _readMainEntity(vm, hideSpinner, currentCounter).then(function (res) {
                     _afterUpdateMainEntity(vm, res, currentCounter);
                     vm.tableError = false;
                     $log.debug("counter", currentCounter, ": read is done. just before update page (to update the rest of the page)");
@@ -380,7 +382,6 @@
             $log.debug("counter", counter, ": after result update: " + (res ? "successful." : "unsuccessful."));
         }
 
-
         /**
          * @private
          * After the push more row logic is done, merge the pendingRowValues with rowValues
@@ -405,7 +406,7 @@
          * Does the actual read for the main entity. Returns a promise that will
          * be resolved with `true` if the request was successful.
          */
-        function _readMainEntity (vm, isInitialize, hideSpinner, counterer) {
+        function _readMainEntity (vm, hideSpinner, counterer) {
             _attachExtraAttributes(vm);
 
             // cancel timeout loop that may still be running and hide the spinner and "Loading ..."
@@ -414,23 +415,28 @@
             vm.dirtyResult = false;
             vm.hasLoaded = false;
             var defer = $q.defer();
-            (function (current) {
-                var logParams = vm.logObject ? vm.logObject : {};
 
-                // TODO LOG can this be done in any other way?
+            var logParams = vm.logObject ? vm.logObject : {};
 
-                var act = isInitialize ? logService.logActions.load : logService.logActions.reload;
-                if (vm.config.displayMode === recordsetDisplayModes.addPureBinaryPopup) {
-                    act =isInitialize ? logService.logActions.loadDomain : logService.logActions.reloadDomain;
-                }
+            var hasCauses = Array.isArray(vm.updateCauses) && vm.updateCauses.length > 0;
+            var act = hasCauses ? logService.logActions.RELOAD : logService.logActions.LOAD;
 
-                // add causes
-                if (Array.isArray(vm.causes) && vm.causes.length > 0) {
-                    logParams.causes = vm.causes;
-                }
+            // fix the action for add pure and binary popup (the check could be based on getDisabledTuples as well)
+            if (vm.config.displayMode === recordsetDisplayModes.addPureBinaryPopup) {
+                act = hasCauses ? logService.logActions.RELOAD_DOMAIN : logService.logActions.LOAD_DOMAIN;
+            }
 
-                // create the action
-                logParams.action = getTableLogAction(vm, "", act);
+            // add updateCauses
+            if (hasCauses) {
+                logParams.stack = logService.addCausesToStack(getTableLogStack(vm), vm.updateCauses, vm.updateStartTime);
+            } else {
+                logParams.stack = getTableLogStack(vm);
+            }
+
+            // create the action
+            logParams.action = getTableLogAction(vm, "", act);
+
+            (function (current, requestCauses, updateStartTime) {
                 vm.reference.read(vm.pageLimit, logParams).then(function (page) {
                     if (current !== vm.flowControlObject.counter) {
                         defer.resolve(false);
@@ -443,7 +449,7 @@
                     vm.aggregateResults = new Array(vm.page.tuples.length);
                     vm.pendingRowValues = {};
 
-                    return vm.getDisabledTuples ? vm.getDisabledTuples(page, vm.pageLimit, isInitialize) : '';
+                    return vm.getDisabledTuples ? vm.getDisabledTuples(vm, requestCauses, updateStartTime) : '';
                 }).then(function (rows) {
                     if (current !== vm.flowControlObject.counter) {
                         defer.resolve(false);
@@ -503,30 +509,40 @@
                     vm.initialized = true;
                     // globally sets when the app state is ready to interact with
                     $rootScope.displayReady = true;
-                    // TODO could be better
-                    vm.aggregatesToInitialize = [];
-                    if (vm.reference.activeList) {
-                        vm.reference.activeList.aggregates.forEach(function (c, i) {
-                            if (vm.page.tuples.length > 0) {
-                                vm.aggregatesToInitialize.push(i);
-                            } else {
-                                // there are not matching rows, so there's no point in creating
-                                // aggregate requests.
-                                // make sure the spinner is hidden for the pending columns.
-                                c.objects.forEach(function (obj) {
-                                    if (obj.column) {
-                                        vm.columnModels[obj.index].isLoading = false;
-                                    }
-                                })
+
+                    // make sure we're getting the data for aggregate columns
+                    vm.aggregateModels.forEach(function (agg, i) {
+                        if (vm.page.tuples.length > 0) {
+                            agg.processed = false;
+                            agg.updateCauses = requestCauses;
+                            if (!Number.isInteger(agg.updateStartTime) || agg.updateStartTime === -1) {
+                                agg.updateStartTime = ERMrest.getElapsedTime();
                             }
-                        });
-                    }
+
+                        } else {
+                            agg.processed = true;
+
+                            // there are not matching rows, so there's no point in creating
+                            // aggregate requests.
+                            // make sure the spinner is hidden for the pending columns.
+                            agg.model.objects.forEach(function (obj) {
+                                if (obj.column) {
+                                    vm.columnModels[obj.index].isLoading = false;
+                                }
+                            })
+                        }
+                    });
+
+                    // empty the causes since now we're showing the value.
+                    vm.updateCauses = [];
+                    vm.updateStartTime = -1;
 
                     defer.resolve(true);
                 }).catch(function(err) {
                     if (current !== vm.flowControlObject.counter) {
                         return defer.resolve(false);
                     }
+
                     vm.initialized = true;
                     // globally sets when the app state is ready to interact with
                     $rootScope.displayReady = true;
@@ -536,16 +552,9 @@
                     defer.reject(err);
                 });
 
-                // clear the causes as soon as we sent the request
-                vm.causes = [];
-
-                // clear the extra attributes (this will remove them from the vm.logObject as well)
-                for (var k in logParams) {
-                    if (!logParams.hasOwnProperty(k)) continue;
-                    if (k === "stack") continue;
-                    delete logParams[k];
-                }
-            }) (counterer);
+                // clear logObject since it was used just for the first request
+                vm.logObject = {}
+            }) (counterer, vm.updateCauses, vm.updateStartTime);
             return defer.promise;
         }
 
@@ -567,7 +576,7 @@
          * @private
          * Calls _getMainRowsCount to update the count. won't return any values
          */
-        function _updateMainCount (vm, updatePageCB, isInitialize) {
+        function _updateMainCount (vm, updatePageCB) {
             if (!vm.dirtyCount || !_haveFreeSlot(vm)) {
                 $log.debug("counter", vm.flowControlObject.counter , ": break out of updateCount: (not dirty or full)");
                 return;
@@ -577,7 +586,7 @@
             vm.dirtyCount = false;
 
             (function (curr) {
-                _getMainRowsCount(vm, curr, isInitialize).then(function (res) {
+                _getMainRowsCount(vm, curr).then(function (res) {
                     _afterGetMainRowsCount(vm, res, curr);
                     updatePageCB(vm);
                 }).catch(function (err) {
@@ -592,7 +601,7 @@
          * This will generate the request for getting the count.
          * Returns a promise. If it's resolved with `true` then it has been successful.
          */
-        function _getMainRowsCount(vm, current, isInitialize) {
+        function _getMainRowsCount(vm, current) {
              $log.debug("counter", current, ": getRowsCount.");
              var  defer = $q.defer();
              var aggList, hasError;
@@ -608,11 +617,12 @@
                  return defer.promise;
              }
 
-
-             var action = isInitialize ? logService.logActions.count : logService.logActions.recount;
+             var hasCauses = Array.isArray(vm.countUpdateCauses) && vm.countUpdateCauses.length > 0;
+             var action = hasCauses ? logService.logActions.RECOUNT : logService.logActions.COUNT;
+             var stack = logService.addCausesToStack(getTableLogStack(vm), vm.countUpdateCauses, vm.countUpdateStartTime);
              vm.reference.getAggregates(
                  aggList,
-                 {action: getTableLogAction(vm, "", action), stack: getTableLogStack(vm)}
+                 {action: getTableLogAction(vm, "", action), stack: stack}
              ).then(function getAggregateCount(response) {
                  if (current !== vm.flowControlObject.counter) {
                      defer.resolve(false);
@@ -622,6 +632,10 @@
                  vm.countError = false;
 
                  vm.totalRowsCnt = response[0];
+
+                 vm.countUpdateCauses = [];
+                 vm.countUpdateStartTime = -1;
+
                  defer.resolve(true);
              }).catch(function (err) {
                  if (current !== vm.flowControlObject.counter) {
@@ -664,7 +678,7 @@
             vm.dirtyCount = true;
             vm.flowControlObject.counter = 0;
 
-            update(vm, false, false, false, false, true);
+            update(vm, false, false, false, false);
         }
 
         /**
@@ -683,8 +697,8 @@
          * If while doing so, the whole page updates, the updateFacet function itself should ignore the
          * stale request by looking at the request url.
          */
-        function update (vm, updateResult, updateCount, updateFacets, sameCounter, isInitialize) {
-            $log.debug("counter", vm.flowControlObject.counter ,"update called with res=" + updateResult + ", cnt=" + updateCount + ", facets=" + updateFacets + ", sameCnt=" + sameCounter);
+        function update (vm, updateResult, updateCount, updateFacets, sameCounter, cause) {
+            $log.debug("counter", vm.flowControlObject.counter ,"update called with res=" + updateResult + ", cnt=" + updateCount + ", facets=" + updateFacets + ", sameCnt=" + sameCounter + ", cause=" + cause);
 
             if (updateFacets) {
                 vm.facetModels.forEach(function (fm, index) {
@@ -693,6 +707,13 @@
                     }
 
                     if (fm.isOpen) {
+                        if (!Number.isInteger(fm.updateStartTime) || fm.updateStartTime === -1) {
+                            fm.updateStartTime = ERMrest.getElapsedTime();
+                        }
+                        if (cause && fm.updateCauses.indexOf(cause) === -1) {
+                            fm.updateCauses.push(cause);
+                        }
+
                         fm.processed = false;
                         fm.isLoading = true;
                     } else {
@@ -700,6 +721,24 @@
                         fm.processed = true;
                     }
                 });
+            }
+
+            if (updateResult) {
+                if (!Number.isInteger(vm.updateStartTime) || vm.updateStartTime === -1) {
+                    vm.updateStartTime = ERMrest.getElapsedTime();
+                }
+                if (cause && vm.updateCauses.indexOf(cause) === -1) {
+                    vm.updateCauses.push(cause);
+                }
+            }
+
+            if (updateCount) {
+                if (!Number.isInteger(vm.countUpdateStartTime) || vm.countUpdateStartTime === -1) {
+                    vm.countUpdateStartTime = ERMrest.getElapsedTime();
+                }
+                if (cause && vm.countUpdateCauses.indexOf(cause) === -1) {
+                    vm.countUpdateCauses.push(cause);
+                }
             }
 
             // if it's true change, otherwise don't change.
@@ -715,7 +754,7 @@
                     vm.flowControlObject.counter++;
                     $log.debug("adding one to counter, new: " + vm.flowControlObject.counter);
                 }
-                _updatePage(vm, isInitialize);
+                _updatePage(vm);
             }, 0);
         }
 
@@ -732,22 +771,22 @@
          * @private
          * @param  {Object} vm The table view model
          */
-        function _updatePage(vm, isInitialize) {
+        function _updatePage(vm) {
             $log.debug("counter", vm.flowControlObject.counter, ": running update page");
             if (!_haveFreeSlot(vm)) {
                 return;
             }
 
-            logService.updateStackFilterInfo(vm.logObject.stack, vm.reference.filterLogInfo);
+            logService.updateStackFilterInfo(getTableLogStack(vm), vm.reference.filterLogInfo);
 
             // update the resultset
-            updateMainEntity(vm, _updatePage, isInitialize);
+            updateMainEntity(vm, _updatePage);
 
             // get the aggregate values only if main page is loaded
-            updateColumnAggregates(vm, _updatePage, isInitialize);
+            updateColumnAggregates(vm, _updatePage);
 
             // update the count
-            _updateMainCount(vm, _updatePage, isInitialize);
+            _updateMainCount(vm, _updatePage);
 
             // update the facets
             if (vm.facetModels) {
@@ -762,7 +801,7 @@
 
                         (function (i) {
                             $log.debug("counter", vm.flowControlObject.counter, ": updating facet (index="+i+")");
-                            vm.facetModels[i].updateFacet(isInitialize).then(function (res) {
+                            vm.facetModels[i].updateFacet().then(function (res) {
                                 vm.facetModels[i].facetError = false;
                                 _afterFacetUpdate(vm, i, res);
                                 _updatePage(vm);
@@ -782,14 +821,14 @@
                 else if (_haveFreeSlot(vm)){
                     vm.flowControlObject.occupiedSlots++;
                     var index = vm.facetsToPreProcess.shift();
-                    (function (i, isInitialize, currentCounter) {
+                    (function (i, currentCounter) {
                         $log.debug("counter", vm.flowControlObject.counter, ": initializing facet (index="+index+")");
                         vm.facetModels[i].preProcessFacet().then(function (res) {
                             $log.debug("counter", currentCounter, ": after facet (index="+ i +") initialize: " + (res ? "successful." : "unsuccessful."));
                             vm.flowControlObject.occupiedSlots--;
                             vm.facetModels[i].preProcessed = true;
                             vm.facetModels[i].facetError = false;
-                            _updatePage(vm, isInitialize);
+                            _updatePage(vm);
                         }).catch(function (err) {
                             // show alert if 400 Query Timeout Error
                             if (err instanceof ERMrest.QueryTimeoutError) {
@@ -798,7 +837,7 @@
                                 throw err;
                             }
                         });
-                    })(index, isInitialize, vm.flowControlObject.counter);
+                    })(index, vm.flowControlObject.counter);
                 }
             }
         }
@@ -824,6 +863,18 @@
                 });
             });
 
+            vm.aggregateModels = [];
+            if (vm.reference.activeList) {
+                vm.reference.activeList.aggregates.forEach(function (agg) {
+                    vm.aggregateModels.push({
+                        model: agg, // the api that ermrestjs returns (has .objects and .column)
+                        processed: true, // whether we should get the data or not
+                        updateCauses: [], // why the request is being sent to the server (might be empty)
+                        updateStartTime: -1 // when the page became dirty
+                    });
+                })
+            }
+
             // only allowing single column sort here
             var location = vm.reference.location;
             if (location.sortObject) {
@@ -831,7 +882,10 @@
                 vm.sortOrder = (location.sortObject[0].descending ? "desc" : "asc");
             }
 
-            vm.causes = [];
+            vm.updateCauses = [];
+            vm.countUpdateCauses = [];
+            vm.updateStartTime = -1;
+            vm.countUpdateStartTime = -1;
         }
 
         /**
@@ -841,7 +895,7 @@
          * @param {String} actionPath - the ui context and verb
          */
         function getTableLogAction(vm, childStackPath, actionPath) {
-            var stackPath = vm.logStackPath ? vm.logStackPath : logService.logStackPaths.set;
+            var stackPath = vm.logStackPath ? vm.logStackPath : logService.logStackPaths.SET;
             if (childStackPath) {
                 stackPath = logService.getStackPath(stackPath, childStackPath);
             }
@@ -851,11 +905,15 @@
         /**
          * Returns the stack object that should be used
          */
-        function getTableLogStack(vm, childStackElement) {
+        function getTableLogStack(vm, childStackElement, extraInfo) {
+            var stack = vm.logStack;
             if (childStackElement) {
-                return vm.logObject.stack.concat(childStackElement);
+                stack = vm.logStack.concat(childStackElement);
             }
-            return vm.logObject.stack;
+            if (extraInfo) {
+                return logService.addExtraInfoToStack(stack, extraInfo);
+            }
+            return stack;
         }
 
         function _callonSelectedRowsChanged (scope, tuples, isSelected) {
@@ -927,9 +985,16 @@
 
                 if (scope.$root.checkReferenceURL(ref)) {
                     scope.vm.reference = ref;
-                    scope.vm.causes.push(reloadCauses.ENTITY_DELETE);
 
-                    update(scope.vm, true, false, false);
+
+                    logService.logClientAction(
+                        {
+                            action: getTableLogAction(scope.vm, "", logService.logActions.SORT),
+                            stack: getTableLogStack(scope.vm)
+                        },
+                        scope.vm.reference.defaultLogInfo
+                    );
+                    update(scope.vm, true, false, false, false, logService.updateCauses.ENTITY_DELETE);
                 }
             };
 
@@ -951,8 +1016,15 @@
                     scope.vm.reference = previous;
                     $log.debug('counter', scope.vm.flowControlObject.counter ,': request for previous page');
 
-                    scope.vm.causes.push(reloadCauses.PAGE_PREV);
-                    update(scope.vm, true, false, false);
+                    logService.logClientAction(
+                        {
+                            action: getTableLogAction(scope.vm, "", logService.logActions.PAGE_PREV),
+                            stack: getTableLogStack(scope.vm)
+                        },
+                        scope.vm.reference.defaultLogInfo
+                    );
+
+                    update(scope.vm, true, false, false, false, logService.updateCauses.PAGE_PREV);
                 }
             };
 
@@ -962,8 +1034,15 @@
                     scope.vm.reference = next;
                     $log.debug('counter', scope.vm.flowControlObject.counter ,': request for next page');
 
-                    scope.vm.causes.push(reloadCauses.PAGE_NEXT);
-                    update(scope.vm, true, false, false);
+                    logService.logClientAction(
+                        {
+                            action: getTableLogAction(scope.vm, "", logService.logActions.PAGE_NEXT),
+                            stack: getTableLogStack(scope.vm)
+                        },
+                        scope.vm.reference.defaultLogInfo
+                    );
+
+                    update(scope.vm, true, false, false, false, logService.updateCauses.PAGE_NEXT);
                 }
 
             };
@@ -992,7 +1071,7 @@
             scope.selectNone = function($event) {
                 logService.logClientAction(
                     {
-                        action: getTableLogAction(scope.vm, "", logService.logActions.pageDeSelectAll),
+                        action: getTableLogAction(scope.vm, "", logService.logActions.PAGE_DESELECT_ALL),
                         stack: getTableLogStack(scope.vm)
                     },
                     scope.vm.reference.defaultLogInfo
@@ -1022,7 +1101,7 @@
             scope.selectAll = function($event) {
                 logService.logClientAction(
                     {
-                        action: getTableLogAction(scope.vm, "", logService.logActions.pageSelectAll),
+                        action: getTableLogAction(scope.vm, "", logService.logActions.PAGE_SELECT_ALL),
                         stack: getTableLogStack(scope.vm)
                     },
                     scope.vm.reference.defaultLogInfo
@@ -1111,7 +1190,7 @@
             scope.copyPermalink = function () {
                 logService.logClientAction(
                     {
-                        action: getTableLogAction(scope.vm, "", logService.logActions.permalinkLeft),
+                        action: getTableLogAction(scope.vm, "", logService.logActions.PERMALINK_LEFT),
                         stack: getTableLogStack(scope.vm)
                     },
                     scope.vm.reference.defaultLogInfo
@@ -1140,7 +1219,7 @@
                 var panelOpen = scope.vm.config.facetPanelOpen;
 
                 // log the action
-                var action = panelOpen ? logService.logActions.facetPanelHide : logService.logActions.facetPanelShow;
+                var action = panelOpen ? logService.logActions.FACET_PANEL_HIDE : logService.logActions.FACET_PANEL_SHOW;
                 logService.logClientAction(
                     {
                         action: getTableLogAction(scope.vm, "", action),
@@ -1152,7 +1231,7 @@
                 scope.vm.config.facetPanelOpen = !scope.vm.config.facetPanelOpen;
             }
 
-            scope.search = function(term) {
+            scope.search = function(term, action) {
 
                 if (term) term = term.trim();
 
@@ -1163,8 +1242,14 @@
                      scope.vm.lastActiveFacet = -1;
                      $log.debug('counter', scope.vm.flowControlObject.counter ,': new search term=' + term);
 
-                     scope.vm.causes.push(reloadCauses.SEARCH_BOX);
-                     update(scope.vm, true, true, true);
+                     // log the client action
+                     var extraInfo = typeof term === "string" ? {"search-str": term} : {};
+                     logService.logClientAction({
+                         action:getTableLogAction(scope.vm, "", action),
+                         stack: getTableLogStack(scope.vm, null, extraInfo)
+                     }, scope.vm.reference.defaultLogInfo);
+
+                     update(scope.vm, true, true, true, false, logService.updateCauses.SEARCH_BOX);
                  }
             };
 
@@ -1182,6 +1267,13 @@
                 }
 
                 var tuple = scope.vm.selectedRows.splice(index, 1)[0];
+
+                // log the client action
+                logService.logClientAction({
+                    action:getTableLogAction(scope.vm, "", logService.logActions.SELECTION_CLEAR),
+                    stack: getTableLogStack(scope.vm)
+                }, scope.vm.reference.defaultLogInfo);
+
                 _callonSelectedRowsChanged(scope, tuple, false);
             };
 
@@ -1190,7 +1282,7 @@
 
                 // log the client action
                 logService.logClientAction({
-                    action:getTableLogAction(scope.vm, "", logService.logActions.clearAllSelection),
+                    action:getTableLogAction(scope.vm, "", logService.logActions.SELECTION_CLEAR_ALL),
                     stack: getTableLogStack(scope.vm)
                 }, scope.vm.reference.defaultLogInfo);
 
@@ -1214,16 +1306,13 @@
                     }
                 }
 
-                // read
                 if (completed > 0 || updated) {
                     $log.debug('counter', scope.vm.flowControlObject.counter ,': focused on page after update');
                     updated = false;
+
                     scope.vm.lastActiveFacet = -1;
-
-
-                    //TODO was it update, delete, or create, or other related ones?
-                    scope.vm.causes.push(reloadCauses.ENTITY_UPDATE);
-                    update(scope.vm, true, true, true);
+                    var cause = completed ? logService.updateCauses.ENTITY_CREATE : logService.updateCauses.ENTITY_UPDATE;
+                    update(scope.vm, true, true, true, false, cause);
                 }
 
             };
@@ -1235,14 +1324,14 @@
             };
 
             // listen to facet change
-            angular.forEach([reloadCauses.CLEAR_ALL, reloadCauses.FACET_MODIFIED,
-                            reloadCauses.FACET_SELECT, reloadCauses.FACET_DESELECT,
-                            reloadCauses.FACET_CLEAR], function (evMessage) {
+            angular.forEach([logService.updateCauses.CLEAR_ALL, logService.updateCauses.FACET_MODIFIED,
+                            logService.updateCauses.FACET_SELECT, logService.updateCauses.FACET_DESELECT,
+                            logService.updateCauses.FACET_CLEAR, logService.updateCauses.CLEAR_CFACET,
+                            logService.updateCauses.CLEAR_CUSTOM_FILTER], function (evMessage) {
                 scope.$on(evMessage, function ($event) {
                     $log.debug("-----------------------------");
                     $log.debug('counter', scope.vm.flowControlObject.counter, ': ' + evMessage + ' in recordset directive');
-                    scope.vm.causes.push(evMessage)
-                    update(scope.vm, true, true, true);
+                    update(scope.vm, true, true, true, false ,evMessage);
                 });
             })
 
@@ -1251,8 +1340,7 @@
                 $log.debug('counter', scope.vm.flowControlObject.counter, ': record-deleted in recordset directive');
                 scope.vm.lastActiveFacet = -1;
 
-                scope.vm.causes.push(reloadCauses.ENTITY_DELETE);
-                update(scope.vm, true, true, true);
+                update(scope.vm, true, true, true, false, logService.updateCauses.ENTITY_DELETE);
             });
 
             scope.$watch(function () {
@@ -1334,7 +1422,7 @@
                 if (permalink) {
                     permalink.addEventListener('contextmenu', function (e) {
                         logService.logClientAction({
-                            action: getTableLogAction(scope.vm, "", logService.logActions.permalinkRight),
+                            action: getTableLogAction(scope.vm, "", logService.logActions.PERMALINK_RIGHT),
                             stack: getTableLogStack(scope.vm)
                         }, scope.vm.reference.defaultLogInfo);
                     });
@@ -1420,7 +1508,7 @@
     }])
 
 
-    .directive('tableHeader', ['logService', 'MathUtils', 'messageMap', 'recordsetDisplayModes', 'recordTableUtils', 'reloadCauses', 'UriUtils', '$window', function(logService, MathUtils, messageMap, recordsetDisplayModes, recordTableUtils, reloadCauses, UriUtils, $window) {
+    .directive('tableHeader', ['logService', 'MathUtils', 'messageMap', 'recordsetDisplayModes', 'recordTableUtils', 'UriUtils', '$window', function(logService, MathUtils, messageMap, recordsetDisplayModes, recordTableUtils, UriUtils, $window) {
         return {
             restrict: 'E',
             templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/tableHeader.html',
@@ -1434,14 +1522,21 @@
                 scope.setPageLimit = function(limit) {
                     scope.vm.pageLimit = limit;
 
-                    scope.vm.causes.push(reloadCauses.PAGE_LIMIT);
-                    recordTableUtils.update(scope.vm, true, false, false);
+                    logService.logClientAction(
+                        {
+                            action: recordTableUtils.getTableLogAction(scope.vm, "", logService.logActions.PAGE_SIZE_SELECT),
+                            stack: recordTableUtils.getTableLogStack(scope.vm, null, {"page-size": limit})
+                        },
+                        scope.vm.reference.defaultLogInfo
+                    );
+
+                    recordTableUtils.update(scope.vm, true, false, false, false, logService.updateCauses.PAGE_LIMIT);
                 };
 
                 scope.pageSizeDropdownOpened = function () {
                     logService.logClientAction(
                         {
-                            action: recordTableUtils.getTableLogAction(scope.vm, "", logService.logActions.pageSizeDropdownOpen),
+                            action: recordTableUtils.getTableLogAction(scope.vm, "", logService.logActions.PAGE_SIZE_OEPN),
                             stack: recordTableUtils.getTableLogStack(scope.vm)
                         },
                         scope.vm.reference.defaultLogInfo
@@ -1463,7 +1558,7 @@
                     if (scope.vm.config.displayMode !== recordsetDisplayModes.fullscreen) {
                         logService.logClientAction(
                             {
-                                action: recordTableUtils.getTableLogAction(scope.vm, "", logService.logActions.addIntend),
+                                action: recordTableUtils.getTableLogAction(scope.vm, "", logService.logActions.ADD_INTEND),
                                 stack: recordTableUtils.getTableLogStack(scope.vm)
                             },
                             scope.vm.reference.defaultLogInfo

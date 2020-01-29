@@ -256,7 +256,7 @@
                 }
                 populateSubmissionRow(model.rows[j], model.submissionRows[j], originalTuple, $rootScope.reference.columns, editOrCopy);
             }
-            recordCreate.addRecords(vm.editMode, null, vm.recordEditModel, false, $rootScope.reference, $rootScope.tuples, context.queryParams, vm, onSuccess, logObject);
+            recordCreate.addRecords(vm.editMode, null, vm.recordEditModel, false, $rootScope.reference, $rootScope.tuples, context.queryParams, vm, onSuccess, context.logObject);
         }
 
         function onDelete() {
@@ -304,18 +304,13 @@
             params.reference = column.filteredRef(submissionRow, vm.recordEditModel.foreignKeyData[rowIndex]).contextualize.compactSelect;
             params.reference.session = $rootScope.session;
 
-            params.logObject = params.reference.defaultLogInfo;
-            params.logObject.referrer = params.parentReference.defaultLogInfo;
-
-            params.context = "compact/select";
             params.selectedRows = [];
             params.selectMode = modalBox.singleSelectMode;
             params.showFaceting = true;
             params.facetPanelOpen = false;
 
-            // TODO LOG these are already attached to the columnModel but we don't have access to columnModel
             var columnModel = vm.recordEditModel.columnModels[columnIndex];
-            params.logObject = { stack: columnModel.logStack };
+            params.logStack = columnModel.logStack;
             params.logStackPath = columnModel.logStackPath;
 
             modalUtils.showModal({
@@ -349,10 +344,7 @@
                 }
 
                 vm.recordEditModel.rows[rowIndex][column.name] = tuple.displayname.value;
-            }, function modalCanceled() {
-                // // TODO LOG cancel fk modal
-                // logService.logClientAction(fkCancelHeader, params.reference.defaultLogInfo);
-            }, false);
+            }, null, false);
         }
 
         // idx - the index of the form
@@ -412,12 +404,12 @@
             if (!vm.numberRowsToAdd) vm.numberRowsToAdd = 1;
 
             // log the button was clicked
-            var action = logService.logActions.cloneForm,
+            var action = logService.logActions.FORM_CLONE,
                 stack = logService.getStackObject();
 
             if (vm.numberRowsToAdd > 1) {
-                action = logService.logActions.cloneForm;
-                stack[stack.length-1].clone = vm.numberRowsToAdd;
+                action = logService.logActions.FORM_CLONE_X;
+                stack = logService.addExtraInfoToStack(null, {clone: vm.numberRowsToAdd});
             }
 
             logService.logClientAction({
@@ -519,7 +511,7 @@
             var defaultLogInfo = (vm.editMode ? $rootScope.tuples[index].reference.defaultLogInfo : $rootScope.reference.defaultLogInfo);
 
             logService.logClientAction({
-                action: logService.getActionString("", logService.logActions.removeForm),
+                action: logService.getActionString("", logService.logActions.FORM_REMOVE),
                 stack: logService.getStackObject()
             }, defaultLogInfo);
 
@@ -603,7 +595,7 @@
 
             var defaultLogInfo = (model.column.reference ? model.column.reference.defaultLogInfo : $rootScope.reference.defaultLogInfo);
 
-            var action = model.showSelectAll ? logService.logActions.setAllClose : logService.logActions.setAllOpen;
+            var action = model.showSelectAll ? logService.logActions.SET_ALL_CLOSE : logService.logActions.SET_ALL_OPEN;
             logService.logClientAction({
                 action: logService.getActionString(model.logStackPath, action),
                 stack: model.logStack
@@ -674,7 +666,7 @@
 
             var defaultLogInfo = (model.column.reference ? model.column.reference.defaultLogInfo : $rootScope.reference.defaultLogInfo);
             logService.logClientAction({
-                action: logService.getActionString(model.logStackPath, logService.logActions.setAllCancel),
+                action: logService.getActionString(model.logStackPath, logService.logActions.SET_ALL_CANCEL),
                 stack: model.logStack
             }, defaultLogInfo);
 
@@ -782,7 +774,7 @@
 
             var defaultLogInfo = (model.column.reference ? model.column.reference.defaultLogInfo : $rootScope.reference.defaultLogInfo);
             logService.logClientAction({
-                action: logService.getActionString(model.logStackPath, logService.logActions.setAllApply),
+                action: logService.getActionString(model.logStackPath, logService.logActions.SET_ALL_APPLY),
                 stack: model.logStack
             }, defaultLogInfo);
 
@@ -794,7 +786,7 @@
 
             var defaultLogInfo = (model.column.reference ? model.column.reference.defaultLogInfo : $rootScope.reference.defaultLogInfo);
             logService.logClientAction({
-                action: logService.getActionString(model.logStackPath, logService.logActions.setAllClear),
+                action: logService.getActionString(model.logStackPath, logService.logActions.SET_ALL_CLEAR),
                 stack: model.logStack
             }, defaultLogInfo);
 

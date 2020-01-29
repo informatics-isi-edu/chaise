@@ -14,11 +14,26 @@
         var chaiseConfig = ConfigUtils.getConfigJSON(),
             context = ConfigUtils.getContextJSON();
 
-        function deleteReference(scope, reference, isUnlink) {
-            var logObject = {
-                action: recordTableUtils.getTableLogAction(scope.tableModel, logService.logStackPaths.entity, isUnLink ? logService.logActions.unlink : logService.logActions.delete),
-                stack: recordTableUtils.getTableLogStack(scope.tableModel, logService.getStackElement(logService.logStackTypes.entity, reference.table, reference.filterLogInfo))
+        function containerDetails(scope) {
+            return {
+                displayMode: scope.config.displayMode,
+                containerIndex: scope.config.containerIndex
             };
+        }
+
+        function getLogAction(scope, actionVerb) {
+            return recordTableUtils.getTableLogAction(scope.tableModel, logService.logStackPaths.ENTITY, actionVerb);
+        }
+
+        function deleteReference(scope, reference, isRelated, isUnlink) {
+            var logObj = {
+                action: getLogAction(scope, isUnlink ? logService.logActions.UNLINK : logService.logActions.DELETE),
+                stack: scope.logStack
+            };
+            var emmitedMessageArgs = {};
+            if (isRelated) {
+                emmitedMessageArgs = containerDetails(scope);
+            }
 
             if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
                 var onError = function (response) {
@@ -26,8 +41,8 @@
 
                     // log the opening of cancelation modal
                     logService.logClientAction({
-                        action: recordTableUtils.getTableLogAction(scope.tableModel, logService.logStackPaths.entity, isUnlink ? logService.logActions.unlinkCancel : logService.logActions.deleteCancel),
-                        stack: logObject.stack
+                        action: getLogAction(scope, isUnlink ? logService.logActions.UNLINK_CANCEL : logService.logActions.DELETE_CANCEL),
+                        stack: scope.logStack
                     }, reference.defaultLogInfo);
 
                     // if response is string, the modal has been dismissed
@@ -38,8 +53,8 @@
 
                 // log the opening of delete modal
                 logService.logClientAction({
-                    action: recordTableUtils.getTableLogAction(scope.tableModel, logService.logStackPaths.entity, isUnlink ? logService.logActions.unlinkIntend : logService.logActions.deleteIntend),
-                    stack: logObject.stack
+                    action: getLogAction(scope, isUnlink ? logService.logActions.UNLINK_INTEND : logService.logActions.DELETE_INTEND),
+                    stack: scope.logStack
                 }, reference.defaultLogInfo);
 
                 modalUtils.showModal({
@@ -51,18 +66,18 @@
                 }, function onSuccess(res) {
                     scope.$root.showSpinner = true;
                     // user accepted prompt to delete
-                    reference.delete(logObject).then(function deleteSuccess() {
+                    reference.delete(logObj).then(function deleteSuccess() {
                         scope.$root.showSpinner = false;
                         // tell parent controller data updated
-                        scope.$emit('record-deleted');
+                        scope.$emit('record-deleted', emmitedMessageArgs);
                     }).catch(onError);
                 }, onError, false);
             } else {
                 scope.$root.showSpinner = true;
-                reference.delete(logObject).then(function deleteSuccess() {
+                reference.delete(logObj).then(function deleteSuccess() {
                     scope.$root.showSpinner = false;
                     // tell parent controller data updated
-                    scope.$emit('record-deleted');
+                    scope.$emit('record-deleted', emmitedMessageArgs);
 
                 }).catch(function (error) {
                     scope.$root.showSpinner = false;
@@ -77,17 +92,9 @@
             scope: {
                 tuple: '=',
                 rowValues: '=', // tuple's values
-                context: '=',
-                config: '=',    // {viewable, editable, deletable, selectMode}
                 onRowClickBind: '=?',
-                // the tuple of the parent reference (not the reference that this ellipsis is based on)
-                // in popups and related: the main page tuple, otherwise: it will be empty
-                parentTuple: '=?',
                 selected: '=',
                 selectDisabled: "=?",
-                displayMode: "@",
-                parentReference: "=?",
-                columnModels: "=",
                 tableModel: "="
             },
             link: function (scope, element) {
@@ -98,55 +105,76 @@
                     scope.hideContent = false;
                     scope.linkText = "more";
                     scope.maxHeightStyle = { };
+
                     scope.noSelect = modalBox.noSelect;
                     scope.singleSelect = modalBox.singleSelectMode;
                     scope.multiSelect = modalBox.multiSelectMode;
                     scope.defaultDisplayname = defaultDisplayname;
+                    scope.config = scope.tableModel.config;
 
-                    var editLink = null;
+                    var tupleReference = scope.tuple.reference,
+                        isRelated = scope.config.displayMode.indexOf(recordsetDisplayModes.related) === 0,
+                        associationRef;
 
-                    // TODO LOG edit goes to the association table, should it?
-
-                    // unlink button should only show up in related mode
-                    if (scope.displayMode.indexOf(recordsetDisplayModes.related) === 0 && scope.parentTuple) {
-                        scope.associationRef = scope.tuple.getAssociationRef(scope.parentTuple.data);
+                    // view link
+                    if (scope.config.viewable) {
+                        scope.viewLink = tupleReference.contextualize.detailed.appLink;
                     }
 
-                    if (scope.config.viewable)
-                        scope.viewLink = scope.tuple.reference.contextualize.detailed.appLink;
+                    // if tupleReference is not defined
+                    // this has been added for case of facet picker, in this case we don't want edit and delete links anyways.
+                    if (!tupleReference) return;
 
-                    if (scope.config.editable && scope.associationRef)
-                        editLink = scope.associationRef.contextualize.entryEdit.appLink;
+                    // all the row level actions should use this stack
+                    scope.logStack = recordTableUtils.getTableLogStack(
+                        scope.tableModel,
+                        logService.getStackElement(logService.logStackTypes.ENTITY, tupleReference.table, tupleReference.filterLogInfo)
+                    );
 
-                    else if (scope.config.editable)
-                        editLink = scope.tuple.reference.contextualize.entryEdit.appLink;
-
-
-                    if (editLink) {
+                    // edit button
+                    if (scope.config.editable && tupleReference.canUpdate) {
                         scope.edit = function () {
                             var id = MathUtils.getRandomInt(0, Number.MAX_SAFE_INTEGER);
-                            var link = editLink + '?invalidate=' + UriUtils.fixedEncodeURIComponent(id);
-                            $window.open(link, '_blank');
-                            scope.$emit("edit-request", {"id": id, "schema": scope.tuple.reference.location.schemaName, "table": scope.tuple.reference.location.tableName});
+
+                            var editLink = editLink = tupleReference.contextualize.entryEdit.appLink;
+                            var qCharacter = editLink.indexOf("?") !== -1 ? "&" : "?";
+                            $window.open(editLink + qCharacter + 'invalidate=' + UriUtils.fixedEncodeURIComponent(id), '_blank');
+
+                            var args = {};
+                            if (isRelated) {
+                                args = containerDetails;
+                            }
+                            args.id = id;
+                            scope.$emit("edit-request", args);
+
+                            logService.logClientAction({
+                                action: getLogAction(scope, logService.logActions.EDIT_INTEND),
+                                stack: scope.logStack
+                            }, tupleReference.defaultLogInfo);
                         };
                     }
 
-                    // TODO: why do we need to verify the context?
-                    // NOTE: unlink only makes sense in the context of record app because there is a parent tuple
-                    // there is no concept of an association in other apps (no parent)
-                    scope.isUnLink = (scope.config.deletable && scope.context.indexOf("compact/brief") === 0 && scope.associationRef);
+                    // unlink button should only show up in related mode
+                    if (isRelated && scope.tableModel.parentTuple) {
+                        associationRef = scope.tuple.getAssociationRef(scope.tableModel.parentTuple.data);
+                    }
 
-                    if (scope.isUnLink) {
-                        var associatedRefTuples = [];
-                        // define unlink function
-                        scope.unlink = function() {
-                            deleteReference(scope, scope.associationRef, true);
-                        };
-                    } else if (scope.config.deletable) {
-                        // define delete function
-                        scope.delete = function() {
-                            deleteReference(scope, scope.tuple.reference);
-                        };
+                    // delete/unlink button
+                    if (scope.config.deletable) {
+                        if (associationRef) {
+                            if (associationRef.canDelete) {
+                                // define unlink function
+                                scope.unlink = function() {
+                                    deleteReference(scope, associationRef, isRelated, true);
+                                };
+                            }
+                        }
+                        else if (tupleReference.canDelete) {
+                            // define delete function
+                            scope.delete = function() {
+                                deleteReference(scope, tupleReference, isRelated);
+                            };
+                        }
                     }
                 };
 
@@ -155,6 +183,8 @@
 
                 scope.onSelect = function($event) {
                     var args = {"tuple": scope.tuple};
+
+                    // call the call-backs
                     if (scope.onRowClickBind) {
                         scope.onRowClickBind(args, $event);
                     } else if (scope.onRowClick) {

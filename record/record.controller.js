@@ -3,14 +3,14 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordAppUtils', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
-        function RecordController(AlertsService, ConfigUtils, DataUtils, ERMrest, ErrorService, logService, MathUtils, messageMap, modalBox, modalUtils, recordAppUtils, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
+    .controller('RecordController', ['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordAppUtils', 'recordCreate', 'recordsetDisplayModes', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
+        function RecordController(AlertsService, ConfigUtils, DataUtils, ERMrest, ErrorService, logService, MathUtils, messageMap, modalBox, modalUtils, recordAppUtils, recordCreate, recordsetDisplayModes, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
 
         var initialHref = $window.location.href;
         var mainContainerEl = angular.element(document.getElementsByClassName('main-container')[0]);
         var addRecordRequests = {}; // <generated unique id : reference of related table>
-        var editRecordRequests = {}; // generated id: {schemaName, tableName}
+        var editRecordRequests = {}; // generated id: {displayMode: "", containerIndex: integer)}
         var updated = {};
         var completed = {};
         var modalUpdate = false;
@@ -37,7 +37,7 @@
         }
 
         vm.toggleSidebar = function() {
-            var action = ($rootScope.recordSidePanOpen ? logService.logActions.tocHide : logService.logActions.tocShow );
+            var action = ($rootScope.recordSidePanOpen ? logService.logActions.TOC_HIDE : logService.logActions.TOC_SHOW );
             logService.logClientAction({
                 action: logService.getActionString("", action),
                 stack: logService.getStackObject()
@@ -87,7 +87,7 @@
         vm.deleteRecord = function() {
             var errorData = {};
             var logObj = {
-                action: logService.getActionString("", logService.logActions.delete),
+                action: logService.getActionString("", logService.logActions.DELETE),
                 stack: logService.getStackObject()
             };
             $rootScope.reference.delete(logObj).then(function deleteSuccess() {
@@ -122,7 +122,7 @@
             params.versionDate = UiUtils.versionDate(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
 
             var snaptimeHeader = {
-                action: logService.getActionString("", logService.logActions.openSharePopup),
+                action: logService.getActionString("", logService.logActions.SHARE_OPEN),
                 stack: logService.getStackObject(),
                 catalog: ref.defaultLogInfo.catalog,
                 schema_table: ref.defaultLogInfo.schema_table
@@ -235,17 +235,17 @@
             var tableModel = dataModel;
             if (dataModel.tableModel) tableModel = dataModel.tableModel;
 
-            var action = dataModel.isTableDisplay ? logService.logActions.relatedMkdnDisplay : logService.logActions.relatedTableDisplay;
+            var action = dataModel.isTableDisplay ? logService.logActions.RELATED_DISPLAY_MARKDOWN : logService.logActions.RELATED_DISPLAY_TABLE;
             logService.logClientAction({
                 action: logService.getActionString(tableModel.logStackPath, action),
-                stack: tableModel.logObject.stack
+                stack: tableModel.logStack
             }, tableModel.reference.defaultLogInfo);
 
             dataModel.isTableDisplay = !dataModel.isTableDisplay;
         };
 
         vm.toggleRelatedTables = function() {
-            var action = ($rootScope.showEmptyRelatedTables ? logService.logActions.hideEmptyRelated : logService.logActions.showEmptyRelated);
+            var action = ($rootScope.showEmptyRelatedTables ? logService.logActions.EMPTY_RELATED_HIDE : logService.logActions.EMPTY_RELATED_SHOW);
             logService.logClientAction({
                 action: logService.getActionString("", action),
                 stack: logService.getStackObject()
@@ -260,11 +260,11 @@
         };
 
         vm.logAccordionClick = function (rtm) {
-            var action = (rtm.open ? logService.logActions.close : logService.logActions.open);
+            var action = (rtm.open ? logService.logActions.CLOSE : logService.logActions.OPEN);
 
             logService.logClientAction({
                 action: logService.getActionString(rtm.tableModel.logStackPath, action),
-                stack: rtm.tableModel.logObject.stack
+                stack: rtm.tableModel.logStack
             }, rtm.tableModel.reference.defaultLogInfo);
         }
 
@@ -396,7 +396,9 @@
             };
         }
 
-        vm.addRelatedRecord = function(ref) {
+        vm.addRelatedRecord = function(tableModel) {
+            var ref = tableModel.reference;
+
             event.preventDefault();
             event.stopPropagation();
             var cookie = getPrefillCookieObject(ref);
@@ -407,6 +409,12 @@
                 return;
             }
 
+            // log the client action
+            logService.logClientAction({
+                action: logService.getActionString(tableModel.logStackPath, logService.logActions.ADD_INTEND),
+                stack: tableModel.logStack
+            }, tableModel.reference.defaultLogInfo);
+
             // 2. Generate a unique cookie name and set it to expire after 24hrs.
             var COOKIE_NAME = 'recordedit-' + MathUtils.getRandomInt(0, Number.MAX_SAFE_INTEGER);
             $cookies.putObject(COOKIE_NAME, cookie, {
@@ -416,7 +424,10 @@
             // Generate a unique id for this request
             // append it to the URL
             var referrer_id = 'recordedit-' + MathUtils.getRandomInt(0, Number.MAX_SAFE_INTEGER);
-            addRecordRequests[referrer_id] = ref.uri;
+            addRecordRequests[referrer_id] = {
+                displayMode: tableModel.config.displayMode,
+                containerIndex: tableModel.config.containerIndex
+            };
 
             // 3. Get appLink, append ?prefill=[COOKIE_NAME]&referrer=[referrer_id]
             var appLink = ref.unfilteredReference.contextualize.entryCreate.appLink;
@@ -424,22 +435,17 @@
                 'prefill=' + UriUtils.fixedEncodeURIComponent(COOKIE_NAME) +
                 '&invalidate=' + UriUtils.fixedEncodeURIComponent(referrer_id);
 
-            // TODO LOG
-            // logService.logClientAction({
-            //     action: logService.getActionString(relatedObj.rtm.tableModel.logStackPath, logService.logActions.addIntend),
-            //     stack: relatedObj.rtm.tableModel.logObject.stack
-            // }, relatedObj.rtm.tableModel.reference.defaultLogInfo);
-
             // 4. Redirect to the url in a new tab
             $window.open(appLink, '_blank');
         };
 
         $scope.$on("edit-request", function(event, args) {
-            editRecordRequests[args.id] = {"schema": args.schema, "table": args.table};
+            editRecordRequests[args.id] = {"displayMode": args.displayMode, "containerIndex": args.containerIndex};
         });
 
         $scope.$on('record-deleted', function (event, args) {
-            recordAppUtils.updateRecordPage(true);
+            // TODO LOG how to tell the caller that which related was the main one
+            recordAppUtils.updateRecordPage(true, logService.updateCauses.RELATED_DELETE);
         });
 
         // When page gets focus, check cookie for completed requests
@@ -450,6 +456,9 @@
 
         var onfocusEventCall = function(isModalUpdate) {
             if ($rootScope.loading === false) {
+                // TODO LOG update vs. create?
+                // TODO LOG how to tell the caller that which related was the main one
+
                 var idxInbFk;
                 completed = {};
                 for (var id in addRecordRequests) {
@@ -469,7 +478,7 @@
                 if (isModalUpdate || Object.keys(completed).length > 0 || Object.keys(updated).length > 0) {
                     updated = {};
                     //NOTE we're updating the whole page
-                    recordAppUtils.updateRecordPage(true);
+                    recordAppUtils.updateRecordPage(true, logService.updateCauses.RELATED_UPDATE);
                 }
             }
 
@@ -477,7 +486,7 @@
 
         // function called from form.controller.js to notify record that an entity was just updated
         window.updated = function(id) {
-            updated[editRecordRequests[id].schema + ":" + editRecordRequests[id].table] = true;
+            updated[editRecordRequests[id].displayMode + ":" + editRecordRequests[id].containerIndex] = true;
             delete editRecordRequests[id];
         }
 
@@ -514,7 +523,7 @@
         /*** scroll to events ***/
         // scroll to top button
         $scope.scrollToTop = function (fromToc) {
-            var action = (fromToc ? logService.logActions.tocScrollTop : logService.logActions.scrollTop);
+            var action = (fromToc ? logService.logActions.TOC_SCROLL_TOP : logService.logActions.SCROLL_TOP);
             logService.logClientAction({
                 action: logService.getActionString("", action),
                 stack: logService.getStackObject()
@@ -531,8 +540,8 @@
             var relatedObj = determineScrollElement(sectionId);
 
             logService.logClientAction({
-                action: logService.getActionString(relatedObj.rtm.tableModel.logStackPath, logService.logActions.tocScrollToRelated),
-                stack: relatedObj.rtm.tableModel.logObject.stack
+                action: logService.getActionString(relatedObj.rtm.tableModel.logStackPath, logService.logActions.TOC_SCROLL_RELATED),
+                stack: relatedObj.rtm.tableModel.logStack
             }, relatedObj.rtm.tableModel.reference.defaultLogInfo);
 
             scrollToElement(relatedObj.element);

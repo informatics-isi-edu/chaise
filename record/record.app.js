@@ -107,14 +107,15 @@
                 if (isQueryParameter) logObj.cqp = 1;
 
 
-                $rootScope.logStackPath = logService.logStackPaths.entity;
+                $rootScope.logStackPath = logService.logStackPaths.ENTITY;
                 $rootScope.logStack = [
                     logService.getStackElement(
-                        logService.logStackTypes.entity,
+                        logService.logStackTypes.ENTITY,
                         $rootScope.reference.table,
                         $rootScope.reference.filterLogInfo
                     )
                 ];
+                $rootScope.updateCauses = [];
 
                 return recordAppUtils.readMainEntity(false, logObj);
             }).then(function (page) {
@@ -153,13 +154,14 @@
                             isLoading: true,
                             isAggregate: true,
                             dirtyResult: true,
-                            logObject: {
-                                stack: logService.getStackObject(logService.getStackElement(
-                                    logService.logStackTypes.pseudoColumn,
+                            logStack: logService.getStackObject(
+                                logService.getStackElement(
+                                    logService.logStackTypes.PSEUDO_COLUMN,
                                     col.table,
                                     { source: col.compressedDataSource, aggregate: col.aggregateFn}
-                                ))
-                            }
+                                )
+                            ),
+                            updateCauses: []
                         };
                         $rootScope.hasAggregate = true;
                     }
@@ -172,7 +174,7 @@
                             isInline: true,
                             isTableDisplay: reference.display.type == 'table',
                             displayname: reference.displayname,
-                            tableModel: recordAppUtils.getTableModel(reference, "compact/brief/inline", true)
+                            tableModel: recordAppUtils.getTableModel(reference, index, true)
                         };
                         $rootScope.hasInline = true;
                     }
@@ -196,7 +198,7 @@
                         open: openByDefault,
                         isTableDisplay: ref.display.type == 'table',
                         displayname: ref.displayname,
-                        tableModel: recordAppUtils.getTableModel(ref, "compact/brief"),
+                        tableModel: recordAppUtils.getTableModel(ref, index),
                         baseTableName: $rootScope.reference.displayname
                     });
                 });

@@ -45,15 +45,14 @@
                 return;
             }
 
-            var i = 0, model, logObject;
+            var i = 0, model;
 
             // inline entities
             for (i = 0; i < $rootScope.columnModels.length && $rootScope.hasInline; i++) {
                 model = $rootScope.columnModels[i];
                 if (!model.isInline || !model.tableModel.dirtyResult) continue;
                 if (!_haveFreeSlot()) return;
-                // TODO LOG causes
-                recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate, !isUpdate, true);
+                recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate, true);
             }
 
             // main aggregates
@@ -66,8 +65,7 @@
                 model = $rootScope.relatedTableModels[i];
                 if (!model.tableModel.dirtyResult) continue;
                 if (!_haveFreeSlot()) return;
-                // TODO LOG causes
-                recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate, !isUpdate, true);
+                recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate, true);
             }
 
             // aggregates in inline
@@ -75,7 +73,7 @@
                 model = $rootScope.columnModels[i];
                 if (!model.isInline || model.tableModel.dirtyResult) continue;
                 if (!_haveFreeSlot()) return;
-                recordTableUtils.updateColumnAggregates(model.tableModel, _processRequests, !isUpdate, !isUpdate);
+                recordTableUtils.updateColumnAggregates(model.tableModel, _processRequests, !isUpdate);
             }
 
             // aggregates in related
@@ -83,7 +81,7 @@
                 model = $rootScope.relatedTableModels[i];
                 if (model.tableModel.dirtyResult) continue;
                 if (!_haveFreeSlot()) return;
-                recordTableUtils.updateColumnAggregates(model.tableModel, _processRequests, !isUpdate, !isUpdate);
+                recordTableUtils.updateColumnAggregates(model.tableModel, _processRequests, !isUpdate);
             }
         }
 
@@ -93,15 +91,19 @@
          * @param  {Object} the extra information that we want to log with the main request
          * @returns {Promise} It will be resolved with Page object.
          */
-        function readMainEntity(isUpdate, logObject) {
+        function readMainEntity(isUpdate, logObj) {
             var defer = $q.defer();
 
-            logObject = logObject || {};
-            // TODO LOG causes
-            var action = isUpdate ? logService.logActions.reload : logService.logActions.load;
-            logObject.action = logService.getActionString("", action);
-            logObject.stack = $rootScope.logStack;
-            $rootScope.reference.read(1, logObject).then(function (page) {
+            logObj = logObj || {};
+            var action = isUpdate ? logService.logActions.RELOAD : logService.logActions.LOAD;
+            logObj.action = logService.getActionString("", action);
+            logObj.stack = logService.getStackObject();
+
+            var causes = (Array.isArray($rootScope.updateCauses) && $rootScope.updateCauses.length > 0) ? $rootScope.updateCauses : [];
+            if (causes.length > 0) {
+                logObj.stack = logService.addCausesToStack(logObj.stack, causes, $rootScope.updateStartTime);
+            }
+            $rootScope.reference.read(1, logObj).then(function (page) {
                 $log.info("Page: ", page);
 
                 /*
@@ -134,10 +136,15 @@
                 });
 
                 $rootScope.displayReady = true;
+
+                $rootScope.updateCauses = [];
+                $rootScope.updateStartTime = -1;
+
                 defer.resolve(page);
             }).catch(function (err) {
                 defer.reject(err);
             });
+
 
             return defer.promise;
         }
@@ -179,12 +186,13 @@
          */
         function _readMainColumnAggregate(columnModel, index, isUpdate, current) {
             var defer = $q.defer();
-            var logObj = columnModel.logObject;
 
-            var action = isUpdate ? logService.logActions.reload : logService.logActions.load;
-            var stackPath = logService.getStackPath("", logService.logStackPaths.pseudoColumn)
-            logObj.action = logService.getActionString(stackPath, action);
-
+            var action = isUpdate ? logService.logActions.RELOAD : logService.logActions.LOAD;
+            var stackPath = logService.getStackPath("", logService.logStackPaths.PSEUDO_COLUMN)
+            var logObj = {
+                action: logService.getActionString(stackPath, action),
+                stack: columnModel.logStack
+            };
             columnModel.column.getAggregatedValue($rootScope.page, logObj).then(function (values) {
                 columnModel.isLoading = false;
                 if ($rootScope.recordFlowControl.counter !== current) {
@@ -205,7 +213,7 @@
          * sets the flag and calls the flow-control function to update the record page.
          * @param  {Boolean} isUpdate indicates that the function has been triggered for update and not load.
          */
-        function updateRecordPage(isUpdate) {
+        function updateRecordPage(isUpdate, cause) {
 
             if (!isUpdate) {
                 $rootScope.recordFlowControl.occupiedSlots = 0;
@@ -213,8 +221,17 @@
             } else {
                 // we want to update the main entity on update
                 $rootScope.isMainDirty = true;
+
+                // the time that will be logged with the request
+                if (!Number.isInteger($rootScope.updateStartTime) || $rootScope.updateStartTime === -1) {
+                    $rootScope.updateStartTime = ERMrest.getElapsedTime();
+                }
             }
             $rootScope.recordFlowControl.counter++;
+
+            if (cause && $rootScope.updateCauses.indexOf(cause) === -1) {
+                $rootScope.updateCauses.push(cause);
+            }
 
             $rootScope.columnModels.forEach(function (m) {
                 if (m.isAggregate) {
@@ -225,6 +242,14 @@
             });
             $rootScope.relatedTableModels.forEach(function (m) {
                 m.tableModel.dirtyResult = true;
+
+                if (!Number.isInteger(m.tableModel.updateStartTime) || m.tableModel.updateStartTime === -1) {
+                    m.tableModel.updateStartTime = ERMrest.getElapsedTime();
+                }
+
+                if (cause && m.tableModel.updateCauses.indexOf(cause) === -1) {
+                    m.tableModel.updateCauses.push(cause);
+                }
             });
 
             $rootScope.pauseRequests = false;
@@ -275,22 +300,21 @@
          * @param  {string} context   the context string
          * @param  {boolean} isInline whether the table is inline or not
          */
-        function getTableModel (reference, context, isInline) {
+        function getTableModel (reference, index, isInline) {
             var stackElement = logService.getStackElement(
-                logService.logStackTypes.related,
+                logService.logStackTypes.RELATED,
                 reference.table,
                 {source: reference.compressedDataSource}
             );
-            var currentStackPath = isInline ? logService.logStackPaths.relatedInline : logService.logStackPaths.related;
+            var currentStackPath = isInline ? logService.logStackPaths.RELATED_INLINE : logService.logStackPaths.RELATED;
             var logStackPath = logService.getStackPath("", currentStackPath);
 
             return {
-                reference: reference,
                 parentReference: $rootScope.reference,
+                parentTuple: $rootScope.tuple,
+                reference: reference,
                 pageLimit: getPageSize(reference),
                 isTableDisplay: reference.display.type == 'table',
-                parentTuple: $rootScope.tuple,
-                context: context,
                 enableSort: true,
                 rowValues: [],
                 selectedRows: [],//TODO migth not be needed
@@ -302,12 +326,13 @@
                     editable: $rootScope.modifyRecord,
                     deletable: $rootScope.modifyRecord && $rootScope.showDeleteButton,
                     selectMode: modalBox.noSelect,
-                    displayMode: (context.indexOf("inline") > -1 ? recordsetDisplayModes.inline : recordsetDisplayModes.related)
+                    displayMode: (isInline ? recordsetDisplayModes.inline : recordsetDisplayModes.related),
+                    containerIndex: index // TODO (could be optimized) can this be done in a better way?
                 },
-                logObject: {
-                    stack: logService.getStackObject(stackElement)
-                },
+                logStack: logService.getStackObject(stackElement),
                 logStackPath: logStackPath,
+                updateCauses: [], // might not be needed
+                updateStartTime: -1,
                 flowControlObject: $rootScope.recordFlowControl,
                 queryTimeoutTooltip: messageMap.queryTimeoutTooltip
             };

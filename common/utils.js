@@ -115,6 +115,7 @@
         "queryTimeoutTooltip": "Request timeout: data cannot be retrieved. Refresh the page later to try again."
     })
 
+    // TODO LOG should be removed
     .constant("logActions", {
 
         // actions
@@ -1079,6 +1080,18 @@
          * '?catalog/schema:table/limit=20' where limit is a column name
          */
         function getQueryParam(url, key) {
+            return getQueryParams(url)[key];
+        }
+
+        /**
+         * Given a location href, return all the query parameters available on the url.
+         * @param {String} url - the full url for the current page
+         * @returns {Object} an object, containing the query parameters.
+         *
+         * Note: This won't handle the case where the url might be like this:
+         * '?catalog/schema:table/limit=20' where limit is a column name
+         */
+        function getQueryParams(url) {
             var params = {};
             var idx = url.lastIndexOf("?");
             if (idx !== -1) {
@@ -1088,7 +1101,7 @@
                     params[decodeURIComponent(q_parts[0])] = decodeURIComponent(q_parts[1]);
                 }
             }
-            return params[key];
+            return params;
         }
 
         /**
@@ -1155,6 +1168,7 @@
             getCatalogId: getCatalogId,
             getHash: getHash,
             getQueryParam: getQueryParam,
+            getQueryParams: getQueryParams,
             isBrowserIE: isBrowserIE,
             isSameOrigin: isSameOrigin,
             parsedFilterToERMrestFilter: parsedFilterToERMrestFilter,
@@ -2073,7 +2087,7 @@
         }
     }])
 
-    .directive('chaiseSearchInput', ['UriUtils', '$timeout', function (UriUtils, $timeout) {
+    .directive('chaiseSearchInput', ['logService', 'UriUtils', '$timeout', function (logService, UriUtils, $timeout) {
 
         return {
             restrict: 'E',
@@ -2101,10 +2115,10 @@
                 }
 
                 // will be called when users click on enter or submit button
-                scope.enterPressed = function() {
+                scope.enterPressed = function(isButton) {
                     if (scope.disabled) return;
                     scope.inputChangedPromise = null;
-                    scope.searchCallback(scope.searchTerm);
+                    scope.searchCallback(scope.searchTerm, isButton ? logService.logActions.SEARCH_BOX_CLICK : logService.logActions.SEARCH_BOX_ENTER);
                 };
 
                 // will be called everytime users change the input
@@ -2118,7 +2132,7 @@
                     // Wait for the user to stop typing for a second and then fire the search
                     scope.inputChangedPromise = $timeout(function() {
                         scope.inputChangedPromise = null;
-                        scope.searchCallback(scope.searchTerm);
+                        scope.searchCallback(scope.searchTerm, logService.logActions.SEARCH_BOX_AUTO);
                     }, AUTO_SEARCH_TIMEOUT);
                 };
 
@@ -2126,7 +2140,7 @@
                 scope.clearSearch = function() {
                     if (scope.disabled) return;
                     if (scope.searchTerm) {
-                        scope.searchCallback(null);
+                        scope.searchCallback(null, logService.logActions.SEARCH_BOX_CLEAR);
                     }
                     scope.searchTerm = null;
                 };
@@ -2334,117 +2348,159 @@
             // general
 
             // - server:
-            load: clientPathActionSeparator + "load",
-            reload: clientPathActionSeparator + "reload",
-            autoReload: clientPathActionSeparator + "auto-reload",
-            delete: clientPathActionSeparator + "delete",
-            export: clientPathActionSeparator + "export",
+            LOAD: clientPathActionSeparator + "load",
+            RELOAD: clientPathActionSeparator + "reload",
+            DELETE: clientPathActionSeparator + "delete",
+            EXPORT: clientPathActionSeparator + "export",
 
             // - client:
-            permalinkLeft: "permalink" + clientPathActionSeparator + "lclick",
-            permalinkRight: "permalink" + clientPathActionSeparator + "rclick",
-            cancel: clientPathActionSeparator + "cancel",
-            open: clientPathActionSeparator + "open",
-            close: clientPathActionSeparator + "close",
-            openExport: "export" + clientPathActionSeparator + "open",
-            addIntend: "add" + clientPathActionSeparator + "intend",
-            deleteIntend: "delete" + clientPathActionSeparator + "intend",
-            deleteCancel: "delete" + clientPathActionSeparator + "cancel",
+            CANCEL: clientPathActionSeparator + "cancel",
+            OPEN: clientPathActionSeparator + "open",
+            CLOSE: clientPathActionSeparator + "close",
+            EXPORT_OPEN: "export" + clientPathActionSeparator + "open",
+            ADD_INTEND: "add" + clientPathActionSeparator + "intend",
+            EDIT_INTEND: "edit" + clientPathActionSeparator + "intend",
+            DELETE_INTEND: "delete" + clientPathActionSeparator + "intend",
+            DELETE_CANCEL: "delete" + clientPathActionSeparator + "cancel",
 
-            // recordset:
+            // recordset app and table:
 
             //   - server:
-            count: clientPathActionSeparator + "count",
-            recount: clientPathActionSeparator + "recount",
-            histogramLoad: "histogram" + clientPathActionSeparator + "load",
-            histogramReload: "histogram" + clientPathActionSeparator + "reload",
-            loadPreselectedFacets: "preselect" + clientPathActionSeparator + "preload", // TODO LOG use load?
+            COUNT: clientPathActionSeparator + "count",
+            RECOUNT: clientPathActionSeparator + "recount",
+            HISTOGRAM_LOAD: "histogram" + clientPathActionSeparator + "load",
+            HISTOGRAM_RELOAD: "histogram" + clientPathActionSeparator + "reload",
+            PRESELECTED_FACETS_LOAD: "preselect" + clientPathActionSeparator + "preload",
 
             //   - client:
-            pageSizeDropdownOpen: "page-size" + clientPathActionSeparator + "open",
-            facetPanelShow: "panel" + clientPathActionSeparator + "show",
-            facetPanelHide: "panel" + clientPathActionSeparator + "hide",
-            pageSelectAll: "page" + clientPathActionSeparator + "select-all",
-            pageDeSelectAll: "page" + clientPathActionSeparator + "deselect-all",
-            clearAllSelection: "selection" + clientPathActionSeparator + "reset",
-            facetScrollTo: "breadcrumb" + clientPathActionSeparator + "scroll-to",
-
-            // record:
-
-            // - server:
-            openSharePopup: "share" + clientPathActionSeparator + "open",
-            loadDomain: clientPathActionSeparator + "load-domain",
-            reloadDomain: clientPathActionSeparator + "reload-domain",
-            link: clientPathActionSeparator + "link",
-
-            // - client:
-            tocShow: "toc" +  clientPathActionSeparator + "show",
-            tocHide: "toc" +  clientPathActionSeparator + "hide",
-            relatedTableDisplay: "display/table" + clientPathActionSeparator + "show",
-            relatedMkdnDisplay: "display/mkdn" + clientPathActionSeparator + "show",
-            showEmptyRelated: "show-empty" + clientPathActionSeparator + "show",
-            hideEmptyRelated: "show-empty" + clientPathActionSeparator + "hide",
-            unlinkIntend: "delete" + clientPathActionSeparator + "intend",
-            unlinkCancel: "delete" + clientPathActionSeparator + "cancel",
-
-            scrollTop: clientPathActionSeparator + "scroll-top",
-            tocScrollTop: "toc/main" + clientPathActionSeparator + "scroll-to",
-            tocScrollToRelated: "toc/section" + clientPathActionSeparator + "scroll-to",
-
-            shareLiveLinkCopy: "share/live" + clientPathActionSeparator + "copy",
-            shareVersionLinkCopy: "share/version" + clientPathActionSeparator + "copy",
-
-            downloadBibtex: "cite/bibtex" + clientPathActionSeparator + "download",
+            PERMALINK_LEFT: "permalink" + clientPathActionSeparator + "lclick",
+            PERMALINK_RIGHT: "permalink" + clientPathActionSeparator + "rclick",
+            PAGE_SIZE_OEPN: "page-size" + clientPathActionSeparator + "open",
+            PAGE_SIZE_SELECT: "page-size" + clientPathActionSeparator + "select",
+            FACET_PANEL_SHOW: "panel" + clientPathActionSeparator + "show",
+            FACET_PANEL_HIDE: "panel" + clientPathActionSeparator + "hide",
+            PAGE_SELECT_ALL: "page" + clientPathActionSeparator + "select-all",
+            PAGE_DESELECT_ALL: "page" + clientPathActionSeparator + "deselect-all",
+            PAGE_NEXT: "page" + clientPathActionSeparator + "next",
+            PAGE_PREV: "page" + clientPathActionSeparator + "previous",
+            SORT: clientPathActionSeparator + "sort",
+            SELECTION_CLEAR: "selection" + clientPathActionSeparator + "clear",
+            SELECTION_CLEAR_ALL: "selection" + clientPathActionSeparator + "clear-all",
+            BREADCRUMB_CLEAR: "breadcrumb" + clientPathActionSeparator + "clear",
+            BREADCRUMB_CLEAR_ALL: "breadcrumb" + clientPathActionSeparator + "clear-all",
+            BREADCRUMB_CLEAR_CFACET: "breadcrumb" + clientPathActionSeparator + "clear-cfacet",
+            BREADCRUMB_CLEAR_CUSTOM: "breadcrumb" + clientPathActionSeparator + "clear-custom",
+            BREADCRUMB_SCROLL_TO: "breadcrumb" + clientPathActionSeparator + "scroll-to",
+            SEARCH_BOX_AUTO: "search-box" + clientPathActionSeparator + "search-delay",
+            SEARCH_BOX_CLEAR: "search-box" + clientPathActionSeparator + "clear",
+            SEARCH_BOX_CLICK: "search-box" + clientPathActionSeparator + "search-click",
+            SEARCH_BOX_ENTER: "search-box" + clientPathActionSeparator + "search-enter",
+            FACET_RETRY: clientPathActionSeparator + "retry",
 
 
-            // recordedit:
+            // record app:
 
             // - server:
-            foreignKeyPreselect: clientPathActionSeparator +  "preselect",
-            foreignKeyDefault: clientPathActionSeparator + "default",
+            SHARE_OPEN: "share" + clientPathActionSeparator + "open",
+            LOAD_DOMAIN: clientPathActionSeparator + "load-domain", // add pure and binary first request
+            RELOAD_DOMAIN: clientPathActionSeparator + "reload-domain",
+            LINK: clientPathActionSeparator + "link",
+            UNLINK: clientPathActionSeparator + "unlink",
 
             // - client:
-            cloneForm: clientPathActionSeparator + "clone",
-            cloneXForm: clientPathActionSeparator +  "clone-x",
-            removeForm: clientPathActionSeparator + "remove",
-            setAllOpen: "set-all" + clientPathActionSeparator + "open",
-            setAllClose: "set-all" + clientPathActionSeparator + "close",
-            setAllCancel: "set-all" + clientPathActionSeparator + "cancel",
-            setAllApply: "set-all" + clientPathActionSeparator + "apply",
-            setAllClear: "set-all" + clientPathActionSeparator + "clear"
+            TOC_SHOW: "toc" +  clientPathActionSeparator + "show",
+            TOC_HIDE: "toc" +  clientPathActionSeparator + "hide",
+            RELATED_DISPLAY_TABLE: "display/table" + clientPathActionSeparator + "show",
+            RELATED_DISPLAY_MARKDOWN: "display/mkdn" + clientPathActionSeparator + "show",
+            EMPTY_RELATED_SHOW: "show-empty" + clientPathActionSeparator + "show",
+            EMPTY_RELATED_HIDE: "show-empty" + clientPathActionSeparator + "hide",
+            UNLINK_INTEND: "unlink" + clientPathActionSeparator + "intend",
+            UNLINK_CANCEL: "unlink" + clientPathActionSeparator + "cancel",
+
+            SCROLL_TOP: clientPathActionSeparator + "scroll-top",
+            TOC_SCROLL_TOP: "toc/main" + clientPathActionSeparator + "scroll-to",
+            TOC_SCROLL_RELATED: "toc/section" + clientPathActionSeparator + "scroll-to",
+
+            SHARE_LIVE_LINK_COPY: "share/live" + clientPathActionSeparator + "copy",
+            SHARE_VERSIONED_LINK_COPY: "share/version" + clientPathActionSeparator + "copy",
+
+            CITE_BIBTEXT_DOWNLOAD: "cite/bibtex" + clientPathActionSeparator + "download",
+
+
+            // recordedit app:
+
+            // - server:
+            FOREIGN_KEY_PRESELECT: clientPathActionSeparator +  "preselect",
+            FOREIGN_KEY_DEFAULT: clientPathActionSeparator + "default",
+            CREATE: clientPathActionSeparator + "create",
+            UPDATE: clientPathActionSeparator + "update",
+
+            // - client:
+            FORM_CLONE: clientPathActionSeparator + "clone",
+            FORM_CLONE_X: clientPathActionSeparator +  "clone-x",
+            FORM_REMOVE: clientPathActionSeparator + "remove",
+            SET_ALL_OPEN: "set-all" + clientPathActionSeparator + "open",
+            SET_ALL_CLOSE: "set-all" + clientPathActionSeparator + "close",
+            SET_ALL_CANCEL: "set-all" + clientPathActionSeparator + "cancel",
+            SET_ALL_APPLY: "set-all" + clientPathActionSeparator + "apply",
+            SET_ALL_CLEAR: "set-all" + clientPathActionSeparator + "clear"
 
         });
 
         var logStackTypes = Object.freeze({
-            entity: "entity",
-            set: "set",
-            related: "related",
-            foreignKey: "fk",
-            column: "col",
-            pseudoColumn: "pcol",
-            facet: "facet"
+            ENTITY: "entity",
+            SET: "set",
+            RELATED: "related",
+            FOREIGN_KEY: "fk",
+            COLUMN: "col",
+            PSEUDO_COLUMN: "pcol",
+            FACET: "facet"
         });
 
         var logStackPaths = Object.freeze({
-            entity: "entity",
-            set: "set",
-            column: "col",
-            pseudoColumn: "pcol",
-            foreignKey: "fk",
-            facet: "facet",
-            related: "related",
-            relatedInline: "related-inline",
-            addPureBinaryPopup: "related-link-picker",
-            foreignKeyPopup: "fk-picker",
-            facetPopup: "facet-picker"
+            ENTITY: "entity",
+            SET: "set",
+            COLUMN: "col",
+            PSEUDO_COLUMN: "pcol",
+            FOREIGN_KEY: "fk",
+            FACET: "facet",
+            RELATED: "related",
+            RELATED_INLINE: "related-inline",
+            ADD_PB_POPUP: "related-link-picker",
+            FOREIGN_KEY_POPUP: "fk-picker",
+            FACET_POPUP: "facet-picker"
         });
 
         var appModes = Object.freeze({
-            edit: "edit",
-            create: "create",
-            createCopy: "create-copy",
-            createPreselect: "create-preselect"
-        })
+            EDIT: "edit",
+            CREATE: "create",
+            CREATE_COPY: "create-copy",
+            CREATE_PRESELECT: "create-preselect"
+        });
+
+        var updateCauses = Object.freeze({
+            CLEAR_ALL: "clear-all", // clear all button
+            CLEAR_CFACET: "clear-cfacet",
+            CLEAR_CUSTOM_FILTER: "clear-custom-filter",
+            ENTITY_CREATE: "entity-create", // new rows has been created in the table
+            ENTITY_DELETE: "entity-delete", // a row in the table has been deleted
+            ENTITY_UPDATE: "entity-update", // a row in the table has been updated
+            FACET_CLEAR: "facet-clear", // a facet cleared
+            FACET_DESELECT: "facet-deselect", // a facet deselected
+            FACET_SELECT: "facet-select", // a facet selected
+            FACET_MODIFIED: "facet-modified", // facet changed in the modal
+            FACET_SEARCH_BOX: "facet-search-box", // facet search box changed
+            FACET_PLOT_RELAYOUT:  "facet-plot-relayout", // users interact with plot and we need to get new info for it
+            FACET_RETRY: "facet-retry", // users click on retry for a facet that errored out
+            PAGE_LIMIT: "page-limit", // change page limit
+            PAGE_NEXT: "page-next", // go to next page
+            PAGE_PREV: "page-prev", // go to previous page
+            RELATED_CREATE: "related-create", // new rows in one of the related (or inline) tables has been created
+            RELATED_DELETE: "related-delete", // a row in one of the related (or inline) tables has been deleted
+            RELATED_UPDATE: "related-update", // a row in one of the related (or inline) tables has been edited
+            SORT: "sort", // sort changed
+            SEARCH_BOX: "search-box" // search box value changed
+        });
 
         /**
          * Takes a header object, adds default logging info to it, and logs the request with ermrest
@@ -2495,6 +2551,9 @@
         }
 
         function updateStackFilterInfo(stack, filterLogInfo) {
+            if (!stack) {
+                stack = $rootScope.logStack;
+            }
             var lastStackElement = stack[stack.length-1];
             // TODO can be better? remove the existing filter info in stack
             ['cfacet', 'cfacet_str', 'cfacet_path', 'filters', 'custom_filters'].forEach(function (k) {
@@ -2506,6 +2565,33 @@
                 if (!filterLogInfo.hasOwnProperty(f)) continue;
                 lastStackElement[f] = filterLogInfo[f];
             }
+        }
+
+        function addCausesToStack(stack, causes, startTime) {
+            if (!stack) {
+                stack = $rootScope.logStack;
+            }
+            var newStack = JSON.parse(JSON.stringify(stack));
+            var lastStackElement = newStack[stack.length-1];
+            lastStackElement.causes = causes;
+            lastStackElement.start_time = startTime;
+            lastStackElement.current_time = ERMrest.getElapsedTime();
+            return newStack;
+        }
+
+        function addExtraInfoToStack(stack, extraInfo) {
+            if (!stack) {
+                stack = $rootScope.logStack;
+            }
+            var newStack = JSON.parse(JSON.stringify(stack));
+            var lastStackElement = newStack[stack.length-1];
+
+            for (var f in extraInfo) {
+                if (!extraInfo.hasOwnProperty(f)) continue;
+                lastStackElement[f] = extraInfo[f];
+            }
+
+            return newStack;
         }
 
         function getActionString(logStackPath, logActionPath) {
@@ -2521,12 +2607,15 @@
             logStackTypes: logStackTypes,
             logStackPaths: logStackPaths,
             logActions: logActions,
+            updateCauses: updateCauses,
             logClientAction: logClientAction,
             getActionString: getActionString,
             getStackElement: getStackElement,
             updateStackFilterInfo: updateStackFilterInfo,
+            addCausesToStack: addCausesToStack,
             getStackPath: getStackPath,
-            getStackObject: getStackObject
+            getStackObject: getStackObject,
+            addExtraInfoToStack: addExtraInfoToStack
         }
     }])
 
