@@ -234,6 +234,30 @@
                         }
                     });
 
+                    $timeout(function () {
+                        for(var i=0; i<scope.columnModels.length; i++) {
+                            var column = scope.columnModels[i].column;
+
+                            console.log(column.displayname.value + ": ", scope.rowValues[i].value);
+                            if (column.hasAggregate) {
+                            }
+                        }
+                        // TODO: PoC for sensor on TD with images
+                        var imageTD = element[0].children[2];
+                        new ResizeSensor(imageTD, function (dimensions) {
+                            // if TD.offsetHeight > the calculated maxRecordsetRowHeight
+                            // +10 to account for padding on TD element
+                            if (dimensions.height > (maxHeight)) {
+                                // iterate over each cell (TD), check it's height, and set overflow if necessary
+                                if (!userClicked) {
+                                    initializeOverflowLogic();
+                                }
+                            } else if (dimensions.height < (maxHeight)) {
+                                scope.overflow[2] = false;
+                            }
+                        });
+                    });
+
                     // reset overflows because new rows are available
                     $rootScope.$on('reference-modified', function() {
                         $timeout(function () {

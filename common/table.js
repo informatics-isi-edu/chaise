@@ -266,6 +266,8 @@
                         vm.page.tuples[valIndex]
                     );
 
+                    console.log(displayValue);
+
                     model.isLoading = false;
 
                     // if rowValues has not been completely populated yet, use pendingRowValues instead
@@ -278,6 +280,8 @@
                         vm.rowValues[valIndex][obj.index] = displayValue;
                     }
                 });
+                console.log("row values: ", vm.rowValues);
+                console.log("column models: ", vm.columnModels);
             });
 
         }
