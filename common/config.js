@@ -53,12 +53,14 @@
 
         // initialize dcctx object
         $window.dcctx = {
-            cid: appName,
-            pid: MathUtils.uuid(),
-            wid: $window.name,
+            contextHeaderParams: {
+                cid: appName,
+                pid: MathUtils.uuid(),
+                wid: $window.name
+            },
             hideNavbar: hideNavbar,
             version: version
-        }
+        };
         // set chaise configuration based on what is in `chaise-config.js` first
         ConfigUtils.setConfigJSON();
 
@@ -69,7 +71,7 @@
 
             if (catalogId) {
                 // the server object that can be used in other places
-                $window.dcctx.server = ERMrest.ermrestFactory.getServer(service, { cid: $window.dcctx.cid, pid: $window.dcctx.pid, wid: $window.dcctx.wid });
+                $window.dcctx.server = ERMrest.ermrestFactory.getServer(service, $window.dcctx.contextHeaderParams);
 
                 $window.dcctx.server.catalogs.get(catalogId).then(function (response) {
                     // we already setup the defaults and the configuration based on chaise-config.js

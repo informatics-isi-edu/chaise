@@ -311,7 +311,7 @@
 
             var columnModel = vm.recordEditModel.columnModels[columnIndex];
             params.logStack = columnModel.logStack;
-            params.logStackPath = columnModel.logStackPath;
+            params.logStackPath = logService.getStackPath("", logService.logStackPaths.FOREIGN_KEY_POPUP);
 
             modalUtils.showModal({
                 animation: false,
@@ -413,7 +413,7 @@
             }
 
             logService.logClientAction({
-                action: logService.getActionString("", action),
+                action: logService.getActionString(null, action),
                 stack: stack
             }, $rootScope.reference.defaultLogInfo);
 
@@ -511,7 +511,7 @@
             var defaultLogInfo = (vm.editMode ? $rootScope.tuples[index].reference.defaultLogInfo : $rootScope.reference.defaultLogInfo);
 
             logService.logClientAction({
-                action: logService.getActionString("", logService.logActions.FORM_REMOVE),
+                action: logService.getActionString(null, logService.logActions.FORM_REMOVE),
                 stack: logService.getStackObject()
             }, defaultLogInfo);
 

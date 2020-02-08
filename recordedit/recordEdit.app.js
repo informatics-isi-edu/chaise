@@ -61,6 +61,7 @@
             return function(exception, cause) {
                 var ErrorService = $injector.get("ErrorService");
                 var Session = $injector.get("Session");
+                var logService = $injector.get("logService");
                 // If Conflict Error and user was previously logged in
                 // AND if session is invalid, ask user to login rather than throw an error
                 if (ERMrest && exception instanceof ERMrest.ConflictError && Session.getSessionValue()) {
@@ -154,7 +155,7 @@
             }
 
             // On resolution
-            ERMrest.resolve(ermrestUri, { cid: context.cid, pid: context.pid, wid: context.wid }).then(function getReference(reference) {
+            ERMrest.resolve(ermrestUri, ConfigUtils.getContextHeaderParams()).then(function getReference(reference) {
 
 
                 // we are using filter to determine app mode, the logic for getting filter
@@ -198,7 +199,7 @@
                 var appMode;
                 appMode = logService.appModes.EDIT;
                 if (context.mode == context.modes.COPY) {
-                    appMode = logStack.appModes.CREATE_COPY;
+                    appMode = logService.appModes.CREATE_COPY;
                 } else if (context.mode == context.modes.CREATE){
                     if (context.queryParams.invalidate && context.queryParams.prefill) {
                         appMode = logService.appModes.CREATE_PRESELECT;
@@ -212,7 +213,7 @@
                 // The log object that will be used for the submission request
                 var action = (context.mode == context.modes.CREATE || context.mode == context.modes.COPY) ? logService.logActions.CREATE : logService.logActions.UPDATE;
                 var logObj = {
-                    action: logService.getActionString("", action),
+                    action: logService.getActionString(null, action),
                     stack: logService.getStackObject()
                 };
                 if (pcid) logObj.pcid = pcid;
@@ -225,7 +226,7 @@
                     var stackElement = logService.getStackElement(
                         column.isForeignKey ? logService.logStackTypes.FOREIGN_KEY : logService.logStackTypes.COLUMN,
                         column.table,
-                        {source: column.compressedDataSource}
+                        {source: column.compressedDataSource, entity: column.isForeignKey}
                     );
                     var stackPath = column.isForeignKey ? logService.logStackPaths.FOREIGN_KEY : logService.logStackPaths.COLUMN;
 
@@ -257,7 +258,7 @@
                         }
 
                         var logObj = {
-                            action: logService.getActionString("", logService.logActions.LOAD),
+                            action: logService.getActionString(null, logService.logActions.LOAD),
                             stack: logService.getStackObject()
                         };
                         $rootScope.reference.read(numberRowsToRead, logObj).then(function getPage(page) {
@@ -495,13 +496,13 @@
                                             // initialize foreignKey data
                                             recordEditModel.foreignKeyData[0][column.foreignKey.name] = defaultDisplay.fkValues;
                                             // get the actual foreign key data
-                                            getForeignKeyData(0, [column.name], defaultDisplay.reference, logService.logActions.FOREIGN_KEY_PRESELECT);
+                                            getForeignKeyData(0, [column.name], defaultDisplay.reference, logService.logActions.FOREIGN_KEY_PRESELECT, colModel.logStack);
                                         } else if (defaultValue != null) {
                                             initialModelValue = defaultValue;
                                             // initialize foreignKey data
                                             recordEditModel.foreignKeyData[0][column.foreignKey.name] = column.defaultValues;
                                             // get the actual foreign key data
-                                            getForeignKeyData(0, [column.name], column.defaultReference, logService.logActions.FOREIGN_KEY_DEFAULT);
+                                            getForeignKeyData(0, [column.name], column.defaultReference, logService.logActions.FOREIGN_KEY_DEFAULT, colModel.logStack);
                                         }
                                     } else {
                                         // all other column types
@@ -544,10 +545,11 @@
          * @param  {ERMrest.Refernece} fkRef   Reference to the foreign key table
          * @param  {Object} contextHeaderParams the object will be passed to read as contextHeaderParams
          */
-        function getForeignKeyData (rowIndex, colNames, fkRef, logAction) {
-            // TODO LOG how to get the stack information? we don't have the fk
+        function getForeignKeyData (rowIndex, colNames, fkRef, logAction, logStack) {
+            var stackPath = logService.getStackPath("", logService.logStackPaths.FOREIGN_KEY);
             var logObj = {
-                action: logService.getActionString("", logAction)
+                action: logService.getActionString(stackPath, logAction),
+                stack: logStack
             };
             fkRef.contextualize.compactSelect.read(1, logObj).then(function (page) {
                 colNames.forEach(function (colName) {
@@ -593,12 +595,28 @@
             });
 
             // get the actual foreignkey data
-            ERMrest.resolve(origUrl, {cid: context.cid}).then(function (ref) {
+            ERMrest.resolve(origUrl, ConfigUtils.getContextHeaderParams()).then(function (ref) {
 
-                // TODO LOG how to get the fk information?
-                getForeignKeyData(newRow, fkColumnNames, ref, logService.logActions.FOREIGN_KEY_PRESELECT);
+                // get the first foreignkey relationship between the ref.table and current table
+                // and log it as the foreignkey that we are prefilling (eventhough we're prefilling multiple fks)
+                var fks = $rootScope.reference.table.foreignKeys.all(), source = {};
+                for (var i = 0; i < fks.length; i++) {
+                    if (fkColumnNames.indexOf(fks[i].name) !== -1) {
+                        source = fks[i].compressedDataSource;
+                        break;
+                    }
+                }
+                var stackElement = logService.getStackElement(
+                    logService.logStackTypes.FOREIGN_KEY,
+                    ref.table,
+                    {source: source, entity: true}
+                );
+                var logStack = logService.getStackObject(stackElement);
+                getForeignKeyData(newRow, fkColumnNames, ref, logService.logActions.FOREIGN_KEY_PRESELECT, logStack);
             }).catch(function (err) {
-                $rootScope.showColumnSpinner[newRow][constraintName] = false;
+                fkColumnNames.forEach(function (cn) {
+                    $rootScope.showColumnSpinner[newRow][cn] = false;
+                });
                 $log.warn(err);
             });
 

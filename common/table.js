@@ -78,6 +78,7 @@
      *             fullscreen
      *             related
      *             popup
+     *          - containerIndex: If it's related (or inline), this will return the index of that related(or inline) table.
      *
      * The events that are being used by directives in this file and their children:
      * 1. `reference-modified`: data model has been updated.
@@ -94,6 +95,12 @@
      *     facet(s) has been updated. This is an internal
      *     event that facets will send to the parents. recordset directive uses this
      *     event to call read on this new reference.
+     * 4. `record-deleted`: when a row of table is deleted. The message also includes the following object:
+     *     {
+     *       displayMode: "the display mode of the table",
+     *       containerIndex: "the containerIndex defined in the config object"
+     *     }
+     * 5. `edit-request`: When users click on "edit" button for a row. It's sending the same object as `record-deleted`.
      */
     .factory('recordTableUtils',
             ['AlertsService', 'DataUtils', 'defaultDisplayname', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'recordsetDisplayModes', 'Session', 'tableConstants', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$q', '$rootScope', '$timeout', '$window',
@@ -193,7 +200,7 @@
             var pcolStackEl = logService.getStackElement(
                 logService.logStackTypes.PSEUDO_COLUMN,
                 pcol.column.table,
-                { source: pcol.column.compressedDataSource, aggregate: pcol.column.aggregateFn}
+                { source: pcol.column.compressedDataSource, entity: pcol.column.isEntityMode, agg: pcol.column.aggregateFn}
             );
 
             var action = logService.logActions.LOAD, stack = getTableLogStack(vm, pcolStackEl);
@@ -619,7 +626,10 @@
 
              var hasCauses = Array.isArray(vm.countUpdateCauses) && vm.countUpdateCauses.length > 0;
              var action = hasCauses ? logService.logActions.RECOUNT : logService.logActions.COUNT;
-             var stack = logService.addCausesToStack(getTableLogStack(vm), vm.countUpdateCauses, vm.countUpdateStartTime);
+             var stack = getTableLogStack(vm);
+             if (hasCauses) {
+                 stack = logService.addCausesToStack(stack, vm.countUpdateCauses, vm.countUpdateStartTime);
+             }
              vm.reference.getAggregates(
                  aggList,
                  {action: getTableLogAction(vm, "", action), stack: stack}
@@ -994,7 +1004,7 @@
                         },
                         scope.vm.reference.defaultLogInfo
                     );
-                    update(scope.vm, true, false, false, false, logService.updateCauses.ENTITY_DELETE);
+                    update(scope.vm, true, false, false, false, logService.updateCauses.SORT);
                 }
             };
 
@@ -1533,7 +1543,8 @@
                     recordTableUtils.update(scope.vm, true, false, false, false, logService.updateCauses.PAGE_LIMIT);
                 };
 
-                scope.pageSizeDropdownOpened = function () {
+                scope.pageSizeDropdownToggle = function (open) {
+                    if (!open) return;
                     logService.logClientAction(
                         {
                             action: recordTableUtils.getTableLogAction(scope.vm, "", logService.logActions.PAGE_SIZE_OEPN),

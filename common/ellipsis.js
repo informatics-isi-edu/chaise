@@ -142,7 +142,7 @@
 
                             var args = {};
                             if (isRelated) {
-                                args = containerDetails;
+                                args = containerDetails(scope);
                             }
                             args.id = id;
                             scope.$emit("edit-request", args);

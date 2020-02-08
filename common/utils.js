@@ -115,171 +115,6 @@
         "queryTimeoutTooltip": "Request timeout: data cannot be retrieved. Refresh the page later to try again."
     })
 
-    // TODO LOG should be removed
-    .constant("logActions", {
-
-        // actions
-        "recordRead": "record/main", // read the main entity (record)
-        "recordUpdate": "record/main/update", // read the main entity (record)
-        "recordRelatedRead": "record/related", // secondary
-        "recordRelatedUpdate": "record/related/update", // secondary
-        "recordRelatedAggregate": "record/related/aggregate", // secondary
-        "recordRelatedAggregateUpdate": "record/related/aggregate/update", // secondary
-        "recordInlineRead": "record/inline", // secondary
-        "recordInlineUpdate": "record/inline/update", // secondary
-        "recordInlineAggregate": "record/inline/aggregate",
-        "recordInlineAggregateUpdate": "record/inline/aggregate/update",
-        "recordAggregate": "record/aggregate", // secondary
-        "recordAggregateUpdate": "record/aggregate/update", // secondary
-
-        "createPrefill": "create/prefill", // create with inbound related prefilled (recordedit) -> does it need referrer? (the pre should have it)
-        "createAssociation": "create/prefill/association", // batch create association (record) -> does itneed referrer? (the pre should have it)
-        "createModal": "create/modal", // create entity coming from plus button in modal of foreignkey (recordedit)
-        "copy": "create/copy", // create entity by copying another (recordedit)
-        "create": "create/new", // create entity (recordedit)
-
-        "preCreatePrefill": "pre-create/prefill", // read the foreignkey value for the prefill (recoredit) has referrer -> read is on the fk, .. it's fine. we are not looking at url anyways.
-        "preCreateAssociation": "pre-create/prefill/association", // read the association values to add new ones (record) has referrer
-        "preCreateAssociationSelected": "pre-create/prefill/association/disabled", // secondary
-        "preCopy": "pre-create/copy", // read the current data before copy (recordedit)
-        "recordeditDefault": "default",
-
-        "update": "update", // update entity (recordedit)
-        "preUpdate": "pre-update", // read entity to be updated (recordedit)
-
-        "recordsetCount": "recordset/main/count", // secondary
-        "recordsetLoad": "recordset/main/load", // recordset main data read on load (recordset)
-        "recordsetUpdate": "recordset/main/update", // recordset main data read on update (edit or delete) secondary
-        "recordsetSort": "recordset/main/sort", // recordset main data read on changing sort (recordset) has sort
-        "recordsetPage": "recordset/main/page", // recordset main data read on changing page (recordset) has page
-        "recordsetLimit": "recordset/main/limit", // recordset main data read on changing page limit (recordset)
-        "recordsetAggregate": "recordset/main/aggregate", //secondary (recordset get data for pseudo-columns)
-        "recordsetFacet": "recordset/main/facet", // recordset main data read on changing facet (recordset)
-        "recordsetFacetDetails": "recordset/viewmore", // getting facet details in modal (recordset)
-        "recordsetFacetRead": "recordset/facet", // secondary
-        "recordsetFacetInit": "recordset/facet/init", // secondary (getting the rowname of preselected facets)
-        "recordsetFacetHistogram": "recordset/facet/histogram", // secondary (getting the histogrma buckets)
-
-        "recordDelete": "delete/record", // delete record (record)
-        "recordEditDelete": "delete/recordedit", // delete record (recordedit)
-        "recordsetDelete": "delete/recordset", // delete a row (recordset)
-        "recordRelatedDelete": "delete/record/related", // delete a row from related entities (record) has referrer
-
-        "export": "export",
-
-        "viewerMain": "main",
-        "viewerAnnotation": "annotation",
-        "viewerComment": "comment",
-        "viewerAnatomy": "anatomy",
-
-        // # client actions (mostly button click events)
-        "deleteIntend": "delete/intend", // delete clicked -> confirm delete dialog opened (record button and recordset row)
-        "deleteCancel": "delete/cancel", // cancel clicked when confirm delete dialog open (record button and recordset row)
-
-        // ## recordset actions
-        // ### page level actions
-        "exportOpen": "export/open", // export dropdown was opened
-        "permalinkLeft": "permalink/lclick", // permalink left clicked (copied)
-        "permalinkRight": "permalink/rclick", // permalink right clicked (contextmenu opened)
-        // ### recordset directive for facet popups
-        "recordsetPageSize": "page-size", // page size dropdown opened
-        "recordsetFacetOpen": "panel/show", // facet panel opened
-        "recordsetFacetClose": "panel/hide", // facet panel closed
-        "recordsetFacetPageSize": "facet/page-size", // in "show more" for facet
-        "recordsetFacetAll": "facet/all", // in "show more" for facet
-        "recordsetFacetNone": "facet/none", // in "show more" for facet
-        "recordsetFacetClear": "facet/reset", // in "show more" for facet
-        "recordsetFacetCancel": "facet/cancel", // in "show more" for facet
-
-        // ## record actions
-        "showAllRelated": "show-empty/show", // "show empty sections" button clicked
-        "hideAllRelated": "show-empty/hide", // "hide empty sections" button clicked
-        "share": "share", // share dialog opened
-        "liveCopy": "share/live", // live link copied to clipboard
-        "versionCopy": "share/version", // versioned link copied to clipboard
-        "cite": "cite/bibtex", // bibtex citation downloaded
-        "scrollTop": "scroll-top", // bottom right, "scroll to top" button clicked
-        "tocShow": "toc/show", // the toc panel toggled open/close
-        "tocHide": "toc/hide", // the toc panel toggled open/close
-        "tocScrollTop": "toc/scroll-top", // "summary" heading clicked to scroll to top of record
-        "tocScrollTo": "toc/scroll-to", // one of the toc headings clicked
-        // ### related tables in RT section
-        "relatedOpen": "related/open", // RT in RT section toggled open
-        "relatedClose": "related/close", // RT in RT section toggled close
-        "relatedPageSize": "related/page-size", // toggle page size dropdown
-        // #### RT modes
-        "relatedTableDisplay": "related/display/table", // toggle display mode to table display
-        "relatedMkdnDisplay": "related/display/mkdn", // toggle display mode to custom display
-        "relatedEditDisplay": "related/display/edit", // toggle display mode to edit display
-        // #### RT actions
-        "relatedDeleteIntend": "related/delete/intend", // row delete clicked from delete in action column
-        "relatedDeleteCancel": "related/delete/cancel", // row delete cancelled
-        "relatedUnlinkIntend": "related/unlink/intend", // row unlink clicked from unlink in action column
-        "relatedUnlinkCancel": "related/unlink/cancel", // row unlink cancelled
-        // ### inline related tables in record display section
-        "inlinePageSize": "inline/page-size", // toggle page size dropdown for inline RT
-        // #### inline modes
-        "inlineTableDisplay": "inline/display/table", // toggle display mode to table display
-        "inlineMkdnDisplay": "inline/display/mkdn", // toggle display mode to custom display
-        "inlineEditDisplay": "inline/display/edit", // toggle display mode to edit display
-        // #### inline actions
-        "inlineDeleteIntend": "inline/delete/intend", // row delete clicked from delete in action column
-        "inlineDeleteCancel": "inline/delete/cancel", // row delete cancelled
-        "inlineUnlinkIntend": "inline/unlink/intend", // row unlink clicked from unlink in action column
-        "inlineUnlinkCancel": "inline/unlink/cancel", // row unlink cancelled
-        // ### recordset directive for pure and binary popups
-        "recordPBOpen": "pb/panel/show", // facet panel opened
-        "recordPBClose": "pb/panel/hide", // facet panel closed
-        "recordPBPageSize": "pb/page-size",
-        "recordPBAll": "pb/all",
-        "recordPBNone": "pb/none",
-        "recordPBClear": "pb/reset",
-        "recordPBCancel": "pb/cancel",
-        // #### recordset directive for facet "show more" in pure and binary popups
-        "recordPBFacetPageSize": "pb/facet/page-size",
-        "recordPBFacetAll": "pb/facet/all",
-        "recordPBFacetNone": "pb/facet/none",
-        "recordPBFacetClear": "pb/facet/reset",
-        "recordPBFacetCancel": "pb/facet/cancel",
-
-        // ## recordedit actions
-        // ### create actions
-        "add1": "create/clone", // one form was added to the container
-        "addX": "create/clone-x", // multiple forms were added to the container
-        "createRemove": "create/remove", // remove a form during creation
-        "createMultiOpen": "create/set-all/open", // set all opened
-        "createMultiClose": "create/set-all/close", // set all opened
-        "createMultiCancel": "create/set-all/cancel", // set all closed (cancel button)
-        "createMultiApply": "create/set-all/apply", // set all, apply all clicked
-        "createMultiClear": "create/set-all/clear", // set all, clear all clicked
-        // ### update actions
-        "updateRemove": "update/remove", // remove a form during editing
-        "updateMultiOpen": "update/set-all/open", // set all opened
-        "updateMultiClose": "update/set-all/close", // set all opened
-        "updateMultiCancel": "update/set-all/cancel", // set all closed (cancel button)
-        "updateMultiApply": "update/set-all/apply", // set all, apply all clicked
-        "updateMultiClear": "update/set-all/clear", // set all, clear all clicked
-        // ### recordset directive for foreign key picker
-        "recordeditFKOpen": "fk/panel/show", // facet panel opened
-        "recordeditFKClose": "fk/panel/hide", // facet panel closed
-        "recordeditFKPageSize": "fk/page-size",
-        "recordeditFKCancel": "fk/cancel",
-        // #### recordset directive for facet "show more" in foriegn key pickers
-        "recordeditFKFacetPageSize": "fk/facet/page-size",
-        "recordeditFKFacetAll": "fk/facet/all",
-        "recordeditFKFacetNone": "fk/facet/none",
-        "recordeditFKFacetClear": "fk/facet/reset",
-        "recordeditFKFacetCancel": "fk/facet/cancel",
-
-        // ## navbar actions
-        "branding": "branding", // top left corner branding text/logo clicked
-        "dropdownUser": "user", // user dropdown opened
-        "profile": "user/profile", // user profile dialog opened
-        "dropdownMenu": "menu/submenu", // navbar menu dropdown opened
-        "dropdownMenuInternal": "menu/internal", // navbar menu internal page
-        "dropdownMenuExternal": "menu/external" // navbar menu external page
-    })
-
     // NOTE since this has been used with ng-switch in the code, and we cannot
     // have expressions in ng-switch-when, if you want to update the values,
     // make sure to update the templates that are using this: table.html, ellipsis.html
@@ -563,8 +398,9 @@
             var pcontext = [];
 
             var contextObj = ConfigUtils.getContextJSON();
-            pcontext.push("pcid=" + contextObj.cid);
-            pcontext.push("ppid=" + contextObj.pid);
+            var contextHeaderParams = ConfigUtils.getContextHeaderParams();
+            pcontext.push("pcid=" + contextHeaderParams.cid);
+            pcontext.push("ppid=" + contextHeaderParams.pid);
             // only add the value to the applink function if it's true
             if (contextObj.hideNavbar) pcontext.push("hideNavbar=" + contextObj.hideNavbar)
 
@@ -1405,6 +1241,25 @@
             }
         }
 
+        /**
+         * @private
+         * @function
+         * @param  {Object} source the object that you want to be copied
+         * @desc
+         * Creat a deep copy of the given object.
+         * NOTE: This is very limited and only works for simple objects.
+         * Some of its limitations are:
+         * 1. Cannot copy functions.
+         * 2. Cannot work on circular references.
+         * 3. Will convert date objects back to UTC in the string representation in the ISO8601 format.
+         * 4. It will fail to copy anything that is not in the JSON spec.
+         *
+         * ONLY USE THIS FUNCTION IF IT IS NOT ANY OF THE GIVEN LIMIATIONS.
+         */
+        function simpleDeepCopy (source) {
+            return JSON.parse(JSON.stringify(source));
+        };
+
         return {
             getRowValuesFromPage: getRowValuesFromPage,
             getRowValuesFromTupleData: getRowValuesFromTupleData,
@@ -1414,7 +1269,8 @@
             makeSafeIdAttr: makeSafeIdAttr,
             makeSafeHTML: makeSafeHTML,
             addSpaceAfterLogicalOperators: addSpaceAfterLogicalOperators,
-            verify: verify
+            verify: verify,
+            simpleDeepCopy: simpleDeepCopy
         };
     }])
 
@@ -1972,6 +1828,10 @@
             return getContextJSON().server ? getContextJSON().server.http : $http;
         };
 
+        function getContextHeaderParams() {
+            return getContextJSON().contextHeaderParams;
+        }
+
         function configureAngular(compileProvider, cookiesProvider, logProvider, uibTooltipProvider) {
             // angular configurations
             // allows unsafe prefixes to be downloaded
@@ -2022,6 +1882,7 @@
             getConfigJSON: getConfigJSON,
             setConfigJSON: setConfigJSON,
             getHTTPService: getHTTPService,
+            getContextHeaderParams: getContextHeaderParams,
             systemColumnsMode: systemColumnsMode
         }
     }])
@@ -2102,7 +1963,7 @@
             },
             link: function (scope, elem, attrs) {
                 var AUTO_SEARCH_TIMEOUT = 2000;
-                scope.inputChangedPromise = undefined;
+                scope.inputChangedPromise = null;
                 scope.inputElement = elem[0].querySelector("input");
                 scope.isArray = angular.isArray;
 
@@ -2117,7 +1978,15 @@
                 // will be called when users click on enter or submit button
                 scope.enterPressed = function(isButton) {
                     if (scope.disabled) return;
+
+                    // cancel the timeout
+                    if (scope.inputChangedPromise) {
+                        $timeout.cancel(scope.inputChangedPromise);
+                    }
+
+                    // remove it from scope
                     scope.inputChangedPromise = null;
+
                     scope.searchCallback(scope.searchTerm, isButton ? logService.logActions.SEARCH_BOX_CLICK : logService.logActions.SEARCH_BOX_ENTER);
                 };
 
@@ -2336,10 +2205,7 @@
         }
     }])
 
-    .service('logService', ['ConfigUtils', '$log', '$rootScope', function (ConfigUtils, $log, $rootScope) {
-        var context = ConfigUtils.getContextJSON(),
-            cc = ConfigUtils.getConfigJSON();
-
+    .service('logService', ['ConfigUtils', 'DataUtils', '$log', '$rootScope', function (ConfigUtils, DataUtils, $log, $rootScope) {
         var appModeStackPathSeparator = ":",
             stackPathClientPathSeparator = ",",
             clientPathActionSeparator = ";",
@@ -2373,8 +2239,8 @@
             PRESELECTED_FACETS_LOAD: "preselect" + clientPathActionSeparator + "preload",
 
             //   - client:
-            PERMALINK_LEFT: "permalink" + clientPathActionSeparator + "lclick",
-            PERMALINK_RIGHT: "permalink" + clientPathActionSeparator + "rclick",
+            PERMALINK_LEFT: "permalink" + clientPathActionSeparator + "click-left",
+            PERMALINK_RIGHT: "permalink" + clientPathActionSeparator + "click-right",
             PAGE_SIZE_OEPN: "page-size" + clientPathActionSeparator + "open",
             PAGE_SIZE_SELECT: "page-size" + clientPathActionSeparator + "select",
             FACET_PANEL_SHOW: "panel" + clientPathActionSeparator + "show",
@@ -2395,7 +2261,6 @@
             SEARCH_BOX_CLEAR: "search-box" + clientPathActionSeparator + "clear",
             SEARCH_BOX_CLICK: "search-box" + clientPathActionSeparator + "search-click",
             SEARCH_BOX_ENTER: "search-box" + clientPathActionSeparator + "search-enter",
-            FACET_RETRY: clientPathActionSeparator + "retry",
 
 
             // record app:
@@ -2410,21 +2275,21 @@
             // - client:
             TOC_SHOW: "toc" +  clientPathActionSeparator + "show",
             TOC_HIDE: "toc" +  clientPathActionSeparator + "hide",
-            RELATED_DISPLAY_TABLE: "display/table" + clientPathActionSeparator + "show",
-            RELATED_DISPLAY_MARKDOWN: "display/mkdn" + clientPathActionSeparator + "show",
+            RELATED_DISPLAY_TABLE: "display" + separator + "table" + clientPathActionSeparator + "show",
+            RELATED_DISPLAY_MARKDOWN: "display" + separator + "mkdn" + clientPathActionSeparator + "show",
             EMPTY_RELATED_SHOW: "show-empty" + clientPathActionSeparator + "show",
             EMPTY_RELATED_HIDE: "show-empty" + clientPathActionSeparator + "hide",
             UNLINK_INTEND: "unlink" + clientPathActionSeparator + "intend",
             UNLINK_CANCEL: "unlink" + clientPathActionSeparator + "cancel",
 
             SCROLL_TOP: clientPathActionSeparator + "scroll-top",
-            TOC_SCROLL_TOP: "toc/main" + clientPathActionSeparator + "scroll-to",
-            TOC_SCROLL_RELATED: "toc/section" + clientPathActionSeparator + "scroll-to",
+            TOC_SCROLL_TOP: "toc" + separator + "main" + clientPathActionSeparator + "scroll-to",
+            TOC_SCROLL_RELATED: "toc" + separator + "section" + clientPathActionSeparator + "scroll-to",
 
-            SHARE_LIVE_LINK_COPY: "share/live" + clientPathActionSeparator + "copy",
-            SHARE_VERSIONED_LINK_COPY: "share/version" + clientPathActionSeparator + "copy",
+            SHARE_LIVE_LINK_COPY: "share" + separator + "live" + clientPathActionSeparator + "copy",
+            SHARE_VERSIONED_LINK_COPY: "share" + separator + "version" + clientPathActionSeparator + "copy",
 
-            CITE_BIBTEXT_DOWNLOAD: "cite/bibtex" + clientPathActionSeparator + "download",
+            CITE_BIBTEXT_DOWNLOAD: "cite" + separator + "bibtex" + clientPathActionSeparator + "download",
 
 
             // recordedit app:
@@ -2443,8 +2308,34 @@
             SET_ALL_CLOSE: "set-all" + clientPathActionSeparator + "close",
             SET_ALL_CANCEL: "set-all" + clientPathActionSeparator + "cancel",
             SET_ALL_APPLY: "set-all" + clientPathActionSeparator + "apply",
-            SET_ALL_CLEAR: "set-all" + clientPathActionSeparator + "clear"
+            SET_ALL_CLEAR: "set-all" + clientPathActionSeparator + "clear",
 
+
+            // viewer app:
+
+            // - server:
+            VIEWER_ANNOT_LOAD: "annotation" + clientPathActionSeparator + "read",
+            VIEWER_ANNOT_COMMENT_LOAD: "annotation_comment" + clientPathActionSeparator + "read",
+            VIEWER_COMMENT_LOAD: "commnet" + clientPathActionSeparator + "read",
+            VIEWER_ANATOMY_LOAD: "anatomy" + clientPathActionSeparator + "read",
+
+
+            // - authen:
+            LOGOUT_NAVBAR: "navbar/account" + clientPathActionSeparator + "logout",
+            LOGIN_NAVBAR: "navbar/account" + clientPathActionSeparator + "login",
+            LOGIN_ERROR_MODAL: "error-modal" + clientPathActionSeparator + "login",
+            LOGIN_LOGIN_MODAL: "login-modal" + clientPathActionSeparator + "login",
+            LOGIN_WARNING: "warning" + clientPathActionSeparator + "login",
+            SESSION_VALIDATE: "session" + clientPathActionSeparator + "validate",
+            SESSION_RETRIEVE: "session" + clientPathActionSeparator + "retrieve",
+
+            // - navbar:
+            NAVBAR_BRANDING: "navbar/branding" + clientPathActionSeparator + "navigate",
+            NAVBAR_MENU_EXTERNAL: "navbar/menu" + clientPathActionSeparator + "navigate-external",
+            NAVBAR_MENU_INTERNAL: "navbar/menu" + clientPathActionSeparator + "navigate-internal",
+            NAVBAR_MENU_OPEN: "navbar/menu" + clientPathActionSeparator + "open",
+            NAVBAR_ACCOUNT_DROPDOWN: "navbar/account" + clientPathActionSeparator + "open",
+            NAVBAR_PROFILE_OPEN: "navbar/account/profile" + clientPathActionSeparator + "open"
         });
 
         var logStackTypes = Object.freeze({
@@ -2495,29 +2386,44 @@
             PAGE_LIMIT: "page-limit", // change page limit
             PAGE_NEXT: "page-next", // go to next page
             PAGE_PREV: "page-prev", // go to previous page
-            RELATED_CREATE: "related-create", // new rows in one of the related (or inline) tables has been created
-            RELATED_DELETE: "related-delete", // a row in one of the related (or inline) tables has been deleted
-            RELATED_UPDATE: "related-update", // a row in one of the related (or inline) tables has been edited
+            RELATED_CREATE: "related-create", // new rows in one of the related tables has been created
+            RELATED_DELETE: "related-delete", // a row in one of the related tables has been deleted
+            RELATED_UPDATE: "related-update", // a row in one of the related tables has been edited
+            RELATED_INLINE_CREATE: "related-inline-create", // new rows in one of the related (inline) tables has been created
+            RELATED_INLINE_DELETE: "related-inline-delete", // a row in one of the related (inline) tables has been deleted
+            RELATED_INLINE_UPDATE: "related-inline-update", // a row in one of the related (inline) tables has been edited
             SORT: "sort", // sort changed
-            SEARCH_BOX: "search-box" // search box value changed
+            SEARCH_BOX: "search-box", // search box value changed
         });
 
         /**
          * Takes a header object, adds default logging info to it, and logs the request with ermrest
-         * @params {Object} headerObj - object of key/value pairs that are specific to this action
+         * @params {Object} logObj - object of key/value pairs that are specific to this action
          * @params {Object} commonLogInfo - object of key/value pairs that are common to all action requests
          */
-        function logClientAction(headerObj, commonLogInfo) {
+        function logClientAction(logObj, commonLogInfo) {
+            var cc = ConfigUtils.getConfigJSON();
+            var contextHeaderParams = ConfigUtils.getContextHeaderParams();
+
             if (!cc.logClientActions) return;
 
             if (commonLogInfo) {
                 // TODO this could just use all the attribues in the commonLogInfo
-                headerObj.catalog = commonLogInfo.catalog;
-                headerObj.schema_table = commonLogInfo.schema_table;
+                logObj.catalog = commonLogInfo.catalog;
+                logObj.schema_table = commonLogInfo.schema_table;
             }
 
-            context.server.logClientAction(headerObj).catch(function (err) {
-                $log.debug("An error may have occured when logging: ", headerObj);
+            var headers = {};
+
+            // in the case of static websites, the getHTTPService might return $http,
+            // which doesn't have the contextHeaderParams, so we should add them here just in case
+            for (var key in contextHeaderParams) {
+                if (!contextHeaderParams.hasOwnProperty(key) || (key in logObj)) continue;
+                logObj[key] = contextHeaderParams[key];
+            }
+            headers[ERMrest.contextHeaderName] = logObj;
+            ConfigUtils.getHTTPService().head(cc.ermrestLocation + "/client_action", {headers: headers}).catch(function (err) {
+                $log.debug("An error may have occured when logging: ", logObj);
                 $log.debug(err);
             });
         }
@@ -2571,11 +2477,11 @@
             if (!stack) {
                 stack = $rootScope.logStack;
             }
-            var newStack = JSON.parse(JSON.stringify(stack));
+            var newStack = DataUtils.simpleDeepCopy(stack);
             var lastStackElement = newStack[stack.length-1];
             lastStackElement.causes = causes;
-            lastStackElement.start_time = startTime;
-            lastStackElement.current_time = ERMrest.getElapsedTime();
+            lastStackElement.start_ms = startTime;
+            lastStackElement.end_ms = ERMrest.getElapsedTime();
             return newStack;
         }
 
@@ -2583,7 +2489,7 @@
             if (!stack) {
                 stack = $rootScope.logStack;
             }
-            var newStack = JSON.parse(JSON.stringify(stack));
+            var newStack = DataUtils.simpleDeepCopy(stack);
             var lastStackElement = newStack[stack.length-1];
 
             for (var f in extraInfo) {
@@ -2594,12 +2500,25 @@
             return newStack;
         }
 
-        function getActionString(logStackPath, logActionPath) {
-            if (!logStackPath) {
+        /**
+         * For the request that we don't want log stack or app mode, given logActionVerb will return the appropriate action string.
+         * @param {String} logActionVerb - the action verb
+         */
+        function getActionStringWOnlyVerb(logActionVerb) {
+            return appModeStackPathSeparator + stackPathClientPathSeparator + logActionVerb;
+        }
+
+        /**
+         * Given the logStackPath and logActionVerb will return the appropriate action string.
+         * @param {String} logStackPath - if the given value is not a string, we will use the $rootScope.logStackPath instead.
+         * @param {String} logActionVerb - the action verb
+         */
+        function getActionString(logStackPath, logActionVerb, skipAppMode) {
+            if (typeof logStackPath !== "string") {
                 logStackPath = $rootScope.logStackPath;
             }
-            var appMode = $rootScope.logAppMode ? $rootScope.logAppMode : "";
-            return  appMode + appModeStackPathSeparator + logStackPath + stackPathClientPathSeparator + logActionPath;
+            var appMode = !skipAppMode && $rootScope.logAppMode ? $rootScope.logAppMode : "";
+            return  appMode + appModeStackPathSeparator + logStackPath + stackPathClientPathSeparator + logActionVerb;
         }
 
         return {
@@ -2610,6 +2529,7 @@
             updateCauses: updateCauses,
             logClientAction: logClientAction,
             getActionString: getActionString,
+            getActionStringWOnlyVerb: getActionStringWOnlyVerb,
             getStackElement: getStackElement,
             updateStackFilterInfo: updateStackFilterInfo,
             addCausesToStack: addCausesToStack,
@@ -2706,11 +2626,10 @@
 
                 // if same origin, verify authorization
                 if (UriUtils.isSameOrigin(e.target.href)) {
+                    var config = {skipRetryBrowserError: true, skipHTTP401Handling: true};
 
-                    var dcctx = ConfigUtils.getContextJSON();
                     // make a HEAD request to check if the user can fetch the file
-
-                    dcctx.server.http.head(e.target.href, {skipRetryBrowserError: true, skipHTTP401Handling: true}).then(function (response) {
+                    ConfigUtils.getHTTPService().head(e.target.href, config).then(function (response) {
                         clickHref(e.target.href);
                     }).catch(function (exception) {
                         // error/login modal was closed

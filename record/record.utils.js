@@ -96,7 +96,7 @@
 
             logObj = logObj || {};
             var action = isUpdate ? logService.logActions.RELOAD : logService.logActions.LOAD;
-            logObj.action = logService.getActionString("", action);
+            logObj.action = logService.getActionString(null, action);
             logObj.stack = logService.getStackObject();
 
             var causes = (Array.isArray($rootScope.updateCauses) && $rootScope.updateCauses.length > 0) ? $rootScope.updateCauses : [];
@@ -188,7 +188,7 @@
             var defer = $q.defer();
 
             var action = isUpdate ? logService.logActions.RELOAD : logService.logActions.LOAD;
-            var stackPath = logService.getStackPath("", logService.logStackPaths.PSEUDO_COLUMN)
+            var stackPath = logService.getStackPath("", logService.logStackPaths.PSEUDO_COLUMN);
             var logObj = {
                 action: logService.getActionString(stackPath, action),
                 stack: columnModel.logStack
@@ -209,11 +209,28 @@
             return defer.promise;
         }
 
+
+        function addCauseToModel(obj, cause) {
+            // the time that will be logged with the request
+            if (!Number.isInteger(obj.updateStartTime) || obj.updateStartTime === -1) {
+                obj.updateStartTime = ERMrest.getElapsedTime();
+            }
+
+            if (cause && obj.updateCauses.indexOf(cause) === -1) {
+                obj.updateCauses.push(cause);
+            }
+        }
+
         /**
          * sets the flag and calls the flow-control function to update the record page.
          * @param  {Boolean} isUpdate indicates that the function has been triggered for update and not load.
+         * @param  {String} cause the cause of this update (if it's update and not load)
+         * @param  {Array} changedContainers If this function is called because of multiple
+         *                  changes on the page, then we cannot use a single "cause" and instead
+         *                  this attribute will return the different parts of the page that have caused this.
+         *                  Each array is an object with `cause`, `index`, and `isInline` attributes.
          */
-        function updateRecordPage(isUpdate, cause) {
+        function updateRecordPage(isUpdate, cause, changedContainers) {
 
             if (!isUpdate) {
                 $rootScope.recordFlowControl.occupiedSlots = 0;
@@ -222,35 +239,63 @@
                 // we want to update the main entity on update
                 $rootScope.isMainDirty = true;
 
-                // the time that will be logged with the request
-                if (!Number.isInteger($rootScope.updateStartTime) || $rootScope.updateStartTime === -1) {
-                    $rootScope.updateStartTime = ERMrest.getElapsedTime();
-                }
+                addCauseToModel($rootScope, cause);
             }
             $rootScope.recordFlowControl.counter++;
 
-            if (cause && $rootScope.updateCauses.indexOf(cause) === -1) {
-                $rootScope.updateCauses.push(cause);
-            }
 
             $rootScope.columnModels.forEach(function (m) {
                 if (m.isAggregate) {
                     m.dirtyResult = true;
                 } else if (m.isInline) {
                     m.tableModel.dirtyResult = true;
+
+                    addCauseToModel(m.tableModel, cause);
                 }
             });
+
             $rootScope.relatedTableModels.forEach(function (m) {
                 m.tableModel.dirtyResult = true;
-
-                if (!Number.isInteger(m.tableModel.updateStartTime) || m.tableModel.updateStartTime === -1) {
-                    m.tableModel.updateStartTime = ERMrest.getElapsedTime();
-                }
-
-                if (cause && m.tableModel.updateCauses.indexOf(cause) === -1) {
-                    m.tableModel.updateCauses.push(cause);
-                }
+                addCauseToModel(m.tableModel, cause);
             });
+
+
+            // update the cause list
+            var uc = logService.updateCauses;
+            var selfCause = {};
+            selfCause[uc.RELATED_CREATE] = selfCause[uc.RELATED_INLINE_CREATE] = uc.ENTITY_CREATE;
+            selfCause[uc.RELATED_DELETE] = selfCause[uc.RELATED_INLINE_DELETE] = uc.ENTITY_DELETE;
+            selfCause[uc.RELATED_UPDATE] = selfCause[uc.RELATED_INLINE_UPDATE] = uc.ENTITY_UPDATE;
+            if (Array.isArray(changedContainers)) {
+                changedContainers.forEach(function (container) {
+                    var c;
+
+                    // add it to main causes
+                    addCauseToModel($rootScope, container.cause);
+
+                    // add it to inline related
+                    $rootScope.columnModels.forEach(function (m, index) {
+                        if (!m.isInline) return;
+
+                        c = container.cause;
+                        if (container.isInline && container.index === index) {
+                            c = selfCause[c];
+                        }
+
+                        addCauseToModel(m.tableModel, c);
+                    });
+
+                    // add it to related
+                    $rootScope.relatedTableModels.forEach(function (m, index) {
+                        var c = container.cause;
+                        if (!container.isInline && container.index === index) {
+                            c = selfCause[c];
+                        }
+
+                        addCauseToModel(m.tableModel, c);
+                    });
+                });
+            }
 
             $rootScope.pauseRequests = false;
             _processRequests(isUpdate);
@@ -304,7 +349,7 @@
             var stackElement = logService.getStackElement(
                 logService.logStackTypes.RELATED,
                 reference.table,
-                {source: reference.compressedDataSource}
+                {source: reference.compressedDataSource, entity: true}
             );
             var currentStackPath = isInline ? logService.logStackPaths.RELATED_INLINE : logService.logStackPaths.RELATED;
             var logStackPath = logService.getStackPath("", currentStackPath);

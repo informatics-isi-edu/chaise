@@ -37,7 +37,7 @@ The following are the default attributes that you can find on all the requests:
 - `catalog`: The catalog id.
 - `schema_table`: The `schema:table` combination.
 - `action`: A pre-defined string that implies what the request was for. Refer to [the action list](#action-list) for more information.
-- `elapsed_s`: A value set to determine the elapsed time since the ermrestJS http service has been available. This will always be in seconds
+- `elapsed_ms`: A value set to determine the elapsed time since the ermrestJS http service has been available. This will always be in milliseconds
 
 The following are the optional attributes that you might find on requests:
 - `ppid` and `pcid`: The parent `pid` and `pcid`. These two attributes will be available only on a number of requests. It will indicate which app and page led to this current request. These are the requests that might have `ppid` and `pcid`.

@@ -81,7 +81,7 @@
             $uibModalInstance.dismiss('cancel');
         }
     }])
-    .controller('ErrorModalController', ['ConfigUtils', 'Errors', 'messageMap', 'params', 'Session', '$rootScope', '$sce', '$uibModalInstance', '$window', function ErrorModalController(ConfigUtils, Errors, messageMap, params, Session, $rootScope, $sce, $uibModalInstance, $window) {
+    .controller('ErrorModalController', ['ConfigUtils', 'Errors', 'logService', 'messageMap', 'params', 'Session', '$rootScope', '$sce', '$uibModalInstance', '$window', function ErrorModalController(ConfigUtils, Errors, logService, messageMap, params, Session, $rootScope, $sce, $uibModalInstance, $window) {
         var cc = ConfigUtils.getConfigJSON();
         function isErmrestErrorNeedReplace (error) {
             switch (error.constructor) {
@@ -171,7 +171,7 @@
         };
 
         vm.login = function () {
-            Session.loginInAPopUp();  //Open login pop-up without closing error modal
+            Session.loginInAPopUp(logService.logActions.LOGIN_ERROR_MODAL);  //Open login pop-up without closing error modal
         };
 
 
@@ -185,12 +185,12 @@
      * - message {String} - the message for the body of the modalBox
      * - subMessage {String} - the sub-message to display under the login button (optional)
      */
-    .controller('LoginDialogController', ['$uibModalInstance', 'params', 'Session', function LoginDialogController($uibModalInstance, params, Session) {
+    .controller('LoginDialogController', ['logService', 'params', 'Session', '$uibModalInstance', function LoginDialogController(logService, params, Session, $uibModalInstance) {
         var vm = this;
         vm.params = params;
 
         vm.openWindow = function() {
-            Session.loginInAPopUp();
+            Session.loginInAPopUp(logService.logActions.LOGIN_LOGIN_MODAL);
         };
 
         vm.cancel = function () {
@@ -253,7 +253,6 @@
                 hideNotNullChoice:  params.hideNotNullChoice,
                 hideNullChoice:     params.hideNullChoice,
                 displayMode:        params.displayMode ? params.displayMode : recordsetDisplayModes.popup,
-                parentDisplayMode:  params.parentDisplayMode
             },
             getDisabledTuples:          params.getDisabledTuples,
 
@@ -407,7 +406,7 @@
 
         vm.copyToClipboard = function (text, action) {
             logService.logClientAction({
-                action: logService.getActionString("", action),
+                action: logService.getActionString(null, action),
                 stack: logService.getStackObject()
             }, params.reference.defaultLogInfo);
             // Create a dummy input to put the text string into it, select it, then copy it
@@ -429,7 +428,7 @@
 
         vm.logCitationDownload = function (action) {
             logService.logClientAction({
-                action: logService.getActionString("", action),
+                action: logService.getActionString(null, action),
                 stack: logService.getStackObject()
             }, params.reference.defaultLogInfo);
         }

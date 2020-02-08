@@ -9,10 +9,8 @@
 
         var initialHref = $window.location.href;
         var mainContainerEl = angular.element(document.getElementsByClassName('main-container')[0]);
-        var addRecordRequests = {}; // <generated unique id : reference of related table>
-        var editRecordRequests = {}; // generated id: {displayMode: "", containerIndex: integer)}
-        var updated = {};
-        var completed = {};
+        var addRecordRequests = {}; /// generated id: {displayMode: "", containerIndex: integer}
+        var editRecordRequests = {}; // generated id: {displayMode: "", containerIndex: integer, completed: boolean}
         var modalUpdate = false;
         vm.alerts = AlertsService.alerts;
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
@@ -39,7 +37,7 @@
         vm.toggleSidebar = function() {
             var action = ($rootScope.recordSidePanOpen ? logService.logActions.TOC_HIDE : logService.logActions.TOC_SHOW );
             logService.logClientAction({
-                action: logService.getActionString("", action),
+                action: logService.getActionString(null, action),
                 stack: logService.getStackObject()
             }, $rootScope.reference.defaultLogInfo);
 
@@ -87,7 +85,7 @@
         vm.deleteRecord = function() {
             var errorData = {};
             var logObj = {
-                action: logService.getActionString("", logService.logActions.DELETE),
+                action: logService.getActionString(null, logService.logActions.DELETE),
                 stack: logService.getStackObject()
             };
             $rootScope.reference.delete(logObj).then(function deleteSuccess() {
@@ -122,7 +120,7 @@
             params.versionDate = UiUtils.versionDate(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
 
             var snaptimeHeader = {
-                action: logService.getActionString("", logService.logActions.SHARE_OPEN),
+                action: logService.getActionString(null, logService.logActions.SHARE_OPEN),
                 stack: logService.getStackObject(),
                 catalog: ref.defaultLogInfo.catalog,
                 schema_table: ref.defaultLogInfo.schema_table
@@ -247,7 +245,7 @@
         vm.toggleRelatedTables = function() {
             var action = ($rootScope.showEmptyRelatedTables ? logService.logActions.EMPTY_RELATED_HIDE : logService.logActions.EMPTY_RELATED_SHOW);
             logService.logClientAction({
-                action: logService.getActionString("", action),
+                action: logService.getActionString(null, action),
                 stack: logService.getStackObject()
             }, $rootScope.reference.defaultLogInfo);
 
@@ -288,10 +286,15 @@
         };
 
         // Send user to RecordEdit to create a new row in this related table
-        function onSuccess (){
-            AlertsService.addAlert("Your data has been submitted. Showing you the result set...","success");
-            vm.resultset = true;
-            onfocusEventCall(true);
+        function onSuccess (tableModel){
+            return function () {
+                AlertsService.addAlert("Your data has been submitted. Showing you the result set...","success");
+                vm.resultset = true;
+                onfocusEventCall({
+                    displayMode: tableModel.config.displayMode,
+                    containerIndex: tableModel.config.containerIndex
+                });
+            }
         }
 
         function onModalClose () {
@@ -405,7 +408,7 @@
 
             if(ref.derivedAssociationReference){
                 recordAppUtils.pauseUpdateRecordPage();
-                recordCreate.addRelatedRecordFact(true, ref, 0, cookie, vm.editMode, vm.formContainer, vm.readyToSubmit, vm.recordsetLink, vm.submissionButtonDisabled, $rootScope.reference, [$rootScope.tuple], $rootScope.session, ConfigUtils.getContextJSON().queryParams, onSuccess, onModalClose);
+                recordCreate.addRelatedRecordFact(true, ref, 0, cookie, vm.editMode, vm.formContainer, vm.readyToSubmit, vm.recordsetLink, vm.submissionButtonDisabled, $rootScope.reference, [$rootScope.tuple], $rootScope.session, ConfigUtils.getContextJSON().queryParams, onSuccess(tableModel), onModalClose);
                 return;
             }
 
@@ -440,12 +443,16 @@
         };
 
         $scope.$on("edit-request", function(event, args) {
-            editRecordRequests[args.id] = {"displayMode": args.displayMode, "containerIndex": args.containerIndex};
+            editRecordRequests[args.id] = {"displayMode": args.displayMode, "containerIndex": args.containerIndex, "finished": false};
         });
 
         $scope.$on('record-deleted', function (event, args) {
-            // TODO LOG how to tell the caller that which related was the main one
-            recordAppUtils.updateRecordPage(true, logService.updateCauses.RELATED_DELETE);
+            var isInline = args.displayMode === recordsetDisplayModes.inline;
+            recordAppUtils.updateRecordPage(true, "", [{
+                cause: isInline ? logService.updateCauses.RELATED_INLINE_DELETE : logService.updateCauses.RELATED_DELETE,
+                isInline: isInline,
+                index: args.containerIndex
+            }]);
         });
 
         // When page gets focus, check cookie for completed requests
@@ -454,40 +461,60 @@
             onfocusEventCall(false);
         }
 
-        var onfocusEventCall = function(isModalUpdate) {
-            if ($rootScope.loading === false) {
-                // TODO LOG update vs. create?
-                // TODO LOG how to tell the caller that which related was the main one
+        var onfocusEventCall = function(changedContainerDetails) {
+            if ($rootScope.loading !== false) return;
 
-                var idxInbFk;
-                completed = {};
-                for (var id in addRecordRequests) {
-                    var cookie = $cookies.getObject(id);
-                    if (cookie) { // add request has been completed
-                        console.log('Cookie found for the id=' + id);
-                        completed[addRecordRequests[id]] = true;
+            var uc = logService.updateCauses, id, cookie;
 
-                        // remove cookie and request
-                        $cookies.remove(id);
-                        delete addRecordRequests[id];
-                    } else {
-                        console.log('Could not find cookie', cookie);
-                    }
-                }
-                // read updated tables
-                if (isModalUpdate || Object.keys(completed).length > 0 || Object.keys(updated).length > 0) {
-                    updated = {};
-                    //NOTE we're updating the whole page
-                    recordAppUtils.updateRecordPage(true, logService.updateCauses.RELATED_UPDATE);
+            // where in the page has been changed
+            var changedContainers = [];
+
+            var addToChangedContainers = function (details, causeDefs) {
+                var isInline = details.displayMode === recordsetDisplayModes.inline;
+                changedContainers.push({
+                    cause: causeDefs[isInline ? 1 : 0],
+                    isInline: isInline,
+                    index: details.containerIndex
+                });
+            };
+
+            // modal create
+            if (changedContainerDetails) {
+                addToChangedContainers(changedContainerDetails, [uc.RELATED_CREATE, uc.RELATED_INLINE_CREATE]);
+            }
+
+            //find the completed edit requests
+            for (id in editRecordRequests) {
+                if (editRecordRequests[id].completed) {
+                    addToChangedContainers(editRecordRequests[id], [uc.RELATED_UPDATE, uc.RELATED_INLINE_UPDATE]);
+                    delete editRecordRequests[id];
                 }
             }
 
+            // find the completed create requests
+            for (id in addRecordRequests) {
+                cookie = $cookies.getObject(id);
+                if (cookie) { // add request has been completed
+                    console.log('Cookie found for the id=' + id);
+                    addToChangedContainers(addRecordRequests[id], [uc.RELATED_CREATE, uc.RELATED_INLINE_CREATE]);
+
+                    // remove cookie and request
+                    $cookies.remove(id);
+                    delete addRecordRequests[id];
+                } else {
+                    console.log('Could not find cookie', cookie);
+                }
+            }
+
+            // if something has changed
+            if (changedContainers.length > 0) {
+                recordAppUtils.updateRecordPage(true, "", changedContainers);
+            }
         };
 
         // function called from form.controller.js to notify record that an entity was just updated
         window.updated = function(id) {
-            updated[editRecordRequests[id].displayMode + ":" + editRecordRequests[id].containerIndex] = true;
-            delete editRecordRequests[id];
+            editRecordRequests[id].completed = true;
         }
 
         // to make sure we're adding the watcher just once
@@ -525,7 +552,7 @@
         $scope.scrollToTop = function (fromToc) {
             var action = (fromToc ? logService.logActions.TOC_SCROLL_TOP : logService.logActions.SCROLL_TOP);
             logService.logClientAction({
-                action: logService.getActionString("", action),
+                action: logService.getActionString(null, action),
                 stack: logService.getStackObject()
             }, $rootScope.reference.defaultLogInfo);
 

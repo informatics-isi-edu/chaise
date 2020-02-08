@@ -242,7 +242,7 @@
                      * open or close the facet given its index
                      * @param  {int} index index of facet
                      */
-                    scope.toggleFacet = function (index) {
+                    scope.toggleFacet = function (index, dontLog) {
                         $timeout(function() {
                             var fm = scope.vm.facetModels[index];
                             var fc = scope.vm.reference.facetColumns[index];
@@ -261,12 +261,14 @@
                                 currentCtrl.updateFacetColumn(index);
                             }
 
-                            var action = fm.isOpen ? logService.logActions.OPEN : logService.logActions.CLOSE;
-                            // log the action
-                            logService.logClientAction({
-                                action: currentCtrl.getFacetLogAction(index, action),
-                                stack: currentCtrl.getFacetLogStack(index)
-                            }, fc.sourceReference.defaultLogInfo);
+                            if (!dontLog) {
+                                var action = fm.isOpen ? logService.logActions.OPEN : logService.logActions.CLOSE;
+                                // log the action
+                                logService.logClientAction({
+                                    action: currentCtrl.getFacetLogAction(index, action),
+                                    stack: currentCtrl.getFacetLogStack(index)
+                                }, fc.sourceReference.defaultLogInfo);
+                            }
                         });
                     };
 
@@ -302,7 +304,7 @@
 
                         if (!fm.isOpen && (dontUpdate !== true)) {
                             fm.isOpen = true;
-                            scope.toggleFacet(index);
+                            scope.toggleFacet(index, true);
                         }
 
                         scope.scrollToFacet(index, dontUpdate);
@@ -1314,7 +1316,7 @@
                         scope.parentCtrl.setInitialized();
 
                         // focus on the current facet
-                        scope.parentCtrl.focusOnFacet(scope.index);
+                        scope.parentCtrl.focusOnFacet(scope.index, true);
                     }
                 };
             }
@@ -1413,7 +1415,6 @@
                         }
 
                         params.displayMode = recordsetDisplayModes.facetPopup;
-                        params.parentDisplayMode = scope.facetModel.recordsetConfig.displayMode;
                         params.editable = false;
 
                         params.selectedRows = [];
@@ -1535,16 +1536,10 @@
                     scope.retryQuery = function (noConstraints) {
                         scope.facetModel.noConstraints = noConstraints;
 
-                        // log in the client
-                        logService.logClientAction({
-                            action: currentCtrl.getFacetLogAction(scope.index, logService.logActions.FACET_RETRY),
-                            stack: currentCtrl.getFacetLogStack(scope.index, extraInfo)
-                        }, scope.facetColumn.sourceReference.defaultLogInfo);
-
                         parentCtrl.updateFacetColumn(scope.index, logService.updateCauses.FACET_RETRY);
                     }
 
-                    scope.search = function (term) {
+                    scope.search = function (term, action) {
                         if (term) term = term.trim();
                         var ref = scope.reference.search(term);
                         if (scope.$root.checkReferenceURL(ref)) {
@@ -1553,8 +1548,8 @@
                             // log the client action
                             var extraInfo = typeof term === "string" ? {"search-str": term} : {};
                             logService.logClientAction({
-                                action: currentCtrl.getFacetLogAction(scope.index, action),
-                                stack: currentCtrl.getFacetLogStack(scope.index, extraInfo)
+                                action: scope.parentCtrl.getFacetLogAction(scope.index, action),
+                                stack: scope.parentCtrl.getFacetLogStack(scope.index, extraInfo)
                             }, scope.facetColumn.sourceReference.defaultLogInfo);
 
                             $log.debug("faceting: request for facet (index=" + scope.facetColumn.index + ") update. new search=" + term);

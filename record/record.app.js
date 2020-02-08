@@ -86,7 +86,7 @@
             // Unsubscribe onchange event to avoid this function getting called again
             Session.unsubscribeOnChange(subId);
 
-            ERMrest.resolve(ermrestUri, { cid: context.cid, pid: context.pid, wid: context.wid }).then(function getReference(reference) {
+            ERMrest.resolve(ermrestUri, ConfigUtils.getContextHeaderParams()).then(function getReference(reference) {
                 context.filter = reference.location.filter;
                 context.facets = reference.location.facets;
 
@@ -158,7 +158,7 @@
                                 logService.getStackElement(
                                     logService.logStackTypes.PSEUDO_COLUMN,
                                     col.table,
-                                    { source: col.compressedDataSource, aggregate: col.aggregateFn}
+                                    { source: col.compressedDataSource, entity: col.isEntityMode, agg: col.aggregateFn}
                                 )
                             ),
                             updateCauses: []
