@@ -130,20 +130,20 @@
      * and then changing the location without waiting for the request,
      * This will ensure that we're at least sending the log to server.
      */
-    function logStaticLink(logService, UriUtils, $window) {
+    function onLinkClick(logService, UriUtils, $window) {
         return function ($event, menuObject) {
             $event.preventDefault();
             $event.stopPropagation();
 
-            // NOTE: if link goes to a chaise app, no logging necessary
-            if (isChaise(menuObject.url)) return;
-
-            // check if external or internal resource page
-            var action = UriUtils.isSameOrigin(menuObject.url) ? logService.logActions.NAVBAR_MENU_INTERNAL : logService.logActions.NAVBAR_MENU_EXTERNAL;
-            logService.logClientAction({
-                action: logService.getActionString("", action, true),
-                names: menuObject.names
-            });
+            // NOTE: if link goes to a chaise app, client logging is not necessary (we're using ppid, pcid instead)
+            if (!isChaise(menuObject.url)) {
+                // check if external or internal resource page
+                var action = UriUtils.isSameOrigin(menuObject.url) ? logService.logActions.NAVBAR_MENU_INTERNAL : logService.logActions.NAVBAR_MENU_EXTERNAL;
+                logService.logClientAction({
+                    action: logService.getActionString("", action, true),
+                    names: menuObject.names
+                });
+            }
 
             if (menuObject.newTab) {
                 $window.open(menuObject.url, '_blank');
@@ -277,9 +277,7 @@
                         $window.location = link;
                     }
 
-                    // scope.logMenuToggle = logMenuToggle(logService);
-
-                    scope.logStaticLink = logStaticLink(logService, UriUtils, $window);
+                    scope.onLinkClick = onLinkClick(logService, UriUtils, $window);
 
                     if (isCatalogDefined(catalogId)) {
                         scope.isVersioned = function () {
@@ -332,7 +330,7 @@
                         }
                     };
 
-                    scope.logStaticLink = logStaticLink(logService, UriUtils, $window);
+                    scope.onLinkClick = onLinkClick(logService, UriUtils, $window);
 
                     compiled(scope, function(clone) {
                         el.append(clone);

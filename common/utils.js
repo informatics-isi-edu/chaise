@@ -129,6 +129,7 @@
     // make sure to update the templates that are using this: recordset.html, recordsetSelectFaceting.html
     .constant("recordsetDisplayModes", {
         fullscreen: "fullscreen",
+        table: "table",
         related: "related",
         inline: "related/inline",
         popup: "popup",
@@ -2359,7 +2360,10 @@
             RELATED_INLINE: "related-inline",
             ADD_PB_POPUP: "related-link-picker",
             FOREIGN_KEY_POPUP: "fk-picker",
-            FACET_POPUP: "facet-picker"
+            FACET_POPUP: "facet-picker",
+            // these two have been added to the tables that recordedit is showing
+            RESULT_SUCCESFUL_SET: "result-successful-set",
+            RESULT_FAILED_SET: "result-failed-set"
         });
 
         var appModes = Object.freeze({

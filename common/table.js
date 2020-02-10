@@ -19,11 +19,6 @@
     /**
      * Ways to use recordTable directive:
      *
-     * logObject = {
-     *   pcid, ppid
-     * }
-     * logStack
-     * logStackPath
      *
      * 1. Table only
      *    <record-table vm="vm"></record-table>
@@ -56,7 +51,9 @@
      *        selectedRows, // array of selected rows
      *        search,       // search term, null for none
      *        config,       // set of config to disable or enable features
-     *        context       // reference's context
+     *        logStack,
+     *        logStackPath,
+     *        logObject (optional)
      *       }
      *
      *      available config options:
@@ -74,10 +71,7 @@
      *          - showFaceting: defines if the facet panel should be available
      *          - openFacetPanel: defines if the facet panel is open by default
      *          - showNull: if this is available and equal to `true`, we will differentiate between `null` and empty string.
-     *          - displayMode:
-     *             fullscreen
-     *             related
-     *             popup
+     *          - displayMode: find the complete list in utils.recordsetDisplayModes
      *          - containerIndex: If it's related (or inline), this will return the index of that related(or inline) table.
      *
      * The events that are being used by directives in this file and their children:

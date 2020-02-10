@@ -164,6 +164,16 @@
             else {
                 AlertsService.addAlert("Your data has been submitted. Showing you the result set...", "success");
 
+                // NOTE currently this has been added just to make sure nothing is broken,
+                // but it's not used since the displayed table doesn't have any controls.
+                // if we end up adding more controls and needed to log them, we might want to
+                // revisit the filters that we're logging here.
+                var logStackElement = logService.getStackElement(
+                    logService.logStackTypes.SET,
+                    resultsReference.table,
+                    resultsReference.filterLogInfo
+                );
+
                 // includes identifiers for specific records modified
                 vm.resultsetRecordsetLink = $rootScope.reference.contextualize.compact.appLink;
                 //set values for the view to flip to recordedit resultset view
@@ -183,8 +193,11 @@
                         viewable: false,
                         editable: false,
                         deletable: false,
-                        selectMode: modalBox.noSelect //'no-select'
-                    }
+                        selectMode: modalBox.noSelect, //'no-select'
+                        displayMode: recordsetDisplayModes.table
+                    },
+                    logStack: logService.getStackObject(logStackElement),
+                    logStackPath: logService.getStackPath("", logService.logStackPaths.RESULT_SUCCESFUL_SET)
                 };
 
                 // NOTE: This case is for a pseudo-failure case
@@ -206,8 +219,11 @@
                             viewable: false,
                             editable: false,
                             deletable: false,
-                            selectMode: modalBox.noSelect
-                        }
+                            selectMode: modalBox.noSelect,
+                            displayMode: recordsetDisplayModes.table
+                        },
+                        logStack: logService.getStackObject(logStackElement),
+                        logStackPath: logService.getStackPath("", logService.logStackPaths.RESULT_FAILED_SET)
                     };
                 }
                 vm.resultset = true;

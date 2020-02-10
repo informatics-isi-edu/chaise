@@ -176,9 +176,6 @@ describe ("Viewing exisiting record with related entities, ", function () {
         rowViewPaths: [
             [{column: "id", value: "1"}]
         ],
-        rowEditPaths: [ // in case of association, edit should naviagte to the association table
-            "id_base=2004&id_related=1"
-        ],
         count: 1,
         canEdit: true,
         add: {

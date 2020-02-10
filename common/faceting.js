@@ -798,7 +798,7 @@
                                     defer.reject(err);
                                 });
                             } else {
-                                histogramData().then(function (response) {
+                                histogramData(updateCauses, updateStartTime).then(function (response) {
                                     defer.resolve(response);
                                 }).catch(function (err) {
                                     defer.reject(err);
