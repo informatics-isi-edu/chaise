@@ -266,8 +266,6 @@
                         vm.page.tuples[valIndex]
                     );
 
-                    console.log(displayValue);
-
                     model.isLoading = false;
 
                     // if rowValues has not been completely populated yet, use pendingRowValues instead
@@ -278,10 +276,10 @@
                         vm.pendingRowValues[valIndex][obj.index] = displayValue;
                     } else {
                         vm.rowValues[valIndex][obj.index] = displayValue;
+                        // emit aggregates loaded event for [row][column]
+                        $rootScope.$emit("aggLoaded-" + vm.logObject.schema_table + valIndex, obj.index);
                     }
                 });
-                console.log("row values: ", vm.rowValues);
-                console.log("column models: ", vm.columnModels);
             });
 
         }
@@ -367,6 +365,7 @@
                 for (var rowIndex in vm.pendingRowValues) {
                     for (var colIndex in vm.pendingRowValues[rowIndex]) {
                         vm.rowValues[rowIndex][colIndex] = vm.pendingRowValues[rowIndex][colIndex];
+                        // emit aggregates loaded event for [row][column] after push more rows
                     }
                 }
             }
