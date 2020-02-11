@@ -51,9 +51,9 @@
      *        selectedRows, // array of selected rows
      *        search,       // search term, null for none
      *        config,       // set of config to disable or enable features
-     *        logStack,
-     *        logStackPath,
-     *        logObject (optional)
+     *        logStack,     // (required) used to capture the stack related to this table.
+     *        logStackPath, // (required) used to capture the stack-path related to this table.
+     *        logObject (optional) // used only on the first request of main entity read.
      *       }
      *
      *      available config options:
@@ -191,19 +191,19 @@
             });
 
 
-            var pcolStackEl = logService.getStackElement(
+            var pcolStackNode = logService.getStackNode(
                 logService.logStackTypes.PSEUDO_COLUMN,
                 pcol.column.table,
                 { source: pcol.column.compressedDataSource, entity: pcol.column.isEntityMode, agg: pcol.column.aggregateFn}
             );
 
-            var action = logService.logActions.LOAD, stack = getTableLogStack(vm, pcolStackEl);
+            var action = logService.logActions.LOAD, stack = getTableLogStack(vm, pcolStackNode);
             if (Array.isArray(agg.updateCauses) && agg.updateCauses.length > 0) {
                 action = logService.logActions.RELOAD;
                 stack = logService.addCausesToStack(stack, agg.updateCauses, agg.updateStartTime);
             }
             var logObj = {
-                action: getTableLogAction(vm, logService.logStackPaths.PSEUDO_COLUMN, action),
+                action: getTableLogAction(vm, action, logService.logStackPaths.PSEUDO_COLUMN),
                 stack: stack
             }
             pcol.column.getAggregatedValue(vm.page, logObj).then(function (values) {
@@ -435,7 +435,7 @@
             }
 
             // create the action
-            logParams.action = getTableLogAction(vm, "", act);
+            logParams.action = getTableLogAction(vm, act);
 
             (function (current, requestCauses, updateStartTime) {
                 vm.reference.read(vm.pageLimit, logParams).then(function (page) {
@@ -626,7 +626,7 @@
              }
              vm.reference.getAggregates(
                  aggList,
-                 {action: getTableLogAction(vm, "", action), stack: stack}
+                 {action: getTableLogAction(vm, action), stack: stack}
              ).then(function getAggregateCount(response) {
                  if (current !== vm.flowControlObject.counter) {
                      defer.resolve(false);
@@ -895,15 +895,15 @@
         /**
          * Return the action string that should be used for logs.
          * @param {Object} vm - the vm object
-         * @param {String=} childStackPath - if we're getting the action for child (facet, pseudo-column)
          * @param {String} actionPath - the ui context and verb
+         * @param {String=} childStackPath - if we're getting the action for child (facet, pseudo-column)
          */
-        function getTableLogAction(vm, childStackPath, actionPath) {
+        function getTableLogAction(vm, actionPath, childStackPath) {
             var stackPath = vm.logStackPath ? vm.logStackPath : logService.logStackPaths.SET;
             if (childStackPath) {
                 stackPath = logService.getStackPath(stackPath, childStackPath);
             }
-            return logService.getActionString(stackPath, actionPath);
+            return logService.getActionString(actionPath, stackPath);
         }
 
         /**
@@ -993,7 +993,7 @@
 
                     logService.logClientAction(
                         {
-                            action: getTableLogAction(scope.vm, "", logService.logActions.SORT),
+                            action: getTableLogAction(scope.vm, logService.logActions.SORT),
                             stack: getTableLogStack(scope.vm)
                         },
                         scope.vm.reference.defaultLogInfo
@@ -1022,7 +1022,7 @@
 
                     logService.logClientAction(
                         {
-                            action: getTableLogAction(scope.vm, "", logService.logActions.PAGE_PREV),
+                            action: getTableLogAction(scope.vm, logService.logActions.PAGE_PREV),
                             stack: getTableLogStack(scope.vm)
                         },
                         scope.vm.reference.defaultLogInfo
@@ -1040,7 +1040,7 @@
 
                     logService.logClientAction(
                         {
-                            action: getTableLogAction(scope.vm, "", logService.logActions.PAGE_NEXT),
+                            action: getTableLogAction(scope.vm, logService.logActions.PAGE_NEXT),
                             stack: getTableLogStack(scope.vm)
                         },
                         scope.vm.reference.defaultLogInfo
@@ -1075,7 +1075,7 @@
             scope.selectNone = function($event) {
                 logService.logClientAction(
                     {
-                        action: getTableLogAction(scope.vm, "", logService.logActions.PAGE_DESELECT_ALL),
+                        action: getTableLogAction(scope.vm, logService.logActions.PAGE_DESELECT_ALL),
                         stack: getTableLogStack(scope.vm)
                     },
                     scope.vm.reference.defaultLogInfo
@@ -1105,7 +1105,7 @@
             scope.selectAll = function($event) {
                 logService.logClientAction(
                     {
-                        action: getTableLogAction(scope.vm, "", logService.logActions.PAGE_SELECT_ALL),
+                        action: getTableLogAction(scope.vm, logService.logActions.PAGE_SELECT_ALL),
                         stack: getTableLogStack(scope.vm)
                     },
                     scope.vm.reference.defaultLogInfo
@@ -1194,7 +1194,7 @@
             scope.copyPermalink = function () {
                 logService.logClientAction(
                     {
-                        action: getTableLogAction(scope.vm, "", logService.logActions.PERMALINK_LEFT),
+                        action: getTableLogAction(scope.vm, logService.logActions.PERMALINK_LEFT),
                         stack: getTableLogStack(scope.vm)
                     },
                     scope.vm.reference.defaultLogInfo
@@ -1226,7 +1226,7 @@
                 var action = panelOpen ? logService.logActions.FACET_PANEL_HIDE : logService.logActions.FACET_PANEL_SHOW;
                 logService.logClientAction(
                     {
-                        action: getTableLogAction(scope.vm, "", action),
+                        action: getTableLogAction(scope.vm, action),
                         stack: getTableLogStack(scope.vm)
                     },
                     scope.vm.reference.defaultLogInfo
@@ -1249,7 +1249,7 @@
                      // log the client action
                      var extraInfo = typeof term === "string" ? {"search-str": term} : {};
                      logService.logClientAction({
-                         action:getTableLogAction(scope.vm, "", action),
+                         action:getTableLogAction(scope.vm, action),
                          stack: getTableLogStack(scope.vm, null, extraInfo)
                      }, scope.vm.reference.defaultLogInfo);
 
@@ -1274,7 +1274,7 @@
 
                 // log the client action
                 logService.logClientAction({
-                    action:getTableLogAction(scope.vm, "", logService.logActions.SELECTION_CLEAR),
+                    action:getTableLogAction(scope.vm, logService.logActions.SELECTION_CLEAR),
                     stack: getTableLogStack(scope.vm)
                 }, scope.vm.reference.defaultLogInfo);
 
@@ -1286,7 +1286,7 @@
 
                 // log the client action
                 logService.logClientAction({
-                    action:getTableLogAction(scope.vm, "", logService.logActions.SELECTION_CLEAR_ALL),
+                    action:getTableLogAction(scope.vm, logService.logActions.SELECTION_CLEAR_ALL),
                     stack: getTableLogStack(scope.vm)
                 }, scope.vm.reference.defaultLogInfo);
 
@@ -1426,7 +1426,7 @@
                 if (permalink) {
                     permalink.addEventListener('contextmenu', function (e) {
                         logService.logClientAction({
-                            action: getTableLogAction(scope.vm, "", logService.logActions.PERMALINK_RIGHT),
+                            action: getTableLogAction(scope.vm, logService.logActions.PERMALINK_RIGHT),
                             stack: getTableLogStack(scope.vm)
                         }, scope.vm.reference.defaultLogInfo);
                     });
@@ -1528,7 +1528,7 @@
 
                     logService.logClientAction(
                         {
-                            action: recordTableUtils.getTableLogAction(scope.vm, "", logService.logActions.PAGE_SIZE_SELECT),
+                            action: recordTableUtils.getTableLogAction(scope.vm, logService.logActions.PAGE_SIZE_SELECT),
                             stack: recordTableUtils.getTableLogStack(scope.vm, null, {"page-size": limit})
                         },
                         scope.vm.reference.defaultLogInfo
@@ -1541,7 +1541,7 @@
                     if (!open) return;
                     logService.logClientAction(
                         {
-                            action: recordTableUtils.getTableLogAction(scope.vm, "", logService.logActions.PAGE_SIZE_OEPN),
+                            action: recordTableUtils.getTableLogAction(scope.vm, logService.logActions.PAGE_SIZE_OEPN),
                             stack: recordTableUtils.getTableLogStack(scope.vm)
                         },
                         scope.vm.reference.defaultLogInfo
@@ -1563,7 +1563,7 @@
                     if (scope.vm.config.displayMode !== recordsetDisplayModes.fullscreen) {
                         logService.logClientAction(
                             {
-                                action: recordTableUtils.getTableLogAction(scope.vm, "", logService.logActions.ADD_INTEND),
+                                action: recordTableUtils.getTableLogAction(scope.vm, logService.logActions.ADD_INTEND),
                                 stack: recordTableUtils.getTableLogStack(scope.vm)
                             },
                             scope.vm.reference.defaultLogInfo

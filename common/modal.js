@@ -318,7 +318,7 @@
             if (vm.tableModel.logStackPath && vm.tableModel.logStack) {
                 logService.logClientAction(
                     {
-                        action: logService.getActionString(vm.tableModel.logStackPath, logService.logActions.CANCEL),
+                        action: logService.getActionString(logService.logActions.CANCEL, vm.tableModel.logStackPath),
                         stack: vm.tableModel.logStack
                     },
                     vm.tableModel.reference.defaultLogInfo
@@ -406,7 +406,7 @@
 
         vm.copyToClipboard = function (text, action) {
             logService.logClientAction({
-                action: logService.getActionString(null, action),
+                action: logService.getActionString(action),
                 stack: logService.getStackObject()
             }, params.reference.defaultLogInfo);
             // Create a dummy input to put the text string into it, select it, then copy it
@@ -428,7 +428,7 @@
 
         vm.logCitationDownload = function (action) {
             logService.logClientAction({
-                action: logService.getActionString(null, action),
+                action: logService.getActionString(action),
                 stack: logService.getStackObject()
             }, params.reference.defaultLogInfo);
         }

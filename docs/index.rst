@@ -10,3 +10,4 @@ Web interface (Chaise)
    user-docs/custom-css.md
    user-docs/console.md
    user-docs/logging.md
+   user-docs/logging-pre-feb-20.md

@@ -96,7 +96,7 @@
 
             logObj = logObj || {};
             var action = isUpdate ? logService.logActions.RELOAD : logService.logActions.LOAD;
-            logObj.action = logService.getActionString(null, action);
+            logObj.action = logService.getActionString(action);
             logObj.stack = logService.getStackObject();
 
             var causes = (Array.isArray($rootScope.updateCauses) && $rootScope.updateCauses.length > 0) ? $rootScope.updateCauses : [];
@@ -190,7 +190,7 @@
             var action = isUpdate ? logService.logActions.RELOAD : logService.logActions.LOAD;
             var stackPath = logService.getStackPath("", logService.logStackPaths.PSEUDO_COLUMN);
             var logObj = {
-                action: logService.getActionString(stackPath, action),
+                action: logService.getActionString(action, stackPath),
                 stack: columnModel.logStack
             };
             columnModel.column.getAggregatedValue($rootScope.page, logObj).then(function (values) {
@@ -346,7 +346,7 @@
          * @param  {boolean} isInline whether the table is inline or not
          */
         function getTableModel (reference, index, isInline) {
-            var stackElement = logService.getStackElement(
+            var stackNode = logService.getStackNode(
                 logService.logStackTypes.RELATED,
                 reference.table,
                 {source: reference.compressedDataSource, entity: true}
@@ -374,7 +374,7 @@
                     displayMode: (isInline ? recordsetDisplayModes.inline : recordsetDisplayModes.related),
                     containerIndex: index // TODO (could be optimized) can this be done in a better way?
                 },
-                logStack: logService.getStackObject(stackElement),
+                logStack: logService.getStackObject(stackNode),
                 logStackPath: logStackPath,
                 updateCauses: [], // might not be needed
                 updateStartTime: -1,

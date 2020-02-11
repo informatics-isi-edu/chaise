@@ -168,7 +168,7 @@
                 // but it's not used since the displayed table doesn't have any controls.
                 // if we end up adding more controls and needed to log them, we might want to
                 // revisit the filters that we're logging here.
-                var logStackElement = logService.getStackElement(
+                var logStackNode = logService.getStackNode(
                     logService.logStackTypes.SET,
                     resultsReference.table,
                     resultsReference.filterLogInfo
@@ -196,7 +196,7 @@
                         selectMode: modalBox.noSelect, //'no-select'
                         displayMode: recordsetDisplayModes.table
                     },
-                    logStack: logService.getStackObject(logStackElement),
+                    logStack: logService.getStackObject(logStackNode),
                     logStackPath: logService.getStackPath("", logService.logStackPaths.RESULT_SUCCESFUL_SET)
                 };
 
@@ -222,7 +222,7 @@
                             selectMode: modalBox.noSelect,
                             displayMode: recordsetDisplayModes.table
                         },
-                        logStack: logService.getStackObject(logStackElement),
+                        logStack: logService.getStackObject(logStackNode),
                         logStackPath: logService.getStackPath("", logService.logStackPaths.RESULT_FAILED_SET)
                     };
                 }
@@ -429,7 +429,7 @@
             }
 
             logService.logClientAction({
-                action: logService.getActionString(null, action),
+                action: logService.getActionString(action),
                 stack: stack
             }, $rootScope.reference.defaultLogInfo);
 
@@ -527,7 +527,7 @@
             var defaultLogInfo = (vm.editMode ? $rootScope.tuples[index].reference.defaultLogInfo : $rootScope.reference.defaultLogInfo);
 
             logService.logClientAction({
-                action: logService.getActionString(null, logService.logActions.FORM_REMOVE),
+                action: logService.getActionString(logService.logActions.FORM_REMOVE),
                 stack: logService.getStackObject()
             }, defaultLogInfo);
 
@@ -613,7 +613,7 @@
 
             var action = model.showSelectAll ? logService.logActions.SET_ALL_CLOSE : logService.logActions.SET_ALL_OPEN;
             logService.logClientAction({
-                action: logService.getActionString(model.logStackPath, action),
+                action: logService.getActionString(action, model.logStackPath),
                 stack: model.logStack
             }, defaultLogInfo);
 
@@ -682,7 +682,7 @@
 
             var defaultLogInfo = (model.column.reference ? model.column.reference.defaultLogInfo : $rootScope.reference.defaultLogInfo);
             logService.logClientAction({
-                action: logService.getActionString(model.logStackPath, logService.logActions.SET_ALL_CANCEL),
+                action: logService.getActionString(logService.logActions.SET_ALL_CANCEL, model.logStackPath),
                 stack: model.logStack
             }, defaultLogInfo);
 
@@ -790,7 +790,7 @@
 
             var defaultLogInfo = (model.column.reference ? model.column.reference.defaultLogInfo : $rootScope.reference.defaultLogInfo);
             logService.logClientAction({
-                action: logService.getActionString(model.logStackPath, logService.logActions.SET_ALL_APPLY),
+                action: logService.getActionString(logService.logActions.SET_ALL_APPLY, model.logStackPath),
                 stack: model.logStack
             }, defaultLogInfo);
 
@@ -802,7 +802,7 @@
 
             var defaultLogInfo = (model.column.reference ? model.column.reference.defaultLogInfo : $rootScope.reference.defaultLogInfo);
             logService.logClientAction({
-                action: logService.getActionString(model.logStackPath, logService.logActions.SET_ALL_CLEAR),
+                action: logService.getActionString(logService.logActions.SET_ALL_CLEAR, model.logStackPath),
                 stack: model.logStack
             }, defaultLogInfo);
 

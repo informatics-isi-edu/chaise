@@ -332,7 +332,7 @@
             //NOTE assumption is that this function is only is called for adding pure and binary association
 
             // TODO (could be optimized) this is already done in recordutil getTableModel (we just don't have access to the tableModel here)
-            var stackElement = logService.getStackElement(
+            var stackElement = logService.getStackNode(
                 logService.logStackTypes.RELATED,
                 params.reference.table,
                 {source: domainRef.compressedDataSource, entity: true}
@@ -363,7 +363,7 @@
                     newStack = logService.addCausesToStack(tableModel.logStack, requestCauses, updateStartTime);
                 }
                 var logObj = {
-                    action: logService.getActionString(tableModel.logStackPath, action),
+                    action: logService.getActionString(action, tableModel.logStackPath),
                     stack: newStack
                 }
 
@@ -420,7 +420,7 @@
                 // NOTE this if case is unnecessary, this is always modal update
                 if (isModalUpdate) {
                     var logObj = {
-                        action: logService.getActionString(logStackPath, logService.logActions.LINK),
+                        action: logService.getActionString(logService.logActions.LINK, logStackPath),
                         stack: logStack
                     };
                     addRecords(viewModel.editMode, derivedref, nullArr, isModalUpdate, rsReference, rsTuples, rsQueryParams, viewModel, viewModel.onSuccess, logObj);

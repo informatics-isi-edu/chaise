@@ -37,7 +37,7 @@
         vm.toggleSidebar = function() {
             var action = ($rootScope.recordSidePanOpen ? logService.logActions.TOC_HIDE : logService.logActions.TOC_SHOW );
             logService.logClientAction({
-                action: logService.getActionString(null, action),
+                action: logService.getActionString(action),
                 stack: logService.getStackObject()
             }, $rootScope.reference.defaultLogInfo);
 
@@ -85,7 +85,7 @@
         vm.deleteRecord = function() {
             var errorData = {};
             var logObj = {
-                action: logService.getActionString(null, logService.logActions.DELETE),
+                action: logService.getActionString(logService.logActions.DELETE),
                 stack: logService.getStackObject()
             };
             $rootScope.reference.delete(logObj).then(function deleteSuccess() {
@@ -120,7 +120,7 @@
             params.versionDate = UiUtils.versionDate(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
 
             var snaptimeHeader = {
-                action: logService.getActionString(null, logService.logActions.SHARE_OPEN),
+                action: logService.getActionString(logService.logActions.SHARE_OPEN),
                 stack: logService.getStackObject(),
                 catalog: ref.defaultLogInfo.catalog,
                 schema_table: ref.defaultLogInfo.schema_table
@@ -235,7 +235,7 @@
 
             var action = dataModel.isTableDisplay ? logService.logActions.RELATED_DISPLAY_MARKDOWN : logService.logActions.RELATED_DISPLAY_TABLE;
             logService.logClientAction({
-                action: logService.getActionString(tableModel.logStackPath, action),
+                action: logService.getActionString(action, tableModel.logStackPath),
                 stack: tableModel.logStack
             }, tableModel.reference.defaultLogInfo);
 
@@ -245,7 +245,7 @@
         vm.toggleRelatedTables = function() {
             var action = ($rootScope.showEmptyRelatedTables ? logService.logActions.EMPTY_RELATED_HIDE : logService.logActions.EMPTY_RELATED_SHOW);
             logService.logClientAction({
-                action: logService.getActionString(null, action),
+                action: logService.getActionString(action),
                 stack: logService.getStackObject()
             }, $rootScope.reference.defaultLogInfo);
 
@@ -261,7 +261,7 @@
             var action = (rtm.open ? logService.logActions.CLOSE : logService.logActions.OPEN);
 
             logService.logClientAction({
-                action: logService.getActionString(rtm.tableModel.logStackPath, action),
+                action: logService.getActionString(action, rtm.tableModel.logStackPath),
                 stack: rtm.tableModel.logStack
             }, rtm.tableModel.reference.defaultLogInfo);
         }
@@ -414,7 +414,7 @@
 
             // log the client action
             logService.logClientAction({
-                action: logService.getActionString(tableModel.logStackPath, logService.logActions.ADD_INTEND),
+                action: logService.getActionString(logService.logActions.ADD_INTEND, tableModel.logStackPath),
                 stack: tableModel.logStack
             }, tableModel.reference.defaultLogInfo);
 
@@ -552,7 +552,7 @@
         $scope.scrollToTop = function (fromToc) {
             var action = (fromToc ? logService.logActions.TOC_SCROLL_TOP : logService.logActions.SCROLL_TOP);
             logService.logClientAction({
-                action: logService.getActionString(null, action),
+                action: logService.getActionString(action),
                 stack: logService.getStackObject()
             }, $rootScope.reference.defaultLogInfo);
 
@@ -567,7 +567,7 @@
             var relatedObj = determineScrollElement(sectionId);
 
             logService.logClientAction({
-                action: logService.getActionString(relatedObj.rtm.tableModel.logStackPath, logService.logActions.TOC_SCROLL_RELATED),
+                action: logService.getActionString(logService.logActions.TOC_SCROLL_RELATED, relatedObj.rtm.tableModel.logStackPath),
                 stack: relatedObj.rtm.tableModel.logStack
             }, relatedObj.rtm.tableModel.reference.defaultLogInfo);
 

@@ -178,7 +178,7 @@
             // fix that function.
             if (logAction) {
                 config.headers[ERMrest.contextHeaderName] = {
-                    action: logService.getActionString("", logAction, true)
+                    action: logService.getActionString(logAction, "", "")
                 }
             }
             ConfigUtils.getHTTPService().get(url, config).then(function(response){
@@ -264,7 +264,7 @@
                     headers: {}
                 };
                 config.headers[ERMrest.contextHeaderName] = {
-                    action: logService.getActionString("", logService.logActions.SESSION_RETRIEVE, true)
+                    action: logService.getActionString(logService.logActions.SESSION_RETRIEVE, "", "")
                 }
                 return ConfigUtils.getHTTPService().get(serviceURL + "/authn/session", config).then(function(response) {
                     if (context === "401" && shouldReloadPageAfterLogin(response.data)) {
@@ -294,7 +294,7 @@
                     headers: {}
                 };
                 config.headers[ERMrest.contextHeaderName] = {
-                    action: logService.getActionString("", logService.logActions.SESSION_VALIDATE, true)
+                    action: logService.getActionString(logService.logActions.SESSION_VALIDATE, "", "")
                 }
                 return ConfigUtils.getHTTPService().get(serviceURL + "/authn/session", config).then(function(response) {
                     _session = response.data;
@@ -365,7 +365,7 @@
                     headers: {}
                 };
                 config.headers[ERMrest.contextHeaderName] = {
-                    action: logService.getActionString("", logService.logActions.LOGOUT_NAVBAR, true)
+                    action: logService.getActionString(logService.logActions.LOGOUT_NAVBAR, "", "")
                 }
                 ConfigUtils.getHTTPService().delete(url, config).then(function(response) {
                     StorageService.deleteStorageNamespace(LOCAL_STORAGE_KEY);

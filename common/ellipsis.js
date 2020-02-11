@@ -128,7 +128,7 @@
                     // all the row level actions should use this stack
                     scope.logStack = recordTableUtils.getTableLogStack(
                         scope.tableModel,
-                        logService.getStackElement(logService.logStackTypes.ENTITY, tupleReference.table, tupleReference.filterLogInfo)
+                        logService.getStackNode(logService.logStackTypes.ENTITY, tupleReference.table, tupleReference.filterLogInfo)
                     );
 
                     // edit button

@@ -68,7 +68,7 @@
                         ctrl.childCtrls[index] = childCtrl;
                         ctrl.facetingCount++;
 
-                        var facetLogStackElemenet = logService.getStackElement(
+                        var facetLogStackNode = logService.getStackNode(
                             logService.logStackTypes.FACET,
                             facetColumn.column.table,
                             { source: facetColumn.compressedDataSource, entity: facetColumn.isEntityMode}
@@ -91,7 +91,7 @@
                             recordsetConfig: $scope.vm.config,
                             updateCauses: [],
                             updateStartTime: -1,
-                            logStackElement: facetLogStackElemenet,
+                            logStackNode: facetLogStackNode,
                             parentLogStackPath: $scope.vm.logStackPath ? $scope.vm.logStackPath : logService.logStackPaths.SET
                         };
 
@@ -140,7 +140,7 @@
                      * @param {string} actionPath the user context + action verb
                      */
                     ctrl.getFacetLogAction = function (index, actionPath) {
-                        return recordTableUtils.getTableLogAction($scope.vm, logService.logStackPaths.FACET, actionPath);
+                        return recordTableUtils.getTableLogAction($scope.vm, actionPath, logService.logStackPaths.FACET);
                     };
 
                     /**
@@ -150,7 +150,7 @@
                      * @param {integer}
                      */
                     ctrl.getFacetLogStack = function (index, extraInfo) {
-                        return recordTableUtils.getTableLogStack($scope.vm, $scope.vm.facetModels[index].logStackElement, extraInfo);
+                        return recordTableUtils.getTableLogStack($scope.vm, $scope.vm.facetModels[index].logStackNode, extraInfo);
                     };
                 }],
                 require: 'faceting',
@@ -228,7 +228,7 @@
                             // log the action
                             logService.logClientAction(
                                 {
-                                    action: recordTableUtils.getTableLogAction(scope.vm, "", action),
+                                    action: recordTableUtils.getTableLogAction(scope.vm, action),
                                     stack: recordTableUtils.getTableLogStack(scope.vm)
                                 },
                                 scope.vm.reference.defaultLogInfo
@@ -692,9 +692,9 @@
                                 requestMax = isColumnOfType("timestamp") ? dateTimeToTimestamp(scope.rangeOptions.absMax) : scope.rangeOptions.absMax;
 
                             var facetLog = getDefaultLogInfo(scope);
-                            var action = logService.logActions.HISTOGRAM_LOAD;
+                            var action = logService.logActions.FACET_HISTOGRAM_LOAD;
                             if (updateCauses.length > 0) {
-                                action = logService.logActions.HISTOGRAM_RELOAD;
+                                action = logService.logActions.FACET_HISTOGRAM_RELOAD;
 
                                 // add causes
                                 facetLog.stack = logService.addCausesToStack(facetLog.stack, updateCauses, updateStartTime);
@@ -760,9 +760,9 @@
                                 ];
 
                                 var facetLog = getDefaultLogInfo(scope);
-                                var action = logService.logActions.LOAD;
+                                var action = logService.logActions.FACET_RANGE_LOAD;
                                 if (scope.facetModel.updateCauses.length > 0) {
-                                    action = logService.logActions.RELOAD;
+                                    action = logService.logActions.FACET_RANGE_RELOAD;
                                     // add causes
                                     facetLog.stack = logService.addCausesToStack(facetLog.stack, scope.facetModel.updateCauses, scope.facetModel.updateStartTime);
                                 }
@@ -1151,9 +1151,9 @@
                     var facetLog = getDefaultLogInfo(scope);
 
                     // create the action
-                    var action = logService.logActions.LOAD;
+                    var action = logService.logActions.FACET_CHOICE_LOAD;
                     if (scope.facetModel.updateCauses.length > 0) {
-                        action = logService.logActions.RELOAD;
+                        action = logService.logActions.FACET_CHOICE_RELOAD;
                         // add causes
                         facetLog.stack = logService.addCausesToStack(facetLog.stack, scope.facetModel.updateCauses, scope.facetModel.updateStartTime);
                     }

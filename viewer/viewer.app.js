@@ -147,7 +147,7 @@
 
                 $rootScope.logStackPath = logService.logStackPaths.ENTITY;
                 $rootScope.logStack = [
-                    logService.getStackElement(
+                    logService.getStackNode(
                         logService.logStackTypes.ENTITY,
                         table,
                         {
@@ -161,7 +161,7 @@
                 var contextHeaderParams = {
                     catalog: context.catalogID,
                     schema_table: context.schemaName + ":" + context.tableName,
-                    action: logService.getActionString(null, logService.logActions.LOAD),
+                    action: logService.getActionString(logService.logActions.LOAD),
                     stack: logService.getStackObject()
                 };
 
@@ -205,7 +205,7 @@
                     var contextHeaderParams = {
                         catalog: context.catalogID,
                         schema_table: context.schemaName + ":annotation",
-                        action: logService.getActionString(null, logService.logActions.VIEWER_ANNOT_LOAD),
+                        action: logService.getActionString(logService.logActions.VIEWER_ANNOT_LOAD),
                         stack: logService.getStackObject()
                     };
                     annotationPath.filter(imageFilter).entity.get(contextHeaderParams).then(function success(_annotations) {
@@ -230,7 +230,7 @@
                         var contextHeaderParams = {
                             catalog: context.catalogID,
                             schema_table: context.schemaName + ":annotation_comment",
-                            action: logService.getActionString(null, logService.logActions.VIEWER_ANNOT_COMMENT_LOAD),
+                            action: logService.getActionString(logService.logActions.VIEWER_ANNOT_COMMENT_LOAD),
                             stack: logService.getStackObject()
                         };
 
@@ -264,7 +264,7 @@
                 var contextHeaderParams = {
                     catalog: context.catalogID,
                     schema_table: context.schemaName + ":anatomy",
-                    action: logService.getActionString(null, logService.logActions.VIEWER_ANATOMY_LOAD),
+                    action: logService.getActionString(logService.logActions.VIEWER_ANATOMY_LOAD),
                     stack: logService.getStackObject()
                 };
                 anatomyPath.entity.get(contextHeaderParams).then(function success(_anatomies) {

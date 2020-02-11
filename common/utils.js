@@ -2206,6 +2206,16 @@
         }
     }])
 
+    /**
+     * This service is used for logging purposes. The functions in this service can be used to
+     * create new stack nodes, retrieve the stack object, manipulate the stack object, or
+     * get the action string that should be used.
+     * This service relies on these two attributes in $rootScope:
+     *  - $rootScope.appMode: the app-mode. Could be undefined.
+     *  - $rootScope.logStack: The stack object of the whole app (usually the stack of the initial request of the page)
+     *  - $rootScope.logStackPath: The stack path of the whole app (usually the stack path of the initial request of the page)
+     *
+     */
     .service('logService', ['ConfigUtils', 'DataUtils', '$log', '$rootScope', function (ConfigUtils, DataUtils, $log, $rootScope) {
         var appModeStackPathSeparator = ":",
             stackPathClientPathSeparator = ",",
@@ -2235,9 +2245,13 @@
             //   - server:
             COUNT: clientPathActionSeparator + "count",
             RECOUNT: clientPathActionSeparator + "recount",
-            HISTOGRAM_LOAD: "histogram" + clientPathActionSeparator + "load",
-            HISTOGRAM_RELOAD: "histogram" + clientPathActionSeparator + "reload",
-            PRESELECTED_FACETS_LOAD: "preselect" + clientPathActionSeparator + "preload",
+            FACET_CHOICE_LOAD: "choice" + clientPathActionSeparator + "load",
+            FACET_CHOICE_RELOAD: "choice" + clientPathActionSeparator + "reload",
+            FACET_RANGE_LOAD: "range" + clientPathActionSeparator + "load",
+            FACET_RANGE_RELOAD: "range" + clientPathActionSeparator + "reload",
+            FACET_HISTOGRAM_LOAD: "range" + clientPathActionSeparator + "load-histogram",
+            FACET_HISTOGRAM_RELOAD: "range" + clientPathActionSeparator + "reload-histogram",
+            PRESELECTED_FACETS_LOAD: "choice/preselect" + clientPathActionSeparator + "preload",
 
             //   - client:
             PERMALINK_LEFT: "permalink" + clientPathActionSeparator + "click-left",
@@ -2385,7 +2399,7 @@
             FACET_SELECT: "facet-select", // a facet selected
             FACET_MODIFIED: "facet-modified", // facet changed in the modal
             FACET_SEARCH_BOX: "facet-search-box", // facet search box changed
-            FACET_PLOT_RELAYOUT:  "facet-plot-relayout", // users interact with plot and we need to get new info for it
+            FACET_PLOT_RELAYOUT:  "facet-histogram-relayout", // users interact with plot and we need to get new info for it
             FACET_RETRY: "facet-retry", // users click on retry for a facet that errored out
             PAGE_LIMIT: "page-limit", // change page limit
             PAGE_NEXT: "page-next", // go to next page
@@ -2401,7 +2415,7 @@
         });
 
         /**
-         * Takes a header object, adds default logging info to it, and logs the request with ermrest
+         * Takes a object, adds default logging info to it, and logs the request with ermrest
          * @params {Object} logObj - object of key/value pairs that are specific to this action
          * @params {Object} commonLogInfo - object of key/value pairs that are common to all action requests
          */
@@ -2432,6 +2446,11 @@
             });
         }
 
+        /**
+         * Returns the appropriate stack object that should be used.
+         * If childStackElement passed, it will append it to the existing logStack of the app.
+         * @param {Object} childStackElement
+         */
         function getStackObject(childStackElement) {
             if (childStackElement) {
                 return $rootScope.logStack.concat(childStackElement);
@@ -2439,6 +2458,11 @@
             return $rootScope.logStack;
         }
 
+        /**
+         * Returns the stack path that should be used in logs.
+         * @param {String=} currentPath - the existing stackPath
+         * @param {String} childPath - the current child stack path
+         */
         function getStackPath(currentPath, childPath) {
             if (!currentPath) {
                 currentPath = $rootScope.logStackPath;
@@ -2446,7 +2470,13 @@
             return currentPath + separator + childPath;
         }
 
-        function getStackElement(type, table, extraInfo) {
+        /**
+         * Creates a new stack node given the type, table, and extra information.
+         * @param {String} type - one of the logStackTypes
+         * @param {ERMrest.Table} table - the table object of this node
+         * @param {Object=} extraInfo - if you want to attach more info to this node.
+         */
+        function getStackNode(type, table, extraInfo) {
             var obj = {
                 type: type,
                 s_t: table.schema.name + ":" + table.name
@@ -2460,6 +2490,11 @@
             return obj;
         }
 
+        /**
+         * Given an stack and new filterLogInfo, will remove the old ones and use the new ones.
+         * @param {Object} stack - if not passed, will use the app-wide one
+         * @param {Object} filterLogInfo
+         */
         function updateStackFilterInfo(stack, filterLogInfo) {
             if (!stack) {
                 stack = $rootScope.logStack;
@@ -2477,6 +2512,12 @@
             }
         }
 
+        /**
+         * Given the array of causes and startTime, will return a new stack with appropriate variables.
+         * @param {Object=} stack - if not passed, will use the app-wide one
+         * @param {Array} causes
+         * @param {String} startTime - in milliseconds
+         */
         function addCausesToStack(stack, causes, startTime) {
             if (!stack) {
                 stack = $rootScope.logStack;
@@ -2489,6 +2530,11 @@
             return newStack;
         }
 
+        /**
+         * Given an stack and object, will return a new stack with the object information added.
+         * @param {Object=} stack - if not passed, will use the app-wide one
+         * @param {Object} extraInfo
+         */
         function addExtraInfoToStack(stack, extraInfo) {
             if (!stack) {
                 stack = $rootScope.logStack;
@@ -2505,23 +2551,18 @@
         }
 
         /**
-         * For the request that we don't want log stack or app mode, given logActionVerb will return the appropriate action string.
-         * @param {String} logActionVerb - the action verb
-         */
-        function getActionStringWOnlyVerb(logActionVerb) {
-            return appModeStackPathSeparator + stackPathClientPathSeparator + logActionVerb;
-        }
-
-        /**
          * Given the logStackPath and logActionVerb will return the appropriate action string.
-         * @param {String} logStackPath - if the given value is not a string, we will use the $rootScope.logStackPath instead.
          * @param {String} logActionVerb - the action verb
+         * @param {String} logStackPath - if the given value is not a string, we will use the $rootScope.logStackPath instead.
+         * @param {String} appMode -if the given value is not a string, we will use te $rootScope.logAppMode instead.
          */
-        function getActionString(logStackPath, logActionVerb, skipAppMode) {
+        function getActionString(logActionVerb, logStackPath, appMode) {
             if (typeof logStackPath !== "string") {
                 logStackPath = $rootScope.logStackPath;
             }
-            var appMode = !skipAppMode && $rootScope.logAppMode ? $rootScope.logAppMode : "";
+            if (typeof appMode !== "string") {
+                appMode = $rootScope.logAppMode ? $rootScope.logAppMode : "";
+            }
             return  appMode + appModeStackPathSeparator + logStackPath + stackPathClientPathSeparator + logActionVerb;
         }
 
@@ -2533,8 +2574,7 @@
             updateCauses: updateCauses,
             logClientAction: logClientAction,
             getActionString: getActionString,
-            getActionStringWOnlyVerb: getActionStringWOnlyVerb,
-            getStackElement: getStackElement,
+            getStackNode: getStackNode,
             updateStackFilterInfo: updateStackFilterInfo,
             addCausesToStack: addCausesToStack,
             getStackPath: getStackPath,

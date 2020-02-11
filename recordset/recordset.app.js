@@ -158,7 +158,7 @@
 
                     $rootScope.logStackPath = logService.logStackPaths.SET;
                     $rootScope.logStack = [
-                        logService.getStackElement(
+                        logService.getStackNode(
                             logService.logStackTypes.SET,
                             recordsetModel.reference.table,
                             recordsetModel.reference.filterLogInfo

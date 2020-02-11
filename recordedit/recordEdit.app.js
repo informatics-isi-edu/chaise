@@ -189,7 +189,7 @@
                 // log attribues
                 $rootScope.logStackPath = logService.logStackPaths.SET;
                 $rootScope.logStack = [
-                    logService.getStackElement(
+                    logService.getStackNode(
                         logService.logStackTypes.SET,
                         $rootScope.reference.table,
                         $rootScope.reference.filterLogInfo
@@ -213,7 +213,7 @@
                 // The log object that will be used for the submission request
                 var action = (context.mode == context.modes.CREATE || context.mode == context.modes.COPY) ? logService.logActions.CREATE : logService.logActions.UPDATE;
                 var logObj = {
-                    action: logService.getActionString(null, action),
+                    action: logService.getActionString(action),
                     stack: logService.getStackObject()
                 };
                 if (pcid) logObj.pcid = pcid;
@@ -223,7 +223,7 @@
 
                 $rootScope.reference.columns.forEach(function (column, index) {
                     var isDisabled = InputUtils.isDisabled(column);
-                    var stackElement = logService.getStackElement(
+                    var stackNode = logService.getStackNode(
                         column.isForeignKey ? logService.logStackTypes.FOREIGN_KEY : logService.logStackTypes.COLUMN,
                         column.table,
                         {source: column.compressedDataSource, entity: column.isForeignKey}
@@ -237,7 +237,7 @@
                         inputType: recordEditAppUtils.columnToInputType(column, isDisabled),
                         highlightRow: false,
                         showSelectAll: false,
-                        logStack: logService.getStackObject(stackElement),
+                        logStack: logService.getStackObject(stackNode),
                         logStackPath: logService.getStackPath("", stackPath)
                     };
                 });
@@ -258,7 +258,7 @@
                         }
 
                         var logObj = {
-                            action: logService.getActionString(null, logService.logActions.LOAD),
+                            action: logService.getActionString(logService.logActions.LOAD),
                             stack: logService.getStackObject()
                         };
                         $rootScope.reference.read(numberRowsToRead, logObj).then(function getPage(page) {
@@ -548,7 +548,7 @@
         function getForeignKeyData (rowIndex, colNames, fkRef, logAction, logStack) {
             var stackPath = logService.getStackPath("", logService.logStackPaths.FOREIGN_KEY);
             var logObj = {
-                action: logService.getActionString(stackPath, logAction),
+                action: logService.getActionString(logAction, stackPath),
                 stack: logStack
             };
             fkRef.contextualize.compactSelect.read(1, logObj).then(function (page) {
@@ -606,12 +606,12 @@
                         break;
                     }
                 }
-                var stackElement = logService.getStackElement(
+                var stackNode = logService.getStackNode(
                     logService.logStackTypes.FOREIGN_KEY,
                     ref.table,
                     {source: source, entity: true}
                 );
-                var logStack = logService.getStackObject(stackElement);
+                var logStack = logService.getStackObject(stackNode);
                 getForeignKeyData(newRow, fkColumnNames, ref, logService.logActions.FOREIGN_KEY_PRESELECT, logStack);
             }).catch(function (err) {
                 fkColumnNames.forEach(function (cn) {

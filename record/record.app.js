@@ -109,7 +109,7 @@
 
                 $rootScope.logStackPath = logService.logStackPaths.ENTITY;
                 $rootScope.logStack = [
-                    logService.getStackElement(
+                    logService.getStackNode(
                         logService.logStackTypes.ENTITY,
                         $rootScope.reference.table,
                         $rootScope.reference.filterLogInfo
@@ -155,7 +155,7 @@
                             isAggregate: true,
                             dirtyResult: true,
                             logStack: logService.getStackObject(
-                                logService.getStackElement(
+                                logService.getStackNode(
                                     logService.logStackTypes.PSEUDO_COLUMN,
                                     col.table,
                                     { source: col.compressedDataSource, entity: col.isEntityMode, agg: col.aggregateFn}

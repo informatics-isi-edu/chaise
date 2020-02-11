@@ -90,7 +90,7 @@
                         }
                     });
                     var logObj = {
-                        action: logService.getActionString(null, logService.logActions.EXPORT),
+                        action: logService.getActionString(logService.logActions.EXPORT),
                         stack: logStack
                     }
                     scope.exporter.run(logObj).then(function (response) {
@@ -131,7 +131,7 @@
 
                 scope.logDropdownOpened = function () {
                     logService.logClientAction({
-                        action: logService.getActionString(null, logService.logActions.EXPORT_OPEN),
+                        action: logService.getActionString(logService.logActions.EXPORT_OPEN),
                         stack: logService.getStackObject()
                     }, scope.reference.defaultLogInfo);
                 };

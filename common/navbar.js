@@ -140,7 +140,7 @@
                 // check if external or internal resource page
                 var action = UriUtils.isSameOrigin(menuObject.url) ? logService.logActions.NAVBAR_MENU_INTERNAL : logService.logActions.NAVBAR_MENU_EXTERNAL;
                 logService.logClientAction({
-                    action: logService.getActionString("", action, true),
+                    action: logService.getActionString(action, "", ""),
                     names: menuObject.names
                 });
             }
@@ -249,7 +249,7 @@
                     scope.onToggle = function (open, menuObject) {
                         if (open) {
                             logService.logClientAction({
-                                action: logService.getActionString("", logService.logActions.NAVBAR_MENU_OPEN, true),
+                                action: logService.getActionString(logService.logActions.NAVBAR_MENU_OPEN, "", ""),
                                 names: menuObject.names
                             });
                         }
@@ -270,7 +270,7 @@
                         $event.stopPropagation();
 
                         logService.logClientAction({
-                            action: logService.getActionString("", logService.logActions.NAVBAR_BRANDING, true)
+                            action: logService.getActionString(logService.logActions.NAVBAR_BRANDING, "", "")
                         });
 
                         // change the window location (do the default link behavior)
@@ -324,7 +324,7 @@
                         if (toggleMenu(event)) {
                             // if we opened the menu, log it.
                             logService.logClientAction({
-                                action: logService.getActionString("", logService.logActions.NAVBAR_MENU_OPEN, true),
+                                action: logService.getActionString(logService.logActions.NAVBAR_MENU_OPEN, "", ""),
                                 names: menuObject.names
                             });
                         }

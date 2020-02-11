@@ -46,7 +46,7 @@
                     }
 
                     logService.logClientAction({
-                        action: logService.getActionString(null, logService.logActions.DELETE_INTEND),
+                        action: logService.getActionString(logService.logActions.DELETE_INTEND),
                         stack: logService.getStackObject()
                     }, scope.$root.reference.defaultLogInfo);
 
@@ -61,7 +61,7 @@
                     }, function onError() {
 
                         logService.logClientAction({
-                            action: logService.getActionString(null, logService.logActions.DELETE_CANCEL),
+                            action: logService.getActionString(logService.logActions.DELETE_CANCEL),
                             stack: logService.getStackObject()
                         }, scope.$root.reference.defaultLogInfo);
                     }, false);
