@@ -406,7 +406,9 @@
                 var referenceCol = foreignKeyColumns[i];
 
                 delete model.submissionRows[rowIndex][referenceCol.name];
-                if ($rootScope.tuples) $rootScope.tuples[rowIndex].data[referenceCol.name] = null;
+                // Note: this conditional is for clearing `tuple.data` for update
+                // we rely on the data property to compare against the old data to verify what has changed
+                if ($rootScope.tuples && $rootScope.tuples[rowIndex]) $rootScope.tuples[rowIndex].data[referenceCol.name] = null;
             }
 
             model.rows[rowIndex][column.name] = null;
