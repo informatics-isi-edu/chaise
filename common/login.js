@@ -18,7 +18,7 @@
                     scope.profileURL = chaiseConfig.profileURL;
 
                     Session.subscribeOnChange(function () {
-                        $rootScope.session = dcctx.session = Session.getSessionValue();
+                        $rootScope.session = Session.getSessionValue();
 
                         if ($rootScope.session == null) {
                             scope.user = null;

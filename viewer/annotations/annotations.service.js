@@ -98,6 +98,21 @@
             iframe.postMessage({messageType: 'syncVisibility', content: annotations}, origin);
         }
 
+        function highlightAnnotation(data){
+            iframe.postMessage({messageType: 'highlightAnnotation', content: data}, origin);
+        }
+
+        function changeAnnotationVisibility(data){
+            iframe.postMessage({messageType: 'changeAnnotationVisibility', content: data}, origin);
+        }
+
+        function changeAllAnnotationVisibility(data){
+            iframe.postMessage({messageType: 'changeAllAnnotationVisibility', content: data}, origin);
+        }
+
+        function changeStrokeScale(scale){
+            iframe.postMessage({messageType: 'changeStrokeScale', content: scale}, origin);
+        }
         return {
             drawAnnotation: drawAnnotation,
             createAnnotation: createAnnotation,
@@ -105,7 +120,11 @@
             updateAnnotation: updateAnnotation,
             deleteAnnotation: deleteAnnotation,
             centerAnnotation: centerAnnotation,
-            syncVisibility: syncVisibility
+            syncVisibility: syncVisibility,
+            highlightAnnotation : highlightAnnotation,
+            changeAnnotationVisibility : changeAnnotationVisibility,
+            changeAllAnnotationVisibility : changeAllAnnotationVisibility,
+            changeStrokeScale : changeStrokeScale
         };
 
     }]);

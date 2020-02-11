@@ -396,7 +396,9 @@
                 var referenceCol = foreignKeyColumns[i];
 
                 delete model.submissionRows[rowIndex][referenceCol.name];
-                if ($rootScope.tuples) $rootScope.tuples[rowIndex].data[referenceCol.name] = null;
+                // Note: this conditional is for clearing `tuple.data` for update
+                // we rely on the data property to compare against the old data to verify what has changed
+                if ($rootScope.tuples && $rootScope.tuples[rowIndex]) $rootScope.tuples[rowIndex].data[referenceCol.name] = null;
             }
 
             model.rows[rowIndex][column.name] = null;
@@ -576,11 +578,15 @@
             // All boolean are visible and same size so it doesn't matter which is selected
             var input = document.querySelector('.re-boolean-input');
 
-            // ng-style attached for better repositioning
-            vm.inputWidth = {
-                width: input.offsetWidth + 'px',
-                "margin-top": '14px'
-            };
+            // make sure input is present before setting value
+            // NOTE: this triggers on resize (and there may be no boolean inputs)
+            if (input) {
+                // ng-style attached for better repositioning
+                vm.inputWidth = {
+                    width: input.offsetWidth + 'px',
+                    "margin-top": '14px'
+                };
+            }
         }
 
 // **** Functions for set all input

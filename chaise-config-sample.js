@@ -52,7 +52,7 @@ var chaiseConfig = {
             //             children: [
             //                 {
             //                     name: "Search 1.1",
-            //                     url: "/chaise/search/#1/YOUR_SCHEMA:YOUR_TABLE"
+            //                     url: "/chaise/recordset/#1/YOUR_SCHEMA:YOUR_TABLE"
             //                 }
             //             ]
             //         }
@@ -63,7 +63,14 @@ var chaiseConfig = {
             //     // Use the "url" key to specify this menu item's url
             //     // URLs can be absolute or relative to the document root.
             //     name: "Create",
-            //     url: "/chaise/recordedit/#1/YOUR_SCHEMA:YOUR_TABLE"
+            //     url: "/chaise/recordedit/#1/YOUR_SCHEMA:YOUR_TABLE",
+            //     // Define globus groups or users that can see and and be able to click the link or navigate the submenu
+            //     // If either array, `show` or `enable`, or both are missing, `["*"]` will be used as the default
+            //     // An empty array (`[]`) will hide the link or disable it for everyone
+            //     acls: {
+            //          show: ["https://auth.globus.org/9d596ac6-22b9-11e6-b519-22000aef184d", ...],  // isrd-testers group
+            //          enable: ["https://auth.globus.org/9d596ac6-22b9-11e6-b519-22000aef184d", ...]
+            //      }
             // },
             // {
             //      // URLs support templating primarily for catalog substition

@@ -326,6 +326,8 @@ VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
 	$(COMMON)/authen.js \
 	$(COMMON)/errors.js \
 	$(COMMON)/modal.js \
+	$(COMMON)/navbar.js \
+	$(COMMON)/login.js \
 	$(COMMON)/delete-link.js \
 	$(COMMON)/vendor/re-tree.js \
 	$(COMMON)/vendor/ng-device-detector.js \
@@ -360,6 +362,8 @@ VIEWER_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/vendor/select2.css \
 	$(COMMON)/styles/app.css \
 	$(COMMON)/vendor/MarkdownEditor/styles/github-markdown.css
+
+VIEWER_CSS_SOURCE=$(VIEWER_ASSETS)/viewer.css
 
 # JavaScript and CSS source for RecordEdit app
 RE_ASSETS=recordedit
@@ -534,7 +538,7 @@ html: $(HTML)
 # Rule to compile sass/scss files to css
 $(COMMON)/styles/app.css: $(shell find $(COMMON)/styles/scss/)
 	$(BIN)/node-sass --style=compressed --source-map-embed $(COMMON)/styles/scss/app.scss $(COMMON)/styles/app.css
-	$(BIN)/node-sass --style=compressed --source-map-embed $(COMMON)/styles/scss/_navbar.scss $(COMMON)/styles/navbar.css
+	$(BIN)/node-sass --include-path $(COMMON)/styles/scss/_variables.scss --style=compressed --source-map-embed $(COMMON)/styles/scss/_navbar.scss $(COMMON)/styles/navbar.css
 
 # Rules to attach JavaScript and CSS assets to the head
 login/index.html: login/index.html.in .make-add-version-tag .make-asset-block
@@ -600,9 +604,13 @@ $(JS_CONFIG): chaise-config-sample.js
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-asset-block ; \
 	done
 
-.make-viewer-asset-block: $(VIEWER_SHARED_CSS_DEPS) $(VIEWER_SHARED_JS_DEPS) $(VIEWER_JS_SOURCE) $(JS_CONFIG)
+.make-viewer-asset-block: $(VIEWER_SHARED_CSS_DEPS) $(VIEWER_CSS_SOURCE) $(VIEWER_SHARED_JS_DEPS) $(VIEWER_JS_SOURCE) $(JS_CONFIG)
 	> .make-viewer-asset-block
 	for file in $(VIEWER_SHARED_CSS_DEPS); do \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-viewer-asset-block ; \
+	done
+	for file in $(VIEWER_CSS_SOURCE); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-viewer-asset-block ; \
 	done

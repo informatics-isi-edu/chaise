@@ -16,9 +16,9 @@
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse navbar-inverse" id="fb-navbar-main-collapse">
             <ul id="navbar-menu" class="nav navbar-nav">
-                <li ng-repeat="item in menu" class="dropdown" on-toggle="onToggle(open)" uib-dropdown>
-                    <a ng-if="!item.children" ng-href="{{item.url}}" target="{{item.newTab ? '_blank' : '_self'}}" ng-click=::logStaticLink(item)>{{item.name}}</a>
-                    <a ng-if="item.children" class="dropdown-toggle" uib-dropdown-toggle ng-click="::logMenuToggle(item.name)">{{item.name}} <span class="caret"></span></a>
+                <li ng-repeat="item in menu" class="dropdown" on-toggle="onToggle(open)" ng-if="canShow(item)" uib-dropdown>
+                    <a ng-if="!item.children || !canEnable(item)" ng-href="{{item.url}}" target="{{item.newTab ? '_blank' : '_self'}}" ng-class="{'disable-link': !canEnable(item)}" ng-click=::logStaticLink(item)>{{item.name}}</a>
+                    <a ng-if="item.children && canEnable(item)" class="dropdown-toggle" uib-dropdown-toggle ng-click="::logMenuToggle(item.name)">{{item.name}} <span class="caret"></span></a>
                     <ul ng-if="item.children" navbar-menu menu="item.children" class="dropdown-menu"></ul>
                 </li>
             </ul>
