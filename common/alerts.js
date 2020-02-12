@@ -63,7 +63,7 @@
         };
     }])
 
-    .directive('alerts', ['AlertsService', 'Session', 'UriUtils', function(AlertsService, Session, UriUtils) {
+    .directive('alerts', ['AlertsService', 'logService', 'Session', 'UriUtils', function(AlertsService, logService, Session, UriUtils) {
 
         return {
             restrict: 'E',
@@ -77,7 +77,7 @@
                 }
 
                 scope.login = function() {
-                    Session.loginInAPopUp();
+                    Session.loginInAPopUp(logService.logActions.LOGIN_WARNING);
                 }
             }
         };

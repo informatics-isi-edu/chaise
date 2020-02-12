@@ -1,291 +1,308 @@
 # Logging
 
-By providing `Deriva-Client-Context` header in ermrset requests we can log extra objects alongside the request. ERMrest will log the provided object in the `dcctx` attribute of logs. For example the following is a line from `/var/log/messages` file in dev.isrd:
+> On February 2020 we redesigned the whole logging mechanism in chaise. If you want to analysis a data prior to this date, please refer to [the old documentation](logging-pre-feb-20.md).
 
-```
-Jan 24 16:29:50 dev.isrd.isi.edu ermrest[4313.139635548755712]:
+This document will describe how chaise is logging server requests as well as client actions.
+
+## Table of Contents
+
+- [Logging](#logging)
+    - [Overview](#Overview)
+    - [Attributes](#attributes)
+    - [Action definition](#action-definition)
+    - [List of requests](#list-of-requests)
+        - [Server vs. Client](#server-vs-client)
+        - [Stack structure](#stack-structure)
+    - [Facet compressed syntax](#facet-compressed-syntax)
+    - [Error log](#error-log)
+    - [Truncation](#truncation)
+    - [Analysis](#analysis)
+        - [Asset Download & CSV Default Export](#asset-download--csv-default-export)
+        - [Finding the displayed recordset request](#finding-the-displayed-recordset-request)
+    - [Change Log](#change-log)
+
+
+## Overview
+
+By providing `Deriva-Client-Context` header in ermrset requests we can log extra objects alongside the request. ERMrest will log the provided object in the `dcctx` attribute of logs. For example the following is a line from `/var/log/messages` file in dev.isrd that is for the request to getting one of the facet options.
+
+```javascript
 {
-  "elapsed":0.014,
-  "req":"OSGHMz7JSySiS0Y5UOLA6w",
   "scheme":"https",
   "host":"dev.isrd.isi.edu",
-  "status":"304 Not Modified",
+  "status": "200 OK",
   "method":"GET",
-  "path":"/ermrest/catalog/1/attributegroup/M:=isa:dataset/F5:=left(thumbnail)=(isa:file:id)/$M/F4:=left(owner)=(isa:person:name)/$M/F3:=left(gene_summary)=(vocabulary:gene_summary:id)/$M/F2:=left(status)=(isa:dataset_status:id)/$M/F1:=left(project)=(isa:project:id)/$M/release_date,id;M:=array(M:*),F5:=array(F5:*),F4:=array(F4:*),F3:=array(F3:*),F2:=array(F2:*),F1:=array(F1:*)@sort(release_date::desc::,id)?limit=26", "client":"128.9.184.94",
-  "referrer":"https://dev.isrd.isi.edu/~ashafaei/chaise/recordset/",
-  "agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36",
-  "track":"f671a1bf.559966234faaf",
+  "path": "/ermrest/catalog/1/entity/T:=isa:experiment/dataset=1-3VFJ/$T/M:=(experiment_type)=(vocab:experiment_type:id)@sort(name,RID)?limit=11",
   "dcctx":{
-    "wid":"2d1a297p1l3t24942o261ot1",
+      "catalog":"1",
+      "schema_table":"vocab:experiment_type",
+      "stack":[
+        {
+            "type":"set",
+            "s_t":"isa:experiment",
+            "filters": {"and":[{"src":[{"o":["isa", "experiment_dataset_fkey"]}, "RID"], "ch":["1-3VFJ"]}]}
+        },
+        {
+            "type":"facet",
+            "s_t":"vocab:experiment_type",
+            "source": [{"o":["isa", "experiment_experiment_type_fkey"]}, "id"],
+            "entity":true
+        }
+    ],
+    "action":":set/facet,;load",
     "cid":"recordset",
-    "schema_table":"isa:dataset",
-    "pid":"1fyj2i5t2ew02qg41xuc2mxf",
-    "page_size":25,
-    "action":"recordset/main/load"
+    "pid":"1lp2236a1p1g2age1l1a2pxo",
+    "wid":"1tw6218n1xbr2mvq251y2rsd",
+    "elapsed_ms":646
  }
 }
 ```
 
-You can see the `dcctx` attribute. This belongs to the request for showing the entities in the recordset app.
+In the following, we're going to summarize what are the attributes that are being logged in the `dcctx` attribute alongside each request.
 
 ## Attributes
+
 The following are the default attributes that you can find on all the requests:
 
 - `cid`: The app name (record, recordset, recordedit).
 - `wid`: The window id (randomly generated).
 - `pid`: The page id (randomly generated).
 - `catalog`: The catalog id.
-- `schema_table`: The `schema:table` combination.
-- `action`: A pre-defined string that implies what the request was for. Refer to [the action list](#action-list) for more information.
-- `elapsed_s`: A value set to determine the elapsed time since the ermrestJS http service has been available. This will always be in seconds
+- `schema_table`: The `schema:table` combination. This captures the table that the current action is performed on.
+- `action`: A pre-defined string that implies what the request was for. Please refer to [Action definition](#action-definition) section for more information.
+- `elapsed_ms`: A value set to determine the elapsed time since the ermrestJS http service has been available. This will always be in milliseconds
 
-The following are the optional attributes that you might find on requests:
-- `ppid` and `pcid`: The parent `pid` and `pcid`. These two attributes will be available only on a number of requests. It will indicate which app and page led to this current request. These are the requests that might have `ppid` and `pcid`.
+Depending on the request, we might log extra attributes that we are gong to list in the following. You can find more information about each one in the next section.
+
+- `ppid`: The parent `pid`. This attributes will be available only on a number of requests. It will indicate which app and page led to this current request. These request are:
   - recordset: First read of the main entity.
   - record: First read of the main entity.
-  - recordedit: The create/edit request (the request generated when user clicks on submit).
+  - recordedit: The create/update request (the request generated when user clicks on submit).
   - viewer: First read of the main entity.
-- `facet`: If url contains filter, this attributes gives you the [facet](https://github.com/informatics-isi-edu/ermrestjs/wiki/Facets-JSON-Structure) equivalent of that filter.
-- `filter`: If we couldn't represent the given filter in terms of facet. This will be just a simple string.
-- `cfacet`: If url contains custom-facets (`*::cfacets::`), this attribute will be equal to one. In this case one of the following attributes will be available:
-  - `cfacet_str`: the displayname of custom-facet (if provided in url).
-  - `cfacet_path`: the ERMrest path that was sent with the custom-facet.
-- `page_size`: The number of entities that we requested.
-- `source`: The source path of facet. You will find this attribute in the requests that belong to a facet.
-- `column`: The column that is used for faceting. It will be attached to scalar facet requests.
-- `referrer`: It's an object that has `schema_table` and `facet`/`filter`/`cfacet_str`/`cfacet_path` as its attributes. This attribute is available on the request that needs to capture their parent context, which are
-  - record page: Any secondary request (related entities and aggregate columns). The `referrer` for these request is the main table of the page.
-  - record page: The first request generated after clicking on "add" pure and binary association entity. `referrer` will be the main entity.
-  - recordedit page: The request for getting the pre-filled value of foreign key. `referrer` is the main entity.
-  - recordset page: Any request for getting the facet data. The `referrer` is the main entity and it will include all the selected facets and filters.
-- `t`: If this attribute exists and its value is `1`, then the given object is truncated since it was lengthy. Refer to [truncation](#truncation) for more information.
-- `template`: This object will only be available for export request. It's an object with only `displayname` and `type` attributes.
-- `cqp` (chaise query parameter): When a user uses a link that includes the `?` instead of the `#`. These urls are only used to help with google indexing and should be used only for navigating users from search engines to chaise apps.
 
-## Action List
+- `pcid`: The parent `cid`. Please refer to `ppid` to find more information on where you mind find this attribute. The following is the list of `pcid`'s that will be present on main entity requests in the chaise apps. `cid` will always represent what app the request was made from, `pcid` will represent what app the user navigated from when the main entity request was triggered.
 
-The table below summarizes all the requests that we currently are logging in chaise and their respective `action`.
+  - `record`
+  - `recordset`
+  - `recordedit`
+  - `navbar`
+  - `navbar/record`
+  - `navbar/recordset`
+  - `navbar/recordedit`
 
-| App                                                 | Description                                           | Action                                       | Extra                        | Notes                                                                                                                                                 | Change                        |
-|-----------------------------------------------------|-------------------------------------------------------|----------------------------------------------|------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------|
-| chaise-wide (record, recordset, recordedit, viewer) | get catalog snapshot  information                               | model/snaptime                                |                              |                                                                                                                                                       | [added (4/18/19)](#041819) [updated (10/??/19)](#10??19)    |
-|                                                     | get catalog schemas information                       | model/schema                                 |                              |                                                                                                                                                       | [added (4/18/19)](#041819)    |
-|                                                     |                                                       |                                              |                              |                                                                                                                                                       |                               |
-| record                                              | load main entity                                      | record/main                                  | ppid, pcid                   |                                                                                                                                                       | [bug fix (4/18/19)](#041819)  |
-|                                                     | load aggregates in main entity                        | record/aggregate                             | referrer                     |                                                                                                                                                       | [bug fix (4/18/19)](#041819)  |
-|                                                     | load inline entities                                  | record/inline                                | referrer                     |                                                                                                                                                       | [bug fix (4/18/19)](#041819)  |
-|                                                     | load aggregates in inline entities                    | record/inline/aggregate                      | referrer                     |                                                                                                                                                       | [bug fix (4/18/19)](#041819)  |
-|                                                     | load related entities                                 | record/related                               | referrer                     |                                                                                                                                                       | [bug fix (4/18/19)](#041819)  |
-|                                                     | load aggregates in related entities                   | record/related/aggregate                     | referrer                     |                                                                                                                                                       | [bug fix (4/18/19)](#041819)  |
-|                                                     | update main entity                                    | record/main/update                           |                              | due to change made to any of related entities                                                                                                         |                               |
-|                                                     | update aggregates in main entity                      | record/aggregate/update                      | referrer                     | due to change made to any of related entities                                                                                                         |                               |
-|                                                     | update inline entities                                | record/inline/update                         | referrer                     | due to change made to any of related entities                                                                                                         |                               |
-|                                                     | update aggregates in inline entities                  | record/inline/aggregate/update               | referrer                     | due to change made to any of related entities                                                                                                         |                               |
-|                                                     | update related entities                               | record/related/update                        | referrer                     | due to change made to any of related entities                                                                                                         |                               |
-|                                                     | update aggregates in related entities                 | record/related/aggregate/update              | referrer                     | due to change made to any of related entities                                                                                                         |                               |
-|                                                     | read association values to add                        | pre-create/prefill/association               | referrer                     | due to click on "add" in the inline/related section entity for pure and binary associative relationship                                               |                               |
-|                                                     | read existing values in association table             | pre-create/prefill/association/disabled      | referrer                     | the request explained in previous row will return all the possible values to add. With this request, we know which rows should be disabled in the UI. | [bug fix (03/08/19)](#030819) |
-|                                                     | create association entities                           | create/prefill/association                   | referrer                     | due to click on "submit" button on the modal for adding pure and binary association relationship.                                                     |                               |
-|                                                     |                                                       |                                              |                              |                                                                                                                                                       |                               |
-| recordedit                                          | create new entities                                   | create/new                                   | page_size, ppid, pcid        |                                                                                                                                                       |                               |
-|                                                     | read the foreign key values that must be pre-filled   | pre-create/prefill                           | referrer                     | when user ends up in recordedit after clicking on "add" in a related entity. This request is for pre-filling the fk values.                           |                               |
-|                                                     | create new records with foreign key pre-filled values | create/prefill                               | ppid, pcid                   | the create request that is paired with the previous explained action in this table. due to click on the "submit" button.                              |                               |
-|                                                     | read the current row for copy                         | pre-create/copy                              |                              |                                                                                                                                                       |                               |
-|                                                     | create record from copy                               | create/copy                                  | page_size, ppid, pcid        | due to click on "submit" button.                                                                                                                      |                               |
-|                                                     | creating row by clicking on add in fk modal           | create/modal                                 | page_size, ppid, pcid        | when user clicks on "+" button in the foreign key modal picker and then end up creating new rows in the opened tab. due to click on "submit" button.  |                               |
-|                                                     | read entities to be updated                           | pre-update                                   |                              | page_size is inaccurate                                                                                                                               |                               |
-|                                                     | update entities                                       | update                                       | page_size, ppid, pcid        | due to click on "submit" button.                                                                                                                      |                               |
-|                                                     | get default value for fks                             | default                                      |                              |                                                                                                                                                       | [changed (4/18/19)](#041819)  |
-|                                                     |                                                       |                                              |                              |                                                                                                                                                       |                               |
-| recordset                                           | recordset main data read on load                      | recordset/main/load                          | page_size, ppid, pcid        |                                                                                                                                                       |                               |
-| chaise-wide except viewer                           | recordset main data read on update                    | recordset/main/update                        |                              |                                                                                                                                                       |                               |
-| chaise-wide except viewer                           | recordset main data read on page change               | recordset/main/page                          | sort, page, type             |                                                                                                                                                       |                               |
-| chaise-wide except viewer                           | recordset main data read on sort change               | recordset/main/sort                          | sort                         |                                                                                                                                                       |                               |
-| chaise-wide except viewer                           | recordset main data read on limit change              | recordset/main/limit                         |                              |                                                                                                                                                       |                               |
-| chaise-wide except viewer                           | recordset main data read on facet change              | recordset/main/facet                         |                              |                                                                                                                                                       |                               |
-| chaise-wide except viewer                           | recordset get main count                              | recordset/main/count                         |                              |                                                                                                                                                       |                               |
-| chaise-wide except viewer                           | recordset get aggregated values                       | recordset/main/aggregate                     |                              |                                                                                                                                                       |                               |
-| chaise-wide except viewer                           | recordset                                             | recordset/main/`<ANY_SUBACTION>`/correct-page |                              | please refer to change log for more information.                                                                                                      | [added (7/12/19)](#071219)    |
-| chaise-wide except viewer                           | recordset read facet                                  | recordset/facet                              | referrer, source, column     | facet/filter state are only reported inside the referrer                                                                                              |                               |
-| chaise-wide except viewer                           | recordset initialize preselected entity facets        | recordset/facet/init                         | referrer, source             | facet/filterstate are only reported inside the referrer                                                                                               | [added (4/18/19)](#041819)    |
-| chaise-wide except viewer                           | recordset get buckets for a facet                     | recordset/facet/histogram                    | referrer, source, column     | facet/filter state are only reported inside the referrer                                                                                              | [added (4/18/19)](#041819)    |
-| chaise-wide except viewer                           | recordset click on show details                       | recordset/viewmore                           | referrer, source, column     | facet/filter state are only reported inside the referrer                                                                                              |                               |
-|                                                     |                                                       |                                              |                              |                                                                                                                                                       |                               |
-| record                                              | export                                                | export                                       | template (displayname, type) |                                                                                                                                                       | [changed (4/18/19)](#041819)  |
-|                                                     |                                                       |                                              |                              |                                                                                                                                                       |                               |
-| record                                              | delete from record                                    | delete/record                                |                              |                                                                                                                                                       |                               |
-| recordedit                                          | delete from recordedit                                | delete/recordedit                            |                              |                                                                                                                                                       |                               |
-| recordset                                           | delete row from recordset table                       | delete/recordset                             |                              |                                                                                                                                                       |                               |
-| record                                              | delete related entity rows                            | delete/record/related                        |                              |                                                                                                                                                       | [changed (4/18/19)](#041819)  |
-|                                                     |                                                       |                                              |                              |                                                                                                                                                       |                               |
-| viewer                                              | main request                                          | main                                         | ppid, pcid                   |                                                                                                                                                       | [added (4/18/19)](#041819)    |
-|                                                     | get annotation table                                  | annotation                                   |                              |                                                                                                                                                       | [added (4/18/19)](#041819)    |
-|                                                     | get annotation comments                               | comment                                      |                              |                                                                                                                                                       | [added (4/18/19)](#041819)    |
-|                                                     | get anatomy data                                      | anatomy                                      |                              |                                                                                                                                                       | [added (4/18/19)](#041819)    |
+  If the user clicked on a link in the navbar, the `PCID` will properly denote what app the user came from that had the navbar present. A static page that uses the navbar app, will set the `PCID` as `navbar`. Otherwise the appname will be appended (i.e.   `navbar/<appname>`). This is true for the [deriva-webapps](https://github.com/informatics-isi-edu/deriva-webapps/wiki/Logging-in-WebApps#pcid-list) as well.
 
-## Client Button Action List
-The following table will include the actions that are triggered when the user clicks on buttons or other elements on the page that don't send a request to the server. We make a head request as part of this click event to store the log info.
+- `stack`: This attribute can be found on almost all the requests. It will capture the path that user took to get to the performed action. For example, if the logged request is for when a user interacts with a add pure and binary picker, using this stack you can figure out which main table and related (or inline table) user is interacting with. `stack` is an array of objects that each node can have the following attributes:
+  - Required attributes:
+    - `s_t`: The end table of this node in the format of `schema:table`.
 
-Each head request for the below client action events will be made to the same path in ermrest, namely `.../ermrest/client_action`. To figure out which table or record the action was performed on, locate the server request sent on page load associated with the same `pid`.
+    - `type`: The type of the node request. It can be any of: `entity` (row based), `set` (rowset based), `col` (column), `pcol` (pseudo-column), `fk` (foreign key), `related`, `related-inline`, `related-link-picker`, `fk-picker`, `facet-popup`.
 
-### Button Action Attributes
-The default attributes that you can find on all client action requests are the same as the ones define above in [attributes](#attributes). The only difference for the default attributes is that `action` will be from the list below.
+  - Optional attributes:
+    - `filters`: The facet object using the [compressed syntax](#facet-compressed-syntax).
 
-The following are the optional attributes that you might find on requests:
-- `facet`: If url contains filter, this attributes gives you the [facet](https://github.com/informatics-isi-edu/ermrestjs/wiki/Facets-JSON-Structure) equivalent of that filter.
-  - recordedit page: facet is used for `update/remove` to notify which form was removed from being edited
-  - facet "show more" (all 3 apps): In each case, the "Show More" dialog will be for a specific facet which is constrained by all other facets and the main entity that this facet is a part of.
-- `column`: The column that is used for faceting for faceting popups. The column that is being acted on in recordedit when using multi select/set functionality.
-- `referrer`: It's an object that has `schema_table`, `facet`, and `source` as its attributes. This attribute is available on the request that needs to capture their parent context, which are
-  - record page:
-    - Any client actions taken to interact with related entities sections (inline or below). The `referrer` for these actions is the main table of the page.
-    - Each action in Pure and binary popup, points to main table of page.
-    - Each action in facet popup from Pure and binary popup, points to main table for pure and binary popup.
-  - recordedit page: Each action taken on a foreign key picker row. Includes the select/set all input actions and the foreign key popup dialog actions. `referrer` is the main entity for the create/edit form.
-  - facet "show more" (all 3 apps): In each case, the "Show More" dialog will be for a specific facet. `referrer` pertains to the main table of the page "show more" was clicked on.
+    - `source`, and `entity`: The source path that defines this node using the compressed syntax.
 
-| App                                | Description (button name)  | Action                      | Extra                 | Notes                                                                                                                          | Change                        |
-|------------------------------------|----------------------------|-----------------------------|-----------------------|--------------------------------------------------------------------------------------------------------------------------------|-------------------------------|
-| record/recordset                   | delete clicked             | delete/intend               | facet                 | Delete was clicked from the main record page and confirm delete was shown. (use cid to determine app)                          |                               |
-| record/recordset                   | confirm delete cancelled   | delete/cancel               | facet                 | User closed the confirm delete modal without deleting (facet attribute included when record app)                               |                               |
-|                   &ensp;           |                            |                             |                       |                                                                                                                                |                               |
-| recordset/record                   | export dropdown            | export/open                 |                       | Dropdown was opened (record request will include extra attribute, facet)                                                       |                               |
-| recordset                          | copy permalink             | permalink/lclick            |                       | User left clicked on permalink button (copies link to clipboard)                                                               |                               |
-| recordset                          | permalink                  | permalink/rclick            |                       | User right clicked on permalink button and opened the context menu (we can't track which action was clicked)                   |                               |
-|                   &ensp;           |                            |                             |                       |                                                                                                                                |                               |
-| record                             | show empty sections        | show-empty/show             |                       | "Show empty sections" button clicked in submenu bar                                                                            |                               |
-| record                             | hide empty sections        | show-empty/hide             |                       | "Hide empty sections" button clicked in submenu bar                                                                            |                               |
-| record                             | share popup                | share                       |                       | Share dialog was opened                                                                                                        |                               |
-| record                             | copy live link             | share/live                  |                       | Live link was copied to clipboard                                                                                              |                               |
-| record                             | copy version link          | share/version               |                       | Versioned link was copied to clipboard                                                                                         |                               |
-| record                             | cite, download bibtex      | cite/bibtex                 |                       | Bibtex citation downloaded                                                                                                     |                               |
-| record                             | Scroll top clicked         | scroll-top                  |                       | Bottom right, "Scroll to top" button clicked                                                                                   |                               |
-| record                             | ToC panel open             | toc/show                    |                       | "Show side panel" button clicked                                                                                               |                               |
-| record                             | ToC panel collapse         | toc/hide                    |                       | "Hide panel" button clicked                                                                                                    |                               |
-| record                             | Scroll top clicked         | toc/scroll-top              |                       | first heading in Table of contents clicked (Summary)                                                                           |                               |
-| record                             | ToC panel options selected | toc/scroll-to               |                       | Related table heading clicked in Table of contents                                                                             |                               |
-|                   &ensp;           |                            |                             |                       |                                                                                                                                |                               |
-| record                             | toggle related table open  | related/open                |                       | Related table section toggled open                                                                                             |                               |
-| record                             | toggle related table close | related/close               |                       | Related table section toggled close                                                                                            |                               |
-| record                             | items per page dropdown    | related/page-size           |                       | Dropdown was opened for related table. Selecting a page size will trigger a read request.                                      |                               |
-| record                             | Table mode                 | related/display/table       |                       | User changed display format to show table display (user does not have permission to edit)                                      |                               |
-| record                             | Custom mode                | related/display/mkdn        |                       | User changed display format to show markdown display (for both edit and not edit permission)                                   |                               |
-| record                             | Edit mode                  | related/display/edit        |                       | User changed display format to show table display (user has permission to edit)                                                |                               |
-| record                             | row delete clicked         | related/delete/intend       | facet                 | Delete was clicked from related table and confirm delete was shown (for both edit and not edit permission)                     |                               |
-| record                             | confirm delete cancelled   | related/delete/cancel       | facet                 | User closed the confirm delete modal without deleting                                                                          |                               |
-| record                             | row unlink clicked         | related/unlink/intend       | facet                 | Unlink was clicked from related table and confirm unlink was shown (for both edit and not edit permission)                     |                               |
-| record                             | confirm unlink cancelled   | related/unlink/cancel       | facet                 | User closed the confirm unlink modal without unlinking                                                                         |                               |
-|                   &ensp;           |                            |                             |                       |                                                                                                                                |                               |
-| record                             | items per page dropdown    | inline/page-size            |                       | Dropdown was opened for inline related table. Selecting a page size will trigger a read request.                               |                               |
-| record                             | Table mode                 | inline/display/table        |                       | User changed display format to show table display (user does not have permission to edit)                                      |                               |
-| record                             | Custom mode                | inline/display/mkdn         |                       | User changed display format to show markdown display (for both edit and not edit permission)                                   |                               |
-| record                             | Edit mode                  | inline/display/edit         |                       | User changed display format to show table display (user has permission to edit)                                                |                               |
-| record                             | row delete clicked         | inline/delete/intend        | facet                 | Delete was clicked from inline related table and confirm delete was shown (for both edit and not edit permission)              |                               |
-| record                             | confirm delete cancelled   | inline/delete/cancel        | facet                 | User closed the confirm delete modal without deleting                                                                          |                               |
-| record                             | row unlink clicked         | inline/unlink/intend        | facet                 | Unlink was clicked from inline related table and confirm unlink was shown (for both edit and not edit permission)              |                               |
-| record                             | confirm unlink cancelled   | inline/unlink/cancel        | facet                 | User closed the confirm unlink modal without unlinking                                                                         |                               |
-|                   &ensp;           |                            |                             |                       |                                                                                                                                |                               |
-| recordedit                         | Add 1 record               | create/clone                |                       | User cloned 1 form                                                                                                             |                               |
-| recordedit                         | Add x records              | create/clone-x              | x                     | User cloned more than 1 form                                                                                                   |                               |
-| recordedit                         | remove form                | create/remove               |                       | 1 form was removed from being created                                                                                          |                               |
-| recordedit                         | open set all               | create/set-all/open         | column                | set all row opened, referrer used for FK rows (pencil icon button)                                                             |                               |
-| recordedit                         | close set all              | create/set-all/close        | column                | set all row closed, referrer used for FK rows (chevron up icon button)                                                         |                               |
-| recordedit                         | cancel set all             | create/set-all/cancel       | column                | set all row closed, referrer used for FK rows ("Cancel" button)                                                                |                               |
-| recordedit                         | apply set all              | create/set-all/apply        | column                | set all row applied, referrer used for FK rows ("Apply All" button)                                                            |                               |
-| recordedit                         | clear all                  | create/set-all/clear        | column                | set all row cleared, referrer used for FK rows ("Clear All" button)                                                            |                               |
-|                   &ensp;           |                            |                             |                       |                                                                                                                                |                               |
-| recordedit                         | remove form                | update/remove               | facet                 | 1 form was removed from being updated                                                                                          |                               |
-| recordedit                         | open set all               | update/set-all/open         | column                | set all row opened, referrer used for FK rows (pencil icon button)                                                             |                               |
-| recordedit                         | close set all              | update/set-all/close        | column                | set all row closed, referrer used for FK rows (chevron up icon button)                                                         |                               |
-| recordedit                         | cancel set all             | update/set-all/cancel       | column                | set all row closed, referrer used for FK rows ("Cancel" button)                                                                |                               |
-| recordedit                         | apply set all              | update/set-all/apply        | column                | set all row applied, referrer used for FK rows ("Apply All" button)                                                            |                               |
-| recordedit                         | clear all                  | update/set-all/clear        | column                | set all row cleared, referrer used for FK rows ("Clear All" button)                                                            |                               |
-|                   &ensp;           |                            |                             |                       |                                                                                                                                |                               |
-| navbar                             | branding link clicked      | branding                    |                       | branding logo in the top left clicked                                                                                          |                               |
-| navbar                             | user dropdown menu         | user                        |                       | user dropdown menu was opened (no `catalog` or `schema_table`)                                                                 |                               |
-| navbar                             | My profile                 | user/profile                |                       | My Profile button in top right dropdown to view profile details (no `catalog` or `schema_table`)                               |                               |
-| navbar                             | Navbar menu dropdown       | menu/submenu                | name                  | Navbar dropdown menu was opened (applies to top level and each nested sub menu)                                                |                               |
-| navbar                             | Navbar menu internal link  | menu/internal               | name                  | Navbar menu option was selected that redirects to static/internal resource (same domain)                                       |                               |
-| navbar                             | Navbar menu external link  | menu/external               | name                  | Navbar menu option was selected that redirects to an external resource (different domain)                                      |                               |
-|                   &ensp;           |                            |                             |                       |                                                                                                                                |                               |
-| recordset                          | facet panel open           | panel/show                  |                       | "Show filter panel" button in recordset app clicked                                                                            |                               |
-| recordset                          | facet panel close          | panel/hide                  |                       | "Hide panel" button in recordset app clicked                                                                                   |                               |
-| recordset                          | items per page dropdown    | page-size                   |                       | Dropdown was opened. Selecting a page size will trigger a read request                                                         |                               |
-| recordset                          | items per page dropdown    | facet/page-size             |                       | In facet "show more" popup, dropdown was opened. Selecting a page size will trigger a read request                             |                               |
-| recordset                          | All on page                | facet/all                   |                       | In facet "show more" popup, "All on page" button clicked                                                                       |                               |
-| recordset                          | None on page               | facet/none                  |                       | In facet "show more" popup, "None on page" button clicked                                                                      |                               |
-| recordset                          | Reset selection            | facet/reset                 |                       | In facet "show more" popup, "Reset selection" button clicked to remove selections                                              |                               |
-| recordset                          | Modal closed               | facet/cancel                |                       | In facet "show more" popup, modal closed with no selection made                                                                |                               |
-|                   &ensp;           |                            |                             |                       |                                                                                                                                |                               |
-| record                             | facet panel open           | pb/panel/show               |                       | In pure & binary "Add record" popup, "Show filter panel" button clicked                                                        |                               |
-| record                             | facet panel close          | pb/panel/hide               |                       | In pure & binary "Add record" popup, "Hide panel" button clicked                                                               |                               |
-| record                             | items per page dropdown    | pb/page-size                |                       | In pure & binary "Add record" popup, dropdown was opened. Selecting a page size will trigger a read request                    |                               |
-| record                             | All on page                | pb/all                      |                       | In pure & binary "Add record" popup, "All on page" button clicked                                                              |                               |
-| record                             | None on page               | pb/none                     |                       | In pure & binary "Add record" popup, "None on page" button clicked                                                             |                               |
-| record                             | Reset selection            | pb/reset                    |                       | In pure & binary "Add record" popup, "Reset selection" button clicked to remove selections                                     |                               |
-| record                             | Modal closed               | pb/cancel                   |                       | In pure & binary "Add record" popup, modal closed with no selection made                                                       |                               |
-|                   &ensp;           |                            |                             |                       |                                                                                                                                |                               |
-| record                             | items per page dropdown    | pb/facet/page-size          |                       | In pure & binary "Add record" popup, then in facet "show more" popup, dropdown was opened                                      |                               |
-| record                             | All on page                | pb/facet/all                |                       | In pure & binary "Add record" popup, then in facet "show more" popup, "All on page" button clicked                             |                               |
-| record                             | None on page               | pb/facet/none               |                       | In pure & binary "Add record" popup, then in facet "show more" popup, "None on page" button clicked                            |                               |
-| record                             | Reset selection            | pb/facet/reset              |                       | In pure & binary "Add record" popup, then in facet "show more" popup, "Reset selection" button clicked to remove selections    |                               |
-| record                             | Modal closed               | pb/facet/cancel             |                       | In pure & binary "Add record" popup, then in facet "show more" popup, modal closed with no selection made                      |                               |
-|                   &ensp;           |                            |                             |                       |                                                                                                                                |                               |
-| recordedit                         | facet panel open           | fk/panel/show               |                       | In foreign key popup, "Show filter panel" button clicked                                                                       |                               |
-| recordedit                         | facet panel closed         | fk/panel/hide               |                       | In foreign key popup, "Hide panel" button clicked                                                                              |                               |
-| recordedit                         | items per page dropdown    | fk/page-size                |                       | In foreign key popup, dropdown was opened. Selecting a page size will trigger a read request                                   |                               |
-| recordedit                         | Modal closed               | fk/cancel                   |                       | In foreign key popup, modal closed with no selection made                                                                      |                               |
-|                   &ensp;           |                            |                             |                       |                                                                                                                                |                               |
-| recordedit                         | items per page dropdown    | fk/facet/page-size          |                       | In foreign key popup, then in facet "show more" popup, dropdown was opened. Selecting a page size will trigger a read request  |                               |
-| recordedit                         | All on page                | fk/facet/all                |                       | In foreign key popup, then in facet "show more" popup, "All on page" button clicked                                            |                               |
-| recordedit                         | None on page               | fk/facet/none               |                       | In foreign key popup, then in facet "show more" popup, "None on page" button clicked                                           |                               |
-| recordedit                         | Reset selection            | fk/facet/reset              |                       | In foreign key popup, then in facet "show more" popup, "Reset selection" button clicked to remove all selections               |                               |
-| recordedit                         | Modal closed               | fk/facet/cancel             |                       | In foreign key popup, then in facet "show more" popup, modal closed with no selection made                                     |                               |
-|                   &ensp;           |                            |                             |                       |                                                                                                                                |                               |
+    - `agg`: The aggregate function.
 
+    - `picker`: If the request is happening on a picker, `"picker":1` is added to the last node of the `stack`.
 
-## Error Log
+    - `cfacet`: Only applicable to the first node. If url contains custom-facets (`*::cfacets::`), this attribute will be equal to one. In this case one of the following attributes will be available:
+      - `cfacet_str`: the displayname of custom-facet (if provided in url).
+      - `cfacet_path`: the ERMrest path that was sent with the custom-facet.
 
-Currently we're only logging terminal errors (we might want to change that to log 5xx errors too). To find the errors in log, you can search for `terminal_error` path. This is what a error log would look like:
+    - `custom_filters`: Only applicable to the first node, it captures the usage of "ermrest filters". If we could turn an "ermrest filter" into facet, this will return `true`. Otherwise it will return the given "ermrest filters".
+
+    - `causes`: The "reload" requests are using this attribute to give more clue of why this request was generated. It is an array of unique values. The possible values are different based on the "reload" request and you should refer to each request for more information. The following is all the possible causes values:
+        - `clear-all`: Clear all button clicked.
+        - `clear-cfacet`: Clear "cfacet" button in breadcrumbs clicked.
+        - `clear-custom-filter`: Clear "custom filter" button in breadcrumbs clicked.
+        - `entity-create`: New rows have been created for the current table.
+        - `entity-delete`: A row in the  current table has been deleted.
+        - `entity-update`: Some rows in the table have been updated.
+        - `facet-clear`: Clear facet button in breadcrumb clicked.
+        - `facet-deselect`: Facet checkbox unchecked.
+        - `facet-select`: Facet checkbox checked.
+        - `facet-modified`: Facet changed in the modal.
+        - `facet-search-box`: Facet search box changed.
+        - `facet-plot-relayout`: Users interact with plot and we need to get new info for it.
+        - `facet-retry`: Users click on retry for a facet that timed out.
+        - `page-limit`: Change page limit.
+        - `page-next`: Go to next page,
+        - `page-prev`: Go to previous page.
+        - `related-create`: New rows have been created for a related table.
+        - `related-delete`: A row in one of related tables has been deleted.
+        - `related-update`: Some rows in one of related table have been updated.
+        - `related-inline-create`: New rows have been created for an inline related table.
+        - `related-inline-delete`: A row in one of inline related tables has been deleted.
+        - `related-inline-update`: Some rows in one of inline related table have been updated.
+        - `sort`: sort changed.
+        - `search-box`: search-box changed.
+
+    - `start_ms`: Used only on "reload" requests to indicate the time that the page become dirty first.
+    - `end_ms`: Used only on "reload" requests to indicate the time that we're sending the request. If you join all the "reload" requests by their `start_ms`, the longest `end_ms` will return the request that the user actually sees. The other requests were generated by flow-control as user kept interacting with the page without actually showing their result.
+
+    - `search-str`: Available only on client actions that are based on interacting with a search box. It returns the new search string.
+
+    - `num_created`: The number of rows that have been asked to be created in that request.
+
+    - `num_updated`: The number of rows that have been asked to be updated in that request.
+
+    - `updated_keys`: Available only on "update" request, it will return the key columns and their submitted values. It's an object that and the `cols` attribute returns an array of key column names, while `vals` returns an array of values that corresponds to the given `cols` array (So it's an array of arrays).
+
+    - `template`: Used only for the "export" request and will return an object with `displayname` and `type` attributes to give more information about the used export template.
+
+    - `cqp` (chaise query parameter): When a user uses a link that includes the `?` instead of the `#`. These urls are only used to help with google indexing and should be used only for navigating users from search engines to chaise apps.
+
+- `names`: Used in "navbar" request to capture the path that user took to end up in a particular menu option. It is an array of navbar option "name"s. The last item in the array if the name of the navbar option that user is acting on, and the rest are the name of its ancestors.
+
+## Action definition
+
+As it is mentioned in the previous section, `action` is one of the required attributes in the logs. `action` is a string that is created using the following format:
 
 ```
+[<app-mode>]*:[<stack-path>]*,[<ui-context>]*;<verb>
+```
+
+Where,
+
+- `app-mode` (optional) is used when for apps that have different modes. Currently only recordedit is using app-mode and the possible values are:
+  - `edit`: Edit mode of the app.
+  - `create-copy`: When users end up in this app by clicking on "copy" button in record app.
+  - `create-preselect`: When users end up in this app by clicking on "Add" button of related entities (In this case, we're preselecting the foreignkey relationship between related entity and the main).
+  - `create`: Create mode of the app that is not the other more specific versions.
+
+- `stack-path` (optional) is available only when `stack` is used and summarizes the `stack`. To distinguish between each stack nodes in this string, we're using `/`. The values used for each node are:
+  - `entity`: Based on `entity` stack node `type`.
+  - `set`: Based on `set` stack node `type`.
+  - `col`: Based on `col` stack node `type`.
+  - `pcol`: Based on `pcol` stack node `type`.
+  - `related`, `related-inline`: Based on `related` stack node `type`.
+  - `related-link-picker`: Used for the association link picker.
+  - `facet`: Based on `facet` stack node `type`.
+  - `facet-picker`: Used for facet picker.
+  - `fk`: Based on `fk` stack node `type`.
+  - `fk-picker`: Used for foreign key picker.
+
+  Based on this, `entity/related-inline` is a possible `stack-path`.
+
+- `ui-context` (optional) is used to give more clue as to where in the UI this request belongs to.
+
+- `verb` is the actual user action.
+
+
+Extra rules followed in the action string:
+- `/` is used in each of these sections, to indicate another level. For example `entity/related` in `stack-path` means that the whole `stack-path` of page is `entity`, and this request is part of `entity/related` subsection.
+- `stack-path` has the same number of levels as `stack` and each level corresponds to each stack node. But the string used to represent a stack node can be different from the `type` used in the stack. This has been done to add more information in the action string. For example, the `load` request for both facet, and facet picker are using an stack that has `set`, and `facet` nodes. But their `stack-path`s are `set/facet` and `set/facet-picker`.
+- `-` is used to separate the words at the same level. The `-` could imply hierarchy or just a separator for words, and we're not going to distinguish the two cases by using different delimiters to avoid confusion.
+
+
+## List of requests
+
+You can find the full list of log requests in [this google sheet](https://docs.google.com/spreadsheets/d/1cHhPR0AacvuH2o3QavWlJCIIyPajfn93fJzFnc7VA5M). The following sections have been added to provide more information about the content of this google sheet.
+
+### Server vs. Client
+
+When users open a page, or interact with the page, we might send some requests to server based on the action. You can gather more information about the request just by looking at the url associated withe request. We call these server logs. On the other hand, some user interactions won't necessarily generate a server request and therefore we are logging these by sending a HEAD request to a predefined ermrest path. Currently we're using `/ermrest/client_action` path for these client logs.
+
+
+### Stack structure
+
+As we previously explained, `stack` is used to capture the user path. It's an array of "stack nodes", where each node summarizes the user path. This has been mainly done to distinguish between the same actions that users might have taken in different paths. For instance, we show the same controls that we have in recordset app, in all of our modal pickers. Without the stack, the user path (context) would be lost. We tried to summarize the stack structure associated with each request in the google sheet. Each cell, represent a node in the stack with attributes that will be available on it
+
+To give you a better idea of how to read the table, let's consider the case that the user is interacting with a facet picker, that was opened from an association link picker on an inline related entity. So,
+
+- first stack node should capture the record page app and the filters that it had.
+- second stack node should capture the association link picker and the filters that it had before opening the facet picker.
+- third stack node should capture the state of facet picker.
+
+Therefore this is how the stack should look like:
+
+```javascript
 {
-   e: 1,
-   message: "ERROR MESSAGE",
-   name: "ERROR TITLE"
+  "stack": [
+    {
+      "type": "entity",
+      "s_t": "schema:main_table",
+      "filters": {"and": [{"src": "RID", "ch": ["RID_VALUE"]}]}
+    },
+    {
+      "type": "related",
+      "s_t": "schema:related_table",
+      "source": [{"i": ["schema", "constraint"]}, "RID"],
+      "entity": true,
+      "picker": 1,
+      "filters": {"and": [{"src": "SOME_COLUMN", "ch": ["SOME_VALUE"]}]}
+    },
+    {
+      "type": "facet",
+      "s_t": "schema:facet_table",
+      "source": [{"o": ["schema", "constraint2"]}, "RID"],
+      "entity": false,
+      "picker": 1,
+      "filters": {"and": [{"key": "search-box", "s": ["TERM"]}]}
+    }
+  ]
 }
 ```
 
+And this stack would be added to any logs that we generate from that picker, and will be reflected in the action string. For example if the user opens the page-limit dropdown menu, the action would be `:entity/related-link-picker/facet-picker,page-size;open`.
+
+## Facet compressed syntax
+
+Since the facet object can be lengthy, we decide to modify it for the log purposes. The structure is the same, we are just going to compress some of the attribute names. These are the compressed version of each attribute used in the facet syntax:
+- `i` for `inbound`
+- `o` for `outbound`
+- `src` for `source`
+- `key` for `sourcekey`
+- `ch` for `choices`
+- `r` for `ranges`
+- `s` for `search`
+
+So for example if the facet object is
+
+```javascript
+"and": [
+    {"source":"search-box", "search":["test"]},
+    {"source": [{"inbound": ["s", "cons1"]}, {"outbound": ["s", "cons2"]}, "RID"], "choices":["1"]},
+    {"sourcekey":"some-key", "ranges":[{"min": 1}]}
+]
+```
+
+We're going to log it as the following:
+
+```javascript
+"and": [
+    {"src":"search-box", "s":["test"]},
+    {"src": [{"u": ["s", "cons1"]}, {"o": ["s", "cons2"]}, "RID"], "ch":["1"]},
+    {"key":"some-key", "r":[{"min": 1}]}
+]
+```
+
+
+## Error log
+
+To find the errors in log, you can search for `/ermrest/terminal_error` path. This is what a error log would look like:
+
+```javascript
+{
+   "e": 1,
+   "message": "ERROR MESSAGE",
+   "name": "ERROR TITLE"
+}
+```
+
+As the name suggests, we currently are only logging terminal errors.
 
 ## Truncation
 
-The object that we want to log might be lengthy. So we should truncate this object if it's exceeding the maximum length (we're currently limiting it to 6500). An object with `t:1` indicates that some attributes have been truncated.
-The truncation is done based on a set priority. We keep adding more and more attributes and as soon as we hit the limit, we're going to return that object. Attributes are added in the following order (attribute one has more priority over the next and so on):
- - cid, pid, wid, schema_table, catalog, cfacet, cqp, ppid, pcid
- - template
- - referrer
- - source
- - column
- - cfacet_str
- - cfacet_path
- - filter
- - facet
+The object that we want to log might be lengthy. So we should truncate this object if it's exceeding the maximum length (we're currently limiting it to 6500 characeters after encoding). In truncation logic we perform each of the described steps below to shorten the length of the object. If one step was not enough, we would perform the next step and so on until the length goes below the limit. The steps are:
 
-For example, assume that we were trying to send the following object and it's lengthy.
-
-```
-{
-    "cid": <value>, "pid": <value>, "wid": <value>,
-    "catalog": <value>, "schema_table": <value>,
-    "referrer": {"schema_table": <value>, "facet": <referrer-facet-obj>},
-    "facet": <facet-obj>,
-    "source": <source-obj>
-}
-```
-
-We're going to include `cid`, `pid`, `wid`, `catalog`, `schema_table`, and `t` (with value 1) first. Then we're going to go based on the priority list and try to add each attribute. So we're going to add `referrer`'s `facet` step by step. As soon as we hit the limit, we're going to return that partial object. otherwise we're going to continue to `source` and then `facet`.
-
-
+1. Replace all foreign key constraints with their RID.
+2. Replace values (`choices`, `ranges`, `search`) in the `filters` with the number of values.
+3. Replace all `filters.and` with the number of filters.
+4. Replace all source paths with the number of path nodes.
+5. Replace `stack` value with the number of stack nodes.
 
 ## Analysis
 
@@ -305,99 +322,18 @@ The following url patterns are what's unique about each of these requests and yo
 
 - CSV default export: `uinit=1&cid=`
 
-## PCID list
+#### Finding the displayed recordset request
 
-The following is the list of `PCID`'s that will be present on main entity requests in the chaise apps. `CID` will always represent what app the request was made from, `PCID` will represent what app the user navigated from when the main entity request was triggered.
-
- - `record`
- - `recordset`
- - `recordedit`
- - `navbar`
- - `navbar/record`
- - `navbar/recordset`
- - `navbar/recordedit`
-
-If the user clicked on a link in the navbar, the `PCID` will properly denote what app the user came from that had the navbar present. A static page that uses the navbar app, will set the `PCID` as `navbar`. Otherwise the appname will be appended (i.e.   `navbar/<appname>`). This is true for the [deriva-webapps](https://github.com/informatics-isi-edu/deriva-webapps/wiki/Logging-in-WebApps#pcid-list) as well.
+In recordset app, or any of the other places that use the recordset view, e.g, modal pickers, chaise will communicate with server as soon as user interacts with the page as long as we have enough flow-control slots to send the request. So there might be some requests that we generate while the user is interacting with the page that will be discarded. To find the actual request that the user sees on the page, you can use `start_ms`, and `end_ms`. All these reload requests will have these two attributes. If you join all the reload request by `start_ms`, you can find all the requests that we sent when the user started interacting at `start_ms`. So the request with the longest `end_ms` would give you the actual request that users will see on the page.
 
 
 ## Change Log
 
-### 10/??/19
+### 02/12/20
 
-#### Commit Links
- - (pending, changes in branch)
-
-##### Changed
- - changed model/catalog -> model/snaptime
-
-##### Added
- - [Button Action List](#button-action-list)
-
-### 07/16/19
-
-##### Commit Links
- - [chaise](https://github.com/informatics-isi-edu/chaise/commit/65de409b3229533be76a1537d55a83a9bec84bb3)
-
-###### Added
- - Added `pcid` and `ppid` to navbar links that are for the same origin/host.
-
-### 07/12/19
-
-##### Commit Links
-  - [ermrestjs](https://github.com/informatics-isi-edu/ermrestjs/commit/df91573fac7ae59eee0e6bf73f7023de899de3d4)
-
-###### Added
-  - Added specific action for the `recordset/main/<ANY_SUBACTION>/correct-page`. This action will indicate that users went to a page with `@before` in url AND there is less data than limit implies (beginning of set) OR we got the right set of data but there's no previous set (beginning of set), and then chaise tried again without `@before` in url. This action is used for the second request that is trying the main request again without `@before`.
-
-### 05/06/19
-
-###### Commit Links
- - [chaise](https://github.com/informatics-isi-edu/chaise/commit/8dc53a5e61e3b32dfae3279bb000baf9b2f51fb1)
-
-###### Added
-  - We are going to send `cid`, `wid`, and `pid` headers with authen requests from now on.
-
-### 04/18/19
-
-###### Commit Links
- - [chaise](https://github.com/informatics-isi-edu/chaise/commit/777febb1811620522344314e383238ece936047f)
- - [ermrestjs](https://github.com/informatics-isi-edu/ermrestjs/commit/af7ac83359647e232dbb5385ec25be7add7dc89e)
+###### Commit/PR Links
+ - [chaise](https://github.com/informatics-isi-edu/chaise/pull/1889)
+ - [ermrestjs](https://github.com/informatics-isi-edu/ermrestjs/pull/829)
 
 ###### Changed
-- Changed the action for removing related entity rows from `delete/recordset/related` to `delete/record/related`.
-- Fixed a bug that would cause record load requests to be reported as update.
-- Fixed the issue of reporting both load and update requests of record page as `record/main`. Now they are being logged with proper action.
-  - Impact: We cannot determine the number of record page loads prior to this fix. This only affects deployments that allow their users to create new records since the update request would only fire if the user updates any of the related entities.
-- `recordset/export` was used as action for export from both record and recordset which is changed to `export`.
-- Changed the `template` object that is reported with `export` action to only include the `displayname` and `type`.
-- Instead of logging the whole template document in the `export` action, we're just going to include `displayname` and `type`.
-  ```
-  {
-    "action": "export",
-    "template": {
-        "displayname": "sample template",
-        "type": "BAG"
-    }
-  }
-  ```
-- Fixed the action of scalar column requests.
-- Changed the `recordedit/default` action to `default`.
-
-###### Added
-- Added proper `dcctx` logging to viewer app.
-- `ppid` and `pcid` has been added to the main request of each app which shows the parent `pid` and `cid`.
-- New actions have been attached to schema (`"model/schema"`) and catalog (`"model/catalog"`) requests.
-- `catalog` has been added to all the requests.
-- `column` has been added to requests for getting a scalar facet data.
--  If there are preselected facets, in entity mode we have to get the row-name corresponding to the selected value. Customized action (`recordset/facet/init`) has been added for this request.
-- Added proper action `recordset/facet/histogram` to the request for getting buckets of a range picker facet.
-- Added `cfacet`, `cfacet_str`, and `cfacet_path`.
-- Added `cqp` attribute to track urls that are using `?` (query parameter) instead of `#` (hash fragment).
-
-### 03/08/19
-
-###### Commit Links
- - [chaise](https://github.com/informatics-isi-edu/chaise/commit/05108d07e37c1579b28ccfc58916db486f379005)
-
-###### Changed
- - We realized that the first request of adding pure and binary is not using the correct action. It was using the `recordset/main/load`. We changed it to use the appropriate `pre-create/prefill/association` action with `referred` information.
+ - Completely changed how we're logging in chaise. This is the starting date of logging as described in this documentation.

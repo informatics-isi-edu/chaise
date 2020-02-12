@@ -3,8 +3,8 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'ConfigUtils', 'dataFormats', 'DataUtils', 'ErrorService', 'InputUtils', 'integerLimits', 'logActions', 'logService', 'maskOptions', 'messageMap', 'modalBox', 'modalUtils', 'recordCreate', 'recordEditAppUtils', 'recordEditModel', 'recordsetDisplayModes', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
-        function FormController(AlertsService, ConfigUtils, dataFormats, DataUtils, ErrorService, InputUtils, integerLimits, logActions, logService, maskOptions, messageMap, modalBox, modalUtils, recordCreate, recordEditAppUtils, recordEditModel, recordsetDisplayModes, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
+    .controller('FormController', ['AlertsService', 'ConfigUtils', 'dataFormats', 'DataUtils', 'ErrorService', 'InputUtils', 'integerLimits', 'logService', 'maskOptions', 'messageMap', 'modalBox', 'modalUtils', 'recordCreate', 'recordEditAppUtils', 'recordEditModel', 'recordsetDisplayModes', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
+        function FormController(AlertsService, ConfigUtils, dataFormats, DataUtils, ErrorService, InputUtils, integerLimits, logService, maskOptions, messageMap, modalBox, modalUtils, recordCreate, recordEditAppUtils, recordEditModel, recordsetDisplayModes, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
         var context = ConfigUtils.getContextJSON();
         var chaiseConfig = ConfigUtils.getConfigJSON();
@@ -164,6 +164,16 @@
             else {
                 AlertsService.addAlert("Your data has been submitted. Showing you the result set...", "success");
 
+                // NOTE currently this has been added just to make sure nothing is broken,
+                // but it's not used since the displayed table doesn't have any controls.
+                // if we end up adding more controls and needed to log them, we might want to
+                // revisit the filters that we're logging here.
+                var logStackNode = logService.getStackNode(
+                    logService.logStackTypes.SET,
+                    resultsReference.table,
+                    resultsReference.filterLogInfo
+                );
+
                 // includes identifiers for specific records modified
                 vm.resultsetRecordsetLink = $rootScope.reference.contextualize.compact.appLink;
                 //set values for the view to flip to recordedit resultset view
@@ -183,8 +193,11 @@
                         viewable: false,
                         editable: false,
                         deletable: false,
-                        selectMode: modalBox.noSelect //'no-select'
-                    }
+                        selectMode: modalBox.noSelect, //'no-select'
+                        displayMode: recordsetDisplayModes.table
+                    },
+                    logStack: logService.getStackObject(logStackNode),
+                    logStackPath: logService.getStackPath("", logService.logStackPaths.RESULT_SUCCESFUL_SET)
                 };
 
                 // NOTE: This case is for a pseudo-failure case
@@ -206,8 +219,11 @@
                             viewable: false,
                             editable: false,
                             deletable: false,
-                            selectMode: modalBox.noSelect
-                        }
+                            selectMode: modalBox.noSelect,
+                            displayMode: recordsetDisplayModes.table
+                        },
+                        logStack: logService.getStackObject(logStackNode),
+                        logStackPath: logService.getStackPath("", logService.logStackPaths.RESULT_FAILED_SET)
                     };
                 }
                 vm.resultset = true;
@@ -276,7 +292,7 @@
 
         // NOTE: If changes are made to this function, changes should also be made to the similar function in the inputSwitch directive
         // TODO: remove when RE has been refactored to use the inputSwitch directive for all form inputs
-        function searchPopup(rowIndex, column) {
+        function searchPopup(rowIndex, column, columnIndex) {
             var originalTuple,
                 editOrCopy = true,
                 params = {};
@@ -304,14 +320,14 @@
             params.reference = column.filteredRef(submissionRow, vm.recordEditModel.foreignKeyData[rowIndex]).contextualize.compactSelect;
             params.reference.session = $rootScope.session;
 
-            params.logObject = params.reference.defaultLogInfo;
-            params.logObject.referrer = params.parentReference.defaultLogInfo;
-
-            params.context = "compact/select";
             params.selectedRows = [];
             params.selectMode = modalBox.singleSelectMode;
             params.showFaceting = true;
             params.facetPanelOpen = false;
+
+            var columnModel = vm.recordEditModel.columnModels[columnIndex];
+            params.logStack = columnModel.logStack;
+            params.logStackPath = logService.getStackPath("", logService.logStackPaths.FOREIGN_KEY_POPUP);
 
             modalUtils.showModal({
                 animation: false,
@@ -344,13 +360,7 @@
                 }
 
                 vm.recordEditModel.rows[rowIndex][column.name] = tuple.displayname.value;
-            }, function modalCanceled() {
-                var fkCancelHeader = {
-                    action: logActions.recordeditFKCancel
-                }
-
-                logService.logClientAction(fkCancelHeader, params.reference.defaultLogInfo);
-            }, false);
+            }, null, false);
         }
 
         // idx - the index of the form
@@ -412,16 +422,18 @@
             if (!vm.numberRowsToAdd) vm.numberRowsToAdd = 1;
 
             // log the button was clicked
-            var copyFormRowHeader = {
-                action: logActions.add1
-            }
+            var action = logService.logActions.FORM_CLONE,
+                stack = logService.getStackObject();
 
             if (vm.numberRowsToAdd > 1) {
-                copyFormRowHeader.action = logActions.addX;
-                copyFormRowHeader.x = vm.numberRowsToAdd;
+                action = logService.logActions.FORM_CLONE_X;
+                stack = logService.addExtraInfoToStack(null, {clone: vm.numberRowsToAdd});
             }
 
-            logService.logClientAction(copyFormRowHeader, $rootScope.reference.defaultLogInfo);
+            logService.logClientAction({
+                action: logService.getActionString(action),
+                stack: stack
+            }, $rootScope.reference.defaultLogInfo);
 
             if ((vm.numberRowsToAdd + vm.recordEditModel.rows.length) > vm.MAX_ROWS_TO_ADD) {
                 AlertsService.addAlert("Cannot add " + vm.numberRowsToAdd + " records. Please input a value between 1 and " + (vm.MAX_ROWS_TO_ADD - vm.recordEditModel.rows.length) + ', inclusive.', 'error');
@@ -515,15 +527,11 @@
             scope.$root.showSpinner = true;
 
             var defaultLogInfo = (vm.editMode ? $rootScope.tuples[index].reference.defaultLogInfo : $rootScope.reference.defaultLogInfo);
-            var action = (vm.editMode ? logActions.updateRemove : logActions.createRemove);
 
-            var removeFormRowHeader = {
-                action: action
-            }
-
-            if (vm.editMode) removeFormRowHeader.facet = defaultLogInfo.facet;
-
-            logService.logClientAction(removeFormRowHeader, defaultLogInfo);
+            logService.logClientAction({
+                action: logService.getActionString(logService.logActions.FORM_REMOVE),
+                stack: logService.getStackObject()
+            }, defaultLogInfo);
 
             return spliceRows(index);
         }
@@ -605,19 +613,11 @@
 
             var defaultLogInfo = (model.column.reference ? model.column.reference.defaultLogInfo : $rootScope.reference.defaultLogInfo);
 
-            var action;
-            if (vm.editMode) {
-                action = (model.showSelectAll ? logActions.updateMultiClose : logActions.updateMultiOpen);
-            } else {
-                action = (model.showSelectAll ? logActions.createMultiClose : logActions.createMultiOpen);
-            }
-
-            var toggleSelectAllHeader = {
-                action: action,
-                column: model.column.name
-            };
-
-            logService.logClientAction(toggleSelectAllHeader, defaultLogInfo);
+            var action = model.showSelectAll ? logService.logActions.SET_ALL_CLOSE : logService.logActions.SET_ALL_OPEN;
+            logService.logClientAction({
+                action: logService.getActionString(action, model.logStackPath),
+                stack: model.logStack
+            }, defaultLogInfo);
 
             if (selectAllOpen) {
                 // close the other select all dialog first
@@ -683,14 +683,10 @@
             var model = vm.recordEditModel.columnModels[index];
 
             var defaultLogInfo = (model.column.reference ? model.column.reference.defaultLogInfo : $rootScope.reference.defaultLogInfo);
-            var action = (vm.editMode ? logActions.updateMultiCancel : logActions.createMultiCancel);
-
-            var cancelSelectAllHeader = {
-                action: action,
-                column: model.column.name
-            }
-
-            logService.logClientAction(cancelSelectAllHeader, defaultLogInfo);
+            logService.logClientAction({
+                action: logService.getActionString(logService.logActions.SET_ALL_CANCEL, model.logStackPath),
+                stack: model.logStack
+            }, defaultLogInfo);
 
             model.showSelectAll = false;
             model.highlightRow = false;
@@ -795,14 +791,10 @@
             var model = vm.recordEditModel.columnModels[index];
 
             var defaultLogInfo = (model.column.reference ? model.column.reference.defaultLogInfo : $rootScope.reference.defaultLogInfo);
-            var action = (vm.editMode ? logActions.updateMultiApply : logActions.createMultiApply);
-
-            var applySelectAllHeader = {
-                action: action,
-                column: model.column.name
-            }
-
-            logService.logClientAction(applySelectAllHeader, defaultLogInfo);
+            logService.logClientAction({
+                action: logService.getActionString(logService.logActions.SET_ALL_APPLY, model.logStackPath),
+                stack: model.logStack
+            }, defaultLogInfo);
 
             setValueAllInputs(index, model.allInput.value);
         }
@@ -811,14 +803,10 @@
             var model = vm.recordEditModel.columnModels[index];
 
             var defaultLogInfo = (model.column.reference ? model.column.reference.defaultLogInfo : $rootScope.reference.defaultLogInfo);
-            var action = (vm.editMode ? logActions.updateMultiClear : logActions.createMultiClear);
-
-            var clearSelectAllHeader = {
-                action: action,
-                column: model.column.name
-            }
-
-            logService.logClientAction(clearSelectAllHeader, defaultLogInfo);
+            logService.logClientAction({
+                action: logService.getActionString(logService.logActions.SET_ALL_CLEAR, model.logStackPath),
+                stack: model.logStack
+            }, defaultLogInfo);
 
             var value = null;
             var inputType = model.inputType;

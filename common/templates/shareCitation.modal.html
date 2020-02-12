@@ -16,12 +16,12 @@
             <h3>
                 Versioned Link
                 <small tooltip-placement="bottom" ng-attr-uib-tooltip="{{!ctrl.moreThanWeek() ? 'Data snapshotted at ' + ctrl.params.versionDate : undefined}}">({{ctrl.params.versionDateRelative}})</small>
-                <span class="glyphicon glyphicon-copy chaise-copy-btn" ng-click="::ctrl.copyToClipboard(ctrl.params.versionLink, ctrl.logActions.versionCopy)" uib-tooltip="Copy link URL to clipboard." tooltip-placement="bottom"></span>
+                <span class="glyphicon glyphicon-copy chaise-copy-btn" ng-click="::ctrl.copyToClipboard(ctrl.params.versionLink, ctrl.logActions.SHARE_VERSIONED_LINK_COPY)" uib-tooltip="Copy link URL to clipboard." tooltip-placement="bottom"></span>
             </h3>
             <a id="version" ng-href="{{::ctrl.params.versionLink}}">{{::ctrl.params.versionLink}}</a>
             <h3>
                 Live Link
-                <span class="glyphicon glyphicon-copy chaise-copy-btn" ng-click="::ctrl.copyToClipboard(ctrl.params.permalink, ctrl.logActions.liveCopy)"  uib-tooltip="Copy link URL to clipboard." tooltip-placement="bottom"></span>
+                <span class="glyphicon glyphicon-copy chaise-copy-btn" ng-click="::ctrl.copyToClipboard(ctrl.params.permalink, ctrl.logActions.SHARE_LIVE_LINK_COPY)"  uib-tooltip="Copy link URL to clipboard." tooltip-placement="bottom"></span>
             </h3>
             <a id="permalink" ng-href="{{::ctrl.params.permalink}}">{{::ctrl.params.permalink}}</a>
         </li>
@@ -33,7 +33,7 @@
         </li>
         <li id="download-citation" ng-if="::ctrl.params.citation">
             <h3>Download Data Citation:</h3>
-            <a id="bibtex-download" class="chaise-btn chaise-download-btn" download="{{::ctrl.params.displayname}}.bib" ng-href="{{::ctrl.downloadBibtex}}" ng-click="::ctrl.logCitationDownload()">BibTex</a>
+            <a id="bibtex-download" class="chaise-btn chaise-download-btn" download="{{::ctrl.params.displayname}}.bib" ng-href="{{::ctrl.downloadBibtex}}" ng-click="::ctrl.logCitationDownload(ctrl.logActions.CITE_BIBTEXT_DOWNLOAD)">BibTex</a>
         </li>
     </ul>
 </div>

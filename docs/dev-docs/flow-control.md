@@ -44,12 +44,15 @@ The best way to handle these would be using states and state-management. But in 
   - `aggregatesToInitialize`: An array that contains the index of aggregate columns that we should get the data for. This is going to populated after each successful request for the main entity.
   - `facetsToPreProcess`: An array that contains the index of facets that are already open when the page loads (because of annotation or pre-existing filters). This will be populated once during the initialization of recordset and will be used only on the first cycle of flow-control.
 
+Aggregate (pseudo-column) attributes:
+  - `processed`: `processed=false` means that we have to schedule a request to get the aggregate data. If its value is `true`, it means either the request is pending or the request is already done.
+
 - Facet attributes:
   - `preProccessed`: If a facet has some pre-selected filters, we have to call the `preProcessFacet` function for them. If `preProccessed=false`, that means that we have to call that function for the facet or the request has not got back yet and we have to wait. This will function will behave differently based on different facet types.
    - for entity choice-picker facet: It will get the row-names that we need to display for the selected facets.
    - for other types of facets: It will create the pre-selected checkboxes without calling ERMrest.
   - `initialized`: `initialized=false` indicates that we have not initialized the facet yet so we should not display the facet column data. This will be changed to `true`, when we get the initial facet options. It will remain `true` as long as the facet is open. If users close the facet and change the state of page (by changing other facets), this attribute will be changed to `false` in order to hide its outdated content.
-  - `processed`: `processed=false` means that we have to schedule a request to get the facet data. If its value is `true`, it means that either the request is pending or the displayed data is updated.
+  - `processed`: `processed=false` means that we have to schedule a request to get the facet data. If its value is `true`, it means either the request is pending or the displayed data is updated.
   - `isLoading`: This attribute is used to display the loader for facets. It has no effect on flow-control.
   - `isOpen`: Indicates whether the facet is open.
   - `facetError`: Indicates whether the facet had a timeout error (to show the appropriate options to recover the facet).

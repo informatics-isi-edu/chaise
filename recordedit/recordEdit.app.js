@@ -61,6 +61,7 @@
             return function(exception, cause) {
                 var ErrorService = $injector.get("ErrorService");
                 var Session = $injector.get("Session");
+                var logService = $injector.get("logService");
                 // If Conflict Error and user was previously logged in
                 // AND if session is invalid, ask user to login rather than throw an error
                 if (ERMrest && exception instanceof ERMrest.ConflictError && Session.getSessionValue()) {
@@ -80,8 +81,8 @@
         }]);
     })
 
-    .run(['AlertsService', 'ConfigUtils', 'dataFormats', 'DataUtils', 'ERMrest', 'Errors', 'ErrorService', 'FunctionUtils', 'headInjector', 'InputUtils', 'logActions', 'MathUtils', 'messageMap', 'recordEditAppUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$log', '$rootScope', '$window',
-        function runRecordEditApp(AlertsService, ConfigUtils, dataFormats, DataUtils, ERMrest, Errors, ErrorService, FunctionUtils, headInjector, InputUtils, logActions, MathUtils, messageMap, recordEditAppUtils, recordEditModel, Session, UiUtils, UriUtils, $cookies, $log, $rootScope, $window) {
+    .run(['AlertsService', 'ConfigUtils', 'dataFormats', 'DataUtils', 'ERMrest', 'Errors', 'ErrorService', 'FunctionUtils', 'headInjector', 'InputUtils', 'logService', 'MathUtils', 'messageMap', 'recordEditAppUtils', 'recordEditModel', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$log', '$rootScope', '$window',
+        function runRecordEditApp(AlertsService, ConfigUtils, dataFormats, DataUtils, ERMrest, Errors, ErrorService, FunctionUtils, headInjector, InputUtils, logService, MathUtils, messageMap, recordEditAppUtils, recordEditModel, Session, UiUtils, UriUtils, $cookies, $log, $rootScope, $window) {
 
         var session;
 
@@ -118,10 +119,10 @@
 
         context.catalogID = res.catalogId;
 
-        // will be used to determine the app mode (edit, create, or copy)
-        // We are not passing the query parameters that are used for app mode,
-        // so we cannot use the queryParams that parser is returning.
-        context.queryParams = res.queryParams;
+        // will be used to determine the app mode (edit, create, or copy) and determine whether we should call updated in the caller.
+        // we cannot use the res.queryParams since that will only return the universally acceptable query params.
+        // and not all the query parameters that might be in the url
+        context.queryParams = UriUtils.getQueryParams($window.location.href);
         context.MAX_ROWS_TO_ADD = 201;
 
         // modes = create, edit, copy
@@ -154,7 +155,7 @@
             }
 
             // On resolution
-            ERMrest.resolve(ermrestUri, { cid: context.cid, pid: context.pid, wid: context.wid }).then(function getReference(reference) {
+            ERMrest.resolve(ermrestUri, ConfigUtils.getContextHeaderParams()).then(function getReference(reference) {
 
 
                 // we are using filter to determine app mode, the logic for getting filter
@@ -185,30 +186,49 @@
 
                 $log.info("Reference: ", $rootScope.reference);
 
+                // log attribues
+                $rootScope.logStackPath = logService.logStackPaths.SET;
+                $rootScope.logStack = [
+                    logService.getStackNode(
+                        logService.logStackTypes.SET,
+                        $rootScope.reference.table,
+                        $rootScope.reference.filterLogInfo
+                    )
+                ];
 
-                // create the extra information that we want to log in ermrest (with the submission request)
-                // NOTE currently we're only setting the action, we might need to add extra information here
-                var logObj = {action: logActions.update};
+                var appMode;
+                appMode = logService.appModes.EDIT;
+                if (context.mode == context.modes.COPY) {
+                    appMode = logService.appModes.CREATE_COPY;
+                } else if (context.mode == context.modes.CREATE){
+                    if (context.queryParams.invalidate && context.queryParams.prefill) {
+                        appMode = logService.appModes.CREATE_PRESELECT;
+                    } else {
+                        appMode = logService.appModes.CREATE;
+                    }
+                }
+                $rootScope.logAppMode = appMode;
+
+
+                // The log object that will be used for the submission request
+                var action = (context.mode == context.modes.CREATE || context.mode == context.modes.COPY) ? logService.logActions.CREATE : logService.logActions.UPDATE;
+                var logObj = {
+                    action: logService.getActionString(action),
+                    stack: logService.getStackObject()
+                };
                 if (pcid) logObj.pcid = pcid;
                 if (ppid) logObj.ppid = ppid;
                 if (isQueryParameter) logObj.cqp = 1;
-                if (context.mode == context.modes.COPY) {
-                    logObj = {action: logActions.copy};
-                } else if (context.mode == context.modes.CREATE){
-                    if (context.queryParams.invalidate) {
-                        if (context.queryParams.prefill) {
-                            logObj = {action: logActions.createPrefill};
-                        } else {
-                            logObj = {action: logActions.createModal};
-                        }
-                    } else {
-                        logObj = {action: logActions.create};
-                    }
-                }
                 context.logObject = logObj;
 
                 $rootScope.reference.columns.forEach(function (column, index) {
                     var isDisabled = InputUtils.isDisabled(column);
+                    var stackNode = logService.getStackNode(
+                        column.isForeignKey ? logService.logStackTypes.FOREIGN_KEY : logService.logStackTypes.COLUMN,
+                        column.table,
+                        {source: column.compressedDataSource, entity: column.isForeignKey}
+                    );
+                    var stackPath = column.isForeignKey ? logService.logStackPaths.FOREIGN_KEY : logService.logStackPaths.COLUMN;
 
                     recordEditModel.columnModels[index] = {
                         allInput: null,
@@ -216,7 +236,9 @@
                         isDisabled: isDisabled,
                         inputType: recordEditAppUtils.columnToInputType(column, isDisabled),
                         highlightRow: false,
-                        showSelectAll: false
+                        showSelectAll: false,
+                        logStack: logService.getStackObject(stackNode),
+                        logStackPath: logService.getStackPath("", stackPath)
                     };
                 });
 
@@ -235,8 +257,11 @@
                             numberRowsToRead = context.MAX_ROWS_TO_ADD;
                         }
 
-                        var readAction = context.mode == context.modes.EDIT ? logActions.preUpdate : logActions.preCopy;
-                        $rootScope.reference.read(numberRowsToRead, {action: readAction}).then(function getPage(page) {
+                        var logObj = {
+                            action: logService.getActionString(logService.logActions.LOAD),
+                            stack: logService.getStackObject()
+                        };
+                        $rootScope.reference.read(numberRowsToRead, logObj).then(function getPage(page) {
                             $log.info("Page: ", page);
 
                             if (page.tuples.length < 1) {
@@ -385,20 +410,20 @@
                             var cookie = $cookies.getObject(context.queryParams.prefill);
 
                             // make sure cookie is correct
-                            var hasAllKeys = cookie && ["keys", "constraintNames", "origUrl", "rowname"].every(function (k) {
+                            var hasAllKeys = cookie && ["keys", "fkColumnNames", "origUrl", "rowname"].every(function (k) {
                                 return cookie.hasOwnProperty(k);
                             });
                             if (hasAllKeys) {
                                 $rootScope.cookieObj = cookie;
 
                                 // keep a record of freignkeys that are prefilled
-                                prefilledFks = cookie.constraintNames;
+                                prefilledFks = cookie.fkColumnNames;
 
                                 // keep a record of columns that are prefilled
                                 prefilledColumns = cookie.keys;
 
                                 // process the list of prefilled foreignkeys to get additional data
-                                processPrefilledForeignKeys(cookie.constraintNames, cookie.keys, cookie.origUrl, cookie.rowname);
+                                processPrefilledForeignKeys(cookie.fkColumnNames, cookie.keys, cookie.origUrl, cookie.rowname);
 
                                 // Keep a copy of the initial rows data so that we can see if user has made any changes later
                                 recordEditModel.oldRows = angular.copy(recordEditModel.rows);
@@ -471,13 +496,13 @@
                                             // initialize foreignKey data
                                             recordEditModel.foreignKeyData[0][column.foreignKey.name] = defaultDisplay.fkValues;
                                             // get the actual foreign key data
-                                            getForeignKeyData(0, [column.name], defaultDisplay.reference, {action: logActions.preCreatePrefill});
+                                            getForeignKeyData(0, [column.name], defaultDisplay.reference, logService.logActions.FOREIGN_KEY_PRESELECT, colModel.logStack);
                                         } else if (defaultValue != null) {
                                             initialModelValue = defaultValue;
                                             // initialize foreignKey data
                                             recordEditModel.foreignKeyData[0][column.foreignKey.name] = column.defaultValues;
                                             // get the actual foreign key data
-                                            getForeignKeyData(0, [column.name], column.defaultReference, {action: logActions.recordeditDefault});
+                                            getForeignKeyData(0, [column.name], column.defaultReference, logService.logActions.FOREIGN_KEY_DEFAULT, colModel.logStack);
                                         }
                                     } else {
                                         // all other column types
@@ -520,8 +545,13 @@
          * @param  {ERMrest.Refernece} fkRef   Reference to the foreign key table
          * @param  {Object} contextHeaderParams the object will be passed to read as contextHeaderParams
          */
-        function getForeignKeyData (rowIndex, colNames, fkRef, logObject) {
-            fkRef.contextualize.compactSelect.read(1, logObject).then(function (page) {
+        function getForeignKeyData (rowIndex, colNames, fkRef, logAction, logStack) {
+            var stackPath = logService.getStackPath("", logService.logStackPaths.FOREIGN_KEY);
+            var logObj = {
+                action: logService.getActionString(logAction, stackPath),
+                stack: logStack
+            };
+            fkRef.contextualize.compactSelect.read(1, logObj).then(function (page) {
                 colNames.forEach(function (colName) {
                     $rootScope.showColumnSpinner[rowIndex][colName] = true;
                     if ($rootScope.showColumnSpinner[rowIndex][colName]) {
@@ -548,15 +578,15 @@
         /**
          * - Attach the values for foreignkeys and columns that are prefilled.
          * - Read the actual parent row in order to attach the foreignkeyData
-         * @param  {string[]} constraintNames An array of the name of foreign key columns
+         * @param  {string[]} fkColumnNames An array of the name of foreign key columns
          * @param  {Object} keys            key-value pair of raw values
          * @param  {string} origUrl         the parent url that should be resolved to get the complete row of data
          * @param  {Object} rowname         the default rowname that should be displayed
          */
-        function processPrefilledForeignKeys(constraintNames, keys, origUrl, rowname) {
+        function processPrefilledForeignKeys(fkColumnNames, keys, origUrl, rowname) {
             var newRow = recordEditModel.rows.length - 1;
 
-            constraintNames.forEach(function (cn) {
+            fkColumnNames.forEach(function (cn) {
                 // Update view model
                 recordEditModel.rows[newRow][cn] = rowname.value;
 
@@ -565,14 +595,28 @@
             });
 
             // get the actual foreignkey data
-            ERMrest.resolve(origUrl, {cid: context.cid}).then(function (ref) {
-                // the table that we're logging is not the same table in url (it's the referrer that is the same)
-                var logObject = $rootScope.reference.defaultLogInfo;
-                logObject.referrer = ref.defaultLogInfo;
-                logObject.action = logActions.preCreatePrefill;
-                getForeignKeyData(newRow, constraintNames, ref, logObject);
+            ERMrest.resolve(origUrl, ConfigUtils.getContextHeaderParams()).then(function (ref) {
+
+                // get the first foreignkey relationship between the ref.table and current table
+                // and log it as the foreignkey that we are prefilling (eventhough we're prefilling multiple fks)
+                var fks = $rootScope.reference.table.foreignKeys.all(), source = {};
+                for (var i = 0; i < fks.length; i++) {
+                    if (fkColumnNames.indexOf(fks[i].name) !== -1) {
+                        source = fks[i].compressedDataSource;
+                        break;
+                    }
+                }
+                var stackNode = logService.getStackNode(
+                    logService.logStackTypes.FOREIGN_KEY,
+                    ref.table,
+                    {source: source, entity: true}
+                );
+                var logStack = logService.getStackObject(stackNode);
+                getForeignKeyData(newRow, fkColumnNames, ref, logService.logActions.FOREIGN_KEY_PRESELECT, logStack);
             }).catch(function (err) {
-                $rootScope.showColumnSpinner[newRow][constraintName] = false;
+                fkColumnNames.forEach(function (cn) {
+                    $rootScope.showColumnSpinner[newRow][cn] = false;
+                });
                 $log.warn(err);
             });
 

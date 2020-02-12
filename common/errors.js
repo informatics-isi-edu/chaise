@@ -279,8 +279,8 @@
     }])
 
     // Factory for each error type
-    .factory('ErrorService', ['AlertsService', 'ConfigUtils', 'DataUtils', 'errorMessages', 'errorNames', 'Errors', 'messageMap', 'modalUtils', 'Session', 'UriUtils', '$document', '$log', '$rootScope', '$window',
-        function ErrorService(AlertsService, ConfigUtils, DataUtils, errorMessages, errorNames, Errors, messageMap, modalUtils, Session, UriUtils, $document, $log, $rootScope, $window) {
+    .factory('ErrorService', ['AlertsService', 'ConfigUtils', 'DataUtils', 'errorMessages', 'errorNames', 'Errors', 'logService', 'messageMap', 'modalUtils', 'Session', 'UriUtils', '$document', '$log', '$rootScope', '$window',
+        function ErrorService(AlertsService, ConfigUtils, DataUtils, errorMessages, errorNames, Errors, logService, messageMap, modalUtils, Session, UriUtils, $document, $log, $rootScope, $window) {
 
         // NOTE: overriding `window.onerror` in the ErrorService scope
         $window.onerror = function () {
@@ -359,7 +359,7 @@
 
             modalUtils.showModal(modalProperties, function (actionBtnIdentifier) {
                 if ((errorStatus == errorNames.unauthorized && !providedLink) || (actionBtnIdentifier === "login")) {
-                    Session.loginInAPopUp();
+                    Session.loginInAPopUp(logService.logActions.LOGIN_ERROR_MODAL);
                 } else {
                     if(actionBtnIdentifier == "reload"){
                         reloadCb();
