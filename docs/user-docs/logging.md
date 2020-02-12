@@ -329,7 +329,7 @@ In recordset app, or any of the other places that use the recordset view, e.g, m
 
 ## Change Log
 
-### 02/15/20
+### 02/12/20
 
 ###### Commit/PR Links
  - [chaise](https://github.com/informatics-isi-edu/chaise/pull/1889)

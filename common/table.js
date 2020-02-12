@@ -55,7 +55,6 @@
      *        logStackPath, // (required) used to capture the stack-path related to this table.
      *        logObject (optional) // used only on the first request of main entity read.
      *       }
-     *
      *      available config options:
      *          - mode :
      *              The mode of the recordset, can be any of the following:
@@ -74,6 +73,9 @@
      *          - displayMode: find the complete list in utils.recordsetDisplayModes
      *          - containerIndex: If it's related (or inline), this will return the index of that related(or inline) table.
      *
+     * - vm private variables that are used internally and should not be passed to other directive/modules:
+     *   - _reloadCauses, _reloadStartTime: Used to capture the causes of reload requests as well as the start time of dirtyness of the page.
+     *   - _recountCauses, _recountStartTime: Used to capture the causes of recount requests as well as the start time of dirtyness of the page.
      * The events that are being used by directives in this file and their children:
      * 1. `reference-modified`: data model has been updated.
      *    your app may want to update address bar, permalink etc.
@@ -198,9 +200,9 @@
             );
 
             var action = logService.logActions.LOAD, stack = getTableLogStack(vm, pcolStackNode);
-            if (Array.isArray(agg.updateCauses) && agg.updateCauses.length > 0) {
+            if (Array.isArray(agg.reloadCauses) && agg.reloadCauses.length > 0) {
                 action = logService.logActions.RELOAD;
-                stack = logService.addCausesToStack(stack, agg.updateCauses, agg.updateStartTime);
+                stack = logService.addCausesToStack(stack, agg.reloadCauses, agg.reloadStartTime);
             }
             var logObj = {
                 action: getTableLogAction(vm, action, logService.logStackPaths.PSEUDO_COLUMN),
@@ -214,8 +216,8 @@
                 afterReadAggregate(vm, colIndex, values);
 
                 // clear the causes
-                agg.updateCauses = [];
-                agg.updateStartTime = -1;
+                agg.reloadCauses = [];
+                agg.reloadStartTime = -1;
 
                 return defer.resolve(true);
             }).catch(function (err) {
@@ -419,7 +421,7 @@
 
             var logParams = vm.logObject ? vm.logObject : {};
 
-            var hasCauses = Array.isArray(vm.updateCauses) && vm.updateCauses.length > 0;
+            var hasCauses = Array.isArray(vm.reloadCauses) && vm.reloadCauses.length > 0;
             var act = hasCauses ? logService.logActions.RELOAD : logService.logActions.LOAD;
 
             // fix the action for add pure and binary popup (the check could be based on getDisabledTuples as well)
@@ -427,9 +429,9 @@
                 act = hasCauses ? logService.logActions.RELOAD_DOMAIN : logService.logActions.LOAD_DOMAIN;
             }
 
-            // add updateCauses
+            // add reloadCauses
             if (hasCauses) {
-                logParams.stack = logService.addCausesToStack(getTableLogStack(vm), vm.updateCauses, vm.updateStartTime);
+                logParams.stack = logService.addCausesToStack(getTableLogStack(vm), vm.reloadCauses, vm.reloadStartTime);
             } else {
                 logParams.stack = getTableLogStack(vm);
             }
@@ -437,7 +439,7 @@
             // create the action
             logParams.action = getTableLogAction(vm, act);
 
-            (function (current, requestCauses, updateStartTime) {
+            (function (current, requestCauses, reloadStartTime) {
                 vm.reference.read(vm.pageLimit, logParams).then(function (page) {
                     if (current !== vm.flowControlObject.counter) {
                         defer.resolve(false);
@@ -450,7 +452,7 @@
                     vm.aggregateResults = new Array(vm.page.tuples.length);
                     vm.pendingRowValues = {};
 
-                    return vm.getDisabledTuples ? vm.getDisabledTuples(vm, requestCauses, updateStartTime) : '';
+                    return vm.getDisabledTuples ? vm.getDisabledTuples(vm, requestCauses, reloadStartTime) : '';
                 }).then(function (rows) {
                     if (current !== vm.flowControlObject.counter) {
                         defer.resolve(false);
@@ -515,9 +517,9 @@
                     vm.aggregateModels.forEach(function (agg, i) {
                         if (vm.page.tuples.length > 0) {
                             agg.processed = false;
-                            agg.updateCauses = requestCauses;
-                            if (!Number.isInteger(agg.updateStartTime) || agg.updateStartTime === -1) {
-                                agg.updateStartTime = ERMrest.getElapsedTime();
+                            agg.reloadCauses = requestCauses;
+                            if (!Number.isInteger(agg.reloadStartTime) || agg.reloadStartTime === -1) {
+                                agg.reloadStartTime = ERMrest.getElapsedTime();
                             }
 
                         } else {
@@ -535,8 +537,8 @@
                     });
 
                     // empty the causes since now we're showing the value.
-                    vm.updateCauses = [];
-                    vm.updateStartTime = -1;
+                    vm.reloadCauses = [];
+                    vm.reloadStartTime = -1;
 
                     defer.resolve(true);
                 }).catch(function(err) {
@@ -555,7 +557,7 @@
 
                 // clear logObject since it was used just for the first request
                 vm.logObject = {}
-            }) (counterer, vm.updateCauses, vm.updateStartTime);
+            }) (counterer, vm.reloadCauses, vm.reloadStartTime);
             return defer.promise;
         }
 
@@ -618,11 +620,11 @@
                  return defer.promise;
              }
 
-             var hasCauses = Array.isArray(vm.countUpdateCauses) && vm.countUpdateCauses.length > 0;
+             var hasCauses = Array.isArray(vm._recountCauses) && vm._recountCauses.length > 0;
              var action = hasCauses ? logService.logActions.RECOUNT : logService.logActions.COUNT;
              var stack = getTableLogStack(vm);
              if (hasCauses) {
-                 stack = logService.addCausesToStack(stack, vm.countUpdateCauses, vm.countUpdateStartTime);
+                 stack = logService.addCausesToStack(stack, vm._recountCauses, vm._recountStartTime);
              }
              vm.reference.getAggregates(
                  aggList,
@@ -637,8 +639,8 @@
 
                  vm.totalRowsCnt = response[0];
 
-                 vm.countUpdateCauses = [];
-                 vm.countUpdateStartTime = -1;
+                 vm._recountCauses = [];
+                 vm._recountStartTime = -1;
 
                  defer.resolve(true);
              }).catch(function (err) {
@@ -711,11 +713,11 @@
                     }
 
                     if (fm.isOpen) {
-                        if (!Number.isInteger(fm.updateStartTime) || fm.updateStartTime === -1) {
-                            fm.updateStartTime = ERMrest.getElapsedTime();
+                        if (!Number.isInteger(fm.reloadStartTime) || fm.reloadStartTime === -1) {
+                            fm.reloadStartTime = ERMrest.getElapsedTime();
                         }
-                        if (cause && fm.updateCauses.indexOf(cause) === -1) {
-                            fm.updateCauses.push(cause);
+                        if (cause && fm.reloadCauses.indexOf(cause) === -1) {
+                            fm.reloadCauses.push(cause);
                         }
 
                         fm.processed = false;
@@ -728,20 +730,20 @@
             }
 
             if (updateResult) {
-                if (!Number.isInteger(vm.updateStartTime) || vm.updateStartTime === -1) {
-                    vm.updateStartTime = ERMrest.getElapsedTime();
+                if (!Number.isInteger(vm.reloadStartTime) || vm.reloadStartTime === -1) {
+                    vm.reloadStartTime = ERMrest.getElapsedTime();
                 }
-                if (cause && vm.updateCauses.indexOf(cause) === -1) {
-                    vm.updateCauses.push(cause);
+                if (cause && vm.reloadCauses.indexOf(cause) === -1) {
+                    vm.reloadCauses.push(cause);
                 }
             }
 
             if (updateCount) {
-                if (!Number.isInteger(vm.countUpdateStartTime) || vm.countUpdateStartTime === -1) {
-                    vm.countUpdateStartTime = ERMrest.getElapsedTime();
+                if (!Number.isInteger(vm._recountStartTime) || vm._recountStartTime === -1) {
+                    vm._recountStartTime = ERMrest.getElapsedTime();
                 }
-                if (cause && vm.countUpdateCauses.indexOf(cause) === -1) {
-                    vm.countUpdateCauses.push(cause);
+                if (cause && vm._recountCauses.indexOf(cause) === -1) {
+                    vm._recountCauses.push(cause);
                 }
             }
 
@@ -873,8 +875,8 @@
                     vm.aggregateModels.push({
                         model: agg, // the api that ermrestjs returns (has .objects and .column)
                         processed: true, // whether we should get the data or not
-                        updateCauses: [], // why the request is being sent to the server (might be empty)
-                        updateStartTime: -1 // when the page became dirty
+                        reloadCauses: [], // why the request is being sent to the server (might be empty)
+                        reloadStartTime: -1 // when the page became dirty
                     });
                 })
             }
@@ -886,10 +888,10 @@
                 vm.sortOrder = (location.sortObject[0].descending ? "desc" : "asc");
             }
 
-            vm.updateCauses = [];
-            vm.countUpdateCauses = [];
-            vm.updateStartTime = -1;
-            vm.countUpdateStartTime = -1;
+            vm.reloadCauses = [];
+            vm._recountCauses = [];
+            vm.reloadStartTime = -1;
+            vm._recountStartTime = -1;
         }
 
         /**
@@ -998,7 +1000,7 @@
                         },
                         scope.vm.reference.defaultLogInfo
                     );
-                    update(scope.vm, true, false, false, false, logService.updateCauses.SORT);
+                    update(scope.vm, true, false, false, false, logService.reloadCauses.SORT);
                 }
             };
 
@@ -1028,7 +1030,7 @@
                         scope.vm.reference.defaultLogInfo
                     );
 
-                    update(scope.vm, true, false, false, false, logService.updateCauses.PAGE_PREV);
+                    update(scope.vm, true, false, false, false, logService.reloadCauses.PAGE_PREV);
                 }
             };
 
@@ -1046,7 +1048,7 @@
                         scope.vm.reference.defaultLogInfo
                     );
 
-                    update(scope.vm, true, false, false, false, logService.updateCauses.PAGE_NEXT);
+                    update(scope.vm, true, false, false, false, logService.reloadCauses.PAGE_NEXT);
                 }
 
             };
@@ -1253,7 +1255,7 @@
                          stack: getTableLogStack(scope.vm, null, extraInfo)
                      }, scope.vm.reference.defaultLogInfo);
 
-                     update(scope.vm, true, true, true, false, logService.updateCauses.SEARCH_BOX);
+                     update(scope.vm, true, true, true, false, logService.reloadCauses.SEARCH_BOX);
                  }
             };
 
@@ -1315,7 +1317,7 @@
                     updated = false;
 
                     scope.vm.lastActiveFacet = -1;
-                    var cause = completed ? logService.updateCauses.ENTITY_CREATE : logService.updateCauses.ENTITY_UPDATE;
+                    var cause = completed ? logService.reloadCauses.ENTITY_CREATE : logService.reloadCauses.ENTITY_UPDATE;
                     update(scope.vm, true, true, true, false, cause);
                 }
 
@@ -1328,10 +1330,10 @@
             };
 
             // listen to facet change
-            angular.forEach([logService.updateCauses.CLEAR_ALL, logService.updateCauses.FACET_MODIFIED,
-                            logService.updateCauses.FACET_SELECT, logService.updateCauses.FACET_DESELECT,
-                            logService.updateCauses.FACET_CLEAR, logService.updateCauses.CLEAR_CFACET,
-                            logService.updateCauses.CLEAR_CUSTOM_FILTER], function (evMessage) {
+            angular.forEach([logService.reloadCauses.CLEAR_ALL, logService.reloadCauses.FACET_MODIFIED,
+                            logService.reloadCauses.FACET_SELECT, logService.reloadCauses.FACET_DESELECT,
+                            logService.reloadCauses.FACET_CLEAR, logService.reloadCauses.CLEAR_CFACET,
+                            logService.reloadCauses.CLEAR_CUSTOM_FILTER], function (evMessage) {
                 scope.$on(evMessage, function ($event) {
                     $log.debug("-----------------------------");
                     $log.debug('counter', scope.vm.flowControlObject.counter, ': ' + evMessage + ' in recordset directive');
@@ -1344,7 +1346,7 @@
                 $log.debug('counter', scope.vm.flowControlObject.counter, ': record-deleted in recordset directive');
                 scope.vm.lastActiveFacet = -1;
 
-                update(scope.vm, true, true, true, false, logService.updateCauses.ENTITY_DELETE);
+                update(scope.vm, true, true, true, false, logService.reloadCauses.ENTITY_DELETE);
             });
 
             scope.$watch(function () {
@@ -1534,7 +1536,7 @@
                         scope.vm.reference.defaultLogInfo
                     );
 
-                    recordTableUtils.update(scope.vm, true, false, false, false, logService.updateCauses.PAGE_LIMIT);
+                    recordTableUtils.update(scope.vm, true, false, false, false, logService.reloadCauses.PAGE_LIMIT);
                 };
 
                 scope.pageSizeDropdownToggle = function (open) {

@@ -449,7 +449,7 @@
         $scope.$on('record-deleted', function (event, args) {
             var isInline = args.displayMode === recordsetDisplayModes.inline;
             recordAppUtils.updateRecordPage(true, "", [{
-                cause: isInline ? logService.updateCauses.RELATED_INLINE_DELETE : logService.updateCauses.RELATED_DELETE,
+                cause: isInline ? logService.reloadCauses.RELATED_INLINE_DELETE : logService.reloadCauses.RELATED_DELETE,
                 isInline: isInline,
                 index: args.containerIndex
             }]);
@@ -464,7 +464,7 @@
         var onfocusEventCall = function(changedContainerDetails) {
             if ($rootScope.loading !== false) return;
 
-            var uc = logService.updateCauses, id, cookie;
+            var uc = logService.reloadCauses, id, cookie;
 
             // where in the page has been changed
             var changedContainers = [];

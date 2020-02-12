@@ -351,7 +351,7 @@
              * @param  {Array} requestCauses array of string that indicates why the request is fired
              * @return {Promise} Promise is resolved with a list of disabled rows (array of tuple objects).
              */
-            params.getDisabledTuples = function (tableModel, requestCauses, updateStartTime) {
+            params.getDisabledTuples = function (tableModel, requestCauses, reloadStartTime) {
                 var defer = $q.defer();
                 var page = tableModel.page, pageSize = tableModel.pageLimit;
 
@@ -360,7 +360,7 @@
                 var action = logService.logActions.LOAD;
                 if (Array.isArray(requestCauses) && requestCauses.length > 0) {
                     action = logService.logActions.RELOAD;
-                    newStack = logService.addCausesToStack(tableModel.logStack, requestCauses, updateStartTime);
+                    newStack = logService.addCausesToStack(tableModel.logStack, requestCauses, reloadStartTime);
                 }
                 var logObj = {
                     action: logService.getActionString(action, tableModel.logStackPath),

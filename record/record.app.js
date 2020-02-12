@@ -115,7 +115,7 @@
                         $rootScope.reference.filterLogInfo
                     )
                 ];
-                $rootScope.updateCauses = [];
+                $rootScope.reloadCauses = [];
 
                 return recordAppUtils.readMainEntity(false, logObj);
             }).then(function (page) {
@@ -161,7 +161,7 @@
                                     { source: col.compressedDataSource, entity: col.isEntityMode, agg: col.aggregateFn}
                                 )
                             ),
-                            updateCauses: []
+                            reloadCauses: []
                         };
                         $rootScope.hasAggregate = true;
                     }

@@ -2376,6 +2376,7 @@
             FOREIGN_KEY_POPUP: "fk-picker",
             FACET_POPUP: "facet-picker",
             // these two have been added to the tables that recordedit is showing
+            //(but not used in logs technically since we're not showing any controls he)
             RESULT_SUCCESFUL_SET: "result-successful-set",
             RESULT_FAILED_SET: "result-failed-set"
         });
@@ -2387,7 +2388,8 @@
             CREATE_PRESELECT: "create-preselect"
         });
 
-        var updateCauses = Object.freeze({
+        // why we had to reload a request
+        var reloadCauses = Object.freeze({
             CLEAR_ALL: "clear-all", // clear all button
             CLEAR_CFACET: "clear-cfacet",
             CLEAR_CUSTOM_FILTER: "clear-custom-filter",
@@ -2451,9 +2453,9 @@
          * If childStackElement passed, it will append it to the existing logStack of the app.
          * @param {Object} childStackElement
          */
-        function getStackObject(childStackElement) {
-            if (childStackElement) {
-                return $rootScope.logStack.concat(childStackElement);
+        function getStackObject(childStackNode) {
+            if (childStackNode) {
+                return $rootScope.logStack.concat(childStackNode);
             }
             return $rootScope.logStack;
         }
@@ -2571,7 +2573,7 @@
             logStackTypes: logStackTypes,
             logStackPaths: logStackPaths,
             logActions: logActions,
-            updateCauses: updateCauses,
+            reloadCauses: reloadCauses,
             logClientAction: logClientAction,
             getActionString: getActionString,
             getStackNode: getStackNode,
@@ -2580,7 +2582,7 @@
             getStackPath: getStackPath,
             getStackObject: getStackObject,
             addExtraInfoToStack: addExtraInfoToStack
-        }
+        };
     }])
 
     .service('headInjector', ['ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', 'MathUtils', 'modalUtils', '$q', '$rootScope', 'UriUtils', '$window', function(ConfigUtils, ERMrest, Errors, ErrorService, MathUtils, modalUtils, $q, $rootScope, UriUtils, $window) {

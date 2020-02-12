@@ -99,9 +99,9 @@
             logObj.action = logService.getActionString(action);
             logObj.stack = logService.getStackObject();
 
-            var causes = (Array.isArray($rootScope.updateCauses) && $rootScope.updateCauses.length > 0) ? $rootScope.updateCauses : [];
+            var causes = (Array.isArray($rootScope.reloadCauses) && $rootScope.reloadCauses.length > 0) ? $rootScope.reloadCauses : [];
             if (causes.length > 0) {
-                logObj.stack = logService.addCausesToStack(logObj.stack, causes, $rootScope.updateStartTime);
+                logObj.stack = logService.addCausesToStack(logObj.stack, causes, $rootScope.reloadStartTime);
             }
             $rootScope.reference.read(1, logObj).then(function (page) {
                 $log.info("Page: ", page);
@@ -137,8 +137,8 @@
 
                 $rootScope.displayReady = true;
 
-                $rootScope.updateCauses = [];
-                $rootScope.updateStartTime = -1;
+                $rootScope.reloadCauses = [];
+                $rootScope.reloadStartTime = -1;
 
                 defer.resolve(page);
             }).catch(function (err) {
@@ -209,15 +209,19 @@
             return defer.promise;
         }
 
-
-        function addCauseToModel(obj, cause) {
+        /**
+         * Given an object and cause string, will add it to the list of reloadCauses of the object.
+         * It will also take care of adding reloadStartTime if it's necessary.
+         * reloadStartTime captures the time that the model becomes dirty.
+         */
+        function _addCauseToModel(obj, cause) {
             // the time that will be logged with the request
-            if (!Number.isInteger(obj.updateStartTime) || obj.updateStartTime === -1) {
-                obj.updateStartTime = ERMrest.getElapsedTime();
+            if (!Number.isInteger(obj.reloadStartTime) || obj.reloadStartTime === -1) {
+                obj.reloadStartTime = ERMrest.getElapsedTime();
             }
 
-            if (cause && obj.updateCauses.indexOf(cause) === -1) {
-                obj.updateCauses.push(cause);
+            if (cause && obj.reloadCauses.indexOf(cause) === -1) {
+                obj.reloadCauses.push(cause);
             }
         }
 
@@ -239,7 +243,7 @@
                 // we want to update the main entity on update
                 $rootScope.isMainDirty = true;
 
-                addCauseToModel($rootScope, cause);
+                _addCauseToModel($rootScope, cause);
             }
             $rootScope.recordFlowControl.counter++;
 
@@ -250,18 +254,18 @@
                 } else if (m.isInline) {
                     m.tableModel.dirtyResult = true;
 
-                    addCauseToModel(m.tableModel, cause);
+                    _addCauseToModel(m.tableModel, cause);
                 }
             });
 
             $rootScope.relatedTableModels.forEach(function (m) {
                 m.tableModel.dirtyResult = true;
-                addCauseToModel(m.tableModel, cause);
+                _addCauseToModel(m.tableModel, cause);
             });
 
 
             // update the cause list
-            var uc = logService.updateCauses;
+            var uc = logService.reloadCauses;
             var selfCause = {};
             selfCause[uc.RELATED_CREATE] = selfCause[uc.RELATED_INLINE_CREATE] = uc.ENTITY_CREATE;
             selfCause[uc.RELATED_DELETE] = selfCause[uc.RELATED_INLINE_DELETE] = uc.ENTITY_DELETE;
@@ -271,7 +275,7 @@
                     var c;
 
                     // add it to main causes
-                    addCauseToModel($rootScope, container.cause);
+                    _addCauseToModel($rootScope, container.cause);
 
                     // add it to inline related
                     $rootScope.columnModels.forEach(function (m, index) {
@@ -282,7 +286,7 @@
                             c = selfCause[c];
                         }
 
-                        addCauseToModel(m.tableModel, c);
+                        _addCauseToModel(m.tableModel, c);
                     });
 
                     // add it to related
@@ -292,7 +296,7 @@
                             c = selfCause[c];
                         }
 
-                        addCauseToModel(m.tableModel, c);
+                        _addCauseToModel(m.tableModel, c);
                     });
                 });
             }
@@ -376,8 +380,8 @@
                 },
                 logStack: logService.getStackObject(stackNode),
                 logStackPath: logStackPath,
-                updateCauses: [], // might not be needed
-                updateStartTime: -1,
+                reloadCauses: [], // might not be needed
+                reloadStartTime: -1,
                 flowControlObject: $rootScope.recordFlowControl,
                 queryTimeoutTooltip: messageMap.queryTimeoutTooltip
             };

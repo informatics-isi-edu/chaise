@@ -89,9 +89,12 @@
                             updateFacet: childCtrl.updateFacet,
                             preProcessFacet: childCtrl.preProcessFacet,
                             recordsetConfig: $scope.vm.config,
-                            updateCauses: [],
-                            updateStartTime: -1,
+                            reloadCauses: [], // why the reload request is being sent to the server (might be empty)
+                            reloadStartTime: -1, //when the facet became dirty
+                            // I could capture the whole logStack,
+                            // but only did logStackNode so I can call the recordTableUtils.getTableLogStack with it.
                             logStackNode: facetLogStackNode,
+                            // instead of just logStackPath, we're capturing parent so it can be used in facet and facet picker.
                             parentLogStackPath: $scope.vm.logStackPath ? $scope.vm.logStackPath : logService.logStackPaths.SET
                         };
 
@@ -120,10 +123,10 @@
                         fm.isLoading = true;
                         $log.debug("faceting: sending a request to update the facet index=" + index);
 
-                        if (!Number.isInteger(fm.updateStartTime) || fm.updateStartTime === -1) {
-                            fm.updateStartTime = ERMrest.getElapsedTime();
-                            if (cause && fm.updateCauses.indexOf(cause) === -1) {
-                                fm.updateCauses.push(cause);
+                        if (!Number.isInteger(fm.reloadStartTime) || fm.reloadStartTime === -1) {
+                            fm.reloadStartTime = ERMrest.getElapsedTime();
+                            if (cause && fm.reloadCauses.indexOf(cause) === -1) {
+                                fm.reloadCauses.push(cause);
                             }
                         }
 
@@ -183,22 +186,22 @@
                     };
 
                     scope.removeFilter = function (index) {
-                        var newRef, reason = logService.updateCauses.FACET_CLEAR, action = "";
+                        var newRef, reason = logService.reloadCauses.FACET_CLEAR, action = "";
                         if (index === "filters") {
                             // only remove custom filters on the reference (not the facet)
                             // TODO LOG should we log this?
                             newRef = scope.vm.reference.removeAllFacetFilters(false, true, true);
                             action = logService.logActions.BREADCRUMB_CLEAR_CUSTOM;
-                            reason = logService.updateCauses.CLEAR_CUSTOM_FILTER;
+                            reason = logService.reloadCauses.CLEAR_CUSTOM_FILTER;
                         } else if (index === "cfacets") {
                             // only remove custom facets on the reference
                             // TODO LOG should we log this?
                             newRef = scope.vm.reference.removeAllFacetFilters(true, false, true);
                             action = logService.logActions.BREADCRUMB_CLEAR_CFACET;
-                            reason = logService.updateCauses.CLEAR_CFACET;
+                            reason = logService.reloadCauses.CLEAR_CFACET;
                         } else if (typeof index === 'undefined') {
                             // // delete all filters and facets
-                            reason = logService.updateCauses.CLEAR_ALL;
+                            reason = logService.reloadCauses.CLEAR_ALL;
                             action = logService.logActions.BREADCRUMB_CLEAR_ALL;
                             newRef = scope.vm.reference.removeAllFacetFilters();
                             scope.vm.facetModels.forEach(function (fm) {
@@ -452,7 +455,7 @@
                     // callback for the list directive
                     scope.onSelect = function (row, $event) {
                         var res, i;
-                        var cause = row.selected ? logService.updateCauses.FACET_SELECT : logService.updateCauses.FACET_DESELECT;
+                        var cause = row.selected ? logService.reloadCauses.FACET_SELECT : logService.reloadCauses.FACET_DESELECT;
 
                         // if the selected row is null
                         if (row.isNotNull) {
@@ -519,7 +522,7 @@
                             return; // duplicate filter
                         }
 
-                        if (!scope.parentCtrl.updateVMReference(res.reference, scope.index, logService.updateCauses.FACET_SELECT)) {
+                        if (!scope.parentCtrl.updateVMReference(res.reference, scope.index, logService.reloadCauses.FACET_SELECT)) {
                             $log.debug("faceting: rejected because of url length limit.");
                             return; // uri limit
                         }
@@ -684,7 +687,7 @@
                         };
                     }
 
-                    function histogramData(updateCauses, updateStartTime) {
+                    function histogramData(reloadCauses, reloadStartTime) {
                         var defer = $q.defer();
 
                         (function (uri) {
@@ -693,11 +696,11 @@
 
                             var facetLog = getDefaultLogInfo(scope);
                             var action = logService.logActions.FACET_HISTOGRAM_LOAD;
-                            if (updateCauses.length > 0) {
+                            if (reloadCauses.length > 0) {
                                 action = logService.logActions.FACET_HISTOGRAM_RELOAD;
 
                                 // add causes
-                                facetLog.stack = logService.addCausesToStack(facetLog.stack, updateCauses, updateStartTime);
+                                facetLog.stack = logService.addCausesToStack(facetLog.stack, reloadCauses, reloadStartTime);
                             }
 
                             facetLog.action = scope.parentCtrl.getFacetLogAction(scope.index, action);
@@ -749,7 +752,7 @@
                     scope.updateFacetData = function () {
                         var defer = $q.defer();
 
-                        (function (uri, updateCauses, updateStartTime) {
+                        (function (uri, reloadCauses, reloadStartTime) {
                             if (!scope.relayout) {
                                 // the captured uri is not the same as the initial data uri so we need to refetch the min/max
                                 // this happens when another facet adds a filter that affects the facett object in the uri
@@ -761,10 +764,10 @@
 
                                 var facetLog = getDefaultLogInfo(scope);
                                 var action = logService.logActions.FACET_RANGE_LOAD;
-                                if (scope.facetModel.updateCauses.length > 0) {
+                                if (scope.facetModel.reloadCauses.length > 0) {
                                     action = logService.logActions.FACET_RANGE_RELOAD;
                                     // add causes
-                                    facetLog.stack = logService.addCausesToStack(facetLog.stack, scope.facetModel.updateCauses, scope.facetModel.updateStartTime);
+                                    facetLog.stack = logService.addCausesToStack(facetLog.stack, scope.facetModel.reloadCauses, scope.facetModel.reloadStartTime);
                                 }
                                 facetLog.action = scope.parentCtrl.getFacetLogAction(scope.index, action);
                                 scope.facetColumn.sourceReference.getAggregates(aggregateList, facetLog).then(function(response) {
@@ -787,24 +790,24 @@
                                     scope.histogramDataStack = [];
 
                                     // get initial histogram data
-                                    return histogramData(updateCauses, updateStartTime);
+                                    return histogramData(reloadCauses, reloadStartTime);
                                 }).then(function (response) {
 
-                                    scope.facetModel.updateCauses = [];
-                                    scope.facetModel.updateStartTime = -1;
+                                    scope.facetModel.reloadCauses = [];
+                                    scope.facetModel.reloadStartTime = -1;
 
                                     defer.resolve(response);
                                 }).catch(function (err) {
                                     defer.reject(err);
                                 });
                             } else {
-                                histogramData(updateCauses, updateStartTime).then(function (response) {
+                                histogramData(reloadCauses, reloadStartTime).then(function (response) {
                                     defer.resolve(response);
                                 }).catch(function (err) {
                                     defer.reject(err);
                                 });
                             }
-                        })(scope.facetColumn.sourceReference.uri, scope.facetModel.updateCauses, scope.facetModel.updateStartTime);
+                        })(scope.facetColumn.sourceReference.uri, scope.facetModel.reloadCauses, scope.facetModel.reloadStartTime);
 
                         // // so we can check if the getAggregates request needs to be remade or we can just call histogramData
                         // scope.initialDataUri = scope.facetColumn.sourceReference.uri;
@@ -836,7 +839,7 @@
                         setRangeMinMax(scope.plot.data[0].x[minBinIndex], scope.plot.data[0].x[maxBinIndex]);
 
                         scope.relayout = true;
-                        scope.parentCtrl.updateFacetColumn(scope.index, logService.updateCauses.FACET_PLOT_RELAYOUT);
+                        scope.parentCtrl.updateFacetColumn(scope.index, logService.reloadCauses.FACET_PLOT_RELAYOUT);
                     };
 
                     // disable zoom in ifhistogram has been zoomed 20+ times or the current range is <= the number of buckets
@@ -957,7 +960,7 @@
                                         }
                                     }
 
-                                    scope.parentCtrl.updateFacetColumn(scope.index, logService.updateCauses.FACET_PLOT_RELAYOUT);
+                                    scope.parentCtrl.updateFacetColumn(scope.index, logService.reloadCauses.FACET_PLOT_RELAYOUT);
                                 });
                             } catch (err) {
                                 setRangeVars();
@@ -1152,10 +1155,10 @@
 
                     // create the action
                     var action = logService.logActions.FACET_CHOICE_LOAD;
-                    if (scope.facetModel.updateCauses.length > 0) {
+                    if (scope.facetModel.reloadCauses.length > 0) {
                         action = logService.logActions.FACET_CHOICE_RELOAD;
                         // add causes
-                        facetLog.stack = logService.addCausesToStack(facetLog.stack, scope.facetModel.updateCauses, scope.facetModel.updateStartTime);
+                        facetLog.stack = logService.addCausesToStack(facetLog.stack, scope.facetModel.reloadCauses, scope.facetModel.reloadStartTime);
                     }
                     facetLog.action = scope.parentCtrl.getFacetLogAction(scope.index, action);
 
@@ -1210,8 +1213,8 @@
                             });
                         });
 
-                        scope.facetModel.updateCauses = [];
-                        scope.facetModel.updateStartTime = -1;
+                        scope.facetModel.reloadCauses = [];
+                        scope.facetModel.reloadStartTime = -1;
 
                         defer.resolve(true);
 
@@ -1256,7 +1259,7 @@
                         ref = scope.facetColumn.addNotNullFilter();
 
                         // update the reference
-                        if (!scope.parentCtrl.updateVMReference(ref, -1, logService.updateCauses.FACET_MODIFIED, !changeRef)) {
+                        if (!scope.parentCtrl.updateVMReference(ref, -1, logService.reloadCauses.FACET_MODIFIED, !changeRef)) {
                             return false;
                         }
 
@@ -1277,7 +1280,7 @@
                         ref = scope.facetColumn.replaceAllChoiceFilters(filters);
 
                         // update the reference
-                        if (!scope.parentCtrl.updateVMReference(ref, -1, logService.updateCauses.FACET_MODIFIED, !changeRef)) {
+                        if (!scope.parentCtrl.updateVMReference(ref, -1, logService.reloadCauses.FACET_MODIFIED, !changeRef)) {
                             return false;
                         }
 
@@ -1467,7 +1470,7 @@
 
                     // for clicking on each row (will be registerd as a callback for list directive)
                     scope.onRowClick = function(row, $event) {
-                        var cause = row.selected ? logService.updateCauses.FACET_SELECT : logService.updateCauses.FACET_DESELECT;
+                        var cause = row.selected ? logService.reloadCauses.FACET_SELECT : logService.reloadCauses.FACET_DESELECT;
 
                         // get the new reference based on the operation
                         var ref;
@@ -1536,7 +1539,7 @@
                     scope.retryQuery = function (noConstraints) {
                         scope.facetModel.noConstraints = noConstraints;
 
-                        parentCtrl.updateFacetColumn(scope.index, logService.updateCauses.FACET_RETRY);
+                        parentCtrl.updateFacetColumn(scope.index, logService.reloadCauses.FACET_RETRY);
                     }
 
                     scope.search = function (term, action) {
@@ -1553,7 +1556,7 @@
                             }, scope.facetColumn.sourceReference.defaultLogInfo);
 
                             $log.debug("faceting: request for facet (index=" + scope.facetColumn.index + ") update. new search=" + term);
-                            scope.parentCtrl.updateFacetColumn(scope.index, logService.updateCauses.FACET_SEARCH_BOX);
+                            scope.parentCtrl.updateFacetColumn(scope.index, logService.reloadCauses.FACET_SEARCH_BOX);
                         }
                     };
 
@@ -1667,7 +1670,7 @@
                     };
 
                     scope.onRowClick = function (row, $event) {
-                        var cause = row.selected ? logService.updateCauses.FACET_SELECT : logService.updateCauses.FACET_DESELECT;
+                        var cause = row.selected ? logService.reloadCauses.FACET_SELECT : logService.reloadCauses.FACET_DESELECT;
 
                         var ref;
                         if (row.isNotNull) {

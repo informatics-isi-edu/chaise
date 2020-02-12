@@ -225,6 +225,7 @@
 
         var logStack = {};
         if (params.logStack) {
+            // add the picker indication to the stack
             logStack = logService.addExtraInfoToStack(params.logStack, {picker: 1});
         }
 
