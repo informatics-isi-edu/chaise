@@ -294,8 +294,8 @@
         }
     }])
 
-    .directive('inputSwitch', ['ConfigUtils', 'dataFormats', 'InputUtils', 'integerLimits', 'maskOptions', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'UriUtils', '$log', '$rootScope',
-                function(ConfigUtils, dataFormats, InputUtils, integerLimits, maskOptions, modalBox, modalUtils, recordsetDisplayModes, UriUtils, $log, $rootScope) {
+    .directive('inputSwitch', ['ConfigUtils', 'dataFormats', 'InputUtils', 'integerLimits', 'logService', 'maskOptions', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'UriUtils', '$log', '$rootScope',
+                function(ConfigUtils, dataFormats, InputUtils, integerLimits, logService, maskOptions, modalBox, modalUtils, recordsetDisplayModes, UriUtils, $log, $rootScope) {
         return {
             restrict: 'E',
             templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/inputs/inputSwitch.html',
@@ -374,11 +374,14 @@
                     //   - second parameter is data for the linked table to complete the row name that is currently displayed in input
                     params.reference = scope.column.filteredRef({}, {}).contextualize.compactSelect;
                     params.reference.session = $rootScope.session;
-                    params.context = "compact/select";
                     params.selectedRows = [];
                     params.selectMode = modalBox.singleSelectMode;
                     params.showFaceting = true;
                     params.facetPanelOpen = false;
+
+                    // log attributes
+                    params.logStack = scope.columnModel.logStack;
+                    params.logStackPath = logService.getStackPath("", logService.logStackPaths.FOREIGN_KEY_POPUP);
 
                     modalUtils.showModal({
                         animation: false,

@@ -750,7 +750,8 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
                 it ("edit button should not be visible.", function () {
                     expect(currentEl.all(by.css(".edit-action-button")).isPresent()).not.toBeTruthy();
                 });
-            } else if (params.rowViewPaths || params.rowEditPaths) {
+            } else if (params.rowViewPaths) {
+                // only testing the first link (it's a button not a link, so testing all of them would add a lot of test time)
                 it ("clicking on 'edit` button should open a tab to recordedit page.", function (done) {
                     var btn = chaisePage.recordPage.getRelatedTableRowEdit(params.displayname, 0, params.isInline);
 
@@ -761,10 +762,10 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
                         allWindows = handles;
                         return browser.switchTo().window(allWindows[1]);
                     }).then(function() {
-                        var result = '/recordedit/#' + browser.params.catalogId + "/" + params.schemaName + ":" + params.name;
+                        var tableName = (params.isAssociation ? params.relatedName : params.name);
+                        var result = '/recordedit/#' + browser.params.catalogId + "/" + params.schemaName + ":" + tableName;
 
-                        // in case of association edit and view are different
-                        result += "/" + (params.rowEditPaths ? params.rowEditPaths[0] : "RID=" + chaisePage.getEntityRow(params.schemaName, params.name, params.rowViewPaths[0]).RID);
+                        result += "/RID=" + chaisePage.getEntityRow(params.schemaName, tableName, params.rowViewPaths[0]).RID;
 
                         expect(browser.driver.getCurrentUrl()).toContain(result, "expected link missmatch.");
                         browser.close();

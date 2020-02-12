@@ -1206,7 +1206,7 @@ function chaisePage() {
         return browser.executeScript("return window.name;");
     };
     this.getPageId = function() {
-        return browser.executeScript("return window.dcctx.pid");
+        return browser.executeScript("return window.dcctx.contextHeaderParams.pid");
     };
     this.recordsetPageReady = function() {
         return this.waitForElement(element(by.css(".recordset-table")));

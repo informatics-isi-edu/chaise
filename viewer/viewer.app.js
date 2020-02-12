@@ -123,7 +123,7 @@
     }])
 
     // Hydrate values providers and set up iframe
-    .run(['ConfigUtils', 'ERMrest', 'logActions', '$window', 'context', 'image', 'annotations', 'comments', 'anatomies', 'user', 'MathUtils', function runApp(ConfigUtils, ERMrest, logActions, $window, context, image, annotations, comments, anatomies, user, MathUtils) {
+    .run(['ConfigUtils', 'ERMrest', 'logService', '$window', 'context', 'image', 'annotations', 'comments', 'anatomies', 'user', 'MathUtils', '$rootScope', function runApp(ConfigUtils, ERMrest, logService, $window, context, image, annotations, comments, anatomies, user, MathUtils, $rootScope) {
         var origin = $window.location.origin;
         var iframe = $window.frames[0];
         var annotoriousReady = false;
@@ -145,11 +145,24 @@
                 var imagePathColumn = imagePath.context.columns.get('id');
                 var imageFilter = new ERMrest.BinaryPredicate(imagePathColumn, ERMrest.OPERATOR.EQUAL, context.imageID);
 
+                $rootScope.logStackPath = logService.logStackPaths.ENTITY;
+                $rootScope.logStack = [
+                    logService.getStackNode(
+                        logService.logStackTypes.ENTITY,
+                        table,
+                        {
+                            "and": [
+                                {"source": "id", "choices": [context.imageID]}
+                            ]
+                        }
+                    )
+                ];
+
                 var contextHeaderParams = {
                     catalog: context.catalogID,
                     schema_table: context.schemaName + ":" + context.tableName,
-                    filter: "id=" + context.imageID,
-                    action: logActions.viewerMain
+                    action: logService.getActionString(logService.logActions.LOAD),
+                    stack: logService.getStackObject()
                 };
 
                 if (context.queryParams && context.queryParams.ppid) {
@@ -192,8 +205,8 @@
                     var contextHeaderParams = {
                         catalog: context.catalogID,
                         schema_table: context.schemaName + ":annotation",
-                        filter: "id=" + context.imageID,
-                        action: logActions.viewerAnnotation
+                        action: logService.getActionString(logService.logActions.VIEWER_ANNOT_LOAD),
+                        stack: logService.getStackObject()
                     };
                     annotationPath.filter(imageFilter).entity.get(contextHeaderParams).then(function success(_annotations) {
                         var length = _annotations.length;
@@ -217,8 +230,8 @@
                         var contextHeaderParams = {
                             catalog: context.catalogID,
                             schema_table: context.schemaName + ":annotation_comment",
-                            filter: "id=" + context.imageID,
-                            action: logActions.viewerComment
+                            action: logService.getActionString(logService.logActions.VIEWER_ANNOT_COMMENT_LOAD),
+                            stack: logService.getStackObject()
                         };
 
                         // Get all the comments for this image
@@ -251,7 +264,8 @@
                 var contextHeaderParams = {
                     catalog: context.catalogID,
                     schema_table: context.schemaName + ":anatomy",
-                    action: logActions.viewerAnatomy
+                    action: logService.getActionString(logService.logActions.VIEWER_ANATOMY_LOAD),
+                    stack: logService.getStackObject()
                 };
                 anatomyPath.entity.get(contextHeaderParams).then(function success(_anatomies) {
                     anatomies.push('No Anatomy');

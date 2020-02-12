@@ -150,14 +150,14 @@
                                                             <!-- modal popup input -->
                                                             <div ng-switch-when="popup-select" class="chaise-input-group modal-popup">
                                                                 <div class="chaise-input-control has-feedback">
-                                                                    <div id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-display" contenteditable="false" class="popup-select-value" style="cursor: pointer" ng-click="::form.searchPopup(rowIndex, column)" data-placeholder="Select a value" ng-bind-html="form.recordEditModel.rows[rowIndex][column.name]"></div>
+                                                                    <div id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-display" contenteditable="false" class="popup-select-value" style="cursor: pointer" ng-click="::form.searchPopup(rowIndex, column, columnIndex)" data-placeholder="Select a value" ng-bind-html="form.recordEditModel.rows[rowIndex][column.name]"></div>
                                                                     <chaise-clear-input btn-class="foreignkey-remove" click-callback="::form.clearForeignKey(rowIndex, column)" show="form.showRemove(rowIndex, column.name)"></chaise-clear-input>
                                                                 </div>
                                                                 <label class="sr-only"></label>
                                                                 <!-- So that the foreign key input can be validated -->
                                                                 <input type="hidden" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" ng-required="::form.isRequired(columnIndex);" />
                                                                 <span class="chaise-input-group-append">
-                                                                    <button ng-focus="::form.blurElement($event);" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-button" class="chaise-btn chaise-btn-primary modal-popup-btn" type="button" ng-click="::form.searchPopup(rowIndex, column)" tooltip-placement="bottom" uib-tooltip="Select from an existing value.">
+                                                                    <button ng-focus="::form.blurElement($event);" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-button" class="chaise-btn chaise-btn-primary modal-popup-btn" type="button" ng-click="::form.searchPopup(rowIndex, column, columnIndex)" tooltip-placement="bottom" uib-tooltip="Select from an existing value.">
                                                                         <span class="glyphicon glyphicon-chevron-down"></span>
                                                                     </button>
                                                                 </span>

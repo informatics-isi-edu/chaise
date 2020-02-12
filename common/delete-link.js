@@ -22,7 +22,7 @@
 (function() {
     'use strict';
     angular.module('chaise.delete', ['chaise.utils'])
-    .directive('deleteLink', ['ConfigUtils', 'logActions', 'logService', 'modalUtils', 'UriUtils', '$rootScope', function(ConfigUtils, logActions, logService, modalUtils, UriUtils, $rootScope) {
+    .directive('deleteLink', ['ConfigUtils', 'logService', 'modalUtils', 'UriUtils', '$rootScope', function(ConfigUtils, logService, modalUtils, UriUtils, $rootScope) {
         var chaiseConfig = ConfigUtils.getConfigJSON();
         var context = ConfigUtils.getContextJSON();
         var TEMPLATES_PATH = UriUtils.chaiseDeploymentPath() + 'common/templates/delete-link/';
@@ -45,11 +45,10 @@
                         return scope.callback();
                     }
 
-                    var popupHeader = {
-                        action: logActions.deleteIntend
-                    }
-
-                    logService.logClientAction(popupHeader, scope.$root.reference.defaultLogInfo);
+                    logService.logClientAction({
+                        action: logService.getActionString(logService.logActions.DELETE_INTEND),
+                        stack: logService.getStackObject()
+                    }, scope.$root.reference.defaultLogInfo);
 
                     modalUtils.showModal({
                         templateUrl: TEMPLATES_PATH + 'confirm_delete.modal.html',
@@ -60,11 +59,11 @@
                         scope.$root.showSpinner = true;
                         return scope.callback();
                     }, function onError() {
-                        var cancelHeader = {
-                            action: logActions.deleteCancel
-                        }
 
-                        logService.logClientAction(cancelHeader, scope.$root.reference.defaultLogInfo);
+                        logService.logClientAction({
+                            action: logService.getActionString(logService.logActions.DELETE_CANCEL),
+                            stack: logService.getStackObject()
+                        }, scope.$root.reference.defaultLogInfo);
                     }, false);
                 }
             },

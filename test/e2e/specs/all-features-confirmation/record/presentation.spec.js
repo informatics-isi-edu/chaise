@@ -160,10 +160,7 @@ var testParams = {
           rowViewPaths: [[{
               column: "id",
               value: "3005"
-          }]],
-          rowEditPaths: [ // in case of association, edit should naviagte to the association table
-              "accommodation_id=2002&image_id=3005"
-          ],
+          }]]
       },
       {
           title: "a related entity with invalid row markdown pattern",

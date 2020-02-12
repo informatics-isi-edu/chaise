@@ -50,8 +50,8 @@
         }]);
     }])
 
-    .run(['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'FunctionUtils', 'headInjector', 'MathUtils', 'messageMap', 'recordAppUtils', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$timeout', '$window',
-        function runApp(AlertsService, ConfigUtils, DataUtils, ERMrest, FunctionUtils, headInjector, MathUtils, messageMap, recordAppUtils, Session, UiUtils, UriUtils, $log, $rootScope, $timeout, $window) {
+    .run(['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'FunctionUtils', 'headInjector', `logService`, 'MathUtils', 'messageMap', 'recordAppUtils', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$timeout', '$window',
+        function runApp(AlertsService, ConfigUtils, DataUtils, ERMrest, FunctionUtils, headInjector, logService, MathUtils, messageMap, recordAppUtils, Session, UiUtils, UriUtils, $log, $rootScope, $timeout, $window) {
 
         var session,
             errorData = {};
@@ -86,7 +86,7 @@
             // Unsubscribe onchange event to avoid this function getting called again
             Session.unsubscribeOnChange(subId);
 
-            ERMrest.resolve(ermrestUri, { cid: context.cid, pid: context.pid, wid: context.wid }).then(function getReference(reference) {
+            ERMrest.resolve(ermrestUri, ConfigUtils.getContextHeaderParams()).then(function getReference(reference) {
                 context.filter = reference.location.filter;
                 context.facets = reference.location.facets;
 
@@ -98,12 +98,25 @@
                 // $rootScope.reference != reference after contextualization
                 $rootScope.reference = reference.contextualize.detailed;
                 $rootScope.reference.session = session;
+
                 $log.info("Reference: ", $rootScope.reference);
 
                 var logObj = {};
                 if (pcid) logObj.pcid = pcid;
                 if (ppid) logObj.ppid = ppid;
                 if (isQueryParameter) logObj.cqp = 1;
+
+
+                $rootScope.logStackPath = logService.logStackPaths.ENTITY;
+                $rootScope.logStack = [
+                    logService.getStackNode(
+                        logService.logStackTypes.ENTITY,
+                        $rootScope.reference.table,
+                        $rootScope.reference.filterLogInfo
+                    )
+                ];
+                $rootScope.reloadCauses = [];
+
                 return recordAppUtils.readMainEntity(false, logObj);
             }).then(function (page) {
                 var tuple = page.tuples[0];
@@ -140,7 +153,15 @@
                             columnError: false,
                             isLoading: true,
                             isAggregate: true,
-                            dirtyResult: true
+                            dirtyResult: true,
+                            logStack: logService.getStackObject(
+                                logService.getStackNode(
+                                    logService.logStackTypes.PSEUDO_COLUMN,
+                                    col.table,
+                                    { source: col.compressedDataSource, entity: col.isEntityMode, agg: col.aggregateFn}
+                                )
+                            ),
+                            reloadCauses: []
                         };
                         $rootScope.hasAggregate = true;
                     }
@@ -153,7 +174,7 @@
                             isInline: true,
                             isTableDisplay: reference.display.type == 'table',
                             displayname: reference.displayname,
-                            tableModel: recordAppUtils.getTableModel(reference, "compact/brief/inline", $rootScope.tuple, $rootScope.reference)
+                            tableModel: recordAppUtils.getTableModel(reference, index, true)
                         };
                         $rootScope.hasInline = true;
                     }
@@ -177,7 +198,7 @@
                         open: openByDefault,
                         isTableDisplay: ref.display.type == 'table',
                         displayname: ref.displayname,
-                        tableModel: recordAppUtils.getTableModel(ref, "compact/brief", $rootScope.tuple, $rootScope.reference),
+                        tableModel: recordAppUtils.getTableModel(ref, index),
                         baseTableName: $rootScope.reference.displayname
                     });
                 });

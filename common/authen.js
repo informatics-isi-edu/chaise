@@ -3,8 +3,8 @@
 
     angular.module('chaise.authen', ['chaise.utils', 'chaise.storage'])
 
-    .factory('Session', ['ConfigUtils', 'messageMap', 'modalUtils', 'StorageService', 'UriUtils', '$cookies', '$interval', '$log', '$q', '$rootScope', '$sce', '$uibModalStack', '$window',
-        function (ConfigUtils, messageMap, modalUtils, StorageService, UriUtils, $cookies, $interval, $log, $q, $rootScope, $sce, $uibModalStack, $window) {
+    .factory('Session', ['ConfigUtils', 'messageMap', 'logService', 'modalUtils', 'StorageService', 'UriUtils', '$cookies', '$interval', '$log', '$q', '$rootScope', '$sce', '$uibModalStack', '$window',
+        function (ConfigUtils, messageMap, logService, modalUtils, StorageService, UriUtils, $cookies, $interval, $log, $q, $rootScope, $sce, $uibModalStack, $window) {
         // authn API no longer communicates through ermrest, removing the need to check for ermrest location
         var serviceURL = $window.location.origin;
 
@@ -160,7 +160,7 @@
         };
 
 
-        var logInHelper = function(logInTypeCb, win, cb, type, rejectCb){
+        var logInHelper = function(logInTypeCb, win, cb, type, rejectCb, logAction){
             var referrerId = (new Date().getTime());
 
             var url = serviceURL + '/authn/preauth?referrer='+UriUtils.fixedEncodeURIComponent($window.location.origin+"/"+ UriUtils.chaiseDeploymentPath() + "login?referrerid=" + referrerId);
@@ -172,6 +172,15 @@
                 skipHTTP401Handling: true
             };
 
+            // TODO in the case of loginInAModal, we're not doing the actual login,
+            // but we're still sending the request. Since we need to change this anyways,
+            // I decided to not add any log action in that case and instead we should just
+            // fix that function.
+            if (logAction) {
+                config.headers[ERMrest.contextHeaderName] = {
+                    action: logService.getActionString(logAction, "", "")
+                }
+            }
             ConfigUtils.getHTTPService().get(url, config).then(function(response){
                 var data = response.data;
 
@@ -218,7 +227,7 @@
          * uses the reloadCb function to reload the page no matter what after a user logs in
          * creates a race condition with the calback registered for the LoginInAModal function
          */
-        var popupLogin = function () {
+        var popupLogin = function (logAction) {
             var reloadCb = function(){
                 window.location.reload();
             };
@@ -228,7 +237,7 @@
 
             var win = window.open("", '_blank','width=800,height=600,left=' + x + ',top=' + y);
 
-            logInHelper(loginWindowCb, win, reloadCb, 'popUp');
+            logInHelper(loginWindowCb, win, reloadCb, 'popUp', null, logAction);
         };
 
         var shouldReloadPageAfterLogin = function(newSession) {
@@ -250,7 +259,14 @@
              * @param  {string=} context undefined or "401"
              */
             getSession: function(context) {
-                return ConfigUtils.getHTTPService().get(serviceURL + "/authn/session", {skipHTTP401Handling: true}).then(function(response) {
+                var config = {
+                    skipHTTP401Handling: true,
+                    headers: {}
+                };
+                config.headers[ERMrest.contextHeaderName] = {
+                    action: logService.getActionString(logService.logActions.SESSION_RETRIEVE, "", "")
+                }
+                return ConfigUtils.getHTTPService().get(serviceURL + "/authn/session", config).then(function(response) {
                     if (context === "401" && shouldReloadPageAfterLogin(response.data)) {
                         window.location.reload();
                         return response.data;
@@ -273,7 +289,14 @@
              * Meant for validating the server session and verify if it's still active or not
              */
             validateSession: function () {
-                return ConfigUtils.getHTTPService().get(serviceURL + "/authn/session", {skipHTTP401Handling: true}).then(function(response) {
+                var config = {
+                    skipHTTP401Handling: true,
+                    headers: {}
+                };
+                config.headers[ERMrest.contextHeaderName] = {
+                    action: logService.getActionString(logService.logActions.SESSION_VALIDATE, "", "")
+                }
+                return ConfigUtils.getHTTPService().get(serviceURL + "/authn/session", config).then(function(response) {
                     _session = response.data;
                     return _session;
                 }).catch(function(err) {
@@ -319,14 +342,15 @@
             loginInAPopUp: popupLogin,
 
             /**
+             * TODO technically this function should even ask for preauthn in logInHelper
              * This function opens a modal dialog which has a link for login
              * the callback for this function has a race condition because the login link in the modal uses `loginInAPopUp`
              * that function uses the embedded `reloadCb` as the callback for the actual login window closing.
              * these 2 callbacks trigger in the order of `popupCb` first then `modalCb` where modalCb is ignored more often than not
              * @param {Function} notifyErmrestCB - runs after the login process has been complete
              */
-            loginInAModal: function(notifyErmrestCB, notifyErmrestRejectCB) {
-                logInHelper(loginWindowCb, "", notifyErmrestCB, 'modal', notifyErmrestRejectCB);
+            loginInAModal: function(notifyErmrestCB, notifyErmrestRejectCB, logAction) {
+                logInHelper(loginWindowCb, "", notifyErmrestCB, 'modal', notifyErmrestRejectCB, logAction);
             },
 
             logout: function() {
@@ -336,7 +360,14 @@
 
                 url += '?logout_url=' + UriUtils.fixedEncodeURIComponent(logoutURL);
 
-                ConfigUtils.getHTTPService().delete(url, {skipHTTP401Handling: true}).then(function(response) {
+                var config = {
+                    skipHTTP401Handling: true,
+                    headers: {}
+                };
+                config.headers[ERMrest.contextHeaderName] = {
+                    action: logService.getActionString(logService.logActions.LOGOUT_NAVBAR, "", "")
+                }
+                ConfigUtils.getHTTPService().delete(url, config).then(function(response) {
                     StorageService.deleteStorageNamespace(LOCAL_STORAGE_KEY);
                     $window.location = response.data.logout_url;
                 }, function(error) {

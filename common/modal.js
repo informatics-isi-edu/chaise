@@ -81,7 +81,7 @@
             $uibModalInstance.dismiss('cancel');
         }
     }])
-    .controller('ErrorModalController', ['ConfigUtils', 'Errors', 'messageMap', 'params', 'Session', '$rootScope', '$sce', '$uibModalInstance', '$window', function ErrorModalController(ConfigUtils, Errors, messageMap, params, Session, $rootScope, $sce, $uibModalInstance, $window) {
+    .controller('ErrorModalController', ['ConfigUtils', 'Errors', 'logService', 'messageMap', 'params', 'Session', '$rootScope', '$sce', '$uibModalInstance', '$window', function ErrorModalController(ConfigUtils, Errors, logService, messageMap, params, Session, $rootScope, $sce, $uibModalInstance, $window) {
         var cc = ConfigUtils.getConfigJSON();
         function isErmrestErrorNeedReplace (error) {
             switch (error.constructor) {
@@ -171,7 +171,7 @@
         };
 
         vm.login = function () {
-            Session.loginInAPopUp();  //Open login pop-up without closing error modal
+            Session.loginInAPopUp(logService.logActions.LOGIN_ERROR_MODAL);  //Open login pop-up without closing error modal
         };
 
 
@@ -185,12 +185,12 @@
      * - message {String} - the message for the body of the modalBox
      * - subMessage {String} - the sub-message to display under the login button (optional)
      */
-    .controller('LoginDialogController', ['$uibModalInstance', 'params', 'Session', function LoginDialogController($uibModalInstance, params, Session) {
+    .controller('LoginDialogController', ['logService', 'params', 'Session', '$uibModalInstance', function LoginDialogController(logService, params, Session, $uibModalInstance) {
         var vm = this;
         vm.params = params;
 
         vm.openWindow = function() {
-            Session.loginInAPopUp();
+            Session.loginInAPopUp(logService.logActions.LOGIN_LOGIN_MODAL);
         };
 
         vm.cancel = function () {
@@ -206,8 +206,8 @@
      *  - context {String} - the current context that the directive fetches data for
      *  - selectMode {String} - the select mode the modal uses
      */
-    .controller('SearchPopupController', ['ConfigUtils', 'DataUtils', 'params', 'Session', 'modalBox', 'logActions', 'recordsetDisplayModes', '$rootScope', '$timeout', '$uibModalInstance',
-        function SearchPopupController(ConfigUtils, DataUtils, params, Session, modalBox, logActions, recordsetDisplayModes, $rootScope, $timeout, $uibModalInstance) {
+    .controller('SearchPopupController', ['ConfigUtils', 'DataUtils', 'params', 'Session', 'logService', 'modalBox', 'recordsetDisplayModes', '$rootScope', '$timeout', '$uibModalInstance',
+        function SearchPopupController(ConfigUtils, DataUtils, params, Session, logService, modalBox, recordsetDisplayModes, $rootScope, $timeout, $uibModalInstance) {
         var vm = this;
 
         vm.params = params;
@@ -222,6 +222,12 @@
         var reference = vm.reference = params.reference;
         var limit = (!angular.isUndefined(reference) && !angular.isUndefined(reference.display) && reference.display.defaultPageSize) ? reference.display.defaultPageSize : 25;
         var showFaceting = chaiseConfig.showFaceting ? params.showFaceting : false;
+
+        var logStack = {};
+        if (params.logStack) {
+            // add the picker indication to the stack
+            logStack = logService.addExtraInfoToStack(params.logStack, {picker: 1});
+        }
 
         vm.tableModel = {
             readyToInitialize:  true,
@@ -248,11 +254,14 @@
                 hideNotNullChoice:  params.hideNotNullChoice,
                 hideNullChoice:     params.hideNullChoice,
                 displayMode:        params.displayMode ? params.displayMode : recordsetDisplayModes.popup,
-                parentDisplayMode:  params.parentDisplayMode
             },
-            context:                    params.context,
             getDisabledTuples:          params.getDisabledTuples,
-            logObject:                  params.logObject ? params.logObject: {},
+
+            // log related attributes
+            logStack:                  logStack,
+            logStackPath:               params.logStackPath ? params.logStackPath : null,
+
+            // used for the recordset height and sticky section logic
             // TODO different modals should pass different strings (ultimatly it should be the element and not selector)
             parentContainerSelector:    ".search-popup .modal-content",
             parentStickyAreaSelector:   ".search-popup .modal-header",
@@ -307,6 +316,16 @@
         }
 
         function cancel() {
+            if (vm.tableModel.logStackPath && vm.tableModel.logStack) {
+                logService.logClientAction(
+                    {
+                        action: logService.getActionString(logService.logActions.CANCEL, vm.tableModel.logStackPath),
+                        stack: vm.tableModel.logStack
+                    },
+                    vm.tableModel.reference.defaultLogInfo
+                );
+            }
+
             $uibModalInstance.dismiss("cancel");
         }
     }])
@@ -357,10 +376,10 @@
      *   - {Object} citation - citation object returned from ERMrest.tuple.citation
      *
      */
-    .controller('ShareCitationController', ['logActions', 'logService', 'params', '$uibModalInstance', '$window', function (logActions, logService, params, $uibModalInstance, $window) {
+    .controller('ShareCitationController', ['logService', 'params', '$uibModalInstance', '$window', function (logService, params, $uibModalInstance, $window) {
         var vm = this;
         vm.params = params;
-        vm.logActions = logActions;
+        vm.logActions = logService.logActions;
         vm.warningMessage = "The displayed content may be stale due to recent changes made by other users. You may wish to review the changes prior to sharing the <a ng-href='{{ctrl.params.permalink}}'>live link</a> below. Or, you may share the older content using the <a ng-href='{{ctrl.params.versionLink}}'>versioned link</a>.";
 
         vm.moreThanWeek = function () {
@@ -387,11 +406,10 @@
         }
 
         vm.copyToClipboard = function (text, action) {
-            var copyLinkHeader = {
-                action: action
-            }
-
-            logService.logClientAction(copyLinkHeader, params.reference.defaultLogInfo);
+            logService.logClientAction({
+                action: logService.getActionString(action),
+                stack: logService.getStackObject()
+            }, params.reference.defaultLogInfo);
             // Create a dummy input to put the text string into it, select it, then copy it
             // this has to be done because of HTML security and not letting scripts just copy stuff to the clipboard
             // it has to be a user initiated action that is done through the DOM object
@@ -409,12 +427,11 @@
             document.body.removeChild(dummy[0]);
         }
 
-        vm.logCitationDownload = function () {
-            var citationDownloadHeader = {
-                action: logActions.cite
-            }
-
-            logService.logClientAction(citationDownloadHeader, params.reference.defaultLogInfo);
+        vm.logCitationDownload = function (action) {
+            logService.logClientAction({
+                action: logService.getActionString(action),
+                stack: logService.getStackObject()
+            }, params.reference.defaultLogInfo);
         }
 
         vm.closeAlert = function () {

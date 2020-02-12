@@ -3,16 +3,14 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'ErrorService', 'logActions', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordAppUtils', 'recordCreate', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
-        function RecordController(AlertsService, ConfigUtils, DataUtils, ERMrest, ErrorService, logActions, logService, MathUtils, messageMap, modalBox, modalUtils, recordAppUtils, recordCreate, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
+    .controller('RecordController', ['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordAppUtils', 'recordCreate', 'recordsetDisplayModes', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
+        function RecordController(AlertsService, ConfigUtils, DataUtils, ERMrest, ErrorService, logService, MathUtils, messageMap, modalBox, modalUtils, recordAppUtils, recordCreate, recordsetDisplayModes, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
 
         var initialHref = $window.location.href;
         var mainContainerEl = angular.element(document.getElementsByClassName('main-container')[0]);
-        var addRecordRequests = {}; // <generated unique id : reference of related table>
-        var editRecordRequests = {}; // generated id: {schemaName, tableName}
-        var updated = {};
-        var completed = {};
+        var addRecordRequests = {}; /// generated id: {displayMode: "", containerIndex: integer}
+        var editRecordRequests = {}; // generated id: {displayMode: "", containerIndex: integer, completed: boolean}
         var modalUpdate = false;
         vm.alerts = AlertsService.alerts;
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
@@ -37,13 +35,11 @@
         }
 
         vm.toggleSidebar = function() {
-            var action = ($rootScope.recordSidePanOpen ? logActions.tocHide : logActions.tocShow );
-
-            var tocToggleHeader = {
-                action: action
-            }
-
-            logService.logClientAction(tocToggleHeader, $rootScope.reference.defaultLogInfo);
+            var action = ($rootScope.recordSidePanOpen ? logService.logActions.TOC_HIDE : logService.logActions.TOC_SHOW );
+            logService.logClientAction({
+                action: logService.getActionString(action),
+                stack: logService.getStackObject()
+            }, $rootScope.reference.defaultLogInfo);
 
             $rootScope.recordSidePanOpen = !$rootScope.recordSidePanOpen;
         };
@@ -88,7 +84,11 @@
 
         vm.deleteRecord = function() {
             var errorData = {};
-            $rootScope.reference.delete({action: logActions.recordDelete}).then(function deleteSuccess() {
+            var logObj = {
+                action: logService.getActionString(logService.logActions.DELETE),
+                stack: logService.getStackObject()
+            };
+            $rootScope.reference.delete(logObj).then(function deleteSuccess() {
                 // Get an appLink from a reference to the table that the existing reference came from
                 var unfilteredRefAppLink = $rootScope.reference.table.reference.contextualize.compact.appLink;
                 $rootScope.showSpinner = false;
@@ -120,7 +120,8 @@
             params.versionDate = UiUtils.versionDate(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
 
             var snaptimeHeader = {
-                action: logActions.share,
+                action: logService.getActionString(logService.logActions.SHARE_OPEN),
+                stack: logService.getStackObject(),
                 catalog: ref.defaultLogInfo.catalog,
                 schema_table: ref.defaultLogInfo.schema_table
             }
@@ -232,45 +233,21 @@
             var tableModel = dataModel;
             if (dataModel.tableModel) tableModel = dataModel.tableModel;
 
-            var isInline = tableModel.context.indexOf("inline") > -1;
-            var canEdit = vm.canEditRelated(tableModel.reference);
-
-            // action has 3 states for each positional mode:
-            // if seeing table mode, flip to custom (mkdn-display)
-            // else custom mode
-            //    if no edit allowed, flip to table (table-display)
-            //    else edit mode, flip to edit (edit-display)
-            //
-            // then check for 2 positional modes: inline or !inline
-            var action;
-            if (dataModel.isTableDisplay) {
-                action = (isInline ? logActions.inlineMkdnDisplay : logActions.relatedMkdnDisplay);
-            } else {
-                // we see custom mode (mkdn display)
-                if (canEdit) {
-                    action = (isInline ? logActions.inlineEditDisplay : logActions.relatedEditDisplay);
-                } else {
-                    action = (isInline ? logActions.inlineTableDisplay : logActions.relatedTableDisplay);
-                }
-            }
-
-            var toggleDisplayHeader = {
-                action: action
-            }
-
-            logService.logClientAction(toggleDisplayHeader, tableModel.reference.defaultLogInfo);
+            var action = dataModel.isTableDisplay ? logService.logActions.RELATED_DISPLAY_MARKDOWN : logService.logActions.RELATED_DISPLAY_TABLE;
+            logService.logClientAction({
+                action: logService.getActionString(action, tableModel.logStackPath),
+                stack: tableModel.logStack
+            }, tableModel.reference.defaultLogInfo);
 
             dataModel.isTableDisplay = !dataModel.isTableDisplay;
         };
 
         vm.toggleRelatedTables = function() {
-            var action = ($rootScope.showEmptyRelatedTables ? logActions.hideAllRelated : logActions.showAllRelated);
-
-            var toggleAllRelatedTablesHeader = {
-                action: action
-            }
-
-            logService.logClientAction(toggleAllRelatedTablesHeader, $rootScope.reference.defaultLogInfo);
+            var action = ($rootScope.showEmptyRelatedTables ? logService.logActions.EMPTY_RELATED_HIDE : logService.logActions.EMPTY_RELATED_SHOW);
+            logService.logClientAction({
+                action: logService.getActionString(action),
+                stack: logService.getStackObject()
+            }, $rootScope.reference.defaultLogInfo);
 
             $rootScope.showEmptyRelatedTables = !$rootScope.showEmptyRelatedTables;
             // NOTE: there's a case where clicking the button to toggle this doesn't re-paint the footer until the mouse "moves"
@@ -281,13 +258,12 @@
         };
 
         vm.logAccordionClick = function (rtm) {
-            var action = (rtm.open ? logActions.relatedClose : logActions.relatedOpen);
+            var action = (rtm.open ? logService.logActions.CLOSE : logService.logActions.OPEN);
 
-            var toggleRelatedTableHeader = {
-                action: action
-            }
-
-            logService.logClientAction(toggleRelatedTableHeader, rtm.tableModel.reference.defaultLogInfo);
+            logService.logClientAction({
+                action: logService.getActionString(action, rtm.tableModel.logStackPath),
+                stack: rtm.tableModel.logStack
+            }, rtm.tableModel.reference.defaultLogInfo);
         }
 
         vm.canEditRelated = function(ref) {
@@ -310,10 +286,15 @@
         };
 
         // Send user to RecordEdit to create a new row in this related table
-        function onSuccess (){
-            AlertsService.addAlert("Your data has been submitted. Showing you the result set...","success");
-            vm.resultset = true;
-            onfocusEventCall(true);
+        function onSuccess (tableModel){
+            return function () {
+                AlertsService.addAlert("Your data has been submitted. Showing you the result set...","success");
+                vm.resultset = true;
+                onfocusEventCall({
+                    displayMode: tableModel.config.displayMode,
+                    containerIndex: tableModel.config.containerIndex
+                });
+            }
         }
 
         function onModalClose () {
@@ -351,7 +332,7 @@
          * each foreignkeys eventhough they are referring to the same row of data.
          * So instead of multiple reads, we just have to read the parent record once
          * and use that data for all the foreignkeys that can be prefilled.
-         * For this reason, I didn't remove passing of constraintNames for now.
+         * For this reason, I didn't remove passing of fkColumnNames for now.
          *
          * @param  {Object} fk foreignkey object that we want to test
          * @return {boolean} whether it can be prefilled
@@ -413,21 +394,29 @@
             return {
                 rowname: $rootScope.recordDisplayname, // the displayed value in the form
                 origUrl: $rootScope.reference.uri, // used for reading the actual foreign key data
-                constraintNames: prefilledFks, // the foreignkey columns that should be prefileld
+                fkColumnNames: prefilledFks, // the foreignkey columns that should be prefileld
                 keys: keys // raw values of the foreign key columns
             };
         }
 
-        vm.addRelatedRecord = function(ref) {
+        vm.addRelatedRecord = function(tableModel) {
+            var ref = tableModel.reference;
+
             event.preventDefault();
             event.stopPropagation();
             var cookie = getPrefillCookieObject(ref);
 
             if(ref.derivedAssociationReference){
                 recordAppUtils.pauseUpdateRecordPage();
-                recordCreate.addRelatedRecordFact(true, ref, 0, cookie, vm.editMode, vm.formContainer, vm.readyToSubmit, vm.recordsetLink, vm.submissionButtonDisabled, $rootScope.reference, [$rootScope.tuple], $rootScope.session, ConfigUtils.getContextJSON().queryParams, onSuccess, onModalClose);
+                recordCreate.addRelatedRecordFact(true, ref, 0, cookie, vm.editMode, vm.formContainer, vm.readyToSubmit, vm.recordsetLink, vm.submissionButtonDisabled, $rootScope.reference, [$rootScope.tuple], $rootScope.session, ConfigUtils.getContextJSON().queryParams, onSuccess(tableModel), onModalClose);
                 return;
             }
+
+            // log the client action
+            logService.logClientAction({
+                action: logService.getActionString(logService.logActions.ADD_INTEND, tableModel.logStackPath),
+                stack: tableModel.logStack
+            }, tableModel.reference.defaultLogInfo);
 
             // 2. Generate a unique cookie name and set it to expire after 24hrs.
             var COOKIE_NAME = 'recordedit-' + MathUtils.getRandomInt(0, Number.MAX_SAFE_INTEGER);
@@ -438,7 +427,10 @@
             // Generate a unique id for this request
             // append it to the URL
             var referrer_id = 'recordedit-' + MathUtils.getRandomInt(0, Number.MAX_SAFE_INTEGER);
-            addRecordRequests[referrer_id] = ref.uri;
+            addRecordRequests[referrer_id] = {
+                displayMode: tableModel.config.displayMode,
+                containerIndex: tableModel.config.containerIndex
+            };
 
             // 3. Get appLink, append ?prefill=[COOKIE_NAME]&referrer=[referrer_id]
             var appLink = ref.unfilteredReference.contextualize.entryCreate.appLink;
@@ -451,11 +443,16 @@
         };
 
         $scope.$on("edit-request", function(event, args) {
-            editRecordRequests[args.id] = {"schema": args.schema, "table": args.table};
+            editRecordRequests[args.id] = {"displayMode": args.displayMode, "containerIndex": args.containerIndex, "finished": false};
         });
 
         $scope.$on('record-deleted', function (event, args) {
-            recordAppUtils.updateRecordPage(true);
+            var isInline = args.displayMode === recordsetDisplayModes.inline;
+            recordAppUtils.updateRecordPage(true, "", [{
+                cause: isInline ? logService.reloadCauses.RELATED_INLINE_DELETE : logService.reloadCauses.RELATED_DELETE,
+                isInline: isInline,
+                index: args.containerIndex
+            }]);
         });
 
         // When page gets focus, check cookie for completed requests
@@ -464,37 +461,60 @@
             onfocusEventCall(false);
         }
 
-        var onfocusEventCall = function(isModalUpdate) {
-            if ($rootScope.loading === false) {
-                var idxInbFk;
-                completed = {};
-                for (var id in addRecordRequests) {
-                    var cookie = $cookies.getObject(id);
-                    if (cookie) { // add request has been completed
-                        console.log('Cookie found for the id=' + id);
-                        completed[addRecordRequests[id]] = true;
+        var onfocusEventCall = function(changedContainerDetails) {
+            if ($rootScope.loading !== false) return;
 
-                        // remove cookie and request
-                        $cookies.remove(id);
-                        delete addRecordRequests[id];
-                    } else {
-                        console.log('Could not find cookie', cookie);
-                    }
-                }
-                // read updated tables
-                if (isModalUpdate || Object.keys(completed).length > 0 || Object.keys(updated).length > 0) {
-                    updated = {};
-                    //NOTE we're updating the whole page
-                    recordAppUtils.updateRecordPage(true);
+            var uc = logService.reloadCauses, id, cookie;
+
+            // where in the page has been changed
+            var changedContainers = [];
+
+            var addToChangedContainers = function (details, causeDefs) {
+                var isInline = details.displayMode === recordsetDisplayModes.inline;
+                changedContainers.push({
+                    cause: causeDefs[isInline ? 1 : 0],
+                    isInline: isInline,
+                    index: details.containerIndex
+                });
+            };
+
+            // modal create
+            if (changedContainerDetails) {
+                addToChangedContainers(changedContainerDetails, [uc.RELATED_CREATE, uc.RELATED_INLINE_CREATE]);
+            }
+
+            //find the completed edit requests
+            for (id in editRecordRequests) {
+                if (editRecordRequests[id].completed) {
+                    addToChangedContainers(editRecordRequests[id], [uc.RELATED_UPDATE, uc.RELATED_INLINE_UPDATE]);
+                    delete editRecordRequests[id];
                 }
             }
 
+            // find the completed create requests
+            for (id in addRecordRequests) {
+                cookie = $cookies.getObject(id);
+                if (cookie) { // add request has been completed
+                    console.log('Cookie found for the id=' + id);
+                    addToChangedContainers(addRecordRequests[id], [uc.RELATED_CREATE, uc.RELATED_INLINE_CREATE]);
+
+                    // remove cookie and request
+                    $cookies.remove(id);
+                    delete addRecordRequests[id];
+                } else {
+                    console.log('Could not find cookie', cookie);
+                }
+            }
+
+            // if something has changed
+            if (changedContainers.length > 0) {
+                recordAppUtils.updateRecordPage(true, "", changedContainers);
+            }
         };
 
         // function called from form.controller.js to notify record that an entity was just updated
         window.updated = function(id) {
-            updated[editRecordRequests[id].schema + ":" + editRecordRequests[id].table] = true;
-            delete editRecordRequests[id];
+            editRecordRequests[id].completed = true;
         }
 
         // to make sure we're adding the watcher just once
@@ -530,12 +550,11 @@
         /*** scroll to events ***/
         // scroll to top button
         $scope.scrollToTop = function (fromToc) {
-            var action = (fromToc ? logActions.tocScrollTop : logActions.scrollTop);
-            var scrollTopHeader = {
-                action: action
-            }
-
-            logService.logClientAction(scrollTopHeader, $rootScope.reference.defaultLogInfo);
+            var action = (fromToc ? logService.logActions.TOC_SCROLL_TOP : logService.logActions.SCROLL_TOP);
+            logService.logClientAction({
+                action: logService.getActionString(action),
+                stack: logService.getStackObject()
+            }, $rootScope.reference.defaultLogInfo);
 
             mainContainerEl.scrollTo(0, 0, 500);
         };
@@ -547,11 +566,10 @@
         vm.scrollToSection = function (sectionId) {
             var relatedObj = determineScrollElement(sectionId);
 
-            var scrollToHeader = {
-                action: logActions.tocScrollTo
-            }
-
-            logService.logClientAction(scrollToHeader, relatedObj.rtm.tableModel.reference.defaultLogInfo);
+            logService.logClientAction({
+                action: logService.getActionString(logService.logActions.TOC_SCROLL_RELATED, relatedObj.rtm.tableModel.logStackPath),
+                stack: relatedObj.rtm.tableModel.logStack
+            }, relatedObj.rtm.tableModel.reference.defaultLogInfo);
 
             scrollToElement(relatedObj.element);
         }

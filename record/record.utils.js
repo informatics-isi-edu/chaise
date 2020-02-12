@@ -11,8 +11,8 @@
     }])
 
     .factory('recordAppUtils',
-             ['constants', 'DataUtils', 'Errors', 'ErrorService', '$log', 'logActions', 'messageMap', 'modalBox', '$q', 'recordsetDisplayModes', 'recordTableUtils', '$rootScope',
-             function (constants, DataUtils, Errors, ErrorService, $log, logActions, messageMap, modalBox, $q, recordsetDisplayModes, recordTableUtils, $rootScope) {
+             ['constants', 'DataUtils', 'Errors', 'ErrorService', '$log', 'logService', 'messageMap', 'modalBox', '$q', 'recordsetDisplayModes', 'recordTableUtils', '$rootScope',
+             function (constants, DataUtils, Errors, ErrorService, $log, logService, messageMap, modalBox, $q, recordsetDisplayModes, recordTableUtils, $rootScope) {
 
         /**
          * returns true if we have free slots for requests.
@@ -45,14 +45,13 @@
                 return;
             }
 
-            var i = 0, model, logObject;
+            var i = 0, model;
 
             // inline entities
             for (i = 0; i < $rootScope.columnModels.length && $rootScope.hasInline; i++) {
                 model = $rootScope.columnModels[i];
                 if (!model.isInline || !model.tableModel.dirtyResult) continue;
                 if (!_haveFreeSlot()) return;
-                model.tableModel.logObject = _getTableModelLogObject(model.tableModel, isUpdate ? logActions.recordInlineUpdate : logActions.recordInlineRead);
                 recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate, true);
             }
 
@@ -66,7 +65,6 @@
                 model = $rootScope.relatedTableModels[i];
                 if (!model.tableModel.dirtyResult) continue;
                 if (!_haveFreeSlot()) return;
-                model.tableModel.logObject = _getTableModelLogObject(model.tableModel, isUpdate ? logActions.recordRelatedUpdate : logActions.recordRelatedRead);
                 recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate, true);
             }
 
@@ -75,8 +73,7 @@
                 model = $rootScope.columnModels[i];
                 if (!model.isInline || model.tableModel.dirtyResult) continue;
                 if (!_haveFreeSlot()) return;
-                logObject = _getTableModelLogObject(model.tableModel, isUpdate ? logActions.recordInlineAggregateUpdate : logActions.recordInlineAggregate);
-                recordTableUtils.updateColumnAggregates(model.tableModel, _processRequests, logObject, !isUpdate);
+                recordTableUtils.updateColumnAggregates(model.tableModel, _processRequests, !isUpdate);
             }
 
             // aggregates in related
@@ -84,8 +81,7 @@
                 model = $rootScope.relatedTableModels[i];
                 if (model.tableModel.dirtyResult) continue;
                 if (!_haveFreeSlot()) return;
-                logObject = _getTableModelLogObject(model.tableModel, isUpdate ? logActions.recordRelatedAggregateUpdate : logActions.recordRelatedAggregate);
-                recordTableUtils.updateColumnAggregates(model.tableModel, _processRequests, logObject, !isUpdate);
+                recordTableUtils.updateColumnAggregates(model.tableModel, _processRequests, !isUpdate);
             }
         }
 
@@ -95,12 +91,19 @@
          * @param  {Object} the extra information that we want to log with the main request
          * @returns {Promise} It will be resolved with Page object.
          */
-        function readMainEntity(isUpdate, logObject) {
+        function readMainEntity(isUpdate, logObj) {
             var defer = $q.defer();
 
-            logObject = logObject || {};
-            logObject.action = isUpdate ? logActions.recordUpdate : logActions.recordRead;
-            $rootScope.reference.read(1, logObject).then(function (page) {
+            logObj = logObj || {};
+            var action = isUpdate ? logService.logActions.RELOAD : logService.logActions.LOAD;
+            logObj.action = logService.getActionString(action);
+            logObj.stack = logService.getStackObject();
+
+            var causes = (Array.isArray($rootScope.reloadCauses) && $rootScope.reloadCauses.length > 0) ? $rootScope.reloadCauses : [];
+            if (causes.length > 0) {
+                logObj.stack = logService.addCausesToStack(logObj.stack, causes, $rootScope.reloadStartTime);
+            }
+            $rootScope.reference.read(1, logObj).then(function (page) {
                 $log.info("Page: ", page);
 
                 /*
@@ -133,10 +136,15 @@
                 });
 
                 $rootScope.displayReady = true;
+
+                $rootScope.reloadCauses = [];
+                $rootScope.reloadStartTime = -1;
+
                 defer.resolve(page);
             }).catch(function (err) {
                 defer.reject(err);
             });
+
 
             return defer.promise;
         }
@@ -151,7 +159,7 @@
                 $rootScope.recordFlowControl.occupiedSlots++;
                 model.dirtyResult = false;
                 model.isLoading = true;
-                _readMainColumnAggregate(model.column, index, $rootScope.recordFlowControl.counter).then(function (res) {
+                _readMainColumnAggregate(model, index, isUpdate, $rootScope.recordFlowControl.counter).then(function (res) {
                     $rootScope.recordFlowControl.occupiedSlots--;
                     model.dirtyResult = !res;
                     model.columnError = false;
@@ -176,14 +184,17 @@
          * Generate request for each individual aggregate columns.
          * Returns a promise. The resolved value denotes the success or failure.
          */
-        function _readMainColumnAggregate(column, index, current) {
+        function _readMainColumnAggregate(columnModel, index, isUpdate, current) {
             var defer = $q.defer();
-            var logObject = column.reference.defaultLogInfo;
-            logObject.action = logActions.recordAggregate;
-            logObject.referrer = $rootScope.reference.defaultLogInfo;
 
-            column.getAggregatedValue($rootScope.page, logObject).then(function (values) {
-                $rootScope.columnModels[index].isLoading = false;
+            var action = isUpdate ? logService.logActions.RELOAD : logService.logActions.LOAD;
+            var stackPath = logService.getStackPath("", logService.logStackPaths.PSEUDO_COLUMN);
+            var logObj = {
+                action: logService.getActionString(action, stackPath),
+                stack: columnModel.logStack
+            };
+            columnModel.column.getAggregatedValue($rootScope.page, logObj).then(function (values) {
+                columnModel.isLoading = false;
                 if ($rootScope.recordFlowControl.counter !== current) {
                     return defer.resolve(false);
                 }
@@ -199,10 +210,31 @@
         }
 
         /**
+         * Given an object and cause string, will add it to the list of reloadCauses of the object.
+         * It will also take care of adding reloadStartTime if it's necessary.
+         * reloadStartTime captures the time that the model becomes dirty.
+         */
+        function _addCauseToModel(obj, cause) {
+            // the time that will be logged with the request
+            if (!Number.isInteger(obj.reloadStartTime) || obj.reloadStartTime === -1) {
+                obj.reloadStartTime = ERMrest.getElapsedTime();
+            }
+
+            if (cause && obj.reloadCauses.indexOf(cause) === -1) {
+                obj.reloadCauses.push(cause);
+            }
+        }
+
+        /**
          * sets the flag and calls the flow-control function to update the record page.
          * @param  {Boolean} isUpdate indicates that the function has been triggered for update and not load.
+         * @param  {String} cause the cause of this update (if it's update and not load)
+         * @param  {Array} changedContainers If this function is called because of multiple
+         *                  changes on the page, then we cannot use a single "cause" and instead
+         *                  this attribute will return the different parts of the page that have caused this.
+         *                  Each array is an object with `cause`, `index`, and `isInline` attributes.
          */
-        function updateRecordPage(isUpdate) {
+        function updateRecordPage(isUpdate, cause, changedContainers) {
 
             if (!isUpdate) {
                 $rootScope.recordFlowControl.occupiedSlots = 0;
@@ -210,19 +242,64 @@
             } else {
                 // we want to update the main entity on update
                 $rootScope.isMainDirty = true;
+
+                _addCauseToModel($rootScope, cause);
             }
             $rootScope.recordFlowControl.counter++;
+
 
             $rootScope.columnModels.forEach(function (m) {
                 if (m.isAggregate) {
                     m.dirtyResult = true;
                 } else if (m.isInline) {
                     m.tableModel.dirtyResult = true;
+
+                    _addCauseToModel(m.tableModel, cause);
                 }
             });
+
             $rootScope.relatedTableModels.forEach(function (m) {
                 m.tableModel.dirtyResult = true;
+                _addCauseToModel(m.tableModel, cause);
             });
+
+
+            // update the cause list
+            var uc = logService.reloadCauses;
+            var selfCause = {};
+            selfCause[uc.RELATED_CREATE] = selfCause[uc.RELATED_INLINE_CREATE] = uc.ENTITY_CREATE;
+            selfCause[uc.RELATED_DELETE] = selfCause[uc.RELATED_INLINE_DELETE] = uc.ENTITY_DELETE;
+            selfCause[uc.RELATED_UPDATE] = selfCause[uc.RELATED_INLINE_UPDATE] = uc.ENTITY_UPDATE;
+            if (Array.isArray(changedContainers)) {
+                changedContainers.forEach(function (container) {
+                    var c;
+
+                    // add it to main causes
+                    _addCauseToModel($rootScope, container.cause);
+
+                    // add it to inline related
+                    $rootScope.columnModels.forEach(function (m, index) {
+                        if (!m.isInline) return;
+
+                        c = container.cause;
+                        if (container.isInline && container.index === index) {
+                            c = selfCause[c];
+                        }
+
+                        _addCauseToModel(m.tableModel, c);
+                    });
+
+                    // add it to related
+                    $rootScope.relatedTableModels.forEach(function (m, index) {
+                        var c = container.cause;
+                        if (!container.isInline && container.index === index) {
+                            c = selfCause[c];
+                        }
+
+                        _addCauseToModel(m.tableModel, c);
+                    });
+                });
+            }
 
             $rootScope.pauseRequests = false;
             _processRequests(isUpdate);
@@ -270,16 +347,23 @@
          * Given reference of related or inline, will create appropriate table model.
          * @param  {ERMrest.Reference} reference Reference object.
          * @param  {string} context   the context string
-         * @param  {ERMrest.tuple} parentTuple the main tuple
+         * @param  {boolean} isInline whether the table is inline or not
          */
-        function getTableModel (reference, context, parentTuple, parentReference) {
+        function getTableModel (reference, index, isInline) {
+            var stackNode = logService.getStackNode(
+                logService.logStackTypes.RELATED,
+                reference.table,
+                {source: reference.compressedDataSource, entity: true}
+            );
+            var currentStackPath = isInline ? logService.logStackPaths.RELATED_INLINE : logService.logStackPaths.RELATED;
+            var logStackPath = logService.getStackPath("", currentStackPath);
+
             return {
+                parentReference: $rootScope.reference,
+                parentTuple: $rootScope.tuple,
                 reference: reference,
-                parentReference: parentReference,
                 pageLimit: getPageSize(reference),
                 isTableDisplay: reference.display.type == 'table',
-                parentTuple: parentTuple,
-                context: context,
                 enableSort: true,
                 rowValues: [],
                 selectedRows: [],//TODO migth not be needed
@@ -291,22 +375,16 @@
                     editable: $rootScope.modifyRecord,
                     deletable: $rootScope.modifyRecord && $rootScope.showDeleteButton,
                     selectMode: modalBox.noSelect,
-                    displayMode: (context.indexOf("inline") > -1 ? recordsetDisplayModes.inline : recordsetDisplayModes.related)
+                    displayMode: (isInline ? recordsetDisplayModes.inline : recordsetDisplayModes.related),
+                    containerIndex: index // TODO (could be optimized) can this be done in a better way?
                 },
+                logStack: logService.getStackObject(stackNode),
+                logStackPath: logStackPath,
+                reloadCauses: [], // might not be needed
+                reloadStartTime: -1,
                 flowControlObject: $rootScope.recordFlowControl,
                 queryTimeoutTooltip: messageMap.queryTimeoutTooltip
             };
-        }
-
-        /**
-         * @private
-         * Returns appropriate log object, for the related or inline table model.
-         */
-        function _getTableModelLogObject(tableModel, action) {
-            var logObject = tableModel.reference.defaultLogInfo;
-            logObject.referrer = $rootScope.reference.defaultLogInfo;
-            logObject.action = action;
-            return logObject;
         }
 
         /**
