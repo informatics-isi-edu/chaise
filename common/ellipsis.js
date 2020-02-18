@@ -93,8 +93,6 @@
                 tuple: '=',
                 rowValues: '=', // tuple's values
                 rowIndex: '=', // tuple's row index in rowValues array
-                context: '=',
-                config: '=',    // {viewable, editable, deletable, selectMode}
                 onRowClickBind: '=?',
                 selected: '=',
                 selectDisabled: "=?",
@@ -251,13 +249,18 @@
                     // schemaTable is per table (needs to be done for record app with related tables)
                     // rowIndex is per row in each table
                     $timeout(function () {
-                        $rootScope.$on('aggLoaded-' + scope.tableModel.logObject.schema_table + scope.rowIndex, function(events, data) {
+                        var uniqueIndex = scope.rowIndex;
+                        if (scope.config.containerIndex) {
+                            uniqueIndex = scope.config.containerIndex + "-" + uniqueIndex;
+                        }
+                        $rootScope.$on('aggLoaded-' + uniqueIndex, function(events, data) {
                             var columnModelIndex = data;
                             // +1 to account for the actions column
                             var columnUiIndex = columnModelIndex + 1;
-                            var hasPostLoadClass = scope.rowValues[columnModelIndex].value.indexOf('chaise-post-load') > -1;
+                            // var hasPostLoadClass = scope.rowValues[columnModelIndex] && scope.rowValues[columnModelIndex].value.indexOf('chaise-post-load') > -1;
+                            var hasPostLoadClass =scope.rowValues[columnModelIndex].value.indexOf('chaise-post-load') > -1;
 
-                            if (scope.columnModels[columnModelIndex].column.hasAggregate && hasPostLoadClass) {
+                            if (scope.tableModel.columnModels[columnModelIndex].column.hasAggregate && hasPostLoadClass) {
                                 var aggTD = element[0].children[columnUiIndex];
                                 new ResizeSensor(aggTD, function (dimensions) {
                                     // if TD.offsetHeight > the calculated maxRecordsetRowHeight

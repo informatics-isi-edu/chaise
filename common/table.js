@@ -311,7 +311,11 @@
                     } else {
                         vm.rowValues[valIndex][obj.index] = displayValue;
                         // emit aggregates loaded event for [row][column]
-                        $rootScope.$emit("aggLoaded-" + vm.logObject.schema_table + valIndex, obj.index);
+                        var uniqueIndex = valIndex;
+                        if (vm.config.containerIndex) {
+                            uniqueIndex = vm.config.containerIndex + "-" + uniqueIndex;
+                        }
+                        $rootScope.$emit("aggLoaded-" + uniqueIndex, obj.index);
                     }
                 });
             });
@@ -399,6 +403,12 @@
                     for (var colIndex in vm.pendingRowValues[rowIndex]) {
                         vm.rowValues[rowIndex][colIndex] = vm.pendingRowValues[rowIndex][colIndex];
                         // emit aggregates loaded event for [row][column] after push more rows
+
+                        var uniqueIndex = rowIndex;
+                        if (vm.config.containerIndex) {
+                            uniqueIndex = vm.config.containerIndex + uniqueIndex;
+                        }
+                        $rootScope.$emit("aggLoaded-" + uniqueIndex, colIndex);
                     }
                 }
             }
