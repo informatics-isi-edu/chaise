@@ -265,7 +265,7 @@
                         var columnModelIndex = data;
                         // +1 to account for the actions column
                         var columnUiIndex = columnModelIndex + 1;
-                        var hasPostLoadClass = scope.rowValues[columnModelIndex].isHTML && scope.rowValues[columnModelIndex].value.indexOf('chaise-post-load') > -1;
+                        var hasPostLoadClass = scope.rowValues[columnModelIndex].isHTML && scope.rowValues[columnModelIndex].value.indexOf('-chaise-post-load') > -1;
 
                         if (scope.tableModel.columnModels[columnModelIndex].column.hasAggregate && hasPostLoadClass) {
                             var aggTD = element[0].children[columnUiIndex];
