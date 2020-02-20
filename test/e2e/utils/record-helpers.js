@@ -614,7 +614,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 
             it('should have the correct tooltip.', function(){
                 chaisePage.recordPage.getColumnCommentHTML(exploreBtn).then(function(comment){
-                    expect(comment).toBe("'View more " + params.displayname + " related to this " + params.baseTable + ".'", "Incorrect tooltip on View More button");
+                    expect(comment).toBe("'Explore more " + params.displayname + " records related to this " + params.baseTable + ".'", "Incorrect tooltip on View More button");
                 });
             });
 
