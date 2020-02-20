@@ -92,6 +92,7 @@
             scope: {
                 tuple: '=',
                 rowValues: '=', // tuple's values
+                rowIndex: '=', // tuple's row index in rowValues array
                 onRowClickBind: '=?',
                 selected: '=',
                 selectDisabled: "=?",
@@ -192,20 +193,17 @@
                     }
                 };
 
-                for (var i = 0; i < element[0].children.length; i++) {
-                    scope.overflow[i] = false;
-                }
-
-                // If chaiseconfig contains maxRecordSetHeight then only apply more-less styling
+                // If chaiseconfig contains maxRecordSetHeight then apply more-less styling
                 if (chaiseConfig.maxRecordsetRowHeight != false ) {
-
-                    // 1em = 14px
-                    // 7.25em = 101.5px
-                    var moreButtonHeight = 20;
-                    var maxHeight = chaiseConfig.maxRecordsetRowHeight || 160;
-                    var maxHeightStyle = { "max-height": (maxHeight - moreButtonHeight) + "px" }
+                    var userClicked = false,
+                        tdPadding = 10, // +10 to account for padding on TD
+                        moreButtonHeight = 20,
+                        maxHeight = chaiseConfig.maxRecordsetRowHeight || 160,
+                        maxHeightStyle = { "max-height": (maxHeight - moreButtonHeight) + "px" },
+                        cellSensors = {};
 
                     scope.readmore = function() {
+                        userClicked = true; // avoid triggering resize Sensor logic
                         if (scope.hideContent) {
                             scope.hideContent = false;
                             scope.linkText = "less";
@@ -217,64 +215,88 @@
                         }
                     };
 
-                    var containsOverflow = false;
+                    var setOverflows = function () {
+                        // Iterate over each <td> in the <tr>
+                        // use length-1 because resizeSensor adds a div to end of children list of TDs
+                        for (var i = 0; i < element[0].children.length-1; i++) {
+                            var currentTD = element[0].children[i];
 
-                    // This function checks for height of an element in the row at an index(td'th)
-                    // and Set overflow
-                    var updateHeight = function(index, element) {
-                        var height = element.clientHeight;
-                        if (height > maxHeight) {
-                            scope.overflow[index] = true;
-                            scope.hideContent = true;
-                            containsOverflow = true;
-                            scope.maxHeightStyle = maxHeightStyle;
-                        } else {
-                            scope.overflow[index] = false;
+                            scope.overflow[i] = (currentTD.children[0].clientHeight + tdPadding) > maxHeight
                         }
                     }
 
-                    // Resizerow is called whenever there is a change in rowValues model
-                    // It iterates over all the td elements and extracts image and iframes from it
-                    // After which it binds onload event to adjust height
-                    // It also calls updateHeight for the same td, for any oveflown textual content
-                    var resizeRow = function() {
-                        if (containsOverflow == false) {
+                    var initializeOverflowLogic = function () {
+                        setOverflows();
 
-                            //Iterate over table data in the row
-                            for (var i = 0; i < element[0].children.length; i++) {
+                        scope.hideContent = true;
+                        scope.maxHeightStyle = maxHeightStyle;
 
-                                // Get all images and iframes inside the td
-                                var imagesAndIframes = UiUtils.getImageAndIframes(element[0].children[i]);
+                        scope.$digest();
+                    }
 
-                                // Bind onload event and updateheight for particular td index
-                                imagesAndIframes.forEach(function(el) {
-                                    var index = i;
-                                    el.onload = function() {
-                                        updateHeight(index, el);
-                                    };
-                                });
-
-                                updateHeight(i, element[0].children[i].children[0]);
-                            }
+                    // function to remove the cell sesnsors before adding new ones
+                    // prevents having sensors on cells with no content
+                    var removeCellSensors = function () {
+                        for(var key in cellSensors) {
+                            cellSensors[key].detach();
                         }
-                    };
+                        cellSensors = {};
+                    }
 
+                    new ResizeSensor(element[0], function (dimensions) {
+                        // if TR.offsetHeight > the calculated maxRecordsetRowHeight
+                        if (dimensions.height > (maxHeight + tdPadding)) {
+                            // iterate over each cell (TD), check it's height, and set overflow if necessary
+                            if (!userClicked) {
+                                initializeOverflowLogic();
+                            }
+                        } else if (dimensions.height < (maxHeight + tdPadding)) {
+                            scope.overflow = [];
+                        }
+                    });
+
+                    // schemaTable is per table (needs to be done for record app with related tables)
+                    // rowIndex is per row in each table
+                    var uniqueIndex = scope.rowIndex;
+                    if (scope.config.containerIndex) {
+                        uniqueIndex = scope.config.containerIndex + "-" + uniqueIndex;
+                    }
+                    $rootScope.$on('aggregate-loaded-' + uniqueIndex, function(events, data) {
+                        var columnModelIndex = data;
+                        // +1 to account for the actions column
+                        var columnUiIndex = columnModelIndex + 1;
+                        var hasPostLoadClass = scope.rowValues[columnModelIndex].isHTML && scope.rowValues[columnModelIndex].value.indexOf('-chaise-post-load') > -1;
+
+                        if (scope.tableModel.columnModels[columnModelIndex].column.hasAggregate && hasPostLoadClass) {
+                            var aggTD = element[0].children[columnUiIndex];
+                            cellSensors[columnModelIndex] = new ResizeSensor(aggTD, function (dimensions) {
+                                // if TD.offsetHeight > the calculated maxRecordsetRowHeight
+                                // +10 to account for padding on TD element
+                                if (dimensions.height > (maxHeight)) {
+                                    // iterate over each cell (TD), check it's height, and set overflow if necessary
+                                    if (!userClicked) {
+                                        initializeOverflowLogic();
+                                    }
+                                } else if (dimensions.height < (maxHeight)) {
+                                    scope.overflow[2] = false;
+                                }
+                            });
+                        }
+                    });
+
+                    // reset overflows because new rows are available
+                    $rootScope.$on('reference-modified', function() {
+                        removeCellSensors();
+                        $timeout(function () {
+                            // resets values and makes sure functions for action columns point to proper reference
+                            init();
+                            userClicked = false;
+
+                            initializeOverflowLogic();
+                        });
+                    });
                 }
 
-
-                // Watch for change in rowValues, this is useful in case of pagination
-                // As Angular just changes the content and doesnot destroys elements
-                scope.$watchCollection('rowValues', function (v) {
-                    init();
-
-                    // add timeout only if maxRecordsetRowHeight is not false in chaiseConfig
-                    if (chaiseConfig.maxRecordsetRowHeight != false ) {
-                        $timeout(function() {
-                            containsOverflow = false;
-                            resizeRow();
-                        }, 0);
-                    }
-                });
             }
         };
     }])
