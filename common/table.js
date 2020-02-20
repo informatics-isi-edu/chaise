@@ -97,6 +97,9 @@
      *       containerIndex: "the containerIndex defined in the config object"
      *     }
      * 5. `edit-request`: When users click on "edit" button for a row. It's sending the same object as `record-deleted`.
+     * 6. `aggregate-loaded-<containerIndex>-<rowIndex>`: when an aggregate value has returned, an event is emitted
+     *     to trigger logic in ellipsis.js that conditionally adds a resize sensor to the cell associated with `colIndex`
+     *     that is also passed along with the emitted event
      */
     .factory('recordTableUtils',
             ['AlertsService', 'DataUtils', 'defaultDisplayname', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'recordsetDisplayModes', 'Session', 'tableConstants', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$q', '$rootScope', '$timeout', '$window',
@@ -315,7 +318,7 @@
                         if (vm.config.containerIndex) {
                             uniqueIndex = vm.config.containerIndex + "-" + uniqueIndex;
                         }
-                        $rootScope.$emit("aggLoaded-" + uniqueIndex, obj.index);
+                        $rootScope.$emit("aggregate-loaded-" + uniqueIndex, obj.index);
                     }
                 });
             });
@@ -408,7 +411,7 @@
                         if (vm.config.containerIndex) {
                             uniqueIndex = vm.config.containerIndex + uniqueIndex;
                         }
-                        $rootScope.$emit("aggLoaded-" + uniqueIndex, colIndex);
+                        $rootScope.$emit("aggregate-loaded-" + uniqueIndex, colIndex);
                     }
                 }
             }
