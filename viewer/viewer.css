@@ -157,7 +157,7 @@ a.cardlink.delete {
 }
 
 #sidebar {
-   display: block;
+   display: none;
    margin: 0 20px;
 }
 
