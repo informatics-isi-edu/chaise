@@ -210,10 +210,10 @@ exports.testPresentation = function (tableParams) {
     });
 
     if (!process.env.TRAVIS) {
-        it("should have 'CSV' as a download option and download the file.", function(done) {
+        it("should have 'search results (csv)' as a download option and download the file.", function(done) {
             chaisePage.recordsetPage.getExportDropdown().click().then(function () {
-                var csvOption = chaisePage.recordsetPage.getExportOption("CSV");
-                expect(csvOption.getText()).toBe("CSV");
+                var csvOption = chaisePage.recordsetPage.getExportOption("search results (csv)");
+                expect(csvOption.getText()).toBe("search results (csv)");
                 return csvOption.click();
             }).then(function () {
                 browser.wait(function() {
@@ -321,7 +321,7 @@ exports.testPresentation = function (tableParams) {
             } else if (column.match=='html') {
                 expect(chaisePage.recordPage.getEntityRelatedTableScope(column.title).getAttribute('innerHTML')).toBe(column.value, errMessage);
             } else if (column.title == 'User Rating'){
-                expect(chaisePage.recordPage.getEntityRelatedTableScope('&lt;strong&gt;User&nbsp;Rating&lt;/strong&gt;',true).getAttribute('innerHTML')).toBe(column.value, errMessage);
+                expect(chaisePage.recordPage.getEntityRelatedTableScope('<strong>User Rating</strong>').getAttribute('innerHTML')).toBe(column.value, errMessage);
             } else {
                 columnEls = chaisePage.recordPage.getEntityRelatedTable(column.title);
                 if (column.presentation) {
