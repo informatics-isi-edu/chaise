@@ -251,6 +251,10 @@
         }
     }
 
+    &.table-striped > tbody > tr {
+        position: unset !important;
+    }
+
     &.table-striped > tbody > tr:nth-child(odd) {
         background: $table-striped-background-color;
     }
