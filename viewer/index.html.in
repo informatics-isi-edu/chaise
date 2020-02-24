@@ -47,6 +47,7 @@
                     <!-- <div id="sidebar" ng-class="sidebar faceting-resizable {'open-panel': !osd.annotationsSidebarAreHidden, 'close-panel': osd.annotationsSidebarAreHidden}" resizable r-directions=["right"] r-flex="true"> -->
                         <div ng-controller="AnnotationsController as anno" class='annotation-list facet-panel'>
                             <span class='title'>Annotations</span>
+                            <button ng-click="anno.searchPopup()">Open Modal</button>
                             <span class='row filter' data-type='overlayVisibility'>
                                 <span class='name'> Display : </span>
                                 <span ng-click="anno.changeAllAnnotationsVisibility();" ng-class="anno.isDisplayAll ?'displayAllBtn selected' : 'displayAllBtn'" data-type='all'>
