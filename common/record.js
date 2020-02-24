@@ -46,34 +46,33 @@
                         return scope.columnModels[idx].isInline;
                     };
 
-                    function isAggregate (idx) {
-                        return scope.columnModels[idx].isAggregate;
-                    };
-
                     // Show an error warning if the column is aggregate or inline related table and the data failed to load
                     scope.showError = function (i) {
-                        return ((isInline(i) && scope.columnModels[i].tableModel.tableError) || (isAggregate(i)&& scope.columnModels[i].columnError));
+                        return (isInline(i) && scope.columnModels[i].tableModel.tableError) || scope.columnModels[i].columnError;
                     }
 
                     // Show a loading spinner if the column is aggregate or inline related table
                     scope.showLoader = function (i) {
-                        return ((isInline(i) && !scope.columnModels[i].tableModel.hasLoaded) || (isAggregate(i) && scope.columnModels[i].isLoading));
+                        return (isInline(i) && !scope.columnModels[i].tableModel.hasLoaded) || scope.columnModels[i].isLoading;
                     }
 
                     // returns true if we should show the column
+                    // column is not inline, and not-null or it has wait-for (so we show the column for its loader)
                     scope.showColumn = function (i) {
-                        return ((typeof scope.values[i].value === "string" && scope.values[i].value !== '') && !isInline(i)) || isAggregate(i);
+                        return !isInline(i) && (scope.values[i].value != null || scope.columnModels[i].hasWaitFor);
                     };
 
-                    // returns true if we should show a table
+                    // returns true if we should show a table (data is non-empty or we can show empty)
+                    // we don't need to make sure it's initialized here since we want to show the loader
                     scope.showInlineTable = function (i) {
-                        return isInline(i) && (scope.showEmptyRelatedTables || scope.columnModels[i].tableModel.rowValues.length > 0);
+                        var cm = scope.columnModels[i];
+                        return isInline(i) && (scope.showEmptyRelatedTables || (cm.tableModel.page && cm.tableModel.page.length > 0 && cm.pageContentInitialized));
                     };
 
                     // returns true if inline related tables can be displayed as custom display (markdown)
                     scope.allowInlineTableMarkdown = function (i) {
                         var tm = scope.columnModels[i].tableModel;
-                        return tm.reference.display.type == 'markdown' && tm.page && tm.page.content != '';
+                        return tm.reference.display.type == 'markdown' && tm.page && scope.columnModels[i].pageContent != '';
                     };
                 }
             };

@@ -131,10 +131,29 @@
                 if (context.hideNavbar) url += "?hideNavbar=" + context.hideNavbar;
                 $window.history.replaceState('', '', url);
 
-                // related references
-                var related = $rootScope.reference.generateRelatedList(tuple);
+                var activeList = $rootScope.reference.generateActiveList(tuple);
 
-                var columns = $rootScope.reference.generateColumnsList(tuple), model;
+                $rootScope.aggregateModels = [];
+                activeList.aggregates.forEach(function (agg) {
+                    $rootScope.aggregateModels.push({
+                        model: agg,
+                        processed: false,
+                        reloadCauses: [],
+                        logStack: logService.getStackObject(
+                            logService.getStackNode(
+                                logService.logStackTypes.PSEUDO_COLUMN,
+                                agg.column.table,
+                                { source: agg.column.compressedDataSource, entity: agg.column.isEntityMode, agg: agg.column.aggregateFn}
+                            )
+                        ),
+                        reloadStartTime: -1
+                    });
+                });
+
+                // related references
+                var related = $rootScope.reference.related;
+
+                var columns = $rootScope.reference.columns, model;
 
                 $log.info("default export template is accessible through `defaultExportTemplate` variable. To get the string value of it call `angular.toJson(defaultExportTemplate, 1)`");
                 $window.defaultExportTemplate = $rootScope.reference.defaultExportTemplate;
@@ -147,36 +166,31 @@
                 columns.forEach(function (col, index) {
                     model = {};
 
-                    // aggregate
-                    if (col.isPathColumn && col.hasAggregate) {
-                        model = {
-                            columnError: false,
-                            isLoading: true,
-                            isAggregate: true,
-                            dirtyResult: true,
-                            logStack: logService.getStackObject(
-                                logService.getStackNode(
-                                    logService.logStackTypes.PSEUDO_COLUMN,
-                                    col.table,
-                                    { source: col.compressedDataSource, entity: col.isEntityMode, agg: col.aggregateFn}
-                                )
-                            ),
-                            reloadCauses: []
-                        };
-                        $rootScope.hasAggregate = true;
-                    }
 
                     // inline
-                    else if (col.isInboundForeignKey || (col.isPathColumn && col.hasPath && !col.isUnique && !col.hasAggregate)) {
+                    if (col.isInboundForeignKey || (col.isPathColumn && col.hasPath && !col.isUnique && !col.hasAggregate)) {
                         var reference = col.reference.contextualize.compactBriefInline;
                         model = {
                             tableError: false,
                             isInline: true,
                             isTableDisplay: reference.display.type == 'table',
                             displayname: reference.displayname,
+                            hasWaitFor: col.hasWaitFor,
+                            isLoading: col.hasWaitFor,
+                            waitForDataLoaded: false,
+                            pageContentInitialized: false,
+                            pageContent: null,
                             tableModel: recordAppUtils.getTableModel(reference, index, true)
                         };
                         $rootScope.hasInline = true;
+                    }
+                    // columns that are relying on aggregates or are aggregate themselves
+                    else if (col.hasWaitFor || !col.isUnique) {
+                        model = {
+                            columnError: false,
+                            isLoading: true,
+                            hasWaitFor: true
+                        }
                     }
 
                     model.column = col;
@@ -198,6 +212,11 @@
                         open: openByDefault,
                         isTableDisplay: ref.display.type == 'table',
                         displayname: ref.displayname,
+                        hasWaitFor: ref.display.sourceHasWaitFor,
+                        isLoading: ref.display.sourceHasWaitFor, // to show the content or not
+                        waitForDataLoaded: false,
+                        pageContentInitialized: false,
+                        pageContent: null,
                         tableModel: recordAppUtils.getTableModel(ref, index),
                         baseTableName: $rootScope.reference.displayname
                     });

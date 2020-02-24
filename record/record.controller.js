@@ -102,13 +102,14 @@
             });
         };
 
+        // This function assumes that templateVariables are ready
         vm.sharePopup = function() {
             var tuple = $rootScope.tuple;
             var ref = $rootScope.reference;
             var refTable = ref.table;
 
             var params = {
-                citation: tuple.citation,
+                citation: tuple.citation ? tuple.citation.compute($rootScope.templateVariables) : null,
                 displayname: refTable.name+'_'+tuple.uniqueId,
                 reference: ref
             }
@@ -165,9 +166,9 @@
         vm.showRelatedTable = function(i) {
             if (!$rootScope.relatedTableModels) return false;
 
-            var tableModel = $rootScope.relatedTableModels[i].tableModel;
+            var rtm = $rootScope.relatedTableModels[i];
             var canShow = function () {
-                if (!tableModel.initialized) {
+                if (!rtm.tableModel.initialized || !rtm.pageContentInitialized) {
                   return false;
                 }
 
@@ -188,21 +189,21 @@
             };
 
             if (canShow()) {
-                return $rootScope.showEmptyRelatedTables || (tableModel.page && tableModel.page.length > 0);
+                return ($rootScope.showEmptyRelatedTables || (rtm.tableModel.page && rtm.tableModel.page.length > 0));
             }
             return false;
         };
 
         vm.showInlineTable = function (i) {
             var cm = $rootScope.columnModels[i];
-            return cm.isInline && ($rootScope.showEmptyRelatedTables || (cm.tableModel.page && cm.tableModel.page.length > 0));
+            return cm.isInline && ($rootScope.showEmptyRelatedTables || (cm.tableModel.page && cm.tableModel.page.length > 0 && cm.pageContentInitialized));
         };
 
         /**
          * allow related table markdown display if all the following are true:
          *  - reference.display.type is `markdown`
          *  - related table has data.
-         *  - related table's page.content is not empty string
+         *  - related table's pageContent is not empty string
          *
          * we are going to show the markdown display if the result if this function
          * is true and the related table model is in markdown mode.
@@ -211,9 +212,9 @@
          */
         vm.allowRelatedTableMarkdown = function (i) {
             if (!$rootScope.relatedTableModels) return false;
-
-            var tm = $rootScope.relatedTableModels[i].tableModel;
-            return tm.reference.display.type == 'markdown' && tm.page && tm.page.content != '' && tm.page.tuples.length > 0;
+            var rtm = $rootScope.relatedTableModels[i];
+            var tm = rtm.tableModel;
+            return tm.reference.display.type == 'markdown' && tm.page && tm.page.tuples.length > 0 && rtm.pageContentInitialized && rtm.pageContent != '';
         };
 
         vm.noVisibleRelatedTables = function () {

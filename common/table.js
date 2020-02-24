@@ -242,8 +242,8 @@
         /**
          * This will be called after the data for an aggregate column has returned.
          * It will,
-         *  - update the templateVariables.
-         *  - update the aggregateResults
+         *  - update the templateVariables: to run the template
+         *  - update the aggregateResults: to get the value of a specific aggregate column
          *  - update the column value if all of its dependent requests are back.
          * @param  {Object} vm       vm object
          * @param  {integer} colIndex index of aggregate column
@@ -323,8 +323,9 @@
          * @param  {function} updatePageCB The update page callback which we will call after getting the result.
          * @param  {boolean} hideSpinner  Indicates whether we should show spinner for columns or not
          * @param  {object} isTerminal  Indicates whether we should show a terminal error or not for 400 QueryTimeoutError
+         * @param {object} cb a callback that will be called after the read is done and is successful.
          */
-        function updateMainEntity(vm, updatePageCB, hideSpinner, notTerminal) {
+        function updateMainEntity(vm, updatePageCB, hideSpinner, notTerminal, cb) {
             if (!vm.dirtyResult || !_haveFreeSlot(vm)) {
                 $log.debug("counter", vm.flowControlObject.counter, ": break out of update main");
                 return;
@@ -339,6 +340,7 @@
                     _afterUpdateMainEntity(vm, res, currentCounter);
                     vm.tableError = false;
                     $log.debug("counter", currentCounter, ": read is done. just before update page (to update the rest of the page)");
+                    if (cb) cb(vm);
                     // TODO remember last successful main request
                     // when a request fails for 400 QueryTimeout, revert (change browser location) to this previous request
                     updatePageCB(vm);
