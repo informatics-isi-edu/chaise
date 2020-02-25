@@ -106,16 +106,15 @@
             $rootScope.reference.read(1, logObj).then(function (page) {
                 $log.info("Page: ", page);
 
-                /*
-                *  recordSetLink should be used to present user with  an option in case of no data found/more data found(>1)
-                *  This could be link to RECORDSET or SEARCH.
-                */
-                var recordSetLink = page.reference.unfilteredReference.contextualize.compact.appLink;
+                var recordSetLink;
                 var tableDisplayName = page.reference.displayname.value;
                 if (page.tuples.length < 1) {
+                    //  recordSetLink should be used to present user with an option in case of no data found
+                    recordSetLink = page.reference.unfilteredReference.contextualize.compact.appLink;
                     throw new Errors.noRecordError({}, tableDisplayName, recordSetLink);
                 }
                 else if(page.hasNext || page.hasPrevious){
+                    recordSetLink = page.reference.contextualize.compact.appLink;
                     throw new Errors.multipleRecordError(tableDisplayName, recordSetLink);
                 }
 
