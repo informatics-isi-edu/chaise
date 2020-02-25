@@ -1022,8 +1022,19 @@
                 if (keytdHeight == null || keytdHeight == 0) {
                     keytdHeight = trs[i].children[0].offsetHeight;
                     // set first TD height
-                    trs[i].children[0].setAttribute('data-height', keytdHeight);
+                    trs[i].children[0].setAttribute('height', keytdHeight);
                 }
+
+                // text in entity key
+
+                    for (var j=0; j < trs[i].children[0].children.length; j++) {
+                        var ele = trs[i].children[0].children[j];
+                        if (ele.className.indexOf("column-displayname") > -1 && ele.offsetWidth > 150) {
+                            trs[i].children[0].height = "unset";
+                            trs[i].children[1].height = "unset";
+                        }
+                    };
+
 
                 var valuetdHeight = trs[i].children[1].offsetHeight;
 
