@@ -59,7 +59,7 @@ For both class names and id attributes:
 
 This means that if the schema, table, or column name contains any other characters, they will be replaced with a "-".
 If the name contains multiple unsafe characters in a row, all will be replaced by 1 single "-".
-For example, if your name is `text (name)`, it will be rewritten as `text-name` when used as a class name.
+For example, if your column name is `text (name)`, chaise will rewrite this as `text-name-` and then will use `c_text-name-` as the class name.
 
 ### General HTML structure:
 ```html
@@ -166,14 +166,6 @@ By relaxing the selector, we can make the rule more general:
    - this will apply the styling to all columns with `column.name = Images`
      - useful if multiple Images columns are defined in many different tables in many different schemas
 
-### Caveats
-Some characters are not allowed in HTML class names. We replace those characters with HTML safe characters:
- - `&` is replaced by: `&amp;`
- - `\s` (any whitespace character) is replaced by `&nbsp;`
- - `<` is replaced by `&lt;`
- - `>` is replaced by `&gt;`
- - `"` is replaced by `&quot;`
- - `'` is replaced by `&#39;`
 
 For pseudocolumns, it's not immediately obvious what they name will be. We use a hashing function in `ermrestJS` that is based on the full path of the column. So `this/path/id=value` will become something like `hsoinel`.
 
