@@ -6,6 +6,7 @@
     .directive('export', ['AlertsService', 'ConfigUtils', 'DataUtils', 'ErrorService', 'logService', 'modalUtils', '$rootScope', '$timeout', 'UriUtils', '$window', function (AlertsService, ConfigUtils, DataUtils, ErrorService, logService, modalUtils, $rootScope, $timeout, UriUtils, $window) {
         var chaiseConfig = ConfigUtils.getConfigJSON();
         var context = ConfigUtils.getContextJSON();
+        var DEFAULT_CSV_NAME = "search results (csv)";
         /**
          * Cancel the current export request
          */
@@ -39,7 +40,7 @@
             var formatType = template.type;
             switch (formatType) {
                 case "DIRECT":
-                    if (formatName === "CSV") {
+                    if (formatName === DEFAULT_CSV_NAME) {
                         location.href = scope.reference.csvDownloadLink;
                     }
                     // NOTE: uncomment below when we want to support JSON
@@ -140,7 +141,7 @@
                     supportedFormats: [
                         {
                             outputs: [],
-                            displayname: "CSV",
+                            displayname: DEFAULT_CSV_NAME,
                             type: "DIRECT"
                         }
                     ]
