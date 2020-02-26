@@ -333,7 +333,8 @@
     .controller('profileModalDialogController', ['$uibModalInstance','$rootScope', 'ConfigUtils', 'Session','UriUtils',function ($uibModalInstance, $rootScope, ConfigUtils, Session, UriUtils){
         var dcctx = ConfigUtils.getContextJSON();
         var vm = this;
-        vm.groupList =[];
+        vm.globusGroupList = [];
+        vm.otherGroups = [];
         vm.identities = [];
         vm.client = {};
         vm.cancel = function() {
@@ -347,11 +348,14 @@
             vm.identities.push(session.client.identities[i]);
         }
 
-
         for(var i = 0; i<session.attributes.length; i++){
-            if(session.attributes[i].display_name && session.attributes[i].display_name !== user.display_name){
-                session.attributes[i].id = session.attributes[i].id.substring(24);
-                vm.groupList.push(session.attributes[i]);
+            if(session.attributes[i].display_name && session.attributes[i].display_name !== user.display_name && vm.identities.indexOf(session.attributes[i].id) == -1){
+                if (session.attributes[i].id.indexOf("globus") > -1) {
+                    session.attributes[i].id = session.attributes[i].id.substring(24);
+                    vm.globusGroupList.push(session.attributes[i]);
+                } else {
+                    vm.otherGroups.push(session.attributes[i]);
+                }
             }
         }
     }])

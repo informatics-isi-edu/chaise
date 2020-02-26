@@ -20,15 +20,15 @@
                     </ul>
                 </td>
             </tr>
-            <tr ng-if="ctrl.groupList">
-                <td rowspan="{{ctrl.groupList.length}}" class="text-left">Groups</td>
+            <tr ng-if="ctrl.globusGroupList">
+                <td rowspan="{{ctrl.globusGroupList.length}}" class="text-left">Groups</td>
                 <td rowspan="2">
                     <ul>
-                        <li ng-repeat="group in ctrl.groupList"><a href="https://www.globus.org/app/groups/{{group.id}}/about" target="_blank">{{group.display_name}}</a></li>
+                        <li ng-repeat="group in ctrl.globusGroupList"><a href="https://app.globus.org/groups/{{group.id}}/about" target="_blank">{{group.display_name}}</a></li>
+                        <li ng-repeat="group in ctrl.otherGroups"><span>{{group.display_name}}</span></li>
                     </ul>
                 </td>
             </tr>
         </tbody>
     </table>
-
 </div>
