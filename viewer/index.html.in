@@ -121,28 +121,28 @@
                     </div>
                     <div class="osd-container">
                         <div class="btn-group btn-group-sm pull-left menu-btn-container" ng-class="{'open-panel': !osd.annotationsSidebarAreHidden, 'close-panel': osd.annotationsSidebarAreHidden}" role="group">
-                            <button ng-click="osd.openAnnotations();" class="btn btn-success" type="button" ng-class="{'pick':!osd.annotationsSidebarAreHidden}" role="button" title="edit annotations" ng-disabled="osd.disableAnnotationList"  id="edit-btn">
+                            <button ng-click="osd.openAnnotations();" class="btn chaise-btn chaise-btn-primary" type="button" ng-class="{'pick':!osd.annotationsSidebarAreHidden}" role="button" uib-tooltip="edit annotations" ng-disabled="osd.disableAnnotationList"  id="edit-btn">
                               <span class="glyphicon glyphicon-edit"></span> {{osd.annotationsSidebarAreHidden ? "Show" : "Hide" }} Annotations
                             </button>
-                            <button ng-click="osd.filterChannels();" class="btn btn-success" ng-class="{'pick':osd.filterChannelsAreHidden}" type="button" role="button" title="channel filtering" ng-disabled="osd.filterChannels.length == 0" id="filter-btn">
+                            <button ng-click="osd.filterChannels();" class="btn chaise-btn chaise-btn-primary" ng-class="{'pick':osd.filterChannelsAreHidden}" type="button" role="button" uib-tooltip="channel filtering" id="filter-btn">
                                 <span class="glyphicon glyphicon-tasks"></span> {{osd.filterChannelsAreHidden ? "Hide" : "Show" }} Channels
                             </button>
-                            <!-- <button ng-click="osd.openAnnotations();" class="btn btn-success" type="button" ng-class="{'pick':!osd.annotationsSidebarAreHidden}" role="button" title="edit annotations" id="edit-btn">
+                            <!-- <button ng-click="osd.openAnnotations();" class="btn chaise-btn chaise-btn-primary" type="button" ng-class="{'pick':!osd.annotationsSidebarAreHidden}" role="button" title="edit annotations" id="edit-btn">
                                 <span class="glyphicon glyphicon-edit"></span> Annotations
                             </button> -->
-                            <!-- <button ng-click="osd.toggleAnnotations();" class="btn btn-success" ng-class="{'pick': osd.annotationsAreHidden}" type="button" role="button" title="hide or show annotations" id="hide-btn">
+                            <!-- <button ng-click="osd.toggleAnnotations();" class="btn chaise-btn chaise-btn-primary" ng-class="{'pick': osd.annotationsAreHidden}" type="button" role="button" title="hide or show annotations" id="hide-btn">
                                 <span class="glyphicon glyphicon-eye-close"></span> Hide
                             </button> -->
-                            <button ng-click="osd.zoomInView();" class="btn btn-success" type="button" role="button" title="zoom in" id="zoomin-btn">
+                            <button ng-click="osd.zoomInView();" class="btn chaise-btn chaise-btn-primary" type="button" role="button" uib-tooltip="zoom in" id="zoomin-btn">
                                 <span class="glyphicon glyphicon-zoom-in"></span> Zoom In
                             </button>
-                            <button ng-click="osd.zoomOutView();" class="btn btn-success" type="button" role="button" title="zoom out" id="zoomout-btn">
+                            <button ng-click="osd.zoomOutView();" class="btn chaise-btn chaise-btn-primary" type="button" role="button" uib-tooltip="zoom out" id="zoomout-btn">
                                 <span class="glyphicon glyphicon-zoom-out"></span> Zoom Out
                             </button>
-                            <button ng-click="osd.homeView();" class="btn btn-success" type="button" role="button" title="go home" id="gohome-btn">
+                            <button ng-click="osd.homeView();" class="btn chaise-btn chaise-btn-primary" type="button" role="button" uib-tooltip="reset" id="gohome-btn">
                                 <span class="glyphicon glyphicon-home"></span> Reset
                             </button>
-                            <button ng-click="osd.downloadView();" class="btn btn-success" type="button" role="button" title="take snapshot" id="download-btn">
+                            <button ng-click="osd.downloadView();" class="btn chaise-btn chaise-btn-primary" type="button" role="button" uib-tooltip="take snapshot" id="download-btn">
                                 <span class="glyphicon glyphicon-camera"></span> Take a Screenshot </button>
                         </div>
                         <iframe id="osd" width="100%" src="about:blank" frameBorder="0" style="flex:1">
