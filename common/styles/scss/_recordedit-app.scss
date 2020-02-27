@@ -142,6 +142,10 @@
                                 min-width: 250px;
                                 border-right: 1px solid $border-color;
                             }
+
+                            .modal-popup .chaise-input-control {
+                                height: unset;
+                            }
                         }
                     }
                 } // end "> tbody"
