@@ -35,7 +35,7 @@
         'ngSanitize',
         'ui.select',
         'ui.bootstrap',
-        'ng.deviceDetector' 
+        'ng.deviceDetector'
     ])
 
     .config(['$provide', function($provide) {
@@ -132,6 +132,8 @@
         var iframe = $window.frames[0];
         var annotoriousReady = false;
         var chaiseReady = false;
+        $rootScope.displayReady = false;
+
         var arrows = [];
         var rectangles = [];
         var sections = [];
@@ -220,7 +222,7 @@
                     $rootScope.reference.filterLogInfo
                 )
             ];
-            
+
         }, function error(response){
             console.log("ERMrest error : ", response );
         })
@@ -292,6 +294,9 @@
                     console.log('replace uri = '+image.entity.uri + waterMark)
                     iframe.location.replace(image.entity.uri + waterMark);
                     console.log('Image: ', image);
+                    console.log($rootScope.displayReady);
+                    $rootScope.displayReady = true;
+                    console.log($rootScope.displayReady);
 
                     var annotationTable = schema.tables.get('annotation');
                     var annotationPath = imagePath.extend(annotationTable).datapath;
@@ -312,7 +317,6 @@
                             annotations.push(annotation);
                         }
                         chaiseReady = true;
-
                         if (annotoriousReady && chaiseReady) {
                             iframe.postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
                         }
