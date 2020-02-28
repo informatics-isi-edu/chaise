@@ -9,9 +9,6 @@
                     <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-left">
-                    <li ng-if="pageLimits.indexOf(vm.pageLimit) === -1">
-                        <a class="page-size-limit-custom" href ng-click="setPageLimit(vm.pageLimit)">{{ vm.pageLimit }} (Custom)<span class="glyphicon glyphicon-ok pull-right"></span></a>
-                    </li>
                     <li ng-repeat="limit in pageLimits">
                         <a class="page-size-limit-{{limit}}" href ng-click="setPageLimit(limit)">{{ limit }}<span class="glyphicon pull-right" ng-class="vm.pageLimit === limit ? 'glyphicon-ok' : 'glyphicon-invisible'"></span></a>
                     </li>
