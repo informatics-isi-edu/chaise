@@ -20,9 +20,9 @@
                     </ul>
                 </td>
             </tr>
-            <tr ng-if="ctrl.globusGroupList">
-                <td rowspan="{{ctrl.globusGroupList.length}}" class="text-left">Groups</td>
-                <td rowspan="2">
+            <tr ng-if="ctrl.globusGroupList || ctrl.otherGroups">
+                <td class="text-left">Groups</td>
+                <td>
                     <ul>
                         <li ng-repeat="group in ctrl.globusGroupList"><a href="https://app.globus.org/groups/{{group.id}}/about" target="_blank">{{group.display_name}}</a></li>
                         <li ng-repeat="group in ctrl.otherGroups"><span>{{group.display_name}}</span></li>
