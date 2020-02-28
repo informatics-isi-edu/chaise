@@ -1019,6 +1019,9 @@
 
             // iterate over each row
             for(var i=0;i<trs.length;i++) {
+                // unset the height in case the column name is long enough to move the set all button down
+                trs[i].children[0].height = "unset";
+
                 // Get the height of the first column and  second column of the row
                 // Which are the key and value for the row
                 var keytdHeight = trs[i].children[0].getAttribute('data-height');
@@ -1027,17 +1030,6 @@
                     // set first TD height
                     trs[i].children[0].setAttribute('height', keytdHeight);
                 }
-
-                // text in entity key
-
-                    for (var j=0; j < trs[i].children[0].children.length; j++) {
-                        var ele = trs[i].children[0].children[j];
-                        if (ele.className.indexOf("column-displayname") > -1 && ele.offsetWidth > 150) {
-                            trs[i].children[0].height = "unset";
-                            trs[i].children[1].height = "unset";
-                        }
-                    };
-
 
                 var valuetdHeight = trs[i].children[1].offsetHeight;
 
