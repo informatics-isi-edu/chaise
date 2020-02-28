@@ -47,7 +47,7 @@ describe('View existing record,', function() {
             expect(element.all(by.css('.panel-open')).count()).toEqual(0);
         });
 
-        it ("should have only 'CSV' option in export menu because of `disableDefaultExport` chaise-config.", function () {
+        it ("should have only 'search results (csv)' option in export menu because of `disableDefaultExport` chaise-config.", function () {
             var options = chaisePage.recordsetPage.getExportOptions();
             expect(options.count()).toBe(1, "count missmatch");
         });

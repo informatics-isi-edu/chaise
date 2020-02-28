@@ -352,6 +352,15 @@ If the user clicked on a link in the navbar, the `PCID` will properly denote wha
 ###### Added
   - Added specific action for the `recordset/main/<ANY_SUBACTION>/correct-page`. This action will indicate that users went to a page with `@before` in url AND there is less data than limit implies (beginning of set) OR we got the right set of data but there's no previous set (beginning of set), and then chaise tried again without `@before` in url. This action is used for the second request that is trying the main request again without `@before`.
 
+### 07/10/19
+
+##### Commit Links
+ - [chaise](https://github.com/informatics-isi-edu/chaise/commit/062e5d1ec5eae13b2652e73a3abdcfc6c54c5f50)
+ 
+##### Changed
+ - pcid=navbar to pcid=navbar/<app-name>
+ - This was done to give more clarity as to which app the navbar was used to navigate
+
 ### 05/06/19
 
 ###### Commit Links

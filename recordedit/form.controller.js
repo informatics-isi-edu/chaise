@@ -360,6 +360,9 @@
                 }
 
                 vm.recordEditModel.rows[rowIndex][column.name] = tuple.displayname.value;
+
+                // call resize function in case the rowname is long enough to span 2+ lines
+                resizeColumns(true);
             }, null, false);
         }
 

@@ -1165,13 +1165,8 @@ var errorModal = function () {
 // Makes a string safe and valid for use in an HTML element's id attribute.
 // Commonly used for column displaynames.
 function makeSafeIdAttr(string) {
-    return String(string)
-        .replace(/&/g, '&amp;')
-        .replace(/\s/g, '&nbsp;') // any whitespace
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+    var ID_SAFE_REGEX = /[^\w-]+/g;
+    return String(string).replace(ID_SAFE_REGEX, '-');
 }
 
 function chaisePage() {
