@@ -294,9 +294,6 @@
                     console.log('replace uri = '+image.entity.uri + waterMark)
                     iframe.location.replace(image.entity.uri + waterMark);
                     console.log('Image: ', image);
-                    console.log($rootScope.displayReady);
-                    $rootScope.displayReady = true;
-                    console.log($rootScope.displayReady);
 
                     var annotationTable = schema.tables.get('annotation');
                     var annotationPath = imagePath.extend(annotationTable).datapath;

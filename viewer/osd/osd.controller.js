@@ -37,6 +37,8 @@
               break;
             }
         }
+        $rootScope.displayReady = true;
+
         vm.openAnnotations = openAnnotations;
         vm.error = '';
         vm.device = deviceDetector;
