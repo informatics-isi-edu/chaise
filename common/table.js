@@ -1541,6 +1541,16 @@
                 scope.recordsetDisplayModes = recordsetDisplayModes;
 
                 scope.pageLimits = [10, 25, 50, 75, 100, 200];
+                var insertCustomPageLimit = scope.$watch('vm.readyToInitialize', function () {
+                    if (scope.vm.readyToInitialize == true && scope.pageLimits.indexOf(scope.vm.pageLimit) === -1) {
+                        scope.pageLimits.push(scope.vm.pageLimit);
+                        scope.pageLimits.sort(function(a, b) {
+                            return a - b;
+                        });
+                        insertCustomPageLimit();
+                    }
+                });
+
                 scope.setPageLimit = function(limit) {
                     scope.vm.pageLimit = limit;
 

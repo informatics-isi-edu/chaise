@@ -878,10 +878,6 @@ var recordsetPage = function() {
         return element(by.css(".page-size-dropdown"));
     };
 
-    this.getCustomPageSize = function() {
-        return element(by.css(".page-size-limit-custom"));
-    };
-
     this.getPageLimitSelector = function (limit) {
         return element(by.css(".page-size-limit-" + limit));
     };
