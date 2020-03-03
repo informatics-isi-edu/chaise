@@ -141,6 +141,10 @@ body.error-open loading-spinner {
 
 /************* Profile Card ****************/
 .profile-popup {
+    // to allow scrolling and showing all content
+    .modal-content {
+        max-height: unset;
+    }
     ul li {
         list-style-type: disc;
     }

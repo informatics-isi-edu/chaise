@@ -208,15 +208,45 @@ When users open a page, or interact with the page, we might send some requests t
 
 ### Stack structure
 
-As we previously explained, `stack` is used to capture the user path. It's an array of "stack nodes", where each node summarizes the user path. This has been mainly done to distinguish between the same actions that users might have taken in different paths. For instance, we show the same controls that we have in recordset app, in all of our modal pickers. Without the stack, the user path (context) would be lost. We tried to summarize the stack structure associated with each request in the google sheet. Each cell, represent a node in the stack with attributes that will be available on it
+As we previously explained, `stack` is used to capture the user path. It's an array of "stack nodes", where each node summarizes the user path. This has been mainly done to distinguish between the same actions that users might have taken in different paths. For instance, we show the same controls that we have in recordset app, in all of our modal pickers. Without the stack, the user path (context) would be lost. We tried to summarize the stack structure associated with each request in the google sheet. Each cell represent a node in the stack with attributes that will be available on it.
 
 To give you a better idea of how to read the table, let's consider the case that the user is interacting with a facet picker, that was opened from an association link picker on an inline related entity. So,
 
-- first stack node should capture the record page app and the filters that it had.
-- second stack node should capture the association link picker and the filters that it had before opening the facet picker.
-- third stack node should capture the state of facet picker.
+- first stack node should capture the record page app and the filters that it had. So it should be of `"type": "entity"`, and should have `filters` of main page and `s_t` should be the main table.
+  ```javascript
+  {
+    "type": "entity",
+    "s_t": "schema:main_table",
+    "filters": {"and": [{"src": "RID", "ch": ["RID_VALUE"]}]}
+  }
+  ```
 
-Therefore this is how the stack should look like:
+- second stack node should capture the association link picker and the filters that it had before opening the facet picker. So the `s_t` should show the leaf (related) table, the `source` should capture the path from the main table to this related table, a `"picker": 1` should be added to signal that this was a picker and not the related section, and if the picker had any filters (facets), `filters` should capture those (`filters` might not be available if the user didn't select any filters).
+  ```javascript
+  {
+    "type": "related",
+    "s_t": "schema:related_table",
+    "source": [{"i": ["schema", "constraint"]}, "RID"],
+    "entity": true,
+    "picker": 1,
+    "filters": {"and": [{"src": "SOME_COLUMN", "ch": ["SOME_VALUE"]}]}
+  }
+  ```
+
+- third stack node should capture the state of facet picker. So the `s_t` should show the facet table, `source` should be the path from the related table to the facet table, `"picker": 1` should be added to signal that it was a picker, and if the picker had any filters (search-box filter is the only applicable case here), `filters` should capture those (`filters` might not be available if the user didn't change the search-box value).
+    ```javascript
+    {
+      "type": "facet",
+      "s_t": "schema:facet_table",
+      "source": [{"o": ["schema", "constraint2"]}, "RID"],
+      "entity": false,
+      "picker": 1,
+      "filters": {"and": [{"key": "search-box", "s": ["TERM"]}]}
+    }
+    ```
+
+
+And if we put these three together, this is how the stack should look like:
 
 ```javascript
 {
@@ -246,7 +276,7 @@ Therefore this is how the stack should look like:
 }
 ```
 
-And this stack would be added to any logs that we generate from that picker, and will be reflected in the action string. For example if the user opens the page-limit dropdown menu, the action would be `:entity/related-link-picker/facet-picker,page-size;open`.
+This stack would be added to any logs that we generate from that picker, and will be reflected in the action string. For example if the user opens the page-limit dropdown menu, the action would be `:entity/related-link-picker/facet-picker,page-size;open`.
 
 ## Facet compressed syntax
 
@@ -296,13 +326,21 @@ As the name suggests, we currently are only logging terminal errors.
 
 ## Truncation
 
-The object that we want to log might be lengthy. So we should truncate this object if it's exceeding the maximum length (we're currently limiting it to 6500 characeters after encoding). In truncation logic we perform each of the described steps below to shorten the length of the object. If one step was not enough, we would perform the next step and so on until the length goes below the limit. The steps are:
+The object that we want to log might be lengthy. So we should truncate this object if it's exceeding the maximum length (we're currently limiting it to 6500 characters after encoding). In truncation logic we perform each of the described steps below to shorten the length of the object. If one step was not enough, we would perform the next step and so on until the length goes below the limit. The steps are:
 
-1. Replace all foreign key constraints with their RID.
+1. Replace all foreign key constraints that are in `source` or `filters` properties with their ermrest-provided model RID.
 2. Replace values (`choices`, `ranges`, `search`) in the `filters` with the number of values.
 3. Replace all `filters.and` with the number of filters.
 4. Replace all source paths with the number of path nodes.
 5. Replace `stack` value with the number of stack nodes.
+
+As you might have noticed, we are not adding any extra flag to signal truncation, and the structure itself should indicate that the request header has been truncated. The following summarizes how structure is changed based on the defined steps above:
+
+1. Instead of array of two elements ([`schema`, `constraint`]) for the constraints, there will be a string.
+2. Instead of arrays of values for `choices`, `ranges`, and `search` attributes in `filters`, there will be a number.
+3. Instead of array of filters in the `filters.and`, there will be just a number.
+4. Instead of an array, the `stack` value will be just a number.
+
 
 ## Analysis
 

@@ -97,6 +97,9 @@
      *       containerIndex: "the containerIndex defined in the config object"
      *     }
      * 5. `edit-request`: When users click on "edit" button for a row. It's sending the same object as `record-deleted`.
+     * 6. `aggregate-loaded-<containerIndex>-<rowIndex>`: when an aggregate value has returned, an event is emitted
+     *     to trigger logic in ellipsis.js that conditionally adds a resize sensor to the cell associated with `colIndex`
+     *     that is also passed along with the emitted event
      */
     .factory('recordTableUtils',
             ['AlertsService', 'DataUtils', 'defaultDisplayname', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'recordsetDisplayModes', 'Session', 'tableConstants', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$q', '$rootScope', '$timeout', '$window',
@@ -256,6 +259,12 @@
                             vm.pendingRowValues[valIndex][obj.index] = displayValue;
                         } else {
                             vm.rowValues[valIndex][obj.index] = displayValue;
+                            // emit aggregates loaded event for [row][column]
+                            var uniqueIndex = valIndex;
+                            if (vm.config.containerIndex) {
+                                uniqueIndex = vm.config.containerIndex + "-" + uniqueIndex;
+                            }
+                            $rootScope.$emit("aggregate-loaded-" + uniqueIndex, obj.index);
                         }
                     });
                 });
@@ -383,6 +392,13 @@
                 for (var rowIndex in vm.pendingRowValues) {
                     for (var colIndex in vm.pendingRowValues[rowIndex]) {
                         vm.rowValues[rowIndex][colIndex] = vm.pendingRowValues[rowIndex][colIndex];
+                        // emit aggregates loaded event for [row][column] after push more rows
+
+                        var uniqueIndex = rowIndex;
+                        if (vm.config.containerIndex) {
+                            uniqueIndex = vm.config.containerIndex + uniqueIndex;
+                        }
+                        $rootScope.$emit("aggregate-loaded-" + uniqueIndex, colIndex);
                     }
                 }
             }
@@ -1519,6 +1535,16 @@
                 scope.recordsetDisplayModes = recordsetDisplayModes;
 
                 scope.pageLimits = [10, 25, 50, 75, 100, 200];
+                var insertCustomPageLimit = scope.$watch('vm.readyToInitialize', function () {
+                    if (scope.vm.readyToInitialize == true && scope.pageLimits.indexOf(scope.vm.pageLimit) === -1) {
+                        scope.pageLimits.push(scope.vm.pageLimit);
+                        scope.pageLimits.sort(function(a, b) {
+                            return a - b;
+                        });
+                        insertCustomPageLimit();
+                    }
+                });
+
                 scope.setPageLimit = function(limit) {
                     scope.vm.pageLimit = limit;
 

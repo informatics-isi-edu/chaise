@@ -1187,22 +1187,20 @@
             return (typeof data === 'number') && (data % 1 === 0);
         }
 
+        var ID_SAFE_REGEX = /[^\w-]+/g;
         /**
         *
-        * @desc Converts the following characters to HTML entities for safe and
-        * HTML5-valid usage in the `id` attributes of HTML elements: spaces, ampersands,
-        * right angle brackets, left angle brackets, double quotes, single quotes.
+        * @desc This function is used to make sure the input `string` is id/class safe
+        * For both class and id:
+        *   - Must begin with a letter A-Z or a-z
+        *   - Can be followed by: letters (A-Za-z), digits (0-9), hyphens ("-"), and underscores ("_")
+        * NOTE: this won't ensure the very beginning of the input string is safe
+        * it assumes the input string is being appended to an already safe string
         * @param {String} string
         * @return {String} a string suitable for use in the `id` attributes of HTML elements
         */
         function makeSafeIdAttr(string, val) {
-            return String(string)
-                .replace(/&/g, '&amp;')
-                .replace(/\s/g, '&nbsp;') // any whitespace
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
+            return String(string).replace(ID_SAFE_REGEX, '-');
         }
 
         /**

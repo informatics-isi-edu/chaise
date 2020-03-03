@@ -345,9 +345,9 @@ describe('View recordset,', function() {
 
             it("should use annotated page size", function() {
                 var EC = protractor.ExpectedConditions;
-                var e = chaisePage.recordsetPage.getCustomPageSize();
+                var e = chaisePage.recordsetPage.getPageLimitSelector(15);
                 browser.wait(EC.presenceOf(e), browser.params.defaultTimeout);
-                expect(e.getAttribute("innerText")).toBe("15 (Custom)");
+                expect(e.getAttribute("innerText")).toBe("15");
             });
 
             it("should show correct table rows", function() {
@@ -421,8 +421,8 @@ describe('View recordset,', function() {
             if (!process.env.TRAVIS) {
                 it("should have 'CSV' as a download option and download the file.", function(done) {
                     chaisePage.recordsetPage.getExportDropdown().click().then(function () {
-                        var csvOption = chaisePage.recordsetPage.getExportOption("CSV");
-                        expect(csvOption.getText()).toBe("CSV");
+                        var csvOption = chaisePage.recordsetPage.getExportOption("search results (csv)");
+                        expect(csvOption.getText()).toBe("search results (csv)");
                         return csvOption.click();
                     }).then(function () {
                         browser.wait(function() {
@@ -488,7 +488,7 @@ describe('View recordset,', function() {
 
             it("apply different searches, ", function(done) {
                 var EC = protractor.ExpectedConditions;
-                var e = chaisePage.recordsetPage.getCustomPageSize();
+                var e = chaisePage.recordsetPage.getPageLimitSelector(15);
                 browser.wait(EC.presenceOf(e), browser.params.defaultTimeout);
 
                 var searchBox = chaisePage.recordsetPage.getMainSearchInput(),
@@ -875,7 +875,7 @@ describe('View recordset,', function() {
 
         it("should load the table with " + fileParams.custom_page_size + " rows of data based on the page size annotation.", function() {
             // Verify page count and on first page
-            var e = chaisePage.recordsetPage.getCustomPageSize();
+            var e = chaisePage.recordsetPage.getPageLimitSelector(fileParams.custom_page_size);
 
             browser.wait(EC.presenceOf(e), browser.params.defaultTimeout).then(function() {
                 browser.wait(function () {

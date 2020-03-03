@@ -360,6 +360,9 @@
                 }
 
                 vm.recordEditModel.rows[rowIndex][column.name] = tuple.displayname.value;
+
+                // call resize function in case the rowname is long enough to span 2+ lines
+                resizeColumns(true);
             }, null, false);
         }
 
@@ -1016,13 +1019,16 @@
 
             // iterate over each row
             for(var i=0;i<trs.length;i++) {
+                // unset the height in case the column name is long enough to move the set all button down
+                trs[i].children[0].height = "unset";
+
                 // Get the height of the first column and  second column of the row
                 // Which are the key and value for the row
                 var keytdHeight = trs[i].children[0].getAttribute('data-height');
                 if (keytdHeight == null || keytdHeight == 0) {
                     keytdHeight = trs[i].children[0].offsetHeight;
                     // set first TD height
-                    trs[i].children[0].setAttribute('data-height', keytdHeight);
+                    trs[i].children[0].setAttribute('height', keytdHeight);
                 }
 
                 var valuetdHeight = trs[i].children[1].offsetHeight;

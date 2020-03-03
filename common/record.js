@@ -113,7 +113,7 @@
 
             $scope.tooltip = {
                 createButton: "Add more " + displayname + " related to this " + tablename + ".",
-                exploreButton: "View more " + displayname + " related to this " + tablename + "."
+                exploreButton: "Explore more " + displayname + " records related to this " + tablename + "."
             };
 
             if ($scope.canEdit) {

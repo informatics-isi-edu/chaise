@@ -41,11 +41,11 @@ describe('View existing record,', function() {
                     recordSetHelpers.deleteDownloadedFiles(testParams.file_names);
                 });
 
-                it ("first option must be `CSV` and user should be able to download the file.", function (done) {
+                it ("first option must be `search results (csv)` and user should be able to download the file.", function (done) {
                     browser.wait(EC.elementToBeClickable(exportBtn));
                     chaisePage.clickButton(exportBtn).then(function () {
-                        var csvOption = chaisePage.recordsetPage.getExportOption("CSV");
-                        expect(csvOption.getText()).toBe("CSV");
+                        var csvOption = chaisePage.recordsetPage.getExportOption("search results (csv)");
+                        expect(csvOption.getText()).toBe("search results (csv)");
                         return chaisePage.clickButton(csvOption);
                     }).then(function () {
                         browser.wait(function() {
