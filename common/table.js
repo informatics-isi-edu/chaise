@@ -232,41 +232,7 @@
                     vm.aggregateResults[valIndex][activeListModel.column.name] = val;
 
                     // attach the values to the appropriate objects
-                    activeListModel.objects.forEach(function (obj) {
-                        // this is only called in recordset so it won't be related
-                        if (!obj.column) return;
-                        var model = vm.columnModels[obj.index];
-
-                        // do we have all the waitfor results?
-                        var hasAll = model.column.waitFor.every(function (col) {
-                            return col.isUnique || col.name in vm.aggregateResults[valIndex];
-                        });
-                        if (!(hasAll && (model.column.name in vm.aggregateResults[valIndex] || model.column.isUnique))) return;
-
-                        var displayValue = model.column.sourceFormatPresentation(
-                            vm.templateVariables[valIndex],
-                            vm.aggregateResults[valIndex][model.column.name],
-                            vm.page.tuples[valIndex]
-                        );
-
-                        model.isLoading = false;
-
-                        // if rowValues has not been completely populated yet, use pendingRowValues instead
-                        if (vm.pushMoreRowsPending) {
-                            if (vm.pendingRowValues[valIndex] === undefined) {
-                                vm.pendingRowValues[valIndex] = {};
-                            }
-                            vm.pendingRowValues[valIndex][obj.index] = displayValue;
-                        } else {
-                            vm.rowValues[valIndex][obj.index] = displayValue;
-                            // emit aggregates loaded event for [row][column]
-                            var uniqueIndex = valIndex;
-                            if (vm.config.containerIndex) {
-                                uniqueIndex = vm.config.containerIndex + "-" + uniqueIndex;
-                            }
-                            $rootScope.$emit("aggregate-loaded-" + uniqueIndex, obj.index);
-                        }
-                    });
+                    _attachPseudoColumnValue(vm, activeListModel, valIndex);
                 });
 
                 // clear the causes
@@ -297,6 +263,55 @@
             });
 
             return defer.promise;
+        }
+
+        /**
+         * @private
+         * This function is called inside `_updateColumnAggregate`, after
+         * the value is attached to the appropriate objects.
+         * The purpose of this function is to show value of a column,
+         * if all it's dependencies are available.
+         * @param {Object} vm - the table model
+         * @param {Object} activeListModel - the model that ermrestjs returns
+         * @param {Integer} valIndex - the row index
+         */
+        function _attachPseudoColumnValue(vm, activeListModel, valIndex) {
+            activeListModel.objects.forEach(function (obj) {
+                // this is only called in recordset so it won't be any other type
+                if (!obj.column) return;
+
+                var model = vm.columnModels[obj.index];
+
+                // do we have all the waitfor results?
+                var hasAll = model.column.waitFor.every(function (col) {
+                    return col.isUnique || col.name in vm.aggregateResults[valIndex];
+                });
+                if (!(hasAll && (model.column.name in vm.aggregateResults[valIndex] || model.column.isUnique))) return;
+
+                var displayValue = model.column.sourceFormatPresentation(
+                    vm.templateVariables[valIndex],
+                    vm.aggregateResults[valIndex][model.column.name],
+                    vm.page.tuples[valIndex]
+                );
+
+                model.isLoading = false;
+
+                // if rowValues has not been completely populated yet, use pendingRowValues instead
+                if (vm.pushMoreRowsPending) {
+                    if (vm.pendingRowValues[valIndex] === undefined) {
+                        vm.pendingRowValues[valIndex] = {};
+                    }
+                    vm.pendingRowValues[valIndex][obj.index] = displayValue;
+                } else {
+                    vm.rowValues[valIndex][obj.index] = displayValue;
+                    // emit aggregates loaded event for [row][column]
+                    var uniqueIndex = valIndex;
+                    if (vm.config.containerIndex) {
+                        uniqueIndex = vm.config.containerIndex + "-" + uniqueIndex;
+                    }
+                    $rootScope.$emit("aggregate-loaded-" + uniqueIndex, obj.index);
+                }
+            });
         }
 
         /**
