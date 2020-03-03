@@ -45,27 +45,42 @@
                 return;
             }
 
-            var i = 0, model;
+            var i = 0, model, reqModel, activeListModel;
 
-            // inline entities
-            for (i = 0; i < $rootScope.columnModels.length && $rootScope.hasInline; i++) {
-                model = $rootScope.columnModels[i];
-                if (!model.isInline || !model.tableModel.dirtyResult) continue;
+            // requests (inline, aggrgates, entityset, related)
+            for (i = 0; i < $rootScope.requestModels.length; i++) {
                 if (!_haveFreeSlot()) return;
-                recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate, true, _afterUpdateRelatedEntity(model));
+                reqModel = $rootScope.requestModels[i];
+                activeListModel = reqModel.activeListModel;
+
+                if (reqModel.processed) continue;
+
+                reqModel.processed = true;
+
+                // inline
+                if (activeListModel.inline) {
+                    model = $rootScope.columnModels[activeListModel.index];
+                    if (model.tableModel.dirtyResult) {
+                        // will take care of adding to occpuied slots
+                        recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate, true, _afterUpdateRelatedEntity(model));
+                    }
+                    return;
+                }
+
+                // related
+                if (activeListModel.related) {
+                    model = $rootScope.relatedTableModels[activeListModel.index];
+                    if (model.tableModel.dirtyResult) {
+                        // will take care of adding to occpuied slots
+                        recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate, true, _afterUpdateRelatedEntity(model));
+                    }
+
+                    return;
+                }
+
+                // entityset or aggregate
+                _updatePseudoColumn(reqModel, isUpdate, $rootScope.recordFlowControl.counter);
             }
-
-            // main aggregates
-            readMainAggregates(isUpdate);
-
-            // related entites
-            for (i = 0; i < $rootScope.relatedTableModels.length; i++) {
-                model = $rootScope.relatedTableModels[i];
-                if (!model.tableModel.dirtyResult) continue;
-                if (!_haveFreeSlot()) return;
-                recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate, true, _afterUpdateRelatedEntity(model));
-            }
-
 
             // aggregates in inline
             for (i = 0; i < $rootScope.columnModels.length && $rootScope.hasInline; i++) {
@@ -90,8 +105,9 @@
          * - otherwise it will not do anyting.
          */
         function _afterUpdateRelatedEntity(model) {
-            return function (tableModel) {
-                if (!model.hasWaitFor || model.waitForDataLoaded) {
+            return function (tableModel, res) {
+                model.processed = !res;
+                if (res && (!model.hasWaitFor || model.waitForDataLoaded)) {
                     model.pageContentInitialized = true;
                     model.pageContent = tableModel.page.getContent($rootScope.templateVariables);
                 }
@@ -118,65 +134,63 @@
             }
 
             $rootScope.citationReady = false;
-            (function (requestCauses, reloadStartTime) {
-                $rootScope.reference.read(1, logObj).then(function (page) {
-                    $log.info("Page: ", page);
+            $rootScope.reference.read(1, logObj).then(function (page) {
+                $log.info("Page: ", page);
 
-                    /*
-                    *  recordSetLink should be used to present user with  an option in case of no data found/more data found(>1)
-                    *  This could be link to RECORDSET or SEARCH.
-                    */
-                    var recordSetLink = page.reference.unfilteredReference.contextualize.compact.appLink;
-                    var tableDisplayName = page.reference.displayname.value;
-                    if (page.tuples.length < 1) {
-                        throw new Errors.noRecordError({}, tableDisplayName, recordSetLink);
-                    }
-                    else if(page.hasNext || page.hasPrevious){
-                        throw new Errors.multipleRecordError(tableDisplayName, recordSetLink);
-                    }
+                /*
+                *  recordSetLink should be used to present user with  an option in case of no data found/more data found(>1)
+                *  This could be link to RECORDSET or SEARCH.
+                */
+                var recordSetLink = page.reference.unfilteredReference.contextualize.compact.appLink;
+                var tableDisplayName = page.reference.displayname.value;
+                if (page.tuples.length < 1) {
+                    throw new Errors.noRecordError({}, tableDisplayName, recordSetLink);
+                }
+                else if(page.hasNext || page.hasPrevious){
+                    throw new Errors.multipleRecordError(tableDisplayName, recordSetLink);
+                }
 
-                    $rootScope.page = page;
-                    var tuple = $rootScope.tuple = page.tuples[0];
+                $rootScope.page = page;
+                var tuple = $rootScope.tuple = page.tuples[0];
 
-                    //whether citation is waiting for other data or we can show it on load
-                    $rootScope.citationReady = ($rootScope.tuple.citation === null) || ($rootScope.tuple.citation.hasWaitFor);
+                // Used directly in the record-display directive
+                $rootScope.recordDisplayname = tuple.displayname;
 
-                    // Used directly in the record-display directive
-                    $rootScope.recordDisplayname = tuple.displayname;
-
-                    // Collate tuple.isHTML and tuple.values into an array of objects
-                    // i.e. {isHTML: false, value: 'sample'}
-                    $rootScope.recordValues = [];
-                    tuple.values.forEach(function(value, index) {
-                        $rootScope.recordValues.push({
-                            isHTML: tuple.isHTML[index],
-                            value: value
-                        });
+                // Collate tuple.isHTML and tuple.values into an array of objects
+                // i.e. {isHTML: false, value: 'sample'}
+                $rootScope.recordValues = [];
+                tuple.values.forEach(function(value, index) {
+                    $rootScope.recordValues.push({
+                        isHTML: tuple.isHTML[index],
+                        value: value
                     });
-
-                    $rootScope.templateVariables = tuple.templateVariables.values;
-                    $rootScope.aggregateResults = new Array(1);
-
-                    $rootScope.displayReady = true;
-
-                    if (isUpdate) {
-                        $rootScope.aggregateModels.forEach(function (agg, i) {
-                            agg.processed = false;
-                            agg.reloadCauses = requestCauses;
-                            if (!Number.isInteger(agg.reloadStartTime) || agg.reloadStartTime === -1) {
-                                agg.reloadStartTime = ERMrest.getElapsedTime();
-                            }
-                        });
-                    }
-
-                    $rootScope.reloadCauses = [];
-                    $rootScope.reloadStartTime = -1;
-
-                    defer.resolve(page);
-                }).catch(function (err) {
-                    defer.reject(err);
                 });
-            })(causes, $rootScope.reloadStartTime);
+
+                $rootScope.templateVariables = tuple.templateVariables.values;
+                $rootScope.aggregateResults = {};
+                $rootScope.entitySetResults = {};
+
+                //whether citation is waiting for other data or we can show it on load
+                var citation = tuple.citation;
+                if (DataUtils.isObjectAndNotNull(citation)) {
+                    $rootScope.citationReady = !citation.hasWaitFor;
+                    if ($rootScope.citationReady) {
+                        $rootScope.citation = citation.compute($rootScope.templateVariables);
+                    }
+                } else {
+                    $rootScope.citationReady = true;
+                    $rootScope.citation = null;
+                }
+
+                $rootScope.displayReady = true;
+
+                $rootScope.reloadCauses = [];
+                $rootScope.reloadStartTime = -1;
+
+                defer.resolve(page);
+            }).catch(function (err) {
+                defer.reject(err);
+            });
 
 
             return defer.promise;
@@ -184,22 +198,17 @@
 
         /**
          * @private
-         * creates the read request for aggregate columns of the main entity
+         * _processRequests calls this to handle pseudo-columns (aggregate and entityset)
          */
-        function readMainAggregates(isUpdate) {
-            $rootScope.aggregateModels.forEach(function (aggModel, index) {
-                if (!_haveFreeSlot() || aggModel.processed) return;
+        function _updatePseudoColumn(reqModel, isUpdate, counter) {
+            _readPseudoColumn(reqModel, isUpdate, $rootScope.recordFlowControl.counter).then(function (res) {
+                $rootScope.recordFlowControl.occupiedSlots--;
 
-                $rootScope.recordFlowControl.occupiedSlots++;
-                aggModel.processed = true;
+                reqModel.processed = res;
 
-                _readMainColumnAggregate(aggModel, isUpdate, $rootScope.recordFlowControl.counter).then(function (res) {
-                    $rootScope.recordFlowControl.occupiedSlots--;
-
-                    $rootScope.aggregateModels[index].processed = res;
-                }).catch(function (err) {
-                    throw err;
-                });
+                _processRequests(isUpdate);
+            }).catch(function (err) {
+                throw err;
             });
         }
 
@@ -208,12 +217,12 @@
          * Generate request for each individual aggregate columns.
          * Returns a promise. The resolved value denotes the success or failure.
          */
-        function _readMainColumnAggregate(aggModel, isUpdate, current) {
+        function _readPseudoColumn(recordModel, isUpdate, current) {
             var defer = $q.defer();
-            var agg = aggModel.model;
+            var activeListModel = recordModel.activeListModel;
 
             // show spinner for all the dependent columns
-            agg.objects.forEach(function (obj) {
+            activeListModel.objects.forEach(function (obj) {
                 if (obj.column || obj.inline) {
                     $rootScope.columnModels[obj.index].isLoading = true;
                 } else if (obj.related) {
@@ -222,85 +231,80 @@
             });
 
             var action = isUpdate ? logService.logActions.RELOAD : logService.logActions.LOAD;
-            var stackPath = logService.getStackPath("", logService.logStackPaths.PSEUDO_COLUMN), stack = agg.logStack;
-            if (Array.isArray(agg.reloadCauses) && agg.reloadCauses.length > 0) {
-                stack = logService.addCausesToStack(stack, agg.reloadCauses, agg.reloadStartTime);
+            var stack = recordModel.logStack;
+            if (Array.isArray(recordModel.reloadCauses) && recordModel.reloadCauses.length > 0) {
+                stack = logService.addCausesToStack(stack, recordModel.reloadCauses, recordModel.reloadStartTime);
             }
             var logObj = {
-                action: logService.getActionString(action, stackPath),
-                stack: stack
+                action: logService.getActionString(action, recordModel.logStackPath),
+                stack: recordModel.logStack
             };
-            agg.column.getAggregatedValue($rootScope.page, logObj).then(function (values) {
+
+            var cb;
+            if (activeListModel.entityset) {
+                // TODO contextualize?
+                cb = activeListModel.column.reference.read(1, logObj);
+            } else {
+                cb = activeListModel.column.getAggregatedValue($rootScope.page, logObj);
+            }
+
+            cb.then(function (values) {
                 if ($rootScope.recordFlowControl.counter !== current) {
                     return defer.resolve(false), defer.promise;
                 }
 
-                // use the returned value (assumption is that values is an array of 0)
-                var val = values[0];
+                // remove the column error (they might retry)
+                activeListModel.objects.forEach(function (obj) {
+                    if (obj.column) {
+                        $rootScope.columnModels[obj.index].columnError = false;
+                    }
+                })
 
-                //update the templateVariables
-                var sourceDefinitions = $rootScope.reference.table.sourceDefinitions;
-                if (agg.objects.length > 0 && Array.isArray(sourceDefinitions)) {
-                    sourceDefinitions.forEach(function (k) {
-                        if (val.templateVariables["$self"]) {
-                            vm.templateVariables[k] = val.templateVariables["$self"];
-                        }
-                        if (val.templateVariables["$_self"]) {
-                            vm.templateVariables["_" + k] = val.templateVariables["$_self"];
-                        }
-                    });
+                if (activeListModel.entityset) { // entitysets
+
+                    //update the templateVariables
+                    var sourceDefinitions = $rootScope.reference.table.sourceDefinitions;
+
+                    // this check is unnecessary, otherwise ermrestjs wouldn't add them to the active list
+                    // but for consistency I left this check here
+                    // entitysets are fetched to be used in waitfor, so we don't need to do anything else with
+                    // the returned object apart from updating the templateVariables
+                    if (activeListModel.objects.length > 0 && Array.isArray(sourceDefinitions)) {
+                        sourceDefinitions.forEach(function (k) {
+                            // the returned values is a page object in this case
+                            $rootScope.templateVariables[k] = values.templateVariables;
+                        });
+                    }
+
+                    // update the entitySetResults (we're just using this to make sure it's done)
+                    $rootScope.entitySetResults[activeListModel.column.name] = true;
+                } else { // aggregates
+                    // use the returned value (assumption is that values is an array of 0)
+                    var val = values[0];
+
+                    //update the templateVariables
+                    var sourceDefinitions = $rootScope.reference.table.sourceDefinitions;
+                    if (activeListModel.objects.length > 0 && Array.isArray(sourceDefinitions)) {
+                        sourceDefinitions.forEach(function (k) {
+                            if (val.templateVariables["$self"]) {
+                                $rootScope.templateVariables[k] = val.templateVariables["$self"];
+                            }
+                            if (val.templateVariables["$_self"]) {
+                                $rootScope.templateVariables["_" + k] = val.templateVariables["$_self"];
+                            }
+                        });
+                    }
+
+                    //update the aggregateResults
+                    $rootScope.aggregateResults[activeListModel.column.name] = val;
                 }
 
-                //update the aggregateResults
-                $rootScope.aggregateResults[agg.columnName] = val;
-
                 // attach the value if all has been returned
-                agg.objects.forEach(function (obj) {
-                    var hasAll
-                    if (obj.citation) { // this means that the citation is available and not null
-                        hasAll = $root.tuple.citation.waitFor.every(function (c) {
-                            return c.isUnique || c.name in $rootScope.aggregateResults;
-                        });
-                        if (hasAll) {
-                            // we just need to set this flag
-                            $rootScope.citationReady = true;
-                        }
-                        return;
-                    } else if (obj.column) {
-                        var cmodel = $rootScope.columnModels[obj.index];
-                        var hasAll = cmodel.column.waitFor.every(function (col) {
-                            return col.isUnique || col.name in $rootScope.aggregateResults;
-                        });
-                        if (!(hasAll && (cmodel.column.name in $rootScope.aggregateResults || cmodel.column.isUnique))) return;
-
-                        var displayValue = cmodel.column.sourceFormatPresentation(
-                            $rootScope.templateVariables,
-                            $rootScope.aggregateResults[cmodel.column.name],
-                            $rootScope.tuple
-                        );
-
-                        cmodel.isLoading = false;
-                        $rootScope.recordValues[obj.index] = displayValue;
-                    } else if (obj.inline || obj.related) {
-                        var model = obj.inline ? $rootScope.columnModels[obj.index] : $rootScope.relatedTableModels[obj.index];
-                        var ref = model.tableModel.reference;
-                        var hasAll = ref.sourceWaitFor.every(function (col) {
-                            return col.isUnique || col.name in $rootScope.aggregateResults;
-                        });
-
-                        model.isLoading = false;
-                        model.waitForDataLoaded = true;
-                        // if the page data is already fetched, we can just popuplate the pageContent value.
-                        if (model.tableModel.page && !model.tableModel.dirtyResult) {
-                            model.pageContent = model.tableModel.page.getContent($rootScope.templateVariables);
-                            model.pageContentInitialized = true;
-                        }
-                    }
-                });
+                _attachPseudoColumnValue(activeListModel);
 
                 // clear the causes
-                agg.reloadCauses = [];
-                agg.reloadStartTime = -1;
+                recordModel.reloadCauses = [];
+                recordModel.reloadStartTime = -1;
 
                 return defer.resolve(true), defer.promise;
             }).catch(function (err) {
@@ -308,7 +312,7 @@
                     return defer.resolve(false), defer.promise;
                 }
 
-                agg.objects.forEach(function (obj) {
+                activeListModel.objects.forEach(function (obj) {
 
                     //remove the spinner from the dependent columns
                     if (obj.column || obj.inline) {
@@ -332,6 +336,62 @@
             });
 
             return defer.promise;
+        }
+
+        /**
+         * @private
+         * This function is called inside `_readPseudoColumn`, after
+         * the value is attached to the appropriate objects.
+         * The purpose of this function is to show value of a model,
+         * if all it's dependencies are available.
+         * @param {Object} activeListModel - the model that ermrestjs returns
+         */
+        function _attachPseudoColumnValue(activeListModel) {
+            activeListModel.objects.forEach(function (obj) {
+                var hasAll;
+                if (obj.citation) { // this means that the citation is available and not null
+                    hasAll = $rootScope.tuple.citation.waitFor.every(function (c) {
+                        return c.isUnique || c.name in $rootScope.aggregateResults || c.name in $rootScope.entitySetResults;
+                    });
+                    if (hasAll) {
+                        $rootScope.citationReady = true;
+                        $rootScope.citation = $rootScope.tuple.citation.compute($rootScope.templateVariables);
+                    }
+                    return;
+                } else if (obj.column) {
+                    var cmodel = $rootScope.columnModels[obj.index];
+                    var hasAll = cmodel.column.waitFor.every(function (col) {
+                        return col.isUnique || col.name in $rootScope.aggregateResults || col.name in $rootScope.entitySetResults;
+                    });
+                    // TODO we need the second check because in ermrestjs I'm not adding the current column,
+                    // if I change ermerstjs to include the current column then this will be solved....
+                    if (!(hasAll && (cmodel.column.name in $rootScope.aggregateResults || cmodel.column.name in $rootScope.entitySetResults || cmodel.column.isUnique))) return;
+
+                    var displayValue = cmodel.column.sourceFormatPresentation(
+                        $rootScope.templateVariables,
+                        $rootScope.aggregateResults[cmodel.column.name],
+                        $rootScope.tuple
+                    );
+
+                    cmodel.isLoading = false;
+                    $rootScope.recordValues[obj.index] = displayValue;
+                } else if (obj.inline || obj.related) {
+                    var model = obj.inline ? $rootScope.columnModels[obj.index] : $rootScope.relatedTableModels[obj.index];
+                    var ref = model.tableModel.reference;
+                    var hasAll = ref.sourceWaitFor.every(function (col) {
+                        return col.isUnique || col.name in $rootScope.aggregateResults || col.name in $rootScope.entitySetResults;
+                    });
+                    if (!hasAll) return;
+
+                    model.isLoading = false;
+                    model.waitForDataLoaded = true;
+                    // if the page data is already fetched, we can just popuplate the pageContent value.
+                    if (model.tableModel.page && !model.tableModel.dirtyResult) {
+                        model.pageContent = model.tableModel.page.getContent($rootScope.templateVariables);
+                        model.pageContentInitialized = true;
+                    }
+                }
+            });
         }
 
         /**
@@ -384,6 +444,13 @@
                 _addCauseToModel(m.tableModel, cause);
             });
 
+            $rootScope.requestModels.forEach(function (m) {
+                m.processed = false;
+                if (m.activeListModel.entityset || m.activeListModel.aggregate) {
+                    _addCauseToModel(m, cause);
+                }
+            });
+
 
             // update the cause list
             var uc = logService.reloadCauses;
@@ -419,6 +486,14 @@
 
                         _addCauseToModel(m.tableModel, c);
                     });
+
+                    // add it to request models for aggregate and entity set
+                    $rootScope.requestModels.forEach(function (m) {
+                        if (m.activeListModel.entityset || m.activeListModel.aggregate) {
+                            _addCauseToModel(m, container.cause);
+                        }
+                    });
+
                 });
             }
 

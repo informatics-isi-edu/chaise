@@ -109,7 +109,6 @@
             var refTable = ref.table;
 
             var params = {
-                citation: tuple.citation ? tuple.citation.compute($rootScope.templateVariables) : null,
                 displayname: refTable.name+'_'+tuple.uniqueId,
                 reference: ref
             }

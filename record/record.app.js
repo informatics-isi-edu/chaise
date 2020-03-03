@@ -133,21 +133,33 @@
 
                 var activeList = $rootScope.reference.generateActiveList(tuple);
 
-                $rootScope.aggregateModels = [];
-                activeList.aggregates.forEach(function (agg) {
-                    $rootScope.aggregateModels.push({
-                        model: agg,
+                $rootScope.requestModels = [];
+                activeList.requests.forEach(function (req) {
+                    var m = {
+                        activeListModel: req,
                         processed: false,
-                        reloadCauses: [],
-                        logStack: logService.getStackObject(
-                            logService.getStackNode(
-                                logService.logStackTypes.PSEUDO_COLUMN,
-                                agg.column.table,
-                                { source: agg.column.compressedDataSource, entity: agg.column.isEntityMode, agg: agg.column.aggregateFn}
-                            )
-                        ),
-                        reloadStartTime: -1
-                    });
+                    };
+
+                    if (req.entityset || req.aggregate) {
+                        m.reloadCauses = [];
+                        m.reloadStartTime = -1;
+
+                        var extra = {
+                            source: req.column.compressedDataSource,
+                            entity: req.column.isEntityMode,
+                        };
+                        if (req.aggregate) {
+                            extra.agg = req.column.aggregateFn;
+                        }
+
+                        m.logStack = logService.getStackObject(
+                            logService.getStackNode(logService.logStackTypes.PSEUDO_COLUMN, req.column.table, extra)
+                        );
+                        m.logStackPath = logService.getStackPath("", logService.logStackPaths.PSEUDO_COLUMN);
+
+                    }
+
+                    $rootScope.requestModels.push(m);
                 });
 
                 // related references

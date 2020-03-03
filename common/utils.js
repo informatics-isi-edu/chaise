@@ -1172,6 +1172,13 @@
         }
 
         /**
+         * Verifies that the object is not null and is defined.
+         */
+        function isObjectAndNotNull(obj) {
+            return typeof obj === "object" && obj !== null;
+        }
+
+        /**
          * Verifies that the given data is integer
          * @param  {Object}  data
          * @return {Boolean} whether it is integer or not
@@ -1266,6 +1273,7 @@
             getRowValuesFromTupleData: getRowValuesFromTupleData,
             getRowValuesFromTuples: getRowValuesFromTuples,
             isObjectAndKeyDefined: isObjectAndKeyDefined,
+            isObjectAndNotNull: isObjectAndNotNull,
             isInteger: isInteger,
             makeSafeIdAttr: makeSafeIdAttr,
             makeSafeHTML: makeSafeHTML,
