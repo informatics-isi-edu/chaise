@@ -2,6 +2,7 @@ var chaisePage = require('../../../utils/chaise.page.js');
 var recordHelpers = require('../../../utils/record-helpers.js');
 var recordSetHelpers = require('../../../utils/recordset-helpers.js');
 var moment = require('moment');
+var EC = protractor.ExpectedConditions;
 
 var testParams = {
     table_name: "accommodation",
@@ -324,6 +325,7 @@ describe('View existing record,', function() {
         it('On click of Related table name in TOC, page should move to the contents and open the table details', function(done){
             var rtTableHeading = chaisePage.recordPage.getRelatedTableAccordion(testParams.sidePanelTest.tableToShow);
 
+            browser.wait(EC.elementToBeClickable(recSidePanelCat_5), browser.params.defaultTimeout);
             recSidePanelCat_5.click().then(function(className) {
               // related table should be visible
                 expect(rtTableHeading.isDisplayed()).toBeTruthy("Category_5 heading is not visible.");
