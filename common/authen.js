@@ -14,6 +14,7 @@
 
         // Private variable to store current session object
         var _session = null;
+        var _prevSession = null;
 
         var _changeCbs = {};
 
@@ -78,6 +79,7 @@
             StorageService.updateStorage(LOCAL_STORAGE_KEY, data);
         };
 
+        var modalInstance = null;
         var loginWindowCb = function (params, referrerId, cb, type, rejectCb){
             if(type.indexOf('modal')!== -1){
                 if (_session) {
@@ -86,20 +88,25 @@
                     params.title = messageMap.noSession.title;
                 }
                 var closed = false;
-                var onModalCloseSuccess = function () {
-                    onModalClose();
-                }
 
-                var onModalClose = function(response) {
+                var cleanupModal = function (message) {
                     $interval.cancel(intervalId);
                     $cookies.remove("chaise-" + referrerId, { path: "/" });
                     closed = true;
 
-                    $uibModalStack.dismissAll("no login");
+                    $uibModalStack.dismissAll(message);
+                }
+                var onModalCloseSuccess = function () {
+                    cleanupModal("login refreshed");
+                    cb();
+                }
+
+                var onModalClose = function(response) {
+                    cleanupModal("no login");
                     if (rejectCb) rejectCb(response);
                 };
 
-                var modalInstance = modalUtils.showModal({
+                modalInstance = modalUtils.showModal({
                     windowClass: "modal-login-instruction",
                     templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/loginDialog.modal.html",
                     controller: 'LoginDialogController',
@@ -229,7 +236,13 @@
          */
         var popupLogin = function (logAction) {
             var reloadCb = function(){
-                window.location.reload();
+                if (!shouldReloadPageAfterLogin()) {
+                    _getSession().then(function (newSession) {
+                        modalInstance.close();
+                    });
+                } else {
+                    window.location.reload();
+                }
             };
 
             var x = window.innerWidth/2 - 800/2;
@@ -240,49 +253,59 @@
             logInHelper(loginWindowCb, win, reloadCb, 'popUp', null, logAction);
         };
 
-        var shouldReloadPageAfterLogin = function(newSession) {
+        var shouldReloadPageAfterLogin = function() {
             if (_session === null) return true;
             return false;
         };
 
-        return {
-
-            /**
-             * Will return a promise that is resolved with the session.
-             * It will also call the _executeListeners() functions and sets the _session.
-             * If we couldn't fetch the session, it will resolve with `null`.
-             *
-             * TODO needs to be revisited for 401.
-             * We want to reload the page and stop the code execution for 401,
-             *  but currently the code will continue executing and then reloads.
-             *
-             * @param  {string=} context undefined or "401"
-             */
-            getSession: function(context) {
-                var config = {
-                    skipHTTP401Handling: true,
-                    headers: {}
-                };
-                config.headers[ERMrest.contextHeaderName] = {
-                    action: logService.getActionString(logService.logActions.SESSION_RETRIEVE, "", "")
+        /**
+         * Will return a promise that is resolved with the session.
+         * It will also call the _executeListeners() functions and sets the _session.
+         * If we couldn't fetch the session, it will resolve with `null`.
+         *
+         * TODO needs to be revisited for 401.
+         * We want to reload the page and stop the code execution for 401,
+         *  but currently the code will continue executing and then reloads.
+         *
+         * @param  {string=} context undefined or "401"
+         */
+        var _getSession = function(context) {
+            var config = {
+                skipHTTP401Handling: true,
+                headers: {}
+            };
+            config.headers[ERMrest.contextHeaderName] = {
+                action: logService.getActionString(logService.logActions.SESSION_RETRIEVE, "", "")
+            }
+            return ConfigUtils.getHTTPService().get(serviceURL + "/authn/session", config).then(function(response) {
+                if (context === "401" && shouldReloadPageAfterLogin()) {
+                    window.location.reload();
+                    return response.data;
                 }
-                return ConfigUtils.getHTTPService().get(serviceURL + "/authn/session", config).then(function(response) {
-                    if (context === "401" && shouldReloadPageAfterLogin(response.data)) {
-                        window.location.reload();
-                        return response.data;
-                    }
 
-                    _session = response.data;
-                    _executeListeners();
-                    return _session;
-                }).catch(function(err) {
-                    $log.warn(ERMrest.responseToError(err));
+                var sameSessionAsPrevious = false;
+                if (_prevSession) sameSessionAsPrevious = _prevSession.client.id == response.data.client.id;
 
-                    _session = null;
-                    _executeListeners();
-                    return _session;
-                });
-            },
+                _session = response.data;
+                // keep track of previous session, so when a timeout occurs, we can compare the sessions
+                // when a new session is fetched after timeout, check if the identities are the same
+                // if not the same, update in case timeout occurs again
+                if (!_prevSession || !sameSessionAsPrevious) {
+                    _prevSession = response.data
+                }
+                _executeListeners();
+                return _session;
+            }).catch(function(err) {
+                $log.warn(ERMrest.responseToError(err));
+
+                _session = null;
+                _executeListeners();
+                return _session;
+            });
+        }
+
+        return {
+            getSession: _getSession,
 
             /**
              * Will return a promise that is resolved with the session.
