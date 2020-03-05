@@ -133,7 +133,12 @@
                 logObj.stack = logService.addCausesToStack(logObj.stack, causes, $rootScope.reloadStartTime);
             }
 
-            $rootScope.citationReady = false;
+            if (DataUtils.isObjectAndNotNull($rootScope.reference.citation)) {
+                $rootScope.citationReady = false;
+            } else {
+                $rootScope.citationReady = true;
+                $rootScope.citation = null;
+            }
             $rootScope.reference.read(1, logObj).then(function (page) {
                 $log.info("Page: ", page);
 
@@ -170,11 +175,11 @@
                 $rootScope.entitySetResults = {};
 
                 //whether citation is waiting for other data or we can show it on load
-                var citation = tuple.citation;
+                var citation = $rootScope.reference.citation;
                 if (DataUtils.isObjectAndNotNull(citation)) {
                     $rootScope.citationReady = !citation.hasWaitFor;
                     if ($rootScope.citationReady) {
-                        $rootScope.citation = citation.compute($rootScope.templateVariables);
+                        $rootScope.citation = citation.compute(tuple, $rootScope.templateVariables);
                     }
                 } else {
                     $rootScope.citationReady = true;
@@ -349,12 +354,12 @@
             activeListModel.objects.forEach(function (obj) {
                 var hasAll;
                 if (obj.citation) { // this means that the citation is available and not null
-                    hasAll = $rootScope.tuple.citation.waitFor.every(function (c) {
+                    hasAll = $rootScope.reference.citation.waitFor.every(function (c) {
                         return c.isUnique || c.name in $rootScope.aggregateResults || c.name in $rootScope.entitySetResults;
                     });
                     if (hasAll) {
                         $rootScope.citationReady = true;
-                        $rootScope.citation = $rootScope.tuple.citation.compute($rootScope.templateVariables);
+                        $rootScope.citation = $rootScope.reference.citation.compute($rootScope.tuple, $rootScope.templateVariables);
                     }
                     return;
                 } else if (obj.column) {

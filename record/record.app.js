@@ -131,6 +131,10 @@
                 if (context.hideNavbar) url += "?hideNavbar=" + context.hideNavbar;
                 $window.history.replaceState('', '', url);
 
+                //NOTE when the read is called, reference.activeList will be generated
+                // autmoatically but we want to make sure that urls are generated using tuple,
+                // so the links are based on facet. We might be able to improve this and avoid
+                // duplicated logic.
                 var activeList = $rootScope.reference.generateActiveList(tuple);
 
                 $rootScope.requestModels = [];
