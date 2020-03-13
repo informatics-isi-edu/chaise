@@ -15,6 +15,7 @@ var chaiseConfig = {
     resolverImplicitCatalog: null,
     disableDefaultExport: true,
     disableExternalLinkModal: true,
+    logClientActions: false,
     navbarMenu: {
         children: [
             {
