@@ -2,8 +2,8 @@
     'use strict';
     angular.module('chaise.recordcreate', ['chaise.errors','chaise.utils'])
 
-    .factory("recordCreate", ['$cookies', '$log', '$q', '$rootScope', '$window', 'AlertsService', 'DataUtils', 'ErrorService', 'logService', 'messageMap', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'Session', 'UriUtils',
-        function($cookies, $log, $q, $rootScope, $window, AlertsService, DataUtils, ErrorService, logService, messageMap, modalBox, modalUtils, recordsetDisplayModes, Session, UriUtils) {
+    .factory("recordCreate", ['$cookies', '$log', '$q', '$rootScope', '$window', 'AlertsService', 'DataUtils', 'Errors', 'ErrorService', 'logService', 'messageMap', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'Session', 'UriUtils',
+        function($cookies, $log, $q, $rootScope, $window, AlertsService, DataUtils, Errors, ErrorService, logService, messageMap, modalBox, modalUtils, recordsetDisplayModes, Session, UriUtils) {
 
         var viewModel = {};
         var GV_recordEditModel = {},
@@ -241,6 +241,7 @@
                     // assume user had been previously logged in (can't create/update without it)
                     // if no valid current session, user should re-login
                     // validate session will never throw an error, so it's safe to not write a reject callback or catch clause
+                    console.log("before validate session");
                     Session.validateSession().then(function (session) {
                         if (!session && exception instanceof ERMrest.ConflictError) throw new ERMrest.UnauthorizedError();
                         // append link to end of alert.
@@ -248,8 +249,16 @@
                             exception.message += ' Click <a href="' + exception.duplicateReference.contextualize.detailed.appLink + '" target="_blank">here</a> to see the conflicting record that already exists.';
                         }
 
-                        if (isModalUpdate) {
+                        // TODO: rejectCb from onModalCloseSuccess for login returns here if not same user
+                        console.log("catch of create/update: ", exception);
+
+                        // TODO: change message for forbidden error
+                        // add logout? then login? not sure the workflow
+
+                        console.log(exception instanceof Errors.DifferentUserConflictError);
+                        if (isModalUpdate || exception instanceof Errors.DifferentUserConflictError) {
                             // pure and binary add on record page, we want a popup error
+                            // if timeout error, also show popup
                             ErrorService.handleException(exception, true);
                         } else {
                             AlertsService.addAlert(exception.message, (exception instanceof ERMrest.NoDataChangedError ? 'warning' : 'error') );

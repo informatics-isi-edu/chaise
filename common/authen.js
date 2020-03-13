@@ -3,8 +3,8 @@
 
     angular.module('chaise.authen', ['chaise.utils', 'chaise.storage'])
 
-    .factory('Session', ['ConfigUtils', 'messageMap', 'logService', 'modalUtils', 'StorageService', 'UriUtils', '$cookies', '$interval', '$log', '$q', '$rootScope', '$sce', '$uibModalStack', '$window',
-        function (ConfigUtils, messageMap, logService, modalUtils, StorageService, UriUtils, $cookies, $interval, $log, $q, $rootScope, $sce, $uibModalStack, $window) {
+    .factory('Session', ['ConfigUtils', 'Errors', 'messageMap', 'logService', 'modalUtils', 'StorageService', 'UriUtils', '$cookies', '$interval', '$log', '$q', '$rootScope', '$sce', '$uibModalStack', '$window',
+        function (ConfigUtils, Errors, messageMap, logService, modalUtils, StorageService, UriUtils, $cookies, $interval, $log, $q, $rootScope, $sce, $uibModalStack, $window) {
         // authn API no longer communicates through ermrest, removing the need to check for ermrest location
         var serviceURL = $window.location.origin;
 
@@ -15,6 +15,7 @@
         // Private variable to store current session object
         var _session = null;
         var _prevSession = null;
+        var _sameSessionAsPrevious = false;
 
         var _changeCbs = {};
 
@@ -103,7 +104,13 @@
 
                 var onModalClose = function(response) {
                     cleanupModal("no login");
-                    if (rejectCb) rejectCb(response);
+                    if (rejectCb) {
+                        // throws error in ermrestJS if not formatted as an Error
+                        if (typeof response == "String") {
+                            response = new Error(response);
+                        }
+                        rejectCb(response);
+                    }
                 };
 
                 modalInstance = modalUtils.showModal({
@@ -283,16 +290,18 @@
                     return response.data;
                 }
 
-                var sameSessionAsPrevious = false;
-                if (_prevSession) sameSessionAsPrevious = _prevSession.client.id == response.data.client.id;
+                if (_prevSession) {
+                    console.log("previous session");
+                    _sameSessionAsPrevious = _prevSession.client.id == response.data.client.id;
+                } else {
+                    // only update _session if no session exists yet
+                    _session = response.data;
+                }
 
-                _session = response.data;
                 // keep track of previous session, so when a timeout occurs, we can compare the sessions
                 // when a new session is fetched after timeout, check if the identities are the same
-                // if not the same, update in case timeout occurs again
-                if (!_prevSession || !sameSessionAsPrevious) {
-                    _prevSession = response.data
-                }
+                // only keep track of the first session
+                if (!_prevSession) _prevSession = response.data;
                 _executeListeners();
                 return _session;
             }).catch(function(err) {
@@ -332,6 +341,10 @@
 
             getSessionValue: function() {
                 return _session;
+            },
+
+            isSameSessionAsPrevious: function() {
+                return _sameSessionAsPrevious;
             },
 
             // if there's a previous login token AND
@@ -409,30 +422,39 @@
 
         angular.module('chaise.authen')
 
-        .run(['ERMrest', '$injector', '$q', function runRecordEditApp(ERMrest, $injector, $q) {
+        .run(['ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', '$injector', '$q', function runRecordEditApp(ConfigUtils, ERMrest, Errors, ErrorService, $injector, $q) {
 
             var Session = $injector.get("Session");
 
             // Bind callback function by invoking setHTTP401Handler handler passing the callback
             // This callback will be called whenever 401 HTTP error is encountered unless there is
             // already login flow in progress
+            console.log("before set http 401 handler");
             ERMrest.setHTTP401Handler(function() {
                 var defer = $q.defer();
 
                 // Call login in a new modal window to perform authentication
                 // and return a promise to notify ermrestjs that the user has loggedin
                 Session.loginInAModal(function() {
+                    console.log("success CB login in a modal")
 
                     // Once the user has logged in fetch the new session and set the session value
                     // and resolve the promise to notify ermrestjs that the user has logged in
                     // and it can continue firing other queued calls
                     Session.getSession("401").then(function(_session) {
-                        defer.resolve();
+                        var differentUser = (ConfigUtils.getContextJSON().appContext.indexOf("entry") != -1 && !Session.isSameSessionAsPrevious())
+
+                        // send boolean to communicate in ermrestJS if execution should continue after 401 error thrown and subsequent login
+                        defer.resolve(differentUser);
+
+                        // throw Error if login is successful but it's a different user
+                        if (differentUser) ErrorService.handleException(new Errors.DifferentUserConflictError("You aren't the previous user"));
                     }, function(exception) {
                         defer.reject(exception);
                     });
 
                 }, function (response) {
+                    console.log("reject before going to ermrestJS")
                     // returns to rejectCB in ermrestJS/http.js
                     defer.reject(response);
                 });

@@ -458,7 +458,12 @@
         // When page gets focus, check cookie for completed requests
         // re-read the records for that table
         $window.onfocus = function() {
+            console.log("focused");
             onfocusEventCall(false);
+        }
+
+        $window.onblur = function () {
+            console.log("un-focused");
         }
 
         var onfocusEventCall = function(changedContainerDetails) {
