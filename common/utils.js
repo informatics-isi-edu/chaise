@@ -103,7 +103,7 @@
             downloadCSV: "Click to download all matched results",
             permalink: "Click to copy the current url to clipboard.",
             actionCol: "Click on the action buttons to view, edit, or delete each record",
-            viewCol: "Click on the eye button to view the detailed page associated with each record",
+            viewCol: "Click on the icon to view the detailed page associated with each record",
             null: "Search for any record with no value assigned",
             empty: "Search for any record with the empty string value",
             notNull: "Search for any record that has a value",

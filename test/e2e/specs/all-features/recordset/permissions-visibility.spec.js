@@ -8,7 +8,7 @@ var testParams = {
         operator: "="
     },
     tooltip:{
-        viewCol: "Click on the eye button to view the detailed page associated with each record"
+        viewCol: "Click on the icon to view the detailed page associated with each record"
     }
 };
 
