@@ -8,9 +8,9 @@
         var iframe = $window.frames[0];
         var table = null;
 
-        function drawAnnotation() {
-            iframe.postMessage({messageType: 'drawAnnotation'}, origin);
-        }
+        // function drawAnnotation() {
+        //     iframe.postMessage({messageType: 'drawAnnotation'}, origin);
+        // }
 
         function createAnnotation(newAnnotation) {
             if (newAnnotation.anatomy == 'No Anatomy') {
@@ -113,6 +113,19 @@
         function changeStrokeScale(scale){
             iframe.postMessage({messageType: 'changeStrokeScale', content: scale}, origin);
         }
+
+        function drawAnnotation(data){
+            iframe.postMessage({messageType: 'drawAnnotationMode', content: data}, origin);
+        }
+
+        function changeGroupInfo(data){
+            iframe.postMessage({messageType: 'changeGroupInfo', content: data}, origin);
+        }
+
+        function addNewTerm(data){
+            iframe.postMessage({messageType: 'addNewTerm', content: data}, origin);
+        }
+
         return {
             drawAnnotation: drawAnnotation,
             createAnnotation: createAnnotation,
@@ -124,7 +137,9 @@
             highlightAnnotation : highlightAnnotation,
             changeAnnotationVisibility : changeAnnotationVisibility,
             changeAllAnnotationVisibility : changeAllAnnotationVisibility,
-            changeStrokeScale : changeStrokeScale
+            changeStrokeScale : changeStrokeScale,
+            changeGroupInfo : changeGroupInfo,
+            addNewTerm : addNewTerm
         };
 
     }]);

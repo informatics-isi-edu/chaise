@@ -67,6 +67,9 @@
         vm.changeSelectingAnnotation = changeSelectingAnnotation;
         vm.changeStrokeScale = changeStrokeScale;
         vm.searchPopup = searchPopup;
+        vm.drawAnnotation = drawAnnotation;
+        vm.changeTerm = changeTerm;
+        vm.addNewTerm = addNewTerm;
 
         // Listen to events of type 'message' (from Annotorious)
         $window.addEventListener('message', function annotationControllerListener(event) {
@@ -137,7 +140,7 @@
             }
         });
 
-        function searchPopup(){
+        function searchPopup(callback){
 
             var column = $rootScope.reference.columns[1];
             var params = {};
@@ -181,9 +184,7 @@
                 },
                 size: "lg",
                 templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
-            }, function(tuple){
-                console.log(tuple);
-            }, null, false);
+            }, callback, null, false);
         }
 
         function updateAnnotationVisibility(annotation) {
@@ -230,10 +231,10 @@
             return false;
         }
 
-        function drawAnnotation(type) {
-            vm.newAnnotation.type = type;
-            return AnnotationsService.drawAnnotation();
-        }
+        // function drawAnnotation(type) {
+        //     vm.newAnnotation.type = type;
+        //     return AnnotationsService.drawAnnotation();
+        // }
 
         function createAnnotation() {
             vm.createMode = false;
@@ -489,6 +490,7 @@
                     anatomy : items[i].anatomy,
                     description : items[i].description,
                     isSelected : false,
+                    isDrawing : false,
                     isDisplay: true,
                     name: name,
                     id: id,
@@ -539,9 +541,56 @@
             event.stopPropagation();
         }
 
+        function drawAnnotation(item, event){
+            // disabled selecting from other list
+            item.isDrawing = !item.isDrawing;
+    
+            AnnotationsService.drawAnnotation({
+                svgID : item.svgID,
+                groupID : item.groupID,
+                mode : (item.isDrawing) ? "ON" : "OFF"
+            });
+
+            event.stopPropagation();
+        }
+
         function changeStrokeScale(){
             // console.log(vm.strokeScale);
             AnnotationsService.changeStrokeScale(vm.strokeScale);
+        }
+
+        function changeTerm(item, event){
+            vm.searchPopup(function(tuple){
+                var data = tuple._data;
+                var id = fixedEncodeURIComponent(data.ID);
+                
+                AnnotationsService.changeGroupInfo({
+                    svgID : item.svgID,
+                    groupID : item.groupID,
+                    newGroupID : data.ID + "," + data.Name,
+                    newAnatomy : data.Name + " (" + data.ID + ")"
+                });
+
+                item.groupID = data.ID + "," + data.Name;
+                item.url = "/chaise/record/#2/Vocabulary:Anatomy/ID=" + id;
+                item.name = data.Name;
+            })
+        }
+
+        function addNewTerm(){
+            vm.searchPopup(function(tuple){
+                var svgID = vm.collection.length > 0 ? vm.collection[0].svgID : Date.parse(new Date()) + parseInt(Math.random() * 1000);
+                var data = tuple._data;
+                var groupInfo = {
+                    svgID : svgID,
+                    groupID : data.ID + "," + data.Name,
+                    anatomy : data.Name + " (" + data.ID + ")",
+                    description : data.Description,
+                }
+                AnnotationsService.addNewTerm(groupInfo);
+
+                vm.addAnnotation([groupInfo]);
+            })
         }
     }]);
 })();

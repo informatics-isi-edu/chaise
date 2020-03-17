@@ -46,8 +46,8 @@
 
                     <!-- <div id="sidebar" ng-class="sidebar faceting-resizable {'open-panel': !osd.annotationsSidebarAreHidden, 'close-panel': osd.annotationsSidebarAreHidden}" resizable r-directions=["right"] r-flex="true"> -->
                         <div ng-controller="AnnotationsController as anno" class='annotation-list facet-panel'>
+                            <div class='itemSettingMenu'></div>
                             <span class='title'>Annotations</span>
-                            <button ng-click="anno.searchPopup()">Open Modal</button>
                             <span class='row filter' data-type='overlayVisibility'>
                                 <span class='name'> Display : </span>
                                 <span ng-click="anno.changeAllAnnotationsVisibility();" ng-class="anno.isDisplayAll ?'displayAllBtn selected' : 'displayAllBtn'" data-type='all'>
@@ -84,6 +84,7 @@
                                       &nbsp;<span class="glyphicon glyphicon-search"></span>&nbsp;<!-- Added 2 non-breaking spaces to prevent btn's margins from collapsing and to center the icon-->
                                   </button>
                                 </div>
+                                <button class='btn chaise-btn chaise-btn-primary newAnnoBtn' ng-click="anno.addNewTerm()" tooltip-placement="bottom" uib-tooltip="Create new annotation">New</button>
                             </div>
 
                             <span class='resultCount'>
@@ -94,8 +95,8 @@
                             </div>
                             <div class='groups'>
                                 <div id="{{item.svgID + item.groupID}}" ng-click="anno.highlightGroup(item, $event)" ng-repeat="item in anno.collection | filter: anno.searchKeyword" ng-class="item.isSelected ? 'annotationItem current' : 'annotationItem' ">
-
-                                        <div class='itemContent'>
+                                    <div class='itemContent'>
+                                        <div class='itemRow'> 
                                             <span class='anatomy'>
                                                 {{ item.name }}
                                                 <a ng-if="item.id"  href="{{item.url}}" target="_blank" tooltip-placement="auto" uib-tooltip="Click to view details and associated data">
@@ -106,15 +107,22 @@
                                             <!-- <span class='description'> -->
                                                 <!-- <textarea class='edit' data-type='description'> {{ item.description ? item.description : 'no description'}} </textarea> -->
                                             <!-- </span> -->
-                                        </div>
-                                        <span class='editRow'>
+                                            <span class='editRow'>
                                             <span class='editBtn' ng-click="anno.toggleDisplay(item, $event)" data-type='toggleDisplay' data-toggle='tooltip' tooltip-placement="bottom" uib-tooltip="{{ item.isDisplay ? 'Hide annotation' : 'Show annotation'}}">
                                                 <i ng-class="item.isDisplay ? 'glyphicon glyphicon-eye-open' : 'glyphicon glyphicon-eye-close'"></i>
                                             </span>
                                             <span class="editBtn" ng-click="anno.highlightGroup(item, $event)" data-type='highlightGroup' data-toggle='tooltip' tooltip-placement="bottom" uib-tooltip="{{ item.isSelected ? 'Unhighlight annotation' : 'Highlight annotation'}}">
                                                 <i class="glyphicon glyphicon-tag"></i>
                                             </span>
-                                        </span>
+                                        </div>
+                                        <div class='itemRow'>
+                                            <span class='itemMenu' ng-click="anno.changeTerm(item, $event)" data-toggle='tooltip' tooltip-placement="bottom" uib-tooltip="Change term ID">Term</span>
+                                            <span class='itemMenu'>Status</span>
+                                            <span class='itemMenu' ng-class="{'selected' : item.isDrawing }" ng-click="anno.drawAnnotation(item, $event)" data-toggle='tooltip' tooltip-placement="bottom" uib-tooltip="{{ item.isDrawing ? 'Click to save the progress' : 'Click to draw contour'}}">Contour</span>
+                                        </div>
+                                    </span>
+                                    </div>
+                                    
                                 </div>
                             </div>
                         </div>

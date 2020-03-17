@@ -281,12 +281,14 @@
                       Currently it's a HACK
                     */
                     var params = window.location.href.split("?");
-                    if(window.location.href.indexOf("url") > -1){
-                      image.entity.uri = origin+"/openseadragon-viewer/index.html?" + params[1];
-                    } else {
-                      var old_params = image.entity.uri.split("?");
-                      image.entity.uri = origin+"/openseadragon-viewer/index.html?" + old_params[1];
-                    }
+                    // if(window.location.href.indexOf("url") > -1){
+                    //   image.entity.uri = origin+"/~mingyi/openseadragon-viewer/index.html?" + params[1];
+                    // } else {
+                    //   var old_params = image.entity.uri.split("?");
+                    //   image.entity.uri = origin+"/openseadragon-viewer/index.html?" + old_params[1];
+                    // }
+                    // var old_params = image.entity.uri.split("?");
+                    image.entity.uri = origin+"/~mingyi/openseadragon-viewer/index.html?" + params[1];
 
                     // image.entity.uri = image.entity.uri + "&url=data/Q-296R_all_contours_cw_named.svg";
                     console.log('replace uri = '+image.entity.uri + waterMark)

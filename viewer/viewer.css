@@ -126,6 +126,7 @@ a.cardlink.delete {
     flex-direction: column;
     height: 92.5%;
     padding: 0;
+    overflow: auto;
 }
 
 #viewer-container.col-md-9 {
@@ -216,7 +217,7 @@ a.cardlink.delete {
     display: flex;
     flex-direction: row;
     flex: 1;
-    /* height: 100%; */
+    height: 100%;
     /* padding: 15px 0 15px 0; */
 }
 
@@ -239,8 +240,9 @@ a.cardlink.delete {
     overflow: hidden;
     background: #fff;
     z-index: 1;
-    /* height: 100%; */
     padding: 0;
+    height: 100%;
+    padding: 0 0 15px 0;
 }
 
 #viewer-content .annotation-list .title{
@@ -436,9 +438,6 @@ a.cardlink.delete {
     margin: 0 0 10px 0;
 }
 
-#viewer-content .annotation-list .strokeScale .sliderTicks{
-
-}
 #viewer-content .annotation-list .resultCount{
     display: flex;
     padding: 0;
@@ -453,6 +452,11 @@ a.cardlink.delete {
     position: relative;
     float: left;
     margin: 5px 0;
+}
+
+/* New Annotation Button */
+#viewer-content .newAnnoBtn{
+    margin: 0 0 0 10px;
 }
 
 /* Annotations item  */
@@ -486,6 +490,7 @@ a.cardlink.delete {
     /* cursor: pointer; */
 }
 
+
 #viewer-content .annotation-list .annotationItem:first-child{
     border-top: 1px solid #f2f2f2;
 }
@@ -517,11 +522,6 @@ a.cardlink.delete {
     resize: none;
     border: none;
     outline: none;
-}
-
-#viewer-content .annotation-list .annotationItem .anatomy{
-    /* color: 333; */
-#viewer-content .annotation-list .strokeScale    padding: 0 0 0 3px;
 }
 
 #viewer-content .annotation-list .annotationItem .anatomy a{
@@ -590,6 +590,36 @@ a.cardlink.delete {
 #viewer-content .annotation-list .annotationItem.current .editBtn[data-type="highlightGroup"]{
     color: #ffff80;
 }
+
+#viewer-content .annotation-list .annotationItem .itemRow{
+    display: flex;
+    flex-direction: row;
+}
+
+#viewer-content .annotation-list .annotationItem .itemRow .anatomy{
+    flex : 1;
+}
+
+#viewer-content .annotation-list .annotationItem .itemMenu{
+    font-size: 10px;
+    border: 1px solid #3f7cca;
+    color: 3f7cca;
+    margin: 3px 5px 5px 0;
+    flex: 1;
+    text-align: center;
+}
+
+#viewer-content .annotation-list .annotationItem .itemMenu:hover,
+#viewer-content .annotation-list .annotationItem .itemMenu.selected{
+    background: #2058a0;
+    color: #fff;
+}
+
+#viewer-content .annotation-list .annotationItem.current .itemMenu{
+    color: #ccd8e8;
+    border: 1px solid #79aff4;
+}
+
 
 #viewer-content .osd-container {
     display: flex;
