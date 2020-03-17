@@ -284,10 +284,10 @@
                     */
                     var params = window.location.href.split("?");
                     if(window.location.href.indexOf("url") > -1){
-                      image.entity.uri = origin+"/openseadragon-viewer/index.html?" + params[1];
+                      image.entity.uri = origin+"/~vipul/openseadragon-viewer/index.html?" + params[1];
                     } else {
                       var old_params = image.entity.uri.split("?");
-                      image.entity.uri = origin+"/openseadragon-viewer/index.html?" + old_params[1];
+                      image.entity.uri = origin+"/~vipul/openseadragon-viewer/index.html?" + old_params[1];
                     }
 
                     // image.entity.uri = image.entity.uri + "&url=data/Q-296R_all_contours_cw_named.svg";
