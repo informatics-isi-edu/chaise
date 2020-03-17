@@ -137,6 +137,7 @@
                 // duplicated logic.
                 var activeList = $rootScope.reference.generateActiveList(tuple);
 
+                // requestModels is used to generate the secondary requests that the page needs.
                 $rootScope.requestModels = [];
                 activeList.requests.forEach(function (req) {
                     var m = {
@@ -145,9 +146,6 @@
                     };
 
                     if (req.entityset || req.aggregate) {
-                        m.reloadCauses = [];
-                        m.reloadStartTime = -1;
-
                         var extra = {
                             source: req.column.compressedDataSource,
                             entity: req.column.isEntityMode,
@@ -156,12 +154,16 @@
                             extra.agg = req.column.aggregateFn;
                         }
 
+                        // these attributes are used for logging purposes
                         m.logStack = logService.getStackObject(
                             logService.getStackNode(logService.logStackTypes.PSEUDO_COLUMN, req.column.table, extra)
                         );
                         m.logStackPath = logService.getStackPath("", logService.logStackPaths.PSEUDO_COLUMN);
+                        m.reloadCauses = [];
+                        m.reloadStartTime = -1;
 
                         // to avoid computing this multiple times
+                        // this reference is going to be used for getting the values
                         if (req.entityset) {
                             m.reference = req.column.reference.contextualize.compactBrief;
                         }
@@ -196,9 +198,15 @@
                             isInline: true,
                             isTableDisplay: reference.display.type == 'table',
                             displayname: reference.displayname,
+                            // whether we should do the waitfor logic:
                             hasWaitFor: col.hasWaitFor,
+                            // to show the content or not
                             isLoading: col.hasWaitFor,
+                            // this indicates that we got the waitfor data:
+                            // only if w got the waitfor data, and the main data we can popuplate the page.content value
                             waitForDataLoaded: false,
+                            // this indicates that the pageContent has been initialized:
+                            // we should not show the related table before initialzing the pageContent
                             pageContentInitialized: false,
                             pageContent: null,
                             tableModel: recordAppUtils.getTableModel(reference, index, true)
@@ -233,9 +241,15 @@
                         open: openByDefault,
                         isTableDisplay: ref.display.type == 'table',
                         displayname: ref.displayname,
+                        // whether we should do the waitfor logic:
                         hasWaitFor: ref.display.sourceHasWaitFor,
-                        isLoading: ref.display.sourceHasWaitFor, // to show the content or not
+                        // to show the content or not:
+                        isLoading: ref.display.sourceHasWaitFor,
+                        // this indicates that we got the waitfor data:
+                        // only if w got the waitfor data, and the main data we can popuplate the page.content value
                         waitForDataLoaded: false,
+                        // this indicates that the pageContent has been initialized:
+                        // we should not show the related table before initialzing the pageContent
                         pageContentInitialized: false,
                         pageContent: null,
                         tableModel: recordAppUtils.getTableModel(ref, index),

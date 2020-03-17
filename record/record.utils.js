@@ -48,6 +48,7 @@
             var i = 0, model, reqModel, activeListModel;
 
             // requests (inline, aggrgates, entityset, related)
+            // please refer to Reference.activeList documentation for the order of requests
             for (i = 0; i < $rootScope.requestModels.length; i++) {
                 if (!_haveFreeSlot()) return;
                 reqModel = $rootScope.requestModels[i];
@@ -123,6 +124,14 @@
         function readMainEntity(isUpdate, logObj) {
             var defer = $q.defer();
 
+            // clear the value of citation, so we can fetch it again.
+            if (DataUtils.isObjectAndNotNull($rootScope.reference.citation)) {
+                $rootScope.citationReady = false;
+            } else {
+                $rootScope.citationReady = true;
+                $rootScope.citation = null;
+            }
+
             logObj = logObj || {};
             var action = isUpdate ? logService.logActions.RELOAD : logService.logActions.LOAD;
             logObj.action = logService.getActionString(action);
@@ -133,12 +142,6 @@
                 logObj.stack = logService.addCausesToStack(logObj.stack, causes, $rootScope.reloadStartTime);
             }
 
-            if (DataUtils.isObjectAndNotNull($rootScope.reference.citation)) {
-                $rootScope.citationReady = false;
-            } else {
-                $rootScope.citationReady = true;
-                $rootScope.citation = null;
-            }
             $rootScope.reference.read(1, logObj).then(function (page) {
                 $log.info("Page: ", page);
 
@@ -170,8 +173,11 @@
                     });
                 });
 
+                // the initial values for the templateVariables
                 $rootScope.templateVariables = tuple.templateVariables.values;
+                // the aggregate values
                 $rootScope.aggregateResults = {};
+                // indicator that the entityset values are fetched
                 $rootScope.entitySetResults = {};
 
                 //whether citation is waiting for other data or we can show it on load
@@ -202,7 +208,7 @@
 
         /**
          * @private
-         * _processRequests calls this to handle pseudo-columns (aggregate and entityset)
+         * _processRequests calls this to fetch the value of pseudo-columns (aggregate and entityset)
          */
         function _updatePseudoColumn(reqModel, isUpdate, counter) {
             _readPseudoColumn(reqModel, isUpdate, $rootScope.recordFlowControl.counter).then(function (res) {
@@ -344,16 +350,19 @@
          * This function is called inside `_readPseudoColumn`, after
          * the value is attached to the appropriate objects.
          * The purpose of this function is to show value of a model,
-         * if all it's dependencies are available.
+         * if all its dependencies are available.
          * @param {Object} activeListModel - the model that ermrestjs returns
          */
         function _attachPseudoColumnValue(activeListModel) {
             activeListModel.objects.forEach(function (obj) {
                 var hasAll;
-                if (obj.citation) { // this means that the citation is available and not null
+                if (obj.citation) {
+                    // we don't need to validate the .citation here because obj.citation means that the citation is available and not null
                     hasAll = $rootScope.reference.citation.waitFor.every(function (c) {
                         return c.isUnique || c.name in $rootScope.aggregateResults || c.name in $rootScope.entitySetResults;
                     });
+
+                    // if all the waitfor values are fetched, we can change the citation value
                     if (hasAll) {
                         $rootScope.citationReady = true;
                         $rootScope.citation = $rootScope.reference.citation.compute($rootScope.tuple, $rootScope.templateVariables);
@@ -364,8 +373,8 @@
                     var hasAll = cmodel.column.waitFor.every(function (col) {
                         return col.isUnique || col.name in $rootScope.aggregateResults || col.name in $rootScope.entitySetResults;
                     });
-                    // TODO we need the second check because in ermrestjs I'm not adding the current column,
-                    // if I change ermerstjs to include the current column then this will be solved....
+                    // we need the second check because ermrestjs is not adding the current column,
+                    // NOTE I might be able to improve ermrestjs for this purpose
                     if (!(hasAll && (cmodel.column.name in $rootScope.aggregateResults || cmodel.column.name in $rootScope.entitySetResults || cmodel.column.isUnique))) return;
 
                     var displayValue = cmodel.column.sourceFormatPresentation(
@@ -387,6 +396,7 @@
                     model.isLoading = false;
                     model.waitForDataLoaded = true;
                     // if the page data is already fetched, we can just popuplate the pageContent value.
+                    // otherwise we should just wait for the related/inline table data to get back to popuplate the pageContent
                     if (model.tableModel.page && !model.tableModel.dirtyResult) {
                         model.pageContent = model.tableModel.page.getContent($rootScope.templateVariables);
                         model.pageContentInitialized = true;
@@ -447,6 +457,7 @@
 
             $rootScope.requestModels.forEach(function (m) {
                 m.processed = false;
+                // the cause for related and inline are handled by columnModels and relatedTableModels
                 if (m.activeListModel.entityset || m.activeListModel.aggregate) {
                     _addCauseToModel(m, cause);
                 }
@@ -489,6 +500,7 @@
                     });
 
                     // add it to request models for aggregate and entity set
+                    // the cause for related and inline are handled by columnModels and relatedTableModels
                     $rootScope.requestModels.forEach(function (m) {
                         if (m.activeListModel.entityset || m.activeListModel.aggregate) {
                             _addCauseToModel(m, container.cause);
