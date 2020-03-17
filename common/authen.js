@@ -12,9 +12,12 @@
         var PROMPT_EXPIRATION_KEY = 'promptExpiration'; // name of key for prompt expiration value
         var PREVIOUS_SESSION_KEY = 'previousSession';   // name of key for previous session boolean
 
-        // Private variable to store current session object
-        var _session = null;
-        var _prevSession = null;
+        var SESSION_INFO_KEY = "sessionInfo";           // name of key for logged in user's session
+        var SESSION_COOKIE_KEY = "cookie";              // name of key for logged in user's cookie
+
+        var _cookie = null;                             // cookie value when app loads
+        var _session = null;                            // current session object
+        var _prevSession = null;                        // previous session object
         var _sameSessionAsPrevious = false;
 
         var _changeCbs = {};
@@ -29,15 +32,37 @@
 
         /**
          * Functions that interact with the StorageService tokens
-         * There are 2 keys stored under the LOCAL_STORAGE_KEY object, PROMPT_EXPIRATION_KEY and PREVIOUS_SESSION_KEY
+         * There are 3 keys stored under the LOCAL_STORAGE_KEY object, PROMPT_EXPIRATION_KEY, PREVIOUS_SESSION_KEY, and SESSION_INFO_KEY
          */
 
+        // returns data stored in loacal storage for `keyName`
+        var _getKeyFromStorage = function (keyName) {
+            return StorageService.getStorage(LOCAL_STORAGE_KEY)[keyName];
+        }
+
+        // create value in storage with `keyName` and `value`
+        var _setKeyInStorage = function (keyName, value) {
+            var data = {};
+
+            data[keyName] = value;
+
+            StorageService.updateStorage(LOCAL_STORAGE_KEY, data);
+        }
+
+        // removes the key/value pair at `keyName`
+        var _removeKeyFromStorage = function (keyName) {
+            if (_keyExistsInStorage(keyName)) {
+                StorageService.deleteStorageValue(LOCAL_STORAGE_KEY, keyName);
+            }
+        };
+
         // verifies value exists for `keyName`
-        var _tokenExists = function(keyName) {
+        var _keyExistsInStorage = function(keyName) {
             var sessionStorage = StorageService.getStorage(LOCAL_STORAGE_KEY);
 
             return (sessionStorage && sessionStorage[keyName]);
         };
+
 
         // creates an expiration token with `keyName`
         var _createToken = function (keyName) {
@@ -50,13 +75,6 @@
             StorageService.updateStorage(LOCAL_STORAGE_KEY, data);
         };
 
-        // removes the key/value pair at `keyName`
-        var _removeToken = function (keyName) {
-            if (_tokenExists(keyName)) {
-                StorageService.deleteStorageValue(LOCAL_STORAGE_KEY, keyName);
-            }
-        };
-
         // checks if the expiration token with `keyName` has expired
         var _expiredToken = function (keyName) {
             var sessionStorage = StorageService.getStorage(LOCAL_STORAGE_KEY);
@@ -66,18 +84,9 @@
 
         // extends the expiration token with `keyName` if it hasn't expired
         var _extendToken = function (keyName) {
-            if (_tokenExists(keyName) && !_expiredToken(keyName)) {
+            if (_keyExistsInStorage(keyName) && !_expiredToken(keyName)) {
                 _createToken(keyName);
             }
-        };
-
-        // creates a boolean token with `keyName`
-        var _createBool = function (keyName) {
-            var data = {};
-
-            data[keyName] = true;
-
-            StorageService.updateStorage(LOCAL_STORAGE_KEY, data);
         };
 
         var modalInstance = null;
@@ -155,8 +164,8 @@
             else {
                 window.addEventListener('message', function(args) {
                     if (args && args.data && (typeof args.data == 'string')) {
-                        _createBool(PREVIOUS_SESSION_KEY);
-                        _removeToken(PROMPT_EXPIRATION_KEY);
+                        _setKeyInStorage(PREVIOUS_SESSION_KEY);
+                        _removeKeyFromStorage(PROMPT_EXPIRATION_KEY);
                         var obj = UriUtils.queryStringToJSON(args.data);
                         if (obj.referrerid == referrerId && (typeof cb== 'function')) {
                             if(type.indexOf('modal')!== -1){
@@ -281,27 +290,44 @@
                 skipHTTP401Handling: true,
                 headers: {}
             };
+
             config.headers[ERMrest.contextHeaderName] = {
                 action: logService.getActionString(logService.logActions.SESSION_RETRIEVE, "", "")
             }
+
+            // see if there's a token before doing any decision making
+
+            // if there's no webauthnCookie || no cookieFromStorage, login flow
+
+            // if there's a webauthnCookie user was logged in at some point on this machine, check to see if it matches _cookie
+            //  - if NOT match page was used by someone that's not the current webauthn cookie holder, check webauthnCookie matches cookieFromStorage
+            //    - if match, check cookieFromStorage.expires is not expired
+            //      - if expired, login flow
+            //      - if not expired, use local storage session
+            //    - if NOT match, shouldn't happen unless cookie in browser is updated without chaise
+            //  - if match user had a session on this page, make sure _session.expires is not expired
+            //    - if not expired, TODO leasing idea
+            //    - if expired, login timeout warning
+
+            // no webauthn
+            // if there's a cookieFromStorage user was here before, see if it is expired
+            //  - if expired
+
             return ConfigUtils.getHTTPService().get(serviceURL + "/authn/session", config).then(function(response) {
                 if (context === "401" && shouldReloadPageAfterLogin()) {
                     window.location.reload();
                     return response.data;
                 }
 
-                if (_prevSession) {
-                    console.log("previous session");
-                    _sameSessionAsPrevious = _prevSession.client.id == response.data.client.id;
+                // keep track of only the first session, so when a timeout occurs, we can compare the sessions
+                // when a new session is fetched after timeout, check if the identities are the same
+                if (_session) {
+                    _sameSessionAsPrevious = _session.client.id == response.data.client.id;
                 } else {
                     // only update _session if no session exists yet
                     _session = response.data;
                 }
 
-                // keep track of previous session, so when a timeout occurs, we can compare the sessions
-                // when a new session is fetched after timeout, check if the identities are the same
-                // only keep track of the first session
-                if (!_prevSession) _prevSession = response.data;
                 _executeListeners();
                 return _session;
             }).catch(function(err) {
@@ -350,7 +376,7 @@
             // if there's a previous login token AND
             // the prompt expiration token does not exist OR it has expired
             showPreviousSessionAlert: function() {
-                return (_tokenExists(PREVIOUS_SESSION_KEY) && (!_tokenExists(PROMPT_EXPIRATION_KEY) || _expiredToken(PROMPT_EXPIRATION_KEY)));
+                return (_keyExistsInStorage(PREVIOUS_SESSION_KEY) && (!_keyExistsInStorage(PROMPT_EXPIRATION_KEY) || _expiredToken(PROMPT_EXPIRATION_KEY)));
             },
 
             subscribeOnChange: function(fn) {
