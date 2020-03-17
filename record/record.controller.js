@@ -102,7 +102,7 @@
             });
         };
 
-        // This function assumes that templateVariables are ready
+        // this function assumes tuple and reference are attached to the $rootScope
         vm.sharePopup = function() {
             var tuple = $rootScope.tuple;
             var ref = $rootScope.reference;

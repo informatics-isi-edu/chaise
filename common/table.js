@@ -466,9 +466,13 @@
 
                     $log.debug("counter", current, ": read main successful.");
                     vm.page = page;
-                    vm.templateVariables = page.templateVariables.map(function (tv) {
-                        return tv.values;
-                    });
+                    if (Array.isArray(page.templateVariables)) {
+                        vm.templateVariables = page.templateVariables.map(function (tv) {
+                            return tv.values;
+                        });
+                    } else {
+                        vm.templateVariables = [];
+                    }
                     vm.aggregateResults = new Array(vm.page.tuples.length);
                     vm.pendingRowValues = {};
 

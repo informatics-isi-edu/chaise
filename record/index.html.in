@@ -39,7 +39,7 @@
                                 </button>
                                 <!-- download CSV included by default -->
                                 <export reference="reference" style="position:relative;" disabled="!displayReady"></export>
-                                <button ng-disabeld="!displayReady" id="share" class="chaise-btn chaise-btn-primary" ng-click="::ctrl.sharePopup()" uib-tooltip="Click here to show the share dialog." tooltip-placement="bottom">
+                                <button ng-disabeld="!displayReady || !$root.tuple" id="share" class="chaise-btn chaise-btn-primary" ng-click="ctrl.sharePopup()" uib-tooltip="Click here to show the share dialog." tooltip-placement="bottom">
                                     <span class="chaise-btn-icon glyphicon glyphicon-share"></span>
                                     <span>Share and cite</span>
                                 </button>

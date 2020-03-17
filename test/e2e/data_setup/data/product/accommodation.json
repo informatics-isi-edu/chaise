@@ -69,7 +69,8 @@
   "json_col":{"name":"Testing","age":25},
   "json_col_with_markdown": "Processing",
   "date_col": "12/9/2008",
-  "luxurious": false
+  "luxurious": false,
+  "fk_col_outbound1": "o1_2"
 },
 {
  "id": 4004,
