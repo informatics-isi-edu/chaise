@@ -612,6 +612,17 @@ var recordPage = function() {
         return element(by.css(".chaise-share-citation"));
     };
 
+    this.waitForCitation = function (timeout) {
+        var locator = element.all(by.css('.citation-loader'));
+        return browser.wait(function () {
+            return locator.isDisplayed().then(function (arr) {
+                return arr.includes(true) === false;
+            }).catch(function () {
+                return true;
+            });
+        }, timeout || browser.params.defaultTimeout);
+    }
+
     this.getModalListElements = function() {
         return this.getModalText().all(by.tagName('li'));
     };
@@ -1121,17 +1132,6 @@ var recordsetPage = function() {
         return element(by.id("fc-" + idx)).element(by.css(".reset-plotly-button"));
     };
 
-    this.waitForAggregates = function (timeout) {
-        var locator = element.all(by.css('.aggregate-col-loader'));
-        return browser.wait(function () {
-            return locator.isDisplayed().then(function (arr) {
-                return arr.includes(true) === false;
-            }).catch(function () {
-                return true;
-            });
-        }, timeout || browser.params.defaultTimeout);
-    };
-
     this.getWarningAlert = function () {
         return element(by.css(".alert-warning"));
     };
@@ -1365,6 +1365,17 @@ function chaisePage() {
         });
 
         return defer.promise;
+    };
+
+    this.waitForAggregates = function (timeout) {
+        var locator = element.all(by.css('.aggregate-col-loader'));
+        return browser.wait(function () {
+            return locator.isDisplayed().then(function (arr) {
+                return arr.includes(true) === false;
+            }).catch(function () {
+                return true;
+            });
+        }, timeout || browser.params.defaultTimeout);
     };
 };
 

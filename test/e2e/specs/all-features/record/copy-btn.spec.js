@@ -10,7 +10,8 @@ var testParams = {
     html_table_name: "html-name-table",
     html_table_display: "<strong>Html Name</strong>",
     keys: [{"name": "id", "value": 1, "operator": "="}],
-    html_keys: [{"name": "id", "value": 1, "operator": "="}]
+    html_keys: [{"name": "id", "value": 1, "operator": "="}],
+    html_table_name_record_url: browser.params.url + "/record/#" + browser.params.catalogId + "/editable-id:html-name-table/RID=" + chaisePage.getEntityRow("editable-id", "html-name-table", [{column: "id", value: "1"}]).RID
 };
 
 var relatedTableTestParams = {
@@ -57,12 +58,11 @@ describe('View existing record,', function() {
     // tests for subtitle link, resolverImplicitCatalog, and no citation in share modal
     describe("For table " + testParams.html_table_name + ",", function() {
 
+        var currentBrowserUrl;
         beforeAll(function() {
             var keys = [];
             browser.ignoreSynchronization=true;
-            var RID = chaisePage.getEntityRow("editable-id", testParams.html_table_name, [{column: "id", value: "1"}]).RID
-            var url = browser.params.url + "/record/#" + browser.params.catalogId + "/editable-id:" + testParams.html_table_name + "/RID=" + RID;
-            browser.get(url);
+            browser.get(testParams.html_table_name_record_url);
             // TODO use recordPageReady
             chaisePage.waitForElement(element(by.id('tblRecord')));
             chaisePage.waitForElementInverse(element(by.id('rt-loading')));
@@ -86,31 +86,11 @@ describe('View existing record,', function() {
         });
 
         // test that no citation appears in share modal when no citation is defined on table
-        it("should show the share dialog when clicking the share button with only permalink present.", function(done) {
-            chaisePage.recordPage.getShareButton().click().then(function () {
-                var shareDialog = chaisePage.recordPage.getShareModal();
-                // wait for dialog to open
-                chaisePage.waitForElement(shareDialog);
-                shareDialog.allowAnimations(false);
-
-                // verify modal dialog contents
-                expect(chaisePage.recordEditPage.getModalTitle().getText()).toBe("Share", "Share citation modal title is incorrect");
-                expect(chaisePage.recordPage.getModalListElements().count()).toBe(1, "Number of list elements in share citation modal is incorrect");
-
-                return browser.getCurrentUrl();
-            }).then(function (url) {
-                // verify permalink
-                expect(chaisePage.recordPage.getShareLinkHeader().getText()).toBe("Share Link", "Share Link (permalink) header is incorrect");
-                expect(chaisePage.recordPage.getPermalinkText().getText()).toContain(url, "permalink url is incorrect");
-
-                // close dialog
-                return chaisePage.recordsetPage.getModalCloseBtn().click();
-            }).then(function () {
-                done();
-            }).catch(function(err){
-                console.log(err);
-                done.fail();
-            });
+        recordHelpers.testSharePopup({
+            permalink: testParams.html_table_name_record_url,
+            verifyVersionedLink: false,
+            citation: null,
+            bibtextFile: null
         });
 
         it("open a new tab, update the current record, close the tab, and then verify the share dialog alert warning appears", function (done) {

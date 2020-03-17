@@ -246,8 +246,7 @@
 
             var cb;
             if (activeListModel.entityset) {
-                // TODO contextualize?
-                cb = activeListModel.column.reference.read(1, logObj);
+                cb = recordModel.reference.read(getPageSize(recordModel.reference), logObj);
             } else {
                 cb = activeListModel.column.getAggregatedValue($rootScope.page, logObj);
             }
@@ -264,17 +263,17 @@
                     }
                 })
 
+                //update the templateVariables
+                var sourceDefinitions = $rootScope.reference.table.sourceDefinitions;
+                var sm = sourceDefinitions.sourceMapping[activeListModel.column.name];
+
                 if (activeListModel.entityset) { // entitysets
-
-                    //update the templateVariables
-                    var sourceDefinitions = $rootScope.reference.table.sourceDefinitions;
-
                     // this check is unnecessary, otherwise ermrestjs wouldn't add them to the active list
                     // but for consistency I left this check here
                     // entitysets are fetched to be used in waitfor, so we don't need to do anything else with
                     // the returned object apart from updating the templateVariables
-                    if (activeListModel.objects.length > 0 && Array.isArray(sourceDefinitions)) {
-                        sourceDefinitions.forEach(function (k) {
+                    if (activeListModel.objects.length > 0 && Array.isArray(sm)) {
+                        sm.forEach(function (k) {
                             // the returned values is a page object in this case
                             $rootScope.templateVariables[k] = values.templateVariables;
                         });
@@ -286,10 +285,8 @@
                     // use the returned value (assumption is that values is an array of 0)
                     var val = values[0];
 
-                    //update the templateVariables
-                    var sourceDefinitions = $rootScope.reference.table.sourceDefinitions;
-                    if (activeListModel.objects.length > 0 && Array.isArray(sourceDefinitions)) {
-                        sourceDefinitions.forEach(function (k) {
+                    if (activeListModel.objects.length > 0 && Array.isArray(sm)) {
+                        sm.forEach(function (k) {
                             if (val.templateVariables["$self"]) {
                                 $rootScope.templateVariables[k] = val.templateVariables["$self"];
                             }
@@ -382,7 +379,7 @@
                 } else if (obj.inline || obj.related) {
                     var model = obj.inline ? $rootScope.columnModels[obj.index] : $rootScope.relatedTableModels[obj.index];
                     var ref = model.tableModel.reference;
-                    var hasAll = ref.sourceWaitFor.every(function (col) {
+                    var hasAll = ref.display.sourceWaitFor.every(function (col) {
                         return col.isUnique || col.name in $rootScope.aggregateResults || col.name in $rootScope.entitySetResults;
                     });
                     if (!hasAll) return;

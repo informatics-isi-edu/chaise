@@ -141,7 +141,7 @@
                 activeList.requests.forEach(function (req) {
                     var m = {
                         activeListModel: req,
-                        processed: false,
+                        processed: false
                     };
 
                     if (req.entityset || req.aggregate) {
@@ -160,6 +160,11 @@
                             logService.getStackNode(logService.logStackTypes.PSEUDO_COLUMN, req.column.table, extra)
                         );
                         m.logStackPath = logService.getStackPath("", logService.logStackPaths.PSEUDO_COLUMN);
+
+                        // to avoid computing this multiple times
+                        if (req.entityset) {
+                            m.reference = req.column.reference.contextualize.compactBrief;
+                        }
 
                     }
 

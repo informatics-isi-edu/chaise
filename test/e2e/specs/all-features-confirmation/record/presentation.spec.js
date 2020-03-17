@@ -26,7 +26,6 @@ var testParams = {
     related_table_name_with_page_size_annotation: "accommodation_image",
     page_size: 2,
     related_tables: [
-
         {
             title: "accommodation_image",
             displayname: "accommodation_image",
@@ -45,7 +44,7 @@ var testParams = {
     ],
     columns: [
         { title: "Id", value: "2002", type: "serial4"},
-        { title: "Name of Accommodation", value: "Sherathon Hotel", type: "text"},
+        { title: "Name of Accommodation", value: "Sherathon Hotel, accommodation_inbound3 one| accommodation_inbound3 three| accommodation_inbound3 five", type: "text"},
         { title: "Website", value: "<p><a href=\"http://www.starwoodhotels.com/sheraton/index.html\" class=\"external-link-icon\">Link to Website</a></p>\n", type: "text", comment: "A valid url of the accommodation", match:"html" },
         { title: "Category", value: "Hotel", type: "text", comment: "Type of accommodation ('Resort/Hotel/Motel')", presentation: { type:"url", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-record:category/", table_name: "category", key_value: [{column: "id", value: "10003"}]} },
         { title: "booking", value:'<p><strong class="vocab">2</strong> <strong class="vocab">350.0000</strong> <strong class="vocab">2016-04-18 00:00:00</strong> <strong class="vocab">4</strong> <strong class="vocab">200.0000</strong> <strong class="vocab">2016-05-31 00:00:00</strong></p>\n', type: "inline" },
@@ -57,16 +56,19 @@ var testParams = {
         { title: "Thumbnail", value: null, type: "int4"},
         { title: "Operational Since", value: "2008-12-09 00:00:00", type: "timestamptz" },
         { title: "Is Luxurious", value: "true", type: "boolean" },
-        { title: "accommodation_collections", value: "Sherathon Hotel", comment: "collections", presentation: { type: "inline", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-record:accommodation_collection/", table_name: "accommodation_collection", key_value: [{column: "id", value: "2000"}]} },
+        { title: "accommodation_collections", value: "<p>Sherathon Hotel, accommodation_outbound1_outbound2 one</p>", comment: "collections", type: "inline" },
         { title: "table_w_aggregates", value: "3", comment: "has aggregates", presentation: { type: "inline", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-record:table_w_aggregates/", table_name: "table_w_aggregates", key_value: [{column: "id", value: "3"}]} },
         { title: "# thumbnail collection", comment: "Count of thumbnail collection", value: "1", markdown_title: "# thumbnail collection"},
         { title: "# distinct thumbnail collection", comment: "Count distinct of thumbnail collection", value: "1", markdown_title: "# distinct thumbnail collection"},
-        { title: "Min Name of accommodation_collection", comment: "Minimum of title", value: "Sherathon Hotel", markdown_title: "Min Name of accommodation_collection"},
+        { title: "agg column with waitfor entityset and all-outbound", comment: "Minimum of title", value: "Sherathon Hotel, accommodation_outbound1_outbound4 one, accommodation_inbound2 one| accommodation_inbound2 three| accommodation_inbound2 five", markdown_title: "agg column with waitfor entityset and all-outbound"},
         { title: "Max Name of accommodation_collection", comment: "maximum of title", value: "Sherathon Hotel", markdown_title: "Max Name of accommodation_collection"},
         { title: "json_col", value:'<pre>'+JSON.stringify(null,undefined,2)+'</pre>', match:"html"},
         { title: "json_col_with_markdown", value: "<p>Status is: “delivered”</p>\n", match:"html"},
         { title: "accommodation_image_assoc", comment: "Accommodation Image", value: "3005", presentation: { type: "inline", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-record:file/", table_name: "file", key_value: [{column: "id", value: "3005"}]} },
-        { title: "table_w_invalid_row_markdown_pattern"}
+        { title: "table_w_invalid_row_markdown_pattern"},
+        { title: "virtual column wait_for all-outbound", "value": "virtual value of 2002 with title Sherathon Hotel", markdown_title: "virtual column wait_for all-outbound"},
+        { title: "virtual column wait_for agg", "value": "virtual Sherathon Hotel", markdown_title: "virtual column wait_for agg"},
+        { title: "virtual column wait_for entity set", "value": "Sherathon Hotel", markdown_title: "virtual column wait_for entity set"}
       ],
     no_related_data: {
         key: {
@@ -88,9 +90,10 @@ var testParams = {
       sidePanelTableOrder:[ 'Summary', 'Categories_collection (5)',  'media (1)', 'Categories_collection_2 (5)',  'Categories_3 (5)',  'Categories_4 (5)',  'Categories_5 (5)',  'Categories_6 (5)']
     },
     citationParams: {
-        numListElements: 3,
         permalink: browser.params.origin+"/id/"+browser.params.catalogId+"/"+chaisePage.getEntityRow("product-record", "accommodation", [{column: "id",value: "2002"}]).RID,
-        citation: "Sherathon Hotel http://www.starwoodhotels.com/sheraton/index.html (" + moment().format("YYYY") + ")."
+        verifyVersionedLink: true,
+        citation: "accommodation_inbound1 one, accommodation_inbound1 three, accommodation_inbound1 five(3) Sherathon Hotel, accommodation_outbound1_outbound3 one http://www.starwoodhotels.com/sheraton/index.html (" + moment().format("YYYY") + ").",
+        bibtextFile: "accommodation_"+chaisePage.getEntityRow("product-record", "accommodation", [{column: "id",value: "2002"}]).RID+".bib"
     },
     inline_columns: [
       {

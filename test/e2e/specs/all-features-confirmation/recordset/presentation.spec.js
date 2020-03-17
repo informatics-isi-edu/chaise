@@ -221,12 +221,14 @@ var testParams = {
                 "current: 12,345,221, 12345221, 12,345,111", //min_i2
                 "1,234,525", //max_i1
                 "current: 12,345,225, 12345225", //max_i2
+                "virtual col value is 12,345,225", //virtual column
             ],
             [
                 "main two", "", "1,234,502",
                 "", "", "", "", "", "", "",
                 "", "", "", "", "", "", "",
-                "", "", "", "", "", "", ""
+                "", "", "", "", "", "", "",
+                ""
             ]
         ]
     },
@@ -256,7 +258,7 @@ describe('View recordset,', function() {
                 browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + activeListParams.schemaName + ":" + activeListParams.table_name + "@sort(" + activeListParams.sortby + ")");
 
                 chaisePage.recordsetPageReady();
-                chaisePage.recordsetPage.waitForAggregates();
+                chaisePage.waitForAggregates();
             });
 
             it ("should show correct table rows.", function (done) {
@@ -288,7 +290,7 @@ describe('View recordset,', function() {
                 browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + activeListParams.schemaName + ":" + activeListParams.table_name + "/main_id=03");
 
                 chaisePage.recordsetPageReady()
-                chaisePage.recordsetPage.waitForAggregates();
+                chaisePage.waitForAggregates();
                 done();
             })
         });
@@ -303,7 +305,7 @@ describe('View recordset,', function() {
             browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:" + accommodationParams.table_name + "/" + keys.join("&") + "@sort(" + accommodationParams.sortby + ")");
 
             chaisePage.recordsetPageReady()
-            chaisePage.recordsetPage.waitForAggregates();
+            chaisePage.waitForAggregates();
         });
 
         describe("Presentation ,", function() {
