@@ -39,7 +39,7 @@
                                 </button>
                                 <!-- download CSV included by default -->
                                 <export reference="reference" style="position:relative;" disabled="!displayReady"></export>
-                                <button ng-disabeld="!displayReady || !$root.tuple" id="share" class="chaise-btn chaise-btn-primary" ng-click="ctrl.sharePopup()" uib-tooltip="Click here to show the share dialog." tooltip-placement="bottom">
+                                <button ng-disabled="!displayReady || tuple == null" id="share" class="chaise-btn chaise-btn-primary" ng-click="ctrl.sharePopup()" uib-tooltip="Click here to show the share dialog." tooltip-placement="bottom">
                                     <span class="chaise-btn-icon glyphicon glyphicon-share"></span>
                                     <span>Share and cite</span>
                                 </button>
@@ -150,7 +150,7 @@
                                     <div class="row" style="margin-right: 0px; margin-left: 0px;">
                                         <div class="col-xs-12 accordion-content" ng-if="rtm.open" ng-switch="!rtm.isTableDisplay && ctrl.allowRelatedTableMarkdown($index)">
                                             <div ng-switch-when="true">
-                                                <span class="markdown-container" ng-bind-html="rtm.pageContent | trustedHTML"></span>
+                                                <span class="markdown-container" ng-bind-html="rtm.tableMarkdownContent | trustedHTML"></span>
                                             </div>
                                             <div ng-switch-default>
                                                 <table-header vm="rtm.tableModel"></table-header>

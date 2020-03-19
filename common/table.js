@@ -888,8 +888,7 @@
             vm.reference.columns.forEach(function (col) {
                 vm.columnModels.push({
                     column: col,
-                    isLoading: col.hasWaitFor === true || col.isUnique === false,
-                    hasWaitFor: col.hasWaitFor === true || col.isUnique === false
+                    isLoading: col.hasWaitFor === true || col.isUnique === false
                 });
             });
 

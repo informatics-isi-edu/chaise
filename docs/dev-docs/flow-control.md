@@ -128,7 +128,7 @@ The flow-control of record page is the same as recordset. We don't have a queue 
 
 3. Send requests for all the aggregate columns that are used in the tabular mode of inline tables from to bottom.
 
-4. Send requests for all the aggregate columns that are used in the tabular mode of inline tables from top to bottom.
+4. Send requests for all the aggregate columns that are used in the tabular mode of related tables from top to bottom.
 
 
 

@@ -200,15 +200,15 @@
                             displayname: reference.displayname,
                             // whether we should do the waitfor logic:
                             hasWaitFor: col.hasWaitFor,
-                            // to show the content or not
+                            // to show the loader or not:
                             isLoading: col.hasWaitFor,
                             // this indicates that we got the waitfor data:
-                            // only if w got the waitfor data, and the main data we can popuplate the page.content value
-                            waitForDataLoaded: false,
-                            // this indicates that the pageContent has been initialized:
-                            // we should not show the related table before initialzing the pageContent
-                            pageContentInitialized: false,
-                            pageContent: null,
+                            // only if w got the waitfor data, and the main data we can popuplate the tableMarkdownContent value
+                            waitForDataLoaded: !col.hasWaitFor,
+                            // this indicates that the tableMarkdownContent has been initialized:
+                            // we should not show the related table before initialzing the tableMarkdownContent
+                            tableMarkdownContentInitialized: false,
+                            tableMarkdownContent: null,
                             tableModel: recordAppUtils.getTableModel(reference, index, true)
                         };
                         $rootScope.hasInline = true;
@@ -218,8 +218,8 @@
                         model = {
                             columnError: false,
                             isLoading: true,
-                            hasWaitFor: true
-                        }
+                            hasWaitForOrNotUnique: true
+                        };
                     }
 
                     model.column = col;
@@ -243,15 +243,15 @@
                         displayname: ref.displayname,
                         // whether we should do the waitfor logic:
                         hasWaitFor: ref.display.sourceHasWaitFor,
-                        // to show the content or not:
+                        // to show the loader or not (currently not used in index.html.in but added for consistency):
                         isLoading: ref.display.sourceHasWaitFor,
                         // this indicates that we got the waitfor data:
-                        // only if w got the waitfor data, and the main data we can popuplate the page.content value
+                        // only if w got the waitfor data, and the main data we can popuplate the tableMarkdownContent value
                         waitForDataLoaded: false,
-                        // this indicates that the pageContent has been initialized:
-                        // we should not show the related table before initialzing the pageContent
-                        pageContentInitialized: false,
-                        pageContent: null,
+                        // this indicates that the tableMarkdownContent has been initialized:
+                        // we should not show the related table before initialzing the tableMarkdownContent
+                        tableMarkdownContentInitialized: false,
+                        tableMarkdownContent: null,
                         tableModel: recordAppUtils.getTableModel(ref, index),
                         baseTableName: $rootScope.reference.displayname
                     });

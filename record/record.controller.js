@@ -167,7 +167,7 @@
 
             var rtm = $rootScope.relatedTableModels[i];
             var canShow = function () {
-                if (!rtm.tableModel.initialized || !rtm.pageContentInitialized) {
+                if (!rtm.tableModel.initialized || !rtm.tableMarkdownContentInitialized) {
                   return false;
                 }
 
@@ -195,14 +195,14 @@
 
         vm.showInlineTable = function (i) {
             var cm = $rootScope.columnModels[i];
-            return cm.isInline && ($rootScope.showEmptyRelatedTables || (cm.tableModel.page && cm.tableModel.page.length > 0 && cm.pageContentInitialized));
+            return cm.isInline && ($rootScope.showEmptyRelatedTables || (cm.tableModel.page && cm.tableModel.page.length > 0));
         };
 
         /**
          * allow related table markdown display if all the following are true:
          *  - reference.display.type is `markdown`
          *  - related table has data.
-         *  - related table's pageContent is not empty string
+         *  - related table's tableMarkdownContent is not empty string
          *
          * we are going to show the markdown display if the result if this function
          * is true and the related table model is in markdown mode.
@@ -213,7 +213,7 @@
             if (!$rootScope.relatedTableModels) return false;
             var rtm = $rootScope.relatedTableModels[i];
             var tm = rtm.tableModel;
-            return tm.reference.display.type == 'markdown' && tm.page && tm.page.tuples.length > 0 && rtm.pageContentInitialized && rtm.pageContent != '';
+            return tm.reference.display.type == 'markdown' && tm.page && tm.page.tuples.length > 0 && rtm.tableMarkdownContentInitialized && rtm.tableMarkdownContent != '';
         };
 
         vm.noVisibleRelatedTables = function () {

@@ -102,15 +102,15 @@
 
         /**
          * When the data for inline or related entities are loaded,
-         * - if there's no wait for, or waitfor is loaded: sets the pageContent value.
+         * - if there's no wait for, or waitfor is loaded: sets the tableMarkdownContent value.
          * - otherwise it will not do anyting.
          */
         function _afterUpdateRelatedEntity(model) {
             return function (tableModel, res) {
                 model.processed = !res;
                 if (res && (!model.hasWaitFor || model.waitForDataLoaded)) {
-                    model.pageContentInitialized = true;
-                    model.pageContent = tableModel.page.getContent($rootScope.templateVariables);
+                    model.tableMarkdownContentInitialized = true;
+                    model.tableMarkdownContent = tableModel.page.getContent($rootScope.templateVariables);
                 }
             };
         }
@@ -395,11 +395,11 @@
 
                     model.isLoading = false;
                     model.waitForDataLoaded = true;
-                    // if the page data is already fetched, we can just popuplate the pageContent value.
-                    // otherwise we should just wait for the related/inline table data to get back to popuplate the pageContent
+                    // if the page data is already fetched, we can just popuplate the tableMarkdownContent value.
+                    // otherwise we should just wait for the related/inline table data to get back to popuplate the tableMarkdownContent
                     if (model.tableModel.page && !model.tableModel.dirtyResult) {
-                        model.pageContent = model.tableModel.page.getContent($rootScope.templateVariables);
-                        model.pageContentInitialized = true;
+                        model.tableMarkdownContent = model.tableModel.page.getContent($rootScope.templateVariables);
+                        model.tableMarkdownContentInitialized = true;
                     }
                 }
             });
@@ -446,12 +446,26 @@
             $rootScope.columnModels.forEach(function (m) {
                 if (m.isInline) {
                     m.tableModel.dirtyResult = true;
+
+                    if (m.hasWaitFor) {
+                        m.isLoading = true;
+                        m.waitForDataLoaded = false;
+                    }
+
                     _addCauseToModel(m.tableModel, cause);
+                } else if (m.hasWaitForOrNotUnique) {
+                    m.isLoading = true;
                 }
             })
 
             $rootScope.relatedTableModels.forEach(function (m) {
                 m.tableModel.dirtyResult = true;
+
+                if (m.hasWaitFor) {
+                    m.isLoading = true;
+                    m.waitForDataLoaded = false;
+                }
+
                 _addCauseToModel(m.tableModel, cause);
             });
 
