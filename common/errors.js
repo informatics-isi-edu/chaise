@@ -329,12 +329,6 @@
           return handleException(arguments[4]);
         };
 
-        var reloadCb = function() {
-            if (Session.shouldReloadPageAfterLogin()) {
-                window.location.reload();
-            }
-        };
-
         /**
          * exception    - the error that was thrown
          * pageName     - the name of the page we will redirect to
@@ -451,7 +445,13 @@
             // If not authorized, ask user to sign in first
             if (ERMrest && exception instanceof ERMrest.UnauthorizedError) {
                 // Unauthorized (needs to login)
-                Session.loginInAModal(reloadCb);
+                Session.loginInAModal(function() {
+                    if (Session.shouldReloadPageAfterLogin()) {
+                        window.location.reload();
+                    } else if (!Session.isSameSessionAsPrevious()) {
+                        handleException(new Errors.DifferentUserConflictError(), false);
+                    }
+                });
                 return;
             }
 

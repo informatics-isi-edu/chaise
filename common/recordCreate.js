@@ -184,21 +184,7 @@
 
             //call uploadFiles which will upload files and callback on success
             uploadFiles(submissionRowsCopy, rsReference, function() {
-
-                var fn = "create",
-                    args = [submissionRowsCopy, logObj];
-                var fnScope = isModalUpdate ? derivedref.unfilteredReference.contextualize.entryCreate : rsReference.unfilteredReference.contextualize.entryCreate;
-
-                if (isUpdate) {
-                    var data = checkUpdate(submissionRowsCopy, rsTuples);
-                    // submit rootScope.tuples because we are changing and
-                    // comparing data from the old data set for the tuple with the updated data set from the UI
-                    fn = "update", fnScope = rsReference, args = [rsTuples, logObj];
-                }
-
-                console.log("before ermrestJS request made");
-                fnScope[fn].apply(fnScope, args).then(function success(result) {
-
+                var submitSuccessCB = function success(result) {
                     var page = result.successful;
                     var failedPage = result.failed;
 
@@ -238,7 +224,9 @@
                     } else {
                         onSuccessFunction(model, result);
                     }
-                }).catch(function(exception) {
+                };
+
+                var submitErrorHandler = function(exception) {
                     viewModel.submissionButtonDisabled = false;
                     // assume user had been previously logged in (can't create/update without it)
                     // if no valid current session, user should re-login
@@ -260,8 +248,6 @@
 
                         // TODO: change message for forbidden error
                         // add logout? then login? not sure the workflow
-
-                        console.log(exception instanceof Errors.DifferentUserConflictError);
                         if (isModalUpdate || exception instanceof Errors.DifferentUserConflictError) {
                             // pure and binary add on record page, we want a popup error
                             // if timeout error, also show popup
@@ -270,7 +256,21 @@
                             AlertsService.addAlert(exception.message, (exception instanceof ERMrest.NoDataChangedError ? 'warning' : 'error') );
                         }
                     });
-                });
+                }
+
+                var createRef = isModalUpdate ? derivedref.unfilteredReference.contextualize.entryCreate : rsReference.unfilteredReference.contextualize.entryCreate;
+
+                if (isUpdate) {
+                    var data = checkUpdate(submissionRowsCopy, rsTuples);
+                    // submit rootScope.tuples because we are changing and
+                    // comparing data from the old data set for the tuple with the updated data set from the UI
+                }
+
+                if (!isUpdate) {
+                    createRef.create(submissionRowsCopy, logObj).then(submitSuccessCB).catch(submitErrorHandler);
+                } else {
+                    rsReference.update(rsTuples, logObj).then(submitSuccessCB).catch(submitErrorHandler);
+                }
 
             });
 

@@ -250,11 +250,12 @@
          */
         var popupLogin = function (logAction) {
             var reloadCb = function(){
+                // TODO: think this through,condition and whether get session is needed
                 if (!shouldReloadPageAfterLogin()) {
                     // refreshes the session
-                    _getSession().then(function () {
+                    // _getSession().then(function () {
                         modalInstance.close();
-                    });
+                    // });
                 } else {
                     window.location.reload();
                 }
@@ -457,14 +458,12 @@
             // Bind callback function by invoking setHTTP401Handler handler passing the callback
             // This callback will be called whenever 401 HTTP error is encountered unless there is
             // already login flow in progress
-            console.log("before set http 401 handler");
             ERMrest.setHTTP401Handler(function() {
                 var defer = $q.defer();
 
                 // Call login in a new modal window to perform authentication
                 // and return a promise to notify ermrestjs that the user has loggedin
                 Session.loginInAModal(function() {
-                    console.log("success CB login in a modal")
 
                     // Once the user has logged in fetch the new session and set the session value
                     // and resolve the promise to notify ermrestjs that the user has logged in
@@ -476,13 +475,12 @@
                         defer.resolve(differentUser);
 
                         // throw Error if login is successful but it's a different user
-                        if (differentUser) ErrorService.handleException(new Errors.DifferentUserConflictError());
+                        if (differentUser) ErrorService.handleException(new Errors.DifferentUserConflictError(), false);
                     }, function(exception) {
                         defer.reject(exception);
                     });
 
                 }, function (response) {
-                    console.log("reject before going to ermrestJS")
                     // returns to rejectCB in ermrestJS/http.js
                     defer.reject(response);
                 });
