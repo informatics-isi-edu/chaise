@@ -103,8 +103,6 @@
                     $interval.cancel(intervalId);
                     $cookies.remove("chaise-" + referrerId, { path: "/" });
                     closed = true;
-
-                    $uibModalStack.dismissAll(message);
                 }
                 var onModalCloseSuccess = function () {
                     cleanupModal("login refreshed");
@@ -114,7 +112,7 @@
                 var onModalClose = function(response) {
                     cleanupModal("no login");
                     if (rejectCb) {
-                        // throws error in ermrestJS if not formatted as an Error
+                        //  ermrestJS throws error if 'response' is not formatted as an Error
                         if (typeof response == "String") {
                             response = new Error(response);
                         }
@@ -253,7 +251,8 @@
         var popupLogin = function (logAction) {
             var reloadCb = function(){
                 if (!shouldReloadPageAfterLogin()) {
-                    _getSession().then(function (newSession) {
+                    // refreshes the session
+                    _getSession().then(function () {
                         modalInstance.close();
                     });
                 } else {
@@ -270,7 +269,7 @@
         };
 
         var shouldReloadPageAfterLogin = function() {
-            if (_session === null) return true;
+            if (_session === null && _prevSession == null) return true;
             return false;
         };
 
@@ -322,12 +321,13 @@
                 // keep track of only the first session, so when a timeout occurs, we can compare the sessions
                 // when a new session is fetched after timeout, check if the identities are the same
                 if (_session) {
-                    _sameSessionAsPrevious = _session.client.id == response.data.client.id;
+                    _sameSessionAsPrevious = _prevSession.client.id == response.data.client.id;
                 } else {
                     // only update _session if no session exists yet
                     _session = response.data;
                 }
 
+                if(!_prevSession) _prevSession = response.data
                 _executeListeners();
                 return _session;
             }).catch(function(err) {
@@ -372,6 +372,8 @@
             isSameSessionAsPrevious: function() {
                 return _sameSessionAsPrevious;
             },
+
+            shouldReloadPageAfterLogin: shouldReloadPageAfterLogin,
 
             // if there's a previous login token AND
             // the prompt expiration token does not exist OR it has expired
@@ -474,7 +476,7 @@
                         defer.resolve(differentUser);
 
                         // throw Error if login is successful but it's a different user
-                        if (differentUser) ErrorService.handleException(new Errors.DifferentUserConflictError("You aren't the previous user"));
+                        if (differentUser) ErrorService.handleException(new Errors.DifferentUserConflictError());
                     }, function(exception) {
                         defer.reject(exception);
                     });

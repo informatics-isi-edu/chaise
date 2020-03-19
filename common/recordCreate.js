@@ -11,6 +11,7 @@
         var addRecordRequests = {}; // <generated unique id : reference of related table>
         var editRecordRequests = {}; // generated id: {schemaName, tableName}
         var updated = {};
+        var pbModalInstance = null;
 
 
         /**
@@ -121,6 +122,7 @@
 
                     if (typeof exception !== "string") {
                         // happens with an error with code 0 (Timeout Error)
+                        console.log("upload files error");
                         $log.warn(exception);
                         var message = exception.message || messageMap.errorMessageMissing;
 
@@ -194,6 +196,7 @@
                     fn = "update", fnScope = rsReference, args = [rsTuples, logObj];
                 }
 
+                console.log("before ermrestJS request made");
                 fnScope[fn].apply(fnScope, args).then(function success(result) {
 
                     var page = result.successful;
@@ -231,10 +234,9 @@
                     viewModel.readyToSubmit = false; // form data has already been submitted to ERMrest
 
                     if (isModalUpdate) {
-                        onSuccessFunction();
+                        pbModalInstance.close();
                     } else {
                         onSuccessFunction(model, result);
-
                     }
                 }).catch(function(exception) {
                     viewModel.submissionButtonDisabled = false;
@@ -243,7 +245,11 @@
                     // validate session will never throw an error, so it's safe to not write a reject callback or catch clause
                     console.log("before validate session");
                     Session.validateSession().then(function (session) {
-                        if (!session && exception instanceof ERMrest.ConflictError) throw new ERMrest.UnauthorizedError();
+                        if (!session && exception instanceof ERMrest.ConflictError) {
+                            console.log("unauthorized error")
+                            // login in a modal should show (Session timed out)
+                            throw new ERMrest.UnauthorizedError();
+                        }
                         // append link to end of alert.
                         if (exception instanceof ERMrest.DuplicateConflictError) {
                             exception.message += ' Click <a href="' + exception.duplicateReference.contextualize.detailed.appLink + '" target="_blank">here</a> to see the conflicting record that already exists.';
@@ -393,17 +399,7 @@
                 return defer.promise;
             };
 
-            modalUtils.showModal({
-                animation: false,
-                controller: "SearchPopupController",
-                windowClass: "search-popup add-pure-and-binary-popup",
-                controllerAs: "ctrl",
-                resolve: {
-                    params: params
-                },
-                size: modalUtils.getSearchPopupSize(params),
-                templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
-            }, function dataSelected(res) {
+            params.submitBeforeClose = function dataSelected(res) {
                 //TODO this is written only for modal update (multi-select), isModalUpdate is unnecessary
 
                 if (!res || !res.rows) return;
@@ -432,8 +428,22 @@
                         action: logService.getActionString(logService.logActions.LINK, logStackPath),
                         stack: logStack
                     };
-                    addRecords(viewModel.editMode, derivedref, nullArr, isModalUpdate, rsReference, rsTuples, rsQueryParams, viewModel, viewModel.onSuccess, logObj);
+                    addRecords(viewModel.editMode, derivedref, nullArr, isModalUpdate, rsReference, rsTuples, rsQueryParams, viewModel, null, logObj);
                 }
+            }
+
+            pbModalInstance = modalUtils.showModal({
+                animation: false,
+                controller: "SearchPopupController",
+                windowClass: "search-popup add-pure-and-binary-popup",
+                controllerAs: "ctrl",
+                resolve: {
+                    params: params
+                },
+                size: modalUtils.getSearchPopupSize(params),
+                templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
+            }, function (res) {
+                viewModel.onSuccess();
             }, function () {
                 viewModel.onModalClose();
             }, false);

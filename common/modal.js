@@ -314,7 +314,11 @@
          * If we had the matchNotNull, then we just need to pass that attribute.
          */
         function submitMultiSelection() {
-            $uibModalInstance.close(getMultiSelectionResult());
+            if (vm.params.submitBeforeClose) {
+                vm.params.submitBeforeClose(getMultiSelectionResult());
+            } else {
+                $uibModalInstance.close(getMultiSelectionResult());
+            }
         }
 
         function cancel() {

@@ -330,7 +330,9 @@
         };
 
         var reloadCb = function() {
-            window.location.reload();
+            if (Session.shouldReloadPageAfterLogin()) {
+                window.location.reload();
+            }
         };
 
         /**
