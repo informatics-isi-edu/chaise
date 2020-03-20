@@ -28,7 +28,9 @@
         'chaise.delete',
         'chaise.modal',
         'chaise.navbar',
+        'chaise.upload',
         'chaise.record.table',
+        'chaise.recordcreate',
         'chaise.utils',
         'ermrestjs',
         'ngCookies',
@@ -127,7 +129,7 @@
     }])
 
     // Hydrate values providers and set up iframe
-    .run(['ConfigUtils', 'ERMrest', 'DataUtils', 'FunctionUtils',  'UiUtils', 'UriUtils', 'logService', '$window', 'context', 'image', 'annotations', 'comments', 'anatomies', 'user', 'MathUtils', '$rootScope', function runApp(ConfigUtils, ERMrest, DataUtils, FunctionUtils, UiUtils, UriUtils, logService, $window, context, image, annotations, comments, anatomies, user, MathUtils, $rootScope) {
+    .run(['ConfigUtils', 'ERMrest', 'DataUtils', 'FunctionUtils',  'UiUtils', 'UriUtils', 'InputUtils', 'logService', '$window', 'context', 'image', 'annotations', 'comments', 'anatomies', 'user', 'MathUtils', 'viewerAppUtils', 'viewerModel', '$rootScope', function runApp(ConfigUtils, ERMrest, DataUtils, FunctionUtils, UiUtils, UriUtils, InputUtils, logService, $window, context, image, annotations, comments, anatomies, user, MathUtils, viewerAppUtils, viewerModel, $rootScope) {
         var origin = $window.location.origin;
         var iframe = $window.frames[0];
         var annotoriousReady = false;
@@ -143,19 +145,21 @@
         var arrows = [];
         var rectangles = [];
         var sections = [];
-        var specimenURL = "https://dev.rebuildingakidney.org/ermrest/catalog/2/entity/Gene_Expression:Specimen_Expression";
+        var session; 
+        // var specimenURL = "https://dev.rebuildingakidney.org/ermrest/catalog/2/entity/Gene_Expression:Specimen_Expression";
+        var imageAnnotationURL = "https://dev.rebuildingakidney.org/ermrest/catalog/2/entity/Gene_Expression:Image_Annotation";
         var config = ConfigUtils.getContextJSON();
         context.server = config.server;
-        context.wid = config.wid;
-        context.cid = config.cid;
-        context.pid = config.pid;
+        context.wid = config.contextHeaderParams.wid;
+        context.cid = config.contextHeaderParams.cid;
+        context.pid = config.contextHeaderParams.pid;
         context.chaiseBaseURL = UriUtils.chaiseBaseURL();
         UriUtils.setOrigin();
 
         var res = UriUtils.chaiseURItoErmrestURI($window.location, true);
         var ermrestUri = res.ermrestUri,
-            pcid = res.pcid,
-            ppid = res.ppid,
+            pcid = config.contextHeaderParams.cid,
+            ppid = config.contextHeaderParams.pid,
             isQueryParameter = res.isQueryParameter;
 
         context.catalogID = res.catalogId;
@@ -181,14 +185,13 @@
 
         FunctionUtils.registerErmrestCallbacks();
 
-        ERMrest.resolve(specimenURL, { cid: context.cid, pid: context.pid, wid: context.wid }).then(function(reference){
-            console.log("reference : ", reference);
-
+        ERMrest.resolve(imageAnnotationURL, { cid: context.cid, pid: context.pid, wid: context.wid }).then(function getReference(reference){
+            
             // we are using filter to determine app mode, the logic for getting filter
             // should be in the parser and we should not duplicate it in here
             // NOTE: we might need to change this line (we're parsing the whole url just for fidinig if there's filter)
             var location = reference.location;
-
+            
             // Mode can be any 3 with a filter
             if (location.filter || location.facets) {
                 // prefill always means create
@@ -206,10 +209,11 @@
             } else if (context.mode == context.modes.CREATE || context.mode == context.modes.COPY) {
                 $rootScope.reference = reference.contextualize.entryCreate;
             }
-
+            console.log("Reference : ", $rootScope.reference);
             $rootScope.reference.session = session;
             $rootScope.session = session;
             // $rootScope.reference = reference;
+            
 
             // log attribues
             $rootScope.logStackPath = logService.logStackPaths.SET;
@@ -220,6 +224,105 @@
                     $rootScope.reference.filterLogInfo
                 )
             ];
+
+            // The log object that will be used for the submission request
+            var action = (context.mode == context.modes.CREATE || context.mode == context.modes.COPY) ? logService.logActions.CREATE : logService.logActions.UPDATE;
+            var logObj = {
+                action: logService.getActionString(action),
+                stack: logService.getStackObject()
+            };
+            if (pcid) logObj.pcid = pcid;
+            if (ppid) logObj.ppid = ppid;
+            if (isQueryParameter) logObj.cqp = 1;
+            context.logObject = logObj;
+
+            $rootScope.reference.columns.forEach(function (column, index) {
+                var isDisabled = InputUtils.isDisabled(column);
+                var stackNode = logService.getStackNode(
+                    column.isForeignKey ? logService.logStackTypes.FOREIGN_KEY : logService.logStackTypes.COLUMN,
+                    column.table,
+                    {source: column.compressedDataSource, entity: column.isForeignKey}
+                );
+                var stackPath = column.isForeignKey ? logService.logStackPaths.FOREIGN_KEY : logService.logStackPaths.COLUMN;
+
+                viewerModel.columnModels[index] = {
+                    allInput: null,
+                    column: column,
+                    isDisabled: isDisabled,
+                    inputType: viewerAppUtils.columnToInputType(column, isDisabled),
+                    highlightRow: false,
+                    showSelectAll: false,
+                    logStack: logService.getStackObject(stackNode),
+                    logStackPath: logService.getStackPath("", stackPath)
+                };
+            });
+
+            if (context.mode == context.modes.CREATE){
+                if($rootScope.reference.canCreate){
+                    $rootScope.idSafeTableName = DataUtils.makeSafeIdAttr($rootScope.reference.table.name);
+                    $rootScope.idSafeSchemaName = DataUtils.makeSafeIdAttr($rootScope.reference.table.schema.name);
+
+                    // get the prefilled values
+                    var prefilledColumns = {}, prefilledFks = [];
+
+                    // populate defaults
+                    for (var i = 0; i < $rootScope.reference.columns.length; i++){
+                        // default model initialiation is null
+                        var initialModelValue = null;
+                        var column = $rootScope.reference.columns[i];
+                        var colModel = viewerModel.columnModels[i];
+
+                         // only want to set primitive values in the input fields so make sure it isn't a function, null, or undefined
+                         var defaultValue = column.default;
+
+                         // if it's a prefilled foreignkey, the value is already set
+                         if (column.isForeignKey &&  prefilledFks.indexOf(column.name) !== -1) {
+                             colModel.isDisabled = true;
+                             colModel.inputType = "disabled";
+                             continue;
+                         }
+
+                         var tsOptions = {
+                            outputType: colModel.inputType == "disabled" ? "string" : "object"
+                        };
+
+                        switch (column.type.name) {
+                            // timestamp[tz] and asset columns have default model objects if their inputs are NOT disabled
+                            case 'timestamp':
+                                tsOptions.outputMomentFormat = dataFormats.datetime.display;
+                                // formatDatetime takes care of column.default if null || undefined
+                                initialModelValue = InputUtils.formatDatetime(defaultValue, tsOptions);
+                                break;
+                            case 'timestamptz':
+                                tsOptions.outputMomentFormat = dataFormats.datetime.displayZ;
+                                // formatDatetime takes care of column.default if null || undefined
+                                initialModelValue = InputUtils.formatDatetime(defaultValue, tsOptions);
+                                break;
+                            default:
+                                if (column.isAsset) {
+                                    var metaObj = {};
+                                    metaObj[column.name] = defaultValue;
+
+                                    var metadata = column.getMetadata(metaObj);
+                                    initialModelValue = {
+                                        url: metadata.url || "",
+                                        filename: metadata.filename || metadata.caption || "",
+                                        filesize: metadata.byteCount || ""
+                                    }
+                                } else {
+                                    // all other column types
+                                    if (defaultValue != null) {
+                                        initialModelValue = defaultValue;
+                                    }
+                                }
+                        }
+
+                        viewerModel.rows[0][column.name] = initialModelValue;
+                    }
+
+                    $rootScope.displayReady = true;
+                }
+            }
             
         }, function error(response){
             console.log("ERMrest error : ", response );
@@ -387,6 +490,7 @@
           console.log(response);
         });
 
+        
         // Set up a listener for all "message" events
         $window.addEventListener('message', function(event) {
             if (event.origin === origin) {

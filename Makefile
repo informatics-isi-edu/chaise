@@ -322,6 +322,9 @@ VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
 	$(JS)/vendor/angular-datepicker.js \
 	$(COMMON)/vendor/angular-cookies.min.js \
 	$(COMMON)/vendor/angular-scroll.min.js \
+	$(COMMON)/vendor/mask.min.js \
+	$(COMMON)/vendor/moment.min.js \
+	$(COMMON)/vendor/sparkMD5.min.js \
 	$(COMMON)/alerts.js \
 	$(COMMON)/config.js \
 	$(COMMON)/faceting.js \
@@ -332,12 +335,14 @@ VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
 	$(COMMON)/validators.js \
 	$(COMMON)/vendor/css-element-queries.js \
 	$(COMMON)/utils.js \
+	$(COMMON)/upload.js \
 	$(COMMON)/storage.js \
 	$(COMMON)/authen.js \
 	$(COMMON)/errors.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/navbar.js \
 	$(COMMON)/login.js \
+	$(COMMON)/recordCreate.js \
 	$(COMMON)/delete-link.js \
 	$(COMMON)/vendor/re-tree.js \
 	$(COMMON)/vendor/ng-device-detector.js \
@@ -347,6 +352,7 @@ VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
 	$(JS)/vendor/select.js
 
 VIEWER_JS_SOURCE=$(VIEWER_ASSETS)/viewer.app.js \
+	$(VIEWER_ASSETS)/model.js \
 	$(VIEWER_ASSETS)/common/providers/context.js \
 	$(VIEWER_ASSETS)/common/providers/image.js \
 	$(VIEWER_ASSETS)/common/providers/user.js \
@@ -363,7 +369,8 @@ VIEWER_JS_SOURCE=$(VIEWER_ASSETS)/viewer.app.js \
 	$(VIEWER_ASSETS)/image-metadata/vocabs.js \
 	$(VIEWER_ASSETS)/image-metadata/statuses.js \
 	$(VIEWER_ASSETS)/image-metadata/metadata.controller.js \
-	$(VIEWER_ASSETS)/alerts/alerts.controller.js
+	$(VIEWER_ASSETS)/alerts/alerts.controller.js \
+	$(VIEWER_ASSETS)/viewer.utils.js
 
 VIEWER_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/vendor/fontawesome.min.css \

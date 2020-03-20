@@ -3,11 +3,12 @@
 
     angular.module('chaise.viewer')
 
-    .controller('AnnotationsController', ['AlertsService', 'anatomies', 'annotations', 'AnnotationsService', 'AuthService', 'comments', 'context', 'CommentsService', 'ConfigUtils', 'DataUtils', 'InputUtils', 'UriUtils', 'modalUtils', 'modalBox', 'recordsetDisplayModes', 'logService', '$rootScope','$scope', '$timeout', '$uibModal', '$window',
-    function AnnotationsController(AlertsService, anatomies, annotations, AnnotationsService, AuthService, comments, context, CommentsService, ConfigUtils, DataUtils, InputUtils, UriUtils, modalUtils , modalBox,recordsetDisplayModes, logService,  $rootScope, $scope, $timeout, $uibModal, $window) {
+    .controller('AnnotationsController', ['AlertsService', 'anatomies', 'annotations', 'AnnotationsService', 'AuthService', 'comments', 'context', 'CommentsService', 'ConfigUtils', 'DataUtils', 'InputUtils', 'UriUtils', 'modalUtils', 'modalBox', 'recordsetDisplayModes', 'recordCreate', 'logService', 'viewerModel', '$rootScope','$scope', '$timeout', '$uibModal', '$window',
+    function AnnotationsController(AlertsService, anatomies, annotations, AnnotationsService, AuthService, comments, context, CommentsService, ConfigUtils, DataUtils, InputUtils, UriUtils, modalUtils , modalBox,recordsetDisplayModes, recordCreate, logService, viewerModel,  $rootScope, $scope, $timeout, $uibModal, $window) {
         var chaiseConfig = Object.assign({}, ConfigUtils.getConfigJSON());
         var vm = this;
 
+        vm.viewerModel = viewerModel;
         vm.editMode = (context.mode == context.modes.EDIT ? true : false);
         vm.isDisplayAll = true; // whether to show all annotations
         vm.collection = []; // annotation list
@@ -70,6 +71,7 @@
         vm.drawAnnotation = drawAnnotation;
         vm.changeTerm = changeTerm;
         vm.addNewTerm = addNewTerm;
+        vm.saveAnatomySVGFile = saveAnatomySVGFile;
 
         // Listen to events of type 'message' (from Annotorious)
         $window.addEventListener('message', function annotationControllerListener(event) {
@@ -124,7 +126,9 @@
                             vm.totalCount = vm.collection.length;
                         })
                         break;
-
+                    case "saveGroupSVGContent":
+                        vm.saveAnatomySVGFile(data);
+                        break;
                     // The following cases are already handled elsewhere or are
                     // no longer needed but the case is repeated here to avoid
                     // triggering the default case.
@@ -140,9 +144,68 @@
             }
         });
 
-        function searchPopup(callback){
+        function saveAnatomySVGFile(data){
+            var groupID = data.content[0].groupID,
+                fileName,
+                file,
+                assetCol = $scope.reference.columns.find(column => column.name == "File_URI");
 
-            var column = $rootScope.reference.columns[1];
+            if(data.content.length <= 0 || data.content[0].svg === ""){
+                return;
+            }
+
+            groupID = groupID.split(",")[0];
+            fileName = groupID ? groupID.replace(":", "%3A") : "UnknownAnatomy";
+            file = new File([data.content[0].svg], fileName + ".svg", {
+                type : "image/svg+xml"
+            });
+            console.log("saving file: ", file);
+
+            var submissionRow = {};
+            $rootScope.reference.columns.forEach(function (column) {
+                // If the column is a foreign key column, it needs to get the originating columns name for data submission
+                if (column.isForeignKey) {
+                    var foreignKeyColumns = column.foreignKey.colset.columns;
+                    for (var k = 0; k < foreignKeyColumns.length; k++) {
+                        var referenceColumn = foreignKeyColumns[k];
+                        var foreignTableColumn = column.foreignKey.mapping.get(referenceColumn);
+                        // check if value is set in submission data yet
+                        if (!submissionRow[referenceColumn.name]) {
+                            submissionRow[referenceColumn.name] = null;
+                        }
+                    }
+                // not foreign key, column.name is sufficient for the keys
+                } else {
+                    // set null if not set so that the whole data object is filled out for posting to ermrestJS
+                    submissionRow[column.name] = null;
+                };
+            });
+
+            submissionRow["Image"] = "16-2EC6";
+            submissionRow["Anatomy"] = groupID;
+            submissionRow["File_URI"] = {
+                uri : fileName,
+                file : file,
+                fileName : fileName,
+                fileSize : file.size,
+                hatracObj : new ERMrest.Upload(file, {
+                    column: assetCol,
+                    reference: $rootScope.reference
+                })
+            }
+
+            vm.viewerModel.submissionRows[0] = submissionRow;
+            console.log(submissionRow);
+
+            recordCreate.addRecords(false, null, vm.viewerModel, false, $rootScope.reference, $rootScope.tuples, context.queryParams, vm, onSuccess, context.logObject);
+        }
+
+        function onSuccess(model, result){
+            console.log(model, result);
+        }
+
+        function searchPopup(column, callback){
+
             var params = {};
             var submissionRow = {
                 Specimen: null,
@@ -445,7 +508,8 @@
         function addAnnotation(items){
             var groupID,
                 i,
-                svgID;
+                svgID,
+                isExist;
 
             // HACK: For mapping the id of human anatomy
             var dict = {
@@ -459,7 +523,10 @@
             for(i = 0; i < items.length; i++){
                 groupID = items[i].groupID;
                 svgID = items[i].svgID;
-
+                isExist = false;
+                if(vm.collection.find(item => item.groupID === groupID)){
+                    continue;
+                }
                 /* HACK: This is done for the demo, the all ids are not available currently.
                 Also the encodeURI is the same as ERMrest's _fixedEncodeURIComponent_. Since it
                 is still not clear what will be th format of id.*/
@@ -560,7 +627,7 @@
         }
 
         function changeTerm(item, event){
-            vm.searchPopup(function(tuple){
+            vm.searchPopup($rootScope.reference.columns[1], function(tuple){
                 var data = tuple._data;
                 var id = fixedEncodeURIComponent(data.ID);
                 
@@ -578,7 +645,7 @@
         }
 
         function addNewTerm(){
-            vm.searchPopup(function(tuple){
+            vm.searchPopup($rootScope.reference.columns[1], function(tuple){
                 var svgID = vm.collection.length > 0 ? vm.collection[0].svgID : Date.parse(new Date()) + parseInt(Math.random() * 1000);
                 var data = tuple._data;
                 var groupInfo = {
