@@ -250,12 +250,11 @@
          */
         var popupLogin = function (logAction) {
             var reloadCb = function(){
-                // TODO: think this through,condition and whether get session is needed
                 if (!shouldReloadPageAfterLogin()) {
-                    // refreshes the session
-                    // _getSession().then(function () {
+                    // fetches the session of the user that just logged in
+                    _getSession().then(function () {
                         modalInstance.close();
-                    // });
+                    });
                 } else {
                     window.location.reload();
                 }
@@ -321,14 +320,17 @@
 
                 // keep track of only the first session, so when a timeout occurs, we can compare the sessions
                 // when a new session is fetched after timeout, check if the identities are the same
-                if (_session) {
+                if (_prevSession) {
                     _sameSessionAsPrevious = _prevSession.client.id == response.data.client.id;
                 } else {
-                    // only update _session if no session exists yet
+                    _prevSession = response.data
+                }
+
+                if (!_session) {
+                    // only update _session if no session is set
                     _session = response.data;
                 }
 
-                if(!_prevSession) _prevSession = response.data
                 _executeListeners();
                 return _session;
             }).catch(function(err) {

@@ -122,7 +122,6 @@
 
                     if (typeof exception !== "string") {
                         // happens with an error with code 0 (Timeout Error)
-                        console.log("upload files error");
                         $log.warn(exception);
                         var message = exception.message || messageMap.errorMessageMissing;
 
@@ -231,10 +230,8 @@
                     // assume user had been previously logged in (can't create/update without it)
                     // if no valid current session, user should re-login
                     // validate session will never throw an error, so it's safe to not write a reject callback or catch clause
-                    console.log("before validate session");
                     Session.validateSession().then(function (session) {
                         if (!session && exception instanceof ERMrest.ConflictError) {
-                            console.log("unauthorized error")
                             // login in a modal should show (Session timed out)
                             throw new ERMrest.UnauthorizedError();
                         }
@@ -244,7 +241,6 @@
                         }
 
                         // TODO: rejectCb from onModalCloseSuccess for login returns here if not same user
-                        console.log("catch of create/update: ", exception);
 
                         // TODO: change message for forbidden error
                         // add logout? then login? not sure the workflow
