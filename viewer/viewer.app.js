@@ -275,6 +275,14 @@
                     } else {
                     	waterMark = '&waterMark=' + waterMark;
                     }
+
+                    var meterScaleInPixels = context.queryParams.meterScaleInPixels;
+                    if (meterScaleInPixels === undefined) {
+                      meterScaleInPixels = '';
+                    } else {
+                      meterScaleInPixels = '&meterScaleInPixels=' + meterScaleInPixels;
+                    }
+
                     console.log('uri='+image.entity.uri + waterMark);
 
                     /* Note: the following has been done so that the viewer app supports both type of formats i.e tiff and czi.
@@ -284,15 +292,15 @@
                     */
                     var params = window.location.href.split("?");
                     if(window.location.href.indexOf("url") > -1){
-                      image.entity.uri = origin+"/~vipul/openseadragon-viewer/index.html?" + params[1];
+                      image.entity.uri = origin+"/openseadragon-viewer/index.html?" + params[1];
                     } else {
                       var old_params = image.entity.uri.split("?");
-                      image.entity.uri = origin+"/~vipul/openseadragon-viewer/index.html?" + old_params[1];
+                      image.entity.uri = origin+"/openseadragon-viewer/index.html?" + old_params[1];
                     }
 
                     // image.entity.uri = image.entity.uri + "&url=data/Q-296R_all_contours_cw_named.svg";
-                    console.log('replace uri = '+image.entity.uri + waterMark)
-                    iframe.location.replace(image.entity.uri + waterMark);
+                    console.log('replace uri = '+image.entity.uri + waterMark + meterScaleInPixels)
+                    iframe.location.replace(image.entity.uri + waterMark + meterScaleInPixels);
                     console.log('Image: ', image);
 
                     var annotationTable = schema.tables.get('annotation');
