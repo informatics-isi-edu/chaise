@@ -139,7 +139,7 @@
             vm.clickActionMessage = messageMap.clickActionMessage.pageRedirect + vm.params.pageName + '. ';
 
             // TODO it might be more appropriate to move the following outside the if-else
-            if (vm.params.appName == 'recordedit'){
+            if (vm.params.appName == 'recordedit' || exception.showReloadBtn){
                 vm.showReloadBtn = true;
                 reloadMessage = ' <p>' + messageMap.clickActionMessage.reloadMessage +' </p>';
             }

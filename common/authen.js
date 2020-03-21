@@ -372,6 +372,10 @@
                 return _session;
             },
 
+            getPrevSessionValue: function() {
+                return _prevSession;
+            },
+
             isSameSessionAsPrevious: function() {
                 return _sameSessionAsPrevious;
             },
@@ -477,7 +481,7 @@
                         defer.resolve(differentUser);
 
                         // throw Error if login is successful but it's a different user
-                        if (differentUser) ErrorService.handleException(new Errors.DifferentUserConflictError(), false);
+                        if (differentUser) ErrorService.handleException(new Errors.DifferentUserConflictError(_session, Session.getPrevSessionValue()), false);
                     }, function(exception) {
                         defer.reject(exception);
                     });

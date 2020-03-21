@@ -25,7 +25,8 @@
         facetFilterMissing: "No filtering criteria was specified to identify a specific record.",
         unauthorizedAssetRetrieval: "You must be logged in and authorized to download this asset.",
         forbiddenAssetRetrieval: " is logged in but not authorized to download this asset.",
-        differentUserConflict: " was previously logged in. You may not continue to create/edit this record.",
+        differentUserConflict1: "Continuing in this app requires that you be logged in as ",
+        differentUserConflict2: ". However, you are currently ",
         systemAdminMessage: "An unexpected error has occurred. Try clearing your cache. If you continue to face this issue, please contact the system administrator."
     })
 
@@ -223,7 +224,7 @@
          *
          * @return {object}        Error Object
          */
-        function DifferentUserConflictError() {
+        function DifferentUserConflictError(sessionInfo, prevSessionInfo) {
             /**
              * @type {object}
              * @desc  custom object to store miscellaneous elements viz. stacktrace
@@ -240,7 +241,7 @@
              * @type {string}
              * @desc   Error message
              */
-            this.message = dcctx.user + errorMessages.differentUserConflict;
+            this.message = errorMessages.differentUserConflict1 + prevSessionInfo.client.display_name + errorMessages.differentUserConflict2 + sessionInfo.client.display_name + ".";
 
             /**
              * @type {string}
@@ -253,6 +254,12 @@
              * @desc Set true to dismiss the error modal on clicking the OK button
              */
             this.clickOkToDismiss = false;
+
+            /**
+             * @type {boolean}
+             * @desc Set true to show the reload button in the modal
+             */
+            this.showReloadBtn = true;
         }
 
         DifferentUserConflictError.prototype = Object.create(Error.prototype);
@@ -449,7 +456,7 @@
                     if (Session.shouldReloadPageAfterLogin()) {
                         window.location.reload();
                     } else if (!Session.isSameSessionAsPrevious()) {
-                        handleException(new Errors.DifferentUserConflictError(), false);
+                        handleException(new Errors.DifferentUserConflictError(Session.getSessionValue(), Session.getPrevSessionValue()), false);
                     }
                 });
                 return;
