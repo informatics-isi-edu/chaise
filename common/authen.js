@@ -278,10 +278,6 @@
          * It will also call the _executeListeners() functions and sets the _session.
          * If we couldn't fetch the session, it will resolve with `null`.
          *
-         * TODO needs to be revisited for 401.
-         * We want to reload the page and stop the code execution for 401,
-         *  but currently the code will continue executing and then reloads.
-         *
          * @param  {string=} context undefined or "401"
          */
         var _getSession = function(context) {
@@ -475,13 +471,20 @@
                     // and resolve the promise to notify ermrestjs that the user has logged in
                     // and it can continue firing other queued calls
                     Session.getSession("401").then(function(_session) {
-                        var differentUser = (ConfigUtils.getContextJSON().appContext.indexOf("entry") != -1 && !Session.isSameSessionAsPrevious())
+                        var prevSession = Session.getPrevSessionValue();
+                        // TODO: limiting this to entry may not be the right condition?
+                        // Not sure if this will trigger on page load, if not I think it's safe to run this in all contexts
+                        // recordset  - read should throw a 409 if there's a permission issue
+                        // record     - same issue with read above
+                        //            - p&b add throws a conflict error in most cases, so won't get sent here either (RBK)
+                        // recordedit - add/update return here in some cases, and in other cases will return a 409 and ignore this case
+                        var differentUser = (ConfigUtils.getContextJSON().appContext.indexOf("entry") != -1 && prevSession && !Session.isSameSessionAsPrevious())
 
                         // send boolean to communicate in ermrestJS if execution should continue after 401 error thrown and subsequent login
                         defer.resolve(differentUser);
 
                         // throw Error if login is successful but it's a different user
-                        if (differentUser) ErrorService.handleException(new Errors.DifferentUserConflictError(_session, Session.getPrevSessionValue()), false);
+                        if (differentUser) ErrorService.handleException(new Errors.DifferentUserConflictError(_session, prevSession), false);
                     }, function(exception) {
                         defer.reject(exception);
                     });
