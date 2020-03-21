@@ -46,34 +46,33 @@
                         return scope.columnModels[idx].isInline;
                     };
 
-                    function isAggregate (idx) {
-                        return scope.columnModels[idx].isAggregate;
-                    };
-
                     // Show an error warning if the column is aggregate or inline related table and the data failed to load
                     scope.showError = function (i) {
-                        return ((isInline(i) && scope.columnModels[i].tableModel.tableError) || (isAggregate(i)&& scope.columnModels[i].columnError));
+                        return (isInline(i) && scope.columnModels[i].tableModel.tableError) || scope.columnModels[i].columnError;
                     }
 
-                    // Show a loading spinner if the column is aggregate or inline related table
+                    // Show a loading spinner if the column is aggregate or inline related table and we're waiting for data
                     scope.showLoader = function (i) {
-                        return ((isInline(i) && !scope.columnModels[i].tableModel.hasLoaded) || (isAggregate(i) && scope.columnModels[i].isLoading));
+                        return (isInline(i) && !scope.columnModels[i].tableModel.hasLoaded) || scope.columnModels[i].isLoading;
                     }
 
-                    // returns true if we should show the column
+                    // returns true if we should show the column value (as oppose to not showing or showing an inline table)
+                    // column is not inline and value is not null or it is a secondary request (has wait for or it's not unique)
                     scope.showColumn = function (i) {
-                        return ((typeof scope.values[i].value === "string" && scope.values[i].value !== '') && !isInline(i)) || isAggregate(i);
+                        return !isInline(i) && (scope.values[i].value != null || scope.columnModels[i].hasWaitForOrNotUnique);
                     };
 
-                    // returns true if we should show a table
+                    // returns true if we should show a table (data is non-empty or we can show empty)
+                    // we don't need to make sure it's initialized here since we want to show the loader
                     scope.showInlineTable = function (i) {
-                        return isInline(i) && (scope.showEmptyRelatedTables || scope.columnModels[i].tableModel.rowValues.length > 0);
+                        var cm = scope.columnModels[i];
+                        return isInline(i) && (scope.showEmptyRelatedTables || (cm.tableModel.page && cm.tableModel.page.length > 0 && cm.tableMarkdownContentInitialized));
                     };
 
                     // returns true if inline related tables can be displayed as custom display (markdown)
                     scope.allowInlineTableMarkdown = function (i) {
-                        var tm = scope.columnModels[i].tableModel;
-                        return tm.reference.display.type == 'markdown' && tm.page && tm.page.content != '';
+                        var cm = scope.columnModels[i];
+                        return cm.tableModel.reference.display.type == 'markdown' && cm.tableModel.page && cm.tableMarkdownContentInitialized && cm.tableMarkdownContent != '';
                     };
                 }
             };

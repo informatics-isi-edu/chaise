@@ -1,0 +1,11 @@
+[
+    {"id": "i3_1", "name": "accommodation_inbound3 one", "fk1_col": 2002},
+    {"id": "i3_2", "name": "accommodation_inbound3 two"},
+    {"id": "i3_3", "name": "accommodation_inbound3 three", "fk1_col": 2002},
+    {"id": "i3_4", "name": "accommodation_inbound3 four"},
+    {"id": "i3_5", "name": "accommodation_inbound3 five", "fk1_col": 2002},
+    {"id": "i3_6", "name": "accommodation_inbound3 six", "fk1_col": 2003},
+    {"id": "i3_7", "name": "accommodation_inbound3 seven", "fk1_col": 2004},
+    {"id": "i3_8", "name": "accommodation_inbound3 eight", "fk1_col": 2004},
+    {"id": "i3_9", "name": "accommodation_inbound3 nine", "fk1_col": 2004}
+]

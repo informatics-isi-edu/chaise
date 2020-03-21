@@ -1,0 +1,4 @@
+[
+    {"id": "o1_1", "fk1_col": "o1_o1_1", "fk2_col": "o1_o2_1", "fk3_col": "o1_o3_1", "fk4_col": "o1_o4_1", "name": "accommodation_outbound1 one"},
+    {"id": "o1_2", "fk1_col": "o1_o1_2", "name": "accommodation_outbound1 two"}
+]

@@ -12,6 +12,7 @@ var chaiseConfig = {
     SystemColumnsDisplayCompact: ['RCB', 'RMT'],
     SystemColumnsDisplayDetailed: true,
     disableExternalLinkModal: true,
+    logClientActions: false,
     footerMarkdown:"**Please check** [Privacy Policy](/privacy-policy/){target='_blank'}",
     defaultTables: {
         "1": {

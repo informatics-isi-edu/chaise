@@ -359,7 +359,7 @@ If the user clicked on a link in the navbar, the `PCID` will properly denote wha
  
 ##### Changed
  - pcid=navbar to pcid=navbar/<app-name>
- - This was done to give more clarity as to which app the navbar was used to navigate
+ - This was done to give more clarity as to which app the navbar was used to navigate. Prior to this change, pcid=navbar implies navbar links that were clicked from in chaise apps only. To extract the usage of static navbar, use cid=navbar for schema read.
 
 ### 05/06/19
 

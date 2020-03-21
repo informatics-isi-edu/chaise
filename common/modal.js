@@ -386,22 +386,26 @@
      *   - {Object} citation - citation object returned from ERMrest.tuple.citation
      *
      */
-    .controller('ShareCitationController', ['logService', 'params', '$uibModalInstance', '$window', function (logService, params, $uibModalInstance, $window) {
+    .controller('ShareCitationController', ['logService', 'params', '$rootScope', '$uibModalInstance', '$window', function (logService, params, $rootScope, $uibModalInstance, $window) {
         var vm = this;
-        vm.params = params;
-        vm.logActions = logService.logActions;
-        vm.warningMessage = "The displayed content may be stale due to recent changes made by other users. You may wish to review the changes prior to sharing the <a ng-href='{{ctrl.params.permalink}}'>live link</a> below. Or, you may share the older content using the <a ng-href='{{ctrl.params.versionLink}}'>versioned link</a>.";
 
-        vm.moreThanWeek = function () {
-            var weekAgo = moment().subtract(7, 'days').startOf('day');
-            var versionMoment = moment(params.versionDate);
+        // uses the $rootScope.citationReady to determine whether the citation is ready
+        // then gets the citation value from $rootScope.citation and generates the bibtextURL
+        var generateBibtexURL = function () {
+            if (!$rootScope.citationReady) {
+                vm.citation = null;
+                vm.citationReady = false;
+                return;
+            }
 
-            return weekAgo.isAfter(versionMoment);
-        }
+            var citation = $rootScope.citation;
 
-        // generate bibtex url from citation
-        if (params.citation) {
-            var citation = params.citation;
+            vm.citation = citation;
+            vm.citationReady = true;
+
+            // it might be null
+            if (!vm.citation) return;
+
             var bibtexContent = "@article{";
             bibtexContent += (citation.id ? citation.id+",\n" : params.displayname+",\n");
             if (citation.author) bibtexContent += "author = {" + citation.author + "},\n";
@@ -413,6 +417,21 @@
             var bibtexBlob = new Blob([ bibtexContent ], { type : 'text/plain' });
             // set downloadURL for ng-href attribute
             vm.downloadBibtex = $window.URL.createObjectURL( bibtexBlob );
+        }
+
+        vm.params = params;
+        vm.logActions = logService.logActions;
+
+        // run the function once in case the citation is ready on load
+        generateBibtexURL();
+
+        vm.warningMessage = "The displayed content may be stale due to recent changes made by other users. You may wish to review the changes prior to sharing the <a ng-href='{{ctrl.params.permalink}}'>live link</a> below. Or, you may share the older content using the <a ng-href='{{ctrl.params.versionLink}}'>versioned link</a>.";
+
+        vm.moreThanWeek = function () {
+            var weekAgo = moment().subtract(7, 'days').startOf('day');
+            var versionMoment = moment(params.versionDate);
+
+            return weekAgo.isAfter(versionMoment);
         }
 
         vm.copyToClipboard = function (text, action) {
@@ -451,6 +470,14 @@
         vm.cancel = function() {
             $uibModalInstance.dismiss('cancel');
         }
+
+        // The citation might not be ready when we open the modal, so we should just watch for it
+        $rootScope.$watch(function () {
+            return $rootScope.citationReady;
+        }, function () {
+            generateBibtexURL();
+        }, true);
+
     }])
 
     .controller('RedirectController', ['$interval', '$timeout', '$uibModalInstance', function ($interval, $timeout, $uibModalInstance) {

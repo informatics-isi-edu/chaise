@@ -10,6 +10,8 @@ exports.testPresentation = function (tableParams) {
 
         // make sure the last related entity is visible
         chaisePage.waitForElementInverse(element(by.id('rt-loading')));
+
+        chaisePage.waitForAggregates();
     };
 
     beforeAll(function () {
@@ -76,122 +78,7 @@ exports.testPresentation = function (tableParams) {
         });
     });
 
-    describe("for share citation dialog,", function () {
-
-        beforeAll(function (done) {
-            var shareButton = chaisePage.recordPage.getShareButton(),
-                shareModal = chaisePage.recordPage.getShareModal();
-
-            browser.wait(EC.elementToBeClickable(shareButton), browser.params.defaultTimeout);
-
-            shareButton.click().then(function () {
-                // wait for dialog to open
-                chaisePage.waitForElement(shareModal);
-                // disable animations in modal so that it doesn't "fade out" (instead it instantly disappears when closed) which we can't track with waitFor conditions
-                shareModal.allowAnimations(false);
-
-                done();
-            }).catch(function(err){
-                console.log(err);
-                done.fail();
-            });
-        });
-
-        it("should show the share dialog when clicking the share button with 3 list elements.", function () {
-            // verify modal dialog contents
-            var modalTitle = chaisePage.recordEditPage.getModalTitle();
-            chaisePage.waitForElement(modalTitle);
-            expect(modalTitle.getText()).toBe("Share", "Share citation modal title is incorrect");
-            expect(chaisePage.recordPage.getModalListElements().count()).toBe(tableParams.citationParams.numListElements, "Number of list elements in share citation modal is incorrect");
-        });
-
-        it("should have a share header present.", function () {
-            expect(chaisePage.recordPage.getShareLinkHeader().getText()).toBe("Share Link", "Share Link (permalink) header is incorrect");
-        });
-
-        it("should have a versioned link and permalink present.", function () {
-            chaisePage.recordPage.getShareLinkSubHeaders().then(function (subheaders) {
-                // verify versioned link
-                expect(subheaders[0].getText()).toContain("Versioned Link", "versioned link header is incorrect");
-                expect(chaisePage.recordPage.getVersionedLinkText().getText()).toContain(tableParams.citationParams.permalink, "versioned link url does not contain the permalink");
-
-                // verify permalink
-                expect(subheaders[1].getText()).toContain("Live Link", "versioned link header is incorrect");
-                expect(chaisePage.recordPage.getPermalinkText().getText()).toBe(tableParams.citationParams.permalink, "permalink url is incorrect");
-            })
-        });
-
-        it("should have 2 copy to clipboard icons visible.", function () {
-            expect(element(by.id("share-link")).all(by.css(".glyphicon.glyphicon-copy")).count()).toBe(2, "wrong number of copy to clipboard icons");
-        });
-
-        // NOTE: the copy buttons functionality isn't being tested because it seems really hacky to test this feature
-        xit("should have 2 copy to clipboard icons visible and verify they copy the content.", function () {
-            var copyIcons, copyInput;
-
-            element(by.id("share-link")).all(by.css(".glyphicon.glyphicon-copy")).then(function (icons) {
-                copyIcons = icons;
-
-                expect(icons.length).toBe(2, "wrong number of copy to clipboard icons");
-
-                // click icon to copy text
-                return copyIcons[0].click();
-            }).then(function () {
-                // creating a new input element
-                return browser.executeScript(function () {
-                    var el = document.createElement('input');
-                    el.setAttribute('id', 'copy_input');
-
-                    document.getElementById("share-link").appendChild(el);
-                });
-            }).then(function () {
-                // use the browser to send the keys "ctrl/cmd" + "v" to paste contents
-                copyInput = element(by.id("copy_input"));
-                copyInput.sendKeys(protractor.Key.chord(protractor.Key.SHIFT, protractor.Key.INSERT));
-
-                return chaisePage.recordPage.getVersionedLinkText().getText();
-            }).then(function (versionedLink) {
-
-                // select the input and get it's "value" attribute to verify the pasted contents
-                expect(copyInput.getAttribute('value')).toBe(versionedLink, "copied text for versioned link is incorrect");
-            });
-        }).pend("Test case feels hacky to test a feature of the OS that can't be tested by just verifying the value was copied.");
-
-        it("should have a citation present,", function () {
-            // verify citation
-            expect(chaisePage.recordPage.getCitationHeader().getText()).toBe("Data Citation", "Citation header is incorrect");
-            expect(chaisePage.recordPage.getCitationText().getText()).toBe(tableParams.citationParams.citation, "citation text is incorrect");
-
-            // verify download citation
-            expect(chaisePage.recordPage.getDownloadCitationHeader().getText()).toBe("Download Data Citation:", "Download citation header is incorrect");
-            expect(chaisePage.recordPage.getBibtex().getText()).toBe("BibTex", "bibtex text is incorrect");
-        });
-
-        if (!process.env.TRAVIS) {
-            it("should download the citation in BibTex format.", function (done) {
-                chaisePage.recordPage.getBibtex().click().then(function () {
-                    browser.wait(function() {
-                        return fs.existsSync(process.env.PWD + "/test/e2e/" + tableParams.file_names[2]);
-                    }, browser.params.defaultTimeout).then(function () {
-                        done();
-                    }, function () {
-                        expect(false).toBeTruthy(tableParams.file_names[2] + " was not downloaded");
-                        done.fail();
-                    });
-                });
-            });
-        }
-
-        afterAll(function (done){
-            // close dialog
-            chaisePage.recordsetPage.getModalCloseBtn().click().then(function () {
-                done();
-            }).catch(function(err){
-                console.log(err);
-                done.fail();
-            });
-        });
-    });
+    exports.testSharePopup(tableParams.citationParams);
 
     it("should have '2' options in the dropdown menu.", function (done) {
         var exportButton = chaisePage.recordsetPage.getExportDropdown();
@@ -315,9 +202,10 @@ exports.testPresentation = function (tableParams) {
             var errMessage = "value mismatch for column " + column.title;
 
             var columnEls;
-            if (column.title=='booking') {
+            if (column.type=='inline') {
                 // get the value at row 5 of the table list of values
-                expect(element(by.id('entity-4-markdown')).element(by.css('.markdown-container')).getAttribute('innerHTML')).toContain(column.value, errMessage);
+                columnEls = chaisePage.recordPage.getEntityRelatedTable(column.title);
+                expect(chaisePage.recordPage.getMarkdownContainer(columnEls).getAttribute('innerHTML')).toContain(column.value, errMessage);
             } else if (column.match=='html') {
                 expect(chaisePage.recordPage.getEntityRelatedTableScope(column.title).getAttribute('innerHTML')).toBe(column.value, errMessage);
             } else if (column.title == 'User Rating'){
@@ -550,6 +438,148 @@ exports.testPresentation = function (tableParams) {
                 });
             // })(p);
         }
+    });
+};
+
+
+/**
+ * opens the share and cite popup and test the content. The acceptable input:
+ * {
+ *   permalink: "the permalink", // required
+ *   verifyVersionedLink: boolean, // if true, we will test the versioned link too.
+ *   citation: string, // (optional) pass null if citation should not be displayed.
+ *   bintextFile: string, // (optional) the location of the bibtext file so we can delete it after downloading it
+ * }
+ */
+exports.testSharePopup = function (citationParams) {
+    describe("for share & citation dialog,", function () {
+
+        beforeAll(function (done) {
+            var shareButton = chaisePage.recordPage.getShareButton(),
+                shareModal = chaisePage.recordPage.getShareModal();
+
+            browser.wait(EC.elementToBeClickable(shareButton), browser.params.defaultTimeout);
+
+            shareButton.click().then(function () {
+                // wait for dialog to open
+                chaisePage.waitForElement(shareModal);
+                // disable animations in modal so that it doesn't "fade out" (instead it instantly disappears when closed) which we can't track with waitFor conditions
+                shareModal.allowAnimations(false);
+
+                done();
+            }).catch(function(err){
+                console.log(err);
+                done.fail();
+            });
+        });
+
+        it("should show the share dialog when clicking the share button, and should have the expected elements", function () {
+            // verify modal dialog contents
+            var modalTitle = chaisePage.recordEditPage.getModalTitle();
+            chaisePage.waitForElement(modalTitle);
+            chaisePage.recordPage.waitForCitation();
+            // make sure the loader is not displayed
+            expect(modalTitle.getText()).toBe("Share", "Share citation modal title is incorrect");
+
+            // share link
+            var num = 1;
+            if (citationParams.citation) {
+                // share link + citation + bibtext
+                num = 3;
+            }
+            expect(chaisePage.recordPage.getModalListElements().count()).toBe(num, "Number of list elements in share citation modal is incorrect");
+        });
+
+        it("should have a share header present.", function () {
+            expect(chaisePage.recordPage.getShareLinkHeader().getText()).toBe("Share Link", "Share Link (permalink) header is incorrect");
+        });
+
+        it("should have a versioned link and permalink present.", function () {
+            chaisePage.recordPage.getShareLinkSubHeaders().then(function (subheaders) {
+                // verify versioned link
+                if (citationParams.verifyVersionedLink) {
+                    expect(subheaders[0].getText()).toContain("Versioned Link", "versioned link header is incorrect");
+                    expect(chaisePage.recordPage.getVersionedLinkText().getText()).toContain(citationParams.permalink, "versioned link url does not contain the permalink");
+                }
+
+                // verify permalink
+                expect(subheaders[1].getText()).toContain("Live Link", "versioned link header is incorrect");
+                expect(chaisePage.recordPage.getPermalinkText().getText()).toBe(citationParams.permalink, "permalink url is incorrect");
+            })
+        });
+
+        it("should have 2 copy to clipboard icons visible.", function () {
+            expect(element(by.id("share-link")).all(by.css(".glyphicon.glyphicon-copy")).count()).toBe(2, "wrong number of copy to clipboard icons");
+        });
+
+        // NOTE: the copy buttons functionality isn't being tested because it seems really hacky to test this feature
+        xit("should have 2 copy to clipboard icons visible and verify they copy the content.", function () {
+            var copyIcons, copyInput;
+
+            element(by.id("share-link")).all(by.css(".glyphicon.glyphicon-copy")).then(function (icons) {
+                copyIcons = icons;
+
+                expect(icons.length).toBe(2, "wrong number of copy to clipboard icons");
+
+                // click icon to copy text
+                return copyIcons[0].click();
+            }).then(function () {
+                // creating a new input element
+                return browser.executeScript(function () {
+                    var el = document.createElement('input');
+                    el.setAttribute('id', 'copy_input');
+
+                    document.getElementById("share-link").appendChild(el);
+                });
+            }).then(function () {
+                // use the browser to send the keys "ctrl/cmd" + "v" to paste contents
+                copyInput = element(by.id("copy_input"));
+                copyInput.sendKeys(protractor.Key.chord(protractor.Key.SHIFT, protractor.Key.INSERT));
+
+                return chaisePage.recordPage.getVersionedLinkText().getText();
+            }).then(function (versionedLink) {
+
+                // select the input and get it's "value" attribute to verify the pasted contents
+                expect(copyInput.getAttribute('value')).toBe(versionedLink, "copied text for versioned link is incorrect");
+            });
+        }).pend("Test case feels hacky to test a feature of the OS that can't be tested by just verifying the value was copied.");
+
+        if (citationParams.citation) {
+            it("should have a citation present,", function () {
+                // verify citation
+                expect(chaisePage.recordPage.getCitationHeader().getText()).toBe("Data Citation", "Citation header is incorrect");
+                expect(chaisePage.recordPage.getCitationText().getText()).toBe(citationParams.citation, "citation text is incorrect");
+
+                // verify download citation
+                expect(chaisePage.recordPage.getDownloadCitationHeader().getText()).toBe("Download Data Citation:", "Download citation header is incorrect");
+                expect(chaisePage.recordPage.getBibtex().getText()).toBe("BibTex", "bibtex text is incorrect");
+            });
+        }
+
+        if (!process.env.TRAVIS && citationParams.bibtextFile) {
+            it("should download the citation in BibTex format.", function (done) {
+                chaisePage.recordPage.getBibtex().click().then(function () {
+                    browser.wait(function() {
+                        return fs.existsSync(process.env.PWD + "/test/e2e/" + citationParams.bibtextFile);
+                    }, browser.params.defaultTimeout).then(function () {
+                        done();
+                    }, function () {
+                        expect(false).toBeTruthy(citationParams.bibtextFile + " was not downloaded");
+                        done.fail();
+                    });
+                });
+            });
+        }
+
+        afterAll(function (done){
+            // close dialog
+            chaisePage.recordsetPage.getModalCloseBtn().click().then(function () {
+                done();
+            }).catch(function(err){
+                console.log(err);
+                done.fail();
+            });
+        });
     });
 };
 

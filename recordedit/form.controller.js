@@ -282,8 +282,9 @@
             if (chaiseConfig.showFaceting) {
                 uri = ref.appLink;
             } else {
-                var location = ref.location;
-                uri = "../search/#" + location.catalog + '/' + location.schemaName + ':' + location.tableName;
+                var table = ref.table;
+                var encode = UriUtils.fixedEncodeURIComponent;
+                uri = "../search/#" + table.schema.catalog.id + '/' + encode(table.schema.name) + ':' + encode(table.name);
             }
 
             $rootScope.showSpinner = false;
