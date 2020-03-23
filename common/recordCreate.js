@@ -240,10 +240,6 @@
                             exception.message += ' Click <a href="' + exception.duplicateReference.contextualize.detailed.appLink + '" target="_blank">here</a> to see the conflicting record that already exists.';
                         }
 
-                        // TODO: rejectCb from onModalCloseSuccess for login returns here if not same user
-
-                        // TODO: change message for forbidden error
-                        // add logout? then login? not sure the workflow
                         if (isModalUpdate || exception instanceof Errors.DifferentUserConflictError) {
                             // pure and binary add on record page, we want a popup error
                             // if timeout error, also show popup

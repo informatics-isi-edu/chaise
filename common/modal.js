@@ -159,7 +159,7 @@
         };
 
         vm.ok = function () {
-            // TODO: Doing this in recordedit allows the user to dismiss the reload popup and see the app
+            // NOTE: Doing this in recordedit allows the user to dismiss the browser reload popup and see the app
             // basically allowing the modal to be dismissed
             $uibModalInstance.close();
         };
