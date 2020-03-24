@@ -72,7 +72,11 @@
      *          - showNull: if this is available and equal to `true`, we will differentiate between `null` and empty string.
      *          - displayMode: find the complete list in utils.recordsetDisplayModes
      *          - containerIndex: If it's related (or inline), this will return the index of that related(or inline) table.
-     *
+     * - vm public variables that can be used in other directives: these variables will be generated when the table directive is instantiated
+     *   - columnModels: An array of objects that represent the displayed columns. Each object has the following attribues:
+     *     - column: the column object that comes from ermrestjs
+     *     - isLoading: whether we should show a spinner in the UI
+     *   - internalID: can be used to refer to this specific instance of table directive
      * - vm private variables that are used internally and should not be passed to other directive/modules:
      *   - _reloadCauses, _reloadStartTime: Used to capture the causes of reload requests as well as the start time of dirtyness of the page.
      *   - _recountCauses, _recountStartTime: Used to capture the causes of recount requests as well as the start time of dirtyness of the page.
@@ -97,7 +101,7 @@
      *       containerIndex: "the containerIndex defined in the config object"
      *     }
      * 5. `edit-request`: When users click on "edit" button for a row. It's sending the same object as `record-deleted`.
-     * 6. `aggregate-loaded-<containerIndex>-<rowIndex>`: when an aggregate value has returned, an event is emitted
+     * 6. `aggregate-loaded-<internalID>-<rowIndex>`: when an aggregate value has returned, an event is emitted
      *     to trigger logic in ellipsis.js that conditionally adds a resize sensor to the cell associated with `colIndex`
      *     that is also passed along with the emitted event
      */
@@ -305,11 +309,7 @@
                 } else {
                     vm.rowValues[valIndex][obj.index] = displayValue;
                     // emit aggregates loaded event for [row][column]
-                    var uniqueIndex = valIndex;
-                    if (vm.config.containerIndex) {
-                        uniqueIndex = vm.config.containerIndex + "-" + uniqueIndex;
-                    }
-                    $rootScope.$emit("aggregate-loaded-" + uniqueIndex, obj.index);
+                    $rootScope.$emit("aggregate-loaded-" + vm.internalID + "-" + valIndex, obj.index);
                 }
             });
         }
@@ -409,11 +409,7 @@
                         vm.rowValues[rowIndex][colIndex] = vm.pendingRowValues[rowIndex][colIndex];
                         // emit aggregates loaded event for [row][column] after push more rows
 
-                        var uniqueIndex = rowIndex;
-                        if (vm.config.containerIndex) {
-                            uniqueIndex = vm.config.containerIndex + uniqueIndex;
-                        }
-                        $rootScope.$emit("aggregate-loaded-" + uniqueIndex, colIndex);
+                        $rootScope.$emit("aggregate-loaded-" + vm.internalID + "-" + rowIndex, colIndex);
                     }
                 }
             }
@@ -922,6 +918,9 @@
             vm._recountCauses = [];
             vm.reloadStartTime = -1;
             vm._recountStartTime = -1;
+
+            // can be used to refer to this current instance of table
+            vm.internalID = MathUtils.uuid();
         }
 
         /**

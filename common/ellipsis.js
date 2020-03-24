@@ -255,13 +255,8 @@
                         }
                     });
 
-                    // schemaTable is per table (needs to be done for record app with related tables)
-                    // rowIndex is per row in each table
-                    var uniqueIndex = scope.rowIndex;
-                    if (scope.config.containerIndex) {
-                        uniqueIndex = scope.config.containerIndex + "-" + uniqueIndex;
-                    }
-                    $rootScope.$on('aggregate-loaded-' + uniqueIndex, function(events, data) {
+                    // internalID is per table instance, rowIndex is per row in each table
+                    $rootScope.$on('aggregate-loaded-' + scope.tableModel.internalID + "-" + scope.rowIndex, function(events, data) {
                         var columnModelIndex = data;
                         // +1 to account for the actions column
                         var columnUiIndex = columnModelIndex + 1;
