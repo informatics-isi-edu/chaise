@@ -72,7 +72,11 @@
      *          - showNull: if this is available and equal to `true`, we will differentiate between `null` and empty string.
      *          - displayMode: find the complete list in utils.recordsetDisplayModes
      *          - containerIndex: If it's related (or inline), this will return the index of that related(or inline) table.
-     *
+     * - vm public variables that can be used in other directives: these variables will be generated when the table directive is instantiated
+     *   - columnModels: An array of objects that represent the displayed columns. Each object has the following attribues:
+     *     - column: the column object that comes from ermrestjs
+     *     - isLoading: whether we should show a spinner in the UI
+     *   - internalID: can be used to refer to this specific instance of table directive
      * - vm private variables that are used internally and should not be passed to other directive/modules:
      *   - _reloadCauses, _reloadStartTime: Used to capture the causes of reload requests as well as the start time of dirtyness of the page.
      *   - _recountCauses, _recountStartTime: Used to capture the causes of recount requests as well as the start time of dirtyness of the page.
@@ -97,7 +101,7 @@
      *       containerIndex: "the containerIndex defined in the config object"
      *     }
      * 5. `edit-request`: When users click on "edit" button for a row. It's sending the same object as `record-deleted`.
-     * 6. `aggregate-loaded-<containerIndex>-<rowIndex>`: when an aggregate value has returned, an event is emitted
+     * 6. `aggregate-loaded-<internalID>-<rowIndex>`: when an aggregate value has returned, an event is emitted
      *     to trigger logic in ellipsis.js that conditionally adds a resize sensor to the cell associated with `colIndex`
      *     that is also passed along with the emitted event
      */
@@ -134,43 +138,26 @@
          */
         function updateColumnAggregates(vm, updatePageCB, hideSpinner) {
             if (!vm.hasLoaded) return;
-            vm.aggregateModels.forEach(function (agg, index) {
-                if (!_haveFreeSlot(vm) || agg.processed) {
+            vm.aggregateModels.forEach(function (aggModel, index) {
+                if (!_haveFreeSlot(vm) || aggModel.processed) {
                     return;
                 }
 
                 vm.flowControlObject.occupiedSlots++;
 
-                agg.processed = true;
+                aggModel.processed = true;
 
-                (function (i, current) {
-                    $log.debug("counter", current, ": getting aggregated values for column (index=" + i + ")");
-                    _updateColumnAggregate(vm, i, current, hideSpinner).then(function (res) {
-                        _afterUpdateColumnAggregate(vm, res, i);
-                        //TODO does this make sense?
-                        vm.aggregateModels[i].model.objects.forEach(function (obj) {
-                            // this is only called in recordset so it won't be related
-                            if (obj.column) {
-                                vm.columnModels[obj.index].columnError = false;
-                            }
-                        });
-                        updatePageCB(vm);
-                    }).catch(function (err) {
-                        _afterUpdateColumnAggregate(vm, false, i);
-                        // show alert if 400 Query Timeout Error
-                        if (err instanceof ERMrest.QueryTimeoutError) {
-                            vm.aggregateModels[i].model.objects.forEach(function (obj) {
-                                // this is only called in recordset so it won't be related
-                                if (obj.column) {
-                                    vm.columnModels[obj.index].columnError = true;
-                                }
-                            });
+                $log.debug("counter", vm.flowControlObject.counter, ": getting aggregated values for column (index=" + i + ")");
+                _updateColumnAggregate(vm, aggModel, vm.flowControlObject.counter, hideSpinner).then(function (res) {
+                    vm.flowControlObject.occupiedSlots--;
+                    aggModel.processed = res;
 
-                        } else {
-                            throw err;
-                        }
-                    });
-                })(index, vm.flowControlObject.counter);
+                    $log.debug("counter", vm.flowControlObject.counter, ": after aggregated value for column (index=" + index + ") update: " + (res? "successful." : "unsuccessful."));
+
+                    updatePageCB(vm);
+                }).catch(function (err) {
+                    throw err;
+                });
             });
         }
 
@@ -178,59 +165,153 @@
          * @private
          * Generate request for each individual aggregate columns. Will return
          * a promise that is resolved with a boolean value denoting the success or failure.
+         * A rejected promise should be displayed as an error.
          */
-        function _updateColumnAggregate(vm, colIndex, current, hideSpinner) {
+        function _updateColumnAggregate(vm, aggModel, current, hideSpinner) {
             var defer = $q.defer();
-
-            // TODO maybe we could just pass the agg instead of colIndex
-            // I didn't make this change because colIndex might be needed
-            var agg = vm.aggregateModels[colIndex];
-            var pcol = agg.model;
+            var activeListModel = aggModel.activeListModel;
 
             // show spinner for all the dependent columns
-            pcol.objects.forEach(function (obj) {
+            activeListModel.objects.forEach(function (obj) {
                 // this is only called in recordset so it won't be related
                 if (obj.column) {
                     vm.columnModels[obj.index].isLoading = !hideSpinner;
                 }
             });
 
-
-            var pcolStackNode = logService.getStackNode(
-                logService.logStackTypes.PSEUDO_COLUMN,
-                pcol.column.table,
-                { source: pcol.column.compressedDataSource, entity: pcol.column.isEntityMode, agg: pcol.column.aggregateFn}
-            );
-
-            var action = logService.logActions.LOAD, stack = getTableLogStack(vm, pcolStackNode);
-            if (Array.isArray(agg.reloadCauses) && agg.reloadCauses.length > 0) {
+            // we have to get the stack everytime because the filters might change.
+            var action = logService.logActions.LOAD, stack = getTableLogStack(vm, aggModel.logStackNode);
+            if (Array.isArray(aggModel.reloadCauses) && aggModel.reloadCauses.length > 0) {
                 action = logService.logActions.RELOAD;
-                stack = logService.addCausesToStack(stack, agg.reloadCauses, agg.reloadStartTime);
+                stack = logService.addCausesToStack(stack, aggModel.reloadCauses, aggModel.reloadStartTime);
             }
             var logObj = {
                 action: getTableLogAction(vm, action, logService.logStackPaths.PSEUDO_COLUMN),
                 stack: stack
             }
-            pcol.column.getAggregatedValue(vm.page, logObj).then(function (values) {
+            activeListModel.column.getAggregatedValue(vm.page, logObj).then(function (values) {
                 if (vm.flowControlObject.counter !== current) {
-                    return defer.resolve(false);
+                    return defer.resolve(false), defer.promise;
                 }
 
-                afterReadAggregate(vm, colIndex, values);
+                // remove the column error (they might retry)
+                activeListModel.objects.forEach(function (obj) {
+                    if (obj.column) {
+                        vm.columnModels[obj.index].columnError = false;
+                    }
+                })
+
+                // use the returned value and:
+                //  - update the templateVariables
+                //  - update the aggregateResults
+                //  - attach the values to the appropriate columnModel if we have all the data.
+                var sourceDefinitions = vm.reference.table.sourceDefinitions;
+                values.forEach(function (val, valIndex) {
+
+                    // update the templateVariables
+                    if (activeListModel.objects.length > 0 && Array.isArray(sourceDefinitions.sourceMapping[activeListModel.column.name])) {
+                        // NOTE: not needed
+                        if (!Array.isArray(vm.templateVariables)) {
+                            vm.templateVariables = new Array(values.length);
+                        }
+
+                        if (!vm.templateVariables[valIndex]) {
+                            vm.templateVariables[valIndex] = {};
+                        }
+
+                        sourceDefinitions.sourceMapping[activeListModel.column.name].forEach(function (k) {
+                            if (val.templateVariables["$self"]) {
+                                vm.templateVariables[valIndex][k] = val.templateVariables["$self"];
+                            }
+                            if (val.templateVariables["$_self"]) {
+                                vm.templateVariables[valIndex]["_" + k] = val.templateVariables["$_self"];
+                            }
+                        });
+                    }
+
+                    // update the aggregateResults
+                    if (vm.aggregateResults[valIndex] === undefined) {
+                        vm.aggregateResults[valIndex] = {};
+                    }
+                    vm.aggregateResults[valIndex][activeListModel.column.name] = val;
+
+                    // attach the values to the appropriate objects
+                    _attachPseudoColumnValue(vm, activeListModel, valIndex);
+                });
 
                 // clear the causes
-                agg.reloadCauses = [];
-                agg.reloadStartTime = -1;
+                aggModel.reloadCauses = [];
+                aggModel.reloadStartTime = -1;
 
                 return defer.resolve(true);
             }).catch(function (err) {
                 if (vm.flowControlObject.counter !== current) {
-                    return defer.resolve(false);
+                    return defer.resolve(false), defer.promise;
                 }
-                return defer.reject(err);
+
+                activeListModel.objects.forEach(function (obj) {
+                    if (!obj.column) return;
+
+                    vm.columnModels[obj.index].isLoading = false;
+
+                    // show the timeout error in dependent models
+                    if (err instanceof ERMrest.QueryTimeoutError) {
+                        // TODO what about inline and related ones that timed out?
+                        vm.columnModels[obj.index].columnError = true;
+                        return defer.resolve(true), defer.promise;
+                    }
+
+                });
+
+                defer.reject(err);
             });
 
             return defer.promise;
+        }
+
+        /**
+         * @private
+         * This function is called inside `_updateColumnAggregate`, after
+         * the value is attached to the appropriate objects.
+         * The purpose of this function is to show value of a column,
+         * if all it's dependencies are available.
+         * @param {Object} vm - the table model
+         * @param {Object} activeListModel - the model that ermrestjs returns
+         * @param {Integer} valIndex - the row index
+         */
+        function _attachPseudoColumnValue(vm, activeListModel, valIndex) {
+            activeListModel.objects.forEach(function (obj) {
+                // this is only called in recordset so it won't be any other type
+                if (!obj.column) return;
+
+                var model = vm.columnModels[obj.index];
+
+                // do we have all the waitfor results?
+                var hasAll = model.column.waitFor.every(function (col) {
+                    return col.isUnique || col.name in vm.aggregateResults[valIndex];
+                });
+                if (!(hasAll && (model.column.name in vm.aggregateResults[valIndex] || model.column.isUnique))) return;
+
+                var displayValue = model.column.sourceFormatPresentation(
+                    vm.templateVariables[valIndex],
+                    vm.aggregateResults[valIndex][model.column.name],
+                    vm.page.tuples[valIndex]
+                );
+
+                model.isLoading = false;
+
+                // if rowValues has not been completely populated yet, use pendingRowValues instead
+                if (vm.pushMoreRowsPending) {
+                    if (vm.pendingRowValues[valIndex] === undefined) {
+                        vm.pendingRowValues[valIndex] = {};
+                    }
+                    vm.pendingRowValues[valIndex][obj.index] = displayValue;
+                } else {
+                    vm.rowValues[valIndex][obj.index] = displayValue;
+                    // emit aggregates loaded event for [row][column]
+                    $rootScope.$emit("aggregate-loaded-" + vm.internalID + "-" + valIndex, obj.index);
+                }
+            });
         }
 
         /**
@@ -243,97 +324,15 @@
         }
 
         /**
-         * This will be called after the data for an aggregate column has returned.
-         * It will,
-         *  - update the templateVariables.
-         *  - update the aggregateResults
-         *  - update the column value if all of its dependent requests are back.
-         * @param  {Object} vm       vm object
-         * @param  {integer} colIndex index of aggregate column
-         * @param  {Object} values   the returned value
-         */
-        function afterReadAggregate(vm, colIndex, values) {
-            var agg = vm.aggregateModels[colIndex].model;
-            var sourceDefinitions = vm.reference.table.sourceDefinitions;
-
-            values.forEach(function (val, valIndex) {
-
-                // update the templateVariables
-                if (agg.objects.length > 0 && Array.isArray(sourceDefinitions.sourceMapping[agg.column.name])) {
-                    // NOTE: not needed
-                    if (!Array.isArray(vm.templateVariables)) {
-                        vm.templateVariables = new Array(values.length);
-                    }
-
-                    if (!vm.templateVariables[valIndex]) {
-                        vm.templateVariables[valIndex] = {};
-                    }
-
-                    sourceDefinitions.sourceMapping[agg.column.name].forEach(function (k) {
-                        if (val.templateVariables["$self"]) {
-                            vm.templateVariables[valIndex][k] = val.templateVariables["$self"];
-                        }
-                        if (val.templateVariables["$_self"]) {
-                            vm.templateVariables[valIndex]["_" + k] = val.templateVariables["$_self"];
-                        }
-                    });
-                }
-
-                // update the aggregateResults
-                if (vm.aggregateResults[valIndex] === undefined) {
-                    vm.aggregateResults[valIndex] = {};
-                }
-                vm.aggregateResults[valIndex][agg.columnName] = val;
-
-                // attach the values to the appropriate objects
-                agg.objects.forEach(function (obj) {
-                    // this is only called in recordset so it won't be related
-                    if (!obj.column) return;
-                    var model = vm.columnModels[obj.index];
-
-                    // do we have all the waitfor results?
-                    var hasAll = model.column.waitFor.every(function (col) {
-                        return col.isUnique || col.name in vm.aggregateResults[valIndex];
-                    });
-                    if (!(hasAll && (model.column.name in vm.aggregateResults[valIndex] || model.column.isUnique))) return;
-
-                    var displayValue = model.column.sourceFormatPresentation(
-                        vm.templateVariables[valIndex],
-                        vm.aggregateResults[valIndex][model.column.name],
-                        vm.page.tuples[valIndex]
-                    );
-
-                    model.isLoading = false;
-
-                    // if rowValues has not been completely populated yet, use pendingRowValues instead
-                    if (vm.pushMoreRowsPending) {
-                        if (vm.pendingRowValues[valIndex] === undefined) {
-                            vm.pendingRowValues[valIndex] = {};
-                        }
-                        vm.pendingRowValues[valIndex][obj.index] = displayValue;
-                    } else {
-                        vm.rowValues[valIndex][obj.index] = displayValue;
-                        // emit aggregates loaded event for [row][column]
-                        var uniqueIndex = valIndex;
-                        if (vm.config.containerIndex) {
-                            uniqueIndex = vm.config.containerIndex + "-" + uniqueIndex;
-                        }
-                        $rootScope.$emit("aggregate-loaded-" + uniqueIndex, obj.index);
-                    }
-                });
-            });
-
-        }
-
-        /**
          * Given the tableModel object, will get the values for main entity and
          * attach them to the model.
          * @param  {object} vm           table model
          * @param  {function} updatePageCB The update page callback which we will call after getting the result.
          * @param  {boolean} hideSpinner  Indicates whether we should show spinner for columns or not
          * @param  {object} isTerminal  Indicates whether we should show a terminal error or not for 400 QueryTimeoutError
+         * @param {object} cb a callback that will be called after the read is done and is successful.
          */
-        function updateMainEntity(vm, updatePageCB, hideSpinner, notTerminal) {
+        function updateMainEntity(vm, updatePageCB, hideSpinner, notTerminal, cb) {
             if (!vm.dirtyResult || !_haveFreeSlot(vm)) {
                 $log.debug("counter", vm.flowControlObject.counter, ": break out of update main");
                 return;
@@ -348,11 +347,14 @@
                     _afterUpdateMainEntity(vm, res, currentCounter);
                     vm.tableError = false;
                     $log.debug("counter", currentCounter, ": read is done. just before update page (to update the rest of the page)");
+                    if (cb) cb(vm, res);
                     // TODO remember last successful main request
                     // when a request fails for 400 QueryTimeout, revert (change browser location) to this previous request
                     updatePageCB(vm);
                 }).catch(function (err) {
                     _afterUpdateMainEntity(vm, true, currentCounter);
+                    if (cb) cb(vm, res);
+
                     // show modal with different text if 400 Query Timeout Error
                     if (err instanceof ERMrest.QueryTimeoutError) {
                         // clear the data shown in the table
@@ -407,11 +409,7 @@
                         vm.rowValues[rowIndex][colIndex] = vm.pendingRowValues[rowIndex][colIndex];
                         // emit aggregates loaded event for [row][column] after push more rows
 
-                        var uniqueIndex = rowIndex;
-                        if (vm.config.containerIndex) {
-                            uniqueIndex = vm.config.containerIndex + uniqueIndex;
-                        }
-                        $rootScope.$emit("aggregate-loaded-" + uniqueIndex, colIndex);
+                        $rootScope.$emit("aggregate-loaded-" + vm.internalID + "-" + rowIndex, colIndex);
                     }
                 }
             }
@@ -464,7 +462,13 @@
 
                     $log.debug("counter", current, ": read main successful.");
                     vm.page = page;
-                    vm.templateVariables = page.templateVariables;
+                    if (Array.isArray(page.templateVariables)) {
+                        vm.templateVariables = page.templateVariables.map(function (tv) {
+                            return tv.values;
+                        });
+                    } else {
+                        vm.templateVariables = [];
+                    }
                     vm.aggregateResults = new Array(vm.page.tuples.length);
                     vm.pendingRowValues = {};
 
@@ -544,7 +548,7 @@
                             // there are not matching rows, so there's no point in creating
                             // aggregate requests.
                             // make sure the spinner is hidden for the pending columns.
-                            agg.model.objects.forEach(function (obj) {
+                            agg.activeListModel.objects.forEach(function (obj) {
                                 if (obj.column) {
                                     vm.columnModels[obj.index].isLoading = false;
                                 }
@@ -880,19 +884,25 @@
             vm.reference.columns.forEach(function (col) {
                 vm.columnModels.push({
                     column: col,
-                    isLoading: col.hasWaitFor === true || col.isUnique === false,
-                    hasWaitFor: col.hasWaitFor === true || col.isUnique === false
+                    isLoading: col.hasWaitFor === true || col.isUnique === false
                 });
             });
 
             vm.aggregateModels = [];
             if (vm.reference.activeList) {
-                vm.reference.activeList.aggregates.forEach(function (agg) {
+                vm.reference.activeList.requests.forEach(function (activeListModel) {
+                    // we cannot capture the whole stack object here since it might get updated
+                    var pcolStackNode = logService.getStackNode(
+                        logService.logStackTypes.PSEUDO_COLUMN,
+                        activeListModel.column.table,
+                        { source: activeListModel.column.compressedDataSource, entity: activeListModel.column.isEntityMode, agg: activeListModel.column.aggregateFn}
+                    );
                     vm.aggregateModels.push({
-                        model: agg, // the api that ermrestjs returns (has .objects and .column)
+                        activeListModel: activeListModel, // the api that ermrestjs returns (has .objects and .column)
                         processed: true, // whether we should get the data or not
                         reloadCauses: [], // why the request is being sent to the server (might be empty)
-                        reloadStartTime: -1 // when the page became dirty
+                        reloadStartTime: -1, // when the page became dirty
+                        logStackNode: pcolStackNode
                     });
                 })
             }
@@ -908,6 +918,9 @@
             vm._recountCauses = [];
             vm.reloadStartTime = -1;
             vm._recountStartTime = -1;
+
+            // can be used to refer to this current instance of table
+            vm.internalID = MathUtils.uuid();
         }
 
         /**
@@ -1541,6 +1554,16 @@
                 scope.recordsetDisplayModes = recordsetDisplayModes;
 
                 scope.pageLimits = [10, 25, 50, 75, 100, 200];
+                var insertCustomPageLimit = scope.$watch('vm.readyToInitialize', function () {
+                    if (scope.vm.readyToInitialize == true && scope.pageLimits.indexOf(scope.vm.pageLimit) === -1) {
+                        scope.pageLimits.push(scope.vm.pageLimit);
+                        scope.pageLimits.sort(function(a, b) {
+                            return a - b;
+                        });
+                        insertCustomPageLimit();
+                    }
+                });
+
                 scope.setPageLimit = function(limit) {
                     scope.vm.pageLimit = limit;
 

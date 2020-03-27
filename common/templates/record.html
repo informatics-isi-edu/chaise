@@ -22,11 +22,11 @@
                 </record-action-bar>
                 <div ng-hide="showError($index) || showLoader($index)" ng-switch="!col.tableModel.isTableDisplay && allowInlineTableMarkdown($index)" ng-class="{'inline-table-display': col.tableModel.isTableDisplay || !allowInlineTableMarkdown($index)}">
                     <span ng-switch-when="true" id="entity-{{$index}}-markdown">
-                        <span ng-if="col.tableModel.page.content == null">
+                        <span ng-if="col.tableMarkdownContent == null">
                             <span class="markdown-container"><em><strong>None</strong></em></span>
                         </span>
-                        <span ng-if="col.tableModel.page.content != null">
-                            <span class="markdown-container" ng-bind-html="col.tableModel.page.content | trustedHTML"></span>
+                        <span ng-if="col.tableMarkdownContent != null">
+                            <span class="markdown-container" ng-bind-html="col.tableMarkdownContent | trustedHTML"></span>
                         </span>
                     </span>
                     <span ng-switch-default id="entity-{{$index}}-recTab">

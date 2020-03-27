@@ -612,6 +612,17 @@ var recordPage = function() {
         return element(by.css(".chaise-share-citation"));
     };
 
+    this.waitForCitation = function (timeout) {
+        var locator = element.all(by.css('.citation-loader'));
+        return browser.wait(function () {
+            return locator.isDisplayed().then(function (arr) {
+                return arr.includes(true) === false;
+            }).catch(function () {
+                return true;
+            });
+        }, timeout || browser.params.defaultTimeout);
+    }
+
     this.getModalListElements = function() {
         return this.getModalText().all(by.tagName('li'));
     };
@@ -878,10 +889,6 @@ var recordsetPage = function() {
         return element(by.css(".page-size-dropdown"));
     };
 
-    this.getCustomPageSize = function() {
-        return element(by.css(".page-size-limit-custom"));
-    };
-
     this.getPageLimitSelector = function (limit) {
         return element(by.css(".page-size-limit-" + limit));
     };
@@ -1125,17 +1132,6 @@ var recordsetPage = function() {
         return element(by.id("fc-" + idx)).element(by.css(".reset-plotly-button"));
     };
 
-    this.waitForAggregates = function (timeout) {
-        var locator = element.all(by.css('.aggregate-col-loader'));
-        return browser.wait(function () {
-            return locator.isDisplayed().then(function (arr) {
-                return arr.includes(true) === false;
-            }).catch(function () {
-                return true;
-            });
-        }, timeout || browser.params.defaultTimeout);
-    };
-
     this.getWarningAlert = function () {
         return element(by.css(".alert-warning"));
     };
@@ -1165,13 +1161,8 @@ var errorModal = function () {
 // Makes a string safe and valid for use in an HTML element's id attribute.
 // Commonly used for column displaynames.
 function makeSafeIdAttr(string) {
-    return String(string)
-        .replace(/&/g, '&amp;')
-        .replace(/\s/g, '&nbsp;') // any whitespace
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+    var ID_SAFE_REGEX = /[^\w-]+/g;
+    return String(string).replace(ID_SAFE_REGEX, '-');
 }
 
 function chaisePage() {
@@ -1374,6 +1365,17 @@ function chaisePage() {
         });
 
         return defer.promise;
+    };
+
+    this.waitForAggregates = function (timeout) {
+        var locator = element.all(by.css('.aggregate-col-loader'));
+        return browser.wait(function () {
+            return locator.isDisplayed().then(function (arr) {
+                return arr.includes(true) === false;
+            }).catch(function () {
+                return true;
+            });
+        }, timeout || browser.params.defaultTimeout);
     };
 };
 

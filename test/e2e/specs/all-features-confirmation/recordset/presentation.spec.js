@@ -221,12 +221,14 @@ var testParams = {
                 "current: 12,345,221, 12345221, 12,345,111", //min_i2
                 "1,234,525", //max_i1
                 "current: 12,345,225, 12345225", //max_i2
+                "virtual col value is 12,345,225", //virtual column
             ],
             [
                 "main two", "", "1,234,502",
                 "", "", "", "", "", "", "",
                 "", "", "", "", "", "", "",
-                "", "", "", "", "", "", ""
+                "", "", "", "", "", "", "",
+                ""
             ]
         ]
     },
@@ -256,7 +258,7 @@ describe('View recordset,', function() {
                 browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + activeListParams.schemaName + ":" + activeListParams.table_name + "@sort(" + activeListParams.sortby + ")");
 
                 chaisePage.recordsetPageReady();
-                chaisePage.recordsetPage.waitForAggregates();
+                chaisePage.waitForAggregates();
             });
 
             it ("should show correct table rows.", function (done) {
@@ -288,7 +290,7 @@ describe('View recordset,', function() {
                 browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + activeListParams.schemaName + ":" + activeListParams.table_name + "/main_id=03");
 
                 chaisePage.recordsetPageReady()
-                chaisePage.recordsetPage.waitForAggregates();
+                chaisePage.waitForAggregates();
                 done();
             })
         });
@@ -303,7 +305,7 @@ describe('View recordset,', function() {
             browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:" + accommodationParams.table_name + "/" + keys.join("&") + "@sort(" + accommodationParams.sortby + ")");
 
             chaisePage.recordsetPageReady()
-            chaisePage.recordsetPage.waitForAggregates();
+            chaisePage.waitForAggregates();
         });
 
         describe("Presentation ,", function() {
@@ -345,9 +347,9 @@ describe('View recordset,', function() {
 
             it("should use annotated page size", function() {
                 var EC = protractor.ExpectedConditions;
-                var e = chaisePage.recordsetPage.getCustomPageSize();
+                var e = chaisePage.recordsetPage.getPageLimitSelector(15);
                 browser.wait(EC.presenceOf(e), browser.params.defaultTimeout);
-                expect(e.getAttribute("innerText")).toBe("15 (Custom)");
+                expect(e.getAttribute("innerText")).toBe("15");
             });
 
             it("should show correct table rows", function() {
@@ -421,8 +423,8 @@ describe('View recordset,', function() {
             if (!process.env.TRAVIS) {
                 it("should have 'CSV' as a download option and download the file.", function(done) {
                     chaisePage.recordsetPage.getExportDropdown().click().then(function () {
-                        var csvOption = chaisePage.recordsetPage.getExportOption("CSV");
-                        expect(csvOption.getText()).toBe("CSV");
+                        var csvOption = chaisePage.recordsetPage.getExportOption("search results (csv)");
+                        expect(csvOption.getText()).toBe("search results (csv)");
                         return csvOption.click();
                     }).then(function () {
                         browser.wait(function() {
@@ -488,7 +490,7 @@ describe('View recordset,', function() {
 
             it("apply different searches, ", function(done) {
                 var EC = protractor.ExpectedConditions;
-                var e = chaisePage.recordsetPage.getCustomPageSize();
+                var e = chaisePage.recordsetPage.getPageLimitSelector(15);
                 browser.wait(EC.presenceOf(e), browser.params.defaultTimeout);
 
                 var searchBox = chaisePage.recordsetPage.getMainSearchInput(),
@@ -875,7 +877,7 @@ describe('View recordset,', function() {
 
         it("should load the table with " + fileParams.custom_page_size + " rows of data based on the page size annotation.", function() {
             // Verify page count and on first page
-            var e = chaisePage.recordsetPage.getCustomPageSize();
+            var e = chaisePage.recordsetPage.getPageLimitSelector(fileParams.custom_page_size);
 
             browser.wait(EC.presenceOf(e), browser.params.defaultTimeout).then(function() {
                 browser.wait(function () {

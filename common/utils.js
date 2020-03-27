@@ -103,7 +103,7 @@
             downloadCSV: "Click to download all matched results",
             permalink: "Click to copy the current url to clipboard.",
             actionCol: "Click on the action buttons to view, edit, or delete each record",
-            viewCol: "Click on the eye button to view the detailed page associated with each record",
+            viewCol: "Click on the icon to view the detailed page associated with each record",
             null: "Search for any record with no value assigned",
             empty: "Search for any record with the empty string value",
             notNull: "Search for any record that has a value",
@@ -1172,6 +1172,13 @@
         }
 
         /**
+         * Verifies that the object is not null and is defined.
+         */
+        function isObjectAndNotNull(obj) {
+            return typeof obj === "object" && obj !== null;
+        }
+
+        /**
          * Verifies that the given data is integer
          * @param  {Object}  data
          * @return {Boolean} whether it is integer or not
@@ -1180,22 +1187,20 @@
             return (typeof data === 'number') && (data % 1 === 0);
         }
 
+        var ID_SAFE_REGEX = /[^\w-]+/g;
         /**
         *
-        * @desc Converts the following characters to HTML entities for safe and
-        * HTML5-valid usage in the `id` attributes of HTML elements: spaces, ampersands,
-        * right angle brackets, left angle brackets, double quotes, single quotes.
+        * @desc This function is used to make sure the input `string` is id/class safe
+        * For both class and id:
+        *   - Must begin with a letter A-Z or a-z
+        *   - Can be followed by: letters (A-Za-z), digits (0-9), hyphens ("-"), and underscores ("_")
+        * NOTE: this won't ensure the very beginning of the input string is safe
+        * it assumes the input string is being appended to an already safe string
         * @param {String} string
         * @return {String} a string suitable for use in the `id` attributes of HTML elements
         */
         function makeSafeIdAttr(string, val) {
-            return String(string)
-                .replace(/&/g, '&amp;')
-                .replace(/\s/g, '&nbsp;') // any whitespace
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
+            return String(string).replace(ID_SAFE_REGEX, '-');
         }
 
         /**
@@ -1266,6 +1271,7 @@
             getRowValuesFromTupleData: getRowValuesFromTupleData,
             getRowValuesFromTuples: getRowValuesFromTuples,
             isObjectAndKeyDefined: isObjectAndKeyDefined,
+            isObjectAndNotNull: isObjectAndNotNull,
             isInteger: isInteger,
             makeSafeIdAttr: makeSafeIdAttr,
             makeSafeHTML: makeSafeHTML,

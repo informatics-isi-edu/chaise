@@ -50,7 +50,8 @@
   "json_col":null,
   "json_col_with_markdown": "delivered",
   "date_col": "12/9/2008",
-  "luxurious": true
+  "luxurious": true,
+  "fk_col_outbound1": "o1_1"
  },
  {
   "id": 2004,
@@ -68,7 +69,8 @@
   "json_col":{"name":"Testing","age":25},
   "json_col_with_markdown": "Processing",
   "date_col": "12/9/2008",
-  "luxurious": false
+  "luxurious": false,
+  "fk_col_outbound1": "o1_2"
 },
 {
  "id": 4004,

@@ -71,12 +71,18 @@ body.error-open loading-spinner {
 
 
 /******* Popup modal for share ********/
-.chaise-share-citation ul {
-    padding-left: 10px;
-}
+.chaise-share-citation {
+    ul {
+        padding-left: 10px;
+    }
 
-.chaise-share-citation #share-link h2 {
-    margin-top: 5px;
+    #share-link h2 {
+        margin-top: 5px;
+    }
+
+    .citation-loader {
+        padding-top: 20px;
+    }
 }
 
 /*******Bootstrap  Modal styling *********/
@@ -135,6 +141,10 @@ body.error-open loading-spinner {
 
 /************* Profile Card ****************/
 .profile-popup {
+    // to allow scrolling and showing all content
+    .modal-content {
+        max-height: unset;
+    }
     ul li {
         list-style-type: disc;
     }
