@@ -66,6 +66,10 @@ body.error-open loading-spinner {
 .modal-error {
     .modal-footer .chaise-btn {
         width: 60px;
+
+        &.footer-continue-btn {
+            width: unset;
+        }
     }
 }
 

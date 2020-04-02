@@ -25,8 +25,9 @@
         facetFilterMissing: "No filtering criteria was specified to identify a specific record.",
         unauthorizedAssetRetrieval: "You must be logged in and authorized to download this asset.",
         forbiddenAssetRetrieval: " is logged in but not authorized to download this asset.",
-        differentUserConflict1: "Continuing in this app requires that you be logged in as ",
-        differentUserConflict2: ". However, you are currently ",
+        differentUserConflict1: "Continuing on this page requires that you be logged in as ",
+        differentUserConflict2: ". However, you are currently logged in as ",
+        anonUserConflict: "Your session has expired. Continuing on this page requires that you be logged in as ",
         systemAdminMessage: "An unexpected error has occurred. Try clearing your cache. If you continue to face this issue, please contact the system administrator."
     })
 
@@ -224,7 +225,7 @@
          *
          * @return {object}        Error Object
          */
-        function DifferentUserConflictError(sessionInfo, prevSessionInfo) {
+        function DifferentUserConflictError(sessionInfo, prevSessionInfo, cb) {
             /**
              * @type {object}
              * @desc  custom object to store miscellaneous elements viz. stacktrace
@@ -235,19 +236,71 @@
              * @type {string}
              * @desc   Error message status; acts as Title text for error dialog
              */
-            this.status = messageMap.permissionDenied;
+            this.status = messageMap.loginStatusChanged;
 
-            /**
-             * @type {string}
-             * @desc   Error message
-             */
-            this.message = errorMessages.differentUserConflict1 + prevSessionInfo.client.display_name + errorMessages.differentUserConflict2 + sessionInfo.client.display_name + ".";
+            var prevUser;
+            if (prevSessionInfo.client.full_name) {
+                prevUser = prevSessionInfo.client.full_name + ' (' + prevSessionInfo.client.display_name + ')';
+            } else {
+                prevUser = prevSessionInfo.client.display_name;
+            }
 
-            /**
-             * @type {string}
-             * @desc Action message to display for click of the OK button
-             */
-            this.errorData.clickActionMessage = messageMap.clickActionMessage.dismissDialog;
+            if (sessionInfo) {
+                var currUser;
+                if (sessionInfo.client.full_name) {
+                    currUser = sessionInfo.client.full_name + ' (' + sessionInfo.client.display_name + ')';
+                } else {
+                    currUser = sessionInfo.client.display_name;
+                }
+
+                /**
+                 * @type {string}
+                 * @desc   Error message
+                 */
+                this.message = errorMessages.differentUserConflict1 + prevUser + errorMessages.differentUserConflict2 + currUser + '.';
+
+                /**
+                 * @type {string}
+                 * @desc message for the reload and continue buttons
+                 */
+                this.errorData.clickActionMessage = messageMap.clickActionMessage.continueMessageReload + currUser + '; or';
+
+                /**
+                 * @type {string}
+                 * @desc text to display to the user
+                 */
+                this.errorData.continueMessage = messageMap.clickActionMessage.continueMessage1 + prevUser + messageMap.clickActionMessage.continueMessage2;
+
+                /**
+                 * @type {string}
+                 * @desc button text for continue case
+                 */
+                this.errorData.continueBtnText = "Continue";
+            } else {
+                /**
+                 * @type {string}
+                 * @desc   Error message
+                 */
+                this.message = errorMessages.anonUserConflict + prevUser + '.';
+
+                /**
+                 * @type {string}
+                 * @desc message for the reload and continue buttons
+                 */
+                this.errorData.clickActionMessage = messageMap.clickActionMessage.anonContinueMessageReload;
+
+                /**
+                 * @type {string}
+                 * @desc text to display to the user
+                 */
+                this.errorData.continueMessage = messageMap.clickActionMessage.anonContinueMessage + prevUser + '.';
+
+                /**
+                 * @type {string}
+                 * @desc button text for continue case
+                 */
+                this.errorData.continueBtnText = "Login";
+            }
 
             /**
              * @type {boolean}
@@ -260,6 +313,18 @@
              * @desc Set true to show the reload button in the modal
              */
             this.showReloadBtn = true;
+
+            /**
+             * @type {boolean}
+             * @desc Set true to show the continue button in the modal
+             */
+            this.showContinueBtn = true;
+
+            /**
+             * @type {function}
+             * @desc function to run when continue btn is clicked
+             */
+             this.errorData.continueCB = cb;
         }
 
         DifferentUserConflictError.prototype = Object.create(Error.prototype);
@@ -496,7 +561,7 @@
             errorPopup(exception, pageName, redirectLink, subMessage, stackTrace, isDismissible, showLogin, message, errorStatus);
 
             // if not a dismissible errror then exception should be suppressed
-            if (!isDismissible) exceptionFlag = true;
+            if (!isDismissible && !exception.showContinueBtn) exceptionFlag = true;
         }
 
         return {

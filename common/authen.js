@@ -245,27 +245,28 @@
         };
 
         /**
-         * uses the reloadCb function to reload the page no matter what after a user logs in
-         * creates a race condition with the calback registered for the LoginInAModal function
+         * opens a window dialog for logging in
          */
-        var popupLogin = function (logAction) {
-            var reloadCb = function(){
-                if (!shouldReloadPageAfterLogin()) {
-                    // fetches the session of the user that just logged in
-                    _getSession().then(function () {
-                        modalInstance.close();
-                    });
-                } else {
-                    window.location.reload();
-                }
-            };
+        var popupLogin = function (logAction, postLoginCB) {
+            if (!postLoginCB) {
+                postLoginCB = function(){
+                    if (!shouldReloadPageAfterLogin()) {
+                        // fetches the session of the user that just logged in
+                        _getSession().then(function () {
+                            if (modalInstance) modalInstance.close();
+                        });
+                    } else {
+                        window.location.reload();
+                    }
+                };
+            }
 
             var x = window.innerWidth/2 - 800/2;
             var y = window.innerHeight/2 - 600/2;
 
             var win = window.open("", '_blank','width=800,height=600,left=' + x + ',top=' + y);
 
-            logInHelper(loginWindowCb, win, reloadCb, 'popUp', null, logAction);
+            logInHelper(loginWindowCb, win, postLoginCB, 'popUp', null, logAction);
         };
 
         var shouldReloadPageAfterLogin = function() {
@@ -354,13 +355,77 @@
                     action: logService.getActionString(logService.logActions.SESSION_VALIDATE, "", "")
                 }
                 return ConfigUtils.getHTTPService().get(serviceURL + "/authn/session", config).then(function(response) {
-                    _session = response.data;
+                    if (!_session) {
+                        // only update _session if no session is set
+                        _session = response.data;
+                    }
                     return _session;
                 }).catch(function(err) {
                     $log.warn(ERMrest.responseToError(err));
 
                     _session = null;
                     return _session;
+                });
+            },
+
+            validateSessionBeforeMutation: function (cb) {
+                var handleDiffUser = function () {
+
+                    // modalInstance comes from error modal controller to close the modal after logging in, but before checking to throw an error again
+                    var checkSession = function (modalInstance) {
+                        modalInstance.dismiss("continue");
+                        // check if login state resolved
+                        _getSession().then(function (session) {
+                            if (!session || !_sameSessionAsPrevious) {
+                                handleDiffUser()
+                            } else {
+                                cb();
+                            }
+                        });
+                    }
+
+                    var errorCB = checkSession;
+
+                    if (!_session) {
+                        // for continuing in the modal if there is a user
+                        errorCB = function (modalInstance) {
+                            popupLogin("action", function () {
+                                checkSession(modalInstance);
+                            });
+                        }
+                    }
+
+                    throw new Errors.DifferentUserConflictError(_session, _prevSession, errorCB); // cannot dismiss
+                }
+
+                // Checks if an error needs to be thrown because the user is different and continues execution if the login state is resolved
+                // a session must exist before calling this function
+                var validateSessionSubmit = function () {
+                    if (!_sameSessionAsPrevious) {
+                        handleDiffUser();
+                    } else {
+                        // we have a session now and it's the same as when the app started
+                        cb();
+                    }
+                }
+
+                _getSession().then(function (session) {
+                    if (!session) {
+                        var onSuccess = function () {
+                            validateSessionSubmit();
+                        }
+
+                        var onError = function (err) {
+                            // NOTE: user didn't login, what's the error ?
+                            // same error message as duplicate user except "anon"
+                            handleDiffUser();
+                        }
+
+                        // should be modal login
+                        logInHelper(loginWindowCb, "", onSuccess, 'modal', onError, "action"); // logAction
+                    } else {
+                        validateSessionSubmit();
+                    }
                 });
             },
 
@@ -478,7 +543,7 @@
                         // record     - same issue with read above
                         //            - p&b add throws a conflict error in most cases, so won't get sent here either (RBK)
                         // recordedit - add/update return here in some cases, and in other cases will return a 409 and ignore this case
-                        var differentUser = (ConfigUtils.getContextJSON().appContext.indexOf("entry") != -1 && prevSession && !Session.isSameSessionAsPrevious())
+                        var differentUser = prevSession && !Session.isSameSessionAsPrevious()
 
                         // send boolean to communicate in ermrestJS if execution should continue after 401 error thrown and subsequent login
                         defer.resolve(differentUser);

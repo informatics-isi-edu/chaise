@@ -181,91 +181,96 @@
                 }
             }
 
-            //call uploadFiles which will upload files and callback on success
-            uploadFiles(submissionRowsCopy, rsReference, function() {
-                var submitSuccessCB = function success(result) {
-                    var page = result.successful;
-                    var failedPage = result.failed;
+            // validates the session then calls the uploadFiles function and then the submission of the data once upload files returns
+            Session.validateSessionBeforeMutation(function () {
+                uploadFiles(submissionRowsCopy, rsReference, function() {
 
-                    // the returned reference is contextualized and we don't need to contextualize it again
-                    var resultsReference = page.reference;
+                    // success callback after create/update is called on a reference object
+                    var submitSuccessCB = function success(result) {
+                        var page = result.successful;
+                        var failedPage = result.failed;
+
+                        // the returned reference is contextualized and we don't need to contextualize it again
+                        var resultsReference = page.reference;
+                        if (isUpdate) {
+                            var data = checkUpdate(submissionRowsCopy, rsTuples);
+                            try {
+                                // check if there is a window that opened the current one
+                                // make sure the update function is defined for that window
+                                // verify whether we still have a valid vaue to call that function with
+                                if (window.opener && window.opener.updated && rsQueryParams.invalidate) {
+                                    window.opener.updated(rsQueryParams.invalidate);
+                                }
+                            } catch (exp) {
+                              // if window.opener is from another origin, this will result in error on accessing any attribute in window.opener
+                              // And if it's from another origin, we don't need to call updated since it's not
+                              // the same row that we wanted to update in recordset (table directive)
+                            }
+                        } else {
+                            if (!isModalUpdate) {
+                                $cookies.remove(rsQueryParams.prefill);
+
+
+                                // add cookie indicating record added
+                                if (rsQueryParams.invalidate) {
+                                    $cookies.put(rsQueryParams.invalidate, submissionRowsCopy.length, {
+                                        expires: new Date(Date.now() + (60 * 60 * 24 * 1000))
+                                    });
+                                }
+                            }
+                        }
+                        viewModel.readyToSubmit = false; // form data has already been submitted to ERMrest
+
+                        if (isModalUpdate) {
+                            pbModalInstance.close();
+                        } else {
+                            onSuccessFunction(model, result);
+                        }
+                    };
+
+                    // error handling for create/update calls to ermrest
+                    var submitErrorHandler = function(exception) {
+                        viewModel.submissionButtonDisabled = false;
+                        // assume user had been previously logged in (can't create/update without it)
+                        // if no valid current session, user should re-login
+                        // validate session will never throw an error, so it's safe to not write a reject callback or catch clause
+                        Session.validateSession().then(function (session) {
+                            if (!session && exception instanceof ERMrest.ConflictError) {
+                                // login in a modal should show (Session timed out)
+                                throw new ERMrest.UnauthorizedError();
+                            }
+                            // append link to end of alert.
+                            if (exception instanceof ERMrest.DuplicateConflictError) {
+                                exception.message += ' Click <a href="' + exception.duplicateReference.contextualize.detailed.appLink + '" target="_blank">here</a> to see the conflicting record that already exists.';
+                            }
+
+                            // TODO: remove condition (explore first)
+                            if (isModalUpdate || exception instanceof Errors.DifferentUserConflictError) {
+                                // pure and binary add on record page, we want a popup error
+                                // if timeout error, also show popup
+                                ErrorService.handleException(exception, true);
+                            } else {
+                                AlertsService.addAlert(exception.message, (exception instanceof ERMrest.NoDataChangedError ? 'warning' : 'error') );
+                            }
+                        });
+                    }
+
+                    var createRef = isModalUpdate ? derivedref.unfilteredReference.contextualize.entryCreate : rsReference.unfilteredReference.contextualize.entryCreate;
+
                     if (isUpdate) {
                         var data = checkUpdate(submissionRowsCopy, rsTuples);
-                        try {
-                            // check if there is a window that opened the current one
-                            // make sure the update function is defined for that window
-                            // verify whether we still have a valid vaue to call that function with
-                            if (window.opener && window.opener.updated && rsQueryParams.invalidate) {
-                                window.opener.updated(rsQueryParams.invalidate);
-                            }
-                        } catch (exp) {
-                          // if window.opener is from another origin, this will result in error on accessing any attribute in window.opener
-                          // And if it's from another origin, we don't need to call updated since it's not
-                          // the same row that we wanted to update in recordset (table directive)
-                        }
-                    } else {
-                        if (!isModalUpdate) {
-                            $cookies.remove(rsQueryParams.prefill);
-
-
-                            // add cookie indicating record added
-                            if (rsQueryParams.invalidate) {
-                                $cookies.put(rsQueryParams.invalidate, submissionRowsCopy.length, {
-                                    expires: new Date(Date.now() + (60 * 60 * 24 * 1000))
-                                });
-                            }
-                        }
+                        // submit rootScope.tuples because we are changing and
+                        // comparing data from the old data set for the tuple with the updated data set from the UI
                     }
-                    viewModel.readyToSubmit = false; // form data has already been submitted to ERMrest
 
-                    if (isModalUpdate) {
-                        pbModalInstance.close();
+                    if (!isUpdate) {
+                        createRef.create(submissionRowsCopy, logObj).then(submitSuccessCB).catch(submitErrorHandler);
                     } else {
-                        onSuccessFunction(model, result);
+                        rsReference.update(rsTuples, logObj).then(submitSuccessCB).catch(submitErrorHandler);
                     }
-                };
 
-                var submitErrorHandler = function(exception) {
-                    viewModel.submissionButtonDisabled = false;
-                    // assume user had been previously logged in (can't create/update without it)
-                    // if no valid current session, user should re-login
-                    // validate session will never throw an error, so it's safe to not write a reject callback or catch clause
-                    Session.validateSession().then(function (session) {
-                        if (!session && exception instanceof ERMrest.ConflictError) {
-                            // login in a modal should show (Session timed out)
-                            throw new ERMrest.UnauthorizedError();
-                        }
-                        // append link to end of alert.
-                        if (exception instanceof ERMrest.DuplicateConflictError) {
-                            exception.message += ' Click <a href="' + exception.duplicateReference.contextualize.detailed.appLink + '" target="_blank">here</a> to see the conflicting record that already exists.';
-                        }
-
-                        if (isModalUpdate || exception instanceof Errors.DifferentUserConflictError) {
-                            // pure and binary add on record page, we want a popup error
-                            // if timeout error, also show popup
-                            ErrorService.handleException(exception, true);
-                        } else {
-                            AlertsService.addAlert(exception.message, (exception instanceof ERMrest.NoDataChangedError ? 'warning' : 'error') );
-                        }
-                    });
-                }
-
-                var createRef = isModalUpdate ? derivedref.unfilteredReference.contextualize.entryCreate : rsReference.unfilteredReference.contextualize.entryCreate;
-
-                if (isUpdate) {
-                    var data = checkUpdate(submissionRowsCopy, rsTuples);
-                    // submit rootScope.tuples because we are changing and
-                    // comparing data from the old data set for the tuple with the updated data set from the UI
-                }
-
-                if (!isUpdate) {
-                    createRef.create(submissionRowsCopy, logObj).then(submitSuccessCB).catch(submitErrorHandler);
-                } else {
-                    rsReference.update(rsTuples, logObj).then(submitSuccessCB).catch(submitErrorHandler);
-                }
-
+                });
             });
-
         }
 
         /**

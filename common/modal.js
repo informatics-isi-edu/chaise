@@ -115,6 +115,7 @@
         vm.displayDetails = false;
         vm.linkText = messageMap.showErrDetails;
         vm.showReloadBtn = false;
+        vm.showOkBtn = true;
         var notAllowedPermissionAccess = (vm.params.exception instanceof Errors.UnauthorizedAssetAccess  || vm.params.exception instanceof Errors.ForbiddenAssetAccess)
         vm.showDownloadPolicy = (notAllowedPermissionAccess && cc.assetDownloadPolicyURL && cc.assetDownloadPolicyURL.trim().length > 0 && typeof cc.assetDownloadPolicyURL == "string");
         if (vm.showDownloadPolicy) vm.downloadPolicy = cc.assetDownloadPolicyURL;
@@ -139,9 +140,30 @@
             vm.clickActionMessage = messageMap.clickActionMessage.pageRedirect + vm.params.pageName + '. ';
 
             // TODO it might be more appropriate to move the following outside the if-else
-            if (vm.params.appName == 'recordedit' || exception.showReloadBtn){
+            if (vm.params.appName == 'recordedit'){
                 vm.showReloadBtn = true;
                 reloadMessage = ' <p>' + messageMap.clickActionMessage.reloadMessage +' </p>';
+            }
+        }
+
+        // NOTE: only used for DifferentUserConflictError
+        if (exception.showContinueBtn) {
+            vm.showOkBtn = false;
+            vm.showReloadBtn = exception.showReloadBtn;;
+            vm.showContinueBtn = exception.showContinueBtn;
+            vm.clickActionMessage = exception.errorData.clickActionMessage;
+            vm.continueMessage = exception.errorData.continueMessage;
+            vm.continueBtnText = exception.errorData.continueBtnText;
+
+            vm.continue = function () {
+                exception.errorData.continueCB($uibModalInstance);
+            }
+
+            vm.switchUserAccounts = function () {
+                // should this be relative to this location?
+                // error thrown in record or recordedit means './logout/logoutInstruction.html'
+                //    goes to /chaise/record/logout/logoutInstructions
+                $window.open('../lib/switchUserAccounts.html', '_blank');
             }
         }
 
