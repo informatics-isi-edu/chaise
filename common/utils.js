@@ -2356,6 +2356,8 @@
             SESSION_VALIDATE: "session" + clientPathActionSeparator + "validate",
             SESSION_RETRIEVE: "session" + clientPathActionSeparator + "retrieve",
 
+            SWITCH_USER_ACCOUNTS_LOGIN: "switch-accounts" + clientPathActionSeparator + "login",
+
             // - navbar:
             NAVBAR_BRANDING: "navbar/branding" + clientPathActionSeparator + "navigate",
             NAVBAR_MENU_EXTERNAL: "navbar/menu" + clientPathActionSeparator + "navigate-external",

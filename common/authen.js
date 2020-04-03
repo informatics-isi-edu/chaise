@@ -395,7 +395,7 @@
                     if (!_session) {
                         // for continuing in the modal if there is a user
                         errorCB = function (modalInstance) {
-                            popupLogin("action", function () { // logAction -> validateSession
+                            popupLogin(LOGIN_ERROR_MODAL, function () {
                                 checkSession(modalInstance);
                             });
                         }
@@ -428,7 +428,7 @@
                         }
 
                         // should be modal login
-                        logInHelper(loginWindowCb, "", onSuccess, 'modal', onError, "action"); // logAction -> validateSession
+                        logInHelper(loginWindowCb, "", onSuccess, 'modal', onError, LOGIN_LOGIN_MODAL);
                     } else {
                         validateSessionSubmit();
                     }
