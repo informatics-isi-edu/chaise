@@ -244,7 +244,6 @@
                                 exception.message += ' Click <a href="' + exception.duplicateReference.contextualize.detailed.appLink + '" target="_blank">here</a> to see the conflicting record that already exists.';
                             }
 
-                            // TODO: remove condition (explore first)
                             if (isModalUpdate || exception instanceof Errors.DifferentUserConflictError) {
                                 // pure and binary add on record page, we want a popup error
                                 // if timeout error, also show popup

@@ -64,6 +64,10 @@ body.error-open loading-spinner {
 }
 
 .modal-error {
+    .no-word-break {
+        white-space: nowrap;
+    }
+
     .modal-footer .chaise-btn {
         width: 60px;
 

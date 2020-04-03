@@ -240,7 +240,7 @@
 
             var prevUser;
             if (prevSessionInfo.client.full_name) {
-                prevUser = prevSessionInfo.client.full_name + ' (' + prevSessionInfo.client.display_name + ')';
+                prevUser = '<span class="no-word-break">' + prevSessionInfo.client.full_name + ' (' + prevSessionInfo.client.display_name + ')</span>';
             } else {
                 prevUser = prevSessionInfo.client.display_name;
             }
@@ -248,7 +248,7 @@
             if (sessionInfo) {
                 var currUser;
                 if (sessionInfo.client.full_name) {
-                    currUser = sessionInfo.client.full_name + ' (' + sessionInfo.client.display_name + ')';
+                    currUser = '<span class="no-word-break">' + sessionInfo.client.full_name + ' (' + sessionInfo.client.display_name + ')</span>';
                 } else {
                     currUser = sessionInfo.client.display_name;
                 }
@@ -527,7 +527,7 @@
                 return;
             }
 
-            var permissionError = (exception instanceof Errors.UnauthorizedAssetAccess || exception instanceof Errors.ForbiddenAssetAccess || exception instanceof Errors.DifferentUserConflictError);
+            var assetPermissionError = (exception instanceof Errors.UnauthorizedAssetAccess || exception instanceof Errors.ForbiddenAssetAccess || exception instanceof Errors.DifferentUserConflictError);
 
             if (exception instanceof Errors.multipleRecordError || exception instanceof Errors.noRecordError){
                 // change defaults
@@ -539,7 +539,7 @@
             } else if (exception instanceof Errors.CustomError ) {
                 logError(exception);
                 redirectLink = exception.errorData.redirectUrl;
-            } else if (!permissionError) {
+            } else if (!assetPermissionError) {
                 logError(exception);
                 message = errorMessages.systemAdminMessage;
                 subMessage = exception.message;
@@ -548,7 +548,7 @@
             // There's no message
             if (message.trim().length < 1) message = errorMessages.systemAdminMessage;
 
-            if (!Session.getSessionValue() && !permissionError) {
+            if (!Session.getSessionValue() && !assetPermissionError) {
                 showLogin = true;
                 if (exception instanceof Errors.noRecordError) {
                     // if no logged in user, change the message

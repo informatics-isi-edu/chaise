@@ -12,10 +12,6 @@
         var PROMPT_EXPIRATION_KEY = 'promptExpiration'; // name of key for prompt expiration value
         var PREVIOUS_SESSION_KEY = 'previousSession';   // name of key for previous session boolean
 
-        var SESSION_INFO_KEY = "sessionInfo";           // name of key for logged in user's session
-        var SESSION_COOKIE_KEY = "cookie";              // name of key for logged in user's cookie
-
-        var _cookie = null;                             // cookie value when app loads
         var _session = null;                            // current session object
         var _prevSession = null;                        // previous session object
         var _sameSessionAsPrevious = false;
@@ -32,7 +28,7 @@
 
         /**
          * Functions that interact with the StorageService tokens
-         * There are 3 keys stored under the LOCAL_STORAGE_KEY object, PROMPT_EXPIRATION_KEY, PREVIOUS_SESSION_KEY, and SESSION_INFO_KEY
+         * There are 3 keys stored under the LOCAL_STORAGE_KEY object, PROMPT_EXPIRATION_KEY, PREVIOUS_SESSION_KEY
          */
 
         // returns data stored in loacal storage for `keyName`
@@ -89,7 +85,10 @@
             }
         };
 
+        // variable so the modal can be passed to another function outside of this scope to close it when appropriate
         var modalInstance = null;
+
+        // post login callback function
         var loginWindowCb = function (params, referrerId, cb, type, rejectCb){
             if(type.indexOf('modal')!== -1){
                 if (_session) {
@@ -269,6 +268,9 @@
             logInHelper(loginWindowCb, win, postLoginCB, 'popUp', null, logAction);
         };
 
+        // Checks for a session or previous session being set, if neither allow the page to reload
+        // the page will reload after login when the page started with no user
+        // _session can become null if getSession is called and the session has timed out or the user logged out
         var shouldReloadPageAfterLogin = function() {
             if (_session === null && _prevSession == null) return true;
             return false;
@@ -291,23 +293,26 @@
                 action: logService.getActionString(logService.logActions.SESSION_RETRIEVE, "", "")
             }
 
-            // see if there's a token before doing any decision making
-
-            // if there's no webauthnCookie || no cookieFromStorage, login flow
-
-            // if there's a webauthnCookie user was logged in at some point on this machine, check to see if it matches _cookie
-            //  - if NOT match page was used by someone that's not the current webauthn cookie holder, check webauthnCookie matches cookieFromStorage
-            //    - if match, check cookieFromStorage.expires is not expired
-            //      - if expired, login flow
-            //      - if not expired, use local storage session
-            //    - if NOT match, shouldn't happen unless cookie in browser is updated without chaise
-            //  - if match user had a session on this page, make sure _session.expires is not expired
-            //    - if not expired, TODO leasing idea
-            //    - if expired, login timeout warning
-
-            // no webauthn
-            // if there's a cookieFromStorage user was here before, see if it is expired
-            //  - if expired
+            /**
+             * NOTE: the following is for future implementation when we decide to verify session against the cookie object
+             * see if there's a token before doing any decision making
+             *
+             * if there's no webauthnCookie || no cookieFromStorage, login flow
+             *
+             * if there's a webauthnCookie user was logged in at some point on this machine, check to see if it matches _cookie
+             *  - if NOT match page was used by someone that's not the current webauthn cookie holder, check webauthnCookie matches cookieFromStorage
+             *    - if match, check cookieFromStorage.expires is not expired
+             *      - if expired, login flow
+             *      - if not expired, use local storage session
+             *    - if NOT match, shouldn't happen unless cookie in browser is updated without chaise
+             *  - if match user had a session on this page, make sure _session.expires is not expired
+             *    - if not expired, TODO leasing idea
+             *    - if expired, login timeout warning
+             *
+             * no webauthn
+             * if there's a cookieFromStorage user was here before, see if it is expired
+             *  - if expired
+            **/
 
             return ConfigUtils.getHTTPService().get(serviceURL + "/authn/session", config).then(function(response) {
                 if (context === "401" && shouldReloadPageAfterLogin()) {
@@ -368,9 +373,10 @@
                 });
             },
 
+            // Makes a request to fetch the most recent session from the server
+            // verifies if that is the same as when the page loaded before calling `cb`
             validateSessionBeforeMutation: function (cb) {
                 var handleDiffUser = function () {
-
                     // modalInstance comes from error modal controller to close the modal after logging in, but before checking to throw an error again
                     var checkSession = function (modalInstance) {
                         modalInstance.dismiss("continue");
@@ -389,7 +395,7 @@
                     if (!_session) {
                         // for continuing in the modal if there is a user
                         errorCB = function (modalInstance) {
-                            popupLogin("action", function () {
+                            popupLogin("action", function () { // logAction -> validateSession
                                 checkSession(modalInstance);
                             });
                         }
@@ -422,7 +428,7 @@
                         }
 
                         // should be modal login
-                        logInHelper(loginWindowCb, "", onSuccess, 'modal', onError, "action"); // logAction
+                        logInHelper(loginWindowCb, "", onSuccess, 'modal', onError, "action"); // logAction -> validateSession
                     } else {
                         validateSessionSubmit();
                     }
@@ -537,13 +543,12 @@
                     // and it can continue firing other queued calls
                     Session.getSession("401").then(function(_session) {
                         var prevSession = Session.getPrevSessionValue();
-                        // TODO: limiting this to entry may not be the right condition?
                         // Not sure if this will trigger on page load, if not I think it's safe to run this in all contexts
                         // recordset  - read should throw a 409 if there's a permission issue
                         // record     - same issue with read above
                         //            - p&b add throws a conflict error in most cases, so won't get sent here either (RBK)
                         // recordedit - add/update return here in some cases, and in other cases will return a 409 and ignore this case
-                        var differentUser = prevSession && !Session.isSameSessionAsPrevious()
+                        var differentUser = prevSession && !Session.isSameSessionAsPrevious();
 
                         // send boolean to communicate in ermrestJS if execution should continue after 401 error thrown and subsequent login
                         defer.resolve(differentUser);
