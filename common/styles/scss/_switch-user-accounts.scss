@@ -1,6 +1,10 @@
 #switchUserAccounts {
-    .chaise-body li {
-        list-style-type: unset;
+    .chaise-body {
+        overflow-y: auto;
+
+        li {
+            list-style-type: unset;
+        }
     }
 
     .main-container {

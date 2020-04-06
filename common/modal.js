@@ -81,7 +81,7 @@
             $uibModalInstance.dismiss('cancel');
         }
     }])
-    .controller('ErrorModalController', ['ConfigUtils', 'Errors', 'logService', 'messageMap', 'params', 'Session', '$rootScope', '$sce', '$uibModalInstance', '$window', function ErrorModalController(ConfigUtils, Errors, logService, messageMap, params, Session, $rootScope, $sce, $uibModalInstance, $window) {
+    .controller('ErrorModalController', ['ConfigUtils', 'Errors', 'logService', 'messageMap', 'params', 'Session', 'UriUtils', '$rootScope', '$sce', '$uibModalInstance', '$window', function ErrorModalController(ConfigUtils, Errors, logService, messageMap, params, Session, UriUtils, $rootScope, $sce, $uibModalInstance, $window) {
         var cc = ConfigUtils.getConfigJSON();
         function isErmrestErrorNeedReplace (error) {
             switch (error.constructor) {
@@ -143,10 +143,7 @@
             }
 
             vm.switchUserAccounts = function () {
-                // NOTE: should this be relative to this location?
-                // error thrown in record or recordedit means './logout/logoutInstruction.html'
-                //    goes to /chaise/record/logout/logoutInstructions
-                $window.open('../lib/switchUserAccounts.html', '_blank');
+                $window.open(UriUtils.chaiseDeploymentPath() + 'lib/switchUserAccounts.html', '_blank');
             }
         } else if ( (exception instanceof Errors.CustomError && exception.errorData.clickActionMessage) || notAllowedPermissionAccess) {
             vm.clickActionMessage = exception.errorData.clickActionMessage;
