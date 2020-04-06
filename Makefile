@@ -493,8 +493,6 @@ DEFAULT_CSS_DEPS = $(CSS)/vendor/bootstrap.min.css \
 
 USER_SOURCE=lib/switchUserAccounts.app.js
 
-USER_CSS=lib/switchUserAccounts.css
-
 # Config file
 JS_CONFIG=chaise-config.js
 
@@ -761,9 +759,9 @@ $(JS_CONFIG): chaise-config-sample.js
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-md-asset-block ; \
 	done
 
-.make-user-asset-block: $(DEFAULT_CSS_DEPS) $(USER_CSS) $(DEFAULT_JS_DEPS) $(JS_CONFIG) $(USER_SOURCE)
+.make-user-asset-block: $(DEFAULT_CSS_DEPS) $(DEFAULT_JS_DEPS) $(JS_CONFIG) $(USER_SOURCE)
 	> .make-user-asset-block
-	for file in $(DEFAULT_CSS_DEPS) $(USER_CSS); do \
+	for file in $(DEFAULT_CSS_DEPS); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-user-asset-block ; \
 	done

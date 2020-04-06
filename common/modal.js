@@ -130,6 +130,24 @@
             vm.clickActionMessage =  messageMap.clickActionMessage.multipleRecords;
         } else if (exception instanceof Errors.noRecordError) {
             vm.clickActionMessage = messageMap.clickActionMessage.noRecordsFound;
+        } else if (exception instanceof Errors.DifferentUserConflictError) {
+            vm.showOkBtn = false;
+            vm.showReloadBtn = exception.showReloadBtn;;
+            vm.showContinueBtn = exception.showContinueBtn;
+            vm.clickActionMessage = exception.errorData.clickActionMessage;
+            vm.continueMessage = exception.errorData.continueMessage;
+            vm.continueBtnText = exception.errorData.continueBtnText;
+
+            vm.continue = function () {
+                exception.errorData.continueCB($uibModalInstance);
+            }
+
+            vm.switchUserAccounts = function () {
+                // NOTE: should this be relative to this location?
+                // error thrown in record or recordedit means './logout/logoutInstruction.html'
+                //    goes to /chaise/record/logout/logoutInstructions
+                $window.open('../lib/switchUserAccounts.html', '_blank');
+            }
         } else if ( (exception instanceof Errors.CustomError && exception.errorData.clickActionMessage) || notAllowedPermissionAccess) {
             vm.clickActionMessage = exception.errorData.clickActionMessage;
         } else if (ERMrest && exception instanceof ERMrest.InvalidFilterOperatorError) {
@@ -143,27 +161,6 @@
             if (vm.params.appName == 'recordedit'){
                 vm.showReloadBtn = true;
                 reloadMessage = ' <p>' + messageMap.clickActionMessage.reloadMessage +' </p>';
-            }
-        }
-
-        // NOTE: only used for DifferentUserConflictError
-        if (exception.showContinueBtn) {
-            vm.showOkBtn = false;
-            vm.showReloadBtn = exception.showReloadBtn;;
-            vm.showContinueBtn = exception.showContinueBtn;
-            vm.clickActionMessage = exception.errorData.clickActionMessage;
-            vm.continueMessage = exception.errorData.continueMessage;
-            vm.continueBtnText = exception.errorData.continueBtnText;
-
-            vm.continue = function () {
-                exception.errorData.continueCB($uibModalInstance);
-            }
-
-            vm.switchUserAccounts = function () {
-                // should this be relative to this location?
-                // error thrown in record or recordedit means './logout/logoutInstruction.html'
-                //    goes to /chaise/record/logout/logoutInstructions
-                $window.open('../lib/switchUserAccounts.html', '_blank');
             }
         }
 
