@@ -9,12 +9,6 @@
         > No matching record found for the given filter or facet.
            You are not authorized to perform this action. [Please login]() to continue.
 
-## 409 error without session -> 401 error
-- Navigate to a creation form that has columns that require a user to be logged in to change ([Example](https://dev.rebuildingakidney.org/chaise/recordedit/#2/RNASeq:Study))
-- open another tab and log out of the application
-- go back to original tab and submit the data
-- instead of a 409 conflict error (because an anonymous user can't modify some columns like RCB), a login dialog should be provided to the user
-
 ## Record (url to page pending..)
 - Making sure markdown displayed entities show properly
 - Single lists don't have a bullet before the only item
@@ -139,6 +133,47 @@ In [ErmrestDataUtils](https://github.com/informatics-isi-edu/ErmrestDataUtils), 
       - ssh to `dev.isrd.isi.edu`
       - `cd /var/www/hatrac/js/chaise/<timestamp_txt-value>/<id-value>/`
       - `ls -al` to list all contents and file sizes
+
+# Testing Session Timed out (and different user) data mutation events
+The UX currently doesn't update the user when their session state has changed. In some cases a user could log in and navigate to a page that allows create or update, then have their log in status change prior to submitting the data to be mutated. They could have had their session time out (treated as an anonymous user) or changed to a  different user entirely. This pertains to create/update in `recordedit`, pure and binary add in `record`, and anywhere that we show tables with shows thatcan be deleted.
+
+## Testing workflow
+For each of the pages listed below, the following should be done to verify that the appropriate errors occur and dialogs are shown: 
+
+ - Navigate to a creation form that requires a user to be logged in ([Example](https://dev.rebuildingakidney.org/chaise/recordedit/#2/RNASeq:Study))
+   - fill in the required fields
+   - open another tab and log out of the application
+   - go back to original tab and submit the data
+   - a login dialog should be shown instead of an error
+   - login to a **different** user
+   - now the "Unexpected Change of Login Status" error dialog should be shown
+   - in another tab, log out again
+   - go back to the original tab and click "continue" as if the login state was fixed
+   - a different error dialog with the same title, "Unexpected Change of Login Status", should be shown
+   - click the "login" button and log in as the orignial user
+   - the data should submit properly after that
+
+ - Navigate to a record page that requires a user to be logged in to mutate one of the related entities ([Example](https://dev.rebuildingakidney.org/~jchudy/chaise/record/#2/Gene_Expression:Specimen/RID=N-GXA4))
+   - click "add record" for a related entity that is pure and binary. The "Anatomical Source" related entity should be pure and binary
+   - select 1 or more rows to link to the specimen
+   - open another tab and log out of the application
+   - then login to a **different** user
+   - go back to the original tab and submit the selected rows
+   - the "Unexpected Change of Login Status" error dialog should be shown with a continue button
+   - in another tab, log out again and log back in as the original user
+   - go back to the original tab and click "continue" once the login state has been resolved
+   - the rows should be properly added after clicking continue
+   
+ - Navigate to a page with rows that can be deleted ([Example](https://dev.rebuildingakidney.org/~jchudy/chaise/recordset/#2/Gene_Expression:Specimen/))
+   - open another tab and log out of the application
+   - go back to the original tab and delete one of the rows
+   - a login dialog should be shown instead of an error
+   - login to a **different** user
+   - now the "Unexpected Change of Login Status" error dialog should be shown
+   - in another tab, log out again and log back in as the original user
+   - go back to the original tab and click "continue" once the login state has been resolved
+   - either the confirm dialog will show, or the row will be deleted
+     - hopefully you followed the link above and removed a row on dev :)
 
 # Testing row level security
 
