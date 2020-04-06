@@ -2357,6 +2357,7 @@
             SESSION_RETRIEVE: "session" + clientPathActionSeparator + "retrieve",
 
             SWITCH_USER_ACCOUNTS_LOGIN: "switch-accounts" + clientPathActionSeparator + "login",
+            SWITCH_USER_ACCOUNTS_WIKI_LOGIN: "switch-accounts-wiki" + clientPathActionSeparator + "login",
 
             // - navbar:
             NAVBAR_BRANDING: "navbar/branding" + clientPathActionSeparator + "navigate",
