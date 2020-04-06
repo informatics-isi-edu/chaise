@@ -63,7 +63,7 @@
                     };
 
                     scope.logout = function logout() {
-                        Session.logout();
+                        Session.logout(logService.logActions.LOGOUT_NAVBAR);
                     };
 
                 }

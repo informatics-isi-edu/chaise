@@ -491,7 +491,7 @@
                 logInHelper(loginWindowCb, "", notifyErmrestCB, 'modal', notifyErmrestRejectCB, logAction);
             },
 
-            logout: function() {
+            logout: function(action) {
                 var chaiseConfig = ConfigUtils.getConfigJSON();
                 var logoutURL = chaiseConfig['logoutURL'] ? chaiseConfig['logoutURL'] : '/';
                 var url = serviceURL + "/authn/session";
@@ -503,7 +503,7 @@
                     headers: {}
                 };
                 config.headers[ERMrest.contextHeaderName] = {
-                    action: logService.getActionString(logService.logActions.LOGOUT_NAVBAR, "", "")
+                    action: logService.getActionString(action, "", "")
                 }
                 ConfigUtils.getHTTPService().delete(url, config).then(function(response) {
                     StorageService.deleteStorageNamespace(LOCAL_STORAGE_KEY);

@@ -134,6 +134,7 @@
             vm.showOkBtn = false;
             vm.showReloadBtn = exception.showReloadBtn;;
             vm.showContinueBtn = exception.showContinueBtn;
+            // contains the `reloadMessage` already since it's customized in the error
             vm.clickActionMessage = exception.errorData.clickActionMessage;
             vm.continueMessage = exception.errorData.continueMessage;
             vm.continueBtnText = exception.errorData.continueBtnText;

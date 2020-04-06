@@ -759,6 +759,8 @@ $(JS_CONFIG): chaise-config-sample.js
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-md-asset-block ; \
 	done
 
+# NOTE: this is created at 1 level deep because the dependencies in ermrestJS rely on a path value as well
+# these src tags can be updated to be properly reltive if we want it 2 or 3 folders deep, but changes in ermrestJS will also need ot be made
 .make-user-asset-block: $(DEFAULT_CSS_DEPS) $(DEFAULT_JS_DEPS) $(JS_CONFIG) $(USER_SOURCE)
 	> .make-user-asset-block
 	for file in $(DEFAULT_CSS_DEPS); do \
