@@ -9,8 +9,8 @@
         };
     }])
 
-    .directive('ellipsis', ['AlertsService', 'ConfigUtils', 'defaultDisplayname', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'recordTableUtils', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$window',
-        function(AlertsService, ConfigUtils, defaultDisplayname, ErrorService, logService, MathUtils, messageMap, modalBox, modalUtils, recordsetDisplayModes, recordTableUtils, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $window) {
+    .directive('ellipsis', ['AlertsService', 'ConfigUtils', 'defaultDisplayname', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'recordTableUtils', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$window',
+        function(AlertsService, ConfigUtils, defaultDisplayname, ErrorService, logService, MathUtils, messageMap, modalBox, modalUtils, recordsetDisplayModes, recordTableUtils, Session, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $window) {
         var chaiseConfig = ConfigUtils.getConfigJSON(),
             context = ConfigUtils.getContextJSON();
 
@@ -26,64 +26,66 @@
         }
 
         function deleteReference(scope, reference, isRelated, isUnlink) {
-            var logObj = {
-                action: getLogAction(scope, isUnlink ? logService.logActions.UNLINK : logService.logActions.DELETE),
-                stack: scope.logStack
-            };
-            var emmitedMessageArgs = {};
-            if (isRelated) {
-                emmitedMessageArgs = containerDetails(scope);
-            }
+            Session.validateSessionBeforeMutation(function () {
+                var logObj = {
+                    action: getLogAction(scope, isUnlink ? logService.logActions.UNLINK : logService.logActions.DELETE),
+                    stack: scope.logStack
+                };
+                var emmitedMessageArgs = {};
+                if (isRelated) {
+                    emmitedMessageArgs = containerDetails(scope);
+                }
 
-            if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
-                var onError = function (response) {
-                    scope.$root.showSpinner = false;
+                if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
+                    var onError = function (response) {
+                        scope.$root.showSpinner = false;
 
-                    // log the opening of cancelation modal
+                        // log the opening of cancelation modal
+                        logService.logClientAction({
+                            action: getLogAction(scope, isUnlink ? logService.logActions.UNLINK_CANCEL : logService.logActions.DELETE_CANCEL),
+                            stack: scope.logStack
+                        }, reference.defaultLogInfo);
+
+                        // if response is string, the modal has been dismissed
+                        if (typeof response !== "string") {
+                            ErrorService.handleException(response, true);  // throw exception for dismissible pop- up (error, isDismissible = true)
+                        }
+                    }
+
+                    // log the opening of delete modal
                     logService.logClientAction({
-                        action: getLogAction(scope, isUnlink ? logService.logActions.UNLINK_CANCEL : logService.logActions.DELETE_CANCEL),
+                        action: getLogAction(scope, isUnlink ? logService.logActions.UNLINK_INTEND : logService.logActions.DELETE_INTEND),
                         stack: scope.logStack
                     }, reference.defaultLogInfo);
 
-                    // if response is string, the modal has been dismissed
-                    if (typeof response !== "string") {
-                        ErrorService.handleException(response, true);  // throw exception for dismissible pop- up (error, isDismissible = true)
-                    }
-                }
-
-                // log the opening of delete modal
-                logService.logClientAction({
-                    action: getLogAction(scope, isUnlink ? logService.logActions.UNLINK_INTEND : logService.logActions.DELETE_INTEND),
-                    stack: scope.logStack
-                }, reference.defaultLogInfo);
-
-                modalUtils.showModal({
-                    animation: false,
-                    templateUrl:  UriUtils.chaiseDeploymentPath() + "common/templates/delete-link/confirm_delete.modal.html",
-                    controller: "ConfirmDeleteController",
-                    controllerAs: "ctrl",
-                    size: "sm"
-                }, function onSuccess(res) {
+                    modalUtils.showModal({
+                        animation: false,
+                        templateUrl:  UriUtils.chaiseDeploymentPath() + "common/templates/delete-link/confirm_delete.modal.html",
+                        controller: "ConfirmDeleteController",
+                        controllerAs: "ctrl",
+                        size: "sm"
+                    }, function onSuccess(res) {
+                        scope.$root.showSpinner = true;
+                        // user accepted prompt to delete
+                        reference.delete(logObj).then(function deleteSuccess() {
+                            scope.$root.showSpinner = false;
+                            // tell parent controller data updated
+                            scope.$emit('record-deleted', emmitedMessageArgs);
+                        }).catch(onError);
+                    }, onError, false);
+                } else {
                     scope.$root.showSpinner = true;
-                    // user accepted prompt to delete
                     reference.delete(logObj).then(function deleteSuccess() {
                         scope.$root.showSpinner = false;
                         // tell parent controller data updated
                         scope.$emit('record-deleted', emmitedMessageArgs);
-                    }).catch(onError);
-                }, onError, false);
-            } else {
-                scope.$root.showSpinner = true;
-                reference.delete(logObj).then(function deleteSuccess() {
-                    scope.$root.showSpinner = false;
-                    // tell parent controller data updated
-                    scope.$emit('record-deleted', emmitedMessageArgs);
 
-                }).catch(function (error) {
-                    scope.$root.showSpinner = false;
-                    ErrorService.handleException(error, true); // throw exception for dismissible pop- up (error, isDismissible = true)
-                });
-            }
+                    }).catch(function (error) {
+                        scope.$root.showSpinner = false;
+                        ErrorService.handleException(error, true); // throw exception for dismissible pop- up (error, isDismissible = true)
+                    });
+                }
+            });
         }
 
         return {

@@ -56,6 +56,8 @@
         }]);
     }])
 
+    // TODO: is this ever being called?
+    // maybe there's an error occuring inside of it and it's trying to catch itself but can't because of the error
     .config(function($provide) {
         $provide.decorator("$exceptionHandler", ['$log', '$injector', function($log, $injector) {
             return function(exception, cause) {

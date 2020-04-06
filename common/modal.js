@@ -81,7 +81,7 @@
             $uibModalInstance.dismiss('cancel');
         }
     }])
-    .controller('ErrorModalController', ['ConfigUtils', 'Errors', 'logService', 'messageMap', 'params', 'Session', '$rootScope', '$sce', '$uibModalInstance', '$window', function ErrorModalController(ConfigUtils, Errors, logService, messageMap, params, Session, $rootScope, $sce, $uibModalInstance, $window) {
+    .controller('ErrorModalController', ['ConfigUtils', 'Errors', 'logService', 'messageMap', 'params', 'Session', 'UriUtils', '$rootScope', '$sce', '$uibModalInstance', '$window', function ErrorModalController(ConfigUtils, Errors, logService, messageMap, params, Session, UriUtils, $rootScope, $sce, $uibModalInstance, $window) {
         var cc = ConfigUtils.getConfigJSON();
         function isErmrestErrorNeedReplace (error) {
             switch (error.constructor) {
@@ -115,6 +115,7 @@
         vm.displayDetails = false;
         vm.linkText = messageMap.showErrDetails;
         vm.showReloadBtn = false;
+        vm.showOkBtn = true;
         var notAllowedPermissionAccess = (vm.params.exception instanceof Errors.UnauthorizedAssetAccess  || vm.params.exception instanceof Errors.ForbiddenAssetAccess)
         vm.showDownloadPolicy = (notAllowedPermissionAccess && cc.assetDownloadPolicyURL && cc.assetDownloadPolicyURL.trim().length > 0 && typeof cc.assetDownloadPolicyURL == "string");
         if (vm.showDownloadPolicy) vm.downloadPolicy = cc.assetDownloadPolicyURL;
@@ -129,6 +130,22 @@
             vm.clickActionMessage =  messageMap.clickActionMessage.multipleRecords;
         } else if (exception instanceof Errors.noRecordError) {
             vm.clickActionMessage = messageMap.clickActionMessage.noRecordsFound;
+        } else if (exception instanceof Errors.DifferentUserConflictError) {
+            vm.showOkBtn = false;
+            vm.showReloadBtn = exception.showReloadBtn;;
+            vm.showContinueBtn = exception.showContinueBtn;
+            // contains the `reloadMessage` already since it's customized in the error
+            vm.clickActionMessage = exception.errorData.clickActionMessage;
+            vm.continueMessage = exception.errorData.continueMessage;
+            vm.continueBtnText = exception.errorData.continueBtnText;
+
+            vm.continue = function () {
+                exception.errorData.continueCB($uibModalInstance);
+            }
+
+            vm.switchUserAccounts = function () {
+                $window.open(UriUtils.chaiseDeploymentPath() + 'lib/switchUserAccounts.html', '_blank');
+            }
         } else if ( (exception instanceof Errors.CustomError && exception.errorData.clickActionMessage) || notAllowedPermissionAccess) {
             vm.clickActionMessage = exception.errorData.clickActionMessage;
         } else if (ERMrest && exception instanceof ERMrest.InvalidFilterOperatorError) {
@@ -159,6 +176,8 @@
         };
 
         vm.ok = function () {
+            // NOTE: Doing this in recordedit allows the user to dismiss the browser reload popup and see the app
+            // basically allowing the modal to be dismissed
             $uibModalInstance.close();
         };
 
@@ -312,7 +331,11 @@
          * If we had the matchNotNull, then we just need to pass that attribute.
          */
         function submitMultiSelection() {
-            $uibModalInstance.close(getMultiSelectionResult());
+            if (vm.params.submitBeforeClose) {
+                vm.params.submitBeforeClose(getMultiSelectionResult());
+            } else {
+                $uibModalInstance.close(getMultiSelectionResult());
+            }
         }
 
         function cancel() {

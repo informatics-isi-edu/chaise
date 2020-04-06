@@ -171,7 +171,8 @@ HTML=login/index.html \
 	 viewer/index.html \
 	 recordedit/index.html \
 	 record/index.html \
-	 recordedit/mdHelp.html
+	 recordedit/mdHelp.html \
+	 lib/switchUserAccounts.html
 
 # ERMrestjs Deps
 ERMRESTJS_RT_DIR=../../ermrestjs
@@ -468,6 +469,30 @@ RECSET_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
 RECSET_CSS_SOURCE=$(COMMON)/styles/app.css \
 	$(COMMON)/vendor/MarkdownEditor/styles/github-markdown.css
 
+DEFAULT_JS_DEPS=$(JS)/vendor/angular.js \
+	$(JS)/vendor/angular-sanitize.js \
+	$(JS)/vendor/ui-bootstrap-tpls-2.5.0.min.js \
+	$(COMMON)/vendor/angular-animate.min.js \
+	$(COMMON)/alerts.js \
+	$(COMMON)/authen.js \
+	$(COMMON)/config.js \
+	$(COMMON)/errors.js \
+	$(COMMON)/filters.js \
+	$(COMMON)/footer.js \
+	$(COMMON)/inputs.js \
+	$(COMMON)/login.js \
+	$(COMMON)/modal.js \
+	$(COMMON)/navbar.js \
+	$(COMMON)/storage.js \
+	$(COMMON)/utils.js \
+	$(COMMON)/validators.js \
+	$(COMMON)/vendor/angular-cookies.min.js
+
+DEFAULT_CSS_DEPS = $(CSS)/vendor/bootstrap.min.css \
+	$(COMMON)/styles/app.css
+
+USER_SOURCE=lib/switchUserAccounts.app.js
+
 # Config file
 JS_CONFIG=chaise-config.js
 
@@ -570,6 +595,11 @@ recordedit/mdHelp.html: recordedit/mdHelp.html.in .make-add-version-tag .make-md
 	sed -e '/%VERSION%/ {' -e 'r .make-add-version-tag' -e 'd' -e '}' \
 		-e '/%ASSETS%/ {' -e 'r .make-md-asset-block' -e 'd' -e '}' \
 		recordedit/mdHelp.html.in common/templates/noscript.html > recordedit/mdHelp.html
+
+lib/switchUserAccounts.html: lib/switchUserAccounts.html.in .make-add-version-tag .make-user-asset-block
+	sed -e '/%VERSION%/ {' -e 'r .make-add-version-tag' -e 'd' -e '}' \
+		-e '/%ASSETS%/ {' -e 'r .make-user-asset-block' -e 'd' -e '}' \
+		lib/switchUserAccounts.html.in common/templates/noscript.html > lib/switchUserAccounts.html
 
 $(JS_CONFIG): chaise-config-sample.js
 	cp -n chaise-config-sample.js $(JS_CONFIG) || true
@@ -727,6 +757,29 @@ $(JS_CONFIG): chaise-config-sample.js
 	for file in $(RE_JS_MDHELP); do \
 		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
 		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-md-asset-block ; \
+	done
+
+# NOTE: this is created at 1 level deep because the dependencies in ermrestJS rely on a path value as well
+# these src tags can be updated to be properly reltive if we want it 2 or 3 folders deep, but changes in ermrestJS will also need ot be made
+.make-user-asset-block: $(DEFAULT_CSS_DEPS) $(DEFAULT_JS_DEPS) $(JS_CONFIG) $(USER_SOURCE)
+	> .make-user-asset-block
+	for file in $(DEFAULT_CSS_DEPS); do \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-user-asset-block ; \
+	done
+	for file in $(JS_CONFIG) $(DEFAULT_JS_DEPS); do \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-user-asset-block ; \
+	done
+	for script in $(ERMRESTJS_DEPS); do \
+		buildpath=$(ERMRESTJS_BLD_DIR)/$$script ; \
+		runtimepath=$(ERMRESTJS_RT_DIR)/$$script ; \
+		checksum=$$($(MD5) $$buildpath | awk '{ print $$1 }') ; \
+		echo "<script src='$$runtimepath?v=$$checksum'></script>" >> .make-user-asset-block ; \
+	done
+	for file in $(USER_SOURCE); do \
+		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
+		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-user-asset-block ; \
 	done
 
 # Rule for installing for normal deployment

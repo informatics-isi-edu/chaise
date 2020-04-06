@@ -76,14 +76,19 @@
             title: "You need to be logged in to continue."
         },
         "clickActionMessage": {
-            "messageWReplace": "Click <b>OK</b> to reload this page without @errorStatus.",
-            "loginOrDismissDialog": "Click <a ng-click='ctrl.login()'>Login</a> to log in to the system, or click <b>OK</b> to dismiss this dialog.",
+            "continueMessageReload": "Click <b>Reload</b> to start over with the identity ",
+            "anonContinueMessageReload": "Click <b>Reload</b> to start over with limited anonymous access; or",
+            "continueMessage1": "Click <b>Continue</b> to continue as ",
+            "continueMessage2": ' after you restore your login status. Instructions on how to restore login is in the <a id="switch-user-accounts-link" ng-click="ctrl.switchUserAccounts()">Switch User Accounts Document</a>.',
+            "anonContinueMessage": "Click <b>Login</b> to login and continue access as ",
             "dismissDialog": "Click <b>OK</b> to dismiss this dialog.",
+            "loginOrDismissDialog": "Click <a ng-click='ctrl.login()'>Login</a> to log in to the system, or click <b>OK</b> to dismiss this dialog.",
+            "messageWReplace": "Click <b>OK</b> to reload this page without @errorStatus.",
             "multipleRecords": "Click <b>OK</b> to show all the matched records.",
             "noRecordsFound": "Click <b>OK</b> to show the list of all records.",
             "okBtnMessage": "Click <b>OK</b> to go to the Recordset.",
-            "reloadMessage": "Click <b>Reload</b> to start over.",
-            "pageRedirect": "Click <b>OK</b> to go to the "
+            "pageRedirect": "Click <b>OK</b> to go to the ",
+            "reloadMessage": "Click <b>Reload</b> to start over."
         },
         "errorMessageMissing": "An unexpected error has occurred. Please try again",
         "tableMissing": "No table specified in the form of 'schema-name:table-name' and no Default is set.",
@@ -94,6 +99,7 @@
         "noRecordForFilter" : "No matching record found for the given filter or facet.",
         "loginRequired": "Login Required",
         "permissionDenied": "Permission Denied",
+        "loginStatusChanged": "Unexpected Change of Login Status",
         "unauthorizedErrorCode" : "Unauthorized Access",
         "localStorageDisabled": "localStorage is disabled by the browser settings. Some features might not work as expected",
         "showErrDetails" : "Show Error Details",
@@ -2349,6 +2355,10 @@
             LOGIN_WARNING: "warning" + clientPathActionSeparator + "login",
             SESSION_VALIDATE: "session" + clientPathActionSeparator + "validate",
             SESSION_RETRIEVE: "session" + clientPathActionSeparator + "retrieve",
+
+            SWITCH_USER_ACCOUNTS_LOGIN: "switch-accounts" + clientPathActionSeparator + "login",
+            SWITCH_USER_ACCOUNTS_WIKI_LOGIN: "switch-accounts-wiki" + clientPathActionSeparator + "login",
+            SWITCH_USER_ACCOUNTS_LOGOUT: "switch-accounts" + clientPathActionSeparator + "logout",
 
             // - navbar:
             NAVBAR_BRANDING: "navbar/branding" + clientPathActionSeparator + "navigate",
