@@ -353,7 +353,7 @@
                     updatePageCB(vm);
                 }).catch(function (err) {
                     _afterUpdateMainEntity(vm, true, currentCounter);
-                    if (cb) cb(vm, res);
+                    if (cb) cb(vm, true);
 
                     // show modal with different text if 400 Query Timeout Error
                     if (err instanceof ERMrest.QueryTimeoutError) {
