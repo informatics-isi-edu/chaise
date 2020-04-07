@@ -75,6 +75,12 @@
                             vm.error = "No data in svg found.";
                         });
                         break;
+                    case "hideChannelList":
+                        $scope.$apply(function(){
+                          vm.filterChannelsAreHidden = !vm.filterChannelsAreHidden;
+                        });
+                        break;
+
                     default:
                         console.log('Invalid event message type "' + messageType + '"');
                 }
