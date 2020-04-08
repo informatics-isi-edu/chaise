@@ -18,17 +18,21 @@
     var client;
 
     angular.module('chaise.viewer', [
-        'ermrestjs',
-        'ngSanitize',
+        'duScroll',
         'chaise.alerts',
-        'chaise.filters',
-        'ngCookies',
         'chaise.authen',
         'chaise.errors',
+        'chaise.faceting',
+        'chaise.filters',
+        'chaise.inputs',
         'chaise.delete',
         'chaise.modal',
         'chaise.navbar',
+        'chaise.record.table',
         'chaise.utils',
+        'ermrestjs',
+        'ngCookies',
+        'ngSanitize',
         'ui.select',
         'ui.bootstrap',
         'ng.deviceDetector'
@@ -123,7 +127,17 @@
     }])
 
     // Hydrate values providers and set up iframe
-    .run(['ConfigUtils', 'ERMrest', 'logService', '$window', 'context', 'image', 'annotations', 'comments', 'anatomies', 'user', 'MathUtils', '$rootScope', function runApp(ConfigUtils, ERMrest, logService, $window, context, image, annotations, comments, anatomies, user, MathUtils, $rootScope) {
+    .run(['ConfigUtils', 'ERMrest', 'DataUtils', 'FunctionUtils',  'UiUtils', 'UriUtils', 'logService', '$window', 'context', 'image', 'annotations', 'comments', 'anatomies', 'user', 'MathUtils', '$rootScope', function runApp(ConfigUtils, ERMrest, DataUtils, FunctionUtils, UiUtils, UriUtils, logService, $window, context, image, annotations, comments, anatomies, user, MathUtils, $rootScope) {
+        var origin = $window.location.origin;
+        var iframe = $window.frames[0];
+        var annotoriousReady = false;
+        var chaiseReady = false;
+        $rootScope.displayReady = false;
+
+        var arrows = [];
+        var rectangles = [];
+        var sections = [];
+
         var origin = $window.location.origin;
         var iframe = $window.frames[0];
         var annotoriousReady = false;
@@ -131,6 +145,87 @@
         var arrows = [];
         var rectangles = [];
         var sections = [];
+        var specimenURL = "https://dev.rebuildingakidney.org/ermrest/catalog/2/entity/Gene_Expression:Specimen_Expression";
+        var config = ConfigUtils.getContextJSON();
+        context.server = config.server;
+        context.wid = config.wid;
+        context.cid = config.cid;
+        context.pid = config.pid;
+        context.chaiseBaseURL = UriUtils.chaiseBaseURL();
+        UriUtils.setOrigin();
+
+        var res = UriUtils.chaiseURItoErmrestURI($window.location, true);
+        var ermrestUri = res.ermrestUri,
+            pcid = res.pcid,
+            ppid = res.ppid,
+            isQueryParameter = res.isQueryParameter;
+
+        context.catalogID = res.catalogId;
+
+        // will be used to determine the app mode (edit, create, or copy)
+        // We are not passing the query parameters that are used for app mode,
+        // so we cannot use the queryParams that parser is returning.
+        context.queryParams = res.queryParams;
+        context.MAX_ROWS_TO_ADD = 201;
+
+        // modes = create, edit, copy
+        // create is contextualized to entry/create
+        // edit is contextualized to entry/edit
+        // copy is contextualized to entry/create
+        // NOTE: copy is technically creating an entity so it needs the proper visible column list as well as the data for the record associated with the given filter
+        context.modes = {
+            COPY: "copy",
+            CREATE: "create",
+            EDIT: "edit"
+        }
+        // mode defaults to create
+        context.mode = context.modes.CREATE;
+
+        FunctionUtils.registerErmrestCallbacks();
+
+        ERMrest.resolve(specimenURL, { cid: context.cid, pid: context.pid, wid: context.wid }).then(function(reference){
+            console.log("reference : ", reference);
+
+            // we are using filter to determine app mode, the logic for getting filter
+            // should be in the parser and we should not duplicate it in here
+            // NOTE: we might need to change this line (we're parsing the whole url just for fidinig if there's filter)
+            var location = reference.location;
+
+            // Mode can be any 3 with a filter
+            if (location.filter || location.facets) {
+                // prefill always means create
+                // copy means copy regardless of a limit defined
+                // edit is everything else with a filter
+                context.mode = (context.queryParams.prefill ? context.modes.CREATE : (context.queryParams.copy ? context.modes.COPY : context.modes.EDIT));
+            } else if (context.queryParams.limit) {
+                context.mode = context.modes.EDIT;
+            }
+            context.appContext = (context.mode == context.modes.EDIT ? "entry/edit" : "entry/create");
+
+            //contextualize the reference based on the mode (determined above) recordedit is in
+            if (context.mode == context.modes.EDIT) {
+                $rootScope.reference = reference.contextualize.entryEdit;
+            } else if (context.mode == context.modes.CREATE || context.mode == context.modes.COPY) {
+                $rootScope.reference = reference.contextualize.entryCreate;
+            }
+
+            $rootScope.reference.session = session;
+            $rootScope.session = session;
+            // $rootScope.reference = reference;
+
+            // log attribues
+            $rootScope.logStackPath = logService.logStackPaths.SET;
+            $rootScope.logStack = [
+                logService.getStackNode(
+                    logService.logStackTypes.SET,
+                    $rootScope.reference.table,
+                    $rootScope.reference.filterLogInfo
+                )
+            ];
+
+        }, function error(response){
+            console.log("ERMrest error : ", response );
+        })
 
         ConfigUtils.getContextJSON().server.catalogs.get(context.catalogID).then(function success(catalog) {
             var schema = catalog.schemas.get(context.schemaName);
@@ -180,6 +275,14 @@
                     } else {
                     	waterMark = '&waterMark=' + waterMark;
                     }
+
+                    var meterScaleInPixels = context.queryParams.meterScaleInPixels;
+                    if (meterScaleInPixels === undefined) {
+                      meterScaleInPixels = '';
+                    } else {
+                      meterScaleInPixels = '&meterScaleInPixels=' + meterScaleInPixels;
+                    }
+
                     console.log('uri='+image.entity.uri + waterMark);
 
                     /* Note: the following has been done so that the viewer app supports both type of formats i.e tiff and czi.
@@ -196,8 +299,8 @@
                     }
 
                     // image.entity.uri = image.entity.uri + "&url=data/Q-296R_all_contours_cw_named.svg";
-                    console.log('replace uri = '+image.entity.uri + waterMark)
-                    iframe.location.replace(image.entity.uri + waterMark);
+                    console.log('replace uri = '+image.entity.uri + waterMark + meterScaleInPixels)
+                    iframe.location.replace(image.entity.uri + waterMark + meterScaleInPixels);
                     console.log('Image: ', image);
 
                     var annotationTable = schema.tables.get('annotation');
@@ -219,7 +322,6 @@
                             annotations.push(annotation);
                         }
                         chaiseReady = true;
-
                         if (annotoriousReady && chaiseReady) {
                             iframe.postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
                         }

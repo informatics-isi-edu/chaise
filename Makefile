@@ -317,10 +317,20 @@ VIEWER_ASSETS=viewer
 
 VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
 	$(JS)/vendor/angular.js \
+	$(JS)/vendor/angular-plotly.js \
 	$(JS)/vendor/angular-sanitize.js \
+	$(JS)/vendor/angular-messages.min.js \
+	$(JS)/vendor/angular-datepicker.js \
+	$(COMMON)/vendor/angular-cookies.min.js \
+	$(COMMON)/vendor/angular-scroll.min.js \
 	$(COMMON)/alerts.js \
 	$(COMMON)/config.js \
+	$(COMMON)/faceting.js \
 	$(COMMON)/filters.js \
+	$(COMMON)/ellipsis.js \
+	$(COMMON)/inputs.js \
+	$(COMMON)/table.js \
+	$(COMMON)/validators.js \
 	$(COMMON)/vendor/css-element-queries.js \
 	$(COMMON)/utils.js \
 	$(COMMON)/storage.js \

@@ -3,12 +3,12 @@
 
     angular.module('chaise.viewer')
 
-    .controller('AnnotationsController', ['AlertsService', 'anatomies', 'annotations', 'AnnotationsService', 'AuthService', 'comments', 'CommentsService', 'ConfigUtils', 'UriUtils', '$rootScope','$scope', '$timeout', '$uibModal', '$window',
-        function AnnotationsController(AlertsService, anatomies, annotations, AnnotationsService, AuthService, comments, CommentsService, ConfigUtils, UriUtils, $rootScope, $scope, $timeout, $uibModal, $window) {
+    .controller('AnnotationsController', ['AlertsService', 'anatomies', 'annotations', 'AnnotationsService', 'AuthService', 'comments', 'context', 'CommentsService', 'ConfigUtils', 'DataUtils', 'InputUtils', 'UriUtils', 'modalUtils', 'modalBox', 'recordsetDisplayModes', 'logService', '$rootScope','$scope', '$timeout', '$uibModal', '$window',
+    function AnnotationsController(AlertsService, anatomies, annotations, AnnotationsService, AuthService, comments, context, CommentsService, ConfigUtils, DataUtils, InputUtils, UriUtils, modalUtils , modalBox,recordsetDisplayModes, logService,  $rootScope, $scope, $timeout, $uibModal, $window) {
         var chaiseConfig = Object.assign({}, ConfigUtils.getConfigJSON());
         var vm = this;
 
-
+        vm.editMode = (context.mode == context.modes.EDIT ? true : false);
         vm.isDisplayAll = true; // whether to show all annotations
         vm.collection = []; // annotation list
         vm.searchKeyword = "";
@@ -37,7 +37,7 @@
         vm.drawAnnotation = drawAnnotation;
         vm.createAnnotation = createAnnotation;
         vm.cancelNewAnnotation = cancelNewAnnotation;
-
+            
         var originalAnnotation; // Holds the original contents of annotation in the event that a user cancels an edit
         resetEditedValues();
         vm.editAnnotation = editAnnotation;
@@ -66,6 +66,7 @@
         vm.highlightGroup = highlightGroup;
         vm.changeSelectingAnnotation = changeSelectingAnnotation;
         vm.changeStrokeScale = changeStrokeScale;
+        vm.searchPopup = searchPopup;
 
         // Listen to events of type 'message' (from Annotorious)
         $window.addEventListener('message', function annotationControllerListener(event) {
@@ -135,6 +136,55 @@
                 console.log('Invalid event origin. Event origin: ', event.origin, '. Expected origin: ', window.location.origin);
             }
         });
+
+        function searchPopup(){
+
+            var column = $rootScope.reference.columns[1];
+            var params = {};
+            var submissionRow = {
+                Specimen: null,
+                Region: null,
+                Strength: null,
+                Strength_Modifier: null,
+                Pattern: null,
+                Pattern_Location: null,
+                Density: null,
+                Density_Direction: null,
+                Density_Magnitude: null,
+                Density_Relative_To: null,
+                Density_Note: null,
+                Notes: null,
+                RCT: null,
+                RMT: null
+            };
+            params.parentReference = $rootScope.reference;
+            params.parentTuple = null;
+            params.displayname = $rootScope.reference.displayname;
+            params.displayMode = vm.editMode ? recordsetDisplayModes.foreignKeyPopupEdit : recordsetDisplayModes.foreignKeyPopupCreate;
+            params.reference = column.filteredRef(submissionRow, {}).contextualize.compactSelect;;
+            params.reference.session = $rootScope.session;
+            params.context = "compact/select";
+            params.selectedRows = [];
+            params.selectMode = "single-select";
+            params.showFaceting = true;
+            params.facetPanelOpen = false;
+            params.logStack = $rootScope.logStack;
+            params.logStackPath = $rootScope.logStackPath;
+
+            modalUtils.showModal({
+                animation: false,
+                controller: "SearchPopupController",
+                windowClass: "search-popup foreignkey-popup",
+                controllerAs: "ctrl",
+                resolve: {
+                    params: params
+                },
+                size: "lg",
+                templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
+            }, function(tuple){
+                console.log(tuple);
+            }, null, false);
+        }
 
         function updateAnnotationVisibility(annotation) {
             if (vm.filterByType[annotation.type]) {

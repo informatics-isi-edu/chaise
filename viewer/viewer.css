@@ -157,7 +157,7 @@ a.cardlink.delete {
 }
 
 #sidebar {
-   display: block;
+   display: none;
    margin: 0 20px;
 }
 
@@ -203,14 +203,14 @@ a.cardlink.delete {
 }
 
 
-.btn.pick {
+/* .btn.pick {
   background-color: #18558E;
-}
+} */
 
-.btn.pick:hover {
+/* .btn.pick:hover {
     background-color: #002D73;
     border-color: #1E4E9A;
-}
+} */
 
 #viewer-content{
     display: flex;
