@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .factory('AnnotationsService', ['context', 'user', 'image', 'annotations', 'AlertsService', '$window', '$q', function(context, user, image, annotations, AlertsService, $window, $q) {
+    .factory('AnnotationsService', ['context', 'user', 'image', 'annotations', 'AlertsService', 'ERMrest', '$window', '$q', function(context, user, image, annotations, AlertsService, ERMrest, $window, $q) {
         var origin = $window.location.origin;
         var iframe = $window.frames[0];
         var table = null;
@@ -49,6 +49,63 @@
 
         function cancelNewAnnotation() {
             iframe.postMessage({messageType: 'cancelAnnotationCreation'}, origin);
+        }
+
+        /**
+         * checkEntryExist - checks whether the table has created an entry with the combination of keys
+         * @param {string} imageID 
+         * @param {string} anatomyID 
+         * @return {boolean} whether table has the entry
+         */
+        function checkEntryExist(imageID, anatomyID){
+            var defer = $q.defer();
+            var uri = context.serviceURL + "/catalog/" + context.catalogID + "/entity/" + context.schemaName + ":Image_Annotation/Image=" + encodeURIComponent(imageID) + "&Anatomy="+ encodeURIComponent(anatomyID);
+
+            ERMrest.resolve(uri, { cid: context.cid, pid: context.pid, wid: context.wid }).then(function(ref){
+                 //TODO needs proper logging parameter
+                return ref.contextualize.detailed.read(1, context.logObject, true, true);
+            })
+            .then(function(page){
+                defer.resolve(page);
+            })
+            .catch(function(err){
+                defer.reject(err);
+            });
+
+            return defer.promise;
+        }
+
+        function removeEntry(imageID, anatomyID){
+            var defer = $q.defer();
+            var uri = context.serviceURL + "/catalog/" + context.catalogID + "/entity/" + context.schemaName + ":Image_Annotation/Image=" + encodeURIComponent(imageID) + "&Anatomy="+ encodeURIComponent(anatomyID);
+            var reference; 
+
+            ERMrest.resolve(uri, { cid: context.cid, pid: context.pid, wid: context.wid }).then(function(ref){
+                 //TODO needs proper logging parameter
+                reference = ref;
+                return reference.contextualize.detailed.read(1, context.logObject, true, true);
+            })
+            .then(function(page){
+                reference.delete(context.logObject).then(function deleteSuccess(){
+                    console.log("delete success");
+                }, function deleteFail(){
+                    console.log("delete failed");
+                });
+                // defer.resolve(page);
+            })
+            .catch(function(err){
+                defer.reject(err);
+            });
+
+            return defer.promise;
+        }
+
+        /**
+         * send saving result to openseadragon 
+         * @param {} result 
+         */
+        function notifySaveResult(result) {
+            iframe.postMessage({messageType: 'notifySaveResult', content: result}, origin);
         }
 
         function updateAnnotation(annotation) {
@@ -126,10 +183,15 @@
             iframe.postMessage({messageType: 'addNewTerm', content: data}, origin);
         }
 
+        function saveAnnotationRecord(data){
+            iframe.postMessage({messageType: 'saveAnnotationRecord', content: data}, origin);
+        }
+
         return {
             drawAnnotation: drawAnnotation,
             createAnnotation: createAnnotation,
             cancelNewAnnotation: cancelNewAnnotation,
+            checkEntryExist : checkEntryExist,
             updateAnnotation: updateAnnotation,
             deleteAnnotation: deleteAnnotation,
             centerAnnotation: centerAnnotation,
@@ -139,7 +201,10 @@
             changeAllAnnotationVisibility : changeAllAnnotationVisibility,
             changeStrokeScale : changeStrokeScale,
             changeGroupInfo : changeGroupInfo,
-            addNewTerm : addNewTerm
+            addNewTerm : addNewTerm,
+            notifySaveResult : notifySaveResult,
+            removeEntry : removeEntry,
+            saveAnnotationRecord : saveAnnotationRecord
         };
 
     }]);

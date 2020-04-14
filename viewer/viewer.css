@@ -3,7 +3,7 @@
 } */
 
 #alert {
-    position: relative;
+    position: relative !important;
     top: 15;
     /* Why set z-index to 3? Because we want alerts to appear as the top-most layer
     and it looks like the current top-most layer has a z-index of 2. (Bootstrap
@@ -124,7 +124,7 @@ a.cardlink.delete {
 #viewer-container{
     display: flex;
     flex-direction: column;
-    height: 92.5%;
+    height: calc(100vh - 60px);
     padding: 0;
     overflow: auto;
 }
@@ -245,7 +245,85 @@ a.cardlink.delete {
     padding: 0 0 15px 0;
 }
 
-#viewer-content .annotation-list .title{
+#viewer-content .annotation-list .annotationSetting{
+    position: absolute;
+    width: 100%;
+    background: #f8f8f8;
+    height: calc(100% - 45px);
+    z-index: -1;
+    opacity: -120%;
+    transition: opacity 0.5s;
+    display: flex;
+    flex-direction: column;
+    top: 45px;
+    border: 1px solid #d9d9d9;
+    border-radius: 3px;
+    overflow: auto;
+}
+
+#viewer-content .annotation-list .annotationSetting.open{
+    opacity : 1;
+    z-index: 10;
+}
+
+#viewer-content .annotation-list .annotationSetting .annotationRow{
+    border-bottom: 1px solid #e1e1e1;
+    margin: 0 10px;
+    padding: 10px 0;
+}
+
+#viewer-content .annotation-list .annotationSetting .annotationRow:last-child{
+    border-bottom: none;
+}
+
+#viewer-content .annotation-list .annotationSetting .annotationRowHeader{
+    font-weight: bold;
+    margin: 0 0 5px;
+}
+
+#viewer-content .annotation-list .annotationSetting .annotationRowValue{
+    display: flex;
+    overflow: hidden;
+    align-items: center;
+}
+
+#viewer-content .annotation-list .annotationSetting .annotationRowValue .text{
+    background: #e1e1e1;
+    flex: 1;
+    display: flex;
+    padding: 3px;
+    align-items: center;
+    cursor: pointer;
+}
+
+#viewer-content .annotation-list .annotationSetting .annotationRowValue .text:hover{
+    color: #18548d;
+    opacity: 0.8;
+}
+
+#viewer-content .annotation-list .annotationSetting .annotationRowValue .btn{
+    flex : 1;
+}
+
+#viewer-content .annotation-list .annotationSetting .annotationRowValue .changeBtn{
+    /* background: #18548d; */
+    /* color: #18548d; */
+    padding: 5px;
+    border-radius: 5px;
+    /* height: 25px; */
+    /* width: 25; */
+    display: flex;
+    align-items: center;
+    margin: 0 0 0 5px;
+}
+
+#viewer-content .annotation-list .titleRow{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#viewer-content .annotation-list .titleRow .title{
     padding: 8px 0;
     color: #333333;
     font-size: 24px;
@@ -586,7 +664,13 @@ a.cardlink.delete {
 #viewer-content .annotation-list .annotationItem.current .editBtn{
     color: #fff;
 }
+#viewer-content .annotation-list .annotationItem .editBtn.selected{
+    background: #3669ac;
+    color: #ffffff;
+    padding: 3px;
+}
 
+#viewer-content .annotation-list .annotationItem.current .editBtn.selected,
 #viewer-content .annotation-list .annotationItem.current .editBtn[data-type="highlightGroup"]{
     color: #ffff80;
 }
@@ -598,6 +682,7 @@ a.cardlink.delete {
 
 #viewer-content .annotation-list .annotationItem .itemRow .anatomy{
     flex : 1;
+    padding: 3px;
 }
 
 #viewer-content .annotation-list .annotationItem .itemMenu{

@@ -129,7 +129,7 @@
     }])
 
     // Hydrate values providers and set up iframe
-    .run(['ConfigUtils', 'ERMrest', 'DataUtils', 'FunctionUtils',  'UiUtils', 'UriUtils', 'InputUtils', 'logService', '$window', 'context', 'image', 'annotations', 'comments', 'anatomies', 'user', 'MathUtils', 'viewerAppUtils', 'viewerModel', '$rootScope', function runApp(ConfigUtils, ERMrest, DataUtils, FunctionUtils, UiUtils, UriUtils, InputUtils, logService, $window, context, image, annotations, comments, anatomies, user, MathUtils, viewerAppUtils, viewerModel, $rootScope) {
+    .run(['ConfigUtils', 'ERMrest', 'Errors', 'DataUtils', 'FunctionUtils',  'UiUtils', 'UriUtils', 'InputUtils', 'logService', '$window', 'context', 'image', 'annotations', 'comments', 'anatomies', 'user', 'MathUtils', 'viewerAppUtils', 'viewerModel', '$rootScope', function runApp(ConfigUtils, ERMrest, Errors, DataUtils, FunctionUtils, UiUtils, UriUtils, InputUtils, logService, $window, context, image, annotations, comments, anatomies, user, MathUtils, viewerAppUtils, viewerModel, $rootScope) {
         var origin = $window.location.origin;
         var iframe = $window.frames[0];
         var annotoriousReady = false;
@@ -146,9 +146,9 @@
         var rectangles = [];
         var sections = [];
         var session; 
-        // var specimenURL = "https://dev.rebuildingakidney.org/ermrest/catalog/2/entity/Gene_Expression:Specimen_Expression";
-        var imageAnnotationURL = "https://dev.rebuildingakidney.org/ermrest/catalog/2/entity/Gene_Expression:Image_Annotation";
+        var imageAnnotationURL = context.serviceURL + "/catalog/2/entity/Gene_Expression:Image_Annotation";
         var config = ConfigUtils.getContextJSON();
+
         context.server = config.server;
         context.wid = config.contextHeaderParams.wid;
         context.cid = config.contextHeaderParams.cid;
@@ -185,148 +185,7 @@
 
         FunctionUtils.registerErmrestCallbacks();
 
-        ERMrest.resolve(imageAnnotationURL, { cid: context.cid, pid: context.pid, wid: context.wid }).then(function getReference(reference){
-            
-            // we are using filter to determine app mode, the logic for getting filter
-            // should be in the parser and we should not duplicate it in here
-            // NOTE: we might need to change this line (we're parsing the whole url just for fidinig if there's filter)
-            var location = reference.location;
-            
-            // Mode can be any 3 with a filter
-            if (location.filter || location.facets) {
-                // prefill always means create
-                // copy means copy regardless of a limit defined
-                // edit is everything else with a filter
-                context.mode = (context.queryParams.prefill ? context.modes.CREATE : (context.queryParams.copy ? context.modes.COPY : context.modes.EDIT));
-            } else if (context.queryParams.limit) {
-                context.mode = context.modes.EDIT;
-            }
-            context.appContext = (context.mode == context.modes.EDIT ? "entry/edit" : "entry/create");
-
-            //contextualize the reference based on the mode (determined above) recordedit is in
-            if (context.mode == context.modes.EDIT) {
-                $rootScope.reference = reference.contextualize.entryEdit;
-            } else if (context.mode == context.modes.CREATE || context.mode == context.modes.COPY) {
-                $rootScope.reference = reference.contextualize.entryCreate;
-            }
-            console.log("Reference : ", $rootScope.reference);
-            $rootScope.reference.session = session;
-            $rootScope.session = session;
-            // $rootScope.reference = reference;
-            
-
-            // log attribues
-            $rootScope.logStackPath = logService.logStackPaths.SET;
-            $rootScope.logStack = [
-                logService.getStackNode(
-                    logService.logStackTypes.SET,
-                    $rootScope.reference.table,
-                    $rootScope.reference.filterLogInfo
-                )
-            ];
-
-            // The log object that will be used for the submission request
-            var action = (context.mode == context.modes.CREATE || context.mode == context.modes.COPY) ? logService.logActions.CREATE : logService.logActions.UPDATE;
-            var logObj = {
-                action: logService.getActionString(action),
-                stack: logService.getStackObject()
-            };
-            if (pcid) logObj.pcid = pcid;
-            if (ppid) logObj.ppid = ppid;
-            if (isQueryParameter) logObj.cqp = 1;
-            context.logObject = logObj;
-
-            $rootScope.reference.columns.forEach(function (column, index) {
-                var isDisabled = InputUtils.isDisabled(column);
-                var stackNode = logService.getStackNode(
-                    column.isForeignKey ? logService.logStackTypes.FOREIGN_KEY : logService.logStackTypes.COLUMN,
-                    column.table,
-                    {source: column.compressedDataSource, entity: column.isForeignKey}
-                );
-                var stackPath = column.isForeignKey ? logService.logStackPaths.FOREIGN_KEY : logService.logStackPaths.COLUMN;
-
-                viewerModel.columnModels[index] = {
-                    allInput: null,
-                    column: column,
-                    isDisabled: isDisabled,
-                    inputType: viewerAppUtils.columnToInputType(column, isDisabled),
-                    highlightRow: false,
-                    showSelectAll: false,
-                    logStack: logService.getStackObject(stackNode),
-                    logStackPath: logService.getStackPath("", stackPath)
-                };
-            });
-
-            if (context.mode == context.modes.CREATE){
-                if($rootScope.reference.canCreate){
-                    $rootScope.idSafeTableName = DataUtils.makeSafeIdAttr($rootScope.reference.table.name);
-                    $rootScope.idSafeSchemaName = DataUtils.makeSafeIdAttr($rootScope.reference.table.schema.name);
-
-                    // get the prefilled values
-                    var prefilledColumns = {}, prefilledFks = [];
-
-                    // populate defaults
-                    for (var i = 0; i < $rootScope.reference.columns.length; i++){
-                        // default model initialiation is null
-                        var initialModelValue = null;
-                        var column = $rootScope.reference.columns[i];
-                        var colModel = viewerModel.columnModels[i];
-
-                         // only want to set primitive values in the input fields so make sure it isn't a function, null, or undefined
-                         var defaultValue = column.default;
-
-                         // if it's a prefilled foreignkey, the value is already set
-                         if (column.isForeignKey &&  prefilledFks.indexOf(column.name) !== -1) {
-                             colModel.isDisabled = true;
-                             colModel.inputType = "disabled";
-                             continue;
-                         }
-
-                         var tsOptions = {
-                            outputType: colModel.inputType == "disabled" ? "string" : "object"
-                        };
-
-                        switch (column.type.name) {
-                            // timestamp[tz] and asset columns have default model objects if their inputs are NOT disabled
-                            case 'timestamp':
-                                tsOptions.outputMomentFormat = dataFormats.datetime.display;
-                                // formatDatetime takes care of column.default if null || undefined
-                                initialModelValue = InputUtils.formatDatetime(defaultValue, tsOptions);
-                                break;
-                            case 'timestamptz':
-                                tsOptions.outputMomentFormat = dataFormats.datetime.displayZ;
-                                // formatDatetime takes care of column.default if null || undefined
-                                initialModelValue = InputUtils.formatDatetime(defaultValue, tsOptions);
-                                break;
-                            default:
-                                if (column.isAsset) {
-                                    var metaObj = {};
-                                    metaObj[column.name] = defaultValue;
-
-                                    var metadata = column.getMetadata(metaObj);
-                                    initialModelValue = {
-                                        url: metadata.url || "",
-                                        filename: metadata.filename || metadata.caption || "",
-                                        filesize: metadata.byteCount || ""
-                                    }
-                                } else {
-                                    // all other column types
-                                    if (defaultValue != null) {
-                                        initialModelValue = defaultValue;
-                                    }
-                                }
-                        }
-
-                        viewerModel.rows[0][column.name] = initialModelValue;
-                    }
-
-                    $rootScope.displayReady = true;
-                }
-            }
-            
-        }, function error(response){
-            console.log("ERMrest error : ", response );
-        })
+        
 
         ConfigUtils.getContextJSON().server.catalogs.get(context.catalogID).then(function success(catalog) {
             var schema = catalog.schemas.get(context.schemaName);
@@ -368,13 +227,14 @@
                 if (context.queryParams && context.queryParams.pcid) {
                     contextHeaderParams.pcid = context.queryParams.pcid;
                 }
+
                 imagePath.filter(imageFilter).entity.get(contextHeaderParams).then(function success(entity) {
                     image.entity = entity[0];
                     var waterMark = context.queryParams.waterMark;
                     if (waterMark === undefined) {
-                    	waterMark = '';
+                        waterMark = '';
                     } else {
-                    	waterMark = '&waterMark=' + waterMark;
+                        waterMark = '&waterMark=' + waterMark;
                     }
                     console.log('uri='+image.entity.uri + waterMark);
 
@@ -383,7 +243,7 @@
                       will start getting svg files in the URL itself instead of making a call to ermrest.
                       Currently it's a HACK
                     */
-                    var params = window.location.href.split("?");
+                    // var params = window.location.href.split("?");
                     // if(window.location.href.indexOf("url") > -1){
                     //   image.entity.uri = origin+"/~mingyi/openseadragon-viewer/index.html?" + params[1];
                     // } else {
@@ -391,70 +251,220 @@
                     //   image.entity.uri = origin+"/openseadragon-viewer/index.html?" + old_params[1];
                     // }
                     // var old_params = image.entity.uri.split("?");
-                    image.entity.uri = origin+"/~mingyi/openseadragon-viewer/index.html?" + params[1];
+                    // image.entity.uri = origin+"/~mingyi/openseadragon-viewer/index.html?" + params[1];
+                    
+                    // for (var i = 0; i < svgUrls.length; i++){
+                    //     image.entity.uri += "&url=" + svgUrls[i];
+                    // }
 
-                    // image.entity.uri = image.entity.uri + "&url=data/Q-296R_all_contours_cw_named.svg";
-                    console.log('replace uri = '+image.entity.uri + waterMark)
-                    iframe.location.replace(image.entity.uri + waterMark);
-                    console.log('Image: ', image);
+                    // // image.entity.uri = image.entity.uri + "&url=data/Q-296R_all_contours_cw_named.svg";
+                    // console.log('replace uri = '+image.entity.uri + waterMark)
+                    // iframe.location.replace(image.entity.uri + waterMark);
+                    // console.log('Image: ', image);
 
-                    var annotationTable = schema.tables.get('annotation');
-                    var annotationPath = imagePath.extend(annotationTable).datapath;
-                    var contextHeaderParams = {
-                        catalog: context.catalogID,
-                        schema_table: context.schemaName + ":annotation",
-                        action: logService.getActionString(logService.logActions.VIEWER_ANNOT_LOAD),
-                        stack: logService.getStackObject()
-                    };
-                    annotationPath.filter(imageFilter).entity.get(contextHeaderParams).then(function success(_annotations) {
-                        var length = _annotations.length;
-                        for (var i = 0; i < length; i++) {
-                            _annotations[i].table = annotationPath.context.table.name;
-                            var annotation = _annotations[i];
-                            if (!annotation.config) {
-                                annotation.config = {};
-                            }
-                            annotations.push(annotation);
+                    // var annotationTable = schema.tables.get('annotation');
+                    // var annotationPath = imagePath.extend(annotationTable).datapath;
+                    // var contextHeaderParams = {
+                    //     catalog: context.catalogID,
+                    //     schema_table: context.schemaName + ":annotation",
+                    //     action: logService.getActionString(logService.logActions.VIEWER_ANNOT_LOAD),
+                    //     stack: logService.getStackObject()
+                    // };
+                    // annotationPath.filter(imageFilter).entity.get(contextHeaderParams).then(function success(_annotations) {
+                    //     var length = _annotations.length;
+                    //     for (var i = 0; i < length; i++) {
+                    //         _annotations[i].table = annotationPath.context.table.name;
+                    //         var annotation = _annotations[i];
+                    //         if (!annotation.config) {
+                    //             annotation.config = {};
+                    //         }
+                    //         annotations.push(annotation);
+                    //     }
+                    //     chaiseReady = true;
+
+                    //     if (annotoriousReady && chaiseReady) {
+                    //         iframe.postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
+                    //     }
+                    //     console.log('Annotations: ', annotations);
+
+                    //     var commentTable = schema.tables.get('annotation_comment');
+                    //     var commentPath = annotationPath.extend(commentTable).datapath;
+                    //     var contextHeaderParams = {
+                    //         catalog: context.catalogID,
+                    //         schema_table: context.schemaName + ":annotation_comment",
+                    //         action: logService.getActionString(logService.logActions.VIEWER_ANNOT_COMMENT_LOAD),
+                    //         stack: logService.getStackObject()
+                    //     };
+
+                    //     // Get all the comments for this image
+                    //     // Nest comments fetch in annotations so annotations will be fetched and loaded to the DOM before the comments
+                    //     commentPath.filter(imageFilter).entity.get(contextHeaderParams).then(function success(_comments){
+                    //         var length = _comments.length;
+                    //         for (var i = 0; i < length; i++) {
+                    //             _comments[i].table = commentPath.context.table.name;
+                    //             var annotationId = _comments[i].annotation_id;
+                    //             if (!comments[annotationId]) {
+                    //                 comments[annotationId] = [];
+                    //             }
+                    //             comments[annotationId].push(_comments[i]);
+                    //         }
+                    //         console.log('Comments: ', comments);
+                    //     }, function error(response) {
+                    //         console.log(response);
+                    //     });
+
+                    // }, function error(response) {
+                    //     throw response;
+                    // });
+                }, function error(response) {
+                    throw response;
+                }).then(function(){
+                    
+                    imageAnnotationURL += "/Image="+context.imageID;
+                    ERMrest.resolve(imageAnnotationURL, { cid: context.cid, pid: context.pid, wid: context.wid }).then(function getReference(reference){
+            
+                        // we are using filter to determine app mode, the logic for getting filter
+                        // should be in the parser and we should not duplicate it in here
+                        // NOTE: we might need to change this line (we're parsing the whole url just for fidinig if there's filter)
+                        var location = reference.location;
+                        var svgUrls = [];
+    
+                        // Mode can be any 3 with a filter
+                        if (location.filter || location.facets) {
+                            // prefill always means create
+                            // copy means copy regardless of a limit defined
+                            // edit is everything else with a filter
+                            context.mode = (context.queryParams.prefill ? context.modes.CREATE : (context.queryParams.copy ? context.modes.COPY : context.modes.EDIT));
+                        } else if (context.queryParams.limit) {
+                            context.mode = context.modes.EDIT;
                         }
-                        chaiseReady = true;
-
-                        if (annotoriousReady && chaiseReady) {
-                            iframe.postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
+                        context.appContext = (context.mode == context.modes.EDIT ? "entry/edit" : "entry/create");
+            
+                        //contextualize the reference based on the mode (determined above) recordedit is in
+                        if (context.mode == context.modes.EDIT) {
+                            $rootScope.reference = reference.contextualize.entryEdit;
+                        } else if (context.mode == context.modes.CREATE || context.mode == context.modes.COPY) {
+                            $rootScope.reference = reference.contextualize.entryCreate;
                         }
-                        console.log('Annotations: ', annotations);
-
-                        var commentTable = schema.tables.get('annotation_comment');
-                        var commentPath = annotationPath.extend(commentTable).datapath;
-                        var contextHeaderParams = {
-                            catalog: context.catalogID,
-                            schema_table: context.schemaName + ":annotation_comment",
-                            action: logService.getActionString(logService.logActions.VIEWER_ANNOT_COMMENT_LOAD),
+                        console.log("Reference : ", $rootScope.reference);
+                        $rootScope.canCreate = reference.canCreate || false;
+                        $rootScope.canUpdate = reference.canUpdate || false;
+                        $rootScope.canDelete = reference.canDelete || false;
+                        
+                        $rootScope.reference.session = session;
+                        $rootScope.session = session;
+                        // $rootScope.reference = reference;
+                        
+            
+                        // log attribues
+                        $rootScope.logStackPath = logService.logStackPaths.SET;
+                        $rootScope.logStack = [
+                            logService.getStackNode(
+                                logService.logStackTypes.SET,
+                                $rootScope.reference.table,
+                                $rootScope.reference.filterLogInfo
+                            )
+                        ];
+            
+                        // The log object that will be used for the submission request
+                        var action = (context.mode == context.modes.CREATE || context.mode == context.modes.COPY) ? logService.logActions.CREATE : logService.logActions.UPDATE;
+                        var logObj = {
+                            action: logService.getActionString(action),
+                            stack: logService.getStackObject()
+                        };
+                        if (pcid) logObj.pcid = pcid;
+                        if (ppid) logObj.ppid = ppid;
+                        if (isQueryParameter) logObj.cqp = 1;
+                        context.logObject = logObj;
+            
+                        $rootScope.reference.columns.forEach(function (column, index) {
+                            var isDisabled = InputUtils.isDisabled(column);
+                            var stackNode = logService.getStackNode(
+                                column.isForeignKey ? logService.logStackTypes.FOREIGN_KEY : logService.logStackTypes.COLUMN,
+                                column.table,
+                                {source: column.compressedDataSource, entity: column.isForeignKey}
+                            );
+                            var stackPath = column.isForeignKey ? logService.logStackPaths.FOREIGN_KEY : logService.logStackPaths.COLUMN;
+            
+                            viewerModel.columnModels[index] = {
+                                allInput: null,
+                                column: column,
+                                isDisabled: isDisabled,
+                                inputType: viewerAppUtils.columnToInputType(column, isDisabled),
+                                highlightRow: false,
+                                showSelectAll: false,
+                                logStack: logService.getStackObject(stackNode),
+                                logStackPath: logService.getStackPath("", stackPath)
+                            };
+                        });
+                                    
+                        var numberRowsToRead = context.MAX_ROWS_TO_ADD;
+                        var logObj = {
+                            action: logService.getActionString(logService.logActions.LOAD),
                             stack: logService.getStackObject()
                         };
 
-                        // Get all the comments for this image
-                        // Nest comments fetch in annotations so annotations will be fetched and loaded to the DOM before the comments
-                        commentPath.filter(imageFilter).entity.get(contextHeaderParams).then(function success(_comments){
-                            var length = _comments.length;
-                            for (var i = 0; i < length; i++) {
-                                _comments[i].table = commentPath.context.table.name;
-                                var annotationId = _comments[i].annotation_id;
-                                if (!comments[annotationId]) {
-                                    comments[annotationId] = [];
-                                }
-                                comments[annotationId].push(_comments[i]);
+                        $rootScope.reference.read(numberRowsToRead, logObj).then(function getPage(page) {
+                            console.log("Page : ", page );
+       
+                            // $rootScope.tuples is used for keeping track of changes in the tuple data before it is submitted for update
+                            $rootScope.tuples = [];
+                            if (context.mode == context.modes.EDIT && page.tuples.length == 1) {
+                                $rootScope.displayname = page.tuples[0].displayname;
                             }
-                            console.log('Comments: ', comments);
-                        }, function error(response) {
-                            console.log(response);
-                        });
+                            $rootScope.idSafeTableName = DataUtils.makeSafeIdAttr($rootScope.reference.table.name);
+                            $rootScope.idSafeSchemaName = DataUtils.makeSafeIdAttr($rootScope.reference.table.schema.name);
+                            
+                            var column, value; 
 
-                    }, function error(response) {
-                        throw response;
-                    });
-                }, function error(response) {
-                    throw response;
+                            for(var j = 0; j < page.tuples.length; j++){
+                                var row = page.tuples[j].data,
+                                    tuple = page.tuples[j],
+                                    shallowCopy = tuple.copy();
+
+                                viewerModel.rows[j] = shallowCopy.data;
+
+                                if(row && row.File_URI){
+                                    viewerModel.rows[j]._svgUrl =  "https://"+ context.server.host + row.File_URI;
+                                    // svgUrls.push("https://"+ context.server.host + row.File_URI);
+                                }
+                            }
+    
+                            $rootScope.displayReady = true;
+                            console.log('Model: ', viewerModel);
+                            // Keep a copy of the initial rows data so that we can see if user has made any changes later
+                            viewerModel.oldRows = angular.copy(viewerModel.rows);
+                            // return svgUrls;
+                        }, function error(response) {
+                            var errorData = {};
+                            errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
+                            errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
+                            response.errorData = errorData;
+                            throw response;
+                        })
+                        .then(function(){
+                            // Load the openseadragon after get the corresponding svg files
+                            var waterMark = context.queryParams.waterMark === undefined ? '' :  '&waterMark=' + context.queryParams.waterMark;
+                            var params = window.location.href.split("?");
+                            image.entity.uri = origin+"/~mingyi/openseadragon-viewer/index.html?" + params[1];
+                            
+                            for (var i = 0; i < viewerModel.rows.length; i++){
+                                image.entity.uri += "&url=" + viewerModel.rows[i]._svgUrl;
+                            }
+
+                            console.log('replace uri = '+image.entity.uri + waterMark)
+                            iframe.location.replace(image.entity.uri + waterMark);
+                            console.log('Image: ', image);
+
+                        })
+    
+                    }, function error(response){
+                        console.log("ERMrest error : ", response );
+                    })
                 });
+                
+                
+                
 
                 // Get all rows from "anatomy" table
                 var anatomyTable = schema.tables.get('anatomy');
