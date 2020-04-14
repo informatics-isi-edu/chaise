@@ -1,6 +1,10 @@
 /* html, body {
     background-color: #f9f9f9;
 } */
+.flex-row{
+    display: flex;
+    flex-direction: row;
+}
 
 #alert {
     position: relative !important;
@@ -43,6 +47,7 @@
 .annotation, .searchbar {
     box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12);
 }
+
 
 .annotation-anatomy-text {
     color: #444;
@@ -266,6 +271,12 @@ a.cardlink.delete {
     z-index: 10;
 }
 
+#viewer-content .annotation-list .clear-search{
+    position: absolute;
+    right: 5px;
+    top: 8px;
+}
+
 #viewer-content .annotation-list .annotationSetting .annotationRow{
     border-bottom: 1px solid #e1e1e1;
     margin: 0 10px;
@@ -276,8 +287,18 @@ a.cardlink.delete {
     border-bottom: none;
 }
 
+#viewer-content .annotation-list .annotationSetting .annotationRow .annotationToolRow{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#viewer-content .annotation-list .annotationSetting .annotationRow .annotationToolRow .chaise-btn.selected{
+    background-color: #4673a7;
+    color: #fff;
+}
+
 #viewer-content .annotation-list .annotationSetting .annotationRowHeader{
-    font-weight: bold;
     margin: 0 0 5px;
 }
 
@@ -287,11 +308,13 @@ a.cardlink.delete {
     align-items: center;
 }
 
+#viewer-content .annotation-list .annotationSetting .annotationRowValue input{
+    background: none;
+}
+
 #viewer-content .annotation-list .annotationSetting .annotationRowValue .text{
-    background: #e1e1e1;
     flex: 1;
     display: flex;
-    padding: 3px;
     align-items: center;
     cursor: pointer;
 }
@@ -315,6 +338,11 @@ a.cardlink.delete {
     display: flex;
     align-items: center;
     margin: 0 0 0 5px;
+}
+
+#viewer-content .annotation-list .annotationSetting .annotationRowMessage{
+    font-size: 12px;
+    padding: 3px 0 0 0;
 }
 
 #viewer-content .annotation-list .titleRow{
@@ -404,7 +432,7 @@ a.cardlink.delete {
     border-radius: 3px;
 }
 
-#viewer-content .annotation-list .searchAnnotationBar .search-input{
+/* #viewer-content .annotation-list .searchAnnotationBar .search-input{
     flex: 1;
     padding: 3px 25px 3px 3px;
     border-radius: 3px 0 0 3px;
@@ -437,7 +465,7 @@ a.cardlink.delete {
     justify-content: center;
     align-items: center;
     position: absolute;
-}
+} */
 
 #viewer-content .annotation-list .searchAnnotationBar .input-group{
     flex: 1;

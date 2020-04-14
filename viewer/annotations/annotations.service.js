@@ -75,9 +75,9 @@
             return defer.promise;
         }
 
-        function removeEntry(imageID, anatomyID){
+        function removeEntry(item){
             var defer = $q.defer();
-            var uri = context.serviceURL + "/catalog/" + context.catalogID + "/entity/" + context.schemaName + ":Image_Annotation/Image=" + encodeURIComponent(imageID) + "&Anatomy="+ encodeURIComponent(anatomyID);
+            var uri = context.serviceURL + "/catalog/" + context.catalogID + "/entity/" + context.schemaName + ":Image_Annotation/Image=" + encodeURIComponent(item.Image) + "&Anatomy="+ encodeURIComponent(item.Anatomy);
             var reference; 
 
             ERMrest.resolve(uri, { cid: context.cid, pid: context.pid, wid: context.wid }).then(function(ref){
@@ -88,6 +88,10 @@
             .then(function(page){
                 reference.delete(context.logObject).then(function deleteSuccess(){
                     console.log("delete success");
+                    defer.resolve({
+                        item : item,
+                        status : "success"
+                    })
                 }, function deleteFail(){
                     console.log("delete failed");
                 });
@@ -104,8 +108,8 @@
          * send saving result to openseadragon 
          * @param {} result 
          */
-        function notifySaveResult(result) {
-            iframe.postMessage({messageType: 'notifySaveResult', content: result}, origin);
+        function changeSVGId(result) {
+            iframe.postMessage({messageType: 'changeSVGId', content: result}, origin);
         }
 
         function updateAnnotation(annotation) {
@@ -183,6 +187,10 @@
             iframe.postMessage({messageType: 'addNewTerm', content: data}, origin);
         }
 
+        function removeSVG(data){
+            iframe.postMessage({messageType: 'removeSVG', content: data}, origin);
+        }
+
         function saveAnnotationRecord(data){
             iframe.postMessage({messageType: 'saveAnnotationRecord', content: data}, origin);
         }
@@ -200,10 +208,11 @@
             changeAnnotationVisibility : changeAnnotationVisibility,
             changeAllAnnotationVisibility : changeAllAnnotationVisibility,
             changeStrokeScale : changeStrokeScale,
+            changeSVGId : changeSVGId,
             changeGroupInfo : changeGroupInfo,
             addNewTerm : addNewTerm,
-            notifySaveResult : notifySaveResult,
             removeEntry : removeEntry,
+            removeSVG : removeSVG,
             saveAnnotationRecord : saveAnnotationRecord
         };
 
