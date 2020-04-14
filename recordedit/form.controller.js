@@ -133,11 +133,6 @@
                                 rowVal=JSON.parse(rowVal);
                                 break;
                             default:
-                                if (col.isAsset) {
-                                    if (!vm.readyToSubmit) {
-                                        rowVal = { url: "" };
-                                    }
-                                }
                                 break;
                         }
                     }
