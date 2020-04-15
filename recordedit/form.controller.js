@@ -417,6 +417,58 @@
             $window.open(column.reference.contextualize.entryCreate.appLink, '_blank');
         }
 
+        /**
+         * what we capture in rows are not always simple objects and
+         * we should manually copy in those cases. this includes:
+         *   - asset column: for these columns we are storing the object
+         */
+        function copyRow (row) {
+            var res = {}, k, colValue;
+            $rootScope.reference.columns.forEach(function (col, colIndex) {
+                colValue = row[col.name];
+                if (col.isAsset) {
+
+                    // make sure it is not null
+                    if (!DataUtils.isObjectAndNotNull(colValue)) return;
+
+                    res[col.name] = {};
+
+                    // copy each value individually
+                    for (k in colValue) {
+                        if (!colValue.hasOwnProperty(k)) return;
+                        if (k === "hatracObj") {
+                            res[col.name].hatracObj = new ERMrest.Upload(colValue.file, {
+                                column: col,
+                                reference: $rootScope.reference
+                            });
+                        } else {
+                            // one of the values is file object, based on my testing
+                            // it seems like passing the value this way is fine.
+                            // we should avoid angular.copy since based on the
+                            // angular documentation it has known issues with File object
+                            res[col.name][k] = colValue[k];
+                        }
+                    }
+
+                    return;
+                }
+
+                // for other columns we can just copy the value
+                res[col.name] = angular.copy(colValue);
+            });
+
+            // there might be some data for the columns that are not visible
+            if (DataUtils.isObjectAndNotNull(row)) {
+                for (k in row) {
+                    if (row.hasOwnProperty(k) && !(k in res)) {
+                        res[k] = angular.copy(row[k]);
+                    }
+                }
+            }
+
+            return res;
+        }
+
         function copyFormRow() {
             if (!vm.numberRowsToAdd) vm.numberRowsToAdd = 1;
 
@@ -453,17 +505,13 @@
             });
 
             if (validRow) {
-                var rowset = vm.recordEditModel.rows;
-                var protoRow = rowset[index];
-
                 for (var i = 0; i < vm.numberRowsToAdd; i++) {
-                    var row = angular.copy(protoRow);
-                    // transform row values to avoid parsing issues with null values
-                    var transformedRow = transformRowValues(row);
-                    var submissionRow = angular.copy(vm.recordEditModel.submissionRows[index]);
+
+                    var row = copyRow(vm.recordEditModel.rows[index]);
+                    var submissionRow = copyRow(vm.recordEditModel.submissionRows[index]);
                     var foreignKeyData = angular.copy(vm.recordEditModel.foreignKeyData[index]);
 
-                    rowset.push(transformedRow);
+                    vm.recordEditModel.rows.push(row);
                     vm.recordEditModel.submissionRows.push(submissionRow);
                     vm.recordEditModel.foreignKeyData.push(foreignKeyData);
                 }
