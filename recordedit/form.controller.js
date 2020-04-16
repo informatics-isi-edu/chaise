@@ -89,9 +89,15 @@
         }
 
         /*
+         * TODO this is currently only used in populateSubmissionRow and
+         * it's not doing what it was originally desgined for which is as described:
          * Allows to tranform some form values depending on their types
          * Boolean: If the value is empty ('') then set it as null
          * Date/Timestamptz: If the value is empty ('') then set it as null
+         * Instead it will:
+         *  - turn array and json string value to object.
+         *  - turn the timestamp object to a string value that database understands.
+         * NOTE Should not be used by itself, instead use the populateSubmissionRow to populate submission rows
          */
         function transformRowValues(row) {
             var transformedRow = {};
@@ -265,7 +271,7 @@
                     originalTuple = null;
                     editOrCopy = false;
                 }
-                populateSubmissionRow(model.rows[j], model.submissionRows[j], originalTuple, $rootScope.reference.columns, editOrCopy);
+                populateSubmissionRow(model.rows[j], model.submissionRows[j], originalTuple, editOrCopy);
             }
             recordCreate.addRecords(vm.editMode, null, vm.recordEditModel, false, $rootScope.reference, $rootScope.tuples, context.queryParams, vm, onSuccess, context.logObject);
         }
@@ -304,7 +310,7 @@
                 editOrCopy = false;
             }
 
-            var submissionRow = populateSubmissionRow(vm.recordEditModel.rows[rowIndex], vm.recordEditModel.submissionRows[rowIndex], originalTuple, $rootScope.reference.columns, editOrCopy);
+            var submissionRow = populateSubmissionRow(vm.recordEditModel.rows[rowIndex], vm.recordEditModel.submissionRows[rowIndex], originalTuple, editOrCopy);
 
             // used for title
             params.parentReference = $rootScope.reference;
@@ -524,9 +530,24 @@
             }
         }
 
-        function populateSubmissionRow(modelRow, submissionRow, originalTuple, columns, editOrCopy) {
+        /**
+         * Given a modelRow and submissionRow objects, use the value of modelRow to modify the submissionRow value.
+         * These are the modifications that it does:
+         *   - foreignKeys: if they are not edited, use the value of originalTuple for its constituent columns
+         *   - array: parse the string representation
+         *   - timestamp: turn object to string representation
+         *   - json: parse the string representation
+         *   - otherwise: use the modelRow value as is
+         * TODO technically we don't need to pass modelRow and submissionRow since their attached to $rootScope
+         * TODO even the third and fourth inputs can be derived in this function.
+         * @param {Object} modelRow - each object in the recordEditModel.rows array
+         * @param {Object} submissionRow - each object in the recordEditModel.submissionRow array
+         * @param {ERMrest.Tuple=} originalTuple - the original tuple that comes from the first read
+         * @param {Boolean} editOrCopy - true if it's edit or copy, otherwise it's false.
+         */
+        function populateSubmissionRow(modelRow, submissionRow, originalTuple, editOrCopy) {
             var transformedRow = transformRowValues(modelRow);
-            columns.forEach(function (column) {
+            $rootScopeg.reference.columns.forEach(function (column) {
                 // If the column is a foreign key column, it needs to get the originating columns name for data submission
                 if (column.isForeignKey) {
 
@@ -534,7 +555,7 @@
                     for (var k = 0; k < foreignKeyColumns.length; k++) {
                         var referenceColumn = foreignKeyColumns[k];
                         var foreignTableColumn = column.foreignKey.mapping.get(referenceColumn);
-                        // check if value is set in submission data yet
+                        // check if value is set in submission data yet (searchPopup will set this value if foreignkey is picked)
                         if (!submissionRow[referenceColumn.name]) {
                             /**
                              * User didn't change the foreign key, copy the value over to the submission data with the proper column name
