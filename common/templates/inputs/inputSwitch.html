@@ -130,7 +130,7 @@
 
     <!-- File input -->
     <div ng-switch-when="file">
-        <upload reference="::$root.reference" column="::column" placeholder="getDisabledInputValue()" value="model.value" is-required="false"></upload>
+        <upload reference="::$root.reference" column="::column" placeholder="getDisabledInputValue()" value="model.value" is-required="false" is-disabled="columnModel.isDisabled"></upload>
     </div>
 
     <!--JSON input -->

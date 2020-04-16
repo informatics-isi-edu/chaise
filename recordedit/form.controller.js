@@ -16,6 +16,7 @@
             cheatsheet: "http://commonmark.org/help/"
         };
         vm.isRequired = isRequired;
+        vm.isDisabled = isDisabled;
         vm.getDisabledInputValue = getDisabledInputValue;
 
         vm.alerts = AlertsService.alerts;
@@ -547,7 +548,7 @@
          */
         function populateSubmissionRow(modelRow, submissionRow, originalTuple, editOrCopy) {
             var transformedRow = transformRowValues(modelRow);
-            $rootScopeg.reference.columns.forEach(function (column) {
+            $rootScope.reference.columns.forEach(function (column) {
                 // If the column is a foreign key column, it needs to get the originating columns name for data submission
                 if (column.isForeignKey) {
 
@@ -649,6 +650,14 @@
             return cm && cm.column && !cm.column.nullok && !cm.isDisabled;
         }
 
+        /**
+         * if ermrestjs says the column should be disabled, or we're showing select-all
+         */
+        function isDisabled(columnIndex) {
+            var cm = vm.recordEditModel.columnModels[columnIndex];
+            return cm && (cm.isDisabled || cm.showSelectAll);
+        }
+
         // when a boolean dropdown is opened, resize the dropdown menu to match the width of the input
         vm.setDropdownWidth = function () {
             // All boolean are visible and same size so it doesn't matter which is selected
@@ -675,7 +684,12 @@
             selectAllOpen = false;
         }
 
-        // toggles the state of the select all dialog
+        /**
+         * this function will be called when user toggles the select-all panel. it will,
+         * - log the client action
+         * - set the boolean flags
+         * - convert the values from disabled mode to interactable mode or vice versa.
+         */
         vm.toggleSelectAll = function toggleSelectAll(index) {
             var model = vm.recordEditModel.columnModels[index];
 
@@ -722,21 +736,12 @@
                                 var valueOrNull = value.date ? value.date + value.time + value.meridiem : null;
                                 value = InputUtils.formatDatetime(valueOrNull, options);
                             }
-                        } else if (cm.inputType == "file") {
-                            // copy file values to submission model to preserve them
-                            vm.recordEditModel.submissionRows[index][cm.column.name] = value;
-                            value = value.url;
                         }
                     } else {
                         if (cm.inputType == "timestamp") {
                             var options = { outputType: "object" };
                             // if value is a string or null, convert to object format
                             if ((value && typeof value == "string") || value == null) value = InputUtils.formatDatetime(value, options);
-                        } else if (cm.inputType == "file") {
-                            // copy file values from submission model (if they exist)
-                            if (vm.recordEditModel.submissionRows[index][cm.column.name]) {
-                                value = vm.recordEditModel.submissionRows[index][cm.column.name];
-                            }
                         }
                     }
                     row[cm.column.name] = value;
@@ -746,7 +751,12 @@
             resizeColumns(true);
         }
 
-        // closes the select all
+        /**
+         * this function will be called when user closes the select-all panel. it will,
+         * - log the client action
+         * - set the boolean flags
+         * - convert the values from disabled mode to interactable mode.
+         */
         vm.cancelSelectAll = function cancelSelectAll(index) {
             var model = vm.recordEditModel.columnModels[index];
 
@@ -769,11 +779,6 @@
                     var value = row[model.column.name];
                     var options = { outputType: "object" };
                     row[model.column.name] = InputUtils.formatDatetime(value, options);
-                });
-            } else if (model.inputType == "file") {
-                vm.recordEditModel.rows.forEach(function (row, index) {
-                    // copy file values from submission model
-                    row[model.column.name] = vm.recordEditModel.submissionRows[index][model.column.name];
                 });
             }
         }
@@ -810,28 +815,24 @@
                     });
                     break;
                 case "file":
-                    model.submissionRows.forEach(function (submissionRow) {
+                    model.rows.forEach(function (row) {
                         // need to set each property to avoid having a reference to the same object
-                        submissionRow[column.name] = {}
+                        row[column.name] = {}
                         Object.keys(value).forEach(function (key) {
                             if (key !== "hatracObj") {
-                                submissionRow[column.name][key] = value[key];
+                                row[column.name][key] = value[key];
                             }
                         });
 
                         // TODO: This is duplicated in the upload-input directive.
                         // Should be removed in both places and only created at submission time
-                        if (submissionRow[column.name].file) {
+                        if (row[column.name].file) {
                             // if condition guards for "clear all" case
-                            submissionRow[column.name].hatracObj = new ERMrest.Upload(submissionRow[column.name].file, {
+                            row[column.name].hatracObj = new ERMrest.Upload(row[column.name].file, {
                                 column: column,
                                 reference: $rootScope.reference
                             });
                         }
-                    });
-
-                    model.rows.forEach(function (row) {
-                        row[column.name] = value.url;
                     });
                     break;
                 case "timestamp":
@@ -914,11 +915,11 @@
 
         // We have 2 ways to determine a disabled input, or rather, when an input should be shown as disabled
         //   1. we check the column beforehand and determine if the input should ALWAYS be disabled
-        //   2. If the select all dialog is open, the form inputs should be disabled
+        //   2. If the select all dialog is open and input is not file, the form inputs should be disabled
         vm.inputTypeOrDisabled = function inputTypeOrDisabled(index) {
             try {
                 var model = vm.recordEditModel.columnModels[index];
-                return model.showSelectAll ? "disabled" : model.inputType;
+                return (model.showSelectAll && model.inputType !== "file") ? "disabled" : model.inputType;
             } catch (err) {}
         }
 
