@@ -196,9 +196,9 @@
                 };
 
                 // If chaiseconfig contains maxRecordSetHeight then apply more-less styling
+                var userClicked = false, initializeOverflowLogic, removeCellSensors;
                 if (chaiseConfig.maxRecordsetRowHeight != false ) {
-                    var userClicked = false,
-                        tdPadding = 10, // +10 to account for padding on TD
+                    var tdPadding = 10, // +10 to account for padding on TD
                         moreButtonHeight = 20,
                         maxHeight = chaiseConfig.maxRecordsetRowHeight || 160,
                         maxHeightStyle = { "max-height": (maxHeight - moreButtonHeight) + "px" },
@@ -280,19 +280,25 @@
                             });
                         }
                     });
-
-                    // reset overflows because new rows are available
-                    $rootScope.$on('reference-modified', function() {
-                        removeCellSensors();
-                        $timeout(function () {
-                            // resets values and makes sure functions for action columns point to proper reference
-                            init();
-                            userClicked = false;
-
-                            initializeOverflowLogic();
-                        });
-                    });
                 }
+
+                // when the row data updates we have to:
+                //  - run the init function to make sure functions for action columns point to proper reference
+                //  - reset the overflow (truncation) logic
+                $rootScope.$on('reference-modified', function() {
+                    if (removeCellSensors) {
+                        removeCellSensors();
+                    }
+
+                    $timeout(function () {
+                        init();
+
+                        userClicked = false;
+                        if (initializeOverflowLogic) {
+                            initializeOverflowLogic();
+                        }
+                    });
+                });
 
             }
         };
