@@ -25,6 +25,29 @@ describe('Recordset add record,', function() {
 
     });
 
+    it("verify view details link, search for a term, then verify view details link has changed", function () {
+        var baseUrl = '/record/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/RID=";
+
+        chaisePage.recordsetPage.getRows().then(function (rows) {
+            // get first row view details button
+            expect(rows[0].element(by.css('.view-action-button')).getAttribute("href")).toContain(baseUrl + "1Z6", "View button url is incorrect before searching set");
+
+            // search for a row that is not the first one after sorting
+            chaisePage.recordsetPage.getMainSearchInput().sendKeys('hilton');
+            return chaisePage.recordsetPage.getSearchSubmitButton().click();
+        }).then(function() {
+            chaisePage.recordsetPage.waitForInverseMainSpinner();
+            return chaisePage.recordsetPage.getRows();
+        }).then(function(rows) {
+            expect(rows.length).toBe(1);
+            // get first row view details button
+            expect(rows[0].element(by.css('.view-action-button')).getAttribute("href")).toContain(baseUrl + "1ZE", "View button url is incorrect after searching set");
+
+            // clear search
+            return chaisePage.recordsetPage.getSearchClearButton().click();
+        });
+    });
+
     var allWindows;
     it("click on the add button should open a new tab to recordedit", function(done) {
 
