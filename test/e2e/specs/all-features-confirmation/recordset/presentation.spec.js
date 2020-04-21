@@ -545,20 +545,38 @@ describe('View recordset,', function() {
 
             it("JSON Column value should be searchable", function(){
                 var searchBox = chaisePage.recordsetPage.getMainSearchInput(),
-                searchSubmitButton = chaisePage.recordsetPage.getSearchSubmitButton(),
-                clearSearchButton = chaisePage.recordsetPage.getSearchClearButton(),
-                noResultsMessage = "No Results Found";
-                searchBox.sendKeys('testing_json');
+                    searchSubmitButton = chaisePage.recordsetPage.getSearchSubmitButton();
+
+                // search for a row that is not the first one after sorting
+                searchBox.sendKeys('9876.3543');
                 searchSubmitButton.click().then(function() {
                     chaisePage.recordsetPage.waitForInverseMainSpinner();
                     return chaisePage.recordsetPage.getRows();
                 }).then(function(rows) {
                     expect(rows.length).toBe(1);
-                    // clear search
-                    return clearSearchButton.click();
-                })
+
+                    // clear search in next it case
+                });
             });
 
+            it("check the link of the view details after searching", function () {
+                var dataRow = browser.params.entities[accommodationParams.schemaName][accommodationParams.table_name].find(function (entity) {
+                    return entity.id == accommodationParams.data[3].id;
+                });
+
+                var filter = accommodationParams.shortest_key_filter + dataRow.RID;
+                var viewUrl = '/record/#' + browser.params.catalogId + "/" + accommodationParams.schemaName + ":" + accommodationParams.table_name + "/" + filter;
+
+                chaisePage.recordsetPage.getRows().then(function (rows) {
+                    // get first row view details button
+                    expect(rows[0].element(by.css('.view-action-button')).getAttribute("href")).toContain(viewUrl, "View button url is incorrect after filtering set");
+
+                    // clear search
+                    return chaisePage.recordsetPage.getSearchClearButton().click();
+                });
+            });
+
+            // view link here should be different from the `it` case above
             it("action columns should show view button that redirects to the record page", function() {
                 var dataRow = browser.params.entities[accommodationParams.schemaName][accommodationParams.table_name].find(function (entity) {
                     return entity.id == accommodationParams.data[0].id;
