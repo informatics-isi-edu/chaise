@@ -18,6 +18,15 @@
 @import "viewer-app";
 @import "switch-user-accounts";
 
+
+// if we want to hide the page and then show navbar and content together
+.wait-for-navbar {
+    visibility: hidden;
+}
+.wait-for-navbar-loader {
+    visibility: visible;
+}
+
 // configure app rules
 .chaise-body .app-container {
     display: none;
