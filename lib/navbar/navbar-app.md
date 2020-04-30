@@ -36,8 +36,8 @@ sample-navbar.html
 3. Some css classes from the app.css file in chaise, which is a dependency for the login app, might conflict with the css classes on the target html page
 
 4. Since navbar is going to take some time to load, if you want to make sure you're showing navbar and the rest of the page together, you can use the following class names:
-  - `wait-for-navbar`: This class should be used on an element that is wrapping the main content of your page.
-  - `wait-for-navbar-loader`: If you want to display a loader while the navbar is loading, make sure your loader is using this class name.
+  - `wait-for-navbar`: This class should be used on an element that is wrapping the whole content of your page (including navbar). Chaise will set a `visibility:hidden` on this element and will only set it to `visibility:visible` when the navbar is loaded.
+  - `wait-for-navbar-loader`: If you want to display a loader while the navbar is loading, make sure your loader is using this class name. Chaise will set a `visibility:visible` on this element to ensure that it's visible on load. When the navbar finished loading, chaise will set the `visibility:hidden` to hide the loader.
   ```html
   <div class="wait-for-navbar">
     <div class="wait-for-navbar-loader">some loader</div>
