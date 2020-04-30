@@ -234,6 +234,9 @@
                 // navbar doesn't need to have functionality until the session returns, just like app.js blocks
                 var subFunctionId = Session.subscribeOnChange(function() {
 
+                    // signal the ancestors that navbar is now displayed
+                    $rootScope.$emit("navbar-done");
+
                     // Unsubscribe onchange event to avoid this function getting called again
                     Session.unsubscribeOnChange(subFunctionId);
 

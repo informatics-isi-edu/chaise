@@ -2611,6 +2611,11 @@
             var defer = $q.defer();
             var chaiseConfig = ConfigUtils.getConfigJSON();
             if (chaiseConfig['customCSS'] !== undefined) {
+                // if the file is already injected
+                if (document.querySelector('link[href="' + chaiseConfig['customCSS'] + '"]')) {
+                    return defer.resolve(), defer.promise;
+                }
+
                 var customCSSElement = document.createElement("link");
                 customCSSElement.setAttribute("rel", "stylesheet");
                 customCSSElement.setAttribute("type", "text/css");
