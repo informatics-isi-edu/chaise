@@ -281,25 +281,6 @@
                         }
                     });
                 }
-
-                // when the row data updates we have to:
-                //  - run the init function to make sure functions for action columns point to proper reference
-                //  - reset the overflow (truncation) logic
-                $rootScope.$on('reference-modified', function() {
-                    if (removeCellSensors) {
-                        removeCellSensors();
-                    }
-
-                    $timeout(function () {
-                        init();
-
-                        userClicked = false;
-                        if (initializeOverflowLogic) {
-                            initializeOverflowLogic();
-                        }
-                    });
-                });
-
             }
         };
     }])
