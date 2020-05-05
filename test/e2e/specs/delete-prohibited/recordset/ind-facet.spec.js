@@ -1,5 +1,4 @@
 var chaisePage = require('../../../utils/chaise.page.js');
-var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
 var recordSetHelpers = require('../../../utils/recordset-helpers.js');
 var Q = require('q');
 var EC = protractor.ExpectedConditions;
@@ -323,22 +322,24 @@ describe("Viewing Recordset with Faceting,", function() {
                 expect(chaisePage.recordsetPage.getFacetTitles()).toEqual(testParams.facetNames, "All facets' names is incorrect");
             });
 
-            it("should have 3 facets open", function () {
+            it("should have 3 facets open", function (done) {
                 chaisePage.recordsetPage.getOpenFacets().count().then(function (ct) {
                     expect(ct).toBe(testParams.defaults.openFacetNames.length, "Number of open facets is incorrect");
 
                     return chaisePage.recordsetPage.getOpenFacetTitles();
                 }).then(function (text) {
                     expect(text).toEqual(testParams.defaults.openFacetNames, "Names of open facets are incorrect");
-                });
+                    done();
+                }).catch(chaisePage.catchTestError(done));
             });
 
             // test defaults and values shown
-            it("'id' facet should have 1 row checked", function () {
+            it("'id' facet should have 1 row checked", function (done) {
                 // use 0 index
                 chaisePage.recordsetPage.getCheckedFacetOptions(0).count().then(function (ct) {
                     expect(ct).toBe(1);
-                });
+                    done();
+                }).catch(chaisePage.catchTestError(done));
             });
 
             it("'int_col' facet should not show the histogram", function () {
@@ -348,31 +349,56 @@ describe("Viewing Recordset with Faceting,", function() {
                 });
             });
 
-            it("should have 2 filters selected", function () {
+            it("should have 2 filters selected", function (done) {
                 chaisePage.recordsetPage.getFacetFilters().count().then(function (ct) {
                     expect(ct).toBe(testParams.defaults.numFilters, "Number of visible filters is incorrect");
-                });
+                    done();
+                }).catch(chaisePage.catchTestError(done));
             });
 
-            it("should have 1 row visible", function () {
+            it("should have 1 row visible", function (done) {
                 chaisePage.recordsetPage.getRows().count().then(function (ct) {
                     expect(ct).toBe(testParams.defaults.numRows, "Number of visible rows is incorrect");
-                });
+                    done();
+                }).catch(chaisePage.catchTestError(done));
             });
 
-            it("should have 1 row selected in show more popup for scalar picker.", function () {
+            it("should have 1 row selected in show more popup for scalar picker and should be able to search in popup.", function (done) {
                 var showMore = chaisePage.recordsetPage.getShowMore(0);
 
                 // open show more, verify only 1 row checked, check another and submit
                 showMore.click().then(function () {
+                    // one row is selected
                     browser.wait(function () {
                         return chaisePage.recordsetPage.getCheckedModalOptions().count().then(function(ct) {
                             return ct == 1;
                         });
-                    }, browser.params.defaultTimeout);
+                    }, browser.params.defaultTimeout, "waiting for one row to be selected");
+
+                    // search
+                    var facetPopup = chaisePage.searchPopup.getFacetPopup();
+                    var searchInp = chaisePage.recordsetPage.getMainSearchInput(facetPopup),
+                        searchSubmitBtn = chaisePage.recordsetPage.getSearchSubmitButton(facetPopup);
+
+                    searchInp.sendKeys("1|2");
+                    return searchSubmitBtn.click();
+                }).then(function () {
+                    // make sure search result is displayed
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getModalOptions().count().then(function(ct) {
+                            return ct == 13;
+                        });
+                    }, browser.params.defaultTimeout, "waiting for rows after search");
 
                     return chaisePage.recordsetPage.getModalOptions();
                 }).then(function (options) {
+                    // make sure the first row is selected
+                    expect(options[0].isSelected()).toBeTruthy("the first option was not selected");
+                    options.forEach(function (op, i) {
+                        if (i === 0) return;
+                        expect(op.isSelected()).toBeFalsy("option index=" + i + " was selected.");
+                    });
+
                     // click the 2nd option
                     return chaisePage.clickButton(options[1]);
                 }).then(function () {
@@ -382,7 +408,7 @@ describe("Viewing Recordset with Faceting,", function() {
                         return chaisePage.recordsetPage.getCheckedFacetOptions(0).count().then(function(ct) {
                             return ct == 2;
                         });
-                    }, browser.params.defaultTimeout);
+                    }, browser.params.defaultTimeout, "waiting for checked facet options in recordset");
 
                     return chaisePage.recordsetPage.getCheckedFacetOptions(0).count();
                 }).then(function (ct) {
@@ -406,10 +432,12 @@ describe("Viewing Recordset with Faceting,", function() {
                     expect(ct).toBe(3, "Facet values after search are incorrect");
 
                     return chaisePage.recordsetPage.getFacetSearchBoxClear(0).click();
-                });
+                }).then(function () {
+                    done();
+                }).catch(chaisePage.catchTestError(done));
             });
 
-            it("boolean facet should not have a search box present", function () {
+            it("boolean facet should not have a search box present", function (done) {
                 // idx 8 is for boolean facet
                 var booleanFacet = chaisePage.recordsetPage.getFacetById(8);
 
@@ -419,7 +447,9 @@ describe("Viewing Recordset with Faceting,", function() {
                     expect(bool).toBeFalsy();
 
                     return booleanFacet.click();
-                });
+                }).then(function () {
+                    done();
+                }).catch(chaisePage.catchTestError(done));
             });
 
             it ("main search box should show the search columns.", function () {
