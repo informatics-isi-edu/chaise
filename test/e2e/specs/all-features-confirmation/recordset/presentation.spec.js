@@ -1143,6 +1143,12 @@ describe('View recordset,', function() {
                     }).then(function () {
                         return chaisePage.recordPageReady();
                     }).then(function () {
+                        browser.wait(function () {
+                            return chaisePage.recordPage.getColumns().count().then(function(ct) {
+                                return ct == systemColumnsParams.detailedColumns.length;
+                            });
+                        });
+
                         return chaisePage.recordPage.getColumns();
                     }).then(function (columns) {
                         expect(columns.length).toBe(systemColumnsParams.detailedColumns.length);
