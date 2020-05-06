@@ -204,7 +204,12 @@ describe ("Viewing exisiting record with related entities, ", function () {
             totalCount: 4,
             existingCount: 1,
             disabledRows: ["1"],
-            selectIndex: 2,
+            search: {
+                term: "television|Coffee",
+                afterSearchCount: 2,
+                afterSearchDisabledRows: ["1"]
+            },
+            selectIndex: 1, // after search
             rowValuesAfter: [
                 ["Television"],
                 ["Coffee Maker"]

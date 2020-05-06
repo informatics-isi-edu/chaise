@@ -930,8 +930,10 @@ describe('View recordset,', function() {
 
                 return chaisePage.recordsetPage.getPageLimitDropdown().click();
             }).then(function() {
+                var dropdownOption = chaisePage.recordsetPage.getPageLimitSelector(fileParams.page_size);
+                browser.wait(EC.elementToBeClickable(dropdownOption), browser.params.defaultTimeout);
                 // increase the page limit
-                return chaisePage.recordsetPage.getPageLimitSelector(fileParams.page_size).click();
+                return dropdownOption.click();
             }).then(function() {
                 browser.wait(function() {
                     return chaisePage.recordsetPage.getRows().count().then(function(ct) {
@@ -1141,6 +1143,12 @@ describe('View recordset,', function() {
                     }).then(function () {
                         return chaisePage.recordPageReady();
                     }).then(function () {
+                        browser.wait(function () {
+                            return chaisePage.recordPage.getColumns().count().then(function(ct) {
+                                return ct == systemColumnsParams.detailedColumns.length;
+                            });
+                        });
+
                         return chaisePage.recordPage.getColumns();
                     }).then(function (columns) {
                         expect(columns.length).toBe(systemColumnsParams.detailedColumns.length);

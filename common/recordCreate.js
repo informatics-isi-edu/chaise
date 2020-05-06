@@ -359,14 +359,13 @@
              * Callback to get the list of disabled tuples.
              * This is only applicable in case of adding related entities.
              * @param  {Object} tableModel the table model
+             * @param {Object} page the new page object
              * @param  {Array} requestCauses array of string that indicates why the request is fired
              * @return {Promise} Promise is resolved with a list of disabled rows (array of tuple objects).
              */
-            params.getDisabledTuples = function (tableModel, requestCauses, reloadStartTime) {
+            params.getDisabledTuples = function (tableModel, page, requestCauses, reloadStartTime) {
                 var defer = $q.defer();
-                var page = tableModel.page, pageSize = tableModel.pageLimit;
-
-                var disabledRows = [], index, newStack = tableModel.logStack;
+                var disabledRows = [], index, newStack = tableModel.logStack, pageSize = tableModel.pageLimit;
 
                 var action = logService.logActions.LOAD;
                 if (Array.isArray(requestCauses) && requestCauses.length > 0) {
@@ -387,7 +386,7 @@
                         if (index > -1) disabledRows.push(page.tuples[index]);
                     });
 
-                    defer.resolve(disabledRows);
+                    defer.resolve({disabledRows: disabledRows, page: page});
                 }).catch(function (err) {
                     defer.reject(err);
                 });

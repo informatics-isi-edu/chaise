@@ -948,7 +948,7 @@ exports.testAddRelatedTable = function (params, isInline, inputCallback) {
                 return chaisePage.recordEditPage.submitForm();
             }).then(function() {
                 // wait until redirected to record page
-                browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
+                browser.wait(EC.presenceOf(element(by.className('record-container'))), browser.params.defaultTimeout);
                 browser.close();
                 return browser.switchTo().window(allWindows[0]);
             }).then(function () {
@@ -1022,6 +1022,41 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
                 done.fail();
             });
         });
+
+        if (params.search) {
+            it ("should be able to search the displayed values.", function (done) {
+                var modal = chaisePage.searchPopup.getAddPureBinaryPopup();
+                var searchInp = chaisePage.recordsetPage.getMainSearchInput(modal),
+                    searchSubmitBtn = chaisePage.recordsetPage.getSearchSubmitButton(modal);
+                searchInp.sendKeys(params.search.term);
+                searchSubmitBtn.click().then(function () {
+
+                    // tests the count
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
+                            return (ct == params.search.afterSearchCount);
+                        });
+                    });
+
+                    return chaisePage.recordPage.getModalDisabledRows();
+                }).then(function (disabledRows) {
+                    // make sure disabled are correct after search
+                    expect(disabledRows.length).toBe(params.search.afterSearchDisabledRows.length, "disabled length missmatch.");
+
+                    // go through the list and check their first column (which is the id)
+                    disabledRows.forEach(function (r, index) {
+                        r.findElement(by.css("td:not(.action-btns)")).then(function (el) {
+                            expect(el.getText()).toMatch(params.disabledRows[index], "missmatch disabled row index=" + index);
+                        });
+                    });
+
+                    done();
+                }).catch(function(error) {
+                    console.log(error);
+                    done.fail();
+                });
+            });
+        }
 
         it ("user should be able to select new values and submit.", function (done) {
             var inp = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(params.selectIndex);

@@ -42,7 +42,7 @@
 
         <!-- rows -->
         <tbody>
-            <tr class="chaise-table-row" ng-class="{'disabled-row': isDisabled(vm.page.tuples[$index])}" ng-repeat="row in vm.rowValues track by $index"
+            <tr class="chaise-table-row" ng-class="{'disabled-row': isDisabled(vm.page.tuples[$index])}" ng-repeat="row in vm.rowValues"
                 ellipsis tuple="vm.page.tuples[$index]" row-values="row" row-index="$index" table-model="vm" on-row-click-bind="onSelect"
                 selected="isSelected(vm.page.tuples[$index])" select-disabled="isDisabled(vm.page.tuples[$index])">
             </tr>
