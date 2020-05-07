@@ -1617,10 +1617,8 @@ exports.testSubmission = function (tableParams, isEditMode) {
 exports.testRecordAppValuesAfterSubmission = function(column_names, column_values, num_displayed_columns) {
     chaisePage.recordPageReady();
 
-    console.log(num_displayed_columns)
     browser.wait(function() {
         return chaisePage.recordPage.getColumns().count().then(function(ct) {
-            console.log(ct)
             return (ct == num_displayed_columns);
         });
     }, browser.params.defaultTimeout);

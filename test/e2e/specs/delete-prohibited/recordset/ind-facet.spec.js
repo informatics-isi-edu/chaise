@@ -1280,14 +1280,6 @@ describe("Viewing Recordset with Faceting,", function() {
             });
 
             it("should open facets, click an option in each, and verify the data after", function (done) {
-                /*
-                multipleFacets: [
-                    { facetIdx: 10, option: 2, numOptions: 11, numRows: 10 },
-                    { facetIdx: 11, option: 0, numOptions: 2, numRows: 5 },
-                    { facetIdx: 12, option: 1, numOptions: 2, numRows: 5 },
-                    { facetIdx: 13, option: 2, numOptions: 6, numRows: 1 }
-                ]
-                */
                 var numFacets = testParams.multipleFacets.length;
 
                 // open the four facets

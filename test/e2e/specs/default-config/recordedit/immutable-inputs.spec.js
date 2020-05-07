@@ -297,6 +297,7 @@ describe("Record Edit with immutable columns", function() {
 
                             // test the tooltip on hover
                             // NOTE: the mouse over isn't always occurring properly. Maybe it needs to be scrolled to first?
+                            // maybe change the visible columns order instead?
                             browser.actions().mouseMove(input).perform();
                             var tooltip = chaisePage.getTooltipDiv();
                             chaisePage.waitForElement(tooltip).then(function () {
