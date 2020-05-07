@@ -827,7 +827,7 @@
         */
         function chaiseDeploymentPath() {
             var chaiseConfig = ConfigUtils.getConfigJSON();
-            var appNames = ["record", "recordset", "recordedit", "search", "login"];
+            var appNames = ["record", "recordset", "recordedit", "login"];
             var currentAppName = appNamefromUrlPathname($window.location.pathname);
             if (appNames.includes(currentAppName)) {
                 var index = $window.location.pathname.indexOf(currentAppName);
