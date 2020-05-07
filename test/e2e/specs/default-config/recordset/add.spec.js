@@ -119,6 +119,12 @@ describe('Recordset add record,', function() {
         browser.switchTo().window(allWindows[0]).then(function() {
             return chaisePage.waitForElementInverse(element(by.id("spinner")));
         }).then(function() {
+            browser.wait(function() {
+                return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                    return (ct == rowCount+1);
+                });
+            }, browser.params.defaultTimeout);
+
             return chaisePage.recordsetPage.getRows();
         }).then(function(rows) {
             expect(rows.length).toBe(rowCount+1);

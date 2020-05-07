@@ -1344,6 +1344,8 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     });
 
                     it("should validate invalid float input", function() {
+                        // NOTE: something is happening in the execution of this `it` that cause a terminal error to be thrown
+                        // writing this as chained promises might fix the issue
                         floatDataTypeFields.forEach(function(floatInput) {
                             var c = floatInput.column;
 
@@ -1355,14 +1357,19 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             if (tableParams.primary_keys.indexOf(c.name) != -1) {
                                 floatInput.getAttribute("value").then(function(value) {
                                     validNo = value + "";
+                                }).catch(function (err) {
+                                    console.log(err);
                                 });
                             }
                             chaisePage.recordEditPage.clearInput(floatInput);
 
+                            // test the validation message when a field is required
                             if (c.nullok == false) {
                                 chaisePage.recordEditPage.submitForm();
                                 chaisePage.recordEditPage.getInputErrorMessage(floatInput, 'required').then(function(err) {
                                     expect(err.isDisplayed()).toBeTruthy(colError(c.name , "Expected to show required error."));
+                                }).catch(function (err) {
+                                    console.log(err);
                                 });
                             }
 
@@ -1375,6 +1382,8 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             // Required Error message should disappear;
                             chaisePage.recordEditPage.getInputErrorMessage(floatInput, 'required').then(function(err) {
                                 expect(err).toBeNull(colError(c.name , "Expected to not show reqyured error."));
+                            }).catch(function (err) {
+                                console.log(err);
                             });
 
                             // Clear value
@@ -1382,7 +1391,9 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             expect(floatInput.getAttribute('value')).toBe("", colError(c.name, "Expected to not clear the input."));
 
                             //Restore the value to the original one or a valid input
-                            floatInput.sendKeys(validNo);
+                            floatInput.sendKeys(validNo).catch(function (err) {
+                                console.log(err);
+                            });
                             expect(floatInput.getAttribute('value')).toBe(validNo, colError(c.name, "Couldn't change the value."));
                         });
                     });
@@ -1590,7 +1601,7 @@ exports.testSubmission = function (tableParams, isEditMode) {
                     column_values[tableParams.result_columns[i]] = tableParams.results[0][i];
                 }
 
-                exports.testRecordAppValuesAfterSubmission(tableParams.result_columns, column_values);
+                exports.testRecordAppValuesAfterSubmission(tableParams.result_columns, column_values, tableParams.result_columns.length);
             });
         }
     }
@@ -1603,8 +1614,16 @@ exports.testSubmission = function (tableParams, isEditMode) {
  * column_values - hash of column_name: column_value
  * Checks for if values are defined and set properly
  */
-exports.testRecordAppValuesAfterSubmission = function(column_names, column_values) {
+exports.testRecordAppValuesAfterSubmission = function(column_names, column_values, num_displayed_columns) {
     chaisePage.recordPageReady();
+
+    console.log(num_displayed_columns)
+    browser.wait(function() {
+        return chaisePage.recordPage.getColumns().count().then(function(ct) {
+            console.log(ct)
+            return (ct == num_displayed_columns);
+        });
+    }, browser.params.defaultTimeout);
 
     for (var i = 0; i < column_names.length; i++) {
         var columnName = column_names[i];

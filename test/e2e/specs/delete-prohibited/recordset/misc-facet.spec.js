@@ -193,6 +193,11 @@ describe("Other facet features, ", function() {
         it ("the selected value should be selected on the modal.", function (done) {
             chaisePage.clickButton(chaisePage.recordsetPage.getShowMore(idx)).then(function () {
                 chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getModalOptions().count().then(function(ct) {
+                        return ct == 12;
+                    });
+                }, browser.params.defaultTimeout);
 
                 expect(chaisePage.recordsetPage.getCheckedModalOptions().count()).toBe(1, "number of checked rows missmatch.");
                 return chaisePage.recordsetPage.getModalOptions();
@@ -349,6 +354,12 @@ describe("Other facet features, ", function() {
         it ("`All Records with value` option must be available in facet panel.", function (done) {
             // make sure facet is loaded
             browser.wait(EC.elementToBeClickable(showMore));
+            browser.wait(function () {
+                return chaisePage.recordsetPage.getFacetOptions(testParams.not_null.option).count().then(function(ct) {
+                    return ct == 12;
+                });
+            }, browser.params.defaultTimeout);
+
             chaisePage.recordsetPage.getFacetOptionsText(testParams.not_null.option).then(function (text) {
                 expect(text).toEqual(testParams.not_null.options_w_not_null, "the options are not the same.");
                 done();
@@ -543,6 +554,11 @@ describe("Other facet features, ", function() {
 
         it ("main and faceting data should be based on the filter, and be able to apply new filters.", function (done) {
             // main
+            browser.wait(function () {
+                return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                    return ct == customFilterParams.numRows;
+                });
+            }, browser.params.defaultTimeout);
             expect(chaisePage.recordsetPage.getRows().count()).toEqual(customFilterParams.numRows, "total row count missmatch.");
 
             chaisePage.recordsetPage.getFacetById(idx).click().then(function () {
@@ -578,7 +594,6 @@ describe("Other facet features, ", function() {
                 // make sure filter is there
                 expect(chaisePage.recordsetPage.getFacetFilters().count()).toBe(2, "facet filter missing.");
 
-
                 done();
             }).catch(chaisePage.catchTestError(done));
         });
@@ -588,9 +603,19 @@ describe("Other facet features, ", function() {
 
             chaisePage.recordsetPage.getClearCustomFilters().click().then(function () {
                 chaisePage.waitForElementInverse(element(by.id("spinner")));
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                        return ct == customFilterParams.numRowsWOFilter;
+                    });
+                }, browser.params.defaultTimeout);
 
                 expect(chaisePage.recordsetPage.getRows().count()).toEqual(customFilterParams.numRowsWOFilter, "total row count missmatch.");
 
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getFacetOptions(idx).count().then(function(ct) {
+                        return ct == customFilterParams.optionsWOFilter.length;
+                    });
+                }, browser.params.defaultTimeout);
                 expect(chaisePage.recordsetPage.getFacetOptionsText(idx)).toEqual(customFilterParams.optionsWOFilter, "options missmatch.");
 
                 done();
@@ -878,7 +903,7 @@ describe("Other facet features, ", function() {
             })
 
             it("navigating to record with a facet url", function () {
-                recordEditHelpers.testRecordAppValuesAfterSubmission(testParams.recordColumns, testParams.recordValues);
+                recordEditHelpers.testRecordAppValuesAfterSubmission(testParams.recordColumns, testParams.recordValues, testParams.recordColumns.length);
             });
 
             it("should click the add button for an association table and have the facet collapse button visible", function (done) {
@@ -971,6 +996,11 @@ describe("Other facet features, ", function() {
         });
 
         it ("main and faceting data should be based on the filter, and be able to apply new filters.", function (done) {
+            browser.wait(function () {
+                return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                    return ct == customFacetParams.numRows;
+                });
+            }, browser.params.defaultTimeout);
             // main
             expect(chaisePage.recordsetPage.getRows().count()).toEqual(customFacetParams.numRows, "total row count missmatch.");
 

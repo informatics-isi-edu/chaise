@@ -309,6 +309,7 @@ describe("Viewing Recordset with Faceting,", function() {
             browser.ignoreSynchronization=true;
             browser.get(uri);
             chaisePage.waitForElementInverse(element(by.id("spinner")));
+            chaisePage.recordsetPageReady();
         });
 
         describe("default presentation based on facets annotation ", function () {
@@ -1279,15 +1280,45 @@ describe("Viewing Recordset with Faceting,", function() {
             });
 
             it("should open facets, click an option in each, and verify the data after", function (done) {
+                /*
+                multipleFacets: [
+                    { facetIdx: 10, option: 2, numOptions: 11, numRows: 10 },
+                    { facetIdx: 11, option: 0, numOptions: 2, numRows: 5 },
+                    { facetIdx: 12, option: 1, numOptions: 2, numRows: 5 },
+                    { facetIdx: 13, option: 2, numOptions: 6, numRows: 1 }
+                ]
+                */
                 var numFacets = testParams.multipleFacets.length;
+
                 // open the four facets
                 chaisePage.clickButton(chaisePage.recordsetPage.getFacetById(testParams.multipleFacets[3].facetIdx)).then(function () {
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getClosedFacets().count().then(function(ct) {
+                            return ct == testParams.totalNumFacets-1;
+                        });
+                    }, browser.params.defaultTimeout);
+
                     return chaisePage.clickButton(chaisePage.recordsetPage.getFacetById(testParams.multipleFacets[2].facetIdx));
                 }).then(function () {
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getClosedFacets().count().then(function(ct) {
+                            return ct == testParams.totalNumFacets-2;
+                        });
+                    }, browser.params.defaultTimeout);
+
                     return chaisePage.clickButton(chaisePage.recordsetPage.getFacetById(testParams.multipleFacets[1].facetIdx));
                 }).then(function () {
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getClosedFacets().count().then(function(ct) {
+                            return ct == testParams.totalNumFacets-3;
+                        });
+                    }, browser.params.defaultTimeout);
+
                     return chaisePage.clickButton(chaisePage.recordsetPage.getFacetById(testParams.multipleFacets[0].facetIdx));
                 }).then(function () {
+
+
+                    // all 4 facets opened
                     browser.wait(function () {
                         return chaisePage.recordsetPage.getOpenFacets().count().then(function(ct) {
                             return ct == numFacets;
@@ -1300,28 +1331,31 @@ describe("Viewing Recordset with Faceting,", function() {
                     return chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(testParams.multipleFacets[0].facetIdx, testParams.multipleFacets[0].option));
                 }).then(function () {
                     browser.wait(function () {
-                        return chaisePage.recordsetPage.getCheckedFacetOptions(testParams.multipleFacets[0].facetIdx).count().then(function(ct) {
-                            return ct == 1;
+                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                            return ct == testParams.multipleFacets[0].numRows;
                         });
                     }, browser.params.defaultTimeout);
 
                     return chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(testParams.multipleFacets[1].facetIdx, testParams.multipleFacets[1].option));
                 }).then(function () {
                     browser.wait(function () {
-                        return chaisePage.recordsetPage.getCheckedFacetOptions(testParams.multipleFacets[1].facetIdx).count().then(function(ct) {
-                            return ct == 1;
+                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                            return ct == testParams.multipleFacets[1].numRows;
                         });
                     }, browser.params.defaultTimeout);
 
                     return chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(testParams.multipleFacets[2].facetIdx, testParams.multipleFacets[2].option));
                 }).then(function () {
                     browser.wait(function () {
-                        return chaisePage.recordsetPage.getCheckedFacetOptions(testParams.multipleFacets[2].facetIdx).count().then(function(ct) {
-                            return ct == 1;
+                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                            return ct == testParams.multipleFacets[2].numRows;
                         });
                     }, browser.params.defaultTimeout);
+
                     return chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(testParams.multipleFacets[3].facetIdx, testParams.multipleFacets[3].option));
                 }).then(function () {
+
+
                     // wait for request to return
                     // wait for table rows to load
                     browser.wait(function () {

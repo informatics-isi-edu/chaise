@@ -318,6 +318,8 @@ var recordEditPage = function() {
         return el.getAttribute('value').then(function(value) {
             el.sendKeys(Array(value.length + 1).join(protractor.Key.BACK_SPACE));
             browser.sleep(10);
+        }).catch(function (err) {
+            console.log(err)
         });
     };
 

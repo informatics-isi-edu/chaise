@@ -3,7 +3,7 @@ var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
 var momentTz = require('moment-timezone');
 var testParams = {
     // for verifying data is present
-    column_names: ["text", "text_disabled", "markdown", "markdown_disabled", "iKS50idGfVCGnnS6lUoZ8Q", "WnsyE4pJ1O0IW8zsj6MDHg", "int", "int_disabled", "float", "float_disabled", "boolean_true", "boolean_false", "boolean_disabled", "date", "date_disabled", "timestamptz", "timestamptz_disabled", "json", "json_disabled", "json_disabled_no_default"],
+    column_names: ["text", "text_disabled", "markdown", "markdown_disabled", "iKS50idGfVCGnnS6lUoZ8Q", "WnsyE4pJ1O0IW8zsj6MDHg", "int", "int_disabled", "float", "float_disabled", "boolean_true", "boolean_false", "boolean_disabled", "date", "date_disabled", "timestamp", "timestamp_disabled", "timestamptz", "timestamptz_disabled", "json", "json_disabled", "json_disabled_no_default"],
     table_name: "defaults-table",
     default_column_values: {
     // data values
@@ -262,7 +262,7 @@ describe('Record Add with defaults', function() {
 
                 expect(browser.driver.getCurrentUrl()).toContain(redirectUrl);
 
-                recordEditHelpers.testRecordAppValuesAfterSubmission(testParams.column_names, testParams.record_column_values);
+                recordEditHelpers.testRecordAppValuesAfterSubmission(testParams.column_names, testParams.record_column_values, testParams.column_names.length);
             });
         });
     });
@@ -278,7 +278,12 @@ describe("Record Edit with immutable columns", function() {
             browser.ignoreSynchronization=true;
             browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/defaults:" + testParams.table_name + "/"  + keys.join("&"));
 
-            chaisePage.waitForElement(element(by.id("submit-record-button")));
+            chaisePage.recordeditPageReady();
+            browser.wait(function() {
+                return chaisePage.recordEditPage.getAllColumnNames().count().then(function(ct) {
+                    return (ct == testParams.re_column_names.length+1); // first row is not included
+                });
+            }, browser.params.defaultTimeout);
         });
 
         for (var i=0; i < testParams.re_column_names.length; i++) {
@@ -291,6 +296,7 @@ describe("Record Edit with immutable columns", function() {
                             expect(input.getAttribute('value')).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
 
                             // test the tooltip on hover
+                            // NOTE: the mouse over isn't always occurring properly. Maybe it needs to be scrolled to first?
                             browser.actions().mouseMove(input).perform();
                             var tooltip = chaisePage.getTooltipDiv();
                             chaisePage.waitForElement(tooltip).then(function () {
