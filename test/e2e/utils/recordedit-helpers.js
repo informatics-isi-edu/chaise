@@ -40,7 +40,7 @@ var EC = protractor.ExpectedConditions;
  */
 exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
     beforeAll(function () {
-        chaisePage.waitForElement(chaisePage.recordEditPage.getSubmitRecordButton());
+        chaisePage.recordeditPageReady();
     });
 
     var visibleFields = [];
