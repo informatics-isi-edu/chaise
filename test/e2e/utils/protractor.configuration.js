@@ -13,7 +13,7 @@ exports.getConfig = function(options) {
       //Apache log shows firefox is not requesting the server.
       'chromeOptions' : {
           args: ['--lang=en',
-                 '--window-size=1920,1920'],
+                 '--window-size=1280,720'],
           // Set download path and avoid prompting for download even though
           // this is already the default on Chrome but for completeness
           prefs: {
