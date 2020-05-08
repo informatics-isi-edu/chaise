@@ -1225,6 +1225,7 @@ function chaisePage() {
     }
     this.recordeditPageReady = function() {
         this.waitForElement(element(by.id("submit-record-button")));
+        this.waitForElementInverse(element(by.id("spinner")));
     }
     this.setAuthCookie = function(url, authCookie) {
         if (url && authCookie) {

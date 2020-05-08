@@ -101,7 +101,7 @@ var testParams = {
     recordColumns: [ "text_col", "longtext_col", "markdown_col", "int_col", "float_col", "date_col", "timestamp_col", "boolean_col", "jsonb_col", "1-o7Ye2EkulrWcCVFNHi3A", "hmZyP_Ufo3E5v_nmdTXyyA" ],
     recordValues: {
         text_col: "one",
-        longtext_col: "one",
+        longtext_col: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc scelerisque vitae nisl tempus blandit. Nam at tellus sit amet ex consequat euismod. Aenean placerat dui a imperdiet dignissim. Fusce non nulla sed lectus interdum consequat. Praesent vehicula odio ut mauris posuere semper sit amet vitae enim. Vivamus faucibus quam in felis commodo eleifend. Nunc varius sit amet est eget euismod. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc scelerisque vitae nisl tempus blandit. Nam at tellus sit amet ex consequat euismod. Aenean placerat dui a imperdiet dignissim. Fusce non nulla sed lectus interdum consequat. Praesent vehicula odio ut mauris posuere semper sit amet vitae enim. Vivamus faucibus quam in felis commodo eleifend. Nunc varius sit amet est eget euismod.",
         markdown_col: "one",
         int_col: "11",
         float_col: "11.1100",
@@ -182,6 +182,12 @@ describe("Other facet features, ", function() {
                 browser.wait(EC.visibilityOf(clearAll), browser.params.defaultTimeout);
 
                 chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
+
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                        return ct == testParams.filter_secondary_key.numRows;
+                    });
+                }, browser.params.defaultTimeout);
 
                 return chaisePage.recordsetPage.getRows().count();
             }).then(function (ct) {
@@ -784,7 +790,10 @@ describe("Other facet features, ", function() {
             });
 
             it("clicking edit should show the same number of forms in RE as rows in RS.", function (done) {
-                chaisePage.recordsetPage.getEditRecordLink().click().then(function() {
+                var editLink = chaisePage.recordsetPage.getEditRecordLink();
+                browser.wait(EC.elementToBeClickable(editLink));
+
+                editLink.click().then(function() {
                     browser.wait(function() {
                         return chaisePage.recordEditPage.getForms().count().then(function(ct) {
                             return (ct == 25);
@@ -814,7 +823,7 @@ describe("Other facet features, ", function() {
                     var uri = url.replace("recordset", "recordedit");
                     browser.get(uri);
 
-                    chaisePage.waitForElement(element(by.id("submit-record-button")));
+                    chaisePage.recordeditPageReady();
 
                     done();
                 }).catch(chaisePage.catchTestError(done));
