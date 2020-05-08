@@ -25,18 +25,27 @@ describe('Recordset add record,', function() {
 
     });
 
-    it("verify the text is truncated properly, then not truncated after clicking 'more'", function () {
-        var testCell;
+    it("verify the text is truncated properly based on the default config, then not truncated after clicking 'more'", function () {
+        // default config: maxRecordsetRowHeight = 160
+        // 160 for max height, 10 for padding, 1 for border
+        var testCell, cellHeight = 171;
         chaisePage.recordsetPage.getRows().then(function (rows) {
             return chaisePage.recordsetPage.getRowCells(rows[0]);
         }).then(function (cells) {
             testCell = cells[4];
             expect(testCell.getText()).toContain("... more");
-            return testCell.element(by.css(".readmore"));
-        }).then(function (readmore) {
-            return readmore.click();
+
+            return testCell.getSize();
+        }).then(function (dimensions) {
+            expect(dimensions.height).toBe(cellHeight);
+
+            return testCell.element(by.css(".readmore")).click();
         }).then(function () {
             expect(testCell.getText()).toContain("... less");
+
+            return testCell.getSize();
+        }).then(function (tallerDimensions) {
+            expect(tallerDimensions.height).toBeGreaterThan(cellHeight);
         }).catch(function (err) {
             console.log(err);
         });

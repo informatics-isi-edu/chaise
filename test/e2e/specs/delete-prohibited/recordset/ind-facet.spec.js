@@ -166,10 +166,10 @@ var testParams = {
             name: "longtext_col",
             type: "choice",
             totalNumOptions: 10,
-            option: 2,
+            option: 1,
             filter: "longtext_col\ntwo",
             numRows: 5,
-            options: [ 'Empty', 'one', 'two', 'eight', 'eleven', 'five', 'four', 'nine', 'seven', 'six' ],
+            options: [ 'Empty', 'two', 'one', 'eight', 'eleven', 'five', 'four', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc scelerisque vitae nisl tempus blandit. Nam at tellus sit amet ex consequat euismod. Aenean placerat dui a imperdiet dignissim. Fusce non nulla sed lectus interdum consequat. Praesent vehicula odio ut mauris posuere semper sit amet vitae enim. Vivamus faucibus quam in felis commodo eleifend. Nunc varius sit amet est eget euismod. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc scelerisque vitae nisl tempus blandit. Nam at tellus sit amet ex consequat euismod. Aenean placerat dui a imperdiet dignissim. Fusce non nulla sed lectus interdum consequat. Praesent vehicula odio ut mauris posuere semper sit amet vitae enim. Vivamus faucibus quam in felis commodo eleifend. Nunc varius sit amet est eget euismod.', 'nine', 'seven', 'six' ],
             comment: "A lengthy comment for the facet of the longtext_col. This should be displyed properly in the facet."
         },
         {
@@ -321,6 +321,32 @@ describe("Viewing Recordset with Faceting,", function() {
                 }, browser.params.defaultTimeout);
 
                 expect(chaisePage.recordsetPage.getFacetTitles()).toEqual(testParams.facetNames, "All facets' names is incorrect");
+            });
+
+            it("verify the text is truncated properly based on the 'maxRecordsetRowHeight=100', then not truncated after clicking 'more'", function () {
+                // default config: maxRecordsetRowHeight = 100
+                // 160 for max height, 10 for padding, 1 for border
+                var testCell, cellHeight = 111;
+                chaisePage.recordsetPage.getRows().then(function (rows) {
+                    return chaisePage.recordsetPage.getRowCells(rows[0]);
+                }).then(function (cells) {
+                    testCell = cells[2];
+                    expect(testCell.getText()).toContain("... more");
+
+                    return testCell.getSize();
+                }).then(function (dimensions) {
+                    expect(dimensions.height).toBe(cellHeight);
+
+                    return testCell.element(by.css(".readmore")).click();
+                }).then(function () {
+                    expect(testCell.getText()).toContain("... less");
+
+                    return testCell.getSize();
+                }).then(function (tallerDimensions) {
+                    expect(tallerDimensions.height).toBeGreaterThan(cellHeight);
+                }).catch(function (err) {
+                    console.log(err);
+                });
             });
 
             it("should have 3 facets open", function (done) {
