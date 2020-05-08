@@ -269,37 +269,47 @@
                 delItem = null;
                 isFound = false;
 
-            AnnotationsService.removeEntry(item)
-                .then(function(result){
+            modalUtils.showModal({
+                animation: false,
+                templateUrl:  UriUtils.chaiseDeploymentPath() + "common/templates/delete-link/confirm_delete.modal.html",
+                controller: "ConfirmDeleteController",
+                controllerAs: "ctrl",
+                size: "sm"
+            }, function onSuccess(res) {
+                // scope.$root.showSpinner = true;
+                AnnotationsService.removeEntry(item)
+                    .then(function(result){
 
-                    delItem = result.item;
+                        delItem = result.item;
 
-                    for(i = 0; i < vm.viewerModel.rows.length; i++){
-                        row = vm.viewerModel.rows[i];
-                        if(row.Image === delItem.Image && row.Anatomy === delItem.Anatomy){
-                            isFound = true;
-                            break;
+                        for(i = 0; i < vm.viewerModel.rows.length; i++){
+                            row = vm.viewerModel.rows[i];
+                            if(row.Image === delItem.Image && row.Anatomy === delItem.Anatomy){
+                                isFound = true;
+                                break;
+                            }
                         }
-                    }
 
-                    if(isFound){
-                        // remove row from rows and oldRows
-                        vm.viewerModel.rows.splice(i, 1);
-                        vm.viewerModel.oldRows.splice(i, 1);
+                        if(isFound){
+                            // remove row from rows and oldRows
+                            vm.viewerModel.rows.splice(i, 1);
+                            vm.viewerModel.oldRows.splice(i, 1);
 
-                        // update the total number of annotations
-                        vm.totalCount = vm.viewerModel.rows.length;
+                            // update the total number of annotations
+                            vm.totalCount = vm.viewerModel.rows.length;
 
-                        // remove svg object from openseadragon
-                        AnnotationsService.removeSVG({svgID : delItem.svgID});
+                            // remove svg object from openseadragon
+                            AnnotationsService.removeSVG({svgID : delItem.svgID});
 
-                        // close the current panel
-                        vm.closeAnnotationPanel();
-                    }
-                    
-                    
-                    console.log(result);
-                });
+                            // close the current panel
+                            vm.closeAnnotationPanel();
+                        }
+                        
+                        
+                        console.log(result);
+                    });
+            }, null, false);
+            
         }
 
         function saveAnnotationRecord(item){
@@ -817,9 +827,9 @@
             // console.log("collections", vm.collection);
         }
 
-        function search(term, action){
+        function search(){
 
-            vm.searchKeyword = term ? term.trim() : "";
+            // vm.searchKeyword = term ? term.trim() : "";
             vm.updateDisplayNum();
         }
 

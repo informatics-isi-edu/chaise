@@ -291,6 +291,16 @@ a.cardlink.delete {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 100%;
+    color: #6a6a6a;
+    flex-direction: row;
+    font-size: 12px;
+}
+
+#viewer-content .annotation-list .annotationSetting .annotationRow .annotationToolRow .chaise-btn{
+    height: 25px;
+    padding: 0;
+    line-height: normal;
 }
 
 #viewer-content .annotation-list .annotationSetting .annotationRow .annotationToolRow .chaise-btn.selected{
@@ -310,6 +320,10 @@ a.cardlink.delete {
 
 #viewer-content .annotation-list .annotationSetting .annotationRowValue input{
     background: none;
+}
+
+#viewer-content .annotation-list .annotationSetting .annotationRowValue input:invalid {
+    box-shadow: none;
 }
 
 #viewer-content .annotation-list .annotationSetting .annotationRowValue .text{
@@ -344,6 +358,61 @@ a.cardlink.delete {
     font-size: 12px;
     padding: 3px 0 0 0;
 }
+
+#viewer-content .annotation-list .annotationSetting .annotationRowValue .drawingHint{
+    background: #ecec7d;
+    width: 100%;
+    padding: 5px;
+    margin: 5px 0;
+    border-radius: 3px;
+    font-size: 12px;
+}
+
+#viewer-content .annotation-list .annotationSetting .switch-btn{
+    position: relative;
+    height: 25px;
+    width: 40px;
+    padding: 0;
+    background: #fff;
+    border: 1px solid #ddd;
+}
+
+#viewer-content .annotation-list .annotationSetting .switch-status{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+} 
+
+#viewer-content .annotation-list .annotationSetting .switch-status.on{
+    top: 0;
+    right: -33px;
+    background: #4673a7;
+    color: #fff;
+}
+
+#viewer-content .annotation-list .annotationSetting .switch-status.on.selected{
+    top: 0;
+    left: 5px;
+    color: #fff;
+    background: #4673a7;
+}
+#viewer-content .annotation-list .annotationSetting .switch-status.off{
+    top: 0;
+    right: 5px;
+    left: -35px;
+}
+
+#viewer-content .annotation-list .annotationSetting .switch-status.off.selected{
+    top: 0;
+    right: 5px;
+    left : 0;
+}
+
+
 
 #viewer-content .annotation-list .titleRow{
     display: flex;
@@ -432,7 +501,7 @@ a.cardlink.delete {
     border-radius: 3px;
 }
 
-/* #viewer-content .annotation-list .searchAnnotationBar .search-input{
+#viewer-content .annotation-list .searchAnnotationBar .search-input{
     flex: 1;
     padding: 3px 25px 3px 3px;
     border-radius: 3px 0 0 3px;
@@ -441,7 +510,7 @@ a.cardlink.delete {
     border-right: none;
 }
 
-#viewer-content .annotation-list .searchAnnotationBar .search-remove{
+/* #viewer-content .annotation-list .searchAnnotationBar .search-remove{
     border: none;
 }
 
@@ -453,9 +522,26 @@ a.cardlink.delete {
     display: flex;
     align-items: center;
     justify-content: center;
+} */
+
+#viewer-content .annotation-list .searchAnnotationBar .search-button{
+    display: block;
+    width: 100%;
+    height: 30px;
+    min-height: 30px;
+    padding: 4px 10px;
+    background-color: #FFFFFF;
+    background-clip: padding-box;
+    border: 1px solid #CCCCCC;
+    border-radius: 4px 0 0 4px;
+    position: relative;
 }
 
-#viewer-content .annotation-list .searchAnnotationBar .clear-search{
+
+#viewer-content .annotation-list .searchAnnotationBar #search-submit{
+    border-radius: 0 4px 4px 0;
+}
+/* #viewer-content .annotation-list .searchAnnotationBar .clear-search{
     cursor: pointer;
     right: 45px;
     top: 8px;
@@ -562,7 +648,8 @@ a.cardlink.delete {
 
 /* New Annotation Button */
 #viewer-content .newAnnoBtn{
-    margin: 0 0 0 10px;
+    min-width: 50px;
+    margin-left: 10px;
 }
 
 /* Annotations item  */
