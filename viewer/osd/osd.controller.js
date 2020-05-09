@@ -57,8 +57,11 @@
                 switch (messageType) {
                     case "disableAnnotationList":
                         $scope.$apply(function(){
-                            vm.disableAnnotationList = data.content;
-                            vm.annotationsSidebarAreHidden = data.content;
+                            // Note: This logic need to change
+                            // users should still be able to open annotation list if there's no annotation
+                            // the following two lines are commented for demo purpose
+                            // vm.disableAnnotationList = data.content;
+                            // vm.annotationsSidebarAreHidden = data.content;
                             var sidebarptr=$('#sidebar');
                             if(data.content) {
                               sidebarptr.css("display","none");

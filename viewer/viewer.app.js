@@ -446,8 +446,19 @@
                             // Load the openseadragon after get the corresponding svg files
                             var waterMark = context.queryParams.waterMark === undefined ? '' :  '&waterMark=' + context.queryParams.waterMark;
                             var params = window.location.href.split("?");
-                            image.entity.uri = origin+"/~mingyi/openseadragon-viewer/index.html?" + params[1];
-                            
+
+                            /* Note: the following has been done so that the viewer app supports both type of formats i.e tiff and czi.
+                            It calls the new OpenSeadragon viewer app with parameters based on the file format. Need to change this, when we
+                            will start getting svg files in the URL itself instead of making a call to ermrest.
+                            Currently it's a HACK
+                            */
+                            if(window.location.href.indexOf("url") > -1){
+                              image.entity.uri = origin+"/~mingyi/openseadragon-viewer/index.html?" + params[1];
+                            } else {
+                              var old_params = image.entity.uri.split("?");
+                              image.entity.uri = origin+"/~mingyi/openseadragon-viewer/index.html?" + old_params[1];
+                            }
+
                             for (var i = 0; i < viewerModel.rows.length; i++){
                                 image.entity.uri += "&url=" + viewerModel.rows[i]._svgUrl;
                             }
