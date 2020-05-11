@@ -243,7 +243,7 @@
                     var savedData = (result.successful.length > 0) ? result.successful.tuples[0].copy().data : {};
                     var savedItem = vm.settingAnnotation; 
                     var newSvgID = (!isUpdate && savedItem.svgID === "NEW_SVG") ? Date.parse(new Date()) + parseInt(Math.random() * 10000) : savedItem.svgID;
-                    
+                    var rowIndex = vm.settingAnnotationIndex;
                     // update SVG ID (NEW_SVG) after successfully created
                     if(savedItem.svgID !== newSvgID){
                         AnnotationsService.changeSVGId({
@@ -254,9 +254,31 @@
                         savedItem.isNew = false;
                     }
                     
-                    // add the saved annotation to viewerModel
-                    vm.settingAnnotation = {...savedItem, ...savedData};
-                    vm.viewerModel.rows.push(vm.settingAnnotation);
+                    if(rowIndex !== -1){
+                        // update the old row
+                        if(model.oldRows[rowIndex].Anatomy === vm.settingAnnotation.Anatomy){
+                            vm.viewerModel.rows[rowIndex] = {...savedItem, ...savedData};
+                            vm.viewerModel.oldRows[rowIndex] = {...vm.viewerModel.oldRows[rowIndex], ...savedItem, ...savedData};
+                        }
+                        else{
+                            removeAnatomy({ 
+                                Anatomy : model.oldRows[rowIndex].Anatomy, 
+                                Image : model.oldRows[rowIndex].Image
+                            });
+
+                            // add the saved annotation to viewerModel
+                            vm.settingAnnotation = {...savedItem, ...savedData};
+                            vm.viewerModel.rows.push(vm.settingAnnotation);
+                            viewerModel.oldRows.push(angular.copy(vm.settingAnnotation));
+                        }
+                    } 
+                    else{
+                        // add the saved annotation to viewerModel
+                        vm.settingAnnotation = {...savedItem, ...savedData};
+                        vm.viewerModel.rows.push(vm.settingAnnotation);
+                        viewerModel.oldRows.push(angular.copy(vm.settingAnnotation));
+                    }
+                
                     vm.updateDisplayNum();
                     vm.closeAnnotationPanel();
                 }, context.logObject);
@@ -277,39 +299,43 @@
                 size: "sm"
             }, function onSuccess(res) {
                 // scope.$root.showSpinner = true;
-                AnnotationsService.removeEntry(item)
-                    .then(function(result){
-
-                        delItem = result.item;
-
-                        for(i = 0; i < vm.viewerModel.rows.length; i++){
-                            row = vm.viewerModel.rows[i];
-                            if(row.Image === delItem.Image && row.Anatomy === delItem.Anatomy){
-                                isFound = true;
-                                break;
-                            }
-                        }
-
-                        if(isFound){
-                            // remove row from rows and oldRows
-                            vm.viewerModel.rows.splice(i, 1);
-                            vm.viewerModel.oldRows.splice(i, 1);
-
-                            // update the total number of annotations
-                            vm.totalCount = vm.viewerModel.rows.length;
-
-                            // remove svg object from openseadragon
-                            AnnotationsService.removeSVG({svgID : delItem.svgID});
-
-                            // close the current panel
-                            vm.closeAnnotationPanel();
-                        }
-                        
-                        
-                        console.log(result);
-                    });
+                removeAnatomy(item);
             }, null, false);
             
+        }
+
+        function removeAnatomy(item){
+            return AnnotationsService.removeEntry(item)
+                .then(function(result){
+
+                    delItem = result.item;
+
+                    for(i = 0; i < vm.viewerModel.oldRows.length; i++){
+                        row = vm.viewerModel.oldRows[i];
+                        if(row.Image === delItem.Image && row.Anatomy === delItem.Anatomy){
+                            isFound = true;
+                            break;
+                        }
+                    }
+
+                    if(isFound){
+                        // remove row from rows and oldRows
+                        vm.viewerModel.rows.splice(i, 1);
+                        vm.viewerModel.oldRows.splice(i, 1);
+
+                        // update the total number of annotations
+                        vm.totalCount = vm.viewerModel.rows.length;
+
+                        // remove svg object from openseadragon
+                        if(delItem.svgID){
+                            AnnotationsService.removeSVG({svgID : delItem.svgID});
+                        }
+                        
+                        // close the current panel
+                        vm.closeAnnotationPanel();
+                    }
+                    console.log(result);
+                });
         }
 
         function saveAnnotationRecord(item){
@@ -791,6 +817,7 @@
                     isDrawing : false,
                     isDisplay: true,
                     isNew : false,
+                    isShow : true,
                     name: name,
                     id: id,
                     url: "/chaise/record/#2/Vocabulary:Anatomy/ID="+encodedId,
@@ -804,9 +831,11 @@
                 });
                 if(row){
                     vm.viewerModel.rows[i] = { ...vm.viewerModel.rows[i], ...obj};
+                    vm.viewerModel.oldRows[i] =  { ...vm.viewerModel.oldRows[i], ...obj}
                 }
                 else{
                     vm.viewerModel.rows.push(obj);
+                    vm.viewerModel.oldRows.push(obj);
                 }
                 
                 
@@ -834,13 +863,25 @@
         }
 
         function updateDisplayNum(){
-            var rst = vm.viewerModel.rows.filter(item => vm.filterAnnotations(item));
-            vm.totalCount = rst.length;
+            let count = 0;
+            let item = null;
+
+            for(var i = 0; i < vm.viewerModel.rows.length; i++){
+                item = vm.viewerModel.rows[i];
+                if(vm.filterAnnotations(item)){
+                    count += 1;
+                    item.isShow = true;
+                }
+                else{
+                    item.isShow = false;
+                }
+            }
+            vm.totalCount = count;
         }
 
         function clearSearch(){
             vm.searchKeyword = "";
-            vm.totalCount = vm.collection.length;
+            updateDisplayNum();
         }
 
         function toggleDisplay(item, event){
@@ -1017,10 +1058,11 @@
             $scope.annoForm.$setPristine(); 
             $scope.annoForm.$setUntouched();
 
-            var item = vm.settingAnnotation;
 
+            var item = vm.settingAnnotation;
+            
             // Close the drawing tool if opened 
-            if(item.isDrawing){
+            if(item && item.isDrawing){
                 item.isDrawing = false;
                 AnnotationsService.drawAnnotation({
                     svgID : item.svgID,
@@ -1042,9 +1084,10 @@
          * click the setting icon to open the setting panel for the specific annotation
          * @param {*} item : the annotation object  
          */
-        function manageSetting(item, event = null){
+        function manageSetting(item, index, event = null){
             vm.showPanel = (item !== null) ? true : false;
-            vm.settingAnnotation = item;
+            vm.settingAnnotation = item || null;
+            vm.settingAnnotationIndex = index || -1;
 
             if(event){
                 event.stopPropagation();

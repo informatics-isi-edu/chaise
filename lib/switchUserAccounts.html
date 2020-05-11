@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en" id="switchUserAccounts">
+
+<head>
+    <meta charset="utf-8" http-equiv="X-UA-Compatible" content="IE=10; IE=9; IE=8; IE=7; IE=EDGE" />
+<meta name='version' content='20200420180530'/>
+    <title>Switch User Accounts</title>
+<link rel='stylesheet' type='text/css' href='../styles/vendor/bootstrap.min.css?v=e3e8b38fed66211f84a6d5ddb8e0f876'>
+<link rel='stylesheet' type='text/css' href='../common/styles/app.css?v=bf7f06359c8d3bbd8199ef8460942f03'>
+<script src='../chaise-config.js?v=7e3a307c800c63de6901349e1702c3ea'></script>
+<script src='../scripts/vendor/angular.js?v=ca6464a8e26218520f4b0c3bf2137013'></script>
+<script src='../scripts/vendor/angular-sanitize.js?v=cfca0c834e8a4a014374922dbd5f5652'></script>
+<script src='../scripts/vendor/ui-bootstrap-tpls-2.5.0.min.js?v=f6b4f348e879e349ade8e06333c929e4'></script>
+<script src='../common/vendor/angular-animate.min.js?v=87b4f8591c4a916da916d748e30e0a27'></script>
+<script src='../common/alerts.js?v=aa093164b968844aa46ab1be648372be'></script>
+<script src='../common/authen.js?v=e608ee467025c8c26c91fa8ca14d70c4'></script>
+<script src='../common/config.js?v=0baa06083aaecb8d31b60bb839532bc0'></script>
+<script src='../common/errors.js?v=ddec80872ad68bbff359cc9310c34f14'></script>
+<script src='../common/filters.js?v=0274b7d531170ea432f27829acd62750'></script>
+<script src='../common/footer.js?v=985e229cec8d6dfa8364ff7f7a4467e6'></script>
+<script src='../common/inputs.js?v=f4b454488721a3d7415f1d5e9d53bf4c'></script>
+<script src='../common/login.js?v=8d450f52a372929612c8b620e87dbdbe'></script>
+<script src='../common/modal.js?v=cc11cc468d163e00e2fbd6e389c2d99d'></script>
+<script src='../common/navbar.js?v=5295fb238f8ab22b7a2aec1ba1fd4c5a'></script>
+<script src='../common/storage.js?v=08dde3973d7e1f66f4f32ccf9eaaf5ba'></script>
+<script src='../common/utils.js?v=b61a43739eb52c21bfbd15a83fdd2d0c'></script>
+<script src='../common/validators.js?v=a05f50469cb7f26255b72ca9b567ae36'></script>
+<script src='../common/vendor/angular-cookies.min.js?v=449760376fbb36f5e5db3094c2f48ffa'></script>
+<script src='../../ermrestjs/ermrest.js?v=507b1f13819a92ab2a0e3a403cb73cbe'></script>
+<script src='../lib/switchUserAccounts.app.js?v=3c56376967e3b7043ad2bbaf97486574'></script>
+</head>
+
+<body class="chaise-body">
+    <div class="configure-container" ng-app="chaise.configure-switchUserAccounts">
+        <loading-spinner></loading-spinner>
+    </div>
+    <div class="app-container container-fluid row">
+        <navbar></navbar>
+        <div class="main-container" id="main-content" ng-controller="SwitchUserAccountsController as ctrl">
+            <h2>Switch to a different user identity</h2>
+            <p>If a different identity is used to login unintentionally and you want to go back to your previous identity without loosing your existing work (e.g. the data submission content), please follow the following steps to switch identity.</p>
+            <ul>
+                <li>Use a different tab to access the navigation bar, then click the "Log out" button in the upper right corner on the navigation bar. Or click <a ng-click="logout()">logout</a> here.</li>
+                <li>While logging out, please make sure that you also logout from your identity provider (such as Globus, Google, or your institution) as your identity is usually cached by the provider and will automatically be used for login without being prompted.</li>
+                <li>Log back in with the intended identity by clicking the "Log In" button in the upper right corner of the navigation bar, or click <a ng-click="login()">login</a> here.</li>
+                <li>Once you are logged in with the intended identity, go back to the on-going tab where you want to resume the work (e.g. data submission tab), and click "Continue" to resume identity.</li>
+            </ul>
+
+            <h2>Continue login after session expires</h2>
+            <ul><li>To resume your identity after the existing session expires, click the "Log In" button in the upper right corner on the navigation bar, or click <a ng-click="login()">login</a> here.</li></ul>
+        </div>
+        <footer></footer>
+    </div>
+</body>
+
+</html>
+<noscript>
+    <div modal-render="true" tabindex="-1" role="dialog" class="modal fade in" index="0" animate="animate" modal-animation="true" style="z-index: 1050; display: block;">
+        <div class="modal-dialog">
+            <div class="modal-content" uib-modal-transclude="">
+                <div class="modal-header">
+                    <h2 class="modal-title ">JavaScript Required</h2>
+                </div>
+                <div class="modal-body ">
+                    For full functionality of this site it is necessary to enable JavaScript.
+                    <br>
+                    Here are <a href="http://www.enable-javascript.com/" target="_blank">instructions how to enable JavaScript in your web browser</a>.
+                    <br><br>
+                    Click OK to return to the Home Page.
+                </div>
+                <div class="modal-footer">
+                    <a class="chaise-btn chaise-btn-danger" href="/">OK</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade in" style="z-index: 1040;"></div>
+</noscript>

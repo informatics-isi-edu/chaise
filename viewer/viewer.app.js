@@ -453,10 +453,10 @@
                             Currently it's a HACK
                             */
                             if(window.location.href.indexOf("url") > -1){
-                              image.entity.uri = origin+"/~mingyi/openseadragon-viewer/index.html?" + params[1];
+                              image.entity.uri = origin+"/openseadragon-viewer/index.html?" + params[1];
                             } else {
                               var old_params = image.entity.uri.split("?");
-                              image.entity.uri = origin+"/~mingyi/openseadragon-viewer/index.html?" + old_params[1];
+                              image.entity.uri = origin+"/openseadragon-viewer/index.html?" + old_params[1];
                             }
 
                             for (var i = 0; i < viewerModel.rows.length; i++){
