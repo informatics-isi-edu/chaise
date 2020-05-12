@@ -6,6 +6,7 @@ This is a guide for people who develop Chaise.  We also have our own [Chaise sty
 - [CSS and SASS](#css-and-sass)
   - [Useful links](#useful-links)
   - [SCSS structure](#scss-structure)
+  - [Idioms](#idioms)
 - [AngularJS-related](#angularjs-related)
   * [AngularJS Developer Guides](#angularjs-developer-guides)
   * [One-Time Binding](#one-time-binding)
@@ -37,6 +38,8 @@ To make sure you're familiar with both CSS and SASS. The following are some guid
 ### SCSS structure
 
 Since we're using Sass3+, we're using the SCSS syntax. On of the advantages of Sass in general is the fact that you can easily break your stylesheets into different sections and then merge them together. In Chaise, the `*.scss` files that start with `_` are not meant to be on their own and are only meant to be included (imported) in other files. These files are generally supposed to cover a well-contained feature of UI element. For example `_buttons.scss` contains all the styles related to buttons. The main file that will be compiled in the end is `app.scss` which will be compiled into `app.css` and used in Chaise. You don't need to compile the file manually yourself as make commands will do that automatically for you.
+
+### Idioms
 
 If you want to add a new style, make sure you're following these rules:
 
