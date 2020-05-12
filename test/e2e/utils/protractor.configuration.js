@@ -25,7 +25,7 @@ exports.getConfig = function(options) {
       },
       'os': 'MacOS El Capitan 10.11',
       'platform': 'OS X 10.11',
-      'screenResolution': '1280x720'
+      'screenResolution': '1280x960'
     },
     specs: [
       '*.spec.js'
