@@ -325,7 +325,7 @@ describe("Viewing Recordset with Faceting,", function() {
 
             it("verify the text is truncated properly based on the 'maxRecordsetRowHeight=100', then not truncated after clicking 'more'", function () {
                 // default config: maxRecordsetRowHeight = 100
-                // 160 for max height, 10 for padding, 1 for border
+                // 100 for max height, 10 for padding, 1 for border
                 var testCell, cellHeight = 111;
                 chaisePage.recordsetPage.getRows().then(function (rows) {
                     return chaisePage.recordsetPage.getRowCells(rows[0]);
