@@ -33,7 +33,8 @@
     "set-cookie-parser": "x"
   },
   "dependencies": {
-    "node-sass": "x"
+    "node-sass": "x",
+    "uglify-js": "x"
   },
   "postinstall": "cd node_modules/protractor && npm i webdriver-manager@latest"
 }

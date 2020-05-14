@@ -5,7 +5,7 @@ site_url: https://informatics-isi-edu.github.io/chaise/
 extra_css:
   - /css/extra.css
 
-copyright: Copyright &copy; 2018 <a href="<https://github.com/informatics-isi-edu/chaise>">chaise</a>.
+copyright: Copyright &copy; 2020 <a href="<https://github.com/informatics-isi-edu/chaise>">chaise</a>.
 
 pages:
     - Welcome to the documentation: index.md

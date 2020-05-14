@@ -3,7 +3,7 @@
     <head>
         <title>Record Set App</title>
         <meta charset="UTF-8">
-        %VERSION%
+        %META%
         <script src="/gtm-id.js"></script>
         %ASSETS%
     </head>

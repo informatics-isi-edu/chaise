@@ -19,6 +19,27 @@
   angular.module('chaise.markdown', [])
     .directive('markdownPreview', ['modalUtils', 'ERMrest', '$sce', function(modalUtils, ERMrest, $sce) {
 
+      function modalBox(params) {
+        modalUtils.showModal({
+          animation: false,
+          controller: "MarkdownPreviewController",
+          controllerAs: "ctrl",
+          resolve: {
+            params: params
+          },
+          size: "lg",
+          template: '<div class="modal-header"> \
+                        <button class="btn btn-default pull-right modal-close" type="button" ng-click="ctrl.cancel()">X</button> \
+                        <h2 class="modal-title">{{ctrl.params.heading}}</h2> \
+                     </div> \
+                      <div class="modal-body"> \
+                          <div class="outer-table"> \
+                            <div style="padding:10px" ng-bind-html="ctrl.params.markdownOut" class="markdown-container"></div> \
+                          </div> \
+                      </div> '
+        }, false, false, false);
+      }
+
       return {
         restrict: 'EA',
         scope: {
@@ -34,27 +55,6 @@
 
                 angular.isUndefinedOrNull = function(val) {
                   return val == '' || angular.isUndefined(val) || val === null
-                }
-
-                function modalBox(params) {
-                  modalUtils.showModal({
-                    animation: false,
-                    controller: "MarkdownPreviewController",
-                    controllerAs: "ctrl",
-                    resolve: {
-                      params: params
-                    },
-                    size: "lg",
-                    template: '<div class="modal-header"> \
-                                  <button class="btn btn-default pull-right modal-close" type="button" ng-click="ctrl.cancel()">X</button> \
-                                  <h2 class="modal-title">{{ctrl.params.heading}}</h2> \
-                               </div> \
-                                <div class="modal-body"> \
-                                    <div class="outer-table"> \
-                                      <div style="padding:10px" ng-bind-html="ctrl.params.markdownOut" class="markdown-container"></div> \
-                                    </div> \
-                                </div> '
-                  }, false, false, false);
                 }
 
                 if (angular.isUndefinedOrNull(textInput))

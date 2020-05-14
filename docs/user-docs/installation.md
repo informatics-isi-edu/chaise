@@ -42,31 +42,30 @@ ERMrestJS tests, which will also instruct you to get shared dependencies needed 
 
 ## Deploying
 
-### Set the deployment directory (optional)
+1. First you need to setup some environment variables to tell ERMRestJS where it should install the package. The following are the variables and their default values:
 
-Set `CHAISEDIR` to specify a target deployment location. By default, the
-install target is `/var/www/html/chaise`. If this directory does not exist,
-it will first create it. You may need to run `make install` with _super user_
-privileges depending on the installation directory you choose.
+    ```
+    WEB_URL_ROOT=/
+    WEB_INSTALL_ROOT=/var/www/html/
+    CHAISE_REL_PATH=chaise/
+    ```
+    Which means Chaise build folder will be copied to `/var/www/html/chaise/` location by default. And Chaise will be access by `/chaise/` URL path when deployed. If that is not the case in your deployment, you should modify the variables accordingly.
 
-### Deploy for production usage
+    Notes:
+    - All the variables MUST have a trailing `/`.
 
-This example is for **production** deployments or other deployments to the document root of a Web server. As noted above, this will install to `/var/www/html/chaise`.
+    - If you're installing remotely, since we're using the `WEB_INSTALL_ROOT` in `rsync` command, you can use a remote location `username@host:public_html/` for this variable.
 
-```
-# make install
-```
+    - A very silly thing to do would be to set your deployment directory to root `/` and run `make install` with `sudo`. This would be very silly indeed, and would probably result in some corruption of your operating system. Surely, no one would ever do this. But, in the off chance that one might attempt such silliness, the `make install` rule specifies a `dont_install_in_root` prerequisite that attempts to put a stop to any such silliness before it goes too far.
 
-**Important** For production usage, we strongly recommend that Chaise only be installed in `/var/www/html/chaise`. This is the only configuration that we actively support.
+2. After making sure the variables are properly set, run the following command:
 
-### Deploy to a remote userdir
+    ```
+    $ make install
+    ```
 
-This example is how you would install the software on a remote server, for example a test server. Replacing `username` and `hostname` with real values.
-
-```sh
-$ export CHAISEDIR=username@hostname:public_html/chaise
-$ make install
-```
+    Notes:
+      - If the given directory does not exist, it will first create it. So you may need to run `make install` with _super user_ privileges depending on the installation directory you choose.
 
 ## Configuration
 
@@ -91,7 +90,6 @@ export CHAISE_BASE_URL=https://HOST/~USERNAME/chaise
 export ERMREST_URL=https://HOST/ermrest
 export AUTH_COOKIE=YOUR_ERMREST_COOKIE
 export REMOTE_CHAISE_DIR_PATH=USERNAME@HOST:public_html/chaise
-export CHAISEDIR=$REMOTE_CHAISE_DIR_PATH # when testing on remote host these should be the same
 ```
 
 Then run the tests (install, if you haven't already).

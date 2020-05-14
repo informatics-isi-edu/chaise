@@ -48,7 +48,7 @@
             };
         }])
 
-        .directive('faceting', ['$log', `logService`, 'recordTableUtils', '$rootScope', '$timeout', 'UriUtils', function ($log, logService, recordTableUtils, $rootScope, $timeout, UriUtils) {
+        .directive('faceting', ['$log', 'logService', 'recordTableUtils', '$rootScope', '$timeout', 'UriUtils', function ($log, logService, recordTableUtils, $rootScope, $timeout, UriUtils) {
 
             return {
                 restrict: 'AE',

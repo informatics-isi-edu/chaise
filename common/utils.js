@@ -820,20 +820,13 @@
 
         /**
          * Gives the path of the chaise deployment directory.
-         * If we access it from an app inside chaise folder then it returns the pathname before the appName in the url
-         * otherwise if we access it from an app outside chaise then:
-         *      1. It returns the chaise path mentioned in the chaiseConfig
-         *      2. If ChaiseConfig doesn't specify the chaisePath, then it returns the default value '/chaise/'
+         *   - It returns the chaise path mentioned in the context (based on chaiseBasePath meta tag)
+         *   - otherwise, returns the default value '/chaise/'
         */
         function chaiseDeploymentPath() {
-            var chaiseConfig = ConfigUtils.getConfigJSON();
-            var appNames = ["record", "recordset", "recordedit", "search", "login"];
-            var currentAppName = appNamefromUrlPathname($window.location.pathname);
-            if (appNames.includes(currentAppName)) {
-                var index = $window.location.pathname.indexOf(currentAppName);
-                return $window.location.pathname.substring(0, index);
-            } else if (chaiseConfig && typeof chaiseConfig.chaiseBasePath === "string") {
-                var path = chaiseConfig.chaiseBasePath;
+            var dcctx = ConfigUtils.getContextJSON();
+            if (typeof dcctx.chaiseBasePath === "string") {
+                var path = dcctx.chaiseBasePath;
                 if(path[path.length-1] !== "/")
                     path = path + "/";
                 return path;
@@ -1730,7 +1723,6 @@
     }])
 
     .factory("ConfigUtils", ['defaultChaiseConfig', '$http', '$rootScope', '$window', function(defaultConfig, $http, $rootScope, $window) {
-
         /**
          * Will return the dcctx object that has the following attributes:
          *  - cid: client id (app name)

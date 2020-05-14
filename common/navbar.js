@@ -59,11 +59,12 @@
         return url + paramChar + "pcid=" + pcid + "&ppid=" + contextHeaderParams.pid;
     }
 
-    function path() {
+    // TODO we might want to refactor this
+    function path(dcctx) {
         if (!_path) {
             var path = "/chaise/";
-            if (chaiseConfig && typeof chaiseConfig.chaiseBasePath === "string") {
-                var path = chaiseConfig.chaiseBasePath;
+            if (dcctx && typeof dcctx.chaiseBasePath === "string") {
+                var path = dcctx.chaiseBasePath;
                 // append "/" if not present
                 if (path[path.length-1] !== "/") path += "/";
             }
@@ -74,8 +75,9 @@
         return _path;
     }
 
-    function isChaise(link) {
-        var appNames = ["record", "recordset", "recordedit", "search", "login"];
+    // TODO we might want to refactor this
+    function isChaise(link, dcctx) {
+        var appNames = ["record", "recordset", "recordedit", "login"];
 
         // parses the url into a location object
         var eleUrl = document.createElement('a');
@@ -84,7 +86,7 @@
         for (var i=0; i<appNames.length; i++) {
             var name = appNames[i];
             // path/appName exists in our url
-            if (eleUrl.href.indexOf(path() + name) !== -1) return true;
+            if (eleUrl.href.indexOf(path(dcctx) + name) !== -1) return true;
         }
 
         return false;
@@ -130,13 +132,13 @@
      * and then changing the location without waiting for the request,
      * This will ensure that we're at least sending the log to server.
      */
-    function onLinkClick(logService, UriUtils, $window) {
+    function onLinkClick(ConfigUtils, logService, UriUtils, $window) {
         return function ($event, menuObject) {
             $event.preventDefault();
             $event.stopPropagation();
 
             // NOTE: if link goes to a chaise app, client logging is not necessary (we're using ppid, pcid instead)
-            if (!isChaise(menuObject.url)) {
+            if (!isChaise(menuObject.url, ConfigUtils.getContextJSON())) {
                 // check if external or internal resource page
                 var action = UriUtils.isSameOrigin(menuObject.url) ? logService.logActions.NAVBAR_MENU_INTERNAL : logService.logActions.NAVBAR_MENU_EXTERNAL;
                 logService.logClientAction({
@@ -190,7 +192,7 @@
                 obj.url = ERMrest.renderHandlebarsTemplate(obj.url, null, {id: catalogId});
 
                 // only append pcid/ppid if link is to a chaise url
-                if (isChaise(obj.url)) {
+                if (isChaise(obj.url, ConfigUtils.getContextJSON())) {
                     obj.url = addLogParams(obj.url, ConfigUtils.getContextHeaderParams());
                 }
             }
@@ -280,7 +282,7 @@
                         $window.location = link;
                     }
 
-                    scope.onLinkClick = onLinkClick(logService, UriUtils, $window);
+                    scope.onLinkClick = onLinkClick(ConfigUtils, logService, UriUtils, $window);
 
                     if (isCatalogDefined(catalogId)) {
                         scope.isVersioned = function () {
@@ -333,7 +335,7 @@
                         }
                     };
 
-                    scope.onLinkClick = onLinkClick(logService, UriUtils, $window);
+                    scope.onLinkClick = onLinkClick(ConfigUtils, logService, UriUtils, $window);
 
                     compiled(scope, function(clone) {
                         el.append(clone);
