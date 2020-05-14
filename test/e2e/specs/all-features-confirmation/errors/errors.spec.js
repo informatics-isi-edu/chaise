@@ -1,5 +1,7 @@
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordHelpers = require('../../../utils/record-helpers.js');
+var EC = protractor.ExpectedConditions;
+
 var testParams = {
     table_name: "accommodation",
     schemaName:  "product-record",
@@ -293,7 +295,7 @@ describe('Error related test cases,', function() {
 
     });
 
-    describe("Dismissible Error Modal when using Navbar Delete button", function(){
+    describe("Dismissible Error Modal when using Record Delete button", function(){
 
         beforeAll(function() {
             browser.ignoreSynchronization = true;
@@ -306,7 +308,9 @@ describe('Error related test cases,', function() {
             chaisePage.waitForElement(deleteBtn).then(function(){
                 return deleteBtn.click();
             }).then(function () {
-                return chaisePage.recordPage.getConfirmDeleteButton().click();
+                var confirmBtn = chaisePage.recordPage.getConfirmDeleteButton();
+                browser.wait(EC.presenceOf(confirmBtn), browser.params.defaultTimeout);
+                return confirmBtn.click();
             }).then (function() {
                 closeModal = chaisePage.recordEditPage.getModalCloseBtn();
                 chaisePage.waitForElement(closeModal);
@@ -319,24 +323,26 @@ describe('Error related test cases,', function() {
     // delete from ellipsis
     describe("Dismissible Error Modal when using Ellipses delete button", function(){
 
-      beforeAll(function() {
-          browser.ignoreSynchronization = true;
-          var url = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.fileTable;
-          browser.get(url);
-          deleteBtnEllipses  = chaisePage.recordsetPage.getDeleteActionButtons().first();
-          chaisePage.waitForElement(deleteBtnEllipses);
-      });
-        it('Error modal is dismissible in case of conflict/forbidden error while deleting from ellipsis', function(done){
-            deleteBtnEllipses.click().then(function(){;
-              return chaisePage.recordsetPage.getConfirmDeleteButton().click();
-            }).then (function() {
-              closeModal = chaisePage.recordEditPage.getModalCloseBtn();
-              chaisePage.waitForElement(closeModal);
-              expect(closeModal.isDisplayed()).toBeTruthy('Close modal option is not available for conflict/forbiddden errors');
-              done();
-          }).catch(catchError(done));
-      });
+        beforeAll(function() {
+            browser.ignoreSynchronization = true;
+            var url = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.fileTable;
+            browser.get(url);
+            deleteBtnEllipses  = chaisePage.recordsetPage.getDeleteActionButtons().first();
+            chaisePage.waitForElement(deleteBtnEllipses);
+        });
 
+        it('Error modal is dismissible in case of conflict/forbidden error while deleting from ellipsis', function(done){
+            deleteBtnEllipses.click().then(function(){
+                var confirmBtn = chaisePage.recordPage.getConfirmDeleteButton();
+                browser.wait(EC.presenceOf(confirmBtn), browser.params.defaultTimeout);
+                return confirmBtn.click();
+            }).then (function() {
+                closeModal = chaisePage.recordEditPage.getModalCloseBtn();
+                chaisePage.waitForElement(closeModal);
+                expect(closeModal.isDisplayed()).toBeTruthy('Close modal option is not available for conflict/forbiddden errors');
+                done();
+            }).catch(catchError(done));
+        });
     });
 
     describe("Error check for invalid filter in RecordEdit", function(){

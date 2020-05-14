@@ -166,10 +166,10 @@ var testParams = {
             name: "longtext_col",
             type: "choice",
             totalNumOptions: 10,
-            option: 2,
+            option: 1,
             filter: "longtext_col\ntwo",
             numRows: 5,
-            options: [ 'Empty', 'one', 'two', 'eight', 'eleven', 'five', 'four', 'nine', 'seven', 'six' ],
+            options: [ 'Empty', 'two', 'one', 'eight', 'eleven', 'five', 'four', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc scelerisque vitae nisl tempus blandit. Nam at tellus sit amet ex consequat euismod. Aenean placerat dui a imperdiet dignissim. Fusce non nulla sed lectus interdum consequat. Praesent vehicula odio ut mauris posuere semper sit amet vitae enim. Vivamus faucibus quam in felis commodo eleifend. Nunc varius sit amet est eget euismod. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc scelerisque vitae nisl tempus blandit. Nam at tellus sit amet ex consequat euismod. Aenean placerat dui a imperdiet dignissim. Fusce non nulla sed lectus interdum consequat. Praesent vehicula odio ut mauris posuere semper sit amet vitae enim. Vivamus faucibus quam in felis commodo eleifend. Nunc varius sit amet est eget euismod. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc scelerisque vitae nisl tempus blandit. Nam at tellus sit amet ex consequat euismod. Aenean placerat dui a imperdiet dignissim. Fusce non nulla sed lectus interdum consequat. Praesent vehicula odio ut mauris posuere semper sit amet vitae enim. Vivamus faucibus quam in felis commodo eleifend. Nunc varius sit amet est eget euismod. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc scelerisque vitae nisl tempus blandit. Nam at tellus sit amet ex consequat euismod. Aenean placerat dui a imperdiet dignissim. Fusce non nulla sed lectus interdum consequat. Praesent vehicula odio ut mauris posuere semper sit amet vitae enim. Vivamus faucibus quam in felis commodo eleifend. Nunc varius sit amet est eget euismod.', 'nine', 'seven' ],
             comment: "A lengthy comment for the facet of the longtext_col. This should be displyed properly in the facet."
         },
         {
@@ -309,6 +309,7 @@ describe("Viewing Recordset with Faceting,", function() {
             browser.ignoreSynchronization=true;
             browser.get(uri);
             chaisePage.waitForElementInverse(element(by.id("spinner")));
+            chaisePage.recordsetPageReady();
         });
 
         describe("default presentation based on facets annotation ", function () {
@@ -320,6 +321,32 @@ describe("Viewing Recordset with Faceting,", function() {
                 }, browser.params.defaultTimeout);
 
                 expect(chaisePage.recordsetPage.getFacetTitles()).toEqual(testParams.facetNames, "All facets' names is incorrect");
+            });
+
+            it("verify the text is truncated properly based on the 'maxRecordsetRowHeight=100', then not truncated after clicking 'more'", function () {
+                // default config: maxRecordsetRowHeight = 100
+                // 100 for max height, 10 for padding, 1 for border
+                var testCell, cellHeight = 111;
+                chaisePage.recordsetPage.getRows().then(function (rows) {
+                    return chaisePage.recordsetPage.getRowCells(rows[0]);
+                }).then(function (cells) {
+                    testCell = cells[2];
+                    expect(testCell.getText()).toContain("... more");
+
+                    return testCell.getSize();
+                }).then(function (dimensions) {
+                    expect(dimensions.height).toBe(cellHeight);
+
+                    return testCell.element(by.css(".readmore")).click();
+                }).then(function () {
+                    expect(testCell.getText()).toContain("... less");
+
+                    return testCell.getSize();
+                }).then(function (tallerDimensions) {
+                    expect(tallerDimensions.height).toBeGreaterThan(cellHeight);
+                }).catch(function (err) {
+                    console.log(err);
+                });
             });
 
             it("should have 3 facets open", function (done) {
@@ -1280,14 +1307,36 @@ describe("Viewing Recordset with Faceting,", function() {
 
             it("should open facets, click an option in each, and verify the data after", function (done) {
                 var numFacets = testParams.multipleFacets.length;
+
                 // open the four facets
                 chaisePage.clickButton(chaisePage.recordsetPage.getFacetById(testParams.multipleFacets[3].facetIdx)).then(function () {
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getClosedFacets().count().then(function(ct) {
+                            return ct == testParams.totalNumFacets-1;
+                        });
+                    }, browser.params.defaultTimeout);
+
                     return chaisePage.clickButton(chaisePage.recordsetPage.getFacetById(testParams.multipleFacets[2].facetIdx));
                 }).then(function () {
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getClosedFacets().count().then(function(ct) {
+                            return ct == testParams.totalNumFacets-2;
+                        });
+                    }, browser.params.defaultTimeout);
+
                     return chaisePage.clickButton(chaisePage.recordsetPage.getFacetById(testParams.multipleFacets[1].facetIdx));
                 }).then(function () {
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getClosedFacets().count().then(function(ct) {
+                            return ct == testParams.totalNumFacets-3;
+                        });
+                    }, browser.params.defaultTimeout);
+
                     return chaisePage.clickButton(chaisePage.recordsetPage.getFacetById(testParams.multipleFacets[0].facetIdx));
                 }).then(function () {
+
+
+                    // all 4 facets opened
                     browser.wait(function () {
                         return chaisePage.recordsetPage.getOpenFacets().count().then(function(ct) {
                             return ct == numFacets;
@@ -1300,28 +1349,31 @@ describe("Viewing Recordset with Faceting,", function() {
                     return chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(testParams.multipleFacets[0].facetIdx, testParams.multipleFacets[0].option));
                 }).then(function () {
                     browser.wait(function () {
-                        return chaisePage.recordsetPage.getCheckedFacetOptions(testParams.multipleFacets[0].facetIdx).count().then(function(ct) {
-                            return ct == 1;
+                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                            return ct == testParams.multipleFacets[0].numRows;
                         });
                     }, browser.params.defaultTimeout);
 
                     return chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(testParams.multipleFacets[1].facetIdx, testParams.multipleFacets[1].option));
                 }).then(function () {
                     browser.wait(function () {
-                        return chaisePage.recordsetPage.getCheckedFacetOptions(testParams.multipleFacets[1].facetIdx).count().then(function(ct) {
-                            return ct == 1;
+                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                            return ct == testParams.multipleFacets[1].numRows;
                         });
                     }, browser.params.defaultTimeout);
 
                     return chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(testParams.multipleFacets[2].facetIdx, testParams.multipleFacets[2].option));
                 }).then(function () {
                     browser.wait(function () {
-                        return chaisePage.recordsetPage.getCheckedFacetOptions(testParams.multipleFacets[2].facetIdx).count().then(function(ct) {
-                            return ct == 1;
+                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                            return ct == testParams.multipleFacets[2].numRows;
                         });
                     }, browser.params.defaultTimeout);
+
                     return chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(testParams.multipleFacets[3].facetIdx, testParams.multipleFacets[3].option));
                 }).then(function () {
+
+
                     // wait for request to return
                     // wait for table rows to load
                     browser.wait(function () {

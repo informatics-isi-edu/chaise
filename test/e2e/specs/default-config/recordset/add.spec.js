@@ -25,9 +25,33 @@ describe('Recordset add record,', function() {
 
     });
 
+    it("verify the text is truncated properly based on the default config, then not truncated after clicking 'more'", function () {
+        // default config: maxRecordsetRowHeight = 160
+        // 160 for max height, 10 for padding, 1 for border
+        var testCell, cellHeight = 171;
+        chaisePage.recordsetPage.getRows().then(function (rows) {
+            return chaisePage.recordsetPage.getRowCells(rows[0]);
+        }).then(function (cells) {
+            testCell = cells[4];
+            expect(testCell.getText()).toContain("... more");
+
+            return testCell.getSize();
+        }).then(function (dimensions) {
+            expect(dimensions.height).toBe(cellHeight);
+
+            return testCell.element(by.css(".readmore")).click();
+        }).then(function () {
+            expect(testCell.getText()).toContain("... less");
+
+            return testCell.getSize();
+        }).then(function (tallerDimensions) {
+            expect(tallerDimensions.height).toBeGreaterThan(cellHeight);
+        }).catch(function (err) {
+            console.log(err);
+        });
+    });
+
     it("verify view details link, search for a term, then verify view details link has changed", function () {
-
-
         var baseUrl = '/record/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/RID=";
 
         chaisePage.recordsetPage.getRows().then(function (rows) {
@@ -35,7 +59,6 @@ describe('Recordset add record,', function() {
                 return entity.id == 2003;
             });
             // get first row view details button
-            console.log(baseUrl + dataRow.RID);
             expect(rows[0].element(by.css('.view-action-button')).getAttribute("href")).toContain(baseUrl + dataRow.RID, "View button url is incorrect before searching set");
 
             // search for a row that is not the first one after sorting
@@ -51,7 +74,6 @@ describe('Recordset add record,', function() {
                 return entity.id == 4004;
             });
             // get first row view details button
-            console.log(baseUrl + dataRow.RID);
             expect(rows[0].element(by.css('.view-action-button')).getAttribute("href")).toContain(baseUrl + dataRow.RID, "View button url is incorrect after searching set");
 
             // clear search
@@ -119,6 +141,12 @@ describe('Recordset add record,', function() {
         browser.switchTo().window(allWindows[0]).then(function() {
             return chaisePage.waitForElementInverse(element(by.id("spinner")));
         }).then(function() {
+            browser.wait(function() {
+                return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                    return (ct == rowCount+1);
+                });
+            }, browser.params.defaultTimeout);
+
             return chaisePage.recordsetPage.getRows();
         }).then(function(rows) {
             expect(rows.length).toBe(rowCount+1);

@@ -41,6 +41,11 @@ describe('Edit a record,', function() {
                 }).then(function(text) {
                     // make sure modal opened
                     expect(text.indexOf("Select")).toBeGreaterThan(-1);
+                    browser.wait(function() {
+                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                            return (ct == 3);
+                        });
+                    }, browser.params.defaultTimeout);
 
                     rows = chaisePage.recordsetPage.getRows();
                     // count is needed for clicking a random row
@@ -94,7 +99,7 @@ describe('Edit a record,', function() {
                     });
 
                     expect(browser.driver.getCurrentUrl()).toContain(redirectUrl);
-                    recordEditHelpers.testRecordAppValuesAfterSubmission(testParams.column_names, testParams.column_values);
+                    recordEditHelpers.testRecordAppValuesAfterSubmission(testParams.column_names, testParams.column_values, testParams.column_names.length+5); // +5 for system columns
                 }
             });
         });

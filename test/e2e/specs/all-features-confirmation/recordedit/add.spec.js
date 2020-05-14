@@ -231,7 +231,7 @@ describe('Record Add', function() {
                     } else {
                         browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/"+tableParams.schema_name+":" + tableParams.table_name);
                     }
-                    chaisePage.waitForElement(element(by.id("submit-record-button")));
+                    chaisePage.recordeditPageReady();
                 });
 
                 describe("Presentation and validation,", function() {
