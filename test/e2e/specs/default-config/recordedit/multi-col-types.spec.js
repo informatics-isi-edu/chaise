@@ -150,7 +150,7 @@ describe('When editing a record', function() {
 
             expect(browser.driver.getCurrentUrl()).toContain(redirectUrl);
 
-            recordEditHelpers.testRecordAppValuesAfterSubmission(testParams.table_1.columns, testParams.table_1.submitted_values);
+            recordEditHelpers.testRecordAppValuesAfterSubmission(testParams.table_1.columns, testParams.table_1.submitted_values, testParams.table_1.columns.length+5); // +5 for system columns
         });
     });
 
@@ -249,7 +249,7 @@ describe('When editing a record', function() {
 
                 expect(browser.driver.getCurrentUrl()).toContain(redirectUrl);
 
-                recordEditHelpers.testRecordAppValuesAfterSubmission(testParams.table_1.null_columns, testParams.table_1.null_submitted_values);
+                recordEditHelpers.testRecordAppValuesAfterSubmission(testParams.table_1.null_columns, testParams.table_1.null_submitted_values, testParams.table_1.null_columns.length+5); // +5 for system columns
             });
         });
     });

@@ -3,6 +3,10 @@
 This is a guide for people who develop Chaise.  We also have our own [Chaise style guide](https://github.com/informatics-isi-edu/chaise/blob/master/docs/dev-docs/style-guide.md), that explains the use of different libraries (bootstrap) and other HTML and CSS combinations.
 
 ## Table of Contents
+- [CSS and SASS](#css-and-sass)
+  - [Useful links](#useful-links)
+  - [SCSS structure](#scss-structure)
+  - [Idioms](#idioms)
 - [AngularJS-related](#angularjs-related)
   * [AngularJS Developer Guides](#angularjs-developer-guides)
   * [One-Time Binding](#one-time-binding)
@@ -19,6 +23,35 @@ This is a guide for people who develop Chaise.  We also have our own [Chaise sty
   * [Promise chaining with interleaved catches](#promise-chaining-with-interleaved-catches)
   * [How It Works](#how-it-works)
 - [Config App](#config-app)
+
+## CSS and SASS
+
+As part of your task you might need to modify some of the existing styles or add new ones.
+
+### Useful links
+To make sure you're familiar with both CSS and SASS. The following are some guides that you can use:
+  - [W3schools CSS tutorial](https://www.w3schools.com/css/): this is a good starting point for refreshing your CSS knowledge.
+  - [MDN CSS reference](https://developer.mozilla.org/en-US/docs/Web/CSS): a very thorough CSS reference that you can use to learn more about different CSS features.
+  - [caniuse.com](https://caniuse.com/): can be used to quickly figure out if a feature can be used based on our browser support or not.
+  - [Sass basics](https://sass-lang.com/guide): a very good starting point for learning Sass basics (we're using SCSS syntax.)
+
+### SCSS structure
+
+Since we're using Sass3+, we're using the SCSS syntax. On of the advantages of Sass in general is the fact that you can easily break your stylesheets into different sections and then merge them together. In Chaise, the `*.scss` files that start with `_` are not meant to be on their own and are only meant to be included (imported) in other files. These files are generally supposed to cover a well-contained feature of UI element. For example `_buttons.scss` contains all the styles related to buttons. The main file that will be compiled in the end is `app.scss` which will be compiled into `app.css` and used in Chaise. You don't need to compile the file manually yourself as make commands will do that automatically for you.
+
+### Idioms
+
+If you want to add a new style, make sure you're following these rules:
+
+- It's better if you use classes instead of ids for writing css rules.
+- Use `-` to break the words in your name. Avoid using camelCase or `_`.
+- Follow the indentation that the file has. Don't mix different indentations together.
+- Use names that are meaningful and can be easily understood without knowing the whole page. Try to convey what an ID or class is about while being as brief as possible.
+- Avoid adding duplicated rules. If there's a rule in a file that is applied to the element that you're trying to add a new style to, add it there.
+- Avoid using `!important` as much as you can (Unless there's a bootstrap rule that you're trying to override.)
+- Comment your rule to make it easier for others to figure out why a rule was added.
+- If you're doing some calculations don't just use the end result. Right the calculations so later we can easily figure out why you chose that value.
+- Use variables if you're using the same value more than once and these values should be the same all the times (Just because you're using value `10` in two different rules doesn't mean they should share the same variable. Use a variable if these two rules MUST be using the same value. So if later you changed one to `20`, the other one should be updated as well).
 
 
 ## AngularJS-related
@@ -55,13 +88,13 @@ NOTE: This was causing a race condition before when we were relying on the sessi
 
 ### Use variable vs string in lookup
 The purpose of using variables or enumeration is to avoid rewriting (or copy-and-pasting) the same string in multiple places.
-- if you have more than one call site in more than one script, then define the variable in the utilities.js script and add it to the module (e.g., module._tag_default = "tag:...default") and it may then be used by code in different ermrestjs scripts (e.g., referencing module._tag_default somewhere). Note that this is not being added to the public interface. Code outside of the various ermrestjs scripts are not intended to use these variables. Hence we follow the underscore prefix convention (\__variableName_), which by convention indicates that the variable should be considered private to the module and clients are at least warned not to use it.
+- if you have more than one call site in more than one script, then define the variable in the utilities.js script and add it to the module (e.g., module._tag_default = "tag:...default") and it may then be used by code in different ERMrestJS scripts (e.g., referencing module._tag_default somewhere). Note that this is not being added to the public interface. Code outside of the various ERMrestJS scripts are not intended to use these variables. Hence we follow the underscore prefix convention (\__variableName_), which by convention indicates that the variable should be considered private to the module and clients are at least warned not to use it.
 - Example: The `messageMap` constant can be used to store and display user-facing messages in Chaise. [ERMrestJS#68](https://github.com/informatics-isi-edu/ermrestjs/issues/68) contains detail discussion related to this topic.
 
 ### Naming Conventions
 There are a few naming conventions that are being used across the apps. This pertains to variables, module names, and file names.
 - File names should be written in camel case (camelCase) with identifying information separated by `.` (`*.controller.js`, `*.app.js`, `*.html`).
-- AngularJS modules need to be defined like the following `chaise.*`. Chaise identifies the set of apps it applies to and the `*` is that modules purpose in chaise.
+- AngularJS modules need to be defined like the following `chaise.*`. Chaise identifies the set of apps it applies to and the `*` is that modules purpose in Chaise.
 - Service, Factory, Provider, Controller, and other angular classes should be defined with camel case text leading with a capital letter. For example: `ErrorDialogController` is the convention for naming controllers. Don't shorten the text to `ctrl` because we should be using controller as syntax and want to have a more readable structure to our code.
 - Variables should follow a similar naming convention using camel case text. Variables and functions that are prefixed with an underscore, should be treated as private variables and used with caution.
 - Folder names should be different from file names. Of course folders don't have an extension so it's more apparent that they are folders, but developers should use `-` separated names for folders, i.e. `common\templates\data-link`.
@@ -245,7 +278,7 @@ AngularJS has a common exception handler service, `$exceptionHandler`. For refer
 - [Official guide](https://docs.angularjs.org/api/ng/service/$exceptionHandler)
 - [Unofficial style guide](https://github.com/johnpapa/angular-styleguide/blob/master/a1/README.md#exception-handling)
 
-The AngularJS global exception handler, `$exceptionHandler`, is used as the final catch for exceptions in the `chaise` applications. Any exceptions that need to be handled in a common way should throw the exception and leave it to the AngularJS service to catch them. A function is registered with `$exceptionHandler` to manage how we want general cases to be handled.
+The AngularJS global exception handler, `$exceptionHandler`, is used as the final catch for exceptions in the Chaise applications. Any exceptions that need to be handled in a common way should throw the exception and leave it to the AngularJS service to catch them. A function is registered with `$exceptionHandler` to manage how we want general cases to be handled.
 
 #### Special Case: $uibModal
 The promise used to create an instance of $uibModal is rejected if the user dismisses the modal. Unless you have logic for when the modal is dismissed, there's no need to attach an error callback to this promise. There's also no need to add a `.catch()` because `$exceptionHandler` will handle any errors in the success callback.

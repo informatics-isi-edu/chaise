@@ -33,6 +33,7 @@ describe('View existing record,', function() {
 
         it('should display a disabled delete record button', function() {
             var deleteBtn = chaisePage.recordPage.getDeleteRecordButton();
+            chaisePage.waitForElement(deleteBtn);
             expect(deleteBtn.isPresent()).toBeTruthy("The delete button does not show on the page.");
             expect(deleteBtn.getAttribute("disabled")).toBeTruthy("The delete button was not disabled.");
         });

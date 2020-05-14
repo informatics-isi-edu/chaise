@@ -7,6 +7,7 @@ var chaiseConfig = {
     showFaceting: true,
     navbarBrandText: 'test123',
     navbarBrandImage: '../images/genetic-data.png',
+    maxRecordsetRowHeight: 100,
     disableExternalLinkModal: true,
     logClientActions: false,
     hideTableOfContents: true,

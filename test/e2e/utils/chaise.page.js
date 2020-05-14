@@ -318,6 +318,8 @@ var recordEditPage = function() {
         return el.getAttribute('value').then(function(value) {
             el.sendKeys(Array(value.length + 1).join(protractor.Key.BACK_SPACE));
             browser.sleep(10);
+        }).catch(function (err) {
+            console.log(err)
         });
     };
 
@@ -813,24 +815,25 @@ var recordsetPage = function() {
         return el.getAttribute('uib-tooltip');
     };
 
-    this.getMainSearchBox = function() {
-        return element(by.className("recordset-main-search"));
+    this.getMainSearchBox = function(el) {
+        var locator = by.className("recordset-main-search");
+        return el ? el.element(locator) : element(locator);
     };
 
-    this.getMainSearchPlaceholder = function () {
-        return this.getMainSearchBox().element(by.className("chaise-input-placeholder"))
+    this.getMainSearchPlaceholder = function (el) {
+        return this.getMainSearchBox(el).element(by.className("chaise-input-placeholder"))
     }
 
-    this.getMainSearchInput = function() {
-        return this.getMainSearchBox().element(by.className("main-search-input"));
+    this.getMainSearchInput = function(el) {
+        return this.getMainSearchBox(el).element(by.className("main-search-input"));
     };
 
-    this.getSearchSubmitButton = function() {
-        return this.getMainSearchBox().element(by.className("chaise-search-btn"));
+    this.getSearchSubmitButton = function(el) {
+        return this.getMainSearchBox(el).element(by.className("chaise-search-btn"));
     };
 
-    this.getSearchClearButton = function() {
-        return this.getMainSearchBox().element(by.className("remove-search-btn"));
+    this.getSearchClearButton = function(el) {
+        return this.getMainSearchBox(el).element(by.className("remove-search-btn"));
     };
 
     this.getAddRecordLink = function(el) {
@@ -1143,8 +1146,21 @@ var recordsetPage = function() {
     this.getSelectAllBtn = function () {
         return element(by.id("table-select-all-rows"));
     };
-
 };
+
+var SearchPopup = function () {
+    this.getAddPureBinaryPopup = function () {
+        return element(by.className("add-pure-and-binary-popup"));
+    };
+
+    this.getFacetPopup = function () {
+        return element(by.className("faceting-show-details-popup"));
+    };
+
+    this.getForeignKeyPopup = function () {
+        return element(by.className("foreignkey-popup"));
+    };
+}
 
 var errorModal = function () {
     var self = this;
@@ -1170,6 +1186,7 @@ function chaisePage() {
     this.recordPage = new recordPage();
     this.recordsetPage = new recordsetPage();
     this.errorModal = new errorModal();
+    this.searchPopup = new SearchPopup();
     this.clickButton = function(button) {
         return browser.executeScript("$(arguments[0]).click();", button);
     };
@@ -1208,6 +1225,7 @@ function chaisePage() {
     }
     this.recordeditPageReady = function() {
         this.waitForElement(element(by.id("submit-record-button")));
+        this.waitForElementInverse(element(by.id("spinner")));
     }
     this.setAuthCookie = function(url, authCookie) {
         if (url && authCookie) {

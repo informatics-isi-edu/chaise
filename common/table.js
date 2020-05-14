@@ -461,9 +461,29 @@
                     }
 
                     $log.debug("counter", current, ": read main successful.");
-                    vm.page = page;
-                    if (Array.isArray(page.templateVariables)) {
-                        vm.templateVariables = page.templateVariables.map(function (tv) {
+
+                    return vm.getDisabledTuples ? vm.getDisabledTuples(vm, page, requestCauses, reloadStartTime) : {page: page};
+                }).then(function (result) {
+                    if (current !== vm.flowControlObject.counter) {
+                        defer.resolve(false);
+                        return defer.promise;
+                    }
+
+                    /*
+                     * The following line used to be part of the previous step of promise chain,
+                     * but I moved it here to remove the UI bugs that it was causing.
+                     * since we're showing the rows using ng-repeat on vm.rowValues, the number of
+                     * displayed rows won't change until that value changes. But if we change the
+                     * vm.page before this, then the passed tuple to the ellipsis directive would change.
+                     * So if we were changing vm.page in one digest cycle, and vm.rowValues in the other,
+                     * then the displayed row would be based on the old vm.rowValues but the new vm.page.
+                     */
+                    // attach the new page
+                    vm.page = result.page;
+
+                    // update the objects based on the new page
+                    if (Array.isArray(vm.page.templateVariables)) {
+                        vm.templateVariables = vm.page.templateVariables.map(function (tv) {
                             return tv.values;
                         });
                     } else {
@@ -472,14 +492,11 @@
                     vm.aggregateResults = new Array(vm.page.tuples.length);
                     vm.pendingRowValues = {};
 
-                    return vm.getDisabledTuples ? vm.getDisabledTuples(vm, requestCauses, reloadStartTime) : '';
-                }).then(function (rows) {
-                    if (current !== vm.flowControlObject.counter) {
-                        defer.resolve(false);
-                        return defer.promise;
+                    // if the getDisabledTuples was defined, this will have a value
+                    if (result.disabledRows) {
+                        vm.disabledRows = result.disabledRows;
                     }
 
-                    if (rows) vm.disabledRows = rows;
                     var rowValues = DataUtils.getRowValuesFromPage(vm.page);
                     // calculate how many rows can be shown based on # of columns
                     var rowLimit = Math.ceil(tableConstants.CELL_LIMIT/vm.page.reference.columns.length);

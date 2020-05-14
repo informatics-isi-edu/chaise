@@ -198,7 +198,7 @@
             ],
             "annotations": {
                 "tag:isrd.isi.edu,2016:visible-columns" : {
-                    "compact": ["id"],
+                    "compact": ["id", "longtext_col"],
                     "detailed": [
                         "text_col", "longtext_col", "markdown_col", "int_col", "float_col", "date_col", "timestamp_col", "boolean_col", "jsonb_col",
                         ["faceting", "main_fk1"], ["faceting", "main_fk2"]

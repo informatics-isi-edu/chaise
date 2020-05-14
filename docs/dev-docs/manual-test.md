@@ -37,6 +37,17 @@
 - The test spec is present at "chaise/test/manual/specs/recordset.spec.js"
 - The tooltip text can be changed at "chaise/test/manual/data_setup/schema/product-recordset.json"
 
+## Recordset - auto truncation of cell content
+- by default, `maxRecordsetRowHeight` is set to 160 pixels
+- this causes cells with content larger than the default height to be truncated and show "...more" text
+
+### Test Setup
+- Run the "make testmanually" command in Chaise. This will set up a recordset table named Accommodation with long text in 2 columns, "Summary" and "Description"
+- Maunually check that those 2 columns are truncated and have the "...more" hyperlink. Click that and make sure the column expands to show the full text. Click "...less" and make sure it properly truncates again.
+- End the test spec by pressing ^D in the terminal
+- The test spec is present at "chaise/test/manual/specs/recordset.spec.js"
+- The tooltip text can be changed at "chaise/test/manual/data_setup/schema/product-recordset.json"
+
 
 ## Recordset with Faceting Functionality
 
