@@ -58,7 +58,7 @@
                                                     <span class="chaise-btn-icon glyphicon glyphicon-plus"></span>
                                                     <span>Create</span>
                                                 </button>
-                                                <button id="copy-record" class="chaise-btn chaise-btn-primary" ng-click="::ctrl.copyRecord()" ng-disabled="::!ctrl.canEdit()" uib-tooltip="Click here to create a copy of this record." tooltip-placement="bottom">
+                                                <button id="copy-record" class="chaise-btn chaise-btn-primary" ng-click="::ctrl.copyRecord()" ng-disabled="::!ctrl.canCreate()" uib-tooltip="Click here to create a copy of this record." tooltip-placement="bottom">
                                                     <span class="chaise-btn-icon glyphicon glyphicon-copy"></span>
                                                     <span>Copy</span>
                                                 </button>
