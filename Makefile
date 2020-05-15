@@ -450,6 +450,7 @@ $(DIST)/$(LOGIN_JS_SOURCE_MIN): $(LOGIN_JS_SOURCE)
 
 LOGIN_JS_VENDOR_ASSET=$(JS)/vendor/jquery-ui-tooltip.min.js \
 	$(JS)/vendor/jquery.nouislider.all.min.js \
+	$(JS)/vendor/jquery.cookie.js \
 	$(JS)/vendor/rzslider.js \
 	$(JS)/vendor/angular-datepicker.js \
 	$(JS)/vendor/ng-grid.js \
