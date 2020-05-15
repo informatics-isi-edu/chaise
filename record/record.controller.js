@@ -9,8 +9,8 @@
 
         var initialHref = $window.location.href;
         var mainContainerEl = angular.element(document.getElementsByClassName('main-container')[0]);
-        var addRecordRequests = {}; /// generated id: {displayMode: "", containerIndex: integer}
-        var editRecordRequests = {}; // generated id: {displayMode: "", containerIndex: integer, completed: boolean}
+        vm.addRecordRequests = {}; /// generated id: {displayMode: "", containerIndex: integer}
+        vm.editRecordRequests = {}; // generated id: {displayMode: "", containerIndex: integer, completed: boolean}
         var modalUpdate = false;
         vm.alerts = AlertsService.alerts;
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
