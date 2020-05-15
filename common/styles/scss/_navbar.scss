@@ -16,8 +16,11 @@ body > .container {
     z-index: 1037;
 }
 
+// default modal z-index is 1050 (for the first modal)
+// as more modals get opened, z-index increases by 10 for each modal (1060, 1070, ...)
+// we tried to be safe about it before by increasing it by only 1
 .error-open #mainnav {
-    z-index: 1051;
+    z-index: 1501;
 }
 
 .navbar-inverse {

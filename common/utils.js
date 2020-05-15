@@ -76,14 +76,19 @@
             title: "You need to be logged in to continue."
         },
         "clickActionMessage": {
-            "messageWReplace": "Click <b>OK</b> to reload this page without @errorStatus.",
-            "loginOrDismissDialog": "Click <a ng-click='ctrl.login()'>Login</a> to log in to the system, or click <b>OK</b> to dismiss this dialog.",
+            "continueMessageReload": "Click <b>Reload</b> to start over with the identity ",
+            "anonContinueMessageReload": "Click <b>Reload</b> to start over with limited anonymous access; or",
+            "continueMessage1": "Click <b>Continue</b> to continue as ",
+            "continueMessage2": ' after you restore your login status. Instructions on how to restore login is in the <a id="switch-user-accounts-link" ng-click="ctrl.switchUserAccounts()">Switch User Accounts Document</a>.',
+            "anonContinueMessage": "Click <b>Login</b> to login and continue access as ",
             "dismissDialog": "Click <b>OK</b> to dismiss this dialog.",
+            "loginOrDismissDialog": "Click <a ng-click='ctrl.login()'>Login</a> to log in to the system, or click <b>OK</b> to dismiss this dialog.",
+            "messageWReplace": "Click <b>OK</b> to reload this page without @errorStatus.",
             "multipleRecords": "Click <b>OK</b> to show all the matched records.",
             "noRecordsFound": "Click <b>OK</b> to show the list of all records.",
             "okBtnMessage": "Click <b>OK</b> to go to the Recordset.",
-            "reloadMessage": "Click <b>Reload</b> to start over.",
-            "pageRedirect": "Click <b>OK</b> to go to the "
+            "pageRedirect": "Click <b>OK</b> to go to the ",
+            "reloadMessage": "Click <b>Reload</b> to start over."
         },
         "errorMessageMissing": "An unexpected error has occurred. Please try again",
         "tableMissing": "No table specified in the form of 'schema-name:table-name' and no Default is set.",
@@ -94,6 +99,7 @@
         "noRecordForFilter" : "No matching record found for the given filter or facet.",
         "loginRequired": "Login Required",
         "permissionDenied": "Permission Denied",
+        "loginStatusChanged": "Unexpected Change of Login Status",
         "unauthorizedErrorCode" : "Unauthorized Access",
         "localStorageDisabled": "localStorage is disabled by the browser settings. Some features might not work as expected",
         "showErrDetails" : "Show Error Details",
@@ -103,7 +109,7 @@
             downloadCSV: "Click to download all matched results",
             permalink: "Click to copy the current url to clipboard.",
             actionCol: "Click on the action buttons to view, edit, or delete each record",
-            viewCol: "Click on the eye button to view the detailed page associated with each record",
+            viewCol: "Click on the icon to view the detailed page associated with each record",
             null: "Search for any record with no value assigned",
             empty: "Search for any record with the empty string value",
             notNull: "Search for any record that has a value",
@@ -821,7 +827,7 @@
         */
         function chaiseDeploymentPath() {
             var chaiseConfig = ConfigUtils.getConfigJSON();
-            var appNames = ["record", "recordset", "recordedit", "search", "login"];
+            var appNames = ["record", "recordset", "recordedit", "login"];
             var currentAppName = appNamefromUrlPathname($window.location.pathname);
             if (appNames.includes(currentAppName)) {
                 var index = $window.location.pathname.indexOf(currentAppName);
@@ -1172,6 +1178,13 @@
         }
 
         /**
+         * Verifies that the object is not null and is defined.
+         */
+        function isObjectAndNotNull(obj) {
+            return typeof obj === "object" && obj !== null;
+        }
+
+        /**
          * Verifies that the given data is integer
          * @param  {Object}  data
          * @return {Boolean} whether it is integer or not
@@ -1180,22 +1193,20 @@
             return (typeof data === 'number') && (data % 1 === 0);
         }
 
+        var ID_SAFE_REGEX = /[^\w-]+/g;
         /**
         *
-        * @desc Converts the following characters to HTML entities for safe and
-        * HTML5-valid usage in the `id` attributes of HTML elements: spaces, ampersands,
-        * right angle brackets, left angle brackets, double quotes, single quotes.
+        * @desc This function is used to make sure the input `string` is id/class safe
+        * For both class and id:
+        *   - Must begin with a letter A-Z or a-z
+        *   - Can be followed by: letters (A-Za-z), digits (0-9), hyphens ("-"), and underscores ("_")
+        * NOTE: this won't ensure the very beginning of the input string is safe
+        * it assumes the input string is being appended to an already safe string
         * @param {String} string
         * @return {String} a string suitable for use in the `id` attributes of HTML elements
         */
         function makeSafeIdAttr(string, val) {
-            return String(string)
-                .replace(/&/g, '&amp;')
-                .replace(/\s/g, '&nbsp;') // any whitespace
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
+            return String(string).replace(ID_SAFE_REGEX, '-');
         }
 
         /**
@@ -1266,6 +1277,7 @@
             getRowValuesFromTupleData: getRowValuesFromTupleData,
             getRowValuesFromTuples: getRowValuesFromTuples,
             isObjectAndKeyDefined: isObjectAndKeyDefined,
+            isObjectAndNotNull: isObjectAndNotNull,
             isInteger: isInteger,
             makeSafeIdAttr: makeSafeIdAttr,
             makeSafeHTML: makeSafeHTML,
@@ -2344,6 +2356,10 @@
             SESSION_VALIDATE: "session" + clientPathActionSeparator + "validate",
             SESSION_RETRIEVE: "session" + clientPathActionSeparator + "retrieve",
 
+            SWITCH_USER_ACCOUNTS_LOGIN: "switch-accounts" + clientPathActionSeparator + "login",
+            SWITCH_USER_ACCOUNTS_WIKI_LOGIN: "switch-accounts-wiki" + clientPathActionSeparator + "login",
+            SWITCH_USER_ACCOUNTS_LOGOUT: "switch-accounts" + clientPathActionSeparator + "logout",
+
             // - navbar:
             NAVBAR_BRANDING: "navbar/branding" + clientPathActionSeparator + "navigate",
             NAVBAR_MENU_EXTERNAL: "navbar/menu" + clientPathActionSeparator + "navigate-external",
@@ -2595,6 +2611,11 @@
             var defer = $q.defer();
             var chaiseConfig = ConfigUtils.getConfigJSON();
             if (chaiseConfig['customCSS'] !== undefined) {
+                // if the file is already injected
+                if (document.querySelector('link[href="' + chaiseConfig['customCSS'] + '"]')) {
+                    return defer.resolve(), defer.promise;
+                }
+
                 var customCSSElement = document.createElement("link");
                 customCSSElement.setAttribute("rel", "stylesheet");
                 customCSSElement.setAttribute("type", "text/css");

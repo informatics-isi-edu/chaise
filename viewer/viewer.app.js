@@ -37,7 +37,7 @@
         'ngSanitize',
         'ui.select',
         'ui.bootstrap',
-        'ng.deviceDetector' 
+        'ng.deviceDetector'
     ])
 
     .config(['$provide', function($provide) {
@@ -134,6 +134,8 @@
         var iframe = $window.frames[0];
         var annotoriousReady = false;
         var chaiseReady = false;
+        $rootScope.displayReady = false;
+
         var arrows = [];
         var rectangles = [];
         var sections = [];
@@ -236,6 +238,14 @@
                     } else {
                         waterMark = '&waterMark=' + waterMark;
                     }
+
+                    var meterScaleInPixels = context.queryParams.meterScaleInPixels;
+                    if (meterScaleInPixels === undefined) {
+                      meterScaleInPixels = '';
+                    } else {
+                      meterScaleInPixels = '&meterScaleInPixels=' + meterScaleInPixels;
+                    }
+
                     console.log('uri='+image.entity.uri + waterMark);
 
                     /* Note: the following has been done so that the viewer app supports both type of formats i.e tiff and czi.

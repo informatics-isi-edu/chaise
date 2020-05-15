@@ -73,9 +73,9 @@
                 // the server object that can be used in other places
                 $window.dcctx.server = ERMrest.ermrestFactory.getServer(service, $window.dcctx.contextHeaderParams);
 
-                $window.dcctx.server.catalogs.get(catalogId).then(function (response) {
+                $window.dcctx.server.catalogs.get(catalogId, true).then(function (response) {
                     // we already setup the defaults and the configuration based on chaise-config.js
-                    if (response.chaiseConfig) ConfigUtils.setConfigJSON(response.chaiseConfig);
+                    if (response && response.chaiseConfig) ConfigUtils.setConfigJSON(response.chaiseConfig);
 
                     return headInjector.setupHead();
                 }).then(function () {

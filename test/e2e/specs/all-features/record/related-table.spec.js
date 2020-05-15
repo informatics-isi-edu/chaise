@@ -1,7 +1,7 @@
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordHelpers = require('../../../utils/record-helpers.js');
 var EC = protractor.ExpectedConditions;
-
+var moment = require('moment');
 
 var testParams = {
     schemaName: "product-unordered-related-tables-links",
@@ -18,14 +18,19 @@ var testParams = {
         "association_table", // association
         "accommodation_image", // association with page_size
         "association_table_markdown", // association with markdown
-        "related_table_2", // related entity with path length 3
+        "related_table_2", // related entity with path length 3, wait_for entity set but no markdown patt
         "table_w_aggregates", // related entity with aggregate columns
-        "table_w_invalid_row_markdown_pattern" // related entity with invalid row_markdown_pattern
+        "table_w_invalid_row_markdown_pattern", // related entity with invalid row_markdown_pattern
+        "inbound related with display.wait_for entityset", //related entity with wait_for entityset and markdown patt
+        "inbound related with display.wait_for agg" //related entity with wait_for agg and markdown patt
+
     ],
     tocHeaders: [
         "Summary", "booking (6)", "schedule (2)", "media (1)", "association_table (1)",
         "accommodation_image (2+)", "association_table_markdown (1)", "related_table_2 (1)",
-        "table_w_aggregates (2)", "table_w_invalid_row_markdown_pattern (1)"
+        "table_w_aggregates (2)", "table_w_invalid_row_markdown_pattern (1)",
+        "inbound related with display.wait_for entityset (3)",
+        "inbound related with display.wait_for agg (3)"
     ],
     related_table_name_with_page_size_annotation: "accommodation_image",
     related_table_name_with_link_in_table: "accommodation_image"
@@ -64,6 +69,20 @@ describe ("Viewing exisiting record with related entities, ", function () {
     it ("should show the related table names in the correct order in the Table of Contents", function () {
         expect(chaisePage.recordPage.getSidePanelTableTitles()).toEqual(testParams.tocHeaders, "list of related tables in toc is incorrect");
     });
+
+    describe("share popup when the citation annotation has wait_for of all-outbound", function () {
+        var RIDLink = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name;
+        RIDLink += "/RID=" + chaisePage.getEntityRow(testParams.schemaName, testParams.table_name, [{column: testParams.key.name, value: testParams.key.value}]).RID;
+
+        var keys = [];
+        keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
+        recordHelpers.testSharePopup({
+            permalink: RIDLink,
+            verifyVersionedLink: false,
+            citation: "Super 8 North Hollywood Motel, accommodation_outbound1_outbound1 two https://www.kayak.com/hotels/Super-8-North-Hollywood-c31809-h40498/2016-06-09/2016-06-10/2guests (" + moment().format("YYYY") + ").",
+            bibtextFile: false // we don't need to test this here as well (it has been tested in record presentation)
+        });
+    })
 
     var related_table = {
         comment: "inbound related, no applink or row_markdown_pattern",
@@ -185,7 +204,12 @@ describe ("Viewing exisiting record with related entities, ", function () {
             totalCount: 4,
             existingCount: 1,
             disabledRows: ["1"],
-            selectIndex: 2,
+            search: {
+                term: "television|Coffee",
+                afterSearchCount: 2,
+                afterSearchDisabledRows: ["1"]
+            },
+            selectIndex: 1, // after search
             rowValuesAfter: [
                 ["Television"],
                 ["Coffee Maker"]
@@ -291,8 +315,8 @@ describe ("Viewing exisiting record with related entities, ", function () {
             filter: "fk_to_accommodation\nSuper 8 North Hollywood Motel"
         },
         rowValues: [
-            ["1", "100", "100", "1", "1"],
-            ["2", "101", "101", "1", "1"],
+            ["1", "100", "100", "1", "1", "virtual 100 with Super 8 North Hollywood Motel"],
+            ["2", "101", "101", "1", "1", "virtual 101 with Super 8 North Hollywood Motel"],
         ],
         rowViewPaths: [
             [{column: "id", value: "1"}], [{column: "id", value: "2"}]
@@ -330,6 +354,39 @@ describe ("Viewing exisiting record with related entities, ", function () {
     describe("for a related table with invalid row_markdown_pattern, ", function () {
         recordHelpers.testRelatedTable(related_w_invalid_row_markdown_pattern, pageReadyCondition);
     });
+
+
+    var related_w_entityset_waitfor = {
+        comment: "related table, has waitfor entityset and markdown_pattern",
+        schemaName: "product-unordered-related-tables-links",
+        displayname: "inbound related with display.wait_for entityset",
+        name: "accommodation_inbound1",
+        baseTable:"Accommodations",
+        markdownValue: "<p>accommodation_inbound1 seven, accommodation_inbound1 eight, accommodation_inbound1 nine (accommodation_inbound2 seven, accommodation_inbound2 eight, accommodation_inbound2 nine)</p>\n",
+        isMarkdown: true,
+        count: 3,
+        canEdit: true,
+        canDelete: true
+    };
+    describe("for a related entity with wait_for entity set and markdown_pattern", function () {
+        recordHelpers.testRelatedTable(related_w_entityset_waitfor, pageReadyCondition);
+    });
+
+    var related_w_agg_waitfor = {
+        comment: "related table, has waitfor entityset and markdown_pattern",
+        schemaName: "product-unordered-related-tables-links",
+        displayname: "inbound related with display.wait_for agg",
+        name: "accommodation_inbound3",
+        baseTable:"Accommodations",
+        markdownValue: "<p>accommodation_inbound3 seven, accommodation_inbound3 eight, accommodation_inbound3 nine (3)</p>\n",
+        isMarkdown: true,
+        count: 3,
+        canEdit: true,
+        canDelete: true
+    };
+    describe("for a related entity with wait_for aggregate and markdown_pattern", function () {
+        recordHelpers.testRelatedTable(related_w_agg_waitfor, pageReadyCondition);
+    });
 });
 
 describe("For scroll to query parameter", function() {
@@ -351,7 +408,10 @@ describe("For scroll to query parameter", function() {
         browser.wait(function () {
             return heading.isDisplayed().then(function (bool) {
                 return bool;
-            });
+            }).catch(function () {
+                // the element might not be even in the DOM
+                return false;
+            })
         });
 
         heading.getAttribute("class").then(function(className) {

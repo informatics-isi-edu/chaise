@@ -81,7 +81,7 @@
             $uibModalInstance.dismiss('cancel');
         }
     }])
-    .controller('ErrorModalController', ['ConfigUtils', 'Errors', 'logService', 'messageMap', 'params', 'Session', '$rootScope', '$sce', '$uibModalInstance', '$window', function ErrorModalController(ConfigUtils, Errors, logService, messageMap, params, Session, $rootScope, $sce, $uibModalInstance, $window) {
+    .controller('ErrorModalController', ['ConfigUtils', 'Errors', 'logService', 'messageMap', 'params', 'Session', 'UriUtils', '$rootScope', '$sce', '$uibModalInstance', '$window', function ErrorModalController(ConfigUtils, Errors, logService, messageMap, params, Session, UriUtils, $rootScope, $sce, $uibModalInstance, $window) {
         var cc = ConfigUtils.getConfigJSON();
         function isErmrestErrorNeedReplace (error) {
             switch (error.constructor) {
@@ -115,6 +115,7 @@
         vm.displayDetails = false;
         vm.linkText = messageMap.showErrDetails;
         vm.showReloadBtn = false;
+        vm.showOkBtn = true;
         var notAllowedPermissionAccess = (vm.params.exception instanceof Errors.UnauthorizedAssetAccess  || vm.params.exception instanceof Errors.ForbiddenAssetAccess)
         vm.showDownloadPolicy = (notAllowedPermissionAccess && cc.assetDownloadPolicyURL && cc.assetDownloadPolicyURL.trim().length > 0 && typeof cc.assetDownloadPolicyURL == "string");
         if (vm.showDownloadPolicy) vm.downloadPolicy = cc.assetDownloadPolicyURL;
@@ -129,6 +130,22 @@
             vm.clickActionMessage =  messageMap.clickActionMessage.multipleRecords;
         } else if (exception instanceof Errors.noRecordError) {
             vm.clickActionMessage = messageMap.clickActionMessage.noRecordsFound;
+        } else if (exception instanceof Errors.DifferentUserConflictError) {
+            vm.showOkBtn = false;
+            vm.showReloadBtn = exception.showReloadBtn;;
+            vm.showContinueBtn = exception.showContinueBtn;
+            // contains the `reloadMessage` already since it's customized in the error
+            vm.clickActionMessage = exception.errorData.clickActionMessage;
+            vm.continueMessage = exception.errorData.continueMessage;
+            vm.continueBtnText = exception.errorData.continueBtnText;
+
+            vm.continue = function () {
+                exception.errorData.continueCB($uibModalInstance);
+            }
+
+            vm.switchUserAccounts = function () {
+                $window.open(UriUtils.chaiseDeploymentPath() + 'lib/switchUserAccounts.html', '_blank');
+            }
         } else if ( (exception instanceof Errors.CustomError && exception.errorData.clickActionMessage) || notAllowedPermissionAccess) {
             vm.clickActionMessage = exception.errorData.clickActionMessage;
         } else if (ERMrest && exception instanceof ERMrest.InvalidFilterOperatorError) {
@@ -159,6 +176,8 @@
         };
 
         vm.ok = function () {
+            // NOTE: Doing this in recordedit allows the user to dismiss the browser reload popup and see the app
+            // basically allowing the modal to be dismissed
             $uibModalInstance.close();
         };
 
@@ -312,7 +331,11 @@
          * If we had the matchNotNull, then we just need to pass that attribute.
          */
         function submitMultiSelection() {
-            $uibModalInstance.close(getMultiSelectionResult());
+            if (vm.params.submitBeforeClose) {
+                vm.params.submitBeforeClose(getMultiSelectionResult());
+            } else {
+                $uibModalInstance.close(getMultiSelectionResult());
+            }
         }
 
         function cancel() {
@@ -333,7 +356,8 @@
     .controller('profileModalDialogController', ['$uibModalInstance','$rootScope', 'ConfigUtils', 'Session','UriUtils',function ($uibModalInstance, $rootScope, ConfigUtils, Session, UriUtils){
         var dcctx = ConfigUtils.getContextJSON();
         var vm = this;
-        vm.groupList =[];
+        vm.globusGroupList = [];
+        vm.otherGroups = [];
         vm.identities = [];
         vm.client = {};
         vm.cancel = function() {
@@ -347,11 +371,14 @@
             vm.identities.push(session.client.identities[i]);
         }
 
-
         for(var i = 0; i<session.attributes.length; i++){
-            if(session.attributes[i].display_name && session.attributes[i].display_name !== user.display_name){
-                session.attributes[i].id = session.attributes[i].id.substring(24);
-                vm.groupList.push(session.attributes[i]);
+            if(session.attributes[i].display_name && session.attributes[i].display_name !== user.display_name && vm.identities.indexOf(session.attributes[i].id) == -1){
+                if (session.attributes[i].id.indexOf("https://auth.globus.org/") === 0) {
+                    session.attributes[i].truncatedId = session.attributes[i].id.substring(24);
+                    vm.globusGroupList.push(session.attributes[i]);
+                } else {
+                    vm.otherGroups.push(session.attributes[i]);
+                }
             }
         }
     }])
@@ -376,22 +403,26 @@
      *   - {Object} citation - citation object returned from ERMrest.tuple.citation
      *
      */
-    .controller('ShareCitationController', ['logService', 'params', '$uibModalInstance', '$window', function (logService, params, $uibModalInstance, $window) {
+    .controller('ShareCitationController', ['logService', 'params', '$rootScope', '$uibModalInstance', '$window', function (logService, params, $rootScope, $uibModalInstance, $window) {
         var vm = this;
-        vm.params = params;
-        vm.logActions = logService.logActions;
-        vm.warningMessage = "The displayed content may be stale due to recent changes made by other users. You may wish to review the changes prior to sharing the <a ng-href='{{ctrl.params.permalink}}'>live link</a> below. Or, you may share the older content using the <a ng-href='{{ctrl.params.versionLink}}'>versioned link</a>.";
 
-        vm.moreThanWeek = function () {
-            var weekAgo = moment().subtract(7, 'days').startOf('day');
-            var versionMoment = moment(params.versionDate);
+        // uses the $rootScope.citationReady to determine whether the citation is ready
+        // then gets the citation value from $rootScope.citation and generates the bibtextURL
+        var generateBibtexURL = function () {
+            if (!$rootScope.citationReady) {
+                vm.citation = null;
+                vm.citationReady = false;
+                return;
+            }
 
-            return weekAgo.isAfter(versionMoment);
-        }
+            var citation = $rootScope.citation;
 
-        // generate bibtex url from citation
-        if (params.citation) {
-            var citation = params.citation;
+            vm.citation = citation;
+            vm.citationReady = true;
+
+            // it might be null
+            if (!vm.citation) return;
+
             var bibtexContent = "@article{";
             bibtexContent += (citation.id ? citation.id+",\n" : params.displayname+",\n");
             if (citation.author) bibtexContent += "author = {" + citation.author + "},\n";
@@ -403,6 +434,21 @@
             var bibtexBlob = new Blob([ bibtexContent ], { type : 'text/plain' });
             // set downloadURL for ng-href attribute
             vm.downloadBibtex = $window.URL.createObjectURL( bibtexBlob );
+        }
+
+        vm.params = params;
+        vm.logActions = logService.logActions;
+
+        // run the function once in case the citation is ready on load
+        generateBibtexURL();
+
+        vm.warningMessage = "The displayed content may be stale due to recent changes made by other users. You may wish to review the changes prior to sharing the <a ng-href='{{ctrl.params.permalink}}'>live link</a> below. Or, you may share the older content using the <a ng-href='{{ctrl.params.versionLink}}'>versioned link</a>.";
+
+        vm.moreThanWeek = function () {
+            var weekAgo = moment().subtract(7, 'days').startOf('day');
+            var versionMoment = moment(params.versionDate);
+
+            return weekAgo.isAfter(versionMoment);
         }
 
         vm.copyToClipboard = function (text, action) {
@@ -441,6 +487,14 @@
         vm.cancel = function() {
             $uibModalInstance.dismiss('cancel');
         }
+
+        // The citation might not be ready when we open the modal, so we should just watch for it
+        $rootScope.$watch(function () {
+            return $rootScope.citationReady;
+        }, function () {
+            generateBibtexURL();
+        }, true);
+
     }])
 
     .controller('RedirectController', ['$interval', '$timeout', '$uibModalInstance', function ($interval, $timeout, $uibModalInstance) {

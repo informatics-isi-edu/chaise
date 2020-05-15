@@ -10,7 +10,7 @@
         <button type="button" class="close" ng-click="ctrl.closeAlert();" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <strong>Warning</strong> <span compile="ctrl.warningMessage"></span>
     </div>
-    <ul>
+    <ul style="word-break: break-word;">
         <li id="share-link">
             <h2>Share Link</h2>
             <h3>
@@ -25,13 +25,17 @@
             </h3>
             <a id="permalink" ng-href="{{::ctrl.params.permalink}}">{{::ctrl.params.permalink}}</a>
         </li>
-        <li id="citation" ng-if="::ctrl.params.citation">
+        <li class="citation-loader" ng-if="!ctrl.citationReady">
+            <img class="spinner spinner-sm" src="../common/styles/images/loader.gif"/>
+            Loading...
+        </li>
+        <li id="citation" ng-if="ctrl.citationReady && ctrl.citation">
             <h2>Data Citation</h2>
             <div id="citation-text">
-                <span ng-if="::ctrl.params.citation.author">{{::ctrl.params.citation.author}} </span><span ng-if="::ctrl.params.citation.title">{{::ctrl.params.citation.title}} </span><i>{{::ctrl.params.citation.journal}}</i> <a ng-href="{{::ctrl.params.citation.url}}">{{::ctrl.params.citation.url}}</a> ({{::ctrl.params.citation.year}}).
+                <span ng-if="::ctrl.citation.author">{{::ctrl.citation.author}} </span><span ng-if="::ctrl.citation.title">{{::ctrl.citation.title}} </span><i>{{::ctrl.citation.journal}}</i> <a ng-href="{{::ctrl.citation.url}}">{{::ctrl.citation.url}}</a> ({{::ctrl.citation.year}}).
             </div>
         </li>
-        <li id="download-citation" ng-if="::ctrl.params.citation">
+        <li id="download-citation" ng-if="$root.citationReady && ctrl.downloadBibtex">
             <h3>Download Data Citation:</h3>
             <a id="bibtex-download" class="chaise-btn chaise-download-btn" download="{{::ctrl.params.displayname}}.bib" ng-href="{{::ctrl.downloadBibtex}}" ng-click="::ctrl.logCitationDownload(ctrl.logActions.CITE_BIBTEXT_DOWNLOAD)">BibTex</a>
         </li>

@@ -8,9 +8,9 @@
 </head>
 <body class="chaise-body">
     <div class="configure-container" ng-app="chaise.configure-viewer">
-        <loading-spinner></loading-spinner>
+        <loading-spinner ng-show="!displayReady"></loading-spinner>
     </div>
-    <div class="app-container">
+    <div class="app-container" ng-show="displayReady">
         <navbar></navbar>
         <div>
             <!-- CONTROLLER: OSDController -->
@@ -42,7 +42,7 @@
                 </div>
 
                 <div id="viewer-content">
-                    <div id="sidebar" class="sidebar faceting-resizable" resizable r-directions=["right"] r-flex="true">
+                    <div id="sidebar" class="sidebar faceting-resizable" >
 
                     <!-- <div id="sidebar" ng-class="sidebar faceting-resizable {'open-panel': !osd.annotationsSidebarAreHidden, 'close-panel': osd.annotationsSidebarAreHidden}" resizable r-directions=["right"] r-flex="true"> -->
                         <div ng-controller="AnnotationsController as anno" class='annotation-list facet-panel'>

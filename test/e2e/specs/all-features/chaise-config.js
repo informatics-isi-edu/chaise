@@ -11,10 +11,11 @@ var chaiseConfig = {
     headTitle: 'this one should be ignored in favor of navbarBrandText',
     // config for biewer spec
     customCSS: '/path/to/custom/css',
-    maxRelatedTablesOpen: 9,
+    maxRelatedTablesOpen: 11,
     resolverImplicitCatalog: null,
     disableDefaultExport: true,
     disableExternalLinkModal: true,
+    logClientActions: false,
     navbarMenu: {
         children: [
             {

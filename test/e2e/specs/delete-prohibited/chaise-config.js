@@ -7,7 +7,9 @@ var chaiseConfig = {
     showFaceting: true,
     navbarBrandText: 'test123',
     navbarBrandImage: '../images/genetic-data.png',
+    maxRecordsetRowHeight: 100,
     disableExternalLinkModal: true,
+    logClientActions: false,
     hideTableOfContents: true,
     resolverImplicitCatalog: 4 // when run in parallel config mode, this config runs for catalogId 4 in travis
 };

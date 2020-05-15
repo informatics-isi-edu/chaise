@@ -56,6 +56,8 @@
         }]);
     }])
 
+    // TODO: is this ever being called?
+    // maybe there's an error occuring inside of it and it's trying to catch itself but can't because of the error
     .config(function($provide) {
         $provide.decorator("$exceptionHandler", ['$log', '$injector', function($log, $injector) {
             return function(exception, cause) {
@@ -285,6 +287,8 @@
                                 // initialize row objects {column-name: value,...}
                                 recordEditModel.rows[j] = {};
                                 // needs to be initialized so foreign keys can be set
+                                // these are the values that we're sending to ermrestjs,
+                                // chaise should not use these values and we should just populate the values
                                 recordEditModel.submissionRows[j] = {};
 
                                 var tuple = page.tuples[j],

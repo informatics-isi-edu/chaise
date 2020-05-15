@@ -3,8 +3,8 @@
 
     angular.module('chaise.authen', ['chaise.utils', 'chaise.storage'])
 
-    .factory('Session', ['ConfigUtils', 'messageMap', 'logService', 'modalUtils', 'StorageService', 'UriUtils', '$cookies', '$interval', '$log', '$q', '$rootScope', '$sce', '$uibModalStack', '$window',
-        function (ConfigUtils, messageMap, logService, modalUtils, StorageService, UriUtils, $cookies, $interval, $log, $q, $rootScope, $sce, $uibModalStack, $window) {
+    .factory('Session', ['ConfigUtils', 'Errors', 'messageMap', 'logService', 'modalUtils', 'StorageService', 'UriUtils', '$cookies', '$interval', '$log', '$q', '$rootScope', '$sce', '$uibModalStack', '$window',
+        function (ConfigUtils, Errors, messageMap, logService, modalUtils, StorageService, UriUtils, $cookies, $interval, $log, $q, $rootScope, $sce, $uibModalStack, $window) {
         // authn API no longer communicates through ermrest, removing the need to check for ermrest location
         var serviceURL = $window.location.origin;
 
@@ -12,8 +12,9 @@
         var PROMPT_EXPIRATION_KEY = 'promptExpiration'; // name of key for prompt expiration value
         var PREVIOUS_SESSION_KEY = 'previousSession';   // name of key for previous session boolean
 
-        // Private variable to store current session object
-        var _session = null;
+        var _session = null;                            // current session object
+        var _prevSession = null;                        // previous session object
+        var _sameSessionAsPrevious = false;
 
         var _changeCbs = {};
 
@@ -27,15 +28,37 @@
 
         /**
          * Functions that interact with the StorageService tokens
-         * There are 2 keys stored under the LOCAL_STORAGE_KEY object, PROMPT_EXPIRATION_KEY and PREVIOUS_SESSION_KEY
+         * There are 3 keys stored under the LOCAL_STORAGE_KEY object, PROMPT_EXPIRATION_KEY, PREVIOUS_SESSION_KEY
          */
 
+        // returns data stored in loacal storage for `keyName`
+        var _getKeyFromStorage = function (keyName) {
+            return StorageService.getStorage(LOCAL_STORAGE_KEY)[keyName];
+        }
+
+        // create value in storage with `keyName` and `value`
+        var _setKeyInStorage = function (keyName, value) {
+            var data = {};
+
+            data[keyName] = value;
+
+            StorageService.updateStorage(LOCAL_STORAGE_KEY, data);
+        }
+
+        // removes the key/value pair at `keyName`
+        var _removeKeyFromStorage = function (keyName) {
+            if (_keyExistsInStorage(keyName)) {
+                StorageService.deleteStorageValue(LOCAL_STORAGE_KEY, keyName);
+            }
+        };
+
         // verifies value exists for `keyName`
-        var _tokenExists = function(keyName) {
+        var _keyExistsInStorage = function(keyName) {
             var sessionStorage = StorageService.getStorage(LOCAL_STORAGE_KEY);
 
             return (sessionStorage && sessionStorage[keyName]);
         };
+
 
         // creates an expiration token with `keyName`
         var _createToken = function (keyName) {
@@ -48,13 +71,6 @@
             StorageService.updateStorage(LOCAL_STORAGE_KEY, data);
         };
 
-        // removes the key/value pair at `keyName`
-        var _removeToken = function (keyName) {
-            if (_tokenExists(keyName)) {
-                StorageService.deleteStorageValue(LOCAL_STORAGE_KEY, keyName);
-            }
-        };
-
         // checks if the expiration token with `keyName` has expired
         var _expiredToken = function (keyName) {
             var sessionStorage = StorageService.getStorage(LOCAL_STORAGE_KEY);
@@ -64,20 +80,15 @@
 
         // extends the expiration token with `keyName` if it hasn't expired
         var _extendToken = function (keyName) {
-            if (_tokenExists(keyName) && !_expiredToken(keyName)) {
+            if (_keyExistsInStorage(keyName) && !_expiredToken(keyName)) {
                 _createToken(keyName);
             }
         };
 
-        // creates a boolean token with `keyName`
-        var _createBool = function (keyName) {
-            var data = {};
+        // variable so the modal can be passed to another function outside of this scope to close it when appropriate
+        var modalInstance = null;
 
-            data[keyName] = true;
-
-            StorageService.updateStorage(LOCAL_STORAGE_KEY, data);
-        };
-
+        // post login callback function
         var loginWindowCb = function (params, referrerId, cb, type, rejectCb){
             if(type.indexOf('modal')!== -1){
                 if (_session) {
@@ -86,20 +97,29 @@
                     params.title = messageMap.noSession.title;
                 }
                 var closed = false;
-                var onModalCloseSuccess = function () {
-                    onModalClose();
-                }
 
-                var onModalClose = function(response) {
+                var cleanupModal = function (message) {
                     $interval.cancel(intervalId);
                     $cookies.remove("chaise-" + referrerId, { path: "/" });
                     closed = true;
+                }
+                var onModalCloseSuccess = function () {
+                    cleanupModal("login refreshed");
+                    cb();
+                }
 
-                    $uibModalStack.dismissAll("no login");
-                    if (rejectCb) rejectCb(response);
+                var onModalClose = function(response) {
+                    cleanupModal("no login");
+                    if (rejectCb) {
+                        //  ermrestJS throws error if 'response' is not formatted as an Error
+                        if (typeof response == "String") {
+                            response = new Error(response);
+                        }
+                        rejectCb(response);
+                    }
                 };
 
-                var modalInstance = modalUtils.showModal({
+                modalInstance = modalUtils.showModal({
                     windowClass: "modal-login-instruction",
                     templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/loginDialog.modal.html",
                     controller: 'LoginDialogController',
@@ -141,8 +161,8 @@
             else {
                 window.addEventListener('message', function(args) {
                     if (args && args.data && (typeof args.data == 'string')) {
-                        _createBool(PREVIOUS_SESSION_KEY);
-                        _removeToken(PROMPT_EXPIRATION_KEY);
+                        _setKeyInStorage(PREVIOUS_SESSION_KEY);
+                        _removeKeyFromStorage(PROMPT_EXPIRATION_KEY);
                         var obj = UriUtils.queryStringToJSON(args.data);
                         if (obj.referrerid == referrerId && (typeof cb== 'function')) {
                             if(type.indexOf('modal')!== -1){
@@ -224,65 +244,108 @@
         };
 
         /**
-         * uses the reloadCb function to reload the page no matter what after a user logs in
-         * creates a race condition with the calback registered for the LoginInAModal function
+         * opens a window dialog for logging in
          */
-        var popupLogin = function (logAction) {
-            var reloadCb = function(){
-                window.location.reload();
-            };
+        var popupLogin = function (logAction, postLoginCB) {
+            if (!postLoginCB) {
+                postLoginCB = function(){
+                    if (!shouldReloadPageAfterLogin()) {
+                        // fetches the session of the user that just logged in
+                        _getSession().then(function () {
+                            if (modalInstance) modalInstance.close();
+                        });
+                    } else {
+                        window.location.reload();
+                    }
+                };
+            }
 
             var x = window.innerWidth/2 - 800/2;
             var y = window.innerHeight/2 - 600/2;
 
             var win = window.open("", '_blank','width=800,height=600,left=' + x + ',top=' + y);
 
-            logInHelper(loginWindowCb, win, reloadCb, 'popUp', null, logAction);
+            logInHelper(loginWindowCb, win, postLoginCB, 'popUp', null, logAction);
         };
 
-        var shouldReloadPageAfterLogin = function(newSession) {
-            if (_session === null) return true;
+        // Checks for a session or previous session being set, if neither allow the page to reload
+        // the page will reload after login when the page started with no user
+        // _session can become null if getSession is called and the session has timed out or the user logged out
+        var shouldReloadPageAfterLogin = function() {
+            if (_session === null && _prevSession == null) return true;
             return false;
         };
 
-        return {
+        /**
+         * Will return a promise that is resolved with the session.
+         * It will also call the _executeListeners() functions and sets the _session.
+         * If we couldn't fetch the session, it will resolve with `null`.
+         *
+         * @param  {string=} context undefined or "401"
+         */
+        var _getSession = function(context) {
+            var config = {
+                skipHTTP401Handling: true,
+                headers: {}
+            };
+
+            config.headers[ERMrest.contextHeaderName] = {
+                action: logService.getActionString(logService.logActions.SESSION_RETRIEVE, "", "")
+            }
 
             /**
-             * Will return a promise that is resolved with the session.
-             * It will also call the _executeListeners() functions and sets the _session.
-             * If we couldn't fetch the session, it will resolve with `null`.
+             * NOTE: the following is for future implementation when we decide to verify session against the cookie object
+             * see if there's a token before doing any decision making
              *
-             * TODO needs to be revisited for 401.
-             * We want to reload the page and stop the code execution for 401,
-             *  but currently the code will continue executing and then reloads.
+             * if there's no webauthnCookie || no cookieFromStorage, login flow
              *
-             * @param  {string=} context undefined or "401"
-             */
-            getSession: function(context) {
-                var config = {
-                    skipHTTP401Handling: true,
-                    headers: {}
-                };
-                config.headers[ERMrest.contextHeaderName] = {
-                    action: logService.getActionString(logService.logActions.SESSION_RETRIEVE, "", "")
+             * if there's a webauthnCookie user was logged in at some point on this machine, check to see if it matches _cookie
+             *  - if NOT match page was used by someone that's not the current webauthn cookie holder, check webauthnCookie matches cookieFromStorage
+             *    - if match, check cookieFromStorage.expires is not expired
+             *      - if expired, login flow
+             *      - if not expired, use local storage session
+             *    - if NOT match, shouldn't happen unless cookie in browser is updated without chaise
+             *  - if match user had a session on this page, make sure _session.expires is not expired
+             *    - if not expired, TODO leasing idea
+             *    - if expired, login timeout warning
+             *
+             * no webauthn
+             * if there's a cookieFromStorage user was here before, see if it is expired
+             *  - if expired
+            **/
+
+            return ConfigUtils.getHTTPService().get(serviceURL + "/authn/session", config).then(function(response) {
+                if (context === "401" && shouldReloadPageAfterLogin()) {
+                    window.location.reload();
+                    return response.data;
                 }
-                return ConfigUtils.getHTTPService().get(serviceURL + "/authn/session", config).then(function(response) {
-                    if (context === "401" && shouldReloadPageAfterLogin(response.data)) {
-                        window.location.reload();
-                        return response.data;
-                    }
 
+                // keep track of only the first session, so when a timeout occurs, we can compare the sessions
+                // when a new session is fetched after timeout, check if the identities are the same
+                if (_prevSession) {
+                    _sameSessionAsPrevious = _prevSession.client.id == response.data.client.id;
+                } else {
+                    _prevSession = response.data
+                }
+
+                if (!_session) {
+                    // only update _session if no session is set
                     _session = response.data;
-                    _executeListeners();
-                    return _session;
-                }).catch(function(err) {
-                    $log.warn(ERMrest.responseToError(err));
+                }
 
-                    _session = null;
-                    _executeListeners();
-                    return _session;
-                });
-            },
+                _executeListeners();
+                return _session;
+            }).catch(function(err) {
+                $log.warn(ERMrest.responseToError(err));
+
+                _session = null;
+                _executeListeners();
+                return _session;
+            });
+        }
+
+        return {
+            getSession: _getSession,
 
             /**
              * Will return a promise that is resolved with the session.
@@ -297,7 +360,10 @@
                     action: logService.getActionString(logService.logActions.SESSION_VALIDATE, "", "")
                 }
                 return ConfigUtils.getHTTPService().get(serviceURL + "/authn/session", config).then(function(response) {
-                    _session = response.data;
+                    if (!_session) {
+                        // only update _session if no session is set
+                        _session = response.data;
+                    }
                     return _session;
                 }).catch(function(err) {
                     $log.warn(ERMrest.responseToError(err));
@@ -307,14 +373,86 @@
                 });
             },
 
+            // Makes a request to fetch the most recent session from the server
+            // verifies if that is the same as when the page loaded before calling `cb`
+            validateSessionBeforeMutation: function (cb) {
+                var handleDiffUser = function () {
+                    // modalInstance comes from error modal controller to close the modal after logging in, but before checking to throw an error again
+                    var checkSession = function (modalInstance) {
+                        modalInstance.dismiss("continue");
+                        // check if login state resolved
+                        _getSession().then(function (session) {
+                            if (!session || !_sameSessionAsPrevious) {
+                                handleDiffUser()
+                            } else {
+                                cb();
+                            }
+                        });
+                    }
+
+                    var errorCB = checkSession;
+
+                    if (!_session) {
+                        // for continuing in the modal if there is a user
+                        errorCB = function (modalInstance) {
+                            popupLogin(logService.logActions.SWITCH_USER_ACCOUNTS_LOGIN, function () {
+                                checkSession(modalInstance);
+                            });
+                        }
+                    }
+
+                    throw new Errors.DifferentUserConflictError(_session, _prevSession, errorCB); // cannot dismiss
+                }
+
+                // Checks if an error needs to be thrown because the user is different and continues execution if the login state is resolved
+                // a session must exist before calling this function
+                var validateSessionSubmit = function () {
+                    if (!_sameSessionAsPrevious) {
+                        handleDiffUser();
+                    } else {
+                        // we have a session now and it's the same as when the app started
+                        cb();
+                    }
+                }
+
+                _getSession().then(function (session) {
+                    if (!session) {
+                        var onSuccess = function () {
+                            validateSessionSubmit();
+                        }
+
+                        var onError = function (err) {
+                            // NOTE: user didn't login, what's the error ?
+                            // same error message as duplicate user except "anon"
+                            handleDiffUser();
+                        }
+
+                        // should be modal login
+                        logInHelper(loginWindowCb, "", onSuccess, 'modal', onError, logService.logActions.SWITCH_USER_ACCOUNTS_LOGIN);
+                    } else {
+                        validateSessionSubmit();
+                    }
+                });
+            },
+
             getSessionValue: function() {
                 return _session;
             },
 
+            getPrevSessionValue: function() {
+                return _prevSession;
+            },
+
+            isSameSessionAsPrevious: function() {
+                return _sameSessionAsPrevious;
+            },
+
+            shouldReloadPageAfterLogin: shouldReloadPageAfterLogin,
+
             // if there's a previous login token AND
             // the prompt expiration token does not exist OR it has expired
             showPreviousSessionAlert: function() {
-                return (_tokenExists(PREVIOUS_SESSION_KEY) && (!_tokenExists(PROMPT_EXPIRATION_KEY) || _expiredToken(PROMPT_EXPIRATION_KEY)));
+                return (_keyExistsInStorage(PREVIOUS_SESSION_KEY) && (!_keyExistsInStorage(PROMPT_EXPIRATION_KEY) || _expiredToken(PROMPT_EXPIRATION_KEY)));
             },
 
             subscribeOnChange: function(fn) {
@@ -353,7 +491,7 @@
                 logInHelper(loginWindowCb, "", notifyErmrestCB, 'modal', notifyErmrestRejectCB, logAction);
             },
 
-            logout: function() {
+            logout: function(action) {
                 var chaiseConfig = ConfigUtils.getConfigJSON();
                 var logoutURL = chaiseConfig['logoutURL'] ? chaiseConfig['logoutURL'] : '/';
                 var url = serviceURL + "/authn/session";
@@ -365,7 +503,7 @@
                     headers: {}
                 };
                 config.headers[ERMrest.contextHeaderName] = {
-                    action: logService.getActionString(logService.logActions.LOGOUT_NAVBAR, "", "")
+                    action: logService.getActionString(action, "", "")
                 }
                 ConfigUtils.getHTTPService().delete(url, config).then(function(response) {
                     StorageService.deleteStorageNamespace(LOCAL_STORAGE_KEY);
@@ -386,7 +524,7 @@
 
         angular.module('chaise.authen')
 
-        .run(['ERMrest', '$injector', '$q', function runRecordEditApp(ERMrest, $injector, $q) {
+        .run(['ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', '$injector', '$q', function runRecordEditApp(ConfigUtils, ERMrest, Errors, ErrorService, $injector, $q) {
 
             var Session = $injector.get("Session");
 
@@ -404,7 +542,19 @@
                     // and resolve the promise to notify ermrestjs that the user has logged in
                     // and it can continue firing other queued calls
                     Session.getSession("401").then(function(_session) {
-                        defer.resolve();
+                        var prevSession = Session.getPrevSessionValue();
+                        // Not sure if this will trigger on page load, if not I think it's safe to run this in all contexts
+                        // recordset  - read should throw a 409 if there's a permission issue
+                        // record     - same issue with read above
+                        //            - p&b add throws a conflict error in most cases, so won't get sent here either (RBK)
+                        // recordedit - add/update return here in some cases, and in other cases will return a 409 and ignore this case
+                        var differentUser = prevSession && !Session.isSameSessionAsPrevious();
+
+                        // send boolean to communicate in ermrestJS if execution should continue after 401 error thrown and subsequent login
+                        defer.resolve(differentUser);
+
+                        // throw Error if login is successful but it's a different user
+                        if (differentUser) ErrorService.handleException(new Errors.DifferentUserConflictError(_session, prevSession), false);
                     }, function(exception) {
                         defer.reject(exception);
                     });
