@@ -128,7 +128,6 @@ before_script:
   - sudo -H -u webauthn webauthn2-manage assign test1 admin
 
 script:
-  - make install
   - make testfullfeaturesconfirmation
   - make testdefaultconfig
   - make testfullfeatures
