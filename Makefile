@@ -542,6 +542,11 @@ $(BIN): $(MODULES)
 $(MODULES): package.json
 	npm install
 
+# Rule to create the package.
+# - we have to make sure the npm dependencies required for build are installed.
+# - we have to clean all the dist files because we need to generate new ones.
+$(DIST): print_variables npm_install_prod_modules clean $(SASS) $(HTML) gitversion
+
 # dummy target to always run the targets that depend on it
 FORCE:
 
@@ -566,38 +571,43 @@ clean:
 distclean: clean
 	rm -rf $(MODULES) || true
 
-
-# Rule to make html
-.PHONY: html
-html: $(HTML)
-
+# Rule to build chaise
 .PHONY: all
-# all should just do the minimal needed to deploy chaise
-all: clean npm_install_prod_modules $(SASS) $(HTML)
+all: $(DIST)
 
-# TODO we should just copy the folders that we know not everything
-# Rule for installing for normal deployment
+# Rule for installing for normal deployment (build chaise and deploy)
 .PHONY: install dont_install_in_root
-install: npm_install_prod_modules $(SASS) $(HTML) dont_install_in_root gitversion
+install: $(DIST) dont_install_in_root
 	$(info - deploying the package)
 	@rsync -avz --exclude='.*' --exclude='test' --exclude='$(MODULES)' --exclude=/chaise-config.js . $(CHAISEDIR)
 
+# Rule for installing during testing (build chaise and deploy with the chaise-config)
 .PHONY: install-w-config dont_install_in_root
-install-w-config: $(SASS) $(HTML) dont_install_in_root gitversion
+install-w-config: $(DIST) dont_install_in_root $(JS_CONFIG)
 	$(info - deploying the package with the existing default chaise-config)
 	@rsync -avz --exclude='.*' --exclude='test' --exclude='$(MODULES)' . $(CHAISEDIR)
 
+# Rule to create version.txt
 .PHONY: gitversion
 gitversion:
 	$(info - creating version.txt)
 	@sh ./git_version_info.sh
 
-# TODO do the same thing that you did in ermrestjs (we shouldn't do this all the times)
+# we want to make sure npm install is done for production
+# if we don't run this, npm install without any flags will be called from
+# make install which will install all the dependencies of npm.
 npm_install_prod_modules:
 	npm install --production
 
 dont_install_in_root:
 	@echo "$(CHAISEDIR)" | egrep -vq "^/$$|.*:/$$"
+
+print_variables:
+	$(info =================)
+	$(info BUILD_VERSION=$(BUILD_VERSION))
+	$(info building and deploying to: $(CHAISEDIR))
+	$(info Chaise will be accessed using: $(CHAISE_BASE_PATH))
+	$(info =================)
 
 # Rules for help/usage
 .PHONY: help usage

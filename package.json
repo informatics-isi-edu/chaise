@@ -4,11 +4,10 @@
   "version": "0.0.0",
   "license": "Apache-2.0",
   "private": true,
-  "main": "chaise.js",
   "scripts": {
-    "build": "make build",
-    "pretest": "make build",
-    "docs": "make doc"
+    "build": "make install",
+    "pretest": "npm install",
+    "test": "make test"
   },
   "repository": {
     "type": "git",
@@ -35,6 +34,5 @@
   "dependencies": {
     "node-sass": "x",
     "uglify-js": "x"
-  },
-  "postinstall": "cd node_modules/protractor && npm i webdriver-manager@latest"
+  }
 }
