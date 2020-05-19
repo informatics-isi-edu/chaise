@@ -3,9 +3,8 @@
     <head>
         <title>Record Set App</title>
         <meta charset="UTF-8">
-        %META%
         <script src="/gtm-id.js"></script>
-        %ASSETS%
+        %INCLUDES%
     </head>
     <body class="chaise-body">
         <div class="configure-container" ng-app="chaise.configure-recordset">

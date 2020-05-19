@@ -181,14 +181,24 @@ test: test-ALL_TESTS
 #						BULDING THE PACKAGE						#
 # ============================================================= #
 
-# HTML
+# HTML files that need to be created
 HTML=login/index.html \
 	 recordset/index.html \
 	 viewer/index.html \
 	 recordedit/index.html \
 	 record/index.html \
 	 recordedit/mdHelp.html \
-	 lib/switchUserAccounts.html
+	 lib/switchUserAccounts.html \
+	 $(DIST)/chaise_includes.html
+
+# the minified files that need to be created
+MIN=$(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) \
+	$(DIST)/$(SHARED_JS_SOURCE_MIN) \
+	$(DIST)/$(RECORD_JS_SOURCE_MIN) \
+	$(DIST)/$(RECORDSET_JS_SOURCE_MIN) \
+	$(DIST)/$(RECORDEDIT_JS_SOURCE_MIN) \
+	$(DIST)/$(VIEWER_JS_SOURCE_MIN) \
+	$(DIST)/$(LOGIN_JS_SOURCE_MIN)
 
  DIST=dist
 
@@ -253,8 +263,7 @@ $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN): $(SHARED_JS_VENDOR_ASSET)
 
 SHARED_CSS_SOURCE=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/vendor/fontawesome.min.css \
-	$(COMMON)/styles/app.css \
-	$(COMMON)/vendor/MarkdownEditor/styles/github-markdown.css
+	$(COMMON)/styles/app.css
 
 SASS=$(COMMON)/styles/app.css
 $(SASS): $(shell find $(COMMON)/styles/scss/)
@@ -267,10 +276,13 @@ $(JS_CONFIG): chaise-config-sample.js
 	cp -n chaise-config-sample.js $(JS_CONFIG) || true
 	touch $(JS_CONFIG)
 
-.make-meta-tags: FORCE
-	$(info - creating .make-meta-tags)
-	@echo "<meta name='version' content='${BUILD_VERSION}'/>" >> .make-meta-tags
-	@echo "<meta name='chaiseBasePath' content='${CHAISE_BASE_PATH}'/>" >> .make-meta-tags
+$(DIST)/chaise_includes.html: $(BUILD_VERSION)
+	$(info - creating chaise_includes.html)
+	@> $(DIST)/chaise_includes.html
+	@$(call add_meta_tags,$(DIST)/chaise_includes.html)
+	@$(call add_css_link,$(DIST)/chaise_includes.html,)
+	@$(call add_js_script,$(DIST)/chaise_includes.html,$(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN))
+	@$(call add_ermrestjs_script,$(DIST)/chaise_includes.html)
 
 # -------------------------- record app -------------------------- #
 RECORD_ROOT=record
@@ -287,16 +299,17 @@ RECORD_JS_VENDOR_ASSET=
 
 RECORD_CSS_SOURCE=
 
-.make-record-asset-block: $(SHARED_CSS_SOURCE) $(RECORD_CSS_SOURCE) $(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(RECORD_JS_VENDOR_ASSET) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(DIST)/$(RECORD_JS_SOURCE_MIN)
-	$(info - creating .make-record-asset-block)
-	@> .make-record-asset-block
-	@$(call add_css_link, .make-record-asset-block, $(SHARED_CSS_SOURCE) $(RECORD_CSS_SOURCE))
-	@$(call add_js_script, .make-record-asset-block, $(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(RECORD_JS_VENDOR_ASSET) $(DIST)/$(RECORD_JS_SOURCE_MIN))
-	@$(call add_ermrestjs_script, .make-record-asset-block)
+.make-record-includes: $(BUILD_VERSION)
+	$(info - creating .make-record-includes)
+	@> .make-record-includes
+	@$(call add_meta_tags,.make-record-includes)
+	@$(call add_css_link,.make-record-includes,$(RECORD_CSS_SOURCE))
+	@$(call add_js_script, .make-record-includes,$(SHARED_JS_VENDOR_BASE) $(RECORD_JS_VENDOR_ASSET) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(DIST)/$(RECORD_JS_SOURCE_MIN))
+	@$(call add_ermrestjs_script,.make-record-includes)
 
-record/index.html: record/index.html.in .make-meta-tags .make-record-asset-block
+record/index.html: record/index.html.in .make-record-includes
 	$(info - creating record/index.html)
-	@$(call build_html, .make-record-asset-block, record/index.html)
+	@$(call build_html, .make-record-includes, record/index.html)
 
 # -------------------------- recordset app -------------------------- #
 
@@ -313,16 +326,17 @@ RECORDSET_JS_VENDOR_ASSET=
 
 RECORDSET_CSS_SOURCE=
 
-.make-recordset-asset-block: $(SHARED_CSS_SOURCE) $(RECORDSET_CSS_SOURCE) $(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(RECORDSET_JS_VENDOR_ASSET) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(DIST)/$(RECORDSET_JS_SOURCE_MIN)
-	$(info - creating .make-recordset-asset-block)
-	@> .make-recordset-asset-block
-	@$(call add_css_link, .make-recordset-asset-block, $(SHARED_CSS_SOURCE) $(RECORDSET_CSS_SOURCE))
-	@$(call add_js_script, .make-recordset-asset-block, $(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(RECORDSET_JS_VENDOR_ASSET) $(DIST)/$(RECORDSET_JS_SOURCE_MIN))
-	@$(call add_ermrestjs_script, .make-recordset-asset-block)
+.make-recordset-includes: $(BUILD_VERSION)
+	@> .make-recordset-includes
+	$(info - creating .make-recordset-includes)
+	@$(call add_meta_tags,.make-recordset-includes)
+	@$(call add_css_link,.make-recordset-includes,$(RECORDSET_CSS_SOURCE))
+	@$(call add_js_script,.make-recordset-includes,$(SHARED_JS_VENDOR_BASE) $(RECORDSET_JS_VENDOR_ASSET) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(DIST)/$(RECORDSET_JS_SOURCE_MIN))
+	@$(call add_ermrestjs_script,.make-recordset-includes)
 
-recordset/index.html: recordset/index.html.in .make-meta-tags .make-recordset-asset-block
+recordset/index.html: recordset/index.html.in .make-recordset-includes
 	$(info - creating recordset/index.html)
-	@$(call build_html, .make-recordset-asset-block, recordset/index.html)
+	@$(call build_html,.make-recordset-includes,recordset/index.html)
 
 
 # -------------------------- recordedit app -------------------------- #
@@ -350,36 +364,36 @@ RECORDEDIT_JS_VENDOR_ASSET=$(JS)/vendor/select.js \
 RECORDEDIT_CSS_SOURCE=$(COMMON)/vendor/MarkdownEditor/styles/bootstrap-markdown.min.css \
 	$(COMMON)/vendor/MarkdownEditor/styles/github.min.css \
 	$(COMMON)/vendor/MarkdownEditor/styles/angular-markdown-editor.min.css \
-	$(COMMON)/vendor/MarkdownEditor/styles/github-markdown.css \
 	$(CSS)/vendor/rzslider.css
 
-.make-recordedit-asset-block: $(SHARED_CSS_SOURCE) $(RECORDEDIT_CSS_SOURCE) $(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(RECORDEDIT_JS_VENDOR_ASSET) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(DIST)/$(RECORDEDIT_JS_SOURCE_MIN)
-	$(info - creating .make-recordedit-asset-block)
-	@> .make-recordedit-asset-block
-	@$(call add_css_link, .make-recordedit-asset-block, $(SHARED_CSS_SOURCE) $(RECORDEDIT_CSS_SOURCE))
-	@$(call add_js_script, .make-recordedit-asset-block, $(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(RECORDEDIT_JS_VENDOR_ASSET) $(DIST)/$(RECORDEDIT_JS_SOURCE_MIN))
-	@$(call add_ermrestjs_script, .make-recordedit-asset-block)
+.make-recordedit-includes: $(BUILD_VERSION)
+	@> .make-recordedit-includes
+	$(info - creating .make-recordedit-includes)
+	@$(call add_meta_tags,.make-recordedit-includes)
+	@$(call add_css_link,.make-recordedit-includes,$(RECORDEDIT_CSS_SOURCE))
+	@$(call add_js_script,.make-recordedit-includes,$(SHARED_JS_VENDOR_BASE) $(RECORDEDIT_JS_VENDOR_ASSET) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(DIST)/$(RECORDEDIT_JS_SOURCE_MIN))
+	@$(call add_ermrestjs_script,.make-recordedit-includes)
 
-recordedit/index.html: recordedit/index.html.in .make-meta-tags .make-recordedit-asset-block
+recordedit/index.html: recordedit/index.html.in .make-recordedit-includes
 	$(info - creating recordedit/index.html)
-	@$(call build_html, .make-recordedit-asset-block, recordedit/index.html)
+	@$(call build_html,.make-recordedit-includes,recordedit/index.html)
 
 # -------------------------- markdown help app -------------------------- #
 MDHELP_JS_SOURCE=$(RECORDEDIT_ROOT)/mdHelp.app.js
 
 MDHELP_CSS_SOURCE=$(RECORDEDIT_ROOT)/mdHelpStyle.min.css
 
-.make-mdhelp-asset-block: $(SHARED_CSS_SOURCE) $(MDHELP_CSS_SOURCE) $(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(MDHELP_JS_SOURCE)
-	$(info - creating .make-mdhelp-asset-block)
-	@> .make-mdhelp-asset-block
-	@#TODO we might be able to move the common to add_js_script and add_css_link
-	@$(call add_css_link, .make-mdhelp-asset-block, $(SHARED_CSS_SOURCE) $(MDHELP_CSS_SOURCE))
-	@$(call add_js_script, .make-mdhelp-asset-block, $(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(MDHELP_JS_SOURCE))
-	@$(call add_ermrestjs_script, .make-switchuser-asset-block)
+.make-mdhelp-includes: $(BUILD_VERSION)
+	@> .make-mdhelp-includes
+	$(info - creating .make-mdhelp-includes)
+	@$(call add_meta_tags,.make-mdhelp-includes)
+	@$(call add_css_link,.make-mdhelp-includes,$(MDHELP_CSS_SOURCE))
+	@$(call add_js_script,.make-mdhelp-includes,$(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(MDHELP_JS_SOURCE))
+	@$(call add_ermrestjs_script,.make-mdhelp-includes)
 
-recordedit/mdHelp.html: recordedit/mdHelp.html.in .make-meta-tags .make-mdhelp-asset-block
+recordedit/mdHelp.html: recordedit/mdHelp.html.in .make-mdhelp-includes
 	$(info - creating recordedit/mdHelp.html)
-	@$(call build_html, .make-mdhelp-asset-block, recordedit/mdHelp.html)
+	@$(call build_html, .make-mdhelp-includes, recordedit/mdHelp.html)
 
 # -------------------------- viewer app -------------------------- #
 VIEWER_ROOT=viewer
@@ -414,16 +428,17 @@ VIEWER_CSS_SOURCE=$(CSS)/vendor/select.css \
 	$(CSS)/vendor/select2.css \
 	$(VIEWER_ROOT)/viewer.css
 
-.make-viewer-asset-block: $(SHARED_CSS_SOURCE) $(VIEWER_CSS_SOURCE) $(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(VIEWER_JS_VENDOR_ASSET) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(DIST)/$(VIEWER_JS_SOURCE_MIN)
-	$(info - creating .make-viewer-asset-block)
-	@> .make-viewer-asset-block
-	@$(call add_css_link, .make-viewer-asset-block, $(SHARED_CSS_SOURCE) $(VIEWER_CSS_SOURCE))
-	@$(call add_js_script, .make-viewer-asset-block, $(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(VIEWER_JS_VENDOR_ASSET) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(DIST)/$(VIEWER_JS_SOURCE_MIN))
-	@$(call add_ermrestjs_script, .make-viewer-asset-block)
+.make-viewer-includes: $(BUILD_VERSION)
+	@> .make-viewer-includes
+	$(info - creating .make-viewer-includes)
+	@$(call add_meta_tags,.make-viewer-includes)
+	@$(call add_css_link, .make-viewer-includes,$(VIEWER_CSS_SOURCE))
+	@$(call add_js_script, .make-viewer-includes, $(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(VIEWER_JS_VENDOR_ASSET) $(DIST)/$(VIEWER_JS_SOURCE_MIN))
+	@$(call add_ermrestjs_script,.make-viewer-includes)
 
-viewer/index.html: viewer/index.html.in .make-meta-tags .make-viewer-asset-block
+viewer/index.html: viewer/index.html.in .make-viewer-includes
 	$(info - creating viewer/index.html)
-	@$(call build_html, .make-viewer-asset-block, viewer/index.html)
+	@$(call build_html, .make-viewer-includes, viewer/index.html)
 
 # -------------------------- Login app -------------------------- #
 LOGIN_ROOT=login
@@ -465,37 +480,39 @@ LOGIN_CSS_SOURCE=$(CSS)/jquery.nouislider.min.css \
 	$(CSS)/vendor/bootstrap-tour.min.css \
 	$(COMMON)/styles/navbar.css
 
-.make-login-asset-block: $(SHARED_CSS_SOURCE) $(LOGIN_CSS_SOURCE) $(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(LOGIN_JS_VENDOR_ASSET) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(DIST)/$(LOGIN_JS_SOURCE_MIN)
-	$(info - creating .make-login-asset-block)
-	@> .make-login-asset-block
-	@$(call add_css_link, .make-login-asset-block, $(SHARED_CSS_SOURCE) $(LOGIN_CSS_SOURCE))
-	@$(call add_js_script, .make-login-asset-block, $(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(LOGIN_JS_VENDOR_ASSET) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(DIST)/$(LOGIN_JS_SOURCE_MIN))
-	@$(call add_ermrestjs_script, .make-login-asset-block)
+.make-login-includes: $(BUILD_VERSION)
+	@> .make-login-includes
+	$(info - creating .make-login-includes)
+	@$(call add_meta_tags,.make-login-includes)
+	@$(call add_css_link,.make-login-includes,$(LOGIN_CSS_SOURCE))
+	@$(call add_js_script,.make-login-includes,$(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(LOGIN_JS_VENDOR_ASSET) $(DIST)/$(LOGIN_JS_SOURCE_MIN))
+	@$(call add_ermrestjs_script,.make-login-includes)
 
-login/index.html: login/index.html.in .make-meta-tags .make-login-asset-block
+login/index.html: login/index.html.in .make-login-includes
 	$(info - creating login/index.html)
-	@$(call build_html, .make-login-asset-block, login/index.html)
+	@$(call build_html, .make-login-includes, login/index.html)
 
 # -------------------------- switch user help app -------------------------- #
 SWITCH_USER_JS_SOURCE=lib/switchUserAccounts.app.js
 
-.make-switchuser-asset-block: $(SHARED_CSS_SOURCE) $(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(SWITCH_USER_JS_SOURCE)
-	$(info - creating .make-switchuser-asset-block)
-	@> .make-switchuser-asset-block
-	@$(call add_css_link, .make-switchuser-asset-block, $(SHARED_CSS_SOURCE))
-	@$(call add_js_script, .make-switchuser-asset-block, $(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(SWITCH_USER_JS_SOURCE))
-	@$(call add_ermrestjs_script, .make-switchuser-asset-block)
+.make-switchuser-includes: $(BUILD_VERSION)
+	@> .make-switchuser-includes
+	$(info - creating .make-switchuser-includes)
+	@$(call add_meta_tags,.make-switchuser-includes)
+	@$(call add_css_link,.make-switchuser-includes,)
+	@$(call add_js_script,.make-switchuser-includes,$(SHARED_JS_VENDOR_BASE)$(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN)  $(SWITCH_USER_JS_SOURCE))
+	@$(call add_ermrestjs_script,.make-switchuser-includes)
 
-lib/switchUserAccounts.html: lib/switchUserAccounts.html.in .make-meta-tags .make-switchuser-asset-block
+lib/switchUserAccounts.html: lib/switchUserAccounts.html.in .make-switchuser-includes
 	$(info - creating lib/switchUserAccounts.html)
-	@$(call build_html, .make-switchuser-asset-block, lib/switchUserAccounts.html)
+	@$(call build_html,.make-switchuser-includes,lib/switchUserAccounts.html)
 
 
 # -------------------------- utility functions -------------------------- #
 
 # given a list of css files, will create link tag for each one and appends to the first parameter location
 define add_css_link
-	for file in $(2); do \
+	for file in $(SHARED_CSS_SOURCE) $(2); do \
 		runtimepath=$(CHAISE_BASE_PATH)$$file; \
 		version=$(BUILD_VERSION); \
 		echo "<link rel='stylesheet' type='text/css' href='$$runtimepath?v=$$version'>" >> $(1) ; \
@@ -520,17 +537,21 @@ define add_ermrestjs_script
 	done
 endef
 
+define add_meta_tags
+	@echo "<meta name='version' content='${BUILD_VERSION}'/>" >> $(1)
+	@echo "<meta name='chaiseBasePath' content='${CHAISE_BASE_PATH}'/>" >> $(1)
+	@echo "<meta name='ermrestjsBasePath' content='${ERMRESTJS_BASE_PATH}'/>" >> $(1)
+endef
+
 # add meta and assets to the html
 define build_html
-    sed -e '/%META%/ {' -e 'r .make-meta-tags' -e 'd' -e '}' \
-        -e '/%ASSETS%/ {' -e 'r $(1)' -e 'd' -e '}' \
+    sed -e '/%INCLUDES%/ {' -e 'r $(1)' -e 'd' -e '}' \
         $(2).in common/templates/noscript.html > $(2)
 endef
 
 # given a list of js files, create a minified version
 define bundle_js_files
 	$(info - creating $(1))
-	@mkdir -p $(DIST)
 	@$(BIN)/uglifyjs $(2) -o $(DIST)/$(1) --compress --source-map "url='$(1).map',root='$(CHAISE_BASE_PATH)'"
 endef
 
@@ -545,10 +566,10 @@ $(MODULES): package.json
 # Rule to create the package.
 # - we have to make sure the npm dependencies required for build are installed.
 # - we have to clean all the dist files because we need to generate new ones.
-$(DIST): print_variables npm_install_prod_modules clean $(SASS) $(HTML) gitversion
+$(DIST): print_variables npm_install_prod_modules $(SASS) $(MIN) $(HTML) gitversion
 
-# dummy target to always run the targets that depend on it
-FORCE:
+# build version will change everytime make all or install is called
+$(BUILD_VERSION):
 
 .PHONY: deps
 deps: $(BIN)
@@ -603,6 +624,7 @@ dont_install_in_root:
 	@echo "$(CHAISEDIR)" | egrep -vq "^/$$|.*:/$$"
 
 print_variables:
+	@mkdir -p $(DIST)
 	$(info =================)
 	$(info BUILD_VERSION=$(BUILD_VERSION))
 	$(info building and deploying to: $(CHAISEDIR))

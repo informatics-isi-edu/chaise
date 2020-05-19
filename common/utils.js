@@ -2604,7 +2604,7 @@
             var chaiseConfig = ConfigUtils.getConfigJSON();
             if (chaiseConfig['customCSS'] !== undefined) {
                 // if the file is already injected
-                if (document.querySelector('link[href="' + chaiseConfig['customCSS'] + '"]')) {
+                if (document.querySelector('link[href^="' + chaiseConfig['customCSS'] + '"]')) {
                     return defer.resolve(), defer.promise;
                 }
 

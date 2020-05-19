@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "build": "make install",
-    "pretest": "npm install",
+    "pretest": "make install",
     "test": "make test"
   },
   "repository": {

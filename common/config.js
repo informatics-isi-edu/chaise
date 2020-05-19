@@ -56,6 +56,9 @@
         var chaiseBasePathMetatag = document.head.querySelector("[name~=chaiseBasePath][content]");
         var chaiseBasePath = chaiseBasePathMetatag ? chaiseBasePathMetatag.content : null;
 
+        var ermrestjsBasePathMetatag = document.head.querySelector("[name~=ermrestjsBasePath][content]");
+        var ermrestjsBasePath = ermrestjsBasePathMetatag ? ermrestjsBasePathMetatag.content : '/ermrestjs/';
+
         // initialize dcctx object
         $window.dcctx = {
             contextHeaderParams: {
@@ -65,7 +68,8 @@
             },
             hideNavbar: hideNavbar,
             version: version,
-            chaiseBasePath: chaiseBasePath
+            chaiseBasePath: chaiseBasePath,
+            ermrestjsBasePath: ermrestjsBasePath
         };
         // set chaise configuration based on what is in `chaise-config.js` first
         ConfigUtils.setConfigJSON();

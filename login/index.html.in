@@ -3,10 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  %META%
   <title>Chaise :: Login</title>
   <script src="/gtm-id.js"></script>
-  %ASSETS%
+  %INCLUDES%
 </head>
 <body>
 	<!-- Overlay for fixed sidebar -->
