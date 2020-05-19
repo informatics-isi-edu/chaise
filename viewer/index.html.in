@@ -46,22 +46,22 @@
 
                     <!-- <div id="sidebar" ng-class="sidebar faceting-resizable {'open-panel': !osd.annotationsSidebarAreHidden, 'close-panel': osd.annotationsSidebarAreHidden}" resizable r-directions=["right"] r-flex="true"> -->
                         <div ng-controller="AnnotationsController as anno" class='annotation-list facet-panel'>
-                            <div class='annotationSetting' ng-form="annoForm" ng-show="anno.showPanel" ng-class="{'open' : anno.settingAnnotation !== null}">
+                            <div class='annotationSetting' ng-form="annoForm" ng-show="anno.showPanel" ng-class="{'open' : anno.editingAnatomy !== null}">
                                 <div class="annotationRow" ng-show="canUpdate">
                                     <div class="flex-column entity-key">
                                         <div class="annotationRowHeader">
                                             <span class="text-danger ng-scope">*</span>Annotated Region
                                         </div>
-                                        <div class="annotationRowValue" ng-show="anno.settingAnnotation.isNew">
+                                        <div class="annotationRowValue" ng-show="anno.editingAnatomy.isNew">
                                             <div class="drawingHint">Drawing is required for new annotations</div>
                                         </div>
                                         <div class="annotationRowValue">
                                             <div class='annotationToolRow'>
                                                 <div class='annotationRowHeader'>Drawing Tool</div>
                                                 <div class='annotationRowValue'>
-                                                    <div class="switch-btn" ng-click="anno.drawAnnotation(anno.settingAnnotation, $event)" data-toggle='tooltip' tooltip-placement="bottom" uib-tooltip="{{anno.settingAnnotation.isDrawing ? 'Turn off the drawing tool' : 'Turn on the drawing tool'}}">
-                                                        <span class="switch-status on" ng-class="{'selected' : anno.settingAnnotation.isDrawing}">ON</span>
-                                                        <span class="switch-status off" ng-class="{'selected' : !anno.settingAnnotation.isDrawing}">OFF</span>
+                                                    <div class="switch-btn" ng-click="anno.drawAnnotation(anno.editingAnatomy, $event)" data-toggle='tooltip' tooltip-placement="bottom" uib-tooltip="{{anno.editingAnatomy.isDrawing ? 'Turn off the drawing tool' : 'Turn on the drawing tool'}}">
+                                                        <span class="switch-status on" ng-class="{'selected' : anno.editingAnatomy.isDrawing}">ON</span>
+                                                        <span class="switch-status off" ng-class="{'selected' : !anno.editingAnatomy.isDrawing}">OFF</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -74,8 +74,8 @@
                                             <span class="text-danger ng-scope">*</span>Anatomy ID
                                         </div>
                                         <div class="annotationRowValue" data-toggle="tooltip" tooltip-placement="bottom" uib-tooltip="Change term ID" data-original-title="" title="">
-                                            <span class="chaise-input-control text" ng-click="anno.changeTerm(anno.settingAnnotation, $event)">
-                                                <input name="anatomy" style="flex:1" type="text" class="ng-binding" ng-model="anno.settingAnnotation.Anatomy" required disabled/>
+                                            <span class="chaise-input-control text" ng-click="anno.changeTerm(anno.editingAnatomy, $event)">
+                                                <input name="anatomy" style="flex:1" type="text" class="ng-binding" ng-model="anno.editingAnatomy.Anatomy" required disabled/>
                                                 <span class="changeBtn glyphicon glyphicon-search"></span>
                                             </span>
                                         </div>
@@ -87,9 +87,9 @@
                                 <div class="annotationRow">
                                     <div class='flex-column'>
                                         <div class='annotationRowHeader'>Record Status</div>
-                                        <div class="annotationRowValue" ng-click="anno.changeStatus(anno.settingAnnotation, 'Record_Status')" data-toggle='tooltip' tooltip-placement="bottom" uib-tooltip="Change record status">
+                                        <div class="annotationRowValue" ng-click="anno.changeStatus(anno.editingAnatomy, 'Record_Status')" data-toggle='tooltip' tooltip-placement="bottom" uib-tooltip="Change record status">
                                             <span class="chaise-input-control text">
-                                                <input name="record_status" style="flex:1" type="text" class="ng-binding" ng-model="anno.settingAnnotation.Record_Status" required disabled />
+                                                <input name="record_status" style="flex:1" type="text" class="ng-binding" ng-model="anno.editingAnatomy.Record_Status" required disabled />
                                                 <span class="changeBtn glyphicon glyphicon-chevron-down"></span>
                                             </span>
                                         </div>
@@ -98,9 +98,9 @@
                                 <div class="annotationRow">
                                     <div class='flex-column'>
                                         <div class='annotationRowHeader'>Curation Status</div>
-                                        <div class="annotationRowValue" ng-click="anno.changeStatus(anno.settingAnnotation, 'Curation_Status')" data-toggle='tooltip' tooltip-placement="bottom" uib-tooltip="Change curation status">
+                                        <div class="annotationRowValue" ng-click="anno.changeStatus(anno.editingAnatomy, 'Curation_Status')" data-toggle='tooltip' tooltip-placement="bottom" uib-tooltip="Change curation status">
                                             <span class="chaise-input-control text">
-                                                <input name="record_status" style="flex:1" type="text" class="ng-binding" ng-model="anno.settingAnnotation.Curation_Status" required disabled />
+                                                <input name="record_status" style="flex:1" type="text" class="ng-binding" ng-model="anno.editingAnatomy.Curation_Status" required disabled />
                                                 <span class="changeBtn glyphicon glyphicon-chevron-down"></span>
                                             </span>
                                         </div>
@@ -108,14 +108,14 @@
                                 </div>
                                 <div class="annotationRow">
                                     <div class='flex-row' style="justify-content: space-between;">
-                                        <div class='annotationRowValue' ng-show="canDelete && !anno.settingAnnotation.isNew" data-toggle='tooltip' tooltip-placement="bottom">
-                                            <button class="btn chaise-btn chaise-btn-danger" ng-click="anno.removeAnnotationEntry(anno.settingAnnotation)">
+                                        <div class='annotationRowValue' ng-show="canDelete && !anno.editingAnatomy.isNew" data-toggle='tooltip' tooltip-placement="bottom">
+                                            <button class="btn chaise-btn chaise-btn-danger" ng-click="anno.removeAnnotationEntry(anno.editingAnatomy)">
                                                 <span class="chaise-btn-icon far fa-trash-alt"></span>
                                                 <span>Delete</span>
                                             </button>
                                         </div>
                                         <div class='annotationRowValue' data-toggle='tooltip' tooltip-placement="bottom">
-                                            <button class="btn chaise-btn chaise-btn-primary" type="submit" ng-click="anno.saveAnnotationRecord(anno.settingAnnotation)" ng-disabled="annoForm.$invalid">
+                                            <button class="btn chaise-btn chaise-btn-primary" type="submit" ng-click="anno.saveAnnotationRecord(anno.editingAnatomy)" ng-disabled="annoForm.$invalid">
                                                 <span class="chaise-btn-icon glyphicon glyphicon-saved"></span>
                                                 <span>Submit</span>
                                             </button>   
@@ -126,7 +126,7 @@
                             </div>
                             <span class='titleRow'>
                                 <span class='title'>Annotations</span>
-                                <button ng-show="anno.settingAnnotation !== null" class="chaise-btn chaise-btn-tertiary" ng-click="anno.closeAnnotationPanel()">
+                                <button ng-show="anno.editingAnatomy !== null" class="chaise-btn chaise-btn-tertiary" ng-click="anno.closeAnnotationPanel()">
                                     <span class="chaise-icon chaise-sidebar-close"></span>
                                     <span>Close</span>
                                 </button>
@@ -169,13 +169,13 @@
                                 <button ng-show="canCreate" class='btn chaise-btn chaise-btn-primary newAnnoBtn' ng-click="anno.addNewTerm()" tooltip-placement="bottom" uib-tooltip="Create new annotation">New</button>
                             </div>
                             <span class='resultCount'>
-                                <span>Displaying {{ anno.totalCount }} of {{ anno.viewerModel.rows.length }} Annotations</span>
+                                <span>Displaying {{ anno.matchCount }} of {{ anno.totalCount }} Annotations</span>
                             </span>
                             <div ng-if="osd.error != ''" class="annotation-error">
                               {{osd.error}}
                             </div>
                             <div class='groups'>
-                                <div id="{{item.svgID + item.groupID}}" ng-click="anno.highlightGroup(item, $event)" ng-repeat="item in anno.viewerModel.rows" ng-show="item.isShow" ng-class="item.isSelected ? 'annotationItem current' : 'annotationItem' ">
+                                <div id="{{item.svgID + item.groupID}}" ng-click="anno.highlightGroup(item, $event)" ng-repeat="item in anno.viewerModel.rows" ng-show="item.isShow && item.svgID && item.groupID" ng-class="item.isSelected ? 'annotationItem current' : 'annotationItem' ">
                                     <div class='itemContent'>
                                         <div class='itemRow'> 
                                             <span class='anatomy'>
@@ -191,7 +191,7 @@
                                                 <span class="editBtn" ng-click="anno.highlightGroup(item, $event)" data-type='highlightGroup' data-toggle='tooltip' tooltip-placement="bottom" uib-tooltip="{{ item.isSelected ? 'Unhighlight annotation' : 'Highlight annotation'}}">
                                                     <i class="glyphicon glyphicon-tag"></i>
                                                 </span>
-                                                <span ng-show="canUpdate" class="editBtn" ng-click="anno.manageSetting(item, $index, $event)" data-type='settingAnnotation' data-toggle='tooltip' tooltip-placement="bottom" uib-tooltip="Edit Annotation">
+                                                <span ng-show="canUpdate" class="editBtn" ng-click="anno.editAnatomyAnnotations(item, $index, $event)" data-type='editingAnatomy' data-toggle='tooltip' tooltip-placement="bottom" uib-tooltip="Edit Annotation">
                                                     <i class="glyphicon glyphicon-pencil"></i>
                                                 </span>
                                             </span>
