@@ -9,8 +9,8 @@
 
         var initialHref = $window.location.href;
         var mainContainerEl = angular.element(document.getElementsByClassName('main-container')[0]);
-        var addRecordRequests = {}; /// generated id: {displayMode: "", containerIndex: integer}
-        var editRecordRequests = {}; // generated id: {displayMode: "", containerIndex: integer, completed: boolean}
+        vm.addRecordRequests = {}; /// generated id: {displayMode: "", containerIndex: integer}
+        vm.editRecordRequests = {}; // generated id: {displayMode: "", containerIndex: integer, completed: boolean}
         var modalUpdate = false;
         vm.alerts = AlertsService.alerts;
         vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
@@ -427,7 +427,7 @@
             // Generate a unique id for this request
             // append it to the URL
             var referrer_id = 'recordedit-' + MathUtils.getRandomInt(0, Number.MAX_SAFE_INTEGER);
-            addRecordRequests[referrer_id] = {
+            vm.addRecordRequests[referrer_id] = {
                 displayMode: tableModel.config.displayMode,
                 containerIndex: tableModel.config.containerIndex
             };
@@ -443,7 +443,7 @@
         };
 
         $scope.$on("edit-request", function(event, args) {
-            editRecordRequests[args.id] = {"displayMode": args.displayMode, "containerIndex": args.containerIndex, "finished": false};
+            vm.editRecordRequests[args.id] = {"displayMode": args.displayMode, "containerIndex": args.containerIndex, "finished": false};
         });
 
         $scope.$on('record-deleted', function (event, args) {
@@ -484,23 +484,23 @@
             }
 
             //find the completed edit requests
-            for (id in editRecordRequests) {
-                if (editRecordRequests[id].completed) {
-                    addToChangedContainers(editRecordRequests[id], [uc.RELATED_UPDATE, uc.RELATED_INLINE_UPDATE]);
-                    delete editRecordRequests[id];
+            for (id in vm.editRecordRequests) {
+                if (vm.editRecordRequests[id].completed) {
+                    addToChangedContainers(vm.editRecordRequests[id], [uc.RELATED_UPDATE, uc.RELATED_INLINE_UPDATE]);
+                    delete vm.editRecordRequests[id];
                 }
             }
 
             // find the completed create requests
-            for (id in addRecordRequests) {
+            for (id in vm.addRecordRequests) {
                 cookie = $cookies.getObject(id);
                 if (cookie) { // add request has been completed
                     console.log('Cookie found for the id=' + id);
-                    addToChangedContainers(addRecordRequests[id], [uc.RELATED_CREATE, uc.RELATED_INLINE_CREATE]);
+                    addToChangedContainers(vm.addRecordRequests[id], [uc.RELATED_CREATE, uc.RELATED_INLINE_CREATE]);
 
                     // remove cookie and request
                     $cookies.remove(id);
-                    delete addRecordRequests[id];
+                    delete vm.addRecordRequests[id];
                 } else {
                     console.log('Could not find cookie', cookie);
                 }
@@ -514,7 +514,7 @@
 
         // function called from form.controller.js to notify record that an entity was just updated
         window.updated = function(id) {
-            editRecordRequests[id].completed = true;
+            vm.editRecordRequests[id].completed = true;
         }
 
         // to make sure we're adding the watcher just once
