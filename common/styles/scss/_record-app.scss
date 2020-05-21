@@ -304,28 +304,72 @@
     /********* print ********/
 
     @media print {
-        #main-content {
-            height: auto !important;
+        .bottom-panel-container {
+            height: auto!important;
             display: block;
+            text-align: justify;
         }
 
-        #record-side-pan {
+        //Action button top right corner
+        .top-right-panel {
+            .page-action-btns{
+                display:none;
+            }
+        }
+
+        //Creat,Copy,Edit and Del Buttons
+        .top-right-panel {
+            .title-buttons {
+                display:none;
+            }
+        }
+
+        //Sections
+        .top-left-panel {
             display: none;
         }
 
+        //Side panel
+        .side-panel-container {
+            display:none        }
+
+        //three dots
+        .rg-right{
+            display:none;
+        }
+
+        //Record action buttons
+        .action-bar-RT-heading{
+            display:none;
+        }
+
+        //Top up arrow
+        #back-to-top{
+            display:none;
+        }
+
+        //Side space
+        #record-side-pan{
+            display:none;
+        }
         .container-fluid {
             padding-left: 0px;
         }
 
-        .record-container {
-            .entity-key {
+        //Column widths in the table
+        .bottom-panel-container{
+            .table {
+                .entity-key {
                 width: 15%;
-                max-width: 120px;
-            }
+                min-width: 150px;
+                float: left;
+                }
 
             .entity-value {
                 width: 85%;
-            }
+                padding-left: 15%!important
+                }
+            } 
         }
 
         #footer {
