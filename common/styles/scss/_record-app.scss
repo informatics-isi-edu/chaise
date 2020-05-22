@@ -331,7 +331,8 @@
 
         //Side panel
         .side-panel-container {
-            display:none        }
+            display:none        
+        }
 
         //three dots
         .rg-right{
@@ -360,14 +361,11 @@
             }
         }
 
-        .container-fluid {
-            padding-left: 0px;
-        }
-
         //Column widths in the table
         .bottom-panel-container{
             .table {
                 .entity-key {
+                padding-left:20px;
                 width: 15%;
                 min-width: 150px;
                 float: left;
@@ -375,9 +373,26 @@
 
             .entity-value {
                 width: 85%;
-                padding-left: 15%!important
+                padding-left: 12%!important
+                padding-right: 8px;
+                padding-top: 8px;
+                padding-bottom: 8px;
                 }
             } 
+        }
+
+        //Prev and Next buttons
+        .bottom-panel-container {
+            .chaise-table-pagination {
+                display:none;
+            }
+        }
+
+        //Down arrows for records
+        .rt-section-header {
+            .fa-chevron-down {
+                display:none;
+            }
         }
 
         #footer {
