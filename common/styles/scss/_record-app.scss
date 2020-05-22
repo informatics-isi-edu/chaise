@@ -352,6 +352,14 @@
         #record-side-pan{
             display:none;
         }
+
+        //Hide Displaying of info
+        .chaise-table-header {
+            .chaise-table-header-total-count {
+                display:none;
+            }
+        }
+
         .container-fluid {
             padding-left: 0px;
         }
