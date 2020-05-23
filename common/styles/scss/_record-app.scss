@@ -354,13 +354,6 @@
             display:none;
         }
 
-        //Hide Displaying of info
-        .chaise-table-header {
-            .chaise-table-header-total-count {
-                display:none;
-            }
-        }
-
         //Column widths in the table
         .bottom-panel-container{
             .table {
@@ -388,15 +381,20 @@
             }
         }
 
-        //Down arrows for records
-        .rt-section-header {
-            .fa-chevron-down {
-                display:none;
-            }
-        }
-
         #footer {
             display: none;
+        }
+
+        //Round blobs of links
+        .markdown-container {
+            .vocab {
+                color: darkblue;
+                background-color: rgba(220, 220, 220, 0.68);
+                padding: 7px;
+                border-radius: 10px;
+                display: inline-block;
+                margin: 2px;
+            }
         }
 
         a[href]:after {
