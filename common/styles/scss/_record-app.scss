@@ -385,15 +385,22 @@
             display: none;
         }
 
+        #rt-container{
+            break-inside: avoid!important;
+        }
+
         //Round blobs of links
         .markdown-container {
             .vocab {
-                background-color: rgba(220, 220, 220, 0.68)!important;
-                padding: 7px;
                 border: solid #000 !important;
                 border-width: 1px 0 0 1px !important;
-                display: inline-block;
-                margin: 2px;
+            }
+        }
+
+        .chaise-table {
+            .table {
+                border-top: 1px solid #BBBBBB!important;
+                border-bottom: 1px solid #BBBBBB!important;
             }
         }
 
@@ -418,8 +425,10 @@
             }
         }
 
-        #rt-heading-Reference{
-            break-inside: avoid;
+        .chaise-table {
+            .table {
+                box-decoration-break: clone!important;
+            }
         }
     }
 }
