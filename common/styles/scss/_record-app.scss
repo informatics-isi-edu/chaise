@@ -400,10 +400,26 @@
         a[href]:after {
             content: none !important;
         }
+
+        .table {
+            .table-heading-icons {
+                display:none;
+            }
+        }
     }
 
     @page {
         size: auto;
         margin: 5% 4% 5% 3%;
+
+        .markdown-container {
+            .vocab {
+                box-decoration-break: clone;
+            }
+        }
+
+        #rt-heading-Reference{
+            break-inside: avoid;
+        }
     }
 }
