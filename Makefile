@@ -211,9 +211,11 @@ MIN=$(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) \
  # old javascript sources
  JS=scripts
 
+ MAKEFILE_VAR=makefile_variables.js
 # -------------------------- shared/common files -------------------------- #
 
-SHARED_JS_SOURCE=$(COMMON)/alerts.js \
+SHARED_JS_SOURCE=$(DIST)/$(MAKEFILE_VAR) \
+	$(COMMON)/alerts.js \
 	$(COMMON)/authen.js \
 	$(COMMON)/bindHtmlUnsafe.js \
 	$(COMMON)/config.js \
@@ -276,10 +278,17 @@ $(JS_CONFIG): chaise-config-sample.js
 	cp -n chaise-config-sample.js $(JS_CONFIG) || true
 	touch $(JS_CONFIG)
 
+$(DIST)/$(MAKEFILE_VAR): $(BUILD_VERSION)
+	$(info - creating makefile_variables.js)
+	@echo 'var chaiseBuildVariables = {};' > $(DIST)/$(MAKEFILE_VAR)
+	@echo 'chaiseBuildVariables.buildVersion="$(BUILD_VERSION)";' >> $(DIST)/$(MAKEFILE_VAR)
+	@echo 'chaiseBuildVariables.chaiseBasePath="$(CHAISE_BASE_PATH)";' >> $(DIST)/$(MAKEFILE_VAR)
+	@echo 'chaiseBuildVariables.ermrestjsBasePath="$(ERMRESTJS_BASE_PATH)";' >> $(DIST)/$(MAKEFILE_VAR)
+
+
 $(DIST)/chaise_includes.html: $(BUILD_VERSION)
 	$(info - creating chaise_includes.html)
 	@> $(DIST)/chaise_includes.html
-	@$(call add_meta_tags,$(DIST)/chaise_includes.html)
 	@$(call add_css_link,$(DIST)/chaise_includes.html,)
 	@$(call add_js_script,$(DIST)/chaise_includes.html,$(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN))
 	@$(call add_ermrestjs_script,$(DIST)/chaise_includes.html)
@@ -302,7 +311,6 @@ RECORD_CSS_SOURCE=
 .make-record-includes: $(BUILD_VERSION)
 	$(info - creating .make-record-includes)
 	@> .make-record-includes
-	@$(call add_meta_tags,.make-record-includes)
 	@$(call add_css_link,.make-record-includes,$(RECORD_CSS_SOURCE))
 	@$(call add_js_script, .make-record-includes,$(SHARED_JS_VENDOR_BASE) $(RECORD_JS_VENDOR_ASSET) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(DIST)/$(RECORD_JS_SOURCE_MIN))
 	@$(call add_ermrestjs_script,.make-record-includes)
@@ -329,7 +337,6 @@ RECORDSET_CSS_SOURCE=
 .make-recordset-includes: $(BUILD_VERSION)
 	@> .make-recordset-includes
 	$(info - creating .make-recordset-includes)
-	@$(call add_meta_tags,.make-recordset-includes)
 	@$(call add_css_link,.make-recordset-includes,$(RECORDSET_CSS_SOURCE))
 	@$(call add_js_script,.make-recordset-includes,$(SHARED_JS_VENDOR_BASE) $(RECORDSET_JS_VENDOR_ASSET) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(DIST)/$(RECORDSET_JS_SOURCE_MIN))
 	@$(call add_ermrestjs_script,.make-recordset-includes)
@@ -369,7 +376,6 @@ RECORDEDIT_CSS_SOURCE=$(COMMON)/vendor/MarkdownEditor/styles/bootstrap-markdown.
 .make-recordedit-includes: $(BUILD_VERSION)
 	@> .make-recordedit-includes
 	$(info - creating .make-recordedit-includes)
-	@$(call add_meta_tags,.make-recordedit-includes)
 	@$(call add_css_link,.make-recordedit-includes,$(RECORDEDIT_CSS_SOURCE))
 	@$(call add_js_script,.make-recordedit-includes,$(SHARED_JS_VENDOR_BASE) $(RECORDEDIT_JS_VENDOR_ASSET) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(DIST)/$(RECORDEDIT_JS_SOURCE_MIN))
 	@$(call add_ermrestjs_script,.make-recordedit-includes)
@@ -386,7 +392,6 @@ MDHELP_CSS_SOURCE=$(RECORDEDIT_ROOT)/mdHelpStyle.min.css
 .make-mdhelp-includes: $(BUILD_VERSION)
 	@> .make-mdhelp-includes
 	$(info - creating .make-mdhelp-includes)
-	@$(call add_meta_tags,.make-mdhelp-includes)
 	@$(call add_css_link,.make-mdhelp-includes,$(MDHELP_CSS_SOURCE))
 	@$(call add_js_script,.make-mdhelp-includes,$(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(MDHELP_JS_SOURCE))
 	@$(call add_ermrestjs_script,.make-mdhelp-includes)
@@ -431,7 +436,6 @@ VIEWER_CSS_SOURCE=$(CSS)/vendor/select.css \
 .make-viewer-includes: $(BUILD_VERSION)
 	@> .make-viewer-includes
 	$(info - creating .make-viewer-includes)
-	@$(call add_meta_tags,.make-viewer-includes)
 	@$(call add_css_link, .make-viewer-includes,$(VIEWER_CSS_SOURCE))
 	@$(call add_js_script, .make-viewer-includes, $(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(VIEWER_JS_VENDOR_ASSET) $(DIST)/$(VIEWER_JS_SOURCE_MIN))
 	@$(call add_ermrestjs_script,.make-viewer-includes)
@@ -483,7 +487,6 @@ LOGIN_CSS_SOURCE=$(CSS)/jquery.nouislider.min.css \
 .make-login-includes: $(BUILD_VERSION)
 	@> .make-login-includes
 	$(info - creating .make-login-includes)
-	@$(call add_meta_tags,.make-login-includes)
 	@$(call add_css_link,.make-login-includes,$(LOGIN_CSS_SOURCE))
 	@$(call add_js_script,.make-login-includes,$(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(LOGIN_JS_VENDOR_ASSET) $(DIST)/$(LOGIN_JS_SOURCE_MIN))
 	@$(call add_ermrestjs_script,.make-login-includes)
@@ -498,7 +501,6 @@ SWITCH_USER_JS_SOURCE=lib/switchUserAccounts.app.js
 .make-switchuser-includes: $(BUILD_VERSION)
 	@> .make-switchuser-includes
 	$(info - creating .make-switchuser-includes)
-	@$(call add_meta_tags,.make-switchuser-includes)
 	@$(call add_css_link,.make-switchuser-includes,)
 	@$(call add_js_script,.make-switchuser-includes,$(SHARED_JS_VENDOR_BASE)$(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN)  $(SWITCH_USER_JS_SOURCE))
 	@$(call add_ermrestjs_script,.make-switchuser-includes)
@@ -535,12 +537,6 @@ define add_ermrestjs_script
 		version=$(BUILD_VERSION); \
 		echo "<script src='$$runtimepath?v=$$version'></script>" >> $(1) ; \
 	done
-endef
-
-define add_meta_tags
-	@echo "<meta name='version' content='${BUILD_VERSION}'/>" >> $(1)
-	@echo "<meta name='chaiseBasePath' content='${CHAISE_BASE_PATH}'/>" >> $(1)
-	@echo "<meta name='ermrestjsBasePath' content='${ERMRESTJS_BASE_PATH}'/>" >> $(1)
 endef
 
 # add meta and assets to the html

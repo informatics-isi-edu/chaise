@@ -14,6 +14,8 @@ pages:
         - Chaise Configuration: user-docs/chaise-config.md
         - Contexts: user-docs/contexts.md
         - Custom CSS: user-docs/custom-css.md
+        - Navbar app: user-docs/navbar-app.md
+        - Login app: user-docs/login-app.md
         - Logging: user-docs/logging.md
     - Developer Documents:
         - Dev Guide: dev-docs/dev-guide.md

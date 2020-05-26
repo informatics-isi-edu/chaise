@@ -824,9 +824,8 @@
          *   - otherwise, returns the default value '/chaise/'
         */
         function chaiseDeploymentPath() {
-            var dcctx = ConfigUtils.getContextJSON();
-            if (typeof dcctx.chaiseBasePath === "string") {
-                var path = dcctx.chaiseBasePath;
+            if (typeof chaiseBuildVariables.chaiseBasePath === "string") {
+                var path = chaiseBuildVariables.chaiseBasePath;
                 if(path[path.length-1] !== "/")
                     path = path + "/";
                 return path;
@@ -1853,8 +1852,8 @@
         function decorateTemplateRequest(delegate, chaiseDeploymentPath) {
             // return a function that will be called when a template needs t be fetched
             return function(templateUrl) {
-                var dcctx = getContextJSON();
-                var versionedTemplateUrl = templateUrl + (templateUrl.indexOf(chaiseDeploymentPath) !== -1 ? "?v=" + dcctx.version : "");
+                var version = chaiseBuildVariables.buildVersion;
+                var versionedTemplateUrl = templateUrl + (templateUrl.indexOf(chaiseDeploymentPath) !== -1 ? "?v=" + version : "");
 
                 return delegate(versionedTemplateUrl);
             }

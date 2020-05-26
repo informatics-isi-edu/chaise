@@ -51,13 +51,6 @@
          *      - doesn't matter if in an iframe or not, if true, hide it
          */
         var hideNavbar = (inIframe && hideNavbarParam !== false) || hideNavbarParam === true;
-        var versionMetatag = document.head.querySelector("[name~=version][content]");
-        var version = versionMetatag ? versionMetatag.content : null;
-        var chaiseBasePathMetatag = document.head.querySelector("[name~=chaiseBasePath][content]");
-        var chaiseBasePath = chaiseBasePathMetatag ? chaiseBasePathMetatag.content : null;
-
-        var ermrestjsBasePathMetatag = document.head.querySelector("[name~=ermrestjsBasePath][content]");
-        var ermrestjsBasePath = ermrestjsBasePathMetatag ? ermrestjsBasePathMetatag.content : '/ermrestjs/';
 
         // initialize dcctx object
         $window.dcctx = {
@@ -66,10 +59,7 @@
                 pid: MathUtils.uuid(),
                 wid: $window.name
             },
-            hideNavbar: hideNavbar,
-            version: version,
-            chaiseBasePath: chaiseBasePath,
-            ermrestjsBasePath: ermrestjsBasePath
+            hideNavbar: hideNavbar
         };
         // set chaise configuration based on what is in `chaise-config.js` first
         ConfigUtils.setConfigJSON();

@@ -63,8 +63,8 @@
     function path(dcctx) {
         if (!_path) {
             var path = "/chaise/";
-            if (dcctx && typeof dcctx.chaiseBasePath === "string") {
-                var path = dcctx.chaiseBasePath;
+            if (dcctx && typeof chaiseBuildVariables.chaiseBasePath === "string") {
+                var path = chaiseBuildVariables.chaiseBasePath;
                 // append "/" if not present
                 if (path[path.length-1] !== "/") path += "/";
             }
