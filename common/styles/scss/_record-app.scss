@@ -385,7 +385,7 @@
             display: none;
         }
 
-        #rt-container{
+        .related-table-accordion{
             break-inside: avoid!important;
         }
 
@@ -397,11 +397,9 @@
             }
         }
 
-        .chaise-table {
-            .table {
-                border-top: 1px solid #BBBBBB!important;
-                border-bottom: 1px solid #BBBBBB!important;
-            }
+        .outer-table {
+           overflow-x: auto!important;
+           border: 1px solid #000!important;
         }
 
         a[href]:after {
@@ -425,10 +423,8 @@
             }
         }
 
-        .chaise-table {
-            .table {
-                box-decoration-break: clone!important;
-            }
+        .outer-table  {
+            box-decoration-break: clone!important;
         }
     }
 }
