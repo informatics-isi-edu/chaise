@@ -394,7 +394,6 @@
                 border-width: 1px 0 0 1px !important;
                 display: inline-block;
                 margin: 2px;
-                box-decoration-break: clone!important;
             }
         }
 
@@ -415,7 +414,7 @@
 
         .markdown-container {
             .vocab {
-                box-decoration-break: clone;
+                box-decoration-break: clone!important;
             }
         }
 
