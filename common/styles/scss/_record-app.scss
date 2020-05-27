@@ -394,6 +394,9 @@
             .vocab {
                 border: solid #000 !important;
                 border-width: 1px 1px 1px 1px !important;
+                margin: 8px;
+                width: 180px;
+                text-align: center;
             }
         }
 
@@ -408,14 +411,14 @@
         }
 
         .chaise-table {
-            .table > thead:first-child > tr:first-child > th {
+            .table th {
                 border: solid #000 !important;
                 border-width: 1px 1px 1px 1px !important;
             }   
         }
 
         .chaise-table {
-            .table > tbody > tr > td {
+            .table td {
                 border: solid #000 !important;
                 border-width: 1px 1px 1px 1px !important;
             }
@@ -430,7 +433,7 @@
 
     @page {
         size: auto;
-        margin: 5% 4% 5% 3%;
+        margin: 5% 3% 5% 3%;
 
         .markdown-container {
             .vocab {
@@ -438,7 +441,7 @@
             }
         }
 
-        .outer-table  {
+        ..chaise-table  {
             box-decoration-break: clone!important;
         }
     }
