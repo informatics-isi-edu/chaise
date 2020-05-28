@@ -3,8 +3,25 @@
 # Disable built-in rules
 .SUFFIXES:
 
-# Install directory on dev.isrd
-CHAISEDIR?=/var/www/html/chaise
+# env variables needed for installation
+WEB_URL_ROOT?=/
+WEB_INSTALL_ROOT?=/var/www/html/
+ERMRESTJS_REL_PATH?=ermrestjs/
+CHAISE_REL_PATH?=chaise/
+
+# version number added to all the assets
+BUILD_VERSION:=$(shell date +%Y%m%d%H%M%S)
+
+# where chaise will be installed
+CHAISEDIR:=$(WEB_INSTALL_ROOT)$(CHAISE_REL_PATH)
+
+#chaise and ermrsetjs paths
+CHAISE_BASE_PATH:=$(WEB_URL_ROOT)$(CHAISE_REL_PATH)
+ERMRESTJS_BASE_PATH:=$(WEB_URL_ROOT)$(ERMRESTJS_REL_PATH)
+
+# ERMrestjs dependencies
+ERMRESTJS_DEPS=ermrest.vendor.min.js \
+	ermrest.min.js
 
 # Project name
 PROJ=chaise
@@ -14,6 +31,10 @@ MODULES=node_modules
 
 # Node bin scripts
 BIN=$(MODULES)/.bin
+
+# ============================================================= #
+#						E2E TESTING RULES						#
+# ============================================================= #
 
 ### Protractor scripts
 ## Sequential protractor scripts
@@ -156,81 +177,279 @@ testmanually: test-ALL_MANUAL_TESTS
 .PHONY: test
 test: test-ALL_TESTS
 
-# Rule to determine MD5 utility
-ifeq ($(shell which md5 2>/dev/null),)
-    MD5 = md5sum
-else
-    MD5 = md5 -q
-endif
+# ============================================================= #
+#						BULDING THE PACKAGE						#
+# ============================================================= #
 
-CAT=cat
-
-# HTML
+# HTML files that need to be created
 HTML=login/index.html \
 	 recordset/index.html \
 	 viewer/index.html \
 	 recordedit/index.html \
 	 record/index.html \
 	 recordedit/mdHelp.html \
-	 lib/switchUserAccounts.html
+	 lib/switchUserAccounts.html \
+	 $(DIST)/chaise-dependencies.html
 
-# ERMrestjs Deps
-ERMRESTJS_RT_DIR=../../ermrestjs
-ERMRESTJS_BLD_DIR=../ermrestjs/build
-ERMRESTJS_DEPS=ermrest.js
+# the minified files that need to be created
+MIN=$(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) \
+	$(DIST)/$(SHARED_JS_SOURCE_MIN) \
+	$(DIST)/$(RECORD_JS_SOURCE_MIN) \
+	$(DIST)/$(RECORDSET_JS_SOURCE_MIN) \
+	$(DIST)/$(RECORDEDIT_JS_SOURCE_MIN) \
+	$(DIST)/$(VIEWER_JS_SOURCE_MIN) \
+	$(DIST)/$(LOGIN_JS_SOURCE_MIN)
 
-# Shared utilities
-COMMON=common
+ DIST=dist
 
-# Markdown Editor dependencies
-MDEDIT_CSS_DEPS=$(COMMON)/vendor/MarkdownEditor/styles/bootstrap-markdown.min.css \
-	$(COMMON)/vendor/MarkdownEditor/styles/github.min.css \
-	$(COMMON)/vendor/MarkdownEditor/styles/angular-markdown-editor.min.css \
-	$(COMMON)/vendor/MarkdownEditor/styles/github-markdown.css
+ # Shared utilities
+ COMMON=common
 
-MDEDIT_JS_DEPS=$(COMMON)/vendor/MarkdownEditor/bootstrap-markdown.js \
+ # old CSS source
+ CSS=styles
+
+ # old javascript sources
+ JS=scripts
+
+ MAKEFILE_VAR=makefile_variables.js
+# -------------------------- shared/common files -------------------------- #
+
+SHARED_JS_SOURCE=$(DIST)/$(MAKEFILE_VAR) \
+	$(COMMON)/alerts.js \
+	$(COMMON)/authen.js \
+	$(COMMON)/bindHtmlUnsafe.js \
+	$(COMMON)/config.js \
+	$(COMMON)/delete-link.js \
+	$(COMMON)/ellipsis.js \
+	$(COMMON)/errors.js \
+	$(COMMON)/export.js \
+	$(COMMON)/faceting.js \
+	$(COMMON)/filters.js \
+	$(COMMON)/footer.js \
+	$(COMMON)/inputs.js \
+	$(COMMON)/login.js \
+	$(COMMON)/markdownPreview.js \
+	$(COMMON)/modal.js \
+	$(COMMON)/navbar.js \
+	$(COMMON)/record.js \
+	$(COMMON)/recordCreate.js \
+	$(COMMON)/resizable.js \
+	$(COMMON)/storage.js \
+	$(COMMON)/table.js \
+	$(COMMON)/upload.js \
+	$(COMMON)/utils.js \
+	$(COMMON)/validators.js
+
+SHARED_JS_SOURCE_MIN=chaise.min.js
+$(DIST)/$(SHARED_JS_SOURCE_MIN): $(SHARED_JS_SOURCE)
+	$(call bundle_js_files,$(SHARED_JS_SOURCE_MIN),$(SHARED_JS_SOURCE))
+
+ANGULARJS=$(JS)/vendor/angular.js
+
+SHARED_JS_VENDOR_BASE=$(JS)/vendor/jquery-3.4.1.min.js \
+	$(ANGULARJS) \
+	$(JS)/vendor/bootstrap-3.3.7.min.js \
+	$(JS)/vendor/plotly-latest.min.js
+
+SHARED_JS_VENDOR_ASSET=$(JS)/vendor/angular-plotly.js \
+	$(JS)/vendor/angular-messages.min.js \
+	$(JS)/vendor/angular-sanitize.js \
+	$(COMMON)/vendor/angular-cookies.min.js \
+	$(COMMON)/vendor/angular-animate.min.js \
+	$(COMMON)/vendor/angular-scroll.min.js \
+	$(COMMON)/vendor/css-element-queries.js \
+	$(JS)/vendor/ui-bootstrap-tpls-2.5.0.min.js \
+	$(JS)/vendor/select.js
+
+SHARED_JS_VENDOR_ASSET_MIN=chaise.vendor.min.js
+$(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN): $(SHARED_JS_VENDOR_ASSET)
+	$(call bundle_js_files,$(SHARED_JS_VENDOR_ASSET_MIN),$(SHARED_JS_VENDOR_ASSET))
+
+SHARED_CSS_SOURCE=$(CSS)/vendor/bootstrap.min.css \
+	$(CSS)/vendor/fontawesome.min.css \
+	$(COMMON)/styles/app.css
+
+SASS=$(COMMON)/styles/app.css
+$(SASS): $(shell find $(COMMON)/styles/scss/)
+	$(info - creating app.css and navbar.css)
+	@$(BIN)/node-sass --output-style compressed --source-map-embed $(COMMON)/styles/scss/app.scss $(COMMON)/styles/app.css
+	@$(BIN)/node-sass --include-path $(COMMON)/styles/scss/_variables.scss --output-style compressed --source-map-embed $(COMMON)/styles/scss/_navbar.scss $(COMMON)/styles/navbar.css
+
+JS_CONFIG=chaise-config.js
+$(JS_CONFIG): chaise-config-sample.js
+	cp -n chaise-config-sample.js $(JS_CONFIG) || true
+	touch $(JS_CONFIG)
+
+$(DIST)/$(MAKEFILE_VAR): $(BUILD_VERSION)
+	$(info - creating makefile_variables.js)
+	@echo 'var chaiseBuildVariables = {};' > $(DIST)/$(MAKEFILE_VAR)
+	@echo 'chaiseBuildVariables.buildVersion="$(BUILD_VERSION)";' >> $(DIST)/$(MAKEFILE_VAR)
+	@echo 'chaiseBuildVariables.chaiseBasePath="$(CHAISE_BASE_PATH)";' >> $(DIST)/$(MAKEFILE_VAR)
+	@echo 'chaiseBuildVariables.ermrestjsBasePath="$(ERMRESTJS_BASE_PATH)";' >> $(DIST)/$(MAKEFILE_VAR)
+
+
+$(DIST)/chaise-dependencies.html: $(BUILD_VERSION)
+	$(info - creating chaise-dependencies.html)
+	@> $(DIST)/chaise-dependencies.html
+	@$(call add_css_link,$(DIST)/chaise-dependencies.html,)
+	@$(call add_js_script,$(DIST)/chaise-dependencies.html,$(ANGULARJS) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN))
+	@$(call add_ermrestjs_script,$(DIST)/chaise-dependencies.html)
+
+# -------------------------- record app -------------------------- #
+RECORD_ROOT=record
+
+RECORD_JS_SOURCE=$(RECORD_ROOT)/record.app.js \
+	$(RECORD_ROOT)/record.utils.js \
+	$(RECORD_ROOT)/record.controller.js
+
+RECORD_JS_SOURCE_MIN=record.min.js
+$(DIST)/$(RECORD_JS_SOURCE_MIN): $(RECORD_JS_SOURCE)
+	$(call bundle_js_files,$(RECORD_JS_SOURCE_MIN),$(RECORD_JS_SOURCE))
+
+RECORD_JS_VENDOR_ASSET=
+
+RECORD_CSS_SOURCE=
+
+.make-record-includes: $(BUILD_VERSION)
+	$(info - creating .make-record-includes)
+	@> .make-record-includes
+	@$(call add_css_link,.make-record-includes,$(RECORD_CSS_SOURCE))
+	@$(call add_js_script, .make-record-includes,$(SHARED_JS_VENDOR_BASE) $(RECORD_JS_VENDOR_ASSET) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(DIST)/$(RECORD_JS_SOURCE_MIN))
+	@$(call add_ermrestjs_script,.make-record-includes)
+
+record/index.html: record/index.html.in .make-record-includes
+	$(info - creating record/index.html)
+	@$(call build_html, .make-record-includes, record/index.html)
+
+# -------------------------- recordset app -------------------------- #
+
+RECORDSET_ROOT=recordset
+
+RECORDSET_JS_SOURCE=$(RECORDSET_ROOT)/recordset.app.js \
+    $(RECORDSET_ROOT)/recordset.controller.js
+
+RECORDSET_JS_SOURCE_MIN=recordset.min.js
+$(DIST)/$(RECORDSET_JS_SOURCE_MIN): $(RECORDSET_JS_SOURCE)
+	$(call bundle_js_files,$(RECORDSET_JS_SOURCE_MIN),$(RECORDSET_JS_SOURCE))
+
+RECORDSET_JS_VENDOR_ASSET=
+
+RECORDSET_CSS_SOURCE=
+
+.make-recordset-includes: $(BUILD_VERSION)
+	@> .make-recordset-includes
+	$(info - creating .make-recordset-includes)
+	@$(call add_css_link,.make-recordset-includes,$(RECORDSET_CSS_SOURCE))
+	@$(call add_js_script,.make-recordset-includes,$(SHARED_JS_VENDOR_BASE) $(RECORDSET_JS_VENDOR_ASSET) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(DIST)/$(RECORDSET_JS_SOURCE_MIN))
+	@$(call add_ermrestjs_script,.make-recordset-includes)
+
+recordset/index.html: recordset/index.html.in .make-recordset-includes
+	$(info - creating recordset/index.html)
+	@$(call build_html,.make-recordset-includes,recordset/index.html)
+
+
+# -------------------------- recordedit app -------------------------- #
+RECORDEDIT_ROOT=recordedit
+
+RECORDEDIT_JS_SOURCE=$(RECORDEDIT_ROOT)/recordEdit.app.js \
+	$(RECORDEDIT_ROOT)/model.js \
+	$(RECORDEDIT_ROOT)/form.controller.js \
+	$(RECORDEDIT_ROOT)/recordedit.utils.js
+
+RECORDEDIT_JS_SOURCE_MIN=recordedit.min.js
+$(DIST)/$(RECORDEDIT_JS_SOURCE_MIN): $(RECORDEDIT_JS_SOURCE)
+	$(call bundle_js_files,$(RECORDEDIT_JS_SOURCE_MIN),$(RECORDEDIT_JS_SOURCE))
+
+# TODO why four different files for markdown? if inputswitch will be used everywhere, this should move to shared
+RECORDEDIT_JS_VENDOR_ASSET=$(JS)/vendor/select.js \
+	$(JS)/vendor/angular-datepicker.js \
+	$(JS)/vendor/rzslider.js \
+	$(COMMON)/vendor/mask.min.js \
+	$(COMMON)/vendor/MarkdownEditor/bootstrap-markdown.js \
 	$(COMMON)/vendor/MarkdownEditor/highlight.min.js \
 	$(COMMON)/vendor/MarkdownEditor/angular-highlightjs.min.js \
 	$(COMMON)/vendor/MarkdownEditor/angular-markdown-editor.js
 
-# CSS source
-CSS=styles
+RECORDEDIT_CSS_SOURCE=$(COMMON)/vendor/MarkdownEditor/styles/bootstrap-markdown.min.css \
+	$(COMMON)/vendor/MarkdownEditor/styles/github.min.css \
+	$(COMMON)/vendor/MarkdownEditor/styles/angular-markdown-editor.min.css \
+	$(CSS)/vendor/rzslider.css
 
-SASS=$(COMMON)/styles/app.css
+.make-recordedit-includes: $(BUILD_VERSION)
+	@> .make-recordedit-includes
+	$(info - creating .make-recordedit-includes)
+	@$(call add_css_link,.make-recordedit-includes,$(RECORDEDIT_CSS_SOURCE))
+	@$(call add_js_script,.make-recordedit-includes,$(SHARED_JS_VENDOR_BASE) $(RECORDEDIT_JS_VENDOR_ASSET) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(DIST)/$(RECORDEDIT_JS_SOURCE_MIN))
+	@$(call add_ermrestjs_script,.make-recordedit-includes)
 
-CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
-	$(CSS)/vendor/fontawesome.min.css \
-	$(CSS)/vendor/ng-grid.css \
-	$(CSS)/vendor/rzslider.css \
-	$(CSS)/vendor/select.css \
+recordedit/index.html: recordedit/index.html.in .make-recordedit-includes
+	$(info - creating recordedit/index.html)
+	@$(call build_html,.make-recordedit-includes,recordedit/index.html)
+
+# -------------------------- markdown help app -------------------------- #
+MDHELP_JS_SOURCE=$(RECORDEDIT_ROOT)/mdHelp.app.js
+
+MDHELP_CSS_SOURCE=$(RECORDEDIT_ROOT)/mdHelpStyle.min.css
+
+.make-mdhelp-includes: $(BUILD_VERSION)
+	@> .make-mdhelp-includes
+	$(info - creating .make-mdhelp-includes)
+	@$(call add_css_link,.make-mdhelp-includes,$(MDHELP_CSS_SOURCE))
+	@$(call add_js_script,.make-mdhelp-includes,$(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(MDHELP_JS_SOURCE))
+	@$(call add_ermrestjs_script,.make-mdhelp-includes)
+
+recordedit/mdHelp.html: recordedit/mdHelp.html.in .make-mdhelp-includes
+	$(info - creating recordedit/mdHelp.html)
+	@$(call build_html, .make-mdhelp-includes, recordedit/mdHelp.html)
+
+# -------------------------- viewer app -------------------------- #
+VIEWER_ROOT=viewer
+
+VIEWER_JS_SOURCE=$(VIEWER_ROOT)/viewer.app.js \
+	$(VIEWER_ROOT)/common/providers/context.js \
+	$(VIEWER_ROOT)/common/providers/image.js \
+	$(VIEWER_ROOT)/common/providers/user.js \
+	$(VIEWER_ROOT)/common/providers/auth.service.js \
+	$(VIEWER_ROOT)/sidebar/sidebar.controller.js \
+	$(VIEWER_ROOT)/annotations/annotations.js \
+	$(VIEWER_ROOT)/annotations/comments.js \
+	$(VIEWER_ROOT)/annotations/anatomies.js \
+	$(VIEWER_ROOT)/annotations/annotations.service.js \
+	$(VIEWER_ROOT)/annotations/comments.service.js \
+	$(VIEWER_ROOT)/annotations/annotations.controller.js \
+	$(VIEWER_ROOT)/annotations/comments.controller.js \
+	$(VIEWER_ROOT)/osd/osd.controller.js \
+	$(VIEWER_ROOT)/image-metadata/vocabs.js \
+	$(VIEWER_ROOT)/image-metadata/statuses.js \
+	$(VIEWER_ROOT)/image-metadata/metadata.controller.js \
+	$(VIEWER_ROOT)/alerts/alerts.controller.js
+
+VIEWER_JS_SOURCE_MIN=viewer.min.js
+$(DIST)/$(VIEWER_JS_SOURCE_MIN): $(VIEWER_JS_SOURCE)
+	$(call bundle_js_files,$(VIEWER_JS_SOURCE_MIN),$(VIEWER_JS_SOURCE))
+
+VIEWER_JS_VENDOR_ASSET=$(COMMON)/vendor/re-tree.js \
+	$(COMMON)/vendor/ng-device-detector.js
+
+VIEWER_CSS_SOURCE=$(CSS)/vendor/select.css \
 	$(CSS)/vendor/select2.css \
-	$(CSS)/vendor/angular-datepicker.css \
-	$(CSS)/vendor/bootstrap-tour.min.css
+	$(VIEWER_ROOT)/viewer.css
 
-CSS_SOURCE=$(CSS)/jquery.nouislider.min.css \
-	$(CSS)/material-design/css/material-design-iconic-font.min.css \
-	$(COMMON)/styles/navbar.css \
+.make-viewer-includes: $(BUILD_VERSION)
+	@> .make-viewer-includes
+	$(info - creating .make-viewer-includes)
+	@$(call add_css_link, .make-viewer-includes,$(VIEWER_CSS_SOURCE))
+	@$(call add_js_script, .make-viewer-includes, $(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(VIEWER_JS_VENDOR_ASSET) $(DIST)/$(VIEWER_JS_SOURCE_MIN))
+	@$(call add_ermrestjs_script,.make-viewer-includes)
 
-# JavaScript source and test specs
-JS=scripts
+viewer/index.html: viewer/index.html.in .make-viewer-includes
+	$(info - creating viewer/index.html)
+	@$(call build_html, .make-viewer-includes, viewer/index.html)
 
-JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
-	$(JS)/vendor/jquery-ui-tooltip.min.js \
-	$(JS)/vendor/jquery.nouislider.all.min.js \
-	$(JS)/vendor/bootstrap-3.3.7.min.js \
-	$(JS)/vendor/jquery.cookie.js \
-	$(JS)/vendor/angular.js \
-	$(JS)/vendor/angular-sanitize.js \
-	$(JS)/vendor/ui-bootstrap-tpls-2.5.0.min.js \
-	$(COMMON)/vendor/angular-cookies.min.js \
-	$(JS)/vendor/rzslider.js \
-	$(JS)/vendor/angular-datepicker.js \
-	$(JS)/vendor/ng-grid.js \
-	$(JS)/vendor/select.js \
-	$(JS)/vendor/bootstrap-tour.min.js \
-	$(JS)/vendor/plotly-latest.min.js
+# -------------------------- Login app -------------------------- #
+LOGIN_ROOT=login
 
-JS_SOURCE=$(JS)/respond.js \
+LOGIN_JS_SOURCE=$(JS)/respond.js \
 	$(JS)/variables.js \
 	$(JS)/utils.js \
 	$(JS)/ermrest.js \
@@ -244,292 +463,95 @@ JS_SOURCE=$(JS)/respond.js \
 	$(JS)/controller/ermrestResultsController.js \
 	$(JS)/controller/ermrestSideBarController.js \
 	$(JS)/controller/ermrestTourController.js \
-	$(JS)/tour.js \
-	$(COMMON)/alerts.js \
-	$(COMMON)/storage.js \
-	$(COMMON)/authen.js \
-	$(COMMON)/config.js \
-	$(COMMON)/delete-link.js \
-	$(COMMON)/errors.js \
-	$(COMMON)/filters.js \
-	$(COMMON)/inputs.js \
-	$(COMMON)/modal.js \
-	$(COMMON)/navbar.js \
-	$(COMMON)/login.js \
-	$(COMMON)/record.js \
-	$(COMMON)/ellipsis.js \
-	$(COMMON)/storage.js \
-	$(COMMON)/table.js \
-	$(COMMON)/vendor/css-element-queries.js \
-	$(COMMON)/utils.js \
-	$(COMMON)/bindHtmlUnsafe.js
+	$(JS)/tour.js
 
-# JavaScript and CSS source for Record(2) app
-RECORD_ASSETS=record
+LOGIN_JS_SOURCE_MIN=login.min.js
+$(DIST)/$(LOGIN_JS_SOURCE_MIN): $(LOGIN_JS_SOURCE)
+	$(call bundle_js_files,$(LOGIN_JS_SOURCE_MIN),$(LOGIN_JS_SOURCE))
 
-RECORD_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
-	$(JS)/vendor/plotly-latest.min.js \
-	$(JS)/vendor/angular.js \
-	$(JS)/vendor/angular-plotly.js \
-	$(JS)/vendor/angular-messages.min.js \
-	$(JS)/vendor/angular-sanitize.js \
-	$(COMMON)/vendor/angular-cookies.min.js \
-	$(COMMON)/vendor/angular-animate.min.js \
-	$(COMMON)/vendor/angular-scroll.min.js \
-	$(COMMON)/alerts.js \
-	$(COMMON)/authen.js \
-	$(COMMON)/config.js \
-	$(COMMON)/delete-link.js \
-	$(COMMON)/errors.js \
-	$(COMMON)/export.js \
-	$(COMMON)/faceting.js \
-	$(COMMON)/filters.js \
-	$(COMMON)/inputs.js \
-	$(COMMON)/modal.js \
-	$(COMMON)/navbar.js \
-	$(COMMON)/login.js \
-	$(COMMON)/record.js \
-	$(COMMON)/ellipsis.js \
-	$(COMMON)/storage.js \
-	$(COMMON)/table.js \
-	$(COMMON)/vendor/css-element-queries.js \
-	$(COMMON)/utils.js \
-	$(COMMON)/bindHtmlUnsafe.js \
-	$(COMMON)/footer.js \
-	$(COMMON)/upload.js \
-	$(COMMON)/validators.js \
-	$(COMMON)/recordCreate.js \
-	$(COMMON)/resizable.js \
-	$(JS)/vendor/bootstrap-3.3.7.min.js \
-	$(JS)/vendor/ui-bootstrap-tpls-2.5.0.min.js
-
-RECORD_JS_SOURCE=$(RECORD_ASSETS)/record.app.js \
-	$(RECORD_ASSETS)/record.utils.js \
-	$(RECORD_ASSETS)/record.controller.js
-
-RECORD_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
-	$(CSS)/vendor/fontawesome.min.css \
-	$(COMMON)/styles/app.css \
-	$(COMMON)/vendor/MarkdownEditor/styles/github-markdown.css \
-
-# JavaScript and CSS source for Viewer app
-VIEWER_ASSETS=viewer
-
-VIEWER_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
-	$(JS)/vendor/angular.js \
-	$(JS)/vendor/angular-plotly.js \
-	$(JS)/vendor/angular-sanitize.js \
-	$(JS)/vendor/angular-messages.min.js \
+LOGIN_JS_VENDOR_ASSET=$(JS)/vendor/jquery-ui-tooltip.min.js \
+	$(JS)/vendor/jquery.nouislider.all.min.js \
+	$(JS)/vendor/jquery.cookie.js \
+	$(JS)/vendor/rzslider.js \
 	$(JS)/vendor/angular-datepicker.js \
-	$(COMMON)/vendor/angular-cookies.min.js \
-	$(COMMON)/vendor/angular-scroll.min.js \
-	$(COMMON)/alerts.js \
-	$(COMMON)/config.js \
-	$(COMMON)/faceting.js \
-	$(COMMON)/filters.js \
-	$(COMMON)/ellipsis.js \
-	$(COMMON)/inputs.js \
-	$(COMMON)/table.js \
-	$(COMMON)/validators.js \
-	$(COMMON)/vendor/css-element-queries.js \
-	$(COMMON)/utils.js \
-	$(COMMON)/storage.js \
-	$(COMMON)/authen.js \
-	$(COMMON)/errors.js \
-	$(COMMON)/modal.js \
-	$(COMMON)/navbar.js \
-	$(COMMON)/login.js \
-	$(COMMON)/delete-link.js \
-	$(COMMON)/vendor/re-tree.js \
-	$(COMMON)/vendor/ng-device-detector.js \
-	$(COMMON)/vendor/angular-cookies.min.js \
-	$(JS)/vendor/bootstrap-3.3.7.min.js \
-	$(JS)/vendor/ui-bootstrap-tpls-2.5.0.min.js \
-	$(JS)/vendor/select.js
+	$(JS)/vendor/ng-grid.js \
+	$(JS)/vendor/bootstrap-tour.min.js
 
-VIEWER_JS_SOURCE=$(VIEWER_ASSETS)/viewer.app.js \
-	$(VIEWER_ASSETS)/common/providers/context.js \
-	$(VIEWER_ASSETS)/common/providers/image.js \
-	$(VIEWER_ASSETS)/common/providers/user.js \
-	$(VIEWER_ASSETS)/common/providers/auth.service.js \
-	$(VIEWER_ASSETS)/sidebar/sidebar.controller.js \
-	$(VIEWER_ASSETS)/annotations/annotations.js \
-	$(VIEWER_ASSETS)/annotations/comments.js \
-	$(VIEWER_ASSETS)/annotations/anatomies.js \
-	$(VIEWER_ASSETS)/annotations/annotations.service.js \
-	$(VIEWER_ASSETS)/annotations/comments.service.js \
-	$(VIEWER_ASSETS)/annotations/annotations.controller.js \
-	$(VIEWER_ASSETS)/annotations/comments.controller.js \
-	$(VIEWER_ASSETS)/osd/osd.controller.js \
-	$(VIEWER_ASSETS)/image-metadata/vocabs.js \
-	$(VIEWER_ASSETS)/image-metadata/statuses.js \
-	$(VIEWER_ASSETS)/image-metadata/metadata.controller.js \
-	$(VIEWER_ASSETS)/alerts/alerts.controller.js
-
-VIEWER_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
-	$(CSS)/vendor/fontawesome.min.css \
-	$(CSS)/material-design/css/material-design-iconic-font.min.css \
+LOGIN_CSS_SOURCE=$(CSS)/jquery.nouislider.min.css \
+	$(CSS)/vendor/ng-grid.css \
+	$(CSS)/vendor/rzslider.css \
 	$(CSS)/vendor/select.css \
 	$(CSS)/vendor/select2.css \
-	$(COMMON)/styles/app.css \
-	$(COMMON)/vendor/MarkdownEditor/styles/github-markdown.css
+	$(CSS)/vendor/angular-datepicker.css \
+	$(CSS)/vendor/bootstrap-tour.min.css \
+	$(COMMON)/styles/navbar.css
 
-VIEWER_CSS_SOURCE=$(VIEWER_ASSETS)/viewer.css
+.make-login-includes: $(BUILD_VERSION)
+	@> .make-login-includes
+	$(info - creating .make-login-includes)
+	@$(call add_css_link,.make-login-includes,$(LOGIN_CSS_SOURCE))
+	@$(call add_js_script,.make-login-includes,$(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(LOGIN_JS_VENDOR_ASSET) $(DIST)/$(LOGIN_JS_SOURCE_MIN))
+	@$(call add_ermrestjs_script,.make-login-includes)
 
-# JavaScript and CSS source for RecordEdit app
-RE_ASSETS=recordedit
+login/index.html: login/index.html.in .make-login-includes
+	$(info - creating login/index.html)
+	@$(call build_html, .make-login-includes, login/index.html)
 
-RE_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
-	$(JS)/vendor/plotly-latest.min.js \
-	$(JS)/vendor/angular.js \
-	$(JS)/vendor/angular-plotly.js \
-	$(JS)/vendor/angular-sanitize.js \
-	$(JS)/vendor/angular-messages.min.js \
-	$(COMMON)/vendor/angular-cookies.min.js \
-	$(COMMON)/vendor/angular-scroll.min.js \
-	$(COMMON)/vendor/mask.min.js \
-	$(COMMON)/vendor/moment.min.js \
-	$(COMMON)/vendor/sparkMD5.min.js \
-	$(COMMON)/alerts.js \
-	$(COMMON)/authen.js \
-	$(COMMON)/config.js \
-	$(COMMON)/errors.js \
-	$(COMMON)/faceting.js \
-	$(COMMON)/filters.js \
-	$(COMMON)/ellipsis.js \
-	$(COMMON)/inputs.js \
-	$(COMMON)/resizable.js \
-	$(COMMON)/storage.js \
-	$(COMMON)/table.js \
-	$(COMMON)/vendor/css-element-queries.js \
-	$(COMMON)/utils.js \
-	$(COMMON)/upload.js \
-	$(COMMON)/validators.js \
-	$(COMMON)/navbar.js \
-	$(COMMON)/login.js \
-	$(COMMON)/modal.js \
-	$(COMMON)/delete-link.js \
-	$(COMMON)/bindHtmlUnsafe.js \
-	$(COMMON)/markdownPreview.js \
-	$(COMMON)/footer.js \
-	$(COMMON)/recordCreate.js \
-	$(JS)/vendor/bootstrap-3.3.7.min.js \
-	$(JS)/vendor/ui-bootstrap-tpls-2.5.0.min.js \
-	$(JS)/vendor/select.js \
-	$(JS)/vendor/angular-datepicker.js \
-	$(JS)/vendor/rzslider.js
+# -------------------------- switch user help app -------------------------- #
+SWITCH_USER_JS_SOURCE=lib/switchUserAccounts.app.js
+
+.make-switchuser-includes: $(BUILD_VERSION)
+	@> .make-switchuser-includes
+	$(info - creating .make-switchuser-includes)
+	@$(call add_css_link,.make-switchuser-includes,)
+	@$(call add_js_script,.make-switchuser-includes,$(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN)  $(SWITCH_USER_JS_SOURCE))
+	@$(call add_ermrestjs_script,.make-switchuser-includes)
+
+lib/switchUserAccounts.html: lib/switchUserAccounts.html.in .make-switchuser-includes
+	$(info - creating lib/switchUserAccounts.html)
+	@$(call build_html,.make-switchuser-includes,lib/switchUserAccounts.html)
 
 
-RE_JS_SOURCE=$(RE_ASSETS)/recordEdit.app.js \
-	$(RE_ASSETS)/model.js \
-	$(RE_ASSETS)/form.controller.js \
-	$(RE_ASSETS)/recordedit.utils.js
+# -------------------------- utility functions -------------------------- #
 
-RE_JS_MDHELP=$(RE_ASSETS)/mdHelp.app.js
+# given a list of css files, will create link tag for each one and appends to the first parameter location
+define add_css_link
+	for file in $(SHARED_CSS_SOURCE) $(2); do \
+		runtimepath=$(CHAISE_BASE_PATH)$$file; \
+		version=$(BUILD_VERSION); \
+		echo "<link rel='stylesheet' type='text/css' href='$$runtimepath?v=$$version'>" >> $(1) ; \
+	done
+endef
 
+# given a list of js files, will create script tag for each one and appends to the first parameter location
+define add_js_script
+	for file in $(2); do \
+		runtimepath=$(CHAISE_BASE_PATH)$$file; \
+		version=$(BUILD_VERSION); \
+		echo "<script src='$$runtimepath?v=$$version'></script>" >> $(1) ; \
+	done
+endef
 
-RE_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
-	$(CSS)/vendor/fontawesome.min.css \
-	$(CSS)/material-design/css/material-design-iconic-font.min.css \
-	$(CSS)/vendor/rzslider.css \
-	$(COMMON)/styles/app.css
+# will create script tag for ermrestjs dep and appends to the parameter location
+define add_ermrestjs_script
+	for file in $(ERMRESTJS_DEPS); do \
+		runtimepath=$(ERMRESTJS_BASE_PATH)$$file ; \
+		version=$(BUILD_VERSION); \
+		echo "<script src='$$runtimepath?v=$$version'></script>" >> $(1) ; \
+	done
+endef
 
-RE_CSS_MDHELP=$(RE_ASSETS)/mdHelpStyle.min.css
+# add meta and assets to the html
+define build_html
+    sed -e '/%INCLUDES%/ {' -e 'r $(1)' -e 'd' -e '}' \
+        $(2).in common/templates/noscript.html > $(2)
+endef
 
-# JavaScript and CSS source for RecordSet app
-RECSET_ASSETS=recordset
-
-RECSET_SHARED_JS_DEPS=$(JS)/vendor/jquery-3.4.1.min.js \
-	$(JS)/vendor/plotly-latest.min.js \
-	$(JS)/vendor/angular.js \
-	$(JS)/vendor/angular-plotly.js \
-	$(JS)/vendor/angular-sanitize.js \
-	$(JS)/vendor/bootstrap-3.3.7.min.js \
-	$(JS)/vendor/ui-bootstrap-tpls-2.5.0.min.js \
-	$(COMMON)/vendor/angular-animate.min.js \
-	$(COMMON)/vendor/angular-scroll.min.js \
-	$(COMMON)/alerts.js \
-	$(COMMON)/authen.js \
-	$(COMMON)/bindHtmlUnsafe.js \
-	$(COMMON)/config.js \
-	$(COMMON)/ellipsis.js \
-	$(COMMON)/export.js \
-	$(COMMON)/errors.js \
-	$(COMMON)/faceting.js \
-	$(COMMON)/filters.js \
-	$(COMMON)/footer.js \
-	$(COMMON)/inputs.js \
-	$(COMMON)/modal.js \
-	$(COMMON)/navbar.js \
-	$(COMMON)/login.js \
-	$(COMMON)/resizable.js \
-	$(COMMON)/storage.js \
-	$(COMMON)/table.js \
-	$(COMMON)/vendor/css-element-queries.js \
-	$(COMMON)/utils.js \
-	$(COMMON)/validators.js \
-	$(COMMON)/vendor/angular-cookies.min.js
-
-RECSET_JS_SOURCE=$(RECSET_ASSETS)/recordset.app.js \
-    $(RECSET_ASSETS)/recordset.controller.js
-
-RECSET_SHARED_CSS_DEPS=$(CSS)/vendor/bootstrap.min.css \
-	$(CSS)/vendor/fontawesome.min.css
-
-RECSET_CSS_SOURCE=$(COMMON)/styles/app.css \
-	$(COMMON)/vendor/MarkdownEditor/styles/github-markdown.css
-
-DEFAULT_JS_DEPS=$(JS)/vendor/angular.js \
-	$(JS)/vendor/angular-sanitize.js \
-	$(JS)/vendor/ui-bootstrap-tpls-2.5.0.min.js \
-	$(COMMON)/vendor/angular-animate.min.js \
-	$(COMMON)/alerts.js \
-	$(COMMON)/authen.js \
-	$(COMMON)/config.js \
-	$(COMMON)/errors.js \
-	$(COMMON)/filters.js \
-	$(COMMON)/footer.js \
-	$(COMMON)/inputs.js \
-	$(COMMON)/login.js \
-	$(COMMON)/modal.js \
-	$(COMMON)/navbar.js \
-	$(COMMON)/storage.js \
-	$(COMMON)/utils.js \
-	$(COMMON)/validators.js \
-	$(COMMON)/vendor/angular-cookies.min.js
-
-DEFAULT_CSS_DEPS = $(CSS)/vendor/bootstrap.min.css \
-	$(COMMON)/styles/app.css
-
-USER_SOURCE=lib/switchUserAccounts.app.js
-
-# Config file
-JS_CONFIG=chaise-config.js
-
-# Distribution target
-DIST=dist
-
-# Project package full/minified
-PKG=$(DIST)/$(PROJ).js
-MIN=$(DIST)/$(PROJ).min.js
-
-.PHONY: all
-# all should just do the minimal needed to deploy chaise
-all: clean npm_install_prod_modules $(SASS) $(HTML)
-
-# TODO not used
-.PHONY: build
-build: $(PKG) $(MIN) $(SASS) $(HTML) $(gitversion)
-
-# Rule to build the full library
-$(PKG): $(JS_SOURCE) $(BIN)
-	mkdir -p $(DIST)
-	cat $(JS_SOURCE) > $(PKG)
-
-# Rule to build the minified package
-$(MIN): $(JS_SOURCE) $(BIN)
-	mkdir -p $(DIST)
-	$(BIN)/ccjs $(JS_SOURCE) > $(MIN)
+# given a list of js files, create a minified version
+define bundle_js_files
+	$(info - creating $(1))
+	@$(BIN)/uglifyjs $(2) -o $(DIST)/$(1) --compress --source-map "url='$(1).map',root='$(CHAISE_BASE_PATH)'"
+endef
 
 # Rule to ensure Node bin scripts are present
 $(BIN): $(MODULES)
@@ -538,6 +560,14 @@ $(BIN): $(MODULES)
 # Rule to install Node modules locally
 $(MODULES): package.json
 	npm install
+
+# Rule to create the package.
+# - we have to make sure the npm dependencies required for build are installed.
+# - we have to clean all the dist files because we need to generate new ones.
+$(DIST): print_variables npm_install_prod_modules $(SASS) $(MIN) $(HTML) gitversion
+
+# build version will change everytime make all or install is called
+$(BUILD_VERSION):
 
 .PHONY: deps
 deps: $(BIN)
@@ -555,261 +585,50 @@ clean:
 	rm -rf $(DIST) || true
 	rm .make-* || true
 
-# Rule to clean project directory
-.PHONY: cleanversion
-cleanversion:
-	rm .make-add-version-tag || true
-
 # Rule to clean the dependencies too
 .PHONY: distclean
 distclean: clean
 	rm -rf $(MODULES) || true
 
+# Rule to build chaise
+.PHONY: all
+all: $(DIST)
 
-# Rule to make html
-.PHONY: html
-html: $(HTML)
-
-# Rule to compile sass/scss files to css
-$(COMMON)/styles/app.css: $(shell find $(COMMON)/styles/scss/)
-	$(BIN)/node-sass --style=compressed --source-map-embed $(COMMON)/styles/scss/app.scss $(COMMON)/styles/app.css
-	$(BIN)/node-sass --include-path $(COMMON)/styles/scss/_variables.scss --style=compressed --source-map-embed $(COMMON)/styles/scss/_navbar.scss $(COMMON)/styles/navbar.css
-
-# Rules to attach JavaScript and CSS assets to the head
-login/index.html: login/index.html.in .make-add-version-tag .make-asset-block
-	sed -e '/%VERSION%/ {' -e 'r .make-add-version-tag' -e 'd' -e '}' \
-		-e '/%ASSETS%/ {' -e 'r .make-asset-block' -e 'd' -e '}' \
-		login/index.html.in common/templates/noscript.html > login/index.html
-
-record/index.html: record/index.html.in .make-add-version-tag .make-record-asset-block
-	sed -e '/%VERSION%/ {' -e 'r .make-add-version-tag' -e 'd' -e '}' \
-		-e '/%ASSETS%/ {' -e 'r .make-record-asset-block' -e 'd' -e '}' \
-		record/index.html.in common/templates/noscript.html > record/index.html
-
-recordset/index.html: recordset/index.html.in .make-add-version-tag .make-rs-asset-block
-	sed -e '/%VERSION%/ {' -e 'r .make-add-version-tag' -e 'd' -e '}' \
-		-e '/%ASSETS%/ {' -e 'r .make-rs-asset-block' -e 'd' -e '}' \
-		recordset/index.html.in common/templates/noscript.html > recordset/index.html
-
-viewer/index.html: viewer/index.html.in .make-add-version-tag .make-viewer-asset-block
-	sed -e '/%VERSION%/ {' -e 'r .make-add-version-tag' -e 'd' -e '}' \
-		-e '/%ASSETS%/ {' -e 'r .make-viewer-asset-block' -e 'd' -e '}' \
-		viewer/index.html.in common/templates/noscript.html > viewer/index.html
-
-recordedit/index.html: recordedit/index.html.in .make-add-version-tag .make-de-asset-block
-	sed -e '/%VERSION%/ {' -e 'r .make-add-version-tag' -e 'd' -e '}' \
-		-e '/%ASSETS%/ {' -e 'r .make-de-asset-block' -e 'd' -e '}' \
-		recordedit/index.html.in common/templates/noscript.html > recordedit/index.html
-
-recordedit/mdHelp.html: recordedit/mdHelp.html.in .make-add-version-tag .make-md-asset-block
-	sed -e '/%VERSION%/ {' -e 'r .make-add-version-tag' -e 'd' -e '}' \
-		-e '/%ASSETS%/ {' -e 'r .make-md-asset-block' -e 'd' -e '}' \
-		recordedit/mdHelp.html.in common/templates/noscript.html > recordedit/mdHelp.html
-
-lib/switchUserAccounts.html: lib/switchUserAccounts.html.in .make-add-version-tag .make-user-asset-block
-	sed -e '/%VERSION%/ {' -e 'r .make-add-version-tag' -e 'd' -e '}' \
-		-e '/%ASSETS%/ {' -e 'r .make-user-asset-block' -e 'd' -e '}' \
-		lib/switchUserAccounts.html.in common/templates/noscript.html > lib/switchUserAccounts.html
-
-$(JS_CONFIG): chaise-config-sample.js
-	cp -n chaise-config-sample.js $(JS_CONFIG) || true
-	touch $(JS_CONFIG)
-
-.make-add-version-tag:
-	version=`date +%Y%m%d%H%M%S` ; \
-	echo "<meta name='version' content='$$version'/>" >> .make-add-version-tag ; \
-
-.make-asset-block: $(CSS_DEPS) $(CSS_SOURCE) $(JS_DEPS) $(JS_SOURCE) $(JS_CONFIG)
-	> .make-asset-block
-	for file in $(CSS_DEPS); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-asset-block ; \
-	done
-	for file in $(CSS_SOURCE); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-asset-block ; \
-	done
-	for file in $(JS_CONFIG) $(JS_DEPS); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-asset-block ; \
-	done
-	for script in $(ERMRESTJS_DEPS); do \
-		buildpath=$(ERMRESTJS_BLD_DIR)/$$script ; \
-		runtimepath=$(ERMRESTJS_RT_DIR)/$$script ; \
-		checksum=$$($(MD5) $$buildpath | awk '{ print $$1 }') ; \
-		echo "<script src='$$runtimepath?v=$$checksum'></script>" >> .make-asset-block ; \
-	done
-	for file in $(JS_SOURCE); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-asset-block ; \
-	done
-
-.make-viewer-asset-block: $(VIEWER_SHARED_CSS_DEPS) $(VIEWER_CSS_SOURCE) $(VIEWER_SHARED_JS_DEPS) $(VIEWER_JS_SOURCE) $(JS_CONFIG)
-	> .make-viewer-asset-block
-	for file in $(VIEWER_SHARED_CSS_DEPS); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-viewer-asset-block ; \
-	done
-	for file in $(VIEWER_CSS_SOURCE); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-viewer-asset-block ; \
-	done
-	for file in $(JS_CONFIG) $(VIEWER_SHARED_JS_DEPS); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-viewer-asset-block ; \
-	done
-	for script in $(ERMRESTJS_DEPS); do \
-		buildpath=$(ERMRESTJS_BLD_DIR)/$$script ; \
-		runtimepath=$(ERMRESTJS_RT_DIR)/$$script ; \
-		checksum=$$($(MD5) $$buildpath | awk '{ print $$1 }') ; \
-		echo "<script src='$$runtimepath?v=$$checksum'></script>" >> .make-viewer-asset-block ; \
-	done
-	for file in $(VIEWER_JS_SOURCE); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-viewer-asset-block ; \
-	done
-
-.make-de-asset-block: $(RE_SHARED_CSS_DEPS) $(RE_SHARED_JS_DEPS) $(RE_JS_SOURCE) $(JS_CONFIG) $(MDEDIT_JS_DEPS) $(MDEDIT_CSS_DEPS)
-	> .make-de-asset-block
-	for file in $(RE_SHARED_CSS_DEPS); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-de-asset-block ; \
-	done
-	for file in $(MDEDIT_CSS_DEPS); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-de-asset-block ; \
-	done
-	for file in $(JS_CONFIG) $(RE_SHARED_JS_DEPS); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-de-asset-block ; \
-	done
-	for script in $(ERMRESTJS_DEPS); do \
-		buildpath=$(ERMRESTJS_BLD_DIR)/$$script ; \
-		runtimepath=$(ERMRESTJS_RT_DIR)/$$script ; \
-		checksum=$$($(MD5) $$buildpath | awk '{ print $$1 }') ; \
-		echo "<script src='$$runtimepath?v=$$checksum'></script>" >> .make-de-asset-block ; \
-	done
-	for file in $(RE_JS_SOURCE) $(MDEDIT_JS_DEPS); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-de-asset-block ; \
-	done
-
-.make-rs-asset-block: $(RECSET_SHARED_CSS_DEPS) $(RECSET_CSS_SOURCE) $(RECSET_SHARED_JS_DEPS) $(RECSET_JS_SOURCE) $(JS_CONFIG)
-	> .make-rs-asset-block
-	for file in $(RECSET_SHARED_CSS_DEPS); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-rs-asset-block ; \
-	done
-	for file in $(RECSET_CSS_SOURCE); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-rs-asset-block ; \
-	done
-	for file in $(JS_CONFIG) $(RECSET_SHARED_JS_DEPS); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-rs-asset-block ; \
-	done
-	for script in $(ERMRESTJS_DEPS); do \
-		buildpath=$(ERMRESTJS_BLD_DIR)/$$script ; \
-		runtimepath=$(ERMRESTJS_RT_DIR)/$$script ; \
-		checksum=$$($(MD5) $$buildpath | awk '{ print $$1 }') ; \
-		echo "<script src='$$runtimepath?v=$$checksum'></script>" >> .make-rs-asset-block ; \
-	done
-	for file in $(RECSET_JS_SOURCE); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-rs-asset-block ; \
-	done
-
-.make-record-asset-block: $(RECORD_SHARED_CSS_DEPS) $(RECORD_CSS_SOURCE) $(RECORD_SHARED_JS_DEPS) $(RECORD_JS_SOURCE) $(JS_CONFIG)
-	> .make-record-asset-block
-	for file in $(RECORD_SHARED_CSS_DEPS); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-record-asset-block ; \
-	done
-	for file in $(RECORD_CSS_SOURCE); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-record-asset-block ; \
-	done
-	for file in $(JS_CONFIG) $(RECORD_SHARED_JS_DEPS); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-record-asset-block ; \
-	done
-	for script in $(ERMRESTJS_DEPS); do \
-		buildpath=$(ERMRESTJS_BLD_DIR)/$$script ; \
-		runtimepath=$(ERMRESTJS_RT_DIR)/$$script ; \
-		checksum=$$($(MD5) $$buildpath | awk '{ print $$1 }') ; \
-		echo "<script src='$$runtimepath?v=$$checksum'></script>" >> .make-record-asset-block ; \
-	done
-	for file in $(RECORD_JS_SOURCE); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-record-asset-block ; \
-	done
-
-.make-md-asset-block: $(RE_SHARED_CSS_DEPS) $(RE_SHARED_JS_DEPS) $(JS_CONFIG) $(RE_JS_MDHELP) $(RE_CSS_MDHELP)
-	> .make-md-asset-block
-	for file in $(RE_SHARED_CSS_DEPS); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-md-asset-block ; \
-	done
-	for file in $(RE_CSS_MDHELP); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-md-asset-block ; \
-	done
-	for file in $(JS_CONFIG) $(RE_SHARED_JS_DEPS); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-md-asset-block ; \
-	done
-	for script in $(ERMRESTJS_DEPS); do \
-		buildpath=$(ERMRESTJS_BLD_DIR)/$$script ; \
-		runtimepath=$(ERMRESTJS_RT_DIR)/$$script ; \
-		checksum=$$($(MD5) $$buildpath | awk '{ print $$1 }') ; \
-		echo "<script src='$$runtimepath?v=$$checksum'></script>" >> .make-md-asset-block ; \
-	done
-	for file in $(RE_JS_MDHELP); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-md-asset-block ; \
-	done
-
-# NOTE: this is created at 1 level deep because the dependencies in ermrestJS rely on a path value as well
-# these src tags can be updated to be properly reltive if we want it 2 or 3 folders deep, but changes in ermrestJS will also need ot be made
-.make-user-asset-block: $(DEFAULT_CSS_DEPS) $(DEFAULT_JS_DEPS) $(JS_CONFIG) $(USER_SOURCE)
-	> .make-user-asset-block
-	for file in $(DEFAULT_CSS_DEPS); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<link rel='stylesheet' type='text/css' href='../$$file?v=$$checksum'>" >> .make-user-asset-block ; \
-	done
-	for file in $(JS_CONFIG) $(DEFAULT_JS_DEPS); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-user-asset-block ; \
-	done
-	for script in $(ERMRESTJS_DEPS); do \
-		buildpath=$(ERMRESTJS_BLD_DIR)/$$script ; \
-		runtimepath=$(ERMRESTJS_RT_DIR)/$$script ; \
-		checksum=$$($(MD5) $$buildpath | awk '{ print $$1 }') ; \
-		echo "<script src='$$runtimepath?v=$$checksum'></script>" >> .make-user-asset-block ; \
-	done
-	for file in $(USER_SOURCE); do \
-		checksum=$$($(MD5) $$file | awk '{ print $$1 }') ; \
-		echo "<script src='../$$file?v=$$checksum'></script>" >> .make-user-asset-block ; \
-	done
-
-# Rule for installing for normal deployment
+# Rule for installing for normal deployment (build chaise and deploy)
 .PHONY: install dont_install_in_root
-install: cleanversion npm_install_prod_modules $(SASS) $(HTML) dont_install_in_root gitversion
-	rsync -avz --exclude='.*' --exclude='$(MODULES)' --exclude='wiki-images' --exclude=/chaise-config.js . $(CHAISEDIR)
+install: $(DIST) dont_install_in_root
+	$(info - deploying the package)
+	@rsync -avz --exclude='.*' --exclude='test' --exclude='$(MODULES)' --exclude=/chaise-config.js . $(CHAISEDIR)
 
+# Rule for installing during testing (build chaise and deploy with the chaise-config)
 .PHONY: install-w-config dont_install_in_root
-install-w-config: npm_install_prod_modules $(SASS) $(HTML) dont_install_in_root gitversion
-	rsync -avz --exclude='.*' --exclude='$(MODULES)' --exclude='wiki-images' . $(CHAISEDIR)
+install-w-config: $(DIST) dont_install_in_root $(JS_CONFIG)
+	$(info - deploying the package with the existing default chaise-config)
+	@rsync -avz --exclude='.*' --exclude='test' --exclude='$(MODULES)' . $(CHAISEDIR)
 
+# Rule to create version.txt
 .PHONY: gitversion
 gitversion:
-	sh ./git_version_info.sh
+	$(info - creating version.txt)
+	@sh ./git_version_info.sh
 
+# we want to make sure npm install is done for production
+# if we don't run this, npm install without any flags will be called from
+# make install which will install all the dependencies of npm.
 npm_install_prod_modules:
 	npm install --production
 
 dont_install_in_root:
 	@echo "$(CHAISEDIR)" | egrep -vq "^/$$|.*:/$$"
+
+print_variables:
+	@mkdir -p $(DIST)
+	$(info =================)
+	$(info BUILD_VERSION=$(BUILD_VERSION))
+	$(info building and deploying to: $(CHAISEDIR))
+	$(info Chaise will be accessed using: $(CHAISE_BASE_PATH))
+	$(info ERMrestJS must already be installed and accesible using: $(ERMRESTJS_BASE_PATH))
+	$(info =================)
 
 # Rules for help/usage
 .PHONY: help usage
@@ -820,8 +639,6 @@ usage:
 	@echo "    install          - installs the client (CHAISEDIR=$(CHAISEDIR))"
 	@echo "    deps      		- local install of node dependencies"
 	@echo "    updeps    		- update local dependencies"
-	@echo "    lint      		- lint the source"
-	@echo "    build     		- builds the package"
 	@echo "    test      		- runs e2e tests"
 	@echo "    clean     		- cleans the dist dir"
 	@echo "    distclean 		- cleans the dist dir and the dependencies"
