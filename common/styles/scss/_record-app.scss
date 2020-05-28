@@ -424,23 +424,19 @@
             display:none;
         }
 
-        .chaise-table {
-            .table th {
-                border: solid #000 !important;
-                border-width: 1px 1px 1px 1px !important;
-            }   
-        }
+        table th {
+            border: solid #000 !important;
+            border-width: 1px 1px 1px 1px !important;
+        }   
 
-        .chaise-table {
-            .table td {
-                padding: 8px !important;
-                border: solid #000 !important;
-                border-width: 1px 1px 1px 1px !important;
-            }
+        table td {
+            padding: 8px !important;
+            border: solid #000 !important;
+            border-width: 1px 1px 1px 1px !important;
         }
 
         .chaise-body {
-            .chaise-icon-for-tooltip::after{
+            .chaise-icon-for-tooltip:after{
                 display:none;
             }
         }
