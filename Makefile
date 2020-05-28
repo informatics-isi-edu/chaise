@@ -3,6 +3,9 @@
 # Disable built-in rules
 .SUFFIXES:
 
+# set the default target to install
+.DEFAULT_GOAL:=install
+
 # env variables needed for installation
 WEB_URL_ROOT?=/
 WEB_INSTALL_ROOT?=/var/www/html/
