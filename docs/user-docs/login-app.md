@@ -21,41 +21,51 @@ Make sure Chaise is properly installed. The next steps (and login app) are assum
 
 ### 2. Include Chaise dependencies
 
-The login is an AngularJS app, so at least you need to include `angular.js` and `login.app.js`. Therefore your `head` section should look like the following:
+You need to include `login.app.js` that is part of Chaise in your HTML page. The rest of dependencies will be dynamically fetched by `login.app.js`. Since this might drastically affect the performance, we suggest doing the next steps to prefetch them.
 
 ```html
 <head>
-    <script src="/chaise/scripts/vendor/angular.js"></script>
     <script src="/chaise/lib/login/login.app.js"></script>
 </head>
 ```
 
-#### 2.1. Prefetch Chaise dependencies
+#### 2.1. Prefetch Chaise dependencies (optional)
 
-Login app has more dependencies that, if not included, are fetched dynamically. Hence it's highly recommended that you prefetch these dependencies.  To make it simpler, during installation, Chaise creates the list of dependencies in the `dist/chaise-includes.html` file.  So you need to include the contents of this file in your HTML.
+Login app has more dependencies that, if not included, are fetched dynamically. Hence it's highly recommended that you prefetch these dependencies.  To make it simpler, during installation, Chaise creates the list of dependencies in the `dist/chaise-dependencies.html` file.  So you need to include the contents of this file in your HTML.
 
 ```html
 <head>
-    <script src="/chaise/scripts/vendor/angular.js"></script>
-    <!-- TODO add the contents of dist/chaise-includes.html here -->
+    <!-- TODO add the contents of dist/chaise-dependencies.html here -->
     <script src="/chaise/lib/login/login.app.js"></script>
 </head>
 ```
 
-The position of where you're adding these include statements is very important. It HAS TO be AFTER `angular.js` and BEFORE `login.app.js`.  Adding them before `angular.js` will break the app, while adding after `login.app.js` defeats the purpose of prefetching and actually causes duplicated fetching.
+The position of where you're adding these include statements is very important. It HAS TO be BEFORE `login.app.js`.  Adding them after `login.app.js` defeats the purpose of prefetching and actually causes duplicated fetching. You should not copy the contents of `dist/chaise-dependencies.html` manually and this should be part of the automated process of building Chaise and your other apps (Since the list generation is controlled by Chaise, we might update the list and therefore you should make sure you're always getting the latest list of dependencies.)  
 
-You should not copy the contents of `dist/chaise-includes.html` manually and this should be part of the automated process of building Chaise and your other apps.  If you're using Jekyll, you can:
+If you're using Jekyll, you can:
 
-- After `make install` is done Chaise, copy the `dist/chaise-includes.html` file into your `_includes` folder.
+- After `make install` is done Chaise, copy the `dist/chaise-dependencies.html` file into your `_includes` folder.
 
 - Include the file using `%include` statement:
     ```html
     <head>
-        <script src="/chaise/scripts/vendor/angular.js"></script>
-        {% include chaise-includes.html %}
+        {% include chaise-dependencies.html %}
         <script src="/chaise/lib/login/login.app.js"></script>
     </head>
     ```
+
+#### 2.2. Prefetch custom styles (optional)
+
+If you define `customCSS` property in your [chaise-config](chaise-config.md), Chaise will fetch it during the runtime. To increase the performance, you can prefetch this file by including it in your HTML file. So
+
+```html
+<head>
+    <!-- TODO include your customCSS file here -->
+    <!-- TODO add the contents of dist/chaise-dependencies.html here -->
+    <script src="/chaise/lib/login/login.app.js"></script>
+</head>
+```
+If you want to prefetch it, the include statement MUST be added before the content of `dist/chaise-dependencies.html` .
 
 ### 3. Use login
 

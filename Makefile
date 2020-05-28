@@ -189,7 +189,7 @@ HTML=login/index.html \
 	 record/index.html \
 	 recordedit/mdHelp.html \
 	 lib/switchUserAccounts.html \
-	 $(DIST)/chaise_includes.html
+	 $(DIST)/chaise-dependencies.html
 
 # the minified files that need to be created
 MIN=$(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) \
@@ -244,8 +244,10 @@ SHARED_JS_SOURCE_MIN=chaise.min.js
 $(DIST)/$(SHARED_JS_SOURCE_MIN): $(SHARED_JS_SOURCE)
 	$(call bundle_js_files,$(SHARED_JS_SOURCE_MIN),$(SHARED_JS_SOURCE))
 
+ANGULARJS=$(JS)/vendor/angular.js
+
 SHARED_JS_VENDOR_BASE=$(JS)/vendor/jquery-3.4.1.min.js \
-	$(JS)/vendor/angular.js \
+	$(ANGULARJS) \
 	$(JS)/vendor/bootstrap-3.3.7.min.js \
 	$(JS)/vendor/plotly-latest.min.js
 
@@ -286,12 +288,12 @@ $(DIST)/$(MAKEFILE_VAR): $(BUILD_VERSION)
 	@echo 'chaiseBuildVariables.ermrestjsBasePath="$(ERMRESTJS_BASE_PATH)";' >> $(DIST)/$(MAKEFILE_VAR)
 
 
-$(DIST)/chaise_includes.html: $(BUILD_VERSION)
-	$(info - creating chaise_includes.html)
-	@> $(DIST)/chaise_includes.html
-	@$(call add_css_link,$(DIST)/chaise_includes.html,)
-	@$(call add_js_script,$(DIST)/chaise_includes.html,$(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN))
-	@$(call add_ermrestjs_script,$(DIST)/chaise_includes.html)
+$(DIST)/chaise-dependencies.html: $(BUILD_VERSION)
+	$(info - creating chaise-dependencies.html)
+	@> $(DIST)/chaise-dependencies.html
+	@$(call add_css_link,$(DIST)/chaise-dependencies.html,)
+	@$(call add_js_script,$(DIST)/chaise-dependencies.html,$(ANGULARJS) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN))
+	@$(call add_ermrestjs_script,$(DIST)/chaise-dependencies.html)
 
 # -------------------------- record app -------------------------- #
 RECORD_ROOT=record
@@ -502,7 +504,7 @@ SWITCH_USER_JS_SOURCE=lib/switchUserAccounts.app.js
 	@> .make-switchuser-includes
 	$(info - creating .make-switchuser-includes)
 	@$(call add_css_link,.make-switchuser-includes,)
-	@$(call add_js_script,.make-switchuser-includes,$(SHARED_JS_VENDOR_BASE)$(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN)  $(SWITCH_USER_JS_SOURCE))
+	@$(call add_js_script,.make-switchuser-includes,$(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN)  $(SWITCH_USER_JS_SOURCE))
 	@$(call add_ermrestjs_script,.make-switchuser-includes)
 
 lib/switchUserAccounts.html: lib/switchUserAccounts.html.in .make-switchuser-includes
@@ -625,6 +627,7 @@ print_variables:
 	$(info BUILD_VERSION=$(BUILD_VERSION))
 	$(info building and deploying to: $(CHAISEDIR))
 	$(info Chaise will be accessed using: $(CHAISE_BASE_PATH))
+	$(info ERMrestJS must already be installed and accesible using: $(ERMRESTJS_BASE_PATH))
 	$(info =================)
 
 # Rules for help/usage

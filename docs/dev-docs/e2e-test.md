@@ -56,6 +56,12 @@ You can get your cookie by querying the database, or using the following simple 
 $ make install
 ```
 
+- Make sure all the npm dependencies are installed by running `npm install`.
+
+```sh
+$ npm install
+```
+
 ### Test cases
 - To execute all test cases in sequential order, set the following:
 ```sh
@@ -68,7 +74,7 @@ and then run the following command:
 $ make test
 ```
 
-This will automatically call `npm install` to install all *node.js* dependencies and also updates the *selenium* web-driver that protractor is using.
+This will automatically update the *selenium* web-driver that protractor is using.
 
 - To execute all the test cases in parallel, set the following:
 
