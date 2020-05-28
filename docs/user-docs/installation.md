@@ -12,14 +12,10 @@ Chaise depends on the following server- and client-side software.
   will want to deploy the app on the same host as [ERMrest]. If it is deployed
   on a separate host, you will need to enable [CORS] on the web server on which
   ERMrest is deployed.
-- **Client-side JavaScript Libraries**: [AngularJS] and other client-side
-  JavaScript runtime dependencies are bundled in `scripts/vendors` in this repository.
-- **ERMrestJS**: ERMrestJS is a client library for [ERMrest]. It must be
-  deployed to the same base directory as Chaise. If Chaise is deployed to
-  `/path/to/chaise` then ERMrestJS must be installed in `/path/to/ermrestjs`.
+- **ERMrestJS**: [ERMrestJS] is a client library for [ERMrest]. This library must be properly installed before installing Chaise. For more information about installing ermrestjs please refer to its installation document.
 
+[ERMrest]: https://github.com/informatics-isi-edu/ermrest
 [ERMrestJS]: https://github.com/informatics-isi-edu/ermrestjs
-[AngularJS]: https://angularjs.org
 [CORS]: https://en.wikipedia.org/wiki/Cross-origin_resource_sharing "Cross-origin resource sharing"
 
 ### Development Dependencies
@@ -49,7 +45,7 @@ ERMrestJS tests, which will also instruct you to get shared dependencies needed 
     WEB_INSTALL_ROOT=/var/www/html/
     CHAISE_REL_PATH=chaise/
     ```
-    Which means Chaise build folder will be copied to `/var/www/html/chaise/` location by default. And Chaise will be access by `/chaise/` URL path when deployed. If that is not the case in your deployment, you should modify the variables accordingly.
+    Which means Chaise build folder will be copied to `/var/www/html/chaise/` location by default. And the URL path of Chaise is `/chaise/`. If that is not the case in your deployment, you should modify the variables accordingly.
 
     Notes:
     - All the variables MUST have a trailing `/`.
@@ -75,7 +71,7 @@ See the [configuration guide](chaise-config.md).
 
 Once deployed the apps can be found at `http://<hostname>/chaise/<app>`, where `<app>` must be replaced with one of the app names (i.e., `search`, `recordset`).
 
-**TODO**: We need to document how to use these apps because without additional details the bare app name without additional parameters is not sufficient.
+<!-- **TODO**: We need to document how to use these apps because without additional details the bare app name without additional parameters is not sufficient. -->
 
 ## Testing
 
@@ -96,11 +92,8 @@ Then run the tests (install, if you haven't already).
 
 ```sh
 $ make install  # if not already installed
+$ npm install # if npm dependencies not already installed
 $ make test
 ```
-
-Make will invoke `npm install` to download and install all additional
-dependencies under the local `node_modules` directory relative to the project
-directory.
 
 For more information, see the [E2E tests guide](../dev-docs/e2e-test.md).
