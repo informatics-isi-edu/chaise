@@ -390,22 +390,17 @@
         }
 
         //Round blobs of links
-        #accordiongroup-212-6715-panel{
-            .markdown-container {
-                .vocab {
-                    //border: solid #000 !important;
-                    //border-width: 1px 1px 1px 1px !important;
-                    //margin: 8px;
-                    //width: 180px;
-                    //text-align: center;
+        .markdown-container {
+            .vocab {
+                border: solid #000 !important;
+                border-width: 1px 1px 1px 1px !important;
 
-                    color: darkblue!important;
-                    background-color: rgba(220, 220, 220, 0.68)!important;
-                    padding: 7px!important;
-                    border-radius: 10px!important;
-                    display: inline-block!important!;
-                    margin: 4px!important;
-                }
+                color: darkblue!important;
+                background-color: rgba(220, 220, 220, 0.68)!important;
+                padding: 7px!important;
+                border-radius: 10px!important;
+                display: inline-block!important!;
+                margin: 4px!important;
             }
         }
         
