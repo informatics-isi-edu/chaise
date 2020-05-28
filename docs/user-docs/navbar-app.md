@@ -1,14 +1,15 @@
 # Use navbar app in external HTML pages
 
-This documentation focuses on navbar and how it can be used in external  HTML pages.
+This documentation focuses on navbar and how it can be used in external HTML pages.
 
 ## Table of Contents
 - [How to add navbar app](#how-to-add-navbar-app)
   * [1. Install Chaise](#1-install-chaise)
   * [2. Include Chaise dependencies](#2-include-chaise-dependencies)
-    + [2.1. Prefetch Chaise dependencies](#21-prefetch-chaise-dependencies)
+    + [2.1. Prefetch Chaise dependencies](#21-prefetch-chaise-dependencies-optional)
+    + [2.2. Prefetch custom styles](#22-prefetch-custom-styles-optional)
   * [3. Use navbar](#3-use-navbar)
-- [Sample HTML page](#sample-html-pages)
+- [Sample HTML page](#sample-html-page)
 - [Notes](#notes)
 
 ## How to add navbar app
@@ -40,7 +41,9 @@ Navbar app has more dependencies that, if not included, are fetched dynamically.
 </head>
 ```
 
-The position of where you're adding these include statements is very important. It HAS TO be BEFORE `navbar.app.js`.  Adding them after `navbar.app.js` defeats the purpose of prefetching and actually causes duplicated fetching. You should not copy the contents of `dist/chaise-dependencies.html` manually and this should be part of the automated process of building Chaise and your other apps (Since the list generation is controlled by Chaise, we might update the list and therefore you should make sure you're always getting the latest list of dependencies.)  
+The position of where you're adding these include statements is very important. It HAS TO be BEFORE `navbar.app.js`.  Adding them after `navbar.app.js` defeats the purpose of prefetching and actually causes duplicated fetching.
+
+You should not copy the contents of `dist/chaise-dependencies.html` manually and this should be part of the automated process of building Chaise and your other apps (Since the list generation is controlled by Chaise, we might update the list and therefore you should make sure you're always getting the latest list of dependencies.)  
 
 If you're using Jekyll, you can:
 
@@ -78,7 +81,7 @@ After installing Chaise and including the dependencies, you can now use navbar b
 ```
 
 ## Sample HTML page
- If you want to look at a sample HTML page, you can take a look at [sample-navbar.html file in chaise](https://github.com/informatics-isi-edu/chaise/blob/master/lib/navbar/sample-navbar.html).
+ If you want to look at a sample HTML page, you can take a look at [sample-navbar.html file in Chaise](https://github.com/informatics-isi-edu/chaise/blob/master/lib/navbar/sample-navbar.html).
 
 ## Notes
 
