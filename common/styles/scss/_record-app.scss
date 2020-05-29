@@ -400,7 +400,7 @@
         
         #rt-container{
             a:after{
-                content: attr(href) "\2022" !important;
+                content: "\2022" !important;
             }
         }
 
