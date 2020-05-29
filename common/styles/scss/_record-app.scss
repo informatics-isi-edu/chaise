@@ -393,14 +393,14 @@
         .markdown-container {
             .vocab {
                 float:left!important;
-                padding: 0px!important;
-                margin:0px!important;
+                padding: 2px!important;
+                margin:2px!important;
             }
         }
         
         #rt-container{
             .markdown-container a:after{
-                content: "   \2022   " !important;
+                content: "\2002\2002\2022\2002\2002\" !important;
             }
 
             .markdown-container a:last-child:after{
@@ -442,7 +442,7 @@
 
         .chaise-body {
             .chaise-icon-for-tooltip:after{
-                display:none;
+                content:none!important;
             }
         }
     }
