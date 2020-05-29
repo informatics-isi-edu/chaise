@@ -392,8 +392,6 @@
         //Round blobs of links
         .markdown-container {
             .vocab {
-                display: inline!important;
-                margin: 3px!important;
                 float:left!important;
             }
         }
@@ -401,6 +399,10 @@
         #rt-container{
             .markdown-container a:after{
                 content: "  \2022  " !important;
+            }
+
+            .markdown-container a:last-child:after{
+                content: none !important;
             }
         }    
 
