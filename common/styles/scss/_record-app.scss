@@ -399,9 +399,13 @@
         }
         
         #rt-container{
-            a:after{
-                content: "\2022" !important;
-            }
+            .markdown-container {
+                .vocab {
+                    a:after{
+                        content: "\2022" !important;
+                    }
+                }
+            }    
         }
 
         a[href]:after {
