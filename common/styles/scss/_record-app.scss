@@ -400,10 +400,9 @@
         
         #rt-container{
             .markdown-container a:after{
-                content: "\2022  " !important;
-                }
-            }    
-        }
+                content: "\2022" !important;
+            }
+        }    
 
         a[href]:after {
             content: none !important;
