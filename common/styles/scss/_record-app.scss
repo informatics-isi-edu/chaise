@@ -392,16 +392,17 @@
         //Round blobs of links
         .markdown-container {
             .vocab {
-                border: solid #000 !important;
-                border-width: 1px 1px 1px 1px !important;
-                padding: 7px!important;
-                border-radius: 10px!important;
-                display: inline-block!important;
+                display: inline!important;
                 margin: 4px!important;
                 float:left!important;
             }
         }
         
+        #rt-container{
+            a:after{
+                content: attr(href) "\2022" !important;
+            }
+        }
 
         a[href]:after {
             content: none !important;
