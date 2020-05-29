@@ -394,14 +394,13 @@
             .vocab {
                 float:left!important;
                 padding: 0px!important;
-                display:inline!important;
                 margin:0px!important;
             }
         }
         
         #rt-container{
             .markdown-container a:after{
-                content: "  \2022  " !important;
+                content: "   \2022   " !important;
             }
 
             .markdown-container a:last-child:after{
