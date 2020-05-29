@@ -399,11 +399,8 @@
         }
         
         #rt-container{
-            .markdown-container {
-                .vocab {
-                    a:after{
-                        content: "\2022" !important;
-                    }
+            .markdown-container a:after{
+                content: "\2022  " !important;
                 }
             }    
         }
