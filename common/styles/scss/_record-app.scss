@@ -409,8 +409,8 @@
             }
         }    
 
-        .chaise-body .chaise-icon-for-tooltip::after{
-                content: none !important;
+        .chaise-icon-for-tooltip::after{
+            content: none !important;
         }
 
         a[href]:after {
