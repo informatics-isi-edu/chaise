@@ -310,12 +310,6 @@
             text-align: justify;
         }
 
-        .chaise-body {
-            .chaise-icon-for-tooltip:after{
-                content:none!important;
-                display:none!important;
-            }
-        }
 
         //Action button top right corner
         .top-right-panel {
@@ -407,13 +401,17 @@
         
         #rt-container{
             .markdown-container a:after{
-                content: "\2002\2022\2002" !important;
+                content: "\2002\2022" !important;
             }
 
             .markdown-container a:last-child:after{
                 content: none !important;
             }
         }    
+
+        .chaise-body .chaise-icon-for-tooltip::after{
+                content: none !important;
+        }
 
         a[href]:after {
             content: none !important;
