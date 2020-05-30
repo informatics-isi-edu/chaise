@@ -310,6 +310,13 @@
             text-align: justify;
         }
 
+        .chaise-body {
+            .chaise-icon-for-tooltip:after{
+                content:none!important;
+                display:none!important;
+            }
+        }
+
         //Action button top right corner
         .top-right-panel {
             .page-action-btns{
@@ -400,7 +407,7 @@
         
         #rt-container{
             .markdown-container a:after{
-                content: "\2002\2002\2022\2002\2002" !important;
+                content: "\2002\2022\2002" !important;
             }
 
             .markdown-container a:last-child:after{
@@ -438,12 +445,6 @@
             padding: 8px !important;
             border: solid #000 !important;
             border-width: 1px 1px 1px 1px !important;
-        }
-
-        .chaise-body {
-            .chaise-icon-for-tooltip:after{
-                content:none!important;
-            }
         }
     }
 
