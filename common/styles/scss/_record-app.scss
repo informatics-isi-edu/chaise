@@ -446,6 +446,12 @@
         }
     }
 
+    @media screen and (max-width: 900px) and (min-width: 600px), (min-width: 1100px) {
+        .bottom-panel-container{
+            font-size: 20px;
+            padding: 50px;
+        }
+    }
     @page {
 
         size: auto;
