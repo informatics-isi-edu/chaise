@@ -436,33 +436,28 @@
 
         record-table th {
             border: solid #000 !important;
-            border-width: 1px 1px 1px 1px !important;
+            border-width: 1.5px 1.5px 1.5px 1.5px !important;
         }   
 
         record-table td {
-            padding: 8px !important;
             border: solid #000 !important;
-            border-width: 1px 1px 1px 1px !important;
+            border-width: 1.5px 1.5px 1.5px 1.5px !important;
         }
-    }
 
-    @page {
+        @page {
 
-        size: auto;
-        margin: 5% 3% 5% 3%;
+            size: auto;
+            margin: 5% 3% 5% 3%;
 
-        .markdown-container {
-            .vocab {
+            .markdown-container {
+                .vocab {
+                    box-decoration-break: clone!important;
+                }
+            }
+
+            .record-table  {
                 box-decoration-break: clone!important;
             }
-        }
-
-        .chaise-table  {
-            box-decoration-break: clone!important;
-        }
-
-        .record-table  {
-            box-decoration-break: clone!important;
         }
     }
 }
