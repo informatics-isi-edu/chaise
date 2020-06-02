@@ -11,6 +11,7 @@ WEB_URL_ROOT?=/
 WEB_INSTALL_ROOT?=/var/www/html/
 ERMRESTJS_REL_PATH?=ermrestjs/
 CHAISE_REL_PATH?=chaise/
+OSD_VIEWER_REL_PATH?=openseadragon-viewer/
 
 # version number added to all the assets
 BUILD_VERSION:=$(shell date +%Y%m%d%H%M%S)
@@ -21,6 +22,7 @@ CHAISEDIR:=$(WEB_INSTALL_ROOT)$(CHAISE_REL_PATH)
 #chaise and ermrsetjs paths
 CHAISE_BASE_PATH:=$(WEB_URL_ROOT)$(CHAISE_REL_PATH)
 ERMRESTJS_BASE_PATH:=$(WEB_URL_ROOT)$(ERMRESTJS_REL_PATH)
+OSD_VIEWER_BASE_PATH:=$(WEB_URL_ROOT)$(OSD_VIEWER_REL_PATH)
 
 # ERMrestjs dependencies
 ERMRESTJS_DEPS=ermrest.vendor.min.js \
@@ -289,6 +291,7 @@ $(DIST)/$(MAKEFILE_VAR): $(BUILD_VERSION)
 	@echo 'chaiseBuildVariables.buildVersion="$(BUILD_VERSION)";' >> $(DIST)/$(MAKEFILE_VAR)
 	@echo 'chaiseBuildVariables.chaiseBasePath="$(CHAISE_BASE_PATH)";' >> $(DIST)/$(MAKEFILE_VAR)
 	@echo 'chaiseBuildVariables.ermrestjsBasePath="$(ERMRESTJS_BASE_PATH)";' >> $(DIST)/$(MAKEFILE_VAR)
+	@echo 'chaiseBuildVariables.OSDViewerBasePath="$(OSD_VIEWER_BASE_PATH)";' >> $(DIST)/$(MAKEFILE_VAR)
 
 
 $(DIST)/chaise-dependencies.html: $(BUILD_VERSION)
@@ -631,6 +634,7 @@ print_variables:
 	$(info building and deploying to: $(CHAISEDIR))
 	$(info Chaise will be accessed using: $(CHAISE_BASE_PATH))
 	$(info ERMrestJS must already be installed and accesible using: $(ERMRESTJS_BASE_PATH))
+	$(info If using viewer, OSD viewer must already be installed and accesible using: $(OSD_VIEWER_BASE_PATH))
 	$(info =================)
 
 # Rules for help/usage

@@ -835,6 +835,17 @@
         }
 
         /**
+         * Returns the path that openseadragon-viewer is installed
+         */
+        function OSDViewerDeploymentPath() {
+            if (typeof chaiseBuildVariables.OSDViewerBasePath === "string") {
+                return chaiseBuildVariables.OSDViewerBasePath;
+            } else {
+                return '/openseadragon-viewer/';
+            }
+        }
+
+        /**
          * Returns the chaise base url without the trailing slash
          * TODO we might want to find a better way instead of this.
          * @return {String}
@@ -1006,6 +1017,7 @@
             getQueryParams: getQueryParams,
             isBrowserIE: isBrowserIE,
             isSameOrigin: isSameOrigin,
+            OSDViewerDeploymentPath: OSDViewerDeploymentPath,
             parsedFilterToERMrestFilter: parsedFilterToERMrestFilter,
             parseURLFragment: parseURLFragment,
             queryStringToJSON: queryStringToJSON,
