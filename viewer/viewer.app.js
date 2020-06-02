@@ -147,7 +147,7 @@
         var arrows = [];
         var rectangles = [];
         var sections = [];
-        var session; 
+        var session;
         var imageAnnotationURL = context.serviceURL + "/catalog/2/entity/Gene_Expression:Image_Annotation";
         var config = ConfigUtils.getContextJSON();
 
@@ -187,7 +187,7 @@
 
         FunctionUtils.registerErmrestCallbacks();
 
-        
+
 
         ConfigUtils.getContextJSON().server.catalogs.get(context.catalogID).then(function success(catalog) {
             var schema = catalog.schemas.get(context.schemaName);
@@ -262,7 +262,7 @@
                     // }
                     // var old_params = image.entity.uri.split("?");
                     // image.entity.uri = origin+"/~mingyi/openseadragon-viewer/index.html?" + params[1];
-                    
+
                     // for (var i = 0; i < svgUrls.length; i++){
                     //     image.entity.uri += "&url=" + svgUrls[i];
                     // }
@@ -329,16 +329,16 @@
                 }, function error(response) {
                     throw response;
                 }).then(function(){
-                    
+
                     imageAnnotationURL += "/Image="+context.imageID;
                     ERMrest.resolve(imageAnnotationURL, { cid: context.cid, pid: context.pid, wid: context.wid }).then(function getReference(reference){
-            
+
                         // we are using filter to determine app mode, the logic for getting filter
                         // should be in the parser and we should not duplicate it in here
                         // NOTE: we might need to change this line (we're parsing the whole url just for fidinig if there's filter)
                         var location = reference.location;
                         var svgUrls = [];
-    
+
                         // Mode can be any 3 with a filter
                         if (location.filter || location.facets) {
                             // prefill always means create
@@ -349,7 +349,7 @@
                             context.mode = context.modes.EDIT;
                         }
                         context.appContext = (context.mode == context.modes.EDIT ? "entry/edit" : "entry/create");
-            
+
                         //contextualize the reference based on the mode (determined above) recordedit is in
                         if (context.mode == context.modes.EDIT) {
                             $rootScope.reference = reference.contextualize.entryEdit;
@@ -360,12 +360,12 @@
                         $rootScope.canCreate = reference.canCreate || false;
                         $rootScope.canUpdate = reference.canUpdate || false;
                         $rootScope.canDelete = reference.canDelete || false;
-                        
+
                         $rootScope.reference.session = session;
                         $rootScope.session = session;
                         // $rootScope.reference = reference;
-                        
-            
+
+
                         // log attribues
                         $rootScope.logStackPath = logService.logStackPaths.SET;
                         $rootScope.logStack = [
@@ -375,7 +375,7 @@
                                 $rootScope.reference.filterLogInfo
                             )
                         ];
-            
+
                         // The log object that will be used for the submission request
                         var action = (context.mode == context.modes.CREATE || context.mode == context.modes.COPY) ? logService.logActions.CREATE : logService.logActions.UPDATE;
                         var logObj = {
@@ -386,7 +386,7 @@
                         if (ppid) logObj.ppid = ppid;
                         if (isQueryParameter) logObj.cqp = 1;
                         context.logObject = logObj;
-            
+
                         $rootScope.reference.columns.forEach(function (column, index) {
                             var isDisabled = InputUtils.isDisabled(column);
                             var stackNode = logService.getStackNode(
@@ -395,7 +395,7 @@
                                 {source: column.compressedDataSource, entity: column.isForeignKey}
                             );
                             var stackPath = column.isForeignKey ? logService.logStackPaths.FOREIGN_KEY : logService.logStackPaths.COLUMN;
-            
+
                             viewerModel.columnModels[index] = {
                                 allInput: null,
                                 column: column,
@@ -407,7 +407,7 @@
                                 logStackPath: logService.getStackPath("", stackPath)
                             };
                         });
-                                    
+
                         var numberRowsToRead = context.MAX_ROWS_TO_ADD;
                         var logObj = {
                             action: logService.getActionString(logService.logActions.LOAD),
@@ -416,7 +416,7 @@
 
                         $rootScope.reference.read(numberRowsToRead, logObj).then(function getPage(page) {
                             console.log("Page : ", page );
-       
+
                             // $rootScope.tuples is used for keeping track of changes in the tuple data before it is submitted for update
                             $rootScope.tuples = [];
                             if (context.mode == context.modes.EDIT && page.tuples.length == 1) {
@@ -424,8 +424,8 @@
                             }
                             $rootScope.idSafeTableName = DataUtils.makeSafeIdAttr($rootScope.reference.table.name);
                             $rootScope.idSafeSchemaName = DataUtils.makeSafeIdAttr($rootScope.reference.table.schema.name);
-                            
-                            var column, value; 
+
+                            var column, value;
 
                             for(var j = 0; j < page.tuples.length; j++){
                                 var row = page.tuples[j].data,
@@ -439,7 +439,7 @@
                                     // svgUrls.push("https://"+ context.server.host + row.File_URI);
                                 }
                             }
-    
+
                             $rootScope.displayReady = true;
                             console.log('Model: ', viewerModel);
                             // Keep a copy of the initial rows data so that we can see if user has made any changes later
@@ -478,14 +478,14 @@
                             console.log('Image: ', image);
 
                         })
-    
+
                     }, function error(response){
                         console.log("ERMrest error : ", response );
                     })
                 });
-                
-                
-                
+
+
+
 
                 // Get all rows from "anatomy" table
                 var anatomyTable = schema.tables.get('anatomy');
@@ -521,7 +521,7 @@
           console.log(response);
         });
 
-        
+
         // Set up a listener for all "message" events
         $window.addEventListener('message', function(event) {
             if (event.origin === origin) {

@@ -50,7 +50,7 @@
         }]);
     }])
 
-    .run(['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'FunctionUtils', 'headInjector', `logService`, 'MathUtils', 'messageMap', 'recordAppUtils', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$timeout', '$window',
+    .run(['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'FunctionUtils', 'headInjector', 'logService', 'MathUtils', 'messageMap', 'recordAppUtils', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$timeout', '$window',
         function runApp(AlertsService, ConfigUtils, DataUtils, ERMrest, FunctionUtils, headInjector, logService, MathUtils, messageMap, recordAppUtils, Session, UiUtils, UriUtils, $log, $rootScope, $timeout, $window) {
 
         var session,

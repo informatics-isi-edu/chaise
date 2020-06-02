@@ -5,7 +5,7 @@
 
     .controller('AnnotationsController', ['AlertsService', 'anatomies', 'annotations','AnnotationsService', 'AuthService', 'comments', 'context', 'CommentsService', 'ConfigUtils', 'DataUtils', 'InputUtils', 'UriUtils', 'modalUtils', 'modalBox', 'recordsetDisplayModes', 'recordCreate', 'logService', 'viewerModel', '$q', '$rootScope','$scope', '$timeout', '$uibModal', '$window',
     function AnnotationsController(AlertsService, anatomies, annotations,AnnotationsService, AuthService, comments, context, CommentsService, ConfigUtils, DataUtils, InputUtils, UriUtils, modalUtils , modalBox,recordsetDisplayModes, recordCreate, logService, viewerModel, $q, $rootScope, $scope, $timeout, $uibModal, $window) {
-        
+
         console.log("annotation controller created!");
         var chaiseConfig = Object.assign({}, ConfigUtils.getConfigJSON());
         var vm = this;
@@ -31,7 +31,7 @@
         // vm.drawAnnotation = drawAnnotation;
         vm.createAnnotation = createAnnotation;
         vm.cancelNewAnnotation = cancelNewAnnotation;
-            
+
         var originalAnnotation; // Holds the original contents of annotation in the event that a user cancels an edit
         resetEditedValues();
         vm.editAnnotation = editAnnotation;
@@ -47,8 +47,8 @@
         vm.allowEdit = AuthService.editAnnotation;
         vm.allowDelete = AuthService.deleteAnnotation;
 
-        /** 
-         * features added to support new annotation features 
+        /**
+         * features added to support new annotation features
          * **/
         vm.viewerModel = viewerModel; // model that contains antaomy's annotations
         vm.editMode = (context.mode == context.modes.EDIT ? true : false);
@@ -61,7 +61,7 @@
         vm.strokeScale = 1; // stroke size of the annotation
         vm.editingAnatomy = null; // current setting anatomy from viewerModel
         vm.editingAnatomyIndex = null;
-        
+
         vm.addAnnotation = addAnnotation;
         vm.addNewTerm = addNewTerm;
         vm.changeAllAnnotationsVisibility = changeAllAnnotationsVisibility;
@@ -81,7 +81,7 @@
         vm.saveAnnotationRecord = saveAnnotationRecord;
         vm.toggleDisplay = toggleDisplay;
         vm.updateDisplayNum = updateDisplayNum;
-        
+
         // Listen to events of type 'message' (from Annotorious)
         $window.addEventListener('message', function annotationControllerListener(event) {
             // TODO: Check if origin is valid first; if not, return and exit.
@@ -155,7 +155,7 @@
                 console.log('Invalid event origin. Event origin: ', event.origin, '. Expected origin: ', window.location.origin);
             }
         });
-        
+
         function populateSubmissionRow(modelRow, submissionRow, originalTuple, columns, editOrCopy) {
             var transformedRow = transformRowValues(modelRow);
             columns.forEach(function (column) {
@@ -500,7 +500,7 @@
                     continue;
                 }
 
-                if(vm.viewerModel.rows.find(item => item.groupID === groupID)){
+                if(vm.viewerModel.rows.find(function (item) { return item.groupID === groupID})){
                     continue;
                 }
                 /* HACK: This is done for the demo, the all ids are not available currently.
@@ -547,33 +547,32 @@
                     Curation_Status : "In Preparation"
                 };
 
-                row = vm.viewerModel.rows.find((row, index) => {
+                row = vm.viewerModel.rows.find(function (row, index) {
                     if(row.Anatomy === id){
                         i = index;
                         return true;
                     }
+                    return false;
                 });
 
                 // if row with same anatomy id exists in the viewer model -> update it
                 if(row){
-                    vm.viewerModel.rows[i] = { ...vm.viewerModel.rows[i], ...obj};
-                    vm.viewerModel.oldRows[i] =  { ...vm.viewerModel.oldRows[i], ...obj}
+                    Object.assign(vm.viewerModel.rows[i], obj);
+                    Object.assign(vm.viewerModel.oldRows[i], obj);
                 }
                 // add new row to the viewer model
                 else{
                     vm.viewerModel.rows.push(obj);
                     vm.viewerModel.oldRows.push(obj);
                 }
-                
+
             }
         }
 
         // Add new anatomy to the list
         function addNewTerm(){
-            let newAnnotation = populateSubmissionRow({}, {}, null, $rootScope.reference.columns, false);
-            
-            newAnnotation = {...newAnnotation, ...{
-
+            var newAnnotation = populateSubmissionRow({}, {}, null, $rootScope.reference.columns, false);
+            Object.assign(newAnnotation, {
                 svgID : "NEW_SVG",
                 groupID : "NEW_GROUP",
                 anatomy : "",
@@ -589,9 +588,8 @@
                 Anatomy : "",
                 Record_Status : "Incomplete",
                 Curation_Status : "In Preparation"
+            });
 
-            }};
-            
             // Set it to show the setting panel
             vm.editAnatomyAnnotations(newAnnotation);
 
@@ -602,7 +600,7 @@
                 anatomy : "",
                 description : ""
             });
-        
+
         }
 
         // Click to toggle overlay visibility in Openseadragon
@@ -634,26 +632,26 @@
             }
         }
 
-        // Notify openseadragon to change stroke width 
+        // Notify openseadragon to change stroke width
         function changeStrokeScale(){
             AnnotationsService.changeStrokeScale(vm.strokeScale);
         }
 
         /**
          * change the Anatomy ID in current annotation object
-         * @param {object} item : each annotation object in the viewerModel.row 
-         * @param {object} event 
+         * @param {object} item : each annotation object in the viewerModel.row
+         * @param {object} event
          */
         function changeTerm(item, event){
             vm.searchPopup($rootScope.reference.columns[1], function(tuple){
                 var data = tuple._data;
                 var id = fixedEncodeURIComponent(data.ID);
-                
+
                 if(checkAnatomyIDExist(data.ID)){
                     AlertsService.addAlert("This Anatomy ID already exists, please select other terms.", "warning");
                     return;
                 }
-                
+
                 // Update the new Anatomy name and ID at openseadragon viewer
                 AnnotationsService.changeGroupInfo({
                     svgID : item.svgID,
@@ -666,7 +664,7 @@
                 item["name"] = data.Name;
                 item["id"] = data.ID;
                 item["url"] = "/chaise/record/#2/Vocabulary:Anatomy/ID=" + id;
-                item["Anatomy"] = data.ID;                
+                item["Anatomy"] = data.ID;
             })
         }
 
@@ -676,10 +674,8 @@
          * @param {string} key : changing metadata
          */
         function changeStatus(item, key){
-            var column = $rootScope.reference.columns.find(col => {
-                if(col.isForeignKey){
-                    return col.foreignKey.colset.columns[0].name === key;
-                }
+            var column = $rootScope.reference.columns.find(function (col) {
+                return col.isForeignKey && col.foreignKey.colset.columns[0].name === key;
             });
 
             if(!column){
@@ -695,7 +691,7 @@
 
         // Check whether anatomy id has existed in the viewerModel
         function checkAnatomyIDExist(id){
-            return vm.viewerModel.rows.find(row => row.id === id) ? true : false;
+            return vm.viewerModel.rows.find(function (row) { return row.id === id}) ? true : false;
         }
 
         // Clear search term from the input
@@ -709,12 +705,12 @@
          */
         function closeAnnotationPanel(){
 
-            $scope.annoForm.$setPristine(); 
+            $scope.annoForm.$setPristine();
             $scope.annoForm.$setUntouched();
 
             var item = vm.editingAnatomy;
-            
-            // Close the drawing tool if opened 
+
+            // Close the drawing tool if opened
             if(item && item.isDrawing){
                 item.isDrawing = false;
                 AnnotationsService.drawAnnotation({
@@ -723,7 +719,7 @@
                     mode : (item.isDrawing) ? "ON" : "OFF"
                 });
             };
-            
+
             /**
              * if the current setting anatomy is still unsaved when closing the panel
              * remove the drawing from openseadragon
@@ -732,14 +728,14 @@
                 // Remove the new created svg and group if not saved
                 AnnotationsService.removeSVG({svgID : item.svgID});
             }
-            
+
             // Set editing item to null to hide the metadata panel
             vm.editAnatomyAnnotations(null);
-        } 
+        }
 
         /**
          * Click to open drawing tool for anatomy's annotations
-         * @param {object} item : the anatomy's annotations object  
+         * @param {object} item : the anatomy's annotations object
          * @param {object} event : click event object
          */
         function drawAnnotation(item, event){
@@ -757,7 +753,7 @@
             // change current drawing annotation to selected one
             vm.editingAnatomy = item;
             vm.editingAnatomy.isDrawing = !vm.editingAnatomy.isDrawing;
-    
+
             AnnotationsService.drawAnnotation({
                 svgID : vm.editingAnatomy.svgID,
                 groupID : vm.editingAnatomy.groupID,
@@ -769,9 +765,9 @@
 
         /**
          * click the setting icon to open the setting panel for the specific annotation
-         * @param {object} item : the anatomy's annotations object  
+         * @param {object} item : the anatomy's annotations object
          */
-        function editAnatomyAnnotations(item, index, event = null){
+        function editAnatomyAnnotations(item, index, event){
             vm.showPanel = (item !== null) ? true : false;
             vm.editingAnatomy = item || null;
             vm.editingAnatomyIndex = index || -1;
@@ -783,8 +779,8 @@
 
         /**
          * filter anatomy's annotations based on keyword
-         * if svgID or groupID not exist -> not qualified 
-         * @param {object} item : the anatomy's annotations object  
+         * if svgID or groupID not exist -> not qualified
+         * @param {object} item : the anatomy's annotations object
          */
         function filterAnnotations(item){
 
@@ -794,13 +790,13 @@
             var anatomy = item && item.Anatomy ? item.Anatomy.toLowerCase() : "",
                 name = item && item.name ? item.name.toLowerCase() : "",
                 keyword = vm.searchKeyword ? vm.searchKeyword.toLowerCase() : "";
-            
+
             return (anatomy.indexOf(keyword) >= 0) || (name.indexOf(keyword) >= 0);
         }
 
         /**
          * Click to highlight the anatomy's annotations
-         * @param {obejct} item : the anatomy's annotations object 
+         * @param {obejct} item : the anatomy's annotations object
          * @param {object} event : click event object
          */
         function highlightGroup(item, event){
@@ -821,10 +817,10 @@
         /**
          * remove annotation record from the table
          * show delete modal to let user confirm whether to delete it
-         * @param {object} item : the anatomy's annotations object 
+         * @param {object} item : the anatomy's annotations object
          */
         function removeAnnotationEntry(item){
-            var i = 0, 
+            var i = 0,
                 row = null,
                 delItem = null;
                 isFound = false;
@@ -842,7 +838,7 @@
 
         /**
          * remove annotation record from the table
-         * @param {object} item : the anatomy's annotations object 
+         * @param {object} item : the anatomy's annotations object
          */
         function removeAnatomy(item){
             return AnnotationsService.removeEntry(item)
@@ -870,7 +866,7 @@
                         if(delItem.svgID){
                             AnnotationsService.removeSVG({svgID : delItem.svgID});
                         }
-                        
+
                         // close the current panel
                         vm.closeAnnotationPanel();
                     }
@@ -883,9 +879,9 @@
         }
 
         /**
-         * 
-         * @param {object} column 
-         * @param {function} callback : callback after user select the 
+         *
+         * @param {object} column
+         * @param {function} callback : callback after user select the
          */
         function searchPopup(column, callback){
 
@@ -949,7 +945,7 @@
                 submissionRow = {},
                 tuples = [],
                 row,
-                assetCol = $scope.reference.columns.find(column => column.name == "File_URI");
+                assetCol = $scope.reference.columns.find(function (column) {return column.name == "File_URI"});
 
             if(data.content[0].numOfAnnotations === 0){
                 AlertsService.addAlert("You do not draw any annotations on this anatomy", "error");
@@ -973,7 +969,7 @@
                 // update the existing entry
                 if(page.length > 0){
                     isUpdate = true;
-                    row = model.rows.find(r => r.Anatomy === anatomyID && r.Image === imageID);
+                    row = model.rows.find(function (r) {return r.Anatomy === anatomyID && r.Image === imageID});
                     if(row){
                         submissionRow["Image"] = row.Image;
                         submissionRow["Anatomy"] = row.Anatomy;
@@ -991,8 +987,8 @@
                         };
                         tuples.push(page.tuples[0].copy());
                         vm.viewerModel.submissionRows = [submissionRow];
-                    };
-                    
+                    }
+
                 }
                 // create a new record
                 else{
@@ -1014,12 +1010,12 @@
                     console.log(submissionRow);
                 }
 
-                recordCreate.addRecords(isUpdate, null, vm.viewerModel, false, $rootScope.reference, tuples, context.queryParams, vm, (model, result) => {
+                recordCreate.addRecords(isUpdate, null, vm.viewerModel, false, $rootScope.reference, tuples, context.queryParams, vm, function (model, result) {
                     console.log("save svg file sucess! successful callback ", model, result);
                     AlertsService.addAlert("Your data has been saved.", "success");
 
                     var savedData = (result.successful.length > 0) ? result.successful.tuples[0].copy().data : {};
-                    var savedItem = vm.editingAnatomy; 
+                    var savedItem = vm.editingAnatomy;
                     var newSvgID = (!isUpdate && savedItem.svgID === "NEW_SVG") ? Date.parse(new Date()) + parseInt(Math.random() * 10000) : savedItem.svgID;
                     var rowIndex = vm.editingAnatomyIndex;
                     // update SVG ID (NEW_SVG) after successfully created
@@ -1031,30 +1027,30 @@
                         savedItem.svgID = newSvgID;
                         savedItem.isNew = false;
                     }
-                    
+
                     // if rowIndex exist
                     if(rowIndex !== -1){
                         // update the old row with same anatomy id
                         if(model.oldRows[rowIndex].Anatomy === vm.editingAnatomy.Anatomy){
-                            vm.viewerModel.rows[rowIndex] = {...savedItem, ...savedData};
-                            vm.viewerModel.oldRows[rowIndex] = {...vm.viewerModel.oldRows[rowIndex], ...savedItem, ...savedData};
+                            Object.assign(vm.viewerModel.rows[rowIndex], savedItem, savedData);
+                            Object.assign(vm.viewerModel.oldRows[rowIndex], savedItem, savedData);
                         }
                         else{
-                            // remove the old one with different anatomy id 
-                            removeAnatomy({ 
-                                Anatomy : model.oldRows[rowIndex].Anatomy, 
+                            // remove the old one with different anatomy id
+                            removeAnatomy({
+                                Anatomy : model.oldRows[rowIndex].Anatomy,
                                 Image : model.oldRows[rowIndex].Image
                             });
 
                             // add the saved annotation to viewerModel
-                            vm.editingAnatomy = {...savedItem, ...savedData};
+                            Object.assign(vm.editingAnatomy, savedItem, savedData);
                             vm.viewerModel.rows.push(vm.editingAnatomy);
                             vm.viewerModel.oldRows.push(angular.copy(vm.editingAnatomy));
                         }
-                    } 
+                    }
                     else{
                         // add the saved annotation to viewerModel
-                        vm.editingAnatomy = {...savedItem, ...savedData};
+                        Object.assign(vm.editingAnatomy, savedItem, savedData);
                         vm.viewerModel.rows.push(vm.editingAnatomy);
                         vm.viewerModel.oldRows.push(angular.copy(vm.editingAnatomy));
                     }
@@ -1067,7 +1063,7 @@
 
         /**
          * Notfiy openseadragon to export the editing anatomy's annotations before saving
-         * @param {object} item : the editing anatomy's annotations object 
+         * @param {object} item : the editing anatomy's annotations object
          */
         function saveAnnotationRecord(item){
 
@@ -1097,9 +1093,9 @@
          * Update the total number of annotations and displayed filtered annotations
          */
         function updateDisplayNum(){
-            let totalCount = 0; // total numver of qualified anatomy annotations
-            let matchCount = 0; // total matched number of filtered anatomy annotations
-            let item = null;
+            var totalCount = 0; // total numver of qualified anatomy annotations
+            var matchCount = 0; // total matched number of filtered anatomy annotations
+            var item = null;
 
             for(var i = 0; i < vm.viewerModel.rows.length; i++){
                 item = vm.viewerModel.rows[i];

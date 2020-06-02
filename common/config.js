@@ -26,6 +26,9 @@
     ])
 
     .run(['appName', 'ConfigUtils', 'ERMrest', 'headInjector', 'MathUtils', 'UriUtils', '$rootScope', '$window', function(appName, ConfigUtils, ERMrest, headInjector, MathUtils, UriUtils, $rootScope, $window) {
+
+        // TODO navbar changes (these should move to ConfigUtils)
+        // because we might call that one first. these should be in the setter...
         headInjector.setWindowName();
 
         // trick to verify if this config app is running inside of an iframe as part of another app
@@ -48,8 +51,6 @@
          *      - doesn't matter if in an iframe or not, if true, hide it
          */
         var hideNavbar = (inIframe && hideNavbarParam !== false) || hideNavbarParam === true;
-        var metatag = document.head.querySelector("[name~=version][content]");
-        var version = metatag ? metatag.content : null;
 
         // initialize dcctx object
         $window.dcctx = {
@@ -58,8 +59,7 @@
                 pid: MathUtils.uuid(),
                 wid: $window.name
             },
-            hideNavbar: hideNavbar,
-            version: version
+            hideNavbar: hideNavbar
         };
         // set chaise configuration based on what is in `chaise-config.js` first
         ConfigUtils.setConfigJSON();

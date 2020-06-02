@@ -12,14 +12,10 @@ Chaise depends on the following server- and client-side software.
   will want to deploy the app on the same host as [ERMrest]. If it is deployed
   on a separate host, you will need to enable [CORS] on the web server on which
   ERMrest is deployed.
-- **Client-side JavaScript Libraries**: [AngularJS] and other client-side
-  JavaScript runtime dependencies are bundled in `scripts/vendors` in this repository.
-- **ERMrestJS**: ERMrestJS is a client library for [ERMrest]. It must be
-  deployed to the same base directory as Chaise. If Chaise is deployed to
-  `/path/to/chaise` then ERMrestJS must be installed in `/path/to/ermrestjs`.
+- **ERMrestJS**: [ERMrestJS] is a client library for [ERMrest]. This library must be properly installed before installing Chaise. For more information about installing ermrestjs please refer to its installation document.
 
+[ERMrest]: https://github.com/informatics-isi-edu/ermrest
 [ERMrestJS]: https://github.com/informatics-isi-edu/ermrestjs
-[AngularJS]: https://angularjs.org
 [CORS]: https://en.wikipedia.org/wiki/Cross-origin_resource_sharing "Cross-origin resource sharing"
 
 ### Development Dependencies
@@ -42,31 +38,30 @@ ERMrestJS tests, which will also instruct you to get shared dependencies needed 
 
 ## Deploying
 
-### Set the deployment directory (optional)
+1. First you need to setup some environment variables to tell ERMRestJS where it should install the package. The following are the variables and their default values:
 
-Set `CHAISEDIR` to specify a target deployment location. By default, the
-install target is `/var/www/html/chaise`. If this directory does not exist,
-it will first create it. You may need to run `make install` with _super user_
-privileges depending on the installation directory you choose.
+    ```
+    WEB_URL_ROOT=/
+    WEB_INSTALL_ROOT=/var/www/html/
+    CHAISE_REL_PATH=chaise/
+    ```
+    Which means Chaise build folder will be copied to `/var/www/html/chaise/` location by default. And the URL path of Chaise is `/chaise/`. If that is not the case in your deployment, you should modify the variables accordingly.
 
-### Deploy for production usage
+    Notes:
+    - All the variables MUST have a trailing `/`.
 
-This example is for **production** deployments or other deployments to the document root of a Web server. As noted above, this will install to `/var/www/html/chaise`.
+    - If you're installing remotely, since we're using the `WEB_INSTALL_ROOT` in `rsync` command, you can use a remote location `username@host:public_html/` for this variable.
 
-```
-# make install
-```
+    - A very silly thing to do would be to set your deployment directory to root `/` and run `make install` with `sudo`. This would be very silly indeed, and would probably result in some corruption of your operating system. Surely, no one would ever do this. But, in the off chance that one might attempt such silliness, the `make install` rule specifies a `dont_install_in_root` prerequisite that attempts to put a stop to any such silliness before it goes too far.
 
-**Important** For production usage, we strongly recommend that Chaise only be installed in `/var/www/html/chaise`. This is the only configuration that we actively support.
+2. After making sure the variables are properly set, run the following command:
 
-### Deploy to a remote userdir
+    ```
+    $ make install
+    ```
 
-This example is how you would install the software on a remote server, for example a test server. Replacing `username` and `hostname` with real values.
-
-```sh
-$ export CHAISEDIR=username@hostname:public_html/chaise
-$ make install
-```
+    Notes:
+      - If the given directory does not exist, it will first create it. So you may need to run `make install` with _super user_ privileges depending on the installation directory you choose.
 
 ## Configuration
 
@@ -76,7 +71,7 @@ See the [configuration guide](chaise-config.md).
 
 Once deployed the apps can be found at `http://<hostname>/chaise/<app>`, where `<app>` must be replaced with one of the app names (i.e., `search`, `recordset`).
 
-**TODO**: We need to document how to use these apps because without additional details the bare app name without additional parameters is not sufficient.
+<!-- **TODO**: We need to document how to use these apps because without additional details the bare app name without additional parameters is not sufficient. -->
 
 ## Testing
 
@@ -91,18 +86,14 @@ export CHAISE_BASE_URL=https://HOST/~USERNAME/chaise
 export ERMREST_URL=https://HOST/ermrest
 export AUTH_COOKIE=YOUR_ERMREST_COOKIE
 export REMOTE_CHAISE_DIR_PATH=USERNAME@HOST:public_html/chaise
-export CHAISEDIR=$REMOTE_CHAISE_DIR_PATH # when testing on remote host these should be the same
 ```
 
 Then run the tests (install, if you haven't already).
 
 ```sh
 $ make install  # if not already installed
+$ npm install # if npm dependencies not already installed
 $ make test
 ```
-
-Make will invoke `npm install` to download and install all additional
-dependencies under the local `node_modules` directory relative to the project
-directory.
 
 For more information, see the [E2E tests guide](../dev-docs/e2e-test.md).

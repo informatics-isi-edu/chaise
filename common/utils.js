@@ -820,20 +820,12 @@
 
         /**
          * Gives the path of the chaise deployment directory.
-         * If we access it from an app inside chaise folder then it returns the pathname before the appName in the url
-         * otherwise if we access it from an app outside chaise then:
-         *      1. It returns the chaise path mentioned in the chaiseConfig
-         *      2. If ChaiseConfig doesn't specify the chaisePath, then it returns the default value '/chaise/'
+         *   - It returns the chaise path mentioned in the context (based on chaiseBasePath meta tag)
+         *   - otherwise, returns the default value '/chaise/'
         */
         function chaiseDeploymentPath() {
-            var chaiseConfig = ConfigUtils.getConfigJSON();
-            var appNames = ["record", "recordset", "recordedit", "login"];
-            var currentAppName = appNamefromUrlPathname($window.location.pathname);
-            if (appNames.includes(currentAppName)) {
-                var index = $window.location.pathname.indexOf(currentAppName);
-                return $window.location.pathname.substring(0, index);
-            } else if (chaiseConfig && typeof chaiseConfig.chaiseBasePath === "string") {
-                var path = chaiseConfig.chaiseBasePath;
+            if (typeof chaiseBuildVariables.chaiseBasePath === "string") {
+                var path = chaiseBuildVariables.chaiseBasePath;
                 if(path[path.length-1] !== "/")
                     path = path + "/";
                 return path;
@@ -1730,7 +1722,6 @@
     }])
 
     .factory("ConfigUtils", ['defaultChaiseConfig', '$http', '$rootScope', '$window', function(defaultConfig, $http, $rootScope, $window) {
-
         /**
          * Will return the dcctx object that has the following attributes:
          *  - cid: client id (app name)
@@ -1861,8 +1852,8 @@
         function decorateTemplateRequest(delegate, chaiseDeploymentPath) {
             // return a function that will be called when a template needs t be fetched
             return function(templateUrl) {
-                var dcctx = getContextJSON();
-                var versionedTemplateUrl = templateUrl + (templateUrl.indexOf(chaiseDeploymentPath) !== -1 ? "?v=" + dcctx.version : "");
+                var version = chaiseBuildVariables.buildVersion;
+                var versionedTemplateUrl = templateUrl + (templateUrl.indexOf(chaiseDeploymentPath) !== -1 ? "?v=" + version : "");
 
                 return delegate(versionedTemplateUrl);
             }
@@ -2612,7 +2603,7 @@
             var chaiseConfig = ConfigUtils.getConfigJSON();
             if (chaiseConfig['customCSS'] !== undefined) {
                 // if the file is already injected
-                if (document.querySelector('link[href="' + chaiseConfig['customCSS'] + '"]')) {
+                if (document.querySelector('link[href^="' + chaiseConfig['customCSS'] + '"]')) {
                     return defer.resolve(), defer.promise;
                 }
 
