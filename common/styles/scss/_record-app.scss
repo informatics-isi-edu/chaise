@@ -304,6 +304,11 @@
     /********* print ********/
 
     @media print {
+        * {
+            -webkit-transition: none !important;
+            transition: none !important;
+          }
+
         .bottom-panel-container {
             height: auto!important;
             display: block;
@@ -332,7 +337,7 @@
 
         //Side panel
         .side-panel-container {
-            display:none        
+            display:none
         }
 
         //three dots
@@ -372,7 +377,7 @@
                 padding-top: 8px;
                 padding-bottom: 8px;
                 }
-            } 
+            }
         }
 
         //Prev and Next buttons
@@ -398,7 +403,7 @@
                 margin:2px!important;
             }
         }
-        
+
         #rt-container{
             .markdown-container a:after{
                 content: "\2002\2022" !important;
@@ -407,7 +412,7 @@
             .markdown-container a:last-child:after{
                 content: none !important;
             }
-        }    
+        }
 
         .chaise-icon-for-tooltip::after{
             content: none !important;
@@ -428,7 +433,7 @@
                 margin:8px!important;
             }
 
-        } 
+        }
 
         .fa-arrows-alt-v{
             display:none;
