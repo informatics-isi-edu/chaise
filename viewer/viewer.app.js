@@ -209,8 +209,10 @@
                 $rootScope.reference = reference.contextualize.entryCreate;
             }
 
-            $rootScope.reference.session = session;
-            $rootScope.session = session;
+            if (typeof session !== "undefined") {
+                $rootScope.reference.session = session;
+                $rootScope.session = session;
+            }
             // $rootScope.reference = reference;
 
             // log attribues
@@ -285,6 +287,8 @@
 
                     console.log('uri='+image.entity.uri + waterMark);
 
+                    var osdViewerPath =  origin + UriUtils.OSDViewerDeploymentPath() + "mview.html";
+
                     /* Note: the following has been done so that the viewer app supports both type of formats i.e tiff and czi.
                       It calls the new OpenSeadragon viewer app with parameters based on the file format. Need to change this, when we
                       will start getting svg files in the URL itself instead of making a call to ermrest.
@@ -292,10 +296,10 @@
                     */
                     var params = window.location.href.split("?");
                     if(window.location.href.indexOf("url") > -1){
-                      image.entity.uri = origin+"/openseadragon-viewer/index.html?" + params[1];
+                      image.entity.uri = osdViewerPath + "?" + params[1];
                     } else {
                       var old_params = image.entity.uri.split("?");
-                      image.entity.uri = origin+"/openseadragon-viewer/index.html?" + old_params[1];
+                      image.entity.uri = osdViewerPath + "?" + old_params[1];
                     }
 
                     // image.entity.uri = image.entity.uri + "&url=data/Q-296R_all_contours_cw_named.svg";
