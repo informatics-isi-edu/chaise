@@ -824,7 +824,7 @@
          *   - otherwise, returns the default value '/chaise/'
         */
         function chaiseDeploymentPath() {
-            if (typeof chaiseBuildVariables.chaiseBasePath === "string") {
+            if (typeof chaiseBuildVariables === "object" && typeof chaiseBuildVariables.chaiseBasePath === "string") {
                 var path = chaiseBuildVariables.chaiseBasePath;
                 if(path[path.length-1] !== "/")
                     path = path + "/";
@@ -838,7 +838,7 @@
          * Returns the path that openseadragon-viewer is installed
          */
         function OSDViewerDeploymentPath() {
-            if (typeof chaiseBuildVariables.OSDViewerBasePath === "string") {
+            if (typeof chaiseBuildVariables === "object" && typeof chaiseBuildVariables.OSDViewerBasePath === "string") {
                 return chaiseBuildVariables.OSDViewerBasePath;
             } else {
                 return '/openseadragon-viewer/';
@@ -1864,7 +1864,10 @@
         function decorateTemplateRequest(delegate, chaiseDeploymentPath) {
             // return a function that will be called when a template needs t be fetched
             return function(templateUrl) {
-                var version = chaiseBuildVariables.buildVersion;
+                var version = "";
+                if (typeof chaiseBuildVariables === "object") {
+                    version = chaiseBuildVariables.buildVersion;
+                }
                 var versionedTemplateUrl = templateUrl + (templateUrl.indexOf(chaiseDeploymentPath) !== -1 ? "?v=" + version : "");
 
                 return delegate(versionedTemplateUrl);
