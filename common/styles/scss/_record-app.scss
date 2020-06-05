@@ -349,6 +349,16 @@
             display:none;
         }
 
+        //Record action buttons outside heading
+        .bottom-panel-container{
+          .action-bar-entity-display-mode{
+            display: none;
+          }
+        }
+
+        iframe{
+          display:none !important;
+        }
         //Top up arrow
         #back-to-top{
             display:none;
