@@ -404,7 +404,7 @@
         }
 
         #rt-container{
-            .markdown-container a:after{
+            .vocab::after{
                 content: "\2002\2022" !important;
             }
 
