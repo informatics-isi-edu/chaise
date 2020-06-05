@@ -45,11 +45,14 @@ The position of where you're adding these include statements is very important. 
 
 You should not copy the contents of `dist/chaise-dependencies.html` manually and this should be part of the automated process of building Chaise and your other apps (Since the list generation is controlled by Chaise, we might update the list and therefore you should make sure you're always getting the latest list of dependencies.)  
 
-If you're using Jekyll, you can:
+If you're using [Jekyll](https://jekyllrb.com), the following are the steps on how you can achieve this:
 
-- After `make install` is done Chaise, copy the `dist/chaise-dependencies.html` file into your `_includes` folder.
+1. After `make install` is done in Chaise, copy the `dist/chaise-dependencies.html` file into your `_includes` folder.
+    - As it was mentioned, this part MUST be part of your automated build process, and should not be done manually.
+    - `dist` folder is created by `make install` in your speicified build target (by default it's `/var/www/html`), so you have to make sure `make install` is done before copying the file.
+    - `_includes` folder [is specific to Jekyll](https://jekyllrb.com/docs/includes/). You should be able to find it in the root location of your website (by default it should be under `/var/www/html`.)
 
-- Include the file using `%include` statement:
+2. Include the file using `%include` statement:
     ```html
     <head>
         {% include chaise-dependencies.html %}
