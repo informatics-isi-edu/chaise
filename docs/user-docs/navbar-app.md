@@ -50,7 +50,7 @@ If you're using [Jekyll](https://jekyllrb.com), the following are the steps on h
 1. After `make install` is done in Chaise, copy the `dist/chaise-dependencies.html` file into your `_includes` folder.
     - As it was mentioned, this part MUST be part of your automated build process, and should not be done manually.g
     - `dist` folder is created by `make install` in your speicified build target (by default it's `/var/www/html/chaise/`), so you have to make sure `make install` is done before copying the file.
-    - `_includes` folder [is specific to Jekyll](https://jekyllrb.com/docs/includes/). You should be able to find it in the root location of your website (by default it should be under `/var/www/html/`.)
+    - `_includes` folder [is specific to Jekyll](https://jekyllrb.com/docs/includes/). You should be able to find it in the root location of your Jekyll website.
 
 2. Include the file using `%include` statement:
     ```html
