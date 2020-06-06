@@ -47,18 +47,27 @@ You should not copy the contents of `dist/chaise-dependencies.html` manually and
 
 If you're using [Jekyll](https://jekyllrb.com), the following are the steps on how you can achieve this:
 
-1. After `make install` is done in Chaise, copy the `dist/chaise-dependencies.html` file into your `_includes` folder.
-    - As it was mentioned, this part MUST be part of your automated build process, and should not be done manually.g
-    - `dist` folder is created by `make install` in your speicified build target (by default it's `/var/www/html/chaise/`), so you have to make sure `make install` is done before copying the file.
-    - `_includes` folder [is specific to Jekyll](https://jekyllrb.com/docs/includes/). You should be able to find it in the root location of your Jekyll website.
+1. Make sure `make install` is done in Chaise.
+    - This will create the `dist` folder in your specified build target (by default it's `/var/www/html/chaise`).
+    - It will also generate the `dist/chaise-dependencies.html`.
 
-2. Include the file using `%include` statement:
+
+2. Copy the `dist/chaise-dependencies.html` file into your `_includes` folder.
+    - As it was mentioned, this MUST be part of your automated build process that is responsible for building Chaise, and should not be done manually.
+    - `_includes` folder [is specific to Jekyll](https://jekyllrb.com/docs/includes/). You should be able to find it in the root location of your Jekyll website repository.
+
+
+3. Include the file using `%include` statement:
     ```html
     <head>
         {% include chaise-dependencies.html %}
         <script src="/chaise/lib/navbar/navbar.app.js"></script>
     </head>
     ```
+
+
+4. Build your Jekyll site as you normally would (using `jekyll build` or `jekyll serve` commands.)
+    - As you most probably might know, this MUST be part of your automated build process, and should not be done manually. You just have to make sure that copying of `chaise-dependencies.html` is done prior to rebuilding the Jekyll site.
 
 #### 2.2. Prefetch custom styles (optional)
 
