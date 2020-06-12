@@ -570,8 +570,9 @@ distclean: clean
 .PHONY: html
 html: $(HTML)
 
-# Rule to compile sass/scss files to css
-$(COMMON)/styles/app.css: $(shell find $(COMMON)/styles/scss/)
+	.FORCE:
+	# Rule to compile sass/scss files to css
+	$(COMMON)/styles/app.css: .FORCE
 	$(BIN)/node-sass --style=compressed --source-map-embed $(COMMON)/styles/scss/app.scss $(COMMON)/styles/app.css
 	$(BIN)/node-sass --include-path $(COMMON)/styles/scss/_variables.scss --style=compressed --source-map-embed $(COMMON)/styles/scss/_navbar.scss $(COMMON)/styles/navbar.css
 
