@@ -360,7 +360,7 @@
         //   display:none !important;
         // }
 
-        
+
 
         //Top up arrow
         #back-to-top{
@@ -451,11 +451,11 @@
             display:none;
         }
 
-        // //Hiding the 1st column (Actions) in Record Table
-        // record-table tr th:nth-child(1),
-        // record-table tr td:nth-child(1) {
-        //     display: none;
-        // }
+        //Hiding the 1st column (Actions) in Record Table
+        record-table th:nth-child(1),
+        record-table td:nth-child(1) {
+            display: none;
+        }
 
         record-table th {
             border: solid #000 !important;
