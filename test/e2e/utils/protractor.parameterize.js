@@ -85,7 +85,7 @@ exports.parameterize = function(config, configParams) {
                 });
 
                 // set the session information to be parsed later
-                process.env.SESSION = body;
+                process.env.WEBAUTHN_SESSION = body;
 
                 if (testConfiguration.authCookie) {
                   process.env.AUTH_COOKIE = testConfiguration.authCookie;
@@ -107,7 +107,7 @@ exports.parameterize = function(config, configParams) {
         }, function(error, response, body) {
             if (!error && response.statusCode == 200) {
                 // set the session information to be parsed later
-                process.env.SESSION = body;
+                process.env.WEBAUTHN_SESSION = body;
 
                 onErmrestLogin(defer);
             } else {
@@ -130,7 +130,7 @@ exports.parameterize = function(config, configParams) {
     jasmine.getEnv().addReporter(new SpecReporter({displayStacktrace: 'all'}));
 
     browser.params.configuration = testConfiguration, defer = Q.defer();
-    browser.params.client = JSON.parse(process.env.SESSION).client;
+    browser.params.client = JSON.parse(process.env.WEBAUTHN_SESSION).client;
 
     // Set catalogId in browser params for future reference to delete it if required
     browser.params.catalogId = catalogId = process.env.CATALOGID;
