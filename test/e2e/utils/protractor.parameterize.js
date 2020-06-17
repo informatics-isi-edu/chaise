@@ -35,6 +35,8 @@ exports.parameterize = function(config, configParams) {
   var onErmrestLogin = function(defer, sessionInfo) {
     testConfiguration.setup.url = process.env.ERMREST_URL;
     testConfiguration.setup.authCookie = testConfiguration.authCookie;
+    console.log("================sessioninfo onErmrstLogin================")
+    console.log(sessionInfo);
     testConfiguration.client = sessionInfo.client;
 
     pImport.setup(testConfiguration).then(function(data) {
@@ -127,6 +129,7 @@ exports.parameterize = function(config, configParams) {
 
   // This method will be called before starting to execute the test suite
   config.onPrepare = function() {
+    console.log(testConfiguration);
 
     var SpecReporter = require('jasmine-spec-reporter');
     // add jasmine spec reporter
