@@ -135,6 +135,7 @@ exports.parameterize = function(config, configParams) {
 
     browser.params.configuration = testConfiguration, defer = Q.defer();
     browser.params.client = testConfiguration.client;
+    console.log("browser param configuration");
     console.log(browser.params.configuration);
 
     // Set catalogId in browser params for future reference to delete it if required
