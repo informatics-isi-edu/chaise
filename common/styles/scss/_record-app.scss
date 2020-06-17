@@ -451,7 +451,7 @@
         }
 
         #no-results-row{
-          display:block !important;
+          display:table-cell !important;
           border: solid #BBBBBB !important;
           border-width: 1px 1px 1px 1px !important;
         }
@@ -461,10 +461,10 @@
           border-collapse: collapse !important;
         }
 
-        // record-table td {
-        //     border: solid #BBBBBB !important;
-        //     border-width: 1px 1px 1px 1px !important;
-        // }
+        record-table td {
+            border: solid #BBBBBB !important;
+            border-width: 1px 1px 1px 1px !important;
+        }
 
         record-table th {
             border: solid #BBBBBB !important;
