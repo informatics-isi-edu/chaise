@@ -68,7 +68,8 @@ describe('Navbar ', function() {
     }
 
     it('should show the "Full Name" of the logged in user in the top right', function () {
-        expect(element(by.css('login .username-display')).getText()).toBe(browser.params.client.full_name, "user's displayed name is incorrect");
+        var name = (!process.env.TRAVIS ? browser.params.client.full_name : browser.params.client.display_name);
+        expect(element(by.css('login .username-display')).getText()).toBe(name, "user's displayed name is incorrect");
     });
 
 
