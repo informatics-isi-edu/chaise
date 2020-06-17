@@ -69,6 +69,7 @@
                                                 <delete-link id="delete-record" callback="::ctrl.deleteRecord()" display="button" icon="true" label="Delete" is-disabled="::!ctrl.canDelete()" uib-tooltip="Click here to delete this record." tooltip-placement="bottom"></delete-link>
                                         </div>
                                     </h1>
+                                    <div class="inline-tooltip">This is inline tooltip</div>
                                 </div>
                             </div>
                         </div>
@@ -148,6 +149,7 @@
 
                                     <!-- for different elements inside the accordion -->
                                     <div class="row" style="margin-right: 0px; margin-left: 0px;">
+                                        <div class="inline-tooltip">This is inline tooltip</div>
                                         <div class="col-xs-12 accordion-content" ng-if="rtm.open" ng-switch="!rtm.isTableDisplay && ctrl.allowRelatedTableMarkdown($index)">
                                             <div ng-switch-when="true">
                                                 <span class="markdown-container" ng-bind-html="rtm.tableMarkdownContent | trustedHTML"></span>
