@@ -83,6 +83,11 @@ exports.parameterize = function(config, configParams) {
                 cookies.forEach(function(c) {
                   if (c.name == "webauthn") testConfiguration.authCookie = c.name + "=" + c.value + ";";
                 });
+
+                // get the client information
+                var info = JSON.parse(body);
+                testConfiguration.client = info.client;
+
                 if (testConfiguration.authCookie) {
                   process.env.AUTH_COOKIE = testConfiguration.authCookie;
                   onErmrestLogin(defer);
@@ -94,7 +99,24 @@ exports.parameterize = function(config, configParams) {
           });
         });
     } else {
-      onErmrestLogin(defer);
+        require('request')({
+            url:  process.env.ERMREST_URL.replace('ermrest', 'authn') + '/session',
+            method: 'GET',
+            headers: {
+                'Cookie': process.env.AUTH_COOKIE
+            }
+        }, function(error, response, body) {
+            if (!error && response.statusCode == 200) {
+                // get the client information
+                var info = JSON.parse(body);
+                testConfiguration.client = info.client;
+
+                onErmrestLogin(defer);
+            } else {
+                throw new Error('Unable to retreive userinfo');
+            }
+        });
+
     }
 
     console.log("In beforeLaunch");
@@ -110,6 +132,7 @@ exports.parameterize = function(config, configParams) {
     jasmine.getEnv().addReporter(new SpecReporter({displayStacktrace: 'all'}));
 
     browser.params.configuration = testConfiguration, defer = Q.defer();
+    browser.params.client = testConfiguration.client;
 
     // Set catalogId in browser params for future reference to delete it if required
     browser.params.catalogId = catalogId = process.env.CATALOGID;
